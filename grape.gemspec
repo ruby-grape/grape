@@ -5,9 +5,9 @@
 
 Gem::Specification.new do |s|
   s.name = %q{grape}
-  s.version = "0.0.1"
+  s.version = "0.0.1.beta"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Bleigh"]
   s.date = %q{2010-08-02}
   s.description = %q{TODO: longer description of your gem}
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "autotest/discover.rb",
+     "grape.gemspec",
      "lib/grape.rb",
      "lib/grape/middleware/base.rb",
      "lib/grape/middleware/prefixer.rb",
