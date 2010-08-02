@@ -1,0 +1,1 @@
+rvm use ree@rails3 --passenger

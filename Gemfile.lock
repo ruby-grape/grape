@@ -1,0 +1,40 @@
+GEM
+  specs:
+    builder (2.1.2)
+    cucumber (0.8.5)
+      builder (~> 2.1.2)
+      diff-lcs (~> 1.1.2)
+      gherkin (~> 2.1.4)
+      json_pure (~> 1.4.3)
+      term-ansicolor (~> 1.0.4)
+    diff-lcs (1.1.2)
+    gherkin (2.1.5)
+      trollop (~> 1.16.2)
+    json_pure (1.4.3)
+    rack (1.2.1)
+    rack-jsonp (1.0.0)
+    rack-mount (0.6.9)
+      rack (>= 1.0.0)
+    rack-test (0.5.4)
+      rack (>= 1.0)
+    rspec (2.0.0.beta.19)
+      rspec-core (= 2.0.0.beta.19)
+      rspec-expectations (= 2.0.0.beta.19)
+      rspec-mocks (= 2.0.0.beta.19)
+    rspec-core (2.0.0.beta.19)
+    rspec-expectations (2.0.0.beta.19)
+      diff-lcs (>= 1.1.2)
+    rspec-mocks (2.0.0.beta.19)
+    term-ansicolor (1.0.5)
+    trollop (1.16.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  cucumber (>= 0.8.5)
+  rack
+  rack-jsonp
+  rack-mount
+  rack-test
+  rspec (>= 2.0.0.beta.19)
