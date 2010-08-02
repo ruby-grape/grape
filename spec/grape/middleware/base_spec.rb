@@ -39,7 +39,25 @@ describe Grape::Middleware::Base do
     subject.response.should be_kind_of(Rack::Response)
   end
   
-  it 'should persist options passed at initialization' do
-    Grape::Middleware::Base.new(blank_app, {:abc => true}).options[:abc].should be_true
+  context 'options' do
+    it 'should persist options passed at initialization' do
+      Grape::Middleware::Base.new(blank_app, {:abc => true}).options[:abc].should be_true
+    end
+    
+    context 'defaults' do
+      class ExampleWare < Grape::Middleware::Base
+        def default_options
+          {:monkey => true}
+        end
+      end
+      
+      it 'should persist the default options' do
+        ExampleWare.new(blank_app).options[:monkey].should be_true
+      end
+      
+      it 'should override default options when provided' do
+        ExampleWare.new(blank_app, :monkey => false).options[:monkey].should be_false
+      end
+    end
   end
 end

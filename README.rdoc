@@ -3,16 +3,28 @@
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
     class Twitter < Grape::Base
-      # Set this API to work only on a specified subdomain
       subdomain 'api'
+      version '1'
+      formats :xml, :json
+      authorization :oauth, User
       
-      # Use a path prefix.
-      path_prefix 'api'
-      
-      version 'v2'
-      
-      version 'v1' do
+      resource :statuses do
+        group :timelines do
+          formats :rss, :atom
+          
+          get :public_timeline do
+            optional :trim_user, Boolean
+            optional :include_entities, Boolean
+          
+            Tweet.limit(20)
+          end
         
+          get :home_timeline do
+            authorized
+          
+            user.home_timeline
+          end
+        end
       end
     end
     
