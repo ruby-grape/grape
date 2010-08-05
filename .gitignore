@@ -17,5 +17,7 @@ tmtags
 coverage
 rdoc
 pkg
+.rvmrc
+.bundle
 
 ## PROJECT::SPECIFIC

@@ -5,11 +5,11 @@ require 'grape'
 
 require 'rubygems'
 require 'bundler'
-Bundler.setup :test
+Bundler.setup :default, :test
 
 require 'rspec'
 require 'rack/test'
 
 RSpec.configure do |config|
-  
+  config.include Rack::Test::Methods
 end
