@@ -28,8 +28,7 @@ module Grape
         if content_types.key?(fmt)
           env['api.format'] = fmt          
         else
-          env['api.error.status'] = 406
-          env['api.error.message'] = 'The requested format is not supported.'
+          throw :error, :status => 406, :message => 'The requested format is not supported.'
         end
       end
       

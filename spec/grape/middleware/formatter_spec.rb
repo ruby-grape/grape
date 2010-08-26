@@ -28,8 +28,8 @@ describe Grape::Middleware::Formatter do
     end
     
     it 'should throw an error on an unrecognized format' do
-      subject.call({'PATH_INFO' => '/info.barklar'})
-      subject.env['api.error.status'].should == 406
+      err = catch(:error){ subject.call({'PATH_INFO' => '/info.barklar'}) }
+      err.should == {:status => 406, :message => "The requested format is not supported."}
     end
   end
 end
