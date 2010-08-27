@@ -1,5 +1,6 @@
 GEM
   specs:
+    activesupport (3.0.0.rc2)
     builder (2.1.2)
     cucumber (0.8.5)
       builder (~> 2.1.2)
@@ -10,9 +11,7 @@ GEM
     diff-lcs (1.1.2)
     gherkin (2.1.5)
       trollop (~> 1.16.2)
-    json (1.4.3)
     json_pure (1.4.3)
-    multi_json (0.0.4)
     rack (1.2.1)
     rack-jsonp (1.0.0)
     rack-mount (0.6.9)
@@ -34,9 +33,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport (>= 3.0.0.rc2)
   cucumber (>= 0.8.5)
-  json
-  multi_json
   rack
   rack-jsonp
   rack-mount

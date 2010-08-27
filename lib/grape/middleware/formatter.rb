@@ -1,5 +1,5 @@
 require 'grape/middleware/base'
-require 'multi_json'
+require 'active_support/json'
 
 module Grape
   module Middleware
@@ -50,7 +50,7 @@ module Grape
       def after
         status, headers, bodies = *@app_response
         bodies.map! do |body|
-          MultiJson.encode(body)
+          ActiveSupport::JSON.encode(body)
         end
         [status, headers, bodies]
       end
