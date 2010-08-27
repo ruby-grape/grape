@@ -7,8 +7,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "grape"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{A Ruby framework for rapid API development.}
+    gem.description = %Q{A Ruby framework for rapid API development with great conventions.}
     gem.email = "michael@intridea.com"
     gem.homepage = "http://github.com/intridea/grape"
     gem.authors = ["Michael Bleigh"]

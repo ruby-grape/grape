@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Bleigh"]
   s.date = %q{2010-08-27}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{A Ruby framework for rapid API development with great conventions.}
   s.email = %q{michael@intridea.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -49,7 +49,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{TODO: one-line summary of your gem}
+  s.summary = %q{A Ruby framework for rapid API development.}
   s.test_files = [
     "spec/grape/middleware/auth/oauth2_spec.rb",
      "spec/grape/middleware/base_spec.rb",
