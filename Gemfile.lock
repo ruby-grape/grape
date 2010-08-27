@@ -9,8 +9,14 @@ GEM
       json_pure (~> 1.4.3)
       term-ansicolor (~> 1.0.4)
     diff-lcs (1.1.2)
+    gemcutter (0.6.1)
     gherkin (2.1.5)
       trollop (~> 1.16.2)
+    git (1.2.5)
+    jeweler (1.4.0)
+      gemcutter (>= 0.1.0)
+      git (>= 1.2.5)
+      rubyforge (>= 2.0.0)
     json_pure (1.4.3)
     rack (1.2.1)
     rack-jsonp (1.0.0)
@@ -18,6 +24,7 @@ GEM
       rack (>= 1.0.0)
     rack-test (0.5.4)
       rack (>= 1.0)
+    rake (0.8.7)
     rspec (2.0.0.beta.19)
       rspec-core (= 2.0.0.beta.19)
       rspec-expectations (= 2.0.0.beta.19)
@@ -26,6 +33,8 @@ GEM
     rspec-expectations (2.0.0.beta.19)
       diff-lcs (>= 1.1.2)
     rspec-mocks (2.0.0.beta.19)
+    rubyforge (2.0.4)
+      json_pure (>= 1.1.7)
     term-ansicolor (1.0.5)
     trollop (1.16.2)
 
@@ -35,8 +44,10 @@ PLATFORMS
 DEPENDENCIES
   activesupport (>= 3.0.0.rc2)
   cucumber (>= 0.8.5)
+  jeweler
   rack
   rack-jsonp
   rack-mount
   rack-test
+  rake
   rspec (>= 2.0.0.beta.19)

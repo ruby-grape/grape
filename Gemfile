@@ -4,6 +4,11 @@ gem 'rack-jsonp'
 
 gem 'activesupport', '>= 3.0.0.rc2'
 
+group :development do
+  gem 'rake'
+  gem 'jeweler'
+end
+
 group :test do
   gem 'rspec', '>= 2.0.0.beta.19'
   gem 'rack-test'

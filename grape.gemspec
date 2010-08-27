@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Bleigh"]
-  s.date = %q{2010-08-02}
+  s.date = %q{2010-08-27}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{michael@intridea.com}
   s.extra_rdoc_files = [
@@ -30,10 +30,16 @@ Gem::Specification.new do |s|
      "autotest/discover.rb",
      "grape.gemspec",
      "lib/grape.rb",
+     "lib/grape/middleware/auth/oauth2.rb",
      "lib/grape/middleware/base.rb",
+     "lib/grape/middleware/error.rb",
+     "lib/grape/middleware/formatter.rb",
      "lib/grape/middleware/prefixer.rb",
      "lib/grape/middleware/versioner.rb",
+     "spec/grape/middleware/auth/oauth2_spec.rb",
      "spec/grape/middleware/base_spec.rb",
+     "spec/grape/middleware/error_spec.rb",
+     "spec/grape/middleware/formatter_spec.rb",
      "spec/grape/middleware/prefixer_spec.rb",
      "spec/grape/middleware/versioner_spec.rb",
      "spec/grape_spec.rb",
@@ -45,7 +51,10 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{TODO: one-line summary of your gem}
   s.test_files = [
-    "spec/grape/middleware/base_spec.rb",
+    "spec/grape/middleware/auth/oauth2_spec.rb",
+     "spec/grape/middleware/base_spec.rb",
+     "spec/grape/middleware/error_spec.rb",
+     "spec/grape/middleware/formatter_spec.rb",
      "spec/grape/middleware/prefixer_spec.rb",
      "spec/grape/middleware/versioner_spec.rb",
      "spec/grape_spec.rb",
@@ -57,15 +66,27 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_development_dependency(%q<cucumber>, [">= 0"])
+      s.add_runtime_dependency(%q<rack>, [">= 0"])
+      s.add_runtime_dependency(%q<rack-mount>, [">= 0"])
+      s.add_runtime_dependency(%q<rack-jsonp>, [">= 0"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+      s.add_development_dependency(%q<rake>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
     else
-      s.add_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_dependency(%q<cucumber>, [">= 0"])
+      s.add_dependency(%q<rack>, [">= 0"])
+      s.add_dependency(%q<rack-mount>, [">= 0"])
+      s.add_dependency(%q<rack-jsonp>, [">= 0"])
+      s.add_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+      s.add_dependency(%q<rake>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
     end
   else
-    s.add_dependency(%q<rspec>, [">= 1.2.9"])
-    s.add_dependency(%q<cucumber>, [">= 0"])
+    s.add_dependency(%q<rack>, [">= 0"])
+    s.add_dependency(%q<rack-mount>, [">= 0"])
+    s.add_dependency(%q<rack-jsonp>, [">= 0"])
+    s.add_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+    s.add_dependency(%q<rake>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
   end
 end
 
