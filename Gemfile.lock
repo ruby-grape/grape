@@ -1,6 +1,6 @@
 GEM
   specs:
-    activesupport (3.0.0.rc2)
+    activesupport (3.0.0)
     builder (2.1.2)
     cucumber (0.8.5)
       builder (~> 2.1.2)
@@ -42,7 +42,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (>= 3.0.0.rc2)
+  activesupport (~> 3.0.0)
   cucumber (>= 0.8.5)
   jeweler
   rack

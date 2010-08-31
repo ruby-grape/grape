@@ -2,7 +2,7 @@ gem 'rack'
 gem 'rack-mount'
 gem 'rack-jsonp'
 
-gem 'activesupport', '>= 3.0.0.rc2'
+gem 'activesupport', '~> 3.0.0'
 
 group :development do
   gem 'rake'
