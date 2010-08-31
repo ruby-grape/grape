@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{grape}
-  s.version = "0.0.0.alpha.1"
+  s.version = "0.0.0.alpha.2"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Bleigh"]
-  s.date = %q{2010-08-27}
+  s.date = %q{2010-08-30}
   s.description = %q{A Ruby framework for rapid API development with great conventions.}
   s.email = %q{michael@intridea.com}
   s.extra_rdoc_files = [
@@ -69,14 +69,14 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rack>, [">= 0"])
       s.add_runtime_dependency(%q<rack-mount>, [">= 0"])
       s.add_runtime_dependency(%q<rack-jsonp>, [">= 0"])
-      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+      s.add_runtime_dependency(%q<activesupport>, ["~> 3.0.0"])
       s.add_development_dependency(%q<rake>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
     else
       s.add_dependency(%q<rack>, [">= 0"])
       s.add_dependency(%q<rack-mount>, [">= 0"])
       s.add_dependency(%q<rack-jsonp>, [">= 0"])
-      s.add_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+      s.add_dependency(%q<activesupport>, ["~> 3.0.0"])
       s.add_dependency(%q<rake>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
     end
@@ -84,7 +84,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rack>, [">= 0"])
     s.add_dependency(%q<rack-mount>, [">= 0"])
     s.add_dependency(%q<rack-jsonp>, [">= 0"])
-    s.add_dependency(%q<activesupport>, [">= 3.0.0.rc2"])
+    s.add_dependency(%q<activesupport>, ["~> 3.0.0"])
     s.add_dependency(%q<rake>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
   end
