@@ -13,6 +13,10 @@ module Grape
         pieces = env['PATH_INFO'].split('/')
         potential_version = pieces[1]
         if potential_version =~ options[:pattern]
+          if options[:versions] && !options[:versions].include?(potential_version)
+            throw :error, :status => 404, :message => "The specified version of the API does not exist."
+          end
+          
           truncated_path = "/#{pieces[2..-1].join('/')}"
           env['api.version'] = potential_version
           env['PATH_INFO'] = truncated_path

@@ -32,4 +32,33 @@ describe Grape::Middleware::Formatter do
       err.should == {:status => 406, :message => "The requested format is not supported."}
     end
   end
+  
+  context 'Accept header detection' do
+    it 'should detect from the Accept header' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/xml'})
+      subject.env['api.format'].should == :xml
+    end
+    
+    it 'should look for case-indifferent headers' do
+      subject.call({'PATH_INFO' => '/info', 'accept' => 'application/xml'})
+      subject.env['api.format'].should == :xml
+    end
+    
+    it 'should use quality rankings to determine formats' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; q=0.3,application/xml; q=1.0'})
+      subject.env['api.format'].should == :xml
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; q=1.0,application/xml; q=0.3'})
+      subject.env['api.format'].should == :json
+    end
+    
+    it 'should handle quality rankings mixed with nothing' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json,application/xml; q=1.0'})
+      subject.env['api.format'].should == :xml
+    end
+    
+    it 'should properly parse headers with other attributes' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7'})
+      subject.env['api.format'].should == :json
+    end
+  end
 end

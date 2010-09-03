@@ -26,4 +26,15 @@ describe Grape::Middleware::Versioner do
       subject.call('PATH_INFO' => '/awesome/radical').last.should be_nil
     end
   end
+  
+  context 'with specified versions' do
+    before{ @options = {:versions => ['v1', 'v2']}}
+    it 'should throw an error if a non-allowed version is specified' do
+      catch(:error){subject.call('PATH_INFO' => '/v3/awesome')}[:status].should == 404
+    end
+    
+    it 'should allow versions that have been specified' do
+      subject.call('PATH_INFO' => '/v1/asoasd').last.should == 'v1'
+    end
+  end
 end

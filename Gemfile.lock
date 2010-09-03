@@ -25,14 +25,14 @@ GEM
     rack-test (0.5.4)
       rack (>= 1.0)
     rake (0.8.7)
-    rspec (2.0.0.beta.19)
-      rspec-core (= 2.0.0.beta.19)
-      rspec-expectations (= 2.0.0.beta.19)
-      rspec-mocks (= 2.0.0.beta.19)
-    rspec-core (2.0.0.beta.19)
-    rspec-expectations (2.0.0.beta.19)
+    rspec (2.0.0.beta.20)
+      rspec-core (= 2.0.0.beta.20)
+      rspec-expectations (= 2.0.0.beta.20)
+      rspec-mocks (= 2.0.0.beta.20)
+    rspec-core (2.0.0.beta.20)
+    rspec-expectations (2.0.0.beta.20)
       diff-lcs (>= 1.1.2)
-    rspec-mocks (2.0.0.beta.19)
+    rspec-mocks (2.0.0.beta.20)
     rubyforge (2.0.4)
       json_pure (>= 1.1.7)
     term-ansicolor (1.0.5)
@@ -50,4 +50,4 @@ DEPENDENCIES
   rack-mount
   rack-test
   rake
-  rspec (>= 2.0.0.beta.19)
+  rspec (>= 2.0.0.beta.20)

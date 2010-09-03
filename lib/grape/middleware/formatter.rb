@@ -22,9 +22,17 @@ module Grape
         CONTENT_TYPES.merge(options[:content_types])
       end
       
+      def mime_types
+        CONTENT_TYPES.invert
+      end
+      
+      def headers
+        env.dup.inject({}){|h,(k,v)| h[k.downcase] = v; h}
+      end
+      
       def before
         fmt = format_from_extension || format_from_header || options[:default_format]
-        
+                
         if content_types.key?(fmt)
           env['api.format'] = fmt          
         else
@@ -44,7 +52,24 @@ module Grape
       end
       
       def format_from_header
-        # TODO: Implement Accept header parsing.
+        mime_array.each do |t| 
+          if mime_types.key?(t)
+            return mime_types[t]
+          end
+        end
+        nil
+      end
+      
+      def mime_array
+        accept = headers['accept']
+        if accept
+          accept.gsub(/\b/,'').
+            scan(/(\w+\/[\w+]+)(?:;[^,]*q=([0-9.]+)[^,]*)?/i).
+            sort_by{|a| -a[1].to_f}.
+            map{|a| a[0]}
+        else
+          []
+        end
       end
       
       def after
