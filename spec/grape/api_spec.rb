@@ -43,4 +43,47 @@ describe Grape::API do
       last_response.body.should == "Version: v1"
     end
   end
+  
+  describe '.namespace' do
+    it 'should be retrievable and converted to a path' do
+      subject.namespace :awesome do
+        namespace.should == '/awesome'
+      end
+    end
+    
+    it 'should come after the prefix and version' do
+      subject.prefix :rad
+      subject.version :v1
+      
+      subject.namespace :awesome do
+        compile_path('hello').should == '/rad/v1/awesome/hello'
+      end
+    end
+    
+    it 'should cancel itself after the block is over' do
+      subject.namespace :awesome do
+        namespace.should == '/awesome'
+      end
+      
+      subject.namespace.should == '/'
+    end
+    
+    it 'should be stackable' do
+      subject.namespace :awesome do
+        namespace :rad do
+          namespace.should == '/awesome/rad'
+        end
+        namespace.should == '/awesome'
+      end
+      subject.namespace.should == '/'
+    end
+    
+    %w(group resource resources).each do |als|
+      it "`.#{als}` should be an alias" do
+        subject.send(als, :awesome) do
+          namespace.should == "/awesome"
+        end
+      end
+    end
+  end
 end

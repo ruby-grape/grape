@@ -30,6 +30,9 @@ Grape is a REST-like API micro-framework for Ruby. It is built to complement exi
       end
     end
     
+    # Rack endpoint
+    Twitter::API.statuses.timelines.get(:public_timeline)
+    
     class Twitter::API::User < Grape::Resource::ActiveRecord
       represents ::User
       
