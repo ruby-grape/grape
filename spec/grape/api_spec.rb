@@ -78,12 +78,49 @@ describe Grape::API do
       subject.namespace.should == '/'
     end
     
+    it 'should be callable with nil just to push onto the stack' do
+      subject.namespace do
+        version 'v2'
+        compile_path('hello').should == '/v2/hello'
+      end
+      subject.compile_path('hello').should == '/hello'
+    end
+    
     %w(group resource resources).each do |als|
       it "`.#{als}` should be an alias" do
         subject.send(als, :awesome) do
           namespace.should == "/awesome"
         end
       end
+    end
+  end
+  
+  describe '.basic' do
+    it 'should protect any resources on the same scope' do
+      subject.http_basic do |u,p|
+        u == 'allow'
+      end
+      subject.get(:hello){ "Hello, world."}
+      get '/hello'
+      last_response.status.should == 401
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      last_response.status.should == 200
+    end
+    
+    it 'should be scopable' do
+      subject.get(:hello){ "Hello, world."}
+      subject.namespace :admin do
+        http_basic do |u,p|
+          u == 'allow'
+        end
+        
+        get(:hello){ "Hello, world." }
+      end
+      
+      get '/hello'
+      last_response.status.should == 200
+      get '/admin/hello'
+      last_response.status.should == 401
     end
   end
 end

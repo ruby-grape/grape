@@ -13,10 +13,6 @@ describe Grape::Middleware::Auth::Basic do
     end
   end
   
-  def encode(username, password)
-    "Basic " + Base64.encode64("#{username}:#{password}")
-  end
-  
   it 'should throw a 401 if no auth is given' do
     @proc = lambda{ false }
     get '/whatever'
@@ -24,12 +20,12 @@ describe Grape::Middleware::Auth::Basic do
   end
   
   it 'should authenticate if given valid creds' do
-    get '/whatever', {}, 'HTTP_AUTHORIZATION' => encode('admin','admin')
+    get '/whatever', {}, 'HTTP_AUTHORIZATION' => encode_basic('admin','admin')
     last_response.status.should == 200
   end
   
   it 'should throw a 401 is wrong auth is given' do
-    get '/whatever', {}, 'HTTP_AUTHORIZATION' => encode('admin','wrong')
+    get '/whatever', {}, 'HTTP_AUTHORIZATION' => encode_basic('admin','wrong')
     last_response.status.should == 401
   end
 end

@@ -48,6 +48,10 @@ module Grape
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
       
+      def http_basic(&block)
+        block_given? ? set(:basic_auth, block) : settings[:basic_auth]
+      end
+      
       def route_set
         @route_set ||= Rack::Mount::RouteSet.new
       end
@@ -68,6 +72,7 @@ module Grape
       def build_endpoint(&block)
         b = Rack::Builder.new
         b.use Grape::Middleware::Error
+        b.use Grape::Middleware::Auth::Basic, &http_basic if http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
@@ -82,9 +87,9 @@ module Grape
       def delete(path_info, &block); route('DELETE', path_info, &block) end
       
       def namespace(space = nil, &block)
-        if space
+        if space || block_given?
           settings_stack << {}
-          set(:namespace, space.to_s)
+          set(:namespace, space.to_s) if space
           instance_eval &block
           settings_stack.pop
         else
