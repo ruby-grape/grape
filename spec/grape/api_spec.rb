@@ -122,5 +122,17 @@ describe Grape::API do
       get '/admin/hello'
       last_response.status.should == 401
     end
+    
+    it 'should be callable via .auth as well' do
+      subject.auth :http_basic do |u,p|
+        u == 'allow'
+      end
+      
+      subject.get(:hello){ "Hello, world."}
+      get '/hello'
+      last_response.status.should == 401
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      last_response.status.should == 200
+    end
   end
 end

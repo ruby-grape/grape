@@ -48,8 +48,16 @@ module Grape
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
       
+      def auth(type = nil, &block)
+        if type
+          set(:auth, {:type => type.to_sym, :proc => block})
+        else
+          settings[:auth]
+        end
+      end
+      
       def http_basic(&block)
-        block_given? ? set(:basic_auth, block) : settings[:basic_auth]
+        auth :http_basic, &block
       end
       
       def route_set
@@ -72,7 +80,7 @@ module Grape
       def build_endpoint(&block)
         b = Rack::Builder.new
         b.use Grape::Middleware::Error
-        b.use Grape::Middleware::Auth::Basic, &http_basic if http_basic
+        b.use Grape::Middleware::Auth::Basic, &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
