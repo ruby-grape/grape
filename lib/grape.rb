@@ -1,10 +1,21 @@
 require 'rack'
 require 'rack/builder'
 
-require 'grape/middleware/base'
-require 'grape/middleware/prefixer'
-require 'grape/middleware/versioner'
-require 'grape/middleware/formatter'
-require 'grape/middleware/error'
-
-require 'grape/middleware/auth/oauth2'
+module Grape
+  autoload :API, 'grape/api'
+  autoload :Endpoint, 'grape/endpoint'
+  autoload :MiddlewareStack, 'grape/middleware_stack'
+  
+  module Middleware
+    autoload :Base,      'grape/middleware/base'
+    autoload :Prefixer,  'grape/middleware/prefixer'
+    autoload :Versioner, 'grape/middleware/versioner'
+    autoload :Formatter, 'grape/middleware/formatter'
+    autoload :Error,     'grape/middleware/error'
+    
+    module Auth
+      autoload :OAuth2, 'grape/middleware/auth/oauth2'
+      autoload :Basic,  'grape/middleware/auth/basic'
+    end
+  end
+end

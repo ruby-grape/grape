@@ -5,11 +5,12 @@ module Grape
     class Error < Base
       def call!(env)
         @env = env
-        err = catch :error do
+        result = catch :error do
           @app.call(@env)
         end
         
-        error_response(err)
+        result ||= {}
+        result.is_a?(Hash) ? error_response(result) : result
       end
       
       def error_response(error = {})

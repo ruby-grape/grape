@@ -1,5 +1,5 @@
 require 'grape/middleware/base'
-require 'active_support/json'
+require 'multi_json'
 
 module Grape
   module Middleware
@@ -8,12 +8,13 @@ module Grape
         :xml => 'application/xml',
         :json => 'application/json',
         :atom => 'application/atom+xml',
-        :rss => 'application/rss+xml'
+        :rss => 'application/rss+xml',
+        :txt => 'text/plain'
       }
       
       def default_options
         { 
-          :default_format => :json,
+          :default_format => :txt,
           :content_types => {}
         }
       end
@@ -23,7 +24,7 @@ module Grape
       end
       
       def mime_types
-        CONTENT_TYPES.invert
+        content_types.invert
       end
       
       def headers
@@ -75,8 +76,14 @@ module Grape
       def after
         status, headers, bodies = *@app_response
         bodies.map! do |body|
-          ActiveSupport::JSON.encode(body)
+          case env['api.format']
+            when :json
+              MultiJson.encode(body)
+            when :txt
+              body.to_s
+          end
         end
+        headers['Content-Type'] = 'application/json'
         [status, headers, bodies]
       end
     end

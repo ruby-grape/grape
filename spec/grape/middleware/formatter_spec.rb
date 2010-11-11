@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
-  subject{ Grape::Middleware::Formatter.new(app)}
+  subject{ Grape::Middleware::Formatter.new(app, :default_format => :json)}
   before{ subject.stub!(:dup).and_return(subject) }
   
   let(:app){ lambda{|env| [200, {}, [@body]]} }
@@ -10,7 +10,7 @@ describe Grape::Middleware::Formatter do
     it 'should look at the bodies for possibly serializable data' do
       @body = {"abc" => "def"}
       status, headers, bodies = *subject.call({'PATH_INFO' => '/somewhere'})
-      bodies.first.should == ActiveSupport::JSON.encode(@body)
+      bodies.first.should == MultiJson.encode(@body)
     end
   end
   

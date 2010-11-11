@@ -1,1 +1,1 @@
-rvm use ree@rails3 --passenger
+rvm use ree@rails3

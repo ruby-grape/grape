@@ -22,4 +22,9 @@ describe Grape::Middleware::Prefixer do
   it 'should pass through unaltered if there is no prefix' do
     subject.call('PATH_INFO' => '/awesome').last.should == '/awesome'
   end
+  
+  it 'should only remove the first instance of the prefix' do
+    @options = {:prefix => 'api'}
+    subject.call('PATH_INFO' => '/api/v1/api/awesome').last.should == '/v1/api/awesome'
+  end
 end

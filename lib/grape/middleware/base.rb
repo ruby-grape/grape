@@ -3,6 +3,8 @@ module Grape
     class Base
       attr_reader :app, :env, :options
       
+      # @param [Rack Application] app The standard argument for a Rack middleware.
+      # @param [Hash] options A hash of options, simply stored for use by subclasses.
       def initialize(app, options = {})
         @app = app
         @options = default_options.merge(options)
@@ -21,7 +23,12 @@ module Grape
         after || @app_response
       end
       
+      # @abstract
+      # Called before the application is called in the middleware lifecycle.
       def before; end
+      # @abstract
+      # Called after the application is called in the middleware lifecycle.
+      # @returns [Response, nil] a Rack SPEC response or nil to call the application afterwards.
       def after; end
       
       def request
