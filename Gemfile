@@ -1,5 +1,5 @@
 gem 'rack'
-gem 'rack-mount'
+gem 'rack-mount', '~> 0.6.13'
 gem 'rack-jsonp'
 
 gem 'multi_json'

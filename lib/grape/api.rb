@@ -74,7 +74,10 @@ module Grape
       end
 
       def route(method, path_info, &block)
-        route_set.add_route(build_endpoint(&block), :path_info => compile_path(path_info))
+        route_set.add_route(build_endpoint(&block), 
+          :path_info => compile_path(path_info), 
+          :request_method => method
+        )
       end
       
       def build_endpoint(&block)
@@ -88,11 +91,11 @@ module Grape
         b.to_app
       end
       
-      def get(path_info, &block); route('GET', path_info, &block) end
-      def post(path_info, &block); route('POST', path_info, &block) end
-      def put(path_info, &block); route('PUT', path_info, &block) end
-      def head(path_info, &block); route('HEAD', path_info, &block) end
-      def delete(path_info, &block); route('DELETE', path_info, &block) end
+      def get(path_info = '', &block); route('GET', path_info, &block) end
+      def post(path_info = '', &block); route('POST', path_info, &block) end
+      def put(path_info = '', &block); route('PUT', path_info, &block) end
+      def head(path_info = '', &block); route('HEAD', path_info, &block) end
+      def delete(path_info = '', &block); route('DELETE', path_info, &block) end
       
       def namespace(space = nil, &block)
         if space || block_given?

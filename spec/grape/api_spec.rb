@@ -95,6 +95,49 @@ describe Grape::API do
     end
   end
   
+  describe '.route' do
+    it 'should allow for no path' do
+      subject.namespace :votes do
+        get do
+          "Votes"
+        end
+        
+        post do
+          "Created a Vote"
+        end
+      end
+      
+      get '/votes'
+      last_response.body.should == 'Votes'
+      post '/votes'
+      last_response.body.should == 'Created a Vote'
+    end
+    
+    verbs = %w(post get head delete put)
+    verbs.each do |verb|
+      it "should allow and properly constrain a #{verb.upcase} method" do
+        subject.send(verb, '/example') do
+          verb
+        end
+        send(verb, '/example')
+        last_response.body.should == verb
+        # Call it with a method other than the properly constrained one.
+        send(verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
+        last_response.status.should == 404
+      end
+    end
+    
+    it 'should return a 201 response code for POST by default' do
+      subject.post('example') do
+        "Created"
+      end
+      
+      post '/example'
+      last_response.status.should == 201
+      last_response.body.should == 'Created'
+    end
+  end
+  
   describe '.basic' do
     it 'should protect any resources on the same scope' do
       subject.http_basic do |u,p|

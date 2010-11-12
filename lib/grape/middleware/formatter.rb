@@ -75,8 +75,9 @@ module Grape
       
       def after
         status, headers, bodies = *@app_response
-        bodies.map! do |body|
-          case env['api.format']
+        bodymap = []
+        bodies.each do |body|
+          bodymap << case env['api.format']
             when :json
               MultiJson.encode(body)
             when :txt
@@ -84,7 +85,7 @@ module Grape
           end
         end
         headers['Content-Type'] = 'application/json'
-        [status, headers, bodies]
+        Rack::Response.new(bodymap, status, headers).to_a
       end
     end
   end
