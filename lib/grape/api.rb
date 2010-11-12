@@ -1,4 +1,5 @@
 require 'rack/mount'
+require 'rack/auth/basic'
 
 module Grape
   class API
@@ -48,16 +49,21 @@ module Grape
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
       
-      def auth(type = nil, &block)
+      def auth(type = nil, options = {}, &block)
         if type
-          set(:auth, {:type => type.to_sym, :proc => block})
+          set(:auth, {:type => type.to_sym, :proc => block}.merge(options))
         else
           settings[:auth]
         end
       end
       
-      def http_basic(&block)
-        auth :http_basic, &block
+      # Add HTTP Basic authorization to the API.
+      #
+      # @param [Hash] options A hash of options.
+      # @option options [String] :realm "API Authorization" The HTTP Basic realm.
+      def http_basic(options = {}, &block)
+        options[:realm] ||= "API Authorization"
+        auth :http_basic, options, &block
       end
       
       def route_set
@@ -83,7 +89,7 @@ module Grape
       def build_endpoint(&block)
         b = Rack::Builder.new
         b.use Grape::Middleware::Error
-        b.use Grape::Middleware::Auth::Basic, &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
+        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
