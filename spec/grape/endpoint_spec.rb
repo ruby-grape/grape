@@ -29,4 +29,24 @@ describe Grape::Endpoint do
       last_response.headers['X-Awesome'].should == 'true'
     end
   end
+  
+  describe '#params' do
+    it 'should be available to the caller' do
+      subject.get('/hey') do
+        params[:howdy]
+      end
+      
+      get '/hey?howdy=hey'
+      last_response.body.should == 'hey'
+    end
+    
+    it 'should parse from path segments' do
+      subject.get('/hey/:id') do
+        params[:id]
+      end
+      
+      get '/hey/12'
+      last_response.body.should == '12'
+    end
+  end
 end

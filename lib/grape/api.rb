@@ -75,7 +75,7 @@ module Grape
 
       def route(method, path_info, &block)
         route_set.add_route(build_endpoint(&block), 
-          :path_info => compile_path(path_info), 
+          :path_info => Rack::Mount::Strexp.compile(compile_path(path_info)), 
           :request_method => method
         )
       end

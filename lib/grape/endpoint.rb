@@ -2,6 +2,10 @@ require 'rack'
 require 'grape'
 
 module Grape
+  # An Endpoint is the proxy scope in which all routing
+  # blocks are executed. In other words, any methods
+  # on the instance level of this class may be called
+  # from inside a `get`, `post`, etc. block.
   class Endpoint
     def initialize(&block)
       @block = block
@@ -9,6 +13,15 @@ module Grape
     
     attr_reader :env, :request
     
+    def params
+      @params ||= request.params.merge(env['rack.routing_args'] || {}).inject({}) do |h,(k,v)|
+        h[k.to_s] = v
+        h[k.to_sym] = v
+        h
+      end
+    end
+    
+    # Set or retrieve the HTTP status code.
     def status(status = nil)
       if status
         @status = status
@@ -23,6 +36,8 @@ module Grape
       end        
     end
     
+    # Set an individual header or retrieve
+    # all headers that have been set.
     def header(key = nil, val = nil)
       if key
         val ? @header[key.to_s] = val : @header.delete(key.to_s)
