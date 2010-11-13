@@ -1,7 +1,6 @@
 gem 'rack'
 gem 'rack-mount', '~> 0.6.13'
 gem 'rack-jsonp'
-gem 'rack-test'
 
 gem 'json'
 gem 'multi_json'
@@ -13,6 +12,7 @@ group :development do
 end
 
 group :test do
+  gem 'rack-test'
   gem 'rspec', '>= 2.1.0'
   gem 'cucumber', '>= 0.8.5'
 end
