@@ -12,6 +12,29 @@ describe Grape::Middleware::Formatter do
       status, headers, bodies = *subject.call({'PATH_INFO' => '/somewhere'})
       bodies.each{|b| b.should == MultiJson.encode(@body) }
     end
+    
+    it 'should call #to_json first if it is available' do
+      @body = "string"
+      @body.instance_eval do
+        def to_json
+          "\"bar\""
+        end
+      end
+      
+      subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '"bar"'}
+    end
+    
+    it 'should serialize the #serializable_hash if that is available' do
+      class SimpleExample
+        def serializable_hash
+          {:abc => 'def'}
+        end
+      end
+      
+      @body = SimpleExample.new
+      
+      subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '{"abc":"def"}'}
+    end
   end
   
   context 'detection' do

@@ -16,6 +16,7 @@ GEM
       gemcutter (>= 0.1.0)
       git (>= 1.2.5)
       rubyforge (>= 2.0.0)
+    json (1.4.6)
     json_pure (1.4.3)
     multi_json (0.0.4)
     multi_xml (0.0.1)
@@ -45,6 +46,7 @@ PLATFORMS
 DEPENDENCIES
   cucumber (>= 0.8.5)
   jeweler
+  json
   multi_json
   multi_xml
   rack

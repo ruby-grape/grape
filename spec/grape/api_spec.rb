@@ -42,6 +42,42 @@ describe Grape::API do
       get '/api/v1/hello'
       last_response.body.should == "Version: v1"
     end
+    
+    it 'should be able to specify version as a nesting' do
+      subject.version 'v2'
+      subject.get '/awesome' do
+        "Radical"
+      end
+      
+      subject.version 'v1' do
+        get '/legacy' do
+          "Totally"
+        end
+      end
+      
+      get '/v1/awesome'
+      last_response.status.should == 404
+      get '/v2/awesome'
+      last_response.status.should == 200
+      get '/v1/legacy'
+      last_response.status.should == 200
+      get '/v2/legacy'
+      last_response.status.should == 404
+    end
+    
+    it 'should be able to specify multiple versions' do
+      subject.version 'v1', 'v2'
+      subject.get 'awesome' do
+        "I exist"
+      end
+      
+      get '/v1/awesome'
+      last_response.status.should == 200
+      get '/v2/awesome'
+      last_response.status.should == 200
+      get '/v3/awesome'
+      last_response.status.should == 404
+    end
   end
   
   describe '.namespace' do
@@ -56,7 +92,7 @@ describe Grape::API do
       subject.version :v1
       
       subject.namespace :awesome do
-        compile_path('hello').should == '/rad/v1/awesome/hello'
+        compile_path('hello').should == '/rad/:version/awesome/hello'
       end
     end
     
@@ -81,7 +117,7 @@ describe Grape::API do
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
         version 'v2'
-        compile_path('hello').should == '/v2/hello'
+        compile_path('hello').should == '/:version/hello'
       end
       subject.compile_path('hello').should == '/hello'
     end
@@ -176,6 +212,72 @@ describe Grape::API do
       last_response.status.should == 401
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
       last_response.status.should == 200
+    end
+  end
+  
+  describe '.helpers' do
+    it 'should be accessible from the endpoint' do
+      subject.helpers do
+        def hello
+          "Hello, world."
+        end
+      end
+      
+      subject.get '/howdy' do
+        hello
+      end
+      
+      get '/howdy'
+      last_response.body.should == 'Hello, world.'
+    end
+    
+    it 'should be scopable' do
+      subject.helpers do
+        def generic
+          'always there'
+        end
+      end
+      
+      subject.namespace :admin do
+        helpers do
+          def secret
+            'only in admin'
+          end
+        end
+        
+        get '/secret' do
+          [generic, secret].join ':'
+        end
+      end
+      
+      subject.get '/generic' do
+        [generic, respond_to?(:secret)].join ':'
+      end
+      
+      get '/generic'
+      last_response.body.should == 'always there:false'
+      get '/admin/secret'
+      last_response.body.should == 'always there:only in admin'
+    end
+    
+    it 'should be reopenable' do
+      subject.helpers do
+        def one
+          1
+        end
+      end
+      
+      subject.helpers do
+        def two
+          2
+        end
+      end
+      
+      subject.get 'howdy' do
+        [one, two]
+      end
+      
+      lambda{get '/howdy'}.should_not raise_error
     end
   end
 end

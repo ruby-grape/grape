@@ -3,6 +3,8 @@ require 'rack/auth/basic'
 
 module Grape
   class API
+    module Helpers; end
+    
     class << self
       attr_reader :route_set
       
@@ -13,6 +15,7 @@ module Grape
       end
       
       def call(env)
+        puts "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         route_set.freeze.call(env)
       end
       
@@ -41,12 +44,36 @@ module Grape
         prefix ? set(:root_prefix, prefix) : settings[:root_prefix]
       end
       
-      def version(new_version = nil)
-        new_version ? set(:version, new_version) : settings[:version]
+      def version(*new_versions, &block)
+        new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
       end
       
       def default_format(new_format = nil)
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
+      end
+
+      # Add helper methods that will be accessible from any
+      # endpoint within this namespace (and child namespaces).
+      #
+      #    class ExampleAPI
+      #      helpers do
+      #        def current_user
+      #          User.find_by_id(params[:token])
+      #        end
+      #      end
+      #    end
+      def helpers(&block)
+        if block_given?
+          m = settings_stack.last[:helpers] || Module.new
+          m.class_eval &block
+          set(:helpers, m)
+        else
+          m = Module.new
+          settings_stack.each do |s|
+            m.send :include, s[:helpers] if s[:helpers]
+          end
+          m
+        end
       end
       
       def auth(type = nil, options = {}, &block)
@@ -73,7 +100,7 @@ module Grape
       def compile_path(path)
         parts = []
         parts << prefix if prefix
-        parts << version if version
+        parts << ':version' if version
         parts << namespace if namespace
         parts << path
         Rack::Mount::Utils.normalize_path(parts.join('/'))
@@ -87,13 +114,18 @@ module Grape
       end
       
       def build_endpoint(&block)
+        
         b = Rack::Builder.new
         b.use Grape::Middleware::Error
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
-        b.use Grape::Middleware::Versioner if version
+        b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
-        b.run Grape::Endpoint.new(&block)
+        
+        endpoint = Grape::Endpoint.new(&block)
+        endpoint.send :extend, helpers
+        b.run endpoint
+        
         b.to_app
       end
       
@@ -105,12 +137,26 @@ module Grape
       
       def namespace(space = nil, &block)
         if space || block_given?
-          settings_stack << {}
-          set(:namespace, space.to_s) if space
-          instance_eval &block
-          settings_stack.pop
+          nest(block) do
+            set(:namespace, space.to_s) if space
+          end
         else
           Rack::Mount::Utils.normalize_path(settings_stack.map{|s| s[:namespace]}.join('/'))
+        end
+      end
+      
+      # Execute first the provided block, then each of the
+      # block passed in. Allows for simple 'before' setups
+      # of settings stack pushes.
+      def nest(*blocks, &block)
+        blocks.reject!{|b| b.nil?}
+        if blocks.any?
+          settings_stack << {}
+          instance_eval &block
+          blocks.each{|b| instance_eval &b}
+          settings_stack.pop
+        else
+          instance_eval &block
         end
       end
       

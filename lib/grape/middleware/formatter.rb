@@ -79,13 +79,27 @@ module Grape
         bodies.each do |body|
           bodymap << case env['api.format']
             when :json
-              MultiJson.encode(body)
+              encode_json(body)
             when :txt
-              body.to_s
+              encode_txt(body)
           end
         end
         headers['Content-Type'] = 'application/json'
         Rack::Response.new(bodymap, status, headers).to_a
+      end
+      
+      def encode_json(object)
+        if object.respond_to? :serializable_hash
+          MultiJson.encode(object.serializable_hash)
+        elsif object.respond_to? :to_json
+          object.to_json
+        else
+          MultiJson.encode(object)
+        end
+      end
+      
+      def encode_txt(object)
+        body.respond_to?(:to_txt) ? body.to_txt : body.to_s
       end
     end
   end

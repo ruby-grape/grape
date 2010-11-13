@@ -5,6 +5,7 @@ module Grape
   autoload :API, 'grape/api'
   autoload :Endpoint, 'grape/endpoint'
   autoload :MiddlewareStack, 'grape/middleware_stack'
+  autoload :Client, 'grape/client'
   
   module Middleware
     autoload :Base,      'grape/middleware/base'

@@ -21,6 +21,12 @@ module Grape
       end
     end
     
+    def version; env['api.version'] end
+    
+    def error!(message, status=403)
+      throw :error, :message => message, :status => status
+    end
+    
     # Set or retrieve the HTTP status code.
     def status(status = nil)
       if status

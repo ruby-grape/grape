@@ -14,7 +14,7 @@ module Grape
         potential_version = pieces[1]
         if potential_version =~ options[:pattern]
           if options[:versions] && !options[:versions].include?(potential_version)
-            throw :error, :status => 404, :message => "The specified version of the API does not exist."
+            throw :error, :status => 404, :message => "404 API Version Not Found"
           end
           
           truncated_path = "/#{pieces[2..-1].join('/')}"

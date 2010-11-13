@@ -49,4 +49,27 @@ describe Grape::Endpoint do
       last_response.body.should == '12'
     end
   end
+  
+  describe '#error!' do
+    it 'should accept a message' do
+      subject.get('/hey') do
+        error! "This is not valid."
+        "This is valid."
+      end
+      
+      get '/hey'
+      last_response.status.should == 403
+      last_response.body.should == "This is not valid."
+    end
+    
+    it 'should accept a code' do
+      subject.get('/hey') do
+        error! "Unauthorized.", 401
+      end
+      
+      get '/hey'
+      last_response.status.should == 401
+      last_response.body.should == "Unauthorized."
+    end
+  end
 end
