@@ -19,37 +19,50 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
         def current_user
           @current_user ||= User.authorize!(env)
         end
+        
+        def authenticate!
+          error!('401 Unauthorized', 401) unless current_user
+        end
       end
       
       resource :statuses do
-        formats :rss, :atom
-        
         get :public_timeline do
           Tweet.limit(20)
         end
       
         get :home_timeline do
+          authenticate!
           current_user.home_timeline
         end
         
+        get '/show/:id' do
+          Tweet.find(params[:id])
+        end
+        
         post :update do
+          authenticate!
           Tweet.create(
+            :user => current_user,
             :text => params[:status]
           )
         end
       end
     end
     
-    # Rack endpoint
-    Twitter::API.statuses.timelines.get(:public_timeline)
+This would create a Rack application that could be used like so (in a Rackup file):
+
+    use Twitter::API
     
-    class Twitter::API::User < Grape::Resource::ActiveRecord
-      represents ::User
-      
-      property :status, lambda{|u| u.latest_status}, Twitter::API::Status
-    end
+And would respond to the following routes:
+
+    GET  /1/statuses/public_timeline(.json)
+    GET  /1/statuses/home_timeline(.json)
+    GET  /1/statuses/show/:id(.json)
+    POST /1/statuses/update(.json)
     
-== Note on Patches/Pull Requests
+Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
+    
+## Note on Patches/Pull Requests
  
 * Fork the project.
 * Make your feature addition or bug fix.
@@ -57,6 +70,6 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
 * Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
-== Copyright
+## Copyright
 
 Copyright (c) 2010 Michael Bleigh and Intridea, Inc. See LICENSE for details.
