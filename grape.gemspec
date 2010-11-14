@@ -5,16 +5,16 @@
 
 Gem::Specification.new do |s|
   s.name = %q{grape}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Bleigh"]
-  s.date = %q{2010-11-13}
+  s.date = %q{2010-11-14}
   s.description = %q{A Ruby framework for rapid API development with great conventions.}
   s.email = %q{michael@intridea.com}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README.rdoc"
+     "README.markdown"
   ]
   s.files = [
     ".document",
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
      "Gemfile",
      "Gemfile.lock",
      "LICENSE",
-     "README.rdoc",
+     "README.markdown",
      "Rakefile",
      "VERSION",
      "autotest/discover.rb",
