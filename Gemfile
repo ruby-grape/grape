@@ -1,3 +1,5 @@
+source 'http://rubygems.org'
+
 gem 'rack'
 gem 'rack-mount', '~> 0.6.13'
 gem 'rack-jsonp'
@@ -9,6 +11,7 @@ gem 'multi_xml'
 group :development do
   gem 'rake'
   gem 'jeweler'
+  # gem 'yard'
 end
 
 group :test do

@@ -119,7 +119,7 @@ describe Grape::API do
         version 'v2'
         compile_path('hello').should == '/:version/hello'
       end
-      subject.compile_path('hello').should == '/hello'
+      subject.send(:compile_path, 'hello').should == '/hello'
     end
     
     %w(group resource resources).each do |als|
@@ -147,6 +147,39 @@ describe Grape::API do
       last_response.body.should == 'Votes'
       post '/votes'
       last_response.body.should == 'Created a Vote'
+    end
+    
+    it 'should allow for multiple paths' do
+      subject.get("/abc", "/def") do
+        "foo"
+      end
+      
+      get '/abc'
+      last_response.body.should == 'foo'
+      get '/def'
+      last_response.body.should == 'foo'
+    end
+    
+    it 'should allow for multiple verbs' do
+      subject.route([:get, :post], '/abc') do
+        "hiya"
+      end
+      
+      get '/abc'
+      last_response.body.should == 'hiya'
+      post '/abc'
+      last_response.body.should == 'hiya'
+    end
+    
+    it 'should allow for :any as a verb' do
+      subject.route(:any, '/abc') do
+        "lol"
+      end
+      
+      %w(get post put delete).each do |m|
+        send(m, '/abc')
+        last_response.body.should == 'lol'
+      end
     end
     
     verbs = %w(post get head delete put)

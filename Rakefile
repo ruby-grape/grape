@@ -3,6 +3,10 @@ require 'bundler'
 
 Bundler.setup :default, :test, :development
 
+def version
+  @version ||= open('VERSION').read.trim
+end
+
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
@@ -33,12 +37,34 @@ end
 task :spec => :check_dependencies
 task :default => :spec
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "grape #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+begin
+  require 'yard'
+  YARD_OPTS = ['-m', 'markdown', '-M', 'maruku']
+  DOC_FILES = ['lib/**/*.rb', 'README.markdown']
+  
+  YARD::Rake::YardocTask.new(:doc) do |t|
+    t.files   = DOC_FILES
+    t.options = YARD_OPTS
+  end
+  
+  namespace :doc do
+    YARD::Rake::YardocTask.new(:pages) do |t|
+      t.files   = DOC_FILES
+      t.options = YARD_OPTS + ['-o', '../grape.doc']
+    end
+    
+    namespace :pages do
+      desc 'Generate and publish YARD docs to GitHub pages.'
+      task :publish => ['doc:pages'] do
+        Dir.chdir(File.dirname(__FILE__) + '/../grape.doc') do
+          system("git add .")
+          system("git add -u")
+          system("git commit -m 'Generating docs for version #{version}.'")
+          system("git push origin gh-pages")
+        end
+      end
+    end
+  end
+rescue LoadError
+  puts "You need to install YARD."
 end

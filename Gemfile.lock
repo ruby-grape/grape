@@ -1,4 +1,5 @@
 GEM
+  remote: http://rubygems.org/
   specs:
     builder (2.1.2)
     cucumber (0.8.5)

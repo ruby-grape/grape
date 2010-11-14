@@ -1,5 +1,6 @@
 require 'rack/mount'
 require 'rack/auth/basic'
+require 'logger'
 
 module Grape
   class API
@@ -8,6 +9,10 @@ module Grape
     class << self
       attr_reader :route_set
       
+      def logger
+        @logger ||= Logger.new($STDOUT)
+      end
+      
       def reset!
         @settings = [{}]
         @route_set = Rack::Mount::RouteSet.new
@@ -15,7 +20,7 @@ module Grape
       end
       
       def call(env)
-        puts "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
+        logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         route_set.freeze.call(env)
       end
       
@@ -30,6 +35,11 @@ module Grape
         @settings
       end
       
+      # Set a configuration value for this
+      # namespace.
+      #
+      # @param key [Symbol] The key of the configuration variable.
+      # @param value [Object] The value to which to set the configuration variable.
       def set(key, value)
         @settings.last[key.to_sym] = value
       end
@@ -48,6 +58,9 @@ module Grape
         new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
       end
       
+      # Specify the default format for the API's 
+      # serializers. Currently only `:json` is
+      # supported.
       def default_format(new_format = nil)
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
@@ -76,6 +89,8 @@ module Grape
         end
       end
       
+      # Add an authentication type to the API. Currently
+      # only `:http_basic` is supported.
       def auth(type = nil, options = {}, &block)
         if type
           set(:auth, {:type => type.to_sym, :proc => block}.merge(options))
@@ -93,47 +108,34 @@ module Grape
         auth :http_basic, options, &block
       end
       
-      def route_set
-        @route_set ||= Rack::Mount::RouteSet.new
+      # Defines a route that will be recognized
+      # by the Grape API.
+      #
+      # @param methods [HTTP Verb(s)] One or more HTTP verbs that are accepted by this route. Set to `:any` if you want any verb to be accepted.
+      # @param paths [String(s)] One or more strings representing the URL segment(s) for this route.
+      # @param block [Proc] The code to be executed 
+      def route(methods, paths, &block)
+        methods = Array(methods)
+        paths = ['/'] if paths == []
+        paths = Array(paths)
+        endpoint = build_endpoint(&block)
+        
+        methods.each do |method|
+          paths.each do |path|
+            path = Rack::Mount::Strexp.compile(compile_path(path))
+            route_set.add_route(endpoint, 
+              :path_info => path, 
+              :request_method => (method.to_s.upcase unless method == :any)
+            )
+          end
+        end
       end
       
-      def compile_path(path)
-        parts = []
-        parts << prefix if prefix
-        parts << ':version' if version
-        parts << namespace if namespace
-        parts << path
-        Rack::Mount::Utils.normalize_path(parts.join('/'))
-      end
-
-      def route(method, path_info, &block)
-        route_set.add_route(build_endpoint(&block), 
-          :path_info => Rack::Mount::Strexp.compile(compile_path(path_info)), 
-          :request_method => method
-        )
-      end
-      
-      def build_endpoint(&block)
-        
-        b = Rack::Builder.new
-        b.use Grape::Middleware::Error
-        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
-        b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
-        b.use Grape::Middleware::Formatter, :default_format => default_format || :json
-        
-        endpoint = Grape::Endpoint.generate(&block)
-        endpoint.send :include, helpers
-        b.run endpoint
-        
-        b.to_app
-      end
-      
-      def get(path_info = '', &block); route('GET', path_info, &block) end
-      def post(path_info = '', &block); route('POST', path_info, &block) end
-      def put(path_info = '', &block); route('PUT', path_info, &block) end
-      def head(path_info = '', &block); route('HEAD', path_info, &block) end
-      def delete(path_info = '', &block); route('DELETE', path_info, &block) end
+      def get(*paths, &block); route('GET', paths, &block) end
+      def post(*paths, &block); route('POST', paths, &block) end
+      def put(*paths, &block); route('PUT', paths, &block) end
+      def head(*paths, &block); route('HEAD', paths, &block) end
+      def delete(*paths, &block); route('DELETE', paths, &block) end
       
       def namespace(space = nil, &block)
         if space || block_given?
@@ -164,8 +166,38 @@ module Grape
       alias_method :resource, :namespace
       alias_method :resources, :namespace
       
+      protected
+      
+      def build_endpoint(&block)
+        b = Rack::Builder.new
+        b.use Grape::Middleware::Error
+        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
+        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
+        b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
+        b.use Grape::Middleware::Formatter, :default_format => default_format || :json
+        
+        endpoint = Grape::Endpoint.generate(&block)
+        endpoint.send :include, helpers
+        b.run endpoint
+        
+        b.to_app
+      end
+      
       def inherited(subclass)
         subclass.reset!
+      end
+      
+      def route_set
+        @route_set ||= Rack::Mount::RouteSet.new
+      end
+      
+      def compile_path(path)
+        parts = []
+        parts << prefix if prefix
+        parts << ':version' if version
+        parts << namespace if namespace
+        parts << path
+        Rack::Mount::Utils.normalize_path(parts.join('/'))
       end
     end  
     
