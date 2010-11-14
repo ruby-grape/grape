@@ -72,4 +72,16 @@ describe Grape::Endpoint do
       last_response.body.should == "Unauthorized."
     end
   end
+  
+  it 'should not persist params between calls' do
+    subject.post('/new') do
+      params[:text]
+    end
+    
+    post '/new', :text => 'abc'
+    last_response.body.should == 'abc'
+    
+    post '/new', :text => 'def'
+    last_response.body.should == 'def'
+  end
 end

@@ -52,10 +52,17 @@ module Grape
       end
     end
     
+    def reset!
+      @params = nil
+      @env = nil
+      @request = nil
+      @header = {}
+    end
+    
     def call(env)
+      reset!
       @env = env
       @request = Rack::Request.new(@env)
-      @header = {}
       
       response_text = instance_eval &@block
       
