@@ -3,9 +3,10 @@ require 'rack/auth/basic'
 require 'logger'
 
 module Grape
+  # The API class is the primary entry point for
+  # creating Grape APIs. Users should subclass this
+  # class in order to build an API.
   class API
-    module Helpers; end
-    
     class << self
       attr_reader :route_set
       
@@ -147,6 +148,19 @@ module Grape
         end
       end
       
+      alias_method :group, :namespace
+      alias_method :resource, :namespace
+      alias_method :resources, :namespace
+      
+      # Create a scope without affecting the URL.
+      # 
+      # @param name [Symbol] Purely placebo, just allows to to name the scope to make the code more readable.
+      def scope(name = nil, &block)
+        nest(block)
+      end
+      
+      protected
+      
       # Execute first the provided block, then each of the
       # block passed in. Allows for simple 'before' setups
       # of settings stack pushes.
@@ -154,19 +168,13 @@ module Grape
         blocks.reject!{|b| b.nil?}
         if blocks.any?
           settings_stack << {}
-          instance_eval &block
+          instance_eval &block if block_given?
           blocks.each{|b| instance_eval &b}
           settings_stack.pop
         else
           instance_eval &block
         end
       end
-      
-      alias_method :group, :namespace
-      alias_method :resource, :namespace
-      alias_method :resources, :namespace
-      
-      protected
       
       def build_endpoint(&block)
         b = Rack::Builder.new

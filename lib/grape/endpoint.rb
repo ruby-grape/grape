@@ -25,6 +25,8 @@ module Grape
     
     attr_reader :env, :request
     
+    # The parameters passed into the request as
+    # well as parsed from URL segments.
     def params
       @params ||= request.params.merge(env['rack.routing_args'] || {}).inject({}) do |h,(k,v)|
         h[k.to_s] = v
@@ -33,13 +35,21 @@ module Grape
       end
     end
     
+    # The API version as specified in the URL.
     def version; env['api.version'] end
     
+    # End the request and display an error to the
+    # end user with the specified message.
+    #
+    # @param message [String] The message to display.
+    # @param status [Integer] the HTTP Status Code. Defaults to 403.
     def error!(message, status=403)
       throw :error, :message => message, :status => status
     end
     
     # Set or retrieve the HTTP status code.
+    #
+    # @param status [Integer] The HTTP Status Code to return for this request.
     def status(status = nil)
       if status
         @status = status

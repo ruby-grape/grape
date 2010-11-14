@@ -313,4 +313,31 @@ describe Grape::API do
       lambda{get '/howdy'}.should_not raise_error
     end
   end
+  
+  describe '.scope' do
+    it 'should scope the various settings' do
+      subject.version 'v2'
+      
+      subject.scope :legacy do
+        version 'v1'
+        
+        get '/abc' do
+          version
+        end
+      end
+      
+      subject.get '/def' do
+        version
+      end
+      
+      get '/v2/abc'
+      last_response.status.should == 404
+      get '/v1/abc'
+      last_response.status.should == 200
+      get '/v1/def'
+      last_response.status.should == 404
+      get '/v2/def'
+      last_response.status.should == 200
+    end
+  end
 end
