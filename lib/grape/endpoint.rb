@@ -7,8 +7,20 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc. block.
   class Endpoint
-    def initialize(&block)
-      @block = block
+    def self.generate(&block)
+      c = Class.new(Grape::Endpoint)
+      c.class_eval do
+        @block = block
+      end
+      c
+    end
+    
+    class << self
+      attr_accessor :block
+    end
+    
+    def self.call(env)
+      new.call(env)
     end
     
     attr_reader :env, :request
@@ -52,19 +64,12 @@ module Grape
       end
     end
     
-    def reset!
-      @params = nil
-      @env = nil
-      @request = nil
-      @header = {}
-    end
-    
     def call(env)
-      reset!
       @env = env
+      @header = {}
       @request = Rack::Request.new(@env)
       
-      response_text = instance_eval &@block
+      response_text = instance_eval &self.class.block
       
       [status, header, [response_text]]
     end

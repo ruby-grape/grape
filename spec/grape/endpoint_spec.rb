@@ -84,4 +84,21 @@ describe Grape::Endpoint do
     post '/new', :text => 'def'
     last_response.body.should == 'def'
   end
+  
+  it 'should reset all instance variables (except block) between calls' do
+    subject.helpers do
+      def memoized
+        @memoized ||= params[:howdy]
+      end
+    end
+    
+    subject.get('/hello') do
+      memoized
+    end
+    
+    get '/hello?howdy=hey'
+    last_response.body.should == 'hey'
+    get '/hello?howdy=yo'
+    last_response.body.should == 'yo'
+  end
 end

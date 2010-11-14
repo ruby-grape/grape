@@ -122,8 +122,8 @@ module Grape
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
         
-        endpoint = Grape::Endpoint.new(&block)
-        endpoint.send :extend, helpers
+        endpoint = Grape::Endpoint.generate(&block)
+        endpoint.send :include, helpers
         b.run endpoint
         
         b.to_app
