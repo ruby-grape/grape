@@ -1,0 +1,1436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="Content-Type" content="text/html; charset=utf-8" />
+<title>Class: Grape::API</title>
+<link rel="stylesheet" href="../css/style.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="../css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  relpath = '..';
+  if (relpath != '') relpath += '/';
+</script>
+<script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+    
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../_index.html">Index (A)</a> &raquo; 
+    <span class='title'><span class='object_link'><a href="../Grape.html" title="Grape (module)">Grape</a></span></span>
+     &raquo; 
+    <span class="title">API</span>
+  
+  
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  <a id="class_list_link" href="#">Class List</a>
+  <a id="method_list_link" href="#">Method List</a>
+  <a id ="file_list_link" href="#">File List</a>
+</div>
+
+      <div class="clear"></div>
+    </div>
+    
+    <iframe id="search_frame"></iframe>
+    
+    <div id="content"><h1>Class: Grape::API
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Grape::API</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+  
+  
+  
+    <dt class="r2 last">Defined in:</dt>
+    <dd class="r2 last">lib/grape/api.rb</dd>
+  
+</dl>
+<div class="clear"></div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>The API class is the primary entry point for creating Grape APIs. Users should subclass this class in order to build an API.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+</div>
+
+
+  
+    <h2>
+      Class Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#auth-class_method" title="auth (class method)">+ (Object) <strong>auth</strong>(type = nil, options = {}, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Add an authentication type to the API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#call-class_method" title="call (class method)">+ (Object) <strong>call</strong>(env) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#default_format-class_method" title="default_format (class method)">+ (Object) <strong>default_format</strong>(new_format = nil) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Specify the default format for the API&#8217;s serializers.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#delete-class_method" title="delete (class method)">+ (Object) <strong>delete</strong>(*paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get-class_method" title="get (class method)">+ (Object) <strong>get</strong>(*paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#head-class_method" title="head (class method)">+ (Object) <strong>head</strong>(*paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#helpers-class_method" title="helpers (class method)">+ (Object) <strong>helpers</strong>(&amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Add helper methods that will be accessible from any endpoint within this namespace (and child namespaces).</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#http_basic-class_method" title="http_basic (class method)">+ (Object) <strong>http_basic</strong>(options = {}, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Add HTTP Basic authorization to the API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#logger-class_method" title="logger (class method)">+ (Object) <strong>logger</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#namespace-class_method" title="namespace (class method)">+ (Object) <strong>namespace</strong>(space = nil, &amp;block) </a>
+    
+
+    
+      (also: resource, group, resources)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#post-class_method" title="post (class method)">+ (Object) <strong>post</strong>(*paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#prefix-class_method" title="prefix (class method)">+ (Object) <strong>prefix</strong>(prefix = nil) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Define a root URL prefix for your entire API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#put-class_method" title="put (class method)">+ (Object) <strong>put</strong>(*paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reset%21-class_method" title="reset! (class method)">+ (Object) <strong>reset!</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#route-class_method" title="route (class method)">+ (Object) <strong>route</strong>(methods, paths, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Defines a route that will be recognized by the Grape API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#scope-class_method" title="scope (class method)">+ (Object) <strong>scope</strong>(name = nil, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create a scope without affecting the URL.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#set-class_method" title="set (class method)">+ (Object) <strong>set</strong>(key, value) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Set a configuration value for this namespace.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#settings-class_method" title="settings (class method)">+ (Object) <strong>settings</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Settings are a stack, so when we want to access them they are merged in the order pushed.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#settings_stack-class_method" title="settings_stack (class method)">+ (Object) <strong>settings_stack</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#version-class_method" title="version (class method)">+ (Object) <strong>version</strong>(*new_versions, &amp;block) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Specify an API version.</p></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+    
+    
+      <div class="method_details first">
+  <p class="signature first" id="auth-class_method">
+  
+    + (<tt>Object</tt>) <strong>auth</strong>(type = nil, options = {}, &amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Add an authentication type to the API. Currently only <code>:http_basic</code> is supported.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+108
+109
+110
+111
+112
+113
+114</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 108</span>
+
+<span class='def def kw'>def</span> <span class='auth identifier id'>auth</span><span class='lparen token'>(</span><span class='type identifier id'>type</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span><span class='comma token'>,</span> <span class='options identifier id'>options</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='if if kw'>if</span> <span class='type identifier id'>type</span>
+    <span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:auth</span><span class='comma token'>,</span> <span class='lbrace token'>{</span><span class='symbol val'>:type</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='type identifier id'>type</span><span class='dot token'>.</span><span class='to_sym identifier id'>to_sym</span><span class='comma token'>,</span> <span class='symbol val'>:proc</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='block identifier id'>block</span><span class='rbrace token'>}</span><span class='dot token'>.</span><span class='merge identifier id'>merge</span><span class='lparen token'>(</span><span class='options identifier id'>options</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+  <span class='else else kw'>else</span>
+    <span class='settings identifier id'>settings</span><span class='lbrack token'>[</span><span class='symbol val'>:auth</span><span class='rbrack token'>]</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="call-class_method">
+  
+    + (<tt>Object</tt>) <strong>call</strong>(env) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+23
+24
+25
+26</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 23</span>
+
+<span class='def def kw'>def</span> <span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='env identifier id'>env</span><span class='rparen token'>)</span>
+  <span class='logger identifier id'>logger</span><span class='dot token'>.</span><span class='info identifier id'>info</span> <span class='dstring node'>&quot;#{env['REQUEST_METHOD']} #{env['PATH_INFO']}&quot;</span>
+  <span class='route_set identifier id'>route_set</span><span class='dot token'>.</span><span class='freeze identifier id'>freeze</span><span class='dot token'>.</span><span class='call identifier id'>call</span><span class='lparen token'>(</span><span class='env identifier id'>env</span><span class='rparen token'>)</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="default_format-class_method">
+  
+    + (<tt>Object</tt>) <strong>default_format</strong>(new_format = nil) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Specify the default format for the API&#8217;s serializers. Currently only <code>:json</code> is supported.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+77
+78
+79</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 77</span>
+
+<span class='def def kw'>def</span> <span class='default_format identifier id'>default_format</span><span class='lparen token'>(</span><span class='new_format identifier id'>new_format</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span><span class='rparen token'>)</span>
+  <span class='new_format identifier id'>new_format</span> <span class='integer val'>? </span><span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:default_format</span><span class='comma token'>,</span> <span class='new_format identifier id'>new_format</span><span class='dot token'>.</span><span class='to_sym identifier id'>to_sym</span><span class='rparen token'>)</span> <span class='colon op'>:</span> <span class='settings identifier id'>settings</span><span class='lbrack token'>[</span><span class='symbol val'>:default_format</span><span class='rbrack token'>]</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="delete-class_method">
+  
+    + (<tt>Object</tt>) <strong>delete</strong>(*paths, &amp;block) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+158</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 158</span>
+
+<span class='def def kw'>def</span> <span class='delete identifier id'>delete</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='string val'>'DELETE'</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="get-class_method">
+  
+    + (<tt>Object</tt>) <strong>get</strong>(*paths, &amp;block) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+154</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 154</span>
+
+<span class='def def kw'>def</span> <span class='get identifier id'>get</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='string val'>'GET'</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="head-class_method">
+  
+    + (<tt>Object</tt>) <strong>head</strong>(*paths, &amp;block) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+157</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 157</span>
+
+<span class='def def kw'>def</span> <span class='head identifier id'>head</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='string val'>'HEAD'</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="helpers-class_method">
+  
+    + (<tt>Object</tt>) <strong>helpers</strong>(&amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Add helper methods that will be accessible from any endpoint within this namespace (and child namespaces).</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h3>Examples:</h3>
+    
+      <h4><div class='inline'><p>Define some helpers.</p></div></h4>
+      <pre class="example code"><span class='class class kw'>class</span> <span class='ExampleAPI constant id'>ExampleAPI</span> <span class='lt op'>&lt;</span> <span class='Grape constant id'>Grape</span><span class='colon2 op'>::</span><span class='API constant id'>API</span>
+  <span class='helpers identifier id'>helpers</span> <span class='do do kw'>do</span>
+    <span class='def def kw'>def</span> <span class='current_user identifier id'>current_user</span>
+      <span class='User constant id'>User</span><span class='dot token'>.</span><span class='find_by_id identifier id'>find_by_id</span><span class='lparen token'>(</span><span class='params identifier id'>params</span><span class='lbrack token'>[</span><span class='symbol val'>:token</span><span class='rbrack token'>]</span><span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    
+  </div>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 92</span>
+
+<span class='def def kw'>def</span> <span class='helpers identifier id'>helpers</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='if if kw'>if</span> <span class='block_given? fid id'>block_given?</span>
+    <span class='m identifier id'>m</span> <span class='assign token'>=</span> <span class='settings_stack identifier id'>settings_stack</span><span class='dot token'>.</span><span class='last identifier id'>last</span><span class='lbrack token'>[</span><span class='symbol val'>:helpers</span><span class='rbrack token'>]</span> <span class='orop op'>||</span> <span class='Module constant id'>Module</span><span class='dot token'>.</span><span class='new identifier id'>new</span>
+    <span class='m identifier id'>m</span><span class='dot token'>.</span><span class='class_eval identifier id'>class_eval</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span>
+    <span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:helpers</span><span class='comma token'>,</span> <span class='m identifier id'>m</span><span class='rparen token'>)</span>
+  <span class='else else kw'>else</span>
+    <span class='m identifier id'>m</span> <span class='assign token'>=</span> <span class='Module constant id'>Module</span><span class='dot token'>.</span><span class='new identifier id'>new</span>
+    <span class='settings_stack identifier id'>settings_stack</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='s identifier id'>s</span><span class='bitor op'>|</span>
+      <span class='m identifier id'>m</span><span class='dot token'>.</span><span class='send identifier id'>send</span> <span class='symbol val'>:include</span><span class='comma token'>,</span> <span class='s identifier id'>s</span><span class='lbrack token'>[</span><span class='symbol val'>:helpers</span><span class='rbrack token'>]</span> <span class='if if_mod kw'>if</span> <span class='s identifier id'>s</span><span class='lbrack token'>[</span><span class='symbol val'>:helpers</span><span class='rbrack token'>]</span>
+    <span class='end end kw'>end</span>
+    <span class='m identifier id'>m</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="http_basic-class_method">
+  
+    + (<tt>Object</tt>) <strong>http_basic</strong>(options = {}, &amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Add HTTP Basic authorization to the API.</p>
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+        <span class='name'>options</span>
+      
+      
+        <em class="default">(defaults to: <tt>{}</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>A hash of options.</p></div>
+      
+    </li>
+  
+</ul>
+
+  
+    
+    
+    <h3>Options Hash (<tt>options</tt>):</h3>
+    <ul class="option">
+      
+        <li>
+          <span class="type">(<tt>String</tt>)</span>
+          <span class="name">:realm</span>
+          <span class="default">
+            
+              <span class="na">N/A</span>
+            
+          </span>
+          &mdash;<div class='inline'><p>&#8220;API Authorization&#8221; The HTTP Basic realm.</p></div>
+        </tr>
+      
+    </ul>
+  
+    
+    
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+120
+121
+122
+123</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 120</span>
+
+<span class='def def kw'>def</span> <span class='http_basic identifier id'>http_basic</span><span class='lparen token'>(</span><span class='options identifier id'>options</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='options identifier id'>options</span><span class='lbrack token'>[</span><span class='symbol val'>:realm</span><span class='rbrack token'>]</span> <span class='opasgn op'>||=</span> <span class='string val'>&quot;API Authorization&quot;</span>
+  <span class='auth identifier id'>auth</span> <span class='symbol val'>:http_basic</span><span class='comma token'>,</span> <span class='options identifier id'>options</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="logger-class_method">
+  
+    + (<tt>Object</tt>) <strong>logger</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+13
+14
+15</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 13</span>
+
+<span class='def def kw'>def</span> <span class='logger identifier id'>logger</span>
+  <span class='@logger ivar id'>@logger</span> <span class='opasgn op'>||=</span> <span class='Logger constant id'>Logger</span><span class='dot token'>.</span><span class='new identifier id'>new</span><span class='lparen token'>(</span><span class='$STDOUT gvar id'>$STDOUT</span><span class='rparen token'>)</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="namespace-class_method">
+  
+    + (<tt>Object</tt>) <strong>namespace</strong>(space = nil, &amp;block) 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='resource-class_method'>resource</span>, <span id='group-class_method'>group</span>, <span id='resources-class_method'>resources</span></span>
+    </span>
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+160
+161
+162
+163
+164
+165
+166
+167
+168</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 160</span>
+
+<span class='def def kw'>def</span> <span class='namespace identifier id'>namespace</span><span class='lparen token'>(</span><span class='space identifier id'>space</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='if if kw'>if</span> <span class='space identifier id'>space</span> <span class='orop op'>||</span> <span class='block_given? fid id'>block_given?</span>
+    <span class='nest identifier id'>nest</span><span class='lparen token'>(</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='do do kw'>do</span>
+      <span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:namespace</span><span class='comma token'>,</span> <span class='space identifier id'>space</span><span class='dot token'>.</span><span class='to_s identifier id'>to_s</span><span class='rparen token'>)</span> <span class='if if_mod kw'>if</span> <span class='space identifier id'>space</span>
+    <span class='end end kw'>end</span>
+  <span class='else else kw'>else</span>
+    <span class='Rack constant id'>Rack</span><span class='colon2 op'>::</span><span class='Mount constant id'>Mount</span><span class='colon2 op'>::</span><span class='Utils constant id'>Utils</span><span class='dot token'>.</span><span class='normalize_path identifier id'>normalize_path</span><span class='lparen token'>(</span><span class='settings_stack identifier id'>settings_stack</span><span class='dot token'>.</span><span class='map identifier id'>map</span><span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='s identifier id'>s</span><span class='bitor op'>|</span> <span class='s identifier id'>s</span><span class='lbrack token'>[</span><span class='symbol val'>:namespace</span><span class='rbrack token'>]</span><span class='rbrace token'>}</span><span class='dot token'>.</span><span class='join identifier id'>join</span><span class='lparen token'>(</span><span class='string val'>'/'</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="post-class_method">
+  
+    + (<tt>Object</tt>) <strong>post</strong>(*paths, &amp;block) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+155</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 155</span>
+
+<span class='def def kw'>def</span> <span class='post identifier id'>post</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='string val'>'POST'</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="prefix-class_method">
+  
+    + (<tt>Object</tt>) <strong>prefix</strong>(prefix = nil) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Define a root URL prefix for your entire API.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+50
+51
+52</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 50</span>
+
+<span class='def def kw'>def</span> <span class='prefix identifier id'>prefix</span><span class='lparen token'>(</span><span class='prefix identifier id'>prefix</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span><span class='rparen token'>)</span>
+  <span class='prefix identifier id'>prefix</span> <span class='integer val'>? </span><span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:root_prefix</span><span class='comma token'>,</span> <span class='prefix identifier id'>prefix</span><span class='rparen token'>)</span> <span class='colon op'>:</span> <span class='settings identifier id'>settings</span><span class='lbrack token'>[</span><span class='symbol val'>:root_prefix</span><span class='rbrack token'>]</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="put-class_method">
+  
+    + (<tt>Object</tt>) <strong>put</strong>(*paths, &amp;block) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+156</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 156</span>
+
+<span class='def def kw'>def</span> <span class='put identifier id'>put</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='string val'>'PUT'</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span> <span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="reset!-class_method">
+  
+    + (<tt>Object</tt>) <strong>reset!</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+17
+18
+19
+20
+21</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 17</span>
+
+<span class='def def kw'>def</span> <span class='reset! fid id'>reset!</span>
+  <span class='@settings ivar id'>@settings</span> <span class='assign token'>=</span> <span class='lbrack token'>[</span><span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rbrack token'>]</span>
+  <span class='@route_set ivar id'>@route_set</span> <span class='assign token'>=</span> <span class='Rack constant id'>Rack</span><span class='colon2 op'>::</span><span class='Mount constant id'>Mount</span><span class='colon2 op'>::</span><span class='RouteSet constant id'>RouteSet</span><span class='dot token'>.</span><span class='new identifier id'>new</span>
+  <span class='@prototype ivar id'>@prototype</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="route-class_method">
+  
+    + (<tt>Object</tt>) <strong>route</strong>(methods, paths, &amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Defines a route that will be recognized by the Grape API.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h3>Examples:</h3>
+    
+      <h4><div class='inline'><p>Defining a basic route.</p></div></h4>
+      <pre class="example code"><span class='class class kw'>class</span> <span class='MyAPI constant id'>MyAPI</span> <span class='lt op'>&lt;</span> <span class='Grape constant id'>Grape</span><span class='colon2 op'>::</span><span class='API constant id'>API</span>
+  <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='symbol val'>:any</span><span class='comma token'>,</span> <span class='string val'>'/hello'</span><span class='rparen token'>)</span> <span class='do do kw'>do</span>
+    <span class='lbrace token'>{</span><span class='symbol val'>:hello</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'world'</span><span class='rbrace token'>}</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    
+  </div>
+<h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>HTTP Verb</tt>)</span>
+      
+      
+        <span class='name'>methods</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>One or more HTTP verbs that are accepted by this route. Set to <code>:any</code> if you want any verb to be accepted.</p></div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+        <span class='name'>paths</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>One or more strings representing the URL segment(s) for this route.</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 137</span>
+
+<span class='def def kw'>def</span> <span class='route identifier id'>route</span><span class='lparen token'>(</span><span class='methods identifier id'>methods</span><span class='comma token'>,</span> <span class='paths identifier id'>paths</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='methods identifier id'>methods</span> <span class='assign token'>=</span> <span class='Array constant id'>Array</span><span class='lparen token'>(</span><span class='methods identifier id'>methods</span><span class='rparen token'>)</span>
+  <span class='paths identifier id'>paths</span> <span class='assign token'>=</span> <span class='lbrack token'>[</span><span class='string val'>'/'</span><span class='rbrack token'>]</span> <span class='if if_mod kw'>if</span> <span class='paths identifier id'>paths</span> <span class='eq op'>==</span> <span class='lbrack token'>[</span><span class='rbrack token'>]</span>
+  <span class='paths identifier id'>paths</span> <span class='assign token'>=</span> <span class='Array constant id'>Array</span><span class='lparen token'>(</span><span class='paths identifier id'>paths</span><span class='rparen token'>)</span>
+  <span class='endpoint identifier id'>endpoint</span> <span class='assign token'>=</span> <span class='build_endpoint identifier id'>build_endpoint</span><span class='lparen token'>(</span><span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  
+  <span class='methods identifier id'>methods</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='method identifier id'>method</span><span class='bitor op'>|</span>
+    <span class='paths identifier id'>paths</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='path identifier id'>path</span><span class='bitor op'>|</span>
+      <span class='path identifier id'>path</span> <span class='assign token'>=</span> <span class='Rack constant id'>Rack</span><span class='colon2 op'>::</span><span class='Mount constant id'>Mount</span><span class='colon2 op'>::</span><span class='Strexp constant id'>Strexp</span><span class='dot token'>.</span><span class='compile identifier id'>compile</span><span class='lparen token'>(</span><span class='compile_path identifier id'>compile_path</span><span class='lparen token'>(</span><span class='path identifier id'>path</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+      <span class='route_set identifier id'>route_set</span><span class='dot token'>.</span><span class='add_route identifier id'>add_route</span><span class='lparen token'>(</span><span class='endpoint identifier id'>endpoint</span><span class='comma token'>,</span> 
+        <span class='symbol val'>:path_info</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='path identifier id'>path</span><span class='comma token'>,</span> 
+        <span class='symbol val'>:request_method</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='lparen token'>(</span><span class='method identifier id'>method</span><span class='dot token'>.</span><span class='to_s identifier id'>to_s</span><span class='dot token'>.</span><span class='upcase identifier id'>upcase</span> <span class='unless unless_mod kw'>unless</span> <span class='method identifier id'>method</span> <span class='eq op'>==</span> <span class='symbol val'>:any</span><span class='rparen token'>)</span>
+      <span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="scope-class_method">
+  
+    + (<tt>Object</tt>) <strong>scope</strong>(name = nil, &amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Create a scope without affecting the URL.</p>
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <span class='name'>name</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Purely placebo, just allows to to name the scope to make the code more readable.</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+177
+178
+179</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 177</span>
+
+<span class='def def kw'>def</span> <span class='scope identifier id'>scope</span><span class='lparen token'>(</span><span class='name identifier id'>name</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='nest identifier id'>nest</span><span class='lparen token'>(</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="set-class_method">
+  
+    + (<tt>Object</tt>) <strong>set</strong>(key, value) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Set a configuration value for this namespace.</p>
+
+  </div>
+</div>
+<div class="tags">
+  <h3>Parameters:</h3>
+<ul class="param">
+  
+    <li>
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+        <span class='name'>key</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The key of the configuration variable.</p></div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+        <span class='name'>value</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>The value to which to set the configuration variable.</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+44
+45
+46</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 44</span>
+
+<span class='def def kw'>def</span> <span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='key identifier id'>key</span><span class='comma token'>,</span> <span class='value identifier id'>value</span><span class='rparen token'>)</span>
+  <span class='@settings ivar id'>@settings</span><span class='dot token'>.</span><span class='last identifier id'>last</span><span class='lbrack token'>[</span><span class='key identifier id'>key</span><span class='dot token'>.</span><span class='to_sym identifier id'>to_sym</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='value identifier id'>value</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="settings-class_method">
+  
+    + (<tt>Object</tt>) <strong>settings</strong> 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Settings are a stack, so when we want to access them they are merged in the order pushed.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+31
+32
+33</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 31</span>
+
+<span class='def def kw'>def</span> <span class='settings identifier id'>settings</span>
+  <span class='@settings ivar id'>@settings</span><span class='dot token'>.</span><span class='inject identifier id'>inject</span><span class='lparen token'>(</span><span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rparen token'>)</span><span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='f identifier id'>f</span><span class='comma token'>,</span><span class='h identifier id'>h</span><span class='bitor op'>|</span> <span class='f identifier id'>f</span><span class='dot token'>.</span><span class='merge! fid id'>merge!</span><span class='lparen token'>(</span><span class='h identifier id'>h</span><span class='rparen token'>)</span><span class='semicolon token'>;</span> <span class='f identifier id'>f</span><span class='rbrace token'>}</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="settings_stack-class_method">
+  
+    + (<tt>Object</tt>) <strong>settings_stack</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+35
+36
+37</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 35</span>
+
+<span class='def def kw'>def</span> <span class='settings_stack identifier id'>settings_stack</span>
+  <span class='@settings ivar id'>@settings</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="version-class_method">
+  
+    + (<tt>Object</tt>) <strong>version</strong>(*new_versions, &amp;block) 
+  
+
+  
+</p><div class="docstring">
+  <div class="discussion">
+    <p>Specify an API version.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h3>Examples:</h3>
+    
+      <h4><div class='inline'><p>API with legacy support.</p></div></h4>
+      <pre class="example code"><span class='class class kw'>class</span> <span class='MyAPI constant id'>MyAPI</span> <span class='lt op'>&lt;</span> <span class='Grape constant id'>Grape</span><span class='colon2 op'>::</span><span class='API constant id'>API</span>
+  <span class='version identifier id'>version</span> <span class='string val'>'v2'</span>
+
+  <span class='get identifier id'>get</span> <span class='string val'>'/main'</span> <span class='do do kw'>do</span>
+    <span class='lbrace token'>{</span><span class='symbol val'>:some</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'data'</span><span class='rbrace token'>}</span>
+  <span class='end end kw'>end</span>
+
+  <span class='version identifier id'>version</span> <span class='string val'>'v1'</span> <span class='do do kw'>do</span>
+    <span class='get identifier id'>get</span> <span class='string val'>'/legacy'</span> <span class='do do kw'>do</span>
+      <span class='lbrace token'>{</span><span class='symbol val'>:legacy</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'data'</span><span class='rbrace token'>}</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    
+  </div>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+70
+71
+72</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/api.rb', line 70</span>
+
+<span class='def def kw'>def</span> <span class='version identifier id'>version</span><span class='lparen token'>(</span><span class='mult op'>*</span><span class='new_versions identifier id'>new_versions</span><span class='comma token'>,</span> <span class='bitand op'>&amp;</span><span class='block identifier id'>block</span><span class='rparen token'>)</span>
+  <span class='new_versions identifier id'>new_versions</span><span class='dot token'>.</span><span class='any? fid id'>any?</span> <span class='integer val'>? </span><span class='nest identifier id'>nest</span><span class='lparen token'>(</span><span class='block identifier id'>block</span><span class='rparen token'>)</span><span class='lbrace token'>{</span> <span class='set identifier id'>set</span><span class='lparen token'>(</span><span class='symbol val'>:version</span><span class='comma token'>,</span> <span class='new_versions identifier id'>new_versions</span><span class='rparen token'>)</span> <span class='rbrace token'>}</span> <span class='colon op'>:</span> <span class='settings identifier id'>settings</span><span class='lbrack token'>[</span><span class='symbol val'>:version</span><span class='rbrack token'>]</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+    
+    <div id="footer">
+  Generated on Sun Nov 14 20:41:15 2010 by 
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.6.1 (ruby-1.8.7).
+</div>
+
+  </body>
+</html>

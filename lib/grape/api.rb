@@ -45,16 +45,28 @@ module Grape
         @settings.last[key.to_sym] = value
       end
       
-      # Define a root prefix for your entire
-      # API. For instance, if you had an api
-      # that you wanted to be namespaced at
-      # `/api/` you would do this:
-      # 
-      #   prefix '/api'
+      # Define a root URL prefix for your entire
+      # API.
       def prefix(prefix = nil)
         prefix ? set(:root_prefix, prefix) : settings[:root_prefix]
       end
       
+      # Specify an API version.
+      #
+      # @example API with legacy support.
+      #   class MyAPI < Grape::API
+      #     version 'v2'
+      #     
+      #     get '/main' do
+      #       {:some => 'data'}
+      #     end
+      #         
+      #     version 'v1' do
+      #       get '/legacy' do
+      #         {:legacy => 'data'}
+      #       end
+      #     end
+      #   end
       def version(*new_versions, &block)
         new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
       end
@@ -69,13 +81,14 @@ module Grape
       # Add helper methods that will be accessible from any
       # endpoint within this namespace (and child namespaces).
       #
-      #    class ExampleAPI
-      #      helpers do
-      #        def current_user
-      #          User.find_by_id(params[:token])
-      #        end
-      #      end
-      #    end
+      # @example Define some helpers.
+      #     class ExampleAPI < Grape::API
+      #       helpers do
+      #         def current_user
+      #           User.find_by_id(params[:token])
+      #         end
+      #       end
+      #     end
       def helpers(&block)
         if block_given?
           m = settings_stack.last[:helpers] || Module.new
@@ -112,9 +125,15 @@ module Grape
       # Defines a route that will be recognized
       # by the Grape API.
       #
-      # @param methods [HTTP Verb(s)] One or more HTTP verbs that are accepted by this route. Set to `:any` if you want any verb to be accepted.
-      # @param paths [String(s)] One or more strings representing the URL segment(s) for this route.
-      # @param block [Proc] The code to be executed 
+      # @param methods [HTTP Verb] One or more HTTP verbs that are accepted by this route. Set to `:any` if you want any verb to be accepted.
+      # @param paths [String] One or more strings representing the URL segment(s) for this route.
+      #
+      # @example Defining a basic route.
+      #   class MyAPI < Grape::API
+      #     route(:any, '/hello') do
+      #       {:hello => 'world'}
+      #     end
+      #   end
       def route(methods, paths, &block)
         methods = Array(methods)
         paths = ['/'] if paths == []

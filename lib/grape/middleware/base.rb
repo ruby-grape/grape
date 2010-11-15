@@ -28,7 +28,7 @@ module Grape
       def before; end
       # @abstract
       # Called after the application is called in the middleware lifecycle.
-      # @returns [Response, nil] a Rack SPEC response or nil to call the application afterwards.
+      # @return [Response, nil] a Rack SPEC response or nil to call the application afterwards.
       def after; end
       
       def request

@@ -1,0 +1,796 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="Content-Type" content="text/html; charset=utf-8" />
+<title>Class: Grape::Middleware::Formatter</title>
+<link rel="stylesheet" href="../../css/style.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="../../css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  relpath = '../..';
+  if (relpath != '') relpath += '/';
+</script>
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+    
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../../_index.html">Index (F)</a> &raquo; 
+    <span class='title'><span class='object_link'><a href="../../Grape.html" title="Grape (module)">Grape</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Middleware.html" title="Grape::Middleware (module)">Middleware</a></span></span>
+     &raquo; 
+    <span class="title">Formatter</span>
+  
+  
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  <a id="class_list_link" href="#">Class List</a>
+  <a id="method_list_link" href="#">Method List</a>
+  <a id ="file_list_link" href="#">File List</a>
+</div>
+
+      <div class="clear"></div>
+    </div>
+    
+    <iframe id="search_frame"></iframe>
+    
+    <div id="content"><h1>Class: Grape::Middleware::Formatter
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName"><span class='object_link'><a href="Base.html" title="Grape::Middleware::Base (class)">Base</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="Base.html" title="Grape::Middleware::Base (class)">Base</a></span></li>
+          
+            <li class="next">Grape::Middleware::Formatter</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+  
+  
+  
+    <dt class="r2 last">Defined in:</dt>
+    <dd class="r2 last">lib/grape/middleware/formatter.rb</dd>
+  
+</dl>
+<div class="clear"></div>
+
+
+  <h2>Constant Summary</h2>
+  
+    <dl class="constants">
+      
+        <dt id="CONTENT_TYPES-constant" class="">CONTENT_TYPES =
+          
+        </dt>
+        <dd><pre class="code"><span class='lbrace token'>{</span>
+  <span class='symbol val'>:xml</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'application/xml'</span><span class='comma token'>,</span>
+  <span class='symbol val'>:json</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'application/json'</span><span class='comma token'>,</span>
+  <span class='symbol val'>:atom</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'application/atom+xml'</span><span class='comma token'>,</span>
+  <span class='symbol val'>:rss</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'application/rss+xml'</span><span class='comma token'>,</span>
+  <span class='symbol val'>:txt</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'text/plain'</span>
+<span class='rbrace token'>}</span>
+</pre></dd>
+      
+    </dl>
+  
+
+
+  
+  
+  
+  
+
+  
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#after-instance_method" title="#after (instance method)">- (Object) <strong>after</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#before-instance_method" title="#before (instance method)">- (Object) <strong>before</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#content_types-instance_method" title="#content_types (instance method)">- (Object) <strong>content_types</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#default_options-instance_method" title="#default_options (instance method)">- (Object) <strong>default_options</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#encode_json-instance_method" title="#encode_json (instance method)">- (Object) <strong>encode_json</strong>(object) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#encode_txt-instance_method" title="#encode_txt (instance method)">- (Object) <strong>encode_txt</strong>(object) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#format_from_extension-instance_method" title="#format_from_extension (instance method)">- (Object) <strong>format_from_extension</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#format_from_header-instance_method" title="#format_from_header (instance method)">- (Object) <strong>format_from_header</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#headers-instance_method" title="#headers (instance method)">- (Object) <strong>headers</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mime_array-instance_method" title="#mime_array (instance method)">- (Object) <strong>mime_array</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mime_types-instance_method" title="#mime_types (instance method)">- (Object) <strong>mime_types</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Base.html" title="Grape::Middleware::Base (class)">Base</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Base.html#call-instance_method" title="Grape::Middleware::Base#call (method)">#call</a></span>, <span class='object_link'><a href="Base.html#call%21-instance_method" title="Grape::Middleware::Base#call! (method)">#call!</a></span>, <span class='object_link'><a href="Base.html#initialize-instance_method" title="Grape::Middleware::Base#initialize (method)">#initialize</a></span>, <span class='object_link'><a href="Base.html#request-instance_method" title="Grape::Middleware::Base#request (method)">#request</a></span>, <span class='object_link'><a href="Base.html#response-instance_method" title="Grape::Middleware::Base#response (method)">#response</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <p class="notice">This class inherits a constructor from <span class='object_link'><a href="Base.html#initialize-instance_method" title="Grape::Middleware::Base#initialize (method)">Grape::Middleware::Base</a></span></p>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+    
+    
+      <div class="method_details first">
+  <p class="signature first" id="after-instance_method">
+  
+    - (<tt>Object</tt>) <strong>after</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 76</span>
+
+<span class='def def kw'>def</span> <span class='after identifier id'>after</span>
+  <span class='status identifier id'>status</span><span class='comma token'>,</span> <span class='headers identifier id'>headers</span><span class='comma token'>,</span> <span class='bodies identifier id'>bodies</span> <span class='assign token'>=</span> <span class='mult op'>*</span><span class='@app_response ivar id'>@app_response</span>
+  <span class='bodymap identifier id'>bodymap</span> <span class='assign token'>=</span> <span class='lbrack token'>[</span><span class='rbrack token'>]</span>
+  <span class='bodies identifier id'>bodies</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='body identifier id'>body</span><span class='bitor op'>|</span>
+    <span class='bodymap identifier id'>bodymap</span> <span class='lshft op'>&lt;&lt;</span> <span class='case case kw'>case</span> <span class='env identifier id'>env</span><span class='lbrack token'>[</span><span class='string val'>'api.format'</span><span class='rbrack token'>]</span>
+      <span class='when when kw'>when</span> <span class='symbol val'>:json</span>
+        <span class='encode_json identifier id'>encode_json</span><span class='lparen token'>(</span><span class='body identifier id'>body</span><span class='rparen token'>)</span>
+      <span class='when when kw'>when</span> <span class='symbol val'>:txt</span>
+        <span class='encode_txt identifier id'>encode_txt</span><span class='lparen token'>(</span><span class='body identifier id'>body</span><span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+  <span class='headers identifier id'>headers</span><span class='lbrack token'>[</span><span class='string val'>'Content-Type'</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='string val'>'application/json'</span>
+  <span class='Rack constant id'>Rack</span><span class='colon2 op'>::</span><span class='Response constant id'>Response</span><span class='dot token'>.</span><span class='new identifier id'>new</span><span class='lparen token'>(</span><span class='bodymap identifier id'>bodymap</span><span class='comma token'>,</span> <span class='status identifier id'>status</span><span class='comma token'>,</span> <span class='headers identifier id'>headers</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='to_a identifier id'>to_a</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="before-instance_method">
+  
+    - (<tt>Object</tt>) <strong>before</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+34
+35
+36
+37
+38
+39
+40
+41
+42</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 34</span>
+
+<span class='def def kw'>def</span> <span class='before identifier id'>before</span>
+  <span class='fmt identifier id'>fmt</span> <span class='assign token'>=</span> <span class='format_from_extension identifier id'>format_from_extension</span> <span class='orop op'>||</span> <span class='format_from_header identifier id'>format_from_header</span> <span class='orop op'>||</span> <span class='options identifier id'>options</span><span class='lbrack token'>[</span><span class='symbol val'>:default_format</span><span class='rbrack token'>]</span>
+          
+  <span class='if if kw'>if</span> <span class='content_types identifier id'>content_types</span><span class='dot token'>.</span><span class='key? fid id'>key?</span><span class='lparen token'>(</span><span class='fmt identifier id'>fmt</span><span class='rparen token'>)</span>
+    <span class='env identifier id'>env</span><span class='lbrack token'>[</span><span class='string val'>'api.format'</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='fmt identifier id'>fmt</span>          
+  <span class='else else kw'>else</span>
+    <span class='throw identifier id'>throw</span> <span class='symbol val'>:error</span><span class='comma token'>,</span> <span class='symbol val'>:status</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='integer val'>406</span><span class='comma token'>,</span> <span class='symbol val'>:message</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>'The requested format is not supported.'</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="content_types-instance_method">
+  
+    - (<tt>Object</tt>) <strong>content_types</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+22
+23
+24</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 22</span>
+
+<span class='def def kw'>def</span> <span class='content_types identifier id'>content_types</span>
+  <span class='CONTENT_TYPES constant id'>CONTENT_TYPES</span><span class='dot token'>.</span><span class='merge identifier id'>merge</span><span class='lparen token'>(</span><span class='options identifier id'>options</span><span class='lbrack token'>[</span><span class='symbol val'>:content_types</span><span class='rbrack token'>]</span><span class='rparen token'>)</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="default_options-instance_method">
+  
+    - (<tt>Object</tt>) <strong>default_options</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+15
+16
+17
+18
+19
+20</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 15</span>
+
+<span class='def def kw'>def</span> <span class='default_options identifier id'>default_options</span>
+  <span class='lbrace token'>{</span> 
+    <span class='symbol val'>:default_format</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='symbol val'>:txt</span><span class='comma token'>,</span>
+    <span class='symbol val'>:content_types</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span>
+  <span class='rbrace token'>}</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="encode_json-instance_method">
+  
+    - (<tt>Object</tt>) <strong>encode_json</strong>(object) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+91
+92
+93
+94
+95
+96
+97
+98
+99</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 91</span>
+
+<span class='def def kw'>def</span> <span class='encode_json identifier id'>encode_json</span><span class='lparen token'>(</span><span class='object identifier id'>object</span><span class='rparen token'>)</span>
+  <span class='if if kw'>if</span> <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='respond_to? fid id'>respond_to?</span> <span class='colon op'>:</span><span class='serializable_hash identifier id'>serializable_hash</span>
+    <span class='MultiJson constant id'>MultiJson</span><span class='dot token'>.</span><span class='encode identifier id'>encode</span><span class='lparen token'>(</span><span class='object identifier id'>object</span><span class='dot token'>.</span><span class='serializable_hash identifier id'>serializable_hash</span><span class='rparen token'>)</span>
+  <span class='elsif elsif kw'>elsif</span> <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='respond_to? fid id'>respond_to?</span> <span class='symbol val'>:to_json</span>
+    <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='to_json identifier id'>to_json</span>
+  <span class='else else kw'>else</span>
+    <span class='MultiJson constant id'>MultiJson</span><span class='dot token'>.</span><span class='encode identifier id'>encode</span><span class='lparen token'>(</span><span class='object identifier id'>object</span><span class='rparen token'>)</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="encode_txt-instance_method">
+  
+    - (<tt>Object</tt>) <strong>encode_txt</strong>(object) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+101
+102
+103</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 101</span>
+
+<span class='def def kw'>def</span> <span class='encode_txt identifier id'>encode_txt</span><span class='lparen token'>(</span><span class='object identifier id'>object</span><span class='rparen token'>)</span>
+  <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='respond_to? fid id'>respond_to?</span><span class='lparen token'>(</span><span class='symbol val'>:to_txt</span><span class='rparen token'>)</span> <span class='question op'>?</span> <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='to_txt identifier id'>to_txt</span> <span class='colon op'>:</span> <span class='object identifier id'>object</span><span class='dot token'>.</span><span class='to_s identifier id'>to_s</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="format_from_extension-instance_method">
+  
+    - (<tt>Object</tt>) <strong>format_from_extension</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 44</span>
+
+<span class='def def kw'>def</span> <span class='format_from_extension identifier id'>format_from_extension</span>
+  <span class='parts identifier id'>parts</span> <span class='assign token'>=</span> <span class='request identifier id'>request</span><span class='dot token'>.</span><span class='path identifier id'>path</span><span class='dot token'>.</span><span class='split identifier id'>split</span><span class='lparen token'>(</span><span class='string val'>'.'</span><span class='rparen token'>)</span>
+  <span class='hit identifier id'>hit</span> <span class='assign token'>=</span> <span class='parts identifier id'>parts</span><span class='dot token'>.</span><span class='last identifier id'>last</span><span class='dot token'>.</span><span class='to_sym identifier id'>to_sym</span>
+  
+  <span class='if if kw'>if</span> <span class='parts identifier id'>parts</span><span class='dot token'>.</span><span class='size identifier id'>size</span> <span class='leq op'>&lt;=</span> <span class='integer val'>1</span>
+    <span class='nil nil kw'>nil</span>
+  <span class='else else kw'>else</span>
+    <span class='hit identifier id'>hit</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="format_from_header-instance_method">
+  
+    - (<tt>Object</tt>) <strong>format_from_header</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+55
+56
+57
+58
+59
+60
+61
+62</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 55</span>
+
+<span class='def def kw'>def</span> <span class='format_from_header identifier id'>format_from_header</span>
+  <span class='mime_array identifier id'>mime_array</span><span class='dot token'>.</span><span class='each identifier id'>each</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='t identifier id'>t</span><span class='bitor op'>|</span> 
+    <span class='if if kw'>if</span> <span class='mime_types identifier id'>mime_types</span><span class='dot token'>.</span><span class='key? fid id'>key?</span><span class='lparen token'>(</span><span class='t identifier id'>t</span><span class='rparen token'>)</span>
+      <span class='return return kw'>return</span> <span class='mime_types identifier id'>mime_types</span><span class='lbrack token'>[</span><span class='t identifier id'>t</span><span class='rbrack token'>]</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+  <span class='nil nil kw'>nil</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="headers-instance_method">
+  
+    - (<tt>Object</tt>) <strong>headers</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+30
+31
+32</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 30</span>
+
+<span class='def def kw'>def</span> <span class='headers identifier id'>headers</span>
+  <span class='env identifier id'>env</span><span class='dot token'>.</span><span class='dup identifier id'>dup</span><span class='dot token'>.</span><span class='inject identifier id'>inject</span><span class='lparen token'>(</span><span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rparen token'>)</span><span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='h identifier id'>h</span><span class='comma token'>,</span><span class='lparen token'>(</span><span class='k identifier id'>k</span><span class='comma token'>,</span><span class='v identifier id'>v</span><span class='rparen token'>)</span><span class='bitor op'>|</span> <span class='h identifier id'>h</span><span class='lbrack token'>[</span><span class='k identifier id'>k</span><span class='dot token'>.</span><span class='downcase identifier id'>downcase</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='v identifier id'>v</span><span class='semicolon token'>;</span> <span class='h identifier id'>h</span><span class='rbrace token'>}</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="mime_array-instance_method">
+  
+    - (<tt>Object</tt>) <strong>mime_array</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 64</span>
+
+<span class='def def kw'>def</span> <span class='mime_array identifier id'>mime_array</span>
+  <span class='accept identifier id'>accept</span> <span class='assign token'>=</span> <span class='headers identifier id'>headers</span><span class='lbrack token'>[</span><span class='string val'>'accept'</span><span class='rbrack token'>]</span>
+  <span class='if if kw'>if</span> <span class='accept identifier id'>accept</span>
+    <span class='accept identifier id'>accept</span><span class='dot token'>.</span><span class='gsub identifier id'>gsub</span><span class='lparen token'>(</span><span class='regexp val'>/\b/</span><span class='comma token'>,</span><span class='string val'>''</span><span class='rparen token'>)</span><span class='dot token'>.</span>
+      <span class='scan identifier id'>scan</span><span class='lparen token'>(</span><span class='regexp val'>/(\w+\/[\w+]+)(?:;[^,]*q=([0-9.]+)[^,]*)?/i</span><span class='rparen token'>)</span><span class='dot token'>.</span>
+      <span class='sort_by identifier id'>sort_by</span><span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='a identifier id'>a</span><span class='bitor op'>|</span> <span class='minus op'>-</span><span class='a identifier id'>a</span><span class='lbrack token'>[</span><span class='integer val'>1</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='to_f identifier id'>to_f</span><span class='rbrace token'>}</span><span class='dot token'>.</span>
+      <span class='map identifier id'>map</span><span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='a identifier id'>a</span><span class='bitor op'>|</span> <span class='a identifier id'>a</span><span class='lbrack token'>[</span><span class='integer val'>0</span><span class='rbrack token'>]</span><span class='rbrace token'>}</span>
+  <span class='else else kw'>else</span>
+    <span class='lbrack token'>[</span><span class='rbrack token'>]</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <p class="signature " id="mime_types-instance_method">
+  
+    - (<tt>Object</tt>) <strong>mime_types</strong> 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+26
+27
+28</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/grape/middleware/formatter.rb', line 26</span>
+
+<span class='def def kw'>def</span> <span class='mime_types identifier id'>mime_types</span>
+  <span class='content_types identifier id'>content_types</span><span class='dot token'>.</span><span class='invert identifier id'>invert</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+    
+    <div id="footer">
+  Generated on Sun Nov 14 20:41:14 2010 by 
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.6.1 (ruby-1.8.7).
+</div>
+
+  </body>
+</html>

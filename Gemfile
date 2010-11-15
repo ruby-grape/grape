@@ -11,7 +11,8 @@ gem 'multi_xml'
 group :development do
   gem 'rake'
   gem 'jeweler'
-  # gem 'yard'
+  gem 'maruku'
+  gem 'yard'
 end
 
 group :test do

@@ -1,0 +1,13 @@
+lib/grape.rb 8d663c999a1330ad24920b6b509c80226ebae3cf
+lib/grape/middleware/auth/basic.rb 5a1b8e48fc23bae64f59df40ae5e4532954d3f14
+lib/grape/middleware/auth/oauth2.rb 5c2101f96cd2072966078759b5ca58f045c8f966
+lib/grape/middleware/versioner.rb 3f5bc78e47672cccfae1fc1bed54ee40e6af00fc
+LICENSE de44c0f8d891b6e9d7fa511f30e71c3aaf512155
+lib/grape/middleware/formatter.rb 2840dd6304e007e7bcb872cf802f5cee64edc190
+lib/grape/endpoint.rb df89fce4da897dbd88af91d862ae937f5550c4b1
+README.markdown 9229a954c8e2dbe7f32486913479e05ecffdfc56
+lib/grape/middleware/prefixer.rb 3c296ee67cce85467aaa92cdac5001db8cf90dde
+lib/grape/middleware/error.rb 8244c1e237ddf5d0b2170e61652b16d7821c4b91
+lib/grape/api.rb 007bd49e3ab2f6a1a6ce95296892feb6313631dc
+lib/grape/middleware_stack.rb ed7dff6f588f13eeb5437b2aa41df1fbaba39643
+lib/grape/middleware/base.rb 1f8fafa2575ff63448976ccb5ab576d67efc6ec4

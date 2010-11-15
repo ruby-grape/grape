@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="Content-Type" content="text/html; charset=utf-8" />
+<title>Documentation by YARD 0.6.1</title>
+<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="css/common.css" type="text/css" media="screen" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  relpath = '';
+  if (relpath != '') relpath += '/';
+</script>
+<script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+    
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html" title="Index">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+  
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  <a id="class_list_link" href="#">Class List</a>
+  <a id="method_list_link" href="#">Method List</a>
+  <a id ="file_list_link" href="#">File List</a>
+</div>
+
+      <div class="clear"></div>
+    </div>
+    
+    <iframe id="search_frame"></iframe>
+    
+    <div id="content"><div id='filecontents'><h1 id='grape'>Grape</h1>
+
+<p>Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.</p>
+
+<h2 id='installation'>Installation</h2>
+
+<p>Grape is available as a gem, to install it just install the gem:</p>
+
+<pre class="code"><span class='gem identifier id'>gem</span> <span class='install identifier id'>install</span> <span class='grape identifier id'>grape</span>
+</pre>
+
+<h2 id='basic_usage'>Basic Usage</h2>
+
+<p>Grape APIs are Rack applications that are created by subclassing <code>Grape::API</code>. Below is a simple example showing some of the more common features of Grape in the context of recreating parts of the Twitter API.</p>
+
+<pre class="code"><span class='class class kw'>class</span> <span class='Twitter constant id'>Twitter</span><span class='colon2 op'>::</span><span class='API constant id'>API</span> <span class='lt op'>&lt;</span> <span class='Grape constant id'>Grape</span><span class='colon2 op'>::</span><span class='Base constant id'>Base</span>
+  <span class='version identifier id'>version</span> <span class='string val'>'1'</span>
+  
+  <span class='helpers identifier id'>helpers</span> <span class='do do kw'>do</span>
+    <span class='def def kw'>def</span> <span class='current_user identifier id'>current_user</span>
+      <span class='@current_user ivar id'>@current_user</span> <span class='opasgn op'>||=</span> <span class='User constant id'>User</span><span class='dot token'>.</span><span class='authorize! fid id'>authorize!</span><span class='lparen token'>(</span><span class='env identifier id'>env</span><span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+    
+    <span class='def def kw'>def</span> <span class='authenticate! fid id'>authenticate!</span>
+      <span class='error! fid id'>error!</span><span class='lparen token'>(</span><span class='string val'>'401 Unauthorized'</span><span class='comma token'>,</span> <span class='integer val'>401</span><span class='rparen token'>)</span> <span class='unless unless_mod kw'>unless</span> <span class='current_user identifier id'>current_user</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+  
+  <span class='resource identifier id'>resource</span> <span class='symbol val'>:statuses</span> <span class='do do kw'>do</span>
+    <span class='get identifier id'>get</span> <span class='symbol val'>:public_timeline</span> <span class='do do kw'>do</span>
+      <span class='Tweet constant id'>Tweet</span><span class='dot token'>.</span><span class='limit identifier id'>limit</span><span class='lparen token'>(</span><span class='integer val'>20</span><span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+  
+    <span class='get identifier id'>get</span> <span class='symbol val'>:home_timeline</span> <span class='do do kw'>do</span>
+      <span class='authenticate! fid id'>authenticate!</span>
+      <span class='current_user identifier id'>current_user</span><span class='dot token'>.</span><span class='home_timeline identifier id'>home_timeline</span>
+    <span class='end end kw'>end</span>
+    
+    <span class='get identifier id'>get</span> <span class='string val'>'/show/:id'</span> <span class='do do kw'>do</span>
+      <span class='Tweet constant id'>Tweet</span><span class='dot token'>.</span><span class='find identifier id'>find</span><span class='lparen token'>(</span><span class='params identifier id'>params</span><span class='lbrack token'>[</span><span class='symbol val'>:id</span><span class='rbrack token'>]</span><span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+    
+    <span class='post identifier id'>post</span> <span class='symbol val'>:update</span> <span class='do do kw'>do</span>
+      <span class='authenticate! fid id'>authenticate!</span>
+      <span class='Tweet constant id'>Tweet</span><span class='dot token'>.</span><span class='create identifier id'>create</span><span class='lparen token'>(</span>
+        <span class='symbol val'>:user</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='current_user identifier id'>current_user</span><span class='comma token'>,</span>
+        <span class='symbol val'>:text</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='params identifier id'>params</span><span class='lbrack token'>[</span><span class='symbol val'>:status</span><span class='rbrack token'>]</span>
+      <span class='rparen token'>)</span>
+    <span class='end end kw'>end</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+
+<p>This would create a Rack application that could be used like so (in a Rackup file):</p>
+
+<pre class="code"><span class='use identifier id'>use</span> <span class='Twitter constant id'>Twitter</span><span class='colon2 op'>::</span><span class='API constant id'>API</span>
+</pre>
+
+<p>And would respond to the following routes:</p>
+
+<pre class="code"><span class='GET constant id'>GET</span>  <span class='regexp val'>/1/s</span><span class='tatuses identifier id'>tatuses</span><span class='div op'>/</span><span class='public_timeline identifier id'>public_timeline</span><span class='lparen token'>(</span><span class='dot token'>.</span><span class='json identifier id'>json</span><span class='rparen token'>)</span>
+<span class='GET constant id'>GET</span>  <span class='regexp val'>/1/s</span><span class='tatuses identifier id'>tatuses</span><span class='div op'>/</span><span class='home_timeline identifier id'>home_timeline</span><span class='lparen token'>(</span><span class='dot token'>.</span><span class='json identifier id'>json</span><span class='rparen token'>)</span>
+<span class='GET constant id'>GET</span>  <span class='regexp val'>/1/s</span><span class='tatuses identifier id'>tatuses</span><span class='div op'>/</span><span class='show identifier id'>show</span><span class='div op'>/</span><span class='symbol val'>:id</span><span class='lparen token'>(</span><span class='dot token'>.</span><span class='json identifier id'>json</span><span class='rparen token'>)</span>
+<span class='POST constant id'>POST</span> <span class='regexp val'>/1/s</span><span class='tatuses identifier id'>tatuses</span><span class='div op'>/</span><span class='update identifier id'>update</span><span class='lparen token'>(</span><span class='dot token'>.</span><span class='json identifier id'>json</span><span class='rparen token'>)</span>
+</pre>
+
+<p>Serialization takes place automatically. For more detailed usage information, please visit the <a href='http://github.com/intridea/grape/wiki'>Grape Wiki</a>.</p>
+
+<h2 id='note_on_patchespull_requests'>Note on Patches/Pull Requests</h2>
+
+<ul>
+<li>Fork the project.</li>
+
+<li>Make your feature addition or bug fix.</li>
+
+<li>Add tests for it. This is important so I don&#8217;t break it in a future version unintentionally.</li>
+
+<li>Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)</li>
+
+<li>Send me a pull request. Bonus points for topic branches.</li>
+</ul>
+
+<h2 id='copyright'>Copyright</h2>
+
+<p>Copyright (c) 2010 Michael Bleigh and Intridea, Inc. See LICENSE for details.</p></div></div>
+    
+    <div id="footer">
+  Generated on Sun Nov 14 20:41:13 2010 by 
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.6.1 (ruby-1.8.7).
+</div>
+
+  </body>
+</html>

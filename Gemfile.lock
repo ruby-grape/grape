@@ -19,6 +19,8 @@ GEM
       rubyforge (>= 2.0.0)
     json (1.4.6)
     json_pure (1.4.3)
+    maruku (0.6.0)
+      syntax (>= 1.0.0)
     multi_json (0.0.4)
     multi_xml (0.0.1)
     rack (1.2.1)
@@ -38,8 +40,10 @@ GEM
     rspec-mocks (2.1.0)
     rubyforge (2.0.4)
       json_pure (>= 1.1.7)
+    syntax (1.0.0)
     term-ansicolor (1.0.5)
     trollop (1.16.2)
+    yard (0.6.1)
 
 PLATFORMS
   ruby
@@ -48,6 +52,7 @@ DEPENDENCIES
   cucumber (>= 0.8.5)
   jeweler
   json
+  maruku
   multi_json
   multi_xml
   rack
@@ -56,3 +61,4 @@ DEPENDENCIES
   rack-test
   rake
   rspec (>= 2.1.0)
+  yard
