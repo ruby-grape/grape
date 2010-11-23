@@ -9,7 +9,7 @@ describe Grape::Middleware::Auth::Basic do
       b.use(Grape::Middleware::Auth::Basic) do |u,p| 
         u && p && u == p
       end
-      b.run lambda{|env| [200, {}, "Hello there."]}
+      b.run lambda{|env| [200, {}, ["Hello there."]]}
     end
   end
   
