@@ -12,7 +12,7 @@ Grape is available as a gem, to install it just install the gem:
 
 Grape APIs are Rack applications that are created by subclassing `Grape::API`. Below is a simple example showing some of the more common features of Grape in the context of recreating parts of the Twitter API.
 
-    class Twitter::API < Grape::Base
+    class Twitter::API < Grape::API
       version '1'
       
       helpers do
@@ -49,9 +49,9 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
       end
     end
     
-This would create a Rack application that could be used like so (in a Rackup file):
+This would create a Rack application that could be used like so (in a Rackup config.ru file):
 
-    use Twitter::API
+    run Twitter::API
     
 And would respond to the following routes:
 
