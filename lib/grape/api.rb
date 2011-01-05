@@ -222,8 +222,9 @@ module Grape
         parts = []
         parts << prefix if prefix
         parts << ':version' if version
-        parts << namespace if namespace
-        parts << path
+        parts << namespace.to_s if namespace
+        parts << path.to_s if path && '/' != path
+        parts.last << '(.:format)'
         Rack::Mount::Utils.normalize_path(parts.join('/'))
       end
     end  

@@ -92,7 +92,7 @@ describe Grape::API do
       subject.version :v1
       
       subject.namespace :awesome do
-        compile_path('hello').should == '/rad/:version/awesome/hello'
+        compile_path('hello').should == '/rad/:version/awesome/hello(.:format)'
       end
     end
     
@@ -117,9 +117,9 @@ describe Grape::API do
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
         version 'v2'
-        compile_path('hello').should == '/:version/hello'
+        compile_path('hello').should == '/:version/hello(.:format)'
       end
-      subject.send(:compile_path, 'hello').should == '/hello'
+      subject.send(:compile_path, 'hello').should == '/hello(.:format)'
     end
     
     %w(group resource resources).each do |als|
@@ -158,6 +158,26 @@ describe Grape::API do
       last_response.body.should == 'foo'
       get '/def'
       last_response.body.should == 'foo'
+    end
+
+    it 'should allow for format' do
+      subject.get("/abc") do
+        "json"
+      end
+      
+      get '/abc.json'
+      last_response.body.should == '"json"'
+    end
+
+    it 'should allow for format in namespace with no path' do
+      subject.namespace :abc do
+        get do
+          "json"
+        end
+      end
+      
+      get '/abc.json'
+      last_response.body.should == '"json"'
     end
     
     it 'should allow for multiple verbs' do
