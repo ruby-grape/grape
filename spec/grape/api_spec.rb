@@ -227,6 +227,67 @@ describe Grape::API do
     end
   end
   
+  context 'custom middleware' do
+    class PhonyMiddleware
+      def initialize(app, *args)
+        @args = args
+        @app = app
+      end
+
+      def call(env)
+        env['phony.args'] ||= []
+        env['phony.args'] << @args
+        @app.call(env)
+      end
+    end
+
+    describe '.middleware' do
+      it 'should include middleware arguments from settings' do
+        subject.stub!(:settings_stack).and_return [{:middleware => [[PhonyMiddleware, 'abc', 123]]}]
+        subject.middleware.should == [[PhonyMiddleware, 'abc', 123]]
+      end
+
+      it 'should include all middleware from stacked settings' do
+        subject.stub!(:settings_stack).and_return [
+          {:middleware => [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]},
+          {:middleware => [[PhonyMiddleware, 'foo']]}
+        ]
+  
+        subject.middleware.should == [
+          [PhonyMiddleware, 123],
+          [PhonyMiddleware, 'abc'],
+          [PhonyMiddleware, 'foo']
+        ]
+      end
+    end
+
+    describe '.use' do
+      it 'should add middleware' do
+        subject.use PhonyMiddleware, 123
+        subject.middleware.should == [[PhonyMiddleware, 123]]
+      end
+
+      it 'should not show up outside the namespace' do
+        subject.use PhonyMiddleware, 123
+        subject.namespace :awesome do
+          use PhonyMiddleware, 'abc'
+          middleware.should == [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]
+        end
+
+        subject.middleware.should == [[PhonyMiddleware, 123]]        
+      end
+
+      it 'should actually call the middleware' do
+        subject.use PhonyMiddleware, 'hello'
+        subject.get '/' do
+          env['phony.args'].first.first
+        end
+
+        get '/'
+        last_response.body.should == 'hello'
+      end
+    end
+  end
   describe '.basic' do
     it 'should protect any resources on the same scope' do
       subject.http_basic do |u,p|

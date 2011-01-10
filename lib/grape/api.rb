@@ -177,7 +177,24 @@ module Grape
       def scope(name = nil, &block)
         nest(block)
       end
-      
+
+      # Apply a custom middleware to the API. Applies
+      # to the current namespace and any children, but
+      # not parents.
+      #
+      # @param middleware_class [Class] The class of the middleware you'd like to inject.
+      def use(middleware_class, *args)
+        settings_stack.last[:middleware] ||= []
+        settings_stack.last[:middleware] << [middleware_class, *args]        
+      end
+
+      # Retrieve an array of the middleware classes
+      # and arguments that are currently applied to the
+      # application.
+      def middleware
+        settings_stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
+      end
+
       protected
       
       # Execute first the provided block, then each of the
@@ -202,7 +219,8 @@ module Grape
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
-        
+        middleware.each{|m| b.use *m }
+
         endpoint = Grape::Endpoint.generate(&block)
         endpoint.send :include, helpers
         b.run endpoint
