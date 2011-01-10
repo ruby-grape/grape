@@ -71,6 +71,18 @@ describe Grape::Endpoint do
       last_response.status.should == 401
       last_response.body.should == "Unauthorized."
     end
+
+    it 'should accept an object and render it in format' do
+      pending
+
+      subject.get '/hey' do
+        error!({'dude' => 'rad'}, 403)
+      end
+
+      get '/hey.json'
+      last_response.status.should == 403
+      last_response.body.should == '{"dude":"rad"}'
+    end
   end
   
   it 'should not persist params between calls' do
