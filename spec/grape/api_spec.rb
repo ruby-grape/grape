@@ -78,6 +78,27 @@ describe Grape::API do
       get '/v3/awesome'
       last_response.status.should == 404
     end
+    
+    it 'should allow the same endpoint to be implemented for different versions' do
+      subject.version 'v2'
+      subject.get 'version' do
+        request.env['api.version']
+      end
+      
+      subject.version 'v1' do
+        get 'version' do
+          "version " + request.env['api.version']
+        end
+      end
+      
+      get '/v2/version'
+      last_response.status.should == 200
+      last_response.body.should == 'v2'
+      get '/v1/version'
+      last_response.status.should == 200
+      last_response.body.should == 'version v1'
+    end
+      
   end
   
   describe '.namespace' do
