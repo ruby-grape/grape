@@ -14,10 +14,10 @@ describe Grape::API do
       end
     
       get 'awesome/sauce/hello'
-      last_response.body.should == "Hello there."
+      last_response.body.should eql "Hello there."
       
       get '/hello'
-      last_response.status.should == 404
+      last_response.status.should eql 404
     end
   end
   
@@ -29,7 +29,7 @@ describe Grape::API do
       end
       
       get '/v1/hello'
-      last_response.body.should == "Version: v1"
+      last_response.body.should eql "Version: v1"
     end
     
     it 'should add the prefix before the API version' do
@@ -40,7 +40,7 @@ describe Grape::API do
       end
       
       get '/api/v1/hello'
-      last_response.body.should == "Version: v1"
+      last_response.body.should eql "Version: v1"
     end
     
     it 'should be able to specify version as a nesting' do
@@ -56,13 +56,13 @@ describe Grape::API do
       end
       
       get '/v1/awesome'
-      last_response.status.should == 404
+      last_response.status.should eql 404
       get '/v2/awesome'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/v1/legacy'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/v2/legacy'
-      last_response.status.should == 404
+      last_response.status.should eql 404
     end
     
     it 'should be able to specify multiple versions' do
@@ -72,11 +72,11 @@ describe Grape::API do
       end
       
       get '/v1/awesome'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/v2/awesome'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/v3/awesome'
-      last_response.status.should == 404
+      last_response.status.should eql 404
     end
   end
   
@@ -125,7 +125,7 @@ describe Grape::API do
     %w(group resource resources).each do |als|
       it "`.#{als}` should be an alias" do
         subject.send(als, :awesome) do
-          namespace.should == "/awesome"
+          namespace.should ==  "/awesome"
         end
       end
     end
@@ -144,9 +144,9 @@ describe Grape::API do
       end
       
       get '/votes'
-      last_response.body.should == 'Votes'
+      last_response.body.should eql 'Votes'
       post '/votes'
-      last_response.body.should == 'Created a Vote'
+      last_response.body.should eql 'Created a Vote'
     end
     
     it 'should allow for multiple paths' do
@@ -155,9 +155,9 @@ describe Grape::API do
       end
       
       get '/abc'
-      last_response.body.should == 'foo'
+      last_response.body.should eql 'foo'
       get '/def'
-      last_response.body.should == 'foo'
+      last_response.body.should eql 'foo'
     end
 
     it 'should allow for format' do
@@ -166,7 +166,7 @@ describe Grape::API do
       end
       
       get '/abc.json'
-      last_response.body.should == '"json"'
+      last_response.body.should eql '"json"'
     end
 
     it 'should allow for format in namespace with no path' do
@@ -177,7 +177,7 @@ describe Grape::API do
       end
       
       get '/abc.json'
-      last_response.body.should == '"json"'
+      last_response.body.should eql '"json"'
     end
     
     it 'should allow for multiple verbs' do
@@ -186,9 +186,38 @@ describe Grape::API do
       end
       
       get '/abc'
-      last_response.body.should == 'hiya'
+      last_response.body.should eql 'hiya'
       post '/abc'
-      last_response.body.should == 'hiya'
+      last_response.body.should eql 'hiya'
+    end
+
+    it 'should allow for multipart paths' do
+
+
+      subject.route([:get, :post], '/:id/first') do
+        "first"
+      end
+
+      
+      subject.route([:get, :post], '/:id') do
+        "ola"
+      end
+      subject.route([:get, :post], '/:id/first/second') do
+        "second"
+      end
+      
+
+      get '/1'
+      last_response.body.should eql 'ola'
+      post '/1'
+      last_response.body.should eql 'ola'
+      get '/1/first'
+      last_response.body.should eql 'first'
+      post '/1/first'
+      last_response.body.should eql 'first'
+      get '/1/first/second'
+      last_response.body.should eql 'second'
+
     end
     
     it 'should allow for :any as a verb' do
@@ -198,7 +227,7 @@ describe Grape::API do
       
       %w(get post put delete).each do |m|
         send(m, '/abc')
-        last_response.body.should == 'lol'
+        last_response.body.should eql 'lol'
       end
     end
     
@@ -209,10 +238,10 @@ describe Grape::API do
           verb
         end
         send(verb, '/example')
-        last_response.body.should == verb
+        last_response.body.should eql verb
         # Call it with a method other than the properly constrained one.
         send(verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
-        last_response.status.should == 404
+        last_response.status.should eql 404
       end
     end
     
@@ -222,8 +251,8 @@ describe Grape::API do
       end
       
       post '/example'
-      last_response.status.should == 201
-      last_response.body.should == 'Created'
+      last_response.status.should eql 201
+      last_response.body.should eql 'Created'
     end
   end
   
@@ -244,7 +273,7 @@ describe Grape::API do
     describe '.middleware' do
       it 'should include middleware arguments from settings' do
         subject.stub!(:settings_stack).and_return [{:middleware => [[PhonyMiddleware, 'abc', 123]]}]
-        subject.middleware.should == [[PhonyMiddleware, 'abc', 123]]
+        subject.middleware.should eql [[PhonyMiddleware, 'abc', 123]]
       end
 
       it 'should include all middleware from stacked settings' do
@@ -253,7 +282,7 @@ describe Grape::API do
           {:middleware => [[PhonyMiddleware, 'foo']]}
         ]
   
-        subject.middleware.should == [
+        subject.middleware.should eql [
           [PhonyMiddleware, 123],
           [PhonyMiddleware, 'abc'],
           [PhonyMiddleware, 'foo']
@@ -264,7 +293,7 @@ describe Grape::API do
     describe '.use' do
       it 'should add middleware' do
         subject.use PhonyMiddleware, 123
-        subject.middleware.should == [[PhonyMiddleware, 123]]
+        subject.middleware.should eql [[PhonyMiddleware, 123]]
       end
 
       it 'should not show up outside the namespace' do
@@ -274,7 +303,7 @@ describe Grape::API do
           middleware.should == [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]
         end
 
-        subject.middleware.should == [[PhonyMiddleware, 123]]        
+        subject.middleware.should eql [[PhonyMiddleware, 123]]        
       end
 
       it 'should actually call the middleware' do
@@ -284,7 +313,7 @@ describe Grape::API do
         end
 
         get '/'
-        last_response.body.should == 'hello'
+        last_response.body.should eql 'hello'
       end
     end
   end
@@ -295,9 +324,9 @@ describe Grape::API do
       end
       subject.get(:hello){ "Hello, world."}
       get '/hello'
-      last_response.status.should == 401
+      last_response.status.should eql 401
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
-      last_response.status.should == 200
+      last_response.status.should eql 200
     end
     
     it 'should be scopable' do
@@ -311,9 +340,9 @@ describe Grape::API do
       end
       
       get '/hello'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/admin/hello'
-      last_response.status.should == 401
+      last_response.status.should eql 401
     end
     
     it 'should be callable via .auth as well' do
@@ -323,9 +352,9 @@ describe Grape::API do
       
       subject.get(:hello){ "Hello, world."}
       get '/hello'
-      last_response.status.should == 401
+      last_response.status.should eql 401
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
-      last_response.status.should == 200
+      last_response.status.should eql 200
     end
   end
   
@@ -342,7 +371,7 @@ describe Grape::API do
       end
       
       get '/howdy'
-      last_response.body.should == 'Hello, world.'
+      last_response.body.should eql 'Hello, world.'
     end
     
     it 'should be scopable' do
@@ -369,9 +398,9 @@ describe Grape::API do
       end
       
       get '/generic'
-      last_response.body.should == 'always there:false'
+      last_response.body.should eql 'always there:false'
       get '/admin/secret'
-      last_response.body.should == 'always there:only in admin'
+      last_response.body.should eql 'always there:only in admin'
     end
     
     it 'should be reopenable' do
@@ -412,13 +441,13 @@ describe Grape::API do
       end
       
       get '/v2/abc'
-      last_response.status.should == 404
+      last_response.status.should eql 404
       get '/v1/abc'
-      last_response.status.should == 200
+      last_response.status.should eql 200
       get '/v1/def'
-      last_response.status.should == 404
+      last_response.status.should eql 404
       get '/v2/def'
-      last_response.status.should == 200
+      last_response.status.should eql 200
     end
   end
 end
