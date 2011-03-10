@@ -104,4 +104,23 @@ describe Grape::Middleware::Formatter do
       headers['Content-type'].should == 'application/x-custom'
     end
   end
+
+  context 'Format' do
+    it 'should use custom formatter' do
+      subject.options[:content_types][:custom] = "don't care"
+      subject.options[:formatters][:custom] = lambda { |obj| 'CUSTOM FORMAT' }
+      _, _, body = subject.call({'PATH_INFO' => '/info.custom'})
+      body.body.should == ['CUSTOM FORMAT']
+    end
+    it 'should use default json formatter' do
+      @body = 'blah'
+      _, _, body = subject.call({'PATH_INFO' => '/info.json'})
+      body.body.should == ['"blah"']
+    end
+    it 'should use custom json formatter' do
+      subject.options[:formatters][:json] = lambda { |obj| 'CUSTOM JSON FORMAT' }
+      _, _, body = subject.call({'PATH_INFO' => '/info.json'})
+      body.body.should == ['CUSTOM JSON FORMAT']
+    end
+  end
 end

@@ -11,16 +11,25 @@ module Grape
         :rss => 'application/rss+xml',
         :txt => 'text/plain'
       }
+      FORMATTERS = {
+        :json => :encode_json,
+        :txt => :encode_txt,
+      }
       
       def default_options
         { 
           :default_format => :txt,
+          :formatters => {},
           :content_types => {}
         }
       end
       
       def content_types
         CONTENT_TYPES.merge(options[:content_types])
+      end
+
+      def formatters
+        FORMATTERS.merge(options[:formatters])
       end
       
       def mime_types
@@ -75,17 +84,24 @@ module Grape
       
       def after
         status, headers, bodies = *@app_response
-        bodymap = []
-        bodies.each do |body|
-          bodymap << case env['api.format']
-            when :json
-              encode_json(body)
-            when :txt
-              encode_txt(body)
-          end
+        formatter = formatter_for env['api.format']
+        bodymap = bodies.collect do |body|
+          formatter.call(body)
         end
         headers['Content-Type'] = content_types[env['api.format']]
         Rack::Response.new(bodymap, status, headers).to_a
+      end
+
+      def formatter_for(api_format)
+        spec = formatters[api_format]
+        case spec
+        when nil
+          lambda { |obj| obj }
+        when Symbol
+          method(spec)
+        else
+          spec
+        end
       end
       
       def encode_json(object)
