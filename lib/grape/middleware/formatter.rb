@@ -84,7 +84,7 @@ module Grape
               encode_txt(body)
           end
         end
-        headers['Content-Type'] = 'application/json'
+        headers['Content-Type'] = content_types[env['api.format']]
         Rack::Response.new(bodymap, status, headers).to_a
       end
       
