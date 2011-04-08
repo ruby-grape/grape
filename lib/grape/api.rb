@@ -145,7 +145,7 @@ module Grape
         
         methods.each do |method|
           paths.each do |path|
-            path = Rack::Mount::Strexp.compile(compile_path(path), options)
+            path = Rack::Mount::Strexp.compile(compile_path(path), options, ['/'], true)
             route_set.add_route(endpoint, 
               :path_info => path, 
               :request_method => (method.to_s.upcase unless method == :any)
