@@ -84,4 +84,43 @@ describe Grape::Middleware::Formatter do
       subject.env['api.format'].should == :json
     end
   end
+
+  context 'Content-type' do
+    it 'should be set for json' do
+      _, headers, _ = subject.call({'PATH_INFO' => '/info.json'})
+      headers['Content-type'].should == 'application/json'
+    end
+    it 'should be set for xml' do
+      _, headers, _ = subject.call({'PATH_INFO' => '/info.xml'})
+      headers['Content-type'].should == 'application/xml'
+    end
+    it 'should be set for txt' do
+      _, headers, _ = subject.call({'PATH_INFO' => '/info.txt'})
+      headers['Content-type'].should == 'text/plain'
+    end
+    it 'should be set for custom' do
+      subject.options[:content_types][:custom] = 'application/x-custom'
+      _, headers, _ = subject.call({'PATH_INFO' => '/info.custom'})
+      headers['Content-type'].should == 'application/x-custom'
+    end
+  end
+
+  context 'Format' do
+    it 'should use custom formatter' do
+      subject.options[:content_types][:custom] = "don't care"
+      subject.options[:formatters][:custom] = lambda { |obj| 'CUSTOM FORMAT' }
+      _, _, body = subject.call({'PATH_INFO' => '/info.custom'})
+      body.body.should == ['CUSTOM FORMAT']
+    end
+    it 'should use default json formatter' do
+      @body = 'blah'
+      _, _, body = subject.call({'PATH_INFO' => '/info.json'})
+      body.body.should == ['"blah"']
+    end
+    it 'should use custom json formatter' do
+      subject.options[:formatters][:json] = lambda { |obj| 'CUSTOM JSON FORMAT' }
+      _, _, body = subject.call({'PATH_INFO' => '/info.json'})
+      body.body.should == ['CUSTOM JSON FORMAT']
+    end
+  end
 end
