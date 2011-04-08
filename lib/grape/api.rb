@@ -62,11 +62,12 @@ module Grape
       #     end
       #         
       #     version 'v1' do
-      #       get '/legacy' do
+      #       get '/main' do
       #         {:legacy => 'data'}
       #       end
       #     end
       #   end
+      #
       def version(*new_versions, &block)
         new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
       end
@@ -139,10 +140,12 @@ module Grape
         paths = ['/'] if paths == []
         paths = Array(paths)
         endpoint = build_endpoint(&block)
+        options = {}
+        options[:version] = /#{version.join('|')}/ if version
         
         methods.each do |method|
           paths.each do |path|
-            path = Rack::Mount::Strexp.compile(compile_path(path))
+            path = Rack::Mount::Strexp.compile(compile_path(path), options)
             route_set.add_route(endpoint, 
               :path_info => path, 
               :request_method => (method.to_s.upcase unless method == :any)
