@@ -20,3 +20,5 @@ module Grape
     end
   end
 end
+
+require 'grape/version'

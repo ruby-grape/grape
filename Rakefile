@@ -1,28 +1,9 @@
 require 'rubygems'
 require 'bundler'
-
 Bundler.setup :default, :test, :development
 
-def version
-  @version ||= open('VERSION').read.trim
-end
-
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "grape"
-    gem.summary = %Q{A Ruby framework for rapid API development.}
-    gem.description = %Q{A Ruby framework for rapid API development with great conventions.}
-    gem.email = "michael@intridea.com"
-    gem.homepage = "http://github.com/intridea/grape"
-    gem.authors = ["Michael Bleigh"]
-    gem.add_bundler_dependencies
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
-end
+require 'mg'
+MG.new('grape.gemspec')
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
@@ -34,7 +15,7 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task :spec => :check_dependencies
+task :spec
 task :default => :spec
 
 begin
