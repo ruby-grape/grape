@@ -62,6 +62,31 @@ And would respond to the following routes:
     
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
     
+## Error Handling
+
+The default behavior of Grape is to rescue all exceptions and to return a 403 status code with the exception's message in the response body. 
+
+It's possible to disable this behavior and pass exceptions further up the stack. This usually means displaying the web server's error page as a result.
+
+    class Twitter::API < Grape::API
+      use Grape::Middleware::Error, :rescue => false
+      ...
+    end
+
+It's also common to change the error format to JSON. 
+
+    class Twitter::API < Grape::API
+      use Grape::Middleware::Error, :format => :json
+      ...
+    end
+
+Finally, you can specify your own error formatter. The following example returns a custom error message in the JSON format.
+
+    class Twitter::API < Grape::API
+      use Grape::Middleware::Error, :format => :custom, :formatters = { lambda { |message| { :custom => "the error message was: #{message}" } }
+      ...
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
