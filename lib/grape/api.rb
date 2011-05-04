@@ -50,7 +50,7 @@ module Grape
       def prefix(prefix = nil)
         prefix ? set(:root_prefix, prefix) : settings[:root_prefix]
       end
-      
+
       # Specify an API version.
       #
       # @example API with legacy support.
@@ -77,6 +77,22 @@ module Grape
       # supported.
       def default_format(new_format = nil)
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
+      end
+
+      # Specify the format for error messages.
+      # May be `:json` or `:txt` (default).
+      def error_format(new_format = nil)
+        new_format ? set(:error_format, new_format.to_sym) : settings[:error_format]
+      end
+
+      # Specify the default status code for errors.
+      def default_error_status(new_status = nil)
+        new_status ? set(:default_error_status, new_status) : settings[:default_error_status]
+      end
+
+      # Specify whether to rescue all errors.
+      def rescue_all_errors(new_value = true)
+        set(:rescue_all_errors, new_value)
       end
 
       # Add helper methods that will be accessible from any
@@ -217,7 +233,7 @@ module Grape
       
       def build_endpoint(&block)
         b = Rack::Builder.new
-        b.use Grape::Middleware::Error
+        b.use Grape::Middleware::Error, :default_status => settings[:default_error_status] || 403, :rescue => settings[:rescue_all_errors], :format => settings[:error_format] || :txt
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version

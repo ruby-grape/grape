@@ -66,25 +66,14 @@ Serialization takes place automatically. For more detailed usage information, pl
 
 The default behavior of Grape is to rescue all exceptions and to return a 403 status code with the exception's message in the response body. 
 
-It's possible to disable this behavior and pass exceptions further up the stack. This usually means displaying the web server's error page as a result.
+It's possible to trap all exceptions by setting `rescue_all_errors true`. This prevents displaying the web server's error page as a result. You may also change the error format to JSON by using `error_format :json` and set the default error status to 200 with `default_error_status 200`.
 
     class Twitter::API < Grape::API
-      use Grape::Middleware::Error, :rescue => false
-      ...
-    end
+      rescue_all_errors false
+      error_format :json
+      default_error_status 200
 
-It's also common to change the error format to JSON. 
-
-    class Twitter::API < Grape::API
-      use Grape::Middleware::Error, :format => :json
-      ...
-    end
-
-Finally, you can specify your own error formatter. The following example returns a custom error message in the JSON format.
-
-    class Twitter::API < Grape::API
-      use Grape::Middleware::Error, :format => :custom, :formatters = { lambda { |message| { :custom => "the error message was: #{message}" } }
-      ...
+      # api methods
     end
 
 ## Note on Patches/Pull Requests
