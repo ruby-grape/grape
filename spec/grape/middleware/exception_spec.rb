@@ -8,6 +8,17 @@ describe Grape::Middleware::Error do
       end
     end
   end
+
+  class AccessDeniedApp    
+    class << self
+      def error!(message, status=403)
+        throw :error, :message => message, :status => status
+      end
+      def call(env)
+        error!("Access Denied", 401)
+      end
+    end
+  end
   
   def app
     @app
@@ -69,5 +80,14 @@ describe Grape::Middleware::Error do
     get '/'
     last_response.body.should == '{:custom_formatter=>"rain!"}'
   end
+  
+  it 'should not trap regular error! codes' do
+    @app ||= Rack::Builder.app do
+      use Grape::Middleware::Error
+      run AccessDeniedApp
+    end
+    get '/'
+    last_response.status.should == 401    
+  end 
   
 end
