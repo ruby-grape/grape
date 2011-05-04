@@ -69,7 +69,7 @@ The default behavior of Grape is to rescue all exceptions and to return a 403 st
 It's possible to trap all exceptions by setting `rescue_all_errors true`. This prevents displaying the web server's error page as a result. You may also change the error format to JSON by using `error_format :json` and set the default error status to 200 with `default_error_status 200`.
 
     class Twitter::API < Grape::API
-      rescue_all_errors false
+      rescue_all_errors true
       error_format :json
       default_error_status 200
 
