@@ -36,7 +36,7 @@ module Grape
       end
 
       def format_json(message)
-        { :error => message }
+        { :error => message }.to_json
       end
       
       def format_txt(message)

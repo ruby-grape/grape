@@ -507,7 +507,7 @@ describe Grape::API do
         raise "rain!"
       end    
       get '/exception'
-      last_response.body.should eql '{:error=>"rain!"}'
+      last_response.body.should eql '{"error":"rain!"}'
     end
     it 'should rescue all errors' do
       subject.error_format :txt
@@ -523,7 +523,7 @@ describe Grape::API do
         error!("Access Denied", 401)
       end    
       get '/error'
-      last_response.body.should eql '{:error=>"Access Denied"}'
+      last_response.body.should eql '{"error":"Access Denied"}'
     end
   end
   

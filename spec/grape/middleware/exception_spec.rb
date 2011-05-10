@@ -65,7 +65,7 @@ describe Grape::Middleware::Error do
       run ExceptionApp
     end
     get '/'
-    last_response.body.should == '{:error=>"rain!"}'
+    last_response.body.should == '{"error":"rain!"}'
   end
 
   it 'should be possible to specify a custom formatter' do
