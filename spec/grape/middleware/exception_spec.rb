@@ -73,7 +73,7 @@ describe Grape::Middleware::Error do
       use Grape::Middleware::Error, 
         :format => :custom, 
         :formatters => { 
-          :custom => lambda { |message| { :custom_formatter => message } }  
+          :custom => lambda { |message, backtrace| { :custom_formatter => message } }  
         }
       run ExceptionApp
     end

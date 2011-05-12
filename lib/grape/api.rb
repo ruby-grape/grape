@@ -95,6 +95,11 @@ module Grape
         set(:rescue_all_errors, new_value)
       end
 
+      # Specify whether to include error backtrace with errors.
+      def rescue_with_backtrace(new_value = true)
+        set(:rescue_with_backtrace, new_value)
+      end
+
       # Add helper methods that will be accessible from any
       # endpoint within this namespace (and child namespaces).
       #
@@ -233,7 +238,7 @@ module Grape
       
       def build_endpoint(&block)
         b = Rack::Builder.new
-        b.use Grape::Middleware::Error, :default_status => settings[:default_error_status] || 403, :rescue => settings[:rescue_all_errors], :format => settings[:error_format] || :txt
+        b.use Grape::Middleware::Error, :default_status => settings[:default_error_status] || 403, :rescue => settings[:rescue_all_errors], :format => settings[:error_format] || :txt, :backtrace => settings[:rescue_with_backtrace]
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version

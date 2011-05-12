@@ -11,6 +11,7 @@ module Grape
         :default_message => "",
         :format => :txt,
         :formatters => {},
+        :backtrace => false, # true to display backtrace
       }
       end
 
@@ -35,12 +36,21 @@ module Grape
         end
       end
 
-      def format_json(message)
-        { :error => message }.to_json
+      def format_json(message, backtrace)
+        result = { :error => message }
+        if (options[:backtrace] && backtrace && ! backtrace.empty?)
+          result = result.merge({ :backtrace => backtrace })
+        end
+        result.to_json
       end
       
-      def format_txt(message)
-        message
+      def format_txt(message, backtrace)
+        result = message
+        if options[:backtrace] && backtrace && ! backtrace.empty?
+          result += "\r\n "
+          result += backtrace.join("\r\n ")
+        end
+        result
       end
 
       def call!(env)
@@ -52,7 +62,7 @@ module Grape
           })
         rescue Exception => e
           raise unless options[:rescue]
-          error_response({ :message => e.message })
+          error_response({ :message => e.message, :backtrace => e.backtrace })
         end
         
       end
@@ -61,13 +71,14 @@ module Grape
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]
         headers = error[:headers] || {}
-        Rack::Response.new([format_message(message, status)], status, headers).finish
+        backtrace = error[:backtrace] || []
+        Rack::Response.new([format_message(message, backtrace, status)], status, headers).finish
       end
       
-      def format_message(message, status)
+      def format_message(message, backtrace, status)
         formatter = formatter_for(options[:format])
         throw :error, :status => 406, :message => "The requested format #{options[:format]} is not supported." unless formatter        
-        formatter.call(message)
+        formatter.call(message, backtrace)
       end
       
     end

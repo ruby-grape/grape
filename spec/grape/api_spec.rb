@@ -491,7 +491,7 @@ describe Grape::API do
   end
   
   describe ".error_format" do
-    it 'should return :txt' do
+    it 'should rescue all errors and return :txt' do
       subject.rescue_all_errors true
       subject.error_format :txt
       subject.get '/exception' do
@@ -500,7 +500,17 @@ describe Grape::API do
       get '/exception'
       last_response.body.should eql "rain!"
     end
-    it 'should rescue all errors' do
+    it 'should rescue all errros and return :txt with backtrace' do
+      subject.rescue_all_errors true
+      subject.error_format :txt
+      subject.rescue_with_backtrace true
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.body.start_with?("rain!\r\n").should be_true
+    end
+    it 'should rescue all errors and return :json' do
       subject.rescue_all_errors true
       subject.error_format :json
       subject.get '/exception' do
@@ -509,7 +519,19 @@ describe Grape::API do
       get '/exception'
       last_response.body.should eql '{"error":"rain!"}'
     end
-    it 'should rescue all errors' do
+    it 'should rescue all errors and return :json with backtrace' do
+      subject.rescue_all_errors true
+      subject.error_format :json
+      subject.rescue_with_backtrace true
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      json = JSON.parse(last_response.body)
+      json["error"].should eql 'rain!'
+      json["backtrace"].length.should > 0
+    end
+    it 'should rescue error! and return txt' do
       subject.error_format :txt
       subject.get '/error' do
         error!("Access Denied", 401)
@@ -517,7 +539,7 @@ describe Grape::API do
       get '/error'
       last_response.body.should eql "Access Denied"
     end
-    it 'should rescue all errors' do
+    it 'should rescue error! and return json' do
       subject.error_format :json
       subject.get '/error' do
         error!("Access Denied", 401)
