@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Error do
+  
+  # raises a text exception
   class ExceptionApp
     class << self
       def call(env)
@@ -8,7 +10,20 @@ describe Grape::Middleware::Error do
       end
     end
   end
-
+  
+  # raises a hash error
+  class ErrorHashApp
+    class << self
+      def error!(message, status=403)
+        throw :error, :message => { :error => message, :detail => "missing widget" }, :status => status
+      end
+      def call(env)
+        error!("rain!", 401)
+      end
+    end
+  end
+  
+  # raises an error!
   class AccessDeniedApp    
     class << self
       def error!(message, status=403)
@@ -66,6 +81,15 @@ describe Grape::Middleware::Error do
     end
     get '/'
     last_response.body.should == '{"error":"rain!"}'
+  end
+
+  it 'should be possible to return hash errors in json format' do
+    @app ||= Rack::Builder.app do
+      use Grape::Middleware::Error, :format => :json
+      run ErrorHashApp
+    end
+    get '/'
+    last_response.body.should == '{"error":"rain!","detail":"missing widget"}'
   end
 
   it 'should be possible to specify a custom formatter' do

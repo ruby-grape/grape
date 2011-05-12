@@ -37,7 +37,7 @@ module Grape
       end
 
       def format_json(message, backtrace)
-        result = { :error => message }
+        result = message.is_a?(Hash) ? message : { :error => message }
         if (options[:backtrace] && backtrace && ! backtrace.empty?)
           result = result.merge({ :backtrace => backtrace })
         end
@@ -45,7 +45,7 @@ module Grape
       end
       
       def format_txt(message, backtrace)
-        result = message
+        result = message.is_a?(Hash) ? message.to_json : message
         if options[:backtrace] && backtrace && ! backtrace.empty?
           result += "\r\n "
           result += backtrace.join("\r\n ")
