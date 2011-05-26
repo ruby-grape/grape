@@ -63,6 +63,29 @@ And would respond to the following routes:
     
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
     
+## Raising Errors
+
+You can raise errors explicitly.
+
+    error!("Access Denied", 401)
+
+You can also return JSON formatted objects explicitly by raising error! and passing a hash instead of a message.
+
+    error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
+
+## Exception Handling
+
+By default Grape does not catch all unexpected exceptions. This means that the web server will handle the error and render the default error page as a result. It is possible to trap all exceptions by setting `rescue_all_errors true` instead. You may change the error format to JSON by using `error_format :json` and set the default error status to 200 with `default_error_status 200`. You may also include the complete backtrace of the exception with `rescue_with_backtrace true` either as text (for the :txt format) or as a :backtrace field in the json (for the :json format).
+
+    class Twitter::API < Grape::API
+      rescue_all_errors true
+      rescue_with_backtrace true
+      error_format :json
+      default_error_status 200
+
+      # api methods
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
