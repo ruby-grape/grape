@@ -73,8 +73,6 @@ describe Grape::Endpoint do
     end
 
     it 'should accept an object and render it in format' do
-      pending
-
       subject.get '/hey' do
         error!({'dude' => 'rad'}, 403)
       end

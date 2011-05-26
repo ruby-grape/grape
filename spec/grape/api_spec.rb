@@ -20,7 +20,7 @@ describe Grape::API do
       last_response.status.should eql 404
     end
   end
-  
+
   describe '.version' do
     it 'should set the API version' do
       subject.version 'v1'
@@ -469,6 +469,103 @@ describe Grape::API do
       last_response.status.should eql 404
       get '/v2/def'
       last_response.status.should eql 200
+    end
+  end
+  
+  describe ".rescue_all_errors" do
+    it 'should not rescue all errors when rescue_all_errors is false' do
+      subject.rescue_all_errors false
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      lambda { get '/exception' }.should raise_error
+    end
+    it 'should rescue all errors' do
+      subject.rescue_all_errors true
+      subject.get '/exception' do
+        raise "rain!"
+      end
+      get '/exception'
+      last_response.status.should eql 403
+    end
+  end
+  
+  describe ".error_format" do
+    it 'should rescue all errors and return :txt' do
+      subject.rescue_all_errors true
+      subject.error_format :txt
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.body.should eql "rain!"
+    end
+    it 'should rescue all errros and return :txt with backtrace' do
+      subject.rescue_all_errors true
+      subject.error_format :txt
+      subject.rescue_with_backtrace true
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.body.start_with?("rain!\r\n").should be_true
+    end
+    it 'should rescue all errors and return :json' do
+      subject.rescue_all_errors true
+      subject.error_format :json
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.body.should eql '{"error":"rain!"}'
+    end
+    it 'should rescue all errors and return :json with backtrace' do
+      subject.rescue_all_errors true
+      subject.error_format :json
+      subject.rescue_with_backtrace true
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      json = JSON.parse(last_response.body)
+      json["error"].should eql 'rain!'
+      json["backtrace"].length.should > 0
+    end
+    it 'should rescue error! and return txt' do
+      subject.error_format :txt
+      subject.get '/error' do
+        error!("Access Denied", 401)
+      end    
+      get '/error'
+      last_response.body.should eql "Access Denied"
+    end
+    it 'should rescue error! and return json' do
+      subject.error_format :json
+      subject.get '/error' do
+        error!("Access Denied", 401)
+      end    
+      get '/error'
+      last_response.body.should eql '{"error":"Access Denied"}'
+    end
+  end
+  
+  describe ".default_error_status" do
+    it 'should allow setting default_error_status' do
+      subject.rescue_all_errors true
+      subject.default_error_status 200
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.status.should eql 200
+    end
+    it 'should have a default error status' do
+      subject.rescue_all_errors true
+      subject.get '/exception' do
+        raise "rain!"
+      end    
+      get '/exception'
+      last_response.status.should eql 403
     end
   end
 end
