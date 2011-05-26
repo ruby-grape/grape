@@ -1,4 +1,5 @@
 # Grape
+[![Build Status](http://travis-ci.org/rupakg/ruby-alibris.png)](http://travis-ci.org/rupakg/ruby-alibris)
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
