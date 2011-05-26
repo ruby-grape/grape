@@ -19,5 +19,6 @@ coverage
 pkg
 .rvmrc
 .bundle
+dist
 
 ## PROJECT::SPECIFIC

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grape (0.1.3)
+    grape (0.1.4)
       multi_json
       multi_xml
       rack
@@ -11,12 +11,11 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+    ZenTest (4.5.0)
     diff-lcs (1.1.2)
     json_pure (1.4.3)
     maruku (0.6.0)
       syntax (>= 1.0.0)
-    mg (0.0.8)
-      rake
     multi_json (0.0.5)
     multi_xml (0.2.2)
     rack (1.2.1)
@@ -26,15 +25,14 @@ GEM
       rack (>= 1.0.0)
     rack-test (0.5.4)
       rack (>= 1.0)
-    rake (0.8.7)
-    rspec (2.5.0)
-      rspec-core (~> 2.5.0)
-      rspec-expectations (~> 2.5.0)
-      rspec-mocks (~> 2.5.0)
-    rspec-core (2.5.1)
-    rspec-expectations (2.5.0)
+    rspec (2.6.0)
+      rspec-core (~> 2.6.0)
+      rspec-expectations (~> 2.6.0)
+      rspec-mocks (~> 2.6.0)
+    rspec-core (2.6.0)
+    rspec-expectations (2.6.0)
       diff-lcs (~> 1.1.2)
-    rspec-mocks (2.5.0)
+    rspec-mocks (2.6.0)
     syntax (1.0.0)
     yard (0.6.1)
 
@@ -42,10 +40,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ZenTest
+  bundler
   grape!
   json_pure
   maruku
-  mg
   rack-test
-  rspec (~> 2.5.0)
+  rspec (~> 2.6.0)
   yard
