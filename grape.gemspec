@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'multi_json'
   s.add_runtime_dependency 'multi_xml'
 
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'maruku'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'rack-test'
