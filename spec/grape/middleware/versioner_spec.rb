@@ -15,6 +15,10 @@ describe Grape::Middleware::Versioner do
   it 'should store the original version of the path in api.original_path_info' do
     subject.call('PATH_INFO' => '/v1/awesome')[1]['api.original_path_info'].should == '/v1/awesome'
   end
+
+  it 'should not overwrite api.original_path_info if it was already set by the prefixer' do
+    subject.call('api.original_path_info' => '/api/v1/awesome', 'PATH_INFO' => '/v1/awesome')[1]['api.original_path_info'].should == '/api/v1/awesome'
+  end
   
   it 'should provide a nil version if no path is given' do
     subject.call('PATH_INFO' => '/').last.should be_nil

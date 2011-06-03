@@ -11,6 +11,7 @@ module Grape
       end
       
       def before
+        env['api.original_path_info'] ||= env['PATH_INFO'].dup
         if env['PATH_INFO'].index(prefix) == 0
           env['PATH_INFO'].sub!(prefix, '')
           env['PATH_INFO'] = Rack::Mount::Utils.normalize_path(env['PATH_INFO'])
