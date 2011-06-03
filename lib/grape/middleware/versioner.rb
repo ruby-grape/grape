@@ -10,6 +10,7 @@ module Grape
       end
       
       def before
+        env['api.original_path_info'] = env['PATH_INFO'].dup
         pieces = env['PATH_INFO'].split('/')
         potential_version = pieces[1]
         if potential_version =~ options[:pattern]

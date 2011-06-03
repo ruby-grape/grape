@@ -11,6 +11,10 @@ describe Grape::Middleware::Versioner do
   it 'should cut the version out of the path' do
     subject.call('PATH_INFO' => '/v1/awesome')[1]['PATH_INFO'].should == '/awesome'
   end
+
+  it 'should store the original version of the path in api.original_path_info' do
+    subject.call('PATH_INFO' => '/v1/awesome')[1]['api.original_path_info'].should == '/v1/awesome'
+  end
   
   it 'should provide a nil version if no path is given' do
     subject.call('PATH_INFO' => '/').last.should be_nil
