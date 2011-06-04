@@ -82,6 +82,28 @@ describe Grape::Endpoint do
       last_response.body.should == '{"dude":"rad"}'
     end
   end
+
+  describe '#url' do
+    it 'should create a full URL' do
+      subject.get 'content/:id' do
+        url('/content/id-12345')
+      end
+
+      get '/content/1'
+      last_response.body.should == 'http://example.org/content/id-12345'
+    end
+
+    it 'should not be phased by a prefix or version' do
+      subject.prefix 'rest'
+      subject.version 'v1'
+      subject.get 'content/:id' do
+        url('/content/id-12345')
+      end
+
+      get '/rest/v1/content/1'
+      last_response.body.should == 'http://example.org/rest/v1/content/id-12345'
+    end
+  end
   
   it 'should not persist params between calls' do
     subject.post('/new') do
