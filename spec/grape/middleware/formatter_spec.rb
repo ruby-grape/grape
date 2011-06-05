@@ -130,9 +130,9 @@ describe Grape::Middleware::Formatter do
       subject.env['rack.request.form_hash']['is_boolean'].should be_true
       subject.env['rack.request.form_hash']['string'].should == 'thing'
     end
-    it 'should be able to fail gracefully if the body is invalid' do
-      err = catch(:error){ subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,string:"thing"}')}) }
-      err.should == {:status => 400, :message => "Body content could not be parsed."}
+    it 'should be able to fail gracefully if the body is regular POST content' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
+      subject.env['rack.request.form_hash'].should be_nil
     end
   end
 end

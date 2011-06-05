@@ -52,14 +52,15 @@ module Grape
         fmt = format_from_extension || format_from_header || options[:default_format]
                 
         if content_types.key?(fmt)
-          if !env['rack.input'].nil? and (body = env['rack.input'].read).length != 0
+          if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = parser_for fmt
             unless parser.nil?
               begin
-                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(parser.call(body)) : parser.call(body)
+                body = parser.call(body)
+                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
                 env['rack.request.form_input'] = env['rack.input']
               rescue
-                throw :error, :status => 400, :message => 'Body content could not be parsed.'
+                # It's possible that it's just regular POST content -- just back off
               end
             end
             env['rack.input'].rewind
