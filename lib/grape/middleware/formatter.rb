@@ -15,12 +15,16 @@ module Grape
         :json => :encode_json,
         :txt => :encode_txt,
       }
+      PARSERS = {
+        :json => :decode_json
+      }
       
       def default_options
         { 
           :default_format => :txt,
           :formatters => {},
-          :content_types => {}
+          :content_types => {},
+          :parsers => {}
         }
       end
       
@@ -30,6 +34,10 @@ module Grape
 
       def formatters
         FORMATTERS.merge(options[:formatters])
+      end
+
+      def parsers
+        PARSERS.merge(options[:parsers])
       end
       
       def mime_types
@@ -44,7 +52,19 @@ module Grape
         fmt = format_from_extension || format_from_header || options[:default_format]
                 
         if content_types.key?(fmt)
-          env['api.format'] = fmt          
+          if !env['rack.input'].nil? and (body = env['rack.input'].read).length != 0
+            parser = parser_for fmt
+            unless parser.nil?
+              begin
+                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(parser.call(body)) : parser.call(body)
+                env['rack.request.form_input'] = env['rack.input']
+              rescue
+                throw :error, :status => 400, :message => 'Body content could not be parsed.'
+              end
+            end
+            env['rack.input'].rewind
+          end
+          env['api.format'] = fmt
         else
           throw :error, :status => 406, :message => 'The requested format is not supported.'
         end
@@ -102,6 +122,22 @@ module Grape
         else
           spec
         end
+      end
+
+      def parser_for(api_format)
+        spec = parsers[api_format]
+        case spec
+        when nil
+          nil
+        when Symbol
+          method(spec)
+        else
+          spec
+        end
+      end
+
+      def decode_json(object)
+        MultiJson.decode(object)
       end
       
       def encode_json(object)
