@@ -138,7 +138,7 @@ module Grape
       end
       
       # Add an authentication type to the API. Currently
-      # only `:http_basic` is supported.
+      # only `:http_basic` and `:oauth2` are supported.
       def auth(type = nil, options = {}, &block)
         if type
           set(:auth, {:type => type.to_sym, :proc => block}.merge(options))
