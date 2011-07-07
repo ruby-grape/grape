@@ -90,7 +90,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      last_response.body.should == '{"error":"rain!","detail":"missing widget"}'
+      ['{"error":"rain!","detail":"missing widget"}',
+       '{"detail":"missing widget","error":"rain!"}'].should be_include(last_response.body)
     end
 
     it 'should be possible to specify a custom formatter' do
@@ -99,7 +100,7 @@ describe Grape::Middleware::Error do
           :rescue_all => true,
           :format => :custom, 
           :formatters => { 
-            :custom => lambda { |message, backtrace| { :custom_formatter => message } }  
+            :custom => lambda { |message, backtrace| { :custom_formatter => message }.inspect }  
           }
         run ExceptionApp
       end
