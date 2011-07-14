@@ -2,7 +2,7 @@ module Grape
   module Middleware
     class Base
       attr_reader :app, :env, :options
-      
+
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
       def initialize(app, options = {})
@@ -38,6 +38,52 @@ module Grape
       def response
         Rack::Response.new(@app_response)
       end
+
+
+      module Formats
+
+        CONTENT_TYPES = {
+          :xml => 'application/xml',
+          :json => 'application/json',
+          :atom => 'application/atom+xml',
+          :rss => 'application/rss+xml',
+          :txt => 'text/plain'
+        }
+        FORMATTERS = {
+          :json => :encode_json,
+          :txt => :encode_txt,
+        }
+
+        def formatters
+          FORMATTERS.merge(options[:formatters] || {})
+        end
+
+        def content_types
+          CONTENT_TYPES.merge(options[:content_types] || {})
+        end
+
+        def content_type
+          content_types[options[:format]] || 'text/html'
+        end
+
+        def mime_types
+          content_types.invert
+        end
+
+        def formatter_for(api_format)
+          spec = formatters[api_format]
+          case spec
+          when nil
+            lambda { |obj| obj }
+          when Symbol
+            method(spec)
+          else
+            spec
+          end
+        end
+
+      end
+
     end
   end
 end
