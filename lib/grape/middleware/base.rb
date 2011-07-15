@@ -1,3 +1,5 @@
+require 'multi_json'
+
 module Grape
   module Middleware
     class Base
@@ -53,9 +55,16 @@ module Grape
           :json => :encode_json,
           :txt => :encode_txt,
         }
+        PARSERS = {
+          :json => :decode_json
+        }
 
         def formatters
           FORMATTERS.merge(options[:formatters] || {})
+        end
+
+        def parsers
+          PARSERS.merge(options[:parsers] || {})
         end
 
         def content_types
@@ -82,6 +91,35 @@ module Grape
           end
         end
 
+        def parser_for(api_format)
+          spec = parsers[api_format]
+          case spec
+          when nil
+            nil
+          when Symbol
+            method(spec)
+          else
+            spec
+          end
+        end
+
+        def decode_json(object)
+          MultiJson.decode(object)
+        end
+
+        def encode_json(object)
+          if object.respond_to? :serializable_hash
+            MultiJson.encode(object.serializable_hash)
+          elsif object.respond_to? :to_json
+            object.to_json
+          else
+            MultiJson.encode(object)
+          end
+        end
+
+        def encode_txt(object)
+          object.respond_to?(:to_txt) ? object.to_txt : object.to_s
+        end
       end
 
     end

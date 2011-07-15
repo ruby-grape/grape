@@ -1,5 +1,4 @@
 require 'grape/middleware/base'
-require 'multi_json'
 
 module Grape
   module Middleware
@@ -82,20 +81,6 @@ module Grape
         end
         headers['Content-Type'] = content_types[env['api.format']]
         Rack::Response.new(bodymap, status, headers).to_a
-      end
-
-      def encode_json(object)
-        if object.respond_to? :serializable_hash
-          MultiJson.encode(object.serializable_hash)
-        elsif object.respond_to? :to_json
-          object.to_json
-        else
-          MultiJson.encode(object)
-        end
-      end
-      
-      def encode_txt(object)
-        object.respond_to?(:to_txt) ? object.to_txt : object.to_s
       end
     end
   end
