@@ -190,6 +190,15 @@ describe Grape::API do
       last_response.body.should eql '"json"'
     end
 
+    it 'should allow for format without corrupting a param' do
+      subject.get('/:id') do
+        params[:id]
+      end
+
+      get '/awesome.json'
+      last_response.body.should eql "\"awesome\""
+    end
+
     it 'should allow for format in namespace with no path' do
       subject.namespace :abc do
         get do
