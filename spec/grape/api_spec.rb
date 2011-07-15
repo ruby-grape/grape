@@ -276,6 +276,35 @@ describe Grape::API do
       last_response.body.should eql 'Created'
     end
   end
+
+  context 'format' do
+    before do
+      subject.get("/foo") { "bar" }
+    end
+
+    it 'should set content type for txt format' do
+      get '/foo'
+      last_response.headers['Content-Type'].should eql 'text/plain'
+    end
+
+    it 'should set content type for json' do
+      get '/foo.json'
+      last_response.headers['Content-Type'].should eql 'application/json'
+    end
+
+    it 'should set content type for error' do
+      subject.get('/error') { error!('error in plain text', 500) }
+      get '/error'
+      last_response.headers['Content-Type'].should eql 'text/plain'
+    end
+
+    it 'should set content type for error' do
+      subject.error_format :json
+      subject.get('/error') { error!('error in json', 500) }
+      get '/error.json'
+      last_response.headers['Content-Type'].should eql 'application/json'
+    end
+  end
   
   context 'custom middleware' do
     class PhonyMiddleware
