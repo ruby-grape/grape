@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grape (0.1.4)
+    grape (0.1.5)
       multi_json
       multi_xml
       rack
