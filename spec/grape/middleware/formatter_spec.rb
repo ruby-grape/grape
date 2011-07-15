@@ -123,4 +123,16 @@ describe Grape::Middleware::Formatter do
       body.body.should == ['CUSTOM JSON FORMAT']
     end
   end
+
+  context 'Input' do
+    it 'should parse the body from a POST/PUT and put the contents into rack.request.form_hash' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,"string":"thing"}')})
+      subject.env['rack.request.form_hash']['is_boolean'].should be_true
+      subject.env['rack.request.form_hash']['string'].should == 'thing'
+    end
+    it 'should be able to fail gracefully if the body is regular POST content' do
+      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
+      subject.env['rack.request.form_hash'].should be_nil
+    end
+  end
 end
