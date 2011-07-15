@@ -1,5 +1,6 @@
 require 'rack/mount'
 require 'rack/auth/basic'
+require 'rack/auth/digest/md5'
 require 'logger'
 
 module Grape
@@ -138,7 +139,7 @@ module Grape
       end
       
       # Add an authentication type to the API. Currently
-      # only `:http_basic` is supported.
+      # only `:http_basic`, `:http_digest` and `:oauth2` are supported.
       def auth(type = nil, options = {}, &block)
         if type
           set(:auth, {:type => type.to_sym, :proc => block}.merge(options))
@@ -154,6 +155,12 @@ module Grape
       def http_basic(options = {}, &block)
         options[:realm] ||= "API Authorization"
         auth :http_basic, options, &block
+      end
+
+      def http_digest(options = {}, &block)
+        options[:realm] ||= "API Authorization"
+	options[:opaque] ||= "secret"
+        auth :http_digest, options, &block
       end
       
       # Defines a route that will be recognized
@@ -257,6 +264,7 @@ module Grape
           :format => settings[:error_format] || :txt, 
           :rescue_options => settings[:rescue_options]
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
+	b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json

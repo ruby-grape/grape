@@ -65,9 +65,11 @@ describe Grape::Middleware::Auth::OAuth2 do
     it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='expired_token'" }
   end
   
-  context 'with the token in the header' do
-    before { get '/awesome', {}, 'Authorization' => 'OAuth g123' }
-    it { last_response.body.should == 'g123' }
+  %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|  
+    context "with the token in the #{head} header" do
+      before { get '/awesome', {}, head => 'OAuth g123' }
+      it { last_response.body.should == 'g123' }
+    end
   end
   
   context 'with the token in the POST body' do
