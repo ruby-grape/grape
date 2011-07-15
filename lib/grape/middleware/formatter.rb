@@ -4,36 +4,14 @@ require 'multi_json'
 module Grape
   module Middleware
     class Formatter < Base
-      CONTENT_TYPES = {
-        :xml => 'application/xml',
-        :json => 'application/json',
-        :atom => 'application/atom+xml',
-        :rss => 'application/rss+xml',
-        :txt => 'text/plain'
-      }
-      FORMATTERS = {
-        :json => :encode_json,
-        :txt => :encode_txt,
-      }
-      
+      include Formats
+
       def default_options
         { 
           :default_format => :txt,
           :formatters => {},
           :content_types => {}
         }
-      end
-      
-      def content_types
-        CONTENT_TYPES.merge(options[:content_types])
-      end
-
-      def formatters
-        FORMATTERS.merge(options[:formatters])
-      end
-      
-      def mime_types
-        content_types.invert
       end
       
       def headers
@@ -92,18 +70,6 @@ module Grape
         Rack::Response.new(bodymap, status, headers).to_a
       end
 
-      def formatter_for(api_format)
-        spec = formatters[api_format]
-        case spec
-        when nil
-          lambda { |obj| obj }
-        when Symbol
-          method(spec)
-        else
-          spec
-        end
-      end
-      
       def encode_json(object)
         if object.respond_to? :serializable_hash
           MultiJson.encode(object.serializable_hash)
