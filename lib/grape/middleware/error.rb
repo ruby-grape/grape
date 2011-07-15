@@ -4,7 +4,8 @@ require 'multi_json'
 module Grape
   module Middleware
     class Error < Base
-    
+      include Formats
+
       def default_options
       { 
         :default_status => 403, # default status returned on error
@@ -18,28 +19,7 @@ module Grape
       }
       end
 
-      FORMATTERS = {
-        :json => :format_json,
-        :txt => :format_txt,
-      }
-
-      def formatters
-        FORMATTERS.merge(options[:formatters])
-      end
-
-      def formatter_for(api_format)
-        spec = formatters[api_format]
-        case spec
-        when nil
-          lambda { |obj| obj }
-        when Symbol
-          method(spec)
-        else
-          spec
-        end
-      end
-
-      def format_json(message, backtrace)
+      def encode_json(message, backtrace)
         result = message.is_a?(Hash) ? message : { :error => message }
         if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result = result.merge({ :backtrace => backtrace })
@@ -47,7 +27,7 @@ module Grape
         MultiJson.encode(result)
       end
       
-      def format_txt(message, backtrace)
+      def encode_txt(message, backtrace)
         result = message.is_a?(Hash) ? MultiJson.encode(message) : message
         if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result += "\r\n "
@@ -73,7 +53,8 @@ module Grape
       def error_response(error = {})
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]
-        headers = error[:headers] || {}
+        headers = {'Content-Type' => content_type}
+        headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         backtrace = error[:backtrace] || []
         Rack::Response.new([format_message(message, backtrace, status)], status, headers).finish
       end
