@@ -1,39 +1,17 @@
 require 'grape/middleware/base'
-require 'multi_json'
 
 module Grape
   module Middleware
     class Formatter < Base
-      CONTENT_TYPES = {
-        :xml => 'application/xml',
-        :json => 'application/json',
-        :atom => 'application/atom+xml',
-        :rss => 'application/rss+xml',
-        :txt => 'text/plain'
-      }
-      FORMATTERS = {
-        :json => :encode_json,
-        :txt => :encode_txt,
-      }
-      
+      include Formats
+
       def default_options
         { 
           :default_format => :txt,
           :formatters => {},
-          :content_types => {}
+          :content_types => {},
+          :parsers => {}
         }
-      end
-      
-      def content_types
-        CONTENT_TYPES.merge(options[:content_types])
-      end
-
-      def formatters
-        FORMATTERS.merge(options[:formatters])
-      end
-      
-      def mime_types
-        content_types.invert
       end
       
       def headers
@@ -44,7 +22,20 @@ module Grape
         fmt = format_from_extension || format_from_header || options[:default_format]
                 
         if content_types.key?(fmt)
-          env['api.format'] = fmt          
+          if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
+            parser = parser_for fmt
+            unless parser.nil?
+              begin
+                body = parser.call(body)
+                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
+                env['rack.request.form_input'] = env['rack.input']
+              rescue
+                # It's possible that it's just regular POST content -- just back off
+              end
+            end
+            env['rack.input'].rewind
+          end
+          env['api.format'] = fmt
         else
           throw :error, :status => 406, :message => 'The requested format is not supported.'
         end
@@ -90,32 +81,6 @@ module Grape
         end
         headers['Content-Type'] = content_types[env['api.format']]
         Rack::Response.new(bodymap, status, headers).to_a
-      end
-
-      def formatter_for(api_format)
-        spec = formatters[api_format]
-        case spec
-        when nil
-          lambda { |obj| obj }
-        when Symbol
-          method(spec)
-        else
-          spec
-        end
-      end
-      
-      def encode_json(object)
-        if object.respond_to? :serializable_hash
-          MultiJson.encode(object.serializable_hash)
-        elsif object.respond_to? :to_json
-          object.to_json
-        else
-          MultiJson.encode(object)
-        end
-      end
-      
-      def encode_txt(object)
-        object.respond_to?(:to_txt) ? object.to_txt : object.to_s
       end
     end
   end

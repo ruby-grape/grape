@@ -20,5 +20,6 @@ pkg
 .rvmrc
 .bundle
 .yardoc/*
+dist
 
 ## PROJECT::SPECIFIC

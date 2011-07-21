@@ -1,4 +1,5 @@
 # Grape
+[![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
@@ -74,15 +75,12 @@ You can also return JSON formatted objects explicitly by raising error! and pass
 
 ## Exception Handling
 
-By default Grape does not catch all unexpected exceptions. This means that the web server will handle the error and render the default error page as a result. It is possible to trap all exceptions by setting `rescue_all_errors true` instead. You may change the error format to JSON by using `error_format :json` and set the default error status to 200 with `default_error_status 200`. You may also include the complete backtrace of the exception with `rescue_with_backtrace true` either as text (for the :txt format) or as a :backtrace field in the json (for the :json format).
+Grape can be told to rescue certain (or all) exceptions in your
+application and instead display them in text or json form. To do this,
+you simply use the `rescue_from` method inside your API declaration:
 
     class Twitter::API < Grape::API
-      rescue_all_errors true
-      rescue_with_backtrace true
-      error_format :json
-      default_error_status 200
-
-      # api methods
+      rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
 ## Note on Patches/Pull Requests
