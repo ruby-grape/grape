@@ -190,6 +190,15 @@ describe Grape::API do
       last_response.body.should eql '"json"'
     end
 
+    it 'should allow for format without corrupting a param' do
+      subject.get('/:id') do
+        params[:id]
+      end
+
+      get '/awesome.json'
+      last_response.body.should eql "\"awesome\""
+    end
+
     it 'should allow for format in namespace with no path' do
       subject.namespace :abc do
         get do
@@ -274,6 +283,35 @@ describe Grape::API do
       post '/example'
       last_response.status.should eql 201
       last_response.body.should eql 'Created'
+    end
+  end
+
+  context 'format' do
+    before do
+      subject.get("/foo") { "bar" }
+    end
+
+    it 'should set content type for txt format' do
+      get '/foo'
+      last_response.headers['Content-Type'].should eql 'text/plain'
+    end
+
+    it 'should set content type for json' do
+      get '/foo.json'
+      last_response.headers['Content-Type'].should eql 'application/json'
+    end
+
+    it 'should set content type for error' do
+      subject.get('/error') { error!('error in plain text', 500) }
+      get '/error'
+      last_response.headers['Content-Type'].should eql 'text/plain'
+    end
+
+    it 'should set content type for error' do
+      subject.error_format :json
+      subject.get('/error') { error!('error in json', 500) }
+      get '/error.json'
+      last_response.headers['Content-Type'].should eql 'application/json'
     end
   end
   
@@ -472,27 +510,38 @@ describe Grape::API do
     end
   end
   
-  describe ".rescue_all_errors" do
-    it 'should not rescue all errors when rescue_all_errors is false' do
-      subject.rescue_all_errors false
+  describe ".rescue_from" do
+    it 'should not rescue errors when rescue_from is not set' do
       subject.get '/exception' do
         raise "rain!"
       end    
       lambda { get '/exception' }.should raise_error
     end
-    it 'should rescue all errors' do
-      subject.rescue_all_errors true
+
+    it 'should rescue all errors if rescue_from :all is called' do
+      subject.rescue_from :all
       subject.get '/exception' do
         raise "rain!"
       end
       get '/exception'
       last_response.status.should eql 403
     end
+
+    it 'should rescue only certain errors if rescue_from is called with specific errors' do
+      subject.rescue_from ArgumentError
+      subject.get('/rescued'){ raise ArgumentError }
+      subject.get('/unrescued'){ raise "beefcake" }
+
+      get '/rescued'
+      last_response.status.should eql 403
+      
+      lambda{ get '/unrescued' }.should raise_error
+    end
   end
   
   describe ".error_format" do
     it 'should rescue all errors and return :txt' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all
       subject.error_format :txt
       subject.get '/exception' do
         raise "rain!"
@@ -500,18 +549,19 @@ describe Grape::API do
       get '/exception'
       last_response.body.should eql "rain!"
     end
+
     it 'should rescue all errros and return :txt with backtrace' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all, :backtrace => true
       subject.error_format :txt
-      subject.rescue_with_backtrace true
       subject.get '/exception' do
         raise "rain!"
       end    
       get '/exception'
       last_response.body.start_with?("rain!\r\n").should be_true
     end
+
     it 'should rescue all errors and return :json' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all
       subject.error_format :json
       subject.get '/exception' do
         raise "rain!"
@@ -520,9 +570,8 @@ describe Grape::API do
       last_response.body.should eql '{"error":"rain!"}'
     end
     it 'should rescue all errors and return :json with backtrace' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all, :backtrace => true
       subject.error_format :json
-      subject.rescue_with_backtrace true
       subject.get '/exception' do
         raise "rain!"
       end    
@@ -551,7 +600,7 @@ describe Grape::API do
   
   describe ".default_error_status" do
     it 'should allow setting default_error_status' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all
       subject.default_error_status 200
       subject.get '/exception' do
         raise "rain!"
@@ -560,7 +609,7 @@ describe Grape::API do
       last_response.status.should eql 200
     end
     it 'should have a default error status' do
-      subject.rescue_all_errors true
+      subject.rescue_from :all
       subject.get '/exception' do
         raise "rain!"
       end    

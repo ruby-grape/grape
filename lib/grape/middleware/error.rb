@@ -1,52 +1,35 @@
 require 'grape/middleware/base'
+require 'multi_json'
 
 module Grape
   module Middleware
     class Error < Base
-    
+      include Formats
+
       def default_options
       { 
         :default_status => 403, # default status returned on error
-        :rescue => true, # true to rescue all exceptions
         :default_message => "",
         :format => :txt,
         :formatters => {},
-        :backtrace => false, # true to display backtrace
+
+        :rescue_all => false, # true to rescue all exceptions        
+        :rescue_options => {:backtrace => false}, # true to display backtrace
+        :rescued_errors => []
       }
       end
 
-      FORMATTERS = {
-        :json => :format_json,
-        :txt => :format_txt,
-      }
-
-      def formatters
-        FORMATTERS.merge(options[:formatters])
-      end
-
-      def formatter_for(api_format)
-        spec = formatters[api_format]
-        case spec
-        when nil
-          lambda { |obj| obj }
-        when Symbol
-          method(spec)
-        else
-          spec
-        end
-      end
-
-      def format_json(message, backtrace)
+      def encode_json(message, backtrace)
         result = message.is_a?(Hash) ? message : { :error => message }
-        if (options[:backtrace] && backtrace && ! backtrace.empty?)
+        if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result = result.merge({ :backtrace => backtrace })
         end
-        result.to_json
+        MultiJson.encode(result)
       end
       
-      def format_txt(message, backtrace)
-        result = message.is_a?(Hash) ? message.to_json : message
-        if options[:backtrace] && backtrace && ! backtrace.empty?
+      def encode_txt(message, backtrace)
+        result = message.is_a?(Hash) ? MultiJson.encode(message) : message
+        if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result += "\r\n "
           result += backtrace.join("\r\n ")
         end
@@ -61,7 +44,7 @@ module Grape
             return @app.call(@env) 
           })
         rescue Exception => e
-          raise unless options[:rescue]
+          raise unless options[:rescue_all] || (options[:rescued_errors] || []).include?(e.class)
           error_response({ :message => e.message, :backtrace => e.backtrace })
         end
         
@@ -70,7 +53,8 @@ module Grape
       def error_response(error = {})
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]
-        headers = error[:headers] || {}
+        headers = {'Content-Type' => content_type}
+        headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         backtrace = error[:backtrace] || []
         Rack::Response.new([format_message(message, backtrace, status)], status, headers).finish
       end
