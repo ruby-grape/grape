@@ -159,7 +159,7 @@ module Grape
 
       def http_digest(options = {}, &block)
         options[:realm] ||= "API Authorization"
-	options[:opaque] ||= "secret"
+        options[:opaque] ||= "secret"
         auth :http_digest, options, &block
       end
       
@@ -231,6 +231,13 @@ module Grape
         settings_stack.last[:middleware] << [middleware_class, *args]        
       end
 
+      # Include a module into the API.
+      #
+      # @param module_ref [Module] The module you'd like to inject.
+      def module(module_ref)
+        include module_ref
+      end
+
       # Retrieve an array of the middleware classes
       # and arguments that are currently applied to the
       # application.
@@ -264,7 +271,7 @@ module Grape
           :format => settings[:error_format] || :txt, 
           :rescue_options => settings[:rescue_options]
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-	b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+        b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json

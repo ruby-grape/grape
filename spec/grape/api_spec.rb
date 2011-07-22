@@ -617,4 +617,22 @@ describe Grape::API do
       last_response.status.should eql 403
     end
   end
+
+  module MyApi
+    def self.included(api)
+      api.namespace :ping do
+        get '/pong' do
+          'pong'
+        end
+      end
+    end
+  end
+  
+  describe "module" do
+    it 'should import module methods' do
+      subject.module MyApi
+      get '/ping/pong'
+      last_response.body.should eql 'pong'
+    end
+  end
 end

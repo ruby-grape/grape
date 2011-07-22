@@ -83,6 +83,24 @@ you simply use the `rescue_from` method inside your API declaration:
       rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
+## Including Modules
+
+You can use a more modular approach to compose an API by including other modules that implement the `included` callback.
+
+    module TwitterApiStatus
+      def included(api) do
+        api.resource :statuses do
+          get :public_timeline do
+            Tweet.limit(20)
+          end
+        end
+      end
+    end
+
+    class Twitter::API < Grape::API
+      include TwitterApiStatus
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
