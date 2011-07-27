@@ -1,5 +1,6 @@
 require 'rack'
 require 'grape'
+require File.dirname(__FILE__) + '/helpers/extensions/hash'
 
 module Grape
   # An Endpoint is the proxy scope in which all routing
@@ -30,7 +31,11 @@ module Grape
     def params
       @params ||= request.params.merge(env['rack.routing_args'] || {}).inject({}) do |h,(k,v)|
         h[k.to_s] = v
-        h[k.to_sym] = v
+
+        # Also return a version of the parameters with symbols as hash keys
+        v_sym = (v.kind_of?(Hash) && v.respond_to?(:key_strings_to_symbols)) ? v.key_strings_to_symbols : v
+        h[k.to_sym] = v_sym
+        
         h
       end
     end
