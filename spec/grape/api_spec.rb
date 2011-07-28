@@ -617,4 +617,95 @@ describe Grape::API do
       last_response.status.should eql 403
     end
   end
+
+  describe "simple version structure" do
+    before(:each) do
+      subject.get :hello do
+        "No version"
+      end
+    end
+    it "versions api" do      
+      get '/hello'
+      last_response.body.should eql "No version"      
+    end
+    it "returns an array of versions" do
+      subject.structure.should == 
+      {
+        :default => [ { :method => "GET", :path => "hello" } ],
+      }
+    end
+  end
+  
+  describe "twitter versions" do
+    class TwitterAPI < Grape::API
+      version 'v1'
+      get "version" do 
+        api.version
+      end
+      version 'v2'
+      namespace "ns" do
+        get "version" do
+          api.version
+        end
+      end
+    end
+    it "should return a single structure with both versions" do
+      TwitterAPI::structure.should == {
+        "v1"=>[{:method=>"GET", :path=>"version(.:format)"}], 
+        "v2"=>{
+          "ns"=>[{:method=>"GET", :path=>"version(.:format)"}]
+        }}
+    end
+  end
+  
+  describe "nested versions" do
+    before(:each) do
+      subject.get :hello do
+        "No version"
+      end
+      subject.version 'v1'
+      subject.get :hello do
+        "Version: #{request.env['api.version']}"
+      end
+      subject.version 'v2'
+      subject.get :hello do
+        "Version: #{request.env['api.version']} w/o namespace"
+      end
+      subject.namespace :ns1 do
+        get :hello do
+          "Version: #{request.env['api.version']}"
+        end
+      end
+      subject.namespace :ns2 do
+        get :hello do
+          "Version: #{request.env['api.version']}"
+        end
+      end
+      subject.post :goodbye do
+        "Version: #{request.env['api.version']} w/o namespace"
+      end
+    end
+    it "versions api" do      
+      get '/hello'
+      last_response.body.should eql "No version"      
+      get '/v1/hello'
+      last_response.body.should eql "Version: v1"      
+      get '/v2/ns1/hello'
+      last_response.body.should eql "Version: v2"      
+      get '/v2/ns2/hello'
+      last_response.body.should eql "Version: v2"      
+    end
+    it "returns an array of versions" do
+      subject.structure.should == 
+      {
+        :default => [ { :method => "GET", :path => "hello" } ],
+        "v1" => [ { :method => "GET", :path => "hello" } ],
+        "v2" => {
+          :default => [ { :method => "GET", :path => "hello" }, { :method => "POST", :path => "goodbye" } ],
+          "ns1" => [ { :method => "GET", :path => "hello" } ],
+          "ns2" => [ { :method => "GET", :path => "hello" } ]
+        } 
+      }
+    end
+  end
 end
