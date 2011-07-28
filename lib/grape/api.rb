@@ -10,6 +10,7 @@ module Grape
   class API
     class << self
       attr_reader :route_set
+      attr_reader :structure
       
       def logger
         @logger ||= Logger.new($STDOUT)
@@ -159,7 +160,7 @@ module Grape
 
       def http_digest(options = {}, &block)
         options[:realm] ||= "API Authorization"
-	options[:opaque] ||= "secret"
+        options[:opaque] ||= "secret"
         auth :http_digest, options, &block
       end
       
@@ -192,6 +193,39 @@ module Grape
             )
           end
         end
+ 
+        # create API structure
+        (version || [ :default ]).each { |v|
+          
+          ms = []
+          methods.each { |m|
+            paths.each { |p|
+              ms << {
+                :method => m,
+                :path => p.to_s
+              }
+            }
+          }
+          
+          if namespace == '/'
+            if structure[v].is_a?(Hash)
+              structure[v][:default] ||= (structure[v][:default] || {}).merge(structure[v])
+              if (structure[v][:default].is_a?(Hash))
+                structure[v][:default] = [ structure[v][:default], ms ]
+              else
+                structure[v][:default] |= ms
+              end
+            else
+              structure[v] ||= []
+              structure[v] |= ms
+            end
+          else
+            structure[v] = { :default => structure[v] } if structure[v].is_a?(Array)
+            structure[v] ||= {}
+            structure[v][namespace[1..namespace.length - 1].to_s] = ms
+          end          
+        }
+        
       end
       
       def get(*paths, &block); route('GET', paths, &block) end
@@ -238,6 +272,12 @@ module Grape
         settings_stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
       end
 
+      # API structure contains a hash of API versions to API methods.
+      # If the API is not versioned, the hash contains a single :current key.
+      def structure
+        @structure ||= {}
+      end
+      
       protected
       
       # Execute first the provided block, then each of the
@@ -264,7 +304,7 @@ module Grape
           :format => settings[:error_format] || :txt, 
           :rescue_options => settings[:rescue_options]
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-	b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+        b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
@@ -284,7 +324,7 @@ module Grape
       def route_set
         @route_set ||= Rack::Mount::RouteSet.new
       end
-      
+
       def compile_path(path)
         parts = []
         parts << prefix if prefix
