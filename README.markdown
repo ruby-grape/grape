@@ -83,6 +83,39 @@ you simply use the `rescue_from` method inside your API declaration:
       rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
+## API Structure
+
+Grape exposes the API structure as a hash. The hash keys are API versions (`:default` when version is omitted). When namespaces are present,
+each value is a hash of namespaces with paths as values. When namespaces are not present, each value is an array of paths. Each path is a hash
+containing two keys, `:method` which holds a string containing the path's HTTP request type, and `:path` which holds a string representing the
+path. The structure is retrieved via the `structure` method. 
+
+    class TwitterAPI < Grape::API      
+
+      version 'v1'
+      get "version" do 
+        api.version
+      end
+      
+      version 'v2'
+      namespace "ns" do
+        get "version" do
+          api.version
+        end
+      end      
+
+    end
+
+Yields the following `TwitterAPI::structure`.
+
+    {
+      "v1" => [ 
+        { :method=>"GET", :path=>"version(.:format)"} ], 
+      "v2"=> {
+        "ns"=>[ { :method=>"GET", :path=>"version(.:format)" }]
+       }
+    }
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
