@@ -83,12 +83,9 @@ you simply use the `rescue_from` method inside your API declaration:
       rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
-## API Structure
+## Inspecting an API
 
-Grape exposes the API structure as a hash. The hash keys are API versions (`:default` when version is omitted). When namespaces are present,
-each value is a hash of namespaces with paths as values. When namespaces are not present, each value is an array of paths. Each path is a hash
-containing two keys, `:method` which holds a string containing the path's HTTP request type, and `:path` which holds a string representing the
-path. The structure is retrieved via the `structure` method. 
+Grape exposes arrays of API versions and compiled routes. Each route contains a prefix, version, namespace, method and path.
 
     class TwitterAPI < Grape::API      
 
@@ -96,7 +93,7 @@ path. The structure is retrieved via the `structure` method.
       get "version" do 
         api.version
       end
-      
+
       version 'v2'
       namespace "ns" do
         get "version" do
@@ -106,22 +103,15 @@ path. The structure is retrieved via the `structure` method.
 
     end
 
-Yields the following `TwitterAPI::structure`.
-
-    {
-      "v1" => [ 
-        { :method=>"GET", :path=>"version(.:format)"} ], 
-      "v2"=> {
-        "ns"=>[ { :method=>"GET", :path=>"version(.:format)" }]
-       }
-    }
+    TwitterAPI::versions # yields [ 'v1', 'v2' ]
+    TwitterAPI::routes # yields an array of Grape::Route objects
 
 ## Note on Patches/Pull Requests
  
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a future version unintentionally.
-* Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
 ## Copyright

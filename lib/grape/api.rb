@@ -10,7 +10,8 @@ module Grape
   class API
     class << self
       attr_reader :route_set
-      attr_reader :structure
+      attr_reader :versions
+      attr_reader :routes
       
       def logger
         @logger ||= Logger.new($STDOUT)
@@ -71,7 +72,12 @@ module Grape
       #   end
       #
       def version(*new_versions, &block)
-        new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
+        if new_versions.any?
+          @versions = versions | new_versions
+          nest(block) { set(:version, new_versions) }
+        else
+          settings[:version]
+        end
       end
       
       # Specify the default format for the API's 
@@ -180,52 +186,27 @@ module Grape
         methods = Array(methods)
         paths = ['/'] if paths == []
         paths = Array(paths)
-        endpoint = build_endpoint(&block)
+        endpoint = build_endpoint(&block)        
         options = {}
+        
         options[:version] = /#{version.join('|')}/ if version
         
         methods.each do |method|
           paths.each do |path|
-            path = Rack::Mount::Strexp.compile(compile_path(path), options, %w( / . ? ), true)
+            compiled_path = compile_path(path)
+            path = Rack::Mount::Strexp.compile(compiled_path, options, %w( / . ? ), true)
+            request_method = (method.to_s.upcase unless method == :any)
+            routes << Route.new(prefix, 
+              version ? version.join('|') : nil, 
+              namespace, 
+              request_method, 
+              compiled_path)
             route_set.add_route(endpoint, 
               :path_info => path, 
-              :request_method => (method.to_s.upcase unless method == :any)
+              :request_method => request_method
             )
           end
         end
- 
-        # create API structure
-        (version || [ :default ]).each { |v|
-          
-          ms = []
-          methods.each { |m|
-            paths.each { |p|
-              ms << {
-                :method => m,
-                :path => p.to_s
-              }
-            }
-          }
-          
-          if namespace == '/'
-            if structure[v].is_a?(Hash)
-              structure[v][:default] ||= (structure[v][:default] || {}).merge(structure[v])
-              if (structure[v][:default].is_a?(Hash))
-                structure[v][:default] = [ structure[v][:default], ms ]
-              else
-                structure[v][:default] |= ms
-              end
-            else
-              structure[v] ||= []
-              structure[v] |= ms
-            end
-          else
-            structure[v] = { :default => structure[v] } if structure[v].is_a?(Array)
-            structure[v] ||= {}
-            structure[v][namespace[1..namespace.length - 1].to_s] = ms
-          end          
-        }
-        
       end
       
       def get(*paths, &block); route('GET', paths, &block) end
@@ -272,10 +253,13 @@ module Grape
         settings_stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
       end
 
-      # API structure contains a hash of API versions to API methods.
-      # If the API is not versioned, the hash contains a single :current key.
-      def structure
-        @structure ||= {}
+      # An array of API routes.
+      def routes
+        @routes ||= []
+      end
+      
+      def versions
+        @versions ||= []
       end
       
       protected
@@ -305,7 +289,7 @@ module Grape
           :rescue_options => settings[:rescue_options]
         b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
-        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
+        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
         middleware.each{|m| b.use *m }

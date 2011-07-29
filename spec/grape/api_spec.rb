@@ -618,94 +618,63 @@ describe Grape::API do
     end
   end
 
-  describe "simple version structure" do
-    before(:each) do
-      subject.get :hello do
-        "No version"
+  context "routes" do
+    describe "empty api structure" do
+      it "returns an empty array of routes" do
+        subject.routes.should == []
       end
-    end
-    it "versions api" do      
-      get '/hello'
-      last_response.body.should eql "No version"      
-    end
-    it "returns an array of versions" do
-      subject.structure.should == 
-      {
-        :default => [ { :method => "GET", :path => "hello" } ],
-      }
-    end
-  end
-  
-  describe "twitter versions" do
-    class TwitterAPI < Grape::API
-      version 'v1'
-      get "version" do 
-        api.version
+    end     
+    describe "single method api structure" do
+      before(:each) do
+        subject.get :ping do 
+          'pong'
+        end
       end
-      version 'v2'
-      namespace "ns" do
-        get "version" do
+      it "returns one route" do
+        subject.routes.size.should == 1
+        route = subject.routes[0]
+        route.version.should be_nil
+        route.path.should == "/ping(.:format)"
+        route.method.should == "GET"
+      end
+    end    
+    describe "api structure with two versions and a namespace" do
+      class TwitterAPI < Grape::API
+        # version v1
+        version 'v1'
+        get "version" do 
           api.version
         end
+        # version v2
+        version 'v2'
+        prefix 'p'
+        namespace "n1" do
+          namespace "n2" do
+            get "version" do
+              api.version
+            end
+          end
+        end
       end
-    end
-    it "should return a single structure with both versions" do
-      TwitterAPI::structure.should == {
-        "v1"=>[{:method=>"GET", :path=>"version(.:format)"}], 
-        "v2"=>{
-          "ns"=>[{:method=>"GET", :path=>"version(.:format)"}]
-        }}
+      it "should return versions" do
+        TwitterAPI::versions.should == [ 'v1', 'v2' ]
+      end
+      it "should set route paths" do
+        TwitterAPI::routes.size.should == 2
+        TwitterAPI::routes[0].path.should == "/:version/version(.:format)"
+        TwitterAPI::routes[1].path.should == "/p/:version/n1/n2/version(.:format)"
+      end
+      it "should set route versions" do
+        TwitterAPI::routes[0].version.should == 'v1'
+        TwitterAPI::routes[1].version.should == 'v2'
+      end
+      it "should set a nested namespace" do
+        TwitterAPI::routes[1].namespace.should == "/n1/n2"
+      end
+      it "should set prefix" do
+        TwitterAPI::routes[1].prefix.should == 'p'
+      end
     end
   end
   
-  describe "nested versions" do
-    before(:each) do
-      subject.get :hello do
-        "No version"
-      end
-      subject.version 'v1'
-      subject.get :hello do
-        "Version: #{request.env['api.version']}"
-      end
-      subject.version 'v2'
-      subject.get :hello do
-        "Version: #{request.env['api.version']} w/o namespace"
-      end
-      subject.namespace :ns1 do
-        get :hello do
-          "Version: #{request.env['api.version']}"
-        end
-      end
-      subject.namespace :ns2 do
-        get :hello do
-          "Version: #{request.env['api.version']}"
-        end
-      end
-      subject.post :goodbye do
-        "Version: #{request.env['api.version']} w/o namespace"
-      end
-    end
-    it "versions api" do      
-      get '/hello'
-      last_response.body.should eql "No version"      
-      get '/v1/hello'
-      last_response.body.should eql "Version: v1"      
-      get '/v2/ns1/hello'
-      last_response.body.should eql "Version: v2"      
-      get '/v2/ns2/hello'
-      last_response.body.should eql "Version: v2"      
-    end
-    it "returns an array of versions" do
-      subject.structure.should == 
-      {
-        :default => [ { :method => "GET", :path => "hello" } ],
-        "v1" => [ { :method => "GET", :path => "hello" } ],
-        "v2" => {
-          :default => [ { :method => "GET", :path => "hello" }, { :method => "POST", :path => "goodbye" } ],
-          "ns1" => [ { :method => "GET", :path => "hello" } ],
-          "ns2" => [ { :method => "GET", :path => "hello" } ]
-        } 
-      }
-    end
-  end
 end

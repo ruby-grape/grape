@@ -6,6 +6,7 @@ module Grape
   autoload :Endpoint, 'grape/endpoint'
   autoload :MiddlewareStack, 'grape/middleware_stack'
   autoload :Client, 'grape/client'
+  autoload :Route, 'grape/route'
   
   module Middleware
     autoload :Base,      'grape/middleware/base'
