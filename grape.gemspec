@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack-jsonp'
   s.add_runtime_dependency 'multi_json'
   s.add_runtime_dependency 'multi_xml'
+  s.add_runtime_dependency 'tilt'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'maruku'

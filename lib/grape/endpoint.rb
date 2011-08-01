@@ -73,7 +73,13 @@ module Grape
         @header
       end
     end
-    
+
+    # Set a template in the env for
+    # the formatter middleware to render via Tilt.
+    def template(name)
+      env['api.template'] = name
+    end
+
     def call(env)
       @env = env
       @header = {}

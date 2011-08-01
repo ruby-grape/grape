@@ -75,7 +75,16 @@ module Grape
       
       def after
         status, headers, bodies = *@app_response
-        formatter = formatter_for env['api.format']
+
+        unless env['api.template']
+          formatter = formatter_for(env['api.format'])
+        else
+          formatter = Proc.new do |obj|
+            tilt = ::Tilt.new(env['api.template']) {}
+            tilt.render(nil, obj)
+          end
+        end
+
         bodymap = bodies.collect do |body|
           formatter.call(body)
         end

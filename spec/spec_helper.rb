@@ -18,3 +18,16 @@ end
 RSpec.configure do |config|
   config.include Rack::Test::Methods
 end
+
+require 'tilt'
+require 'tilt/template'
+
+module Tilt
+  class BarTemplate < Template
+    def prepare; end;
+    def precompiled_template; end;
+    def evaluate(scope, locals, &block); "<em>#{locals[:message]}</em>" end;
+  end
+end
+Tilt.register Tilt::BarTemplate, 'bar'
+
