@@ -674,17 +674,22 @@ describe Grape::API do
     end
     describe "api structure with additional parameters" do
       before(:each) do
-        subject.get :split, { :params => [ :string, :token ] } do 
-          params[:string].split(params[:token])
+        subject.get 'split/:string', { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+          params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
       it "should split a string" do
-        get "/split", :string => "a,b,c", :token => ','
+        get "/split/a,b,c", :token => ','
         last_response.body.should == '["a", "b", "c"]'
+      end
+      it "should split a string with limit" do
+        get "/split/a,b,c", :token => ',', :limit => '2'
+        last_response.body.should == '["a", "b,c"]'
       end
       it "should set route_params" do
         subject.routes.size.should == 1
-        subject.routes[0].route_params.should == [ :string, :token ]
+        subject.routes[0].route_params.should == [ "string", "token" ]
+        subject.routes[0].route_optional_params.should == [ "limit" ]
       end
     end
   end
