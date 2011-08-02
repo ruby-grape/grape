@@ -85,7 +85,7 @@ you simply use the `rescue_from` method inside your API declaration:
 
 ## Inspecting an API
 
-Grape exposes arrays of API versions and compiled routes. Each route contains a prefix, version, namespace, method and path.
+Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`.
 
     class TwitterAPI < Grape::API      
 
@@ -107,16 +107,16 @@ Grape exposes arrays of API versions and compiled routes. Each route contains a 
     TwitterAPI::routes # yields an array of Grape::Route objects
     TwitterAPI::routes[0].route_version # yields 'v1'
 
-Grape also supports storing additional options with the route information. This can be useful for generating documentation. 
-The optional hash that follows the API path may contain any number of keys and values are accessible via `route_[name]`.
+Grape also supports storing additional parameters with the route information. This can be useful for generating documentation. The optional hash that follows the API path may contain any number of keys and its values are also accessible via a dynamically-generated `route_[name]` function.
 
-    class StringAPI < Grape::API      
-      get :split, { :params => [ :string, :token ] } do 
-        params[:string].split(params[:token])
+    class StringAPI < Grape::API
+      get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+        params[:string].split(params[:token], (params[:limit] || 0))
       end
     end
 
-    StringAPI::routes[0].route_params # yields an array [ :string, :token ]
+    StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
+    StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
 
 ## Note on Patches/Pull Requests
  

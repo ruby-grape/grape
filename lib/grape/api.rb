@@ -193,20 +193,24 @@ module Grape
         endpoint_options = {}
         endpoint_options[:version] = /#{version.join('|')}/ if version
         
+        route_options ||= {}
+        
         methods.each do |method|
           paths.each do |path|
 
             compiled_path = compile_path(path)
             path = Rack::Mount::Strexp.compile(compiled_path, endpoint_options, %w( / . ? ), true)
+            path_params = path.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+            path_params |= (route_options[:params] || [])            
             request_method = (method.to_s.upcase unless method == :any)
 
-            routes << Route.new({
+            routes << Route.new(route_options.merge({
               :prefix => prefix, 
               :version => version ? version.join('|') : nil, 
               :namespace => namespace, 
               :method => request_method, 
-              :path => compiled_path}
-              .merge(route_options || {}))
+              :path => compiled_path,
+              :params => path_params}))
 
             route_set.add_route(endpoint, 
               :path_info => path, 
