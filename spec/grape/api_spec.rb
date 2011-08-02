@@ -171,7 +171,7 @@ describe Grape::API do
     end
     
     it 'should allow for multiple paths' do
-      subject.get("/abc", "/def") do
+      subject.get(["/abc", "/def"]) do
         "foo"
       end
       
@@ -223,11 +223,9 @@ describe Grape::API do
 
     it 'should allow for multipart paths' do
 
-
       subject.route([:get, :post], '/:id/first') do
         "first"
       end
-
       
       subject.route([:get, :post], '/:id') do
         "ola"
@@ -235,7 +233,6 @@ describe Grape::API do
       subject.route([:get, :post], '/:id/first/second') do
         "second"
       end
-      
 
       get '/1'
       last_response.body.should eql 'ola'
@@ -633,9 +630,9 @@ describe Grape::API do
       it "returns one route" do
         subject.routes.size.should == 1
         route = subject.routes[0]
-        route.version.should be_nil
-        route.path.should == "/ping(.:format)"
-        route.method.should == "GET"
+        route.route_version.should be_nil
+        route.route_path.should == "/ping(.:format)"
+        route.route_method.should == "GET"
       end
     end    
     describe "api structure with two versions and a namespace" do
@@ -661,18 +658,33 @@ describe Grape::API do
       end
       it "should set route paths" do
         TwitterAPI::routes.size.should == 2
-        TwitterAPI::routes[0].path.should == "/:version/version(.:format)"
-        TwitterAPI::routes[1].path.should == "/p/:version/n1/n2/version(.:format)"
+        TwitterAPI::routes[0].route_path.should == "/:version/version(.:format)"
+        TwitterAPI::routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
       end
       it "should set route versions" do
-        TwitterAPI::routes[0].version.should == 'v1'
-        TwitterAPI::routes[1].version.should == 'v2'
+        TwitterAPI::routes[0].route_version.should == 'v1'
+        TwitterAPI::routes[1].route_version.should == 'v2'
       end
       it "should set a nested namespace" do
-        TwitterAPI::routes[1].namespace.should == "/n1/n2"
+        TwitterAPI::routes[1].route_namespace.should == "/n1/n2"
       end
       it "should set prefix" do
-        TwitterAPI::routes[1].prefix.should == 'p'
+        TwitterAPI::routes[1].route_prefix.should == 'p'
+      end
+    end
+    describe "api structure with additional parameters" do
+      before(:each) do
+        subject.get :split, { :params => [ :string, :token ] } do 
+          params[:string].split(params[:token])
+        end
+      end
+      it "should split a string" do
+        get "/split", :string => "a,b,c", :token => ','
+        last_response.body.should == '["a", "b", "c"]'
+      end
+      it "should set route_params" do
+        subject.routes.size.should == 1
+        subject.routes[0].route_params.should == [ :string, :token ]
       end
     end
   end

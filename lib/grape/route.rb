@@ -3,22 +3,20 @@ module Grape
   # A compiled route for inspection.
   class Route
   
-    attr_reader :prefix
-    attr_reader :version
-    attr_reader :namespace
-    attr_reader :method
-    attr_reader :path
+    def initialize(options = {})
+      @options = options || {}
+    end
     
-    def initialize(prefix, version, namespace, method, path)
-      @prefix = prefix
-      @version = version
-      @namespace = namespace
-      @method = method
-      @path = path
+    def method_missing(method_id, *arguments)
+      if match = /route_(?<name>[_a-zA-Z]\w*)/.match(method_id.to_s)
+        @options[match['name'].to_sym]
+      else
+        super
+      end
     end
     
     def to_s
-      "#{method} #{path}"
+      "#{route_method} #{route_path}"
     end
     
   end

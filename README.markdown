@@ -105,6 +105,18 @@ Grape exposes arrays of API versions and compiled routes. Each route contains a 
 
     TwitterAPI::versions # yields [ 'v1', 'v2' ]
     TwitterAPI::routes # yields an array of Grape::Route objects
+    TwitterAPI::routes[0].route_version # yields 'v1'
+
+Grape also supports storing additional options with the route information. This can be useful for generating documentation. 
+The optional hash that follows the API path may contain any number of keys and values are accessible via `route_[name]`.
+
+    class StringAPI < Grape::API      
+      get :split, { :params => [ :string, :token ] } do 
+        params[:string].split(params[:token])
+      end
+    end
+
+    StringAPI::routes[0].route_params # yields an array [ :string, :token ]
 
 ## Note on Patches/Pull Requests
  

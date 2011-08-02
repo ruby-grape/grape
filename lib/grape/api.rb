@@ -182,25 +182,32 @@ module Grape
       #       {:hello => 'world'}
       #     end
       #   end
-      def route(methods, paths, &block)
+      def route(methods, paths = ['/'], route_options = {}, &block)
         methods = Array(methods)
-        paths = ['/'] if paths == []
-        paths = Array(paths)
-        endpoint = build_endpoint(&block)        
-        options = {}
         
-        options[:version] = /#{version.join('|')}/ if version
+        paths = ['/'] if ! paths || paths == []
+        paths = Array(paths)
+        
+        endpoint = build_endpoint(&block)        
+        
+        endpoint_options = {}
+        endpoint_options[:version] = /#{version.join('|')}/ if version
         
         methods.each do |method|
           paths.each do |path|
+
             compiled_path = compile_path(path)
-            path = Rack::Mount::Strexp.compile(compiled_path, options, %w( / . ? ), true)
+            path = Rack::Mount::Strexp.compile(compiled_path, endpoint_options, %w( / . ? ), true)
             request_method = (method.to_s.upcase unless method == :any)
-            routes << Route.new(prefix, 
-              version ? version.join('|') : nil, 
-              namespace, 
-              request_method, 
-              compiled_path)
+
+            routes << Route.new({
+              :prefix => prefix, 
+              :version => version ? version.join('|') : nil, 
+              :namespace => namespace, 
+              :method => request_method, 
+              :path => compiled_path}
+              .merge(route_options || {}))
+
             route_set.add_route(endpoint, 
               :path_info => path, 
               :request_method => request_method
@@ -209,11 +216,11 @@ module Grape
         end
       end
       
-      def get(*paths, &block); route('GET', paths, &block) end
-      def post(*paths, &block); route('POST', paths, &block) end
-      def put(*paths, &block); route('PUT', paths, &block) end
-      def head(*paths, &block); route('HEAD', paths, &block) end
-      def delete(*paths, &block); route('DELETE', paths, &block) end
+      def get(paths = ['/'], options = {}, &block); route('GET', paths, options, &block) end
+      def post(paths = ['/'], options = {}, &block); route('POST', paths, options, &block) end
+      def put(paths = ['/'], options = {}, &block); route('PUT', paths, options, &block) end
+      def head(paths = ['/'], options = {}, &block); route('HEAD', paths, options, &block) end
+      def delete(paths = ['/'], options = {}, &block); route('DELETE', paths, options, &block) end
       
       def namespace(space = nil, &block)
         if space || block_given?
