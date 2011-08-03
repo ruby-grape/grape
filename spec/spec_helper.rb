@@ -31,7 +31,7 @@ module Tilt
     end
     def prepare; end;
     def precompiled_template; end;
-    def evaluate(scope, locals, &block); "<em>#{locals[:message]}</em>" end;
+    def evaluate(scope, locals, &block); "<em>#{locals[:object]}</em>" end;
   end
 end
 Tilt.register Tilt::BarTemplate, 'bar'

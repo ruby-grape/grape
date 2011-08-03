@@ -113,7 +113,7 @@ describe Grape::Middleware::Formatter do
       body.body.should == ['CUSTOM FORMAT']
     end
     it 'should use tilt if template specified' do
-      @body = { :message => 'Hello' }
+      @body = "Hello"
       _, _, body = subject.call({'PATH_INFO' => '/info', 'api.tilt.root' => '/path/to/root', 'api.tilt.template' => 'foo.bar'})
       body.body.should == ['<em>Hello</em>']
     end

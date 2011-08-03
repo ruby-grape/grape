@@ -9,7 +9,7 @@ describe Grape::Endpoint do
     it 'should be callable from within a block' do
       subject.get('/home') do
         template 'foo.bar'
-        { message: "Hello" } # locals for template
+        "Hello"
       end
 
       get '/home', {}, { 'api.tilt.root' => '/path/to/root' }
