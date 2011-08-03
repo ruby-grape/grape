@@ -76,12 +76,14 @@ module Grape
       def after
         status, headers, bodies = *@app_response
 
-        unless env['api.template']
+        unless env['api.tilt.template']
           formatter = formatter_for(env['api.format'])
         else
           formatter = Proc.new do |obj|
-            tilt = ::Tilt.new(env['api.template']) {}
-            tilt.render(nil, obj)
+            return [500, {}, ["Use Rack::Config to set 'api.tilt.root' in config.ru"]] \
+              unless env['api.tilt.root']
+            tilt = ::Tilt.new(File.join(env['api.tilt.root'], env['api.tilt.template']))
+            tilt.render(Object.new, { :object => obj }) # scope is new object.
           end
         end
 

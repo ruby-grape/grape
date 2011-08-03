@@ -24,6 +24,11 @@ require 'tilt/template'
 
 module Tilt
   class BarTemplate < Template
+    def initialize(*args, &block)
+      super *args do
+        #noop for file read
+      end
+    end
     def prepare; end;
     def precompiled_template; end;
     def evaluate(scope, locals, &block); "<em>#{locals[:message]}</em>" end;

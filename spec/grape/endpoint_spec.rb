@@ -12,7 +12,7 @@ describe Grape::Endpoint do
         { message: "Hello" } # locals for template
       end
 
-      get '/home'
+      get '/home', {}, { 'api.tilt.root' => '/path/to/root' }
       last_response.status.should == 200
       last_response.body.should == "<em>Hello</em>"
     end
