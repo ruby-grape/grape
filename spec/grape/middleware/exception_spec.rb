@@ -116,5 +116,6 @@ describe Grape::Middleware::Error do
       get '/'
       last_response.status.should == 401    
     end 
+    
   end 
 end
