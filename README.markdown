@@ -93,6 +93,22 @@ The error format can be specified using `error_format`. Available formats are `:
       error_format :json
     end
 
+You can rescue all exceptions with a code block. The `rack_response` wrapper automatically sets the default error code and content-type.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" })
+      end
+    end
+
+You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" ).finish
+      end
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
