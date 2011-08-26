@@ -8,38 +8,38 @@ Grape is a REST-like API micro-framework for Ruby. It is built to complement exi
 Grape is available as a gem, to install it just install the gem:
 
     gem install grape
-    
+
 ## Basic Usage
 
 Grape APIs are Rack applications that are created by subclassing `Grape::API`. Below is a simple example showing some of the more common features of Grape in the context of recreating parts of the Twitter API.
 
     class Twitter::API < Grape::API
       version '1'
-      
+
       helpers do
         def current_user
           @current_user ||= User.authorize!(env)
         end
-        
+
         def authenticate!
           error!('401 Unauthorized', 401) unless current_user
         end
       end
-      
+
       resource :statuses do
         get :public_timeline do
           Tweet.limit(20)
         end
-      
+
         get :home_timeline do
           authenticate!
           current_user.home_timeline
         end
-        
+
         get '/show/:id' do
           Tweet.find(params[:id])
         end
-        
+
         post :update do
           authenticate!
           Tweet.create(
@@ -49,20 +49,20 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
         end
       end
     end
-    
+
 This would create a Rack application that could be used like so (in a Rackup config.ru file):
 
     run Twitter::API
-    
+
 And would respond to the following routes:
 
     GET  /1/statuses/public_timeline(.json)
     GET  /1/statuses/home_timeline(.json)
     GET  /1/statuses/show/:id(.json)
     POST /1/statuses/update(.json)
-    
+
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
-    
+
 ## Raising Errors
 
 You can raise errors explicitly.
@@ -83,8 +83,26 @@ you simply use the `rescue_from` method inside your API declaration:
       rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
+## Including Modules
+
+You can use a more modular approach to compose an API by including other modules that implement the `included` callback.
+
+    module TwitterApiStatus
+      def included(api) do
+        api.resource :statuses do
+          get :public_timeline do
+            Tweet.limit(20)
+          end
+        end
+      end
+    end
+
+    class Twitter::API < Grape::API
+      include TwitterApiStatus
+    end
+
 ## Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a future version unintentionally.
