@@ -93,6 +93,46 @@ The error format can be specified using `error_format`. Available formats are `:
       error_format :json
     end
 
+You can rescue all exceptions with a code block. The `rack_response` wrapper automatically sets the default error code and content-type.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" })
+      end
+    end
+
+You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" ).finish
+      end
+    end
+
+## Writing Tests
+
+You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+    RSpec.configure do |config|
+      config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => { 
+        :file_path => /spec\/api/
+      } 
+    end
+
+A simple RSpec API test makes a `get` request and parses the response.
+
+    require 'spec_helper'
+
+    describe Twitter::API do
+      describe "GET /api/v1/statuses" do
+        it "returns an empty array of statuses" do
+          get "/api/v1/statuses"
+          response.status.should == 200
+          JSON.parse(response.body).should == []
+        end
+      end
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
