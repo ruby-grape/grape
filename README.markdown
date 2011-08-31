@@ -186,7 +186,6 @@ Grape also supports storing additional parameters with the route information. Th
     StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
     StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
 
->>>>>>> f263d54b018cbf576a213d73169b2aac7d2fd9ed
 ## Note on Patches/Pull Requests
  
 * Fork the project.
