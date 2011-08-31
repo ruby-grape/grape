@@ -4,7 +4,20 @@ describe Grape::Endpoint do
   subject { Class.new(Grape::API) }
   before { subject.default_format :txt }
   def app; subject end
-  
+
+  describe '#template' do
+    it 'should be callable from within a block' do
+      subject.get('/home') do
+        template 'foo.bar'
+        "Hello"
+      end
+
+      get '/home', {}, { 'api.tilt.root' => '/path/to/root' }
+      last_response.status.should == 200
+      last_response.body.should == "<em>Hello</em>"
+    end
+  end
+
   describe '#status' do
     it 'should be callable from within a block' do
       subject.get('/home') do

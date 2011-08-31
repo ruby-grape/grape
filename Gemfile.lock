@@ -7,6 +7,7 @@ PATH
       rack
       rack-jsonp
       rack-mount
+      tilt
 
 GEM
   remote: http://rubygems.org/
@@ -35,6 +36,7 @@ GEM
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.6.0)
     syntax (1.0.0)
+    tilt (1.3.2)
     yard (0.7.1)
 
 PLATFORMS

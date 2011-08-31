@@ -112,6 +112,11 @@ describe Grape::Middleware::Formatter do
       _, _, body = subject.call({'PATH_INFO' => '/info.custom'})
       body.body.should == ['CUSTOM FORMAT']
     end
+    it 'should use tilt if template specified' do
+      @body = "Hello"
+      _, _, body = subject.call({'PATH_INFO' => '/info', 'api.tilt.root' => '/path/to/root', 'api.tilt.template' => 'foo.bar'})
+      body.body.should == ['<em>Hello</em>']
+    end
     it 'should use default json formatter' do
       @body = 'blah'
       _, _, body = subject.call({'PATH_INFO' => '/info.json'})
