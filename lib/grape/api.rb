@@ -10,6 +10,8 @@ module Grape
   class API
     class << self
       attr_reader :route_set
+      attr_reader :versions
+      attr_reader :routes
       
       def logger
         @logger ||= Logger.new($STDOUT)
@@ -70,7 +72,12 @@ module Grape
       #   end
       #
       def version(*new_versions, &block)
-        new_versions.any? ? nest(block){ set(:version, new_versions) } : settings[:version]
+        if new_versions.any?
+          @versions = versions | new_versions
+          nest(block) { set(:version, new_versions) }
+        else
+          settings[:version]
+        end
       end
       
       # Specify the default format for the API's 
@@ -181,30 +188,49 @@ module Grape
       #       {:hello => 'world'}
       #     end
       #   end
-      def route(methods, paths, &block)
+      def route(methods, paths = ['/'], route_options = {}, &block)
         methods = Array(methods)
-        paths = ['/'] if paths == []
+        
+        paths = ['/'] if ! paths || paths == []
         paths = Array(paths)
-        endpoint = build_endpoint(&block)
-        options = {}
-        options[:version] = /#{version.join('|')}/ if version
+        
+        endpoint = build_endpoint(&block)        
+        
+        endpoint_options = {}
+        endpoint_options[:version] = /#{version.join('|')}/ if version
+        
+        route_options ||= {}
         
         methods.each do |method|
           paths.each do |path|
-            path = Rack::Mount::Strexp.compile(compile_path(path), options, %w( / . ? ), true)
+
+            compiled_path = compile_path(path)
+            path = Rack::Mount::Strexp.compile(compiled_path, endpoint_options, %w( / . ? ), true)
+            path_params = path.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+            path_params |= (route_options[:params] || [])            
+            request_method = (method.to_s.upcase unless method == :any)
+
+            routes << Route.new(route_options.merge({
+              :prefix => prefix, 
+              :version => version ? version.join('|') : nil, 
+              :namespace => namespace, 
+              :method => request_method, 
+              :path => compiled_path,
+              :params => path_params}))
+
             route_set.add_route(endpoint, 
               :path_info => path, 
-              :request_method => (method.to_s.upcase unless method == :any)
+              :request_method => request_method
             )
           end
         end
       end
       
-      def get(*paths, &block); route('GET', paths, &block) end
-      def post(*paths, &block); route('POST', paths, &block) end
-      def put(*paths, &block); route('PUT', paths, &block) end
-      def head(*paths, &block); route('HEAD', paths, &block) end
-      def delete(*paths, &block); route('DELETE', paths, &block) end
+      def get(paths = ['/'], options = {}, &block); route('GET', paths, options, &block) end
+      def post(paths = ['/'], options = {}, &block); route('POST', paths, options, &block) end
+      def put(paths = ['/'], options = {}, &block); route('PUT', paths, options, &block) end
+      def head(paths = ['/'], options = {}, &block); route('HEAD', paths, options, &block) end
+      def delete(paths = ['/'], options = {}, &block); route('DELETE', paths, options, &block) end
       
       def namespace(space = nil, &block)
         if space || block_given?
@@ -244,6 +270,15 @@ module Grape
         settings_stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
       end
 
+      # An array of API routes.
+      def routes
+        @routes ||= []
+      end
+      
+      def versions
+        @versions ||= []
+      end
+      
       protected
       
       # Execute first the provided block, then each of the
@@ -291,7 +326,7 @@ module Grape
       def route_set
         @route_set ||= Rack::Mount::RouteSet.new
       end
-      
+
       def compile_path(path)
         parts = []
         parts << prefix if prefix

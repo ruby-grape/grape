@@ -133,12 +133,47 @@ A simple RSpec API test makes a `get` request and parses the response.
       end
     end
 
+## Inspecting an API
+
+Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`.
+
+    class TwitterAPI < Grape::API      
+
+      version 'v1'
+      get "version" do 
+        api.version
+      end
+
+      version 'v2'
+      namespace "ns" do
+        get "version" do
+          api.version
+        end
+      end      
+
+    end
+
+    TwitterAPI::versions # yields [ 'v1', 'v2' ]
+    TwitterAPI::routes # yields an array of Grape::Route objects
+    TwitterAPI::routes[0].route_version # yields 'v1'
+
+Grape also supports storing additional parameters with the route information. This can be useful for generating documentation. The optional hash that follows the API path may contain any number of keys and its values are also accessible via a dynamically-generated `route_[name]` function.
+
+    class StringAPI < Grape::API
+      get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+        params[:string].split(params[:token], (params[:limit] || 0))
+      end
+    end
+
+    StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
+    StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a future version unintentionally.
-* Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
 ## Copyright
