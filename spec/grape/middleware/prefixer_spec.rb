@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Prefixer do
-  let(:app){ lambda{|env| [200, {}, env['PATH_INFO']]} }
+  let(:app){ lambda{|env| [200, env, env['PATH_INFO']]} }
   subject{ Grape::Middleware::Prefixer.new(app, @options || {}) }
 
   it 'should lop off a prefix (without a slash)' do
@@ -26,5 +26,10 @@ describe Grape::Middleware::Prefixer do
   it 'should only remove the first instance of the prefix' do
     @options = {:prefix => 'api'}
     subject.call('PATH_INFO' => '/api/v1/api/awesome').last.should == '/v1/api/awesome'
+  end
+
+  it 'should store the original version of the path in api.original_path_info' do
+    @options = {:prefix => 'api'}
+    subject.call('PATH_INFO' => '/api/v1/awesome')[1]['api.original_path_info'].should == '/api/v1/awesome'
   end
 end

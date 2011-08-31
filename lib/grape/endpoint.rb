@@ -73,6 +73,41 @@ module Grape
         @header
       end
     end
+
+    # Creates a URL to use in redirection. It takes the part
+    # of the URL that would come after any version or prefix, but
+    # it doesn't take current resource into consideration.
+    #
+    # @example Create a URL (assuming prefix of 'api' and version of 'v1')
+    #   url('/content/1') #=> "http://example.org/api/v1/content/1"
+    #
+    # @param [String] url the relative url to create
+    # @return [String] the completed url
+    def url(url)
+      path = request.env['api.original_path_info'] || request.env['PATH_INFO']
+      corrected_path = request.env['PATH_INFO']
+
+      # Grab the full requested url, mainly for the
+      # domain information. Before PATH_INFO is changed,
+      # it's not technically what was requested.
+      full_url = request.url
+
+      # See if api.original_path_info is different
+      # If not, then we didn't have an api or version
+      if path != corrected_path
+        # Replace the non-prefix version with
+        # the full version. This should make it the
+        # original url again
+        full_url.sub!(corrected_path, path)
+      end
+
+      # Now trim off the api part of the url so there's room
+      # to attach our new section
+      full_url.sub!(corrected_path, '')
+
+      # Return the completed version
+      full_url + url
+    end
     
     def call(env)
       @env = env
