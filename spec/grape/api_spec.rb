@@ -694,4 +694,52 @@ describe Grape::API do
     end
   end
   
+  describe ".rescue_from klass, block" do
+    it 'should rescue Exception' do
+      subject.rescue_from RuntimeError do |e|
+        rack_response({ :message => "rescued from #{e.message}" }, 202)
+      end
+      subject.get '/exception' do
+        raise "rain!"
+      end
+      get '/exception'
+      last_response.status.should eql 202
+      last_response.body.should == '{:message=>"rescued from rain!"}'
+    end
+    it 'should rescue an error via rescue_from :all' do
+      class ConnectionError < RuntimeError; end
+      subject.rescue_from :all do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+      end
+      subject.get '/exception' do
+        raise ConnectionError
+      end
+      get '/exception'
+      last_response.status.should eql 500
+      last_response.body.should == '{:message=>"rescued from ConnectionError"}'
+    end
+    it 'should rescue a specific error' do
+      class ConnectionError < RuntimeError; end
+      subject.rescue_from ConnectionError do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+      end
+      subject.get '/exception' do
+        raise ConnectionError
+      end
+      get '/exception'
+      last_response.status.should eql 500
+      last_response.body.should == '{:message=>"rescued from ConnectionError"}'
+    end
+    it 'should not rescue a different error' do
+      class CommunicationError < RuntimeError; end
+      subject.rescue_from RuntimeError do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+      end
+      subject.get '/uncaught' do
+        raise CommunicationError
+      end
+      lambda { get '/uncaught' }.should raise_error(CommunicationError)
+    end
+  end
+  
 end
