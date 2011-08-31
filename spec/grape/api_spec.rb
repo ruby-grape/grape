@@ -760,5 +760,4 @@ describe Grape::API do
     end
   end
   
->>>>>>> f263d54b018cbf576a213d73169b2aac7d2fd9ed
 end
