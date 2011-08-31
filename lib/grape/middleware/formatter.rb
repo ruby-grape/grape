@@ -20,7 +20,6 @@ module Grape
       
       def before
         fmt = format_from_extension || format_from_header || options[:default_format]
-                
         if content_types.key?(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = parser_for fmt

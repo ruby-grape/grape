@@ -657,7 +657,7 @@ describe Grape::API do
         TwitterAPI::versions.should == [ 'v1', 'v2' ]
       end
       it "should set route paths" do
-        TwitterAPI::routes.size.should == 2
+        TwitterAPI::routes.size.should >= 2
         TwitterAPI::routes[0].route_path.should == "/:version/version(.:format)"
         TwitterAPI::routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
       end
@@ -679,12 +679,12 @@ describe Grape::API do
         end
       end
       it "should split a string" do
-        get "/split/a,b,c", :token => ','
-        last_response.body.should == '["a", "b", "c"]'
+        get "/split/a,b,c.json", :token => ','
+        last_response.body.should == '["a","b","c"]'
       end
       it "should split a string with limit" do
-        get "/split/a,b,c", :token => ',', :limit => '2'
-        last_response.body.should == '["a", "b,c"]'
+        get "/split/a,b,c.json", :token => ',', :limit => '2'
+        last_response.body.should == '["a","b,c"]'
       end
       it "should set route_params" do
         subject.routes.size.should == 1
@@ -697,43 +697,43 @@ describe Grape::API do
   describe ".rescue_from klass, block" do
     it 'should rescue Exception' do
       subject.rescue_from RuntimeError do |e|
-        rack_response({ :message => "rescued from #{e.message}" }, 202)
+        rack_response("rescued from #{e.message}", 202)
       end
       subject.get '/exception' do
         raise "rain!"
       end
       get '/exception'
       last_response.status.should eql 202
-      last_response.body.should == '{:message=>"rescued from rain!"}'
+      last_response.body.should == 'rescued from rain!'
     end
     it 'should rescue an error via rescue_from :all' do
       class ConnectionError < RuntimeError; end
       subject.rescue_from :all do |e|
-        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+        rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/exception' do
         raise ConnectionError
       end
       get '/exception'
       last_response.status.should eql 500
-      last_response.body.should == '{:message=>"rescued from ConnectionError"}'
+      last_response.body.should == 'rescued from ConnectionError'
     end
     it 'should rescue a specific error' do
       class ConnectionError < RuntimeError; end
       subject.rescue_from ConnectionError do |e|
-        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+        rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/exception' do
         raise ConnectionError
       end
       get '/exception'
       last_response.status.should eql 500
-      last_response.body.should == '{:message=>"rescued from ConnectionError"}'
+      last_response.body.should == 'rescued from ConnectionError'
     end
     it 'should not rescue a different error' do
       class CommunicationError < RuntimeError; end
       subject.rescue_from RuntimeError do |e|
-        rack_response({ :message => "rescued from #{e.class.name}" }, 500)
+        rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
         raise CommunicationError
