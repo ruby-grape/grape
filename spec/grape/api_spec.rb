@@ -171,7 +171,7 @@ describe Grape::API do
     end
     
     it 'should allow for multiple paths' do
-      subject.get("/abc", "/def") do
+      subject.get(["/abc", "/def"]) do
         "foo"
       end
       
@@ -223,11 +223,9 @@ describe Grape::API do
 
     it 'should allow for multipart paths' do
 
-
       subject.route([:get, :post], '/:id/first') do
         "first"
       end
-
       
       subject.route([:get, :post], '/:id') do
         "ola"
@@ -235,7 +233,6 @@ describe Grape::API do
       subject.route([:get, :post], '/:id/first/second') do
         "second"
       end
-      
 
       get '/1'
       last_response.body.should eql 'ola'
@@ -617,6 +614,85 @@ describe Grape::API do
       last_response.status.should eql 403
     end
   end
+
+  context "routes" do
+    describe "empty api structure" do
+      it "returns an empty array of routes" do
+        subject.routes.should == []
+      end
+    end     
+    describe "single method api structure" do
+      before(:each) do
+        subject.get :ping do 
+          'pong'
+        end
+      end
+      it "returns one route" do
+        subject.routes.size.should == 1
+        route = subject.routes[0]
+        route.route_version.should be_nil
+        route.route_path.should == "/ping(.:format)"
+        route.route_method.should == "GET"
+      end
+    end    
+    describe "api structure with two versions and a namespace" do
+      class TwitterAPI < Grape::API
+        # version v1
+        version 'v1'
+        get "version" do 
+          api.version
+        end
+        # version v2
+        version 'v2'
+        prefix 'p'
+        namespace "n1" do
+          namespace "n2" do
+            get "version" do
+              api.version
+            end
+          end
+        end
+      end
+      it "should return versions" do
+        TwitterAPI::versions.should == [ 'v1', 'v2' ]
+      end
+      it "should set route paths" do
+        TwitterAPI::routes.size.should == 2
+        TwitterAPI::routes[0].route_path.should == "/:version/version(.:format)"
+        TwitterAPI::routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
+      end
+      it "should set route versions" do
+        TwitterAPI::routes[0].route_version.should == 'v1'
+        TwitterAPI::routes[1].route_version.should == 'v2'
+      end
+      it "should set a nested namespace" do
+        TwitterAPI::routes[1].route_namespace.should == "/n1/n2"
+      end
+      it "should set prefix" do
+        TwitterAPI::routes[1].route_prefix.should == 'p'
+      end
+    end
+    describe "api structure with additional parameters" do
+      before(:each) do
+        subject.get 'split/:string', { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+          params[:string].split(params[:token], (params[:limit] || 0).to_i)
+        end
+      end
+      it "should split a string" do
+        get "/split/a,b,c", :token => ','
+        last_response.body.should == '["a", "b", "c"]'
+      end
+      it "should split a string with limit" do
+        get "/split/a,b,c", :token => ',', :limit => '2'
+        last_response.body.should == '["a", "b,c"]'
+      end
+      it "should set route_params" do
+        subject.routes.size.should == 1
+        subject.routes[0].route_params.should == [ "string", "token" ]
+        subject.routes[0].route_optional_params.should == [ "limit" ]
+      end
+    end
+  end
   
   describe ".rescue_from klass, block" do
     it 'should rescue Exception' do
@@ -665,6 +741,5 @@ describe Grape::API do
       lambda { get '/uncaught' }.should raise_error(CommunicationError)
     end
   end
-  
   
 end
