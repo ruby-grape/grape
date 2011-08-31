@@ -75,12 +75,38 @@ You can also return JSON formatted objects explicitly by raising error! and pass
 
 ## Exception Handling
 
-Grape can be told to rescue certain (or all) exceptions in your
-application and instead display them in text or json form. To do this,
-you simply use the `rescue_from` method inside your API declaration:
+Grape can be told to rescue all exceptions and instead return them in text or json formats.
 
     class Twitter::API < Grape::API
-      rescue_from ArgumentError, NotImplementedError # :all for all errors
+      rescue_from :all
+    end
+
+You can also rescue specific exceptions.
+
+    class Twitter::API < Grape::API
+      rescue_from ArgumentError, NotImplementedError
+    end
+
+The error format can be specified using `error_format`. Available formats are `:json` and `:txt` (default).
+
+    class Twitter::API < Grape::API
+      error_format :json
+    end
+
+You can rescue all exceptions with a code block. The `rack_response` wrapper automatically sets the default error code and content-type.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" })
+      end
+    end
+
+You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" ).finish
+      end
     end
 
 ## Writing Tests
