@@ -8,8 +8,8 @@ module Grape
     end
     
     def method_missing(method_id, *arguments)
-      if match = /route_(?<name>[_a-zA-Z]\w*)/.match(method_id.to_s)
-        @options[match['name'].to_sym]
+      if match = /route_([_a-zA-Z]\w*)/.match(method_id.to_s)
+        @options[match.captures.last.to_sym]
       else
         super
       end

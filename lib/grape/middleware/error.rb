@@ -70,7 +70,7 @@ module Grape
             
       def format_message(message, backtrace, status)
         formatter = formatter_for(options[:format])
-        throw :error, :status => 406, :message => "The requested format #{options[:format]} is not supported." unless formatter        
+        throw :error, :status => 406, :message => "The requested format #{options[:format]} is not supported." unless formatter
         formatter.call(message, backtrace)
       end
       

@@ -206,8 +206,9 @@ module Grape
 
             compiled_path = compile_path(path)
             path = Rack::Mount::Strexp.compile(compiled_path, endpoint_options, %w( / . ? ), true)
-            path_params = path.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-            path_params |= (route_options[:params] || [])            
+            regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+            path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+            path_params |= (route_options[:params] || [])
             request_method = (method.to_s.upcase unless method == :any)
 
             routes << Route.new(route_options.merge({
