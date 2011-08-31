@@ -83,6 +83,30 @@ you simply use the `rescue_from` method inside your API declaration:
       rescue_from ArgumentError, NotImplementedError # :all for all errors
     end
 
+## Writing Tests
+
+You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+    RSpec.configure do |config|
+      config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => { 
+        :file_path => /spec\/api/
+      } 
+    end
+
+A simple RSpec API test makes a `get` request and parses the response.
+
+    require 'spec_helper'
+
+    describe Twitter::API do
+      describe "GET /api/v1/statuses" do
+        it "returns an empty array of statuses" do
+          get "/api/v1/statuses"
+          response.status.should == 200
+          JSON.parse(response.body).should == []
+        end
+      end
+    end
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
