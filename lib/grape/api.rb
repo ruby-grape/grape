@@ -105,9 +105,15 @@ module Grape
       # @overload rescue_from(*exception_classes, options = {})
       #   @param [Array] exception_classes A list of classes that you want to rescue, or
       #     the symbol :all to rescue from all exceptions.
+      #   @param [Block] block Execution block to handle the given exception.
       #   @param [Hash] options Options for the rescue usage.
       #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
-      def rescue_from(*args)
+      def rescue_from(*args, &block)
+        if block_given?
+          args.each do |arg|
+            set(:rescue_handlers, { arg => block })
+          end
+        end
         set(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
         set(:rescued_errors, args)
@@ -159,7 +165,7 @@ module Grape
 
       def http_digest(options = {}, &block)
         options[:realm] ||= "API Authorization"
-	options[:opaque] ||= "secret"
+        options[:opaque] ||= "secret"
         auth :http_digest, options, &block
       end
       
@@ -262,9 +268,10 @@ module Grape
           :rescue_all => settings[:rescue_all], 
           :rescued_errors => settings[:rescued_errors], 
           :format => settings[:error_format] || :txt, 
-          :rescue_options => settings[:rescue_options]
-        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-	b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+          :rescue_options => settings[:rescue_options],
+          :rescue_handlers => settings[:rescue_handlers] || {}
+        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic	
+        b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
         b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
         b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
