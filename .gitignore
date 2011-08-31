@@ -15,10 +15,11 @@ tmtags
 
 ## PROJECT::GENERAL
 coverage
-/doc
+doc
 pkg
 .rvmrc
 .bundle
+.yardoc/*
 dist
 
 ## PROJECT::SPECIFIC

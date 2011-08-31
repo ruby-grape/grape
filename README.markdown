@@ -75,12 +75,38 @@ You can also return JSON formatted objects explicitly by raising error! and pass
 
 ## Exception Handling
 
-Grape can be told to rescue certain (or all) exceptions in your
-application and instead display them in text or json form. To do this,
-you simply use the `rescue_from` method inside your API declaration:
+Grape can be told to rescue all exceptions and instead return them in text or json formats.
 
     class Twitter::API < Grape::API
-      rescue_from ArgumentError, NotImplementedError # :all for all errors
+      rescue_from :all
+    end
+
+You can also rescue specific exceptions.
+
+    class Twitter::API < Grape::API
+      rescue_from ArgumentError, NotImplementedError
+    end
+
+The error format can be specified using `error_format`. Available formats are `:json` and `:txt` (default).
+
+    class Twitter::API < Grape::API
+      error_format :json
+    end
+
+You can rescue all exceptions with a code block. The `rack_response` wrapper automatically sets the default error code and content-type.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        rack_response({ :message => "rescued from #{e.class.name}" })
+      end
+    end
+
+You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+
+    class Twitter::API < Grape::API
+      rescue_from :all do |e|
+        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" ).finish
+      end
     end
 
 ## Including Modules
@@ -101,12 +127,72 @@ You can use a more modular approach to compose an API by including other modules
       include TwitterApiStatus
     end
 
+## Writing Tests
+
+You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+    RSpec.configure do |config|
+      config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => { 
+        :file_path => /spec\/api/
+      } 
+    end
+
+A simple RSpec API test makes a `get` request and parses the response.
+
+    require 'spec_helper'
+
+    describe Twitter::API do
+      describe "GET /api/v1/statuses" do
+        it "returns an empty array of statuses" do
+          get "/api/v1/statuses"
+          response.status.should == 200
+          JSON.parse(response.body).should == []
+        end
+      end
+    end
+
+## Inspecting an API
+
+Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`.
+
+    class TwitterAPI < Grape::API      
+
+      version 'v1'
+      get "version" do 
+        api.version
+      end
+
+      version 'v2'
+      namespace "ns" do
+        get "version" do
+          api.version
+        end
+      end      
+
+    end
+
+    TwitterAPI::versions # yields [ 'v1', 'v2' ]
+    TwitterAPI::routes # yields an array of Grape::Route objects
+    TwitterAPI::routes[0].route_version # yields 'v1'
+
+Grape also supports storing additional parameters with the route information. This can be useful for generating documentation. The optional hash that follows the API path may contain any number of keys and its values are also accessible via a dynamically-generated `route_[name]` function.
+
+    class StringAPI < Grape::API
+      get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+        params[:string].split(params[:token], (params[:limit] || 0))
+      end
+    end
+
+    StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
+    StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
+
+>>>>>>> f263d54b018cbf576a213d73169b2aac7d2fd9ed
 ## Note on Patches/Pull Requests
  
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a future version unintentionally.
-* Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
 ## Copyright
