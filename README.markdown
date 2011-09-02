@@ -105,7 +105,7 @@ You can also rescue specific exceptions with a code block and handle the Rack re
 
     class Twitter::API < Grape::API
       rescue_from :all do |e|
-        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" ).finish
+        Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finish
       end
     end
 
