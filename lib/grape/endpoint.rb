@@ -1,5 +1,6 @@
 require 'rack'
 require 'grape'
+require 'hashie'
 
 module Grape
   # An Endpoint is the proxy scope in which all routing
@@ -29,11 +30,7 @@ module Grape
     # The parameters passed into the request as
     # well as parsed from URL segments.
     def params
-      @params ||= request.params.merge(env['rack.routing_args'] || {}).inject({}) do |h,(k,v)|
-        h[k.to_s] = v
-        h[k.to_sym] = v
-        h
-      end
+      @params ||= Hashie::Mash.new.deep_merge(request.params).deep_merge(env['rack.routing_args'] || {})
     end
     
     # The API version as specified in the URL.
