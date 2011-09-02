@@ -12,17 +12,21 @@ module Grape
       attr_reader :route_set
       attr_reader :versions
       attr_reader :routes
-      
-      def logger
-        @logger ||= Logger.new($STDOUT)
+
+      def logger(logger = nil)
+        if logger
+          @logger = logger
+        else
+          @logger ||= Logger.new($STDOUT)
+        end
       end
-      
+
       def reset!
         @settings = [{}]
         @route_set = Rack::Mount::RouteSet.new
         @prototype = nil
       end
-      
+
       def call(env)
         logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         route_set.freeze.call(env)
