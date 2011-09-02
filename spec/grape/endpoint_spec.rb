@@ -111,4 +111,32 @@ describe Grape::Endpoint do
     get '/hello?howdy=yo'
     last_response.body.should == 'yo'
   end
+
+  context 'filters' do
+    describe 'before filters' do
+      it 'should run the before filter if set' do
+        subject.before{ env['before_test'] = "OK" }
+        subject.get('/before_test'){ env['before_test'] }
+
+        get '/before_test'
+        last_response.body.should == "OK"
+      end
+    end
+
+    describe 'after filters' do
+      it 'should override the response body if it sets it' do
+        subject.after{ body "after" }
+        subject.get('/after_test'){ "during" }
+        get '/after_test'
+        last_response.body.should == 'after'
+      end
+
+      it 'should not override the response body with its return' do
+        subject.after{ "after" }
+        subject.get('/after_test'){ "body" }
+        get '/after_test'
+        last_response.body.should == "body"
+      end
+    end
+  end
 end

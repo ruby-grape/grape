@@ -150,7 +150,7 @@ module Grape
           m
         end
       end
-      
+
       # Add an authentication type to the API. Currently
       # only `:http_basic`, `:http_digest` and `:oauth2` are supported.
       def auth(type = nil, options = {}, &block)
@@ -160,7 +160,7 @@ module Grape
           settings[:auth]
         end
       end
-      
+
       # Add HTTP Basic authorization to the API.
       #
       # @param [Hash] options A hash of options.
@@ -175,7 +175,7 @@ module Grape
         options[:opaque] ||= "secret"
         auth :http_digest, options, &block
       end
-      
+
       # Defines a route that will be recognized
       # by the Grape API.
       #
@@ -190,17 +190,17 @@ module Grape
       #   end
       def route(methods, paths = ['/'], route_options = {}, &block)
         methods = Array(methods)
-        
+
         paths = ['/'] if ! paths || paths == []
         paths = Array(paths)
-        
-        endpoint = build_endpoint(&block)        
-        
+
+        endpoint = build_endpoint(&block)
+
         endpoint_options = {}
         endpoint_options[:version] = /#{version.join('|')}/ if version
-        
+
         route_options ||= {}
-        
+
         methods.each do |method|
           paths.each do |path|
 
@@ -226,13 +226,23 @@ module Grape
           end
         end
       end
+
+      def before(&block)
+        settings_stack.last[:befores] ||= []
+        settings_stack.last[:befores] << block
+      end
       
+      def after(&block) 
+        settings_stack.last[:afters] ||= []
+        settings_stack.last[:afters] << block
+      end
+
       def get(paths = ['/'], options = {}, &block); route('GET', paths, options, &block) end
       def post(paths = ['/'], options = {}, &block); route('POST', paths, options, &block) end
       def put(paths = ['/'], options = {}, &block); route('PUT', paths, options, &block) end
       def head(paths = ['/'], options = {}, &block); route('HEAD', paths, options, &block) end
       def delete(paths = ['/'], options = {}, &block); route('DELETE', paths, options, &block) end
-      
+
       def namespace(space = nil, &block)
         if space || block_given?
           nest(block) do
@@ -296,7 +306,13 @@ module Grape
           instance_eval &block
         end
       end
-      
+
+      def aggregate_setting(key)
+        settings_stack.inject([]) do |befores, settings|
+          befores += (settings[key] || [])
+        end
+      end
+
       def build_endpoint(&block)
         b = Rack::Builder.new
         b.use Grape::Middleware::Error, 
@@ -313,7 +329,10 @@ module Grape
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
         middleware.each{|m| b.use *m }
 
-        endpoint = Grape::Endpoint.generate(&block)
+        befores = aggregate_setting(:befores)
+        afters =  aggregate_setting(:afters)
+
+        endpoint = Grape::Endpoint.generate({:befores => befores, :afters => afters}, &block)
         endpoint.send :include, helpers
         b.run endpoint
         
