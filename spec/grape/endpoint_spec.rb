@@ -48,6 +48,14 @@ describe Grape::Endpoint do
       get '/hey/12'
       last_response.body.should == '12'
     end
+
+    it 'should deeply convert nested params' do
+      subject.get '/location' do
+        params[:location][:city]
+      end
+      get '/location?location[city]=Dallas'
+      last_response.body.should == 'Dallas'
+    end
   end
   
   describe '#error!' do

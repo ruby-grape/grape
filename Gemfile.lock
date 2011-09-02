@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     grape (0.1.5)
+      hashie (~> 1.0)
       multi_json
       multi_xml
       rack
@@ -19,15 +20,16 @@ GEM
       guard (>= 0.2.2)
     guard-rspec (0.4.2)
       guard (>= 0.4.0)
+    hashie (1.1.0)
     json_pure (1.5.2)
     maruku (0.6.0)
       syntax (>= 1.0.0)
     multi_json (1.0.3)
-    multi_xml (0.2.2)
+    multi_xml (0.3.0)
     rack (1.3.0)
     rack-jsonp (1.2.0)
       rack
-    rack-mount (0.8.1)
+    rack-mount (0.8.3)
       rack (>= 1.0.0)
     rack-test (0.6.0)
       rack (>= 1.0)
