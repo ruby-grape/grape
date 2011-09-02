@@ -48,6 +48,14 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
           )
         end
       end
+
+      resource :account do
+        before{ authenticate! }
+
+        get '/private' do
+          "Congratulations, you found the secret!"
+        end
+      end
     end
     
 This would create a Rack application that could be used like so (in a Rackup config.ru file):

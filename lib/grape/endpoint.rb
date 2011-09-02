@@ -7,16 +7,17 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc. block.
   class Endpoint
-    def self.generate(&block)
+    def self.generate(options = {}, &block)
       c = Class.new(Grape::Endpoint)
       c.class_eval do
         @block = block
+        @options = options
       end
       c
     end
     
     class << self
-      attr_accessor :block
+      attr_accessor :block, :options
     end
     
     def self.call(env)
@@ -73,15 +74,43 @@ module Grape
         @header
       end
     end
-    
+
+    # Allows you to define the response body as something other than the
+    # return value.
+    #
+    # @example
+    #   get '/body' do
+    #     body "Body"
+    #     "Not the Body"
+    #   end
+    #
+    #   GET /body # => "Body"
+    def body(value = nil)
+      if value
+        @body = value
+      else
+        @body
+      end
+    end
+
     def call(env)
       @env = env
       @header = {}
       @request = Rack::Request.new(@env)
-      
+
+      run_filters self.class.options[:befores]
       response_text = instance_eval &self.class.block
-      
-      [status, header, [response_text]]
+      run_filters self.class.options[:afters]
+
+      [status, header, [body || response_text]]
+    end
+
+    protected
+
+    def run_filters(filters)
+      (filters || []).each do |filter|
+        instance_eval &filter
+      end
     end
   end
 end
