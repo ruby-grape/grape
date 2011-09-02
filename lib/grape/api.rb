@@ -279,6 +279,13 @@ module Grape
         settings_stack.last[:middleware] << [middleware_class, *args]        
       end
 
+      # Include a module into the API.
+      #
+      # @param module_ref [Module] The module you'd like to inject.
+      def module(module_ref)
+        include module_ref
+      end
+
       # Retrieve an array of the middleware classes
       # and arguments that are currently applied to the
       # application.

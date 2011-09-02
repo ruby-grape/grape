@@ -117,6 +117,24 @@ You can also rescue specific exceptions with a code block and handle the Rack re
       end
     end
 
+## Including Modules
+
+You can use a more modular approach to compose an API by including other modules that implement the `included` callback.
+
+    module TwitterApiStatus
+      def included(api) do
+        api.resource :statuses do
+          get :public_timeline do
+            Tweet.limit(20)
+          end
+        end
+      end
+    end
+
+    class Twitter::API < Grape::API
+      include TwitterApiStatus
+    end
+
 ## Writing Tests
 
 You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.

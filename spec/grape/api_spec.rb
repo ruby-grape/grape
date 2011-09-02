@@ -628,6 +628,24 @@ describe Grape::API do
     end
   end
 
+  module MyApi
+    def self.included(api)
+      api.namespace :ping do
+        get '/pong' do
+          'pong'
+        end
+      end
+    end
+  end
+  
+  describe "module" do
+    it 'should import module methods' do
+      subject.module MyApi
+      get '/ping/pong'
+      last_response.body.should eql 'pong'
+    end
+  end
+
   context "routes" do
     describe "empty api structure" do
       it "returns an empty array of routes" do
