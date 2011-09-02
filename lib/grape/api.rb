@@ -256,6 +256,7 @@ module Grape
       alias_method :group, :namespace
       alias_method :resource, :namespace
       alias_method :resources, :namespace
+      alias_method :segment, :namespace
       
       # Create a scope without affecting the URL.
       # 

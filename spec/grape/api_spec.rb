@@ -134,6 +134,19 @@ describe Grape::API do
       end
       subject.namespace.should == '/'
     end
+
+    it 'should accept path segments correctly' do
+      subject.namespace :members do
+        namespace "/:member_id" do
+          namespace.should == '/members/:member_id'
+          get '/' do
+            params[:member_id]
+          end
+        end
+      end
+      get '/members/23'
+      last_response.body.should == "23"
+    end
     
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
@@ -143,7 +156,7 @@ describe Grape::API do
       subject.send(:compile_path, 'hello').should == '/hello(.:format)'
     end
     
-    %w(group resource resources).each do |als|
+    %w(group resource resources segment).each do |als|
       it "`.#{als}` should be an alias" do
         subject.send(als, :awesome) do
           namespace.should ==  "/awesome"
