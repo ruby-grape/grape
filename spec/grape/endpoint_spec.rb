@@ -48,6 +48,42 @@ describe Grape::Endpoint do
       get '/hey/12'
       last_response.body.should == '12'
     end
+
+    it 'returns a hashed version of parameters which are hashes with symbol keys' do
+      subject.get('/hey') do
+        "#{params[:location][:city]}, #{params[:location][:state]}"
+      end
+
+      get '/hey?location[city]=New%20York&location[state]=NY'
+      last_response.body.should == "New York, NY"
+    end
+
+    it 'returns a hashed version of parameters which are hashes with string keys' do
+      subject.get('/hey') do
+        "#{params['location']['city']}, #{params['location']['state']}"
+      end
+
+      get '/hey?location[city]=New%20York&location[state]=NY'
+      last_response.body.should == "New York, NY"
+    end
+
+    it 'returns a hashed version of parameters which are hashes with symbol keys multiple levels deep' do
+      subject.get('/hey') do
+        params[:location][:city][:neighborhood]
+      end
+
+      get '/hey?location[city][neighborhood]=Chelsea'
+      last_response.body.should == "Chelsea"
+    end
+
+    it 'returns a hashed version of parameters which are hashes with string keys multiple levels deep' do
+      subject.get('/hey') do
+        params['location']['city']['neighborhood']
+      end
+
+      get '/hey?location[city][neighborhood]=Chelsea'
+      last_response.body.should == "Chelsea"
+    end
   end
   
   describe '#error!' do
