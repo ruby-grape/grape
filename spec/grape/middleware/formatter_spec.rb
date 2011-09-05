@@ -35,6 +35,17 @@ describe Grape::Middleware::Formatter do
       
       subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '{"abc":"def"}'}
     end
+    
+    it 'should call #to_xml if the content type is xml' do
+      @body = "string"
+      @body.instance_eval do
+        def to_xml
+          "<bar/>"
+        end
+      end
+      
+      subject.call({'PATH_INFO' => '/somewhere.xml'}).last.each{|b| b.should == '<bar/>'}
+    end
   end
   
   context 'detection' do
