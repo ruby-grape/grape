@@ -54,6 +54,7 @@ module Grape
         FORMATTERS = {
           :json => :encode_json,
           :txt => :encode_txt,
+          :xml => :encode_xml
         }
         PARSERS = {
           :json => :decode_json
@@ -119,6 +120,10 @@ module Grape
 
         def encode_txt(object)
           object.respond_to?(:to_txt) ? object.to_txt : object.to_s
+        end
+        
+        def encode_xml(object)
+          object.respond_to?(:to_xml) ? object.to_xml : object.to_s
         end
       end
 
