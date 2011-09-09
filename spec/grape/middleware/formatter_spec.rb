@@ -141,6 +141,10 @@ describe Grape::Middleware::Formatter do
       subject.env['rack.request.form_hash']['is_boolean'].should be_true
       subject.env['rack.request.form_hash']['string'].should == 'thing'
     end
+    it 'should parse the body from an xml POST/PUT and put the contents into rack.request.from_hash' do
+      subject.call({'PATH_INFO' => '/info.xml', 'Accept' => 'application/xml', 'rack.input' => StringIO.new('<thing><name>Test</name></thing>')})
+      subject.env['rack.request.form_hash']['thing']['name'].should == 'Test'
+    end
     it 'should be able to fail gracefully if the body is regular POST content' do
       subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
       subject.env['rack.request.form_hash'].should be_nil
