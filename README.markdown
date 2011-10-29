@@ -8,7 +8,7 @@ Grape is a REST-like API micro-framework for Ruby. It is built to complement exi
 Grape is available as a gem, to install it just install the gem:
 
     gem install grape
-    
+
 ## Basic Usage
 
 Grape APIs are Rack applications that are created by subclassing `Grape::API`. Below is a simple example showing some of the more common features of Grape in the context of recreating parts of the Twitter API.
@@ -57,20 +57,20 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
         end
       end
     end
-    
+
 This would create a Rack application that could be used like so (in a Rackup config.ru file):
 
     run Twitter::API
-    
+
 And would respond to the following routes:
 
     GET  /1/statuses/public_timeline(.json)
     GET  /1/statuses/home_timeline(.json)
     GET  /1/statuses/show/:id(.json)
     POST /1/statuses/update(.json)
-    
+
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
-    
+
 ## Raising Errors
 
 You can raise errors explicitly.
@@ -114,6 +114,15 @@ You can also rescue specific exceptions with a code block and handle the Rack re
     class Twitter::API < Grape::API
       rescue_from :all do |e|
         Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finish
+      end
+    end
+
+    class Twitter::API < Grape::API
+      rescue_from ArgumentError do |e|
+        Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+      end
+      rescue_from NotImplementedError do |e|
+        Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
       end
     end
 
