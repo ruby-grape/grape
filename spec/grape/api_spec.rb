@@ -743,6 +743,28 @@ describe Grape::API do
       last_response.status.should eql 500
       last_response.body.should == 'rescued from ConnectionError'
     end
+    it 'should rescue multiple specific errors' do
+      class ConnectionError < RuntimeError; end
+      class DatabaseError < RuntimeError; end
+      subject.rescue_from ConnectionError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.rescue_from DatabaseError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/connection' do
+        raise ConnectionError
+      end
+      subject.get '/database' do
+        raise DatabaseError
+      end
+      get '/connection'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from ConnectionError'
+      get '/database'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from DatabaseError'
+    end
     it 'should not rescue a different error' do
       class CommunicationError < RuntimeError; end
       subject.rescue_from RuntimeError do |e|

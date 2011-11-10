@@ -1,4 +1,5 @@
 require 'multi_json'
+require 'multi_xml'
 
 module Grape
   module Middleware
@@ -54,9 +55,11 @@ module Grape
         FORMATTERS = {
           :json => :encode_json,
           :txt => :encode_txt,
+          :xml => :encode_xml
         }
         PARSERS = {
-          :json => :decode_json
+          :json => :decode_json,
+          :xml => :decode_xml
         }
 
         def formatters
@@ -119,6 +122,14 @@ module Grape
 
         def encode_txt(object)
           object.respond_to?(:to_txt) ? object.to_txt : object.to_s
+        end
+        
+        def decode_xml(object)
+          MultiXml.parse(object)
+        end
+        
+        def encode_xml(object)
+          object.respond_to?(:to_xml) ? object.to_xml : object.to_s
         end
       end
 

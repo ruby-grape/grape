@@ -35,6 +35,17 @@ describe Grape::Middleware::Formatter do
       
       subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '{"abc":"def"}'}
     end
+    
+    it 'should call #to_xml if the content type is xml' do
+      @body = "string"
+      @body.instance_eval do
+        def to_xml
+          "<bar/>"
+        end
+      end
+      
+      subject.call({'PATH_INFO' => '/somewhere.xml'}).last.each{|b| b.should == '<bar/>'}
+    end
   end
   
   context 'detection' do
@@ -129,6 +140,10 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,"string":"thing"}')})
       subject.env['rack.request.form_hash']['is_boolean'].should be_true
       subject.env['rack.request.form_hash']['string'].should == 'thing'
+    end
+    it 'should parse the body from an xml POST/PUT and put the contents into rack.request.from_hash' do
+      subject.call({'PATH_INFO' => '/info.xml', 'Accept' => 'application/xml', 'rack.input' => StringIO.new('<thing><name>Test</name></thing>')})
+      subject.env['rack.request.form_hash']['thing']['name'].should == 'Test'
     end
     it 'should be able to fail gracefully if the body is regular POST content' do
       subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})

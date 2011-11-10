@@ -168,6 +168,15 @@ class Twitter::API < Grape::API
 end
 ```
 
+    class Twitter::API < Grape::API
+      rescue_from ArgumentError do |e|
+        Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+      end
+      rescue_from NotImplementedError do |e|
+        Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
+      end
+    end
+
 ## Writing Tests
 
 You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
