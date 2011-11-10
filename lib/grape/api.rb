@@ -52,6 +52,22 @@ module Grape
         @settings.last[key.to_sym] = value
       end
       
+      # Add to a configuration value for this
+      # namespace.
+      #
+      # @param key [Symbol] The key of the configuration variable.
+      # @param value [Object] The value to which to set the configuration variable.
+      def add(key, value)
+        current = @settings.last[key.to_sym]
+        if current.is_a?(Array)
+          current.concat(value)
+        elsif current.is_a?(Hash)
+          current.merge!(value)
+        else
+          @settings.last[key.to_sym] = value
+        end
+      end
+      
       # Define a root URL prefix for your entire
       # API.
       def prefix(prefix = nil)
@@ -122,12 +138,12 @@ module Grape
       def rescue_from(*args, &block)
         if block_given?
           args.each do |arg|
-            set(:rescue_handlers, { arg => block })
+            add(:rescue_handlers, { arg => block })
           end
         end
-        set(:rescue_options, args.pop) if args.last.is_a?(Hash)
+        add(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
-        set(:rescued_errors, args)
+        add(:rescued_errors, args)
       end
 
       # Add helper methods that will be accessible from any
