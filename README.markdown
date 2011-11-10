@@ -75,6 +75,38 @@ And would respond to the following routes:
 
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
+## Working with Entities
+
+A common problem in designing Ruby APIs is that you probably don't want
+the exact structure of your data models exposed. ActiveRecord, for
+instance, will dump all of its attributes. While you can override
+`#as_json` to alter this behavior somewhat, what is really needed is an
+intermediary layer between the model and the API. This is where the
+`Grape::Entity` class comes in.
+
+```ruby
+module Entities
+  class User < Grape::Entity
+    expose :first_name, :last_name
+    expose :email, :if => {:authenticated => true}
+    expose :name, :id => {:version => 'v1'} # deprecated
+  end
+end
+
+class API < Grape::API
+  version 'v1', 'v2'
+
+  get '/users/:id' do
+    present User.find(params[:id]), 
+      :with => Entities::User,
+      :authenticated => env.key?('api.token')
+  end
+end
+```
+
+For more information about Entities, view the project's YARD
+documentation.
+
 ## Raising Errors
 
 You can raise errors explicitly.
