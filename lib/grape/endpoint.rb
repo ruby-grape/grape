@@ -90,6 +90,33 @@ module Grape
       end
     end
 
+    # Allows you to make use of Grape Entities by setting
+    # the response body to the serializable hash of the
+    # entity provided in the `:with` option. This has the
+    # added benefit of automatically passing along environment
+    # and version information to the serialization, making it
+    # very easy to do conditional exposures. See Entity docs
+    # for more info.
+    #
+    # @example
+    #
+    #   get '/users/:id' do
+    #     present User.find(params[:id]),
+    #       :with => API::Entities::User,
+    #       :admin => current_user.admin?
+    #   end
+    def present(object, options = {})
+      entity_class = options.delete(:with)
+
+      if entity_class
+        embeds = {:env => env}
+        embeds[:version] = env['api.version'] if env['api.version']
+        body entity_class.represent(object, embeds.merge(options))
+      else
+        body object
+      end
+    end
+
     def call(env)
       @env = env
       @header = {}
