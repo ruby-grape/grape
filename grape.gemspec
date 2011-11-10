@@ -15,21 +15,17 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'rack-mount'
-  s.add_runtime_dependency 'rack-jsonp'
+  # s.add_runtime_dependency 'rack-jsonp'
   s.add_runtime_dependency 'multi_json'
   s.add_runtime_dependency 'multi_xml'
-  s.add_runtime_dependency 'hashie', '~> 1.0'
+  s.add_runtime_dependency 'hashie', '~> 1.2'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'maruku'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'rspec', '~> 2.6.0'
-  s.add_development_dependency 'json_pure'
+  s.add_development_dependency 'rspec', '~> 2.7.0'
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'guard'
-  s.add_development_dependency 'guard-rspec'
-  s.add_development_dependency 'guard-bundler'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
