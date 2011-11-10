@@ -2,11 +2,12 @@ require 'rack'
 require 'rack/builder'
 
 module Grape
-  autoload :API, 'grape/api'
-  autoload :Endpoint, 'grape/endpoint'
+  autoload :API,             'grape/api'
+  autoload :Endpoint,        'grape/endpoint'
   autoload :MiddlewareStack, 'grape/middleware_stack'
-  autoload :Client, 'grape/client'
-  autoload :Route, 'grape/route'
+  autoload :Client,          'grape/client'
+  autoload :Route,           'grape/route'
+  autoload :Entity,          'grape/entity'
   
   module Middleware
     autoload :Base,      'grape/middleware/base'
