@@ -25,6 +25,20 @@ describe Grape::Entity do
           expect{ subject.expose :name, :as => :foo }.not_to raise_error
         end
       end
+
+      context 'with a block' do
+        it 'should error out if called with multiple attributes' do
+          expect{ subject.expose(:name, :email) do
+            true
+          end }.to raise_error(ArgumentError)
+        end
+
+        it 'should set the :proc option in the exposure options' do
+          block = lambda{|obj,opts| true }
+          subject.expose :name, &block
+          subject.exposures[:name][:proc].should == block
+        end
+      end
     end
 
     describe '.represent' do
@@ -80,6 +94,9 @@ describe Grape::Entity do
         fresh_class.class_eval do
           expose :name, :email
           expose :friends, :using => self
+          expose :computed do |object, options|
+            options[:awesome]
+          end
         end
       end
 
@@ -92,6 +109,10 @@ describe Grape::Entity do
         rep.reject{|r| r.is_a?(fresh_class)}.should be_empty
         rep.first.serializable_hash[:name].should == 'Friend 1'
         rep.last.serializable_hash[:name].should == 'Friend 2'
+      end
+
+      it 'should call through to the proc if there is one' do
+        subject.send(:value_for, :computed, :awesome => 123).should == 123
       end
     end
 
