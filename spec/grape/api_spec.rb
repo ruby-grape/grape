@@ -21,6 +21,35 @@ describe Grape::API do
     end
   end
 
+  describe '.vendor' do
+    it 'should set the vendor' do
+      subject.vendor 'grape'
+      subject.vendor.should eql ['grape']
+    end
+
+    it 'should not use HTTP_ACCEPT headers when no vendor is set' do
+      subject.get :hello do
+        "Hello"
+      end
+
+      subject.version 'v1'
+      subject.get :hello do
+        "World"
+      end
+
+      header 'Accept', 'application/vnd.grape-v1+json'
+      get '/hello'
+      last_response.status.should eql 200
+      last_response.body.should eql 'Hello'
+
+      
+      header 'Accept', 'application/vnd.grape-v1+json'
+      get '/v1/hello'
+      last_response.status.should eql 200
+      last_response.body.should eql 'World'
+    end
+  end
+
   describe '.version' do
     it 'should set the API version' do
       subject.version 'v1'
