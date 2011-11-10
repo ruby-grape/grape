@@ -137,16 +137,6 @@ describe Grape::Endpoint do
       end
       get '/example'
     end
-
-    it 'should embed version and env when calling through to an entity' do
-      subject.version 'v2'
-      subject.get '/example' do
-        entity_mock = Object.new
-        entity_mock.should_receive(:represent).with(:version => 'v2', :env => env)
-        present Object.new, :with => entity_mock
-      end
-      get '/example'
-    end
   end
 
   context 'filters' do
