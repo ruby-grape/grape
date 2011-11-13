@@ -87,6 +87,9 @@ describe Grape::Entity do
     subject{ fresh_class.new(model) }
 
     describe '#serializable_hash' do
+      it 'should not throw an exception if a nil options object is passed' do
+        expect{ fresh_class.new(model).serializable_hash(nil) }.not_to raise_error
+      end
     end
 
     describe '#value_for' do
