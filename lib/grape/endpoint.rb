@@ -108,6 +108,10 @@ module Grape
     def present(object, options = {})
       entity_class = options.delete(:with)
 
+      object.class.ancestors.each do |potential|
+        entity_class ||= self.class.options[:representations][potential]
+      end
+
       if entity_class
         embeds = {:env => env}
         embeds[:version] = env['api.version'] if env['api.version']

@@ -43,8 +43,7 @@ module Grape
         @settings
       end
       
-      # Set a configuration value for this
-      # namespace.
+      # Set a configuration value for this namespace.
       #
       # @param key [Symbol] The key of the configuration variable.
       # @param value [Object] The value to which to set the configuration variable.
@@ -144,6 +143,31 @@ module Grape
         add(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
         add(:rescued_errors, args)
+      end
+
+      # Allows you to specify a default representation entity for a
+      # class. This allows you to map your models to their respective
+      # entities once and then simply call `present` with the model.
+      #
+      # @example
+      #   class ExampleAPI < Grape::API
+      #     represent User, :with => Entity::User
+      #
+      #     get '/me' do
+      #       present current_user # :with => Entity::User is assumed
+      #     end
+      #   end
+      #
+      # Note that Grape will automatically go up the class ancestry to
+      # try to find a representing entity, so if you, for example, define
+      # an entity to represent `Object` then all presented objects will
+      # bubble up and utilize the entity provided on that `represent` call.
+      #
+      # @param model_class [Class] The model class that will be represented.
+      # @option options [Class] :with The entity class that will represent the model.
+      def represent(model_class, options)
+        raise ArgumentError, "You must specify an entity class in the :with option." unless options[:with] && options[:with].is_a?(Class)
+        add(:representations, model_class => options[:with])
       end
 
       # Add helper methods that will be accessible from any
@@ -352,8 +376,13 @@ module Grape
 
         befores = aggregate_setting(:befores)
         afters =  aggregate_setting(:afters)
+        representations = settings[:representations] || {}
 
-        endpoint = Grape::Endpoint.generate({:befores => befores, :afters => afters}, &block)
+        endpoint = Grape::Endpoint.generate({
+          :befores => befores, 
+          :afters => afters,
+          :representations => representations
+        }, &block)
         endpoint.send :include, helpers
         b.run endpoint
         

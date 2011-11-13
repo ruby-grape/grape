@@ -100,7 +100,18 @@ describe Grape::API do
     end
       
   end
-  
+
+  describe '.represent' do
+    it 'should require a :with option' do
+      expect{ subject.represent Object, {} }.to raise_error(ArgumentError)
+    end
+
+    it 'should add the association to the :representations setting' do
+      subject.represent Object, :with => BasicObject
+      subject.settings[:representations][Object].should == BasicObject
+    end
+  end
+
   describe '.namespace' do
     it 'should be retrievable and converted to a path' do
       subject.namespace :awesome do
