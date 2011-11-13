@@ -118,6 +118,7 @@ module Grape
     #   representation, this is where you can trigger things from conditional options
     #   etc.
     def serializable_hash(runtime_options = {})
+      return nil if object.nil?
       opts = options.merge(runtime_options || {})
       exposures.inject({}) do |output, (attribute, exposure_options)|
         output[key_for(attribute)] = value_for(attribute, opts) if conditions_met?(exposure_options, opts)
