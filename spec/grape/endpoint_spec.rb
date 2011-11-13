@@ -137,6 +137,32 @@ describe Grape::Endpoint do
       end
       get '/example'
     end
+
+    it 'should pull a representation from the class options if it exists' do
+      entity = Class.new(Grape::Entity)
+      entity.stub!(:represent).and_return("Hiya")
+
+      subject.represent Object, :with => entity
+      subject.get '/example' do
+        present Object.new
+      end
+      get '/example'
+      last_response.body.should == 'Hiya'
+    end
+
+    it 'should pull a representation from the class ancestor if it exists' do
+      entity = Class.new(Grape::Entity)
+      entity.stub!(:represent).and_return("Hiya")
+
+      subclass = Class.new(Object)
+
+      subject.represent Object, :with => entity
+      subject.get '/example' do
+        present subclass.new
+      end
+      get '/example'
+      last_response.body.should == 'Hiya'
+    end
   end
 
   context 'filters' do
