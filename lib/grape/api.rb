@@ -17,7 +17,7 @@ module Grape
         if logger
           @logger = logger
         else
-          @logger ||= Logger.new($STDOUT)
+          @logger ||= Logger.new($stdout)
         end
       end
 
