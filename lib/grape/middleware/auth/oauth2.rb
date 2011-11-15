@@ -60,13 +60,12 @@ module Grape::Middleware::Auth
     end
     
     def error_out(status, error)
-      throw :error, {
+      throw :error,
         :message => error,
         :status => status,
         :headers => {
           'WWW-Authenticate' => "OAuth realm='#{options[:realm]}', error='#{error}'"
         }
-      }
     end
   end
 end
