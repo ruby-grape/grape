@@ -107,8 +107,9 @@ describe Grape::API do
     end
 
     it 'should add the association to the :representations setting' do
-      subject.represent Object, :with => BasicObject
-      subject.settings[:representations][Object].should == BasicObject
+      klass = Class.new
+      subject.represent Object, :with => klass
+      subject.settings[:representations][Object].should == klass
     end
   end
 
@@ -597,7 +598,7 @@ describe Grape::API do
         raise "rain!"
       end    
       get '/exception'
-      json = JSON.parse(last_response.body)
+      json = MultiJson.decode(last_response.body)
       json["error"].should eql 'rain!'
       json["backtrace"].length.should > 0
     end
