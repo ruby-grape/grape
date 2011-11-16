@@ -12,6 +12,7 @@ module Grape
       attr_reader :route_set
       attr_reader :versions
       attr_reader :routes
+      attr_reader :settings
 
       def logger(logger = nil)
         if logger
@@ -22,7 +23,7 @@ module Grape
       end
 
       def reset!
-        @settings = [{}]
+        @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
         @prototype = nil
       end
@@ -31,40 +32,22 @@ module Grape
         logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         route_set.freeze.call(env)
       end
-      
-      # Settings are a stack, so when we
-      # want to access them they are merged
-      # in the order pushed.
-      def settings
-        @settings.inject({}){|f,h| f.merge!(h); f}
-      end
-      
-      def settings_stack
-        @settings
-      end
-      
+
       # Set a configuration value for this namespace.
       #
       # @param key [Symbol] The key of the configuration variable.
       # @param value [Object] The value to which to set the configuration variable.
       def set(key, value)
-        @settings.last[key.to_sym] = value
+        settings[key.to_sym] = value
       end
-      
+
       # Add to a configuration value for this
       # namespace.
       #
       # @param key [Symbol] The key of the configuration variable.
       # @param value [Object] The value to which to set the configuration variable.
-      def add(key, value)
-        current = @settings.last[key.to_sym]
-        if current.is_a?(Array)
-          current.concat(value)
-        elsif current.is_a?(Hash)
-          current.merge!(value)
-        else
-          @settings.last[key.to_sym] = value
-        end
+      def imbue(key, value)
+        settings.imbue(key, value)
       end
       
       # Define a root URL prefix for your entire
@@ -137,12 +120,12 @@ module Grape
       def rescue_from(*args, &block)
         if block_given?
           args.each do |arg|
-            add(:rescue_handlers, { arg => block })
+            imbue(:rescue_handlers, { arg => block })
           end
         end
-        add(:rescue_options, args.pop) if args.last.is_a?(Hash)
+        imbue(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
-        add(:rescued_errors, args)
+        imbue(:rescued_errors, args)
       end
 
       # Allows you to specify a default representation entity for a
@@ -167,12 +150,15 @@ module Grape
       # @option options [Class] :with The entity class that will represent the model.
       def represent(model_class, options)
         raise ArgumentError, "You must specify an entity class in the :with option." unless options[:with] && options[:with].is_a?(Class)
-        add(:representations, model_class => options[:with])
+        imbue(:representations, model_class => options[:with])
       end
 
       # Add helper methods that will be accessible from any
       # endpoint within this namespace (and child namespaces).
       #
+      # When called without a block, all known helpers within this scope
+      # are included.
+      # 
       # @example Define some helpers.
       #     class ExampleAPI < Grape::API
       #       helpers do
@@ -183,12 +169,12 @@ module Grape
       #     end
       def helpers(&block)
         if block_given?
-          m = settings_stack.last[:helpers] || Module.new
+          m = settings.peek[:helpers] || Module.new
           m.class_eval &block
           set(:helpers, m)
         else
           m = Module.new
-          settings_stack.each do |s|
+          settings.stack.each do |s|
             m.send :include, s[:helpers] if s[:helpers]
           end
           m
@@ -272,13 +258,11 @@ module Grape
       end
 
       def before(&block)
-        settings_stack.last[:befores] ||= []
-        settings_stack.last[:befores] << block
+        settings.imbue(:befores, [block])
       end
       
       def after(&block) 
-        settings_stack.last[:afters] ||= []
-        settings_stack.last[:afters] << block
+        settings.imbue(:afters, [block])
       end
 
       def get(paths = ['/'], options = {}, &block); route('GET', paths, options, &block) end
@@ -293,7 +277,7 @@ module Grape
             set(:namespace, space.to_s) if space
           end
         else
-          Rack::Mount::Utils.normalize_path(settings_stack.map{|s| s[:namespace]}.join('/'))
+          Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
         end
       end
       
@@ -313,17 +297,17 @@ module Grape
       # to the current namespace and any children, but
       # not parents.
       #
-      # @param middleware_class [Class] The class of the middleware you'd like to inject.
+      # @param middleware_class [Class] The class of the middleware you'd like
+      #   to inject.
       def use(middleware_class, *args)
-        settings_stack.last[:middleware] ||= []
-        settings_stack.last[:middleware] << [middleware_class, *args]        
+        settings.imbue(:middleware, [[middleware_class, *args]])
       end
 
       # Retrieve an array of the middleware classes
       # and arguments that are currently applied to the
       # application.
       def middleware
-        settings_stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
+        settings.stack.inject([]){|a,s| a += s[:middleware] if s[:middleware]; a}
       end
 
       # An array of API routes.
@@ -343,18 +327,18 @@ module Grape
       def nest(*blocks, &block)
         blocks.reject!{|b| b.nil?}
         if blocks.any?
-          settings_stack << {}
+          settings.push  # create a new context to eval the follow
           instance_eval &block if block_given?
           blocks.each{|b| instance_eval &b}
-          settings_stack.pop
+          settings.pop   # when finished, we pop the context
         else
           instance_eval &block
         end
       end
 
       def aggregate_setting(key)
-        settings_stack.inject([]) do |befores, settings|
-          befores += (settings[key] || [])
+        settings.stack.inject([]) do |aggregate, frame|
+          aggregate += (frame[key] || [])
         end
       end
 
@@ -392,7 +376,13 @@ module Grape
       def inherited(subclass)
         subclass.reset!
       end
-      
+
+      def inherit(other_stack)
+        # settings stack should know how to merge aggregate keys / values
+        # settings_stack.unshift *other_stack
+        # raise settings_stack.inspect
+      end
+
       def route_set
         @route_set ||= Rack::Mount::RouteSet.new
       end
