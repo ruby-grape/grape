@@ -22,6 +22,10 @@ module Grape
       autoload :Digest,	'grape/middleware/auth/digest'
     end
   end
+
+  module Util
+    autoload :HashStack, 'grape/util/hash_stack'
+  end
 end
 
 require 'grape/version'

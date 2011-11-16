@@ -1,5 +1,6 @@
 ## MAC OS
 .DS_Store
+.com.apple.timemachine.supported
 
 ## TEXTMATE
 *.tmproj
