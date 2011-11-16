@@ -308,6 +308,32 @@ describe Grape::API do
     end
   end
 
+  describe 'filters' do
+    it 'should add a before filter' do
+      subject.before { @foo = 'first'  }
+      subject.before { @bar = 'second' }
+      subject.get '/' do
+        "#{@foo} #{@bar}"
+      end
+
+      get '/'
+      last_response.body.should eql 'first second'
+    end
+
+    it 'should add a after filter' do
+      m = double('after mock')
+      subject.after { m.do_something! }
+      subject.after { m.do_something! }
+      subject.get '/' do
+        @var ||= 'default'
+      end
+
+      m.should_receive(:do_something!).exactly(2).times
+      get '/'
+      last_response.body.should eql 'default'
+    end
+  end
+
   context 'format' do
     before do
       subject.get("/foo") { "bar" }
@@ -353,15 +379,19 @@ describe Grape::API do
 
     describe '.middleware' do
       it 'should include middleware arguments from settings' do
-        subject.stub!(:settings_stack).and_return [{:middleware => [[PhonyMiddleware, 'abc', 123]]}]
+        settings = Grape::Util::HashStack.new
+        settings.stub!(:stack).and_return([{:middleware => [[PhonyMiddleware, 'abc', 123]]}])
+        subject.stub!(:settings).and_return(settings)
         subject.middleware.should eql [[PhonyMiddleware, 'abc', 123]]
       end
 
       it 'should include all middleware from stacked settings' do
-        subject.stub!(:settings_stack).and_return [
+        settings = Grape::Util::HashStack.new
+        settings.stub!(:stack).and_return [
           {:middleware => [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]},
           {:middleware => [[PhonyMiddleware, 'foo']]}
         ]
+        subject.stub!(:settings).and_return(settings)
   
         subject.middleware.should eql [
           [PhonyMiddleware, 123],
@@ -788,5 +818,4 @@ describe Grape::API do
       lambda { get '/uncaught' }.should raise_error(CommunicationError)
     end
   end
-  
 end
