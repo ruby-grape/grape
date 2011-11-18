@@ -25,7 +25,6 @@ module Grape
       def reset!
         @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
-        @prototype = nil
       end
 
       def call(env)
