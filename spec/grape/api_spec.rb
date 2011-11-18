@@ -125,7 +125,7 @@ describe Grape::API do
       subject.version :v1
       
       subject.namespace :awesome do
-        compile_path('hello').should == '/rad/:version/awesome/hello(.:format)'
+        prepare_path('hello').should == '/rad/:version/awesome/hello(.:format)'
       end
     end
     
@@ -163,9 +163,9 @@ describe Grape::API do
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
         version 'v2'
-        compile_path('hello').should == '/:version/hello(.:format)'
+        prepare_path('hello').should == '/:version/hello(.:format)'
       end
-      subject.send(:compile_path, 'hello').should == '/hello(.:format)'
+      subject.send(:prepare_path, 'hello').should == '/hello(.:format)'
     end
     
     %w(group resource resources segment).each do |als|
@@ -816,6 +816,47 @@ describe Grape::API do
         raise CommunicationError
       end
       lambda { get '/uncaught' }.should raise_error(CommunicationError)
+    end
+  end
+
+  describe '.mount.' do
+    let(:mounted_app){ lambda{|env| [200, {}, ["MOUNTED"]]} }
+  
+    context 'with a bare rack app' do
+      before do
+        subject.mount mounted_app => '/mounty'
+      end
+    
+      it 'should make a bare Rack app available at the endpoint' do
+        get '/mounty'
+        last_response.body.should == 'MOUNTED'
+      end
+
+      it 'should anchor the routes, passing all subroutes to it' do
+        get '/mounty/awesome'
+        last_response.body.should == 'MOUNTED'
+      end
+
+      it 'should be able to cascade' do
+        subject.mount lambda{ |env| 
+          headers = {}
+          headers['X-Cascade'] == 'pass' unless env['PATH_INFO'].include?('boo')
+          [200, headers, ["Farfegnugen"]]
+        } => '/'
+
+        get '/boo'
+        last_response.body.should == 'Farfegnugen'
+        get '/mounty'
+        last_response.body.should == 'MOUNTED'
+      end
+    end
+
+    context 'without a hash' do
+      it 'should call through setting the route to "/"' do
+        subject.mount mounted_app
+        get '/'
+        last_response.body.should == 'MOUNTED'
+      end
     end
   end
 end
