@@ -211,7 +211,7 @@ module Grape
         mounts.each_pair do |app, path|
           next unless app.respond_to?(:call)
           route_set.add_route(app, 
-            path_info: compile_path(path, false)
+            :path_info => compile_path(path, false)
           )
         end
       end
