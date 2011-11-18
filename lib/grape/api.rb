@@ -205,6 +205,17 @@ module Grape
         auth :http_digest, options, &block
       end
 
+      def mount(mounts)
+        mounts = {mounts => '/'} unless mounts.respond_to?(:each_pair)
+
+        mounts.each_pair do |app, path|
+          next unless app.respond_to?(:call)
+          route_set.add_route(app, 
+            path_info: compile_path(path, false)
+          )
+        end
+      end
+
       # Defines a route that will be recognized
       # by the Grape API.
       #
@@ -225,16 +236,12 @@ module Grape
 
         endpoint = build_endpoint(&block)
 
-        endpoint_options = {}
-        endpoint_options[:version] = /#{version.join('|')}/ if version
-
         route_options ||= {}
 
         methods.each do |method|
           paths.each do |path|
-
-            compiled_path = compile_path(path)
-            path = Rack::Mount::Strexp.compile(compiled_path, endpoint_options, %w( / . ? ), true)
+            prepared_path = prepare_path(path)
+            path = compile_path(path)
             regex = Rack::Mount::RegexpWithNamedGroups.new(path)
             path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
             path_params |= (route_options[:params] || [])
@@ -245,7 +252,7 @@ module Grape
               :version => version ? version.join('|') : nil, 
               :namespace => namespace, 
               :method => request_method, 
-              :path => compiled_path,
+              :path => prepared_path,
               :params => path_params}))
 
             route_set.add_route(endpoint, 
@@ -386,7 +393,7 @@ module Grape
         @route_set ||= Rack::Mount::RouteSet.new
       end
 
-      def compile_path(path)
+      def prepare_path(path)
         parts = []
         parts << prefix if prefix
         parts << ':version' if version
@@ -394,6 +401,13 @@ module Grape
         parts << path.to_s if path && '/' != path
         parts.last << '(.:format)'
         Rack::Mount::Utils.normalize_path(parts.join('/'))
+      end
+
+      def compile_path(path, anchor = true)
+        endpoint_options = {}
+        endpoint_options[:version] = /#{version.join('|')}/ if version
+
+        Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
       end
     end  
     
