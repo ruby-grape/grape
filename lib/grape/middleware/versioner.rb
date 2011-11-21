@@ -1,25 +1,25 @@
-require 'grape/middleware/base'
-
+# Versioners set env['api.version'] when a version is defined on an API and
+# on the requests. The current methods for determining version are:
+#
+#   :header - version from HTTP Accept header.
+#   :path   - version from uri. e.g. /v1/resource
+#
+# See individual classes for details.
 module Grape
   module Middleware
-    class Versioner < Base
-      def default_options
-        {
-          :pattern => /.*/i
-        }
-      end
-      
-      def before
-        pieces = env['PATH_INFO'].split('/')
-        potential_version = pieces[1]
-        if potential_version =~ options[:pattern]
-          if options[:versions] && !options[:versions].include?(potential_version)
-            throw :error, :status => 404, :message => "404 API Version Not Found"
-          end
-          
-          truncated_path = "/#{pieces[2..-1].join('/')}"
-          env['api.version'] = potential_version
-          env['PATH_INFO'] = truncated_path
+    module Versioner
+      extend self
+
+      # @param strategy [Symbol] :path or :header
+      # @return a middleware class based on strategy
+      def using(strategy)
+        case strategy
+        when :path
+          Path
+        when :header
+          Header
+        else
+          raise ArgumentError.new("Unknown :using for versioner: #{strategy}")
         end
       end
     end
