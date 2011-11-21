@@ -15,7 +15,7 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`. B
 
 ```ruby
 class Twitter::API < Grape::API
-  version '1'
+  version 'v1', :using => :header, :vendor => 'twitter', :format => :json
 
   helpers do
     def current_user
@@ -68,10 +68,18 @@ run Twitter::API
 
 And would respond to the following routes:
 
-    GET  /1/statuses/public_timeline(.json)
-    GET  /1/statuses/home_timeline(.json)
-    GET  /1/statuses/show/:id(.json)
-    POST /1/statuses/update(.json)
+    GET  /statuses/public_timeline(.json)
+    GET  /statuses/home_timeline(.json)
+    GET  /statuses/show/:id(.json)
+    POST /statuses/update(.json)
+
+Versioning is handled with HTTP Accept head by default, but can be configures
+to [use different
+strategies](https://github.com/intridea/grape/wiki/API-Versioning). For
+example, to request the above with a version, you would make the following
+request:
+
+    curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
