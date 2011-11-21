@@ -72,12 +72,16 @@ module Grape
       #     end
       #   end
       #
-      def version(*new_versions, &block)
-        if new_versions.any?
-          @versions = versions | new_versions
-          nest(block) { set(:version, new_versions) }
-        else
-          settings[:version]
+      def version(*args, &block)
+        if args.any?
+          options = args.pop if args.last.is_a? Hash
+          options ||= {}
+          options = {:using => :header}.merge!(options)
+          @versions = versions | args
+          nest(block) do
+            set(:version, args)
+            set(:version_options, options)
+          end
         end
       end
       
@@ -248,15 +252,15 @@ module Grape
             request_method = (method.to_s.upcase unless method == :any)
 
             routes << Route.new(route_options.merge({
-              :prefix => prefix, 
-              :version => version ? version.join('|') : nil, 
-              :namespace => namespace, 
-              :method => request_method, 
+              :prefix => prefix,
+              :version => settings[:version] ? settings[:version].join('|') : nil,
+              :namespace => namespace,
+              :method => request_method,
               :path => prepared_path,
               :params => path_params}))
 
-            route_set.add_route(endpoint, 
-              :path_info => path, 
+            route_set.add_route(endpoint,
+              :path_info => path,
               :request_method => request_method
             )
           end
@@ -357,10 +361,18 @@ module Grape
           :format => settings[:error_format] || :txt, 
           :rescue_options => settings[:rescue_options],
           :rescue_handlers => settings[:rescue_handlers] || {}
-        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic	
+
+        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
         b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
-        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix        
-        b.use Grape::Middleware::Versioner, :versions => (version if version.is_a?(Array)) if version
+        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix
+
+        if settings[:version]
+          b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
+            :versions        => settings[:version],
+            :version_options => settings[:version_options]
+          }
+        end
+
         b.use Grape::Middleware::Formatter, :default_format => default_format || :json
         middleware.each{|m| b.use *m }
 
@@ -375,7 +387,6 @@ module Grape
         }, &block)
         endpoint.send :include, helpers
         b.run endpoint
-        
         b.to_app
       end
       
@@ -396,7 +407,7 @@ module Grape
       def prepare_path(path)
         parts = []
         parts << prefix if prefix
-        parts << ':version' if version
+        parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
         parts << namespace.to_s if namespace
         parts << path.to_s if path && '/' != path
         parts.last << '(.:format)'
@@ -405,12 +416,12 @@ module Grape
 
       def compile_path(path, anchor = true)
         endpoint_options = {}
-        endpoint_options[:version] = /#{version.join('|')}/ if version
+        endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
 
         Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
       end
-    end  
-    
-    reset! 
+    end
+
+    reset!
   end
 end
