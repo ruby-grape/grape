@@ -21,6 +21,11 @@ module Grape
       autoload :Basic,  'grape/middleware/auth/basic'
       autoload :Digest,	'grape/middleware/auth/digest'
     end
+
+    module Versioner
+      autoload :Path,   'grape/middleware/versioner/path'
+      autoload :Header, 'grape/middleware/versioner/header'
+    end
   end
 
   module Util
