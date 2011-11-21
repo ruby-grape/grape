@@ -1,0 +1,45 @@
+require 'grape/middleware/base'
+
+module Grape
+  module Middleware
+    module Versioner
+      # This middleware sets various version related rack environment variables
+      # based on the HTTP Accept header with the pattern:
+      # application/vnd.:vendor-:version+:format
+      #
+      # Example: For request header
+      #    Accept: application/vnd.mycompany-v1+json
+      #
+      # The following rack env variables are set:
+      #
+      #    env['api.type']    => 'application'
+      #    env['api.subtype'] => 'vnd.mycompany-v1+json'
+      #    env['api.vendor]   => 'mycompany'
+      #    env['api.version]  => 'v1'
+      #    env['api.format]   => 'format'
+      #
+      # If version does not match this route, then a 404 is throw with
+      # X-Cascade header to alert Rack::Mount to attempt the next matched
+      # route.
+      class Header < Base
+        def before
+          accept = env['HTTP_ACCEPT'] || ""
+          accept.strip.scan(/^(.+?)\/(.+?)$/) do |type, subtype|
+            env['api.type']    = type
+            env['api.subtype'] = subtype
+
+            subtype.scan(/vnd\.(.+)?-(.+)?\+(.*)?/) do |vendor, version, format|
+              if options[:versions] && !options[:versions].include?(version)
+                throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
+              end
+
+              env['api.version'] = version
+              env['api.vendor']  = vendor
+              env['api.format']  = format  # weird that Grape::Middleware::Formatter also does this
+            end
+          end
+        end
+      end
+    end
+  end
+end
