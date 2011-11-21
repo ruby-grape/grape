@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'shared_versioning_examples'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -21,84 +22,44 @@ describe Grape::API do
     end
   end
 
-  describe '.version' do
-    it 'should set the API version' do
-      subject.version 'v1'
-      subject.get :hello do
-        "Version: #{request.env['api.version']}"
+  describe '.version using path' do
+    it_should_behave_like 'versioning' do
+      let(:macro_options) do
+        {
+          :using => :path
+        }
       end
-      
-      get '/v1/hello'
-      last_response.body.should eql "Version: v1"
     end
-    
-    it 'should add the prefix before the API version' do
-      subject.prefix 'api'
-      subject.version 'v1'
-      subject.get :hello do
-        "Version: #{request.env['api.version']}"
+  end
+
+  describe '.version using header' do
+    it_should_behave_like 'versioning' do
+      let(:macro_options) do
+        {
+          :using  => :header,
+          :vendor => 'mycompany',
+          :format => 'json'
+        }
       end
-      
-      get '/api/v1/hello'
-      last_response.body.should eql "Version: v1"
     end
-    
-    it 'should be able to specify version as a nesting' do
-      subject.version 'v2'
-      subject.get '/awesome' do
-        "Radical"
-      end
-      
-      subject.version 'v1' do
-        get '/legacy' do
-          "Totally"
-        end
-      end
-      
-      get '/v1/awesome'
-      last_response.status.should eql 404
-      get '/v2/awesome'
-      last_response.status.should eql 200
-      get '/v1/legacy'
-      last_response.status.should eql 200
-      get '/v2/legacy'
-      last_response.status.should eql 404
+
+    # Behavior as defined by rfc2616 when no header is defined
+    # http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+    describe 'no specified accept header' do
+      # subject.version 'v1', :using => :header
+      # subject.get '/hello' do
+      #   'hello'
+      # end
+
+      # it 'should route' do
+      #   get '/hello'
+      #   last_response.status.should eql 200
+      # end
     end
-    
-    it 'should be able to specify multiple versions' do
-      subject.version 'v1', 'v2'
-      subject.get 'awesome' do
-        "I exist"
-      end
+
+    it 'should route if any media type is allowed' do
       
-      get '/v1/awesome'
-      last_response.status.should eql 200
-      get '/v2/awesome'
-      last_response.status.should eql 200
-      get '/v3/awesome'
-      last_response.status.should eql 404
     end
-    
-    it 'should allow the same endpoint to be implemented for different versions' do
-      subject.version 'v2'
-      subject.get 'version' do
-        request.env['api.version']
-      end
-      
-      subject.version 'v1' do
-        get 'version' do
-          "version " + request.env['api.version']
-        end
-      end
-      
-      get '/v2/version'
-      last_response.status.should == 200
-      last_response.body.should == 'v2'
-      get '/v1/version'
-      last_response.status.should == 200
-      last_response.body.should == 'version v1'
-    end
-      
   end
 
   describe '.represent' do
@@ -122,7 +83,7 @@ describe Grape::API do
     
     it 'should come after the prefix and version' do
       subject.prefix :rad
-      subject.version :v1
+      subject.version :v1, :using => :path
       
       subject.namespace :awesome do
         compile_path('hello').should == '/rad/:version/awesome/hello(.:format)'
@@ -162,7 +123,7 @@ describe Grape::API do
     
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
-        version 'v2'
+        version 'v2', :using => :path
         compile_path('hello').should == '/:version/hello(.:format)'
       end
       subject.send(:compile_path, 'hello').should == '/hello(.:format)'
@@ -536,28 +497,29 @@ describe Grape::API do
   end
   
   describe '.scope' do
+    # TODO: refactor this to not be tied to versioning. How about a generic
+    # .setting macro?
     it 'should scope the various settings' do
-      subject.version 'v2'
-      
+      subject.prefix 'new'
+
       subject.scope :legacy do
-        version 'v1'
-        
+        prefix 'legacy'
         get '/abc' do
-          version
+          'abc'
         end
       end
       
       subject.get '/def' do
-        version
+        'def'
       end
       
-      get '/v2/abc'
+      get '/new/abc'
       last_response.status.should eql 404
-      get '/v1/abc'
+      get '/legacy/abc'
       last_response.status.should eql 200
-      get '/v1/def'
+      get '/legacy/def'
       last_response.status.should eql 404
-      get '/v2/def'
+      get '/new/def'
       last_response.status.should eql 200
     end
   end
@@ -693,12 +655,12 @@ describe Grape::API do
     describe "api structure with two versions and a namespace" do
       class TwitterAPI < Grape::API
         # version v1
-        version 'v1'
+        version 'v1', :using => :path
         get "version" do 
           api.version
         end
         # version v2
-        version 'v2'
+        version 'v2', :using => :path
         prefix 'p'
         namespace "n1" do
           namespace "n2" do
