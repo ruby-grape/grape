@@ -82,6 +82,10 @@ module Grape
         @stack.concat hash_stack.stack
         self
       end
+
+      def to_s
+        @stack.to_s
+      end
     end
   end
 end
