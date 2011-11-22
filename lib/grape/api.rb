@@ -347,48 +347,20 @@ module Grape
         end
       end
 
-      def aggregate_setting(key)
-        settings.stack.inject([]) do |aggregate, frame|
-          aggregate += (frame[key] || [])
-        end
-      end
-
       def build_endpoint(&block)
-        b = Rack::Builder.new
-        b.use Grape::Middleware::Error, 
-          :default_status => settings[:default_error_status] || 403, 
-          :rescue_all => settings[:rescue_all], 
-          :rescued_errors => settings[:rescued_errors], 
-          :format => settings[:error_format] || :txt, 
-          :rescue_options => settings[:rescue_options],
-          :rescue_handlers => settings[:rescue_handlers] || {}
+        # befores = aggregate_setting(:befores)
+        # afters =  aggregate_setting(:afters)
+        # representations = settings[:representations] || {}
 
-        b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-        b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
-        b.use Grape::Middleware::Prefixer, :prefix => prefix if prefix
-
-        if settings[:version]
-          b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
-            :versions        => settings[:version],
-            :version_options => settings[:version_options]
-          }
-        end
-
-        b.use Grape::Middleware::Formatter, :default_format => default_format || :json
-        middleware.each{|m| b.use *m }
-
-        befores = aggregate_setting(:befores)
-        afters =  aggregate_setting(:afters)
-        representations = settings[:representations] || {}
-
-        endpoint = Grape::Endpoint.generate({
-          :befores => befores, 
-          :afters => afters,
-          :representations => representations
-        }, &block)
-        endpoint.send :include, helpers
-        b.run endpoint
-        b.to_app
+        # endpoint = Grape::Endpoint.generate({
+        #   :befores => befores, 
+        #   :afters => afters,
+        #   :representations => representations
+        # }, &block)
+        # endpoint.send :include, helpers
+        # b.run endpoint
+        # b.to_app
+        Grape::Endpoint.new(settings.clone, {}, &block)
       end
       
       def inherited(subclass)

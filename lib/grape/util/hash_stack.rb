@@ -86,6 +86,15 @@ module Grape
       def to_s
         @stack.to_s
       end
+
+      def clone
+        new_stack = HashStack.new
+        stack.each do |frame|
+          new_stack.push frame.clone
+        end
+        new_stack.stack.shift
+        new_stack
+      end
     end
   end
 end

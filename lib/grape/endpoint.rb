@@ -8,34 +8,34 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc. block.
   class Endpoint
-    def self.generate(options = {}, &block)
-      c = Class.new(Grape::Endpoint)
-      c.class_eval do
-        @block = block
-        @options = options
-      end
-      c
-    end
-    
-    class << self
-      attr_accessor :block, :options
-    end
-    
-    def self.call(env)
-      new.call(env)
-    end
-    
+    attr_accessor :block, :options, :settings
     attr_reader :env, :request
-    
+
+    def initialize(settings, options = {}, &block)
+      @settings = settings
+      @block = block
+      @options = options
+    end
+
+    def call(env)
+      dup.call!(env)
+    end
+
+    def call!(env)
+      builder = build_middleware
+      builder.run lambda{|env| self.run(env) }
+      builder.call(env)
+    end
+
     # The parameters passed into the request as
     # well as parsed from URL segments.
     def params
       @params ||= Hashie::Mash.new.deep_merge(request.params).deep_merge(env['rack.routing_args'] || {})
     end
-    
+
     # The API version as specified in the URL.
     def version; env['api.version'] end
-    
+
     # End the request and display an error to the
     # end user with the specified message.
     #
@@ -44,7 +44,7 @@ module Grape
     def error!(message, status=403)
       throw :error, :message => message, :status => status
     end
-    
+
     # Set or retrieve the HTTP status code.
     #
     # @param status [Integer] The HTTP Status Code to return for this request.
@@ -59,9 +59,9 @@ module Grape
           else
             200
         end
-      end        
+      end
     end
-    
+
     # Set an individual header or retrieve
     # all headers that have been set.
     def header(key = nil, val = nil)
@@ -109,7 +109,7 @@ module Grape
       entity_class = options.delete(:with)
 
       object.class.ancestors.each do |potential|
-        entity_class ||= self.class.options[:representations][potential]
+        entity_class ||= (settings[:representations] || {})[potential]
       end
 
       if entity_class
@@ -121,24 +121,68 @@ module Grape
       end
     end
 
-    def call(env)
+    protected
+
+    def run(env)
       @env = env
       @header = {}
       @request = Rack::Request.new(@env)
 
-      run_filters self.class.options[:befores]
-      response_text = instance_eval &self.class.block
-      run_filters self.class.options[:afters]
+      self.extend helpers
+      run_filters befores
+      response_text = instance_eval &self.block
+      run_filters afters
 
       [status, header, [body || response_text]]
     end
 
-    protected
+    def build_middleware
+      b = Rack::Builder.new
+      b.use Grape::Middleware::Error, 
+        :default_status => settings[:default_error_status] || 403, 
+        :rescue_all => settings[:rescue_all], 
+        :rescued_errors => settings[:rescued_errors], 
+        :format => settings[:error_format] || :txt, 
+        :rescue_options => settings[:rescue_options],
+        :rescue_handlers => settings[:rescue_handlers] || {}
+
+      b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
+      b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+      b.use Grape::Middleware::Prefixer, :prefix => settings[:root_prefix] if settings[:root_prefix]
+
+      if settings[:version]
+        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
+          :versions        => settings[:version],
+          :version_options => settings[:version_options]
+        }
+      end
+
+      b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
+
+      aggregate_setting(:middleware).each{|m| b.use *m }
+
+      b
+    end
+
+    def helpers
+      m = Module.new
+      settings.stack.each{|frame| m.send :include, frame[:helpers] if frame[:helpers]}
+      m
+    end
+
+    def aggregate_setting(key)
+      settings.stack.inject([]) do |aggregate, frame|
+        aggregate += (frame[key] || [])
+      end
+    end
 
     def run_filters(filters)
       (filters || []).each do |filter|
         instance_eval &filter
       end
     end
+
+    def befores; aggregate_setting(:befores) end
+    def afters; aggregate_setting(:afters) end
   end
 end
