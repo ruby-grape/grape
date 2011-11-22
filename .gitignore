@@ -22,5 +22,6 @@ pkg
 .bundle
 .yardoc/*
 dist
+Gemfile.lock
 
 ## PROJECT::SPECIFIC
