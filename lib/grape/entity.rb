@@ -9,7 +9,7 @@ module Grape
   #
   #   module API
   #     module Entities
-  #       class User < Grape::Endpoint
+  #       class User < Grape::Entity
   #         expose :first_name, :last_name, :screen_name, :location
   #         expose :latest_status, :using => API::Status, :as => :status, :unless => {:collection => true}
   #         expose :email, :if => {:type => :full}
