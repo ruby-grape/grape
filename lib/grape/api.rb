@@ -13,6 +13,7 @@ module Grape
       attr_reader :versions
       attr_reader :routes
       attr_reader :settings
+      attr_writer :logger
 
       def logger(logger = nil)
         if logger
@@ -392,6 +393,7 @@ module Grape
       
       def inherited(subclass)
         subclass.reset!
+        subclass.logger = logger.clone
       end
 
       def inherit(other_stack)
