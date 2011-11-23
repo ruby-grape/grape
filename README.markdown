@@ -81,6 +81,9 @@ request:
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
+By default, the first matching version is used when no Accept header is supplied. This behavior is similar to routing in Rails.
+To circumvent this default behaviour, one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error is returned when no correct Accept header is supplied.
+
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
 ## Working with Entities
@@ -105,7 +108,7 @@ class API < Grape::API
   version 'v1', 'v2'
 
   get '/users/:id' do
-    present User.find(params[:id]), 
+    present User.find(params[:id]),
       :with => Entities::User,
       :authenticated => env.key?('api.token')
   end
@@ -191,9 +194,9 @@ You can test a Grape API with RSpec. Tests make HTTP requests, therefore they mu
 
 ```ruby
 RSpec.configure do |config|
-  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => { 
+  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
     :file_path => /spec\/api/
-  } 
+  }
 end
 ```
 
@@ -218,10 +221,10 @@ end
 Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`.
 
 ```ruby
-class TwitterAPI < Grape::API      
+class TwitterAPI < Grape::API
 
   version 'v1'
-  get "version" do 
+  get "version" do
     api.version
   end
 
@@ -242,7 +245,7 @@ Grape also supports storing additional parameters with the route information. Th
 
 ```ruby
 class StringAPI < Grape::API
-  get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+  get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do
     params[:string].split(params[:token], (params[:limit] || 0))
   end
 end
