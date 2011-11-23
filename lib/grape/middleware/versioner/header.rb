@@ -23,7 +23,13 @@ module Grape
       # route.
       class Header < Base
         def before
-          accept = env['HTTP_ACCEPT'] || ""
+          accept = env['HTTP_ACCEPT']
+
+          if options[:version_options] && options[:version_options].keys.include?(:strict) && options[:version_options][:strict]
+            if (accept.nil? || accept.empty?) && options[:versions] && options[:version_options][:using] == :header
+              throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
+            end
+          end
           accept.strip.scan(/^(.+?)\/(.+?)$/) do |type, subtype|
             env['api.type']    = type
             env['api.subtype'] = subtype

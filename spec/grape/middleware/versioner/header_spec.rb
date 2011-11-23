@@ -50,6 +50,34 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
+  context 'no header' do
+    it 'should return a 200 when no header is set and no strict setting is done' do
+      @options = {
+        :versions => ['v1'],
+        :version_options => {:using => :header}
+      }
+      subject.call('HTTP_ACCEPT' => '').first.should == 200
+    end
+
+    it 'should return a 200 when no header is set but strict header based versioning is disabled' do
+      @options = {
+        :versions => ['v1'],
+        :version_options => {:using => :header, :strict => false}
+      }
+      subject.call('HTTP_ACCEPT' => '').first.should == 200
+    end
+
+    it 'should return a 404 when no header is set but strict header based versioning is used' do
+      @options = {
+        :versions => ['v1'],
+        :version_options => {:using => :header, :strict => true}
+      }
+      expect {
+        env = subject.call('HTTP_ACCEPT' => '').last
+      }.to throw_symbol(:error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found")
+    end
+  end
+
   context 'no matched version' do
     before do
       @options = {
