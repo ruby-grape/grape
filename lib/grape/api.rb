@@ -86,6 +86,11 @@ module Grape
         end
       end
       
+      # Add a description to the next namespace or function.
+      def desc(description, options = {})
+        @last_description = options.merge({description: description})
+      end
+      
       # Specify the default format for the API's 
       # serializers. Currently only `:json` is
       # supported.
@@ -258,7 +263,11 @@ module Grape
               :namespace => namespace,
               :method => request_method,
               :path => prepared_path,
-              :params => path_params}))
+              :params => path_params
+              }.merge(@last_description || {})
+            ))
+              
+            @last_description = nil
 
             route_set.add_route(endpoint,
               :path_info => path,

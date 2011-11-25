@@ -653,19 +653,21 @@ describe Grape::API do
       end
     end    
     describe "api structure with two versions and a namespace" do
-      class TwitterAPI < Grape::API
-        # version v1
-        version 'v1', :using => :path
-        get "version" do 
-          api.version
-        end
-        # version v2
-        version 'v2', :using => :path
-        prefix 'p'
-        namespace "n1" do
-          namespace "n2" do
-            get "version" do
-              api.version
+      before(:each) do
+        class TwitterAPI < Grape::API
+          # version v1
+          version 'v1', :using => :path
+          get "version" do 
+            api.version
+          end
+          # version v2
+          version 'v2', :using => :path
+          prefix 'p'
+          namespace "n1" do
+            namespace "n2" do
+              get "version" do
+                api.version
+              end
             end
           end
         end
@@ -707,6 +709,72 @@ describe Grape::API do
         subject.routes.size.should == 1
         subject.routes[0].route_params.should == [ "string", "token" ]
         subject.routes[0].route_optional_params.should == [ "limit" ]
+      end
+    end
+  end
+
+  context "desc" do
+    describe "empty api structure" do
+      it "returns an empty array of routes" do
+        subject.desc "grape api"
+        subject.routes.should == []
+      end
+    end     
+    describe "single method with a desc" do
+      before(:each) do
+        subject.desc "ping method"
+        subject.get :ping do 
+          'pong'
+        end
+      end
+      it "returns route description" do
+        subject.routes[0].route_description.should == "ping method"
+      end
+    end    
+    describe "api structure with multiple methods and descriptions" do
+      before(:each) do
+        class JitterAPI < Grape::API
+          desc "first method"
+          get "first" do; end
+          get "second" do; end
+          desc "third method"
+          get "third" do; end
+        end
+      end
+      it "should return a description for the first method" do
+        JitterAPI::routes[0].route_description.should == "first method"
+        JitterAPI::routes[1].route_description.should be_nil
+        JitterAPI::routes[2].route_description.should == "third method"
+      end
+    end
+    describe "api structure with multiple methods, namespaces, descriptions and options" do
+      before(:each) do
+        class LitterAPI < Grape::API
+          desc "first method"
+          get "first" do; end
+          get "second" do; end
+          namespace "ns" do
+            desc "ns second", :foo => "bar"
+            get "second" do; end
+          end
+          desc "third method", :details => "details of third method"
+          get "third" do; end
+          desc "Reverses a string.", { :params => [
+            { "s" => { :desc => "string to reverse", :type => "string" }}
+          ]}
+          get "reverse" do
+            params[:s].reverse
+          end
+        end
+      end
+      it "should return a description for the first method" do
+        LitterAPI::routes[0].route_description.should == "first method"
+        LitterAPI::routes[1].route_description.should be_nil
+        LitterAPI::routes[2].route_description.should == "ns second"
+        LitterAPI::routes[2].route_foo.should == "bar"
+        LitterAPI::routes[3].route_description.should == "third method"
+        LitterAPI::routes[4].route_description.should == "Reverses a string."
+        LitterAPI::routes[4].route_params.should == [{ "s" => { :desc => "string to reverse", :type => "string" }}]
       end
     end
   end

@@ -216,32 +216,40 @@ describe Twitter::API do
 end
 ```
 
-## Inspecting an API
+## Describing and Inspecting an API
 
-Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`.
+Grape lets you add a description to an API along with any other optional elements that can also be inspected at runtime.
+This can be useful for generating documentation.
 
 ```ruby
 class TwitterAPI < Grape::API
 
   version 'v1'
+
+  desc "Retrieves the API version number."
   get "version" do
     api.version
   end
 
-  version 'v2'
-  namespace "ns" do
-    get "version" do
-      api.version
-    end
+  desc "Reverses a string.", { :params => [ 
+    { "s" => { :desc => "string to reverse", :type => "string" }}
+  ]}
+  get "reverse" do
+    params[:s].reverse
   end
 end
+```
 
+Grape then exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`. The description and the optional hash that follows the API path may contain any number of keys and its values are also accessible via dynamically-generated `route_[name]` functions.
+
+```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
 TwitterAPI::routes[0].route_version # yields 'v1'
+TwitterAPI::routes[0].route_description # yields [ { "s" => { :desc => "string to reverse", :type => "string" }} ]
 ```
 
-Grape also supports storing additional parameters with the route information. This can be useful for generating documentation. The optional hash that follows the API path may contain any number of keys and its values are also accessible via a dynamically-generated `route_[name]` function.
+Parameters can also be tagged to the method declaration itself.
 
 ```ruby
 class StringAPI < Grape::API
