@@ -14,6 +14,9 @@ module Grape
       attr_reader :routes
       attr_reader :settings
       attr_writer :logger
+      attr_reader :endpoints
+      attr_reader :mountings
+      attr_reader :instance
 
       def logger(logger = nil)
         if logger
@@ -26,11 +29,26 @@ module Grape
       def reset!
         @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
+        @endpoints = []
+        @mountings = []
+      end
+
+      def compile
+        @instance = self.new
+      end
+
+      def change!
+        @instance = nil
       end
 
       def call(env)
+        compile unless instance
+        call!(env)
+      end
+
+      def call!(env)
         logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
-        route_set.freeze.call(env)
+        instance.call(env)
       end
 
       # Set a configuration value for this namespace.
@@ -49,7 +67,7 @@ module Grape
       def imbue(key, value)
         settings.imbue(key, value)
       end
-      
+
       # Define a root URL prefix for your entire
       # API.
       def prefix(prefix = nil)
@@ -181,6 +199,7 @@ module Grape
           settings.stack.each do |s|
             m.send :include, s[:helpers] if s[:helpers]
           end
+          change!
           m
         end
       end
@@ -212,11 +231,15 @@ module Grape
 
       def mount(mounts)
         mounts = {mounts => '/'} unless mounts.respond_to?(:each_pair)
-
         mounts.each_pair do |app, path|
-          next unless app.respond_to?(:call)
-          route_set.add_route(app, 
-            :path_info => compile_path(path, false)
+          if app.respond_to?(:inherit_settings)
+            app.inherit_settings(settings.clone)
+          end
+
+          endpoints << Grape::Endpoint.new(settings.clone,
+            :method => :any,
+            :path => path,
+            :app => app
           )
         end
       end
@@ -234,46 +257,19 @@ module Grape
       #     end
       #   end
       def route(methods, paths = ['/'], route_options = {}, &block)
-        methods = Array(methods)
-
-        paths = ['/'] if ! paths || paths == []
-        paths = Array(paths)
-
-        endpoint = build_endpoint(&block)
-
-        route_options ||= {}
-
-        methods.each do |method|
-          paths.each do |path|
-            prepared_path = prepare_path(path)
-            path = compile_path(path)
-            regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-            path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-            path_params |= (route_options[:params] || [])
-            request_method = (method.to_s.upcase unless method == :any)
-
-            routes << Route.new(route_options.merge({
-              :prefix => prefix,
-              :version => settings[:version] ? settings[:version].join('|') : nil,
-              :namespace => namespace,
-              :method => request_method,
-              :path => prepared_path,
-              :params => path_params}))
-
-            route_set.add_route(endpoint,
-              :path_info => path,
-              :request_method => request_method
-            )
-          end
-        end
+        endpoints << Grape::Endpoint.new(settings.clone, {
+          :method => methods,
+          :path => paths,
+          :route_options => (route_options || {})
+        }, &block)
       end
 
       def before(&block)
-        settings.imbue(:befores, [block])
+        imbue(:befores, [block])
       end
       
       def after(&block) 
-        settings.imbue(:afters, [block])
+        imbue(:afters, [block])
       end
 
       def get(paths = ['/'], options = {}, &block); route('GET', paths, options, &block) end
@@ -311,7 +307,7 @@ module Grape
       # @param middleware_class [Class] The class of the middleware you'd like
       #   to inject.
       def use(middleware_class, *args)
-        settings.imbue(:middleware, [[middleware_class, *args]])
+        imbue(:middleware, [[middleware_class, *args]])
       end
 
       # Retrieve an array of the middleware classes
@@ -347,53 +343,27 @@ module Grape
         end
       end
 
-      def build_endpoint(&block)
-        # befores = aggregate_setting(:befores)
-        # afters =  aggregate_setting(:afters)
-        # representations = settings[:representations] || {}
-
-        # endpoint = Grape::Endpoint.generate({
-        #   :befores => befores, 
-        #   :afters => afters,
-        #   :representations => representations
-        # }, &block)
-        # endpoint.send :include, helpers
-        # b.run endpoint
-        # b.to_app
-        Grape::Endpoint.new(settings.clone, {}, &block)
-      end
-      
       def inherited(subclass)
         subclass.reset!
         subclass.logger = logger.clone
       end
 
-      def inherit(other_stack)
-        # settings stack should know how to merge aggregate keys / values
-        # settings_stack.unshift *other_stack
-        # raise settings_stack.inspect
+      def inherit_settings(other_stack)
+        settings.prepend other_stack
+      end
+    end
+
+    def initialize
+      @route_set = Rack::Mount::RouteSet.new
+      self.class.endpoints.each do |endpoint|
+        endpoint.mount_in(@route_set)
       end
 
-      def route_set
-        @route_set ||= Rack::Mount::RouteSet.new
-      end
+      @route_set.freeze
+    end
 
-      def prepare_path(path)
-        parts = []
-        parts << prefix if prefix
-        parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
-        parts << namespace.to_s if namespace
-        parts << path.to_s if path && '/' != path
-        parts.last << '(.:format)'
-        Rack::Mount::Utils.normalize_path(parts.join('/'))
-      end
-
-      def compile_path(path, anchor = true)
-        endpoint_options = {}
-        endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
-
-        Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
-      end
+    def call(env)
+      @route_set.call(env)
     end
 
     reset!

@@ -11,6 +11,7 @@ require 'bundler'
 Bundler.setup :default, :test
 
 require 'rack/test'
+require 'pry'
 
 require 'base64'
 def encode_basic(username, password)

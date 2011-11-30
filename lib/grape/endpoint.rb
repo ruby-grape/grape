@@ -15,6 +15,63 @@ module Grape
       @settings = settings
       @block = block
       @options = options
+
+      raise ArgumentError, "Must specify :path option." unless options.key?(:path)
+      options[:path] = Array(options[:path])
+      options[:path] = ['/'] if options[:path].empty?
+
+      raise ArgumentError, "Must specify :method option." unless options.key?(:method)
+      options[:method] = Array(options[:method])
+
+      options[:route_options] ||= {}
+    end
+
+    def mount_in(route_set)
+      options[:method].each do |method|
+        options[:path].each do |path|
+          prepared_path = prepare_path(path)
+          path = compile_path(path, !options[:app])
+          regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+          path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+          path_params |= (options[:route_options][:params] || [])
+          request_method = (method.to_s.upcase unless method == :any)
+
+          # routes << Route.new(route_options.merge({
+          #   :prefix => prefix,
+          #   :version => settings[:version] ? settings[:version].join('|') : nil,
+          #   :namespace => namespace,
+          #   :method => request_method,
+          #   :path => prepared_path,
+          #   :params => path_params})
+          # )
+
+          route_set.add_route(self,
+            :path_info => path,
+            :request_method => request_method
+          )
+        end
+      end
+    end
+
+    def prepare_path(path)
+      parts = []
+      parts << settings[:root_prefix] if settings[:root_prefix]
+      parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
+      parts << namespace.to_s if namespace
+      parts << path.to_s if path && '/' != path
+      parts.last << '(.:format)'
+      Rack::Mount::Utils.normalize_path(parts.join('/'))
+    end
+    
+    def namespace
+      Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
+    end
+
+    def compile_path(path, anchor = true)
+      endpoint_options = {}
+      endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
+
+      Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
     end
 
     def call(env)
@@ -22,9 +79,14 @@ module Grape
     end
 
     def call!(env)
-      builder = build_middleware
-      builder.run lambda{|env| self.run(env) }
-      builder.call(env)
+      if options[:app]
+        $stderr.puts env.inspect
+        options[:app].call(env)
+      else
+        builder = build_middleware
+        builder.run options[:app] || lambda{|env| self.run(env) }
+        builder.call(env)
+      end
     end
 
     # The parameters passed into the request as
@@ -138,6 +200,7 @@ module Grape
 
     def build_middleware
       b = Rack::Builder.new
+
       b.use Grape::Middleware::Error, 
         :default_status => settings[:default_error_status] || 403, 
         :rescue_all => settings[:rescue_all], 

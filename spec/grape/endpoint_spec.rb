@@ -7,7 +7,10 @@ describe Grape::Endpoint do
 
   describe '#initialize' do
     it 'should take a settings stack, options, and a block' do
-      expect{ Grape::Endpoint.new(Grape::Util::HashStack.new, {}, &Proc.new{}) }.not_to raise_error
+      expect{ Grape::Endpoint.new(Grape::Util::HashStack.new, {
+        :path => '/',
+        :method => :get
+      }, &Proc.new{}) }.not_to raise_error
     end
   end
 
