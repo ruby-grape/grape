@@ -350,6 +350,7 @@ module Grape
 
       def inherit_settings(other_stack)
         settings.prepend other_stack
+        endpoints.each{|e| e.settings.prepend(other_stack)}
       end
     end
 

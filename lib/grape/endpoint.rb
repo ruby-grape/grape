@@ -27,28 +27,32 @@ module Grape
     end
 
     def mount_in(route_set)
-      options[:method].each do |method|
-        options[:path].each do |path|
-          prepared_path = prepare_path(path)
-          path = compile_path(path, !options[:app])
-          regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-          path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-          path_params |= (options[:route_options][:params] || [])
-          request_method = (method.to_s.upcase unless method == :any)
+      if options[:app] && options[:app].respond_to?(:endpoints)
+        options[:app].endpoints.each{|e| e.mount_in(route_set)}
+      else
+        options[:method].each do |method|
+          options[:path].each do |path|
+            prepared_path = prepare_path(path)
+            path = compile_path(path, !options[:app])
+            regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+            path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+            path_params |= (options[:route_options][:params] || [])
+            request_method = (method.to_s.upcase unless method == :any)
 
-          # routes << Route.new(route_options.merge({
-          #   :prefix => prefix,
-          #   :version => settings[:version] ? settings[:version].join('|') : nil,
-          #   :namespace => namespace,
-          #   :method => request_method,
-          #   :path => prepared_path,
-          #   :params => path_params})
-          # )
+            # routes << Route.new(route_options.merge({
+            #   :prefix => prefix,
+            #   :version => settings[:version] ? settings[:version].join('|') : nil,
+            #   :namespace => namespace,
+            #   :method => request_method,
+            #   :path => prepared_path,
+            #   :params => path_params})
+            # )
 
-          route_set.add_route(self,
-            :path_info => path,
-            :request_method => request_method
-          )
+            route_set.add_route(self,
+              :path_info => path,
+              :request_method => request_method
+            )
+          end
         end
       end
     end
@@ -80,7 +84,6 @@ module Grape
 
     def call!(env)
       if options[:app]
-        $stderr.puts env.inspect
         options[:app].call(env)
       else
         builder = build_middleware
