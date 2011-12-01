@@ -163,6 +163,9 @@ module Grape
       # When called without a block, all known helpers within this scope
       # are included.
       #
+      # @param mod [Module] optional module of methods to include
+      # @param &block [Block] optional block of methods to include
+      #
       # @example Define some helpers.
       #     class ExampleAPI < Grape::API
       #       helpers do

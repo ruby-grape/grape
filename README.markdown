@@ -86,6 +86,37 @@ To circumvent this default behaviour, one could use the `:strict` option. When t
 
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
+## Helpers
+
+You can define helper methods that your endpoints can use with the `helpers`
+macro by either giving a block or a module:
+
+````ruby
+module MyHelpers
+  def say_hello(user)
+    "hey there #{user.name}"
+  end
+end
+
+class API < Grape::API
+  # define helpers with a block
+  helpers do
+    def current_user
+      User.find(params[:user_id])
+    end
+  end
+
+  # or mix in a module
+  helpers MyHelpers
+
+  get '/hello' do
+    # helpers available in your endpoint and filters
+    say_hello(current_user)
+  end
+end
+````
+
+
 ## Working with Entities
 
 A common problem in designing Ruby APIs is that you probably don't want
