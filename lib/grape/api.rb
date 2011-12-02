@@ -79,11 +79,11 @@ module Grape
       # @example API with legacy support.
       #   class MyAPI < Grape::API
       #     version 'v2'
-      #     
+      #
       #     get '/main' do
       #       {:some => 'data'}
       #     end
-      #         
+      #
       #     version 'v1' do
       #       get '/main' do
       #         {:legacy => 'data'}
@@ -103,8 +103,8 @@ module Grape
           end
         end
       end
-      
-      # Specify the default format for the API's 
+
+      # Specify the default format for the API's
       # serializers. Currently only `:json` is
       # supported.
       def default_format(new_format = nil)
@@ -180,7 +180,10 @@ module Grape
       #
       # When called without a block, all known helpers within this scope
       # are included.
-      # 
+      #
+      # @param mod [Module] optional module of methods to include
+      # @param &block [Block] optional block of methods to include
+      #
       # @example Define some helpers.
       #     class ExampleAPI < Grape::API
       #       helpers do
@@ -189,18 +192,18 @@ module Grape
       #         end
       #       end
       #     end
-      def helpers(&block)
-        if block_given?
-          m = settings.peek[:helpers] || Module.new
-          m.class_eval &block
-          set(:helpers, m)
+      def helpers(mod = nil, &block)
+        if block_given? || mod
+          mod ||= settings.peek[:helpers] || Module.new
+          mod.class_eval &block if block_given?
+          set(:helpers, mod)
         else
-          m = Module.new
+          mod = Module.new
           settings.stack.each do |s|
-            m.send :include, s[:helpers] if s[:helpers]
+            mod.send :include, s[:helpers] if s[:helpers]
           end
           change!
-          m
+          mod
         end
       end
 
@@ -267,7 +270,7 @@ module Grape
       def before(&block)
         imbue(:befores, [block])
       end
-      
+
       def after(&block) 
         imbue(:afters, [block])
       end
@@ -287,14 +290,14 @@ module Grape
           Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
         end
       end
-      
+
       alias_method :group, :namespace
       alias_method :resource, :namespace
       alias_method :resources, :namespace
       alias_method :segment, :namespace
-      
+
       # Create a scope without affecting the URL.
-      # 
+      #
       # @param name [Symbol] Purely placebo, just allows to to name the scope to make the code more readable.
       def scope(name = nil, &block)
         nest(block)
@@ -321,13 +324,13 @@ module Grape
       def routes
         @routes ||= []
       end
-      
+
       def versions
         @versions ||= []
       end
-      
+
       protected
-      
+
       # Execute first the provided block, then each of the
       # block passed in. Allows for simple 'before' setups
       # of settings stack pushes.
@@ -343,7 +346,7 @@ module Grape
         end
       end
 
-      def inherited(subclass)
+     def inherited(subclass)
         subclass.reset!
         subclass.logger = logger.clone
       end

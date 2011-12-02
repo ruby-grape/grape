@@ -502,6 +502,22 @@ describe Grape::API do
 
       lambda{get '/howdy'}.should_not raise_error
     end
+
+    it 'should allow for modules' do
+      mod = Module.new do
+        def hello
+          "Hello, world."
+        end
+      end
+      subject.helpers mod
+
+      subject.get '/howdy' do
+        hello
+      end
+
+      get '/howdy'
+      last_response.body.should eql 'Hello, world.'
+    end
   end
 
   describe '.scope' do
