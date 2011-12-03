@@ -225,7 +225,14 @@ module Grape
 
       b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
 
-      aggregate_setting(:middleware).each{|m| b.use *m }
+      aggregate_setting(:middleware).each do |m|
+        block = m.pop if m.last.is_a?(Proc)
+        if block
+          b.use *m, &block
+        else
+          b.use *m
+        end
+      end
 
       b
     end

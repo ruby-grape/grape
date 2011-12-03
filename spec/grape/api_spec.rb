@@ -337,11 +337,13 @@ describe Grape::API do
       def initialize(app, *args)
         @args = args
         @app = app
+        @block = true if block_given?
       end
 
       def call(env)
         env['phony.args'] ||= []
         env['phony.args'] << @args
+        env['phony.block'] = true if @block
         @app.call(env)
       end
     end
@@ -394,6 +396,23 @@ describe Grape::API do
 
         get '/'
         last_response.body.should eql 'hello'
+      end
+
+      it 'should add a block if one is given' do
+        block = lambda{ }
+        subject.use PhonyMiddleware, &block
+        subject.middleware.should eql [[PhonyMiddleware, block]]
+      end
+
+      it 'should use a block if one is given' do
+        block = lambda{ }
+        subject.use PhonyMiddleware, &block
+        subject.get '/' do
+          env['phony.block'].inspect
+        end
+
+        get '/'
+        last_response.body.should == 'true'
       end
     end
   end

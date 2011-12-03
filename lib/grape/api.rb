@@ -5,7 +5,7 @@ require 'logger'
 
 module Grape
   # The API class is the primary entry point for
-  # creating Grape APIs. Users should subclass this
+  # creating Grape APIs.Users should subclass this
   # class in order to build an API.
   class API
     class << self
@@ -309,8 +309,10 @@ module Grape
       #
       # @param middleware_class [Class] The class of the middleware you'd like
       #   to inject.
-      def use(middleware_class, *args)
-        imbue(:middleware, [[middleware_class, *args]])
+      def use(middleware_class, *args, &block)
+        arr = [middleware_class, *args]
+        arr << block if block_given?
+        imbue(:middleware, [arr])
       end
 
       # Retrieve an array of the middleware classes
