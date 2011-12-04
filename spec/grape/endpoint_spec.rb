@@ -14,6 +14,12 @@ describe Grape::Endpoint do
     end
   end
 
+  it 'should set itself in the env upon call' do
+    subject.get('/'){ "Hello world." }
+    get '/'
+    last_request.env['api.endpoint'].should be_kind_of(Grape::Endpoint)
+  end
+
   describe '#status' do
     it 'should be callable from within a block' do
       subject.get('/home') do

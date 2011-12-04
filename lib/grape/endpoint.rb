@@ -83,6 +83,7 @@ module Grape
     end
 
     def call!(env)
+      env['api.endpoint'] = self
       if options[:app]
         options[:app].call(env)
       else
