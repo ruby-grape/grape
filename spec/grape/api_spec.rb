@@ -414,6 +414,19 @@ describe Grape::API do
         get '/'
         last_response.body.should == 'true'
       end
+
+      it 'should not destroy the middleware settings on multiple runs' do
+        block = lambda{ }
+        subject.use PhonyMiddleware, &block
+        subject.get '/' do
+          env['phony.block'].inspect
+        end
+
+        2.times do 
+          get '/'
+          last_response.body.should == 'true'
+        end
+      end
     end
   end
   describe '.basic' do

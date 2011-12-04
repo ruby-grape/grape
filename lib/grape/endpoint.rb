@@ -226,6 +226,7 @@ module Grape
       b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
 
       aggregate_setting(:middleware).each do |m|
+        m = m.dup
         block = m.pop if m.last.is_a?(Proc)
         if block
           b.use *m, &block
