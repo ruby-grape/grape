@@ -8,34 +8,100 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc. block.
   class Endpoint
-    def self.generate(options = {}, &block)
-      c = Class.new(Grape::Endpoint)
-      c.class_eval do
-        @block = block
-        @options = options
-      end
-      c
-    end
-    
-    class << self
-      attr_accessor :block, :options
-    end
-    
-    def self.call(env)
-      new.call(env)
-    end
-    
+    attr_accessor :block, :options, :settings
     attr_reader :env, :request
+
+    def initialize(settings, options = {}, &block)
+      @settings = settings
+      @block = block
+      @options = options
+
+      raise ArgumentError, "Must specify :path option." unless options.key?(:path)
+      options[:path] = Array(options[:path])
+      options[:path] = ['/'] if options[:path].empty?
+
+      raise ArgumentError, "Must specify :method option." unless options.key?(:method)
+      options[:method] = Array(options[:method])
+
+      options[:route_options] ||= {}
+    end
+
+    def mount_in(route_set)
+      if options[:app] && options[:app].respond_to?(:endpoints)
+        options[:app].endpoints.each{|e| e.mount_in(route_set)}
+      else
+        options[:method].each do |method|
+          options[:path].each do |path|
+            prepared_path = prepare_path(path)
+            path = compile_path(path, !options[:app])
+            regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+            path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+            path_params |= (options[:route_options][:params] || [])
+            request_method = (method.to_s.upcase unless method == :any)
+
+            # routes << Route.new(route_options.merge({
+            #   :prefix => prefix,
+            #   :version => settings[:version] ? settings[:version].join('|') : nil,
+            #   :namespace => namespace,
+            #   :method => request_method,
+            #   :path => prepared_path,
+            #   :params => path_params})
+            # )
+
+            route_set.add_route(self,
+              :path_info => path,
+              :request_method => request_method
+            )
+          end
+        end
+      end
+    end
+
+    def prepare_path(path)
+      parts = []
+      parts << settings[:root_prefix] if settings[:root_prefix]
+      parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
+      parts << namespace.to_s if namespace
+      parts << path.to_s if path && '/' != path
+      parts.last << '(.:format)'
+      Rack::Mount::Utils.normalize_path(parts.join('/'))
+    end
     
+    def namespace
+      Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
+    end
+
+    def compile_path(path, anchor = true)
+      endpoint_options = {}
+      endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
+
+      Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
+    end
+
+    def call(env)
+      dup.call!(env)
+    end
+
+    def call!(env)
+      env['api.endpoint'] = self
+      if options[:app]
+        options[:app].call(env)
+      else
+        builder = build_middleware
+        builder.run options[:app] || lambda{|env| self.run(env) }
+        builder.call(env)
+      end
+    end
+
     # The parameters passed into the request as
     # well as parsed from URL segments.
     def params
       @params ||= Hashie::Mash.new.deep_merge(request.params).deep_merge(env['rack.routing_args'] || {})
     end
-    
+
     # The API version as specified in the URL.
     def version; env['api.version'] end
-    
+
     # End the request and display an error to the
     # end user with the specified message.
     #
@@ -44,7 +110,7 @@ module Grape
     def error!(message, status=403)
       throw :error, :message => message, :status => status
     end
-    
+
     # Set or retrieve the HTTP status code.
     #
     # @param status [Integer] The HTTP Status Code to return for this request.
@@ -59,9 +125,9 @@ module Grape
           else
             200
         end
-      end        
+      end
     end
-    
+
     # Set an individual header or retrieve
     # all headers that have been set.
     def header(key = nil, val = nil)
@@ -109,7 +175,7 @@ module Grape
       entity_class = options.delete(:with)
 
       object.class.ancestors.each do |potential|
-        entity_class ||= self.class.options[:representations][potential]
+        entity_class ||= (settings[:representations] || {})[potential]
       end
 
       if entity_class
@@ -121,24 +187,77 @@ module Grape
       end
     end
 
-    def call(env)
+    protected
+
+    def run(env)
       @env = env
       @header = {}
       @request = Rack::Request.new(@env)
 
-      run_filters self.class.options[:befores]
-      response_text = instance_eval &self.class.block
-      run_filters self.class.options[:afters]
+      self.extend helpers
+      run_filters befores
+      response_text = instance_eval &self.block
+      run_filters afters
 
       [status, header, [body || response_text]]
     end
 
-    protected
+    def build_middleware
+      b = Rack::Builder.new
+
+      b.use Grape::Middleware::Error, 
+        :default_status => settings[:default_error_status] || 403, 
+        :rescue_all => settings[:rescue_all], 
+        :rescued_errors => settings[:rescued_errors], 
+        :format => settings[:error_format] || :txt, 
+        :rescue_options => settings[:rescue_options],
+        :rescue_handlers => settings[:rescue_handlers] || {}
+
+      b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
+      b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+      b.use Grape::Middleware::Prefixer, :prefix => settings[:root_prefix] if settings[:root_prefix]
+
+      if settings[:version]
+        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
+          :versions        => settings[:version],
+          :version_options => settings[:version_options]
+        }
+      end
+
+      b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
+
+      aggregate_setting(:middleware).each do |m|
+        m = m.dup
+        block = m.pop if m.last.is_a?(Proc)
+        if block
+          b.use *m, &block
+        else
+          b.use *m
+        end
+      end
+
+      b
+    end
+
+    def helpers
+      m = Module.new
+      settings.stack.each{|frame| m.send :include, frame[:helpers] if frame[:helpers]}
+      m
+    end
+
+    def aggregate_setting(key)
+      settings.stack.inject([]) do |aggregate, frame|
+        aggregate += (frame[key] || [])
+      end
+    end
 
     def run_filters(filters)
       (filters || []).each do |filter|
         instance_eval &filter
       end
     end
+
+    def befores; aggregate_setting(:befores) end
+    def afters; aggregate_setting(:afters) end
   end
 end

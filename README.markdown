@@ -1,6 +1,6 @@
-# Grape [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+# Grape (Frontier) [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
 
-**Note:** This is the `master` branch of Grape where we're trying to maintain things to be relatively stable. If you want to live on the edge, check out the [frontier](https://github.com/intridea/grape/tree/frontier).
+**Welcome to the `frontier` branch. This is where we're experimenting and building the next version of Grape. Things will be civilized here one day, but until then you best carry your revolver with you.**
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 

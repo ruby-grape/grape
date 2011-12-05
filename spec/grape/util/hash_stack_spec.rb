@@ -120,4 +120,14 @@ describe Grape::Util::HashStack do
       subject.update(:abc => 123).should be_kind_of(klass)
     end
   end
+
+  describe '#clone' do
+    it 'should perform a deep copy' do
+      subject[:abc] = 123
+      subject.push :def => 234
+      clone = subject.clone
+      clone[:def] = 345
+      subject[:def].should == 234
+    end
+  end
 end

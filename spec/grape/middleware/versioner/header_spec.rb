@@ -57,6 +57,7 @@ describe Grape::Middleware::Versioner::Header do
         :version_options => {:using => :header}
       }
       subject.call('HTTP_ACCEPT' => '').first.should == 200
+      subject.call({}).first.should == 200
     end
 
     it 'should return a 200 when no header is set but strict header based versioning is disabled' do
@@ -65,6 +66,7 @@ describe Grape::Middleware::Versioner::Header do
         :version_options => {:using => :header, :strict => false}
       }
       subject.call('HTTP_ACCEPT' => '').first.should == 200
+      subject.call({}).first.should == 200
     end
 
     it 'should return a 404 when no header is set but strict header based versioning is used' do
