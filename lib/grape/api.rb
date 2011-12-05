@@ -95,7 +95,7 @@ module Grape
         if args.any?
           options = args.pop if args.last.is_a? Hash
           options ||= {}
-          options = {:using => :header}.merge!(options)
+          options = {:using => :path}.merge!(options)
           @versions = versions | args
           nest(block) do
             set(:version, args)
@@ -324,7 +324,7 @@ module Grape
 
       # An array of API routes.
       def routes
-        @routes ||= []
+        @routes ||= prepare_routes
       end
 
       def versions
@@ -332,6 +332,14 @@ module Grape
       end
 
       protected
+
+      def prepare_routes
+        routes = []
+        endpoints.each do |endpoint|
+          routes.concat(endpoint.routes)
+        end
+        routes
+      end
 
       # Execute first the provided block, then each of the
       # block passed in. Allows for simple 'before' setups
@@ -364,7 +372,6 @@ module Grape
       self.class.endpoints.each do |endpoint|
         endpoint.mount_in(@route_set)
       end
-
       @route_set.freeze
     end
 
