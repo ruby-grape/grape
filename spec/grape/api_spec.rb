@@ -58,7 +58,7 @@ describe Grape::API do
     end
 
     it 'should route if any media type is allowed' do
-
+      
     end
   end
 
@@ -123,7 +123,7 @@ describe Grape::API do
       get '/members/23'
       last_response.body.should == "23"
     end
-
+    
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
         version 'v2', :using => :path
@@ -136,7 +136,7 @@ describe Grape::API do
       get '/hello'
       last_response.body.should == "outer"
     end
-
+    
     %w(group resource resources segment).each do |als|
       it "`.#{als}` should be an alias" do
         subject.send(als, :awesome) do
@@ -220,7 +220,7 @@ describe Grape::API do
       subject.route([:get, :post], '/:id/first') do
         "first"
       end
-
+      
       subject.route([:get, :post], '/:id') do
         "ola"
       end
@@ -331,7 +331,7 @@ describe Grape::API do
       last_response.headers['Content-Type'].should eql 'application/json'
     end
   end
-
+  
   context 'custom middleware' do
     class PhonyMiddleware
       def initialize(app, *args)
@@ -363,7 +363,7 @@ describe Grape::API do
           {:middleware => [[PhonyMiddleware, 'foo']]}
         ]
         subject.stub!(:settings).and_return(settings)
-
+  
         subject.middleware.should eql [
           [PhonyMiddleware, 123],
           [PhonyMiddleware, 'abc'],
@@ -568,7 +568,7 @@ describe Grape::API do
       subject.get '/def' do
         'def'
       end
-
+      
       get '/new/abc'
       last_response.status.should eql 404
       get '/legacy/abc'
@@ -747,26 +747,92 @@ describe Grape::API do
     end
     describe "api structure with additional parameters" do
       before(:each) do
-        subject.get 'split/:string', { :params => [ "token" ], :optional_params => [ "limit" ] } do
-           params[:string].split(params[:token], (params[:limit] || 0).to_i)
+        subject.get 'split/:string', { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+          params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
       it "should split a string" do
-         get "/split/a,b,c.json", :token => ','
-         last_response.body.should == '["a","b","c"]'
+        get "/split/a,b,c.json", :token => ','
+        last_response.body.should == '["a","b","c"]'
       end
       it "should split a string with limit" do
-         get "/split/a,b,c.json", :token => ',', :limit => '2'
-         last_response.body.should == '["a","b,c"]'
+        get "/split/a,b,c.json", :token => ',', :limit => '2'
+        last_response.body.should == '["a","b,c"]'
       end
       it "should set route_params" do
-         subject.routes.size.should == 1
-         subject.routes[0].route_params.should == [ "string", "token" ]
-         subject.routes[0].route_optional_params.should == [ "limit" ]
+        subject.routes.size.should == 1
+        subject.routes[0].route_params.should == [ "string", "token" ]
+        subject.routes[0].route_optional_params.should == [ "limit" ]
       end
     end
   end
 
+  context "desc" do
+    describe "empty api structure" do
+      it "returns an empty array of routes" do
+        subject.desc "grape api"
+        subject.routes.should == []
+      end
+    end     
+    describe "single method with a desc" do
+      before(:each) do
+        subject.desc "ping method"
+        subject.get :ping do 
+          'pong'
+        end
+      end
+      it "returns route description" do
+        subject.routes[0].route_description.should == "ping method"
+      end
+    end    
+    describe "api structure with multiple methods and descriptions" do
+      before(:each) do
+        class JitterAPI < Grape::API
+          desc "first method"
+          get "first" do; end
+          get "second" do; end
+          desc "third method"
+          get "third" do; end
+        end
+      end
+      it "should return a description for the first method" do
+        JitterAPI::routes[0].route_description.should == "first method"
+        JitterAPI::routes[1].route_description.should be_nil
+        JitterAPI::routes[2].route_description.should == "third method"
+      end
+    end
+    describe "api structure with multiple methods, namespaces, descriptions and options" do
+      before(:each) do
+        class LitterAPI < Grape::API
+          desc "first method"
+          get "first" do; end
+          get "second" do; end
+          namespace "ns" do
+            desc "ns second", :foo => "bar"
+            get "second" do; end
+          end
+          desc "third method", :details => "details of third method"
+          get "third" do; end
+          desc "Reverses a string.", { :params => [
+            { "s" => { :desc => "string to reverse", :type => "string" }}
+          ]}
+          get "reverse" do
+            params[:s].reverse
+          end
+        end
+      end
+      it "should return a description for the first method" do
+        LitterAPI::routes[0].route_description.should == "first method"
+        LitterAPI::routes[1].route_description.should be_nil
+        LitterAPI::routes[2].route_description.should == "ns second"
+        LitterAPI::routes[2].route_foo.should == "bar"
+        LitterAPI::routes[3].route_description.should == "third method"
+        LitterAPI::routes[4].route_description.should == "Reverses a string."
+        LitterAPI::routes[4].route_params.should == [{ "s" => { :desc => "string to reverse", :type => "string" }}]
+      end
+    end
+  end
+  
   describe ".rescue_from klass, block" do
     it 'should rescue Exception' do
       subject.rescue_from RuntimeError do |e|
@@ -839,12 +905,12 @@ describe Grape::API do
 
   describe '.mount' do
     let(:mounted_app){ lambda{|env| [200, {}, ["MOUNTED"]]} }
-
+  
     context 'with a bare rack app' do
       before do
         subject.mount mounted_app => '/mounty'
       end
-
+    
       it 'should make a bare Rack app available at the endpoint' do
         get '/mounty'
         last_response.body.should == 'MOUNTED'
@@ -856,7 +922,7 @@ describe Grape::API do
       end
 
       it 'should be able to cascade' do
-        subject.mount lambda{ |env|
+        subject.mount lambda{ |env| 
           headers = {}
           headers['X-Cascade'] == 'pass' unless env['PATH_INFO'].include?('boo')
           [200, headers, ["Farfegnugen"]]

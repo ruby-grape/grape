@@ -25,7 +25,7 @@ module Grape
 
       options[:route_options] ||= {}
     end
-    
+
     def routes
       @routes ||= prepare_routes
     end
