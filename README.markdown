@@ -1,5 +1,6 @@
-# Grape
-[![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+# Grape [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+
+**Note:** This is the `master` branch of Grape where we're trying to maintain things to be relatively stable. If you want to live on the edge, check out the [frontier](https://github.com/intridea/grape/tree/frontier).
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
@@ -115,39 +116,6 @@ class API < Grape::API
   end
 end
 ````
-
-
-## Working with Entities
-
-A common problem in designing Ruby APIs is that you probably don't want
-the exact structure of your data models exposed. ActiveRecord, for
-instance, will dump all of its attributes. While you can override
-`#as_json` to alter this behavior somewhat, what is really needed is an
-intermediary layer between the model and the API. This is where the
-`Grape::Entity` class comes in.
-
-```ruby
-module Entities
-  class User < Grape::Entity
-    expose :first_name, :last_name
-    expose :email, :if => {:authenticated => true}
-    expose :name, :id => {:version => 'v1'} # deprecated
-  end
-end
-
-class API < Grape::API
-  version 'v1', 'v2'
-
-  get '/users/:id' do
-    present User.find(params[:id]),
-      :with => Entities::User,
-      :authenticated => env.key?('api.token')
-  end
-end
-```
-
-For more information about Entities, view the project's YARD
-documentation.
 
 ## Raising Errors
 

@@ -77,7 +77,7 @@ module Grape
         if args.any?
           options = args.pop if args.last.is_a? Hash
           options ||= {}
-          options = {:using => :header}.merge!(options)
+          options = {:using => :path}.merge!(options)
           @versions = versions | args
           nest(block) do
             set(:version, args)
