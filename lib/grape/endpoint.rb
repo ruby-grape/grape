@@ -25,36 +25,47 @@ module Grape
 
       options[:route_options] ||= {}
     end
+    
+    def routes
+      @routes ||= prepare_routes
+    end
 
     def mount_in(route_set)
       if options[:app] && options[:app].respond_to?(:endpoints)
         options[:app].endpoints.each{|e| e.mount_in(route_set)}
       else
-        options[:method].each do |method|
-          options[:path].each do |path|
-            prepared_path = prepare_path(path)
-            path = compile_path(path, !options[:app])
-            regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-            path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-            path_params |= (options[:route_options][:params] || [])
-            request_method = (method.to_s.upcase unless method == :any)
-
-            # routes << Route.new(route_options.merge({
-            #   :prefix => prefix,
-            #   :version => settings[:version] ? settings[:version].join('|') : nil,
-            #   :namespace => namespace,
-            #   :method => request_method,
-            #   :path => prepared_path,
-            #   :params => path_params})
-            # )
-
-            route_set.add_route(self,
-              :path_info => path,
-              :request_method => request_method
-            )
-          end
+        routes.each do |route|
+          route_set.add_route(self,
+            :path_info => route.route_compiled,
+            :request_method => route.route_method
+          )
         end
       end
+    end
+    
+    def prepare_routes
+      routes = []
+      options[:method].each do |method|
+        options[:path].each do |path|
+          prepared_path = prepare_path(path)
+          path = compile_path(path, !options[:app])
+          regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+          path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+          path_params |= (options[:route_options][:params] || [])
+          request_method = (method.to_s.upcase unless method == :any)
+          routes << Route.new(options[:route_options].clone.merge({
+            :prefix => settings[:root_prefix],
+            :version => settings[:version] ? settings[:version].join('|') : nil,
+            :namespace => namespace,
+            :method => request_method,
+            :path => prepared_path,
+            :params => path_params,
+            :compiled => path,
+            })
+          )
+        end
+      end
+      routes
     end
 
     def prepare_path(path)
