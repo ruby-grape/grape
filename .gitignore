@@ -11,6 +11,9 @@ tmtags
 \#*
 .\#*
 
+## REDCAR
+.redcar
+
 ## VIM
 *.swp
 

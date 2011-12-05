@@ -4,19 +4,19 @@ require 'shared_versioning_examples'
 describe Grape::API do
   subject { Class.new(Grape::API) }
   before { subject.default_format :txt }
-  
+
   def app; subject end
-  
+
   describe '.prefix' do
     it 'should route through with the prefix' do
       subject.prefix 'awesome/sauce'
       subject.get :hello do
         "Hello there."
       end
-    
+
       get 'awesome/sauce/hello'
       last_response.body.should eql "Hello there."
-      
+
       get '/hello'
       last_response.status.should eql 404
     end
@@ -80,7 +80,7 @@ describe Grape::API do
         namespace.should == '/awesome'
       end
     end
-    
+
     it 'should come after the prefix and version' do
       subject.prefix :rad
       subject.version :v1, :using => :path
@@ -89,15 +89,15 @@ describe Grape::API do
         prepare_path('hello').should == '/rad/:version/awesome/hello(.:format)'
       end
     end
-    
+
     it 'should cancel itself after the block is over' do
       subject.namespace :awesome do
         namespace.should == '/awesome'
       end
-      
+
       subject.namespace.should == '/'
     end
-    
+
     it 'should be stackable' do
       subject.namespace :awesome do
         namespace :rad do
@@ -137,30 +137,30 @@ describe Grape::API do
       end
     end
   end
-  
+
   describe '.route' do
     it 'should allow for no path' do
       subject.namespace :votes do
         get do
           "Votes"
         end
-        
+
         post do
           "Created a Vote"
         end
       end
-      
+
       get '/votes'
       last_response.body.should eql 'Votes'
       post '/votes'
       last_response.body.should eql 'Created a Vote'
     end
-    
+
     it 'should allow for multiple paths' do
       subject.get(["/abc", "/def"]) do
         "foo"
       end
-      
+
       get '/abc'
       last_response.body.should eql 'foo'
       get '/def'
@@ -171,7 +171,7 @@ describe Grape::API do
       subject.get("/abc") do
         "json"
       end
-      
+
       get '/abc.json'
       last_response.body.should eql '"json"'
     end
@@ -191,16 +191,16 @@ describe Grape::API do
           "json"
         end
       end
-      
+
       get '/abc.json'
       last_response.body.should eql '"json"'
     end
-    
+
     it 'should allow for multiple verbs' do
       subject.route([:get, :post], '/abc') do
         "hiya"
       end
-      
+
       get '/abc'
       last_response.body.should eql 'hiya'
       post '/abc'
@@ -232,18 +232,18 @@ describe Grape::API do
       last_response.body.should eql 'second'
 
     end
-    
+
     it 'should allow for :any as a verb' do
       subject.route(:any, '/abc') do
         "lol"
       end
-      
+
       %w(get post put delete).each do |m|
         send(m, '/abc')
         last_response.body.should eql 'lol'
       end
     end
-    
+
     verbs = %w(post get head delete put)
     verbs.each do |verb|
       it "should allow and properly constrain a #{verb.upcase} method" do
@@ -257,12 +257,12 @@ describe Grape::API do
         last_response.status.should eql 404
       end
     end
-    
+
     it 'should return a 201 response code for POST by default' do
       subject.post('example') do
         "Created"
       end
-      
+
       post '/example'
       last_response.status.should eql 201
       last_response.body.should eql 'Created'
@@ -375,7 +375,7 @@ describe Grape::API do
           middleware.should == [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]
         end
 
-        subject.middleware.should eql [[PhonyMiddleware, 123]]        
+        subject.middleware.should eql [[PhonyMiddleware, 123]]
       end
 
       it 'should actually call the middleware' do
@@ -400,28 +400,28 @@ describe Grape::API do
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
       last_response.status.should eql 200
     end
-    
+
     it 'should be scopable' do
       subject.get(:hello){ "Hello, world."}
       subject.namespace :admin do
         http_basic do |u,p|
           u == 'allow'
         end
-        
+
         get(:hello){ "Hello, world." }
       end
-      
+
       get '/hello'
       last_response.status.should eql 200
       get '/admin/hello'
       last_response.status.should eql 401
     end
-    
+
     it 'should be callable via .auth as well' do
       subject.auth :http_basic do |u,p|
         u == 'allow'
       end
-      
+
       subject.get(:hello){ "Hello, world."}
       get '/hello'
       last_response.status.should eql 401
@@ -429,7 +429,7 @@ describe Grape::API do
       last_response.status.should eql 200
     end
   end
-  
+
   describe '.helpers' do
     it 'should be accessible from the endpoint' do
       subject.helpers do
@@ -437,65 +437,81 @@ describe Grape::API do
           "Hello, world."
         end
       end
-      
+
       subject.get '/howdy' do
         hello
       end
-      
+
       get '/howdy'
       last_response.body.should eql 'Hello, world.'
     end
-    
+
     it 'should be scopable' do
       subject.helpers do
         def generic
           'always there'
         end
       end
-      
+
       subject.namespace :admin do
         helpers do
           def secret
             'only in admin'
           end
         end
-        
+
         get '/secret' do
           [generic, secret].join ':'
         end
       end
-      
+
       subject.get '/generic' do
         [generic, respond_to?(:secret)].join ':'
       end
-      
+
       get '/generic'
       last_response.body.should eql 'always there:false'
       get '/admin/secret'
       last_response.body.should eql 'always there:only in admin'
     end
-    
+
     it 'should be reopenable' do
       subject.helpers do
         def one
           1
         end
       end
-      
+
       subject.helpers do
         def two
           2
         end
       end
-      
+
       subject.get 'howdy' do
         [one, two]
       end
-      
+
       lambda{get '/howdy'}.should_not raise_error
     end
+
+    it 'should allow for modules' do
+      mod = Module.new do
+        def hello
+          "Hello, world."
+        end
+      end
+      subject.helpers mod
+
+      subject.get '/howdy' do
+        hello
+      end
+
+      get '/howdy'
+      last_response.body.should eql 'Hello, world.'
+    end
   end
-  
+
   describe '.scope' do
     # TODO: refactor this to not be tied to versioning. How about a generic
     # .setting macro?
@@ -508,7 +524,7 @@ describe Grape::API do
           'abc'
         end
       end
-      
+
       subject.get '/def' do
         'def'
       end
@@ -523,12 +539,12 @@ describe Grape::API do
       last_response.status.should eql 200
     end
   end
-  
+
   describe ".rescue_from" do
     it 'should not rescue errors when rescue_from is not set' do
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       lambda { get '/exception' }.should raise_error
     end
 
@@ -548,18 +564,18 @@ describe Grape::API do
 
       get '/rescued'
       last_response.status.should eql 403
-      
+
       lambda{ get '/unrescued' }.should raise_error
     end
   end
-  
+
   describe ".error_format" do
     it 'should rescue all errors and return :txt' do
       subject.rescue_from :all
       subject.error_format :txt
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       last_response.body.should eql "rain!"
     end
@@ -569,7 +585,7 @@ describe Grape::API do
       subject.error_format :txt
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       last_response.body.start_with?("rain!\r\n").should be_true
     end
@@ -579,7 +595,7 @@ describe Grape::API do
       subject.error_format :json
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       last_response.body.should eql '{"error":"rain!"}'
     end
@@ -588,7 +604,7 @@ describe Grape::API do
       subject.error_format :json
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       json = MultiJson.decode(last_response.body)
       json["error"].should eql 'rain!'
@@ -598,7 +614,7 @@ describe Grape::API do
       subject.error_format :txt
       subject.get '/error' do
         error!("Access Denied", 401)
-      end    
+      end
       get '/error'
       last_response.body.should eql "Access Denied"
     end
@@ -606,19 +622,19 @@ describe Grape::API do
       subject.error_format :json
       subject.get '/error' do
         error!("Access Denied", 401)
-      end    
+      end
       get '/error'
       last_response.body.should eql '{"error":"Access Denied"}'
     end
   end
-  
+
   describe ".default_error_status" do
     it 'should allow setting default_error_status' do
       subject.rescue_from :all
       subject.default_error_status 200
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       last_response.status.should eql 200
     end
@@ -626,7 +642,7 @@ describe Grape::API do
       subject.rescue_from :all
       subject.get '/exception' do
         raise "rain!"
-      end    
+      end
       get '/exception'
       last_response.status.should eql 403
     end
@@ -637,10 +653,10 @@ describe Grape::API do
       it "returns an empty array of routes" do
         subject.routes.should == []
       end
-    end     
+    end
     describe "single method api structure" do
       before(:each) do
-        subject.get :ping do 
+        subject.get :ping do
           'pong'
         end
       end

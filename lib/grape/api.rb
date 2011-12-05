@@ -49,7 +49,7 @@ module Grape
       def imbue(key, value)
         settings.imbue(key, value)
       end
-      
+
       # Define a root URL prefix for your entire
       # API.
       def prefix(prefix = nil)
@@ -61,11 +61,11 @@ module Grape
       # @example API with legacy support.
       #   class MyAPI < Grape::API
       #     version 'v2'
-      #     
+      #
       #     get '/main' do
       #       {:some => 'data'}
       #     end
-      #         
+      #
       #     version 'v1' do
       #       get '/main' do
       #         {:legacy => 'data'}
@@ -77,7 +77,7 @@ module Grape
         if args.any?
           options = args.pop if args.last.is_a? Hash
           options ||= {}
-          options = {:using => :header}.merge!(options)
+          options = {:using => :path}.merge!(options)
           @versions = versions | args
           nest(block) do
             set(:version, args)
@@ -90,8 +90,8 @@ module Grape
       def desc(description, options = {})
         @last_description = options.merge({description: description})
       end
-      
-      # Specify the default format for the API's 
+
+      # Specify the default format for the API's
       # serializers. Currently only `:json` is
       # supported.
       def default_format(new_format = nil)
@@ -167,7 +167,10 @@ module Grape
       #
       # When called without a block, all known helpers within this scope
       # are included.
-      # 
+      #
+      # @param mod [Module] optional module of methods to include
+      # @param &block [Block] optional block of methods to include
+      #
       # @example Define some helpers.
       #     class ExampleAPI < Grape::API
       #       helpers do
@@ -176,17 +179,17 @@ module Grape
       #         end
       #       end
       #     end
-      def helpers(&block)
-        if block_given?
-          m = settings.peek[:helpers] || Module.new
-          m.class_eval &block
-          set(:helpers, m)
+      def helpers(mod = nil, &block)
+        if block_given? || mod
+          mod ||= settings.peek[:helpers] || Module.new
+          mod.class_eval &block if block_given?
+          set(:helpers, mod)
         else
-          m = Module.new
+          mod = Module.new
           settings.stack.each do |s|
-            m.send :include, s[:helpers] if s[:helpers]
+            mod.send :include, s[:helpers] if s[:helpers]
           end
-          m
+          mod
         end
       end
 
@@ -220,7 +223,7 @@ module Grape
 
         mounts.each_pair do |app, path|
           next unless app.respond_to?(:call)
-          route_set.add_route(app, 
+          route_set.add_route(app,
             :path_info => compile_path(path, false)
           )
         end
@@ -280,8 +283,8 @@ module Grape
       def before(&block)
         settings.imbue(:befores, [block])
       end
-      
-      def after(&block) 
+
+      def after(&block)
         settings.imbue(:afters, [block])
       end
 
@@ -300,14 +303,14 @@ module Grape
           Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
         end
       end
-      
+
       alias_method :group, :namespace
       alias_method :resource, :namespace
       alias_method :resources, :namespace
       alias_method :segment, :namespace
-      
+
       # Create a scope without affecting the URL.
-      # 
+      #
       # @param name [Symbol] Purely placebo, just allows to to name the scope to make the code more readable.
       def scope(name = nil, &block)
         nest(block)
@@ -340,7 +343,7 @@ module Grape
       end
       
       protected
-      
+
       # Execute first the provided block, then each of the
       # block passed in. Allows for simple 'before' setups
       # of settings stack pushes.
@@ -364,11 +367,11 @@ module Grape
 
       def build_endpoint(&block)
         b = Rack::Builder.new
-        b.use Grape::Middleware::Error, 
-          :default_status => settings[:default_error_status] || 403, 
-          :rescue_all => settings[:rescue_all], 
-          :rescued_errors => settings[:rescued_errors], 
-          :format => settings[:error_format] || :txt, 
+        b.use Grape::Middleware::Error,
+          :default_status => settings[:default_error_status] || 403,
+          :rescue_all => settings[:rescue_all],
+          :rescued_errors => settings[:rescued_errors],
+          :format => settings[:error_format] || :txt,
           :rescue_options => settings[:rescue_options],
           :rescue_handlers => settings[:rescue_handlers] || {}
 
@@ -399,7 +402,7 @@ module Grape
         b.run endpoint
         b.to_app
       end
-      
+
       def inherited(subclass)
         subclass.reset!
         subclass.logger = logger.clone

@@ -1,5 +1,6 @@
-# Grape
-[![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+# Grape [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+
+**Note:** This is the `master` branch of Grape where we're trying to maintain things to be relatively stable. If you want to live on the edge, check out the [frontier](https://github.com/intridea/grape/tree/frontier).
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
@@ -86,37 +87,35 @@ To circumvent this default behaviour, one could use the `:strict` option. When t
 
 Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
-## Working with Entities
+## Helpers
 
-A common problem in designing Ruby APIs is that you probably don't want
-the exact structure of your data models exposed. ActiveRecord, for
-instance, will dump all of its attributes. While you can override
-`#as_json` to alter this behavior somewhat, what is really needed is an
-intermediary layer between the model and the API. This is where the
-`Grape::Entity` class comes in.
+You can define helper methods that your endpoints can use with the `helpers`
+macro by either giving a block or a module:
 
-```ruby
-module Entities
-  class User < Grape::Entity
-    expose :first_name, :last_name
-    expose :email, :if => {:authenticated => true}
-    expose :name, :id => {:version => 'v1'} # deprecated
+````ruby
+module MyHelpers
+  def say_hello(user)
+    "hey there #{user.name}"
   end
 end
 
 class API < Grape::API
-  version 'v1', 'v2'
+  # define helpers with a block
+  helpers do
+    def current_user
+      User.find(params[:user_id])
+    end
+  end
 
-  get '/users/:id' do
-    present User.find(params[:id]),
-      :with => Entities::User,
-      :authenticated => env.key?('api.token')
+  # or mix in a module
+  helpers MyHelpers
+
+  get '/hello' do
+    # helpers available in your endpoint and filters
+    say_hello(current_user)
   end
 end
-```
-
-For more information about Entities, view the project's YARD
-documentation.
+````
 
 ## Raising Errors
 
