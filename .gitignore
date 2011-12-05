@@ -11,6 +11,9 @@ tmtags
 \#*
 .\#*
 
+## REDCAR
+.redcar
+
 ## VIM
 *.swp
 
@@ -23,7 +26,5 @@ pkg
 .yardoc/*
 dist
 Gemfile.lock
-*.orig
-*.rej
 
 ## PROJECT::SPECIFIC

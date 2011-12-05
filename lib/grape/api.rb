@@ -85,6 +85,11 @@ module Grape
           end
         end
       end
+      
+      # Add a description to the next namespace or function.
+      def desc(description, options = {})
+        @last_description = options.merge({description: description})
+      end
 
       # Specify the default format for the API's
       # serializers. Currently only `:json` is
@@ -261,7 +266,11 @@ module Grape
               :namespace => namespace,
               :method => request_method,
               :path => prepared_path,
-              :params => path_params}))
+              :params => path_params
+              }.merge(@last_description || {})
+            ))
+              
+            @last_description = nil
 
             route_set.add_route(endpoint,
               :path_info => path,
@@ -328,11 +337,11 @@ module Grape
       def routes
         @routes ||= []
       end
-
+      
       def versions
         @versions ||= []
       end
-
+      
       protected
 
       # Execute first the provided block, then each of the
@@ -385,7 +394,7 @@ module Grape
         representations = settings[:representations] || {}
 
         endpoint = Grape::Endpoint.generate({
-          :befores => befores,
+          :befores => befores, 
           :afters => afters,
           :representations => representations
         }, &block)
