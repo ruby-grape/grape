@@ -250,7 +250,7 @@ end
 
 ## Describing and Inspecting an API
 
-Grape lets you add a description to an API along with any other optional elements that can also be inspected at runtime.
+Grape lets you add a description to an API along with any other optional elements that can also be inspected at runtime. 
 This can be useful for generating documentation.
 
 ```ruby
@@ -263,9 +263,9 @@ class TwitterAPI < Grape::API
     api.version
   end
 
-  desc "Reverses a string.", { :params => [ 
+  desc "Reverses a string.", { :params =>  
     { "s" => { :desc => "string to reverse", :type => "string" }}
-  ]}
+  }
   get "reverse" do
     params[:s].reverse
   end

@@ -747,7 +747,7 @@ describe Grape::API do
     end
     describe "api structure with additional parameters" do
       before(:each) do
-        subject.get 'split/:string', { :params => [ "token" ], :optional_params => [ "limit" ] } do 
+        subject.get 'split/:string', { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do 
           params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
@@ -761,8 +761,8 @@ describe Grape::API do
       end
       it "should set route_params" do
         subject.routes.size.should == 1
-        subject.routes[0].route_params.should == [ "string", "token" ]
-        subject.routes[0].route_optional_params.should == [ "limit" ]
+        subject.routes[0].route_params.should == { "string" => "", "token" => "a token" }
+        subject.routes[0].route_optional_params.should == { "limit" => "the limit" }
       end
     end
   end
@@ -778,6 +778,17 @@ describe Grape::API do
       before(:each) do
         subject.desc "ping method"
         subject.get :ping do 
+          'pong'
+        end
+      end
+      it "returns route description" do
+        subject.routes[0].route_description.should == "ping method"
+      end
+    end    
+    describe "single method with a an array of params and a desc hash block" do
+      before(:each) do
+        subject.desc "ping method", { :params => { "x" => "y" } }
+        subject.get "ping/:x" do 
           'pong'
         end
       end
@@ -813,9 +824,9 @@ describe Grape::API do
           end
           desc "third method", :details => "details of third method"
           get "third" do; end
-          desc "Reverses a string.", { :params => [
+          desc "Reverses a string.", { :params =>
             { "s" => { :desc => "string to reverse", :type => "string" }}
-          ]}
+          }
           get "reverse" do
             params[:s].reverse
           end
@@ -828,7 +839,7 @@ describe Grape::API do
         LitterAPI::routes[2].route_foo.should == "bar"
         LitterAPI::routes[3].route_description.should == "third method"
         LitterAPI::routes[4].route_description.should == "Reverses a string."
-        LitterAPI::routes[4].route_params.should == [{ "s" => { :desc => "string to reverse", :type => "string" }}]
+        LitterAPI::routes[4].route_params.should == { "s" => { :desc => "string to reverse", :type => "string" }}
       end
     end
   end
