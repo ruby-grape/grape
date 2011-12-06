@@ -175,13 +175,24 @@ describe Grape::API do
       last_response.body.should eql 'foo'
     end
 
-    it 'should allow for format' do
-      subject.get("/abc") do
-        "json"
+    context "format" do
+      before(:each) do
+        subject.get("/abc") do
+          params[:format]
+        end
+      end
+    
+      it "should allow .json" do
+        get '/abc.json'
+        last_response.status.should == 200
+        last_response.body.should eql '"json"' # json-encoded symbol
       end
 
-      get '/abc.json'
-      last_response.body.should eql '"json"'
+      it "should allow .txt" do
+        get '/abc.txt'
+        last_response.status.should == 200
+        last_response.body.should eql "txt" # raw text
+      end
     end
 
     it 'should allow for format without corrupting a param' do
