@@ -14,7 +14,7 @@ describe Grape::Middleware::Formatter do
     end
     
     it 'should call #to_json first if it is available' do
-      @body = "string"
+      @body = ['foo']
       @body.instance_eval do
         def to_json
           "\"bar\""
@@ -124,9 +124,9 @@ describe Grape::Middleware::Formatter do
       body.body.should == ['CUSTOM FORMAT']
     end
     it 'should use default json formatter' do
-      @body = 'blah'
+      @body = ['blah']
       _, _, body = subject.call({'PATH_INFO' => '/info.json'})
-      body.body.should == ['"blah"']
+      body.body.should == ['["blah"]']
     end
     it 'should use custom json formatter' do
       subject.options[:formatters][:json] = lambda { |obj| 'CUSTOM JSON FORMAT' }

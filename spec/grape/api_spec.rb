@@ -178,41 +178,41 @@ describe Grape::API do
     context "format" do
       before(:each) do
         subject.get("/abc") do
-          params[:format]
+          RSpec::Mocks::Mock.new(:to_json => 'abc', :to_txt => 'def')
         end
       end
     
       it "should allow .json" do
         get '/abc.json'
         last_response.status.should == 200
-        last_response.body.should eql '"json"' # json-encoded symbol
+        last_response.body.should eql 'abc' # json-encoded symbol
       end
 
       it "should allow .txt" do
         get '/abc.txt'
         last_response.status.should == 200
-        last_response.body.should eql "txt" # raw text
+        last_response.body.should eql 'def' # raw text
       end
     end
 
     it 'should allow for format without corrupting a param' do
       subject.get('/:id') do
-        params[:id]
+        {"id" => params[:id]}
       end
 
       get '/awesome.json'
-      last_response.body.should eql "\"awesome\""
+      last_response.body.should eql '{"id":"awesome"}'
     end
 
     it 'should allow for format in namespace with no path' do
       subject.namespace :abc do
         get do
-          "json"
+          ["json"]
         end
       end
 
       get '/abc.json'
-      last_response.body.should eql '"json"'
+      last_response.body.should eql '["json"]'
     end
 
     it 'should allow for multiple verbs' do
