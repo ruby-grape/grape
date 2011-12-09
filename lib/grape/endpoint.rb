@@ -48,7 +48,7 @@ module Grape
       options[:method].each do |method|
         options[:path].each do |path|
           prepared_path = prepare_path(path)
-          path = compile_path(path, !options[:app])
+          path = compile_path(prepared_path, !options[:app])
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
           path_params |= (options[:route_options][:params] || [])
@@ -82,11 +82,10 @@ module Grape
       Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
     end
 
-    def compile_path(path, anchor = true)
+    def compile_path(prepared_path, anchor = true)
       endpoint_options = {}
       endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
-
-      Rack::Mount::Strexp.compile(prepare_path(path), endpoint_options, %w( / . ? ), anchor)
+      Rack::Mount::Strexp.compile(prepared_path, endpoint_options, %w( / . ? ), anchor)
     end
 
     def call(env)
