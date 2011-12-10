@@ -31,6 +31,7 @@ module Grape
         @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
         @mountings = []
+        @routes = nil
       end
 
       def compile
@@ -102,6 +103,11 @@ module Grape
             set(:version_options, options)
           end
         end
+      end
+      
+      # Add a description to the next namespace or function.
+      def desc(description, options = {})
+        @last_description = options.merge({description: description})
       end
 
       # Specify the default format for the API's
@@ -260,11 +266,13 @@ module Grape
       #     end
       #   end
       def route(methods, paths = ['/'], route_options = {}, &block)
-        endpoints << Grape::Endpoint.new(settings.clone, {
+        endpoint_options = {
           :method => methods,
           :path => paths,
-          :route_options => (route_options || {})
-        }, &block)
+          :route_options => (route_options || {}).merge(@last_description || {})
+        }
+        endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)
+        @last_description = nil
       end
 
       def before(&block)
@@ -326,11 +334,11 @@ module Grape
       def routes
         @routes ||= prepare_routes
       end
-
+      
       def versions
         @versions ||= []
       end
-
+      
       protected
 
       def prepare_routes

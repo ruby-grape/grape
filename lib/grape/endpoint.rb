@@ -25,7 +25,7 @@ module Grape
 
       options[:route_options] ||= {}
     end
-    
+
     def routes
       @routes ||= prepare_routes
     end
@@ -50,8 +50,13 @@ module Grape
           prepared_path = prepare_path(path)
           path = compile_path(prepared_path, !options[:app])
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-          path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-          path_params |= (options[:route_options][:params] || [])
+          path_params = {}
+          # named parameters in the api path
+          named_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+          named_params.each { |named_param| path_params[named_param] = "" }
+          # route parameters declared via desc or appended to the api declaration
+          route_params = (options[:route_options][:params] || {})
+          path_params.merge!(route_params)
           request_method = (method.to_s.upcase unless method == :any)
           routes << Route.new(options[:route_options].clone.merge({
             :prefix => settings[:root_prefix],
