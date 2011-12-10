@@ -12,20 +12,20 @@ module Grape
         @app = app
         @options = default_options.merge(options)
       end
-      
+
       def default_options; {} end
-      
+
       def call(env)
         dup.call!(env)
       end
-      
+
       def call!(env)
         @env = env
         before
         @app_response = @app.call(@env)
         after || @app_response
       end
-      
+
       # @abstract
       # Called before the application is called in the middleware lifecycle.
       def before; end
@@ -33,11 +33,11 @@ module Grape
       # Called after the application is called in the middleware lifecycle.
       # @return [Response, nil] a Rack SPEC response or nil to call the application afterwards.
       def after; end
-      
+
       def request
         Rack::Request.new(self.env)
       end
-      
+
       def response
         Rack::Response.new(@app_response)
       end
@@ -115,6 +115,8 @@ module Grape
 
           if object.respond_to? :serializable_hash
             MultiJson.encode(object.serializable_hash)
+          elsif object.kind_of?(Array) && !object.map {|o| o.respond_to? :serializable_hash }.include?(false)
+            MultiJson.encode(object.map {|o| o.serializable_hash })
           elsif object.respond_to? :to_json
             object.to_json
           else
@@ -125,11 +127,11 @@ module Grape
         def encode_txt(object)
           object.respond_to?(:to_txt) ? object.to_txt : object.to_s
         end
-        
+
         def decode_xml(object)
           MultiXml.parse(object)
         end
-        
+
         def encode_xml(object)
           object.respond_to?(:to_xml) ? object.to_xml : object.to_s
         end
