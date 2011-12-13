@@ -48,7 +48,6 @@ module Grape
       end
 
       def call!(env)
-        logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         instance.call(env)
       end
 
@@ -104,7 +103,7 @@ module Grape
           end
         end
       end
-      
+
       # Add a description to the next namespace or function.
       def desc(description, options = {})
         @last_description = options.merge(:description => description)
@@ -279,7 +278,7 @@ module Grape
         imbue(:befores, [block])
       end
 
-      def after(&block) 
+      def after(&block)
         imbue(:afters, [block])
       end
 
@@ -334,11 +333,11 @@ module Grape
       def routes
         @routes ||= prepare_routes
       end
-      
+
       def versions
         @versions ||= []
       end
-      
+
       protected
 
       def prepare_routes
