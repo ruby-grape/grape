@@ -211,6 +211,21 @@ describe Grape::Entity do
         rep.last.serializable_hash[:name].should == 'Friend 2'
       end
 
+      it 'should disable root key name for child representations' do
+        class FriendEntity < Grape::Entity
+          root 'friends', 'friend'
+          expose :name, :email
+        end
+        fresh_class.class_eval do
+          expose :friends, :using => FriendEntity
+        end
+        rep = subject.send(:value_for, :friends)
+        rep.should be_kind_of(Array)
+        rep.reject{|r| r.is_a?(FriendEntity)}.should be_empty
+        rep.first.serializable_hash[:name].should == 'Friend 1'
+        rep.last.serializable_hash[:name].should == 'Friend 2'
+      end
+
       it 'should call through to the proc if there is one' do
         subject.send(:value_for, :computed, :awesome => 123).should == 123
       end

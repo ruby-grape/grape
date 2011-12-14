@@ -195,7 +195,7 @@ module Grape
       if exposure_options[:proc]
         exposure_options[:proc].call(object, options)
       elsif exposure_options[:using]
-        exposure_options[:using].represent(object.send(attribute))
+        exposure_options[:using].represent(object.send(attribute), :root => nil)
       else
         object.send(attribute)
       end
