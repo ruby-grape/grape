@@ -138,6 +138,10 @@ module Grape
     # @param objects [Object or Array] One or more objects to be represented.
     # @param options [Hash] Options that will be passed through to each entity
     #   representation.
+    #
+    # @option options :root [String] override the default root name set for the
+    #   entity. Pass nil or false to represent the object or objects with no
+    #   root name even if one is defined for the entity.
     def self.represent(objects, options = {})
       inner = if objects.is_a?(Array)
         objects.map{|o| self.new(o, {:collection => true}.merge(options))}
@@ -145,7 +149,11 @@ module Grape
         self.new(objects, options)
       end
 
-      root_element = objects.is_a?(Array) ? @collection_root : @root
+      root_element = if options.has_key?(:root)
+        options[:root]
+      else
+        objects.is_a?(Array) ? @collection_root : @root
+      end
       root_element ? { root_element => inner } : inner
     end
 

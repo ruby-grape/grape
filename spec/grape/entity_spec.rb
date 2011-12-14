@@ -84,6 +84,23 @@ describe Grape::Entity do
             representation['things'].reject{|r| r.kind_of?(subject)}.should be_empty
           end
         end
+
+        context 'it can be overridden' do
+          it 'can be disabled' do
+            representation = subject.represent(4.times.map{Object.new}, :root=>false)
+            representation.should be_kind_of(Array)
+            representation.size.should == 4
+            representation.reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+          it 'can use a different name' do
+            representation = subject.represent(4.times.map{Object.new}, :root=>'others')
+            representation.should be_kind_of(Hash)
+            representation.should have_key('others')
+            representation['others'].should be_kind_of(Array)
+            representation['others'].size.should == 4
+            representation['others'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
       end
 
       context 'with singular root key' do
