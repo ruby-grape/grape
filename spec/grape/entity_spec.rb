@@ -59,6 +59,81 @@ describe Grape::Entity do
       end
     end
 
+    describe '.root' do
+      context 'with singular and plural root keys' do
+        before(:each) do
+          subject.root 'thing', 'things'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(Object.new)
+            representation.should be_kind_of(Hash)
+            representation.should have_key('thing')
+            representation['thing'].should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Hash)
+            representation.should have_key('things')
+            representation['things'].should be_kind_of(Array)
+            representation['things'].size.should == 4
+            representation['things'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+
+      context 'with singular root key' do
+        before(:each) do
+          subject.root 'thing'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(Object.new)
+            representation.should be_kind_of(Hash)
+            representation.should have_key('thing')
+            representation['thing'].should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Array)
+            representation.size.should == 4
+            representation.reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+
+      context 'with plural root key' do
+        before(:each) do
+          subject.root nil, 'things'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            subject.represent(Object.new).should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Hash)
+            representation.should have_key('things')
+            representation['things'].should be_kind_of(Array)
+            representation['things'].size.should == 4
+            representation['things'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+    end
+
     describe '#initialize' do
       it 'should take an object and an optional options hash' do
         expect{ subject.new(Object.new) }.not_to raise_error
@@ -77,10 +152,10 @@ describe Grape::Entity do
   context 'instance methods' do
     let(:model){ mock(attributes) }
     let(:attributes){ {
-      :name => 'Bob Bobson', 
+      :name => 'Bob Bobson',
       :email => 'bob@example.com',
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []), 
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []),
         mock(:name => "Friend 2", :email => 'friend2@example.com', :friends => [])
       ]
     } }
