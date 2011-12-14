@@ -87,15 +87,19 @@ module Grape
 
     # This allows you to set a root element name for your representation.
     #
-    # @param singular [String] the root key to use when representing a single object
-    # @param plural   [String] the root key to use when representing a collection of objects
+    # @param plural   [String] the root key to use when representing
+    #   a collection of objects. If missing or nil, no root key will be used
+    #   when representing collections of objects.
+    # @param singular [String] the root key to use when representing
+    #   a single object. If missing or nil, no root key will be used when
+    #   representing an individual object.
     #
     # @example Entity Definition
     #
     #   module API
     #     module Entities
     #       class User < Grape::Entity
-    #         root 'user', 'users'
+    #         root 'users', 'user'
     #         expose :id
     #       end
     #     end
@@ -120,9 +124,9 @@ module Grape
     #       end
     #     end
     #   end
-    def self.root(singular, plural=nil)
-      @root = singular
+    def self.root(plural, singular=nil)
       @collection_root = plural
+      @root = singular
     end
 
     # This convenience method allows you to instantiate one or more entities by

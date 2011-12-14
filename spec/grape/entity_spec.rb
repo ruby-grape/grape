@@ -62,7 +62,7 @@ describe Grape::Entity do
     describe '.root' do
       context 'with singular and plural root keys' do
         before(:each) do
-          subject.root 'thing', 'things'
+          subject.root 'things', 'thing'
         end
 
         context 'with a single object' do
@@ -88,7 +88,7 @@ describe Grape::Entity do
 
       context 'with singular root key' do
         before(:each) do
-          subject.root 'thing'
+          subject.root nil, 'thing'
         end
 
         context 'with a single object' do
@@ -112,7 +112,7 @@ describe Grape::Entity do
 
       context 'with plural root key' do
         before(:each) do
-          subject.root nil, 'things'
+          subject.root 'things'
         end
 
         context 'with a single object' do
