@@ -1,7 +1,7 @@
 require 'hashie'
 
 module Grape
-  # An Entity is a lightweight structure that allows you to easily 
+  # An Entity is a lightweight structure that allows you to easily
   # represent data from your application in a consistent and abstracted
   # way in your API.
   #
@@ -19,7 +19,7 @@ module Grape
   #     end
   #   end
   #
-  # Entities are not independent structures, rather, they create 
+  # Entities are not independent structures, rather, they create
   # **representations** of other Ruby objects using a number of methods
   # that are convenient for use in an API. Once you've defined an Entity,
   # you can use it in your API like this:
@@ -54,7 +54,7 @@ module Grape
     #   it will yield the object being represented and the options passed to the
     #   representation call. Return true to prevent exposure, false to allow it.
     # @option options :using This option allows you to map an attribute to another Grape
-    #   Entity. Pass it a Grape::Entity class and the attribute in question will 
+    #   Entity. Pass it a Grape::Entity class and the attribute in question will
     #   automatically be transformed into a representation that will receive the same
     #   options as the parent entity when called. Note that arrays are fine here and
     #   will automatically be detected and handled appropriately.
@@ -85,6 +85,50 @@ module Grape
       (@exposures ||= {})
     end
 
+    # This allows you to set a root element name for your representation.
+    #
+    # @param plural   [String] the root key to use when representing
+    #   a collection of objects. If missing or nil, no root key will be used
+    #   when representing collections of objects.
+    # @param singular [String] the root key to use when representing
+    #   a single object. If missing or nil, no root key will be used when
+    #   representing an individual object.
+    #
+    # @example Entity Definition
+    #
+    #   module API
+    #     module Entities
+    #       class User < Grape::Entity
+    #         root 'users', 'user'
+    #         expose :id
+    #       end
+    #     end
+    #   end
+    #
+    # @example Usage in the API Layer
+    #
+    #   module API
+    #     class Users < Grape::API
+    #       version 'v2'
+    #
+    #       # this will render { "users": [ {"id":"1"}, {"id":"2"} ] }
+    #       get '/users' do
+    #         @users = User.all
+    #         present @users, :with => API::Entities::User
+    #       end
+    #
+    #       # this will render { "user": {"id":"1"} }
+    #       get '/users/:id' do
+    #         @user = User.find(params[:id])
+    #         present @user, :with => API::Entities::User
+    #       end
+    #     end
+    #   end
+    def self.root(plural, singular=nil)
+      @collection_root = plural
+      @root = singular
+    end
+
     # This convenience method allows you to instantiate one or more entities by
     # passing either a singular or collection of objects. Each object will be
     # initialized with the same options. If an array of objects is passed in,
@@ -94,12 +138,23 @@ module Grape
     # @param objects [Object or Array] One or more objects to be represented.
     # @param options [Hash] Options that will be passed through to each entity
     #   representation.
+    #
+    # @option options :root [String] override the default root name set for the
+    #   entity. Pass nil or false to represent the object or objects with no
+    #   root name even if one is defined for the entity.
     def self.represent(objects, options = {})
-      if objects.is_a?(Array)
+      inner = if objects.is_a?(Array)
         objects.map{|o| self.new(o, {:collection => true}.merge(options))}
       else
         self.new(objects, options)
       end
+
+      root_element = if options.has_key?(:root)
+        options[:root]
+      else
+        objects.is_a?(Array) ? @collection_root : @root
+      end
+      root_element ? { root_element => inner } : inner
     end
 
     def initialize(object, options = {})
@@ -140,7 +195,7 @@ module Grape
       if exposure_options[:proc]
         exposure_options[:proc].call(object, options)
       elsif exposure_options[:using]
-        exposure_options[:using].represent(object.send(attribute))
+        exposure_options[:using].represent(object.send(attribute), :root => nil)
       else
         object.send(attribute)
       end
