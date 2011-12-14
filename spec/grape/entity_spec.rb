@@ -59,6 +59,98 @@ describe Grape::Entity do
       end
     end
 
+    describe '.root' do
+      context 'with singular and plural root keys' do
+        before(:each) do
+          subject.root 'things', 'thing'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(Object.new)
+            representation.should be_kind_of(Hash)
+            representation.should have_key('thing')
+            representation['thing'].should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Hash)
+            representation.should have_key('things')
+            representation['things'].should be_kind_of(Array)
+            representation['things'].size.should == 4
+            representation['things'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+
+        context 'it can be overridden' do
+          it 'can be disabled' do
+            representation = subject.represent(4.times.map{Object.new}, :root=>false)
+            representation.should be_kind_of(Array)
+            representation.size.should == 4
+            representation.reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+          it 'can use a different name' do
+            representation = subject.represent(4.times.map{Object.new}, :root=>'others')
+            representation.should be_kind_of(Hash)
+            representation.should have_key('others')
+            representation['others'].should be_kind_of(Array)
+            representation['others'].size.should == 4
+            representation['others'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+
+      context 'with singular root key' do
+        before(:each) do
+          subject.root nil, 'thing'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(Object.new)
+            representation.should be_kind_of(Hash)
+            representation.should have_key('thing')
+            representation['thing'].should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Array)
+            representation.size.should == 4
+            representation.reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+
+      context 'with plural root key' do
+        before(:each) do
+          subject.root 'things'
+        end
+
+        context 'with a single object' do
+          it 'should allow a root element name to be specified' do
+            subject.represent(Object.new).should be_kind_of(subject)
+          end
+        end
+
+        context 'with an array of objects' do
+          it 'should allow a root element name to be specified' do
+            representation = subject.represent(4.times.map{Object.new})
+            representation.should be_kind_of(Hash)
+            representation.should have_key('things')
+            representation['things'].should be_kind_of(Array)
+            representation['things'].size.should == 4
+            representation['things'].reject{|r| r.kind_of?(subject)}.should be_empty
+          end
+        end
+      end
+    end
+
     describe '#initialize' do
       it 'should take an object and an optional options hash' do
         expect{ subject.new(Object.new) }.not_to raise_error
@@ -77,10 +169,10 @@ describe Grape::Entity do
   context 'instance methods' do
     let(:model){ mock(attributes) }
     let(:attributes){ {
-      :name => 'Bob Bobson', 
+      :name => 'Bob Bobson',
       :email => 'bob@example.com',
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []), 
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []),
         mock(:name => "Friend 2", :email => 'friend2@example.com', :friends => [])
       ]
     } }
@@ -115,6 +207,21 @@ describe Grape::Entity do
       it 'should instantiate a representation if that is called for' do
         rep = subject.send(:value_for, :friends)
         rep.reject{|r| r.is_a?(fresh_class)}.should be_empty
+        rep.first.serializable_hash[:name].should == 'Friend 1'
+        rep.last.serializable_hash[:name].should == 'Friend 2'
+      end
+
+      it 'should disable root key name for child representations' do
+        class FriendEntity < Grape::Entity
+          root 'friends', 'friend'
+          expose :name, :email
+        end
+        fresh_class.class_eval do
+          expose :friends, :using => FriendEntity
+        end
+        rep = subject.send(:value_for, :friends)
+        rep.should be_kind_of(Array)
+        rep.reject{|r| r.is_a?(FriendEntity)}.should be_empty
         rep.first.serializable_hash[:name].should == 'Friend 1'
         rep.last.serializable_hash[:name].should == 'Friend 2'
       end
