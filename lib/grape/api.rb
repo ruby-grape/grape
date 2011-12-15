@@ -246,10 +246,13 @@ module Grape
 
         route_options ||= {}
 
+        anchor = route_options.delete(:anchor)
+        anchor = anchor.nil? ? true : anchor
+
         methods.each do |method|
           paths.each do |path|
             prepared_path = prepare_path(path)
-            path = compile_path(path)
+            path = compile_path(path, anchor)
             regex = Rack::Mount::RegexpWithNamedGroups.new(path)
             path_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
             path_params |= (route_options[:params] || [])
