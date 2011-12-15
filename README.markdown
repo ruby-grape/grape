@@ -253,6 +253,28 @@ StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
 StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
 ```
 
+## Anchoring
+
+Grape by default anchors all request paths, which means that the request URL should match from start to end to match, otherwise a `404 Not Found` is returned.
+However, this is sometimes not what you want, because it is not always known up front what can be expected from the call.
+This is because Rack-mount by default anchors requests to match from the start to the end, or not at all. Rails solves this problem by using a `:anchor => false` option in your routes.
+In Grape this option can be used as well when a method is defined.
+
+For instance when you're API needs to get part of an URL, for instance:
+
+```ruby
+class UrlAPI < Grape::API
+  namespace :urls do
+    get '/(*:url)', :anchor => false do
+      some_data
+    end
+  end
+end
+```
+
+This will match all paths starting with '/urls/'. There is one caveat though: the `params[:url]` parameter only holds the first part of the request url. Luckily this can be circumvented by using the described above syntax for path specification and using the `PATH_INFO` Rack environment variable, using `env["PATH_INFO"]`. This will hold everyting that comes after the '/urls/' part.
+
+
 ## Note on Patches/Pull Requests
 
 * Fork the project.
