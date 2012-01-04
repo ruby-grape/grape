@@ -2,7 +2,14 @@
 
 **Welcome to the `frontier` branch. This is where we're experimenting and building the next version of Grape. Things will be civilized here one day, but until then you best carry your revolver with you.**
 
+## What is Grape?
+
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
+
+## Project Tracking
+
+* [Grape Google Group](http://groups.google.com/group/ruby-grape)
+* [Grape Wiki](https://github.com/intridea/grape/wiki)
 
 ## Installation
 
