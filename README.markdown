@@ -4,6 +4,11 @@
 
 Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
 
+## Project Tracking
+
+* [Grape Google Group](http://groups.google.com/group/ruby-grape)
+* [Grape Wiki](https://github.com/intridea/grape/wiki)
+
 ## Installation
 
 Grape is available as a gem, to install it just install the gem:
@@ -85,7 +90,7 @@ request:
 By default, the first matching version is used when no Accept header is supplied. This behavior is similar to routing in Rails.
 To circumvent this default behaviour, one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error is returned when no correct Accept header is supplied.
 
-Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
+Serialization takes place automatically.
 
 ## Helpers
 
