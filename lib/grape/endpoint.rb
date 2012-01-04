@@ -42,7 +42,7 @@ module Grape
         end
       end
     end
-    
+
     def prepare_routes
       routes = []
       options[:method].each do |method|
@@ -82,7 +82,7 @@ module Grape
       parts.last << '(.:format)'
       Rack::Mount::Utils.normalize_path(parts.join('/'))
     end
-    
+
     def namespace
       Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
     end
@@ -193,13 +193,18 @@ module Grape
         entity_class ||= (settings[:representations] || {})[potential]
       end
 
-      if entity_class
+      root = options.delete(:root)
+
+      representation = if entity_class
         embeds = {:env => env}
         embeds[:version] = env['api.version'] if env['api.version']
-        body entity_class.represent(object, embeds.merge(options))
+        entity_class.represent(object, embeds.merge(options))
       else
-        body object
+        object
       end
+
+      representation = { root => representation } if root
+      body representation
     end
 
     protected
@@ -220,11 +225,11 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
-      b.use Grape::Middleware::Error, 
-        :default_status => settings[:default_error_status] || 403, 
-        :rescue_all => settings[:rescue_all], 
-        :rescued_errors => settings[:rescued_errors], 
-        :format => settings[:error_format] || :txt, 
+      b.use Grape::Middleware::Error,
+        :default_status => settings[:default_error_status] || 403,
+        :rescue_all => settings[:rescue_all],
+        :rescued_errors => settings[:rescued_errors],
+        :format => settings[:error_format] || :txt,
         :rescue_options => settings[:rescue_options],
         :rescue_handlers => settings[:rescue_handlers] || {}
 

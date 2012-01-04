@@ -178,6 +178,14 @@ describe Grape::Endpoint do
       get '/example'
       last_response.body.should == 'Hiya'
     end
+
+    it 'should add a root key to the output if one is given' do
+      subject.get '/example' do
+        present({:abc => 'def'}, :root => :root)
+        body.should == {:root => {:abc => 'def'}}
+      end
+      get '/example'
+    end
   end
 
   context 'filters' do
