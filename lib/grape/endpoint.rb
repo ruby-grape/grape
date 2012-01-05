@@ -48,7 +48,11 @@ module Grape
       options[:method].each do |method|
         options[:path].each do |path|
           prepared_path = prepare_path(path)
-          path = compile_path(prepared_path, !options[:app])
+
+          anchor = options[:route_options][:anchor]
+          anchor = anchor.nil? ? true : anchor
+
+          path = compile_path(prepared_path, anchor && !options[:app])
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
