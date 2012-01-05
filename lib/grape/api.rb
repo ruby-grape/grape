@@ -95,7 +95,7 @@ module Grape
         if args.any?
           options = args.pop if args.last.is_a? Hash
           options ||= {}
-          options = {:using => :header}.merge!(options)
+          options = {:using => :path}.merge!(options)
           @versions = versions | args
           nest(block) do
             set(:version, args)
@@ -287,6 +287,7 @@ module Grape
       def put(paths = ['/'], options = {}, &block); route('PUT', paths, options, &block) end
       def head(paths = ['/'], options = {}, &block); route('HEAD', paths, options, &block) end
       def delete(paths = ['/'], options = {}, &block); route('DELETE', paths, options, &block) end
+      def options(paths = ['/'], options = {}, &block); route('OPTIONS', paths, options, &block) end
 
       def namespace(space = nil, &block)
         if space || block_given?
