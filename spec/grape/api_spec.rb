@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'shared_versioning_examples'
+require 'shared/versioning_examples'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -448,7 +448,7 @@ describe Grape::API do
       subject.get(:hello){ "Hello, world."}
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
       last_response.status.should eql 200
     end
 
@@ -476,7 +476,7 @@ describe Grape::API do
       subject.get(:hello){ "Hello, world."}
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
       last_response.status.should eql 200
     end
   end

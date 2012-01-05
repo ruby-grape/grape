@@ -4,7 +4,11 @@
 
 ## What is Grape?
 
-Grape is a REST-like API micro-framework for Ruby. It is built to complement existing web application frameworks such as Rails and Sinatra by providing a simple DSL to easily provide APIs. It has built-in support for common conventions such as multiple formats, subdomain/prefix restriction, and versioning.
+Grape is a REST-like API micro-framework for Ruby. It is built to complement
+existing web application frameworks such as Rails and Sinatra by providing a
+simple DSL to easily provide APIs. It has built-in support for common
+conventions such as multiple formats, subdomain/prefix restriction, and
+versioning.
 
 ## Project Tracking
 
@@ -19,7 +23,9 @@ Grape is available as a gem, to install it just install the gem:
 
 ## Basic Usage
 
-Grape APIs are Rack applications that are created by subclassing `Grape::API`. Below is a simple example showing some of the more common features of Grape in the context of recreating parts of the Twitter API.
+Grape APIs are Rack applications that are created by subclassing `Grape::API`.
+Below is a simple example showing some of the more common features of Grape in
+the context of recreating parts of the Twitter API.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -68,7 +74,8 @@ class Twitter::API < Grape::API
 end
 ```
 
-This would create a Rack application that could be used like so (in a Rackup config.ru file):
+This would create a Rack application that could be used like so (in a Rackup
+config.ru file):
 
 ```ruby
 run Twitter::API
@@ -89,10 +96,14 @@ request:
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
-By default, the first matching version is used when no Accept header is supplied. This behavior is similar to routing in Rails.
-To circumvent this default behaviour, one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error is returned when no correct Accept header is supplied.
+By default, the first matching version is used when no Accept header is
+supplied. This behavior is similar to routing in Rails.
+To circumvent this default behaviour, one could use the `:strict` option. When
+this option is set to `true`, a `404 Not found` error is returned when no
+correct Accept header is supplied.
 
-Serialization takes place automatically. For more detailed usage information, please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
+Serialization takes place automatically. For more detailed usage information,
+please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
 
 ## Helpers
 
@@ -132,7 +143,8 @@ You can raise errors explicitly.
 error!("Access Denied", 401)
 ```
 
-You can also return JSON formatted objects explicitly by raising error! and passing a hash instead of a message.
+You can also return JSON formatted objects explicitly by raising error! and
+passing a hash instead of a message.
 
 ```ruby
 error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
@@ -157,7 +169,8 @@ class Twitter::API < Grape::API
 end
 ```
 
-The error format can be specified using `error_format`. Available formats are `:json` and `:txt` (default).
+The error format can be specified using `error_format`. Available formats are
+`:json` and `:txt` (default).
 
 ```ruby
 class Twitter::API < Grape::API
@@ -165,7 +178,8 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can rescue all exceptions with a code block. The `rack_response` wrapper automatically sets the default error code and content-type.
+You can rescue all exceptions with a code block. The `rack_response` wrapper
+automatically sets the default error code and content-type.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -175,7 +189,8 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+You can also rescue specific exceptions with a code block and handle the Rack
+response at the lowest level.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -196,7 +211,10 @@ end
 
 ## Writing Tests
 
-You can test a Grape API with RSpec. Tests make HTTP requests, therefore they must go into the `spec/request` group. You may want your API code to go into `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+You can test a Grape API with RSpec. Tests make HTTP requests, therefore they
+must go into the `spec/request` group. You may want your API code to go into
+`app/api` - you can match that layout under `spec` by adding the following in
+`spec/spec_helper.rb`.
 
 ```ruby
 RSpec.configure do |config|
@@ -224,7 +242,8 @@ end
 
 ## Describing and Inspecting an API
 
-Grape lets you add a description to an API along with any other optional elements that can also be inspected at runtime. 
+Grape lets you add a description to an API along with any other optional
+elements that can also be inspected at runtime. 
 This can be useful for generating documentation.
 
 ```ruby
@@ -246,7 +265,11 @@ class TwitterAPI < Grape::API
 end
 ```
 
-Grape then exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`. The description and the optional hash that follows the API path may contain any number of keys and its values are also accessible via dynamically-generated `route_[name]` functions.
+Grape then exposes arrays of API versions and compiled routes. Each route
+contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`,
+`route_path` and `route_params`. The description and the optional hash that
+follows the API path may contain any number of keys and its values are also
+accessible via dynamically-generated `route_[name]` functions.
 
 ```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
@@ -267,6 +290,37 @@ end
 StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
 StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
 ```
+
+## Anchoring
+
+Grape by default anchors all request paths, which means that the request URL
+should match from start to end to match, otherwise a `404 Not Found` is
+returned.
+However, this is sometimes not what you want, because it is not always known up
+front what can be expected from the call.
+This is because Rack-mount by default anchors requests to match from the start
+to the end, or not at all. Rails solves this problem by using a `:anchor =>
+false` option in your routes.
+In Grape this option can be used as well when a method is defined.
+
+For instance when you're API needs to get part of an URL, for instance:
+
+```ruby
+class UrlAPI < Grape::API
+  namespace :urls do
+    get '/(*:url)', :anchor => false do
+      some_data
+    end
+  end
+end
+```
+
+This will match all paths starting with '/urls/'. There is one caveat though:
+the `params[:url]` parameter only holds the first part of the request url.
+Luckily this can be circumvented by using the described above syntax for path
+specification and using the `PATH_INFO` Rack environment variable, using
+`env["PATH_INFO"]`. This will hold everyting that comes after the '/urls/'
+part.
 
 ## Note on Patches/Pull Requests
 

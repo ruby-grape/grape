@@ -27,4 +27,7 @@ pkg
 dist
 Gemfile.lock
 
+## Rubinius
+.rbx
+
 ## PROJECT::SPECIFIC
