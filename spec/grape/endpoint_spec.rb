@@ -215,4 +215,35 @@ describe Grape::Endpoint do
       end
     end
   end
+
+  context 'anchoring' do
+    verbs = %w(post get head delete put options)
+
+    verbs.each do |verb|
+      it "should allow for the anchoring option with a #{verb.upcase} method" do
+        subject.send(verb, '/example', :anchor => true) do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql 404
+      end
+
+      it "should anchor paths by default for the #{verb.upcase} method" do
+        subject.send(verb, '/example') do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql 404
+      end
+
+      it "should respond to /example/and/some/more for the non-anchored #{verb.upcase} method" do
+        subject.send(verb, '/example', :anchor => false) do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql (verb == "post" ? 201 : 200)
+        last_response.body.should eql verb
+      end
+    end
+  end
 end
