@@ -324,15 +324,17 @@ part.
 
 ## Note on Patches/Pull Requests
 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a future version
-  unintentionally.
-* Commit, do not mess with Rakefile, version, or history. (if you want to have
-  your own version, that is fine but bump version in a commit by itself I can
-  ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+* Fork the project
+* Write tests for your new feature or a test that reproduces a bug
+* Implement your feature or make a bug fix
+* Do not mess with Rakefile, version or history
+* Commit, push and make a pull request. Bonus points for topical branches.
+
+## License
+
+MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010 Michael Bleigh and Intridea, Inc. See LICENSE for details.
+Copyright (c) 2010-2012 Michael Bleigh and Intridea, Inc. 
+
