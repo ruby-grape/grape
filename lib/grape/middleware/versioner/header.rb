@@ -35,7 +35,10 @@ module Grape
             env['api.subtype'] = subtype
 
             subtype.scan(/vnd\.(.+)?-(.+)?\+(.*)?/) do |vendor, version, format|
-              if options[:versions] && !options[:versions].include?(version)
+              is_vendored = options[:version_options] && options[:version_options][:vendor]
+              is_vendored_match = is_vendored ? options[:version_options][:vendor] == vendor : true
+
+              if (options[:versions] && !options[:versions].include?(version)) || !is_vendored_match
                 throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
               end
 

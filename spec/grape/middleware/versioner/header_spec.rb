@@ -80,6 +80,26 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
+  context 'vendors' do
+    before do
+      @options = {
+        :version => ['v1'],
+        :version_options => {:using => :header, :vendor => 'vendor'}
+      }
+    end
+
+    it 'should match with correct vendor' do
+      status = subject.call('HTTP_ACCEPT' => accept).first
+      status.should == 200
+    end
+
+    it 'should not match with an incorrect vendor' do
+      expect {
+        env = subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last
+      }.to throw_symbol(:error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found")
+    end
+  end
+
   context 'no matched version' do
     before do
       @options = {
