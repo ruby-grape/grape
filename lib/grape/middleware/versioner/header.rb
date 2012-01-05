@@ -36,9 +36,9 @@ module Grape
 
             subtype.scan(/vnd\.(.+)?-(.+)?\+(.*)?/) do |vendor, version, format|
               is_vendored = options[:version_options] && options[:version_options][:vendor]
-              correctly_vendored = is_vendored ? options[:version_options][:vendor] == vendor : true
+              is_vendored_match = is_vendored ? options[:version_options][:vendor] == vendor : true
 
-              if (options[:versions] && !options[:versions].include?(version)) || !correctly_vendored
+              if (options[:versions] && !options[:versions].include?(version)) || !is_vendored_match
                 throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
               end
 
