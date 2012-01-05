@@ -9,4 +9,5 @@ group :development, :test do
   gem 'guard-bundler'
   gem 'rb-fsevent'
   gem 'growl'
+  gem 'json'
 end
