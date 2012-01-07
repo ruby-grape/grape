@@ -1,4 +1,4 @@
-# Grape [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+# Grape [![Build Status](https://secure.travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape) [![Dependency Status](https://gemnasium.com/intridea/grape.png)](https://gemnasium.com/intridea/grape)
 
 **Note:** This is the `master` branch of Grape where we're trying to maintain things to be relatively stable. If you want to live on the edge, check out the [frontier](https://github.com/intridea/grape/tree/frontier).
 
