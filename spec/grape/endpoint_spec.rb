@@ -217,7 +217,7 @@ describe Grape::Endpoint do
   end
 
   context 'anchoring' do
-    verbs = %w(post get head delete put options)
+    verbs = %w(post get head delete put options patch)
 
     verbs.each do |verb|
       it "should allow for the anchoring option with a #{verb.upcase} method" do
