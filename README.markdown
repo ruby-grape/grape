@@ -1,4 +1,4 @@
-# Grape (Frontier) [![Build Status](http://travis-ci.org/intridea/grape.png)](http://travis-ci.org/intridea/grape)
+# Grape (Frontier) [![Build Status](http://travis-ci.org/intridea/grape.png?branch=frontier)](http://travis-ci.org/intridea/grape)
 
 **Welcome to the `frontier` branch. This is where we're experimenting and building the next version of Grape. Things will be civilized here one day, but until then you best carry your revolver with you.**
 
