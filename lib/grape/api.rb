@@ -122,6 +122,12 @@ module Grape
         new_format ? set(:error_format, new_format.to_sym) : settings[:error_format]
       end
 
+      # Specify additional content-types, e.g.:
+      #   content_types :xls => 'application/vnd.ms-excel'
+      def content_types(map = {})
+        map.any? ? set(:content_types, map) : settings[:content_types]
+      end
+
       # Specify the default status code for errors.
       def default_error_status(new_status = nil)
         new_status ? set(:default_error_status, new_status) : settings[:default_error_status]
