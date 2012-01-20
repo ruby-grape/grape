@@ -248,7 +248,9 @@ module Grape
         }
       end
 
-      b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
+      b.use Grape::Middleware::Formatter,
+        :default_format => settings[:default_format] || :json,
+        :content_types => settings[:content_types]
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup

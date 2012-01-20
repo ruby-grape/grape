@@ -209,6 +209,16 @@ end
       end
     end
 
+## Content-Types
+
+By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types. Your API can declare additional types to support. Response format is determined by the request's extension or `Accept` header.
+
+```ruby
+class Twitter::API < Grape::API
+  content_type :xls, "application/vnd.ms-excel"
+end
+```
+
 ## Writing Tests
 
 You can test a Grape API with RSpec. Tests make HTTP requests, therefore they

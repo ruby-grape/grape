@@ -679,6 +679,17 @@ describe Grape::API do
     end
   end
 
+  describe ".content_type" do
+    it "sets additional content-type" do
+      subject.content_type :xls, "application/vnd.ms-excel"
+      subject.get(:hello) do
+        "some binary content"
+      end
+      get '/hello.xls'
+      last_response.content_type.should == "application/vnd.ms-excel"
+    end
+  end
+
   describe ".default_error_status" do
     it 'should allow setting default_error_status' do
       subject.rescue_from :all
