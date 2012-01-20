@@ -215,7 +215,7 @@ By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-type
 
 ```ruby
 class Twitter::API < Grape::API
-  content_types :xls => "application/vnd.ms-excel"
+  content_type :xls, "application/vnd.ms-excel"
 end
 ```
 

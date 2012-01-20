@@ -123,9 +123,9 @@ module Grape
       end
 
       # Specify additional content-types, e.g.:
-      #   content_types :xls => 'application/vnd.ms-excel'
-      def content_types(map = {})
-        map.any? ? set(:content_types, map) : settings[:content_types]
+      #   content_type :xls, 'application/vnd.ms-excel'
+      def content_type(key, val)
+        settings.imbue(:content_types, key.to_sym => val)
       end
 
       # Specify the default status code for errors.

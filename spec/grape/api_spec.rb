@@ -679,9 +679,9 @@ describe Grape::API do
     end
   end
 
-  describe ".content_types" do
+  describe ".content_type" do
     it "sets additional content-type" do
-      subject.content_types :xls => "application/vnd.ms-excel"
+      subject.content_type :xls, "application/vnd.ms-excel"
       subject.get(:hello) do
         "some binary content"
       end
