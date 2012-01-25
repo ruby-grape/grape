@@ -266,7 +266,7 @@ class TwitterAPI < Grape::API
     api.version
   end
 
-  desc "Reverses a string.", { :params =>  
+  desc "Reverses a string.", { :params =>
     { "s" => { :desc => "string to reverse", :type => "string" }}
   }
   get "reverse" do
@@ -299,6 +299,17 @@ end
 
 StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
 StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
+```
+
+It's possible to retrieve the information about the current route from within an API call with `route`.
+
+```ruby
+class MyAPI < Grape::API
+  desc "Returns a description of a parameter.", { :params => { "id" => "a required id" } }
+  get "params/:id" do
+    route.route_params[params[:id]] # returns "a required id"
+  end
+end
 ```
 
 ## Anchoring
