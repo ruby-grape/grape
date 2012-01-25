@@ -16,7 +16,7 @@ module Grape
     end
     
     def to_s
-      "Version: #{route_version} #{route_method} #{route_path}"
+      "version=#{route_version}, method=#{route_method}, path=#{route_path}"
     end
     
   end
