@@ -215,8 +215,9 @@ module Grape
     #
     # @example
     #
-    #   get '/users/:id' do
-    #     
+    #   desc "Returns the route description."
+    #   get '/' do
+    #     route.route_description
     #   end
     def route
       env["rack.routing_args"][:route_info]
