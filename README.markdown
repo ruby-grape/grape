@@ -80,7 +80,7 @@ end
 
 ## Mounting
 
-The above sample creates a Rack application that can be run from a Rackup *config.ru* file:
+The above sample creates a Rack application that can be run from a rackup *config.ru* file:
 
 ```ruby
 run Twitter::API
