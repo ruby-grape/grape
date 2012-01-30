@@ -21,6 +21,10 @@ Grape is available as a gem, to install it just install the gem:
 
     gem install grape
 
+If you're using Bundler, add the gem to Gemfile.
+
+    gem 'grape'
+
 ## Basic Usage
 
 Grape APIs are Rack applications that are created by subclassing `Grape::API`.
@@ -74,13 +78,14 @@ class Twitter::API < Grape::API
 end
 ```
 
-This would create a Rack application that could be used like so (in a Rackup
-config.ru file):
+## Mounting
+
+The above exmaple would create a Rack application that could be used like so (in a Rackup
+*config.ru* file):
 
 ```ruby
 run Twitter::API
 ```
-
 And would respond to the following routes:
 
     GET  /statuses/public_timeline(.json)
@@ -88,19 +93,25 @@ And would respond to the following routes:
     GET  /statuses/show/:id(.json)
     POST /statuses/update(.json)
 
+Modify *config/routes* to mount Grape in a Rails 3 application.
+
+```ruby
+mount Twitter::API => "/"
+```
+
+## Versioning
+
 Versioning is handled with HTTP Accept head by default, but can be configures
-to [use different
-strategies](https://github.com/intridea/grape/wiki/API-Versioning). For
-example, to request the above with a version, you would make the following
+to [use different strategies](https://github.com/intridea/grape/wiki/API-Versioning). 
+For example, to request the above with a version, you would make the following
 request:
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no Accept header is
-supplied. This behavior is similar to routing in Rails.
-To circumvent this default behaviour, one could use the `:strict` option. When
-this option is set to `true`, a `404 Not found` error is returned when no
-correct Accept header is supplied.
+supplied. This behavior is similar to routing in Rails. To circumvent this default behaviour, 
+one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error 
+is returned when no correct Accept header is supplied.
 
 Serialization takes place automatically. For more detailed usage information,
 please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
@@ -211,7 +222,9 @@ end
 
 ## Content-Types
 
-By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types. Your API can declare additional types to support. Response format is determined by the request's extension or `Accept` header.
+By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types. 
+Your API can declare additional types to support. Response format is determined by the 
+request's extension or `Accept` header.
 
 ```ruby
 class Twitter::API < Grape::API
