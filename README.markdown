@@ -80,8 +80,7 @@ end
 
 ## Mounting
 
-The above exmaple would create a Rack application that could be used like so (in a Rackup
-*config.ru* file):
+The above sample creates a Rack application that can be run from a Rackup *config.ru* file:
 
 ```ruby
 run Twitter::API
@@ -93,7 +92,7 @@ And would respond to the following routes:
     GET  /statuses/show/:id(.json)
     POST /statuses/update(.json)
 
-Modify *config/routes* to mount Grape in a Rails 3 application.
+In a Rails application, modify *config/routes*:
 
 ```ruby
 mount Twitter::API => "/"
@@ -109,7 +108,7 @@ request:
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no Accept header is
-supplied. This behavior is similar to routing in Rails. To circumvent this default behaviour, 
+supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, 
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error 
 is returned when no correct Accept header is supplied.
 
@@ -342,7 +341,7 @@ This will match all paths starting with '/urls/'. There is one caveat though:
 the `params[:url]` parameter only holds the first part of the request url.
 Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
-`env["PATH_INFO"]`. This will hold everyting that comes after the '/urls/'
+`env["PATH_INFO"]`. This will hold everything that comes after the '/urls/'
 part.
 
 ## Note on Patches/Pull Requests
