@@ -1,5 +1,6 @@
 require 'multi_json'
 require 'multi_xml'
+require 'clj'
 
 module Grape
   module Middleware
@@ -50,16 +51,19 @@ module Grape
           :json => 'application/json',
           :atom => 'application/atom+xml',
           :rss => 'application/rss+xml',
-          :txt => 'text/plain'
+          :txt => 'text/plain',
+          :clj => 'application/clojure'
         }
         FORMATTERS = {
           :json => :encode_json,
           :txt => :encode_txt,
-          :xml => :encode_xml
+          :xml => :encode_xml,
+          :clj => :encode_clj
         }
         PARSERS = {
           :json => :decode_json,
-          :xml => :decode_xml
+          :xml => :decode_xml,
+          :clj => :decode_clj
         }
 
         def formatters
@@ -130,6 +134,20 @@ module Grape
         
         def encode_xml(object)
           object.respond_to?(:to_xml) ? object.to_xml : object.to_s
+        end
+
+        def encode_clj(object)
+          if object.respond_to? :serializable_hash
+            Clojure.dump(object.serializable_hash)
+          elsif object.respond_to? :to_clj
+            object.to_clj
+          else
+            Clojure.dump(object)
+          end
+        end
+
+        def decode_clj(object)
+          Clojure.parse(object)
         end
       end
 
