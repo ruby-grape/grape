@@ -46,6 +46,10 @@ describe Grape::Entity do
         subject.represent(Object.new).should be_kind_of(subject)
       end
 
+      it 'should return a single entity if called with a hash' do
+        subject.represent(Hash.new).should be_kind_of(subject)
+      end
+
       it 'should return multiple entities if called with a collection' do
         representation = subject.represent(4.times.map{Object.new})
         representation.should be_kind_of(Array)
