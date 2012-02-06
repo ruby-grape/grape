@@ -143,8 +143,8 @@ module Grape
     #   entity. Pass nil or false to represent the object or objects with no
     #   root name even if one is defined for the entity.
     def self.represent(objects, options = {})
-      inner = if objects.is_a?(Array)
-        objects.map{|o| self.new(o, {:collection => true}.merge(options))}
+      inner = if objects.respond_to?(:to_ary)
+        objects.to_ary().map{|o| self.new(o, {:collection => true}.merge(options))}
       else
         self.new(objects, options)
       end
@@ -152,7 +152,7 @@ module Grape
       root_element = if options.has_key?(:root)
         options[:root]
       else
-        objects.is_a?(Array) ? @collection_root : @root
+        objects.respond_to?(:to_ary) ? @collection_root : @root
       end
       root_element ? { root_element => inner } : inner
     end
