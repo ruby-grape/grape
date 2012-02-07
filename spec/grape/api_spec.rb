@@ -257,13 +257,13 @@ describe Grape::API do
         "lol"
       end
 
-      %w(get post put delete options).each do |m|
+      %w(get post put delete options patch).each do |m|
         send(m, '/abc')
         last_response.body.should eql 'lol'
       end
     end
 
-    verbs = %w(post get head delete put options)
+    verbs = %w(post get head delete put options patch)
     verbs.each do |verb|
       it "should allow and properly constrain a #{verb.upcase} method" do
         subject.send(verb, '/example') do
