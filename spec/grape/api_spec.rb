@@ -1017,4 +1017,43 @@ describe Grape::API do
       subject.instance.should be_nil
     end
   end
+  
+  describe ".route" do
+    context "plain" do
+      before(:each) do
+        subject.get '/' do
+          route.route_path
+        end
+        subject.get '/path' do
+          route.route_path
+        end
+      end
+      it 'should provide access to route info' do
+        get '/'
+        last_response.body.should == "/(.:format)"
+        get '/path'
+        last_response.body.should == "/path(.:format)"
+      end
+    end
+    context "with desc" do    
+      before(:each) do
+        subject.desc 'returns description'
+        subject.get '/description' do
+          route.route_description
+        end
+        subject.desc 'returns parameters', { :params => { "x" => "y" }}
+        subject.get '/params/:id' do
+          route.route_params[params[:id]]
+        end
+      end
+      it 'should return route description' do
+        get '/description'
+        last_response.body.should == "returns description"
+      end
+      it 'should return route parameters' do
+        get '/params/x'
+        last_response.body.should == "y"
+      end
+    end
+  end
 end
