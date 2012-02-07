@@ -48,7 +48,6 @@ module Grape
       end
 
       def call!(env)
-        logger.info "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
         instance.call(env)
       end
 
@@ -96,7 +95,7 @@ module Grape
         if args.any?
           options = args.pop if args.last.is_a? Hash
           options ||= {}
-          options = {:using => :header}.merge!(options)
+          options = {:using => :path}.merge!(options)
           @versions = versions | args
           nest(block) do
             set(:version, args)
@@ -121,6 +120,12 @@ module Grape
       # May be `:json` or `:txt` (default).
       def error_format(new_format = nil)
         new_format ? set(:error_format, new_format.to_sym) : settings[:error_format]
+      end
+
+      # Specify additional content-types, e.g.:
+      #   content_type :xls, 'application/vnd.ms-excel'
+      def content_type(key, val)
+        settings.imbue(:content_types, key.to_sym => val)
       end
 
       # Specify the default status code for errors.
@@ -279,7 +284,7 @@ module Grape
         imbue(:befores, [block])
       end
 
-      def after(&block) 
+      def after(&block)
         imbue(:afters, [block])
       end
 
@@ -288,6 +293,7 @@ module Grape
       def put(paths = ['/'], options = {}, &block); route('PUT', paths, options, &block) end
       def head(paths = ['/'], options = {}, &block); route('HEAD', paths, options, &block) end
       def delete(paths = ['/'], options = {}, &block); route('DELETE', paths, options, &block) end
+      def options(paths = ['/'], options = {}, &block); route('OPTIONS', paths, options, &block) end
 
       def namespace(space = nil, &block)
         if space || block_given?
@@ -334,11 +340,11 @@ module Grape
       def routes
         @routes ||= prepare_routes
       end
-      
+
       def versions
         @versions ||= []
       end
-      
+
       protected
 
       def prepare_routes

@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/intridea/grape"
   s.summary     = %q{A simple Ruby framework for building REST-like APIs.}
   s.description = %q{A Ruby framework for rapid API development with great conventions.}
+  s.license     = "MIT"
 
   s.rubyforge_project = "grape"
 

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'shared_versioning_examples'
+require 'shared/versioning_examples'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -257,13 +257,13 @@ describe Grape::API do
         "lol"
       end
 
-      %w(get post put delete).each do |m|
+      %w(get post put delete options).each do |m|
         send(m, '/abc')
         last_response.body.should eql 'lol'
       end
     end
 
-    verbs = %w(post get head delete put)
+    verbs = %w(post get head delete put options)
     verbs.each do |verb|
       it "should allow and properly constrain a #{verb.upcase} method" do
         subject.send(verb, '/example') do
@@ -448,7 +448,7 @@ describe Grape::API do
       subject.get(:hello){ "Hello, world."}
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
       last_response.status.should eql 200
     end
 
@@ -476,7 +476,7 @@ describe Grape::API do
       subject.get(:hello){ "Hello, world."}
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
       last_response.status.should eql 200
     end
   end
@@ -676,6 +676,17 @@ describe Grape::API do
       end
       get '/error'
       last_response.body.should eql '{"error":"Access Denied"}'
+    end
+  end
+
+  describe ".content_type" do
+    it "sets additional content-type" do
+      subject.content_type :xls, "application/vnd.ms-excel"
+      subject.get(:hello) do
+        "some binary content"
+      end
+      get '/hello.xls'
+      last_response.content_type.should == "application/vnd.ms-excel"
     end
   end
 

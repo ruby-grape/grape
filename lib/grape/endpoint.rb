@@ -42,13 +42,17 @@ module Grape
         end
       end
     end
-    
+
     def prepare_routes
       routes = []
       options[:method].each do |method|
         options[:path].each do |path|
           prepared_path = prepare_path(path)
-          path = compile_path(prepared_path, !options[:app])
+
+          anchor = options[:route_options][:anchor]
+          anchor = anchor.nil? ? true : anchor
+
+          path = compile_path(prepared_path, anchor && !options[:app])
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
@@ -82,7 +86,7 @@ module Grape
       parts.last << '(.:format)'
       Rack::Mount::Utils.normalize_path(parts.join('/'))
     end
-    
+
     def namespace
       Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
     end
@@ -193,13 +197,18 @@ module Grape
         entity_class ||= (settings[:representations] || {})[potential]
       end
 
-      if entity_class
+      root = options.delete(:root)
+
+      representation = if entity_class
         embeds = {:env => env}
         embeds[:version] = env['api.version'] if env['api.version']
-        body entity_class.represent(object, embeds.merge(options))
+        entity_class.represent(object, embeds.merge(options))
       else
-        body object
+        object
       end
+
+      representation = { root => representation } if root
+      body representation
     end
 
     protected
@@ -220,11 +229,11 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
-      b.use Grape::Middleware::Error, 
-        :default_status => settings[:default_error_status] || 403, 
-        :rescue_all => settings[:rescue_all], 
-        :rescued_errors => settings[:rescued_errors], 
-        :format => settings[:error_format] || :txt, 
+      b.use Grape::Middleware::Error,
+        :default_status => settings[:default_error_status] || 403,
+        :rescue_all => settings[:rescue_all],
+        :rescued_errors => settings[:rescued_errors],
+        :format => settings[:error_format] || :txt,
         :rescue_options => settings[:rescue_options],
         :rescue_handlers => settings[:rescue_handlers] || {}
 
@@ -239,7 +248,9 @@ module Grape
         }
       end
 
-      b.use Grape::Middleware::Formatter, :default_format => settings[:default_format] || :json
+      b.use Grape::Middleware::Formatter,
+        :default_format => settings[:default_format] || :json,
+        :content_types => settings[:content_types]
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup

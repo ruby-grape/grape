@@ -178,6 +178,14 @@ describe Grape::Endpoint do
       get '/example'
       last_response.body.should == 'Hiya'
     end
+
+    it 'should add a root key to the output if one is given' do
+      subject.get '/example' do
+        present({:abc => 'def'}, :root => :root)
+        body.should == {:root => {:abc => 'def'}}
+      end
+      get '/example'
+    end
   end
 
   context 'filters' do
@@ -204,6 +212,37 @@ describe Grape::Endpoint do
         subject.get('/after_test'){ "body" }
         get '/after_test'
         last_response.body.should == "body"
+      end
+    end
+  end
+
+  context 'anchoring' do
+    verbs = %w(post get head delete put options)
+
+    verbs.each do |verb|
+      it "should allow for the anchoring option with a #{verb.upcase} method" do
+        subject.send(verb, '/example', :anchor => true) do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql 404
+      end
+
+      it "should anchor paths by default for the #{verb.upcase} method" do
+        subject.send(verb, '/example') do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql 404
+      end
+
+      it "should respond to /example/and/some/more for the non-anchored #{verb.upcase} method" do
+        subject.send(verb, '/example', :anchor => false) do
+          verb
+        end
+        send(verb, '/example/and/some/more')
+        last_response.status.should eql (verb == "post" ? 201 : 200)
+        last_response.body.should eql verb
       end
     end
   end
