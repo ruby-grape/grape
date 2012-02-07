@@ -35,10 +35,10 @@ module Grape
         options[:app].endpoints.each{|e| e.mount_in(route_set)}
       else
         routes.each do |route|
-          route_set.add_route(self,
+          route_set.add_route(self, {
             :path_info => route.route_compiled,
-            :request_method => route.route_method
-          )
+            :request_method => route.route_method,
+          }, { :route_info => route })
         end
       end
     end
@@ -209,6 +209,18 @@ module Grape
 
       representation = { root => representation } if root
       body representation
+    end
+    
+    # Returns route information for the current request.
+    #
+    # @example
+    #
+    #   desc "Returns the route description."
+    #   get '/' do
+    #     route.route_description
+    #   end
+    def route
+      env["rack.routing_args"][:route_info]
     end
 
     protected
