@@ -104,7 +104,7 @@ module Grape
           end
         end
       end
-      
+
       # Add a description to the next namespace or function.
       def desc(description, options = {})
         @last_description = options.merge(:description => description)

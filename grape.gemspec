@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'maruku'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'rspec', '~> 2.7.0'
+  s.add_development_dependency 'rspec', '~> 2.8'
   s.add_development_dependency 'bundler'
 
   s.files         = `git ls-files`.split("\n")
