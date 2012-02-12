@@ -72,6 +72,18 @@ module Grape
       end
     end
 
+    # Set or get a cookie
+    #
+    # @example
+    #   cookies[:mycookie] = 'mycookie val'
+    #   cookies['mycookie-string'] = 'mycookie string val'
+    #   cookies[:more] = { :value => '123', :expires => Time.at(0) }
+    #   cookies.delete :more
+    #
+    def cookies
+      @cookies ||= Cookies.new
+    end
+
     # Allows you to define the response body as something other than the
     # return value.
     #
@@ -126,9 +138,13 @@ module Grape
       @header = {}
       @request = Rack::Request.new(@env)
 
+      get_cookies
+
       run_filters self.class.options[:befores]
       response_text = instance_eval &self.class.block
       run_filters self.class.options[:afters]
+
+      set_cookies
 
       [status, header, [body || response_text]]
     end
@@ -138,6 +154,21 @@ module Grape
     def run_filters(filters)
       (filters || []).each do |filter|
         instance_eval &filter
+      end
+    end
+
+    def get_cookies
+      cookies.without_send do |c|
+        @request.cookies.each do |name, value|
+          c[name] = value
+        end
+      end
+    end
+
+    def set_cookies
+      cookies.each(:to_send) do |name, value|
+        Rack::Utils.set_cookie_header!(
+            header, name, value.instance_of?(Hash) ? value : { :value => value })
       end
     end
   end
