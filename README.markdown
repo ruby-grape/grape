@@ -140,7 +140,7 @@ class API < Grape::API
 end
 ````
 
-To set more then value use hash-based syntax:
+To set more than value use hash-based syntax:
 
 ````ruby
 cookies[:counter] = {
