@@ -2,15 +2,23 @@ module Grape
   class Cookies
 
       def initialize
-        @send = true
         @cookies = {}
         @send_cookies = {}
       end
 
-      def without_send
-        @send = false
-        yield self if block_given?
-        @send = true
+      def read(request)
+        request.cookies.each do |name, value|
+          @cookies[name.to_sym] = value
+        end
+      end
+
+      def write(header)
+        @cookies.select { |key, value|
+            @send_cookies[key.to_sym] == true
+        }.each { |name, value|
+          Rack::Utils.set_cookie_header!(
+            header, name, value.instance_of?(Hash) ? value : { :value => value })
+        }
       end
 
       def [](name)
@@ -19,17 +27,11 @@ module Grape
 
       def []=(name, value)
         @cookies[name.to_sym] = value
-        @send_cookies[name.to_sym] = true if @send
+        @send_cookies[name.to_sym] = true
       end
 
-      def each(opt = nil, &block)
-        if opt == :to_send
-          @cookies.select { |key, value|
-            @send_cookies[key.to_sym] == true
-          }.each(&block)
-        else
-          @cookies.each(&block)
-        end
+      def each(&block)
+        @cookies.each(&block)
       end
 
       def delete(name)

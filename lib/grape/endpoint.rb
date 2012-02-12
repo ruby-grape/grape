@@ -138,13 +138,13 @@ module Grape
       @header = {}
       @request = Rack::Request.new(@env)
 
-      get_cookies
+      cookies.read(@request)
 
       run_filters self.class.options[:befores]
       response_text = instance_eval &self.class.block
       run_filters self.class.options[:afters]
 
-      set_cookies
+      cookies.write(header)
 
       [status, header, [body || response_text]]
     end
@@ -154,21 +154,6 @@ module Grape
     def run_filters(filters)
       (filters || []).each do |filter|
         instance_eval &filter
-      end
-    end
-
-    def get_cookies
-      cookies.without_send do |c|
-        @request.cookies.each do |name, value|
-          c[name] = value
-        end
-      end
-    end
-
-    def set_cookies
-      cookies.each(:to_send) do |name, value|
-        Rack::Utils.set_cookie_header!(
-            header, name, value.instance_of?(Hash) ? value : { :value => value })
       end
     end
   end
