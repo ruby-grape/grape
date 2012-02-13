@@ -63,7 +63,7 @@ module Grape
       def mime_array
         accept = headers['accept'] or return []
 
-        accept.gsub(/\b/,'').scan(%r((\w+/[\w+.-]+))).map {|(mime)|
+        accept.gsub(/\b/,'').scan(%r((\w+/[\w+.-]+)(?:(?:;[^,]*?)?;\s*q=([\d.]+))?)).sort_by { |_, q| -q.to_f }.map {|mime, _|
           mime.sub(%r(vnd\.[^+]+\+), '')
         }
       end
