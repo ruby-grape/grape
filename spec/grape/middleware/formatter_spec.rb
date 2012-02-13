@@ -69,29 +69,29 @@ describe Grape::Middleware::Formatter do
   
   context 'Accept header detection' do
     it 'should detect from the Accept header' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/xml'})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml'})
       subject.env['api.format'].should == :xml
     end
     
     it 'should look for case-indifferent headers' do
-      subject.call({'PATH_INFO' => '/info', 'accept' => 'application/xml'})
+      subject.call({'PATH_INFO' => '/info', 'http_accept' => 'application/xml'})
       subject.env['api.format'].should == :xml
     end
     
     it 'should use quality rankings to determine formats' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; q=0.3,application/xml; q=1.0'})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=0.3,application/xml; q=1.0'})
       subject.env['api.format'].should == :xml
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; q=1.0,application/xml; q=0.3'})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=1.0,application/xml; q=0.3'})
       subject.env['api.format'].should == :json
     end
     
     it 'should handle quality rankings mixed with nothing' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json,application/xml; q=1.0'})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0'})
       subject.env['api.format'].should == :xml
     end
     
     it 'should properly parse headers with other attributes' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7'})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7'})
       subject.env['api.format'].should == :json
     end
   end
@@ -137,16 +137,16 @@ describe Grape::Middleware::Formatter do
 
   context 'Input' do
     it 'should parse the body from a POST/PUT and put the contents into rack.request.form_hash' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,"string":"thing"}')})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,"string":"thing"}')})
       subject.env['rack.request.form_hash']['is_boolean'].should be_true
       subject.env['rack.request.form_hash']['string'].should == 'thing'
     end
     it 'should parse the body from an xml POST/PUT and put the contents into rack.request.from_hash' do
-      subject.call({'PATH_INFO' => '/info.xml', 'Accept' => 'application/xml', 'rack.input' => StringIO.new('<thing><name>Test</name></thing>')})
+      subject.call({'PATH_INFO' => '/info.xml', 'HTTP_ACCEPT' => 'application/xml', 'rack.input' => StringIO.new('<thing><name>Test</name></thing>')})
       subject.env['rack.request.form_hash']['thing']['name'].should == 'Test'
     end
     it 'should be able to fail gracefully if the body is regular POST content' do
-      subject.call({'PATH_INFO' => '/info', 'Accept' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
       subject.env['rack.request.form_hash'].should be_nil
     end
   end
