@@ -69,22 +69,25 @@ class Twitter::API < Grape::API
   end
 
   resource :account do
-    before{ authenticate! }
+    before { authenticate! }
 
     get '/private' do
       "Congratulations, you found the secret!"
     end
   end
+
 end
 ```
 
 ## Mounting
 
-The above sample creates a Rack application that can be run from a rackup *config.ru* file:
+The above sample creates a Rack application that can be run from a rackup *config.ru* file 
+with `rackup`:
 
 ```ruby
 run Twitter::API
 ```
+
 And would respond to the following routes:
 
     GET  /statuses/public_timeline(.json)
@@ -97,7 +100,7 @@ In a Rails application, modify *config/routes*:
 ```ruby
 mount Twitter::API => "/"
 ```
-You can mount multiple API implementations inside a single one.
+You can mount multiple API implementations inside another one.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -132,7 +135,7 @@ Serialization takes place automatically.
 
 ## Parameters
 
-Parameters are available through the `params` hash object. This include `GET` and `POST` parameters, 
+Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters, 
 along with any named parameters you specify in your route strings.
 
 ```ruby
@@ -247,14 +250,18 @@ class Twitter::API < Grape::API
 end
 ```
 
-    class Twitter::API < Grape::API
-      rescue_from ArgumentError do |e|
-        Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
-      end
-      rescue_from NotImplementedError do |e|
-        Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
-      end
-    end
+Or rescue specific exceptions.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from ArgumentError do |e|
+    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+  end
+  rescue_from NotImplementedError do |e|
+    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
+  end
+end
+```
 
 ## Content-Types
 
@@ -294,6 +301,13 @@ describe Twitter::API do
       get "/api/v1/statuses"
       response.status.should == 200
       JSON.parse(response.body).should == []
+    end
+  end
+  describe "GET /api/v1/statuses/:id" do
+    it "returns a status by id" do
+      status = Status.create!
+      get "/api/v1/statuses/#{status.id}"
+      resonse.body.should == status.to_json
     end
   end
 end
