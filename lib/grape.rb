@@ -8,6 +8,7 @@ module Grape
   autoload :Client,          'grape/client'
   autoload :Route,           'grape/route'
   autoload :Entity,          'grape/entity'
+  autoload :Cookies,         'grape/cookies'
 
   module Middleware
     autoload :Base,      'grape/middleware/base'
