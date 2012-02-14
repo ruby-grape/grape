@@ -149,6 +149,36 @@ class API < Grape::API
 end
 ````
 
+## Cookies
+
+You can set, get and delete your cookies very simply using `cookies` method:
+
+````ruby
+class API < Grape::API
+  get '/counter' do
+    cookies[:counter] ||= 0
+    cookies[:counter] += 1
+    { :counter => cookies[:counter] }
+  end
+
+  delete '/counter' do
+    { :result => cookies.delete(:counter) }
+  end
+end
+````
+
+To set more than value use hash-based syntax:
+
+````ruby
+cookies[:counter] = {
+    :value => 0,
+    :expires => Time.tomorrow,
+    :domain => '.example.com',
+    :path => '/'
+}
+cookies[:counter][:value] +=1
+````
+
 ## Raising Errors
 
 You can raise errors explicitly.
