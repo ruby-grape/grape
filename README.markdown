@@ -97,13 +97,23 @@ In a Rails application, modify *config/routes*:
 ```ruby
 mount Twitter::API => "/"
 ```
+You can mount multiple API implementations inside a single one.
+
+```ruby
+class Twitter::API < Grape::API
+  mount Twitter::APIv1
+  mount Twitter::APIv2
+end
+```
 
 ## Versioning
 
-Versioning is handled with HTTP Accept head by default, but can be configures
-to [use different strategies](https://github.com/intridea/grape/wiki/API-Versioning). 
-For example, to request the above with a version, you would make the following
-request:
+There are two stragies in which clients can reach your API's endpoints: `:header` 
+and `:path`. The default strategy is `:header`.
+
+    version 'v1', :using => :header
+
+Using this versioning strategy, clients should pass the desired version in the HTTP Accept head. 
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
@@ -112,8 +122,35 @@ supplied. This behavior is similar to routing in Rails. To circumvent this defau
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error 
 is returned when no correct Accept header is supplied.
 
-Serialization takes place automatically. For more detailed usage information,
-please visit the [Grape Wiki](http://github.com/intridea/grape/wiki).
+    version 'v1', :using => :path
+
+Using this versioning strategy, clients should pass the desired version in the URL.
+
+    curl -H http://localhost:9292/v1/statuses/public_timeline
+
+Serialization takes place automatically. 
+
+## Parameters
+
+Parameters are available through the `params` hash object. This include `GET` and `POST` parameters, 
+along with any named parameters you specify in your route strings.
+
+```ruby
+  get do
+    Article.order(params[:sort_by])
+  end
+```
+
+## Headers
+
+Headers are available through the `env` hash object.
+
+```ruby
+  get do
+    error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
+    ...
+  end
+```
 
 ## Helpers
 
