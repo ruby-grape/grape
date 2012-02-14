@@ -15,6 +15,11 @@ versioning.
 * [Grape Google Group](http://groups.google.com/group/ruby-grape)
 * [Grape Wiki](https://github.com/intridea/grape/wiki)
 
+## Project Tracking
+
+* [Grape Google Group](http://groups.google.com/group/ruby-grape)
+* [Grape Wiki](https://github.com/intridea/grape/wiki)
+
 ## Installation
 
 Grape is available as a gem, to install it just install the gem:
