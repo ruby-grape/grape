@@ -106,6 +106,11 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7'})
       subject.env['api.format'].should == :json
     end
+
+    it 'should properly parse headers with vendor and api version' do
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test-v1+xml'})
+      subject.env['api.format'].should == :xml
+    end
   end
 
   context 'Content-type' do
