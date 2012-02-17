@@ -61,12 +61,12 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
 
-      last_response.headers['Set-Cookie'].tap { |set_cookies|
-        set_cookies.should =~ /my-awesome-cookie1=is\+cool\n/
-        set_cookies.should =~ /my-awesome-cookie2=is\+cool\+too;\ domain=my\.example\.com;\ path=\/;\ secure\n/
-        set_cookies.should =~ /cookie3=symbol\n/
-        set_cookies.should =~ /cookie4=secret\+code\+here/
-      }
+      last_response.headers['Set-Cookie'].split("\n").sort.should eql [
+        "cookie3=symbol",
+        "cookie4=secret+code+here",
+        "my-awesome-cookie1=is+cool",
+        "my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure"
+      ]
     end
 
     it "should set browser cookies and should not set response cookies" do
@@ -102,9 +102,10 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       last_response.body.should == '3'
-      last_response.headers['Set-Cookie'].should ==
-          "delete_this_cookie=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT\n" +
-              'and_this=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT'
+      last_response.headers['Set-Cookie'].split("\n").sort.should == [
+          "and_this=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT",
+          "delete_this_cookie=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT"
+      ]
     end
   end
   
