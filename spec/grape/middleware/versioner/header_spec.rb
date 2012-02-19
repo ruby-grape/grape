@@ -69,15 +69,46 @@ describe Grape::Middleware::Versioner::Header do
       subject.call({}).first.should == 200
     end
 
-    it 'should return a 404 when no header is set but strict header based versioning is used' do
-      @options = {
-        :versions => ['v1'],
-        :version_options => {:using => :header, :strict => true}
-      }
-      expect {
-        env = subject.call('HTTP_ACCEPT' => '').last
-      }.to throw_symbol(:error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found")
+    context 'when strict header versioning is used' do
+      it 'should return a 406 when no header' do
+        @options = {
+          :versions => ['v1'],
+          :version_options => {:using => :header, :strict => true}
+        }
+        expect {
+          env = subject.call('HTTP_ACCEPT' => '').last
+        }.to throw_symbol(
+          :error,
+          :status => 406,
+          :headers => {'X-Cascade' => 'pass'},
+          :message => "406 API Version Not Found"
+        )
+      end
+
+      it 'should return a 406 when incorrect header format is used' do
+        @options = {
+          :versions => ['v1'],
+          :version_options => {:using => :header, :strict => true}
+        }
+        expect {
+          env = subject.call('HTTP_ACCEPT' => '*/*').last
+        }.to throw_symbol(
+          :error,
+          :status => 406,
+          :headers => {'X-Cascade' => 'pass'},
+          :message => "406 API Version Not Found"
+        )
+      end
+
+      it 'should return a 200 when proper header is set' do
+        @options = {
+          :versions => ['v1'],
+          :version_options => {:using => :header, :strict => true}
+        }
+        subject.call('HTTP_ACCEPT' => 'application/vnd.testing-v1+json').first.should == 200
+      end
     end
+
   end
 
   context 'vendors' do
@@ -96,7 +127,7 @@ describe Grape::Middleware::Versioner::Header do
     it 'should not match with an incorrect vendor' do
       expect {
         env = subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last
-      }.to throw_symbol(:error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found")
+      }.to throw_symbol(:error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found")
     end
   end
 
@@ -108,10 +139,10 @@ describe Grape::Middleware::Versioner::Header do
       }
     end
 
-    it 'should throw 404 error with X-Cascade header set to pass' do
+    it 'should throw 406 error with X-Cascade header set to pass' do
       expect {
         env = subject.call('HTTP_ACCEPT' => accept).last
-      }.to throw_symbol(:error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found")
+      }.to throw_symbol(:error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found")
     end
   end
 end
