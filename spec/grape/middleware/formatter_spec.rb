@@ -73,9 +73,9 @@ describe Grape::Middleware::Formatter do
       subject.env['api.format'].should == :json
     end
 
-    it 'should throw an error on an unrecognized format' do
-      err = catch(:error){ subject.call({'PATH_INFO' => '/info.barklar'}) }
-      err.should == {:status => 406, :message => "The requested format is not supported."}
+    it 'should use default format on an unrecognized format' do
+      subject.call({'PATH_INFO' => '/info.xyz'})
+      subject.env['api.format'].should == :json
     end
   end
 
