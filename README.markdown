@@ -282,20 +282,42 @@ end
 
 ## Writing Tests
 
-You can test a Grape API with RSpec. Tests make HTTP requests, therefore they
-must go into the `spec/request` group. You may want your API code to go into
-`app/api` - you can match that layout under `spec` by adding the following in
-`spec/spec_helper.rb`.
+You can test a Grape API with RSpec by making HTTP requests and examining the response. 
+
+### Writing Tests with Rack
+
+Use `rack-test` and define your API as `app`.
 
 ```ruby
-RSpec.configure do |config|
-  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
-    :file_path => /spec\/api/
-  }
+require 'spec_helper'
+
+describe Twitter::API do
+  include Rack::Test::Methods
+
+  def app
+    Twitter::API
+  end
+
+  describe Twitter::API do
+    describe "GET /api/v1/statuses" do
+      it "returns an empty array of statuses" do
+        get "/api/v1/statuses"
+        last_response.status.should == 200
+        JSON.parse(response.body).should == []
+      end
+    end
+    describe "GET /api/v1/statuses/:id" do
+      it "returns a status by id" do
+        status = Status.create!
+        get "/api/v1/statuses/#{status.id}"
+        last_resonse.body.should == status.to_json
+      end
+    end
+  end
 end
 ```
 
-A simple RSpec API test makes a `get` request and parses the response.
+### Writing Tests with Rails
 
 ```ruby
 require 'spec_helper'
@@ -315,6 +337,17 @@ describe Twitter::API do
       resonse.body.should == status.to_json
     end
   end
+end
+```
+
+In Rails, HTTP request tests would go into the `spec/request` group. You may want your API code to go into
+`app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+```ruby
+RSpec.configure do |config|
+  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
+    :file_path => /spec\/api/
+  }
 end
 ```
 
