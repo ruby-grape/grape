@@ -26,7 +26,7 @@ module Grape
           accept = env['HTTP_ACCEPT'] || ""
 
           if options[:version_options] && options[:version_options].keys.include?(:strict) && options[:version_options][:strict]
-            if (incorrect_header?(accept)) && options[:versions] && options[:version_options][:using] == :header
+            if (incorrect_header?(accept))  && options[:version_options][:using] == :header
               throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
             end
           end
