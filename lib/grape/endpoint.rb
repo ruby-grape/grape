@@ -52,7 +52,9 @@ module Grape
           anchor = options[:route_options][:anchor]
           anchor = anchor.nil? ? true : anchor
 
-          path = compile_path(prepared_path, anchor && !options[:app])
+          requirements = options[:route_options][:requirements] || {}
+
+          path = compile_path(prepared_path, anchor && !options[:app], requirements)
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
@@ -91,9 +93,10 @@ module Grape
       Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
     end
 
-    def compile_path(prepared_path, anchor = true)
+    def compile_path(prepared_path, anchor = true, requirements = {})
       endpoint_options = {}
       endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
+      endpoint_options.merge!(requirements)
       Rack::Mount::Strexp.compile(prepared_path, endpoint_options, %w( / . ? ), anchor)
     end
 

@@ -19,36 +19,35 @@ module Grape
       end
       
       def before
-        fmt = format_from_extension || format_from_header || options[:default_format]
-        if content_types.key?(fmt)
-          if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
-            parser = parser_for fmt
-            unless parser.nil?
-              begin
-                body = parser.call(body)
-                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
-                env['rack.request.form_input'] = env['rack.input']
-              rescue
-                # It's possible that it's just regular POST content -- just back off
-              end
+        response_type = get_response_type
+        if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
+          parser = parser_for(response_type)
+          unless parser.nil?
+            begin
+              body = parser.call(body)
+              env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
+              env['rack.request.form_input'] = env['rack.input']
+            rescue
+              # It's possible that it's just regular POST content -- just back off
             end
-            env['rack.input'].rewind
           end
-          env['api.format'] = fmt
-        else
-          throw :error, :status => 406, :message => 'The requested format is not supported.'
+          env['rack.input'].rewind
         end
+        env['api.format'] = response_type
+      end
+
+      def get_response_type
+        format_from_extension || format_from_header || options[:default_format]
       end
       
       def format_from_extension
         parts = request.path.split('.')
-        hit = parts.last.to_sym
+        extension = parts.last.to_sym
         
-        if parts.size <= 1
-          nil
-        else
-          hit
+        if parts.size > 1 && content_types.key?(extension)
+          return extension
         end
+        nil
       end
       
       def format_from_header
