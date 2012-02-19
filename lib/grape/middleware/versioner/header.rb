@@ -18,7 +18,7 @@ module Grape
       #    env['api.version]  => 'v1'
       #    env['api.format]   => 'format'
       #
-      # If version does not match this route, then a 404 is throw with
+      # If version does not match this route, then a 406 is throw with
       # X-Cascade header to alert Rack::Mount to attempt the next matched
       # route.
       class Header < Base
@@ -26,8 +26,8 @@ module Grape
           accept = env['HTTP_ACCEPT'] || ""
 
           if options[:version_options] && options[:version_options].keys.include?(:strict) && options[:version_options][:strict]
-            if (incorrect_header?(accept))  && options[:version_options][:using] == :header
-              throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
+            if (is_accept_header_valid?(accept))  && options[:version_options][:using] == :header
+              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found"
             end
           end
           accept.strip.scan(/^(.+?)\/(.+?)$/) do |type, subtype|
@@ -39,7 +39,7 @@ module Grape
               is_vendored_match = is_vendored ? options[:version_options][:vendor] == vendor : true
 
               if (options[:versions] && !options[:versions].include?(version)) || !is_vendored_match
-                throw :error, :status => 404, :headers => {'X-Cascade' => 'pass'}, :message => "404 API Version Not Found"
+                throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found"
               end
 
               env['api.version'] = version
@@ -50,7 +50,7 @@ module Grape
         end
 
         protected
-        def incorrect_header?(header)
+        def is_accept_header_valid?(header)
           (header.strip =~ /application\/vnd\.(.+?)-(.+?)\+(.+?)/).nil?
         end
       end
