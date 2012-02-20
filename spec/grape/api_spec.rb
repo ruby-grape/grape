@@ -324,6 +324,43 @@ describe Grape::API do
     end
   end
 
+  context "accept encoding" do
+    let(:content) { 'example' }
+
+    before {
+      subject.get('/example') do
+          'example'
+      end
+    }
+
+    describe 'when Accept-Encoding is set' do
+      it 'should encode content' do
+        get '/example', {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+        last_response.headers['Content-Encoding'].should == 'gzip'
+        decode('gzip', last_response.body).should == content
+
+        get '/example', {}, 'HTTP_ACCEPT_ENCODING' => 'deflate'
+        last_response.headers['Content-Encoding'].should == 'deflate'
+        decode('deflate', last_response.body).should == content
+
+        get '/example', {}, 'HTTP_ACCEPT_ENCODING' => 'gzip,deflate'
+        last_response.headers['Content-Encoding'].should == 'gzip'
+        decode('gzip', last_response.body).should == content
+
+        get '/example', {}, 'HTTP_ACCEPT_ENCODING' => 'deflate,gzip'
+        last_response.headers['Content-Encoding'].should == 'deflate'
+        decode('deflate', last_response.body).should == content
+      end
+    end
+
+    describe 'when Accept-Encoding is not set' do
+      it "shouldn't encode content" do
+        get '/example', {}, 'HTTP_ACCEPT_ENCODING' => ''
+        last_response.headers['Content-Encoding'].should be_nil
+      end
+    end
+  end
+
   context 'custom middleware' do
     class PhonyMiddleware
       def initialize(app, *args)

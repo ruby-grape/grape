@@ -54,3 +54,27 @@ def versioned_get(path, version_name, version_options = {})
   headers = versioned_headers(version_options.merge(:version => version_name))
   get path, {}, headers
 end
+
+# Helpers for decoding string
+def decode(accept, string)
+  if accept.to_sym == :gzip
+    gunzip string
+  elsif accept.to_sym == :deflate
+    inflate string
+  end
+end
+
+def inflate(string)
+  zstream = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+  buf = zstream.inflate(string)
+  zstream.finish
+  zstream.close
+  buf
+end
+
+def gunzip(string)
+  zstream = Zlib::GzipReader.new(StringIO.new(string))
+  result = zstream.read
+  zstream.close
+  result
+end
