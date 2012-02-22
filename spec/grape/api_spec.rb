@@ -1058,7 +1058,7 @@ describe Grape::API do
   context "format" do
     context ":txt" do
       before(:each) do
-        subject.default_format :txt
+        subject.format :txt
         subject.get '/meaning_of_life' do
           { :meaning_of_life => 42 }
         end
@@ -1078,7 +1078,7 @@ describe Grape::API do
     end
     context ":json" do
       before(:each) do
-        subject.default_format :json
+        subject.format :json
         subject.get '/meaning_of_life' do
           { :meaning_of_life => 42 }
         end

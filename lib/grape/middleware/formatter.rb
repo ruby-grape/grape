@@ -7,6 +7,7 @@ module Grape
 
       def default_options
         {
+          :default_format => :txt,
           :formatters => {},
           :content_types => {},
           :parsers => {}
@@ -18,7 +19,7 @@ module Grape
       end
       
       def before
-        fmt = format_from_extension || options[:format] || format_from_header || :txt
+        fmt = format_from_extension || options[:format] || format_from_header || options[:default_format]
         if content_types.key?(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = parser_for fmt

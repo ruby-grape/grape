@@ -115,6 +115,12 @@ module Grape
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
 
+      # Specify the format for the API's serializers.
+      # May be `:json` or `:txt`.
+      def format(new_format = nil)
+        new_format ? set(:format, new_format.to_sym) : settings[:format]
+      end
+      
       # Specify the format for error messages.
       # May be `:json` or `:txt` (default).
       def error_format(new_format = nil)

@@ -268,12 +268,14 @@ end
 You can also set the default format. The order for choosing the format is the following.
 
 * Use the file extension, if specified. If the file is .json, choose the JSON format.
-* Use the default format, if specified by the `default_format` option.
+* Use the format, if specified by the `format` option.
 * Attempt to find an acceptable format from the `Accept` header.
+* Use the default format, if specified by the `default_format` option.
 * Default to `:txt` otherwise.
 
 ```ruby
 class Twitter::API < Grape::API
+  format :json
   defalt_format :json
 end
 ```

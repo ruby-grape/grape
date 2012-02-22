@@ -275,7 +275,8 @@ module Grape
       end
       
       b.use Grape::Middleware::Formatter,
-        :format => settings[:default_format],
+        :format => settings[:format],
+        :default_format => settings[:default_format] || :txt,
         :content_types => settings[:content_types]
 
       aggregate_setting(:middleware).each do |m|
