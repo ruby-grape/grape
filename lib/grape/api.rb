@@ -109,9 +109,8 @@ module Grape
         @last_description = options.merge(:description => description)
       end
 
-      # Specify the default format for the API's
-      # serializers. Currently only `:json` is
-      # supported.
+      # Specify the default format for the API's serializers.
+      # May be `:json` or `:txt` (default).
       def default_format(new_format = nil)
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end

@@ -38,7 +38,7 @@ the context of recreating parts of the Twitter API.
 
 ```ruby
 class Twitter::API < Grape::API
-  version 'v1', :using => :header, :vendor => 'twitter', :format => :json
+  version 'v1', :using => :header, :vendor => 'twitter'
 
   helpers do
     def current_user
@@ -106,15 +106,15 @@ mount Twitter::API => "/"
 ## Versioning
 
 Versioning is handled with HTTP Accept head by default, but can be configures
-to [use different strategies](https://github.com/intridea/grape/wiki/API-Versioning). 
+to [use different strategies](https://github.com/intridea/grape/wiki/API-Versioning).
 For example, to request the above with a version, you would make the following
 request:
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no Accept header is
-supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, 
-one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error 
+supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
+one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
 is returned when no correct Accept header is supplied.
 
 Serialization takes place automatically.
@@ -255,13 +255,26 @@ end
 
 ## Content-Types
 
-By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types. 
-Your API can declare additional types to support. Response format is determined by the 
+By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types.
+Your API can declare additional types to support. Response format is determined by the
 request's extension or `Accept` header.
 
 ```ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
+end
+```
+
+You can also set the default format. The order for choosing the format is the following.
+
+* Use the file extension, if specified. If the file is .json, choose the JSON format.
+* Use the default format, if specified by the `default_format` option.
+* Attempt to find an acceptable format from the `Accept` header.
+* Default to `:txt` otherwise.
+
+```ruby
+class Twitter::API < Grape::API
+  defalt_format :json
 end
 ```
 
@@ -299,7 +312,7 @@ end
 ## Describing and Inspecting an API
 
 Grape lets you add a description to an API along with any other optional
-elements that can also be inspected at runtime. 
+elements that can also be inspected at runtime.
 This can be useful for generating documentation.
 
 ```ruby
@@ -403,5 +416,5 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2012 Michael Bleigh and Intridea, Inc. 
+Copyright (c) 2010-2012 Michael Bleigh and Intridea, Inc.
 

@@ -273,9 +273,9 @@ module Grape
           :version_options => settings[:version_options]
         }
       end
-
+      
       b.use Grape::Middleware::Formatter,
-        :default_format => settings[:default_format] || :json,
+        :format => settings[:default_format],
         :content_types => settings[:content_types]
 
       aggregate_setting(:middleware).each do |m|

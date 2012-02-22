@@ -6,8 +6,7 @@ module Grape
       include Formats
 
       def default_options
-        { 
-          :default_format => :txt,
+        {
           :formatters => {},
           :content_types => {},
           :parsers => {}
@@ -19,7 +18,7 @@ module Grape
       end
       
       def before
-        fmt = format_from_extension || format_from_header || options[:default_format]
+        fmt = format_from_extension || options[:format] || format_from_header || :txt
         if content_types.key?(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = parser_for fmt
@@ -52,7 +51,7 @@ module Grape
       end
       
       def format_from_header
-        mime_array.each do |t| 
+        mime_array.each do |t|
           if mime_types.key?(t)
             return mime_types[t]
           end

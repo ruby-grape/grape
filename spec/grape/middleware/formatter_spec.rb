@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
-  subject{ Grape::Middleware::Formatter.new(app, :default_format => :json)}
+  subject{ Grape::Middleware::Formatter.new(app) }
   before{ subject.stub!(:dup).and_return(subject) }
 
   let(:app){ lambda{|env| [200, {}, [@body]]} }
@@ -9,7 +9,7 @@ describe Grape::Middleware::Formatter do
   context 'serialization' do
     it 'should look at the bodies for possibly serializable data' do
       @body = {"abc" => "def"}
-      status, headers, bodies = *subject.call({'PATH_INFO' => '/somewhere'})
+      status, headers, bodies = *subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'})
       bodies.each{|b| b.should == MultiJson.encode(@body) }
     end
 
@@ -21,7 +21,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '"bar"'}
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '"bar"'}
     end
 
     it 'should serialize the #serializable_hash if that is available' do
@@ -33,7 +33,7 @@ describe Grape::Middleware::Formatter do
 
       @body = [SimpleExample.new, SimpleExample.new]
 
-      subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '[{"abc":"def"},{"abc":"def"}]'}
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '[{"abc":"def"},{"abc":"def"}]'}
     end
 
     it 'should serialize multiple objects that respond to #serializable_hash' do
@@ -45,7 +45,7 @@ describe Grape::Middleware::Formatter do
 
       @body = SimpleExample.new
 
-      subject.call({'PATH_INFO' => '/somewhere'}).last.each{|b| b.should == '{"abc":"def"}'}
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"abc":"def"}'}
     end
 
     it 'should call #to_xml if the content type is xml' do
@@ -56,7 +56,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call({'PATH_INFO' => '/somewhere.xml'}).last.each{|b| b.should == '<bar/>'}
+      subject.call({'PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '<bar/>'}
     end
   end
 
@@ -70,9 +70,19 @@ describe Grape::Middleware::Formatter do
 
     it 'should use the default format if none is provided' do
       subject.call({'PATH_INFO' => '/info'})
+      subject.env['api.format'].should == :txt
+    end
+
+    it 'should use the requested format if provided in headers' do
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json'})
       subject.env['api.format'].should == :json
     end
 
+    it 'should use the file extension format if provided before headers' do
+      subject.call({'PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json'})
+      subject.env['api.format'].should == :txt
+    end
+    
     it 'should throw an error on an unrecognized format' do
       err = catch(:error){ subject.call({'PATH_INFO' => '/info.barklar'}) }
       err.should == {:status => 406, :message => "The requested format is not supported."}
