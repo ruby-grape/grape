@@ -184,14 +184,16 @@ class Twitter::API < Grape::API
 end
 ```
 
-    class Twitter::API < Grape::API
-      rescue_from ArgumentError do |e|
-        Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
-      end
-      rescue_from NotImplementedError do |e|
-        Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
-      end
-    end
+```ruby
+class Twitter::API < Grape::API
+  rescue_from ArgumentError do |e|
+    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+  end
+  rescue_from NotImplementedError do |e|
+    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
+  end
+end
+```
 
 ## Writing Tests
 
