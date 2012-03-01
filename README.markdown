@@ -78,8 +78,9 @@ And would respond to the following routes:
     GET  /statuses/home_timeline(.json)
     GET  /statuses/show/:id(.json)
     POST /statuses/update(.json)
+    GET  /account/private(.json)
 
-Versioning is handled with HTTP Accept head by default, but can be configures
+Versioning is handled with HTTP Accept head by default, but can be configured
 to [use different
 strategies](https://github.com/intridea/grape/wiki/API-Versioning). For
 example, to request the above with a version, you would make the following
