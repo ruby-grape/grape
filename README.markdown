@@ -78,8 +78,9 @@ And would respond to the following routes:
     GET  /statuses/home_timeline(.json)
     GET  /statuses/show/:id(.json)
     POST /statuses/update(.json)
+    GET  /account/private(.json)
 
-Versioning is handled with HTTP Accept head by default, but can be configures
+Versioning is handled with HTTP Accept head by default, but can be configured
 to [use different
 strategies](https://github.com/intridea/grape/wiki/API-Versioning). For
 example, to request the above with a version, you would make the following
@@ -183,14 +184,16 @@ class Twitter::API < Grape::API
 end
 ```
 
-    class Twitter::API < Grape::API
-      rescue_from ArgumentError do |e|
-        Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
-      end
-      rescue_from NotImplementedError do |e|
-        Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
-      end
-    end
+```ruby
+class Twitter::API < Grape::API
+  rescue_from ArgumentError do |e|
+    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+  end
+  rescue_from NotImplementedError do |e|
+    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
+  end
+end
+```
 
 ## Writing Tests
 
