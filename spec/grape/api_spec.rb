@@ -1065,15 +1065,15 @@ describe Grape::API do
       end
       it "should force txt without an extension" do
         get '/meaning_of_life'
-        last_response.body.should == "{:meaning_of_life=>42}"
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
       end
       it "should not force txt with an extension" do
         get '/meaning_of_life.json'
-        last_response.body.should == '{"meaning_of_life":42}'
+        last_response.body.should == { :meaning_of_life => 42 }.to_json
       end
       it "should force txt from a non-accepting header" do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
-        last_response.body.should == "{:meaning_of_life=>42}"
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
       end
     end
     context ":json" do
@@ -1085,15 +1085,15 @@ describe Grape::API do
       end
       it "should force json without an extension" do
         get '/meaning_of_life'
-        last_response.body.should == '{"meaning_of_life":42}'
+        last_response.body.should == { :meaning_of_life => 42 }.to_json
       end
       it "should not force json with an extension" do
         get '/meaning_of_life.txt'
-        last_response.body.should == "{:meaning_of_life=>42}"
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
       end
       it "should force json from a non-accepting header" do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
-        last_response.body.should == '{"meaning_of_life":42}'
+        last_response.body.should == { :meaning_of_life => 42 }.to_json
       end
     end
   end
