@@ -157,6 +157,18 @@ module Grape
       end
     end
 
+    # Set or get a cookie
+    #
+    # @example
+    #   cookies[:mycookie] = 'mycookie val'
+    #   cookies['mycookie-string'] = 'mycookie string val'
+    #   cookies[:more] = { :value => '123', :expires => Time.at(0) }
+    #   cookies.delete :more
+    #
+    def cookies
+      @cookies ||= Cookies.new
+    end
+
     # Allows you to define the response body as something other than the
     # return value.
     #
@@ -231,10 +243,12 @@ module Grape
       @request = Rack::Request.new(@env)
 
       self.extend helpers
+      cookies.read(@request)
       run_filters befores
       response_text = instance_eval &self.block
       run_filters afters
-
+      cookies.write(header)
+      
       [status, header, [body || response_text]]
     end
 
@@ -259,9 +273,10 @@ module Grape
           :version_options => settings[:version_options]
         }
       end
-
+      
       b.use Grape::Middleware::Formatter,
-        :default_format => settings[:default_format] || :json,
+        :format => settings[:format],
+        :default_format => settings[:default_format] || :txt,
         :content_types => settings[:content_types]
 
       aggregate_setting(:middleware).each do |m|
