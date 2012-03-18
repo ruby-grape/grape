@@ -3,7 +3,6 @@ require 'shared/versioning_examples'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
-  before { subject.default_format :txt }
 
   def app; subject end
 
@@ -433,7 +432,7 @@ describe Grape::API do
           env['phony.block'].inspect
         end
 
-        2.times do 
+        2.times do
           get '/'
           last_response.body.should == 'true'
         end
@@ -769,7 +768,7 @@ describe Grape::API do
     end
     describe "api structure with additional parameters" do
       before(:each) do
-        subject.get 'split/:string', { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do 
+        subject.get 'split/:string', { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do
           params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
@@ -795,29 +794,29 @@ describe Grape::API do
         subject.desc "grape api"
         subject.routes.should == []
       end
-    end     
+    end
     describe "single method with a desc" do
       before(:each) do
         subject.desc "ping method"
-        subject.get :ping do 
+        subject.get :ping do
           'pong'
         end
       end
       it "returns route description" do
         subject.routes[0].route_description.should == "ping method"
       end
-    end    
+    end
     describe "single method with a an array of params and a desc hash block" do
       before(:each) do
         subject.desc "ping method", { :params => { "x" => "y" } }
-        subject.get "ping/:x" do 
+        subject.get "ping/:x" do
           'pong'
         end
       end
       it "returns route description" do
         subject.routes[0].route_description.should == "ping method"
       end
-    end    
+    end
     describe "api structure with multiple methods and descriptions" do
       before(:each) do
         class JitterAPI < Grape::API
@@ -955,7 +954,7 @@ describe Grape::API do
       end
 
       it 'should be able to cascade' do
-        subject.mount lambda{ |env| 
+        subject.mount lambda{ |env|
           headers = {}
           headers['X-Cascade'] == 'pass' unless env['PATH_INFO'].include?('boo')
           [200, headers, ["Farfegnugen"]]
@@ -1035,7 +1034,7 @@ describe Grape::API do
         last_response.body.should == "/path(.:format)"
       end
     end
-    context "with desc" do    
+    context "with desc" do
       before(:each) do
         subject.desc 'returns description'
         subject.get '/description' do
@@ -1053,6 +1052,48 @@ describe Grape::API do
       it 'should return route parameters' do
         get '/params/x'
         last_response.body.should == "y"
+      end
+    end
+  end
+  context "format" do
+    context ":txt" do
+      before(:each) do
+        subject.format :txt
+        subject.get '/meaning_of_life' do
+          { :meaning_of_life => 42 }
+        end
+      end
+      it "should force txt without an extension" do
+        get '/meaning_of_life'
+        last_response.body.should == "{:meaning_of_life=>42}"
+      end
+      it "should not force txt with an extension" do
+        get '/meaning_of_life.json'
+        last_response.body.should == '{"meaning_of_life":42}'
+      end
+      it "should force txt from a non-accepting header" do
+        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
+        last_response.body.should == "{:meaning_of_life=>42}"
+      end
+    end
+    context ":json" do
+      before(:each) do
+        subject.format :json
+        subject.get '/meaning_of_life' do
+          { :meaning_of_life => 42 }
+        end
+      end
+      it "should force json without an extension" do
+        get '/meaning_of_life'
+        last_response.body.should == '{"meaning_of_life":42}'
+      end
+      it "should not force json with an extension" do
+        get '/meaning_of_life.txt'
+        last_response.body.should == "{:meaning_of_life=>42}"
+      end
+      it "should force json from a non-accepting header" do
+        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
+        last_response.body.should == '{"meaning_of_life":42}'
       end
     end
   end

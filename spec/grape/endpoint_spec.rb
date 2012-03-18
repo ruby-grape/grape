@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Grape::Endpoint do
   subject { Class.new(Grape::API) }
-  before { subject.default_format :txt }
   def app; subject end
 
   describe '#initialize' do
