@@ -74,22 +74,25 @@ class Twitter::API < Grape::API
   end
 
   resource :account do
-    before{ authenticate! }
+    before { authenticate! }
 
     get '/private' do
       "Congratulations, you found the secret!"
     end
   end
+
 end
 ```
 
 ## Mounting
 
-The above sample creates a Rack application that can be run from a rackup *config.ru* file:
+The above sample creates a Rack application that can be run from a rackup *config.ru* file 
+with `rackup`:
 
 ``` ruby
 run Twitter::API
 ```
+
 And would respond to the following routes:
 
     GET  /statuses/public_timeline(.json)
@@ -103,12 +106,23 @@ In a Rails application, modify *config/routes*:
 mount Twitter::API => "/"
 ```
 
+You can mount multiple API implementations inside another one.
+
+```ruby
+class Twitter::API < Grape::API
+  mount Twitter::APIv1
+  mount Twitter::APIv2
+end
+```
+
 ## Versioning
 
-Versioning is handled with HTTP Accept head by default, but can be configures
-to [use different strategies](https://github.com/intridea/grape/wiki/API-Versioning).
-For example, to request the above with a version, you would make the following
-request:
+There are two stragies in which clients can reach your API's endpoints: `:header` 
+and `:path`. The default strategy is `:header`.
+
+    version 'v1', :using => :header
+
+Using this versioning strategy, clients should pass the desired version in the HTTP Accept head. 
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
@@ -117,7 +131,35 @@ supplied. This behavior is similar to routing in Rails. To circumvent this defau
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
 is returned when no correct Accept header is supplied.
 
-Serialization takes place automatically.
+    version 'v1', :using => :path
+
+Using this versioning strategy, clients should pass the desired version in the URL.
+
+    curl -H http://localhost:9292/v1/statuses/public_timeline
+
+Serialization takes place automatically. 
+
+## Parameters
+
+Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters, 
+along with any named parameters you specify in your route strings.
+
+```ruby
+  get do
+    Article.order(params[:sort_by])
+  end
+```
+
+## Headers
+
+Headers are available through the `env` hash object.
+
+```ruby
+  get do
+    error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
+    ...
+  end
+```
 
 ## Helpers
 
@@ -244,6 +286,8 @@ class Twitter::API < Grape::API
 end
 ```
 
+Or rescue specific exceptions.
+
 ``` ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError do |e|
@@ -284,20 +328,42 @@ end
 
 ## Writing Tests
 
-You can test a Grape API with RSpec. Tests make HTTP requests, therefore they
-must go into the `spec/request` group. You may want your API code to go into
-`app/api` - you can match that layout under `spec` by adding the following in
-`spec/spec_helper.rb`.
+You can test a Grape API with RSpec by making HTTP requests and examining the response. 
 
-``` ruby
-RSpec.configure do |config|
-  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
-    :file_path => /spec\/api/
-  }
+### Writing Tests with Rack
+
+Use `rack-test` and define your API as `app`.
+
+```ruby
+require 'spec_helper'
+
+describe Twitter::API do
+  include Rack::Test::Methods
+
+  def app
+    Twitter::API
+  end
+
+  describe Twitter::API do
+    describe "GET /api/v1/statuses" do
+      it "returns an empty array of statuses" do
+        get "/api/v1/statuses"
+        last_response.status.should == 200
+        JSON.parse(response.body).should == []
+      end
+    end
+    describe "GET /api/v1/statuses/:id" do
+      it "returns a status by id" do
+        status = Status.create!
+        get "/api/v1/statuses/#{status.id}"
+        last_resonse.body.should == status.to_json
+      end
+    end
+  end
 end
 ```
 
-A simple RSpec API test makes a `get` request and parses the response.
+### Writing Tests with Rails
 
 ``` ruby
 require 'spec_helper'
@@ -310,6 +376,24 @@ describe Twitter::API do
       JSON.parse(response.body).should == []
     end
   end
+  describe "GET /api/v1/statuses/:id" do
+    it "returns a status by id" do
+      status = Status.create!
+      get "/api/v1/statuses/#{status.id}"
+      resonse.body.should == status.to_json
+    end
+  end
+end
+```
+
+In Rails, HTTP request tests would go into the `spec/request` group. You may want your API code to go into
+`app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+```ruby
+RSpec.configure do |config|
+  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
+    :file_path => /spec\/api/
+  }
 end
 ```
 
