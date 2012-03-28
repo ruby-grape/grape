@@ -78,11 +78,17 @@ module Grape
       end
     end
 
-    # Returns a hash of exposures that have been declared for this Entity. The keys
+    # Returns a hash of exposures that have been declared for this Entity or ancestors. The keys
     # are symbolized references to methods on the containing object, the values are
     # the options that were passed into expose.
     def self.exposures
-      (@exposures ||= {})
+      @exposures ||= {}
+
+      if superclass.respond_to? :exposures
+        @exposures = superclass.exposures.merge(@exposures)
+      end
+
+      @exposures
     end
 
     # This allows you to set a root element name for your representation.
