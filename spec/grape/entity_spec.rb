@@ -39,6 +39,34 @@ describe Grape::Entity do
           subject.exposures[:name][:proc].should == block
         end
       end
+
+      context 'inherited exposures' do
+        it 'should return exposures from an ancestor' do
+          subject.expose :name, :email
+          child_class = Class.new(subject)
+
+          child_class.exposures.should eq(subject.exposures)
+        end
+
+        it 'should return exposures from multiple ancestor' do
+          subject.expose :name, :email
+          parent_class = Class.new(subject)
+          child_class  = Class.new(parent_class)
+
+          child_class.exposures.should eq(subject.exposures)
+        end
+
+        it 'should return descendant exposures as a priotity' do
+          subject.expose :name, :email
+          child_class = Class.new(subject)
+          child_class.expose :name do |n|
+            'foo'
+          end
+
+          subject.exposures[:name].should_not have_key :proc
+          child_class.exposures[:name].should have_key :proc
+        end
+      end
     end
 
     describe '.represent' do
