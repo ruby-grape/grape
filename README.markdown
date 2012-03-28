@@ -1,6 +1,4 @@
-# Grape (Frontier) [![Build Status](http://travis-ci.org/intridea/grape.png?branch=frontier)](http://travis-ci.org/intridea/grape)
-
-**Welcome to the `frontier` branch. This is where we're experimenting and building the next version of Grape. Things will be civilized here one day, but until then you best carry your revolver with you.**
+# Grape [![Build Status](http://travis-ci.org/intridea/grape.png?branch=frontier)](http://travis-ci.org/intridea/grape)
 
 ## What is Grape?
 
@@ -9,11 +7,6 @@ existing web application frameworks such as Rails and Sinatra by providing a
 simple DSL to easily provide APIs. It has built-in support for common
 conventions such as multiple formats, subdomain/prefix restriction, and
 versioning.
-
-## Project Tracking
-
-* [Grape Google Group](http://groups.google.com/group/ruby-grape)
-* [Grape Wiki](https://github.com/intridea/grape/wiki)
 
 ## Project Tracking
 
