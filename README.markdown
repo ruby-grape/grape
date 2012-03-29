@@ -110,7 +110,7 @@ end
 
 ## Versioning
 
-There are two stragies in which clients can reach your API's endpoints: `:header` 
+There are two strategies in which clients can reach your API's endpoints: `:header` 
 and `:path`. The default strategy is `:header`.
 
     version 'v1', :using => :header
