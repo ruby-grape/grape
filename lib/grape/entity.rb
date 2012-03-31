@@ -141,6 +141,8 @@ module Grape
         exposure_options[:proc].call(object, options)
       elsif exposure_options[:using]
         exposure_options[:using].represent(object.send(attribute))
+      elsif exposure_options[:format_with]
+        self.send(exposure_options[:format_with].to_sym, object.send(attribute))
       else
         object.send(attribute)
       end
