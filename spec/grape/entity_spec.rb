@@ -204,9 +204,10 @@ describe Grape::Entity do
       :name => 'Bob Bobson', 
       :email => 'bob@example.com',
       :birthday => Time.new(2012, 2, 27),
+      :fantasies => ['Unicorns', 'Double Rainbows', 'Nessy'],
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :birthday => Time.new(2012, 2, 27), :friends => []), 
-        mock(:name => "Friend 2", :email => 'friend2@example.com', :birthday => Time.new(2012, 2, 27), :friends => [])
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :fantasies => [], :birthday => Time.new(2012, 2, 27), :friends => []), 
+        mock(:name => "Friend 2", :email => 'friend2@example.com', :fantasies => [], :birthday => Time.new(2012, 2, 27), :friends => [])
       ]
     } }
     subject{ fresh_class.new(model) }
@@ -236,6 +237,8 @@ describe Grape::Entity do
           def timestamp(date)
             date.strftime('%m/%d/%Y')
           end
+
+          expose :fantasies, :format_with => lambda {|f| f.reverse }
         end
       end
 
@@ -271,6 +274,10 @@ describe Grape::Entity do
 
       it 'should return a formatted value if format_with is passed' do
         subject.send(:value_for, :birthday).should == '02/27/2012'
+      end
+
+      it 'should return a formatted value if format_with is passed a lambda' do
+        subject.send(:value_for, :fantasies).should == ['Nessy', 'Double Rainbows', 'Unicorns']
       end
     end
 
