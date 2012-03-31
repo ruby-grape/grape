@@ -203,10 +203,12 @@ module Grape
       elsif exposure_options[:using]
         exposure_options[:using].represent(object.send(attribute), :root => nil)
       elsif exposure_options[:format_with]
-        if exposure_options[:format_with].is_a? Symbol
-          self.send(exposure_options[:format_with].to_sym, object.send(attribute))
-        elsif exposure_options[:format_with].respond_to? :call
-          exposure_options[:format_with].call(object.send(attribute))
+        format_with = exposure_options[:format_with]
+
+        if format_with.is_a? Symbol
+          self.send(format_with.to_sym, object.send(attribute))
+        elsif format_with.respond_to? :call
+          format_with.call(object.send(attribute))
         end
       else
         object.send(attribute)
