@@ -24,6 +24,10 @@ describe Grape::Entity do
           expect{ subject.expose :name, :email, :as => :foo }.to raise_error(ArgumentError)
           expect{ subject.expose :name, :as => :foo }.not_to raise_error
         end
+
+        it 'should make sure that :format_with as a proc can not be used with a block' do
+          expect { subject.expose :name, :format_with => Proc.new {} do |object,options| end }.to raise_error(ArgumentError)
+        end
       end
 
       context 'with a block' do

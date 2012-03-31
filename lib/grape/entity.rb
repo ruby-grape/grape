@@ -71,6 +71,8 @@ module Grape
         raise ArgumentError, "You may not use block-setting on multi-attribute exposures." if block_given?
       end
 
+      raise ArgumentError, "You may not use block-setting when also using " if block_given? && options[:format_with].respond_to?(:call)
+
       options[:proc] = block if block_given?
 
       args.each do |attribute|
