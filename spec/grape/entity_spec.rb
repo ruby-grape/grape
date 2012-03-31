@@ -201,11 +201,12 @@ describe Grape::Entity do
   context 'instance methods' do
     let(:model){ mock(attributes) }
     let(:attributes){ {
-      :name => 'Bob Bobson',
+      :name => 'Bob Bobson', 
       :email => 'bob@example.com',
+      :birthday => Time.new(2012, 2, 27),
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []),
-        mock(:name => "Friend 2", :email => 'friend2@example.com', :friends => [])
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :birthday => Time.new(2012, 2, 27), :friends => []), 
+        mock(:name => "Friend 2", :email => 'friend2@example.com', :birthday => Time.new(2012, 2, 27), :friends => [])
       ]
     } }
     subject{ fresh_class.new(model) }
@@ -228,6 +229,12 @@ describe Grape::Entity do
           expose :friends, :using => self
           expose :computed do |object, options|
             options[:awesome]
+          end
+
+          expose :birthday, :format_with => :timestamp
+
+          def timestamp(date)
+            date.strftime('%m/%d/%Y')
           end
         end
       end
@@ -260,6 +267,10 @@ describe Grape::Entity do
 
       it 'should call through to the proc if there is one' do
         subject.send(:value_for, :computed, :awesome => 123).should == 123
+      end
+
+      it 'should return a formatted value if format_with is passed' do
+        subject.send(:value_for, :birthday).should == '02/27/2012'
       end
     end
 
