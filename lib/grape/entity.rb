@@ -208,7 +208,7 @@ module Grape
         format_with = exposure_options[:format_with]
 
         if format_with.is_a? Symbol
-          self.send(format_with.to_sym, object.send(attribute))
+          self.send(format_with, object.send(attribute))
         elsif format_with.respond_to? :call
           format_with.call(object.send(attribute))
         end
