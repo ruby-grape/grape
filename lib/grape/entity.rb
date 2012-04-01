@@ -93,6 +93,24 @@ module Grape
       @exposures
     end
 
+    # This allows you to declare a Proc in which exposures can be formatted with.
+    # It take a block with an arity of 1 which is passed as the value of the exposed attribute.
+    def self.format_with(name, &block)
+      raise ArgumentError, "You must has a block for formatters" unless block_given?
+      formatters[name.to_sym] = block
+    end
+
+    # Returns a hash of all formatters that are registered for this and it's ancestors.
+    def self.formatters
+      @formatters ||= {}
+
+      if superclass.respond_to? :formatters
+        @formatters = superclass.formatters.merge(@formatters)
+      end
+
+      @formatters
+    end
+
     # This allows you to set a root element name for your representation.
     #
     # @param plural   [String] the root key to use when representing
@@ -173,6 +191,10 @@ module Grape
       self.class.exposures
     end
 
+    def formatters
+      self.class.formatters
+    end
+
     # The serializable hash is the Entity's primary output. It is the transformed
     # hash for the given data model and is used as the basis for serialization to
     # JSON and other formats.
@@ -207,7 +229,9 @@ module Grape
       elsif exposure_options[:format_with]
         format_with = exposure_options[:format_with]
 
-        if format_with.is_a? Symbol
+        if format_with.is_a?(Symbol) && formatters[format_with]
+          formatters[format_with].call(object.send(attribute))
+        elsif format_with.is_a?(Symbol)
           self.send(format_with, object.send(attribute))
         elsif format_with.respond_to? :call
           format_with.call(object.send(attribute))

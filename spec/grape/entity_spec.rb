@@ -71,6 +71,38 @@ describe Grape::Entity do
           child_class.exposures[:name].should have_key :proc
         end
       end
+
+      context 'register formatters' do
+        let(:date_formatter) { lambda {|date| date.strftime('%m/%d/%Y') }}
+
+        it 'should register a formatter' do
+          subject.format_with :timestamp, &date_formatter
+
+          subject.formatters[:timestamp].should_not be_nil
+        end
+
+        it 'should inherit formatters from ancestors' do
+          subject.format_with :timestamp, &date_formatter
+          child_class = Class.new(subject)
+
+          child_class.formatters.should == subject.formatters
+        end
+
+        it 'should not allow registering a formatter without a block' do
+          expect{ subject.format_with :foo }.to raise_error(ArgumentError)
+        end
+
+        it 'should format an exposure with a registered formatter' do
+          subject.format_with :timestamp do |date|
+            date.strftime('%m/%d/%Y')
+          end
+
+          subject.expose :birthday, :format_with => :timestamp
+
+          model  = { :birthday => Time.new(2012, 2, 27) }
+          subject.new(mock(model)).as_json[:birthday].should == '02/27/2012'
+        end
+      end
     end
 
     describe '.represent' do
