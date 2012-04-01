@@ -24,6 +24,10 @@ describe Grape::Entity do
           expect{ subject.expose :name, :email, :as => :foo }.to raise_error(ArgumentError)
           expect{ subject.expose :name, :as => :foo }.not_to raise_error
         end
+
+        it 'should make sure that :format_with as a proc can not be used with a block' do
+          expect { subject.expose :name, :format_with => Proc.new {} do |object,options| end }.to raise_error(ArgumentError)
+        end
       end
 
       context 'with a block' do
@@ -65,6 +69,38 @@ describe Grape::Entity do
 
           subject.exposures[:name].should_not have_key :proc
           child_class.exposures[:name].should have_key :proc
+        end
+      end
+
+      context 'register formatters' do
+        let(:date_formatter) { lambda {|date| date.strftime('%m/%d/%Y') }}
+
+        it 'should register a formatter' do
+          subject.format_with :timestamp, &date_formatter
+
+          subject.formatters[:timestamp].should_not be_nil
+        end
+
+        it 'should inherit formatters from ancestors' do
+          subject.format_with :timestamp, &date_formatter
+          child_class = Class.new(subject)
+
+          child_class.formatters.should == subject.formatters
+        end
+
+        it 'should not allow registering a formatter without a block' do
+          expect{ subject.format_with :foo }.to raise_error(ArgumentError)
+        end
+
+        it 'should format an exposure with a registered formatter' do
+          subject.format_with :timestamp do |date|
+            date.strftime('%m/%d/%Y')
+          end
+
+          subject.expose :birthday, :format_with => :timestamp
+
+          model  = { :birthday => Time.new(2012, 2, 27) }
+          subject.new(mock(model)).as_json[:birthday].should == '02/27/2012'
         end
       end
     end
@@ -201,11 +237,13 @@ describe Grape::Entity do
   context 'instance methods' do
     let(:model){ mock(attributes) }
     let(:attributes){ {
-      :name => 'Bob Bobson',
+      :name => 'Bob Bobson', 
       :email => 'bob@example.com',
+      :birthday => Time.new(2012, 2, 27),
+      :fantasies => ['Unicorns', 'Double Rainbows', 'Nessy'],
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :friends => []),
-        mock(:name => "Friend 2", :email => 'friend2@example.com', :friends => [])
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :fantasies => [], :birthday => Time.new(2012, 2, 27), :friends => []), 
+        mock(:name => "Friend 2", :email => 'friend2@example.com', :fantasies => [], :birthday => Time.new(2012, 2, 27), :friends => [])
       ]
     } }
     subject{ fresh_class.new(model) }
@@ -229,6 +267,14 @@ describe Grape::Entity do
           expose :computed do |object, options|
             options[:awesome]
           end
+
+          expose :birthday, :format_with => :timestamp
+
+          def timestamp(date)
+            date.strftime('%m/%d/%Y')
+          end
+
+          expose :fantasies, :format_with => lambda {|f| f.reverse }
         end
       end
 
@@ -260,6 +306,14 @@ describe Grape::Entity do
 
       it 'should call through to the proc if there is one' do
         subject.send(:value_for, :computed, :awesome => 123).should == 123
+      end
+
+      it 'should return a formatted value if format_with is passed' do
+        subject.send(:value_for, :birthday).should == '02/27/2012'
+      end
+
+      it 'should return a formatted value if format_with is passed a lambda' do
+        subject.send(:value_for, :fantasies).should == ['Nessy', 'Double Rainbows', 'Unicorns']
       end
     end
 
