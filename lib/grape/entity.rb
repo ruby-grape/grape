@@ -95,6 +95,32 @@ module Grape
 
     # This allows you to declare a Proc in which exposures can be formatted with.
     # It take a block with an arity of 1 which is passed as the value of the exposed attribute.
+    # 
+    # @param name [Symbol] the name of the formatter
+    # @param block [Proc] the block that will interpret the exposed attribute
+    #
+    #
+    #
+    # @example Formatter declaration
+    #
+    #   module API
+    #     module Entities
+    #       class User < Grape::Entity
+    #         format_with :timestamp do |date|
+    #           date.strftime('%m/%d/%Y')
+    #         end
+    #
+    #         expose :birthday, :last_signed_in, :format_with => :timestamp
+    #       end
+    #     end
+    #   end
+    #
+    # @example Formatters are available to all decendants
+    #
+    #   Grape::Entity.format_with :timestamp do |date|
+    #     date.strftime('%m/%d/%Y')
+    #   end
+    #
     def self.format_with(name, &block)
       raise ArgumentError, "You must has a block for formatters" unless block_given?
       formatters[name.to_sym] = block
