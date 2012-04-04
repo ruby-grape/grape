@@ -107,7 +107,7 @@ describe Grape::Endpoint do
       ]
     end
   end
-  
+
   describe '#params' do
     it 'should be available to the caller' do
       subject.get('/hey') do
@@ -133,6 +133,42 @@ describe Grape::Endpoint do
       end
       get '/location?location[city]=Dallas'
       last_response.body.should == 'Dallas'
+    end
+
+    context 'with special requirements' do
+      it 'should parse email param with provided requirements for params' do
+        subject.get('/:person_email', :requirements => { :person_email => /.*/ }) do
+        params[:person_email]
+        end
+
+        get '/rodzyn@grape.com'
+        last_response.body.should == 'rodzyn@grape.com'
+
+        get 'rodzyn@grape.com.pl'
+        last_response.body.should == 'rodzyn@grape.com.pl'
+      end
+
+      it 'should parse many params with provided regexps' do
+        subject.get('/:person_email/test/:number',
+          :requirements => {
+            :person_email => /rodzyn@(.*).com/,
+            :number => /[0-9]/ }) do
+        params[:person_email] << params[:number]
+        end
+
+        get '/rodzyn@grape.com/test/1'
+        last_response.body.should == 'rodzyn@grape.com1'
+
+        get '/rodzyn@testing.wrong/test/1'
+        last_response.status.should == 404
+
+        get 'rodzyn@test.com/test/wrong_number'
+        last_response.status.should == 404
+
+        get 'rodzyn@test.com/wrong_middle/1'
+        last_response.status.should == 404
+
+      end
     end
   end
 

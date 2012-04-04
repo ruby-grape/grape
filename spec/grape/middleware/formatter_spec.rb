@@ -82,11 +82,6 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json'})
       subject.env['api.format'].should == :txt
     end
-    
-    it 'should throw an error on an unrecognized format' do
-      err = catch(:error){ subject.call({'PATH_INFO' => '/info.barklar'}) }
-      err.should == {:status => 406, :message => "The requested format is not supported."}
-    end
   end
 
   context 'Accept header detection' do
