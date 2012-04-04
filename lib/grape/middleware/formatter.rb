@@ -42,13 +42,12 @@ module Grape
       
       def format_from_extension
         parts = request.path.split('.')
-        hit = parts.last.to_sym
-        
-        if parts.size <= 1
-          nil
-        else
-          hit
+        extension = parts.last.to_sym
+
+        if parts.size > 1 && content_types.key?(extension)
+          return extension
         end
+        nil
       end
       
       def format_from_header
