@@ -266,6 +266,7 @@ module Grape
         :rescue_options => settings[:rescue_options],
         :rescue_handlers => settings[:rescue_handlers] || {}
 
+      b.use Grape::Middleware::Auth::OAuth2, settings[:auth] if settings[:auth] and settings[:auth][:type] == :oauth2
       b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
       b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
       b.use Grape::Middleware::Prefixer, :prefix => settings[:root_prefix] if settings[:root_prefix]
