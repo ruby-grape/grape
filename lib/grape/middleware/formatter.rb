@@ -7,7 +7,7 @@ module Grape
 
       def default_options
         {
-          :default_format => :txt,
+          :default_format => :json,
           :formatters => {},
           :content_types => {},
           :parsers => {}
