@@ -70,16 +70,16 @@ describe Grape::Middleware::Formatter do
 
     it 'should use the default format if none is provided' do
       subject.call({'PATH_INFO' => '/info'})
-      subject.env['api.format'].should == :txt
-    end
-
-    it 'should use the requested format if provided in headers' do
-      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json'})
       subject.env['api.format'].should == :json
     end
 
+    it 'should use the requested format if provided in headers' do
+      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'text/plain'})
+      subject.env['api.format'].should == :txt
+    end
+
     it 'should use the file extension format if provided before headers' do
-      subject.call({'PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json'})
+      subject.call({'PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'text/plain'})
       subject.env['api.format'].should == :txt
     end
     
