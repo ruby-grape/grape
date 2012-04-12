@@ -310,13 +310,23 @@ You can also set the default format. The order for choosing the format is the fo
 * Use the format, if specified by the `format` option.
 * Attempt to find an acceptable format from the `Accept` header.
 * Use the default format, if specified by the `default_format` option.
-* Default to `:txt` otherwise.
+* Default to `:json` otherwise.
 
 ``` ruby
 class Twitter::API < Grape::API
   format :json
   default_format :json
 end
+```
+
+By default, Grape understands the following content types:
+
+```ruby
+:xml  => 'application/xml',
+:json => 'application/json',
+:atom => 'application/atom+xml',
+:rss  => 'application/rss+xml',
+:txt  => 'text/plain'
 ```
 
 ## Writing Tests
