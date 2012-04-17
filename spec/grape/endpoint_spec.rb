@@ -204,6 +204,27 @@ describe Grape::Endpoint do
       last_response.body.should == '{"dude":"rad"}'
     end
   end
+  
+  describe "#redirect" do 
+    it "should redirect to a url with status 302" do 
+      subject.get('/hey') do 
+        redirect "/ha"
+      end
+      get '/hey'
+      last_response.status.should eq 302
+      last_response.headers['Location'].should eq "/ha"
+      last_response.body.should eq ""
+    end
+
+    it "should have status code 303 if it is not get request and it is http 1.1" do
+      subject.post('/hey') do 
+        redirect "/ha"
+      end
+      post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
+      last_response.status.should eq 303
+      last_response.headers['Location'].should eq "/ha"
+    end
+  end
 
   it 'should not persist params between calls' do
     subject.post('/new') do

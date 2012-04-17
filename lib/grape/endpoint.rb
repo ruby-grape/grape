@@ -133,6 +133,19 @@ module Grape
       throw :error, :message => message, :status => status
     end
 
+    # Redirect to a new url.
+    # 
+    # @param url [String] The url to be redirect.
+    def redirect(url)
+      if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
+        status 303
+      else 
+        status 302
+      end
+      header "Location", url
+      body ""
+    end
+
     # Set or retrieve the HTTP status code.
     #
     # @param status [Integer] The HTTP Status Code to return for this request.
