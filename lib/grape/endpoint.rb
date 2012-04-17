@@ -136,11 +136,16 @@ module Grape
     # Redirect to a new url.
     # 
     # @param url [String] The url to be redirect.
-    def redirect(url)
-      if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
-        status 303
-      else 
-        status 302
+    # @param permanent [Boolean] Whether use permanent redirect with status code 304.
+    def redirect(url, permanent=false)
+      if permanent
+        status 304
+      else
+        if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
+          status 303
+        else 
+          status 302
+        end
       end
       header "Location", url
       body ""

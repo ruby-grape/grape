@@ -213,6 +213,19 @@ cookies[:counter] = {
 }
 cookies[:counter][:value] +=1
 ```
+## Redirect
+
+You can redirect to a new url
+
+``` ruby
+redirect "/new_url"
+```
+
+use permanent redirect
+
+``` ruby
+redirect "/new_url", true
+```
 
 ## Raising Errors
 

@@ -224,6 +224,16 @@ describe Grape::Endpoint do
       last_response.status.should eq 303
       last_response.headers['Location'].should eq "/ha"
     end
+
+    it "support permanent redirect" do 
+      subject.get('/hey') do 
+        redirect "/ha", true
+      end
+      get '/hey'
+      last_response.status.should eq 304
+      last_response.headers['Location'].should eq "/ha"
+      last_response.body.should eq ""
+    end
   end
 
   it 'should not persist params between calls' do
