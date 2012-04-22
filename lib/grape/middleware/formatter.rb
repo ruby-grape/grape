@@ -13,11 +13,11 @@ module Grape
           :parsers => {}
         }
       end
-      
+
       def headers
-        env.dup.inject({}){|h,(k,v)| h[k.downcase[5..-1]] = v if k.downcase.start_with?('http_'); h}
+        env.dup.inject({}){|h,(k,v)| h[k.downcase[5..-1]] = v if k.downcase.to_s.start_with?('http_'); h}
       end
-      
+
       def before
         fmt = format_from_extension || options[:format] || format_from_header || options[:default_format]
         if content_types.key?(fmt)
@@ -39,7 +39,7 @@ module Grape
           throw :error, :status => 406, :message => 'The requested format is not supported.'
         end
       end
-      
+
       def format_from_extension
         parts = request.path.split('.')
         extension = parts.last.to_sym
@@ -49,7 +49,7 @@ module Grape
         end
         nil
       end
-      
+
       def format_from_header
         mime_array.each do |t|
           if mime_types.key?(t)
@@ -58,7 +58,7 @@ module Grape
         end
         nil
       end
-      
+
       def mime_array
         accept = headers['accept'] or return []
 
@@ -66,7 +66,7 @@ module Grape
           mime.sub(%r(vnd\.[^+]+\+), '')
         }
       end
-      
+
       def after
         status, headers, bodies = *@app_response
         formatter = formatter_for env['api.format']
