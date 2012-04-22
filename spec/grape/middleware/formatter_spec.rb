@@ -116,6 +116,11 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test-v1+xml'})
       subject.env['api.format'].should == :xml
     end
+
+    it 'should properly parse headers with symbols as hash keys' do
+      subject.call({'PATH_INFO' => '/info', 'http_accept' => 'application/xml', :system_time => '091293'})
+      subject.env[:system_time].should == '091293'
+    end
   end
 
   context 'Content-type' do
