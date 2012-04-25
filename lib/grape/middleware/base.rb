@@ -107,20 +107,20 @@ module Grape
         end
 
         def decode_json(object)
-          MultiJson.decode(object)
+          MultiJson.load(object)
         end
 
         def encode_json(object)
           return object if object.is_a?(String)
 
           if object.respond_to? :serializable_hash
-            MultiJson.encode(object.serializable_hash)
+            MultiJson.dump(object.serializable_hash)
           elsif object.kind_of?(Array) && !object.map {|o| o.respond_to? :serializable_hash }.include?(false)
-            MultiJson.encode(object.map {|o| o.serializable_hash })
+            MultiJson.dump(object.map {|o| o.serializable_hash })
           elsif object.respond_to? :to_json
             object.to_json
           else
-            MultiJson.encode(object)
+            MultiJson.dump(object)
           end
         end
 

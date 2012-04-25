@@ -10,7 +10,7 @@ describe Grape::Middleware::Formatter do
     it 'should look at the bodies for possibly serializable data' do
       @body = {"abc" => "def"}
       status, headers, bodies = *subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'})
-      bodies.each{|b| b.should == MultiJson.encode(@body) }
+      bodies.each{|b| b.should == MultiJson.dump(@body) }
     end
 
     it 'should call #to_json first if it is available' do
