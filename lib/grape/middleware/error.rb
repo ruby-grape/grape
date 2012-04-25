@@ -24,11 +24,11 @@ module Grape
         if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result = result.merge({ :backtrace => backtrace })
         end
-        MultiJson.encode(result)
+        MultiJson.dump(result)
       end
       
       def encode_txt(message, backtrace)
-        result = message.is_a?(Hash) ? MultiJson.encode(message) : message
+        result = message.is_a?(Hash) ? MultiJson.dump(message) : message
         if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
           result += "\r\n "
           result += backtrace.join("\r\n ")
