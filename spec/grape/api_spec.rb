@@ -656,7 +656,7 @@ describe Grape::API do
         raise "rain!"
       end
       get '/exception'
-      json = MultiJson.decode(last_response.body)
+      json = MultiJson.load(last_response.body)
       json["error"].should eql 'rain!'
       json["backtrace"].length.should > 0
     end
