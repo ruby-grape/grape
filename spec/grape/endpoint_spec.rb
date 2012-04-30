@@ -227,7 +227,7 @@ describe Grape::Endpoint do
 
     it "support permanent redirect" do 
       subject.get('/hey') do 
-        redirect "/ha", true
+        redirect "/ha", :permanent => true
       end
       get '/hey'
       last_response.status.should eq 304

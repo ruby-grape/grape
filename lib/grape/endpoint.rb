@@ -136,9 +136,11 @@ module Grape
     # Redirect to a new url.
     # 
     # @param url [String] The url to be redirect.
-    # @param permanent [Boolean] Whether use permanent redirect with status code 304.
-    def redirect(url, permanent=false)
-      if permanent
+    # @param options [Hash] The options used when redirect.
+    #                       :permanent, default true.
+    def redirect(url, options = {})
+      merged_options = {:permanent => false }.merge(options)
+      if merged_options[:permanent]
         status 304
       else
         if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"

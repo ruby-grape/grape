@@ -224,7 +224,7 @@ redirect "/new_url"
 use permanent redirect
 
 ``` ruby
-redirect "/new_url", true
+redirect "/new_url", :permanent => true
 ```
 
 ## Raising Errors
