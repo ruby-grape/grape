@@ -9,4 +9,8 @@ describe Grape::Middleware::Versioner do
   it 'should recognize :header' do
     klass.using(:header).should == Grape::Middleware::Versioner::Header
   end
+
+  it 'should recognize :param' do
+    klass.using(:param).should == Grape::Middleware::Versioner::Param
+  end
 end
