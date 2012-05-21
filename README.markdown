@@ -110,8 +110,10 @@ end
 
 ## Versioning
 
-There are two strategies in which clients can reach your API's endpoints: `:header` 
-and `:path`. The default strategy is `:header`.
+There are three strategies in which clients can reach your API's endpoints: `:header`, `:path` and `:param`. The default strategy is `:header`.
+
+
+### Header
 
     version 'v1', :using => :header
 
@@ -124,6 +126,8 @@ supplied. This behavior is similar to routing in Rails. To circumvent this defau
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
 is returned when no correct Accept header is supplied.
 
+### Path
+
     version 'v1', :using => :path
 
 Using this versioning strategy, clients should pass the desired version in the URL.
@@ -131,6 +135,20 @@ Using this versioning strategy, clients should pass the desired version in the U
     curl -H http://localhost:9292/v1/statuses/public_timeline
 
 Serialization takes place automatically. 
+
+### Param
+
+    version 'v1', :using => :param
+
+Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body. 
+
+    curl -H http://localhost:9292/events?apiver=v1
+
+The default name for the query parameter is 'apiver' but can be specified using the :parameter option.
+
+    version 'v1', :using => :param, :parameter => "v"
+    curl -H http://localhost:9292/events?v=v1
+
 
 ## Parameters
 
