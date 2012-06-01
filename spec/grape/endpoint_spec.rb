@@ -167,7 +167,31 @@ describe Grape::Endpoint do
 
         get 'rodzyn@test.com/wrong_middle/1'
         last_response.status.should == 404
+      end
+    end
 
+    context 'from body parameters' do
+      before(:each) do
+        subject.post '/request_body' do
+          params[:user]
+        end
+      end
+
+      it 'should convert JSON bodies to params' do
+        post '/request_body', MultiJson.encode(user: 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        last_response.body.should == 'Bobby T.'
+      end
+
+      it 'should convert XML bodies to params' do
+        post '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+        last_response.body.should == 'Bobby T.'
+      end
+
+      it 'does not include parameters not defined by the body' do
+        subject.post '/omitted_params' do
+          body_params[:version].should == nil
+        end
+        post '/omitted_params', MultiJson.encode(user: 'Blah'), {'CONTENT_TYPE' => 'application/json'}
       end
     end
   end

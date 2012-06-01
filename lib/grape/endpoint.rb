@@ -118,7 +118,26 @@ module Grape
     # The parameters passed into the request as
     # well as parsed from URL segments.
     def params
-      @params ||= Hashie::Mash.new.deep_merge(request.params).deep_merge(env['rack.routing_args'] || {})
+      @params ||= Hashie::Mash.new.
+        deep_merge(request.params).
+        deep_merge(env['rack.routing_args'] || {}).
+        deep_merge(self.body_params)
+    end
+
+    # Pull out request body params if the content type matches and we're on a POST or PUT
+    def body_params
+      if ['POST', 'PUT'].include?(request.request_method.to_s.upcase)
+        return case env['CONTENT_TYPE']
+          when 'application/json'
+            MultiJson.decode(request.body.read)
+          when 'application/xml'
+            MultiXml.parse(request.body.read)
+          else
+            {}
+          end
+      end
+
+      {}
     end
 
     # The API version as specified in the URL.
