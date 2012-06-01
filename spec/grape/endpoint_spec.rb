@@ -175,6 +175,10 @@ describe Grape::Endpoint do
         subject.post '/request_body' do
           params[:user]
         end
+
+        subject.put '/request_body' do
+          params[:user]
+        end
       end
 
       it 'should convert JSON bodies to params' do
@@ -182,8 +186,18 @@ describe Grape::Endpoint do
         last_response.body.should == 'Bobby T.'
       end
 
+      it 'should convert JSON bodies to params' do
+        put '/request_body', MultiJson.encode(user: 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        last_response.body.should == 'Bobby T.'
+      end
+
       it 'should convert XML bodies to params' do
         post '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+        last_response.body.should == 'Bobby T.'
+      end
+
+      it 'should convert XML bodies to params' do
+        put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
         last_response.body.should == 'Bobby T.'
       end
 
