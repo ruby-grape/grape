@@ -143,6 +143,19 @@ along with any named parameters you specify in your route strings.
   end
 ```
 
+Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
+
+The Request:
+```curl -d '{"some_key": "some_value"}' 'http://readercity.com/json_endpoint' -H Content-Type:application/json -v```
+
+
+The Grape Endpoint:
+```ruby
+  post '/json_endpoint' do
+    params[:some_key]
+  end
+```
+
 ## Headers
 
 Headers are available through the `env` hash object.
