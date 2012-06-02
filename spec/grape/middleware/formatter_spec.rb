@@ -48,6 +48,18 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"abc":"def"}'}
     end
 
+    it 'should serialize objects that respond to #serializable_hash if there is a root element' do
+      class SimpleExample
+        def serializable_hash
+          {:abc => 'def'}
+        end
+      end
+
+      @body = {"root" => SimpleExample.new}
+
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"root":{"abc":"def"}}'}
+    end
+
     it 'should call #to_xml if the content type is xml' do
       @body = "string"
       @body.instance_eval do
