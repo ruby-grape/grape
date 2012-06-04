@@ -115,7 +115,9 @@ There are three strategies in which clients can reach your API's endpoints: `:he
 
 ### Header
 
-    version 'v1', :using => :header
+```ruby
+version 'v1', :using => :header
+```
 
 Using this versioning strategy, clients should pass the desired version in the HTTP Accept head. 
 
@@ -128,7 +130,9 @@ is returned when no correct Accept header is supplied.
 
 ### Path
 
-    version 'v1', :using => :path
+``` ruby
+version 'v1', :using => :path
+```
 
 Using this versioning strategy, clients should pass the desired version in the URL.
 
@@ -138,7 +142,9 @@ Serialization takes place automatically.
 
 ### Param
 
-    version 'v1', :using => :param
+```ruby
+version 'v1', :using => :param
+```
 
 Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body. 
 
@@ -146,9 +152,11 @@ Using this versioning strategy, clients should pass the desired version as a req
 
 The default name for the query parameter is 'apiver' but can be specified using the :parameter option.
 
-    version 'v1', :using => :param, :parameter => "v"
-    curl -H http://localhost:9292/events?v=v1
+```ruby
+version 'v1', :using => :param, :parameter => "v"
+```
 
+    curl -H http://localhost:9292/events?v=v1
 
 ## Parameters
 
@@ -156,22 +164,23 @@ Parameters are available through the `params` hash object. This includes `GET` a
 along with any named parameters you specify in your route strings.
 
 ```ruby
-  get do
+get do
     Article.order(params[:sort_by])
-  end
+end
 ```
 
 Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
 
 The Request:
+
 ```curl -d '{"some_key": "some_value"}' 'http://localhost:9292/json_endpoint' -H Content-Type:application/json -v```
 
-
 The Grape Endpoint:
+
 ```ruby
-  post '/json_endpoint' do
+post '/json_endpoint' do
     params[:some_key]
-  end
+end
 ```
 
 ## Headers
@@ -179,10 +188,10 @@ The Grape Endpoint:
 Headers are available through the `env` hash object.
 
 ```ruby
-  get do
+get do
     error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
     ...
-  end
+end
 ```
 
 ## Helpers
