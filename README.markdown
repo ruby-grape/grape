@@ -146,7 +146,7 @@ along with any named parameters you specify in your route strings.
 Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
 
 The Request:
-```curl -d '{"some_key": "some_value"}' 'http://readercity.com/json_endpoint' -H Content-Type:application/json -v```
+```curl -d '{"some_key": "some_value"}' 'http://localhost:9292/json_endpoint' -H Content-Type:application/json -v```
 
 
 The Grape Endpoint:
