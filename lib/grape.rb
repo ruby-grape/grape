@@ -26,6 +26,7 @@ module Grape
     module Versioner
       autoload :Path,   'grape/middleware/versioner/path'
       autoload :Header, 'grape/middleware/versioner/header'
+      autoload :Param,  'grape/middleware/versioner/param'
     end
   end
 

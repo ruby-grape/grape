@@ -31,6 +31,17 @@ describe Grape::API do
     end
   end
 
+  describe '.version using param' do
+    it_should_behave_like 'versioning' do
+      let(:macro_options) do
+        {
+          :using => :param,
+          :parameter => "apiver"
+        }
+      end
+    end
+  end
+
   describe '.version using header' do
     it_should_behave_like 'versioning' do
       let(:macro_options) do

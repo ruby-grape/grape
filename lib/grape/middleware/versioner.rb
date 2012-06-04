@@ -18,6 +18,8 @@ module Grape
           Path
         when :header
           Header
+        when :param
+          Param
         else
           raise ArgumentError.new("Unknown :using for versioner: #{strategy}")
         end
