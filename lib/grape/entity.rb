@@ -93,6 +93,24 @@ module Grape
       @exposures
     end
 
+    # Returns a hash of documentation hashes that have been declared for this Entity or ancestors. The keys
+    # are symbolized references to methods on the containing object, the values are
+    # the options that were passed into expose.
+    def self.documentation
+      @documentation ||= exposures.inject({}) do |memo, value|
+                           unless value[1][:documentation].nil? || value[1][:documentation].empty?
+                             memo[value[0]] = value[1][:documentation] 
+                           end
+                           memo
+                         end
+
+      if superclass.respond_to? :documentation
+        @documentation = superclass.documentation.merge(@documentation)
+      end
+
+      @documentation
+    end
+
     # This allows you to declare a Proc in which exposures can be formatted with.
     # It take a block with an arity of 1 which is passed as the value of the exposed attribute.
     # 
@@ -215,6 +233,10 @@ module Grape
 
     def exposures
       self.class.exposures
+    end
+
+    def documentation
+      self.class.documentation
     end
 
     def formatters
