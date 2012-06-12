@@ -63,6 +63,11 @@ module Grape
     #   will be called with the represented object as well as the
     #   runtime options that were passed in. You can also just supply a
     #   block to the expose call to achieve the same effect.
+    # @option options :documentation Provide documenation for an exposed 
+    #   field, typically the value is a hash with two fields, type and desc. 
+    #   Call the class or instance method #documentation for use with #desc. 
+    #   When calling #docmentation, any exposure without a documentation key 
+    #   will be ignored.
     def self.expose(*args, &block)
       options = args.last.is_a?(Hash) ? args.pop : {}
 
@@ -71,7 +76,7 @@ module Grape
         raise ArgumentError, "You may not use block-setting on multi-attribute exposures." if block_given?
       end
 
-      raise ArgumentError, "You may not use block-setting when also using " if block_given? && options[:format_with].respond_to?(:call)
+      raise ArgumentError, "You may not use block-setting when also using format_with" if block_given? && options[:format_with].respond_to?(:call)
 
       options[:proc] = block if block_given?
 
@@ -94,8 +99,8 @@ module Grape
     end
 
     # Returns a hash of documentation hashes that have been declared for this Entity or ancestors. The keys
-    # are symbolized references to methods on the containing object, the values are
-    # the options that were passed into expose.
+    # are symbolized references to fields in the response, the values are those defined in the 
+    # Entity's documentation key.
     def self.documentation
       @documentation ||= exposures.inject({}) do |memo, value|
                            unless value[1][:documentation].nil? || value[1][:documentation].empty?
@@ -140,7 +145,7 @@ module Grape
     #   end
     #
     def self.format_with(name, &block)
-      raise ArgumentError, "You must has a block for formatters" unless block_given?
+      raise ArgumentError, "You must pass a block for formatters" unless block_given?
       formatters[name.to_sym] = block
     end
 

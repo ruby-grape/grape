@@ -443,11 +443,89 @@ RSpec.configure do |config|
 end
 ```
 
+## Reusable Responses with Entities
+
+Entities are a simple and reusable means for converting Ruby objects to API responses.
+Entities can be used to conditionally include fields, nest other entities, and build
+ever larger responses, using inheritance.
+
+### Defining Entities
+
+Entities inherit from Grape::Entity, and define a simple DSL. The `#expose` method can be called in 
+a number of ways. When processing options passed to exposures two keys will always be defined, :version
+and :collection. The :version key is define as api.version. The :collection key is boolean, and defined
+as true if the object presented is an array.
+
+  * expose SYMBOLS
+    * define a list of fields which will always be exposed
+  * expose SYMBOLS, HASH
+    * HASH keys include :if, :unless, :proc, :as, :using, :format_with, :documentation
+      * :if and :unless accept hashes (passed during runtime) or procs (arguments are object and options)
+  * expose SYMBOL, {:format_with => :formatter}
+    * expose a value, formatting it first
+    * `:format_with` can only be applied to one exposure at a time
+  * expose SYMBOL, {:as => "alias"}
+    * Expose a value, changing its hash key from SYMBOL to alias
+    * `:as` can only be applied to one exposure at a time
+  * expose SYMBOL BLOCK
+    * block arguments are object and options
+    * expose the value returned by the block
+    * `block` can only be applied to one exposure at a time
+
+``` ruby
+module API
+  module Entities
+    class User < Grape::Entity
+      expose :first_name, :last_name
+      expose :field, :documentation => {:type => "string", :desc => "words go here"}
+      expose :email, :if => {:type => :full}
+      expose :user_type, user_id, :if => lambda{|user,options| user.confirmed?}
+      expose(:name){|user,options| [user.first_name, user.last_name].join(' ')}
+      expose :latest_status, :using => API::Status, :as => :status
+    end
+  end
+end
+
+module API
+  module Entities
+    class UserDetailed < API::Entities::User
+      expose :account_id
+    end
+  end
+end
+```
+
+### Using Entities
+
+Once an entity is defined, it can be used within endpoints, by calling #present. The #present
+method accepts two arguments, the object to be presented and the options associated with it. The
+options hash must always include :with, which defines the entity to expose.
+
+If the entity includes documentation it can be included in an endpoint's description.
+
+``` ruby
+module API
+  class Users < Grape::API
+    version 'v1'
+
+    desc 'User index', {
+      :object_fields => API::Entities::User.documentation
+    }
+    get '/users' do
+      @users = User.all
+      type = current_user.admin? ? :full : :default
+      present @users, with: API::Entities::User, :type => type
+    end
+  end
+end
+```
+
 ## Describing and Inspecting an API
 
 Grape lets you add a description to an API along with any other optional
 elements that can also be inspected at runtime.
-This can be useful for generating documentation.
+This can be useful for generating documentation. If the response 
+requires documentation, consider using an entity.
 
 ``` ruby
 class TwitterAPI < Grape::API
