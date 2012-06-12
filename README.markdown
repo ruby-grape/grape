@@ -522,6 +522,37 @@ module API
 end
 ```
 
+### Caveats
+
+Entities with duplicate exposure names and conditions will silently overwrite one another.
+In the following example, when object#check equals "foo", only afield will be exposed. 
+However, when object#check equals "bar" both bfield and foo will be exposed.
+
+```ruby
+module API
+  module Entities
+    class User < Grape::Entity
+      expose :afield, :foo, :if => lambda{|object,options| object.check=="foo"}
+      expose :bfield, :foo, :if => lambda{|object,options| object.check=="bar"}
+    end
+  end
+end
+```
+
+This can be problematic, when you have mixed collections. Using #respond_to? is safer.
+
+```ruby
+module API
+  module Entities
+    class User < Grape::Entity
+      expose :afield, :if => lambda{|object,options| object.check=="foo"}
+      expose :bfield, :if => lambda{|object,options| object.check=="bar"}
+      expose :foo, :if => lambda{object,options| object.respond_to?(:foo)}
+    end
+  end
+end
+```
+
 ## Describing and Inspecting an API
 
 Grape lets you add a description to an API along with any other optional
