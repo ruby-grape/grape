@@ -1,0 +1,63 @@
+Next Release
+============
+
+* [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to get request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
+* [#175](https://github.com/intridea/grape/pull/175): Added support for API versioning based on a request parameter - [@jackcasey](https://github.com/jackcasey).
+* [#168](https://github.com/intridea/grape/pull/168): Fix: Formatter can parse symbol keys in the headers hash - [@netmask](https://github.com/netmask).
+* [#169](https://github.com/intridea/grape/pull/169): Silence multi_json deprecation warnings - [@whiteley](https://github.com/whiteley).
+* [#166](https://github.com/intridea/grape/pull/166): Added support for `redirect`, including permanent and temporary - [@allenwei](https://github.com/allenwei).
+* [#159](https://github.com/intridea/grape/pull/159): Added `:requirements` to routes, allowing to use reserved characters in paths - [@gaiottino](https://github.com/gaiottino).
+* [#156](https://github.com/intridea/grape/pull/156): Added support for adding formatters to entities - [@bobbytables](https://github.com/bobbytables).
+
+0.2.0 (3/28/2012)
+=================
+
+* Added support for inheriting exposures from entities - [@bobbytables](https://github.com/bobbytables).
+* Extended formatting with `default_format` - [@dblock](https://github.com/dblock).
+* Added support for cookies - [@lukaszsliwa](https://github.com/lukaszsliwa).
+* Added support for declaring additional content-types - [@joeyAghion](https://github.com/joeyAghion).
+* Added support for HTTP PATCH - [@LTe](https://github.com/LTe).
+* Added support for describing, documenting and reflecting APIs - [@dblock](https://github.com/dblock).
+* Added support for anchoring and vendoring - [@jwkoelewijn](https://github.com/jwkoelewijn).
+* Added support for HTTP OPTIONS - [@grimen](https://github.com/grimen).
+* Added support for silencing logger - [@evansj](https://github.com/evansj).
+* Added support for helper modules - [@freelancing-god](https://github.com/freelancing-god).
+* Added support for Accept header-based versioning - [@jch](https://github.com/jch), [@rodzyn](https://github.com/rodzyn).
+* Added support for mounting APIs and other Rack applications within APIs - [@mbleigh](https://github.com/mbleigh).
+* Added entities, multiple object representations - [@mbleigh](https://github.com/mbleigh).
+* Added ability to handle XML in the incoming request body - [@jwillis](https://github.com/jwillis).
+* Added support for a configurable logger - [@mbleigh](https://github.com/mbleigh).
+* Added support for before and after filters - [@mbleigh](https://github.com/mbleigh).
+* Extended `rescue_from`, which can now take a block - [@dblock](https://github.com/dblock).
+
+
+0.1.5 (6/14/2011)
+==================
+
+* Extended exception handling to all exceptions - [@dblock](https://github.com/dblock).
+* Added support for returning JSON objects from within error blocks - [@dblock](https://github.com/dblock).
+* Added support for handling incoming JSON in body - [@tedkulp](https://github.com/tedkulp).
+* Added support for HTTP digest authentication - [@daddz](https://github.com/daddz).
+
+0.1.4 (4/8/2011)
+==================
+
+* Allow multiple definitions of the same endpoint under multiple versions - [@chrisrhoden](https://github.com/chrisrhoden).
+* Added support for multipart URL parameters - [@mcastilho](https://github.com/mcastilho).
+* Added support for custom formatters - [@spraints](https://github.com/spraints).
+
+0.1.3 (1/10/2011)
+==================
+
+* Added support for JSON format in route matching - [@aiwilliams](https://github.com/aiwilliams).
+* Added suport for custom middleware - [@mbleigh](https://github.com/mbleigh).
+
+0.1.1 (11/14/2010)
+==================
+
+* Endpoints properly reset between each request - [@mbleigh](https://github.com/mbleigh).
+
+0.1.0 (11/13/2010)
+==================
+
+* Initial public release - [@mbleigh](https://github.com/mbleigh).
