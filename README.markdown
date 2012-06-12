@@ -445,32 +445,34 @@ end
 
 ## Reusable Responses with Entities
 
-Entities are a simple and reusable means for converting Ruby objects to API responses.
+Entities are a reusable means for converting Ruby objects to API responses.
 Entities can be used to conditionally include fields, nest other entities, and build
 ever larger responses, using inheritance.
 
 ### Defining Entities
 
-Entities inherit from Grape::Entity, and define a simple DSL. The `#expose` method can be called in 
-a number of ways. When processing options passed to exposures two keys will always be defined, :version
-and :collection. The :version key is define as api.version. The :collection key is boolean, and defined
-as true if the object presented is an array.
+Entities inherit from Grape::Entity, and define a simple DSL. Exposures can use
+runtime options to determine which fields should be visible, these options are
+available to :if, :unless, and :proc. The option keys :version and :collection
+will always be defined. The :version key is defined as api.version. The
+:collection key is boolean, and defined as true if the object presented is an
+array.
 
-  * expose SYMBOLS
+  * `expose SYMBOLS`
     * define a list of fields which will always be exposed
-  * expose SYMBOLS, HASH
+  * `expose SYMBOLS, HASH`
     * HASH keys include :if, :unless, :proc, :as, :using, :format_with, :documentation
       * :if and :unless accept hashes (passed during runtime) or procs (arguments are object and options)
-  * expose SYMBOL, {:format_with => :formatter}
+  * `expose SYMBOL, {:format_with => :formatter}`
     * expose a value, formatting it first
-    * `:format_with` can only be applied to one exposure at a time
-  * expose SYMBOL, {:as => "alias"}
+    * :format_with can only be applied to one exposure at a time
+  * `expose SYMBOL, {:as => "alias"}`
     * Expose a value, changing its hash key from SYMBOL to alias
-    * `:as` can only be applied to one exposure at a time
-  * expose SYMBOL BLOCK
+    * :as can only be applied to one exposure at a time
+  * `expose SYMBOL BLOCK`
     * block arguments are object and options
     * expose the value returned by the block
-    * `block` can only be applied to one exposure at a time
+    * block can only be applied to one exposure at a time
 
 ``` ruby
 module API
