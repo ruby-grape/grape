@@ -110,10 +110,14 @@ end
 
 ## Versioning
 
-There are two strategies in which clients can reach your API's endpoints: `:header` 
-and `:path`. The default strategy is `:header`.
+There are three strategies in which clients can reach your API's endpoints: `:header`, `:path` and `:param`. The default strategy is `:header`.
 
-    version 'v1', :using => :header
+
+### Header
+
+```ruby
+version 'v1', :using => :header
+```
 
 Using this versioning strategy, clients should pass the desired version in the HTTP Accept head. 
 
@@ -124,7 +128,11 @@ supplied. This behavior is similar to routing in Rails. To circumvent this defau
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
 is returned when no correct Accept header is supplied.
 
-    version 'v1', :using => :path
+### Path
+
+``` ruby
+version 'v1', :using => :path
+```
 
 Using this versioning strategy, clients should pass the desired version in the URL.
 
@@ -132,15 +140,47 @@ Using this versioning strategy, clients should pass the desired version in the U
 
 Serialization takes place automatically. 
 
+### Param
+
+```ruby
+version 'v1', :using => :param
+```
+
+Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body. 
+
+    curl -H http://localhost:9292/events?apiver=v1
+
+The default name for the query parameter is 'apiver' but can be specified using the :parameter option.
+
+```ruby
+version 'v1', :using => :param, :parameter => "v"
+```
+
+    curl -H http://localhost:9292/events?v=v1
+
 ## Parameters
 
 Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters, 
 along with any named parameters you specify in your route strings.
 
 ```ruby
-  get do
+get do
     Article.order(params[:sort_by])
-  end
+end
+```
+
+Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
+
+The Request:
+
+```curl -d '{"some_key": "some_value"}' 'http://localhost:9292/json_endpoint' -H Content-Type:application/json -v```
+
+The Grape Endpoint:
+
+```ruby
+post '/json_endpoint' do
+    params[:some_key]
+end
 ```
 
 ## Headers
@@ -148,10 +188,10 @@ along with any named parameters you specify in your route strings.
 Headers are available through the `env` hash object.
 
 ```ruby
-  get do
+get do
     error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
     ...
-  end
+end
 ```
 
 ## Helpers
