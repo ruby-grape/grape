@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* [#181](https://github.com/intridea/grape/pull/181): Fix: Corrected JSON serialization of nested hashes containing `Grape::Entity` instances - [@benrosenblum](https://github.com/benrosenblum).
 * [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to get request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
 * [#175](https://github.com/intridea/grape/pull/175): Added support for API versioning based on a request parameter - [@jackcasey](https://github.com/jackcasey).
 * [#168](https://github.com/intridea/grape/pull/168): Fix: Formatter can parse symbol keys in the headers hash - [@netmask](https://github.com/netmask).
