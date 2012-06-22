@@ -257,6 +257,28 @@ describe Grape::Entity do
         fresh_class.expose :name
         expect{ fresh_class.new(nil).serializable_hash }.not_to raise_error
       end
+
+      it 'should serialize embedded objects which respond to #serializable_hash' do
+        class EmbeddedExample
+          def serializable_hash(opts = {})
+            {:abc => 'def'}
+          end
+        end
+
+        class SimpleExample
+          def name
+            "abc"
+          end
+
+          def embedded
+            EmbeddedExample.new
+          end
+        end
+
+        fresh_class.expose :name, :embedded
+        presenter = fresh_class.new(SimpleExample.new)
+        presenter.serializable_hash.should == {:name => "abc", :embedded => {:abc => "def"}}
+      end
     end
 
     describe '#value_for' do
