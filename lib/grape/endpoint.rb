@@ -85,8 +85,7 @@ module Grape
       parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
       parts << namespace.to_s if namespace
       parts << path.to_s if path && '/' != path
-      parts.last << '(.:format)'
-      Rack::Mount::Utils.normalize_path(parts.join('/'))
+      Rack::Mount::Utils.normalize_path(parts.join('/') + '(.:format)')
     end
 
     def namespace
