@@ -182,12 +182,12 @@ describe Grape::Endpoint do
       end
 
       it 'should convert JSON bodies to params' do
-        post '/request_body', MultiJson.encode(user: 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        post '/request_body', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == 'Bobby T.'
       end
 
       it 'should convert JSON bodies to params' do
-        put '/request_body', MultiJson.encode(user: 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        put '/request_body', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == 'Bobby T.'
       end
 
@@ -205,7 +205,7 @@ describe Grape::Endpoint do
         subject.post '/omitted_params' do
           body_params[:version].should == nil
         end
-        post '/omitted_params', MultiJson.encode(user: 'Blah'), {'CONTENT_TYPE' => 'application/json'}
+        post '/omitted_params', MultiJson.encode(:user => 'Blah'), {'CONTENT_TYPE' => 'application/json'}
       end
     end
   end

@@ -15,7 +15,7 @@ module Grape
       end
 
       def headers
-        env.dup.inject({}){|h,(k,v)| h[k.to_s.downcase[5..-1]] = v if k.downcase.to_s.start_with?('http_'); h}
+        env.dup.inject({}){|h,(k,v)| h[k.to_s.downcase[5..-1]] = v if k.to_s.downcase.start_with?('http_'); h}
       end
 
       def before
