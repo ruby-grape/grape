@@ -230,6 +230,10 @@ describe Grape::API do
         "hiya"
       end
 
+      subject.endpoints.first.routes.each do |route|
+        route.route_path.should eql '/abc(.:format)'
+      end
+
       get '/abc'
       last_response.body.should eql 'hiya'
       post '/abc'
