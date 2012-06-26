@@ -233,8 +233,15 @@ module Grape
       opts = options.merge(runtime_options || {})
       exposures.inject({}) do |output, (attribute, exposure_options)|
         partial_output = value_for(attribute, opts) if conditions_met?(exposure_options, opts)
-        partial_output = partial_output.serializable_hash(runtime_options) if partial_output.respond_to? :serializable_hash
-        output[key_for(attribute)] = partial_output
+        
+        output[key_for(attribute)] =
+          if partial_output.respond_to? :serializable_hash
+            partial_output.serializable_hash(runtime_options)
+          elsif partial_output.kind_of?(Array) && !partial_output.map {|o| o.respond_to? :serializable_hash}.include?(false)
+            partial_output.map {|o| o.serializable_hash}
+          else
+            partial_output
+          end
         
         output
       end

@@ -279,6 +279,28 @@ describe Grape::Entity do
         presenter = fresh_class.new(SimpleExample.new)
         presenter.serializable_hash.should == {:name => "abc", :embedded => {:abc => "def"}}
       end
+
+      it 'should serialize embedded arrays of objects which respond to #serializable_hash' do
+        class EmbeddedExample
+          def serializable_hash(opts = {})
+            {:abc => 'def'}
+          end
+        end
+
+        class SimpleExample
+          def name
+            "abc"
+          end
+
+          def embedded
+            [EmbeddedExample.new, EmbeddedExample.new]
+          end
+        end
+
+        fresh_class.expose :name, :embedded
+        presenter = fresh_class.new(SimpleExample.new)
+        presenter.serializable_hash.should == {:name => "abc", :embedded => [{:abc => "def"}, {:abc => "def"}]}
+      end
     end
 
     describe '#value_for' do
