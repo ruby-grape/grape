@@ -284,7 +284,7 @@ describe Grape::API do
           verb
         end
         send(verb, '/example')
-        last_response.body.should eql verb
+        last_response.body.should eql verb == 'head' ? '' : verb
         # Call it with a method other than the properly constrained one.
         send(verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
         last_response.status.should eql 404
