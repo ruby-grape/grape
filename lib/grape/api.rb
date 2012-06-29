@@ -208,9 +208,14 @@ module Grape
       #         end
       #       end
       #     end
-      def helpers(mod = nil, &block)
-        if block_given? || mod
-          mod ||= settings.peek[:helpers] || Module.new
+      def helpers(new_mod = nil, &block)
+        if block_given? || new_mod
+          mod = settings.peek[:helpers] || Module.new
+          if new_mod
+            mod.class_eval do
+              include new_mod
+            end
+          end
           mod.class_eval &block if block_given?
           set(:helpers, mod)
         else
