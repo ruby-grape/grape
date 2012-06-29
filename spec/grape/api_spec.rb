@@ -588,6 +588,28 @@ describe Grape::API do
       get '/howdy'
       last_response.body.should eql 'Hello, world.'
     end
+
+    it 'should allow multiple calls with modules and blocks' do
+      subject.helpers Module.new do
+        def one
+          1
+        end
+      end
+      subject.helpers Module.new do
+        def two
+          2
+        end
+      end
+      subject.helpers do
+        def three
+          3
+        end
+      end
+      subject.get 'howdy' do
+        [one, two, three]
+      end
+      lambda{get '/howdy'}.should_not raise_error
+    end
   end
 
   describe '.scope' do
