@@ -345,6 +345,51 @@ class Twitter::API < Grape::API
 end
 ```
 
+## Logging
+
+`Grape::API` provides a `logger` method which by default will return an instance of the `Logger`
+class from Ruby's standard library.
+
+To log messages from within an endpoint, you need to define a helper to make the logger
+available in the endpoint context:
+
+``` ruby
+class API < Grape::API
+  helpers do
+    def logger
+      API.logger
+    end
+  end
+  get '/hello' do
+    logger.info "someone said hello"
+    "hey there"
+  end
+end
+```
+
+You can also set your own logger:
+
+``` ruby
+class MyLogger
+  def warning(message)
+    puts "this is a warning: #{message}"
+  end
+end
+
+class API < Grape::API
+  logger MyLogger.new
+  helpers do
+    def logger
+      API.logger
+    end
+  end
+  get '/hello' do
+    logger.warning "someone said hello"
+    "hey there"
+  end
+end
+```
+
 ## Content-Types
 
 By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types.
