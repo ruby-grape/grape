@@ -495,6 +495,19 @@ describe Grape::API do
     end
   end
 
+  describe '.logger' do
+    it 'should return an instance of Logger class by default' do
+      subject.logger.class.should eql Logger
+    end
+
+    it 'should allow setting a custom logger' do
+      mylogger = Class.new
+      subject.logger mylogger
+      mylogger.should_receive(:info).exactly(1).times
+      subject.logger.info "this will be logged"
+    end
+  end
+
   describe '.helpers' do
     it 'should be accessible from the endpoint' do
       subject.helpers do
