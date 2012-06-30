@@ -169,6 +169,14 @@ get do
 end
 ```
 
+With named route parameters:
+
+```ruby
+get '/users/:username'
+    Users.find_by_username params[:username]
+end
+```
+
 Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
 
 The Request:
@@ -180,6 +188,18 @@ The Grape Endpoint:
 ```ruby
 post '/json_endpoint' do
     params[:some_key]
+end
+```
+
+### Defining Requirements for Named Route Parameters
+
+You can define requirements for route parameters with regular expressions:
+
+```ruby
+\# GET /42     => your number is 42
+\# GET /banana => 404 Not Found
+get '/:number', :requirements => { :number => /[0-9]*/ } do
+    "your number is: #{params[:number]}"
 end
 ```
 
