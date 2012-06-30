@@ -77,6 +77,15 @@ class Twitter::API < Grape::API
 end
 ```
 
+Optionally, you can define requirements for your named route parameters using regular expressions. The route will match only if
+all requirements are met.
+
+```ruby
+get '/show/:id', :requirements => { :id => /[0-9]*/ } do
+  Tweet.find(params[:id])
+end
+```
+
 ## Mounting
 
 The above sample creates a Rack application that can be run from a rackup *config.ru* file 
