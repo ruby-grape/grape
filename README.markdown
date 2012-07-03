@@ -650,13 +650,13 @@ Parameters can also be tagged to the method declaration itself.
 
 ``` ruby
 class StringAPI < Grape::API
-  get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do
+  get "split/:string", { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do
     params[:string].split(params[:token], (params[:limit] || 0))
   end
 end
 
-StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
-StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
+StringAPI::routes[0].route_params # yields a hash {"string" => "", "token" => "a token"}
+StringAPI::routes[0].route_optional_params # yields a hash {"limit" => "the limit"}
 ```
 
 It's possible to retrieve the information about the current route from within an API call with `route`.
