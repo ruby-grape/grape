@@ -670,6 +670,33 @@ class MyAPI < Grape::API
 end
 ```
 
+You can use this information to create a helper that will check if the request has
+all required parameters:
+
+``` ruby
+class MyAPI < Grape::API
+
+  helpers do
+    def validate_request!
+      # skip validation if no parameter is declared
+      if route.route_params.nil?; return end
+      route.route_params.each do |k, v|
+        if !params.has_key? k
+          error!("Missing field: #{k}", 400)
+        end
+      end
+    end
+  end
+
+  before { validate_request! }
+
+  desc "creates a new item resource", :params => { :name => 'name is a required parameter' }
+  post :items do
+    ...
+  end
+end
+```
+
 ## Anchoring
 
 Grape by default anchors all request paths, which means that the request URL
