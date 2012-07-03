@@ -650,13 +650,13 @@ Parameters can also be tagged to the method declaration itself.
 
 ``` ruby
 class StringAPI < Grape::API
-  get "split/:string", { :params => [ "token" ], :optional_params => [ "limit" ] } do
+  get "split/:string", { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do
     params[:string].split(params[:token], (params[:limit] || 0))
   end
 end
 
-StringAPI::routes[0].route_params # yields an array [ "string", "token" ]
-StringAPI::routes[0].route_optional_params # yields an array [ "limit" ]
+StringAPI::routes[0].route_params # yields a hash {"string" => "", "token" => "a token"}
+StringAPI::routes[0].route_optional_params # yields a hash {"limit" => "the limit"}
 ```
 
 It's possible to retrieve the information about the current route from within an API call with `route`.
@@ -666,6 +666,33 @@ class MyAPI < Grape::API
   desc "Returns a description of a parameter.", { :params => { "id" => "a required id" } }
   get "params/:id" do
     route.route_params[params[:id]] # returns "a required id"
+  end
+end
+```
+
+You can use this information to create a helper that will check if the request has
+all required parameters:
+
+``` ruby
+class MyAPI < Grape::API
+
+  helpers do
+    def validate_request!
+      # skip validation if no parameter is declared
+      return unless route.route_params
+      route.route_params.each do |k, v|
+        if !params.has_key? k
+          error!("Missing field: #{k}", 400)
+        end
+      end
+    end
+  end
+
+  before { validate_request! }
+
+  desc "creates a new item resource", :params => { :name => 'name is a required parameter' }
+  post :items do
+    ...
   end
 end
 ```
