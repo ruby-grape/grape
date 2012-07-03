@@ -410,7 +410,7 @@ describe Grape::Endpoint do
         end
         send(verb, '/example/and/some/more')
         last_response.status.should eql (verb == "post" ? 201 : 200)
-        last_response.body.should eql verb
+        last_response.body.should eql verb == 'head' ? '' : verb
       end
     end
   end
