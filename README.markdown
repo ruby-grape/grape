@@ -679,7 +679,7 @@ class MyAPI < Grape::API
   helpers do
     def validate_request!
       # skip validation if no parameter is declared
-      if route.route_params.nil?; return end
+      return unless route.route_params
       route.route_params.each do |k, v|
         if !params.has_key? k
           error!("Missing field: #{k}", 400)
