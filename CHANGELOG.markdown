@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* [#199](https://github.com/intridea/grape/issues/199): Fix: named params must use symbols as keys so they can be properly merged with route param descriptions - [@ppadron](https://github.com/ppadron).
 * [#186](https://github.com/intridea/grape/issues/186): Fix: helpers allow multiple calls with modules and blocks - [@ppadron](https://github.com/ppadron).
 * [#188](https://github.com/intridea/grape/pull/188): Fix: multi-method routes append '(.:format)' only once - [@kainosnoema](https://github.com/kainosnoema).
 * [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to get request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
