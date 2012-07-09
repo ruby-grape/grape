@@ -152,7 +152,7 @@ module Grape
     end
 
     # Redirect to a new url.
-    # 
+    #
     # @param url [String] The url to be redirect.
     # @param options [Hash] The options used when redirect.
     #                       :permanent, default true.
@@ -163,7 +163,7 @@ module Grape
       else
         if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
           status 303
-        else 
+        else
           status 302
         end
       end
@@ -197,7 +197,12 @@ module Grape
         @header
       end
     end
-
+    
+    # Set response content-type
+    def content_type(val)
+      header('Content-Type', val)
+    end
+    
     # Set or get a cookie
     #
     # @example
