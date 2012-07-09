@@ -243,9 +243,9 @@ describe Grape::Endpoint do
     end
   end
   
-  describe "#redirect" do 
-    it "should redirect to a url with status 302" do 
-      subject.get('/hey') do 
+  describe "#redirect" do
+    it "should redirect to a url with status 302" do
+      subject.get('/hey') do
         redirect "/ha"
       end
       get '/hey'
@@ -255,7 +255,7 @@ describe Grape::Endpoint do
     end
 
     it "should have status code 303 if it is not get request and it is http 1.1" do
-      subject.post('/hey') do 
+      subject.post('/hey') do
         redirect "/ha"
       end
       post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
@@ -263,8 +263,8 @@ describe Grape::Endpoint do
       last_response.headers['Location'].should eq "/ha"
     end
 
-    it "support permanent redirect" do 
-      subject.get('/hey') do 
+    it "support permanent redirect" do
+      subject.get('/hey') do
         redirect "/ha", :permanent => true
       end
       get '/hey'
@@ -409,7 +409,7 @@ describe Grape::Endpoint do
           verb
         end
         send(verb, '/example/and/some/more')
-        last_response.status.should eql (verb == "post" ? 201 : 200)
+        last_response.status.should eql verb == "post" ? 201 : 200
         last_response.body.should eql verb == 'head' ? '' : verb
       end
     end
