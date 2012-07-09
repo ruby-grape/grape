@@ -830,9 +830,11 @@ describe Grape::API do
         last_response.body.should == '["a","b,c"]'
       end
       it "should set route_params" do
-        subject.routes.size.should == 1
-        subject.routes[0].route_params.should == { "string" => "", "token" => "a token" }
-        subject.routes[0].route_optional_params.should == { "limit" => "the limit" }
+        subject.routes.map { |route|
+          { :params => route.route_params, :optional_params => route.route_optional_params }
+        }.should eq [
+          { :params => { "string" => "", "token" => "a token" }, :optional_params => { "limit" => "the limit" } }
+        ]
       end
     end
   end
@@ -911,9 +913,9 @@ describe Grape::API do
         { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
       ]
     end
-    it "should symbolize params" do
+    it "should not symbolize params" do
       subject.desc "Reverses a string.", { :params =>
-        { :s => { :desc => "string to reverse", :type => "string" }}
+        { "s" => { :desc => "string to reverse", :type => "string" }}
       }
       subject.get "reverse/:s" do
         params[:s].reverse
@@ -921,7 +923,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "Reverses a string.", :params => { :s => { :desc => "string to reverse", :type => "string" } } }
+        { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
       ]
     end
   end
