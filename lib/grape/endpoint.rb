@@ -64,7 +64,7 @@ module Grape
           route_params = (options[:route_options][:params] || {})
           path_params.merge!(route_params)
           request_method = (method.to_s.upcase unless method == :any)
-          route = Route.new(options[:route_options].clone.merge({
+          routes << Route.new(options[:route_options].clone.merge({
             :prefix => settings[:root_prefix],
             :version => settings[:version] ? settings[:version].join('|') : nil,
             :namespace => namespace,
@@ -74,7 +74,6 @@ module Grape
             :compiled => path,
             })
           )
-          routes << route
         end
       end
       routes
