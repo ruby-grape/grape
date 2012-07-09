@@ -59,7 +59,7 @@ module Grape
           path_params = {}
           # named parameters in the api path
           named_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
-          named_params.each { |named_param| path_params[named_param] = "" }
+          named_params.each { |named_param| path_params[named_param.to_sym] = "" }
           # route parameters declared via desc or appended to the api declaration
           route_params = (options[:route_options][:params] || {})
           path_params.merge!(route_params)
