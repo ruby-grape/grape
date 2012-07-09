@@ -64,7 +64,7 @@ module Grape
           route_params = (options[:route_options][:params] || {})
           path_params.merge!(route_params)
           request_method = (method.to_s.upcase unless method == :any)
-          routes << Route.new(options[:route_options].clone.merge({
+          route = Route.new(options[:route_options].clone.merge({
             :prefix => settings[:root_prefix],
             :version => settings[:version] ? settings[:version].join('|') : nil,
             :namespace => namespace,
@@ -74,6 +74,7 @@ module Grape
             :compiled => path,
             })
           )
+          routes << route
         end
       end
       routes
@@ -152,7 +153,7 @@ module Grape
     end
 
     # Redirect to a new url.
-    # 
+    #
     # @param url [String] The url to be redirect.
     # @param options [Hash] The options used when redirect.
     #                       :permanent, default true.
@@ -163,7 +164,7 @@ module Grape
       else
         if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
           status 303
-        else 
+        else
           status 302
         end
       end

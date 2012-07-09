@@ -780,16 +780,15 @@ describe Grape::API do
       end
     end
     describe "api structure with two versions and a namespace" do
-      class TwitterAPI < Grape::API
-        # version v1
-        version 'v1', :using => :path
-        get "version" do
+      before :each do
+        subject.version 'v1', :using => :path
+        subject.get "version" do
            api.version
         end
         # version v2
-        version 'v2', :using => :path
-        prefix 'p'
-        namespace "n1" do
+        subject.version 'v2', :using => :path
+        subject.prefix 'p'
+        subject.namespace "n1" do
           namespace "n2" do
             get "version" do
                api.version
@@ -798,22 +797,22 @@ describe Grape::API do
         end
       end
       it "should return versions" do
-         TwitterAPI::versions.should == [ 'v1', 'v2' ]
+         subject.versions.should == [ 'v1', 'v2' ]
       end
       it "should set route paths" do
-         TwitterAPI::routes.size.should >= 2
-         TwitterAPI::routes[0].route_path.should == "/:version/version(.:format)"
-         TwitterAPI::routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
+         subject.routes.size.should >= 2
+         subject.routes[0].route_path.should == "/:version/version(.:format)"
+         subject.routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
       end
       it "should set route versions" do
-         TwitterAPI::routes[0].route_version.should == 'v1'
-         TwitterAPI::routes[1].route_version.should == 'v2'
+         subject.routes[0].route_version.should == 'v1'
+         subject.routes[1].route_version.should == 'v2'
       end
       it "should set a nested namespace" do
-         TwitterAPI::routes[1].route_namespace.should == "/n1/n2"
+         subject.routes[1].route_namespace.should == "/n1/n2"
       end
       it "should set prefix" do
-         TwitterAPI::routes[1].route_prefix.should == 'p'
+         subject.routes[1].route_prefix.should == 'p'
       end
     end
     describe "api structure with additional parameters" do
@@ -839,79 +838,91 @@ describe Grape::API do
   end
 
   context "desc" do
-    describe "empty api structure" do
-      it "returns an empty array of routes" do
-        subject.desc "grape api"
-        subject.routes.should == []
-      end
+    it "empty array of routes" do
+      subject.routes.should == []
     end
-    describe "single method with a desc" do
-      before(:each) do
-        subject.desc "ping method"
-        subject.get :ping do
-          'pong'
-        end
-      end
-      it "returns route description" do
-        subject.routes[0].route_description.should == "ping method"
-      end
+    it "empty array of routes" do
+      subject.desc "grape api"
+      subject.routes.should == []
     end
-    describe "single method with a an array of params and a desc hash block" do
-      before(:each) do
-        subject.desc "ping method", { :params => { "x" => "y" } }
-        subject.get "ping/:x" do
-          'pong'
-        end
-      end
-      it "returns route description" do
-        subject.routes[0].route_description.should == "ping method"
-      end
+    it "should describe a method" do
+      subject.desc "first method"
+      subject.get :first do ; end
+      subject.routes.length.should == 1
+      route = subject.routes.first
+      route.route_description.should == "first method"
+      route.route_foo.should be_nil
+      route.route_params.should == { }
     end
-    describe "api structure with multiple methods and descriptions" do
-      before(:each) do
-        class JitterAPI < Grape::API
-          desc "first method"
-          get "first" do; end
-          get "second" do; end
-          desc "third method"
-          get "third" do; end
-        end
-      end
-      it "should return a description for the first method" do
-        JitterAPI::routes[0].route_description.should == "first method"
-        JitterAPI::routes[1].route_description.should be_nil
-        JitterAPI::routes[2].route_description.should == "third method"
-      end
+    it "should describe methods separately" do
+      subject.desc "first method"
+      subject.get :first do ; end
+      subject.desc "second method"
+      subject.get :second do ; end
+      subject.routes.count.should == 2
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "first method", :params => {} },
+        { :description => "second method", :params => {} }
+      ]
     end
-    describe "api structure with multiple methods, namespaces, descriptions and options" do
-      before(:each) do
-        class LitterAPI < Grape::API
-          desc "first method"
-          get "first" do; end
-          get "second" do; end
-          namespace "ns" do
-            desc "ns second", :foo => "bar"
-            get "second" do; end
-          end
-          desc "third method", :details => "details of third method"
-          get "third" do; end
-          desc "Reverses a string.", { :params =>
-            { "s" => { :desc => "string to reverse", :type => "string" }}
-          }
-          get "reverse" do
-            params[:s].reverse
-          end
-        end
+    it "should reset desc" do
+      subject.desc "first method"
+      subject.get :first do ; end
+      subject.get :second do ; end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "first method", :params => {} },
+        { :description => nil, :params => {} }
+      ]
+    end
+    it "should namespace and describe arbitrary parameters" do
+      subject.namespace "ns" do
+        desc "ns second", :foo => "bar"
+        get "second" do ; end
       end
-      it "should return a description for the first method" do
-        LitterAPI::routes[0].route_description.should == "first method"
-        LitterAPI::routes[1].route_description.should be_nil
-        LitterAPI::routes[2].route_description.should == "ns second"
-        LitterAPI::routes[2].route_foo.should == "bar"
-        LitterAPI::routes[3].route_description.should == "third method"
-        LitterAPI::routes[4].route_description.should == "Reverses a string."
-        LitterAPI::routes[4].route_params.should == { "s" => { :desc => "string to reverse", :type => "string" }}
+      subject.routes.map { |route|
+        { :description => route.route_description, :foo => route.route_foo, :params => route.route_params }
+      }.should eq [
+        { :description => "ns second", :foo => "bar", :params => {} },
+      ]
+    end
+    it "should include details" do
+      subject.desc "method", :details => "method details"
+      subject.get "method" do ; end
+      subject.routes.map { |route|
+        { :description => route.route_description, :details => route.route_details, :params => route.route_params }
+      }.should eq [
+        { :description => "method", :details => "method details", :params => {} },
+      ]
+    end
+    it "should describe a method with parameters" do
+      subject.desc "Reverses a string.", { :params =>
+        { "s" => { :desc => "string to reverse", :type => "string" }}
+      }
+      subject.get "reverse" do
+        params[:s].reverse
       end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
+      ]
+    end
+    it "should symbolize params" do
+      subject.desc "Reverses a string.", { :params =>
+        { :s => { :desc => "string to reverse", :type => "string" }}
+      }
+      subject.get "reverse/:s" do
+        params[:s].reverse
+      end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "Reverses a string.", :params => { :s => { :desc => "string to reverse", :type => "string" } } }
+      ]
     end
   end
   
