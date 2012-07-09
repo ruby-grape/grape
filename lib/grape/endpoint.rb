@@ -301,6 +301,7 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
+      b.use Rack::Head
       b.use Grape::Middleware::Error,
         :default_status => settings[:default_error_status] || 403,
         :rescue_all => settings[:rescue_all],

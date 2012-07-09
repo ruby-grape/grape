@@ -11,6 +11,7 @@ Next Release
 * [#159](https://github.com/intridea/grape/pull/159): Added `:requirements` to routes, allowing to use reserved characters in paths - [@gaiottino](https://github.com/gaiottino).
 * [#156](https://github.com/intridea/grape/pull/156): Added support for adding formatters to entities - [@bobbytables](https://github.com/bobbytables).
 * [#183](https://github.com/intridea/grape/pull/183): Added ability to include documentation in entities - [@flah00](https://github.com/flah00).
+* [#189](https://github.com/intridea/grape/pull/189): `HEAD` requests no longer return a body - [@stephencelis](https://github.com/stephencelis).
 * [#97](https://github.com/intridea/grape/issues/97): Allow overriding `Content-Type` - [@dblock](https://github.com/dblock).
 
 0.2.0 (3/28/2012)
