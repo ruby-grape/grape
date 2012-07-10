@@ -81,6 +81,17 @@ module Grape
         settings[:validations] = []
       end
       
+      def document_attribute(names, opts)
+        if @last_description
+          @last_description[:params] ||= {}
+        
+          Array(names).each do |name|
+            @last_description[:params][name.to_sym] ||= {}
+            @last_description[:params][name.to_sym].merge!(opts)
+          end
+        end
+      end
+      
       def requires(*attrs)
         validations = {:presence => true}
         if attrs.last.is_a?(Hash)
@@ -100,6 +111,18 @@ module Grape
       end
       
       def validates(attrs, validations)
+        doc_attrs = { :required => validations.keys.include?(:presence) }
+        
+        if coerce_type = validations[:coerce]
+          doc_attrs[:type] = coerce_type.to_s
+        end
+        
+        if desc = validations.delete(:desc)
+          doc_attrs[:desc] = desc
+        end
+        
+        document_attribute(attrs, doc_attrs)
+        
         validations.each do |type, options|
           validator_class = Validations::validators[type]
           if validator_class
