@@ -88,7 +88,7 @@ end
 
 ## Mounting
 
-The above sample creates a Rack application that can be run from a rackup *config.ru* file 
+The above sample creates a Rack application that can be run from a rackup *config.ru* file
 with `rackup`:
 
 ``` ruby
@@ -128,7 +128,7 @@ There are three strategies in which clients can reach your API's endpoints: `:he
 version 'v1', :using => :header
 ```
 
-Using this versioning strategy, clients should pass the desired version in the HTTP Accept head. 
+Using this versioning strategy, clients should pass the desired version in the HTTP Accept head.
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
@@ -147,7 +147,7 @@ Using this versioning strategy, clients should pass the desired version in the U
 
     curl -H http://localhost:9292/v1/statuses/public_timeline
 
-Serialization takes place automatically. 
+Serialization takes place automatically.
 
 ### Param
 
@@ -155,7 +155,7 @@ Serialization takes place automatically.
 version 'v1', :using => :param
 ```
 
-Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body. 
+Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body.
 
     curl -H http://localhost:9292/events?apiver=v1
 
@@ -169,7 +169,7 @@ version 'v1', :using => :param, :parameter => "v"
 
 ## Parameters
 
-Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters, 
+Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters,
 along with any named parameters you specify in your route strings.
 
 ```ruby
@@ -426,9 +426,20 @@ class Twitter::API < Grape::API
 end
 ```
 
+You can override the content-type by setting the `Content-Type` header.
+
+``` ruby
+class API < Grape::API
+  get '/script' do
+    content_type "application/javascript"
+    "var x = 1;"
+  end
+end
+```
+
 ## Writing Tests
 
-You can test a Grape API with RSpec by making HTTP requests and examining the response. 
+You can test a Grape API with RSpec by making HTTP requests and examining the response.
 
 ### Writing Tests with Rack
 
@@ -579,7 +590,7 @@ end
 ### Caveats
 
 Entities with duplicate exposure names and conditions will silently overwrite one another.
-In the following example, when object#check equals "foo", only afield will be exposed. 
+In the following example, when object#check equals "foo", only afield will be exposed.
 However, when object#check equals "bar" both bfield and foo will be exposed.
 
 ```ruby
@@ -611,7 +622,7 @@ end
 
 Grape lets you add a description to an API along with any other optional
 elements that can also be inspected at runtime.
-This can be useful for generating documentation. If the response 
+This can be useful for generating documentation. If the response
 requires documentation, consider using an entity.
 
 ``` ruby
