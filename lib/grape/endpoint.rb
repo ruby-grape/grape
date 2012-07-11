@@ -197,7 +197,12 @@ module Grape
         @header
       end
     end
-
+    
+    # Set response content-type
+    def content_type(val)
+      header('Content-Type', val)
+    end
+    
     # Set or get a cookie
     #
     # @example

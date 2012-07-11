@@ -731,11 +731,19 @@ describe Grape::API do
   describe ".content_type" do
     it "sets additional content-type" do
       subject.content_type :xls, "application/vnd.ms-excel"
-      subject.get(:hello) do
+      subject.get :excel do
         "some binary content"
       end
-      get '/hello.xls'
+      get '/excel.xls'
       last_response.content_type.should == "application/vnd.ms-excel"
+    end
+    it "allows to override content-type" do
+      subject.get :content do
+        content_type "text/javascript"
+        "var x = 1;"
+      end
+      get '/content'
+      last_response.content_type.should == "text/javascript"
     end
   end
 

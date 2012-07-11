@@ -73,7 +73,7 @@ module Grape
         bodymap = bodies.collect do |body|
           formatter.call(body)
         end
-        headers['Content-Type'] = content_types[env['api.format']]
+        headers['Content-Type'] = content_types[env['api.format']] unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a
       end
     end
