@@ -95,6 +95,11 @@ module Grape
       def validates(attrs, validations)
         doc_attrs = { :required => validations.keys.include?(:presence) }
         
+        # special case (type = coerce)
+        if validations[:type]
+          validations[:coerce] = validations.delete(:type)
+        end
+        
         if coerce_type = validations[:coerce]
           doc_attrs[:type] = coerce_type.to_s
         end
