@@ -1,3 +1,5 @@
+Boolean = Virtus::Attribute::Boolean
+
 module Grape
   module Validations
     

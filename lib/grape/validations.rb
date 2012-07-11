@@ -1,5 +1,4 @@
 require 'virtus'
-Boolean = Virtus::Attribute::Boolean
 
 module Grape
     
