@@ -1,5 +1,5 @@
-Next Release
-============
+0.2.1 (7/11/2012)
+=================
 
 * [#186](https://github.com/intridea/grape/issues/186): Fix: helpers allow multiple calls with modules and blocks - [@ppadron](https://github.com/ppadron).
 * [#188](https://github.com/intridea/grape/pull/188): Fix: multi-method routes append '(.:format)' only once - [@kainosnoema](https://github.com/kainosnoema).
