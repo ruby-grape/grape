@@ -8,7 +8,7 @@ module Grape
   # creating Grape APIs.Users should subclass this
   # class in order to build an API.
   class API
-    include Validations
+    extend Validations::ClassMethods
     
     class << self
       attr_reader :route_set

@@ -7,20 +7,29 @@ describe Grape::Validations do
     @app = Class.new(Grape::API) do
       default_format :json
       
-      requires :id, :regexp => /^[0-9]+$/
+      
+      params do
+        requires :id, :regexp => /^[0-9]+$/
+      end
+      
       post do
         {:ret => params[:id]}
       end
       
-      requires :name, :company
-      optional :a_number, :regexp => /^[0-9]+$/
+      params do
+        requires :name, :company
+        optional :a_number, :regexp => /^[0-9]+$/
+      end
+      
       get do
         "Hello"
       end
       
-      requires :int, :coerce => Integer
-      optional :arr, :coerce => Array[Integer]
-      optional :bool, :coerce => Array[Boolean]
+      params do
+        requires :int, :coerce => Integer
+        optional :arr, :coerce => Array[Integer]
+        optional :bool, :coerce => Array[Boolean]
+      end
       get '/coerce' do
         {
           :int    => params[:int].class,
