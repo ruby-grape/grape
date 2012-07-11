@@ -192,6 +192,26 @@ post '/json_endpoint' do
 end
 ```
 
+## Validations
+
+You can define validations and coercion option for your attributes:
+
+```ruby
+params do
+  required :id, type: Integer
+  optional :name, type: String, regexp: /^[a-z]+$/
+end
+
+get ':id' do
+  # params[:id] is an Integer
+end
+```
+
+The coercion is handled by the really nice Virtus gem which will convert the value if possible but
+in case of invalid input nothing will be done (ex: asking to coerce "ex" to Integer will return "ex" ).
+Proper type validation could be added later when Virtus will get a way to tell us.
+
+
 ## Headers
 
 Headers are available through the `env` hash object.
