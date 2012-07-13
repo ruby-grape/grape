@@ -257,6 +257,31 @@ describe Grape::Entity do
         fresh_class.expose :name
         expect{ fresh_class.new(nil).serializable_hash }.not_to raise_error
       end
+
+      it 'should not throw an exception when an attribute is not found on the object' do
+        fresh_class.expose :name, :non_existant_attribute
+        expect{ fresh_class.new(model).serializable_hash }.not_to raise_error
+      end
+
+      it "should not expose attributes that don't exist on the object" do
+        fresh_class.expose :email, :non_existant_attribute, :name
+
+        res = fresh_class.new(model).serializable_hash
+        res.should have_key :email
+        res.should_not have_key :non_existant_attribute
+        res.should have_key :name
+      end
+
+      it "should not expose attributes that don't exist on the object, even with criteria" do
+        fresh_class.expose :email
+        fresh_class.expose :non_existant_attribute, :if => lambda { false }
+        fresh_class.expose :non_existant_attribute2, :if => lambda { true }
+
+        res = fresh_class.new(model).serializable_hash
+        res.should have_key :email
+        res.should_not have_key :non_existant_attribute
+        res.should_not have_key :non_existant_attribute2
+      end
     end
 
     describe '#value_for' do

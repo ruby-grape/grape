@@ -259,7 +259,10 @@ module Grape
       return nil if object.nil?
       opts = options.merge(runtime_options || {})
       exposures.inject({}) do |output, (attribute, exposure_options)|
-        output[key_for(attribute)] = value_for(attribute, opts) if conditions_met?(exposure_options, opts)
+        if object.respond_to?(attribute) && conditions_met?(exposure_options, opts)
+          output[key_for(attribute)] = value_for(attribute, opts) 
+        end
+
         output
       end
     end
