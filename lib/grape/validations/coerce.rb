@@ -1,6 +1,9 @@
-Boolean = Virtus::Attribute::Boolean
 
 module Grape
+  class API
+    Boolean = Virtus::Attribute::Boolean
+  end
+  
   module Validations
     
     class CoerceValidator < SingleOptionValidator

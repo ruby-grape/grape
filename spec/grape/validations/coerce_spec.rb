@@ -1,27 +1,27 @@
 require 'spec_helper'
 
+class CoerceAPI < Grape::API
+  default_format :json
+  
+  params do
+    requires :int, :coerce => Integer
+    optional :arr, :coerce => Array[Integer]
+    optional :bool, :coerce => Array[Boolean]
+  end
+  get '/coerce' do
+    {
+      :int    => params[:int].class,
+      :arr    => params[:arr] ? params[:arr][0].class : nil,
+      :bool   => params[:bool] ? (params[:bool][0] == true) && (params[:bool][1] == false) : nil
+    }
+  end
+end
+
 describe Grape::Validations::CoerceValidator do
   def app; @app; end
   
   before do
-    @app = Class.new(Grape::API) do
-      default_format :json
-      
-      params do
-        requires :int, :coerce => Integer
-        optional :arr, :coerce => Array[Integer]
-        optional :bool, :coerce => Array[Boolean]
-      end
-      get '/coerce' do
-        {
-          :int    => params[:int].class,
-          :arr    => params[:arr] ? params[:arr][0].class : nil,
-          :bool   => params[:bool] ? (params[:bool][0] == true) && (params[:bool][1] == false) : nil
-        }
-      end
-      
-    end
-    
+    @app = CoerceAPI
   end
   
   # TOOD: Later when virtus can tell us that an input IS invalid
