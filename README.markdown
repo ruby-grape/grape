@@ -207,7 +207,7 @@ get ':id' do
 end
 ```
 
-The coercion is handled by the really nice Virtus gem which will convert the value if possible but
+The coercion is handled by the [Virtus](https://github.com/solnic/virtus) gem which will convert the value if possible but
 in case of invalid input nothing will be done (ex: asking to coerce "ex" to Integer will return "ex" ).
 Proper type validation could be added later when Virtus will get a way to tell us.
 
