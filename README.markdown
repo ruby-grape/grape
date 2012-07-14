@@ -207,10 +207,14 @@ get ':id' do
 end
 ```
 
-The coercion is handled by the [Virtus](https://github.com/solnic/virtus) gem which will convert the value if possible but
-in case of invalid input nothing will be done (ex: asking to coerce "ex" to Integer will return "ex" ).
-Proper type validation could be added later when Virtus will get a way to tell us.
+Declaring a parameter type causes the value to be coerced into that type, where possible.  
+There is now implicit validation meaning that invalid input such as "foo" for an Integer will be left unmodified and passed through into the API,  
+this might change in a future release.
 
+However validations are executed in the order defined which allows you to do this:  
+```ruby
+requires :id, regexp: /^[0-9]+$/, type: Integer
+```
 
 ## Headers
 
