@@ -207,14 +207,8 @@ get ':id' do
 end
 ```
 
-Declaring a parameter type causes the value to be coerced into that type, where possible.  
-There is now implicit validation meaning that invalid input such as "foo" for an Integer will be left unmodified and passed through into the API,  
-this might change in a future release.
+When a type is specified an implicit validation is done after the coercion to ensure the output type is what you asked.
 
-However validations are executed in the order defined which allows you to do this:  
-```ruby
-requires :id, regexp: /^[0-9]+$/, type: Integer
-```
 
 ## Headers
 
