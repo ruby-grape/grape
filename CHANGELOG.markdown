@@ -1,3 +1,7 @@
+Next Release
+=================
+* [#181](https://github.com/intridea/grape/pull/181): Fix: Corrected JSON serialization of nested hashes containing `Grape::Entity` instances - [@benrosenblum](https://github.com/benrosenblum).
+
 0.2.1 (7/11/2012)
 =================
 
