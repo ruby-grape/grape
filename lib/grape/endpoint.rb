@@ -85,8 +85,7 @@ module Grape
       parts << ':version' if settings[:version] && settings[:version_options][:using] == :path
       parts << namespace.to_s if namespace
       parts << path.to_s if path && '/' != path
-      parts.last << '(.:format)'
-      Rack::Mount::Utils.normalize_path(parts.join('/'))
+      Rack::Mount::Utils.normalize_path(parts.join('/') + '(.:format)')
     end
 
     def namespace
@@ -153,7 +152,7 @@ module Grape
     end
 
     # Redirect to a new url.
-    # 
+    #
     # @param url [String] The url to be redirect.
     # @param options [Hash] The options used when redirect.
     #                       :permanent, default true.
@@ -164,7 +163,7 @@ module Grape
       else
         if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
           status 303
-        else 
+        else
           status 302
         end
       end
@@ -198,7 +197,12 @@ module Grape
         @header
       end
     end
-
+    
+    # Set response content-type
+    def content_type(val)
+      header('Content-Type', val)
+    end
+    
     # Set or get a cookie
     #
     # @example
@@ -297,6 +301,7 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
+      b.use Rack::Head
       b.use Grape::Middleware::Error,
         :default_status => settings[:default_error_status] || 403,
         :rescue_all => settings[:rescue_all],

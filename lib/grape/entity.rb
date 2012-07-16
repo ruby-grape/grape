@@ -3,7 +3,8 @@ require 'hashie'
 module Grape
   # An Entity is a lightweight structure that allows you to easily
   # represent data from your application in a consistent and abstracted
-  # way in your API.
+  # way in your API. Entities can also provide documentation for the
+  # fields exposed.
   #
   # @example Entity Definition
   #
@@ -11,6 +12,7 @@ module Grape
   #     module Entities
   #       class User < Grape::Entity
   #         expose :first_name, :last_name, :screen_name, :location
+  #         expose :field, :documentation => {:type => "string", :desc => "describe the field"}
   #         expose :latest_status, :using => API::Status, :as => :status, :unless => {:collection => true}
   #         expose :email, :if => {:type => :full}
   #         expose :new_attribute, :if => {:version => 'v2'}
@@ -30,6 +32,7 @@ module Grape
   #     class Users < Grape::API
   #       version 'v2'
   #
+  #       desc 'User index', { :object_fields => API::Entities::User.documentation }
   #       get '/users' do
   #         @users = User.all
   #         type = current_user.admin? ? :full : :default
@@ -63,6 +66,8 @@ module Grape
     #   will be called with the represented object as well as the
     #   runtime options that were passed in. You can also just supply a
     #   block to the expose call to achieve the same effect.
+    # @option options :documentation Define documenation for an exposed 
+    #   field, typically the value is a hash with two fields, type and desc. 
     def self.expose(*args, &block)
       options = args.last.is_a?(Hash) ? args.pop : {}
 
@@ -71,7 +76,7 @@ module Grape
         raise ArgumentError, "You may not use block-setting on multi-attribute exposures." if block_given?
       end
 
-      raise ArgumentError, "You may not use block-setting when also using " if block_given? && options[:format_with].respond_to?(:call)
+      raise ArgumentError, "You may not use block-setting when also using format_with" if block_given? && options[:format_with].respond_to?(:call)
 
       options[:proc] = block if block_given?
 
@@ -91,6 +96,24 @@ module Grape
       end
 
       @exposures
+    end
+
+    # Returns a hash, the keys are symbolized references to fields in the entity, 
+    # the values are document keys in the entity's documentation key. When calling 
+    # #docmentation, any exposure without a documentation key will be ignored.
+    def self.documentation
+      @documentation ||= exposures.inject({}) do |memo, value|
+                           unless value[1][:documentation].nil? || value[1][:documentation].empty?
+                             memo[value[0]] = value[1][:documentation] 
+                           end
+                           memo
+                         end
+
+      if superclass.respond_to? :documentation
+        @documentation = superclass.documentation.merge(@documentation)
+      end
+
+      @documentation
     end
 
     # This allows you to declare a Proc in which exposures can be formatted with.
@@ -122,7 +145,7 @@ module Grape
     #   end
     #
     def self.format_with(name, &block)
-      raise ArgumentError, "You must has a block for formatters" unless block_given?
+      raise ArgumentError, "You must pass a block for formatters" unless block_given?
       formatters[name.to_sym] = block
     end
 
@@ -215,6 +238,10 @@ module Grape
 
     def exposures
       self.class.exposures
+    end
+
+    def documentation
+      self.class.documentation
     end
 
     def formatters

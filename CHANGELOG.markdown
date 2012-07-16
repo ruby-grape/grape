@@ -1,7 +1,9 @@
-Next Release
-============
+0.2.1 (7/11/2012)
+=================
 
 * [#181](https://github.com/intridea/grape/pull/181): Fix: Corrected JSON serialization of nested hashes containing `Grape::Entity` instances - [@benrosenblum](https://github.com/benrosenblum).
+* [#186](https://github.com/intridea/grape/issues/186): Fix: helpers allow multiple calls with modules and blocks - [@ppadron](https://github.com/ppadron).
+* [#188](https://github.com/intridea/grape/pull/188): Fix: multi-method routes append '(.:format)' only once - [@kainosnoema](https://github.com/kainosnoema).
 * [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to get request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
 * [#175](https://github.com/intridea/grape/pull/175): Added support for API versioning based on a request parameter - [@jackcasey](https://github.com/jackcasey).
 * [#168](https://github.com/intridea/grape/pull/168): Fix: Formatter can parse symbol keys in the headers hash - [@netmask](https://github.com/netmask).
@@ -9,6 +11,9 @@ Next Release
 * [#166](https://github.com/intridea/grape/pull/166): Added support for `redirect`, including permanent and temporary - [@allenwei](https://github.com/allenwei).
 * [#159](https://github.com/intridea/grape/pull/159): Added `:requirements` to routes, allowing to use reserved characters in paths - [@gaiottino](https://github.com/gaiottino).
 * [#156](https://github.com/intridea/grape/pull/156): Added support for adding formatters to entities - [@bobbytables](https://github.com/bobbytables).
+* [#183](https://github.com/intridea/grape/pull/183): Added ability to include documentation in entities - [@flah00](https://github.com/flah00).
+* [#189](https://github.com/intridea/grape/pull/189): `HEAD` requests no longer return a body - [@stephencelis](https://github.com/stephencelis).
+* [#97](https://github.com/intridea/grape/issues/97): Allow overriding `Content-Type` - [@dblock](https://github.com/dblock).
 
 0.2.0 (3/28/2012)
 =================

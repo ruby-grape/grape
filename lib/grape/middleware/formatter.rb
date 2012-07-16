@@ -15,7 +15,7 @@ module Grape
       end
 
       def headers
-        env.dup.inject({}){|h,(k,v)| h[k.to_s.downcase[5..-1]] = v if k.downcase.to_s.start_with?('http_'); h}
+        env.dup.inject({}){|h,(k,v)| h[k.to_s.downcase[5..-1]] = v if k.to_s.downcase.start_with?('http_'); h}
       end
 
       def before
@@ -73,7 +73,7 @@ module Grape
         bodymap = bodies.collect do |body|
           formatter.call(body)
         end
-        headers['Content-Type'] = content_types[env['api.format']]
+        headers['Content-Type'] = content_types[env['api.format']] unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a
       end
     end

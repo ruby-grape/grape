@@ -361,6 +361,23 @@ describe Grape::Entity do
       end
     end
 
+    describe '#documentation' do
+      it 'should return an empty hash is no documentation is provided' do
+        fresh_class.expose :name
+
+        subject.documentation.should == {}
+      end
+
+      it 'should return each defined documentation hash' do
+        doc = {:type => "foo", :desc => "bar"}
+        fresh_class.expose :name, :documentation => doc
+        fresh_class.expose :email, :documentation => doc
+        fresh_class.expose :birthday
+
+        subject.documentation.should == {:name  => doc, :email => doc}
+      end
+    end
+
     describe '#key_for' do
       it 'should return the attribute if no :as is set' do
         fresh_class.expose :name
