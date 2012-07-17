@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe Grape::Entity do
-  let(:fresh_class){ Class.new(Grape::Entity) }
+  let(:fresh_class) { Class.new(Grape::Entity) }
 
   context 'class methods' do
-    subject{ fresh_class }
+    subject { fresh_class }
 
     describe '.expose' do
       context 'multiple attributes' do
@@ -238,7 +238,7 @@ describe Grape::Entity do
     
     let(:model){ mock(attributes) }
     
-    let(:attributes){ {
+    let(:attributes) { {
       :name => 'Bob Bobson',
       :email => 'bob@example.com',
       :birthday => Time.gm(2012, 2, 27),
@@ -286,17 +286,46 @@ describe Grape::Entity do
         res.should_not have_key :non_existant_attribute2
       end
       
-      it 'should serialize embedded objects which respond to #serializable_hash' do
-        fresh_class.expose :name, :embedded
-        presenter = fresh_class.new(EmbeddedExampleWithOne.new)
-        presenter.serializable_hash.should == {:name => "abc", :embedded => {:abc => "def"}}
-      end
+      context "#serializable_hash" do
+      
+        module EntitySpec
+          class EmbeddedExample
+            def serializable_hash(opts = {})
+              { :abc => 'def' }
+            end
+          end
+          class EmbeddedExampleWithMany
+            def name
+              "abc"
+            end
+            def embedded
+              [ EmbeddedExample.new, EmbeddedExample.new ]
+            end
+          end
+          class EmbeddedExampleWithOne
+            def name
+              "abc"
+            end
+            def embedded
+              EmbeddedExample.new
+            end
+          end
+        end
+      
+        it 'should serialize embedded objects which respond to #serializable_hash' do
+          fresh_class.expose :name, :embedded
+          presenter = fresh_class.new(EntitySpec::EmbeddedExampleWithOne.new)
+          presenter.serializable_hash.should == {:name => "abc", :embedded => {:abc => "def"}}
+        end
 
-      it 'should serialize embedded arrays of objects which respond to #serializable_hash' do
-        fresh_class.expose :name, :embedded
-        presenter = fresh_class.new(EmbeddedExampleWithMany.new)
-        presenter.serializable_hash.should == {:name => "abc", :embedded => [{:abc => "def"}, {:abc => "def"}]}
+        it 'should serialize embedded arrays of objects which respond to #serializable_hash' do
+          fresh_class.expose :name, :embedded
+          presenter = fresh_class.new(EntitySpec::EmbeddedExampleWithMany.new)
+          presenter.serializable_hash.should == {:name => "abc", :embedded => [{:abc => "def"}, {:abc => "def"}]}
+        end
+        
       end
+      
     end
 
     describe '#value_for' do
@@ -330,12 +359,21 @@ describe Grape::Entity do
       end
 
       it 'should disable root key name for child representations' do
-        fresh_class.class_eval do
-          expose :friends, :using => FriendEntity
+      
+        module EntitySpec
+          class FriendEntity < Grape::Entity
+            root 'friends', 'friend'
+            expose :name, :email
+          end
         end
+        
+        fresh_class.class_eval do
+          expose :friends, :using => EntitySpec::FriendEntity
+        end
+        
         rep = subject.send(:value_for, :friends)
         rep.should be_kind_of(Array)
-        rep.reject{|r| r.is_a?(FriendEntity)}.should be_empty
+        rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
         rep.first.serializable_hash[:name].should == 'Friend 1'
         rep.last.serializable_hash[:name].should == 'Friend 2'
       end
