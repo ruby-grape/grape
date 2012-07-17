@@ -66,8 +66,8 @@ module Grape
     #   will be called with the represented object as well as the
     #   runtime options that were passed in. You can also just supply a
     #   block to the expose call to achieve the same effect.
-    # @option options :documentation Define documenation for an exposed 
-    #   field, typically the value is a hash with two fields, type and desc. 
+    # @option options :documentation Define documenation for an exposed
+    #   field, typically the value is a hash with two fields, type and desc.
     def self.expose(*args, &block)
       options = args.last.is_a?(Hash) ? args.pop : {}
 
@@ -98,13 +98,13 @@ module Grape
       @exposures
     end
 
-    # Returns a hash, the keys are symbolized references to fields in the entity, 
-    # the values are document keys in the entity's documentation key. When calling 
+    # Returns a hash, the keys are symbolized references to fields in the entity,
+    # the values are document keys in the entity's documentation key. When calling
     # #docmentation, any exposure without a documentation key will be ignored.
     def self.documentation
       @documentation ||= exposures.inject({}) do |memo, value|
                            unless value[1][:documentation].nil? || value[1][:documentation].empty?
-                             memo[value[0]] = value[1][:documentation] 
+                             memo[value[0]] = value[1][:documentation]
                            end
                            memo
                          end
@@ -118,7 +118,7 @@ module Grape
 
     # This allows you to declare a Proc in which exposures can be formatted with.
     # It take a block with an arity of 1 which is passed as the value of the exposed attribute.
-    # 
+    #
     # @param name [Symbol] the name of the formatter
     # @param block [Proc] the block that will interpret the exposed attribute
     #
@@ -260,9 +260,16 @@ module Grape
       opts = options.merge(runtime_options || {})
       exposures.inject({}) do |output, (attribute, exposure_options)|
         if object.respond_to?(attribute) && conditions_met?(exposure_options, opts)
-          output[key_for(attribute)] = value_for(attribute, opts) 
+          partial_output = value_for(attribute, opts)
+          output[key_for(attribute)] =
+            if partial_output.respond_to? :serializable_hash
+              partial_output.serializable_hash(runtime_options)
+            elsif partial_output.kind_of?(Array) && !partial_output.map {|o| o.respond_to? :serializable_hash}.include?(false)
+              partial_output.map {|o| o.serializable_hash}
+            else
+              partial_output
+            end
         end
-
         output
       end
     end

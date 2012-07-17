@@ -235,17 +235,20 @@ describe Grape::Entity do
   end
 
   context 'instance methods' do
+    
     let(:model){ mock(attributes) }
+    
     let(:attributes){ {
-      :name => 'Bob Bobson', 
+      :name => 'Bob Bobson',
       :email => 'bob@example.com',
       :birthday => Time.gm(2012, 2, 27),
       :fantasies => ['Unicorns', 'Double Rainbows', 'Nessy'],
       :friends => [
-        mock(:name => "Friend 1", :email => 'friend1@example.com', :fantasies => [], :birthday => Time.gm(2012, 2, 27), :friends => []), 
+        mock(:name => "Friend 1", :email => 'friend1@example.com', :fantasies => [], :birthday => Time.gm(2012, 2, 27), :friends => []),
         mock(:name => "Friend 2", :email => 'friend2@example.com', :fantasies => [], :birthday => Time.gm(2012, 2, 27), :friends => [])
       ]
     } }
+    
     subject{ fresh_class.new(model) }
 
     describe '#serializable_hash' do
@@ -282,6 +285,18 @@ describe Grape::Entity do
         res.should_not have_key :non_existant_attribute
         res.should_not have_key :non_existant_attribute2
       end
+      
+      it 'should serialize embedded objects which respond to #serializable_hash' do
+        fresh_class.expose :name, :embedded
+        presenter = fresh_class.new(EmbeddedExampleWithOne.new)
+        presenter.serializable_hash.should == {:name => "abc", :embedded => {:abc => "def"}}
+      end
+
+      it 'should serialize embedded arrays of objects which respond to #serializable_hash' do
+        fresh_class.expose :name, :embedded
+        presenter = fresh_class.new(EmbeddedExampleWithMany.new)
+        presenter.serializable_hash.should == {:name => "abc", :embedded => [{:abc => "def"}, {:abc => "def"}]}
+      end
     end
 
     describe '#value_for' do
@@ -315,10 +330,6 @@ describe Grape::Entity do
       end
 
       it 'should disable root key name for child representations' do
-        class FriendEntity < Grape::Entity
-          root 'friends', 'friend'
-          expose :name, :email
-        end
         fresh_class.class_eval do
           expose :friends, :using => FriendEntity
         end
