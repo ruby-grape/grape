@@ -192,6 +192,24 @@ post '/json_endpoint' do
 end
 ```
 
+## Validations
+
+You can define validations and coercion option for your attributes:
+
+```ruby
+params do
+  required :id, type: Integer
+  optional :name, type: String, regexp: /^[a-z]+$/
+end
+
+get ':id' do
+  # params[:id] is an Integer
+end
+```
+
+When a type is specified an implicit validation is done after the coercion to ensure the output type is what you asked.
+
+
 ## Headers
 
 Headers are available through the `env` hash object.

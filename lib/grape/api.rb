@@ -8,6 +8,8 @@ module Grape
   # creating Grape APIs.Users should subclass this
   # class in order to build an API.
   class API
+    extend Validations::ClassMethods
+    
     class << self
       attr_reader :route_set
       attr_reader :versions
@@ -32,6 +34,7 @@ module Grape
         @endpoints = []
         @mountings = []
         @routes = nil
+        reset_validations!
       end
 
       def compile
@@ -287,7 +290,9 @@ module Grape
           :route_options => (route_options || {}).merge(@last_description || {})
         }
         endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)
+        
         @last_description = nil
+        reset_validations!
       end
 
       def before(&block)
