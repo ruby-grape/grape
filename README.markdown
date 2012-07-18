@@ -203,7 +203,7 @@ You can define validations and coercion options for your parameters:
 
 ```ruby
 params do
-  required :id, type: Integer
+  requires :id, type: Integer
   optional :name, type: String, regexp: /^[a-z]+$/
 end
 get ':id' do
