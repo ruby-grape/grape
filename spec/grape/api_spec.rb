@@ -923,6 +923,33 @@ describe Grape::API do
         { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
       ]
     end
+    it "should merge the options of the namespace with the options of the method" do
+      subject.desc "namespace", :params => { :ns_param => "ns param" }
+      subject.namespace "ns" do
+        desc "method", :params => { :method_param => "method param" }
+        get "method" do ; end
+      end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "method", :params => { :ns_param => "ns param", :method_param => "method param" } }
+      ]
+    end
+    it "should merge the options of nested namespaces" do
+      subject.desc "ns1", :params => { :ns_param => "ns param 1", :ns1_param => "ns1 param" }
+      subject.namespace "ns1" do
+        desc "ns2", :params => { :ns_param => "ns param 2", :ns2_param => "ns2 param" }
+        namespace "ns2" do
+          desc "method", :params => { :method_param => "method param" }
+          get "method" do ; end
+        end
+      end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "method", :params => { :ns_param => "ns param 2", :ns1_param => "ns1 param", :ns2_param => "ns2 param", :method_param => "method param" } }
+      ]
+    end
     it "should not symbolize params" do
       subject.desc "Reverses a string.", { :params =>
         { "s" => { :desc => "string to reverse", :type => "string" }}
