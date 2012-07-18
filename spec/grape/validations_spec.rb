@@ -1,10 +1,8 @@
 require 'spec_helper'
 
-describe Grape::Validations do
-  def app; @app; end
-  
-  before do
-    @app = Class.new(Grape::API) do
+describe Grape::Validations do 
+  module ValidationsSpec
+    class API < Grape::API
       default_format :json
       
       params do
@@ -15,11 +13,13 @@ describe Grape::Validations do
       get do
         "Hello"
       end
-      
     end
-    
   end
   
+  def app
+    ValidationsSpec::API 
+  end
+
   it 'validates optional parameter if present' do
     get('/', :name => "Bob", :company => "TestCorp", :a_number => "string")
     last_response.status.should == 400

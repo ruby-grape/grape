@@ -358,63 +358,65 @@ describe Grape::API do
   end
   
   context 'custom middleware' do
-    class PhonyMiddleware
-      def initialize(app, *args)
-        @args = args
-        @app = app
-        @block = true if block_given?
-      end
+    module ApiSpec
+      class PhonyMiddleware
+        def initialize(app, *args)
+          @args = args
+          @app = app
+          @block = true if block_given?
+        end
 
-      def call(env)
-        env['phony.args'] ||= []
-        env['phony.args'] << @args
-        env['phony.block'] = true if @block
-        @app.call(env)
+        def call(env)
+          env['phony.args'] ||= []
+          env['phony.args'] << @args
+          env['phony.block'] = true if @block
+          @app.call(env)
+        end
       end
     end
 
     describe '.middleware' do
       it 'should include middleware arguments from settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub!(:stack).and_return([{:middleware => [[PhonyMiddleware, 'abc', 123]]}])
+        settings.stub!(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
         subject.stub!(:settings).and_return(settings)
-        subject.middleware.should eql [[PhonyMiddleware, 'abc', 123]]
+        subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
 
       it 'should include all middleware from stacked settings' do
         settings = Grape::Util::HashStack.new
         settings.stub!(:stack).and_return [
-          {:middleware => [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]},
-          {:middleware => [[PhonyMiddleware, 'foo']]}
+          {:middleware => [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]},
+          {:middleware => [[ApiSpec::PhonyMiddleware, 'foo']]}
         ]
         subject.stub!(:settings).and_return(settings)
   
         subject.middleware.should eql [
-          [PhonyMiddleware, 123],
-          [PhonyMiddleware, 'abc'],
-          [PhonyMiddleware, 'foo']
+          [ApiSpec::PhonyMiddleware, 123],
+          [ApiSpec::PhonyMiddleware, 'abc'],
+          [ApiSpec::PhonyMiddleware, 'foo']
         ]
       end
     end
 
     describe '.use' do
       it 'should add middleware' do
-        subject.use PhonyMiddleware, 123
-        subject.middleware.should eql [[PhonyMiddleware, 123]]
+        subject.use ApiSpec::PhonyMiddleware, 123
+        subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 123]]
       end
 
       it 'should not show up outside the namespace' do
-        subject.use PhonyMiddleware, 123
+        subject.use ApiSpec::PhonyMiddleware, 123
         subject.namespace :awesome do
-          use PhonyMiddleware, 'abc'
-          middleware.should == [[PhonyMiddleware, 123],[PhonyMiddleware, 'abc']]
+          use ApiSpec::PhonyMiddleware, 'abc'
+          middleware.should == [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]
         end
 
-        subject.middleware.should eql [[PhonyMiddleware, 123]]
+        subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 123]]
       end
 
       it 'should actually call the middleware' do
-        subject.use PhonyMiddleware, 'hello'
+        subject.use ApiSpec::PhonyMiddleware, 'hello'
         subject.get '/' do
           env['phony.args'].first.first
         end
@@ -425,13 +427,13 @@ describe Grape::API do
 
       it 'should add a block if one is given' do
         block = lambda{ }
-        subject.use PhonyMiddleware, &block
-        subject.middleware.should eql [[PhonyMiddleware, block]]
+        subject.use ApiSpec::PhonyMiddleware, &block
+        subject.middleware.should eql [[ApiSpec::PhonyMiddleware, block]]
       end
 
       it 'should use a block if one is given' do
         block = lambda{ }
-        subject.use PhonyMiddleware, &block
+        subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
         end
@@ -442,7 +444,7 @@ describe Grape::API do
 
       it 'should not destroy the middleware settings on multiple runs' do
         block = lambda{ }
-        subject.use PhonyMiddleware, &block
+        subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
         end

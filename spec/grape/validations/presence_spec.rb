@@ -1,30 +1,31 @@
 require 'spec_helper'
 
 describe Grape::Validations::PresenceValidator do
-  def app; @app; end
-  
-  before do
-    @app = Class.new(Grape::API) do
-      default_format :json
-      
-      params do
-        requires :id, :regexp => /^[0-9]+$/
+
+  module ValidationsSpec
+    module PresenceValidatorSpec
+      class API < Grape::API
+        default_format :json
+        
+        params do
+          requires :id, :regexp => /^[0-9]+$/
+        end
+        post do
+          {:ret => params[:id]}
+        end
+        
+        params do
+          requires :name, :company
+        end
+        get do
+          "Hello"
+        end
       end
-      
-      post do
-        {:ret => params[:id]}
-      end
-      
-      params do
-        requires :name, :company
-      end
-      
-      get do
-        "Hello"
-      end
-      
     end
-    
+  end
+  
+  def app
+    ValidationsSpec::PresenceValidatorSpec::API
   end
   
   it 'validates id' do

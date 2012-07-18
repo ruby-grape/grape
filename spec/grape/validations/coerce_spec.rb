@@ -1,55 +1,53 @@
 require 'spec_helper'
 
-require 'virtus'
-
-module CoerceTest
-  class User
-    include Virtus
+describe Grape::Validations::CoerceValidator do
+  module ValidationsSpec
+    module CoerceValidatorSpec
+      class User
+        include Virtus
+        attribute :id, Integer
+        attribute :name, String
+      end
     
-    attribute :id, Integer
-    attribute :name, String
+      class API < Grape::API
+        default_format :json
+
+        params do
+          requires :int, :coerce => Integer
+        end
+        get '/single' do
+        end
+
+        params do
+          requires :ids, :type => Array[Integer]
+        end
+        get '/arr' do
+        end
+
+        params do
+          requires :user, :type => ValidationsSpec::CoerceValidatorSpec::User
+        end
+        get '/user' do
+        end
+
+        params do
+          requires :int, :coerce => Integer
+          optional :arr, :coerce => Array[Integer]
+          optional :bool, :coerce => Array[Boolean]
+        end
+        get '/coerce' do
+          {
+            :int    => params[:int].class,
+            :arr    => params[:arr] ? params[:arr][0].class : nil,
+            :bool   => params[:bool] ? (params[:bool][0] == true) && (params[:bool][1] == false) : nil
+          }
+        end
+      end
+    end
   end
   
-  class API < Grape::API
-    default_format :json
-
-
-    params do
-      requires :int, :coerce => Integer
-    end
-    get '/single' do
-    end
-
-    params do
-      requires :ids, type: Array[Integer]
-    end
-    get '/arr' do
-    end
-
-    params do
-      requires :user, type: CoerceTest::User
-    end
-    get '/user' do
-    end
-
-    params do
-      requires :int, :coerce => Integer
-      optional :arr, :coerce => Array[Integer]
-      optional :bool, :coerce => Array[Boolean]
-    end
-    get '/coerce' do
-      {
-        :int    => params[:int].class,
-        :arr    => params[:arr] ? params[:arr][0].class : nil,
-        :bool   => params[:bool] ? (params[:bool][0] == true) && (params[:bool][1] == false) : nil
-      }
-    end
-  end
-end
-
-describe Grape::Validations::CoerceValidator do
   def app
-    CoerceTest::API
+    ValidationsSpec::CoerceValidatorSpec::API
   end
     
   it "should return an error on malformed input" do
@@ -73,7 +71,7 @@ describe Grape::Validations::CoerceValidator do
     get '/user', :user => "32"
     last_response.status.should == 400
     
-    get '/user', :user => {id: 32, name: "Bob"}
+    get '/user', :user => { :id => 32, :name => "Bob"}
     last_response.status.should == 200
   end
   

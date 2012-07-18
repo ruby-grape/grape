@@ -1,21 +1,23 @@
 require 'spec_helper'
 
 describe Grape::Validations::RegexpValidator do
-  def app; @app; end
-  
-  before do
-    @app = Class.new(Grape::API) do
-      default_format :json
-      
-      params do
-        requires :name, :regexp => /^[a-z]+$/
-      end
-      get do
+  module ValidationsSpec
+    module RegexpValidatorSpec
+      class API < Grape::API
+        default_format :json
         
+        params do
+          requires :name, :regexp => /^[a-z]+$/
+        end
+        get do
+          
+        end
       end
-      
     end
-    
+  end
+  
+  def app
+    ValidationsSpec::RegexpValidatorSpec::API
   end
   
   it 'should refuse invalid input' do

@@ -27,7 +27,7 @@ module Grape
           @logger ||= Logger.new($stdout)
         end
       end
-
+      
       def reset!
         @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new

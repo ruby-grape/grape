@@ -1,4 +1,4 @@
-# Grape [![Build Status](http://travis-ci.org/intridea/grape.png?branch=frontier)](http://travis-ci.org/intridea/grape)
+# Grape [![Build Status](http://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape)
 
 ## What is Grape?
 
@@ -12,6 +12,11 @@ versioning.
 
 * [Grape Google Group](http://groups.google.com/group/ruby-grape)
 * [Grape Wiki](https://github.com/intridea/grape/wiki)
+
+## Stable Release
+
+You're reading the documentation for the next release of Grape.
+The current stable release is [0.2.1](https://github.com/intridea/grape/blob/v0.2.1/README.markdown).
 
 ## Installation
 
@@ -192,27 +197,32 @@ post '/json_endpoint' do
 end
 ```
 
-## Validations
+## Parameter Validation and Coercion
 
-You can define validations and coercion option for your attributes:
+You can define validations and coercion options for your parameters:
 
 ```ruby
 params do
   required :id, type: Integer
   optional :name, type: String, regexp: /^[a-z]+$/
 end
-
 get ':id' do
   # params[:id] is an Integer
 end
 ```
 
-When a type is specified an implicit validation is done after the coercion to ensure the output type is what you asked.
-
+When a type is specified an implicit validation is done after the coercion to ensure the output type is the one declared.
 
 ## Headers
 
-Headers are available through the `env` hash object.
+Headers are available through the `header` helper or the `env` hash object.
+
+```ruby
+get do
+    content_type = header['Content-type']
+    ...
+end
+```
 
 ```ruby
 get do
