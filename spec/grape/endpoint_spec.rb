@@ -191,6 +191,11 @@ describe Grape::Endpoint do
         last_response.body.should == 'Bobby T.'
       end
 
+      it 'should not convert empty JSON bodies to params' do
+        put '/request_body', '', {'CONTENT_TYPE' => 'application/json'}
+        last_response.body.should == ''
+      end
+
       it 'should convert XML bodies to params' do
         post '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
         last_response.body.should == 'Bobby T.'
