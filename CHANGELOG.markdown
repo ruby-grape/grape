@@ -2,6 +2,7 @@ Next Release
 ============
 
 * [#201](https://github.com/intridea/grape/pull/201): Rewritten `params` DSL, including support for coercion and validations - [@schmurfy](https://github.com/schmurfy).
+* [#205](https://github.com/intridea/grape/pull/205): Fix: Corrected parsing of empty JSON body on POST/PUT - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#181](https://github.com/intridea/grape/pull/181): Fix: Corrected JSON serialization of nested hashes containing `Grape::Entity` instances - [@benrosenblum](https://github.com/benrosenblum).
 * [#203](https://github.com/intridea/grape/pull/203): Added a check to `Entity#serializable_hash` that verifies an entity exists on an object - [@adamgotterer](https://github.com/adamgotterer).
 
