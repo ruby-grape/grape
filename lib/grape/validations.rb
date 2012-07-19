@@ -137,8 +137,8 @@ module Grape
           @last_description[:params] ||= {}
         
           Array(names).each do |name|
-            @last_description[:params][name.to_sym] ||= {}
-            @last_description[:params][name.to_sym].merge!(opts)
+            @last_description[:params][name.to_s] ||= {}
+            @last_description[:params][name.to_s].merge!(opts)
           end
         end
       end

@@ -923,6 +923,50 @@ describe Grape::API do
         { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
       ]
     end
+    it "should merge the parameters of the namespace with the parameters of the method" do
+      subject.desc "namespace"
+      subject.params do
+        requires :ns_param, :desc => "namespace parameter"
+      end
+      subject.namespace "ns" do
+        desc "method"
+        params do
+          optional :method_param, :desc => "method parameter"
+        end
+        get "method" do ; end
+      end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "namespace parameter" }, "method_param" => { :required => false, :desc => "method parameter" } } }
+      ]
+    end
+    it "should merge the parameters of nested namespaces" do
+      subject.desc "ns1"
+      subject.params do
+        optional :ns_param, :desc => "ns param 1"
+        requires :ns1_param, :desc => "ns1 param"
+      end
+      subject.namespace "ns1" do
+        desc "ns2"
+        params do
+          requires :ns_param, :desc => "ns param 2"
+          requires :ns2_param, :desc => "ns2 param"
+        end
+        namespace "ns2" do
+          desc "method"
+          params do
+            optional :method_param, :desc => "method param"
+          end
+          get "method" do ; end
+        end
+      end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2" }, "ns1_param" => { :required => true, :desc => "ns1 param" }, "ns2_param" => { :required => true, :desc => "ns2 param" }, "method_param" => { :required => false, :desc => "method param" } } }
+      ]
+    end
     it "should not symbolize params" do
       subject.desc "Reverses a string.", { :params =>
         { "s" => { :desc => "string to reverse", :type => "string" }}
