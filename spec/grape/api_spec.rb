@@ -938,7 +938,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { :ns_param => { :required => true, :desc => "namespace parameter" }, :method_param => { :required => false, :desc => "method parameter" } } }
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "namespace parameter" }, "method_param" => { :required => false, :desc => "method parameter" } } }
       ]
     end
     it "should merge the parameters of nested namespaces" do
@@ -964,7 +964,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { :ns_param => { :required => true, :desc => "ns param 2" }, :ns1_param => { :required => true, :desc => "ns1 param" }, :ns2_param => { :required => true, :desc => "ns2 param" }, :method_param => { :required => false, :desc => "method param" } } }
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2" }, "ns1_param" => { :required => true, :desc => "ns1 param" }, "ns2_param" => { :required => true, :desc => "ns2 param" }, "method_param" => { :required => false, :desc => "method param" } } }
       ]
     end
     it "should not symbolize params" do
