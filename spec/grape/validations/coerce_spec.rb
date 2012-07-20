@@ -32,6 +32,7 @@ describe Grape::Validations::CoerceValidator do
 
         params do
           requires :int, :coerce => Integer
+          optional :int2, :coerce => Integer
           optional :arr, :coerce => Array[Integer]
           optional :bool, :coerce => Array[Boolean]
         end
@@ -76,12 +77,12 @@ describe Grape::Validations::CoerceValidator do
   end
   
   it 'should coerce inputs' do
-    get('/coerce', :int => "43")
+    get('/coerce', :int => "43", :int2 => "42")
     last_response.status.should == 200
     ret = MultiJson.load(last_response.body)
     ret["int"].should == "Fixnum"
-    
-    get('/coerce', :int => "40", :arr => ["1","20","3"], :bool => [1, 0])
+
+    get('/coerce', :int => "40", :int2 => "42", :arr => ["1","20","3"], :bool => [1, 0])
     # last_response.body.should == ""
     last_response.status.should == 200
     ret = MultiJson.load(last_response.body)
@@ -90,4 +91,8 @@ describe Grape::Validations::CoerceValidator do
     ret["bool"].should == true
   end
   
+  it 'should not return an error when an optional parameter is nil' do
+    get('/coerce', :int => "40")
+    last_response.status.should == 200
+  end
 end

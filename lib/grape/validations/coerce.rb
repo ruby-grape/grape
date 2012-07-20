@@ -16,6 +16,7 @@ module Grape
         end
       end
   
+      class InvalidValue; end
     private
     
       def _valid_array_type?(type, values)
@@ -27,8 +28,11 @@ module Grape
       def _valid_single_type?(klass, val)
         if klass == Virtus::Attribute::Boolean
           val.is_a?(TrueClass) || val.is_a?(FalseClass)
+        elsif klass == Rack::Multipart::UploadedFile
+          val.is_a?(Hashie::Mash) && val.key?(:tempfile)
         else
-          val.is_a?(klass)
+          # allow nil, to ignore when a parameter is absent
+          val.nil? || val.is_a?(klass)
         end
       end
       
@@ -47,7 +51,7 @@ module Grape
       # not the prettiest but some invalid coercion can currently trigger
       # errors in Virtus (see coerce_spec.rb)
       rescue
-        nil
+        InvalidValue.new
       end
       
     end
