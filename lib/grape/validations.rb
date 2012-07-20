@@ -44,7 +44,7 @@ module Grape
 
     end
 
-    # we define Validator::inherited here so SingleOptionValidator
+    # We define Validator::inherited here so SingleOptionValidator
     # will not be considered a validator.
     class Validator
       def self.inherited(klass)
@@ -53,9 +53,7 @@ module Grape
       end
     end
     
-    
-    
-    class <<self
+    class << self
       attr_accessor :validators
     end
     
@@ -64,7 +62,6 @@ module Grape
     def self.register_validator(short_name, klass)
       validators[short_name] = klass
     end
-    
     
     class ParamsScope
       def initialize(api, &block)
@@ -148,7 +145,7 @@ module Grape
   end
 end
 
-# load all defined validations
+# Load all defined validations.
 Dir[File.expand_path('../validations/*.rb', __FILE__)].each do |path|
   require(path)
 end

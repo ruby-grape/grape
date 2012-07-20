@@ -1,5 +1,5 @@
-
 module Grape
+
   class API
     Boolean = Virtus::Attribute::Boolean
   end
@@ -17,12 +17,12 @@ module Grape
       end
   
     private
+    
       def _valid_array_type?(type, values)
         values.all? do |val|
           _valid_single_type?(type, val)
         end
       end
-      
       
       def _valid_single_type?(klass, val)
         if klass == Virtus::Attribute::Boolean
@@ -46,7 +46,7 @@ module Grape
       
       # not the prettiest but some invalid coercion can currently trigger
       # errors in Virtus (see coerce_spec.rb)
-      rescue => err
+      rescue
         nil
       end
       

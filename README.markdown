@@ -2,11 +2,11 @@
 
 ## What is Grape?
 
-Grape is a REST-like API micro-framework for Ruby. It is built to complement
+Grape is a REST-like API micro-framework for Ruby. It''s built to complement
 existing web application frameworks such as Rails and Sinatra by providing a
-simple DSL to easily provide APIs. It has built-in support for common
-conventions such as multiple formats, subdomain/prefix restriction, and
-versioning.
+simple DSL to easily develop RESTful APIs. It has built-in support for common
+conventions, including multiple formats, subdomain/prefix restriction, content
+negotiation, versioning and much more.
 
 ## Project Tracking
 
@@ -27,6 +27,8 @@ Grape is available as a gem, to install it just install the gem:
 If you're using Bundler, add the gem to Gemfile.
 
     gem 'grape'
+
+Run `bundle install`.
 
 ## Basic Usage
 
@@ -49,19 +51,30 @@ class Twitter::API < Grape::API
   end
 
   resource :statuses do
+  
+    desc "Returns a public timeline."
     get :public_timeline do
       Tweet.limit(20)
     end
 
+    desc "Returns a personal timeline."
     get :home_timeline do
       authenticate!
       current_user.home_timeline
     end
 
+    desc "Returns a tweet."
+    params do
+      requires :id, :type => Integer, :desc => "Tweet id."
+    end
     get '/show/:id' do
       Tweet.find(params[:id])
     end
-
+    
+    desc "Creates a tweet."
+    params do
+      requires :status, :type => String, :desc => "Your status."
+    end
     post :update do
       authenticate!
       Tweet.create(
@@ -71,27 +84,12 @@ class Twitter::API < Grape::API
     end
   end
 
-  resource :account do
-    before { authenticate! }
-
-    get '/private' do
-      "Congratulations, you found the secret!"
-    end
-  end
-
-end
-```
-
-Optionally, you can define requirements for your named route parameters using regular expressions. The route will match only if
-all requirements are met.
-
-```ruby
-get '/show/:id', :requirements => { :id => /[0-9]*/ } do
-  Tweet.find(params[:id])
 end
 ```
 
 ## Mounting
+
+### Rack
 
 The above sample creates a Rack application that can be run from a rackup *config.ru* file
 with `rackup`:
@@ -107,13 +105,18 @@ And would respond to the following routes:
     GET  /statuses/show/:id(.json)
     POST /statuses/update(.json)
 
+### Rails
+
 In a Rails application, modify *config/routes*:
 
 ``` ruby
 mount Twitter::API => "/"
 ```
 
-You can mount multiple API implementations inside another one.
+### Modules
+
+You can mount multiple API implementations inside another one. These don't have to be
+different versions, but may be components of the same API.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -124,8 +127,8 @@ end
 
 ## Versioning
 
-There are three strategies in which clients can reach your API's endpoints: `:header`, `:path` and `:param`. The default strategy is `:header`.
-
+There are three strategies in which clients can reach your API's endpoints: `:header`, 
+`:path` and `:param`. The default strategy is `:header`.
 
 ### Header
 
@@ -133,14 +136,14 @@ There are three strategies in which clients can reach your API's endpoints: `:he
 version 'v1', :using => :header
 ```
 
-Using this versioning strategy, clients should pass the desired version in the HTTP Accept head.
+Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
 
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
-By default, the first matching version is used when no Accept header is
+By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
 one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
-is returned when no correct Accept header is supplied.
+is returned when no correct `Accept` header is supplied.
 
 ### Path
 
@@ -152,19 +155,18 @@ Using this versioning strategy, clients should pass the desired version in the U
 
     curl -H http://localhost:9292/v1/statuses/public_timeline
 
-Serialization takes place automatically.
-
 ### Param
 
 ```ruby
 version 'v1', :using => :param
 ```
 
-Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body.
+Using this versioning strategy, clients should pass the desired version as a request parameter, 
+either in the URL query string or in the request body.
 
     curl -H http://localhost:9292/events?apiver=v1
 
-The default name for the query parameter is 'apiver' but can be specified using the :parameter option.
+The default name for the query parameter is 'apiver' but can be specified using the `:parameter` option.
 
 ```ruby
 version 'v1', :using => :param, :parameter => "v"
@@ -172,14 +174,25 @@ version 'v1', :using => :param, :parameter => "v"
 
     curl -H http://localhost:9292/events?v=v1
 
+## Describing Methods
+
+You can add a description to API methods and namespaces.
+
+``` ruby
+desc "Returns a reticulated spline."
+get "spline/:id" do
+  Spline.find(params[:id])
+end
+```
+
 ## Parameters
 
-Parameters are available through the `params` hash object. This includes `GET` and `POST` parameters,
+Request parameters are available through the `params` hash object. This includes `GET` and `POST` parameters,
 along with any named parameters you specify in your route strings.
 
 ```ruby
 get do
-    Article.order(params[:sort_by])
+  Article.order(params[:sort_by])
 end
 ```
 
@@ -199,7 +212,7 @@ end
 
 ## Parameter Validation and Coercion
 
-You can define validations and coercion options for your parameters:
+You can define validations and coercion options for your parameters using `params`.
 
 ```ruby
 params do
@@ -211,7 +224,28 @@ get ':id' do
 end
 ```
 
-When a type is specified an implicit validation is done after the coercion to ensure the output type is the one declared.
+Namespaces allow parameter definitions and apply to every method within the namespace.
+
+``` ruby
+namespace :shelves do
+  params do
+    requires :shelf_id, type: Integer, desc: "A shelf."
+  end
+  namespace ":shelf_id" do
+    desc "Retrieve a book from a shelf."
+    params do
+      requires :book_id, type: Integer, desc: "A book."
+    end
+    get ":book_id" do
+      # params[:shelf_id] defines a shelf
+      # params[:book_id] defines a book
+    end
+  end
+end
+```
+
+When a type is specified an implicit validation is done after the coercion to ensure 
+the output type is the one declared.
 
 ## Headers
 
@@ -228,6 +262,17 @@ end
 get do
     error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
     ...
+end
+```
+
+## Routes
+
+Optionally, you can define requirements for your named route parameters using regular
+expressions. The route will match only if all requirements are met.
+
+```ruby
+get '/show/:id', :requirements => { :id => /[0-9]*/ } do
+  Tweet.find(params[:id])
 end
 ```
 
@@ -290,30 +335,29 @@ cookies[:counter] = {
 }
 cookies[:counter][:value] +=1
 ```
-## Redirect
 
-You can redirect to a new url
+## Redirecting
+
+You can redirect to a new url temporarily or permanently.
 
 ``` ruby
 redirect "/new_url"
 ```
 
-use permanent redirect
-
 ``` ruby
 redirect "/new_url", :permanent => true
 ```
 
-## Raising Errors
+## Raising Exceptions
 
-You can raise errors explicitly.
+You can abort the execution of an API method by raising errors with `error!`.
 
 ``` ruby
 error!("Access Denied", 401)
 ```
 
-You can also return JSON formatted objects explicitly by raising error! and
-passing a hash instead of a message.
+You can also return JSON formatted objects by raising error! and passing a hash
+instead of a message.
 
 ``` ruby
 error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
@@ -388,7 +432,7 @@ end
 class from Ruby's standard library.
 
 To log messages from within an endpoint, you need to define a helper to make the logger
-available in the endpoint context:
+available in the endpoint context.
 
 ``` ruby
 class API < Grape::API
@@ -404,7 +448,7 @@ class API < Grape::API
 end
 ```
 
-You can also set your own logger:
+You can also set your own logger.
 
 ``` ruby
 class MyLogger
@@ -430,6 +474,8 @@ end
 ## Content-Types
 
 By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types.
+Serialization takes place automatically.
+
 Your API can declare additional types to support. Response format is determined by the
 request's extension or `Accept` header.
 
@@ -462,77 +508,6 @@ class API < Grape::API
     content_type "application/javascript"
     "var x = 1;"
   end
-end
-```
-
-## Writing Tests
-
-You can test a Grape API with RSpec by making HTTP requests and examining the response.
-
-### Writing Tests with Rack
-
-Use `rack-test` and define your API as `app`.
-
-```ruby
-require 'spec_helper'
-
-describe Twitter::API do
-  include Rack::Test::Methods
-
-  def app
-    Twitter::API
-  end
-
-  describe Twitter::API do
-    describe "GET /api/v1/statuses" do
-      it "returns an empty array of statuses" do
-        get "/api/v1/statuses"
-        last_response.status.should == 200
-        JSON.parse(response.body).should == []
-      end
-    end
-    describe "GET /api/v1/statuses/:id" do
-      it "returns a status by id" do
-        status = Status.create!
-        get "/api/v1/statuses/#{status.id}"
-        last_response.body.should == status.to_json
-      end
-    end
-  end
-end
-```
-
-### Writing Tests with Rails
-
-``` ruby
-require 'spec_helper'
-
-describe Twitter::API do
-  describe "GET /api/v1/statuses" do
-    it "returns an empty array of statuses" do
-      get "/api/v1/statuses"
-      response.status.should == 200
-      JSON.parse(response.body).should == []
-    end
-  end
-  describe "GET /api/v1/statuses/:id" do
-    it "returns a status by id" do
-      status = Status.create!
-      get "/api/v1/statuses/#{status.id}"
-      resonse.body.should == status.to_json
-    end
-  end
-end
-```
-
-In Rails, HTTP request tests would go into the `spec/request` group. You may want your API code to go into
-`app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
-
-```ruby
-RSpec.configure do |config|
-  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
-    :file_path => /spec\/api/
-  }
 end
 ```
 
@@ -648,31 +623,10 @@ end
 
 ## Describing and Inspecting an API
 
-Grape lets you add a description to an API along with any other optional
-elements that can also be inspected at runtime.
-This can be useful for generating documentation. If the response
-requires documentation, consider using an entity.
+Grape routes can be reflected at runtime. This can notably be useful for generating 
+documentation.
 
-``` ruby
-class TwitterAPI < Grape::API
-
-  version 'v1'
-
-  desc "Retrieves the API version number."
-  get "version" do
-    api.version
-  end
-
-  desc "Reverses a string.", { :params =>
-    { "s" => { :desc => "string to reverse", :type => "string" }}
-  }
-  get "reverse" do
-    params[:s].reverse
-  end
-end
-```
-
-Grape then exposes arrays of API versions and compiled routes. Each route
+Grape exposes arrays of API versions and compiled routes. Each route
 contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`,
 `route_path` and `route_params`. The description and the optional hash that
 follows the API path may contain any number of keys and its values are also
@@ -682,56 +636,20 @@ accessible via dynamically-generated `route_[name]` functions.
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
 TwitterAPI::routes[0].route_version # yields 'v1'
-TwitterAPI::routes[0].route_description # yields [ { "s" => { :desc => "string to reverse", :type => "string" }} ]
+TwitterAPI::routes[0].route_description # etc.
 ```
 
-Parameters can also be tagged to the method declaration itself.
-
-``` ruby
-class StringAPI < Grape::API
-  get "split/:string", { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do
-    params[:string].split(params[:token], (params[:limit] || 0))
-  end
-end
-
-StringAPI::routes[0].route_params # yields a hash {"string" => "", "token" => "a token"}
-StringAPI::routes[0].route_optional_params # yields a hash {"limit" => "the limit"}
-```
-
-It's possible to retrieve the information about the current route from within an API call with `route`.
+It's possible to retrieve the information about the current route from within an API 
+call with `route`.
 
 ``` ruby
 class MyAPI < Grape::API
-  desc "Returns a description of a parameter.", { :params => { "id" => "a required id" } }
+  desc "Returns a description of a parameter."
+  params do
+    requires :id, :type => Integer, :desc => "Identity."
+  end
   get "params/:id" do
-    route.route_params[params[:id]] # returns "a required id"
-  end
-end
-```
-
-You can use this information to create a helper that will check if the request has
-all required parameters:
-
-``` ruby
-class MyAPI < Grape::API
-
-  helpers do
-    def validate_request!
-      # skip validation if no parameter is declared
-      return unless route.route_params
-      route.route_params.each do |k, v|
-        if !params.has_key? k
-          error!("Missing field: #{k}", 400)
-        end
-      end
-    end
-  end
-
-  before { validate_request! }
-
-  desc "creates a new item resource", :params => { :name => 'name is a required parameter' }
-  post :items do
-    ...
+    route.route_params[params[:id]] # yields the parameter description
   end
 end
 ```
@@ -740,12 +658,10 @@ end
 
 Grape by default anchors all request paths, which means that the request URL
 should match from start to end to match, otherwise a `404 Not Found` is
-returned.
-However, this is sometimes not what you want, because it is not always known up
-front what can be expected from the call.
-This is because Rack-mount by default anchors requests to match from the start
-to the end, or not at all. Rails solves this problem by using a `:anchor =>
-false` option in your routes.
+returned. However, this is sometimes not what you want, because it is not always 
+known upfront what can be expected from the call. This is because Rack-mount by
+default anchors requests to match from the start to the end, or not at all. 
+Rails solves this problem by using a `:anchor => false` option in your routes.
 In Grape this option can be used as well when a method is defined.
 
 For instance when you're API needs to get part of an URL, for instance:
@@ -766,6 +682,77 @@ Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/urls/'
 part.
+
+## Writing Tests
+
+You can test a Grape API with RSpec by making HTTP requests and examining the response.
+
+### Writing Tests with Rack
+
+Use `rack-test` and define your API as `app`.
+
+```ruby
+require 'spec_helper'
+
+describe Twitter::API do
+  include Rack::Test::Methods
+
+  def app
+    Twitter::API
+  end
+
+  describe Twitter::API do
+    describe "GET /api/v1/statuses" do
+      it "returns an empty array of statuses" do
+        get "/api/v1/statuses"
+        last_response.status.should == 200
+        JSON.parse(response.body).should == []
+      end
+    end
+    describe "GET /api/v1/statuses/:id" do
+      it "returns a status by id" do
+        status = Status.create!
+        get "/api/v1/statuses/#{status.id}"
+        last_response.body.should == status.to_json
+      end
+    end
+  end
+end
+```
+
+### Writing Tests with Rails
+
+``` ruby
+require 'spec_helper'
+
+describe Twitter::API do
+  describe "GET /api/v1/statuses" do
+    it "returns an empty array of statuses" do
+      get "/api/v1/statuses"
+      response.status.should == 200
+      JSON.parse(response.body).should == []
+    end
+  end
+  describe "GET /api/v1/statuses/:id" do
+    it "returns a status by id" do
+      status = Status.create!
+      get "/api/v1/statuses/#{status.id}"
+      resonse.body.should == status.to_json
+    end
+  end
+end
+```
+
+In Rails, HTTP request tests would go into the `spec/request` group. You may want your API code to go into
+`app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+
+```ruby
+RSpec.configure do |config|
+  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
+    :file_path => /spec\/api/
+  }
+end
+```
 
 ## Note on Patches/Pull Requests
 

@@ -7,7 +7,6 @@ module Grape
           throw :error, :status => 400, :message => "missing parameter: #{attr_name}"
         end
       end
-    
     end
     
   end
