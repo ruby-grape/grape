@@ -186,11 +186,6 @@ describe Grape::Endpoint do
         last_response.body.should == 'Bobby T.'
       end
 
-      it 'should convert JSON bodies to params' do
-        put '/request_body', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
-        last_response.body.should == 'Bobby T.'
-      end
-
       it 'should not convert empty JSON bodies to params' do
         put '/request_body', '', {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == ''
