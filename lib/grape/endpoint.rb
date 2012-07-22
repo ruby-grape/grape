@@ -125,7 +125,7 @@ module Grape
 
     # Pull out request body params if the content type matches and we're on a POST or PUT
     def body_params
-      if ['POST', 'PUT'].include?(request.request_method.to_s.upcase) && request.body.size > 0
+      if ['POST', 'PUT'].include?(request.request_method.to_s.upcase) && request.content_length.to_i > 0
         return case env['CONTENT_TYPE']
           when 'application/json'
             MultiJson.decode(request.body.read)
