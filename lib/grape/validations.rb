@@ -8,8 +8,9 @@ module Grape
     # All validators must inherit from this class.
     # 
     class Validator
-      def initialize(attrs, options)
+      def initialize(attrs, options, doc_attrs)
         @attrs = Array(attrs)
+        @doc_attrs = doc_attrs
 
         if options.is_a?(Hash) && !options.empty?
           raise "unknown options: #{options.keys}"
@@ -18,7 +19,9 @@ module Grape
 
       def validate!(params)
         @attrs.each do |attr_name|
-          validate_param!(attr_name, params)
+          if @doc_attrs[:required] || params.has_key?(attr_name)
+            validate_param!(attr_name, params)
+          end
         end
       end
 
@@ -37,7 +40,7 @@ module Grape
     ##
     # Base class for all validators taking only one param.
     class SingleOptionValidator < Validator
-      def initialize(attrs, options)
+      def initialize(attrs, options, doc_attrs)
         @option = options
         super
       end
@@ -109,7 +112,7 @@ module Grape
         validations.each do |type, options|
           validator_class = Validations::validators[type.to_s]
           if validator_class
-            @api.settings[:validations] << validator_class.new(attrs, options)
+            @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs)
           else
             raise "unknown validator: #{type}"
           end
