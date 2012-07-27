@@ -109,15 +109,31 @@ module Grape
         
         @api.document_attribute(attrs, doc_attrs)
         
-        validations.each do |type, options|
-          validator_class = Validations::validators[type.to_s]
-          if validator_class
-            @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs)
-          else
-            raise "unknown validator: #{type}"
-          end
+        # Validate for presence before any other validators
+        if validations.has_key?(:presence) && validations[:presence]
+          validate('presence', validations[:presence], attrs, doc_attrs)
         end
-      
+
+        # Before we run the rest of the validators, lets handle
+        # whatever coercion so that we are working with correctly
+        # type casted values
+        if validations.has_key? :coerce
+          validate('coerce', validations[:coerce], attrs, doc_attrs)
+          validations.delete(:coerce)
+        end
+
+        validations.each do |type, options|
+          validate(type, options, attrs, doc_attrs)
+        end
+      end
+
+      def validate(type, options, attrs, doc_attrs)
+        validator_class = Validations::validators[type.to_s]
+        if validator_class
+          @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs)
+        else
+          raise "unknown validator: #{type}"
+        end
       end
       
     end
