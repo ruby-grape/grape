@@ -1,111 +1,116 @@
 require 'spec_helper'
 
 describe Grape::Validations::CoerceValidator do
-  module ValidationsSpec
-    module CoerceValidatorSpec
-      class User
-        include Virtus
-        attribute :id, Integer
-        attribute :name, String
+  subject { Class.new(Grape::API) }
+  def app; subject end
+
+  describe 'coerce' do
+    it 'error on malformed input' do
+      subject.params { requires :int, :type => Integer }
+      subject.get '/single' do 'int works'; end
+
+      get '/single', :int => '43a' 
+      last_response.status.should == 400
+      last_response.body.should == 'invalid parameter: int'
+
+      get '/single', :int => '43'
+      last_response.status.should == 200
+      last_response.body.should == 'int works'
+    end
+
+    it 'error on malformed input (Array)' do
+      subject.params { requires :ids, :type => Array[Integer] }
+      subject.get '/array' do 'array int works'; end
+
+      get 'array', { :ids => ['1', '2', 'az'] }
+      last_response.status.should == 400
+      last_response.body.should == 'invalid parameter: ids'
+
+      get 'array', { :ids => ['1', '2', '890'] }
+      last_response.status.should == 200
+      last_response.body.should == 'array int works'
+    end
+
+    context 'complex objects' do
+      module CoerceValidatorSpec
+        class User
+          include Virtus
+          attribute :id, Integer
+          attribute :name, String
+        end
       end
 
-      class API < Grape::API
-        default_format :json
+      it 'error on malformed input for complex objects' do
+        subject.params { requires :user, :type => CoerceValidatorSpec::User }
+        subject.get '/user' do 'complex works'; end
 
-        params do
-          requires :int, :coerce => Integer
-        end
-        get '/single' do
-        end
+        get '/user', :user => "32"
+        last_response.status.should == 400
+        last_response.body.should == 'invalid parameter: user'
 
-        params do
-          requires :ids, :type => Array[Integer]
-        end
-        get '/arr' do
-        end
-
-        params do
-          requires :user, :type => ValidationsSpec::CoerceValidatorSpec::User
-        end
-        get '/user' do
-        end
-
-        params do
-          requires :int, :coerce => Integer
-          optional :int2, :coerce => Integer
-          optional :arr, :coerce => Array[Integer]
-          optional :bool, :coerce => Array[Boolean]
-        end
-        get '/coerce' do
-          {
-            :int    => params[:int].class,
-            :arr    => params[:arr] ? params[:arr][0].class : nil,
-            :bool   => params[:bool] ? (params[:bool][0] == true) && (params[:bool][1] == false) : nil
-          }
-        end
-        params do
-          requires :uploaded_file, :type => Rack::Multipart::UploadedFile
-        end
-        post '/file' do
-          {
-            :dpx_file => params[:uploaded_file]
-          }
-        end
+        get '/user', :user => { :id => 32, :name => 'Bob' }
+        last_response.status.should == 200
+        last_response.body.should == 'complex works'
       end
     end
-  end
 
-  def app
-    ValidationsSpec::CoerceValidatorSpec::API
-  end
+    context 'coerces' do
+      it 'Integer' do
+        subject.params { requires :int, :coerce => Integer }
+        subject.get '/int' do params[:int].class; end
 
-  it "should return an error on malformed input" do
-    get '/single', :int => "43a"
-    last_response.status.should == 400
+        get '/int', { :int => "45" }
+        last_response.status.should == 200
+        last_response.body.should == 'Fixnum'
+      end
 
-    get '/single', :int => "43"
-    last_response.status.should == 200
-  end
+      it 'Array of Integers' do
+        subject.params { requires :arry, :coerce => Array[Integer] }
+        subject.get '/array' do params[:arry][0].class; end
 
-  it "should return an error on malformed input (array)" do
-    get '/arr', :ids => ["1", "2", "az"]
-    last_response.status.should == 400
+        get '/array', { :arry => [ '1', '2', '3' ] }
+        last_response.status.should == 200
+        last_response.body.should == 'Fixnum'
+      end
 
-    get '/arr', :ids => ["1", "2", "890"]
-    last_response.status.should == 200
-  end
+      it 'Array of Bools' do
+        subject.params { requires :arry, :coerce => Array[Virtus::Attribute::Boolean] }
+        subject.get '/array' do params[:arry][0].class; end
 
-  it "should return an error on malformed input (complex object)" do
-    # this request does raise an error inside Virtus
-    get '/user', :user => "32"
-    last_response.status.should == 400
+        get 'array', { :arry => [1, 0] }
+        last_response.status.should == 200
+        last_response.body.should == 'TrueClass'
+      end
 
-    get '/user', :user => { :id => 32, :name => "Bob"}
-    last_response.status.should == 200
-  end
+      it 'Bool' do
+        subject.params { requires :bool, :coerce => Virtus::Attribute::Boolean }
+        subject.get '/bool' do params[:bool].class; end
 
-  it 'should coerce inputs' do
-    get('/coerce', :int => "43", :int2 => "42")
-    last_response.status.should == 200
-    ret = MultiJson.load(last_response.body)
-    ret["int"].should == "Fixnum"
+        get '/bool', { :bool => 1 }
+        last_response.status.should == 200
+        last_response.body.should == 'TrueClass'
+        
+        get '/bool', { :bool => 0 }
+        last_response.status.should == 200
+        last_response.body.should == 'FalseClass'
 
-    get('/coerce', :int => "40", :int2 => "42", :arr => ["1","20","3"], :bool => [1, 0])
-    # last_response.body.should == ""
-    last_response.status.should == 200
-    ret = MultiJson.load(last_response.body)
-    ret["int"].should == "Fixnum"
-    ret["arr"].should == "Fixnum"
-    ret["bool"].should == true
-  end
+        get '/bool', { :bool => 'false' }
+        last_response.status.should == 200
+        last_response.body.should == 'FalseClass'
 
-  it 'should not return an error when an optional parameter is nil' do
-    get('/coerce', :int => "40")
-    last_response.status.should == 200
-  end
+        get '/bool', { :bool => 'true' }
+        last_response.status.should == 200
+        last_response.body.should == 'TrueClass'
+      end
 
-  it 'should coerce a file' do
-    post('/file', :uploaded_file => Rack::Test::UploadedFile.new(__FILE__))
-    last_response.status.should == 201
+      it 'file' do
+        subject.params { requires :file, :coerce => Rack::Multipart::UploadedFile }
+        subject.post '/upload' do params[:file].filename; end
+
+        post '/upload', { :file => Rack::Test::UploadedFile.new(__FILE__) }
+        last_response.status.should == 201
+        last_response.body.should == File.basename(__FILE__).to_s
+      end
+    end
   end
 end

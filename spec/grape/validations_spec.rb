@@ -1,8 +1,6 @@
 require 'spec_helper'
 
-
-
-describe Grape::API do
+describe Grape::Validations do
   subject { Class.new(Grape::API) }
   def app; subject end
 
