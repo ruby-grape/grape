@@ -226,9 +226,13 @@ get ':id' do
 end
 ```
 
+When a type is specified an implicit validation is done after the coercion to ensure 
+the output type is the one declared.
+
+### Namespace Validation and Coercion
 Namespaces allow parameter definitions and apply to every method within the namespace.
 
-``` ruby
+```ruby
 namespace :shelves do
   params do
     requires :shelf_id, type: Integer, desc: "A shelf."
@@ -246,8 +250,41 @@ namespace :shelves do
 end
 ```
 
-When a type is specified an implicit validation is done after the coercion to ensure 
-the output type is the one declared.
+### Custom Validators
+```ruby
+class doit < Grape::Validations::Validator
+  def validate_param!(attr_name, params)
+    unless params[attr_name] == 'im custom'
+      throw :error, :status => 400, :message => "#{attr_name}: is not custom!"
+    end    
+  end
+end  
+```
+
+```ruby
+params do
+  requires :name, :doit => true
+end
+```
+
+You can also create custom classes that take additional parameters
+```ruby
+class Length < Grape::Validations::SingleOptionValidator
+  def validate_param!(attr_name, params)
+    unless params[attr_name].length == @option
+      throw :error, :status => 400, :message => "#{attr_name}: must be #{@option} characters long"
+    end    
+  end
+end  
+``` 
+
+```ruby
+params do
+  requires :name, :length => 5
+end
+```
+
+
 
 ## Headers
 

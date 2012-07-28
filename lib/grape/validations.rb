@@ -8,8 +8,9 @@ module Grape
     # All validators must inherit from this class.
     # 
     class Validator
-      def initialize(attrs, options)
+      def initialize(attrs, options, required)
         @attrs = Array(attrs)
+        @required = required
 
         if options.is_a?(Hash) && !options.empty?
           raise "unknown options: #{options.keys}"
@@ -18,7 +19,9 @@ module Grape
 
       def validate!(params)
         @attrs.each do |attr_name|
-          validate_param!(attr_name, params)
+          if @required || params.has_key?(attr_name)
+            validate_param!(attr_name, params)
+          end
         end
       end
 
@@ -37,7 +40,7 @@ module Grape
     ##
     # Base class for all validators taking only one param.
     class SingleOptionValidator < Validator
-      def initialize(attrs, options)
+      def initialize(attrs, options, required)
         @option = options
         super
       end
@@ -106,15 +109,31 @@ module Grape
         
         @api.document_attribute(attrs, doc_attrs)
         
-        validations.each do |type, options|
-          validator_class = Validations::validators[type.to_s]
-          if validator_class
-            @api.settings[:validations] << validator_class.new(attrs, options)
-          else
-            raise "unknown validator: #{type}"
-          end
+        # Validate for presence before any other validators
+        if validations.has_key?(:presence) && validations[:presence]
+          validate('presence', validations[:presence], attrs, doc_attrs)
         end
-      
+
+        # Before we run the rest of the validators, lets handle
+        # whatever coercion so that we are working with correctly
+        # type casted values
+        if validations.has_key? :coerce
+          validate('coerce', validations[:coerce], attrs, doc_attrs)
+          validations.delete(:coerce)
+        end
+
+        validations.each do |type, options|
+          validate(type, options, attrs, doc_attrs)
+        end
+      end
+
+      def validate(type, options, attrs, doc_attrs)
+        validator_class = Validations::validators[type.to_s]
+        if validator_class
+          @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs[:required])
+        else
+          raise "unknown validator: #{type}"
+        end
       end
       
     end
