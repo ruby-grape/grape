@@ -6,7 +6,13 @@ describe Grape::Validations::PresenceValidator do
     module PresenceValidatorSpec
       class API < Grape::API
         default_format :json
-        
+
+        resource :bacons do
+          get "/" do
+            "All the bacon"
+          end
+        end
+
         params do
           requires :id, :regexp => /^[0-9]+$/
         end
@@ -26,6 +32,12 @@ describe Grape::Validations::PresenceValidator do
   
   def app
     ValidationsSpec::PresenceValidatorSpec::API
+  end
+
+  it "does not validate for any params" do
+    get("/bacons")
+    last_response.status.should == 200
+    last_response.body.should == "All the bacon"
   end
   
   it 'validates id' do
