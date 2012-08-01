@@ -4,7 +4,7 @@ module Grape
     class RegexpValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
         if params[attr_name] && !( params[attr_name].to_s =~ @option )
-          throw :error, :status => 400, :message => "invalid parameter: #{attr_name}"
+          raise ValidationError, :status => 400, :message => "invalid parameter: #{attr_name}"
         end
       end
     end
