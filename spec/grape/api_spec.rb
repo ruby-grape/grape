@@ -669,6 +669,27 @@ describe Grape::API do
 
       lambda{ get '/unrescued' }.should raise_error
     end
+
+    it 'should not re-raise exceptions of type Grape::Exception::Base' do
+      class CustomError < Grape::Exceptions::Base; end
+      subject.get('/custom_exception'){ raise CustomError }
+      
+      lambda{ get '/custom_exception' }.should_not raise_error
+    end
+
+    it 'should rescue custom grape exceptions' do
+      class CustomError < Grape::Exceptions::Base; end
+      subject.rescue_from CustomError do |e|
+        rack_response('New Error', e.status)
+      end
+      subject.get '/custom_error' do
+        raise CustomError, :status => 400, :message => 'Custom Error'
+      end
+
+      get '/custom_error'
+      last_response.status.should == 400
+      last_response.body.should == 'New Error'
+    end
   end
 
   describe ".error_format" do

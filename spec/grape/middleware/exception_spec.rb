@@ -34,6 +34,16 @@ describe Grape::Middleware::Error do
       end
     end
   end
+
+  # raises a custom error
+  class CustomError < Grape::Exceptions::Base; end
+  class CustomErrorApp
+    class << self
+      def call(env)
+        raise CustomError, :status => 400, :message => 'failed validation'
+      end
+    end
+  end
   
   def app
     @app
@@ -116,6 +126,17 @@ describe Grape::Middleware::Error do
       get '/'
       last_response.status.should == 401    
     end 
+
+    it 'should respond to custom Grape exceptions appropriately' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, :rescue_all => false
+        run CustomErrorApp
+      end
+
+      get '/'
+      last_response.status.should == 400
+      last_response.body.should == 'failed validation'
+    end
     
   end 
 end
