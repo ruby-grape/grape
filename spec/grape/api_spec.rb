@@ -68,7 +68,7 @@ describe Grape::API do
     end
 
     it 'should route if any media type is allowed' do
-      
+
     end
   end
 
@@ -133,7 +133,7 @@ describe Grape::API do
       get '/members/23'
       last_response.body.should == "23"
     end
-    
+
     it 'should be callable with nil just to push onto the stack' do
       subject.namespace do
         version 'v2', :using => :path
@@ -146,7 +146,7 @@ describe Grape::API do
       get '/hello'
       last_response.body.should == "outer"
     end
-    
+
     %w(group resource resources segment).each do |als|
       it "`.#{als}` should be an alias" do
         subject.send(als, :awesome) do
@@ -191,7 +191,7 @@ describe Grape::API do
           RSpec::Mocks::Mock.new(:to_json => 'abc', :to_txt => 'def')
         end
       end
-    
+
       it "should allow .json" do
         get '/abc.json'
         last_response.status.should == 200
@@ -245,7 +245,7 @@ describe Grape::API do
       subject.route([:get, :post], '/:id/first') do
         "first"
       end
-      
+
       subject.route([:get, :post], '/:id') do
         "ola"
       end
@@ -356,7 +356,7 @@ describe Grape::API do
       last_response.headers['Content-Type'].should eql 'application/json'
     end
   end
-  
+
   context 'custom middleware' do
     module ApiSpec
       class PhonyMiddleware
@@ -390,7 +390,7 @@ describe Grape::API do
           {:middleware => [[ApiSpec::PhonyMiddleware, 'foo']]}
         ]
         subject.stub!(:settings).and_return(settings)
-  
+
         subject.middleware.should eql [
           [ApiSpec::PhonyMiddleware, 123],
           [ApiSpec::PhonyMiddleware, 'abc'],
@@ -630,7 +630,7 @@ describe Grape::API do
       subject.get '/def' do
         'def'
       end
-      
+
       get '/new/abc'
       last_response.status.should eql 404
       get '/legacy/abc'
@@ -668,6 +668,76 @@ describe Grape::API do
       last_response.status.should eql 403
 
       lambda{ get '/unrescued' }.should raise_error
+    end
+  end
+
+  describe ".rescue_from klass, block" do
+    it 'should rescue Exception' do
+      subject.rescue_from RuntimeError do |e|
+        rack_response("rescued from #{e.message}", 202)
+      end
+      subject.get '/exception' do
+        raise "rain!"
+      end
+      get '/exception'
+      last_response.status.should eql 202
+      last_response.body.should == 'rescued from rain!'
+    end
+    it 'should rescue an error via rescue_from :all' do
+      class ConnectionError < RuntimeError; end
+      subject.rescue_from :all do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/exception' do
+        raise ConnectionError
+      end
+      get '/exception'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from ConnectionError'
+    end
+    it 'should rescue a specific error' do
+      class ConnectionError < RuntimeError; end
+      subject.rescue_from ConnectionError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/exception' do
+        raise ConnectionError
+      end
+      get '/exception'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from ConnectionError'
+    end
+    it 'should rescue multiple specific errors' do
+      class ConnectionError < RuntimeError; end
+      class DatabaseError < RuntimeError; end
+      subject.rescue_from ConnectionError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.rescue_from DatabaseError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/connection' do
+        raise ConnectionError
+      end
+      subject.get '/database' do
+        raise DatabaseError
+      end
+      get '/connection'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from ConnectionError'
+      get '/database'
+      last_response.status.should eql 500
+      last_response.body.should == 'rescued from DatabaseError'
+    end
+    it 'should not rescue a different error' do
+      class CommunicationError < RuntimeError; end
+      subject.rescue_from RuntimeError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/uncaught' do
+        raise CommunicationError
+      end
+      lambda { get '/uncaught' }.should raise_error(CommunicationError)
     end
   end
 
@@ -981,85 +1051,15 @@ describe Grape::API do
       ]
     end
   end
-  
-  describe ".rescue_from klass, block" do
-    it 'should rescue Exception' do
-      subject.rescue_from RuntimeError do |e|
-        rack_response("rescued from #{e.message}", 202)
-      end
-      subject.get '/exception' do
-        raise "rain!"
-      end
-      get '/exception'
-      last_response.status.should eql 202
-      last_response.body.should == 'rescued from rain!'
-    end
-    it 'should rescue an error via rescue_from :all' do
-      class ConnectionError < RuntimeError; end
-      subject.rescue_from :all do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-      subject.get '/exception' do
-        raise ConnectionError
-      end
-      get '/exception'
-      last_response.status.should eql 500
-      last_response.body.should == 'rescued from ConnectionError'
-    end
-    it 'should rescue a specific error' do
-      class ConnectionError < RuntimeError; end
-      subject.rescue_from ConnectionError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-      subject.get '/exception' do
-        raise ConnectionError
-      end
-      get '/exception'
-      last_response.status.should eql 500
-      last_response.body.should == 'rescued from ConnectionError'
-    end
-    it 'should rescue multiple specific errors' do
-      class ConnectionError < RuntimeError; end
-      class DatabaseError < RuntimeError; end
-      subject.rescue_from ConnectionError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-      subject.rescue_from DatabaseError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-      subject.get '/connection' do
-        raise ConnectionError
-      end
-      subject.get '/database' do
-        raise DatabaseError
-      end
-      get '/connection'
-      last_response.status.should eql 500
-      last_response.body.should == 'rescued from ConnectionError'
-      get '/database'
-      last_response.status.should eql 500
-      last_response.body.should == 'rescued from DatabaseError'
-    end
-    it 'should not rescue a different error' do
-      class CommunicationError < RuntimeError; end
-      subject.rescue_from RuntimeError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-      subject.get '/uncaught' do
-        raise CommunicationError
-      end
-      lambda { get '/uncaught' }.should raise_error(CommunicationError)
-    end
-  end
 
   describe '.mount' do
     let(:mounted_app){ lambda{|env| [200, {}, ["MOUNTED"]]} }
-  
+
     context 'with a bare rack app' do
       before do
         subject.mount mounted_app => '/mounty'
       end
-    
+
       it 'should make a bare Rack app available at the endpoint' do
         get '/mounty'
         last_response.body.should == 'MOUNTED'
@@ -1107,6 +1107,21 @@ describe Grape::API do
         get '/v1/cool/awesome'
         last_response.body.should == 'yo'
       end
+
+      it 'should inherit rescues even when some defined by mounted' do
+        subject.rescue_from :all do |e|
+          rack_response("rescued from #{e.message}", 202)
+        end
+        subject.namespace :mounted do
+          app = Class.new(Grape::API)
+          app.rescue_from ArgumentError
+          app.get('/fail') { raise "doh!" }
+          mount app
+        end
+        get '/mounted/fail'
+        last_response.status.should eql 202
+        last_response.body.should == 'rescued from doh!'
+      end
     end
   end
 
@@ -1133,7 +1148,7 @@ describe Grape::API do
       subject.instance.should be_nil
     end
   end
-  
+
   describe ".route" do
     context "plain" do
       before(:each) do
