@@ -12,6 +12,12 @@ describe Grape::Validations::RegexpValidator do
         get do
           
         end
+        
+        params do
+          requires 'user.id', :regexp => /^[Aa]+$/
+        end
+        get('/nested'){}
+        
       end
     end
   end
@@ -27,6 +33,19 @@ describe Grape::Validations::RegexpValidator do
   
   it 'should accept valid input' do
     get '/', :name => "bob"
+    last_response.status.should == 200
+  end
+  
+  it 'should works with nested attributes' do
+    get '/nested'
+    last_response.status.should == 400
+    last_response.body.should == "missing parameter: user.id"
+    
+    get '/nested', :user => {:id => "tt"}
+    last_response.status.should == 400
+    last_response.body.should == "invalid parameter: user.id"
+
+    get '/nested', :user => {:id => "aAAAaaa"}
     last_response.status.should == 200
   end
   

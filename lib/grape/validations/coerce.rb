@@ -7,12 +7,13 @@ module Grape
   module Validations
     
     class CoerceValidator < SingleOptionValidator
-      def validate_param!(attr_name, params)
-        new_value = coerce_value(@option, params[attr_name])
+      def validate_param!(path, params)
+        value = params.read(path)
+        new_value = coerce_value(@option, value)
         if valid_type?(new_value)
-          params[attr_name] = new_value
+          params.write(path, new_value)
         else
-          throw :error, :status => 400, :message => "invalid parameter: #{attr_name}"
+          throw :error, :status => 400, :message => "invalid parameter: #{path}"
         end
       end
   
