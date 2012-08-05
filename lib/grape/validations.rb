@@ -18,6 +18,7 @@ module Grape
       end
 
       def validate!(params)
+        params = ParamsWrapper.new(params)
         @attrs.each do |attr_name|
           if @required || params.has_key?(attr_name)
             validate_param!(attr_name, params)

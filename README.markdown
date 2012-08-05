@@ -253,9 +253,10 @@ end
 ### Custom Validators
 ```ruby
 class doit < Grape::Validations::Validator
-  def validate_param!(attr_name, params)
-    unless params[attr_name] == 'im custom'
-      throw :error, :status => 400, :message => "#{attr_name}: is not custom!"
+  def validate_param!(path, params)
+    value = params.read(path)
+    unless value == 'im custom'
+      throw :error, :status => 400, :message => "#{value}: is not custom!"
     end    
   end
 end  
@@ -270,9 +271,10 @@ end
 You can also create custom classes that take additional parameters
 ```ruby
 class Length < Grape::Validations::SingleOptionValidator
-  def validate_param!(attr_name, params)
-    unless params[attr_name].length == @option
-      throw :error, :status => 400, :message => "#{attr_name}: must be #{@option} characters long"
+  def validate_param!(path, params)
+    value = params.read(path)
+    unless value.length == @option
+      throw :error, :status => 400, :message => "#{value}: must be #{@option} characters long"
     end    
   end
 end  

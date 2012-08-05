@@ -28,6 +28,21 @@ describe Grape::Validations::PresenceValidator do
     ValidationsSpec::PresenceValidatorSpec::API
   end
   
+  it 'should validates nested values' do
+    app.params{ requires 'user.id', :type => Integer }
+    app.get('/nested')
+    
+    get('/nested')
+    last_response.status.should == 400
+    last_response.body.should == "missing parameter: user.id"
+
+    
+    get('/nested', {}, 'rack.input' => StringIO.new('{ "user" : {"id" : "a56b"}}'))
+    last_response.status.should == 400
+    last_response.body.should == "invalid parameter: user.id"
+    
+  end
+  
   it 'validates id' do
     post('/')
     last_response.status.should == 400

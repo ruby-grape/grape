@@ -39,6 +39,23 @@ describe Grape::Validations::CoerceValidator do
           attribute :name, String
         end
       end
+      
+      it 'can validates nested attributs' do
+        subject.params do
+          requires 'user.id', :type => Integer
+          requires 'user.name', :type => String
+        end
+        
+        subject.get('/nested') { "works" }
+        
+        get '/nested', :user => {:id => "bob", :name => "Arnold"}
+        last_response.status.should == 400
+        last_response.body.should == 'invalid parameter: user.id'
+
+        get '/nested', :user => {:id => 34, :name => "Arnold"}
+        last_response.status.should == 200
+        last_response.body.should == 'works'
+      end
 
       it 'error on malformed input for complex objects' do
         subject.params { requires :user, :type => CoerceValidatorSpec::User }

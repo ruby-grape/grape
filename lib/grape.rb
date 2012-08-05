@@ -10,6 +10,7 @@ module Grape
   autoload :Entity,          'grape/entity'
   autoload :Cookies,         'grape/cookies'
   autoload :Validations,     'grape/validations'
+  autoload :ParamsWrapper,   'grape/params_wrapper'
 
   module Middleware
     autoload :Base,      'grape/middleware/base'
