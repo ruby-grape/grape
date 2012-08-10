@@ -46,7 +46,7 @@ module Grape
         rescue Exception => e
           is_rescuable = rescuable?(e.class)
           if e.is_a?(Grape::Exceptions::Base) && !is_rescuable
-            handler = lambda { error_response(e) }
+            handler = lambda {|e| error_response(e) }
           else
             raise unless is_rescuable
             handler = options[:rescue_handlers][e.class] || options[:rescue_handlers][:all]
