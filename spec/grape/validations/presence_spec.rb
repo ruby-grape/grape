@@ -8,7 +8,7 @@ describe Grape::Validations::PresenceValidator do
         default_format :json
 
         resource :bacons do
-          get "/" do
+          get do
             "All the bacon"
           end
         end
