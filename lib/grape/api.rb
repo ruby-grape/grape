@@ -386,6 +386,7 @@ module Grape
           instance_eval &block if block_given?
           blocks.each{|b| instance_eval &b}
           settings.pop   # when finished, we pop the context
+          reset_validations!
         else
           instance_eval &block
         end
