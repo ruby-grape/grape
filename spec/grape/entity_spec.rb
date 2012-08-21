@@ -235,9 +235,9 @@ describe Grape::Entity do
   end
 
   context 'instance methods' do
-    
+
     let(:model){ mock(attributes) }
-    
+
     let(:attributes) { {
       :name => 'Bob Bobson',
       :email => 'bob@example.com',
@@ -248,7 +248,7 @@ describe Grape::Entity do
         mock(:name => "Friend 2", :email => 'friend2@example.com', :fantasies => [], :birthday => Time.gm(2012, 2, 27), :friends => [])
       ]
     } }
-    
+
     subject{ fresh_class.new(model) }
 
     describe '#serializable_hash' do
@@ -296,9 +296,9 @@ describe Grape::Entity do
         res = fresh_class.new(model).serializable_hash
         res.should have_key :non_existant_attribute
       end
-      
+
       context "#serializable_hash" do
-      
+
         module EntitySpec
           class EmbeddedExample
             def serializable_hash(opts = {})
@@ -322,7 +322,7 @@ describe Grape::Entity do
             end
           end
         end
-      
+
         it 'should serialize embedded objects which respond to #serializable_hash' do
           fresh_class.expose :name, :embedded
           presenter = fresh_class.new(EntitySpec::EmbeddedExampleWithOne.new)
@@ -334,9 +334,9 @@ describe Grape::Entity do
           presenter = fresh_class.new(EntitySpec::EmbeddedExampleWithMany.new)
           presenter.serializable_hash.should == {:name => "abc", :embedded => [{:abc => "def"}, {:abc => "def"}]}
         end
-        
+
       end
-      
+
     end
 
     describe '#value_for' do
@@ -355,6 +355,7 @@ describe Grape::Entity do
           end
 
           expose :fantasies, :format_with => lambda {|f| f.reverse }
+
         end
       end
 
@@ -369,24 +370,35 @@ describe Grape::Entity do
         rep.last.serializable_hash[:name].should == 'Friend 2'
       end
 
-      it 'should disable root key name for child representations' do
-      
+      context 'child representations'  do
+
         module EntitySpec
           class FriendEntity < Grape::Entity
             root 'friends', 'friend'
             expose :name, :email
           end
         end
-        
-        fresh_class.class_eval do
-          expose :friends, :using => EntitySpec::FriendEntity
+
+        it 'should disable root key name for child representations' do
+          fresh_class.class_eval do
+            expose :friends, :using => EntitySpec::FriendEntity
+          end
+
+          rep = subject.send(:value_for, :friends)
+          rep.should be_kind_of(Array)
+          rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
+          rep.first.serializable_hash[:name].should == 'Friend 1'
+          rep.last.serializable_hash[:name].should == 'Friend 2'
         end
-        
-        rep = subject.send(:value_for, :friends)
-        rep.should be_kind_of(Array)
-        rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
-        rep.first.serializable_hash[:name].should == 'Friend 1'
-        rep.last.serializable_hash[:name].should == 'Friend 2'
+
+        it 'should use the enity to represent the result returned by the proc' do
+          fresh_class.class_eval do
+            expose :filtered_friends, :proc => lambda {|fresh_klass,options| fresh_klass.friends[0]}, :using => EntitySpec::FriendEntity
+          end
+          rep = subject.send(:value_for, :filtered_friends)
+          rep.is_a?(EntitySpec::FriendEntity).should be_true
+          rep.serializable_hash[:name].should == 'Friend 1'
+        end
       end
 
       it 'should call through to the proc if there is one' do

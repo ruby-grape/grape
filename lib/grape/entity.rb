@@ -286,7 +286,9 @@ module Grape
       exposure_options = exposures[attribute.to_sym]
 
       if exposure_options[:proc]
-        exposure_options[:proc].call(object, options)
+        result = exposure_options[:proc].call(object, options)
+        result = exposure_options[:using].represent(result, :root => nil) if exposure_options[:using]
+        result
       elsif exposure_options[:using]
         exposure_options[:using].represent(object.send(attribute), :root => nil)
       elsif exposure_options[:format_with]
