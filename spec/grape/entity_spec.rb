@@ -391,7 +391,7 @@ describe Grape::Entity do
           rep.last.serializable_hash[:name].should == 'Friend 2'
         end
 
-        it 'should disable root key name for child representations and use the enity' do
+        it 'should use the enity to represent the result returned by the proc' do
           fresh_class.class_eval do
             expose :filtered_friends, :proc => lambda {|fresh_klass,options| fresh_klass.friends[0]}, :using => EntitySpec::FriendEntity
           end
