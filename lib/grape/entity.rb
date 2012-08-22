@@ -259,7 +259,7 @@ module Grape
       return nil if object.nil?
       opts = options.merge(runtime_options || {})
       exposures.inject({}) do |output, (attribute, exposure_options)|
-        if exposure_options.has_key?(:proc) || object.respond_to?(attribute) && conditions_met?(exposure_options, opts)
+        if (exposure_options.has_key?(:proc) || object.respond_to?(attribute)) && conditions_met?(exposure_options, opts)
           partial_output = value_for(attribute, opts)
           output[key_for(attribute)] =
             if partial_output.respond_to? :serializable_hash
