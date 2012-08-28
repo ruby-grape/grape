@@ -629,6 +629,32 @@ module API
 end
 ```
 
+### Entity Organization
+
+In addition to separately organizing entities, it may be useful to
+put them as namespaced classes underneath the model they represent.
+For example:
+
+```ruby
+class User
+  def entity
+    Entity.new(self)
+  end
+
+  class Entity < Grape::Entity
+    expose :name, :email
+  end
+end
+```
+
+If you organize your entities this way, Grape will automatically
+detect the `Entity` class and use it to present your models. In
+this example, if you added `present User.new` to your endpoint,
+Grape would automatically detect that there is a `User::Entity`
+class and use that as the representative entity. This can still
+be overridden by using the `:with` option or an explicit
+`represents` call.
+
 ### Caveats
 
 Entities with duplicate exposure names and conditions will silently overwrite one another.
