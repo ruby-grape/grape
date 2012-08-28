@@ -478,5 +478,53 @@ describe Grape::Entity do
         subject.send(:conditions_met?, exposure_options, :true => true).should be_false
       end
     end
+
+    describe "::DSL" do
+      subject{ Class.new }
+
+      it 'should create an Entity class when called' do
+        subject.should_not be_const_defined(:Entity)
+        subject.send(:include, Grape::Entity::DSL)
+        subject.should be_const_defined(:Entity)
+      end
+
+      context 'pre-mixed' do
+        before{ subject.send(:include, Grape::Entity::DSL) }
+
+        it 'should be able to define entity traits through DSL' do
+          subject.entity do
+            expose :name
+          end
+
+          subject.entity_class.exposures.should_not be_empty
+        end
+
+        it 'should be able to expose straight from the class' do
+          subject.entity :name, :email
+          subject.entity_class.exposures.size.should == 2
+        end
+
+        it 'should be able to mix field and advanced exposures' do
+          subject.entity :name, :email do
+            expose :third
+          end
+          subject.entity_class.exposures.size.should == 3
+        end
+
+        context 'instance' do
+          let(:instance){ subject.new }
+
+          describe '#entity' do
+            it 'should be an instance of the entity class' do
+              instance.entity.should be_kind_of(subject.entity_class)
+            end
+
+            it 'should have an object of itself' do
+              instance.entity.object.should == instance
+            end
+          end
+        end
+      end
+    end
   end
 end
