@@ -49,7 +49,7 @@ module Grape
       def self.included(base)
         base.extend ClassMethods
         ancestor_entity_class = base.ancestors.detect{|a| a.entity_class if a.respond_to?(:entity_class)}
-        const_set(:Entity, Class.new(ancestor_entity_class || Grape::Entity)) unless const_defined?(:Entity)
+        base.const_set(:Entity, Class.new(ancestor_entity_class || Grape::Entity)) unless const_defined?(:Entity)
       end
 
       module ClassMethods
