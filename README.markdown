@@ -604,6 +604,27 @@ module API
 end
 ```
 
+#### Using the Exposure DSL
+
+Grape ships with a DSL to easily define entities within the context
+of an existing class:
+
+```ruby
+class User
+  include Grape::Entity::DSL
+
+  entity :name, :email do
+    expose :advanced, if: :conditional
+  end
+end
+```
+
+The above will automatically create a `User::Entity` class and
+define properties on it according to the same rules as above. If
+you only want to define simple exposures you don't have to supply
+a block and can instead simply supply a list of comma-separated
+symbols.
+
 ### Using Entities
 
 Once an entity is defined, it can be used within endpoints, by calling #present. The #present

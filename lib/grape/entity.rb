@@ -43,6 +43,60 @@ module Grape
   class Entity
     attr_reader :object, :options
 
+    # The Entity DSL allows you to mix entity functionality into
+    # your existing classes.
+    module DSL
+      def self.included(base)
+        base.extend ClassMethods
+        ancestor_entity_class = base.ancestors.detect{|a| a.entity_class if a.respond_to?(:entity_class)}
+        base.const_set(:Entity, Class.new(ancestor_entity_class || Grape::Entity)) unless const_defined?(:Entity)
+      end
+
+      module ClassMethods
+        # Returns the automatically-created entity class for this
+        # Class.
+        def entity_class(search_ancestors=true)
+          klass = const_get(:Entity) if const_defined?(:Entity)
+          klass ||= ancestors.detect{|a| a.entity_class(false) if a.respond_to?(:entity_class) } if search_ancestors
+          klass
+        end
+
+        # Call this to make exposures to the entity for this Class.
+        # Can be called with symbols for the attributes to expose,
+        # a block that yields the full Entity DSL (See Grape::Entity),
+        # or both.
+        #
+        # @example Symbols only.
+        #
+        #   class User
+        #     include Grape::Entity::DSL
+        #     
+        #     entity :name, :email
+        #   end
+        #
+        # @example Mixed.
+        #
+        #   class User
+        #     include Grape::Entity::DSL
+        #     
+        #     entity :name, :email do
+        #       expose :latest_status, using: Status::Entity, if: :include_status
+        #       expose :new_attribute, :if => {:version => 'v2'}
+        #     end
+        #   end
+        def entity(*exposures, &block)
+          entity_class.expose *exposures if exposures.any?
+          entity_class.class_eval(&block) if block_given?
+          entity_class
+        end
+      end
+
+      # Instantiates an entity version of this object.
+      def entity
+        self.class.entity_class.new(self)
+      end
+    end
+
     # This method is the primary means by which you will declare what attributes
     # should be exposed by the entity.
     #
