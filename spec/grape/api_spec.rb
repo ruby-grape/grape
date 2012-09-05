@@ -1073,6 +1073,17 @@ describe Grape::API do
         { :description => "nesting", :params => { "root_param" => { :required => true, :desc => "root param", :full_name=>"root_param" }, "nested_param" => { :required => true, :desc => "nested param", :full_name=>"nested[nested_param]" } } }
       ]
     end
+    it "should parse parameters when no description is given" do
+      subject.params do
+        requires :one_param, :desc => "one param"
+      end
+      subject.get "method" do ; end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => nil, :params => { "one_param" => { :required => true, :desc => "one param", :full_name=>"one_param" } } }
+      ]
+    end
     it "should not symbolize params" do
       subject.desc "Reverses a string.", { :params =>
         { "s" => { :desc => "string to reverse", :type => "string" }}
