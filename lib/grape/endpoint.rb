@@ -293,11 +293,12 @@ module Grape
       self.extend helpers
       cookies.read(@request)
 
+      run_filters befores
+
       Array(settings[:validations]).each do |validator|
         validator.validate!(params)
       end
 
-      run_filters befores
       response_text = instance_eval &self.block
       run_filters afters
       cookies.write(header)
