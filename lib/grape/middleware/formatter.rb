@@ -19,7 +19,7 @@ module Grape
       end
 
       def before
-        fmt = format_from_extension || options[:format] || format_from_header || options[:default_format]
+        fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
         if content_types.key?(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = parser_for fmt
@@ -48,6 +48,15 @@ module Grape
           return extension
         end
         nil
+      end
+
+      def format_from_params
+        if env['QUERY_STRING']
+          format_query = env['QUERY_STRING'].split('&').reject{|q| !q.include?('format=')} 
+          return format_query[0].split('=').last.to_sym if (format_query && !format_query.empty?)
+        else
+          nil
+        end 
       end
 
       def format_from_header
