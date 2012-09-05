@@ -214,7 +214,7 @@ end
 
 ## Parameter Validation and Coercion
 
-You can define validations and coercion options for your parameters using `params`.
+You can define validations and coercion options for your parameters using a `params` block.
 
 ```ruby
 params do
@@ -260,10 +260,10 @@ end
 
 ### Custom Validators
 ```ruby
-class doit < Grape::Validations::Validator
+class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
-    unless params[attr_name] == 'im custom'
-      throw :error, :status => 400, :message => "#{attr_name}: is not custom!"
+    unless params[attr_name] =~ /^[[:alnum:]]+$/
+      throw :error, :status => 400, :message => "#{attr_name}: must consist of alpha-numeric characters"
     end    
   end
 end  
@@ -271,11 +271,11 @@ end
 
 ```ruby
 params do
-  requires :name, :doit => true
+  requires :username, :alpha_numeric => true
 end
 ```
 
-You can also create custom classes that take additional parameters
+You can also create custom classes that take parameters
 ```ruby
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
@@ -290,6 +290,20 @@ end
 params do
   requires :name, :length => 5
 end
+```
+
+### Validation Errors
+When validation and coercion erros occur an exception of type `ValidationError` is raised.
+If the exception goes uncaught it will respond with a status of 400 and an error message.
+You can rescue a `ValidationError` and respond with a custom response.
+```ruby
+rescue_from ValidationError do |e|
+    Rack::Response.new({
+        'status' => e.status,
+        'message' => e.message,
+        'param' => e.param
+    }.to_json, e.status)    
+end 
 ```
 
 
