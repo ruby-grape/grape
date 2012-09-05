@@ -172,13 +172,12 @@ module Grape
       end
       
       def document_attribute(names, opts)
-        if @last_description
-          @last_description[:params] ||= {}
+        @last_description ||= {}
+        @last_description[:params] ||= {}
 
-          Array(names).each do |name|
-            @last_description[:params][name[:name].to_s] ||= {}
-            @last_description[:params][name[:name].to_s].merge!(opts).merge!({:full_name => name[:full_name]})
-          end
+        Array(names).each do |name|
+          @last_description[:params][name[:name].to_s] ||= {}
+          @last_description[:params][name[:name].to_s].merge!(opts).merge!({:full_name => name[:full_name]})
         end
       end
       
