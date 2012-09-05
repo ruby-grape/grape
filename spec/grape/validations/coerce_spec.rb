@@ -111,6 +111,19 @@ describe Grape::Validations::CoerceValidator do
         last_response.status.should == 201
         last_response.body.should == File.basename(__FILE__).to_s
       end
+
+      it 'Nests integers' do
+        subject.params do
+          group :integers do
+            requires :int, :coerce => Integer
+          end
+        end
+        subject.get '/int' do params[:integers][:int].class; end
+
+        get '/int', { :integers => { :int => "45" } }
+        last_response.status.should == 200
+        last_response.body.should == 'Fixnum'
+      end
     end
   end
 end
