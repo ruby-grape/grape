@@ -107,6 +107,11 @@ module Grape
         params
       end
 
+      def full_name(name)
+        return "#{@parent.full_name(@element)}[#{name}]" if @parent
+        name.to_s
+      end
+
     private
       def validates(attrs, validations)
         doc_attrs = { :required => validations.keys.include?(:presence) }
@@ -123,9 +128,10 @@ module Grape
         if desc = validations.delete(:desc)
           doc_attrs[:desc] = desc
         end
-        
-        @api.document_attribute(attrs, doc_attrs)
-        
+
+        full_attrs = attrs.collect{ |name| { :name => name, :full_name => full_name(name)} }
+        @api.document_attribute(full_attrs, doc_attrs)
+
         # Validate for presence before any other validators
         if validations.has_key?(:presence) && validations[:presence]
           validate('presence', validations[:presence], attrs, doc_attrs)
@@ -168,10 +174,10 @@ module Grape
       def document_attribute(names, opts)
         if @last_description
           @last_description[:params] ||= {}
-        
+
           Array(names).each do |name|
-            @last_description[:params][name.to_s] ||= {}
-            @last_description[:params][name.to_s].merge!(opts)
+            @last_description[:params][name[:name].to_s] ||= {}
+            @last_description[:params][name[:name].to_s].merge!(opts).merge!({:full_name => name[:full_name]})
           end
         end
       end
