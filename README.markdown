@@ -220,6 +220,11 @@ You can define validations and coercion options for your parameters using `param
 params do
   requires :id, type: Integer
   optional :name, type: String, regexp: /^[a-z]+$/
+
+  group :user do
+    requires :first_name
+    requires :last_name
+  end
 end
 get ':id' do
   # params[:id] is an Integer
@@ -228,6 +233,9 @@ end
 
 When a type is specified an implicit validation is done after the coercion to ensure 
 the output type is the one declared.
+
+Parameters can be nested using `group`. In the above example, this means both
+`params[:user][:first_name]` and `params[:user][:last_name]` are required next to `params[:id]`.
 
 ### Namespace Validation and Coercion
 Namespaces allow parameter definitions and apply to every method within the namespace.
