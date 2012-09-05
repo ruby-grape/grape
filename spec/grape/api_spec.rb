@@ -1029,7 +1029,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "namespace parameter" }, "method_param" => { :required => false, :desc => "method parameter" } } }
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "namespace parameter", :full_name=>"ns_param" }, "method_param" => { :required => false, :desc => "method parameter", :full_name=>"method_param" } } }
       ]
     end
     it "should merge the parameters of nested namespaces" do
@@ -1055,7 +1055,22 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2" }, "ns1_param" => { :required => true, :desc => "ns1 param" }, "ns2_param" => { :required => true, :desc => "ns2 param" }, "method_param" => { :required => false, :desc => "method param" } } }
+        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2", :full_name=>"ns_param" }, "ns1_param" => { :required => true, :desc => "ns1 param", :full_name=>"ns1_param" }, "ns2_param" => { :required => true, :desc => "ns2 param", :full_name=>"ns2_param" }, "method_param" => { :required => false, :desc => "method param", :full_name=>"method_param" } } }
+      ]
+    end
+    it "should provide a full_name for parameters in nested groups" do
+      subject.desc "nesting"
+      subject.params do
+        requires :root_param, :desc => "root param"
+        group :nested do
+          requires :nested_param, :desc => "nested param"
+        end
+      end
+      subject.get "method" do ; end
+      subject.routes.map { |route|
+        { :description => route.route_description, :params => route.route_params }
+      }.should eq [
+        { :description => "nesting", :params => { "root_param" => { :required => true, :desc => "root param", :full_name=>"root_param" }, "nested_param" => { :required => true, :desc => "nested param", :full_name=>"nested[nested_param]" } } }
       ]
     end
     it "should not symbolize params" do
