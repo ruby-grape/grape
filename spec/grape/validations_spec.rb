@@ -48,6 +48,25 @@ describe Grape::Validations do
       end
     end
 
+    context 'permitted' do
+      before do
+        subject.params { permits :key }
+        subject.get '/permitted' do 'permitted works'; end
+      end
+
+      it "allows specified key" do
+        get '/permitted', { :key => 'cool' }
+        # last_response.status.should == 200
+        last_response.body.should == 'permitted works'
+      end
+
+      it "disallows any other key" do
+        get '/permitted', { :foo => 'cool' }
+        last_response.status.should == 400
+        last_response.body.should == 'forbidden parameter: foo'
+      end
+    end
+
     context 'custom validation' do
       module CustomValidations  
         class Customvalidator < Grape::Validations::Validator

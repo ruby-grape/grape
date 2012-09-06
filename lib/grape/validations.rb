@@ -87,6 +87,15 @@ module Grape
         
         validates(attrs, validations)
       end
+
+      def permits(*attrs)
+        validations = {:permission => true}
+        if attrs.last.is_a?(Hash)
+          validations.merge!(attrs.pop)
+        end
+        
+        validates(attrs, validations)
+      end
       
       def optional(*attrs)
         validations = {}
@@ -135,6 +144,11 @@ module Grape
         # Validate for presence before any other validators
         if validations.has_key?(:presence) && validations[:presence]
           validate('presence', validations[:presence], attrs, doc_attrs)
+        end
+
+        # Next validate for mission before any other validators
+        if validations.has_key?(:permission) && validations[:permission]
+          validate('permission', validations[:permission], attrs, doc_attrs)
         end
 
         # Before we run the rest of the validators, lets handle

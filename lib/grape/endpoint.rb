@@ -123,6 +123,12 @@ module Grape
         deep_merge(self.body_params)
     end
 
+    def request_params
+      @request_params ||= Hashie::Mash.new.
+        deep_merge(request.params).
+        deep_merge(self.body_params)
+    end
+
     # Pull out request body params if the content type matches and we're on a POST or PUT
     def body_params
       if ['POST', 'PUT'].include?(request.request_method.to_s.upcase) && request.content_length.to_i > 0
@@ -296,7 +302,13 @@ module Grape
       run_filters befores
 
       Array(settings[:validations]).each do |validator|
-        validator.validate!(params)
+        #the permissions validation needs to only take the params for the object
+        #excluding anything to do with the rack env or routing
+        if validator.respond_to?(:permissions)
+          validator.validate!(request_params)
+        else
+          validator.validate!(params)
+        end
       end
 
       response_text = instance_eval &self.block
