@@ -159,7 +159,7 @@ module Grape
     def redirect(url, options = {})
       merged_options = {:permanent => false }.merge(options)
       if merged_options[:permanent]
-        status 304
+        status 301
       else
         if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
           status 303

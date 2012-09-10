@@ -268,7 +268,7 @@ describe Grape::Endpoint do
         redirect "/ha", :permanent => true
       end
       get '/hey'
-      last_response.status.should eq 304
+      last_response.status.should eq 301
       last_response.headers['Location'].should eq "/ha"
       last_response.body.should eq ""
     end
