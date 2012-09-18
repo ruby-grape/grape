@@ -299,6 +299,8 @@ module Grape
         validator.validate!(params)
       end
 
+      run_filters after_validations
+
       response_text = instance_eval &self.block
       run_filters afters
       cookies.write(header)
@@ -372,6 +374,7 @@ module Grape
     end
 
     def befores; aggregate_setting(:befores) end
+    def after_validations; aggregate_setting(:after_validations) end
     def afters; aggregate_setting(:afters) end
   end
 end

@@ -313,6 +313,20 @@ describe Grape::API do
       get '/'
       last_response.body.should eql 'first second'
     end
+    
+    it 'should add a after_validation filter' do
+      subject.after_validation { @foo = "first #{params[:id]}:#{params[:id].class}"  }
+      subject.after_validation { @bar = 'second' }
+      subject.params do
+        requires :id, :type => Integer
+      end
+      subject.get '/' do
+        "#{@foo} #{@bar}"
+      end
+
+      get '/', :id => "32"
+      last_response.body.should eql 'first 32:Fixnum second'
+    end
 
     it 'should add a after filter' do
       m = double('after mock')
