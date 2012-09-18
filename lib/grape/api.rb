@@ -299,6 +299,10 @@ module Grape
       def before(&block)
         imbue(:befores, [block])
       end
+      
+      def after_validation(&block)
+        imbue(:after_validations, [block])
+      end
 
       def after(&block)
         imbue(:afters, [block])
