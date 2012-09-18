@@ -80,6 +80,13 @@ describe Grape::Middleware::Formatter do
       subject.env['api.format'].should == :json
     end
 
+    it 'should use the format parameter if one is provided' do 
+      subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=json'})
+      subject.env['api.format'].should == :json
+      subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=xml'})
+      subject.env['api.format'].should == :xml
+    end
+
     it 'should use the default format if none is provided' do
       subject.call({'PATH_INFO' => '/info'})
       subject.env['api.format'].should == :txt
