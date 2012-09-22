@@ -10,7 +10,7 @@ module Grape
   # class in order to build an API.
   class API
     extend Validations::ClassMethods
-    
+
     class << self
       attr_reader :route_set
       attr_reader :versions
@@ -28,7 +28,7 @@ module Grape
           @logger ||= Logger.new($stdout)
         end
       end
-      
+
       def reset!
         @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
@@ -106,6 +106,8 @@ module Grape
             set(:version_options, options)
           end
         end
+
+        @versions.last unless @versions.nil?
       end
 
       # Add a description to the next namespace or function.
@@ -124,7 +126,7 @@ module Grape
       def format(new_format = nil)
         new_format ? set(:format, new_format.to_sym) : settings[:format]
       end
-      
+
       # Specify the format for error messages.
       # May be `:json` or `:txt` (default).
       def error_format(new_format = nil)
@@ -291,7 +293,7 @@ module Grape
           :route_options => (@namespace_description || {}).deep_merge(@last_description || {}).deep_merge(route_options || {})
         }
         endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)
-        
+
         @last_description = nil
         reset_validations!
       end
@@ -299,7 +301,7 @@ module Grape
       def before(&block)
         imbue(:befores, [block])
       end
-      
+
       def after_validation(&block)
         imbue(:after_validations, [block])
       end
