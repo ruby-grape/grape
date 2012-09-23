@@ -4,8 +4,8 @@
 Features
 --------
 
-* [#201](https://github.com/intridea/grape/pull/201), [#236](https://github.com/intridea/grape/pull/236), [#221](https://github.com/intridea/grape/pull/221): The `params` DSL now includes support for coercion and validations - [@schmurfy](https://github.com/schmurfy), [@tim-vandecasteele](https://github.com/tim-vandecasteele), [@adamgotterer](https://github.com/adamgotterer).
-* [#204](https://github.com/intridea/grape/pull/204): Added ability to declare shared parameters at namespace level - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
+* [#201](https://github.com/intridea/grape/pull/201), [#236](https://github.com/intridea/grape/pull/236), [#221](https://github.com/intridea/grape/pull/221): Added coercion and validations support to `params` DSL - [@schmurfy](https://github.com/schmurfy), [@tim-vandecasteele](https://github.com/tim-vandecasteele), [@adamgotterer](https://github.com/adamgotterer).
+* [#204](https://github.com/intridea/grape/pull/204): Added ability to declare shared `params` at `namespace` level - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#234](https://github.com/intridea/grape/pull/234): Added a DSL for creating entities via mixin - [@mbleigh](https://github.com/mbleigh).
 * [#240](https://github.com/intridea/grape/pull/240): Define API response format from a query string `format` parameter, if specified - [@neetiraj](https://github.com/neetiraj).
 
