@@ -21,6 +21,21 @@ describe Grape::API do
     end
   end
 
+  describe '.version' do
+    context 'when defined' do
+      it 'should return version value' do
+        subject.version 'v1'
+        subject.version.should == 'v1'
+      end
+    end
+
+    context 'when not defined' do
+      it 'should return nil' do
+        subject.version.should be_nil
+      end
+    end
+  end
+
   describe '.version using path' do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
@@ -313,7 +328,7 @@ describe Grape::API do
       get '/'
       last_response.body.should eql 'first second'
     end
-    
+
     it 'should add a after_validation filter' do
       subject.after_validation { @foo = "first #{params[:id]}:#{params[:id].class}"  }
       subject.after_validation { @bar = 'second' }
@@ -687,7 +702,7 @@ describe Grape::API do
     it 'should not re-raise exceptions of type Grape::Exception::Base' do
       class CustomError < Grape::Exceptions::Base; end
       subject.get('/custom_exception'){ raise CustomError }
-      
+
       lambda{ get '/custom_exception' }.should_not raise_error
     end
 
@@ -910,6 +925,9 @@ describe Grape::API do
             end
           end
         end
+      end
+      it "should return the latest version set" do
+         subject.version.should == 'v2'
       end
       it "should return versions" do
          subject.versions.should == [ 'v1', 'v2' ]

@@ -1,9 +1,10 @@
 Next Release
 ============
 
+* [#248](https://github.com/intridea/grape/pull/248): Fix: API version returns version. - [@narkoz](https://github.com/narkoz).
 * [#242](https://github.com/intridea/grape/issues/242): Fix: permanent redirect status. - [@adamgotterer](https://github.com/adamgotterer).
 * [#236](https://github.com/intridea/grape/pull/236): Allow validation of nested parameters. - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
-* [#201](https://github.com/intridea/grape/pull/201): Added custom exceptions to Grape. Updated validations to use ValidationError that can be rescued. - [@adamgotterer](https://github.com/adamgotterer).
+* [#221](https://github.com/intridea/grape/pull/221): Added custom exceptions to Grape. Updated validations to use ValidationError that can be rescued. - [@adamgotterer](https://github.com/adamgotterer).
 * [#211](https://github.com/intridea/grape/pull/211): Updates to validation and coercion: Fix #211 and force order of operations for presence and coercion - [@adamgotterer](https://github.com/adamgotterer).
 * [#210](https://github.com/intridea/grape/pull/210): Fix: `Endpoint#body_params` causing undefined method 'size' - [@adamgotterer](https://github.com/adamgotterer).
 * [#201](https://github.com/intridea/grape/pull/201): Rewritten `params` DSL, including support for coercion and validations - [@schmurfy](https://github.com/schmurfy).
