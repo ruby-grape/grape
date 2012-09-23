@@ -2,11 +2,11 @@
 
 ## What is Grape?
 
-Grape is a REST-like API micro-framework for Ruby. It's built to complement
-existing web application frameworks such as Rails and Sinatra by providing a
-simple DSL to easily develop RESTful APIs. It has built-in support for common
-conventions, including multiple formats, subdomain/prefix restriction, content
-negotiation, versioning and much more.
+Grape is a REST-like API micro-framework for Ruby. It's designed to run on Rack
+or complement existing web application frameworks such as Rails and Sinatra by 
+providing a simple DSL to easily develop RESTful APIs. It has built-in support 
+for common conventions, including multiple formats, subdomain/prefix restriction, 
+content negotiation, versioning and much more.
 
 [![Build Status](http://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape)
 
@@ -41,6 +41,7 @@ the context of recreating parts of the Twitter API.
 ``` ruby
 class Twitter::API < Grape::API
   version 'v1', :using => :header, :vendor => 'twitter'
+  format :json
 
   helpers do
     def current_user
@@ -275,7 +276,8 @@ params do
 end
 ```
 
-You can also create custom classes that take parameters
+You can also create custom classes that take parameters.
+
 ```ruby
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
@@ -293,9 +295,11 @@ end
 ```
 
 ### Validation Errors
+
 When validation and coercion erros occur an exception of type `ValidationError` is raised.
 If the exception goes uncaught it will respond with a status of 400 and an error message.
 You can rescue a `ValidationError` and respond with a custom response.
+
 ```ruby
 rescue_from ValidationError do |e|
     Rack::Response.new({
@@ -305,8 +309,6 @@ rescue_from ValidationError do |e|
     }.to_json, e.status)    
 end 
 ```
-
-
 
 ## Headers
 
@@ -340,7 +342,7 @@ end
 ## Helpers
 
 You can define helper methods that your endpoints can use with the `helpers`
-macro by either giving a block or a module:
+macro by either giving a block or a module.
 
 ``` ruby
 module MyHelpers
@@ -369,7 +371,7 @@ end
 
 ## Cookies
 
-You can set, get and delete your cookies very simply using `cookies` method:
+You can set, get and delete your cookies very simply using `cookies` method.
 
 ``` ruby
 class API < Grape::API
@@ -385,7 +387,7 @@ class API < Grape::API
 end
 ```
 
-To set more than value use hash-based syntax:
+To set more than value use hash-based syntax.
 
 ``` ruby
 cookies[:counter] = {
@@ -399,7 +401,7 @@ cookies[:counter][:value] +=1
 
 ## Redirecting
 
-You can redirect to a new url temporarily or permanently.
+You can redirect to a new url temporarily (302) or permanently (301).
 
 ``` ruby
 redirect "/new_url"
@@ -427,7 +429,7 @@ error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 ## Exception Handling
 
 Grape can be told to rescue all exceptions and instead return them in
-text or json formats.
+txt or json formats.
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -549,7 +551,7 @@ end
 You can also set the default format. The order for choosing the format is the following.
 
 * Use the file extension, if specified. If the file is .json, choose the JSON format.
-* Use the value of the format parameter in the query string, if specified.
+* Use the value of the `format` parameter in the query string, if specified.
 * Use the format set by the `format` option, if specified.
 * Attempt to find an acceptable format from the `Accept` header.
 * Use the default format, if specified by the `default_format` option.
@@ -583,22 +585,22 @@ ever larger responses, using inheritance.
 
 Entities inherit from Grape::Entity, and define a simple DSL. Exposures can use
 runtime options to determine which fields should be visible, these options are
-available to :if, :unless, and :proc. The option keys :version and :collection
-will always be defined. The :version key is defined as api.version. The
-:collection key is boolean, and defined as true if the object presented is an
+available to `:if`, `:unless`, and `:proc`. The option keys `:version` and `:collection`
+will always be defined. The `:version` key is defined as `api.version`. The
+`:collection` key is boolean, and defined as `true` if the object presented is an
 array.
 
   * `expose SYMBOLS`
     * define a list of fields which will always be exposed
   * `expose SYMBOLS, HASH`
-    * HASH keys include :if, :unless, :proc, :as, :using, :format_with, :documentation
-      * :if and :unless accept hashes (passed during runtime) or procs (arguments are object and options)
-  * `expose SYMBOL, {:format_with => :formatter}`
+    * HASH keys include `:if`, `:unless`, `:proc`, `:as`, `:using`, `:format_with`, `:documentation`
+      * `:if` and `:unless` accept hashes (passed during runtime) or procs (arguments are object and options)
+  * `expose SYMBOL, { :format_with => :formatter }`
     * expose a value, formatting it first
-    * :format_with can only be applied to one exposure at a time
-  * `expose SYMBOL, {:as => "alias"}`
+    * `:format_with` can only be applied to one exposure at a time
+  * `expose SYMBOL, { :as => "alias" }`
     * Expose a value, changing its hash key from SYMBOL to alias
-    * :as can only be applied to one exposure at a time
+    * `:as` can only be applied to one exposure at a time
   * `expose SYMBOL BLOCK`
     * block arguments are object and options
     * expose the value returned by the block
@@ -609,10 +611,10 @@ module API
   module Entities
     class User < Grape::Entity
       expose :first_name, :last_name
-      expose :field, :documentation => {:type => "string", :desc => "words go here"}
-      expose :email, :if => {:type => :full}
-      expose :user_type, user_id, :if => lambda{|user,options| user.confirmed?}
-      expose(:name){|user,options| [user.first_name, user.last_name].join(' ')}
+      expose :field, :documentation => { :type => "string", :desc => "words go here" }
+      expose :email, :if => { :type => :full }
+      expose :user_type, user_id, :if => lambda{ |user,options| user.confirmed? }
+      expose(:name) { |user,options| [ user.first_name, user.last_name ].join(' ')}
       expose :latest_status, :using => API::Status, :as => :status
     end
   end
@@ -650,9 +652,9 @@ symbols.
 
 ### Using Entities
 
-Once an entity is defined, it can be used within endpoints, by calling #present. The #present
+Once an entity is defined, it can be used within endpoints, by calling `present`. The `present`
 method accepts two arguments, the object to be presented and the options associated with it. The
-options hash must always include :with, which defines the entity to expose.
+options hash must always include `:with`, which defines the entity to expose.
 
 If the entity includes documentation it can be included in an endpoint's description.
 
@@ -702,29 +704,29 @@ be overridden by using the `:with` option or an explicit
 ### Caveats
 
 Entities with duplicate exposure names and conditions will silently overwrite one another.
-In the following example, when object#check equals "foo", only afield will be exposed.
-However, when object#check equals "bar" both bfield and foo will be exposed.
+In the following example, when `object.check` equals "foo", only `field_a` will be exposed.
+However, when `object.check` equals "bar" both `field_b` and `foo` will be exposed.
 
 ```ruby
 module API
   module Entities
     class User < Grape::Entity
-      expose :afield, :foo, :if => lambda{|object,options| object.check=="foo"}
-      expose :bfield, :foo, :if => lambda{|object,options| object.check=="bar"}
+      expose :field_a, :foo, :if => lambda { |object, options| object.check == "foo" }
+      expose :field_b, :foo, :if => lambda { |object, options| object.check == "bar" }
     end
   end
 end
 ```
 
-This can be problematic, when you have mixed collections. Using #respond_to? is safer.
+This can be problematic, when you have mixed collections. Using `respond_to?` is safer.
 
 ```ruby
 module API
   module Entities
     class User < Grape::Entity
-      expose :afield, :if => lambda{|object,options| object.check=="foo"}
-      expose :bfield, :if => lambda{|object,options| object.check=="bar"}
-      expose :foo, :if => lambda{object,options| object.respond_to?(:foo)}
+      expose :field_a, :if => lambda { |object, options| object.check == "foo" }
+      expose :field_b, :if => lambda { |object, options| object.check == "bar" }
+      expose :foo, :if => lambda { |object, options| object.respond_to?(:foo) }
     end
   end
 end
@@ -863,13 +865,16 @@ RSpec.configure do |config|
 end
 ```
 
-## Note on Patches/Pull Requests
+## Contributing to Grape
+
+Grape is work of dozens of contributors. You're encouraged to submit pull requests, propose
+features and discuss issues.
 
 * Fork the project
 * Write tests for your new feature or a test that reproduces a bug
 * Implement your feature or make a bug fix
 * Do not mess with Rakefile, version or history
-* Commit, push and make a pull request. Bonus points for topical branches.
+* Commit, push and make a pull request. Bonus points for topic branches.
 
 ## License
 
@@ -877,5 +882,4 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2012 Michael Bleigh and Intridea, Inc.
-
+Copyright (c) 2010-2012 Michael Bleigh, and Intridea, Inc.
