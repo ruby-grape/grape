@@ -51,12 +51,8 @@ module Grape
       end
 
       def format_from_params
-        if env['QUERY_STRING']
-          format_query = env['QUERY_STRING'].split('&').reject{|q| !q.include?('format=')} 
-          return format_query[0].split('=').last.to_sym if (format_query && !format_query.empty?)
-        else
-          nil
-        end 
+        fmt = Rack::Utils.parse_nested_query(env['QUERY_STRING'])["format"]
+        fmt ? fmt.to_sym : nil
       end
 
       def format_from_header

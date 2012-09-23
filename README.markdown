@@ -538,7 +538,7 @@ By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-type
 Serialization takes place automatically.
 
 Your API can declare additional types to support. Response format is determined by the
-request's extension or `Accept` header.
+request's extension, an explicit `format` parameter in the query string, or `Accept` header.
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -549,7 +549,8 @@ end
 You can also set the default format. The order for choosing the format is the following.
 
 * Use the file extension, if specified. If the file is .json, choose the JSON format.
-* Use the format, if specified by the `format` option.
+* Use the value of the format parameter in the query string, if specified.
+* Use the format set by the `format` option, if specified.
 * Attempt to find an acceptable format from the `Accept` header.
 * Use the default format, if specified by the `default_format` option.
 * Default to `:txt` otherwise.
