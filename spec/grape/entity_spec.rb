@@ -375,24 +375,73 @@ describe Grape::Entity do
         rep.last.serializable_hash[:name].should == 'Friend 2'
       end
 
-      it 'should disable root key name for child representations' do
-      
-        module EntitySpec
-          class FriendEntity < Grape::Entity
-            root 'friends', 'friend'
-            expose :name, :email
+      context 'child representations' do
+        it 'should disable root key name for child representations' do
+        
+          module EntitySpec
+            class FriendEntity < Grape::Entity
+              root 'friends', 'friend'
+              expose :name, :email
+            end
           end
+          
+          fresh_class.class_eval do
+            expose :friends, :using => EntitySpec::FriendEntity
+          end
+          
+          rep = subject.send(:value_for, :friends)
+          rep.should be_kind_of(Array)
+          rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
+          rep.first.serializable_hash[:name].should == 'Friend 1'
+          rep.last.serializable_hash[:name].should == 'Friend 2'
         end
-        
-        fresh_class.class_eval do
-          expose :friends, :using => EntitySpec::FriendEntity
+
+        it 'should pass through custom options' do
+          module EntitySpec
+            class FriendEntity < Grape::Entity
+              root 'friends', 'friend'
+              expose :name
+              expose :email, :if => { :user_type => :admin }
+            end
+          end
+          
+          fresh_class.class_eval do
+            expose :friends, :using => EntitySpec::FriendEntity
+          end
+          
+          rep = subject.send(:value_for, :friends)
+          rep.should be_kind_of(Array)
+          rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
+          rep.first.serializable_hash[:email].should be_nil
+          rep.last.serializable_hash[:email].should be_nil
+
+          rep = subject.send(:value_for, :friends, { :user_type => :admin })
+          rep.should be_kind_of(Array)
+          rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
+          rep.first.serializable_hash[:email].should == 'friend1@example.com'
+          rep.last.serializable_hash[:email].should == 'friend2@example.com'
         end
-        
-        rep = subject.send(:value_for, :friends)
-        rep.should be_kind_of(Array)
-        rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
-        rep.first.serializable_hash[:name].should == 'Friend 1'
-        rep.last.serializable_hash[:name].should == 'Friend 2'
+
+        it 'should ignore the :collection parameter in the source options' do
+          module EntitySpec
+            class FriendEntity < Grape::Entity
+              root 'friends', 'friend'
+              expose :name
+              expose :email, :if => { :collection => true }
+            end
+          end
+          
+          fresh_class.class_eval do
+            expose :friends, :using => EntitySpec::FriendEntity
+          end
+          
+          rep = subject.send(:value_for, :friends, { :collection => false })
+          rep.should be_kind_of(Array)
+          rep.reject{|r| r.is_a?(EntitySpec::FriendEntity)}.should be_empty
+          rep.first.serializable_hash[:email].should == 'friend1@example.com'
+          rep.last.serializable_hash[:email].should == 'friend2@example.com'
+        end
+
       end
 
       it 'should call through to the proc if there is one' do
