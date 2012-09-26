@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'rack-mount'
   # s.add_runtime_dependency 'rack-jsonp'
-  s.add_runtime_dependency 'multi_json'
+  s.add_runtime_dependency 'multi_json', '>= 1.3.2'
   s.add_runtime_dependency 'multi_xml'
   s.add_runtime_dependency 'hashie', '~> 1.2'
   s.add_runtime_dependency 'virtus'
