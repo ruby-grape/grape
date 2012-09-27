@@ -414,6 +414,7 @@ module Grape
       self.class.endpoints.each do |endpoint|
         endpoint.mount_in(@route_set)
       end
+      add_head_not_allowed_methods
       @route_set.freeze
     end
 
@@ -422,5 +423,41 @@ module Grape
     end
 
     reset!
+
+    private
+
+    # For every resource add a 'OPTIONS' route that returns an HTTP 204 response
+    # with a list of HTTP methods that can be called. Also add a route that
+    # will return an HTTP 405 response for any HTTP method that the resource
+    # cannot handle.
+    def add_head_not_allowed_methods
+      allowed_methods = Hash.new{|h,k| h[k] = [] }
+      resources       = self.class.endpoints.map do |endpoint|
+        endpoint.options[:app] && endpoint.options[:app].respond_to?(:endpoints) ?
+          endpoint.options[:app].endpoints.map(&:routes) :
+          endpoint.routes
+      end
+      resources.flatten.each do |route|
+        allowed_methods[route.route_compiled] << route.route_method
+      end
+
+      allowed_methods.each do |path_info, methods|
+        allow_header = (["OPTIONS"] | methods).join(", ")
+        unless methods.include?("OPTIONS")
+          @route_set.add_route( proc { [204, { 'Allow' => allow_header }, []]}, {
+            :path_info      => path_info,
+            :request_method => "OPTIONS"
+          })
+        end
+        not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
+        not_allowed_methods.each do |bad_method|
+          @route_set.add_route( proc { [405, { 'Allow' => allow_header }, []]}, {
+            :path_info      => path_info,
+            :request_method => bad_method
+          })
+        end
+      end
+    end
+
   end
 end
