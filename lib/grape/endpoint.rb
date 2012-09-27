@@ -295,7 +295,8 @@ module Grape
 
       run_filters befores
 
-      Array(settings[:validations]).each do |validator|
+      # Retieve validations from this namespace and all parent namespaces.
+      settings.gather(:validations).each do |validator|
         validator.validate!(params)
       end
 

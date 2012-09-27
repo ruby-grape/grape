@@ -18,7 +18,7 @@ module Grape
       end
 
       # Add a new hash to the top of the stack.
-      # 
+      #
       # @param hash [Hash] optional hash to be pushed. Defaults to empty hash
       # @return [HashStack]
       def push(hash = {})
@@ -31,7 +31,7 @@ module Grape
       end
 
       # Looks through the stack for the first frame that matches :key
-      # 
+      #
       # @param key [Symbol] key to look for in hash frames
       # @return value of given key after merging the stack
       def get(key)
@@ -52,7 +52,7 @@ module Grape
       alias_method :[]=, :set
 
       # Replace multiple values on the top hash of the stack.
-      # 
+      #
       # @param hash [Hash] Hash of values to be merged in.
       def update(hash)
         peek.merge!(hash)
@@ -81,6 +81,15 @@ module Grape
       def concat(hash_stack)
         @stack.concat hash_stack.stack
         self
+      end
+
+      # Looks through the stack for all instances of a given key and returns
+      # them as a flat Array.
+      #
+      # @param key [Symbol] The key to gather
+      # @return [Array]
+      def gather(key)
+        stack.map{|s| s[key] }.flatten.compact.uniq
       end
 
       def to_s
