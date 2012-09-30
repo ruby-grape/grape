@@ -411,6 +411,50 @@ redirect "/new_url"
 redirect "/new_url", :permanent => true
 ```
 
+## Allowed Methods
+
+When you add a route for a resource, a route for the HTTP OPTIONS
+method will also be added. The response to an OPTIONS request will
+include an Allow header listing the supported methods.
+
+``` ruby
+class API < Grape::API
+  get '/counter' do
+    { :counter => Counter.count }
+  end
+
+  params do
+    requires :value, :type => Integer, :desc => 'value to add to counter'
+  end
+  put '/counter' do
+    { :counter => Counter.incr(params.value) }
+  end
+end
+```
+
+``` shell
+curl -v -X OPTIONS http://localhost:3000/counter 
+
+> OPTIONS /counter HTTP/1.1
+> 
+< HTTP/1.1 204 No Content
+< Allow: OPTIONS, GET, PUT
+```
+
+
+If a request for a resource is made with an unsupported HTTP method, an
+HTTP 405 (Method Not Allowed) response will be returned.
+
+``` shell
+curl -X DELETE -v http://localhost:3000/counter/
+
+> DELETE /counter/ HTTP/1.1
+> Host: localhost:3000
+> 
+< HTTP/1.1 405 Method Not Allowed
+< Allow: OPTIONS, GET, PUT
+```
+
 ## Raising Exceptions
 
 You can abort the execution of an API method by raising errors with `error!`.
