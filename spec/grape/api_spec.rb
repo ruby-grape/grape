@@ -301,8 +301,8 @@ describe Grape::API do
         send(verb, '/example')
         last_response.body.should eql verb == 'head' ? '' : verb
         # Call it with a method other than the properly constrained one.
-        send(verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
-        last_response.status.should eql 404
+        send(used_verb = verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
+        last_response.status.should eql used_verb == 'options' ? 204 :405
       end
     end
 
@@ -314,6 +314,36 @@ describe Grape::API do
       post '/example'
       last_response.status.should eql 201
       last_response.body.should eql 'Created'
+    end
+
+    it 'should return a 405 for an unsupported method' do
+      subject.get 'example' do
+        "example"
+      end
+      put '/example'
+      last_response.status.should eql 405
+      last_response.body.should eql ''
+    end
+
+    specify '405 responses should include an Allow header specifying supported methods' do
+      subject.get 'example' do
+        "example"
+      end
+      subject.post 'example' do
+        "example"
+      end
+      put '/example'
+      last_response.headers['Allow'].should eql 'OPTIONS, GET, POST'
+    end
+
+    it 'should add an OPTIONS route that returns a 204 and an Allow header' do
+      subject.get 'example' do
+        "example"
+      end
+      options '/example'
+      last_response.status.should eql 204
+      last_response.body.should eql ''
+      last_response.headers['Allow'].should eql 'OPTIONS, GET'
     end
   end
 
