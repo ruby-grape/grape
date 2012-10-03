@@ -108,6 +108,57 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared' do
+    before do
+      subject.params do
+        requires :first
+        optional :second
+      end
+
+
+    end
+
+    it 'should have as many keys as there are declared params' do
+      subject.get "/declared" do
+        declared(params).keys.size.should == 2
+        ""
+      end
+
+      get '/declared?first=present'
+      last_response.status.should == 200
+    end
+
+    it 'should filter out any additional params that are given' do
+      subject.get "/declared" do
+        declared(params).key?(:other).should == false
+        ""
+      end
+
+      get '/declared?first=one&other=two'
+      last_response.status.should == 200
+    end
+
+    it 'should stringify if that option is passed' do
+      subject.get "/declared" do
+        declared(params, :stringify => true)["first"].should == "one"
+        ""
+      end
+
+      get '/declared?first=one&other=two'
+      last_response.status.should == 200
+    end
+
+    it 'should not include missing attributes if that option is passed' do
+      subject.get "/declared" do
+        declared(params, :include_missing => false)[:second].should == nil
+        ""
+      end
+
+      get '/declared?first=one&other=two'
+      last_response.status.should == 200
+    end
+  end
+
   describe '#params' do
     it 'should be available to the caller' do
       subject.get('/hey') do

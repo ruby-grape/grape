@@ -27,6 +27,11 @@ describe Grape::Validations do
         last_response.status.should == 200
         last_response.body.should == 'optional works!'
       end
+
+      it 'adds to declared parameters' do
+        subject.params { optional :some_param }
+        subject.settings[:declared_params].should == [:some_param]
+      end
     end
 
     context 'required' do
@@ -45,6 +50,11 @@ describe Grape::Validations do
         get '/required', { :key => 'cool' }
         last_response.status.should == 200
         last_response.body.should == 'required works'
+      end
+
+      it 'adds to declared parameters' do
+        subject.params { requires :some_param }
+        subject.settings[:declared_params].should == [:some_param]
       end
     end
 

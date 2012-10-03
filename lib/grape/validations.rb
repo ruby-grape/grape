@@ -8,6 +8,8 @@ module Grape
     # All validators must inherit from this class.
     # 
     class Validator
+      attr_reader :attrs
+
       def initialize(attrs, options, required, scope)
         @attrs = Array(attrs)
         @required = required
@@ -85,6 +87,7 @@ module Grape
           validations.merge!(attrs.pop)
         end
         
+        push_declared_params(attrs)
         validates(attrs, validations)
       end
       
@@ -93,7 +96,8 @@ module Grape
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
         end
-        
+
+        push_declared_params(attrs)
         validates(attrs, validations)
       end
 
@@ -152,18 +156,25 @@ module Grape
 
       def validate(type, options, attrs, doc_attrs)
         validator_class = Validations::validators[type.to_s]
+
         if validator_class
+
           @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs[:required], self)
         else
           raise "unknown validator: #{type}"
         end
       end
-      
+
+      def push_declared_params(attrs)
+        @api.settings[:declared_params] ||= []
+        @api.settings[:declared_params] += attrs
+      end
     end
     
     # This module is mixed into the API Class.
     module ClassMethods
       def reset_validations!
+        settings[:declared_params] = []
         settings[:validations] = []
       end
       

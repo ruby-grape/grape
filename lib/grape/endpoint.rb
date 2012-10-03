@@ -123,6 +123,28 @@ module Grape
         deep_merge(self.body_params)
     end
 
+    # A filtering method that will return a hash
+    # consisting only of keys that have been declared by a
+    # `params` statement.
+    #
+    # @param params [Hash] The initial hash to filter. Usually this will just be `params`
+    # @param options [Hash] Can pass `:include_missing` and `:stringify` options.
+    def declared(params, options = {})
+      options[:include_missing] = true unless options.key?(:include_missing)
+
+      unless settings[:declared_params]
+        raise ArgumentError, "Tried to filter for declared parameters but none exist."
+      end
+      
+      settings[:declared_params].inject({}){|h,k|
+        output_key = options[:stringify] ? k.to_s : k.to_sym
+        if params.key?(output_key) || options[:include_missing]
+          h[output_key] = params[k]
+        end
+        h
+      }
+    end
+
     # Pull out request body params if the content type matches and we're on a POST or PUT
     def body_params
       if ['POST', 'PUT'].include?(request.request_method.to_s.upcase) && request.content_length.to_i > 0
