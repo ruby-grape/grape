@@ -158,15 +158,14 @@ module Grape
         validator_class = Validations::validators[type.to_s]
 
         if validator_class
-
-          @api.settings[:validations] << validator_class.new(attrs, options, doc_attrs[:required], self)
+          (@api.settings.peek[:validations] ||= []) << validator_class.new(attrs, options, doc_attrs[:required], self)
         else
           raise "unknown validator: #{type}"
         end
       end
 
       def push_declared_params(attrs)
-        @api.settings[:declared_params] ||= []
+        @api.settings.peek[:declared_params] ||= []
         @api.settings[:declared_params] += attrs
       end
     end
@@ -174,8 +173,8 @@ module Grape
     # This module is mixed into the API Class.
     module ClassMethods
       def reset_validations!
-        settings[:declared_params] = []
-        settings[:validations] = []
+        settings.peek[:declared_params] = []
+        settings.peek[:validations] = []
       end
       
       def params(&block)

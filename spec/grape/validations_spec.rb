@@ -137,26 +137,46 @@ describe Grape::Validations do
                 get 'two' do 'no validation required' end
               end
             end
+
+            subject.namespace 'unrelated' do
+              params{ requires :name }
+              get 'one' do 'validation required'; end
+
+              namespace 'double' do
+                get 'two' do 'no validation required' end
+              end
+            end
           end
+          
           specify 'the parent namespace should use the validator' do
             get '/nested/one', { :custom => 'im wrong, validate me'}
             last_response.status.should == 400
             last_response.body.should == 'custom: is not custom!'
           end
+          
           specify 'the nested namesapce should inherit the custom validator' do
             get '/nested/nested/two', { :custom => 'im wrong, validate me'}
             last_response.status.should == 400
             last_response.body.should == 'custom: is not custom!'
           end
+          
           specify 'peer namesapces should not have the validator' do
             get '/peer/one', { :custom => 'im not validated' }
             last_response.status.should == 200
             last_response.body.should == 'no validation required'
           end
+
           specify 'namespaces nested in peers should also not have the validator' do
             get '/peer/nested/two', { :custom => 'im not validated' }
             last_response.status.should == 200
             last_response.body.should == 'no validation required'
+          end
+
+          specify 'when nested, specifying a route should clear out the validations for deeper nested params' do
+            get '/unrelated/one'
+            last_response.status.should == 400
+            get '/unrelated/double/two'
+            last_response.status.should == 200
           end
         end
       end
