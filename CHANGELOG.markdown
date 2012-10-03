@@ -8,6 +8,7 @@ Features
 * [#204](https://github.com/intridea/grape/pull/204): Added ability to declare shared `params` at `namespace` level - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#234](https://github.com/intridea/grape/pull/234): Added a DSL for creating entities via mixin - [@mbleigh](https://github.com/mbleigh).
 * [#240](https://github.com/intridea/grape/pull/240): Define API response format from a query string `format` parameter, if specified - [@neetiraj](https://github.com/neetiraj).
+* [#218](https://github.com/intridea/grape/pull/218): Adds Endpoint#declared to easily filter out unexpected params. - [@mbleigh](https://github.com/mbleigh)
 
 Fixes
 -----
