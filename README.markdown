@@ -131,7 +131,7 @@ end
 ## Versioning
 
 There are three strategies in which clients can reach your API's endpoints: `:header`, 
-`:path` and `:param`. The default strategy is `:header`.
+`:path` and `:param`. The default strategy is `:path`.
 
 ### Header
 
