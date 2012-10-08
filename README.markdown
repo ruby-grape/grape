@@ -136,7 +136,7 @@ There are three strategies in which clients can reach your API's endpoints: `:he
 ### Header
 
 ```ruby
-version 'v1', :using => :header
+version 'v1', :using => :header, :vendor => 'twitter'
 ```
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
