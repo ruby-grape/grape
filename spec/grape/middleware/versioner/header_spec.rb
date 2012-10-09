@@ -16,15 +16,15 @@ describe Grape::Middleware::Versioner::Header do
   context 'api.type and api.subtype' do
     it 'should set type and subtype to first choice of content type if no preference given' do
       status, _, env = subject.call('HTTP_ACCEPT' => '*/*')
-      env['api.type'].should eql '*'
-      env['api.subtype'].should eql '*'
+      env['api.type'].should eql 'application'
+      env['api.subtype'].should eql 'vnd.vendor+xml'
       status.should == 200
     end
 
     it 'should set preferred type' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/*')
       env['api.type'].should eql 'application'
-      env['api.subtype'].should eql '*'
+      env['api.subtype'].should eql 'vnd.vendor+xml'
       status.should == 200
     end
 
@@ -88,7 +88,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'API vendor or version not found'
       )
     end
 
@@ -116,7 +116,7 @@ describe Grape::Middleware::Versioner::Header do
           :error,
           :status => 406,
           :headers => {'X-Cascade' => 'pass'},
-          :message => '406 API Version Not Found'
+          :message => 'API vendor or version not found'
         )
       end
     end
@@ -146,7 +146,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'API vendor or version not found'
       )
     end
   end
@@ -175,7 +175,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'Accept header must be set'
       )
     end
 
@@ -186,7 +186,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'Accept header must be set'
       )
     end
 
@@ -197,7 +197,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'Accept header must not contain ranges ("*")'
       )
     end
 
@@ -208,7 +208,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => '406 API Version Not Found'
+        :message => 'Accept header must not contain ranges ("*")'
       )
     end
 
