@@ -131,12 +131,12 @@ end
 ## Versioning
 
 There are three strategies in which clients can reach your API's endpoints: `:header`, 
-`:path` and `:param`. The default strategy is `:header`.
+`:path` and `:param`. The default strategy is `:path`.
 
 ### Header
 
 ```ruby
-version 'v1', :using => :header
+version 'v1', :using => :header, :vendor => 'twitter'
 ```
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
@@ -145,7 +145,7 @@ Using this versioning strategy, clients should pass the desired version in the H
 
 By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
-one could use the `:strict` option. When this option is set to `true`, a `404 Not found` error
+one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
 is returned when no correct `Accept` header is supplied.
 
 ### Path
@@ -604,6 +604,11 @@ You can also set the default format. The order for choosing the format is the fo
 ``` ruby
 class Twitter::API < Grape::API
   format :json
+end
+```
+
+``` ruby
+class Twitter::API < Grape::API
   default_format :json
 end
 ```
