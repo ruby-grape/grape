@@ -1,4 +1,5 @@
 require 'grape/middleware/base'
+require 'rack/accept'
 
 module Grape
   module Middleware
@@ -21,37 +22,95 @@ module Grape
       # If version does not match this route, then a 406 is throw with
       # X-Cascade header to alert Rack::Mount to attempt the next matched
       # route.
+      #
+      # @throws [RuntimeError] if Accept header is invalid
       class Header < Base
-        def before
-          accept = env['HTTP_ACCEPT'] || ""
+        include Formats
 
-          if options[:version_options] && options[:version_options].keys.include?(:strict) && options[:version_options][:strict]
-            if (is_accept_header_valid?(accept))  && options[:version_options][:using] == :header
-              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found"
+        def before
+          header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
+
+          if strict?
+            # If no Accept header:
+            if header.qvalues.empty?
+              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'Accept header must be set'
+            end
+            # Remove any acceptable content types with ranges.
+            header.qvalues.reject! do |media_type,_|
+              Rack::Accept::Header.parse_media_type(media_type).find{|s| s == '*'}
+            end
+            # If all Accept headers included a range:
+            if header.qvalues.empty?
+              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'Accept header must not contain ranges ("*")'
             end
           end
-          accept.strip.scan(/^(.+?)\/(.+?)$/) do |type, subtype|
+
+          media_type = header.best_of available_media_types
+
+          if media_type
+            type, subtype = Rack::Accept::Header.parse_media_type media_type
             env['api.type']    = type
             env['api.subtype'] = subtype
 
-            subtype.scan(/vnd\.(.+)?-(.+)?\+(.*)?/) do |vendor, version, format|
-              is_vendored = options[:version_options] && options[:version_options][:vendor]
-              is_vendored_match = is_vendored ? options[:version_options][:vendor] == vendor : true
-
-              if (options[:versions] && !options[:versions].include?(version)) || !is_vendored_match
-                throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => "406 API Version Not Found"
-              end
-
-              env['api.version'] = version
-              env['api.vendor']  = vendor
-              env['api.format']  = format  # weird that Grape::Middleware::Formatter also does this
+            if /\Avnd\.([a-z0-9*.]+)(?:-([a-z0-9*\-.]+))?(?:\+([a-z0-9*\-.+]+))?\z/ =~ subtype
+              env['api.vendor']  = $1
+              env['api.version'] = $2
+              env['api.format']  = $3  # weird that Grape::Middleware::Formatter also does this
             end
+          # If none of the available content types are acceptable:
+          elsif strict?
+            throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => '406 Not Acceptable'
+          # If all acceptable content types specify a vendor or version that doesn't exist:
+          elsif header.values.all?{|media_type| has_vendor?(media_type) || has_version?(media_type)}
+            throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'API vendor or version not found'
           end
         end
 
-        protected
-        def is_accept_header_valid?(header)
-          (header.strip =~ /application\/vnd\.(.+?)-(.+?)\+(.+?)/).nil?
+      private
+
+        def available_media_types
+          available_media_types = []
+
+          content_types.each do |extension,media_type|
+            versions.reverse.each do |version|
+              available_media_types += ["application/vnd.#{vendor}-#{version}+#{extension}", "application/vnd.#{vendor}-#{version}"]
+            end
+            available_media_types << "application/vnd.#{vendor}+#{extension}"
+          end
+
+          available_media_types << "application/vnd.#{vendor}"
+
+          content_types.each do |_,media_type|
+            available_media_types << media_type
+          end
+
+          available_media_types = available_media_types.flatten
+        end
+
+        def versions
+          options[:versions] || []
+        end
+
+        def vendor
+          options[:version_options] && options[:version_options][:vendor]
+        end
+
+        def strict?
+          options[:version_options] && options[:version_options][:strict]
+        end
+
+        # @param [String] media_type a content type
+        # @return [Boolean] whether the content type sets a vendor
+        def has_vendor?(media_type)
+          type, subtype = Rack::Accept::Header.parse_media_type media_type
+          subtype[/\Avnd\.[a-z0-9*.]+/]
+        end
+
+        # @param [String] media_type a content type
+        # @return [Boolean] whether the content type sets an API version
+        def has_version?(media_type)
+          type, subtype = Rack::Accept::Header.parse_media_type media_type
+          subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end
       end
     end
