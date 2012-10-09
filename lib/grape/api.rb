@@ -100,6 +100,9 @@ module Grape
           options = args.pop if args.last.is_a? Hash
           options ||= {}
           options = {:using => :path}.merge!(options)
+
+          raise ArgumentError, "Must specify :vendor option." if options[:using] == :header && !options.has_key?(:vendor)
+
           @versions = versions | args
           nest(block) do
             set(:version, args)
