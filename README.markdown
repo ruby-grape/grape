@@ -604,6 +604,11 @@ You can also set the default format. The order for choosing the format is the fo
 ``` ruby
 class Twitter::API < Grape::API
   format :json
+end
+```
+
+``` ruby
+class Twitter::API < Grape::API
   default_format :json
 end
 ```
