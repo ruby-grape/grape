@@ -1,3 +1,4 @@
+require 'active_support/ordered_hash'
 require 'multi_json'
 require 'multi_xml'
 
@@ -44,14 +45,14 @@ module Grape
 
 
       module Formats
-
-        CONTENT_TYPES = {
-          :xml => 'application/xml',
-          :json => 'application/json',
-          :atom => 'application/atom+xml',
-          :rss => 'application/rss+xml',
-          :txt => 'text/plain'
-        }
+        # Content types are listed in order of preference.
+        CONTENT_TYPES = ActiveSupport::OrderedHash[
+          :xml,  'application/xml',
+          :json, 'application/json',
+          :atom, 'application/atom+xml',
+          :rss,  'application/rss+xml',
+          :txt,  'text/plain',
+        ]
         FORMATTERS = {
           :json => :encode_json,
           :txt => :encode_txt,
