@@ -8,7 +8,7 @@ providing a simple DSL to easily develop RESTful APIs. It has built-in support
 for common conventions, including multiple formats, subdomain/prefix restriction, 
 content negotiation, versioning and much more.
 
-[![Build Status](http://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape)
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape)
 
 ## Project Tracking
 
@@ -115,6 +115,9 @@ In a Rails application, modify *config/routes*:
 ``` ruby
 mount Twitter::API => "/"
 ```
+
+Note that you will need to restart Rails to pick up changes in your API classes
+(see [Issue 131](https://github.com/intridea/grape/issues/131))
 
 ### Modules
 
