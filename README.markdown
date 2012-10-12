@@ -116,6 +116,9 @@ In a Rails application, modify *config/routes*:
 mount Twitter::API => "/"
 ```
 
+Note that you will need to restart Rails to pick up changes in your API classes
+(see [Issue 131](https://github.com/intridea/grape/issues/131))
+
 ### Modules
 
 You can mount multiple API implementations inside another one. These don't have to be
