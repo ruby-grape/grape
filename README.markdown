@@ -15,6 +15,11 @@ content negotiation, versioning and much more.
 * [Grape Google Group](http://groups.google.com/group/ruby-grape)
 * [Grape Wiki](https://github.com/intridea/grape/wiki)
 
+## Stable Release
+
+You're reading the documentation for the next release of Grape, which should be 0.2.3.
+The current stable release is [0.2.2](https://github.com/intridea/grape/blob/v0.2.2/README.markdown).
+
 ## Installation
 
 Grape is available as a gem, to install it just install the gem:

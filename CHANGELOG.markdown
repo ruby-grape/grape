@@ -1,5 +1,10 @@
-0.2.2 (Next Release)
+0.2.3 (Next Release)
 ====================
+
+* Your contribution here.
+
+0.2.2
+=====
 
 Features
 --------
