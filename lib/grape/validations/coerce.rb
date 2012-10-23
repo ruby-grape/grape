@@ -12,7 +12,7 @@ module Grape
         if valid_type?(new_value)
           params[attr_name] = new_value
         else
-          raise ValidationError, :status => 400, :param => attr_name, :message => "invalid parameter: #{attr_name}"
+          raise Grape::Exceptions::ValidationError, :status => 400, :param => attr_name, :message => "invalid parameter: #{attr_name}"
         end
       end
   
