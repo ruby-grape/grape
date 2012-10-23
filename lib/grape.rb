@@ -13,8 +13,8 @@ module Grape
 
   module Exceptions
     autoload :Base, 'grape/exceptions/base'
+    autoload :ValidationError, 'grape/exceptions/validation_error'
   end
-  autoload :ValidationError, 'grape/exceptions/validation_error'
 
   module Middleware
     autoload :Base,      'grape/middleware/base'
