@@ -2,6 +2,7 @@
 ====================
 
 * [#265](https://github.com/intridea/grape/issues/264): Fix: The class ValidationError should be in the module "Grape::Exceptions". Fixes [#264](https://github.com/intridea/grape/issues/264) - [@thepumpkin1979](https://github.com/thepumpkin1979).
+* Fix: LocalJumpError will not be raised when using explict return in API methods - [@simulacre](https://github.com/simulacre)
 * Your contribution here.
 
 0.2.2

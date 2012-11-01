@@ -11,9 +11,37 @@ module Grape
     attr_accessor :block, :options, :settings
     attr_reader :env, :request
 
+    class << self
+      # @api private
+      #
+      # Create an UnboundMethod that is appropriate for executing an endpoint
+      # route.
+      #
+      # The unbound method allows explicit calls to +return+ without raising a
+      # +LocalJumpError+. The method will be removed, but a +Proc+ reference to
+      # it will be returned. The returned +Proc+ expects a single argument: the
+      # instance of +Endpoint+ to bind to the method during the call.
+      #
+      # @param [String, Symbol] method_name
+      # @return [Proc]
+      # @raise [NameError] an instance method with the same name already exists
+      def generate_api_method(method_name, &block)
+        if instance_methods.include?(method_name.to_sym)
+          raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
+        end
+        define_method(method_name, &block)
+        method = instance_method(method_name)
+        remove_method(method_name)
+        proc { |endpoint_instance| method.bind(endpoint_instance).call }
+      end
+    end
+
     def initialize(settings, options = {}, &block)
       @settings = settings
-      @block = block
+      if block_given?
+        method_name = "#{options[:method]} #{settings.gather(:namespace).join( "/")} #{Array(options[:path]).join("/")}"
+        @block = self.class.generate_api_method(method_name, &block)
+      end
       @options = options
 
       raise ArgumentError, "Must specify :path option." unless options.key?(:path)
@@ -135,7 +163,7 @@ module Grape
       unless settings[:declared_params]
         raise ArgumentError, "Tried to filter for declared parameters but none exist."
       end
-      
+
       settings[:declared_params].inject({}){|h,k|
         output_key = options[:stringify] ? k.to_s : k.to_sym
         if params.key?(output_key) || options[:include_missing]
@@ -324,7 +352,7 @@ module Grape
 
       run_filters after_validations
 
-      response_text = instance_eval &self.block
+      response_text = @block.call(self)
       run_filters afters
       cookies.write(header)
 
