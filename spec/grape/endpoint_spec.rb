@@ -293,7 +293,7 @@ describe Grape::Endpoint do
       last_response.body.should == '{"dude":"rad"}'
     end
   end
-  
+
   describe "#redirect" do
     it "should redirect to a url with status 302" do
       subject.get('/hey') do
@@ -352,6 +352,32 @@ describe Grape::Endpoint do
     last_response.body.should == 'hey'
     get '/hello?howdy=yo'
     last_response.body.should == 'yo'
+  end
+
+  it 'should allow explicit return calls' do
+    subject.get('/home') do
+      return "Hello"
+    end
+
+    get '/home'
+    last_response.status.should == 200
+    last_response.body.should == "Hello"
+  end
+
+  describe ".generate_api_method" do
+    it "should raise NameError if the method name is already in use" do
+      expect {
+        Grape::Endpoint.generate_api_method("version", &proc{})
+      }.to raise_error(NameError)
+    end
+    it "should raise ArgumentError if a block is not given" do
+      expect {
+        Grape::Endpoint.generate_api_method("GET without a block method")
+      }.to raise_error(ArgumentError)
+    end
+    it "should return a Proc" do
+      Grape::Endpoint.generate_api_method("GET test for a proc", &proc{}).should be_a Proc
+    end
   end
 
   describe '#present' do
