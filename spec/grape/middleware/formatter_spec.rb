@@ -24,6 +24,22 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '"bar"'}
     end
 
+    it 'should call #to_json if custom defined instead of #serializable_hash' do
+      class SimpleJsonExample
+        def serializable_hash
+          {:abc => 'def'}
+        end
+
+        def to_json
+          '{"123":"456"}'
+        end
+      end
+
+      @body = SimpleJsonExample.new
+
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"123":"456"}'}
+    end
+
     it 'should serialize the #serializable_hash if that is available' do
       class SimpleExample
         def serializable_hash
