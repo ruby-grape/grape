@@ -216,7 +216,7 @@ describe Grape::API do
       end
 
       it "header versioned APIs" do
-        subject.version 'v1', :using => :header, vendor: 'test'
+        subject.version 'v1', :using => :header, :vendor => 'test'
         subject.enable_root_route!
 
         versioned_get "/", "v1", :using => :header
