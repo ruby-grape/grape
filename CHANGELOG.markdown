@@ -1,8 +1,8 @@
 0.2.3 (Next Release)
 ====================
 
-* [#265](https://github.com/intridea/grape/issues/264): Fix: The class ValidationError should be in the module "Grape::Exceptions". Fixes [#264](https://github.com/intridea/grape/issues/264) - [@thepumpkin1979](https://github.com/thepumpkin1979).
-* [#269](https://github.com/intridea/grape/pull/269): Fix: LocalJumpError will not be raised when using explict return in API methods - [@simulacre](https://github.com/simulacre).
+* [#265](https://github.com/intridea/grape/issues/264): Fix: Moved `ValidationError` into `Grape::Exceptions` - [@thepumpkin1979](https://github.com/thepumpkin1979).
+* [#269](https://github.com/intridea/grape/pull/269): Fix: `LocalJumpError` will not be raised when using explict return in API methods - [@simulacre](https://github.com/simulacre).
 * [#86] (https://github.com/intridea/grape/issues/275): Fix Path-based versioning not recognizing '/' route - [@walski](https://github.com/walski).
 * Your contribution here.
 
