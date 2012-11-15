@@ -217,8 +217,8 @@ You can define validations and coercion options for your parameters using a `par
 
 ```ruby
 params do
-  requires :id, type => Integer
-  optional :name, type => String, regexp: /^[a-z]+$/
+  requires :id, :type => Integer
+  optional :name, :type => String, regexp: /^[a-z]+$/
 
   group :user do
     requires :first_name
