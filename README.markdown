@@ -217,8 +217,8 @@ You can define validations and coercion options for your parameters using a `par
 
 ```ruby
 params do
-  requires :id, type: Integer
-  optional :name, type: String, regexp: /^[a-z]+$/
+  requires :id, type => Integer
+  optional :name, type => String, regexp: /^[a-z]+$/
 
   group :user do
     requires :first_name
@@ -242,12 +242,12 @@ Namespaces allow parameter definitions and apply to every method within the name
 ```ruby
 namespace :shelves do
   params do
-    requires :shelf_id, type: Integer, desc: "A shelf."
+    requires :shelf_id, type => Integer, desc: "A shelf."
   end
   namespace ":shelf_id" do
     desc "Retrieve a book from a shelf."
     params do
-      requires :book_id, type: Integer, desc: "A book."
+      requires :book_id, type => Integer, desc: "A book."
     end
     get ":book_id" do
       # params[:shelf_id] defines a shelf
