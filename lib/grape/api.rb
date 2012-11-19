@@ -130,6 +130,10 @@ module Grape
         new_format ? set(:format, new_format.to_sym) : settings[:format]
       end
 
+      def formatter(content_type, new_formatter)
+        settings.imbue(:formatters, content_type.to_sym => new_formatter)
+      end
+
       # Specify the format for error messages.
       # May be `:json` or `:txt` (default).
       def error_format(new_format = nil)
