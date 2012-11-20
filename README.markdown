@@ -589,9 +589,12 @@ Serialization takes place automatically.
 Your API can declare additional types to support. Response format is determined by the
 request's extension, an explicit `format` parameter in the query string, or `Accept` header.
 
+Custom formatters for additional types can be defined with a proc or by method pointer.
+
 ``` ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
+  formatter :xls, lambda { |object| object.to_fancy_xls }
 end
 ```
 
