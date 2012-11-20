@@ -946,6 +946,26 @@ describe Grape::API do
     end
   end
 
+  describe ".formatter" do
+    context "multiple formatters" do
+      before :each do
+        subject.formatter :json, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.formatter :txt, lambda { |object| "custom_formatter: #{object[:some]}" }
+        subject.get :simple do
+          {:some => 'hash'}
+        end
+      end
+      it 'sets one formatter' do
+        get '/simple.json'
+        last_response.body.should eql '{"custom_formatter":"hash"}'
+      end
+      it 'sets another formatter' do
+        get '/simple.txt'
+        last_response.body.should eql 'custom_formatter: hash'
+      end
+    end
+  end
+
   describe ".default_error_status" do
     it 'should allow setting default_error_status' do
       subject.rescue_from :all
