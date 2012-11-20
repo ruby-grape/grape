@@ -60,4 +60,20 @@ describe Grape::Middleware::Base do
       end
     end
   end
+
+  context 'formatters' do
+    it 'should query the body object for a method to respond to a custom content type' do
+      class Custom
+        attr_accessor :options
+        include Grape::Middleware::Base::Formats
+        def to_custom
+          'custom'
+        end
+      end
+
+      c = Custom.new
+      c.options = {}
+      c.formatter_for('custom').call(c).should == 'custom'
+    end
+  end
 end
