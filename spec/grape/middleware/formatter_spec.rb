@@ -67,8 +67,19 @@ describe Grape::Middleware::Formatter do
           "<bar/>"
         end
       end
-
       subject.call({'PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '<bar/>'}
+    end
+
+    it "should call #to_custom on the object (if it responds) and the content type is 'custom'" do
+      subject.options[:content_types][:custom] = 'application/custom'
+      @body = "string"
+      @body.instance_eval do
+        def to_custom
+          'custom'
+        end
+      end
+
+      subject.call({'PATH_INFO' => '/somewhere.custom', 'HTTP_ACCEPT' => 'application/custom'}).last.each{|b| b.should == 'custom'}
     end
   end
 

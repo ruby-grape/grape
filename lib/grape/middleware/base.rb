@@ -87,7 +87,10 @@ module Grape
           spec = formatters[api_format]
           case spec
           when nil
-            lambda { |obj| obj }
+            lambda do |obj|
+              method_name = "to_#{api_format}".to_sym
+              obj.respond_to?(method_name) ? obj.send(method_name) : obj
+            end
           when Symbol
             method(spec)
           else
