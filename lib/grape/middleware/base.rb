@@ -111,6 +111,11 @@ module Grape
           MultiJson.load(object)
         end
 
+        def defines_own_to_json?(object)
+          return false unless object.respond_to?(:to_json)
+          object.method(:to_json).owner.name =~ /^JSON::Ext::Generator::GeneratorMethods/ ? false : true
+        end
+
         def serializable?(object)
          object.respond_to?(:serializable_hash) ||
            object.kind_of?(Array) && !object.map {|o| o.respond_to? :serializable_hash }.include?(false) ||
@@ -131,6 +136,7 @@ module Grape
 
         def encode_json(object)
           return object if object.is_a?(String)
+          return object.to_json if defines_own_to_json?(object)
           return MultiJson.dump(serialize(object)) if serializable?(object)
           return object.to_json if object.respond_to?(:to_json)
 
