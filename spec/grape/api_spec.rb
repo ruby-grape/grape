@@ -964,6 +964,23 @@ describe Grape::API do
         last_response.body.should eql 'custom_formatter: hash'
       end
     end
+    context "custom formatter" do
+      before :each do
+        subject.content_type :custom, 'application/custom'
+        subject.formatter :custom, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.get :simple do
+          {:some => 'hash'}
+        end
+      end
+      it 'uses json' do
+        get '/simple.json'
+        last_response.body.should eql '{"some":"hash"}'
+      end
+      it 'uses custom formatter' do
+        get '/simple.custom', { 'HTTP_ACCEPT' => 'application/custom' }
+        last_response.body.should eql '{"custom_formatter":"hash"}'
+      end
+    end
   end
 
   describe ".default_error_status" do
