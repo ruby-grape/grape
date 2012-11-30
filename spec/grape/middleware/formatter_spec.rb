@@ -13,7 +13,7 @@ describe Grape::Middleware::Formatter do
       bodies.each{|b| b.should == MultiJson.dump(@body) }
     end
 
-    it 'should call #to_json first if it is available' do
+    it 'should call #to_json since default format is json' do
       @body = ['foo']
       @body.instance_eval do
         def to_json
@@ -22,42 +22,6 @@ describe Grape::Middleware::Formatter do
       end
 
       subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '"bar"'}
-    end
-
-    it 'should serialize the #serializable_hash if that is available' do
-      class SimpleExample
-        def serializable_hash
-          {:abc => 'def'}
-        end
-      end
-
-      @body = [SimpleExample.new, SimpleExample.new]
-
-      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '[{"abc":"def"},{"abc":"def"}]'}
-    end
-
-    it 'should serialize multiple objects that respond to #serializable_hash' do
-      class SimpleExample
-        def serializable_hash
-          {:abc => 'def'}
-        end
-      end
-
-      @body = SimpleExample.new
-
-      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"abc":"def"}'}
-    end
-
-    it 'should serialize objects that respond to #serializable_hash if there is a root element' do
-      class SimpleExample
-        def serializable_hash
-          {:abc => 'def'}
-        end
-      end
-
-      @body = {"root" => SimpleExample.new}
-
-      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '{"root":{"abc":"def"}}'}
     end
 
     it 'should call #to_xml if the content type is xml' do
@@ -80,7 +44,7 @@ describe Grape::Middleware::Formatter do
       subject.env['api.format'].should == :json
     end
 
-    it 'should use the format parameter if one is provided' do 
+    it 'should use the format parameter if one is provided' do
       subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=json'})
       subject.env['api.format'].should == :json
       subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=xml'})

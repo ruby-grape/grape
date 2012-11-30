@@ -3,7 +3,6 @@ require 'grape/middleware/base'
 module Grape
   module Middleware
     class Formatter < Base
-      include Formats
 
       def default_options
         {
@@ -22,10 +21,10 @@ module Grape
         fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
         if content_types.key?(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
-            parser = parser_for fmt
+            parser = Grape::Parser::Base.parser_for fmt, options
             unless parser.nil?
               begin
-                body = parser.call(body)
+                body = parser.call body
                 env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
                 env['rack.request.form_input'] = env['rack.input']
               rescue
@@ -74,13 +73,14 @@ module Grape
 
       def after
         status, headers, bodies = *@app_response
-        formatter = formatter_for env['api.format']
+        formatter = Grape::Formatter::Base.formatter_for env['api.format'], options
         bodymap = bodies.collect do |body|
-          formatter.call(body)
+          formatter.call body
         end
         headers['Content-Type'] = content_types[env['api.format']] unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a
       end
+
     end
   end
 end

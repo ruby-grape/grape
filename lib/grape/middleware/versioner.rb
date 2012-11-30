@@ -3,6 +3,7 @@
 #
 #   :header - version from HTTP Accept header.
 #   :path   - version from uri. e.g. /v1/resource
+#   :param  - version from uri query string, e.g. /v1/resource?apiver=v1
 #
 # See individual classes for details.
 module Grape
@@ -10,7 +11,7 @@ module Grape
     module Versioner
       extend self
 
-      # @param strategy [Symbol] :path or :header
+      # @param strategy [Symbol] :path, :header or :param
       # @return a middleware class based on strategy
       def using(strategy)
         case strategy

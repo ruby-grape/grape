@@ -964,6 +964,45 @@ describe Grape::API do
         last_response.body.should eql 'custom_formatter: hash'
       end
     end
+    context "custom formatter" do
+      before :each do
+        subject.content_type :custom, 'application/custom'
+        subject.formatter :custom, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.get :simple do
+          {:some => 'hash'}
+        end
+      end
+      it 'uses json' do
+        get '/simple.json'
+        last_response.body.should eql '{"some":"hash"}'
+      end
+      it 'uses custom formatter' do
+        get '/simple.custom', { 'HTTP_ACCEPT' => 'application/custom' }
+        last_response.body.should eql '{"custom_formatter":"hash"}'
+      end
+    end
+    context "custom formatter with a class" do
+      module CustomFormatter
+        def self.call(object)
+          "{\"custom_formatter\":\"#{object[:some]}\"}"
+        end
+      end
+      before :each do
+        subject.content_type :custom, 'application/custom'
+        subject.formatter :custom, CustomFormatter
+        subject.get :simple do
+          {:some => 'hash'}
+        end
+      end
+      it 'uses json' do
+        get '/simple.json'
+        last_response.body.should eql '{"some":"hash"}'
+      end
+      it 'uses custom formatter' do
+        get '/simple.custom', { 'HTTP_ACCEPT' => 'application/custom' }
+        last_response.body.should eql '{"custom_formatter":"hash"}'
+      end
+    end
   end
 
   describe ".default_error_status" do
@@ -1402,6 +1441,37 @@ describe Grape::API do
       it "should force json from a non-accepting header" do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
         last_response.body.should == { :meaning_of_life => 42 }.to_json
+      end
+    end
+    context ":serializable_hash" do
+      before(:each) do
+        class SimpleExample
+          def serializable_hash
+            {:abc => 'def'}
+          end
+        end
+        subject.format :serializable_hash
+      end
+      it "instance" do
+        subject.get '/example' do
+          SimpleExample.new
+        end
+        get '/example'
+        last_response.body.should == '{"abc":"def"}'
+      end
+      it "root" do
+        subject.get '/example' do
+          { "root" => SimpleExample.new }
+        end
+        get '/example'
+        last_response.body.should == '{"root":{"abc":"def"}}'
+      end
+      it "array" do
+        subject.get '/examples' do
+          [ SimpleExample.new, SimpleExample.new ]
+        end
+        get '/examples'
+        last_response.body.should == '[{"abc":"def"},{"abc":"def"}]'
       end
     end
   end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Error do
-  
+
   # raises a text exception
   class ExceptionApp
     class << self
@@ -10,7 +10,7 @@ describe Grape::Middleware::Error do
       end
     end
   end
-  
+
   # raises a hash error
   class ErrorHashApp
     class << self
@@ -22,9 +22,9 @@ describe Grape::Middleware::Error do
       end
     end
   end
-  
+
   # raises an error!
-  class AccessDeniedApp    
+  class AccessDeniedApp
     class << self
       def error!(message, status=403)
         throw :error, :message => message, :status => status
@@ -44,11 +44,11 @@ describe Grape::Middleware::Error do
       end
     end
   end
-  
+
   def app
     @app
   end
- 
+
   it 'should not trap errors by default' do
     @app ||= Rack::Builder.app do
       use Grape::Middleware::Error
@@ -84,7 +84,7 @@ describe Grape::Middleware::Error do
       get '/'
       last_response.status.should == 500
     end
-       
+
     it 'should be possible to return errors in json format' do
       @app ||= Rack::Builder.app do
         use Grape::Middleware::Error, :rescue_all => true, :format => :json
@@ -106,26 +106,26 @@ describe Grape::Middleware::Error do
 
     it 'should be possible to specify a custom formatter' do
       @app ||= Rack::Builder.app do
-        use Grape::Middleware::Error, 
+        use Grape::Middleware::Error,
           :rescue_all => true,
-          :format => :custom, 
-          :formatters => { 
-            :custom => lambda { |message, backtrace| { :custom_formatter => message }.inspect }  
+          :format => :custom,
+          :formatters => {
+            :custom => lambda { |message, backtrace, options| { :custom_formatter => message }.inspect }
           }
         run ExceptionApp
       end
       get '/'
       last_response.body.should == '{:custom_formatter=>"rain!"}'
     end
-    
+
     it 'should not trap regular error! codes' do
       @app ||= Rack::Builder.app do
         use Grape::Middleware::Error
         run AccessDeniedApp
       end
       get '/'
-      last_response.status.should == 401    
-    end 
+      last_response.status.should == 401
+    end
 
     it 'should respond to custom Grape exceptions appropriately' do
       @app ||= Rack::Builder.app do
@@ -137,6 +137,6 @@ describe Grape::Middleware::Error do
       last_response.status.should == 400
       last_response.body.should == 'failed validation'
     end
-    
-  end 
+
+  end
 end
