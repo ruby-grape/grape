@@ -25,7 +25,6 @@ module Grape
       #
       # @throws [RuntimeError] if Accept header is invalid
       class Header < Base
-        include Formats
 
         def before
           header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
@@ -112,6 +111,11 @@ module Grape
           type, subtype = Rack::Accept::Header.parse_media_type media_type
           subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end
+
+        def content_types
+          CONTENT_TYPES.merge(options[:content_types] || {})
+        end
+
       end
     end
   end

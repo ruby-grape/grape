@@ -3,9 +3,9 @@
 ## What is Grape?
 
 Grape is a REST-like API micro-framework for Ruby. It's designed to run on Rack
-or complement existing web application frameworks such as Rails and Sinatra by 
-providing a simple DSL to easily develop RESTful APIs. It has built-in support 
-for common conventions, including multiple formats, subdomain/prefix restriction, 
+or complement existing web application frameworks such as Rails and Sinatra by
+providing a simple DSL to easily develop RESTful APIs. It has built-in support
+for common conventions, including multiple formats, subdomain/prefix restriction,
 content negotiation, versioning and much more.
 
 [![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape)
@@ -54,7 +54,7 @@ class Twitter::API < Grape::API
   end
 
   resource :statuses do
-  
+
     desc "Returns a public timeline."
     get :public_timeline do
       Tweet.limit(20)
@@ -73,7 +73,7 @@ class Twitter::API < Grape::API
     get '/show/:id' do
       Tweet.find(params[:id])
     end
-    
+
     desc "Creates a tweet."
     params do
       requires :status, :type => String, :desc => "Your status."
@@ -133,7 +133,7 @@ end
 
 ## Versioning
 
-There are three strategies in which clients can reach your API's endpoints: `:header`, 
+There are three strategies in which clients can reach your API's endpoints: `:header`,
 `:path` and `:param`. The default strategy is `:path`.
 
 ### Header
@@ -167,7 +167,7 @@ Using this versioning strategy, clients should pass the desired version in the U
 version 'v1', :using => :param
 ```
 
-Using this versioning strategy, clients should pass the desired version as a request parameter, 
+Using this versioning strategy, clients should pass the desired version as a request parameter,
 either in the URL query string or in the request body.
 
     curl -H http://localhost:9292/events?apiver=v1
@@ -235,7 +235,7 @@ get ':id' do
 end
 ```
 
-When a type is specified an implicit validation is done after the coercion to ensure 
+When a type is specified an implicit validation is done after the coercion to ensure
 the output type is the one declared.
 
 Parameters can be nested using `group`. In the above example, this means both
@@ -268,9 +268,9 @@ class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
       throw :error, :status => 400, :message => "#{attr_name}: must consist of alpha-numeric characters"
-    end    
+    end
   end
-end  
+end
 ```
 
 ```ruby
@@ -286,10 +286,10 @@ class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
     unless params[attr_name].length == @option
       throw :error, :status => 400, :message => "#{attr_name}: must be #{@option} characters long"
-    end    
+    end
   end
-end  
-``` 
+end
+```
 
 ```ruby
 params do
@@ -309,8 +309,8 @@ rescue_from Grape::Exceptions::ValidationError do |e|
         'status' => e.status,
         'message' => e.message,
         'param' => e.param
-    }.to_json, e.status)    
-end 
+    }.to_json, e.status)
+end
 ```
 
 ## Headers
@@ -436,10 +436,10 @@ end
 ```
 
 ``` shell
-curl -v -X OPTIONS http://localhost:3000/counter 
+curl -v -X OPTIONS http://localhost:3000/counter
 
 > OPTIONS /counter HTTP/1.1
-> 
+>
 < HTTP/1.1 204 No Content
 < Allow: OPTIONS, GET, PUT
 ```
@@ -453,7 +453,7 @@ curl -X DELETE -v http://localhost:3000/counter/
 
 > DELETE /counter/ HTTP/1.1
 > Host: localhost:3000
-> 
+>
 < HTTP/1.1 405 Method Not Allowed
 < Allow: OPTIONS, GET, PUT
 ```
@@ -493,7 +493,7 @@ end
 ```
 
 The error format can be specified using `error_format`. Available formats are
-`:json` and `:txt` (default).
+`:json`, `:xml` and `:txt` (default).
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -598,7 +598,14 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can also set the default format. The order for choosing the format is the following.
+You can also set the default format. Available formats are the following.
+
+* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
+* `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
+* `:txt`: use object's `to_txt` when available, otherwise `to_s`
+* `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
+
+The order for choosing the format is the following.
 
 * Use the file extension, if specified. If the file is .json, choose the JSON format.
 * Use the value of the `format` parameter in the query string, if specified.
@@ -789,7 +796,7 @@ end
 
 ## Describing and Inspecting an API
 
-Grape routes can be reflected at runtime. This can notably be useful for generating 
+Grape routes can be reflected at runtime. This can notably be useful for generating
 documentation.
 
 Grape exposes arrays of API versions and compiled routes. Each route
@@ -805,7 +812,7 @@ TwitterAPI::routes[0].route_version # yields 'v1'
 TwitterAPI::routes[0].route_description # etc.
 ```
 
-It's possible to retrieve the information about the current route from within an API 
+It's possible to retrieve the information about the current route from within an API
 call with `route`.
 
 ``` ruby
@@ -824,9 +831,9 @@ end
 
 Grape by default anchors all request paths, which means that the request URL
 should match from start to end to match, otherwise a `404 Not Found` is
-returned. However, this is sometimes not what you want, because it is not always 
+returned. However, this is sometimes not what you want, because it is not always
 known upfront what can be expected from the call. This is because Rack-mount by
-default anchors requests to match from the start to the end, or not at all. 
+default anchors requests to match from the start to the end, or not at all.
 Rails solves this problem by using a `:anchor => false` option in your routes.
 In Grape this option can be used as well when a method is defined.
 

@@ -1404,5 +1404,36 @@ describe Grape::API do
         last_response.body.should == { :meaning_of_life => 42 }.to_json
       end
     end
+    context ":serializable_hash" do
+      before(:each) do
+        class SimpleExample
+          def serializable_hash
+            {:abc => 'def'}
+          end
+        end
+        subject.format :serializable_hash
+      end
+      it "instance" do
+        subject.get '/example' do
+          SimpleExample.new
+        end
+        get '/example'
+        last_response.body.should == '{"abc":"def"}'
+      end
+      it "root" do
+        subject.get '/example' do
+          { "root" => SimpleExample.new }
+        end
+        get '/example'
+        last_response.body.should == '{"root":{"abc":"def"}}'
+      end
+      it "array" do
+        subject.get '/examples' do
+          [ SimpleExample.new, SimpleExample.new ]
+        end
+        get '/examples'
+        last_response.body.should == '[{"abc":"def"},{"abc":"def"}]'
+      end
+    end
   end
 end
