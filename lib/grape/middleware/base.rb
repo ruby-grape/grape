@@ -52,6 +52,19 @@ module Grape
       def response
         Rack::Response.new(@app_response)
       end
+
+      def content_types
+        CONTENT_TYPES.merge(options[:content_types] || {})
+      end
+
+      def content_type
+        content_types[options[:format]] || 'text/html'
+      end
+
+      def mime_types
+        content_types.invert
+      end
+
     end
   end
 end

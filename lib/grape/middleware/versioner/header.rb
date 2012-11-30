@@ -112,10 +112,6 @@ module Grape
           subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end
 
-        def content_types
-          CONTENT_TYPES.merge(options[:content_types] || {})
-        end
-
       end
     end
   end

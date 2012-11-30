@@ -64,14 +64,6 @@ module Grape
         formatter.send formatter.respond_to?(:encode) ? :encode : :call, message, backtrace, options
       end
 
-      def content_types
-        CONTENT_TYPES.merge(options[:content_types] || {})
-      end
-
-      def content_type
-        content_types[options[:format]] || 'text/html'
-      end
-
     end
   end
 end
