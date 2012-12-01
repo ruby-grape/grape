@@ -5,6 +5,7 @@
 * [#269](https://github.com/intridea/grape/pull/269): Fix: `LocalJumpError` will not be raised when using explict return in API methods - [@simulacre](https://github.com/simulacre).
 * [#86](https://github.com/intridea/grape/issues/275): Fix Path-based versioning not recognizing '/' route - [@walski](https://github.com/walski).
 * [#277](https://github.com/intridea/grape/pull/277): Added a DSL to declare `formatter` in API settings - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
+* [#273](https://github.com/intridea/grape/pull/273): Disabled formatting via `serializable_hash` and added support for `format :serializable_hash` in API settings - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.2.2
