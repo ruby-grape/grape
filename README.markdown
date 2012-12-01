@@ -501,6 +501,29 @@ class Twitter::API < Grape::API
 end
 ```
 
+Custom error formatters for existing and additional types can be defined with a proc.
+
+``` ruby
+class Twitter::API < Grape::API
+  error_formatter :txt, lambda { |message, backtrace, options| "error: #{message} from #{backtrace}" }
+end
+```
+
+You can also use a module or class.
+
+``` ruby
+module CustomFormatter
+  def self.call(message, backtrace, options)
+    { message: message, backtrace: backtrace }
+  end
+end
+
+class Twitter::API < Grape::API
+  error_format :custom
+  error_formatter :custom, CustomFormatter
+end
+```
+
 You can rescue all exceptions with a code block. The `rack_response` wrapper
 automatically sets the default error code and content-type.
 
@@ -589,7 +612,7 @@ Serialization takes place automatically.
 Your API can declare additional types to support. Response format is determined by the
 request's extension, an explicit `format` parameter in the query string, or `Accept` header.
 
-Custom formatters for additional types can be defined with a proc.
+Custom formatters for existing and additional types can be defined with a proc.
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -613,7 +636,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can also set the default format. Available formats are the following.
+You can set the default format. Available formats are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
