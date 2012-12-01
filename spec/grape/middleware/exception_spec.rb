@@ -109,8 +109,10 @@ describe Grape::Middleware::Error do
         use Grape::Middleware::Error,
           :rescue_all => true,
           :format => :custom,
-          :formatters => {
-            :custom => lambda { |message, backtrace, options| { :custom_formatter => message }.inspect }
+          :error_formatters => {
+            :custom => lambda { |message, backtrace, options| 
+              { :custom_formatter => message }.inspect 
+            }
           }
         run ExceptionApp
       end

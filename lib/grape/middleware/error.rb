@@ -11,6 +11,7 @@ module Grape
         :default_message => "",
         :format => :txt,
         :formatters => {},
+        :error_formatters => {},
         :rescue_all => false, # true to rescue all exceptions
         :rescue_options => { :backtrace => false }, # true to display backtrace
         :rescue_handlers => {}, # rescue handler blocks
@@ -61,7 +62,7 @@ module Grape
       def format_message(message, backtrace, status)
         formatter = Grape::ErrorFormatter::Base.formatter_for(options[:format], options)
         throw :error, :status => 406, :message => "The requested format #{options[:format]} is not supported." unless formatter
-        formatter.send formatter.respond_to?(:encode) ? :encode : :call, message, backtrace, options
+        formatter.call(message, backtrace, options)
       end
 
     end

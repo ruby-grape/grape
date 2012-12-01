@@ -11,14 +11,14 @@ module Grape
         }
 
         def formatters(options)
-          FORMATTERS.merge(options[:formatters] || {})
+          FORMATTERS.merge(options[:error_formatters] || {})
         end
 
         def formatter_for(api_format, options = {})
           spec = formatters(options)[api_format]
           case spec
           when nil
-            lambda { |obj| obj }
+            lambda { |message, backtrace, options| message }
           when Symbol
             method(spec)
           else

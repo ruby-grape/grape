@@ -879,7 +879,7 @@ describe Grape::API do
       last_response.body.should eql "rain!"
     end
 
-    it 'should rescue all errros and return :txt with backtrace' do
+    it 'should rescue all errors and return :txt with backtrace' do
       subject.rescue_from :all, :backtrace => true
       subject.error_format :txt
       subject.get '/exception' do
@@ -887,6 +887,25 @@ describe Grape::API do
       end
       get '/exception'
       last_response.body.start_with?("rain!\r\n").should be_true
+    end
+
+    context "class" do
+      before :each do
+        class CustomErrorFormatter
+          def self.call(message, backtrace, options)
+            "message: #{message} @backtrace"
+          end
+        end
+      end
+      it 'should return a custom error format' do
+        subject.rescue_from :all, :backtrace => true
+        subject.error_formatter :txt, CustomErrorFormatter
+        subject.get '/exception' do
+          raise "rain!"
+        end
+        get '/exception'
+        last_response.body.should == "message: rain! @backtrace"
+      end
     end
 
     it 'should rescue all errors and return :json' do
@@ -981,7 +1000,7 @@ describe Grape::API do
         last_response.body.should eql '{"custom_formatter":"hash"}'
       end
     end
-    context "custom formatter with a class" do
+    context "custom formatter class" do
       module CustomFormatter
         def self.call(object)
           "{\"custom_formatter\":\"#{object[:some]}\"}"
