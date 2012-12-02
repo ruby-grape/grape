@@ -58,7 +58,7 @@ module Grape
       end
 
       def content_type
-        content_types[options[:format]] || 'text/html'
+        content_types[env['api.format'] || options[:format]] || 'text/html'
       end
 
       def mime_types

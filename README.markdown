@@ -492,14 +492,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-The error format can be specified using `error_format`. Available formats are
-`:json`, `:xml` and `:txt` (default).
-
-``` ruby
-class Twitter::API < Grape::API
-  error_format :json
-end
-```
+The error format will match the request format. See "Content-Types" below.
 
 Custom error formatters for existing and additional types can be defined with a proc.
 
@@ -519,7 +512,6 @@ module CustomFormatter
 end
 
 class Twitter::API < Grape::API
-  error_format :custom
   error_formatter :custom, CustomFormatter
 end
 ```

@@ -7,6 +7,7 @@
 * [#273](https://github.com/intridea/grape/pull/273): Disabled formatting via `serializable_hash` and added support for `format :serializable_hash` in API settings - [@dblock](https://github.com/dblock).
 * [#277](https://github.com/intridea/grape/pull/277): Added a DSL to declare `formatter` in API settings - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#284](https://github.com/intridea/grape/pull/284): Added a DSL to declare `error_formatter` in API settings - [@dblock](https://github.com/dblock).
+* [#285](https://github.com/intridea/grape/pull/285): Removed `error_format` from API settings, now matches request format - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.2.2
