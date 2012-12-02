@@ -139,12 +139,6 @@ module Grape
         settings.imbue(:error_formatters, format.to_sym => new_formatter)
       end
 
-      # Specify the format for error messages.
-      # May be `:json` or `:txt` (default).
-      def error_format(new_format = nil)
-        new_format ? set(:error_format, new_format.to_sym) : settings[:error_format]
-      end
-
       # Specify additional content-types, e.g.:
       #   content_type :xls, 'application/vnd.ms-excel'
       def content_type(key, val)
