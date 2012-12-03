@@ -60,8 +60,9 @@ module Grape
       end
 
       def format_message(message, backtrace, status)
-        formatter = Grape::ErrorFormatter::Base.formatter_for(options[:format], options)
-        throw :error, :status => 406, :message => "The requested format #{options[:format]} is not supported." unless formatter
+        format = env['api.format'] || options[:format]
+        formatter = Grape::ErrorFormatter::Base.formatter_for(format, options)
+        throw :error, :status => 406, :message => "The requested format #{format} is not supported." unless formatter
         formatter.call(message, backtrace, options)
       end
 

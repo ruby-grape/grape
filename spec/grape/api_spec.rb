@@ -456,7 +456,7 @@ describe Grape::API do
     end
 
     it 'should set content type for error' do
-      subject.error_format :json
+      subject.format :json
       subject.get('/error') { error!('error in json', 500) }
       get '/error.json'
       last_response.headers['Content-Type'].should eql 'application/json'
@@ -868,10 +868,10 @@ describe Grape::API do
     end
   end
 
-  describe ".error_format" do
+  describe ".format for error" do
     it 'should rescue all errors and return :txt' do
       subject.rescue_from :all
-      subject.error_format :txt
+      subject.format :txt
       subject.get '/exception' do
         raise "rain!"
       end
@@ -881,7 +881,7 @@ describe Grape::API do
 
     it 'should rescue all errors and return :txt with backtrace' do
       subject.rescue_from :all, :backtrace => true
-      subject.error_format :txt
+      subject.format :txt
       subject.get '/exception' do
         raise "rain!"
       end
@@ -910,7 +910,7 @@ describe Grape::API do
 
     it 'should rescue all errors and return :json' do
       subject.rescue_from :all
-      subject.error_format :json
+      subject.format :json
       subject.get '/exception' do
         raise "rain!"
       end
@@ -919,7 +919,7 @@ describe Grape::API do
     end
     it 'should rescue all errors and return :json with backtrace' do
       subject.rescue_from :all, :backtrace => true
-      subject.error_format :json
+      subject.format :json
       subject.get '/exception' do
         raise "rain!"
       end
@@ -929,7 +929,7 @@ describe Grape::API do
       json["backtrace"].length.should > 0
     end
     it 'should rescue error! and return txt' do
-      subject.error_format :txt
+      subject.format :txt
       subject.get '/error' do
         error!("Access Denied", 401)
       end
@@ -937,7 +937,7 @@ describe Grape::API do
       last_response.body.should eql "Access Denied"
     end
     it 'should rescue error! and return json' do
-      subject.error_format :json
+      subject.format :json
       subject.get '/error' do
         error!("Access Denied", 401)
       end
