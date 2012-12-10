@@ -130,7 +130,7 @@ module Grape
         new_format ? set(:format, new_format.to_sym) : settings[:format]
       end
 
-      # Specify a custom formatter for a contnet-type.
+      # Specify a custom formatter for a content-type.
       def formatter(content_type, new_formatter)
         settings.imbue(:formatters, content_type.to_sym => new_formatter)
       end
