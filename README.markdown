@@ -940,7 +940,7 @@ describe Twitter::API do
     it "returns a status by id" do
       status = Status.create!
       get "/api/v1/statuses/#{status.id}"
-      resonse.body.should == status.to_json
+      response.body.should == status.to_json
     end
   end
 end
