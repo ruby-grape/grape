@@ -109,7 +109,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == "{:message=>\"rain!\"}"
+      last_response.body.should == {:message=>"rain!"}.to_s
     end
 
     it 'should be possible to return hash errors in xml format' do
@@ -118,8 +118,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      ["{:error=>\"rain!\", :detail=>\"missing widget\"}",
-       "{:detail=>\"missing widget\", :error=>\"rain!\"}"].should be_include(last_response.body)
+      [{:error=>"rain!", :detail=>"missing widget"}.to_s,
+       {:detail=>"missing widget", :error=>"rain!"}.to_s].should be_include(last_response.body)
     end
 
     it 'should be possible to specify a custom formatter' do
