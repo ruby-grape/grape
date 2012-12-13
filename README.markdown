@@ -299,7 +299,7 @@ end
 
 ### Validation Errors
 
-When validation and coercion erros occur an exception of type `Grape::Exceptions::ValidationError` is raised.
+When validation and coercion errors occur an exception of type `Grape::Exceptions::ValidationError` is raised.
 If the exception goes uncaught it will respond with a status of 400 and an error message.
 You can rescue a `Grape::Exceptions::ValidationError` and respond with a custom response.
 
