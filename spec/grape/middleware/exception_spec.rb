@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'active_support/core_ext/hash'
+
 describe Grape::Middleware::Error do
 
   # raises a text exception
@@ -109,7 +111,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == {:message=>"rain!"}.to_s
+      last_response.body.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n"
     end
 
     it 'should be possible to return hash errors in xml format' do
@@ -118,8 +120,7 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      [{:error=>"rain!", :detail=>"missing widget"}.to_s,
-       {:detail=>"missing widget", :error=>"rain!"}.to_s].should be_include(last_response.body)
+      last_response.body.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n"
     end
 
     it 'should be possible to specify a custom formatter' do
