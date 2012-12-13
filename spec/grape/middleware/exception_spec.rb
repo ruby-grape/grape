@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'active_support/core_ext/hash'
 
 describe Grape::Middleware::Error do
 
@@ -104,14 +105,33 @@ describe Grape::Middleware::Error do
        '{"detail":"missing widget","error":"rain!"}'].should be_include(last_response.body)
     end
 
+    it 'should be possible to return errors in xml format' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, :rescue_all => true, :format => :xml
+        run ExceptionApp
+      end
+      get '/'
+      last_response.body.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n"
+    end
+
+    it 'should be possible to return hash errors in xml format' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, :rescue_all => true, :format => :xml
+        run ErrorHashApp
+      end
+      get '/'
+      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
+       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <error>rain!</error>\n  <detail>missing widget</detail>\n</error>\n"].should be_include(last_response.body)
+    end
+
     it 'should be possible to specify a custom formatter' do
       @app ||= Rack::Builder.app do
         use Grape::Middleware::Error,
           :rescue_all => true,
           :format => :custom,
           :error_formatters => {
-            :custom => lambda { |message, backtrace, options| 
-              { :custom_formatter => message }.inspect 
+            :custom => lambda { |message, backtrace, options|
+              { :custom_formatter => message }.inspect
             }
           }
         run ExceptionApp
