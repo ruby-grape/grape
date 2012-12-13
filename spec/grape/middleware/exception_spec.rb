@@ -120,7 +120,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      last_response.body.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n"
+      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
+       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n"].should be_include(last_response.body)
     end
 
     it 'should be possible to specify a custom formatter' do
