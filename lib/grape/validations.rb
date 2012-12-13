@@ -102,7 +102,7 @@ module Grape
       end
 
       def group(element, &block)
-        scope = ParamsScope.new(@api, element, self, &block)
+        ParamsScope.new(@api, element, self, &block)
       end
 
       def params(params)

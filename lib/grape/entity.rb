@@ -306,7 +306,7 @@ module Grape
     # hash for the given data model and is used as the basis for serialization to
     # JSON and other formats.
     #
-    # @param options [Hash] Any options you pass in here will be known to the entity
+    # @param runtime_options [Hash] Any options you pass in here will be known to the entity
     #   representation, this is where you can trigger things from conditional options
     #   etc.
     def serializable_hash(runtime_options = {})

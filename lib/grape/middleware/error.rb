@@ -52,14 +52,14 @@ module Grape
         headers = {'Content-Type' => content_type}
         headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         backtrace = error[:backtrace] || []
-        rack_response(format_message(message, backtrace, status), status, headers)
+        rack_response(format_message(message, backtrace), status, headers)
       end
 
       def rack_response(message, status = options[:default_status], headers = { 'Content-Type' => content_type })
         Rack::Response.new([ message ], status, headers).finish
       end
 
-      def format_message(message, backtrace, status)
+      def format_message(message, backtrace)
         format = env['api.format'] || options[:format]
         formatter = Grape::ErrorFormatter::Base.formatter_for(format, options)
         throw :error, :status => 406, :message => "The requested format #{format} is not supported." unless formatter
