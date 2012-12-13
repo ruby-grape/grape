@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'rspec', '~> 2.9'
   s.add_development_dependency 'bundler'
+  s.add_development_dependency 'builder'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
