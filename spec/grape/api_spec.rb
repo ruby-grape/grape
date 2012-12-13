@@ -461,6 +461,13 @@ describe Grape::API do
       get '/error.json'
       last_response.headers['Content-Type'].should eql 'application/json'
     end
+
+    it 'should set content type for xml' do
+      subject.format :xml
+      subject.get('/error') { error!('error in xml', 500) }
+      get '/error.xml'
+      last_response.headers['Content-Type'].should eql 'application/xml'
+    end
   end
 
   context 'custom middleware' do
