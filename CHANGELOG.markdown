@@ -8,7 +8,7 @@
 * [#277](https://github.com/intridea/grape/pull/277): Added a DSL to declare `formatter` in API settings - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#284](https://github.com/intridea/grape/pull/284): Added a DSL to declare `error_formatter` in API settings - [@dblock](https://github.com/dblock).
 * [#285](https://github.com/intridea/grape/pull/285): Removed `error_format` from API settings, now matches request format - [@dblock](https://github.com/dblock).
-* [#290](https://github.com/intridea/grape/pull/290): Add more readable root in xml `error_formatter` - [@dpsk](https://github.com/dpsk)
+* [#290](https://github.com/intridea/grape/pull/290): The default error format for XML is now `error/message` instead of `hash/error` - [@dpsk](https://github.com/dpsk).
 * Your contribution here.
 
 0.2.2
