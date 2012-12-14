@@ -1252,6 +1252,23 @@ describe Grape::API do
         { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2", :full_name=>"ns_param" }, "ns1_param" => { :required => true, :desc => "ns1 param", :full_name=>"ns1_param" }, "ns2_param" => { :required => true, :desc => "ns2 param", :full_name=>"ns2_param" }, "method_param" => { :required => false, :desc => "method param", :full_name=>"method_param" } } }
       ]
     end
+    it "should group nested params and prevent overwriting of params with same name in different groups" do
+      subject.desc "method"
+      subject.params do
+        group :group1 do
+          optional :param1, :desc => "group1 param1 desc"
+          requires :param2, :desc => "group1 param2 desc"
+        end
+        group :group2 do
+          optional :param1, :desc => "group2 param1 desc"
+          requires :param2, :desc => "group2 param2 desc"
+        end
+      end
+      subject.get "method" do ; end
+
+      subject.routes.map { |route| route.route_params
+      }.should eq [{"group1"=>{"param1"=>{:required=>false, :desc=>"group1 param1 desc", :full_name=>"group1[param1]"}, "param2"=>{:required=>true, :desc=>"group1 param2 desc", :full_name=>"group1[param2]"}}, "group2"=>{"param1"=>{:required=>false, :desc=>"group2 param1 desc", :full_name=>"group2[param1]"}, "param2"=>{:required=>true, :desc=>"group2 param2 desc", :full_name=>"group2[param2]"}}}]
+    end
     it "should provide a full_name for parameters in nested groups" do
       subject.desc "nesting"
       subject.params do
