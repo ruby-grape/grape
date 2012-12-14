@@ -3,7 +3,6 @@ source 'http://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'builder'
   gem 'pry'
   gem 'guard'
   gem 'guard-rspec'
