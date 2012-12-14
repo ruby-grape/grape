@@ -41,10 +41,10 @@ module Grape
 
       def format_from_extension
         parts = request.path.split('.')
-        extension = parts.last.to_sym
 
-        if parts.size > 1 && content_types.key?(extension)
-          return extension
+        if parts.size > 1
+          extension = parts.last.to_sym
+          return extension if content_types.key?(extension)
         end
         nil
       end
