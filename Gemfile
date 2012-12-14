@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 gemspec
 
 group :development, :test do
+  gem 'builder'
   gem 'pry'
   gem 'guard'
   gem 'guard-rspec'
@@ -10,6 +11,6 @@ group :development, :test do
   gem 'rb-fsevent'
   gem 'growl'
   gem 'json'
-  gem 'rspec' 
+  gem 'rspec'
   gem 'rack-test', "~> 0.6.2", :require => "rack/test"
 end
