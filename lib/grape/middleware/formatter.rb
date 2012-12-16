@@ -8,7 +8,6 @@ module Grape
         {
           :default_format => :txt,
           :formatters => {},
-          :content_types => {},
           :parsers => {}
         }
       end

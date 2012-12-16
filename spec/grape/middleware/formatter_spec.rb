@@ -120,6 +120,7 @@ describe Grape::Middleware::Formatter do
       headers['Content-type'].should == 'text/plain'
     end
     it 'should be set for custom' do
+      subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = 'application/x-custom'
       _, headers, _ = subject.call({'PATH_INFO' => '/info.custom'})
       headers['Content-type'].should == 'application/x-custom'
@@ -128,6 +129,7 @@ describe Grape::Middleware::Formatter do
 
   context 'Format' do
     it 'should use custom formatter' do
+      subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = "don't care"
       subject.options[:formatters][:custom] = lambda { |obj| 'CUSTOM FORMAT' }
       _, _, body = subject.call({'PATH_INFO' => '/info.custom'})

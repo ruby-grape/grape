@@ -970,6 +970,15 @@ describe Grape::API do
       get '/content'
       last_response.content_type.should == "text/javascript"
     end
+    it "removes existing content types" do
+      subject.content_type :xls, "application/vnd.ms-excel"
+      subject.get :excel do
+        "some binary content"
+      end
+      get '/excel.json'
+      last_response.status.should == 406
+      last_response.body.should == "The requested format is not supported."
+    end
   end
 
   describe ".formatter" do
@@ -992,6 +1001,7 @@ describe Grape::API do
     end
     context "custom formatter" do
       before :each do
+        subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
         subject.formatter :custom, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
         subject.get :simple do
@@ -1014,6 +1024,7 @@ describe Grape::API do
         end
       end
       before :each do
+        subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
         subject.formatter :custom, CustomFormatter
         subject.get :simple do

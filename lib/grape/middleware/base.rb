@@ -54,7 +54,7 @@ module Grape
       end
 
       def content_types
-        CONTENT_TYPES.merge(options[:content_types] || {})
+        options[:content_types] || CONTENT_TYPES
       end
 
       def content_type

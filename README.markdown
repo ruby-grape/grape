@@ -55,36 +55,59 @@ class Twitter::API < Grape::API
 
   resource :statuses do
 
-    desc "Returns a public timeline."
+    desc "Return a public timeline."
     get :public_timeline do
       Tweet.limit(20)
     end
 
-    desc "Returns a personal timeline."
+    desc "Return a personal timeline."
     get :home_timeline do
       authenticate!
-      current_user.home_timeline
+      current_user.tweets.limit(20)
     end
 
-    desc "Returns a tweet."
+    desc "Return a tweet."
     params do
       requires :id, :type => Integer, :desc => "Tweet id."
     end
-    get '/show/:id' do
+    get ':id' do
       Tweet.find(params[:id])
     end
 
-    desc "Creates a tweet."
+    desc "Create a tweet."
     params do
       requires :status, :type => String, :desc => "Your status."
     end
-    post :update do
+    post do
       authenticate!
-      Tweet.create(
+      Tweet.create!({
         :user => current_user,
         :text => params[:status]
-      )
+      })
     end
+
+    desc "Update a tweet."
+    params do
+      requires :id, :type => String, :desc => "Tweet ID."
+      requires :status, :type => String, :desc => "Your status."
+    end
+    put ':id' do
+      authenticate!
+      current_user.tweets.find(params[:id]).update({
+        :user => current_user,
+        :text => params[:status]
+      })
+    end
+
+    desc "Delete a tweet."
+    params do
+      requires :id, :type => String, :desc => "Tweet ID."
+    end
+    delete ':id' do
+      authenticate!
+      current_user.tweets.find(params[:id]).destroy
+    end
+
   end
 
 end
@@ -103,10 +126,12 @@ run Twitter::API
 
 And would respond to the following routes:
 
-    GET  /statuses/public_timeline(.json)
-    GET  /statuses/home_timeline(.json)
-    GET  /statuses/show/:id(.json)
-    POST /statuses/update(.json)
+    GET /statuses/public_timeline(.json)
+    GET /statuses/home_timeline(.json)
+    GET /statuses/:id(.json)
+    POST /statuses(.json)
+    PUT /statuses/:id(.json)
+    DELETE /statuses/:id(.json)
 
 ### Rails
 
@@ -116,7 +141,7 @@ In a Rails application, modify *config/routes*:
 mount Twitter::API => "/"
 ```
 
-Note that you will need to restart Rails to pick up changes in your API classes
+Note that when using Rails you will need to restart the server to pick up changes in your API classes
 (see [Issue 131](https://github.com/intridea/grape/issues/131)).
 
 ### Modules
@@ -170,7 +195,7 @@ version 'v1', :using => :param
 Using this versioning strategy, clients should pass the desired version as a request parameter,
 either in the URL query string or in the request body.
 
-    curl -H http://localhost:9292/events?apiver=v1
+    curl -H http://localhost:9292/statuses/public_timeline?apiver=v1
 
 The default name for the query parameter is 'apiver' but can be specified using the `:parameter` option.
 
@@ -178,16 +203,16 @@ The default name for the query parameter is 'apiver' but can be specified using 
 version 'v1', :using => :param, :parameter => "v"
 ```
 
-    curl -H http://localhost:9292/events?v=v1
+    curl -H http://localhost:9292/statuses/public_timeline?v=v1
 
 ## Describing Methods
 
 You can add a description to API methods and namespaces.
 
 ``` ruby
-desc "Returns a reticulated spline."
-get "spline/:id" do
-  Spline.find(params[:id])
+desc "Returns your public timeline."
+get :public_timeline do
+  Tweet.limit(20)
 end
 ```
 
@@ -197,8 +222,8 @@ Request parameters are available through the `params` hash object. This includes
 along with any named parameters you specify in your route strings.
 
 ```ruby
-get do
-  Article.order(params[:sort_by])
+get :public_timeline do
+  Tweet.order(params[:sort_by])
 end
 ```
 
@@ -206,13 +231,13 @@ Parameters are also populated from the request body on POST and PUT for JSON and
 
 The Request:
 
-```curl -d '{"some_key": "some_value"}' 'http://localhost:9292/json_endpoint' -H Content-Type:application/json -v```
+```curl -d '{"text": "140 characters"}' 'http://localhost:9292/statuses' -H Content-Type:application/json -v```
 
 The Grape Endpoint:
 
 ```ruby
-post '/json_endpoint' do
-    params[:some_key]
+post '/statuses' do
+  Tweet.create!({ :text => params[:text] })
 end
 ```
 
@@ -223,14 +248,12 @@ You can define validations and coercion options for your parameters using a `par
 ```ruby
 params do
   requires :id, type: Integer
-  optional :name, type: String, regexp: /^[a-z]+$/
-
-  group :user do
-    requires :first_name
-    requires :last_name
+  optional :text, type: String, regexp: /^[a-z]+$/
+  group :media do
+    requires :url
   end
 end
-get ':id' do
+put ':id' do
   # params[:id] is an Integer
 end
 ```
@@ -238,31 +261,32 @@ end
 When a type is specified an implicit validation is done after the coercion to ensure
 the output type is the one declared.
 
-Parameters can be nested using `group`. In the above example, this means both
-`params[:user][:first_name]` and `params[:user][:last_name]` are required next to `params[:id]`.
+Parameters can be nested using `group`. In the above example, this means
+`params[:media][:url]` is required along with `params[:id]`.
 
 ### Namespace Validation and Coercion
+
 Namespaces allow parameter definitions and apply to every method within the namespace.
 
 ```ruby
-namespace :shelves do
+namespace :statuses do
   params do
-    requires :shelf_id, type: Integer, desc: "A shelf."
+    requires :user_id, type: Integer, desc: "A user ID."
   end
-  namespace ":shelf_id" do
-    desc "Retrieve a book from a shelf."
+  namespace ":user_id" do
+    desc "Retrieve a user's tweet."
     params do
-      requires :book_id, type: Integer, desc: "A book."
+      requires :tweet_id, type: Integer, desc: "A tweet ID."
     end
-    get ":book_id" do
-      # params[:shelf_id] defines a shelf
-      # params[:book_id] defines a book
+    get ":tweet_id" do
+      User.find(params[:user_id]).tweets.find(params[:tweet_id])
     end
   end
 end
 ```
 
 ### Custom Validators
+
 ```ruby
 class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
@@ -275,7 +299,7 @@ end
 
 ```ruby
 params do
-  requires :username, :alpha_numeric => true
+  requires :text, :alpha_numeric => true
 end
 ```
 
@@ -284,8 +308,8 @@ You can also create custom classes that take parameters.
 ```ruby
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
-    unless params[attr_name].length == @option
-      throw :error, :status => 400, :message => "#{attr_name}: must be #{@option} characters long"
+    unless params[attr_name].length <= @option
+      throw :error, :status => 400, :message => "#{attr_name}: must be at the most #{@option} characters long"
     end
   end
 end
@@ -293,7 +317,7 @@ end
 
 ```ruby
 params do
-  requires :name, :length => 5
+  requires :text, :length => 140
 end
 ```
 
@@ -326,7 +350,7 @@ end
 
 ```ruby
 get do
-    error! 'Unauthorized', 401 unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
+    error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
     ...
 end
 ```
@@ -337,7 +361,7 @@ Optionally, you can define requirements for your named route parameters using re
 expressions. The route will match only if all requirements are met.
 
 ```ruby
-get '/show/:id', :requirements => { :id => /[0-9]*/ } do
+get ':id', :requirements => { :id => /[0-9]*/ } do
   Tweet.find(params[:id])
 end
 ```
@@ -348,9 +372,9 @@ You can define helper methods that your endpoints can use with the `helpers`
 macro by either giving a block or a module.
 
 ``` ruby
-module MyHelpers
-  def say_hello(user)
-    "hey there #{user.name}"
+module TweetHelpers
+  def user_info(user)
+    "#{user} has tweeted #{user.tweets} tweet(s)"
   end
 end
 
@@ -363,11 +387,11 @@ class API < Grape::API
   end
 
   # or mix in a module
-  helpers MyHelpers
+  helpers TweetHelpers
 
-  get '/hello' do
+  get 'info' do
     # helpers available in your endpoint and filters
-    say_hello(current_user)
+    user_info(current_user)
   end
 end
 ```
@@ -378,28 +402,31 @@ You can set, get and delete your cookies very simply using `cookies` method.
 
 ``` ruby
 class API < Grape::API
-  get '/counter' do
-    cookies[:counter] ||= 0
-    cookies[:counter] += 1
-    { :counter => cookies[:counter] }
+
+  get 'tweet_count' do
+    cookies[:tweet_count] ||= 0
+    cookies[:tweet_count] += 1
+    { :tweet_count => cookies[:tweet_count] }
   end
 
-  delete '/counter' do
-    { :result => cookies.delete(:counter) }
+  delete 'tweet_count' do
+    { :tweet_count => cookies.delete(:tweet_count) }
   end
+
 end
 ```
 
-To set more than value use hash-based syntax.
+Use a hash-based syntax to set more than one value.
 
 ``` ruby
-cookies[:counter] = {
+cookies[:tweet_count] = {
     :value => 0,
     :expires => Time.tomorrow,
-    :domain => '.example.com',
+    :domain => '.twitter.com',
     :path => '/'
 }
-cookies[:counter][:value] +=1
+
+cookies[:tweet_count][:value] +=1
 ```
 
 ## Redirecting
@@ -407,51 +434,52 @@ cookies[:counter][:value] +=1
 You can redirect to a new url temporarily (302) or permanently (301).
 
 ``` ruby
-redirect "/new_url"
+redirect "/statuses"
 ```
 
 ``` ruby
-redirect "/new_url", :permanent => true
+redirect "/statuses", :permanent => true
 ```
 
 ## Allowed Methods
 
 When you add a route for a resource, a route for the HTTP OPTIONS
 method will also be added. The response to an OPTIONS request will
-include an Allow header listing the supported methods.
+include an "Allow" header listing the supported methods.
 
 ``` ruby
 class API < Grape::API
-  get '/counter' do
-    { :counter => Counter.count }
+
+  get '/retweet_count' do
+    { :retweet_count => current_user.retweet_count }
   end
 
   params do
-    requires :value, :type => Integer, :desc => 'value to add to counter'
+    requires :value, :type => Integer, :desc => 'Value to add to the retweet count.'
   end
-  put '/counter' do
-    { :counter => Counter.incr(params.value) }
+  put '/retweet_count' do
+    current_user.retweet_count += params[:value].to_i
+    { :retweet_count => current_user.retweet_count }
   end
 end
 ```
 
 ``` shell
-curl -v -X OPTIONS http://localhost:3000/counter
+curl -v -X OPTIONS http://localhost:3000/retweet_count
 
-> OPTIONS /counter HTTP/1.1
+> OPTIONS /retweet_count HTTP/1.1
 >
 < HTTP/1.1 204 No Content
 < Allow: OPTIONS, GET, PUT
 ```
 
-
 If a request for a resource is made with an unsupported HTTP method, an
 HTTP 405 (Method Not Allowed) response will be returned.
 
 ``` shell
-curl -X DELETE -v http://localhost:3000/counter/
+curl -X DELETE -v http://localhost:3000/retweet_count/
 
-> DELETE /counter/ HTTP/1.1
+> DELETE /retweet_count/ HTTP/1.1
 > Host: localhost:3000
 >
 < HTTP/1.1 405 Method Not Allowed
@@ -475,8 +503,7 @@ error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 
 ## Exception Handling
 
-Grape can be told to rescue all exceptions and instead return them in
-txt or json formats.
+Grape can be told to rescue all exceptions and return them in txt or json formats.
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -566,9 +593,9 @@ class API < Grape::API
       API.logger
     end
   end
-  get '/hello' do
-    logger.info "someone said hello"
-    "hey there"
+  post '/statuses' do
+    ...
+    logger.info "#{current_user} has tweeted"
   end
 end
 ```
@@ -589,9 +616,8 @@ class API < Grape::API
       API.logger
     end
   end
-  get '/hello' do
-    logger.warning "someone said hello"
-    "hey there"
+  get '/statuses' do
+    logger.warning "#{current_user} has tweeted"
   end
 end
 ```
@@ -601,15 +627,26 @@ end
 By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types.
 Serialization takes place automatically.
 
-Your API can declare additional types to support. Response format is determined by the
-request's extension, an explicit `format` parameter in the query string, or `Accept` header.
+Your API can declare which types to support by using `content_type`. Response format
+is determined by the request's extension, an explicit `format` parameter in the query
+string, or `Accept` header.
+
+The following API will only respond to the JSON content-type. All other requests will
+fail with an HTTP 406 error code.
+
+``` ruby
+class Twitter::API < Grape::API
+  format :json
+  content_type :json, "application/json"
+end
+```
 
 Custom formatters for existing and additional types can be defined with a proc.
 
 ``` ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
-  formatter :xls, lambda { |object| object.to_fancy_xls }
+  formatter :xls, lambda { |object| object.to_xls }
 end
 ```
 
@@ -618,7 +655,7 @@ You can also use a module or class.
 ``` ruby
 module XlsFormatter
   def self.call(object)
-    object.to_fancy_xls
+    object.to_xls
   end
 end
 
@@ -628,7 +665,24 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can set the default format. Available formats are the following.
+The default format is `:txt`. You can set the preferred format for an API that
+supports multiple formats with `format`.
+
+``` ruby
+class Twitter::API < Grape::API
+  format :json
+end
+```
+
+You can set the fallback, default format with `default_format`.
+
+``` ruby
+class Twitter::API < Grape::API
+  default_format :json
+end
+```
+
+Available formats are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
@@ -644,25 +698,13 @@ The order for choosing the format is the following.
 * Use the default format, if specified by the `default_format` option.
 * Default to `:txt` otherwise.
 
-``` ruby
-class Twitter::API < Grape::API
-  format :json
-end
-```
-
-``` ruby
-class Twitter::API < Grape::API
-  default_format :json
-end
-```
-
-You can override the content-type by setting the `Content-Type` header.
+You can override the content-type of the response by setting the `Content-Type` header.
 
 ``` ruby
 class API < Grape::API
-  get '/script' do
+  get '/home_timeline_js' do
     content_type "application/javascript"
-    "var x = 1;"
+    "var tweets = ...;"
   end
 end
 ```
@@ -701,21 +743,21 @@ array.
 ``` ruby
 module API
   module Entities
-    class User < Grape::Entity
-      expose :first_name, :last_name
-      expose :field, :documentation => { :type => "string", :desc => "words go here" }
-      expose :email, :if => { :type => :full }
-      expose :user_type, user_id, :if => lambda{ |user,options| user.confirmed? }
-      expose(:name) { |user,options| [ user.first_name, user.last_name ].join(' ')}
-      expose :latest_status, :using => API::Status, :as => :status
+    class Status < Grape::Entity
+      expose :user_name
+      expose :text, :documentation => { :type => "string", :desc => "Status update text." }
+      expose :ip, :if => { :type => :full }
+      expose :user_type, user_id, :if => lambda{ |status, options| status.user.public? }
+      expose :digest { |status, options| Digest::MD5.hexdigest(satus.txt) }
+      expose :replies, :using => API::Status, :as => :replies
     end
   end
 end
 
 module API
   module Entities
-    class UserDetailed < API::Entities::User
-      expose :account_id
+    class StatusDetailed < API::Entities::Status
+      expose :internal_id
     end
   end
 end
@@ -727,20 +769,18 @@ Grape ships with a DSL to easily define entities within the context
 of an existing class:
 
 ```ruby
-class User
+class Status
   include Grape::Entity::DSL
 
-  entity :name, :email do
-    expose :advanced, if: :conditional
+  entity :text, :user_id do
+    expose :detailed, if: :conditional
   end
 end
 ```
 
-The above will automatically create a `User::Entity` class and
-define properties on it according to the same rules as above. If
-you only want to define simple exposures you don't have to supply
-a block and can instead simply supply a list of comma-separated
-symbols.
+The above will automatically create a `Status::Entity` class and define properties on it according
+to the same rules as above. If you only want to define simple exposures you don't have to supply
+a block and can instead simply supply a list of comma-separated symbols.
 
 ### Using Entities
 
@@ -752,16 +792,16 @@ If the entity includes documentation it can be included in an endpoint's descrip
 
 ``` ruby
 module API
-  class Users < Grape::API
+  class Statuses < Grape::API
     version 'v1'
 
-    desc 'User index', {
-      :object_fields => API::Entities::User.documentation
+    desc 'Statuses index', {
+      :object_fields => API::Entities::Status.documentation
     }
-    get '/users' do
-      @users = User.all
+    get '/statues' do
+      statuses = Status.all
       type = current_user.admin? ? :full : :default
-      present @users, with: API::Entities::User, :type => type
+      present statues, with: API::Entities::Status, :type => type
     end
   end
 end
@@ -769,28 +809,25 @@ end
 
 ### Entity Organization
 
-In addition to separately organizing entities, it may be useful to
-put them as namespaced classes underneath the model they represent.
-For example:
+In addition to separately organizing entities, it may be useful to put them as namespaced
+classes underneath the model they represent.
 
 ```ruby
-class User
+class Status
   def entity
-    Entity.new(self)
+    Status.new(self)
   end
 
   class Entity < Grape::Entity
-    expose :name, :email
+    expose :text, :user_id
   end
 end
 ```
 
-If you organize your entities this way, Grape will automatically
-detect the `Entity` class and use it to present your models. In
-this example, if you added `present User.new` to your endpoint,
-Grape would automatically detect that there is a `User::Entity`
-class and use that as the representative entity. This can still
-be overridden by using the `:with` option or an explicit
+If you organize your entities this way, Grape will automatically detect the `Entity` class and
+use it to present your models. In this example, if you added `present User.new` to your endpoint,
+Grape would automatically detect that there is a `Status::Entity` class and use that as the
+representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
 ### Caveats
@@ -802,7 +839,7 @@ However, when `object.check` equals "bar" both `field_b` and `foo` will be expos
 ```ruby
 module API
   module Entities
-    class User < Grape::Entity
+    class Status < Grape::Entity
       expose :field_a, :foo, :if => lambda { |object, options| object.check == "foo" }
       expose :field_b, :foo, :if => lambda { |object, options| object.check == "bar" }
     end
@@ -815,7 +852,7 @@ This can be problematic, when you have mixed collections. Using `respond_to?` is
 ```ruby
 module API
   module Entities
-    class User < Grape::Entity
+    class Status < Grape::Entity
       expose :field_a, :if => lambda { |object, options| object.check == "foo" }
       expose :field_b, :if => lambda { |object, options| object.check == "bar" }
       expose :foo, :if => lambda { |object, options| object.respond_to?(:foo) }
@@ -870,20 +907,20 @@ In Grape this option can be used as well when a method is defined.
 For instance when you're API needs to get part of an URL, for instance:
 
 ``` ruby
-class UrlAPI < Grape::API
-  namespace :urls do
-    get '/(*:url)', :anchor => false do
-      some_data
+class TwitterAPI < Grape::API
+  namespace :statues do
+    get '/(*:status)', :anchor => false do
+
     end
   end
 end
 ```
 
-This will match all paths starting with '/urls/'. There is one caveat though:
-the `params[:url]` parameter only holds the first part of the request url.
+This will match all paths starting with '/statuses/'. There is one caveat though:
+the `params[:status]` parameter only holds the first part of the request url.
 Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
-`env["PATH_INFO"]`. This will hold everything that comes after the '/urls/'
+`env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
 
 ## Writing Tests
