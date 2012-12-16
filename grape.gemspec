@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'multi_xml'
   s.add_runtime_dependency 'hashie', '~> 1.2'
   s.add_runtime_dependency 'virtus'
+  s.add_runtime_dependency 'builder'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'maruku'
@@ -30,7 +31,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'rspec', '~> 2.9'
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'builder'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
