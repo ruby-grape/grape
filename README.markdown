@@ -57,55 +57,55 @@ class Twitter::API < Grape::API
 
     desc "Return a public timeline."
     get :public_timeline do
-      Tweet.limit(20)
+      Status.limit(20)
     end
 
     desc "Return a personal timeline."
     get :home_timeline do
       authenticate!
-      current_user.tweets.limit(20)
+      current_user.statuses.limit(20)
     end
 
-    desc "Return a tweet."
+    desc "Return a status."
     params do
-      requires :id, :type => Integer, :desc => "Tweet id."
+      requires :id, :type => Integer, :desc => "Status id."
     end
     get ':id' do
-      Tweet.find(params[:id])
+      Status.find(params[:id])
     end
 
-    desc "Create a tweet."
+    desc "Create a status."
     params do
       requires :status, :type => String, :desc => "Your status."
     end
     post do
       authenticate!
-      Tweet.create!({
+      Status.create!({
         :user => current_user,
         :text => params[:status]
       })
     end
 
-    desc "Update a tweet."
+    desc "Update a status."
     params do
-      requires :id, :type => String, :desc => "Tweet ID."
+      requires :id, :type => String, :desc => "Status ID."
       requires :status, :type => String, :desc => "Your status."
     end
     put ':id' do
       authenticate!
-      current_user.tweets.find(params[:id]).update({
+      current_user.statuses.find(params[:id]).update({
         :user => current_user,
         :text => params[:status]
       })
     end
 
-    desc "Delete a tweet."
+    desc "Delete a status."
     params do
-      requires :id, :type => String, :desc => "Tweet ID."
+      requires :id, :type => String, :desc => "Status ID."
     end
     delete ':id' do
       authenticate!
-      current_user.tweets.find(params[:id]).destroy
+      current_user.statuses.find(params[:id]).destroy
     end
 
   end
@@ -212,7 +212,7 @@ You can add a description to API methods and namespaces.
 ``` ruby
 desc "Returns your public timeline."
 get :public_timeline do
-  Tweet.limit(20)
+  Status.limit(20)
 end
 ```
 
@@ -223,7 +223,7 @@ along with any named parameters you specify in your route strings.
 
 ```ruby
 get :public_timeline do
-  Tweet.order(params[:sort_by])
+  Status.order(params[:sort_by])
 end
 ```
 
@@ -237,7 +237,7 @@ The Grape Endpoint:
 
 ```ruby
 post '/statuses' do
-  Tweet.create!({ :text => params[:text] })
+  Status.create!({ :text => params[:text] })
 end
 ```
 
@@ -274,12 +274,12 @@ namespace :statuses do
     requires :user_id, type: Integer, desc: "A user ID."
   end
   namespace ":user_id" do
-    desc "Retrieve a user's tweet."
+    desc "Retrieve a user's status."
     params do
-      requires :tweet_id, type: Integer, desc: "A tweet ID."
+      requires :status_id, type: Integer, desc: "A status ID."
     end
-    get ":tweet_id" do
-      User.find(params[:user_id]).tweets.find(params[:tweet_id])
+    get ":status_id" do
+      User.find(params[:user_id]).statuses.find(params[:status_id])
     end
   end
 end
@@ -362,7 +362,7 @@ expressions. The route will match only if all requirements are met.
 
 ```ruby
 get ':id', :requirements => { :id => /[0-9]*/ } do
-  Tweet.find(params[:id])
+  Status.find(params[:id])
 end
 ```
 
@@ -372,9 +372,9 @@ You can define helper methods that your endpoints can use with the `helpers`
 macro by either giving a block or a module.
 
 ``` ruby
-module TweetHelpers
+module StatusHelpers
   def user_info(user)
-    "#{user} has tweeted #{user.tweets} tweet(s)"
+    "#{user} has statused #{user.statuses} status(s)"
   end
 end
 
@@ -387,7 +387,7 @@ class API < Grape::API
   end
 
   # or mix in a module
-  helpers TweetHelpers
+  helpers StatusHelpers
 
   get 'info' do
     # helpers available in your endpoint and filters
@@ -403,14 +403,14 @@ You can set, get and delete your cookies very simply using `cookies` method.
 ``` ruby
 class API < Grape::API
 
-  get 'tweet_count' do
-    cookies[:tweet_count] ||= 0
-    cookies[:tweet_count] += 1
-    { :tweet_count => cookies[:tweet_count] }
+  get 'status_count' do
+    cookies[:status_count] ||= 0
+    cookies[:status_count] += 1
+    { :status_count => cookies[:status_count] }
   end
 
-  delete 'tweet_count' do
-    { :tweet_count => cookies.delete(:tweet_count) }
+  delete 'status_count' do
+    { :status_count => cookies.delete(:status_count) }
   end
 
 end
@@ -419,14 +419,14 @@ end
 Use a hash-based syntax to set more than one value.
 
 ``` ruby
-cookies[:tweet_count] = {
+cookies[:status_count] = {
     :value => 0,
     :expires => Time.tomorrow,
     :domain => '.twitter.com',
     :path => '/'
 }
 
-cookies[:tweet_count][:value] +=1
+cookies[:status_count][:value] +=1
 ```
 
 ## Redirecting
@@ -450,24 +450,24 @@ include an "Allow" header listing the supported methods.
 ``` ruby
 class API < Grape::API
 
-  get '/retweet_count' do
-    { :retweet_count => current_user.retweet_count }
+  get '/rt_count' do
+    { :rt_count => current_user.rt_count }
   end
 
   params do
-    requires :value, :type => Integer, :desc => 'Value to add to the retweet count.'
+    requires :value, :type => Integer, :desc => 'Value to add to the rt count.'
   end
-  put '/retweet_count' do
-    current_user.retweet_count += params[:value].to_i
-    { :retweet_count => current_user.retweet_count }
+  put '/rt_count' do
+    current_user.rt_count += params[:value].to_i
+    { :rt_count => current_user.rt_count }
   end
 end
 ```
 
 ``` shell
-curl -v -X OPTIONS http://localhost:3000/retweet_count
+curl -v -X OPTIONS http://localhost:3000/rt_count
 
-> OPTIONS /retweet_count HTTP/1.1
+> OPTIONS /rt_count HTTP/1.1
 >
 < HTTP/1.1 204 No Content
 < Allow: OPTIONS, GET, PUT
@@ -477,9 +477,9 @@ If a request for a resource is made with an unsupported HTTP method, an
 HTTP 405 (Method Not Allowed) response will be returned.
 
 ``` shell
-curl -X DELETE -v http://localhost:3000/retweet_count/
+curl -X DELETE -v http://localhost:3000/rt_count/
 
-> DELETE /retweet_count/ HTTP/1.1
+> DELETE /rt_count/ HTTP/1.1
 > Host: localhost:3000
 >
 < HTTP/1.1 405 Method Not Allowed
@@ -595,7 +595,7 @@ class API < Grape::API
   end
   post '/statuses' do
     ...
-    logger.info "#{current_user} has tweeted"
+    logger.info "#{current_user} has statused"
   end
 end
 ```
@@ -617,7 +617,7 @@ class API < Grape::API
     end
   end
   get '/statuses' do
-    logger.warning "#{current_user} has tweeted"
+    logger.warning "#{current_user} has statused"
   end
 end
 ```
@@ -704,7 +704,7 @@ You can override the content-type of the response by setting the `Content-Type` 
 class API < Grape::API
   get '/home_timeline_js' do
     content_type "application/javascript"
-    "var tweets = ...;"
+    "var statuses = ...;"
   end
 end
 ```
