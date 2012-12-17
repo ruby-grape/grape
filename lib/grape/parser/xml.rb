@@ -3,7 +3,7 @@ module Grape
     module Xml
       class << self
 
-        def call(object)
+        def call(object, env)
           MultiXml.parse(object)
         end
 

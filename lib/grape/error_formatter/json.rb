@@ -3,7 +3,7 @@ module Grape
     module Json
       class << self
 
-        def call(message, backtrace, options = {})
+        def call(message, backtrace, options = {}, env = nil)
           result = message.is_a?(Hash) ? message : { :error => message }
           if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
             result = result.merge({ :backtrace => backtrace })

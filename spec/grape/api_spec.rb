@@ -899,7 +899,7 @@ describe Grape::API do
     context "class" do
       before :each do
         class CustomErrorFormatter
-          def self.call(message, backtrace, options)
+          def self.call(message, backtrace, options, env)
             "message: #{message} @backtrace"
           end
         end
@@ -984,8 +984,8 @@ describe Grape::API do
   describe ".formatter" do
     context "multiple formatters" do
       before :each do
-        subject.formatter :json, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
-        subject.formatter :txt, lambda { |object| "custom_formatter: #{object[:some]}" }
+        subject.formatter :json, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.formatter :txt, lambda { |object, env| "custom_formatter: #{object[:some]}" }
         subject.get :simple do
           {:some => 'hash'}
         end
@@ -1003,7 +1003,7 @@ describe Grape::API do
       before :each do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, lambda { |object| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.formatter :custom, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some]}\"}" }
         subject.get :simple do
           {:some => 'hash'}
         end
@@ -1019,7 +1019,7 @@ describe Grape::API do
     end
     context "custom formatter class" do
       module CustomFormatter
-        def self.call(object)
+        def self.call(object, env)
           "{\"custom_formatter\":\"#{object[:some]}\"}"
         end
       end

@@ -3,7 +3,7 @@ module Grape
     module SerializableHash
       class << self
 
-        def call(object)
+        def call(object, env)
           return object if object.is_a?(String)
           return MultiJson.dump(serialize(object)) if serializable?(object)
           return object.to_json if object.respond_to?(:to_json)

@@ -19,7 +19,7 @@ module Grape
           spec = formatters(options)[api_format]
           case spec
           when nil
-            lambda { |obj| obj }
+            lambda { |obj, env| obj }
           when Symbol
             method(spec)
           else

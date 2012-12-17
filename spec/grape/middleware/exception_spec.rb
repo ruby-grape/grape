@@ -130,7 +130,7 @@ describe Grape::Middleware::Error do
           :rescue_all => true,
           :format => :custom,
           :error_formatters => {
-            :custom => lambda { |message, backtrace, options|
+            :custom => lambda { |message, backtrace, options, env|
               { :custom_formatter => message }.inspect
             }
           }

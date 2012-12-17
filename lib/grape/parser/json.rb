@@ -3,7 +3,7 @@ module Grape
     module Json
       class << self
 
-        def call(object)
+        def call(object, env)
           MultiJson.load(object)
         end
 

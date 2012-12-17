@@ -3,7 +3,7 @@ module Grape
     module Txt
       class << self
 
-        def call(object)
+        def call(object, env)
           object.respond_to?(:to_txt) ? object.to_txt : object.to_s
         end
 

@@ -525,7 +525,9 @@ Custom error formatters for existing and additional types can be defined with a 
 
 ``` ruby
 class Twitter::API < Grape::API
-  error_formatter :txt, lambda { |message, backtrace, options| "error: #{message} from #{backtrace}" }
+  error_formatter :txt, lambda { |message, backtrace, options, env|
+    "error: #{message} from #{backtrace}"
+  }
 end
 ```
 
@@ -533,7 +535,7 @@ You can also use a module or class.
 
 ``` ruby
 module CustomFormatter
-  def self.call(message, backtrace, options)
+  def self.call(message, backtrace, options, env)
     { message: message, backtrace: backtrace }
   end
 end
@@ -646,7 +648,7 @@ Custom formatters for existing and additional types can be defined with a proc.
 ``` ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
-  formatter :xls, lambda { |object| object.to_xls }
+  formatter :xls, lambda { |object, env| object.to_xls }
 end
 ```
 
@@ -654,7 +656,7 @@ You can also use a module or class.
 
 ``` ruby
 module XlsFormatter
-  def self.call(object)
+  def self.call(object, env)
     object.to_xls
   end
 end
