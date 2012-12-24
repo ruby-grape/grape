@@ -869,13 +869,13 @@ end
 
 Although Grape ships with its own entity support, it's also possible to use it with other frameworks and renderers.
 
-### Hypermedia w/ [Roar](https://github.com/apotonick/roar)
+### Hypermedia
 
-Include `Roar::Representer::JSON` in your models or call `to_json` explicitly on representers in your API.
+Use [Roar](https://github.com/apotonick/roar). Include `Roar::Representer::JSON` in your models or call `to_json` explicitly on representers in your API.
 
-### [Rabl](https://github.com/nesquena/rabl)
+### Rabl
 
-Use [grape-rabl](https://github.com/LTe/grape-rabl).
+[Rabl](https://github.com/nesquena/rabl) is supported via the [grape-rabl](https://github.com/LTe/grape-rabl) gem.
 
 ## Describing and Inspecting an API
 
