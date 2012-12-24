@@ -700,6 +700,8 @@ The order for choosing the format is the following.
 * Use the default format, if specified by the `default_format` option.
 * Default to `:txt` otherwise.
 
+## Content-type
+
 You can override the content-type of the response by setting the `Content-Type` header.
 
 ``` ruby
@@ -862,6 +864,18 @@ module API
   end
 end
 ```
+
+## Hypermedia and other RESTful Representations
+
+Although Grape ships with its own entity support, it's also possible to use it with other frameworks and renderers.
+
+### Hypermedia w/ [Roar](https://github.com/apotonick/roar)
+
+Include `Roar::Representer::JSON` in your models or call `to_json` explicitly on representers in your API.
+
+### [Rabl](https://github.com/nesquena/rabl)
+
+Use [grape-rabl](https://github.com/LTe/grape-rabl).
 
 ## Describing and Inspecting an API
 

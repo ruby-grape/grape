@@ -1,5 +1,5 @@
-0.2.3 (Next Release)
-====================
+0.2.3 (24/12/2012)
+==================
 
 * [#179](https://github.com/intridea/grape/issues/178): Using `content_type` will remove all default content-types - [@dblock](https://github.com/dblock).
 * [#265](https://github.com/intridea/grape/issues/264): Fix: Moved `ValidationError` into `Grape::Exceptions` - [@thepumpkin1979](https://github.com/thepumpkin1979).
@@ -11,7 +11,6 @@
 * [#285](https://github.com/intridea/grape/pull/285): Removed `error_format` from API settings, now matches request format - [@dblock](https://github.com/dblock).
 * [#290](https://github.com/intridea/grape/pull/290): The default error format for XML is now `error/message` instead of `hash/error` - [@dpsk](https://github.com/dpsk).
 * [#44](https://github.com/intridea/grape/issues/44): Pass `env` into formatters to enable templating - [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 0.2.2
 =====
