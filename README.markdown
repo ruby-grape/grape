@@ -17,8 +17,8 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.2.3.
-The current stable release is [0.2.2](https://github.com/intridea/grape/blob/v0.2.2/README.markdown).
+You're reading the documentation for the next release of Grape, which should be 0.2.4.
+The current stable release is [0.2.3](https://github.com/intridea/grape/blob/v0.2.3/README.markdown).
 
 ## Installation
 
