@@ -1,6 +1,7 @@
 0.2.4 (Next Release)
 ====================
 
+* [#296](https://github.com/intridea/grape/issues/296): Fix: ArgumentError with default error formatter - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.2.3 (24/12/2012)

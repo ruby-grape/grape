@@ -875,7 +875,7 @@ describe Grape::API do
     end
   end
 
-  describe ".format for error" do
+  describe ".error_format" do
     it 'should rescue all errors and return :txt' do
       subject.rescue_from :all
       subject.format :txt
@@ -894,6 +894,17 @@ describe Grape::API do
       end
       get '/exception'
       last_response.body.start_with?("rain!\r\n").should be_true
+    end
+
+    it 'should rescue all errors with a default formatter' do
+      subject.default_format :foo
+      subject.content_type :foo, "text/foo"
+      subject.rescue_from :all
+      subject.get '/exception' do
+        raise "rain!"
+      end
+      get '/exception.foo'
+      last_response.body.should start_with "rain!"
     end
 
     context "class" do

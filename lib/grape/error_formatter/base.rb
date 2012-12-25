@@ -18,7 +18,7 @@ module Grape
           spec = formatters(options)[api_format]
           case spec
           when nil
-            lambda { |message, backtrace, options| message }
+            Grape::ErrorFormatter::Txt
           when Symbol
             method(spec)
           else
