@@ -125,14 +125,24 @@ module Grape
       end
 
       # Specify the format for the API's serializers.
-      # May be `:json` or `:txt`.
+      # May be `:json`, `:xml`, `:txt`, etc.
       def format(new_format = nil)
-        new_format ? set(:format, new_format.to_sym) : settings[:format]
+        if new_format
+          set(:format, new_format.to_sym)
+          set(:default_error_formatter, Grape::ErrorFormatter::Base.formatter_for(new_format, {}))
+        else
+          settings[:format]
+        end
       end
 
       # Specify a custom formatter for a content-type.
       def formatter(content_type, new_formatter)
         settings.imbue(:formatters, content_type.to_sym => new_formatter)
+      end
+
+      # Specify a default error formatter.
+      def default_error_formatter(new_formatter = nil)
+        new_formatter ? set(:default_error_formatter, new_formatter) : settings[:default_error_formatter]
       end
 
       def error_formatter(format, new_formatter)

@@ -907,6 +907,20 @@ describe Grape::API do
       last_response.body.should start_with "rain!"
     end
 
+    it 'defaults the error formatter to format' do
+      subject.format :json
+      subject.rescue_from :all
+      subject.content_type :json, "application/json"
+      subject.content_type :foo, "text/foo"
+      subject.get '/exception' do
+        raise "rain!"
+      end
+      get '/exception.json'
+      last_response.body.should == '{"error":"rain!"}'
+      get '/exception.foo'
+      last_response.body.should == '{"error":"rain!"}'
+    end
+
     context 'class' do
       before :each do
         class CustomErrorFormatter

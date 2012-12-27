@@ -24,7 +24,9 @@ module Grape
         @options = default_options.merge(options)
       end
 
-      def default_options; {} end
+      def default_options
+        {}
+      end
 
       def call(env)
         dup.call!(env)

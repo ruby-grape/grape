@@ -377,6 +377,7 @@ module Grape
         :default_status => settings[:default_error_status] || 403,
         :rescue_all => settings[:rescue_all],
         :rescued_errors => aggregate_setting(:rescued_errors),
+        :default_error_formatter => settings[:default_error_formatter],
         :error_formatters => settings[:error_formatters],
         :rescue_options => settings[:rescue_options],
         :rescue_handlers => merged_setting(:rescue_handlers)

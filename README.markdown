@@ -503,7 +503,7 @@ error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 
 ## Exception Handling
 
-Grape can be told to rescue all exceptions and return them in txt or json formats.
+Grape can be told to rescue all exceptions and return them in the API format.
 
 ``` ruby
 class Twitter::API < Grape::API
@@ -624,10 +624,11 @@ class API < Grape::API
 end
 ```
 
-## Content-Types
+## API Formats
 
-By default, Grape supports _XML_, _JSON_, _Atom_, _RSS_, and _text_ content-types.
-Serialization takes place automatically.
+By default, Grape supports _XML_, _JSON_, and _TXT_ content-types. The default format is `:txt`. 
+
+Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
 
 Your API can declare which types to support by using `content_type`. Response format
 is determined by the request's extension, an explicit `format` parameter in the query
@@ -642,6 +643,8 @@ class Twitter::API < Grape::API
   content_type :json, "application/json"
 end
 ```
+
+If you combine `format` with `rescue_from :all`, errors will be rendered using the same format. If you do not want this behavior, set the default error formatter with `default_error_formatter`.
 
 Custom formatters for existing and additional types can be defined with a proc.
 
@@ -667,29 +670,20 @@ class Twitter::API < Grape::API
 end
 ```
 
-The default format is `:txt`. You can set the preferred format for an API that
-supports multiple formats with `format`.
+Built-in formats are the following.
 
-``` ruby
-class Twitter::API < Grape::API
-  format :json
-end
-```
+* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
+* `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
+* `:txt`: use object's `to_txt` when available, otherwise `to_s`
+* `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 
-You can set the fallback, default format with `default_format`.
+Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header. See below for the order for choosing the API format.
 
 ``` ruby
 class Twitter::API < Grape::API
   default_format :json
 end
 ```
-
-Available formats are the following.
-
-* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
-* `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
-* `:txt`: use object's `to_txt` when available, otherwise `to_s`
-* `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 
 The order for choosing the format is the following.
 
@@ -698,7 +692,7 @@ The order for choosing the format is the following.
 * Use the format set by the `format` option, if specified.
 * Attempt to find an acceptable format from the `Accept` header.
 * Use the default format, if specified by the `default_format` option.
-* Default to `:txt` otherwise.
+* Default to `:txt`.
 
 ## Content-type
 
@@ -1018,8 +1012,7 @@ features and discuss issues.
 * Fork the project
 * Write tests for your new feature or a test that reproduces a bug
 * Implement your feature or make a bug fix
-* Do not mess with Rakefile, version or history
-* Add a line to CHANGELOG.markdown describing your change
+* Add a line to `CHANGELOG.markdown` describing your change
 * Commit, push and make a pull request. Bonus points for topic branches.
 
 ## License

@@ -6,17 +6,17 @@ module Grape
     class Error < Base
 
       def default_options
-      {
-        :default_status => 403, # default status returned on error
-        :default_message => "",
-        :format => :txt,
-        :formatters => {},
-        :error_formatters => {},
-        :rescue_all => false, # true to rescue all exceptions
-        :rescue_options => { :backtrace => false }, # true to display backtrace
-        :rescue_handlers => {}, # rescue handler blocks
-        :rescued_errors => []
-      }
+        {
+          :default_status => 403, # default status returned on error
+          :default_message => "",
+          :format => :txt,
+          :formatters => {},
+          :error_formatters => {},
+          :rescue_all => false, # true to rescue all exceptions
+          :rescue_options => { :backtrace => false }, # true to display backtrace
+          :rescue_handlers => {}, # rescue handler blocks
+          :rescued_errors => []
+        }
       end
 
       def call!(env)
