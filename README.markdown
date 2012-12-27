@@ -1019,6 +1019,7 @@ features and discuss issues.
 * Write tests for your new feature or a test that reproduces a bug
 * Implement your feature or make a bug fix
 * Do not mess with Rakefile, version or history
+* Add a line to CHANGELOG.markdown describing your change
 * Commit, push and make a pull request. Bonus points for topic branches.
 
 ## License
