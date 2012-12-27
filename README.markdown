@@ -962,7 +962,7 @@ describe Twitter::API do
       it "returns an empty array of statuses" do
         get "/api/v1/statuses"
         last_response.status.should == 200
-        JSON.parse(response.body).should == []
+        JSON.parse(last_response.body).should == []
       end
     end
     describe "GET /api/v1/statuses/:id" do
