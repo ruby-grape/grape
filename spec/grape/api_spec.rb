@@ -1426,6 +1426,25 @@ describe Grape::API do
     end
   end
 
+  describe ".endpoint" do
+    before(:each) do
+      subject.format :json
+      subject.get '/endpoint/options' do
+        {
+          :path => options[:path],
+          :source_location => source.source_location
+        }
+      end
+    end
+    it 'path' do
+      get '/endpoint/options'
+      options = MultiJson.load(last_response.body)
+      options["path"].should == ["/endpoint/options"]
+      options["source_location"][0].should include "api_spec.rb"
+      options["source_location"][1].to_i.should > 0
+    end
+  end
+
   describe '.route' do
     context 'plain' do
       before(:each) do

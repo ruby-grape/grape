@@ -6,9 +6,9 @@ module Grape
   # An Endpoint is the proxy scope in which all routing
   # blocks are executed. In other words, any methods
   # on the instance level of this class may be called
-  # from inside a `get`, `post`, etc. block.
+  # from inside a `get`, `post`, etc.
   class Endpoint
-    attr_accessor :block, :options, :settings
+    attr_accessor :block, :source, :options, :settings
     attr_reader :env, :request
 
     class << self
@@ -40,6 +40,7 @@ module Grape
       @settings = settings
       if block_given?
         method_name = "#{options[:method]} #{settings.gather(:namespace).join( "/")} #{Array(options[:path]).join("/")}"
+        @source = block
         @block = self.class.generate_api_method(method_name, &block)
       end
       @options = options

@@ -4,6 +4,8 @@
 * [#296](https://github.com/intridea/grape/issues/296): Fix: ArgumentError with default error formatter - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Added `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Setting `format` will automatically set `default_error_formatter` - [@dblock](https://github.com/dblock).
+* [#295](https://github.com/intridea/grape/issues/295): Storing original API source block in endpoint's `source` attribute - [@dblock](https://github.com/dblock).
+
 * Your contribution here.
 
 0.2.3 (24/12/2012)
