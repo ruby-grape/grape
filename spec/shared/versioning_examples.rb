@@ -1,5 +1,5 @@
-shared_examples_for "versioning" do
-  it 'should set the API version' do
+shared_examples_for 'versioning' do
+  it 'sets the API version' do
     subject.version 'v1', macro_options
     subject.get :hello do
       "Version: #{request.env['api.version']}"
@@ -8,7 +8,7 @@ shared_examples_for "versioning" do
     last_response.body.should eql "Version: v1"
   end
 
-  it 'should add the prefix before the API version' do
+  it 'adds the prefix before the API version' do
     subject.prefix 'api'
     subject.version 'v1', macro_options
     subject.get :hello do
@@ -18,7 +18,7 @@ shared_examples_for "versioning" do
     last_response.body.should eql "Version: v1"
   end
 
-  it 'should be able to specify version as a nesting' do
+  it 'is able to specify version as a nesting' do
     subject.version 'v2', macro_options
     subject.get '/awesome' do
       "Radical"
@@ -41,7 +41,7 @@ shared_examples_for "versioning" do
     last_response.status.should eql 404
   end
 
-  it 'should be able to specify multiple versions' do
+  it 'is able to specify multiple versions' do
     subject.version 'v1', 'v2', macro_options
     subject.get 'awesome' do
       "I exist"
@@ -55,7 +55,7 @@ shared_examples_for "versioning" do
     last_response.status.should eql 404
   end
 
-  it 'should allow the same endpoint to be implemented for different versions' do
+  it 'allows the same endpoint to be implemented for different versions' do
     subject.version 'v2', macro_options
     subject.get 'version' do
       request.env['api.version']

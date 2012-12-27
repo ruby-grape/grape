@@ -5,7 +5,7 @@ describe Grape::Endpoint do
   def app; subject end
 
   describe '#initialize' do
-    it 'should take a settings stack, options, and a block' do
+    it 'takes a settings stack, options, and a block' do
       expect{ Grape::Endpoint.new(Grape::Util::HashStack.new, {
         :path => '/',
         :method => :get
@@ -13,14 +13,14 @@ describe Grape::Endpoint do
     end
   end
 
-  it 'should set itself in the env upon call' do
+  it 'sets itself in the env upon call' do
     subject.get('/'){ "Hello world." }
     get '/'
     last_request.env['api.endpoint'].should be_kind_of(Grape::Endpoint)
   end
 
   describe '#status' do
-    it 'should be callable from within a block' do
+    it 'is callable from within a block' do
       subject.get('/home') do
         status 206
         "Hello"
@@ -33,7 +33,7 @@ describe Grape::Endpoint do
   end
 
   describe '#header' do
-    it 'should be callable from within a block' do
+    it 'is callable from within a block' do
       subject.get('/hey') do
         header 'X-Awesome', 'true'
         "Awesome"
@@ -45,7 +45,7 @@ describe Grape::Endpoint do
   end
 
   describe '#cookies' do
-    it 'should be callable from within a block' do
+    it 'is callable from within a block' do
       subject.get('/get/cookies') do
         cookies['my-awesome-cookie1'] = 'is cool'
         cookies['my-awesome-cookie2'] = {
@@ -68,7 +68,7 @@ describe Grape::Endpoint do
       ]
     end
 
-    it "should set browser cookies and should not set response cookies" do
+    it 'sets browser cookies and does not set response cookies' do
       subject.get('/username') do
         cookies[:username]
       end
@@ -79,7 +79,7 @@ describe Grape::Endpoint do
       last_response.headers['Set-Cookie'].should_not =~ /sandbox=true/
     end
 
-    it "should set and update browser cookies" do
+    it 'sets and update browser cookies' do
       subject.get('/username') do
         cookies[:sandbox] = true if cookies[:sandbox] == 'false'
         cookies[:username] += "_test"
@@ -90,7 +90,7 @@ describe Grape::Endpoint do
       last_response.headers['Set-Cookie'].should =~ /sandbox=true/
     end
 
-    it "should delete cookie" do
+    it 'deletes cookie' do
       subject.get('/test') do
         sum = 0
         cookies.each do |name, val|
@@ -118,8 +118,8 @@ describe Grape::Endpoint do
 
     end
 
-    it 'should have as many keys as there are declared params' do
-      subject.get "/declared" do
+    it 'has as many keys as there are declared params' do
+      subject.get '/declared' do
         declared(params).keys.size.should == 2
         ""
       end
@@ -128,8 +128,8 @@ describe Grape::Endpoint do
       last_response.status.should == 200
     end
 
-    it 'should filter out any additional params that are given' do
-      subject.get "/declared" do
+    it 'filters out any additional params that are given' do
+      subject.get '/declared' do
         declared(params).key?(:other).should == false
         ""
       end
@@ -138,8 +138,8 @@ describe Grape::Endpoint do
       last_response.status.should == 200
     end
 
-    it 'should stringify if that option is passed' do
-      subject.get "/declared" do
+    it 'stringifies if that option is passed' do
+      subject.get '/declared' do
         declared(params, :stringify => true)["first"].should == "one"
         ""
       end
@@ -148,8 +148,8 @@ describe Grape::Endpoint do
       last_response.status.should == 200
     end
 
-    it 'should not include missing attributes if that option is passed' do
-      subject.get "/declared" do
+    it 'does not include missing attributes if that option is passed' do
+      subject.get '/declared' do
         declared(params, :include_missing => false)[:second].should == nil
         ""
       end
@@ -160,7 +160,7 @@ describe Grape::Endpoint do
   end
 
   describe '#params' do
-    it 'should be available to the caller' do
+    it 'is available to the caller' do
       subject.get('/hey') do
         params[:howdy]
       end
@@ -169,7 +169,7 @@ describe Grape::Endpoint do
       last_response.body.should == 'hey'
     end
 
-    it 'should parse from path segments' do
+    it 'parses from path segments' do
       subject.get('/hey/:id') do
         params[:id]
       end
@@ -178,7 +178,7 @@ describe Grape::Endpoint do
       last_response.body.should == '12'
     end
 
-    it 'should deeply convert nested params' do
+    it 'deeply converts nested params' do
       subject.get '/location' do
         params[:location][:city]
       end
@@ -187,7 +187,7 @@ describe Grape::Endpoint do
     end
 
     context 'with special requirements' do
-      it 'should parse email param with provided requirements for params' do
+      it 'parses email param with provided requirements for params' do
         subject.get('/:person_email', :requirements => { :person_email => /.*/ }) do
         params[:person_email]
         end
@@ -199,7 +199,7 @@ describe Grape::Endpoint do
         last_response.body.should == 'rodzyn@grape.com.pl'
       end
 
-      it 'should parse many params with provided regexps' do
+      it 'parses many params with provided regexps' do
         subject.get('/:person_email/test/:number',
           :requirements => {
             :person_email => /rodzyn@(.*).com/,
@@ -232,22 +232,22 @@ describe Grape::Endpoint do
         end
       end
 
-      it 'should convert JSON bodies to params' do
+      it 'converts JSON bodies to params' do
         post '/request_body', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == 'Bobby T.'
       end
 
-      it 'should not convert empty JSON bodies to params' do
+      it 'does not convert empty JSON bodies to params' do
         put '/request_body', '', {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == ''
       end
 
-      it 'should convert XML bodies to params' do
+      it 'converts XML bodies to params' do
         post '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
         last_response.body.should == 'Bobby T.'
       end
 
-      it 'should convert XML bodies to params' do
+      it 'converts XML bodies to params' do
         put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
         last_response.body.should == 'Bobby T.'
       end
@@ -262,7 +262,7 @@ describe Grape::Endpoint do
   end
 
   describe '#error!' do
-    it 'should accept a message' do
+    it 'accepts a message' do
       subject.get('/hey') do
         error! "This is not valid."
         "This is valid."
@@ -273,7 +273,7 @@ describe Grape::Endpoint do
       last_response.body.should == "This is not valid."
     end
 
-    it 'should accept a code' do
+    it 'accepts a code' do
       subject.get('/hey') do
         error! "Unauthorized.", 401
       end
@@ -283,7 +283,7 @@ describe Grape::Endpoint do
       last_response.body.should == "Unauthorized."
     end
 
-    it 'should accept an object and render it in format' do
+    it 'accepts an object and render it in format' do
       subject.get '/hey' do
         error!({'dude' => 'rad'}, 403)
       end
@@ -294,8 +294,8 @@ describe Grape::Endpoint do
     end
   end
 
-  describe "#redirect" do
-    it "should redirect to a url with status 302" do
+  describe '#redirect' do
+    it 'redirects to a url with status 302' do
       subject.get('/hey') do
         redirect "/ha"
       end
@@ -305,7 +305,7 @@ describe Grape::Endpoint do
       last_response.body.should eq ""
     end
 
-    it "should have status code 303 if it is not get request and it is http 1.1" do
+    it 'has status code 303 if it is not get request and it is http 1.1' do
       subject.post('/hey') do
         redirect "/ha"
       end
@@ -314,7 +314,7 @@ describe Grape::Endpoint do
       last_response.headers['Location'].should eq "/ha"
     end
 
-    it "support permanent redirect" do
+    it 'support permanent redirect' do
       subject.get('/hey') do
         redirect "/ha", :permanent => true
       end
@@ -325,7 +325,7 @@ describe Grape::Endpoint do
     end
   end
 
-  it 'should not persist params between calls' do
+  it 'does not persist params between calls' do
     subject.post('/new') do
       params[:text]
     end
@@ -337,7 +337,7 @@ describe Grape::Endpoint do
     last_response.body.should == 'def'
   end
 
-  it 'should reset all instance variables (except block) between calls' do
+  it 'resets all instance variables (except block) between calls' do
     subject.helpers do
       def memoized
         @memoized ||= params[:howdy]
@@ -354,7 +354,7 @@ describe Grape::Endpoint do
     last_response.body.should == 'yo'
   end
 
-  it 'should allow explicit return calls' do
+  it 'allows explicit return calls' do
     subject.get('/home') do
       return "Hello"
     end
@@ -364,24 +364,24 @@ describe Grape::Endpoint do
     last_response.body.should == "Hello"
   end
 
-  describe ".generate_api_method" do
-    it "should raise NameError if the method name is already in use" do
+  describe '.generate_api_method' do
+    it 'raises NameError if the method name is already in use' do
       expect {
         Grape::Endpoint.generate_api_method("version", &proc{})
       }.to raise_error(NameError)
     end
-    it "should raise ArgumentError if a block is not given" do
+    it 'raises ArgumentError if a block is not given' do
       expect {
         Grape::Endpoint.generate_api_method("GET without a block method")
       }.to raise_error(ArgumentError)
     end
-    it "should return a Proc" do
+    it 'returns a Proc' do
       Grape::Endpoint.generate_api_method("GET test for a proc", &proc{}).should be_a Proc
     end
   end
 
   describe '#present' do
-    it 'should just set the object as the body if no options are provided' do
+    it 'sets the object as the body if no options are provided' do
       subject.get '/example' do
         present({:abc => 'def'})
         body.should == {:abc => 'def'}
@@ -389,7 +389,7 @@ describe Grape::Endpoint do
       get '/example'
     end
 
-    it 'should call through to the provided entity class if one is given' do
+    it 'calls through to the provided entity class if one is given' do
       subject.get '/example' do
         entity_mock = Object.new
         entity_mock.should_receive(:represent)
@@ -398,7 +398,7 @@ describe Grape::Endpoint do
       get '/example'
     end
 
-    it 'should pull a representation from the class options if it exists' do
+    it 'pulls a representation from the class options if it exists' do
       entity = Class.new(Grape::Entity)
       entity.stub!(:represent).and_return("Hiya")
 
@@ -410,7 +410,7 @@ describe Grape::Endpoint do
       last_response.body.should == 'Hiya'
     end
 
-    it 'should pull a representation from the class ancestor if it exists' do
+    it 'pulls a representation from the class ancestor if it exists' do
       entity = Class.new(Grape::Entity)
       entity.stub!(:represent).and_return("Hiya")
 
@@ -424,7 +424,7 @@ describe Grape::Endpoint do
       last_response.body.should == 'Hiya'
     end
 
-    it 'should automatically use Klass::Entity if that exists' do
+    it 'automatically uses Klass::Entity if that exists' do
       some_model = Class.new
       entity = Class.new(Grape::Entity)
       entity.stub!(:represent).and_return("Auto-detect!")
@@ -438,7 +438,7 @@ describe Grape::Endpoint do
       last_response.body.should == 'Auto-detect!'
     end
 
-    it 'should add a root key to the output if one is given' do
+    it 'adds a root key to the output if one is given' do
       subject.get '/example' do
         present({:abc => 'def'}, :root => :root)
         body.should == {:root => {:abc => 'def'}}
@@ -449,7 +449,7 @@ describe Grape::Endpoint do
 
   context 'filters' do
     describe 'before filters' do
-      it 'should run the before filter if set' do
+      it 'runs the before filter if set' do
         subject.before{ env['before_test'] = "OK" }
         subject.get('/before_test'){ env['before_test'] }
 
@@ -459,14 +459,14 @@ describe Grape::Endpoint do
     end
 
     describe 'after filters' do
-      it 'should override the response body if it sets it' do
+      it 'overrides the response body if it sets it' do
         subject.after{ body "after" }
         subject.get('/after_test'){ "during" }
         get '/after_test'
         last_response.body.should == 'after'
       end
 
-      it 'should not override the response body with its return' do
+      it 'does not override the response body with its return' do
         subject.after{ "after" }
         subject.get('/after_test'){ "body" }
         get '/after_test'
@@ -479,7 +479,7 @@ describe Grape::Endpoint do
     verbs = %w(post get head delete put options patch)
 
     verbs.each do |verb|
-      it "should allow for the anchoring option with a #{verb.upcase} method" do
+      it 'allows for the anchoring option with a #{verb.upcase} method' do
         subject.send(verb, '/example', :anchor => true) do
           verb
         end
@@ -487,7 +487,7 @@ describe Grape::Endpoint do
         last_response.status.should eql 404
       end
 
-      it "should anchor paths by default for the #{verb.upcase} method" do
+      it 'anchors paths by default for the #{verb.upcase} method' do
         subject.send(verb, '/example') do
           verb
         end
@@ -495,7 +495,7 @@ describe Grape::Endpoint do
         last_response.status.should eql 404
       end
 
-      it "should respond to /example/and/some/more for the non-anchored #{verb.upcase} method" do
+      it 'responds to /example/and/some/more for the non-anchored #{verb.upcase} method' do
         subject.send(verb, '/example', :anchor => false) do
           verb
         end

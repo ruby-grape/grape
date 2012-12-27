@@ -9,38 +9,38 @@ describe Grape::Middleware::Base do
     subject.stub!(:dup).and_return(subject)
   end
 
-  it 'should have the app as an accessor' do
+  it 'has the app as an accessor' do
     subject.app.should == blank_app
   end
 
-  it 'should be able to access the request' do
+  it 'is able to access the request' do
     subject.call({})
     subject.request.should be_kind_of(Rack::Request)
   end
 
-  it 'should call through to the app' do
+  it 'calls through to the app' do
     subject.call({}).should == [200, {}, 'Hi there.']
   end
 
   context 'callbacks' do
-    it 'should call #before' do
+    it 'calls #before' do
       subject.should_receive(:before)
     end
 
-    it 'should call #after' do
+    it 'calls #after' do
       subject.should_receive(:after)
     end
 
     after{ subject.call!({}) }
   end
 
-  it 'should be able to access the response' do
+  it 'is able to access the response' do
     subject.call({})
     subject.response.should be_kind_of(Rack::Response)
   end
 
   context 'options' do
-    it 'should persist options passed at initialization' do
+    it 'persists options passed at initialization' do
       Grape::Middleware::Base.new(blank_app, {:abc => true}).options[:abc].should be_true
     end
 
@@ -51,11 +51,11 @@ describe Grape::Middleware::Base do
         end
       end
 
-      it 'should persist the default options' do
+      it 'persists the default options' do
         ExampleWare.new(blank_app).options[:monkey].should be_true
       end
 
-      it 'should override default options when provided' do
+      it 'overrides default options when provided' do
         ExampleWare.new(blank_app, :monkey => false).options[:monkey].should be_false
       end
     end

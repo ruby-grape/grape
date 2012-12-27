@@ -32,7 +32,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     context 'and a valid token' do
       before { get '/awesome?oauth_token=g123' }
       
-      it 'should set env["api.token"]' do
+      it 'sets env["api.token"]' do
         last_response.body.should == 'g123'
       end
     end
@@ -44,11 +44,11 @@ describe Grape::Middleware::Auth::OAuth2 do
         end
       end
       
-      it 'should throw an error' do
+      it 'throws an error' do
         @err[:status].should == 401
       end
       
-      it 'should set the WWW-Authenticate header in the response' do
+      it 'sets the WWW-Authenticate header in the response' do
         @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_token'"
       end
     end
@@ -66,7 +66,7 @@ describe Grape::Middleware::Auth::OAuth2 do
   end
   
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|  
-    context "with the token in the #{head} header" do
+    context 'with the token in the #{head} header' do
       before { get '/awesome', {}, head => 'OAuth g123' }
       it { last_response.body.should == 'g123' }
     end

@@ -23,23 +23,23 @@ describe Grape::Middleware::Auth::Digest do
     Test
   end
   
-  it 'should be a digest authentication challenge' do
+  it 'is a digest authentication challenge' do
     get '/test'
     last_response.should be_challenge
   end
   
-  it 'should throw a 401 if no auth is given' do
+  it 'throws a 401 if no auth is given' do
     get '/test'
     last_response.status.should == 401
   end
 
-  it 'should authenticate if given valid creds' do
+  it 'authenticates if given valid creds' do
     digest_authorize "foo", "bar"
     get '/test'
     last_response.status.should == 200
   end
 
-  it 'should throw a 401 if given invalid creds' do
+  it 'throws a 401 if given invalid creds' do
     digest_authorize "bar", "foo"
     get '/test'
     last_response.status.should == 401

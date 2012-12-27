@@ -19,25 +19,25 @@ describe Grape::Middleware::Error do
     end
   end
   
-  it 'should set the status code appropriately' do
+  it 'sets the status code appropriately' do
     ErrApp.error = {:status => 410}
     get '/'
     last_response.status.should == 410
   end
   
-  it 'should set the error message appropriately' do
+  it 'sets the error message appropriately' do
     ErrApp.error = {:message => 'Awesome stuff.'}
     get '/'
     last_response.body.should == 'Awesome stuff.'
   end
   
-  it 'should default to a 403 status' do
+  it 'defaults to a 403 status' do
     ErrApp.error = {}
     get '/'
     last_response.status.should == 403
   end
   
-  it 'should have a default message' do
+  it 'has a default message' do
     ErrApp.error = {}
     get '/'
     last_response.body.should == 'Aww, hamburgers.'

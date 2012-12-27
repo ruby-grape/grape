@@ -20,12 +20,12 @@ describe Grape::Validations::RegexpValidator do
     ValidationsSpec::RegexpValidatorSpec::API
   end
   
-  it 'should refuse invalid input' do
+  it 'refuses invalid input' do
     get '/', :name => "invalid name"
     last_response.status.should == 400
   end
   
-  it 'should accept valid input' do
+  it 'accepts valid input' do
     get '/', :name => "bob"
     last_response.status.should == 200
   end

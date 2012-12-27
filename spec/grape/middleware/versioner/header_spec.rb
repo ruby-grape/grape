@@ -14,21 +14,21 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   context 'api.type and api.subtype' do
-    it 'should set type and subtype to first choice of content type if no preference given' do
+    it 'sets type and subtype to first choice of content type if no preference given' do
       status, _, env = subject.call('HTTP_ACCEPT' => '*/*')
       env['api.type'].should eql 'application'
       env['api.subtype'].should eql 'vnd.vendor+xml'
       status.should == 200
     end
 
-    it 'should set preferred type' do
+    it 'sets preferred type' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/*')
       env['api.type'].should eql 'application'
       env['api.subtype'].should eql 'vnd.vendor+xml'
       status.should == 200
     end
 
-    it 'should set preferred type and subtype' do
+    it 'sets preferred type and subtype' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'text/plain')
       env['api.type'].should eql 'text'
       env['api.subtype'].should eql 'plain'
@@ -37,13 +37,13 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   context 'api.format' do
-    it 'should be set' do
+    it 'is set' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
       env['api.format'].should eql 'json'
       status.should == 200
     end
 
-    it 'should be nil if not provided' do
+    it 'is nil if not provided' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
       env['api.format'].should eql nil
       status.should == 200
@@ -54,13 +54,13 @@ describe Grape::Middleware::Versioner::Header do
         @options[:versions] = ['v1']
       end
 
-      it 'should be set' do
+      it 'is set' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
         env['api.format'].should eql 'json'
         status.should == 200
       end
 
-      it 'should be nil if not provided' do
+      it 'is nil if not provided' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
         env['api.format'].should eql nil
         status.should == 200
@@ -69,19 +69,19 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   context 'api.vendor' do
-    it 'should be set' do
+    it 'is set' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
       env['api.vendor'].should eql 'vendor'
       status.should == 200
     end
 
-    it 'should be set if format provided' do
+    it 'is set if format provided' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
       env['api.vendor'].should eql 'vendor'
       status.should == 200
     end
 
-    it 'should fail with 406 Not Acceptable if vendor is invalid' do
+    it 'fails with 406 Not Acceptable if vendor is invalid' do
       expect {
         env = subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor+json').last
       }.to throw_symbol(
@@ -97,19 +97,19 @@ describe Grape::Middleware::Versioner::Header do
         @options[:versions] = ['v1']
       end
 
-      it 'should be set' do
+      it 'is set' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
         env['api.vendor'].should eql 'vendor'
         status.should == 200
       end
 
-      it 'should be set if format provided' do
+      it 'is set if format provided' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
         env['api.vendor'].should eql 'vendor'
         status.should == 200
       end
 
-      it 'should fail with 406 Not Acceptable if vendor is invalid' do
+      it 'fails with 406 Not Acceptable if vendor is invalid' do
         expect {
           env = subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last
         }.to throw_symbol(
@@ -127,19 +127,19 @@ describe Grape::Middleware::Versioner::Header do
       @options[:versions] = ['v1']
     end
 
-    it 'should be set' do
+    it 'is set' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
       env['api.version'].should eql 'v1'
       status.should == 200
     end
 
-    it 'should be set if format provided' do
+    it 'is set if format provided' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
       env['api.version'].should eql 'v1'
       status.should == 200
     end
 
-    it 'should fail with 406 Not Acceptable if version is invalid' do
+    it 'fails with 406 Not Acceptable if version is invalid' do
       expect {
         env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').last
       }.to throw_symbol(
@@ -151,12 +151,12 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
-  it 'should succeed if :strict is not set' do
+  it 'succeeds if :strict is not set' do
     subject.call('HTTP_ACCEPT' => '').first.should == 200
     subject.call({}).first.should == 200
   end
 
-  it 'should succeed if :strict is set to false' do
+  it 'succeeds if :strict is set to false' do
     @options[:version_options][:strict] = false
     subject.call('HTTP_ACCEPT' => '').first.should == 200
     subject.call({}).first.should == 200
@@ -168,7 +168,7 @@ describe Grape::Middleware::Versioner::Header do
       @options[:version_options][:strict] = true
     end
 
-    it 'should fail with 406 Not Acceptable if header is not set' do
+    it 'fails with 406 Not Acceptable if header is not set' do
       expect {
         env = subject.call({}).last
       }.to throw_symbol(
@@ -179,7 +179,7 @@ describe Grape::Middleware::Versioner::Header do
       )
     end
 
-    it 'should fail with 406 Not Acceptable if header is empty' do
+    it 'fails with 406 Not Acceptable if header is empty' do
       expect {
         env = subject.call('HTTP_ACCEPT' => '').last
       }.to throw_symbol(
@@ -190,7 +190,7 @@ describe Grape::Middleware::Versioner::Header do
       )
     end
 
-    it 'should fail with 406 Not Acceptable if type is a range' do
+    it 'fails with 406 Not Acceptable if type is a range' do
       expect {
         env = subject.call('HTTP_ACCEPT' => '*/*').last
       }.to throw_symbol(
@@ -201,7 +201,7 @@ describe Grape::Middleware::Versioner::Header do
       )
     end
 
-    it 'should fail with 406 Not Acceptable if subtype is a range' do
+    it 'fails with 406 Not Acceptable if subtype is a range' do
       expect {
         env = subject.call('HTTP_ACCEPT' => 'application/*').last
       }.to throw_symbol(
@@ -212,7 +212,7 @@ describe Grape::Middleware::Versioner::Header do
       )
     end
 
-    it 'should succeed if proper header is set' do
+    it 'succeeds if proper header is set' do
       subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
     end
   end

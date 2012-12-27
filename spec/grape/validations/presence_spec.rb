@@ -57,7 +57,7 @@ describe Grape::Validations::PresenceValidator do
     ValidationsSpec::PresenceValidatorSpec::API
   end
 
-  it "does not validate for any params" do
+  it 'does not validate for any params' do
     get("/bacons")
     last_response.status.should == 200
     last_response.body.should == "All the bacon"
