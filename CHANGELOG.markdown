@@ -5,7 +5,7 @@
 * [#297](https://github.com/intridea/grape/issues/297): Added `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Setting `format` will automatically set `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#295](https://github.com/intridea/grape/issues/295): Storing original API source block in endpoint's `source` attribute - [@dblock](https://github.com/dblock).
-
+* [#298](https://github.com/intridea/grape/pull/298): Fix: subsequent calls to `body_params` would fail due to IO read - [@justinmcp](https://github.com/justinmcp).
 * Your contribution here.
 
 0.2.3 (24/12/2012)
