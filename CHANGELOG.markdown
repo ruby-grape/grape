@@ -2,6 +2,7 @@
 ====================
 
 * [#296](https://github.com/intridea/grape/issues/296): Fix: ArgumentError with default error formatter - [@dblock](https://github.com/dblock).
+* [#298](https://github.com/intridea/grape/pull/298): Fix: Subsequent calls to `body_params` would fail due to read on an IO. - [@justinmcp](https://github.com/justinmcp).
 * Your contribution here.
 
 0.2.3 (24/12/2012)
