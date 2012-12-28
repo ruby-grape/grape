@@ -236,7 +236,7 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        post '/request_body', MultiJson.dump(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
         last_response.body.should == 'Bobby T.'
       end
 
@@ -259,14 +259,14 @@ describe Grape::Endpoint do
         subject.post '/omitted_params' do
           body_params[:version].should == nil
         end
-        post '/omitted_params', MultiJson.encode(:user => 'Blah'), {'CONTENT_TYPE' => 'application/json'}
+        post '/omitted_params', MultiJson.dump(:user => 'Blah'), {'CONTENT_TYPE' => 'application/json'}
       end
 
       it 'should return an equivalent hash on subsequenst calls' do
         subject.post '/two_times' do
           body_params.should == body_params
         end
-        post '/two_times', MultiJson.encode(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        post '/two_times', MultiJson.dump(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
       end
     end
   end

@@ -190,7 +190,7 @@ module Grape
         return @body_params ||=
           case env['CONTENT_TYPE']
           when 'application/json'
-            MultiJson.decode(request.body.read)
+            MultiJson.load(request.body.read)
           when 'application/xml'
             MultiXml.parse(request.body.read)
           else
