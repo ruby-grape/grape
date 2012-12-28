@@ -1,11 +1,9 @@
-require 'active_support/core_ext/hash/indifferent_access'
-
 module Grape
   class Cookies
 
     def initialize
-      @cookies = HashWithIndifferentAccess.new
-      @send_cookies = HashWithIndifferentAccess.new
+      @cookies = {}
+      @send_cookies = {}
     end
 
     def read(request)
@@ -24,12 +22,12 @@ module Grape
     end
 
     def [](name)
-      @cookies[name]
+      @cookies[name.to_s]
     end
 
     def []=(name, value)
-      @cookies[name] = value
-      @send_cookies[name] = true
+      @cookies[name.to_s] = value
+      @send_cookies[name.to_s] = true
     end
 
     def each(&block)
