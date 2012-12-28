@@ -8,6 +8,7 @@
 * [#298](https://github.com/intridea/grape/pull/298): Fix: subsequent calls to `body_params` would fail due to IO read - [@justinmcp](https://github.com/justinmcp).
 * [#301](https://github.com/intridea/grape/issues/301): Fix: symbol memory leak in cookie and formatter middleware - [@dblock](https://github.com/dblock).
 * [#300](https://github.com/intridea/grape/issues/300): Fix `Grape::API.routes` to include mounted api routes - [@aiwilliams](https://github.com/aiwilliams).
+* [#302](https://github.com/intridea/grape/pull/302): Fix: removed redundant `autoload` entries - [@ugisozols](https://github.com/ugisozols).
 * Your contribution here.
 
 0.2.3 (24/12/2012)
