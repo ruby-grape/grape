@@ -1400,7 +1400,7 @@ describe Grape::API do
         last_response.body.should == 'rescued from doh!'
       end
 
-      it 'includes routes' do
+      it 'collects the routes of the mounted api' do
         subject.namespace :cool do
           app = Class.new(Grape::API)
           app.get('/awesome') {}
@@ -1408,6 +1408,8 @@ describe Grape::API do
           mount app
         end
         subject.routes.size.should == 2
+        subject.routes.first.route_path.should =~ /\/cool\/awesome/
+        subject.routes.last.route_path.should =~ /\/cool\/sauce/
       end
     end
   end

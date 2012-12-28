@@ -56,12 +56,12 @@ module Grape
     end
 
     def routes
-      @routes ||= prepare_routes
+      @routes ||= endpoints? ? endpoints.collect(&:routes).flatten : prepare_routes
     end
 
     def mount_in(route_set)
-      if options[:app] && options[:app].respond_to?(:endpoints)
-        options[:app].endpoints.each{|e| e.mount_in(route_set)}
+      if endpoints?
+        endpoints.each{|e| e.mount_in(route_set)}
       else
         routes.each do |route|
           route_set.add_route(self, {
@@ -345,6 +345,16 @@ module Grape
     end
 
     protected
+
+    def endpoints
+      options[:app].endpoints if endpoints?
+    end
+
+    # Return true if this Endpoint contains a collection of Endpoints, which is
+    # the case when an Grape::API mounts another Grape::API.
+    def endpoints?
+      options[:app] && options[:app].respond_to?(:endpoints)
+    end
 
     def run(env)
       @env = env
