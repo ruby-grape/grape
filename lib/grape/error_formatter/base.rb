@@ -1,5 +1,3 @@
-require 'active_support/core_ext/hash/indifferent_access'
-
 module Grape
   module ErrorFormatter
     module Base
@@ -14,9 +12,7 @@ module Grape
         }
 
         def formatters(options)
-          HashWithIndifferentAccess.new(
-            FORMATTERS.merge(options[:error_formatters] || {})
-          )
+          FORMATTERS.merge(options[:error_formatters] || {})
         end
 
         def formatter_for(api_format, options = {})

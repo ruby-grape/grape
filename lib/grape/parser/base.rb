@@ -1,5 +1,3 @@
-require 'active_support/core_ext/hash/indifferent_access'
-
 module Grape
   module Parser
     module Base
@@ -12,9 +10,7 @@ module Grape
         }
 
         def parsers(options)
-          HashWithIndifferentAccess.new(
-            PARSERS.merge(options[:parsers] || {})
-          )
+          PARSERS.merge(options[:parsers] || {})
         end
 
         def parser_for(api_format, options = {})
