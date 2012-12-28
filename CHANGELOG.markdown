@@ -5,6 +5,7 @@
 * [#297](https://github.com/intridea/grape/issues/297): Added `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Setting `format` will automatically set `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#295](https://github.com/intridea/grape/issues/295): Storing original API source block in endpoint's `source` attribute - [@dblock](https://github.com/dblock).
+* [#300](https://github.com/intridea/grape/issues/300): Fix Grape::API.routes to include mounted api routes - [@aiwilliams](https://github.com/aiwilliams).
 
 * Your contribution here.
 
