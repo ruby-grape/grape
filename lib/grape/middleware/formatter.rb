@@ -18,7 +18,7 @@ module Grape
 
       def before
         fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
-        if content_types.key?(fmt)
+        if content_type_for(fmt)
           if !env['rack.input'].nil? and (body = env['rack.input'].read).strip.length != 0
             parser = Grape::Parser::Base.parser_for fmt, options
             unless parser.nil?
@@ -42,15 +42,18 @@ module Grape
         parts = request.path.split('.')
 
         if parts.size > 1
-          extension = parts.last.to_sym
-          return extension if content_types.key?(extension)
+          extension = parts.last
+          # avoid symbol memory leak on an unknown format
+          return extension.to_sym if content_type_for(extension)
         end
         nil
       end
 
       def format_from_params
         fmt = Rack::Utils.parse_nested_query(env['QUERY_STRING'])["format"]
-        fmt ? fmt.to_sym : nil
+        # avoid symbol memory leak on an unknown format
+        return fmt.to_sym if content_type_for(fmt)
+        fmt
       end
 
       def format_from_header
@@ -76,7 +79,7 @@ module Grape
         bodymap = bodies.collect do |body|
           formatter.call body, env
         end
-        headers['Content-Type'] = content_types[env['api.format']] unless headers['Content-Type']
+        headers['Content-Type'] = content_type_for(env['api.format']) unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a
       end
 

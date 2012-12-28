@@ -1,4 +1,5 @@
 require 'active_support/ordered_hash'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'multi_json'
 require 'multi_xml'
 
@@ -55,12 +56,16 @@ module Grape
         Rack::Response.new(@app_response)
       end
 
+      def content_type_for(format)
+        HashWithIndifferentAccess.new(content_types)[format]
+      end
+
       def content_types
         options[:content_types] || CONTENT_TYPES
       end
 
       def content_type
-        content_types[env['api.format'] || options[:format]] || 'text/html'
+        content_type_for(env['api.format'] || options[:format]) || 'text/html'
       end
 
       def mime_types
