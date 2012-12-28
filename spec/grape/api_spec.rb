@@ -1399,6 +1399,18 @@ describe Grape::API do
         last_response.status.should eql 202
         last_response.body.should == 'rescued from doh!'
       end
+
+      it 'collects the routes of the mounted api' do
+        subject.namespace :cool do
+          app = Class.new(Grape::API)
+          app.get('/awesome') {}
+          app.post('/sauce') {}
+          mount app
+        end
+        subject.routes.size.should == 2
+        subject.routes.first.route_path.should =~ /\/cool\/awesome/
+        subject.routes.last.route_path.should =~ /\/cool\/sauce/
+      end
     end
   end
 
