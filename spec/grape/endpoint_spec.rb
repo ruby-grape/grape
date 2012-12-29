@@ -109,6 +109,23 @@ describe Grape::Endpoint do
           "delete_this_cookie=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT"
       ]
     end
+
+    it 'deletes cookies with path' do
+      subject.get('/test') do
+        sum = 0
+        cookies.each do |name, val|
+          sum += val.to_i
+          cookies.delete name, { :path => '/test' }
+        end
+        sum
+      end
+      get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
+      last_response.body.should == '3'
+      last_response.headers['Set-Cookie'].split("\n").sort.should == [
+          "and_this=deleted; path=/test; expires=Thu, 01-Jan-1970 00:00:00 GMT",
+          "delete_this_cookie=deleted; path=/test; expires=Thu, 01-Jan-1970 00:00:00 GMT"
+      ]
+    end
   end
 
   describe '#declared' do

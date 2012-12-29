@@ -429,6 +429,18 @@ cookies[:status_count] = {
 cookies[:status_count][:value] +=1
 ```
 
+Delete a cookie with `delete`.
+
+``` ruby
+cookies.delete :status_count
+```
+
+Specify an optional path.
+
+``` ruby
+cookies.delete :status_count, :path => '/'
+```
+
 ## Redirecting
 
 You can redirect to a new url temporarily (302) or permanently (301).

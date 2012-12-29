@@ -10,6 +10,7 @@
 * [#300](https://github.com/intridea/grape/issues/300): Fix `Grape::API.routes` to include mounted api routes - [@aiwilliams](https://github.com/aiwilliams).
 * [#302](https://github.com/intridea/grape/pull/302): Fix: removed redundant `autoload` entries - [@ugisozols](https://github.com/ugisozols).
 * [#172](https://github.com/intridea/grape/issues/172): Fix: MultiJson deprecated methods warnings - [@dblock](https://github.com/dblock).
+* [#293](https://github.com/intridea/grape/pull/293): Added options to `cookies.delete`, enables passing a path - [@inst](https://github.com/inst).
 * Your contribution here.
 
 0.2.3 (24/12/2012)
