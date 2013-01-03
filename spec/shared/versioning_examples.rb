@@ -55,23 +55,50 @@ shared_examples_for 'versioning' do
     last_response.status.should eql 404
   end
 
-  it 'allows the same endpoint to be implemented for different versions' do
-    subject.version 'v2', macro_options
-    subject.get 'version' do
-      request.env['api.version']
-    end
+  context 'with different versions for the same endpoint' do
+    context 'without a prefix' do
+      it 'allows the same endpoint to be implemented' do
+        subject.version 'v2', macro_options
+        subject.get 'version' do
+          request.env['api.version']
+        end
 
-    subject.version 'v1', macro_options do
-      get 'version' do
-        "version " + request.env['api.version']
+        subject.version 'v1', macro_options do
+          get 'version' do
+            "version " + request.env['api.version']
+          end
+        end
+
+        versioned_get '/version', 'v2', macro_options
+        last_response.status.should == 200
+        last_response.body.should == 'v2'
+        versioned_get '/version', 'v1', macro_options
+        last_response.status.should == 200
+        last_response.body.should == 'version v1'
       end
     end
 
-    versioned_get '/version', 'v2', macro_options
-    last_response.status.should == 200
-    last_response.body.should == 'v2'
-    versioned_get '/version', 'v1', macro_options
-    last_response.status.should == 200
-    last_response.body.should == 'version v1'
+    context 'with a prefix' do
+      it 'allows the same endpoint to be implemented' do
+        subject.prefix 'api'
+        subject.version 'v2', macro_options
+        subject.get 'version' do
+          request.env['api.version']
+        end
+
+        subject.version 'v1', macro_options do
+          get 'version' do
+            "version " + request.env['api.version']
+          end
+        end
+
+        versioned_get '/api/version', 'v2', macro_options
+        last_response.status.should == 200
+        last_response.body.should == 'v2'
+        versioned_get '/api/version', 'v1', macro_options
+        last_response.status.should == 200
+        last_response.body.should == 'version v1'
+      end
+    end
   end
 end
