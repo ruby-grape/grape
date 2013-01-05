@@ -1258,7 +1258,12 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "namespace parameter", :full_name=>"ns_param" }, "method_param" => { :required => false, :desc => "method parameter", :full_name=>"method_param" } } }
+        { :description => "method", 
+          :params => { 
+            "ns_param" => { :required => true, :desc => "namespace parameter" }, 
+            "method_param" => { :required => false, :desc => "method parameter" } 
+          }
+        }
       ]
     end
     it 'merges the parameters of nested namespaces' do
@@ -1284,7 +1289,14 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", :params => { "ns_param" => { :required => true, :desc => "ns param 2", :full_name=>"ns_param" }, "ns1_param" => { :required => true, :desc => "ns1 param", :full_name=>"ns1_param" }, "ns2_param" => { :required => true, :desc => "ns2 param", :full_name=>"ns2_param" }, "method_param" => { :required => false, :desc => "method param", :full_name=>"method_param" } } }
+        { :description => "method", 
+          :params => { 
+            "ns_param" => { :required => true, :desc => "ns param 2" }, 
+            "ns1_param" => { :required => true, :desc => "ns1 param" }, 
+            "ns2_param" => { :required => true, :desc => "ns2 param" }, 
+            "method_param" => { :required => false, :desc => "method param" } 
+          } 
+        }
       ]
     end
     it "groups nested params and prevents overwriting of params with same name in different groups" do
@@ -1304,16 +1316,13 @@ describe Grape::API do
       subject.routes.map { |route| 
         route.route_params
       }.should eq [{
-        "group1" => { 
-          "param1" => { :required => false, :desc => "group1 param1 desc", :full_name => "group1[param1]" },
-          "param2" => { :required => true, :desc => "group1 param2 desc", :full_name => "group1[param2]" }
-        }, "group2" => { 
-          "param1" => { :required => false, :desc => "group2 param1 desc", :full_name => "group2[param1]" }, 
-          "param2" => { :required => true, :desc => "group2 param2 desc", :full_name => "group2[param2]" }
-        }
+        "group1[param1]" => { :required => false, :desc => "group1 param1 desc" },
+        "group1[param2]" => { :required => true, :desc => "group1 param2 desc" },
+        "group2[param1]" => { :required => false, :desc => "group2 param1 desc" }, 
+        "group2[param2]" => { :required => true, :desc => "group2 param2 desc" }
       }]
     end
-    it 'provides a full_name for parameters in nested groups' do
+    it 'uses full name of parameters in nested groups' do
       subject.desc "nesting"
       subject.params do
         requires :root_param, :desc => "root param"
@@ -1325,7 +1334,12 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "nesting", :params => { "root_param" => { :required => true, :desc => "root param", :full_name=>"root_param" }, "nested_param" => { :required => true, :desc => "nested param", :full_name=>"nested[nested_param]" } } }
+        { :description => "nesting", 
+          :params => { 
+            "root_param" => { :required => true, :desc => "root param" }, 
+            "nested[nested_param]" => { :required => true, :desc => "nested param" } 
+          } 
+        }
       ]
     end
     it 'parses parameters when no description is given' do
@@ -1336,7 +1350,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => nil, :params => { "one_param" => { :required => true, :desc => "one param", :full_name=>"one_param" } } }
+        { :description => nil, :params => { "one_param" => { :required => true, :desc => "one param" } } }
       ]
     end
     it 'does not symbolize params' do
