@@ -472,6 +472,53 @@ describe Grape::Endpoint do
       end
       get '/example'
     end
+
+    [ :json, :serializable_hash ].each do |format|
+
+      it 'presents with #{format}' do
+        entity = Class.new(Grape::Entity)
+        entity.root "examples", "example"
+        entity.expose :id
+
+        subject.format format
+        subject.get '/example' do
+          c = Class.new do
+            attr_reader :id
+            def initialize(id)
+              @id = id
+            end
+          end
+          present c.new(1), :with => entity
+        end
+
+        get '/example'
+        last_response.status.should == 200
+        last_response.body.should == '{"example":{"id":1}}'
+      end
+
+      it 'presents with #{format} collection' do
+        entity = Class.new(Grape::Entity)
+        entity.root "examples", "example"
+        entity.expose :id
+
+        subject.format format
+        subject.get '/examples' do
+          c = Class.new do
+            attr_reader :id
+            def initialize(id)
+              @id = id
+            end
+          end
+          examples = [ c.new(1), c.new(2) ]
+          present examples, :with => entity
+        end
+
+        get '/examples'
+        last_response.status.should == 200
+        last_response.body.should == '{"examples":[{"id":1},{"id":2}]}'
+      end
+
+    end
   end
 
   context 'filters' do

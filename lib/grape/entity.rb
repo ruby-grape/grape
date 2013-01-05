@@ -330,6 +330,11 @@ module Grape
 
     alias :as_json :serializable_hash
 
+    def to_json(options = {})
+      options = options.to_h if options && options.respond_to?(:to_h)
+      MultiJson.dump(serializable_hash(options))
+    end
+
     protected
 
     def key_for(attribute)

@@ -14,6 +14,7 @@
 * [#133](https://github.com/intridea/grape/issues/133): Fix: header-based versioning with use of `prefix` - [@seanmoon](https://github.com/seanmoon), [@dblock](https://github.com/dblock).
 * [#133](https://github.com/intridea/grape/issues/133): The value of `env['PATH_INFO']` is no longer altered with `path` versioning - [@dblock](https://github.com/dblock).
 * [#280](https://github.com/intridea/grape/issues/280): Fix: grouped parameters mangled in `route_params` hash - [@marcusg](https://github.com/marcusg), [@dblock](https://github.com/dblock).
+* [#304](https://github.com/intridea/grape/issues/304): Fix: `present x, :with => Entity` returns class references with `format :json` - [@dblock](https://github.com/dblock).
 
 * Your contribution here.
 
