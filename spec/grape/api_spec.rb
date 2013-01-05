@@ -1622,17 +1622,15 @@ describe Grape::API do
 
   context "catch-all" do
     before do
-      api1 = Class.new(Grape::API) do
-        version 'v1', :using => :path
-        get "hello" do
-          "v1"
-        end
+      api1 = Class.new(Grape::API)
+      api1.version 'v1', :using => :path
+      api1.get "hello" do
+        "v1"
       end
-      api2 = Class.new(Grape::API) do
-        version 'v2', :using => :path
-        get "hello" do
-          "v2"
-        end
+      api2 = Class.new(Grape::API)
+      api2.version 'v2', :using => :path
+      api2.get "hello" do
+        "v2"
       end
       subject.mount api1
       subject.mount api2
