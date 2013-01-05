@@ -79,7 +79,7 @@ shared_examples_for 'versioning' do
     end
 
     context 'with a prefix' do
-      it 'allows the same endpoint to be implemented' do
+      it 'allows the same endpoint to be implemented' do        
         subject.prefix 'api'
         subject.version 'v2', macro_options
         subject.get 'version' do
@@ -92,12 +92,13 @@ shared_examples_for 'versioning' do
           end
         end
 
-        versioned_get '/api/version', 'v2', macro_options
-        last_response.status.should == 200
-        last_response.body.should == 'v2'
-        versioned_get '/api/version', 'v1', macro_options
+        versioned_get '/version', 'v1', macro_options.merge(:prefix => subject.prefix)
         last_response.status.should == 200
         last_response.body.should == 'version v1'
+
+        versioned_get '/version', 'v2', macro_options.merge(:prefix => subject.prefix)
+        last_response.status.should == 200
+        last_response.body.should == 'v2'
       end
     end
   end

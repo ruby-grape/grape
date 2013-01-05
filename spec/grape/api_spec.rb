@@ -45,7 +45,6 @@ describe Grape::API do
       end
     end
   end
-
   describe '.version using param' do
     it_should_behave_like 'versioning' do
       let(:macro_options) do

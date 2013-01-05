@@ -396,7 +396,7 @@ module Grape
 
       b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
       b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
-      b.use Grape::Middleware::Prefixer, :prefix => settings[:root_prefix] if settings[:root_prefix]
+      b.use Grape::Middleware::Prefixer, :prefix => settings[:root_prefix] if settings[:root_prefix] && settings[:version] && settings[:version_options][:using] == :path
 
       if settings[:version]
         b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
