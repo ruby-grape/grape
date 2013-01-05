@@ -579,4 +579,32 @@ describe Grape::Endpoint do
       end
     end
   end
+
+  context 'request' do
+    it 'should be set to the url requested' do
+      subject.get('/url') do
+        request.url
+      end
+      get '/url'
+      last_response.body.should == "http://example.org/url"
+    end
+    it 'should include version' do
+      subject.version 'v1', :using => :path
+      subject.get('/url') do
+        request.url
+      end
+      get '/v1/url'
+      last_response.body.should == "http://example.org/v1/url"
+    end
+    it 'should include prefix' do
+      subject.version 'v1', :using => :path
+      subject.prefix 'api'
+      subject.get('/url') do
+        request.url
+      end
+      get '/api/v1/url'
+      last_response.body.should == "http://example.org/api/v1/url"
+    end
+  end
+  
 end

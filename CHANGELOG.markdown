@@ -12,7 +12,7 @@
 * [#172](https://github.com/intridea/grape/issues/172): Fix: MultiJson deprecated methods warnings - [@dblock](https://github.com/dblock).
 * [#293](https://github.com/intridea/grape/pull/293): Added options to `cookies.delete`, enables passing a path - [@inst](https://github.com/inst).
 * [#133](https://github.com/intridea/grape/issues/133): Fix: header-based versioning with use of `prefix` - [@seanmoon](https://github.com/seanmoon), [@dblock](https://github.com/dblock).
-* [#133](https://github.com/intridea/grape/issues/133): The value of `env['PATH_INFO']` is no longer altered with `path` versioning - [@dblock](https://github.com/dblock).
+* [#174](https://github.com/intridea/grape/issues/174): The value of `env['PATH_INFO']` is no longer altered with `path` versioning - [@dblock](https://github.com/dblock).
 * [#280](https://github.com/intridea/grape/issues/280): Fix: grouped parameters mangled in `route_params` hash - [@marcusg](https://github.com/marcusg), [@dblock](https://github.com/dblock).
 * [#304](https://github.com/intridea/grape/issues/304): Fix: `present x, :with => Entity` returns class references with `format :json` - [@dblock](https://github.com/dblock).
 * [#196](https://github.com/intridea/grape/issues/196): Fix: root requests don't work with `prefix` - [@dblock](https://github.com/dblock).

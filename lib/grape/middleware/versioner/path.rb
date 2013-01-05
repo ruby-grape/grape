@@ -24,7 +24,7 @@ module Grape
         end
 
         def before
-          path = env['PATH_INFO']
+          path = env['PATH_INFO'].dup
 
           if prefix && path.index(prefix) == 0
             path.sub!(prefix, '')
