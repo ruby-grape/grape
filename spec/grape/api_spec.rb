@@ -1619,4 +1619,40 @@ describe Grape::API do
       end
     end
   end
+
+  context "catch-all" do
+    before do
+      api1 = Class.new(Grape::API) do
+        version 'v1', :using => :path
+        get "hello" do
+          "v1"
+        end
+      end
+      api2 = Class.new(Grape::API) do
+        version 'v2', :using => :path
+        get "hello" do
+          "v2"
+        end
+      end
+      subject.mount api1
+      subject.mount api2
+    end
+    [ true, false ].each do |anchor|
+      it "anchor=#{anchor}" do
+        subject.route :any, '*path', :anchor => anchor do
+          error!("Unrecognized request path: #{params[:path]} - #{env['PATH_INFO']}#{env['SCRIPT_NAME']}", 404)
+        end
+        get "/v1/hello"
+        last_response.status.should == 200
+        last_response.body.should == "v1"
+        get "/v2/hello"
+        last_response.status.should == 200
+        last_response.body.should == "v2"
+        get "/foobar"
+        last_response.status.should == 404
+        last_response.body.should == "Unrecognized request path: foobar - /foobar"
+      end
+    end
+  end
+
 end
