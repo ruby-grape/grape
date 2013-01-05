@@ -110,7 +110,7 @@ module Grape
 
     def prepare_path(path)
       parts = []
-      parts << settings[:root_prefix] if settings[:root_prefix]
+      parts << settings[:root_prefix].to_s.split("/") if settings[:root_prefix]
 
       uses_path_versioning = settings[:version] && settings[:version_options][:using] == :path
       namespace_is_empty = namespace && (namespace.to_s =~ /^\s*$/ || namespace.to_s == '/')
@@ -119,11 +119,12 @@ module Grape
       parts << ':version' if uses_path_versioning
       if !uses_path_versioning || (!namespace_is_empty || !path_is_empty)
         parts << namespace.to_s if namespace
-        parts << path.to_s if path && '/' != path
+        parts << path.to_s if path
         format_suffix = '(.:format)'
       else
         format_suffix = '(/.:format)'
       end
+      parts = parts.flatten.select { |part| part != '/' }
       Rack::Mount::Utils.normalize_path(parts.join('/') + format_suffix)
     end
 

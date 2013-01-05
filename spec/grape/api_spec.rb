@@ -7,6 +7,17 @@ describe Grape::API do
   def app; subject end
 
   describe '.prefix' do
+
+    it 'routes root through with the prefix' do
+      subject.prefix 'awesome/sauce'
+      subject.get do
+        "Hello there."
+      end
+
+      get 'awesome/sauce/'
+      last_response.body.should eql "Hello there."
+    end
+
     it 'routes through with the prefix' do
       subject.prefix 'awesome/sauce'
       subject.get :hello do
@@ -19,6 +30,7 @@ describe Grape::API do
       get '/hello'
       last_response.status.should eql 404
     end
+
   end
 
   describe '.version' do
