@@ -138,7 +138,7 @@ And would respond to the following routes:
 In a Rails application, modify *config/routes*:
 
 ``` ruby
-mount Twitter::API => "/"
+mount Twitter::API
 ```
 
 Note that when using Rails you will need to restart the server to pick up changes in your API classes
