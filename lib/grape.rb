@@ -37,7 +37,6 @@ module Grape
 
   module Middleware
     autoload :Base,              'grape/middleware/base'
-    autoload :Prefixer,          'grape/middleware/prefixer'
     autoload :Versioner,         'grape/middleware/versioner'
     autoload :Formatter,         'grape/middleware/formatter'
     autoload :Error,             'grape/middleware/error'

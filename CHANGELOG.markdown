@@ -12,6 +12,8 @@
 * [#172](https://github.com/intridea/grape/issues/172): Fix: MultiJson deprecated methods warnings - [@dblock](https://github.com/dblock).
 * [#293](https://github.com/intridea/grape/pull/293): Added options to `cookies.delete`, enables passing a path - [@inst](https://github.com/inst).
 * [#133](https://github.com/intridea/grape/issues/133): Fix: header-based versioning with use of `prefix` - [@seanmoon](https://github.com/seanmoon), [@dblock](https://github.com/dblock).
+* [#133](https://github.com/intridea/grape/issues/133): The value of `env['PATH_INFO']` is no longer altered with `path` versioning - [@dblock](https://github.com/dblock).
+
 * Your contribution here.
 
 0.2.3 (24/12/2012)

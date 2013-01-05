@@ -8,8 +8,8 @@ describe Grape::Middleware::Versioner::Path do
     subject.call('PATH_INFO' => '/v1/awesome').last.should == 'v1'
   end
 
-  it 'cuts the version out of the path' do
-    subject.call('PATH_INFO' => '/v1/awesome')[1]['PATH_INFO'].should == '/awesome'
+  it 'does not cut the version out of the path' do
+    subject.call('PATH_INFO' => '/v1/awesome')[1]['PATH_INFO'].should == '/v1/awesome'
   end
 
   it 'provides a nil version if no path is given' do
