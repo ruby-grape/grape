@@ -19,11 +19,9 @@ module Grape
       #    env['api.version]  => 'v1'
       #    env['api.format]   => 'format'
       #
-      # If version does not match this route, then a 406 is throw with
+      # If version does not match this route, then a 406 is raised with
       # X-Cascade header to alert Rack::Mount to attempt the next matched
       # route.
-      #
-      # @throws [RuntimeError] if Accept header is invalid
       class Header < Base
 
         def before

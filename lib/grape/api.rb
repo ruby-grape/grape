@@ -219,10 +219,11 @@ module Grape
       # When called without a block, all known helpers within this scope
       # are included.
       #
-      # @param mod [Module] optional module of methods to include
-      # @param &block [Block] optional block of methods to include
+      # @param [Module] new_mod optional module of methods to include
+      # @param [Block] block optional block of methods to include
       #
       # @example Define some helpers.
+      #
       #     class ExampleAPI < Grape::API
       #       helpers do
       #         def current_user
@@ -230,6 +231,7 @@ module Grape
       #         end
       #       end
       #     end
+      #
       def helpers(new_mod = nil, &block)
         if block_given? || new_mod
           mod = settings.peek[:helpers] || Module.new

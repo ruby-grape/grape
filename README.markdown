@@ -38,78 +38,80 @@ Grape APIs are Rack applications that are created by subclassing `Grape::API`.
 Below is a simple example showing some of the more common features of Grape in
 the context of recreating parts of the Twitter API.
 
-``` ruby
-class Twitter::API < Grape::API
-  version 'v1', :using => :header, :vendor => 'twitter'
-  format :json
+```ruby
+module Twitter
+  class API < Grape::API
 
-  helpers do
-    def current_user
-      @current_user ||= User.authorize!(env)
+    version 'v1', :using => :header, :vendor => 'twitter'
+    format :json
+
+    helpers do
+      def current_user
+        @current_user ||= User.authorize!(env)
+      end
+
+      def authenticate!
+        error!('401 Unauthorized', 401) unless current_user
+      end
     end
 
-    def authenticate!
-      error!('401 Unauthorized', 401) unless current_user
+    resource :statuses do
+
+      desc "Return a public timeline."
+      get :public_timeline do
+        Status.limit(20)
+      end
+
+      desc "Return a personal timeline."
+      get :home_timeline do
+        authenticate!
+        current_user.statuses.limit(20)
+      end
+
+      desc "Return a status."
+      params do
+        requires :id, :type => Integer, :desc => "Status id."
+      end
+      get ':id' do
+        Status.find(params[:id])
+      end
+
+      desc "Create a status."
+      params do
+        requires :status, :type => String, :desc => "Your status."
+      end
+      post do
+        authenticate!
+        Status.create!({
+          :user => current_user,
+          :text => params[:status]
+        })
+      end
+
+      desc "Update a status."
+      params do
+        requires :id, :type => String, :desc => "Status ID."
+        requires :status, :type => String, :desc => "Your status."
+      end
+      put ':id' do
+        authenticate!
+        current_user.statuses.find(params[:id]).update({
+          :user => current_user,
+          :text => params[:status]
+        })
+      end
+
+      desc "Delete a status."
+      params do
+        requires :id, :type => String, :desc => "Status ID."
+      end
+      delete ':id' do
+        authenticate!
+        current_user.statuses.find(params[:id]).destroy
+      end
+
     end
   end
-
-  resource :statuses do
-
-    desc "Return a public timeline."
-    get :public_timeline do
-      Status.limit(20)
-    end
-
-    desc "Return a personal timeline."
-    get :home_timeline do
-      authenticate!
-      current_user.statuses.limit(20)
-    end
-
-    desc "Return a status."
-    params do
-      requires :id, :type => Integer, :desc => "Status id."
-    end
-    get ':id' do
-      Status.find(params[:id])
-    end
-
-    desc "Create a status."
-    params do
-      requires :status, :type => String, :desc => "Your status."
-    end
-    post do
-      authenticate!
-      Status.create!({
-        :user => current_user,
-        :text => params[:status]
-      })
-    end
-
-    desc "Update a status."
-    params do
-      requires :id, :type => String, :desc => "Status ID."
-      requires :status, :type => String, :desc => "Your status."
-    end
-    put ':id' do
-      authenticate!
-      current_user.statuses.find(params[:id]).update({
-        :user => current_user,
-        :text => params[:status]
-      })
-    end
-
-    desc "Delete a status."
-    params do
-      requires :id, :type => String, :desc => "Status ID."
-    end
-    delete ':id' do
-      authenticate!
-      current_user.statuses.find(params[:id]).destroy
-    end
-
-  end
-
 end
 ```
 
@@ -120,7 +122,7 @@ end
 The above sample creates a Rack application that can be run from a rackup *config.ru* file
 with `rackup`:
 
-``` ruby
+```ruby
 run Twitter::API
 ```
 
@@ -137,7 +139,7 @@ And would respond to the following routes:
 
 In a Rails application, modify *config/routes*:
 
-``` ruby
+```ruby
 mount Twitter::API
 ```
 
@@ -178,7 +180,7 @@ is returned when no correct `Accept` header is supplied.
 
 ### Path
 
-``` ruby
+```ruby
 version 'v1', :using => :path
 ```
 
@@ -209,7 +211,7 @@ version 'v1', :using => :param, :parameter => "v"
 
 You can add a description to API methods and namespaces.
 
-``` ruby
+```ruby
 desc "Returns your public timeline."
 get :public_timeline do
   Status.limit(20)
@@ -343,15 +345,15 @@ Headers are available through the `header` helper or the `env` hash object.
 
 ```ruby
 get do
-    content_type = header['Content-type']
-    ...
+  content_type = header['Content-type']
+  # ...
 end
 ```
 
 ```ruby
 get do
-    error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
-    ...
+  error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
+  # ...
 end
 ```
 
@@ -371,7 +373,7 @@ end
 You can define helper methods that your endpoints can use with the `helpers`
 macro by either giving a block or a module.
 
-``` ruby
+```ruby
 module StatusHelpers
   def user_info(user)
     "#{user} has statused #{user.statuses} status(s)"
@@ -400,7 +402,7 @@ end
 
 You can set, get and delete your cookies very simply using `cookies` method.
 
-``` ruby
+```ruby
 class API < Grape::API
 
   get 'status_count' do
@@ -418,7 +420,7 @@ end
 
 Use a hash-based syntax to set more than one value.
 
-``` ruby
+```ruby
 cookies[:status_count] = {
     :value => 0,
     :expires => Time.tomorrow,
@@ -431,13 +433,13 @@ cookies[:status_count][:value] +=1
 
 Delete a cookie with `delete`.
 
-``` ruby
+```ruby
 cookies.delete :status_count
 ```
 
 Specify an optional path.
 
-``` ruby
+```ruby
 cookies.delete :status_count, :path => '/'
 ```
 
@@ -445,11 +447,11 @@ cookies.delete :status_count, :path => '/'
 
 You can redirect to a new url temporarily (302) or permanently (301).
 
-``` ruby
+```ruby
 redirect "/statuses"
 ```
 
-``` ruby
+```ruby
 redirect "/statuses", :permanent => true
 ```
 
@@ -459,7 +461,7 @@ When you add a route for a resource, a route for the HTTP OPTIONS
 method will also be added. The response to an OPTIONS request will
 include an "Allow" header listing the supported methods.
 
-``` ruby
+```ruby
 class API < Grape::API
 
   get '/rt_count' do
@@ -473,6 +475,7 @@ class API < Grape::API
     current_user.rt_count += params[:value].to_i
     { :rt_count => current_user.rt_count }
   end
+
 end
 ```
 
@@ -502,22 +505,22 @@ curl -X DELETE -v http://localhost:3000/rt_count/
 
 You can abort the execution of an API method by raising errors with `error!`.
 
-``` ruby
-error!("Access Denied", 401)
+```ruby
+error! "Access Denied", 401
 ```
 
 You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 
-``` ruby
-error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
+```ruby
+error! { "error" => "unexpected error", "detail" => "missing widget" }, 500
 ```
 
 ## Exception Handling
 
 Grape can be told to rescue all exceptions and return them in the API format.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   rescue_from :all
 end
@@ -525,7 +528,7 @@ end
 
 You can also rescue specific exceptions.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError, NotImplementedError
 end
@@ -535,7 +538,7 @@ The error format will match the request format. See "Content-Types" below.
 
 Custom error formatters for existing and additional types can be defined with a proc.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   error_formatter :txt, lambda { |message, backtrace, options, env|
     "error: #{message} from #{backtrace}"
@@ -545,7 +548,7 @@ end
 
 You can also use a module or class.
 
-``` ruby
+```ruby
 module CustomFormatter
   def self.call(message, backtrace, options, env)
     { message: message, backtrace: backtrace }
@@ -560,7 +563,7 @@ end
 You can rescue all exceptions with a code block. The `rack_response` wrapper
 automatically sets the default error code and content-type.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
     rack_response({ :message => "rescued from #{e.class.name}" })
@@ -571,7 +574,7 @@ end
 You can also rescue specific exceptions with a code block and handle the Rack
 response at the lowest level.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
     Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finish
@@ -581,7 +584,7 @@ end
 
 Or rescue specific exceptions.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError do |e|
     Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
@@ -600,7 +603,7 @@ class from Ruby's standard library.
 To log messages from within an endpoint, you need to define a helper to make the logger
 available in the endpoint context.
 
-``` ruby
+```ruby
 class API < Grape::API
   helpers do
     def logger
@@ -608,7 +611,7 @@ class API < Grape::API
     end
   end
   post '/statuses' do
-    ...
+    # ...
     logger.info "#{current_user} has statused"
   end
 end
@@ -616,7 +619,7 @@ end
 
 You can also set your own logger.
 
-``` ruby
+```ruby
 class MyLogger
   def warning(message)
     puts "this is a warning: #{message}"
@@ -649,7 +652,7 @@ string, or `Accept` header.
 The following API will only respond to the JSON content-type. All other requests will
 fail with an HTTP 406 error code.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   format :json
   content_type :json, "application/json"
@@ -660,7 +663,7 @@ If you combine `format` with `rescue_from :all`, errors will be rendered using t
 
 Custom formatters for existing and additional types can be defined with a proc.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
   formatter :xls, lambda { |object, env| object.to_xls }
@@ -669,7 +672,7 @@ end
 
 You can also use a module or class.
 
-``` ruby
+```ruby
 module XlsFormatter
   def self.call(object, env)
     object.to_xls
@@ -691,7 +694,7 @@ Built-in formats are the following.
 
 Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header. See below for the order for choosing the API format.
 
-``` ruby
+```ruby
 class Twitter::API < Grape::API
   default_format :json
 end
@@ -710,7 +713,7 @@ The order for choosing the format is the following.
 
 You can override the content-type of the response by setting the `Content-Type` header.
 
-``` ruby
+```ruby
 class API < Grape::API
   get '/home_timeline_js' do
     content_type "application/javascript"
@@ -750,7 +753,7 @@ array.
     * expose the value returned by the block
     * block can only be applied to one exposure at a time
 
-``` ruby
+```ruby
 module API
   module Entities
     class Status < Grape::Entity
@@ -800,7 +803,7 @@ options hash must always include `:with`, which defines the entity to expose.
 
 If the entity includes documentation it can be included in an endpoint's description.
 
-``` ruby
+```ruby
 module API
   class Statuses < Grape::API
     version 'v1'
@@ -894,7 +897,7 @@ contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`,
 follows the API path may contain any number of keys and its values are also
 accessible via dynamically-generated `route_[name]` functions.
 
-``` ruby
+```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
 TwitterAPI::routes[0].route_version # yields 'v1'
@@ -904,7 +907,7 @@ TwitterAPI::routes[0].route_description # etc.
 It's possible to retrieve the information about the current route from within an API
 call with `route`.
 
-``` ruby
+```ruby
 class MyAPI < Grape::API
   desc "Returns a description of a parameter."
   params do
@@ -928,7 +931,7 @@ In Grape this option can be used as well when a method is defined.
 
 For instance when you're API needs to get part of an URL, for instance:
 
-``` ruby
+```ruby
 class TwitterAPI < Grape::API
   namespace :statues do
     get '/(*:status)', :anchor => false do
@@ -984,7 +987,7 @@ end
 
 ### Writing Tests with Rails
 
-``` ruby
+```ruby
 require 'spec_helper'
 
 describe Twitter::API do
@@ -1015,6 +1018,9 @@ RSpec.configure do |config|
   }
 end
 ```
+## Performance Monitoring
+
+Grape integrates with NewRelic via the [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem.
 
 ## Contributing to Grape
 

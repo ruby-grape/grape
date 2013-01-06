@@ -19,18 +19,16 @@ task :default => :spec
 
 begin
   require 'yard'
-  YARD_OPTS = ['-m', 'markdown', '-M', 'maruku']
   DOC_FILES = ['lib/**/*.rb', 'README.markdown']
   
   YARD::Rake::YardocTask.new(:doc) do |t|
     t.files   = DOC_FILES
-    t.options = YARD_OPTS
   end
   
   namespace :doc do
     YARD::Rake::YardocTask.new(:pages) do |t|
       t.files   = DOC_FILES
-      t.options = YARD_OPTS + ['-o', '../grape.doc']
+      t.options = ['-o', '../grape.doc']
     end
     
     namespace :pages do
