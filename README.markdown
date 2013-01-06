@@ -15,11 +15,6 @@ content negotiation, versioning and much more.
 * [Grape Google Group](http://groups.google.com/group/ruby-grape)
 * [Grape Wiki](https://github.com/intridea/grape/wiki)
 
-## Stable Release
-
-You're reading the documentation for the next release of Grape, which should be 0.2.4.
-The current stable release is [0.2.3](https://github.com/intridea/grape/blob/v0.2.3/README.markdown).
-
 ## Installation
 
 Grape is available as a gem, to install it just install the gem:
@@ -231,11 +226,13 @@ end
 
 Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
 
-The Request:
+The request:
 
-```curl -d '{"text": "140 characters"}' 'http://localhost:9292/statuses' -H Content-Type:application/json -v```
+```
+curl -d '{"text": "140 characters"}' 'http://localhost:9292/statuses' -H Content-Type:application/json -v
+```
 
-The Grape Endpoint:
+The Grape endpoint:
 
 ```ruby
 post '/statuses' do
@@ -661,6 +658,13 @@ end
 
 If you combine `format` with `rescue_from :all`, errors will be rendered using the same format. If you do not want this behavior, set the default error formatter with `default_error_formatter`.
 
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  default_error_formatter :txt
+end
+```
+
 Custom formatters for existing and additional types can be defined with a proc.
 
 ```ruby
@@ -692,7 +696,8 @@ Built-in formats are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 
-Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header. See below for the order for choosing the API format.
+Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header. 
+See below for the order for choosing the API format.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -711,7 +716,8 @@ The order for choosing the format is the following.
 
 ## Content-type
 
-You can override the content-type of the response by setting the `Content-Type` header.
+Content-type is set by the formatter. You can override the content-type of the response at runtime
+by setting the `Content-Type` header.
 
 ```ruby
 class API < Grape::API
@@ -904,6 +910,8 @@ TwitterAPI::routes[0].route_version # yields 'v1'
 TwitterAPI::routes[0].route_description # etc.
 ```
 
+## Current Route and Endpoint
+
 It's possible to retrieve the information about the current route from within an API
 call with `route`.
 
@@ -915,6 +923,21 @@ class MyAPI < Grape::API
   end
   get "params/:id" do
     route.route_params[params[:id]] # yields the parameter description
+  end
+end
+```
+
+The current endpoint responding to the request is `self` within the API block 
+or `env['api.endpoint']` elsewhere. The endpoint has some interesting properties, 
+such as `source` which gives you access to the original code block of the API 
+implementation. This can be particularly useful for building a logger middleware.
+
+```ruby
+class ApiLogger < Grape::Middleware::Base
+  def before
+    file = env['api.endpoint'].source.source_location[0]
+    line = env['api.endpoint'].source.source_location[1]
+    logger.debug "[api] #{file}:#{line}"
   end
 end
 ```
