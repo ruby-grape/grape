@@ -822,10 +822,10 @@ module API
     desc 'Statuses index', {
       :object_fields => API::Entities::Status.documentation
     }
-    get '/statues' do
+    get '/statuses' do
       statuses = Status.all
       type = current_user.admin? ? :full : :default
-      present statues, with: API::Entities::Status, :type => type
+      present statuses, with: API::Entities::Status, :type => type
     end
   end
 end
@@ -961,7 +961,7 @@ For instance when you're API needs to get part of an URL, for instance:
 
 ```ruby
 class TwitterAPI < Grape::API
-  namespace :statues do
+  namespace :statuses do
     get '/(*:status)', :anchor => false do
 
     end
