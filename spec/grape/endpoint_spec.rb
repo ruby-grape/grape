@@ -7,11 +7,11 @@ describe Grape::Endpoint do
   describe '#initialize' do
     it 'takes a settings stack, options, and a block' do
       p = Proc.new {}
-      expect { 
+      expect {
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
           :path => '/',
           :method => :get
-        }, &p) 
+        }, &p)
       }.not_to raise_error
     end
   end
@@ -437,6 +437,20 @@ describe Grape::Endpoint do
       last_response.body.should == 'Hiya'
     end
 
+    it 'pulls a representation from the class options if the presented object is a collection of objects' do
+      entity = Class.new(Grape::Entity)
+      entity.stub!(:represent).and_return("Hiya")
+
+      class TestObject; end
+
+      subject.represent TestObject, :with => entity
+      subject.get '/example' do
+        present [TestObject.new]
+      end
+      get '/example'
+      last_response.body.should == "Hiya"
+    end
+
     it 'pulls a representation from the class ancestor if it exists' do
       entity = Class.new(Grape::Entity)
       entity.stub!(:represent).and_return("Hiya")
@@ -460,6 +474,20 @@ describe Grape::Endpoint do
 
       subject.get '/example' do
         present some_model.new
+      end
+      get '/example'
+      last_response.body.should == 'Auto-detect!'
+    end
+
+    it 'automatically uses Klass::Entity based on the first object in the collection being presented' do
+      some_model = Class.new
+      entity = Class.new(Grape::Entity)
+      entity.stub!(:represent).and_return("Auto-detect!")
+
+      some_model.const_set :Entity, entity
+
+      subject.get '/example' do
+        present [some_model.new]
       end
       get '/example'
       last_response.body.should == 'Auto-detect!'
@@ -606,5 +634,5 @@ describe Grape::Endpoint do
       last_response.body.should == "http://example.org/api/v1/url"
     end
   end
-  
+
 end
