@@ -314,12 +314,14 @@ module Grape
     def present(object, options = {})
       entity_class = options.delete(:with)
 
-      (object.is_a?(Array) ? object.first : object).class.ancestors.each do |potential|
+      # auto-detect the entity from the first object in the collection
+      object_instance = object.is_a?(Array) ? object.first : object
+
+      object_instance.class.ancestors.each do |potential|
         entity_class ||= (settings[:representations] || {})[potential]
       end
 
-      entity_class ||= object.class.const_get(:Entity) if object.class.const_defined?(:Entity)
-      entity_class ||= object.first.class.const_get(:Entity) if object.is_a?(Array) && object.first.class.const_defined?(:Entity)
+      entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
 
       root = options.delete(:root)
 

@@ -1,7 +1,7 @@
 0.2.5 (Next Release)
 ====================
 
-* [#305](https://github.com/intridea/grape/issues/305): Fix: presenting arrays of objects didn't work when declaring representations via `represent` or when auto-detecting an `Entity` constant in the objects being presented - [@brandonweiss](https://github.com/brandonweiss).
+* [#305](https://github.com/intridea/grape/issues/305): Fix: presenting arrays of objects via `represent` or when auto-detecting an `Entity` constant in the objects being presented - [@brandonweiss](https://github.com/brandonweiss).
 * Your Contribution Here
 
 0.2.4 (01/06/2013)
