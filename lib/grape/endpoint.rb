@@ -314,11 +314,12 @@ module Grape
     def present(object, options = {})
       entity_class = options.delete(:with)
 
-      object.class.ancestors.each do |potential|
+      (object.is_a?(Array) ? object.first : object).class.ancestors.each do |potential|
         entity_class ||= (settings[:representations] || {})[potential]
       end
 
       entity_class ||= object.class.const_get(:Entity) if object.class.const_defined?(:Entity)
+      entity_class ||= object.first.class.const_get(:Entity) if object.is_a?(Array) && object.first.class.const_defined?(:Entity)
 
       root = options.delete(:root)
 
