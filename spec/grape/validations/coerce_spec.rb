@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 describe Grape::Validations::CoerceValidator do
@@ -5,11 +6,23 @@ describe Grape::Validations::CoerceValidator do
   def app; subject end
 
   describe 'coerce' do
+    it "i18n error on malformed input" do
+      I18n.load_path << File.expand_path('../zh-CN.yml',__FILE__)
+      I18n.locale = :'zh-CN'
+      subject.params { requires :age, :type => Integer }
+      subject.get '/single' do 'int works'; end
+
+      get '/single', :age => '43a'
+      last_response.status.should == 400
+      last_response.body.should == '年龄格式不正确'
+      I18n.locale = :en
+
+    end
     it 'error on malformed input' do
       subject.params { requires :int, :type => Integer }
       subject.get '/single' do 'int works'; end
 
-      get '/single', :int => '43a' 
+      get '/single', :int => '43a'
       last_response.status.should == 400
       last_response.body.should == 'invalid parameter: int'
 
@@ -89,7 +102,7 @@ describe Grape::Validations::CoerceValidator do
         get '/bool', { :bool => 1 }
         last_response.status.should == 200
         last_response.body.should == 'TrueClass'
-        
+
         get '/bool', { :bool => 0 }
         last_response.status.should == 200
         last_response.body.should == 'FalseClass'

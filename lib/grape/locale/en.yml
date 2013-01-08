@@ -1,0 +1,7 @@
+en:
+  grape:
+    errors:
+      messages:
+        coerce: 'invalid parameter: %{attribute}'
+        presence: 'missing parameter: %{attribute}'
+        regexp: 'invalid parameter: %{attribute}'
