@@ -475,31 +475,27 @@ describe Grape::Endpoint do
 
     it 'presents with xml' do 
       entity = Class.new(Grape::Entity)
-      entity.root "toys", "toy"
-      entity.expose :cheese_burger
+      entity.root "examples", "example"
+      entity.expose :name
 
       subject.format :xml
 
       subject.get '/example' do 
         c = Class.new do 
-          attr_reader :cheese_burger
+          attr_reader :name
           def initialize(args)
-            @cheese_burger = args[:cheese_burger] || "no id set"
+            @name = args[:name] || "no name set"
           end
-          #def to_ary
-          #  {:id=>@id}
-          #end
         end
-
-        present c.new({cheese_burger: "lots of tomato"}), :with => entity
+        present c.new({:name => "johnnyiller"}), :with => entity
       end
       get '/example'
       last_response.status.should == 200
 nicexml=<<-BEGIN
 <?xml version="1.0" encoding="UTF-8"?>
-<toy>
-  <cheese-burger>lots of tomato</cheese-burger>
-</toy>
+<example>
+  <name>johnnyiller</name>
+</example>
 BEGIN
       last_response.body.should == nicexml
 
