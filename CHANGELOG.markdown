@@ -1,6 +1,6 @@
 0.2.4 (Next Release)
 ====================
-
+* [#228](https://github.com/intridea/grape/issues/228): Fix: xml formatter to work with entity - [@johnnyiller](https://github.com/johnnyiller)
 * [#296](https://github.com/intridea/grape/issues/296): Fix: ArgumentError with default error formatter - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Added `default_error_formatter` - [@dblock](https://github.com/dblock).
 * [#297](https://github.com/intridea/grape/issues/297): Setting `format` will automatically set `default_error_formatter` - [@dblock](https://github.com/dblock).
