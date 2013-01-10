@@ -33,8 +33,8 @@ module Grape
       end
 
       def i18n_message(type, attribute)
-        i18n_attr = I18n.t("grape.errors.attributes.#{attribute}", default: attribute.to_s)
-        I18n.t("grape.errors.messages.#{type}", attribute: i18n_attr)
+        i18n_attr = I18n.t("grape.errors.attributes.#{attribute}", :default => attribute.to_s)
+        I18n.t("grape.errors.messages.#{type}", :attribute => i18n_attr)
       end
 
     private
