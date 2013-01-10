@@ -246,7 +246,6 @@ describe Grape::Endpoint do
         subject.post '/request_body' do
           params[:user]
         end
-
         subject.put '/request_body' do
           params[:user]
         end
@@ -274,17 +273,12 @@ describe Grape::Endpoint do
 
       it 'does not include parameters not defined by the body' do
         subject.post '/omitted_params' do
-          body_params[:version].should == nil
+          params[:version].should == nil
+          params[:user].should == 'Bob'
         end
-        post '/omitted_params', MultiJson.dump(:user => 'Blah'), {'CONTENT_TYPE' => 'application/json'}
+        post '/omitted_params', MultiJson.dump(:user => 'Bob'), {'CONTENT_TYPE' => 'application/json'}
       end
 
-      it 'should return an equivalent hash on subsequenst calls' do
-        subject.post '/two_times' do
-          body_params.should == body_params
-        end
-        post '/two_times', MultiJson.dump(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
-      end
     end
   end
 

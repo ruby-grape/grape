@@ -159,8 +159,7 @@ module Grape
     def params
       @params ||= Hashie::Mash.new.
         deep_merge(request.params).
-        deep_merge(env['rack.routing_args'] || {}).
-        deep_merge(self.body_params)
+        deep_merge(env['rack.routing_args'] || {})
     end
 
     # A filtering method that will return a hash
@@ -183,23 +182,6 @@ module Grape
         end
         h
       }
-    end
-
-    # Pull out request body params if the content type matches and we're on a POST or PUT
-    def body_params
-      if ['POST', 'PUT'].include?(request.request_method.to_s.upcase) && request.content_length.to_i > 0
-        return @body_params ||=
-          case env['CONTENT_TYPE']
-          when 'application/json'
-            MultiJson.load(request.body.read)
-          when 'application/xml'
-            MultiXml.parse(request.body.read)
-          else
-            {}
-          end
-      end
-
-      {}
     end
 
     # The API version as specified in the URL.

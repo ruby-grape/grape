@@ -149,16 +149,37 @@ describe Grape::Middleware::Formatter do
 
   context 'Input' do
     it 'parses the body from a POST/PUT and put the contents into rack.request.form_hash' do
-      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json', 'rack.input' => StringIO.new('{"is_boolean":true,"string":"thing"}')})
+      io = StringIO.new('{"is_boolean":true,"string":"thing"}')
+      subject.call({
+        'PATH_INFO' => '/info',
+        'REQUEST_METHOD' => 'POST',
+        'CONTENT_TYPE' => 'application/json',
+        'rack.input' => io,
+        'CONTENT_LENGTH' => io.length
+      })
       subject.env['rack.request.form_hash']['is_boolean'].should be_true
       subject.env['rack.request.form_hash']['string'].should == 'thing'
     end
     it 'parses the body from an xml POST/PUT and put the contents into rack.request.from_hash' do
-      subject.call({'PATH_INFO' => '/info.xml', 'HTTP_ACCEPT' => 'application/xml', 'rack.input' => StringIO.new('<thing><name>Test</name></thing>')})
+      io = StringIO.new('<thing><name>Test</name></thing>')
+      subject.call({
+        'PATH_INFO' => '/info.xml',
+        'REQUEST_METHOD' => 'POST',
+        'CONTENT_TYPE' => 'application/xml',
+        'rack.input' => io,
+        'CONTENT_LENGTH' => io.length
+      })
       subject.env['rack.request.form_hash']['thing']['name'].should == 'Test'
     end
     it 'is able to fail gracefully if the body is regular POST content' do
-      subject.call({'PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json', 'rack.input' => StringIO.new('name=Other+Test+Thing')})
+      io = StringIO.new('name=Other+Test+Thing')
+      subject.call({
+        'PATH_INFO' => '/info',
+        'REQUEST_METHOD' => 'POST',
+        'CONTENT_TYPE' => 'application/json',
+        'rack.input' => io,
+        'CONTENT_LENGTH' => io.length
+      })
       subject.env['rack.request.form_hash'].should be_nil
     end
   end

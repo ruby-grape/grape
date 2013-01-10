@@ -64,15 +64,21 @@ describe Grape::Validations::PresenceValidator do
   end
 
   it 'validates id' do
-    post('/')
+    post '/'
     last_response.status.should == 400
     last_response.body.should == '{"error":"missing parameter: id"}'
 
-    post('/', {}, 'rack.input' => StringIO.new('{"id" : "a56b"}'))
+    io = StringIO.new('{"id" : "a56b"}')
+    post '/', {}, 'rack.input' => io,
+      'CONTENT_TYPE' => 'application/json',
+      'CONTENT_LENGTH' => io.length
     last_response.body.should == '{"error":"invalid parameter: id"}'
     last_response.status.should == 400
 
-    post('/', {}, 'rack.input' => StringIO.new('{"id" : 56}'))
+    io = StringIO.new('{"id" : 56}')
+    post '/', {}, 'rack.input' => io,
+      'CONTENT_TYPE' => 'application/json',
+      'CONTENT_LENGTH' => io.length
     last_response.body.should == '{"ret":56}'
     last_response.status.should == 201
   end
