@@ -1,12 +1,14 @@
 require 'virtus'
+require 'i18n'
 
+I18n.load_path << File.expand_path('../locale/en.yml', __FILE__)
 module Grape
-    
+
   module Validations
-    
+
     ##
     # All validators must inherit from this class.
-    # 
+    #
     class Validator
       attr_reader :attrs
 
@@ -28,6 +30,11 @@ module Grape
             validate_param!(attr_name, params)
           end
         end
+      end
+
+      def i18n_message(type, attribute)
+        i18n_attr = I18n.t("grape.errors.attributes.#{attribute}", :default => attribute.to_s)
+        I18n.t("grape.errors.messages.#{type}", :attribute => i18n_attr)
       end
 
     private
@@ -60,17 +67,17 @@ module Grape
         Validations::register_validator(short_name, klass)
       end
     end
-    
+
     class << self
       attr_accessor :validators
     end
-    
+
     self.validators = {}
-    
+
     def self.register_validator(short_name, klass)
       validators[short_name] = klass
     end
-    
+
     class ParamsScope
       attr_accessor :element, :parent
 
@@ -80,17 +87,17 @@ module Grape
         @api = api
         instance_eval(&block)
       end
-      
+
       def requires(*attrs)
         validations = {:presence => true}
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
         end
-        
+
         push_declared_params(attrs)
         validates(attrs, validations)
       end
-      
+
       def optional(*attrs)
         validations = {}
         if attrs.last.is_a?(Hash)
@@ -119,16 +126,16 @@ module Grape
     private
       def validates(attrs, validations)
         doc_attrs = { :required => validations.keys.include?(:presence) }
-        
+
         # special case (type = coerce)
         if validations[:type]
           validations[:coerce] = validations.delete(:type)
         end
-        
+
         if coerce_type = validations[:coerce]
           doc_attrs[:type] = coerce_type.to_s
         end
-        
+
         if desc = validations.delete(:desc)
           doc_attrs[:desc] = desc
         end
@@ -169,18 +176,18 @@ module Grape
         @api.settings[:declared_params] += attrs
       end
     end
-    
+
     # This module is mixed into the API Class.
     module ClassMethods
       def reset_validations!
         settings.peek[:declared_params] = []
         settings.peek[:validations] = []
       end
-      
+
       def params(&block)
         ParamsScope.new(self, nil, nil, &block)
       end
-      
+
       def document_attribute(names, opts)
         @last_description ||= {}
         @last_description[:params] ||= {}
@@ -189,9 +196,9 @@ module Grape
           @last_description[:params][name[:full_name].to_s].merge!(opts)
         end
       end
-      
+
     end
-    
+
   end
 end
 
