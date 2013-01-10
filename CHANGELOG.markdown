@@ -2,6 +2,7 @@
 ====================
 
 * [#305](https://github.com/intridea/grape/issues/305): Fix: presenting arrays of objects via `represent` or when auto-detecting an `Entity` constant in the objects being presented - [@brandonweiss](https://github.com/brandonweiss).
+* [#306](https://github.com/intridea/grape/issues/306): Added i18n support for validation error messages - [@niedhui](https://github.com/niedhui)
 * Your Contribution Here
 
 0.2.4 (01/06/2013)
