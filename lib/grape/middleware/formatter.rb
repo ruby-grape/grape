@@ -42,9 +42,13 @@ module Grape
                 if content_type_for(fmt)
                   parser = Grape::Parser::Base.parser_for fmt, options
                   unless parser.nil?
-                    body = parser.call body, env
-                    env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
-                    env['rack.request.form_input'] = env['rack.input']
+                    begin
+                      body = parser.call body, env
+                      env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
+                      env['rack.request.form_input'] = env['rack.input']
+                    rescue Exception => e
+                      throw :error, :status => 400, :message => e.message
+                    end
                   end
                 else
                   throw :error, :status => 406, :message => 'The requested content-type is not supported.'

@@ -1116,6 +1116,16 @@ describe Grape::API do
         last_response.body.should eql "elpmis"
       end
     end
+    context "muti_xml" do
+      it "doesn't parse yaml" do
+        subject.put :yaml do
+          params[:tag]
+        end
+        put '/yaml', '<tag type="symbol">a123</tag>', "CONTENT_TYPE" => "application/xml"
+        last_response.status.should == 400
+        last_response.body.should eql 'Disallowed type attribute: "symbol"'
+      end
+    end
   end
 
   describe '.default_error_status' do
