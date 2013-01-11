@@ -34,9 +34,8 @@ module Grape
       private
 
         def read_body_input
-          request_method = request.request_method.to_s.upcase
-          if [ 'POST', 'PUT' ].include?(request_method) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
-            if env['rack.input'] && (body = env['rack.input'].read).strip.length > 0
+          if (request.post? || request.put?) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
+            if env['rack.input'] && (body = env['rack.input'].read).length > 0
               begin
                 fmt = mime_types[request.media_type] if request.media_type
                 if content_type_for(fmt)
