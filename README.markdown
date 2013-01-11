@@ -220,8 +220,8 @@ end
 
 ## Parameters
 
-Request parameters are available through the `params` hash object. This includes `GET` and `POST` parameters,
-along with any named parameters you specify in your route strings.
+Request parameters are available through the `params` hash object. This includes `GET`, `POST`
+and `PUT` parameters, along with any named parameters you specify in your route strings.
 
 ```ruby
 get :public_timeline do
@@ -229,7 +229,8 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on POST and PUT for JSON and XML content-types.
+Parameters are automatically populated from the request body on POST and PUT for form input, JSON and
+XML content-types.
 
 The request:
 
@@ -243,37 +244,6 @@ The Grape endpoint:
 post '/statuses' do
   Status.create!({ :text => params[:text] })
 end
-```
-
-The API format is closely tied to input formats. A declaration of `format` will remove all other formats.
-You must declare additional content-types via `content_type` and optionally supply a parser via `parser`
-unless a parser is already available within Grape. Such a parser can be a function or a class.
-
-The following example is a trivial parser that will assign any input with the "text/custom" content-type
-to `:value`. The parameter will be available via `params[:value]` inside the API call.
-
-```ruby
-module CustomParser
-  def self.call(object, env)
-    { :value => object.to_s }
-  end
-end
-```
-
-```ruby
-content_type :txt, "text/plain"
-content_type :custom, "text/custom"
-parser :custom, CustomParser
-
-put "value" do
-  params[:value]
-end
-```
-
-You can invoke the above API as follows.
-
-```
-curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom -v
 ```
 
 ## Parameter Validation and Coercion
@@ -764,6 +734,42 @@ class API < Grape::API
     "var statuses = ...;"
   end
 end
+```
+
+## API Data Formats
+
+Grape accepts and parses input data sent with the POST and PUT methods as described in the Parameters
+section above. It also supports custom data formats. You must declare additional content-types via
+`content_type` and optionally supply a parser via `parser` unless a parser is already available within
+Grape to enable a custom format. Such a parser can be a function or a class.
+
+Without a parser, data is available "as-is" and can be read with `env['rack.input'].read`.
+
+The following example is a trivial parser that will assign any input with the "text/custom" content-type
+to `:value`. The parameter will be available via `params[:value]` inside the API call.
+
+```ruby
+module CustomParser
+  def self.call(object, env)
+    { :value => object.to_s }
+  end
+end
+```
+
+```ruby
+content_type :txt, "text/plain"
+content_type :custom, "text/custom"
+parser :custom, CustomParser
+
+put "value" do
+  params[:value]
+end
+```
+
+You can invoke the above API as follows.
+
+```
+curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom -v
 ```
 
 ## Reusable Responses with Entities
