@@ -2,7 +2,7 @@
 ====================
 
 * Fix: support content-type with character set when parsing POST and PUT input - [@dblock](http://github.com/dblock).
-* Fix: CVE-2013-0175, `multi_xml` parse vulnerability, require 'multi_xml' 0.5.2 - [@dblock](http://github.com/dblock).
+* Fix: CVE-2013-0175, multi_xml parse vulnerability, require multi_xml 0.5.2 - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.5 (01/10/2013)
