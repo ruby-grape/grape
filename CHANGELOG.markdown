@@ -1,6 +1,7 @@
 0.2.6 (Next Release)
 ====================
 
+* Fix: support content-type with character set when parsing POST and PUT input - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.5 (01/10/2013)

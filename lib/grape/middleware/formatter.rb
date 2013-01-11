@@ -35,20 +35,16 @@ module Grape
 
         def read_body_input
           request_method = request.request_method.to_s.upcase
-          if [ 'POST', 'PUT' ].include?(request_method) && (! request.form_data?) && (request.content_length.to_i > 0)
+          if [ 'POST', 'PUT' ].include?(request_method) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
             if env['rack.input'] && (body = env['rack.input'].read).strip.length > 0
               begin
-                fmt = mime_types[format_from_content_type]
+                fmt = mime_types[request.media_type] if request.media_type
                 if content_type_for(fmt)
                   parser = Grape::Parser::Base.parser_for fmt, options
                   unless parser.nil?
-                    begin
-                      body = parser.call body, env
-                      env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
-                      env['rack.request.form_input'] = env['rack.input']
-                    rescue
-                      # It's possible that it's just regular POST content -- just back off
-                    end
+                    body = parser.call body, env
+                    env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
+                    env['rack.request.form_input'] = env['rack.input']
                   end
                 else
                   throw :error, :status => 406, :message => 'The requested content-type is not supported.'
@@ -67,13 +63,6 @@ module Grape
           else
             throw :error, :status => 406, :message => 'The requested format is not supported.'
           end
-        end
-
-        def format_from_content_type
-          fmt = env['CONTENT_TYPE']
-          # avoid symbol memory leak on an unknown format
-          return fmt.to_sym if content_type_for(fmt)
-          fmt
         end
 
         def format_from_extension

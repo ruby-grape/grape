@@ -1088,10 +1088,12 @@ describe Grape::API do
           params[:simple]
         end
       end
-      it 'uses parser' do
-        put '/simple', "simple", "CONTENT_TYPE" => "text/custom"
-        last_response.status.should == 200
-        last_response.body.should eql "elpmis"
+      [ "text/custom", "text/custom; charset=UTF-8" ].each do |content_type|
+        it "uses parser for #{content_type}" do
+          put '/simple', "simple", "CONTENT_TYPE" => content_type
+          last_response.status.should == 200
+          last_response.body.should eql "elpmis"
+        end
       end
     end
     context 'custom parser class' do
