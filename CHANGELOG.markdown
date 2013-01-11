@@ -1,3 +1,7 @@
+0.2.1.1 (1/11/2013)
+====================
+* Fix: CVE-2013-0175, `multi_xml` parse vulnerability, require 'multi_xml' 0.5.2 - [@dblock](http://github.com/dblock).
+
 0.2.1 (7/11/2012)
 =================
 

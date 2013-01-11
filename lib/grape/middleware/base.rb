@@ -70,6 +70,10 @@ module Grape
           PARSERS.merge(options[:parsers] || {})
         end
 
+        def content_type_for(format)
+          Hash.new(content_types)[format.to_sym]
+        end
+
         def content_types
           CONTENT_TYPES.merge(options[:content_types] || {})
         end

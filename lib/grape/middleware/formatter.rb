@@ -25,11 +25,23 @@ module Grape
             parser = parser_for fmt
             unless parser.nil?
               begin
-                body = parser.call(body)
-                env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
-                env['rack.request.form_input'] = env['rack.input']
-              rescue
-                # It's possible that it's just regular POST content -- just back off
+                fmt = mime_types[request.media_type] if request.media_type
+                if content_type_for(fmt)
+                  parser = parser_for fmt
+                  unless parser.nil?
+                    begin
+                      body = parser.call body
+                      env['rack.request.form_hash'] = !env['rack.request.form_hash'].nil? ? env['rack.request.form_hash'].merge(body) : body
+                      env['rack.request.form_input'] = env['rack.input']
+                    rescue
+                      # It's possible that it's just regular POST content -- just back off
+                    end
+                  end
+                else
+                  throw :error, :status => 406, :message => 'The requested content-type is not supported.'
+                end
+              ensure
+                env['rack.input'].rewind
               end
             end
             env['rack.input'].rewind

@@ -766,7 +766,19 @@ describe Grape::API do
       last_response.status.should eql 403
     end
   end
+  
+  context "muti_xml" do
+    it "doesn't parse yaml" do
+      subject.put :yaml do
+        params[:tag]
+      end
 
+	    expect {
+        put '/yaml', '<tag type="symbol">a123</tag>', "CONTENT_TYPE" => "application/xml"
+      }.to raise_error(MultiXml::DisallowedTypeError)
+    end
+  end
+  
   context "routes" do
     describe "empty api structure" do
       it "returns an empty array of routes" do
