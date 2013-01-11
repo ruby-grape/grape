@@ -1078,6 +1078,44 @@ describe Grape::API do
     end
   end
 
+  describe '.parser' do
+    context 'lambda parser' do
+      before :each do
+        subject.content_type :txt, "text/plain"
+        subject.content_type :custom, "text/custom"
+        subject.parser :custom, lambda { |object, env| { object.to_sym => object.to_s.reverse } }
+        subject.put :simple do
+          params[:simple]
+        end
+      end
+      it 'uses parser' do
+        put '/simple', "simple", "CONTENT_TYPE" => "text/custom"
+        last_response.status.should == 200
+        last_response.body.should eql "elpmis"
+      end
+    end
+    context 'custom parser class' do
+      module CustomParser
+        def self.call(object, env)
+          { object.to_sym => object.to_s.reverse }
+        end
+      end
+      before :each do
+        subject.content_type :txt, "text/plain"
+        subject.content_type :custom, "text/custom"
+        subject.parser :custom, CustomParser
+        subject.put :simple do
+          params[:simple]
+        end
+      end
+      it 'uses custom parser' do
+        put '/simple', "simple", "CONTENT_TYPE" => "text/custom"
+        last_response.status.should == 200
+        last_response.body.should eql "elpmis"
+      end
+    end
+  end
+
   describe '.default_error_status' do
     it 'allows setting default_error_status' do
       subject.rescue_from :all
@@ -1270,10 +1308,10 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", 
-          :params => { 
-            "ns_param" => { :required => true, :desc => "namespace parameter" }, 
-            "method_param" => { :required => false, :desc => "method parameter" } 
+        { :description => "method",
+          :params => {
+            "ns_param" => { :required => true, :desc => "namespace parameter" },
+            "method_param" => { :required => false, :desc => "method parameter" }
           }
         }
       ]
@@ -1301,13 +1339,13 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "method", 
-          :params => { 
-            "ns_param" => { :required => true, :desc => "ns param 2" }, 
-            "ns1_param" => { :required => true, :desc => "ns1 param" }, 
-            "ns2_param" => { :required => true, :desc => "ns2 param" }, 
-            "method_param" => { :required => false, :desc => "method param" } 
-          } 
+        { :description => "method",
+          :params => {
+            "ns_param" => { :required => true, :desc => "ns param 2" },
+            "ns1_param" => { :required => true, :desc => "ns1 param" },
+            "ns2_param" => { :required => true, :desc => "ns2 param" },
+            "method_param" => { :required => false, :desc => "method param" }
+          }
         }
       ]
     end
@@ -1325,12 +1363,12 @@ describe Grape::API do
       end
       subject.get "method" do ; end
 
-      subject.routes.map { |route| 
+      subject.routes.map { |route|
         route.route_params
       }.should eq [{
         "group1[param1]" => { :required => false, :desc => "group1 param1 desc" },
         "group1[param2]" => { :required => true, :desc => "group1 param2 desc" },
-        "group2[param1]" => { :required => false, :desc => "group2 param1 desc" }, 
+        "group2[param1]" => { :required => false, :desc => "group2 param1 desc" },
         "group2[param2]" => { :required => true, :desc => "group2 param2 desc" }
       }]
     end
@@ -1346,11 +1384,11 @@ describe Grape::API do
       subject.routes.map { |route|
         { :description => route.route_description, :params => route.route_params }
       }.should eq [
-        { :description => "nesting", 
-          :params => { 
-            "root_param" => { :required => true, :desc => "root param" }, 
-            "nested[nested_param]" => { :required => true, :desc => "nested param" } 
-          } 
+        { :description => "nesting",
+          :params => {
+            "root_param" => { :required => true, :desc => "root param" },
+            "nested[nested_param]" => { :required => true, :desc => "nested param" }
+          }
         }
       ]
     end
@@ -1550,6 +1588,7 @@ describe Grape::API do
     context ':txt' do
       before(:each) do
         subject.format :txt
+        subject.content_type :json, "application/json"
         subject.get '/meaning_of_life' do
           { :meaning_of_life => 42 }
         end
@@ -1567,9 +1606,30 @@ describe Grape::API do
         last_response.body.should == { :meaning_of_life => 42 }.to_s
       end
     end
+    context ':txt only' do
+      before(:each) do
+        subject.format :txt
+        subject.get '/meaning_of_life' do
+          { :meaning_of_life => 42 }
+        end
+      end
+      it 'forces txt without an extension' do
+        get '/meaning_of_life'
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
+      end
+      it 'forces txt with the wrong extension' do
+        get '/meaning_of_life.json'
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
+      end
+      it 'forces txt from a non-accepting header' do
+        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
+      end
+    end
     context ':json' do
       before(:each) do
         subject.format :json
+        subject.content_type :txt, "text/plain"
         subject.get '/meaning_of_life' do
           { :meaning_of_life => 42 }
         end

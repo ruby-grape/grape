@@ -1,7 +1,10 @@
 0.2.5 (Next Release)
 ====================
 
+* Added support for custom parsers via `parser`, in addition to built-in multipart, JSON and XML parsers - [@dblock](http://github.com/dblock).
 * Removed `body_params`, data sent via a POST or PUT with a supported content-type is merged into `params` - [@dblock](http://github.com/dblock).
+* Setting `format` will automatically remove other content-types by calling `content_type` - [@dblock](http://github.com/dblock).
+* Setting `content_type` will prevent any input data other than the matching content-type or any Rack-supported form and parseable media types (`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`) from being parsed - [@dblock](http://github.com/dblock).
 * [#305](https://github.com/intridea/grape/issues/305): Fix: presenting arrays of objects via `represent` or when auto-detecting an `Entity` constant in the objects being presented - [@brandonweiss](https://github.com/brandonweiss).
 * [#306](https://github.com/intridea/grape/issues/306): Added i18n support for validation error messages - [@niedhui](https://github.com/niedhui).
 * Your Contribution Here

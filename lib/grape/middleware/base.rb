@@ -1,21 +1,11 @@
-require 'active_support/ordered_hash'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'grape/util/content_types'
 require 'multi_json'
 require 'multi_xml'
 
 module Grape
   module Middleware
     class Base
-      # Content types are listed in order of preference.
-      CONTENT_TYPES = ActiveSupport::OrderedHash[
-        :xml,  'application/xml',
-        :serializable_hash, 'application/json',
-        :json, 'application/json',
-        :atom, 'application/atom+xml',
-        :rss,  'application/rss+xml',
-        :txt,  'text/plain',
-      ]
-
       attr_reader :app, :env, :options
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
@@ -61,7 +51,7 @@ module Grape
       end
 
       def content_types
-        options[:content_types] || CONTENT_TYPES
+        ContentTypes.content_types_for(options[:content_types])
       end
 
       def content_type

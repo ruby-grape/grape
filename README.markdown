@@ -229,7 +229,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are also populated from the request body on POST and PUT for JSON and XML content-types.
+Parameters are automatically populated from the request body on POST and PUT for JSON and XML content-types.
 
 The request:
 
@@ -243,6 +243,37 @@ The Grape endpoint:
 post '/statuses' do
   Status.create!({ :text => params[:text] })
 end
+```
+
+The API format is closely tied to input formats. A declaration of `format` will remove all other formats.
+You must declare additional content-types via `content_type` and optionally supply a parser via `parser`
+unless a parser is already available within Grape. Such a parser can be a function or a class.
+
+The following example is a trivial parser that will assign any input with the "text/custom" content-type
+to `:value`. The parameter will be available via `params[:value]` inside the API call.
+
+```ruby
+module CustomParser
+  def self.call(object, env)
+    { :value => object.to_s }
+  end
+end
+```
+
+```ruby
+content_type :txt, "text/plain"
+content_type :custom, "text/custom"
+parser :custom, CustomParser
+
+put "value" do
+  params[:value]
+end
+```
+
+You can invoke the above API as follows.
+
+```
+curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom -v
 ```
 
 ## Parameter Validation and Coercion
@@ -643,7 +674,7 @@ end
 
 ## API Formats
 
-By default, Grape supports _XML_, _JSON_, and _TXT_ content-types. The default format is `:txt`. 
+By default, Grape supports _XML_, _JSON_, and _TXT_ content-types. The default format is `:txt`.
 
 Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
 
@@ -651,21 +682,23 @@ Your API can declare which types to support by using `content_type`. Response fo
 is determined by the request's extension, an explicit `format` parameter in the query
 string, or `Accept` header.
 
-The following API will only respond to the JSON content-type. All other requests will
-fail with an HTTP 406 error code.
+The following API will only respond to the JSON content-type and will not parse any other input than `application/json`,
+'application/x-www-form-urlencoded', 'multipart/form-data', 'multipart/related' and 'multipart/mixed'. All other requests
+will fail with an HTTP 406 error code.
 
 ```ruby
 class Twitter::API < Grape::API
   format :json
-  content_type :json, "application/json"
 end
 ```
 
-If you combine `format` with `rescue_from :all`, errors will be rendered using the same format. If you do not want this behavior, set the default error formatter with `default_error_formatter`.
+If you combine `format` with `rescue_from :all`, errors will be rendered using the same format.
+If you do not want this behavior, set the default error formatter with `default_error_formatter`.
 
 ```ruby
 class Twitter::API < Grape::API
   format :json
+  content_type :txt, "text/plain"
   default_error_formatter :txt
 end
 ```
@@ -701,7 +734,7 @@ Built-in formats are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 
-Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header. 
+Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header.
 See below for the order for choosing the API format.
 
 ```ruby
@@ -932,9 +965,9 @@ class MyAPI < Grape::API
 end
 ```
 
-The current endpoint responding to the request is `self` within the API block 
-or `env['api.endpoint']` elsewhere. The endpoint has some interesting properties, 
-such as `source` which gives you access to the original code block of the API 
+The current endpoint responding to the request is `self` within the API block
+or `env['api.endpoint']` elsewhere. The endpoint has some interesting properties,
+such as `source` which gives you access to the original code block of the API
 implementation. This can be particularly useful for building a logger middleware.
 
 ```ruby

@@ -3,6 +3,7 @@ require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
 require 'logger'
 require 'grape/util/deep_merge'
+require 'grape/util/content_types'
 
 module Grape
   # The API class is the primary entry point for
@@ -129,7 +130,12 @@ module Grape
       def format(new_format = nil)
         if new_format
           set(:format, new_format.to_sym)
+          # define the default error formatters
           set(:default_error_formatter, Grape::ErrorFormatter::Base.formatter_for(new_format, {}))
+          # define a single mime type
+          mime_type = content_types[new_format.to_sym]
+          raise "missing mime type for #{new_format}" unless mime_type
+          settings.imbue(:content_types, new_format.to_sym => mime_type)
         else
           settings[:format]
         end
@@ -138,6 +144,11 @@ module Grape
       # Specify a custom formatter for a content-type.
       def formatter(content_type, new_formatter)
         settings.imbue(:formatters, content_type.to_sym => new_formatter)
+      end
+
+      # Specify a custom parser for a content-type.
+      def parser(content_type, new_parser)
+        settings.imbue(:parsers, content_type.to_sym => new_parser)
       end
 
       # Specify a default error formatter.
@@ -153,6 +164,11 @@ module Grape
       #   content_type :xls, 'application/vnd.ms-excel'
       def content_type(key, val)
         settings.imbue(:content_types, key.to_sym => val)
+      end
+
+      # All available content types.
+      def content_types
+        Grape::ContentTypes.content_types_for(settings[:content_types])
       end
 
       # Specify the default status code for errors.
@@ -283,7 +299,6 @@ module Grape
           if app.respond_to?(:inherit_settings)
             app.inherit_settings(settings.clone)
           end
-
           endpoints << Grape::Endpoint.new(settings.clone,
             :method => :any,
             :path => path,

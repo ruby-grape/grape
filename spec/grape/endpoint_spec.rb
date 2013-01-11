@@ -278,8 +278,19 @@ describe Grape::Endpoint do
         end
         post '/omitted_params', MultiJson.dump(:user => 'Bob'), {'CONTENT_TYPE' => 'application/json'}
       end
-
     end
+
+    it "responds with a 406 for an unsupported content-type" do
+      subject.format :json
+      # subject.content_type :json, "application/json"
+      subject.put '/request_body' do
+        params[:user]
+      end
+      put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+      last_response.status.should == 406
+      last_response.body.should == '{"error":"The requested content-type is not supported."}'
+    end
+
   end
 
   describe '#error!' do

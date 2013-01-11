@@ -395,7 +395,8 @@ module Grape
         :format => settings[:format],
         :default_format => settings[:default_format] || :txt,
         :content_types => settings[:content_types],
-        :formatters => settings[:formatters]
+        :formatters => settings[:formatters],
+        :parsers => settings[:parsers]
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup
