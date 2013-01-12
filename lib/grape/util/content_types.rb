@@ -1,5 +1,3 @@
-require 'active_support/ordered_hash'
-
 module Grape
   module ContentTypes
     # Content types are listed in order of preference.

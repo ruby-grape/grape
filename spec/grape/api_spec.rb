@@ -1690,6 +1690,52 @@ describe Grape::API do
         last_response.body.should == '[{"abc":"def"},{"abc":"def"}]'
       end
     end
+    context ":xml" do
+      before(:each) do
+        subject.format :xml
+      end
+      it 'string' do
+        subject.get "/example" do
+          "example"
+        end
+        get '/example'
+        last_response.status.should == 500
+        last_response.body.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<error>
+  <message>cannot convert String to xml</message>
+</error>
+XML
+      end
+      it 'hash' do
+        subject.get "/example" do
+          { :example1 => "example1", :example2 => "example2" }
+        end
+        get '/example'
+        last_response.status.should == 200
+        last_response.body.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<hash>
+  <example1>example1</example1>
+  <example2>example2</example2>
+</hash>
+XML
+      end
+      it 'array' do
+        subject.get "/example" do
+          [ "example1", "example2" ]
+        end
+        get '/example'
+        last_response.status.should == 200
+        last_response.body.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<strings type="array">
+  <string>example1</string>
+  <string>example2</string>
+</strings>
+XML
+      end
+    end
   end
 
   context "catch-all" do

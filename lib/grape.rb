@@ -1,5 +1,20 @@
+require 'logger'
 require 'rack'
+require 'rack/mount'
 require 'rack/builder'
+require 'rack/accept'
+require 'rack/auth/basic'
+require 'rack/auth/digest/md5'
+require 'hashie'
+require 'active_support/all'
+require 'grape/util/deep_merge'
+require 'grape/util/content_types'
+require 'multi_json'
+require 'multi_xml'
+require 'virtus'
+require 'i18n'
+
+I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
   autoload :API,                 'grape/api'

@@ -24,8 +24,12 @@ module Grape
       def after
         status, headers, bodies = *@app_response
         formatter = Grape::Formatter::Base.formatter_for env['api.format'], options
-        bodymap = bodies.collect do |body|
-          formatter.call body, env
+        begin
+          bodymap = bodies.collect do |body|
+            formatter.call body, env
+          end
+        rescue Exception => e
+          throw :error, :status => 500, :message => e.message
         end
         headers['Content-Type'] = content_type_for(env['api.format']) unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a

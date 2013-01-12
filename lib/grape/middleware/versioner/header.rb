@@ -1,5 +1,4 @@
 require 'grape/middleware/base'
-require 'rack/accept'
 
 module Grape
   module Middleware

@@ -4,7 +4,8 @@ module Grape
       class << self
 
         def call(object, env)
-          object.respond_to?(:to_xml) ? object.to_xml : object.to_s
+          return object.to_xml if object.respond_to?(:to_xml)
+          raise "cannot convert #{object.class} to xml"
         end
 
       end

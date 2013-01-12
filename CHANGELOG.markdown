@@ -1,5 +1,8 @@
 Next Release
 ============
+* [#309](https://github.com/intridea/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
+* [#309](https://github.com/intridea/grape/pull/309): Added XML support to entities - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
+* A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.6 (01/11/2013)

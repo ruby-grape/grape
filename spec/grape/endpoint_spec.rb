@@ -552,6 +552,57 @@ describe Grape::Endpoint do
       end
 
     end
+
+    it 'presents with xml' do 
+      entity = Class.new(Grape::Entity)
+      entity.root "examples", "example"
+      entity.expose :name
+
+      subject.format :xml
+
+      subject.get '/example' do 
+        c = Class.new do 
+          attr_reader :name
+          def initialize(args)
+            @name = args[:name] || "no name set"
+          end
+        end
+        present c.new({:name => "johnnyiller"}), :with => entity
+      end
+      get '/example'
+      last_response.status.should == 200
+      last_response.headers['Content-type'].should == "application/xml"
+      last_response.body.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<hash>
+  <example>
+    <name>johnnyiller</name>
+  </example>
+</hash>
+XML
+    end
+
+    it 'presents with json' do 
+      entity = Class.new(Grape::Entity)
+      entity.root "examples", "example"
+      entity.expose :name
+
+      subject.format :json
+
+      subject.get '/example' do 
+        c = Class.new do 
+          attr_reader :name
+          def initialize(args)
+            @name = args[:name] || "no name set"
+          end
+        end
+        present c.new({:name => "johnnyiller"}), :with => entity
+      end
+      get '/example'
+      last_response.status.should == 200
+      last_response.headers['Content-type'].should == "application/json"
+      last_response.body.should == '{"example":{"name":"johnnyiller"}}'
+    end
   end
 
   context 'filters' do

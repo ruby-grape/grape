@@ -1,8 +1,3 @@
-require 'active_support/core_ext/hash/indifferent_access'
-require 'grape/util/content_types'
-require 'multi_json'
-require 'multi_xml'
-
 module Grape
   module Middleware
     class Base

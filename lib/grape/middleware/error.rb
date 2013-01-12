@@ -1,5 +1,4 @@
 require 'grape/middleware/base'
-require 'multi_json'
 
 module Grape
   module Middleware

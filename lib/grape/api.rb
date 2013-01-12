@@ -1,10 +1,3 @@
-require 'rack/mount'
-require 'rack/auth/basic'
-require 'rack/auth/digest/md5'
-require 'logger'
-require 'grape/util/deep_merge'
-require 'grape/util/content_types'
-
 module Grape
   # The API class is the primary entry point for
   # creating Grape APIs.Users should subclass this

@@ -4,7 +4,7 @@ describe Grape::Middleware::Formatter do
   subject{ Grape::Middleware::Formatter.new(app) }
   before{ subject.stub!(:dup).and_return(subject) }
 
-  let(:app){ lambda{|env| [200, {}, [@body]]} }
+  let(:app){ lambda{|env| [200, {}, [@body || { "foo" => "bar" }]]} }
 
   context 'serialization' do
     it 'looks at the bodies for possibly serializable data' do
@@ -37,6 +37,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'detection' do
+    
     it 'uses the extension if one is provided' do
       subject.call({'PATH_INFO' => '/info.xml'})
       subject.env['api.format'].should == :xml
@@ -45,9 +46,9 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'uses the format parameter if one is provided' do
-      subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=json'})
+      subject.call({'PATH_INFO' => '/info','QUERY_STRING' => 'format=json'})
       subject.env['api.format'].should == :json
-      subject.call({'PATH_INFO' => '/somewhere','QUERY_STRING' => 'format=xml'})
+      subject.call({'PATH_INFO' => '/info','QUERY_STRING' => 'format=xml'})
       subject.env['api.format'].should == :xml
     end
 
