@@ -1116,7 +1116,7 @@ describe Grape::API do
         last_response.body.should eql "elpmis"
       end
     end
-    context "muti_xml" do
+    context "multi_xml" do
       it "doesn't parse yaml" do
         subject.put :yaml do
           params[:tag]
