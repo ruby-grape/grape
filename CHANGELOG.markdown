@@ -1,8 +1,8 @@
 Next Release
 ============
+* [#294](https://github.com/intridea/grape/issues/294): Extracted `Grape::Entity` into a [grape-entity](https://github.com/agileanimal/grape-entity) gem - [@agileanimal](https://github.com/agileanimal).
 * [#309](https://github.com/intridea/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
 * [#309](https://github.com/intridea/grape/pull/309): Added XML support to entities - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
-* [#294](https://github.com/intridea/grape/issues/294): Extracted `Grape::Entity` into a `grape-entity` gem - [@agileanimal](https://github.com/agileanimal).
 * A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
