@@ -1709,7 +1709,10 @@ XML
       end
       it 'hash' do
         subject.get "/example" do
-          { :example1 => "example1", :example2 => "example2" }
+          ActiveSupport::OrderedHash[
+            :example1, "example1", 
+            :example2, "example2"
+          ]
         end
         get '/example'
         last_response.status.should == 200
