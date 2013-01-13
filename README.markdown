@@ -12,7 +12,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.2.7.
+You're reading the documentation for the next release of Grape, which should be 0.3.
 The current stable release is [0.2.6](https://github.com/intridea/grape/blob/v0.2.6/README.markdown).
 
 ## Project Tracking
@@ -772,39 +772,23 @@ You can invoke the above API as follows.
 curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom -v
 ```
 
-## Reusable Responses with Entities
+## RESTful Model Representations
 
-Entities are a reusable means for converting Ruby objects to API responses.
-Entities can be used to conditionally include fields, nest other entities, and build
-ever larger responses, using inheritance.
+Grape supports a range of ways to present your data with some help from a generic `present` method, 
+which accepts two arguments: the object to be presented and the options associated with it. The options 
+hash may include `:with`, which defines the entity to expose.
 
-### Defining Entities
+### Grape Entities
 
-Entities inherit from Grape::Entity, and define a simple DSL. Exposures can use
-runtime options to determine which fields should be visible, these options are
-available to `:if`, `:unless`, and `:proc`. The option keys `:version` and `:collection`
-will always be defined. The `:version` key is defined as `api.version`. The
-`:collection` key is boolean, and defined as `true` if the object presented is an
-array.
+Add the [grape-entity](https://github.com/agileanimal/grape-entity) gem to your Gemfile. 
+Please refer to the [grape-entity documentation](https://github.com/agileanimal/grape-entity/blob/master/README.markdown)
+for more details.
 
-  * `expose SYMBOLS`
-    * define a list of fields which will always be exposed
-  * `expose SYMBOLS, HASH`
-    * HASH keys include `:if`, `:unless`, `:proc`, `:as`, `:using`, `:format_with`, `:documentation`
-      * `:if` and `:unless` accept hashes (passed during runtime) or procs (arguments are object and options)
-  * `expose SYMBOL, { :format_with => :formatter }`
-    * expose a value, formatting it first
-    * `:format_with` can only be applied to one exposure at a time
-  * `expose SYMBOL, { :as => "alias" }`
-    * Expose a value, changing its hash key from SYMBOL to alias
-    * `:as` can only be applied to one exposure at a time
-  * `expose SYMBOL BLOCK`
-    * block arguments are object and options
-    * expose the value returned by the block
-    * block can only be applied to one exposure at a time
+The following example exposes statuses.
 
 ```ruby
 module API
+
   module Entities
     class Status < Grape::Entity
       expose :user_name
@@ -815,46 +799,7 @@ module API
       expose :replies, :using => API::Status, :as => :replies
     end
   end
-end
 
-module API
-  module Entities
-    class StatusDetailed < API::Entities::Status
-      expose :internal_id
-    end
-  end
-end
-```
-
-#### Using the Exposure DSL
-
-Grape ships with a DSL to easily define entities within the context
-of an existing class:
-
-```ruby
-class Status
-  include Grape::Entity::DSL
-
-  entity :text, :user_id do
-    expose :detailed, if: :conditional
-  end
-end
-```
-
-The above will automatically create a `Status::Entity` class and define properties on it according
-to the same rules as above. If you only want to define simple exposures you don't have to supply
-a block and can instead simply supply a list of comma-separated symbols.
-
-### Using Entities
-
-Once an entity is defined, it can be used within endpoints, by calling `present`. The `present`
-method accepts two arguments, the object to be presented and the options associated with it. The
-options hash must always include `:with`, which defines the entity to expose.
-
-If the entity includes documentation it can be included in an endpoint's description.
-
-```ruby
-module API
   class Statuses < Grape::API
     version 'v1'
 
@@ -869,8 +814,6 @@ module API
   end
 end
 ```
-
-### Entity Organization
 
 In addition to separately organizing entities, it may be useful to put them as namespaced
 classes underneath the model they represent.
@@ -889,52 +832,21 @@ end
 
 If you organize your entities this way, Grape will automatically detect the `Entity` class and
 use it to present your models. In this example, if you added `present User.new` to your endpoint,
-Grape would automatically detect that there is a `Status::Entity` class and use that as the
+Grape will automatically detect that there is a `Status::Entity` class and use that as the
 representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
-### Caveats
-
-Entities with duplicate exposure names and conditions will silently overwrite one another.
-In the following example, when `object.check` equals "foo", only `field_a` will be exposed.
-However, when `object.check` equals "bar" both `field_b` and `foo` will be exposed.
-
-```ruby
-module API
-  module Entities
-    class Status < Grape::Entity
-      expose :field_a, :foo, :if => lambda { |object, options| object.check == "foo" }
-      expose :field_b, :foo, :if => lambda { |object, options| object.check == "bar" }
-    end
-  end
-end
-```
-
-This can be problematic, when you have mixed collections. Using `respond_to?` is safer.
-
-```ruby
-module API
-  module Entities
-    class Status < Grape::Entity
-      expose :field_a, :if => lambda { |object, options| object.check == "foo" }
-      expose :field_b, :if => lambda { |object, options| object.check == "bar" }
-      expose :foo, :if => lambda { |object, options| object.respond_to?(:foo) }
-    end
-  end
-end
-```
-
-## Hypermedia and other RESTful Representations
-
-Although Grape ships with its own entity support, it's also possible to use it with other frameworks and renderers.
-
 ### Hypermedia
 
-Use [Roar](https://github.com/apotonick/roar). Include `Roar::Representer::JSON` in your models or call `to_json` explicitly on representers in your API.
+You can use any Hypermedia representer, including [Roar](https://github.com/apotonick/roar).
+Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON` 
+into your models or call `to_json` explicitly in your API implementation.
 
 ### Rabl
 
-[Rabl](https://github.com/nesquena/rabl) is supported via the [grape-rabl](https://github.com/LTe/grape-rabl) gem.
+You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of the 
+[grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl 
+formatter.
 
 ## Describing and Inspecting an API
 

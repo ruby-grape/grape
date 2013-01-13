@@ -20,7 +20,6 @@ module Grape
   autoload :API,                 'grape/api'
   autoload :Endpoint,            'grape/endpoint'
   autoload :Route,               'grape/route'
-  autoload :Entity,              'grape/entity'
   autoload :Cookies,             'grape/cookies'
   autoload :Validations,         'grape/validations'
 
