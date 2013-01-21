@@ -1002,7 +1002,7 @@ end
 
 ### Rails 3.x
 
-Add the following in `development.rb`:
+Add the following to `config/environments/development.rb`:
 
 ``` ruby
 @last_api_change = Time.now
@@ -1028,7 +1028,7 @@ ActionDispatch::Reloader.to_prepare do
 end
 ```
 
-Add the following into `routes.rb`:
+Add the following to `config/routes.rb`:
 
 ``` ruby
 require_dependency "app/api/api.rb" if Rails.env.development?
