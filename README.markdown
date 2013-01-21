@@ -774,13 +774,13 @@ curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom 
 
 ## RESTful Model Representations
 
-Grape supports a range of ways to present your data with some help from a generic `present` method, 
-which accepts two arguments: the object to be presented and the options associated with it. The options 
+Grape supports a range of ways to present your data with some help from a generic `present` method,
+which accepts two arguments: the object to be presented and the options associated with it. The options
 hash may include `:with`, which defines the entity to expose.
 
 ### Grape Entities
 
-Add the [grape-entity](https://github.com/agileanimal/grape-entity) gem to your Gemfile. 
+Add the [grape-entity](https://github.com/agileanimal/grape-entity) gem to your Gemfile.
 Please refer to the [grape-entity documentation](https://github.com/agileanimal/grape-entity/blob/master/README.markdown)
 for more details.
 
@@ -839,13 +839,13 @@ representative entity. This can still be overridden by using the `:with` option 
 ### Hypermedia
 
 You can use any Hypermedia representer, including [Roar](https://github.com/apotonick/roar).
-Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON` 
+Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON`
 into your models or call `to_json` explicitly in your API implementation.
 
 ### Rabl
 
-You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of the 
-[grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl 
+You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of the
+[grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl
 formatter.
 
 ## Describing and Inspecting an API
@@ -997,6 +997,46 @@ RSpec.configure do |config|
   }
 end
 ```
+
+## Reloading API Changes in Development
+
+### Rails 3.x
+
+Add the following in `development.rb`:
+
+``` ruby
+@last_api_change = Time.now
+api_files = Dir["#{Rails.root}/app/api/**/*.rb"] # adjust the path to your API files
+api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do |reloader|
+  times = api_files.map { |f| File.mtime(f) }
+
+  Rails.logger.debug "! Change detected: reloading following files:"
+  api_files.each_with_index do |s,i|
+    if times[i] > @last_api_change
+      Rails.logger.debug " - #{s}"
+      load s
+    end
+  end
+
+  Rails.application.reload_routes!
+  Rails.application.routes_reloader.reload!
+  Rails.application.eager_load!
+end
+
+ActionDispatch::Reloader.to_prepare do
+  api_reloader.execute_if_updated
+end
+```
+
+Add the following into `routes.rb`:
+
+``` ruby
+require_dependency "app/api/api.rb" if Rails.env.development?
+```
+
+Additional `require_dependency` entries are also required for every mounted Grape endpoint.
+
+
 ## Performance Monitoring
 
 Grape integrates with NewRelic via the [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem.
