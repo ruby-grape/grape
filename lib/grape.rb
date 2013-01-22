@@ -26,6 +26,14 @@ module Grape
   module Exceptions
     autoload :Base,                           'grape/exceptions/base'
     autoload :Validation,                     'grape/exceptions/validation'
+    autoload :MissingVendorOption,            'grape/exceptions/missing_vendor_option'
+    autoload :MissingMimeType,                'grape/exceptions/missing_mime_type'
+    autoload :MissingOption,                  'grape/exceptions/missing_option'
+    autoload :InvalidFormatter,               'grape/exceptions/invalid_formatter'
+    autoload :InvalidVersionerOption,         'grape/exceptions/invalid_versioner_option'
+    autoload :UnknownValidator,               'grape/exceptions/unknown_validator'
+    autoload :UnknownOptions,                 'grape/exceptions/unknown_options'
+    autoload :InvalidWithOptionForRepresent,  'grape/exceptions/invalid_with_option_for_represent'
   end
 
   module ErrorFormatter

@@ -22,7 +22,7 @@ module Grape
         when :param
           Param
         else
-          raise ArgumentError.new("Unknown :using for versioner: #{strategy}")
+          raise Grape::Exceptions::InvalidVersionerOption.new(strategy)
         end
       end
     end

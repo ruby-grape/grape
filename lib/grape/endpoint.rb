@@ -41,11 +41,11 @@ module Grape
       end
       @options = options
 
-      raise ArgumentError, "Must specify :path option." unless options.key?(:path)
+      raise Grape::Exceptions::MissingOption.new(:path) unless options.key?(:path)
       options[:path] = Array(options[:path])
       options[:path] = ['/'] if options[:path].empty?
 
-      raise ArgumentError, "Must specify :method option." unless options.key?(:method)
+      raise Grape::Exceptions::MissingOption.new(:method) unless options.key?(:method)
       options[:method] = Array(options[:method])
 
       options[:route_options] ||= {}

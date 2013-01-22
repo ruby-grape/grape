@@ -95,7 +95,7 @@ module Grape
           options ||= {}
           options = {:using => :path}.merge!(options)
 
-          raise ArgumentError, "Must specify :vendor option." if options[:using] == :header && !options.has_key?(:vendor)
+          raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.has_key?(:vendor)
 
           @versions = versions | args
           nest(block) do
@@ -127,7 +127,7 @@ module Grape
           set(:default_error_formatter, Grape::ErrorFormatter::Base.formatter_for(new_format, {}))
           # define a single mime type
           mime_type = content_types[new_format.to_sym]
-          raise "missing mime type for #{new_format}" unless mime_type
+          raise Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
           settings.imbue(:content_types, new_format.to_sym => mime_type)
         else
           settings[:format]
@@ -218,7 +218,7 @@ module Grape
       # @param model_class [Class] The model class that will be represented.
       # @option options [Class] :with The entity class that will represent the model.
       def represent(model_class, options)
-        raise ArgumentError, "You must specify an entity class in the :with option." unless options[:with] && options[:with].is_a?(Class)
+        raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
         imbue(:representations, model_class => options[:with])
       end
 
