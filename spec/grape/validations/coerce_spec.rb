@@ -8,6 +8,7 @@ describe Grape::Validations::CoerceValidator do
   describe 'coerce' do
     it "i18n error on malformed input" do
       I18n.load_path << File.expand_path('../zh-CN.yml',__FILE__)
+      I18n.reload!
       I18n.locale = :'zh-CN'
       subject.params { requires :age, :type => Integer }
       subject.get '/single' do 'int works'; end
