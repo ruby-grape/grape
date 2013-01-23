@@ -24,8 +24,8 @@ module Grape
   autoload :Validations,         'grape/validations'
 
   module Exceptions
-    autoload :Base,              'grape/exceptions/base'
-    autoload :ValidationError,   'grape/exceptions/validation_error'
+    autoload :Base,                           'grape/exceptions/base'
+    autoload :Validation,                     'grape/exceptions/validation'
   end
 
   module ErrorFormatter

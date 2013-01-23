@@ -2,7 +2,7 @@ require 'grape/exceptions/base'
 
 module Grape
   module Exceptions
-    class ValidationError < Grape::Exceptions::Base
+    class Validation < Grape::Exceptions::Base
       attr_accessor :param
 
       def initialize(args = {})
