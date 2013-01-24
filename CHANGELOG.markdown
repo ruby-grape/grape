@@ -1,5 +1,7 @@
 Next Release
 ============
+
+* [#306](https://github.com/intridea/grape/issues/306): Added I18n support for all Grape exceptions - [@niedhui](https://github.com/niedhui).
 * [#294](https://github.com/intridea/grape/issues/294): Extracted `Grape::Entity` into a [grape-entity](https://github.com/agileanimal/grape-entity) gem - [@agileanimal](https://github.com/agileanimal).
 * [#309](https://github.com/intridea/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
 * [#309](https://github.com/intridea/grape/pull/309): Added XML support to entities - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
