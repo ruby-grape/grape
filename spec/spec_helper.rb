@@ -13,6 +13,7 @@ Bundler.setup :default, :test
 require 'rack/test'
 require 'pry'
 require 'base64'
+require 'cookiejar'
 
 Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
   require file

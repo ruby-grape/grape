@@ -104,18 +104,17 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       last_response.body.should == '3'
-      expected_cookie = if Rack.release < '1.5'
-                          [
-                            "and_this=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT",
-                            "delete_this_cookie=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT"
-                          ]
-                        else
-                          [
-                            "and_this=deleted; expires=Thu, 01 Jan 1970 00:00:00 -0000",
-                            "delete_this_cookie=deleted; expires=Thu, 01 Jan 1970 00:00:00 -0000"
-                          ]
-                        end
-      last_response.headers['Set-Cookie'].split("\n").sort.should == expected_cookie
+      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
+        [ cookie.name, cookie ]
+      end]
+      cookies.size.should == 2
+      [ "and_this", "delete_this_cookie" ].each do |cookie_name|
+        cookie = cookies[cookie_name]
+        cookie.should_not be_nil
+        cookie.value.should == "deleted"
+        cookie.expired?.should be_true
+      end
     end
 
     it 'deletes cookies with path' do
@@ -129,18 +128,18 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       last_response.body.should == '3'
-      expected_cookie = if Rack.release < '1.5'
-                          [
-                            "and_this=deleted; path=/test; expires=Thu, 01-Jan-1970 00:00:00 GMT",
-                            "delete_this_cookie=deleted; path=/test; expires=Thu, 01-Jan-1970 00:00:00 GMT"
-                          ]
-                        else
-                          [
-                            "and_this=deleted; path=/test; expires=Thu, 01 Jan 1970 00:00:00 -0000",
-                            "delete_this_cookie=deleted; path=/test; expires=Thu, 01 Jan 1970 00:00:00 -0000"
-                          ]
-                        end
-      last_response.headers['Set-Cookie'].split("\n").sort.should == expected_cookie
+      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
+        [ cookie.name, cookie ]
+      end]
+      cookies.size.should == 2
+      [ "and_this", "delete_this_cookie" ].each do |cookie_name|
+        cookie = cookies[cookie_name]
+        cookie.should_not be_nil
+        cookie.value.should == "deleted"
+        cookie.path.should == "/test"
+        cookie.expired?.should be_true
+      end
     end
   end
 
