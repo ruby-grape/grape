@@ -5,3 +5,23 @@ en:
         coerce: 'invalid parameter: %{attribute}'
         presence: 'missing parameter: %{attribute}'
         regexp: 'invalid parameter: %{attribute}'
+        missing_vendor_option:
+          problem: 'missing :vendor option.'
+          summary: 'when version using header, you must specify :verdor option. '
+          resolution: "eg: version 'v1', :using => :header, :vendor => 'twitter'"
+        missing_mime_type:
+          problem: 'missing mime type for %{new_format}'
+          resolution:
+            "you can choose exist mime type from Grape::ContentTypes::CONTENT_TYPES
+            or add your own with content_type :%{new_format}, 'application/%{new_format}'
+            "
+        invalid_with_option_for_represent:
+          problem: 'You must specify an entity class in the :with option.'
+          resolution: 'eg: represent User, :with => Entity::User'
+        missing_option: 'You must specify :%{option} options.'
+        invalid_formatter: 'cannot convert %{klass} to %{to_format}'
+        invalid_versioner_option:
+          problem: 'Unknown :using for versioner: %{strategy}'
+          resolution: 'available strategy for :using is :path, :header, :param'
+        unknown_validator: 'unknown validator: %{validator_type}'
+        unknown_options: 'unknown options: %{options}'

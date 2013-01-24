@@ -14,7 +14,7 @@ module Grape
         @scope = scope
 
         if options.is_a?(Hash) && !options.empty?
-          raise "unknown options: #{options.keys}"
+          raise Grape::Exceptions.UnknownOptions.new(options.keys)
         end
       end
 
@@ -26,11 +26,6 @@ module Grape
             validate_param!(attr_name, params)
           end
         end
-      end
-
-      def i18n_message(type, attribute)
-        i18n_attr = I18n.t("grape.errors.attributes.#{attribute}", :default => attribute.to_s)
-        I18n.t("grape.errors.messages.#{type}", :attribute => i18n_attr)
       end
 
     private
@@ -163,7 +158,7 @@ module Grape
         if validator_class
           (@api.settings.peek[:validations] ||= []) << validator_class.new(attrs, options, doc_attrs[:required], self)
         else
-          raise "unknown validator: #{type}"
+          raise Grape::Exceptions::UnknownValidator.new(type)
         end
       end
 

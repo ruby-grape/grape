@@ -100,7 +100,7 @@ describe Grape::API do
 
   describe '.represent' do
     it 'requires a :with option' do
-      expect{ subject.represent Object, {} }.to raise_error(ArgumentError)
+      expect{ subject.represent Object, {} }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
     end
 
     it 'adds the association to the :representations setting' do
@@ -108,6 +108,7 @@ describe Grape::API do
       subject.represent Object, :with => klass
       subject.settings[:representations][Object].should == klass
     end
+
   end
 
   describe '.namespace' do
@@ -1710,7 +1711,7 @@ XML
       it 'hash' do
         subject.get "/example" do
           ActiveSupport::OrderedHash[
-            :example1, "example1", 
+            :example1, "example1",
             :example2, "example2"
           ]
         end
