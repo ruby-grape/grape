@@ -1002,28 +1002,30 @@ end
 
 ### Rails 3.x
 
-Source: http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838
+Add API paths to `config/application.rb`.
 
-Create file `config/initializers/reload_lib.rb`
+```ruby
+# Auto-load API and its subdirectories
+config.paths.add "app/api", :glob => "**/*.rb"
+config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
+```
+
+Create `config/initializers/reload_api.rb`.
 
 ```ruby
 if Rails.env.development?
-  lib_reloader = ActiveSupport::FileUpdateChecker.new(Dir["app/api/**/*"]) do
+  api_files = Dir["#{Rails.root}/app/api/**/*.rb"]
+  api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
     Rails.application.reload_routes!
   end
-
   ActionDispatch::Callbacks.to_prepare do
-    lib_reloader.execute_if_updated
+    api_reloader.execute_if_updated
   end
 end
 ```
 
-In `config/application.rb`, add
+See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
 
-```ruby
-config.autoload_paths += %W(#{config.root}/app/api)
-config.autoload_paths += Dir["#{config.root}/app/api/**/"]
-```
 
 ## Performance Monitoring
 
