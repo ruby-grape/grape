@@ -1002,40 +1002,28 @@ end
 
 ### Rails 3.x
 
-Add the following to `config/environments/development.rb`:
+Source: http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838
 
-``` ruby
-@last_api_change = Time.now
-api_files = Dir["#{Rails.root}/app/api/**/*.rb"] # adjust the path to your API files
-api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do |reloader|
-  times = api_files.map { |f| File.mtime(f) }
+Create file `config/initializers/reload_lib.rb`
 
-  Rails.logger.debug "! Change detected: reloading following files:"
-  api_files.each_with_index do |s,i|
-    if times[i] > @last_api_change
-      Rails.logger.debug " - #{s}"
-      load s
-    end
+```ruby
+if Rails.env.development?
+  lib_reloader = ActiveSupport::FileUpdateChecker.new(Dir["app/api/**/*"]) do
+    Rails.application.reload_routes!
   end
 
-  Rails.application.reload_routes!
-  Rails.application.routes_reloader.reload!
-  Rails.application.eager_load!
-end
-
-ActionDispatch::Reloader.to_prepare do
-  api_reloader.execute_if_updated
+  ActionDispatch::Callbacks.to_prepare do
+    lib_reloader.execute_if_updated
+  end
 end
 ```
 
-Add the following to `config/routes.rb`:
+In `config/application.rb`, add
 
-``` ruby
-require_dependency "app/api/api.rb" if Rails.env.development?
+```ruby
+config.autoload_paths += %W(#{config.root}/app/api)
+config.autoload_paths += Dir["#{config.root}/app/api/**/"]
 ```
-
-Additional `require_dependency` entries are also required for every mounted Grape endpoint.
-
 
 ## Performance Monitoring
 
