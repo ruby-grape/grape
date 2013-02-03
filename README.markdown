@@ -290,6 +290,9 @@ namespace :statuses do
 end
 ```
 
+The `namespace` method has a number of aliases, including: `group`, `resource`, 
+`resources`, and `segment`. Use whichever reads the best for your API.
+
 ### Custom Validators
 
 ```ruby
