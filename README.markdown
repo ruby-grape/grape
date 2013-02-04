@@ -363,6 +363,12 @@ get do
 end
 ```
 
+You can set a header with `header` inside an API call.
+
+```ruby
+header "X-Robots-Tag", "noindex"
+```
+
 ## Routes
 
 Optionally, you can define requirements for your named route parameters using regular
@@ -898,6 +904,16 @@ class ApiLogger < Grape::Middleware::Base
     line = env['api.endpoint'].source.source_location[1]
     logger.debug "[api] #{file}:#{line}"
   end
+end
+```
+
+## Before and After
+
+Execute a block before or after every API call with `before` and `after`.
+
+```ruby
+before do
+  header "X-Robots-Tag", "noindex"
 end
 ```
 
