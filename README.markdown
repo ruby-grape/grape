@@ -246,6 +246,29 @@ post '/statuses' do
 end
 ```
 
+## Multipart file parameters
+
+When uploading files using a multipart POST, the file information is
+available in the given form parameter.  The `tempfile` field contains
+the file object:
+
+```ruby
+desc "Upload a file"
+params do
+  requires :source, :desc => "The file we are uploading"
+end
+post "upload/:filename" do
+  FileUtils.cp(params.source.tempfile.path,  params.filename)
+  "uploaded"
+end
+```
+
+You can use curl to upload the file:
+
+```
+curl --form source=@my_file http://localhost:9292/upload/foo
+```
+
 ## Parameter Validation and Coercion
 
 You can define validations and coercion options for your parameters using a `params` block.
@@ -290,7 +313,7 @@ namespace :statuses do
 end
 ```
 
-The `namespace` method has a number of aliases, including: `group`, `resource`, 
+The `namespace` method has a number of aliases, including: `group`, `resource`,
 `resources`, and `segment`. Use whichever reads the best for your API.
 
 ### Custom Validators
