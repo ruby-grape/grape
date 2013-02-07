@@ -12,7 +12,8 @@ module Grape
         if valid_type?(new_value)
           params[attr_name] = new_value
         else
-          raise Grape::Exceptions::Validation, :status => 400, :param => attr_name, :message_key => :coerce
+          raise Grape::Exceptions::Validation, :status => 400,
+            :param => @scope.full_name(attr_name), :message_key => :coerce
         end
       end
 
