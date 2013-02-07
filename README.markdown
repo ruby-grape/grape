@@ -246,27 +246,20 @@ post '/statuses' do
 end
 ```
 
-## Multipart file parameters
+Multipart POSTs and PUTs are supported as well.
 
-When uploading files using a multipart POST, the file information is
-available in the given form parameter.  The `tempfile` field contains
-the file object:
+The request:
+
+```
+curl --form image_file=image.jpg http://localhost:9292/upload
+```
+
+The Grape endpoint:
 
 ```ruby
-desc "Upload a file"
-params do
-  requires :source, :desc => "The file we are uploading"
+post "upload" do
+  # file in params[:image_file]
 end
-post "upload/:filename" do
-  FileUtils.cp(params.source.tempfile.path,  params.filename)
-  "uploaded"
-end
-```
-
-You can use curl to upload the file:
-
-```
-curl --form source=@my_file http://localhost:9292/upload/foo
 ```
 
 ## Parameter Validation and Coercion
