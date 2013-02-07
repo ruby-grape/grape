@@ -239,6 +239,17 @@ module Grape
       end
     end
 
+    # Retrieves all available request headers.
+    def headers
+      @headers ||= @env.dup.inject({}) { |h, (k, v)|
+        if k.start_with? 'HTTP_'
+          k = k[5..-1].gsub('_', '-').downcase.gsub(/^.|[-_\s]./) { |x| x.upcase }
+          h[k] = v
+        end
+        h
+      }
+    end
+
     # Set response content-type
     def content_type(val)
       header('Content-Type', val)

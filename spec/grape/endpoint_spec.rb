@@ -47,6 +47,25 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#headers' do
+    before do
+      subject.get('/headers') do
+        headers.to_json
+      end
+    end
+    it 'includes request headers' do
+      get '/headers'
+      JSON.parse(last_response.body).should == {
+        "Host" => "example.org",
+        "Cookie" => ""
+      }
+    end
+    it 'includes additional request headers' do
+      get '/headers', nil, { "HTTP_X_GRAPE_CLIENT" => "1" }
+      JSON.parse(last_response.body)["X-Grape-Client"].should == "1"
+    end
+  end
+
   describe '#cookies' do
     it 'is callable from within a block' do
       subject.get('/get/cookies') do

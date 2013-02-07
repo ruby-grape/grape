@@ -363,23 +363,21 @@ end
 
 ## Headers
 
-Headers are available through the `header` helper or the `env` hash object.
+Request headers are available through the `headers` helper or from `env` in their original form.
 
 ```ruby
 get do
-  content_type = header['Content-type']
-  # ...
+  error!('Unauthorized', 401) unless headers['Secret-Password'] == 'swordfish'
 end
 ```
 
 ```ruby
 get do
   error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
-  # ...
 end
 ```
 
-You can set a header with `header` inside an API call.
+You can set a response header with `header` inside an API.
 
 ```ruby
 header "X-Robots-Tag", "noindex"
