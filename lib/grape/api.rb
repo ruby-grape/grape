@@ -287,16 +287,19 @@ module Grape
       end
 
       def mount(mounts)
-        mounts = {mounts => '/'} unless mounts.respond_to?(:each_pair)
+        mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
         mounts.each_pair do |app, path|
           if app.respond_to?(:inherit_settings)
-            app.inherit_settings(settings.clone)
+            app_settings = settings.clone
+            mount_path = Rack::Mount::Utils.normalize_path([ settings[:mount_path], path ].compact.join("/"))
+            app_settings.set :mount_path, mount_path
+            app.inherit_settings(app_settings)
           end
-          endpoints << Grape::Endpoint.new(settings.clone,
+          endpoints << Grape::Endpoint.new(settings.clone, {
             :method => :any,
             :path => path,
             :app => app
-          )
+          })
         end
       end
 

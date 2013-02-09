@@ -35,7 +35,12 @@ module Grape
     def initialize(settings, options = {}, &block)
       @settings = settings
       if block_given?
-        method_name = "#{options[:method]} #{settings.gather(:namespace).join( "/")} #{Array(options[:path]).join("/")}"
+        method_name = [ 
+          options[:method],
+          settings.gather(:namespace).join("/"),
+          settings.gather(:mount_path).join("/"),
+          Array(options[:path]).join("/")
+        ].join(" ")
         @source = block
         @block = self.class.generate_api_method(method_name, &block)
       end
@@ -57,7 +62,7 @@ module Grape
 
     def mount_in(route_set)
       if endpoints
-        endpoints.each{|e| e.mount_in(route_set)}
+        endpoints.each { |e| e.mount_in(route_set) }
       else
         routes.each do |route|
           route_set.add_route(self, {
@@ -106,6 +111,7 @@ module Grape
 
     def prepare_path(path)
       parts = []
+      parts << settings[:mount_path].to_s.split("/") if settings[:mount_path]
       parts << settings[:root_prefix].to_s.split("/") if settings[:root_prefix]
 
       uses_path_versioning = settings[:version] && settings[:version_options][:using] == :path
@@ -113,7 +119,7 @@ module Grape
       path_is_empty = path && (path.to_s =~ /^\s*$/ || path.to_s == '/')
 
       parts << ':version' if uses_path_versioning
-      if !uses_path_versioning || (!namespace_is_empty || !path_is_empty)
+      if ! uses_path_versioning || (! namespace_is_empty || ! path_is_empty)
         parts << namespace.to_s if namespace
         parts << path.to_s if path
         format_suffix = '(.:format)'

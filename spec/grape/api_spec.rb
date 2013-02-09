@@ -1513,6 +1513,34 @@ describe Grape::API do
         subject.routes.first.route_path.should =~ /\/cool\/awesome/
         subject.routes.last.route_path.should =~ /\/cool\/sauce/
       end
+
+      it 'mounts on a path' do
+        subject.namespace :cool do
+          app = Class.new(Grape::API)
+          app.get '/awesome' do
+            "sauce"
+          end
+          mount app => '/mounted'
+        end
+        get "/mounted/cool/awesome"
+        last_response.status.should == 200
+        last_response.body.should == "sauce"
+      end
+
+      it 'mounts on a nested path' do
+        app1 = Class.new(Grape::API)
+        app2 = Class.new(Grape::API)
+        app2.get '/nice' do
+          "play"
+        end
+        # note that the reverse won't work, mount from outside-in
+        subject.mount app1 => '/app1'
+        app1.mount app2 => '/app2'
+        get "/app1/app2/nice"
+        last_response.status.should == 200
+        last_response.body.should == "play"
+      end
+
     end
   end
 

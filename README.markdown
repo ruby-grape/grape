@@ -143,9 +143,6 @@ In a Rails application, modify *config/routes*:
 mount Twitter::API
 ```
 
-Note that when using Rails you will need to restart the server to pick up changes in your API classes
-(see [Issue 131](https://github.com/intridea/grape/issues/131)).
-
 ### Modules
 
 You can mount multiple API implementations inside another one. These don't have to be
@@ -155,6 +152,14 @@ different versions, but may be components of the same API.
 class Twitter::API < Grape::API
   mount Twitter::APIv1
   mount Twitter::APIv2
+end
+```
+
+You can also mount on a path, which is similar to using `prefix` inside the mounted API itself.
+
+```ruby
+class Twitter::API < Grape::API
+  mount Twitter::APIv1 => '/v1'
 end
 ```
 
