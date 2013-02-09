@@ -322,7 +322,7 @@ describe Grape::Endpoint do
       end
       put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
       last_response.status.should == 406
-      last_response.body.should == '{"error":"The requested content-type is not supported."}'
+      last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
     end
 
   end

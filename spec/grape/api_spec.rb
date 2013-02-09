@@ -1014,7 +1014,7 @@ describe Grape::API do
       end
       get '/excel.json'
       last_response.status.should == 406
-      last_response.body.should == "The requested format is not supported."
+      last_response.body.should == "The requested format 'txt' is not supported."
     end
   end
 

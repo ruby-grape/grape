@@ -54,7 +54,7 @@ module Grape
                     end
                   end
                 else
-                  throw :error, :status => 406, :message => 'The requested content-type is not supported.'
+                  throw :error, :status => 406, :message => "The requested content-type '#{request.media_type}' is not supported."
                 end
               ensure
                 env['rack.input'].rewind
@@ -68,7 +68,7 @@ module Grape
           if content_type_for(fmt)
             env['api.format'] = fmt
           else
-            throw :error, :status => 406, :message => 'The requested format is not supported.'
+            throw :error, :status => 406, :message => "The requested format '#{fmt}' is not supported."
           end
         end
 

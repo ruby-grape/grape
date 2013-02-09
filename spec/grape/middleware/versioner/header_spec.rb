@@ -90,7 +90,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'API vendor or version not found'
+        :message => 'API vendor or version not found.'
       )
     end
 
@@ -118,7 +118,7 @@ describe Grape::Middleware::Versioner::Header do
           :error,
           :status => 406,
           :headers => {'X-Cascade' => 'pass'},
-          :message => 'API vendor or version not found'
+          :message => 'API vendor or version not found.'
         )
       end
     end
@@ -148,7 +148,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'API vendor or version not found'
+        :message => 'API vendor or version not found.'
       )
     end
   end
@@ -177,7 +177,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'Accept header must be set'
+        :message => 'Accept header must be set.'
       )
     end
 
@@ -188,7 +188,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'Accept header must be set'
+        :message => 'Accept header must be set.'
       )
     end
 
@@ -199,7 +199,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'Accept header must not contain ranges ("*")'
+        :message => 'Accept header must not contain ranges ("*").'
       )
     end
 
@@ -210,7 +210,7 @@ describe Grape::Middleware::Versioner::Header do
         :error,
         :status => 406,
         :headers => {'X-Cascade' => 'pass'},
-        :message => 'Accept header must not contain ranges ("*")'
+        :message => 'Accept header must not contain ranges ("*").'
       )
     end
 

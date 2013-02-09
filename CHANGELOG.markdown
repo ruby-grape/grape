@@ -10,6 +10,7 @@ Next Release
 * [#317](https://github.com/intridea/grape/issues/317): Added `headers` that returns a hash of parsed HTTP request headers - [@dblock](http://github.com/dblock).
 * [#328](https://github.com/intridea/grape/issues/328): Version can now be specified as both String and Symbol - [@dblock](http://github.com/dblock).
 * [#332](https://github.com/intridea/grape/pull/332): `Grape::Exceptions::Validation` now contains full nested parameter names - [@alovak](https://github.com/alovak).
+* [#322](https://github.com/intridea/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.6 (01/11/2013)
