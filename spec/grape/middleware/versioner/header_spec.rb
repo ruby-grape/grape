@@ -49,21 +49,23 @@ describe Grape::Middleware::Versioner::Header do
       status.should == 200
     end
 
-    context 'when version is set' do
-      before do
-        @options[:versions] = ['v1']
-      end
+    [ 'v1', :v1 ].each do |version|
+      context 'when version is set to #{version{' do
+        before do
+          @options[:versions] = [ version ]
+        end
 
-      it 'is set' do
-        status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
-        env['api.format'].should eql 'json'
-        status.should == 200
-      end
+        it 'is set' do
+          status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+          env['api.format'].should eql 'json'
+          status.should == 200
+        end
 
-      it 'is nil if not provided' do
-        status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
-        env['api.format'].should eql nil
-        status.should == 200
+        it 'is nil if not provided' do
+          status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
+          env['api.format'].should eql nil
+          status.should == 200
+        end
       end
     end
   end

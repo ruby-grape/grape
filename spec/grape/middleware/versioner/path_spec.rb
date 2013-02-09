@@ -17,7 +17,7 @@ describe Grape::Middleware::Versioner::Path do
   end
 
   context 'with a pattern' do
-    before{ @options = {:pattern => /v./i} }
+    before { @options = {:pattern => /v./i} }
     it 'sets the version if it matches' do
       subject.call('PATH_INFO' => '/v1/awesome').last.should == 'v1'
     end
@@ -27,14 +27,18 @@ describe Grape::Middleware::Versioner::Path do
     end
   end
 
-  context 'with specified versions' do
-    before{ @options = {:versions => ['v1', 'v2']}}
-    it 'throws an error if a non-allowed version is specified' do
-      catch(:error){subject.call('PATH_INFO' => '/v3/awesome')}[:status].should == 404
-    end
+  [ [ 'v1', 'v2'], [ :v1, :v2 ], [ :v1, 'v2' ], [ 'v1', :v2 ] ].each do |versions|
+    context 'with specified versions as #{versions}' do
+      before { @options = { :versions => versions } }
 
-    it 'allows versions that have been specified' do
-      subject.call('PATH_INFO' => '/v1/asoasd').last.should == 'v1'
+      it 'throws an error if a non-allowed version is specified' do
+        catch(:error){subject.call('PATH_INFO' => '/v3/awesome')}[:status].should == 404
+      end
+
+      it 'allows versions that have been specified' do
+        subject.call('PATH_INFO' => '/v1/asoasd').last.should == 'v1'
+      end
     end
   end
+
 end

@@ -8,6 +8,7 @@ Next Release
 * A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
 * [#131](https://github.com/intridea/grape/issues/131): Added instructions for Grape API reloading in Rails - [@jyn](http://github.com/jyn), [@dblock](http://github.com/dblock).
 * [#317](https://github.com/intridea/grape/issues/317): Added `headers` that returns a hash of parsed HTTP request headers - [@dblock](http://github.com/dblock).
+* [#328](https://github.com/intridea/grape/issues/328): Version can now be specified as both String and Symbol - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.6 (01/11/2013)
