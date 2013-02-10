@@ -66,7 +66,9 @@ module Grape
       else
         routes.each do |route|
           methods = [ route.route_method ]
-          methods << "HEAD" if (! settings[:do_not_route_head]) && route.route_method == "GET"
+          if ! settings[:do_not_route_head] && route.route_method == "GET"
+            methods << "HEAD"
+          end
           methods.each do |method|
             route_set.add_route(self, {
               :path_info => route.route_compiled,

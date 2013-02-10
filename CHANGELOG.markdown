@@ -13,6 +13,7 @@ Next Release
 * [#322](https://github.com/intridea/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
 * [#60](https://github.com/intridea/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](http://github.com/dblock).
 * [#190](https://github.com/intridea/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
+* Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.6 (01/11/2013)

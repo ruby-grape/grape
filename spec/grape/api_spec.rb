@@ -413,6 +413,17 @@ describe Grape::API do
       last_response.status.should eql 200
       last_response.body.should eql ''
     end
+
+    it 'overwrites the default HEAD request' do
+      subject.head 'example' do
+        error! 'nothing to see here', 400
+      end
+      subject.get 'example' do
+        "example"
+      end
+      head '/example'
+      last_response.status.should eql 400
+    end
   end
 
   context "do_not_route_head!" do
@@ -430,6 +441,19 @@ describe Grape::API do
     end
     it 'does not allow HEAD on a GET request' do
       head '/example'
+      last_response.status.should eql 405
+    end
+  end
+
+  context "do_not_route_options!" do
+    before :each do
+      subject.do_not_route_options!
+      subject.get 'example' do
+        "example"
+      end
+    end
+    it 'options does not exist' do
+      options '/example'
       last_response.status.should eql 405
     end
   end

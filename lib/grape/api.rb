@@ -76,6 +76,11 @@ module Grape
         set(:do_not_route_head, true)
       end
 
+      # Do not automatically route OPTIONS
+      def do_not_route_options!
+        set(:do_not_route_options, true)
+      end
+
       # Specify an API version.
       #
       # @example API with legacy support.
@@ -473,17 +478,19 @@ module Grape
       resources.flatten.each do |route|
         allowed_methods[route.route_compiled] << route.route_method
       end
-
       allowed_methods.each do |path_info, methods|
-        methods = methods | [ 'HEAD' ] if (! self.class.settings[:do_not_route_head]) && methods.include?('GET') && ! methods.include?('HEAD')
+        if methods.include?('GET') && ! methods.include?("HEAD") && ! self.class.settings[:do_not_route_head]
+          methods = methods | [ 'HEAD' ]
+        end
         allow_header = (["OPTIONS"] | methods).join(", ")
-        unless methods.include?("OPTIONS")
+        unless methods.include?("OPTIONS") || self.class.settings[:do_not_route_options]
           @route_set.add_route( proc { [204, { 'Allow' => allow_header }, []]}, {
             :path_info      => path_info,
             :request_method => "OPTIONS"
           })
         end
         not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
+        not_allowed_methods << "OPTIONS" if self.class.settings[:do_not_route_options]
         not_allowed_methods.each do |bad_method|
           @route_set.add_route( proc { [405, { 'Allow' => allow_header }, []]}, {
             :path_info      => path_info,

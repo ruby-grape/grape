@@ -538,6 +538,8 @@ curl -v -X OPTIONS http://localhost:3000/rt_count
 < Allow: OPTIONS, GET, PUT
 ```
 
+You can disable this behavior with `do_not_route_options!`.
+
 If a request for a resource is made with an unsupported HTTP method, an
 HTTP 405 (Method Not Allowed) response will be returned.
 
