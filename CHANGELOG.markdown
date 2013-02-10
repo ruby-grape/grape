@@ -12,6 +12,7 @@ Next Release
 * [#332](https://github.com/intridea/grape/pull/332): `Grape::Exceptions::Validation` now contains full nested parameter names - [@alovak](https://github.com/alovak).
 * [#322](https://github.com/intridea/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
 * [#60](https://github.com/intridea/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](http://github.com/dblock).
+* [#190](https://github.com/intridea/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
 * Your contribution here.
 
 0.2.6 (01/11/2013)
@@ -93,7 +94,7 @@ Fixes
 
 * [#186](https://github.com/intridea/grape/issues/186): Fix: helpers allow multiple calls with modules and blocks - [@ppadron](https://github.com/ppadron).
 * [#188](https://github.com/intridea/grape/pull/188): Fix: multi-method routes append '(.:format)' only once - [@kainosnoema](https://github.com/kainosnoema).
-* [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to get request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
+* [#64](https://github.com/intridea/grape/issues/64), [#180](https://github.com/intridea/grape/pull/180): Added support to `GET` request bodies as parameters - [@bobbytables](https://github.com/bobbytables).
 * [#175](https://github.com/intridea/grape/pull/175): Added support for API versioning based on a request parameter - [@jackcasey](https://github.com/jackcasey).
 * [#168](https://github.com/intridea/grape/pull/168): Fix: Formatter can parse symbol keys in the headers hash - [@netmask](https://github.com/netmask).
 * [#169](https://github.com/intridea/grape/pull/169): Silence multi_json deprecation warnings - [@whiteley](https://github.com/whiteley).

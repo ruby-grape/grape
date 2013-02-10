@@ -65,10 +65,14 @@ module Grape
         endpoints.each { |e| e.mount_in(route_set) }
       else
         routes.each do |route|
-          route_set.add_route(self, {
-            :path_info => route.route_compiled,
-            :request_method => route.route_method,
-          }, { :route_info => route })
+          methods = [ route.route_method ]
+          methods << "HEAD" if (! settings[:do_not_route_head]) && route.route_method == "GET"
+          methods.each do |method|
+            route_set.add_route(self, {
+              :path_info => route.route_compiled,
+              :request_method => method,
+            }, { :route_info => route })
+          end
         end
       end
     end

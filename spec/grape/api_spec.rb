@@ -360,7 +360,7 @@ describe Grape::API do
         send(verb, '/example')
         last_response.body.should eql verb == 'head' ? '' : verb
         # Call it with a method other than the properly constrained one.
-        send(used_verb = verbs[(verbs.index(verb) + 1) % verbs.size], '/example')
+        send(used_verb = verbs[(verbs.index(verb) + 2) % verbs.size], '/example')
         last_response.status.should eql used_verb == 'options' ? 204 :405
       end
     end
@@ -392,7 +392,7 @@ describe Grape::API do
         "example"
       end
       put '/example'
-      last_response.headers['Allow'].should eql 'OPTIONS, GET, POST'
+      last_response.headers['Allow'].should eql 'OPTIONS, GET, POST, HEAD'
     end
 
     it 'adds an OPTIONS route that returns a 204 and an Allow header' do
@@ -402,7 +402,35 @@ describe Grape::API do
       options '/example'
       last_response.status.should eql 204
       last_response.body.should eql ''
+      last_response.headers['Allow'].should eql 'OPTIONS, GET, HEAD'
+    end
+
+    it 'allows HEAD on a GET request' do
+      subject.get 'example' do
+        "example"
+      end
+      head '/example'
+      last_response.status.should eql 200
+      last_response.body.should eql ''
+    end
+  end
+
+  context "do_not_route_head!" do
+    before :each do
+      subject.do_not_route_head!
+      subject.get 'example' do
+        "example"
+      end
+    end
+    it 'options does not contain HEAD' do
+      options '/example'
+      last_response.status.should eql 204
+      last_response.body.should eql ''
       last_response.headers['Allow'].should eql 'OPTIONS, GET'
+    end
+    it 'does not allow HEAD on a GET request' do
+      head '/example'
+      last_response.status.should eql 405
     end
   end
 

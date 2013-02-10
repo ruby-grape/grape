@@ -66,10 +66,14 @@ module Grape
         settings.imbue(key, value)
       end
 
-      # Define a root URL prefix for your entire
-      # API.
+      # Define a root URL prefix for your entire API.
       def prefix(prefix = nil)
         prefix ? set(:root_prefix, prefix) : settings[:root_prefix]
+      end
+
+      # Do not route HEAD requests to GET requests automatically
+      def do_not_route_head!
+        set(:do_not_route_head, true)
       end
 
       # Specify an API version.
@@ -471,6 +475,7 @@ module Grape
       end
 
       allowed_methods.each do |path_info, methods|
+        methods = methods | [ 'HEAD' ] if (! self.class.settings[:do_not_route_head]) && methods.include?('GET') && ! methods.include?('HEAD')
         allow_header = (["OPTIONS"] | methods).join(", ")
         unless methods.include?("OPTIONS")
           @route_set.add_route( proc { [204, { 'Allow' => allow_header }, []]}, {

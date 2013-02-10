@@ -129,8 +129,11 @@ run Twitter::API
 And would respond to the following routes:
 
     GET /statuses/public_timeline(.json)
+    HEAD /statuses/public_timeline(.json)
     GET /statuses/home_timeline(.json)
+    HEAD /statuses/home_timeline(.json)
     GET /statuses/:id(.json)
+    HEAD /statuses/:id(.json)
     POST /statuses(.json)
     PUT /statuses/:id(.json)
     DELETE /statuses/:id(.json)
@@ -488,7 +491,23 @@ redirect "/statuses", :permanent => true
 
 ## Allowed Methods
 
-When you add a route for a resource, a route for the HTTP OPTIONS
+When you add a `GET` route for a resource, a route for the `HEAD`
+method will also be added automatically. You can disable this 
+behavior with `do_not_route_head!`.
+
+``` ruby
+class API < Grape::API
+
+  do_not_route_head!
+
+  get '/example' do
+    # only responds to GET
+  end
+
+end
+```
+
+When you add a route for a resource, a route for the `OPTIONS`
 method will also be added. The response to an OPTIONS request will
 include an "Allow" header listing the supported methods.
 
