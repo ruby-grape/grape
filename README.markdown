@@ -140,11 +140,20 @@ And would respond to the following routes:
 
 ### Rails
 
-In a Rails application, modify *config/routes*:
+Place API files into `app/api` and modify `application.rb`.
 
 ```ruby
-mount Twitter::API
+config.paths.add "app/api", :glob => "**/*.rb"
+config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
 ```
+
+Modify *config/routes*:
+
+```ruby
+mount Twitter::API => '/'
+```
+
+See below for additional code that enables reloading of API changes in development.
 
 ### Modules
 
