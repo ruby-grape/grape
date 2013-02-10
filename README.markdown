@@ -915,6 +915,7 @@ http_digest({ :realm => 'Test Api', :opaque => 'app secret' }) do |username|
   # lookup the user's password here
   { 'user1' => 'password1' }[username]
 end
+```
 
 Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
