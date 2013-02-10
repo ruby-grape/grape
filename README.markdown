@@ -897,6 +897,27 @@ You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of 
 [grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl
 formatter.
 
+## Authentication
+
+### Basic and Digest Auth 
+
+Grape has built-in Basic and Digest authentication.
+
+```ruby
+http_basic do |username, password|
+  # verify user's password here
+  { 'test' => 'password1' }[username] == password
+end
+```
+
+```ruby
+http_digest({ :realm => 'Test Api', :opaque => 'app secret' }) do |username|
+  # lookup the user's password here
+  { 'user1' => 'password1' }[username]
+end
+
+Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
+
 ## Describing and Inspecting an API
 
 Grape routes can be reflected at runtime. This can notably be useful for generating
