@@ -119,7 +119,7 @@ end
 
 ### Rack
 
-The above sample creates a Rack application that can be run from a rackup *config.ru* file
+The above sample creates a Rack application that can be run from a rackup `config.ru` file
 with `rackup`:
 
 ```ruby
@@ -147,7 +147,7 @@ config.paths.add "app/api", :glob => "**/*.rb"
 config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
 ```
 
-Modify *config/routes*:
+Modify `config/routes`:
 
 ```ruby
 mount Twitter::API => '/'
