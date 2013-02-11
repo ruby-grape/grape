@@ -129,14 +129,13 @@ run Twitter::API
 And would respond to the following routes:
 
     GET /statuses/public_timeline(.json)
-    HEAD /statuses/public_timeline(.json)
     GET /statuses/home_timeline(.json)
-    HEAD /statuses/home_timeline(.json)
     GET /statuses/:id(.json)
-    HEAD /statuses/:id(.json)
     POST /statuses(.json)
     PUT /statuses/:id(.json)
     DELETE /statuses/:id(.json)
+
+Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
 ### Rails
 
