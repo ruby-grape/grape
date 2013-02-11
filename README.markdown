@@ -710,7 +710,7 @@ is determined by the request's extension, an explicit `format` parameter in the 
 string, or `Accept` header.
 
 The following API will only respond to the JSON content-type and will not parse any other input than `application/json`,
-'application/x-www-form-urlencoded', 'multipart/form-data', 'multipart/related' and 'multipart/mixed'. All other requests
+`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests
 will fail with an HTTP 406 error code.
 
 ```ruby
