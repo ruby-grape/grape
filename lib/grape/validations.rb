@@ -21,9 +21,11 @@ module Grape
       def validate!(params)
         params = @scope.params(params)
 
-        @attrs.each do |attr_name|
-          if @required || params.has_key?(attr_name)
-            validate_param!(attr_name, params)
+        (params.is_a?(Array) ? params : [params]).each do |resource_params|
+          @attrs.each do |attr_name|
+            if @required || resource_params.has_key?(attr_name)
+              validate_param!(attr_name, resource_params)
+            end
           end
         end
       end
