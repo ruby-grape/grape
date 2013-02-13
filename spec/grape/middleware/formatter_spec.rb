@@ -150,11 +150,35 @@ describe Grape::Middleware::Formatter do
 
   context 'input' do
     [ "application/json", "application/json; charset=utf-8" ].each do |content_type|
-      it 'parses the body from a POST/PUT and put the contents into rack.request.form_hash for #{content_type}' do
+      it 'parses the body from a POST and put the contents into rack.request.form_hash for #{content_type}' do
         io = StringIO.new('{"is_boolean":true,"string":"thing"}')
         subject.call({
           'PATH_INFO' => '/info',
           'REQUEST_METHOD' => 'POST',
+          'CONTENT_TYPE' => content_type,
+          'rack.input' => io,
+          'CONTENT_LENGTH' => io.length
+        })
+        subject.env['rack.request.form_hash']['is_boolean'].should be_true
+        subject.env['rack.request.form_hash']['string'].should == 'thing'
+      end
+      it 'parses the body from a PUT and put the contents into rack.request.form_hash for #{content_type}' do
+        io = StringIO.new('{"is_boolean":true,"string":"thing"}')
+        subject.call({
+          'PATH_INFO' => '/info',
+          'REQUEST_METHOD' => 'PUT',
+          'CONTENT_TYPE' => content_type,
+          'rack.input' => io,
+          'CONTENT_LENGTH' => io.length
+        })
+        subject.env['rack.request.form_hash']['is_boolean'].should be_true
+        subject.env['rack.request.form_hash']['string'].should == 'thing'
+      end
+      it 'parses the body from a PATCH and put the contents into rack.request.form_hash for #{content_type}' do
+        io = StringIO.new('{"is_boolean":true,"string":"thing"}')
+        subject.call({
+          'PATH_INFO' => '/info',
+          'REQUEST_METHOD' => 'PATCH',
           'CONTENT_TYPE' => content_type,
           'rack.input' => io,
           'CONTENT_LENGTH' => io.length
