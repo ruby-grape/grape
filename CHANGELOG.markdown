@@ -16,6 +16,7 @@ Next Release
 * [#190](https://github.com/intridea/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
 * Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](http://github.com/dblock).
 * [#335](https://github.com/intridea/grape/pull/335): Fix: Fixed parameters passed in request body when issuing a `PATCH` request not being available in the `params` hash - [@FreakenK](http://github.com/FreakenK).
+* Your contribution here.
 
 0.2.6 (01/11/2013)
 ==================
