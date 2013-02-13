@@ -167,8 +167,7 @@ module Grape
     def params
       @params ||= Hashie::Mash.new.
         deep_merge(request.params).
-        deep_merge(env['rack.routing_args'] || {}).
-        deep_merge(env["action_dispatch.request.request_parameters"] || {})
+        deep_merge(env['rack.routing_args'] || {})
     end
 
     # A filtering method that will return a hash

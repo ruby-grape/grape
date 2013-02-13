@@ -38,7 +38,7 @@ module Grape
       private
 
         def read_body_input
-          if (request.post? || request.put?) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
+          if (request.post? || request.put? || request.patch?) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
             if env['rack.input'] && (body = env['rack.input'].read).length > 0
               begin
                 fmt = mime_types[request.media_type] if request.media_type
