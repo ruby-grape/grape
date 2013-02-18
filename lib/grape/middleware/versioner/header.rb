@@ -96,11 +96,11 @@ module Grape
         end
 
         def cascade?
-          options[:version_options] && (options[:version_options][:cascade].nil? ? true : options[:version_options][:cascade])
+          options[:version_options] && (options[:version_options].has_key?(:cascade) ? options[:version_options][:cascade] : true)
         end
 
         def error_headers
-          cascade? ? {'X-Cascade' => 'pass'} : {}
+          cascade? ? { 'X-Cascade' => 'pass' } : {}
         end
 
         # @param [String] media_type a content type
