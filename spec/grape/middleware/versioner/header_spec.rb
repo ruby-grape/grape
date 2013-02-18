@@ -218,4 +218,60 @@ describe Grape::Middleware::Versioner::Header do
       subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
     end
   end
+
+  context 'when :strict and :cascade=>false are set' do
+    before do
+      @options[:versions] = ['v1']
+      @options[:version_options][:strict] = true
+      @options[:version_options][:cascade] = false
+    end
+
+    it 'fails with 406 Not Acceptable if header is not set' do
+      expect {
+        env = subject.call({}).last
+      }.to throw_symbol(
+        :error,
+        :status => 406,
+        :headers => {},
+        :message => 'Accept header must be set.'
+      )
+    end
+
+    it 'fails with 406 Not Acceptable if header is empty' do
+      expect {
+        env = subject.call('HTTP_ACCEPT' => '').last
+      }.to throw_symbol(
+        :error,
+        :status => 406,
+        :headers => {},
+        :message => 'Accept header must be set.'
+      )
+    end
+
+    it 'fails with 406 Not Acceptable if type is a range' do
+      expect {
+        env = subject.call('HTTP_ACCEPT' => '*/*').last
+      }.to throw_symbol(
+        :error,
+        :status => 406,
+        :headers => {},
+        :message => 'Accept header must not contain ranges ("*").'
+      )
+    end
+
+    it 'fails with 406 Not Acceptable if subtype is a range' do
+      expect {
+        env = subject.call('HTTP_ACCEPT' => 'application/*').last
+      }.to throw_symbol(
+        :error,
+        :status => 406,
+        :headers => {},
+        :message => 'Accept header must not contain ranges ("*").'
+      )
+    end
+
+    it 'succeeds if proper header is set' do
+      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
+    end
+  end
 end

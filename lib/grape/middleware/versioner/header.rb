@@ -29,7 +29,7 @@ module Grape
           if strict?
             # If no Accept header:
             if header.qvalues.empty?
-              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'Accept header must be set.'
+              throw :error, :status => 406, :headers => error_headers, :message => 'Accept header must be set.'
             end
             # Remove any acceptable content types with ranges.
             header.qvalues.reject! do |media_type,_|
@@ -37,7 +37,7 @@ module Grape
             end
             # If all Accept headers included a range:
             if header.qvalues.empty?
-              throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'Accept header must not contain ranges ("*").'
+              throw :error, :status => 406, :headers => error_headers, :message => 'Accept header must not contain ranges ("*").'
             end
           end
 
@@ -55,10 +55,10 @@ module Grape
             end
           # If none of the available content types are acceptable:
           elsif strict?
-            throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => '406 Not Acceptable'
+            throw :error, :status => 406, :headers => error_headers, :message => '406 Not Acceptable'
           # If all acceptable content types specify a vendor or version that doesn't exist:
           elsif header.values.all?{ |media_type| has_vendor?(media_type) || has_version?(media_type)}
-            throw :error, :status => 406, :headers => {'X-Cascade' => 'pass'}, :message => 'API vendor or version not found.'
+            throw :error, :status => 406, :headers => error_headers, :message => 'API vendor or version not found.'
           end
         end
 
@@ -93,6 +93,14 @@ module Grape
 
         def strict?
           options[:version_options] && options[:version_options][:strict]
+        end
+
+        def cascade?
+          options[:version_options] && (options[:version_options][:cascade].nil? ? true : options[:version_options][:cascade])
+        end
+
+        def error_headers
+          cascade? ? {'X-Cascade' => 'pass'} : {}
         end
 
         # @param [String] media_type a content type

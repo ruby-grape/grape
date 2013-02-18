@@ -192,7 +192,11 @@ Using this versioning strategy, clients should pass the desired version in the H
 By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
 one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
-is returned when no correct `Accept` header is supplied.
+is returned when no correct `Accept` header is supplied. By default this error contains a
+`X-Cascade` header set to `pass`, allowing nesting and stacking of routes (See
+[Rack::Mount](https://github.com/josh/rack-mount) for more information). To circumvent this default
+behavior, one can set the `:cascade` option to `false`, indicating the `X-Cascade` header may not
+be passed.
 
 ### Path
 
@@ -500,7 +504,7 @@ redirect "/statuses", :permanent => true
 ## Allowed Methods
 
 When you add a `GET` route for a resource, a route for the `HEAD`
-method will also be added automatically. You can disable this 
+method will also be added automatically. You can disable this
 behavior with `do_not_route_head!`.
 
 ``` ruby
@@ -907,7 +911,7 @@ formatter.
 
 ## Authentication
 
-### Basic and Digest Auth 
+### Basic and Digest Auth
 
 Grape has built-in Basic and Digest authentication.
 
