@@ -436,7 +436,7 @@ module Grape
         end
       end
 
-     def inherited(subclass)
+      def inherited(subclass)
         subclass.reset!
         subclass.logger = logger.clone
       end
@@ -457,7 +457,22 @@ module Grape
     end
 
     def call(env)
-      @route_set.call(env)
+      status, headers, body = @route_set.call(env)
+      headers['X-Cascade'] = '' unless cascade?
+      [status, headers, body]
+    end
+
+    # Some requests may return a HTTP 404 error if grape cannot find a matching
+    # route. In this case, Rack::Mount adds a X-Cascade header to the response
+    # and sets it to 'pass', indicating to grape's parents they should keep
+    # looking for a matching route on other resources.
+    #
+    # In some applications (e.g. mounting grape on rails), one might need to trap
+    # errors from reaching upstream. This is effectivelly done by unsetting
+    # X-Cascade. Default :cascade is true.
+    def cascade?
+      cascade = ((self.class.settings || {})[:version_options] || {})[:cascade]
+      cascade.nil? ? true : cascade
     end
 
     reset!
