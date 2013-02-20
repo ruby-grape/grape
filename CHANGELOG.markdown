@@ -1,7 +1,7 @@
 Next Release
 ============
 
-* [#340](https://github.com/intridea/grape/pull/339): Allow rack/mount cascading to be skipped on header - [@dieb](https://github.com/dieb).
+* [#340](https://github.com/intridea/grape/pull/339), [#342](https://github.com/intridea/grape/pull/342): Added `:cascade` option to `version` to allow disabling of rack/mount cascade behavior - [@dieb](https://github.com/dieb).
 * [#333](https://github.com/intridea/grape/pull/333): Validation for array in params - [@flyerhzm](https://github.com/flyerhzm).
 * [#306](https://github.com/intridea/grape/issues/306): Added I18n support for all Grape exceptions - [@niedhui](https://github.com/niedhui).
 * [#294](https://github.com/intridea/grape/issues/294): Extracted `Grape::Entity` into a [grape-entity](https://github.com/agileanimal/grape-entity) gem - [@agileanimal](https://github.com/agileanimal).

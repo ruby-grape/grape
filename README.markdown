@@ -660,7 +660,7 @@ end
 
 When mounted inside Rails 3.x, errors like "404 Not Found" or "406 Not Acceptable" will likely be
 handled and rendered by Rails handlers. For instance, accessing a nonexistent route "/api/foo"
-raises a 404, which inside rails will ultimately be translated to a ActionController::RoutingError,
+raises a 404, which inside rails will ultimately be translated to an `ActionController::RoutingError`,
 which most likely will get rendered to a HTML error page.
 
 Most APIs will enjoy avoiding Rails exceptions and have their own exceptions reaching the client.

@@ -1867,7 +1867,7 @@ XML
       subject.version 'v2', :using => :path, :cascade => false
       get "/v2/hello"
       last_response.status.should == 404
-      last_response.headers["X-Cascade"].should == ""
+      last_response.headers.keys.should_not include "X-Cascade"
     end
   end
 end
