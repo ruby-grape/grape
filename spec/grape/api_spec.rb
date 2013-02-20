@@ -1855,4 +1855,19 @@ XML
     end
   end
 
+  context "cascading" do
+    it "cascades" do
+      subject.version 'v1', :using => :path, :cascade => true
+      get "/v1/hello"
+      last_response.status.should == 404
+      last_response.headers["X-Cascade"].should == "pass"
+    end
+
+    it "does not cascade" do
+      subject.version 'v2', :using => :path, :cascade => false
+      get "/v2/hello"
+      last_response.status.should == 404
+      last_response.headers["X-Cascade"].should == ""
+    end
+  end
 end

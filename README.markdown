@@ -176,8 +176,18 @@ end
 
 ## Versioning
 
-There are three strategies in which clients can reach your API's endpoints: `:header`,
-`:path` and `:param`. The default strategy is `:path`.
+There are three strategies in which clients can reach your API's endpoints: `:path`,
+`:header` and `:param`. The default strategy is `:path`.
+
+### Path
+
+```ruby
+version 'v1', :using => :path
+```
+
+Using this versioning strategy, clients should pass the desired version in the URL.
+
+    curl -H http://localhost:9292/v1/statuses/public_timeline
 
 ### Header
 
@@ -192,24 +202,7 @@ Using this versioning strategy, clients should pass the desired version in the H
 By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
 one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
-is returned when no correct `Accept` header is supplied. By default this error contains an
-`X-Cascade` header set to `pass`, allowing nesting and stacking of routes (see
-[Rack::Mount](https://github.com/josh/rack-mount) for more information). To prevent this behavior,
-and not add the `X-Cascade` header, set the `:cascade` option to `false`.
-
-```ruby
-version 'v1', :using => :header, :vendor => 'twitter', :cascade => false
-```
-
-### Path
-
-```ruby
-version 'v1', :using => :path
-```
-
-Using this versioning strategy, clients should pass the desired version in the URL.
-
-    curl -H http://localhost:9292/v1/statuses/public_timeline
+is returned when no correct `Accept` header is supplied.
 
 ### Param
 
@@ -229,6 +222,7 @@ version 'v1', :using => :param, :parameter => "v"
 ```
 
     curl -H http://localhost:9292/statuses/public_timeline?v=v1
+
 
 ## Describing Methods
 
@@ -661,6 +655,22 @@ class Twitter::API < Grape::API
   end
 end
 ```
+
+#### Rails 3.x
+
+When mounted inside Rails 3.x, errors like "404 Not Found" or "406 Not Acceptable" will likely be
+handled and rendered by Rails handlers. For instance, accessing a nonexistent route "/api/foo"
+raises a 404, which inside rails will ultimately be translated to a ActionController::RoutingError,
+which most likely will get rendered to a HTML error page.
+
+Most APIs will enjoy avoiding Rails exceptions and have their own exceptions reaching the client.
+In that case, the `:cascade` option can be set to `false` on the versioning definition.
+
+```ruby
+version 'v1', :using => :header, :vendor => 'twitter', :cascade => false
+```
+
+The `:cascade` option can also be used with the other versioning strategies (`:param` and `:path`).
 
 ## Logging
 

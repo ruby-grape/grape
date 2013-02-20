@@ -95,6 +95,9 @@ module Grape
           options[:version_options] && options[:version_options][:strict]
         end
 
+        # By default those errors contain an `X-Cascade` header set to `pass`, which allows nesting and stacking
+        # of routes (see [Rack::Mount](https://github.com/josh/rack-mount) for more information). To prevent
+        # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
           options[:version_options] && (options[:version_options].has_key?(:cascade) ? options[:version_options][:cascade] : true)
         end
