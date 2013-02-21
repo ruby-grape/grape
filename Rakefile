@@ -19,18 +19,18 @@ task :default => :spec
 
 begin
   require 'yard'
-  DOC_FILES = ['lib/**/*.rb', 'README.markdown']
-  
+  DOC_FILES = ['lib/**/*.rb', 'README.md']
+
   YARD::Rake::YardocTask.new(:doc) do |t|
     t.files   = DOC_FILES
   end
-  
+
   namespace :doc do
     YARD::Rake::YardocTask.new(:pages) do |t|
       t.files   = DOC_FILES
       t.options = ['-o', '../grape.doc']
     end
-    
+
     namespace :pages do
       desc 'Generate and publish YARD docs to GitHub pages.'
       task :publish => ['doc:pages'] do

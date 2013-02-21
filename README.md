@@ -13,7 +13,7 @@ content negotiation, versioning and much more.
 ## Stable Release
 
 You're reading the documentation for the next release of Grape, which should be 0.3.1.
-The current stable release is [0.3.0](https://github.com/intridea/grape/blob/v0.3.0/README.markdown).
+The current stable release is [0.3.0](https://github.com/intridea/grape/blob/v0.3.0/README.md).
 
 ## Project Tracking
 
@@ -1145,7 +1145,7 @@ features and discuss issues.
 * Fork the project
 * Write tests for your new feature or a test that reproduces a bug
 * Implement your feature or make a bug fix
-* Add a line to `CHANGELOG.markdown` describing your change
+* Add a line to `CHANGELOG.md` describing your change
 * Commit, push and make a pull request. Bonus points for topic branches.
 
 ## License
