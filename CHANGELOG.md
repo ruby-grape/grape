@@ -1,23 +1,22 @@
-Next Release
-============
+0.3.0 (02/21/2013)
+==================
 
-* [#340](https://github.com/intridea/grape/pull/339), [#342](https://github.com/intridea/grape/pull/342): Added `:cascade` option to `version` to allow disabling of rack/mount cascade behavior - [@dieb](https://github.com/dieb).
-* [#333](https://github.com/intridea/grape/pull/333): Validation for array in params - [@flyerhzm](https://github.com/flyerhzm).
-* [#306](https://github.com/intridea/grape/issues/306): Added I18n support for all Grape exceptions - [@niedhui](https://github.com/niedhui).
 * [#294](https://github.com/intridea/grape/issues/294): Extracted `Grape::Entity` into a [grape-entity](https://github.com/agileanimal/grape-entity) gem - [@agileanimal](https://github.com/agileanimal).
-* [#309](https://github.com/intridea/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
-* [#309](https://github.com/intridea/grape/pull/309): Added XML support to entities - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
-* A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
+* [#340](https://github.com/intridea/grape/pull/339), [#342](https://github.com/intridea/grape/pull/342): Added `:cascade` option to `version` to allow disabling of rack/mount cascade behavior - [@dieb](https://github.com/dieb).
+* [#333](https://github.com/intridea/grape/pull/333): Added support for validation of arrays in `params` - [@flyerhzm](https://github.com/flyerhzm).
+* [#306](https://github.com/intridea/grape/issues/306): Added I18n support for all Grape exceptions - [@niedhui](https://github.com/niedhui).
+* [#309](https://github.com/intridea/grape/pull/309): Added XML support to the entity presenter - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
 * [#131](https://github.com/intridea/grape/issues/131): Added instructions for Grape API reloading in Rails - [@jyn](http://github.com/jyn), [@dblock](http://github.com/dblock).
 * [#317](https://github.com/intridea/grape/issues/317): Added `headers` that returns a hash of parsed HTTP request headers - [@dblock](http://github.com/dblock).
-* [#328](https://github.com/intridea/grape/issues/328): Version can now be specified as both String and Symbol - [@dblock](http://github.com/dblock).
 * [#332](https://github.com/intridea/grape/pull/332): `Grape::Exceptions::Validation` now contains full nested parameter names - [@alovak](https://github.com/alovak).
-* [#322](https://github.com/intridea/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
-* [#60](https://github.com/intridea/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](http://github.com/dblock).
+* [#328](https://github.com/intridea/grape/issues/328): API version can now be specified as both String and Symbol - [@dblock](http://github.com/dblock).
 * [#190](https://github.com/intridea/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
 * Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](http://github.com/dblock).
+* [#309](https://github.com/intridea/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
+* A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
+* [#322](https://github.com/intridea/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
+* [#60](https://github.com/intridea/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](http://github.com/dblock).
 * [#335](https://github.com/intridea/grape/pull/335): Fix: request body parameters from a `PATCH` request not available in `params` - [@FreakenK](http://github.com/FreakenK).
-* Your contribution here.
 
 0.2.6 (01/11/2013)
 ==================
