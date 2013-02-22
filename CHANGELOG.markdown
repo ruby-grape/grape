@@ -17,6 +17,7 @@ Next Release
 * [#190](https://github.com/intridea/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
 * Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](http://github.com/dblock).
 * [#335](https://github.com/intridea/grape/pull/335): Fix: request body parameters from a `PATCH` request not available in `params` - [@FreakenK](http://github.com/FreakenK).
+* [#343](https://github.com/intridea/grape/pull/343): Fix: returning 405 with no Content-Type caused Rack to throw Rack::Lint::LintError - [@gustavosaume](https://github.com/gustavosaume) & [@wyattisimo](https://github.com/wyattisimo).
 * Your contribution here.
 
 0.2.6 (01/11/2013)
