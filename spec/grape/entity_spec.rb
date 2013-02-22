@@ -146,15 +146,15 @@ describe Grape::Entity do
 
     end
 
-    it 'presents with xml' do 
+    it 'presents with xml' do
       entity = Class.new(Grape::Entity)
       entity.root "examples", "example"
       entity.expose :name
 
       subject.format :xml
 
-      subject.get '/example' do 
-        c = Class.new do 
+      subject.get '/example' do
+        c = Class.new do
           attr_reader :name
           def initialize(args)
             @name = args[:name] || "no name set"
@@ -175,15 +175,15 @@ describe Grape::Entity do
 XML
     end
 
-    it 'presents with json' do 
+    it 'presents with json' do
       entity = Class.new(Grape::Entity)
       entity.root "examples", "example"
       entity.expose :name
 
       subject.format :json
 
-      subject.get '/example' do 
-        c = Class.new do 
+      subject.get '/example' do
+        c = Class.new do
           attr_reader :name
           def initialize(args)
             @name = args[:name] || "no name set"
@@ -197,15 +197,13 @@ XML
       last_response.body.should == '{"example":{"name":"johnnyiller"}}'
     end
 
-    # We ignore the JSONP callback and rack-jsonp dependency for this test
-    # the main focus is the serialization of the Entity with the
-    # application/javascript content-type
-    it 'presents with jsonp' do
+    it 'presents with jsonp and a custom formatter' do
       entity = Class.new(Grape::Entity)
       entity.root "examples", "example"
       entity.expose :name
 
       subject.content_type :jsonp, 'application/javascript'
+      subject.formatter :jsonp, lambda { |object, env| object.to_json }
       subject.format :jsonp
 
       subject.get '/example' do
