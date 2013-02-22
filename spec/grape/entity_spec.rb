@@ -196,6 +196,34 @@ XML
       last_response.headers['Content-type'].should == "application/json"
       last_response.body.should == '{"example":{"name":"johnnyiller"}}'
     end
+
+    # We ignore the JSONP callback and rack-jsonp dependency for this test
+    # the main focus is the serialization of the Entity with the
+    # application/javascript content-type
+    it 'presents with jsonp' do
+      entity = Class.new(Grape::Entity)
+      entity.root "examples", "example"
+      entity.expose :name
+
+      subject.content_type :jsonp, 'application/javascript'
+      subject.format :jsonp
+
+      subject.get '/example' do
+        c = Class.new do
+          attr_reader :name
+          def initialize(args)
+            @name = args[:name] || "no name set"
+          end
+        end
+
+        present c.new({:name => "johnnyiller"}), :with => entity
+      end
+      get '/example'
+      last_response.status.should == 200
+      last_response.headers['Content-type'].should == "application/javascript"
+      last_response.body.should == '{"example":{"name":"johnnyiller"}}'
+    end
+
   end
 
 end
