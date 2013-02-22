@@ -395,7 +395,7 @@ describe Grape::API do
       last_response.headers['Allow'].should eql 'OPTIONS, GET, POST, HEAD'
     end
 
-    specify '405 responses includes an Content-Type header specifying supported methods' do
+    specify '405 responses includes an Content-Type header' do
       subject.get 'example' do
         "example"
       end
