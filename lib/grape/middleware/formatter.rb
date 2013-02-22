@@ -18,7 +18,8 @@ module Grape
 
       def before
         negotiate_content_type
-        read_body_input
+        endpoint = request.env['api.endpoint']
+        read_body_input if endpoint.nil? || !endpoint.options[:route_options][:skip_read_body]
       end
 
       def after
