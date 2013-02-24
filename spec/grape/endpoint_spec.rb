@@ -534,4 +534,60 @@ describe Grape::Endpoint do
     end
   end
 
+  context 'pagination' do
+    before :each do
+      subject.get('/foo') do
+        present 0.upto(42).to_a
+      end
+    end
+    it 'consider Array objects as paginable' do
+      get('/foo?page=11')
+      last_response.status.should eq 200
+      last_response.header.should include 'page'
+    end
+    it 'paginate the body' do
+      get('/foo?page=11')
+      last_response.status.should eq 200
+      last_response.body.should include '10'
+    end
+    it 'paginate the body and understand size' do
+      get('/foo?page=3&size=3') 
+      last_response.status.should eq 200
+      last_response.body.should_not include '5'
+      last_response.body.should include '6'
+      last_response.body.should include '8'
+      last_response.body.should_not include '9'
+      last_response.body.should eq 6.upto(8).to_a.to_s
+    end
+    it 'set headers for pagination' do
+      get('/foo?page=3&size=3') 
+      last_response.status.should eq 200
+      last_response.header.should include 'page'
+      last_response.header['page'].should eq '3'
+      last_response.header.should include 'next'
+      last_response.header['next'].should eq '4'
+      last_response.header.should include 'prev'
+      last_response.header['prev'].should eq '2'
+    end
+    it 'do not mess with last pages' do
+      get('/foo?page=5&size=10') 
+      last_response.status.should eq 200
+      last_response.header.should include 'page'
+      last_response.header.should include 'prev'
+      last_response.header.should_not include 'next'
+      last_response.body.should_not include '39'
+      last_response.body.should include '40'
+      last_response.body.should include '42'
+      last_response.body.should_not include '43'
+      last_response.body.should eq 40.upto(42).to_a.to_s
+    end
+    it 'do not mess with foo pages' do
+      subject.get('/foo') do
+        present 0.upto(42).to_a
+      end
+      get('/foo?page=6&size=10') 
+      last_response.status.should eq 400
+    end
+  end
+
 end

@@ -340,8 +340,8 @@ module Grape
           page = params[:page].to_i ||= options[:default_page]
           error!("Invalid page: #{page}", 400) if page < 0
           size = unless (params[:size].nil? || params[:size].to_i.zero?)
-            params[:size].to_i 
-          else if params[:size].to_i > object.count
+              params[:size].to_i 
+            else if params[:size].to_i > object.count
               object.count
             else 
               options[:default_page_size]
@@ -349,10 +349,10 @@ module Grape
           end
           error!("Invalid page size: #{size}", 400) if size <= 0
           page_count = if (object.count%size).zero?
-            object.count/size
-          else
-            object.count/size + 1
-          end
+              object.count/size
+            else
+              object.count/size + 1
+            end
           error!("Page #{page} out!", 400) if page > page_count || page.zero?
           # page = 1 if page >= total_pages
           object = object[((page - 1) * size)...(page * size)]
