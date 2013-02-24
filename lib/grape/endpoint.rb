@@ -314,11 +314,11 @@ module Grape
     #   end
     def present(object, options = {})
 
-      PAGINATE_OPTIONS = {
+      paginate_options = {
         :default_page_size => 1,
         :default_page => 1
-      }
-      options = PAGINATE_OPTIONS.merge(options)
+      } # move to CONSTANTS
+      options = paginate_options.merge(options)
       entity_class = options.delete(:with)
 
       # auto-detect the entity from the first object in the collection
