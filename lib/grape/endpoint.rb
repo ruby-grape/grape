@@ -313,6 +313,12 @@ module Grape
     #       :admin => current_user.admin?
     #   end
     def present(object, options = {})
+
+      PAGINATE_OPTIONS = {
+        :default_page_size => 1,
+        :default_page => 1
+      }
+      options = PAGINATE_OPTIONS.merge(options)
       entity_class = options.delete(:with)
 
       # auto-detect the entity from the first object in the collection
@@ -326,6 +332,36 @@ module Grape
 
       root = options.delete(:root)
 
+      # select the object to paginate...
+      # give the paginated result
+      if object.is_a?(Array) || object.is_a?(Hash)
+        if params[:page] 
+          object = object.to_a
+          page = params[:page].to_i ||= options[:default_page]
+          error!("Invalid page: #{page}", 400) if page < 0
+          size = unless (params[:size].nil? || params[:size].to_i.zero?)
+            params[:size].to_i 
+          else if params[:size].to_i > object.count
+              object.count
+            else 
+              options[:default_page_size]
+            end
+          end
+          error!("Invalid page size: #{size}", 400) if size <= 0
+          page_count = if (object.count%size).zero?
+            object.count/size
+          else
+            object.count/size + 1
+          end
+          error!("Page #{page} out!", 400) if page > page_count || page.zero?
+          # page = 1 if page >= total_pages
+          object = object[((page - 1) * size)...(page * size)]
+          set_paginate_headers page, page_count
+          monkeypatch_the_objects object
+          # cookies[:pagination_info] = "present #{size}/#{object.count}"
+        end
+      end
+
       representation = if entity_class
         embeds = {:env => env}
         embeds[:version] = env['api.version'] if env['api.version']
@@ -337,6 +373,27 @@ module Grape
       representation = { root => representation } if root
       body representation
     end
+
+    def set_paginate_headers page, page_count
+      header :page, page.to_s
+      header :prev, (page - 1).to_s if page > 1
+      header :next, (page + 1).to_s if page < page_count
+    end
+  
+    def monkeypatch_the_objects objects
+      objects.each do |obj|
+        obj.class.class_eval do
+          attr_accessor :page, :next, :prev
+        end
+        obj.instance_exec header do |header|
+          @page = header['page']
+          @next = header['next']
+          @prev = header['prev']
+        end
+      end
+    end
+
+    private :set_paginate_headers, :monkeypatch_the_objects
 
     # Returns route information for the current request.
     #
