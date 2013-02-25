@@ -1535,6 +1535,7 @@ describe Grape::API do
 
           mount app
         end
+
         get '/v1/cool/awesome'
         last_response.body.should == 'yo'
       end

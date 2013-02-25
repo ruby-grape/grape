@@ -298,7 +298,7 @@ module Grape
       def mount(mounts)
         mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
         mounts.each_pair do |app, path|
-          if app.respond_to?(:inherit_settings)
+          if app.respond_to?(:inherit_settings, true)
             app_settings = settings.clone
             mount_path = Rack::Mount::Utils.normalize_path([ settings[:mount_path], path ].compact.join("/"))
             app_settings.set :mount_path, mount_path

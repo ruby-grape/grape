@@ -30,6 +30,7 @@ pkg
 .yardoc/*
 dist
 Gemfile.lock
+tmp
 
 ## Rubinius
 .rbx
