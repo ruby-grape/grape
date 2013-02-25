@@ -403,7 +403,7 @@ describe Grape::API do
         "example"
       end
       put '/example'
-      last_response.headers['Content-Type'].should eql ''
+      last_response.headers['Content-Type'].should eql 'text/plain'
     end
 
     it 'adds an OPTIONS route that returns a 204 and an Allow header' do

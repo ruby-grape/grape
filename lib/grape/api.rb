@@ -492,7 +492,7 @@ module Grape
         not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
         not_allowed_methods << "OPTIONS" if self.class.settings[:do_not_route_options]
         not_allowed_methods.each do |bad_method|
-          @route_set.add_route( proc { [405, { 'Allow' => allow_header, 'Content-Type' => '' }, []]}, {
+          @route_set.add_route( proc { [405, { 'Allow' => allow_header, 'Content-Type' => 'text/plain' }, []]}, {
             :path_info      => path_info,
             :request_method => bad_method
           })
