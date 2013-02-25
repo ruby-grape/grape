@@ -222,6 +222,48 @@ XML
       last_response.body.should == '{"example":{"name":"johnnyiller"}}'
     end
 
+
+    it 'presents with jsonp and a custom formatter [with Rack::JSONP]' do
+      require 'rack/contrib'
+
+      # Include JSONP middleware
+      subject.use Rack::JSONP
+
+      # Tell rack our content-type, if it isn't application/json
+      # then Rack::JSONP will not process it. When the formatter is fixed
+      # and executes before Rack::JSONP we can
+      # stop setting this directly
+      subject.use Rack::ContentType, "application/json"
+
+
+      entity = Class.new(Grape::Entity)
+      entity.root "examples", "example"
+      entity.expose :name
+
+
+      # Rack::JSONP manages modifying the content-type and expects a
+      # standard JSON response so we don't actually need our
+      # custom :jsonp 'type' anymore
+      subject.format :json
+
+
+      subject.get '/example' do
+        c = Class.new do
+          attr_reader :name
+          def initialize(args)
+            @name = args[:name] || "no name set"
+          end
+        end
+
+        present c.new({:name => "johnnyiller"}), :with => entity
+      end
+
+      get '/example?callback=abcDef'
+      last_response.status.should == 200
+      last_response.headers['Content-type'].should == "application/javascript"
+      last_response.body.should == 'abcDef({"example":{"name":"johnnyiller"}})'
+    end
+
   end
 
 end
