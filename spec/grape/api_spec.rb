@@ -314,6 +314,20 @@ describe Grape::API do
       last_response.body.should eql 'hiya'
     end
 
+    %w(put post).each do |verb|
+      ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
+        it "allows a(n) #{object.class} json object for #{verb.upcase} when accessing the params" do
+          subject.send(verb) do
+            params
+            {}
+          end
+          send verb, '/', MultiJson.dump(object), {'CONTENT_TYPE' => 'application/json'}
+          last_response.status.should == (verb == 'post' ? 201 : 200)
+          last_response.body.should eql '{}'
+        end
+      end
+    end
+
     it 'allows for multipart paths' do
 
       subject.route([:get, :post], '/:id/first') do
