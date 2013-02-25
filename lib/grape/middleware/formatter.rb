@@ -101,10 +101,19 @@ module Grape
 
         def mime_array
           accept = headers['accept'] or return []
+          accept_into_mime_and_quality = %r(
+            (
+              \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
+            (?:
+             (?:;[^,]*?)?       # optionally multiple formats in a row
+             ;\s*q=([\d.]+)     # optional "quality" preference (eg q=0.5)
+            )?
+          )x  # x = extended regular expression with comments etc
+          vendor_prefix_pattern = %r(vnd\.[^+]+\+)
 
-          accept.gsub(/\b/,'').scan(%r((\w+/[\w+.-]+)(?:(?:;[^,]*?)?;\s*q=([\d.]+))?)).sort_by { |_, q| -q.to_f }.map {|mime, _|
-            mime.sub(%r(vnd\.[^+]+\+), '')
-          }
+          accept.scan(accept_into_mime_and_quality).
+            sort_by { |_, quality_preference| -quality_preference.to_f }.
+            map {|mime, _| mime.sub(vendor_prefix_pattern, '') }
         end
 
     end
