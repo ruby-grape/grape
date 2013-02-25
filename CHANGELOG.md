@@ -1,8 +1,7 @@
-Next Release
-============
+0.3.1 (2/25/2013)
+=================
 
 * [#351](https://github.com/intridea/grape/issues/351): Compatibility with Ruby 2.0 - [@mbleigh](https://github.com/mbleigh).
-* Your contribution here.
 
 0.3.0 (02/21/2013)
 ==================
