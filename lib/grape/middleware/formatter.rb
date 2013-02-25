@@ -111,7 +111,7 @@ module Grape
           )x  # x = extended regular expression with comments etc
           vendor_prefix_pattern = %r(vnd\.[^+]+\+)
 
-          accept.gsub(/\b/,'').scan(accept_into_mime_and_quality).
+          accept.scan(accept_into_mime_and_quality).
             sort_by { |_, quality_preference| -quality_preference.to_f }.
             map {|mime, _| mime.sub(vendor_prefix_pattern, '') }
         end
