@@ -2,6 +2,7 @@ Next Release
 ============
 
 * Your contribution here.
+* [#355](https://github.com/intridea/grape/issues/355): Relax dependency constraint on Hashie
 
 0.3.1 (2/25/2013)
 =================

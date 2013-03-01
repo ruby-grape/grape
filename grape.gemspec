@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'activesupport'
   s.add_runtime_dependency 'multi_json', '>= 1.3.2'
   s.add_runtime_dependency 'multi_xml', '>= 0.5.2'
-  s.add_runtime_dependency 'hashie', '>= 2.0.2'
+  s.add_runtime_dependency 'hashie', '>= 1.2.0'
   s.add_runtime_dependency 'virtus'
   s.add_runtime_dependency 'builder'
 
