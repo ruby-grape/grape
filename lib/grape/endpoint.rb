@@ -389,6 +389,18 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
+
+      aggregate_setting(:middleware).each do |m|
+        m = m.dup
+        block = m.pop if m.last.is_a?(Proc)
+        if block
+          b.use *m, &block
+        else
+          b.use *m
+        end
+      end
+
+
       b.use Rack::Head
       b.use Grape::Middleware::Error,
         :default_status => settings[:default_error_status] || 403,
@@ -417,15 +429,6 @@ module Grape
         :formatters => settings[:formatters],
         :parsers => settings[:parsers]
 
-      aggregate_setting(:middleware).each do |m|
-        m = m.dup
-        block = m.pop if m.last.is_a?(Proc)
-        if block
-          b.use *m, &block
-        else
-          b.use *m
-        end
-      end
 
       b
     end
