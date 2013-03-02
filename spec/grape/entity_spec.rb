@@ -197,14 +197,18 @@ XML
       last_response.body.should == '{"example":{"name":"johnnyiller"}}'
     end
 
-    it 'presents with jsonp and a custom formatter' do
+    it 'presents with jsonp utilising Rack::JSONP' do
+      require 'rack/contrib'
+
+      # Include JSONP middleware
+      subject.use Rack::JSONP
+
       entity = Class.new(Grape::Entity)
       entity.root "examples", "example"
       entity.expose :name
 
-      subject.content_type :jsonp, 'application/javascript'
-      subject.formatter :jsonp, lambda { |object, env| object.to_json }
-      subject.format :jsonp
+      # Rack::JSONP expects a standard JSON response
+      subject.format :json
 
       subject.get '/example' do
         c = Class.new do
@@ -216,10 +220,11 @@ XML
 
         present c.new({:name => "johnnyiller"}), :with => entity
       end
-      get '/example'
+
+      get '/example?callback=abcDef'
       last_response.status.should == 200
       last_response.headers['Content-type'].should == "application/javascript"
-      last_response.body.should == '{"example":{"name":"johnnyiller"}}'
+      last_response.body.should == 'abcDef({"example":{"name":"johnnyiller"}})'
     end
 
   end
