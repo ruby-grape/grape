@@ -1,7 +1,7 @@
 Next Release
 ============
 
-* [#345](https://github.com/intridea/grape/issues/345), [#346](https://github.com/intridea/grape/pull/346): Modified registration/execution order of Rack Middleware. This fixes issues with Rack::JSONP responses that contain a `Grape::Entity` - [@deckchair](https://github.com/deckchair).
+* [#352](https://github.com/intridea/grape/pull/352): Modified registration/execution order of Rack Middleware. This fixes issues with Rack::JSONP responses that contain a `Grape::Entity` - [@deckchair](https://github.com/deckchair).
 
 0.3.2 (2/28/2013)
 =================
