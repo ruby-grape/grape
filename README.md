@@ -796,6 +796,43 @@ The order for choosing the format is the following.
 * Use the default format, if specified by the `default_format` option.
 * Default to `:txt`.
 
+### JSONP & CORS
+
+Grape does not directly support JSONP or CORS so support is enabled through the use of available Rack middleware
+libraries.
+
+Add the relevant libraries to your Gemfile e.g.
+
+* [JSONP (as part of rack-contrib)](https://github.com/rack/rack-contrib)
+* [CORS](https://github.com/cyu/rack-cors)
+
+```ruby
+require 'rack/contrib'
+require 'rack/cors'
+
+class API < Grape::API
+
+  # Enable JSONP
+  # https://github.com/rack/rack-contrib
+  use Rack::JSONP
+
+  # Enable CORS
+  # https://github.com/cyu/rack-cors
+  use Rack::Cors do
+    allow do
+      origins '*'
+      resource '*', :headers => :any, :methods => :get
+    end
+  end
+
+  format :json
+
+  get '/' do
+    'Hello World'
+  end
+end
+```
+
 ## Content-type
 
 Content-type is set by the formatter. You can override the content-type of the response at runtime

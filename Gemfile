@@ -14,4 +14,5 @@ group :development, :test do
   gem 'rack-test', "~> 0.6.2", :require => "rack/test"
   gem 'github-markup'
   gem 'cookiejar'
+  gem 'rack-contrib'
 end
