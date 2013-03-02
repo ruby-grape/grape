@@ -389,7 +389,6 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
-
       aggregate_setting(:middleware).each do |m|
         m = m.dup
         block = m.pop if m.last.is_a?(Proc)
@@ -399,7 +398,6 @@ module Grape
           b.use *m
         end
       end
-
 
       b.use Rack::Head
       b.use Grape::Middleware::Error,
@@ -428,7 +426,6 @@ module Grape
         :content_types => settings[:content_types],
         :formatters => settings[:formatters],
         :parsers => settings[:parsers]
-
 
       b
     end

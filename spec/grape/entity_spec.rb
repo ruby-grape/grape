@@ -197,55 +197,18 @@ XML
       last_response.body.should == '{"example":{"name":"johnnyiller"}}'
     end
 
-    it 'presents with jsonp and a custom formatter' do
-      entity = Class.new(Grape::Entity)
-      entity.root "examples", "example"
-      entity.expose :name
-
-      subject.content_type :jsonp, 'application/javascript'
-      subject.formatter :jsonp, lambda { |object, env| object.to_json }
-      subject.format :jsonp
-
-      subject.get '/example' do
-        c = Class.new do
-          attr_reader :name
-          def initialize(args)
-            @name = args[:name] || "no name set"
-          end
-        end
-
-        present c.new({:name => "johnnyiller"}), :with => entity
-      end
-      get '/example'
-      last_response.status.should == 200
-      last_response.headers['Content-type'].should == "application/javascript"
-      last_response.body.should == '{"example":{"name":"johnnyiller"}}'
-    end
-
-
-    it 'presents with jsonp and a custom formatter [with Rack::JSONP]' do
+    it 'presents with jsonp utilising Rack::JSONP' do
       require 'rack/contrib'
 
       # Include JSONP middleware
       subject.use Rack::JSONP
 
-      # Tell rack our content-type, if it isn't application/json
-      # then Rack::JSONP will not process it. When the formatter is fixed
-      # and executes before Rack::JSONP we can
-      # stop setting this directly
-      subject.use Rack::ContentType, "application/json"
-
-
       entity = Class.new(Grape::Entity)
       entity.root "examples", "example"
       entity.expose :name
 
-
-      # Rack::JSONP manages modifying the content-type and expects a
-      # standard JSON response so we don't actually need our
-      # custom :jsonp 'type' anymore
+      # Rack::JSONP expects a standard JSON response
       subject.format :json
-
 
       subject.get '/example' do
         c = Class.new do
