@@ -40,12 +40,23 @@ describe Grape::Entity do
       entity.stub!(:represent).and_return("Hiya")
 
       class TestObject; end
+      class FakeCollection
+        def first; TestObject.new; end
+      end
 
       subject.represent TestObject, :with => entity
       subject.get '/example' do
         present [TestObject.new]
       end
+
+      subject.get '/example2' do
+        present FakeCollection.new
+      end
+
       get '/example'
+      last_response.body.should == "Hiya"
+
+      get '/example2'
       last_response.body.should == "Hiya"
     end
 
