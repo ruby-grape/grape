@@ -318,7 +318,7 @@ describe Grape::API do
       ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
         it "allows a(n) #{object.class} json object for #{verb.upcase} when accessing the params" do
           subject.send(verb) do
-            params
+            params # TODO: get the object passed in
             {}
           end
           send verb, '/', MultiJson.dump(object), {'CONTENT_TYPE' => 'application/json'}
