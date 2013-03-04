@@ -1,6 +1,6 @@
 Next Release
 ============
-* [#356](https://github.com/intridea/grape/pull/356): Support presenting collections others than Array (Eg: ActiveRecord::Relation).
+* [#356](https://github.com/intridea/grape/pull/356): Fix: presenting collections other than `Array` (eg. `ActiveRecord::Relation`) - [@zimbatm](https://github.com/zimbatm).
 * [#352](https://github.com/intridea/grape/pull/352): Fix: using `Rack::JSONP` with `Grape::Entity` responses - [@deckchair](https://github.com/deckchair).
 * [#347](https://github.com/intridea/grape/issues/347): Grape will accept any valid JSON as PUT or POST, including strings, symbols and arrays - [@qqshfox](https://github.com/qqshfox), [@dblock](https://github.com/dblock).
 * [#347](https://github.com/intridea/grape/issues/347): JSON format APIs always return valid JSON, eg. strings are now returned as `"string"` and no longer `string` - [@dblock](https://github.com/dblock).
