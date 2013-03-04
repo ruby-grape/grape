@@ -6,7 +6,7 @@ Next Release
 * [#347](https://github.com/intridea/grape/issues/347): JSON format APIs will always return valid JSON, eg. strings are now returned as `"string"` and no longer `string` - [@dblock](https://github.com/dblock).
 * Raw body input from POST and PUT requests, equivalent to `env['rack.input'].read` is now available in `api.request.input` - [@dblock](https://github.com/dblock).
 * Parsed body input from POST and PUT requests is now available in `api.request.body` - [@dblock](https://github.com/dblock).
-
+* [#343](https://github.com/intridea/grape/pull/343): Fix: return `Content-Type: text/plain` with error 405 - [@gustavosaume](https://github.com/gustavosaume), [@wyattisimo](https://github.com/wyattisimo).
 * Your contribution here.
 
 0.3.2 (2/28/2013)

@@ -421,6 +421,17 @@ describe Grape::API do
       last_response.headers['Allow'].should eql 'OPTIONS, GET, POST, HEAD'
     end
 
+    specify '405 responses includes an Content-Type header' do
+      subject.get 'example' do
+        "example"
+      end
+      subject.post 'example' do
+        "example"
+      end
+      put '/example'
+      last_response.headers['Content-Type'].should eql 'text/plain'
+    end
+
     it 'adds an OPTIONS route that returns a 204 and an Allow header' do
       subject.get 'example' do
         "example"
