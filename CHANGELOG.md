@@ -1,12 +1,11 @@
 Next Release
 ============
 
-* [#352](https://github.com/intridea/grape/pull/352): Modified registration/execution order of Rack Middleware, fixes issues with `Rack::JSONP` responses that contain a `Grape::Entity` - [@deckchair](https://github.com/deckchair).
+* [#352](https://github.com/intridea/grape/pull/352): Fix: using `Rack::JSONP` with `Grape::Entity` responses - [@deckchair](https://github.com/deckchair).
 * [#347](https://github.com/intridea/grape/issues/347): Grape will accept any valid JSON as PUT or POST, including strings, symbols and arrays - [@qqshfox](https://github.com/qqshfox), [@dblock](https://github.com/dblock).
-* [#347](https://github.com/intridea/grape/issues/347): JSON format APIs will always return valid JSON, eg. strings are now returned as `"string"` and no longer `string` - [@dblock](https://github.com/dblock).
-* Raw body input from POST and PUT requests, equivalent to `env['rack.input'].read` is now available in `api.request.input` - [@dblock](https://github.com/dblock).
+* [#347](https://github.com/intridea/grape/issues/347): JSON format APIs always return valid JSON, eg. strings are now returned as `"string"` and no longer `string` - [@dblock](https://github.com/dblock).
+* Raw body input from POST and PUT requests (`env['rack.input'].read`) is now available in `api.request.input` - [@dblock](https://github.com/dblock).
 * Parsed body input from POST and PUT requests is now available in `api.request.body` - [@dblock](https://github.com/dblock).
-
 * Your contribution here.
 
 0.3.2 (2/28/2013)
