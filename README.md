@@ -722,9 +722,8 @@ By default, Grape supports _XML_, _JSON_, and _TXT_ content-types. The default f
 
 Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
 
-Your API can declare which types to support by using `content_type`. Response format
-is determined by the request's extension, an explicit `format` parameter in the query
-string, or `Accept` header.
+Your API can declare which types to support by using `content_type`. Response format is determined by the
+request's extension, an explicit `format` parameter in the query string, or `Accept` header.
 
 The following API will only respond to the JSON content-type and will not parse any other input than `application/json`,
 `application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests
@@ -856,7 +855,8 @@ section above. It also supports custom data formats. You must declare additional
 `content_type` and optionally supply a parser via `parser` unless a parser is already available within
 Grape to enable a custom format. Such a parser can be a function or a class.
 
-Without a parser, data is available "as-is" and can be read with `env['rack.input'].read`.
+With a parser, parsed data is available "as-is" in `env['api.request.body']`. 
+Without a parser, data is available "as-is" and in `env['api.request.input']`.
 
 The following example is a trivial parser that will assign any input with the "text/custom" content-type
 to `:value`. The parameter will be available via `params[:value]` inside the API call.
