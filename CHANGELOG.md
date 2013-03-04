@@ -2,6 +2,8 @@ Next Release
 ============
 
 * [#352](https://github.com/intridea/grape/pull/352): Modified registration/execution order of Rack Middleware, fixes issues with `Rack::JSONP` responses that contain a `Grape::Entity` - [@deckchair](https://github.com/deckchair).
+* [#347](https://github.com/intridea/grape/issues/347): Grape will accept any valid JSON as PUT or POST, including strings, symbols and arrays - [@qqshfox](https://github.com/qqshfox), [@dblock](https://github.com/dblock).
+* [#347](https://github.com/intridea/grape/issues/347): JSON format APIs will always return valid JSON, eg. strings are now returned as `"string"` and no longer `string` - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.3.2 (2/28/2013)

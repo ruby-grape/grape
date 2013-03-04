@@ -44,10 +44,14 @@ module Grape
                 fmt = mime_types[request.media_type] if request.media_type
                 if content_type_for(fmt)
                   parser = Grape::Parser::Base.parser_for fmt, options
-                  unless parser.nil?
+                  if parser
                     begin
-                      body = parser.call body, env
-                      env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
+                      body = (env['api.request.body'] = parser.call(body, env))
+                      if body.is_a?(Hash)
+                        env['rack.request.form_hash'] = env['rack.request.form_hash'] ? env['rack.request.form_hash'].merge(body) : body
+                      else
+                        env['api.request.body'] = body
+                      end
                       env['rack.request.form_input'] = env['rack.input']
                     rescue Exception => e
                       throw :error, :status => 400, :message => e.message

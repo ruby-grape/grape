@@ -1,5 +1,6 @@
 shared_examples_for 'versioning' do
   it 'sets the API version' do
+    subject.format :txt
     subject.version 'v1', macro_options
     subject.get :hello do
       "Version: #{request.env['api.version']}"
@@ -9,7 +10,8 @@ shared_examples_for 'versioning' do
   end
 
   it 'adds the prefix before the API version' do
-    subject.prefix 'api'
+    subject.format :txt
+    subject.prefix 'api'    
     subject.version 'v1', macro_options
     subject.get :hello do
       "Version: #{request.env['api.version']}"
@@ -58,6 +60,7 @@ shared_examples_for 'versioning' do
   context 'with different versions for the same endpoint' do
     context 'without a prefix' do
       it 'allows the same endpoint to be implemented' do
+        subject.format :txt
         subject.version 'v2', macro_options
         subject.get 'version' do
           request.env['api.version']
@@ -79,7 +82,8 @@ shared_examples_for 'versioning' do
     end
 
     context 'with a prefix' do
-      it 'allows the same endpoint to be implemented' do        
+      it 'allows the same endpoint to be implemented' do
+        subject.format :txt
         subject.prefix 'api'
         subject.version 'v2', macro_options
         subject.get 'version' do

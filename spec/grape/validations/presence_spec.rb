@@ -17,7 +17,7 @@ describe Grape::Validations::PresenceValidator do
           requires :id, :regexp => /^[0-9]+$/
         end
         post do
-          {:ret => params[:id]}
+          { :ret => params[:id] }
         end
 
         params do
@@ -60,7 +60,7 @@ describe Grape::Validations::PresenceValidator do
   it 'does not validate for any params' do
     get("/bacons")
     last_response.status.should == 200
-    last_response.body.should == "All the bacon"
+    last_response.body.should == "All the bacon".to_json
   end
 
   it 'validates id' do
@@ -94,7 +94,7 @@ describe Grape::Validations::PresenceValidator do
 
     get('/', :name => "Bob", :company => "TestCorp")
     last_response.status.should == 200
-    last_response.body.should == "Hello"
+    last_response.body.should == "Hello".to_json
   end
 
   it 'validates nested parameters' do
@@ -108,7 +108,7 @@ describe Grape::Validations::PresenceValidator do
 
     get('/nested', :user => {:first_name => "Billy", :last_name => "Bob"})
     last_response.status.should == 200
-    last_response.body.should == "Nested"
+    last_response.body.should == "Nested".to_json
   end
 
   it 'validates triple nested parameters' do
@@ -138,7 +138,7 @@ describe Grape::Validations::PresenceValidator do
 
     get('/nested_triple', :admin => { :admin_name => 'admin', :super => {:user => {:first_name => "Billy", :last_name => "Bob"}}})
     last_response.status.should == 200
-    last_response.body.should == "Nested triple"
+    last_response.body.should == "Nested triple".to_json
   end
 
 end
