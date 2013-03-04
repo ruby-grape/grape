@@ -316,7 +316,7 @@ module Grape
       entity_class = options.delete(:with)
 
       # auto-detect the entity from the first object in the collection
-      object_instance = object.is_a?(Array) ? object.first : object
+      object_instance = object.respond_to?(:first) ? object.first : object
 
       object_instance.class.ancestors.each do |potential|
         entity_class ||= (settings[:representations] || {})[potential]
