@@ -7,6 +7,7 @@ Next Release
 * Raw body input from POST and PUT requests (`env['rack.input'].read`) is now available in `api.request.input` - [@dblock](https://github.com/dblock).
 * Parsed body input from POST and PUT requests is now available in `api.request.body` - [@dblock](https://github.com/dblock).
 * [#343](https://github.com/intridea/grape/pull/343): Fix: return `Content-Type: text/plain` with error 405 - [@gustavosaume](https://github.com/gustavosaume), [@wyattisimo](https://github.com/wyattisimo).
+* [#357](https://github.com/intridea/grape/pull/357): Grape now requires Rack 1.3.0 or newer - [@jhecking](https://github.com/jhecking).
 * Your contribution here.
 
 0.3.2 (2/28/2013)
