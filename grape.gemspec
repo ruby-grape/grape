@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "grape"
 
-  s.add_runtime_dependency 'rack'
+  s.add_runtime_dependency 'rack', '>= 1.3.0'
   s.add_runtime_dependency 'rack-mount'
   s.add_runtime_dependency 'rack-accept'
   s.add_runtime_dependency 'activesupport'
