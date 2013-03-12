@@ -7,7 +7,7 @@ en:
         regexp: 'invalid parameter: %{attribute}'
         missing_vendor_option:
           problem: 'missing :vendor option.'
-          summary: 'when version using header, you must specify :verdor option. '
+          summary: 'when version using header, you must specify :vendor option. '
           resolution: "eg: version 'v1', :using => :header, :vendor => 'twitter'"
         missing_mime_type:
           problem: 'missing mime type for %{new_format}'
