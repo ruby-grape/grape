@@ -247,42 +247,42 @@ describe Grape::Endpoint do
         params[:person_email]
         end
 
-        get '/rodzyn@grape.com'
-        last_response.body.should == 'rodzyn@grape.com'
+        get '/someone@example.com'
+        last_response.body.should == 'someone@example.com'
 
-        get 'rodzyn@grape.com.pl'
-        last_response.body.should == 'rodzyn@grape.com.pl'
+        get 'someone@example.com.pl'
+        last_response.body.should == 'someone@example.com.pl'
       end
 
       it 'parses many params with provided regexps' do
         subject.get('/:person_email/test/:number',
           :requirements => {
-            :person_email => /rodzyn@(.*).com/,
+            :person_email => /someone@(.*).com/,
             :number => /[0-9]/ }) do
         params[:person_email] << params[:number]
         end
 
-        get '/rodzyn@grape.com/test/1'
-        last_response.body.should == 'rodzyn@grape.com1'
+        get '/someone@example.com/test/1'
+        last_response.body.should == 'someone@example.com1'
 
-        get '/rodzyn@testing.wrong/test/1'
+        get '/someone@testing.wrong/test/1'
         last_response.status.should == 404
 
-        get 'rodzyn@test.com/test/wrong_number'
+        get 'someone@test.com/test/wrong_number'
         last_response.status.should == 404
 
-        get 'rodzyn@test.com/wrong_middle/1'
+        get 'someone@test.com/wrong_middle/1'
         last_response.status.should == 404
       end
 
-      context ' namespace requirements' do
+      context 'namespace requirements' do
         before :each do
           subject.namespace :outer, :requirements => { :person_email => /abc@(.*).com/ } do
             get('/:person_email') do
               params[:person_email]
             end
 
-            namespace :inner, :requirements => {:number => /[0-9]/, :person_email => /rodzyn@(.*).com/ }do
+            namespace :inner, :requirements => {:number => /[0-9]/, :person_email => /someone@(.*).com/ }do
               get '/:person_email/test/:number' do
                 params[:person_email] << params[:number]
               end
@@ -290,17 +290,17 @@ describe Grape::Endpoint do
           end
         end
         it "parse email param with provided requirements for params" do
-          get '/outer/abc@grape.com'
-          last_response.body.should == 'abc@grape.com'
+          get '/outer/abc@example.com'
+          last_response.body.should == 'abc@example.com'
         end
 
         it "should override outer namespace's requirements" do
-          get '/outer/inner/rodzyn@testing.wrong/test/1'
+          get '/outer/inner/someone@testing.wrong/test/1'
           last_response.status.should == 404
 
-          get '/outer/inner/rodzyn@testing.com/test/1'
+          get '/outer/inner/someone@testing.com/test/1'
           last_response.status.should == 200
-          last_response.body.should == 'rodzyn@testing.com1'
+          last_response.body.should == 'someone@testing.com1'
         end
 
       end
