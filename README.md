@@ -403,11 +403,19 @@ header "X-Robots-Tag", "noindex"
 ## Routes
 
 Optionally, you can define requirements for your named route parameters using regular
-expressions. The route will match only if all requirements are met.
+expressions on namespace or endpoint. The route will match only if all requirements are met.
 
 ```ruby
 get ':id', :requirements => { :id => /[0-9]*/ } do
   Status.find(params[:id])
+end
+
+namespace :outer, :requirements => { :id => /[0-9]*/ } do
+  get :id do
+  end
+
+  get ":id/edit" do
+  end
 end
 ```
 
@@ -855,7 +863,7 @@ section above. It also supports custom data formats. You must declare additional
 `content_type` and optionally supply a parser via `parser` unless a parser is already available within
 Grape to enable a custom format. Such a parser can be a function or a class.
 
-With a parser, parsed data is available "as-is" in `env['api.request.body']`. 
+With a parser, parsed data is available "as-is" in `env['api.request.body']`.
 Without a parser, data is available "as-is" and in `env['api.request.input']`.
 
 The following example is a trivial parser that will assign any input with the "text/custom" content-type

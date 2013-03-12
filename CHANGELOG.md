@@ -8,6 +8,7 @@ Next Release
 * Parsed body input from POST and PUT requests is now available in `api.request.body` - [@dblock](https://github.com/dblock).
 * [#343](https://github.com/intridea/grape/pull/343): Fix: return `Content-Type: text/plain` with error 405 - [@gustavosaume](https://github.com/gustavosaume), [@wyattisimo](https://github.com/wyattisimo).
 * [#357](https://github.com/intridea/grape/pull/357): Grape now requires Rack 1.3.0 or newer - [@jhecking](https://github.com/jhecking).
+* [#320](https://github.com/intridea/grape/issues/320): Namespace accept requirements now - [@niedhui](https://github.com/niedhui).
 * Your contribution here.
 
 0.3.2 (2/28/2013)

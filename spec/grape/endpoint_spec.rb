@@ -241,6 +241,7 @@ describe Grape::Endpoint do
     end
 
     context 'with special requirements' do
+
       it 'parses email param with provided requirements for params' do
         subject.get('/:person_email', :requirements => { :person_email => /.*/ }) do
         params[:person_email]
@@ -272,6 +273,36 @@ describe Grape::Endpoint do
 
         get 'rodzyn@test.com/wrong_middle/1'
         last_response.status.should == 404
+      end
+
+      context ' namespace requirements' do
+        before :each do
+          subject.namespace :outer, :requirements => { :person_email => /abc@(.*).com/ } do
+            get('/:person_email') do
+              params[:person_email]
+            end
+
+            namespace :inner, :requirements => {:number => /[0-9]/, :person_email => /rodzyn@(.*).com/ }do
+              get '/:person_email/test/:number' do
+                params[:person_email] << params[:number]
+              end
+            end
+          end
+        end
+        it "parse email param with provided requirements for params" do
+          get '/outer/abc@grape.com'
+          last_response.body.should == 'abc@grape.com'
+        end
+
+        it "should override outer namespace's requirements" do
+          get '/outer/inner/rodzyn@testing.wrong/test/1'
+          last_response.status.should == 404
+
+          get '/outer/inner/rodzyn@testing.com/test/1'
+          last_response.status.should == 200
+          last_response.body.should == 'rodzyn@testing.com1'
+        end
+
       end
     end
 

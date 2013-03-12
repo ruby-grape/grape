@@ -35,9 +35,9 @@ module Grape
     def initialize(settings, options = {}, &block)
       @settings = settings
       if block_given?
-        method_name = [ 
+        method_name = [
           options[:method],
-          settings.gather(:namespace).join("/"),
+          settings.gather(:namespace).map(&:space).join("/"),
           settings.gather(:mount_path).join("/"),
           Array(options[:path]).join("/")
         ].join(" ")
@@ -88,7 +88,11 @@ module Grape
           anchor = options[:route_options][:anchor]
           anchor = anchor.nil? ? true : anchor
 
-          requirements = options[:route_options][:requirements] || {}
+          endpoint_requirements = options[:route_options][:requirements] || {}
+          all_requirements = (settings.gather(:namespace).map(&:requirements) << endpoint_requirements)
+          requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
+            base_requirements.merge!(single_requirements)
+          end
 
           path = compile_path(prepared_path, anchor && !options[:app], requirements)
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
@@ -137,7 +141,7 @@ module Grape
     end
 
     def namespace
-      Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
+      Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace].try(:space)}.join('/'))
     end
 
     def compile_path(prepared_path, anchor = true, requirements = {})

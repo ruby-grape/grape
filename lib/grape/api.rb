@@ -356,17 +356,17 @@ module Grape
       def options(paths = ['/'], options = {}, &block); route('OPTIONS', paths, options, &block) end
       def patch(paths = ['/'], options = {}, &block); route('PATCH', paths, options, &block) end
 
-      def namespace(space = nil, &block)
+      def namespace(space = nil, options = {},  &block)
         if space || block_given?
           previous_namespace_description = @namespace_description
           @namespace_description = (@namespace_description || {}).deep_merge(@last_description || {})
           @last_description = nil
           nest(block) do
-            set(:namespace, space.to_s) if space
+            set(:namespace, Namespace.new(space, options)) if space
           end
           @namespace_description = previous_namespace_description
         else
-          Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace]}.join('/'))
+          Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace].try(:space)}.join('/'))
         end
       end
 
