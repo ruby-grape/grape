@@ -37,7 +37,7 @@ module Grape
       if block_given?
         method_name = [
           options[:method],
-          settings.gather(:namespace).map(&:space).join("/"),
+          Namespace.joined_space(settings),
           settings.gather(:mount_path).join("/"),
           Array(options[:path]).join("/")
         ].join(" ")
@@ -141,7 +141,7 @@ module Grape
     end
 
     def namespace
-      Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace].try(:space)}.join('/'))
+      @namespace ||= Namespace.joined_space_path(settings)
     end
 
     def compile_path(prepared_path, anchor = true, requirements = {})
