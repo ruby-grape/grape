@@ -366,7 +366,7 @@ module Grape
           end
           @namespace_description = previous_namespace_description
         else
-          Rack::Mount::Utils.normalize_path(settings.stack.map{|s| s[:namespace].try(:space)}.join('/'))
+          Namespace.joined_space_path(settings)
         end
       end
 
