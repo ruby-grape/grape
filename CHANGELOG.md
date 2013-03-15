@@ -9,6 +9,7 @@ Next Release
 * [#343](https://github.com/intridea/grape/pull/343): Fix: return `Content-Type: text/plain` with error 405 - [@gustavosaume](https://github.com/gustavosaume), [@wyattisimo](https://github.com/wyattisimo).
 * [#357](https://github.com/intridea/grape/pull/357): Grape now requires Rack 1.3.0 or newer - [@jhecking](https://github.com/jhecking).
 * [#320](https://github.com/intridea/grape/issues/320): API `namespace` now supports `requirements` - [@niedhui](https://github.com/niedhui).
+* [#353](https://github.com/intridea/grape/issues/353): Revert to standard Ruby logger formatter, `require active_support/all` if you want old behavior - [@rhunter](https://github.com/rhunter), [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.3.2 (2/28/2013)

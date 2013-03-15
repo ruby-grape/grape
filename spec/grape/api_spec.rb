@@ -722,6 +722,13 @@ describe Grape::API do
       mylogger.should_receive(:info).exactly(1).times
       subject.logger.info "this will be logged"
     end
+
+    it "defaults to a standard logger log format" do
+      t = Time.at(100)
+      Time.stub(:now).and_return(t)
+      STDOUT.should_receive(:write).with("I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : this will be logged\n")
+      subject.logger.info "this will be logged"
+    end
   end
 
   describe '.helpers' do
