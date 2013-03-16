@@ -383,7 +383,7 @@ module Grape
 
       run_filters after_validations
 
-      response_text = @block.call(self)
+      response_text = @block ? @block.call(self) : nil
       run_filters afters
       cookies.write(header)
 

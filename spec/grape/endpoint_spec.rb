@@ -168,8 +168,6 @@ describe Grape::Endpoint do
         requires :first
         optional :second
       end
-
-
     end
 
     it 'has as many keys as there are declared params' do
@@ -241,7 +239,6 @@ describe Grape::Endpoint do
     end
 
     context 'with special requirements' do
-
       it 'parses email param with provided requirements for params' do
         subject.get('/:person_email', :requirements => { :person_email => /.*/ }) do
         params[:person_email]

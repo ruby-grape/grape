@@ -57,6 +57,7 @@ describe Grape::API do
       end
     end
   end
+
   describe '.version using param' do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
@@ -93,9 +94,7 @@ describe Grape::API do
       # end
     end
 
-    it 'routes if any media type is allowed' do
-
-    end
+    # pending 'routes if any media type is allowed'
   end
 
   describe '.represent' do
@@ -108,7 +107,6 @@ describe Grape::API do
       subject.represent Object, :with => klass
       subject.settings[:representations][Object].should == klass
     end
-
   end
 
   describe '.namespace' do
@@ -189,7 +187,6 @@ describe Grape::API do
         get do
           "Votes"
         end
-
         post do
           "Created a Vote"
         end
@@ -199,6 +196,12 @@ describe Grape::API do
       last_response.body.should eql 'Votes'
       post '/votes'
       last_response.body.should eql 'Created a Vote'
+    end
+
+    it 'handles empty calls' do
+      subject.get "/"
+      get "/"
+      last_response.body.should eql ""
     end
 
     describe 'root routes should work with' do
@@ -672,7 +675,7 @@ describe Grape::API do
       it 'mounts behind error middleware' do
         m = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, message: "Caught in the Net", status: 400
+            throw :error, :message => "Caught in the Net", :status => 400
           end
         end
         subject.use m
