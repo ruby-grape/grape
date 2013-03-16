@@ -668,6 +668,20 @@ describe Grape::API do
           last_response.body.should == 'true'
         end
       end
+
+      it 'mounts behind error middleware' do
+        m = Class.new(Grape::Middleware::Base) do
+          def before
+            throw :error, message: "Caught in the Net", status: 400
+          end
+        end
+        subject.use m
+        subject.get "/" do
+        end
+        get "/"
+        last_response.status.should == 400
+        last_response.body.should == "Caught in the Net"
+      end
     end
   end
   describe '.basic' do

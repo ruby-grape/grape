@@ -393,16 +393,6 @@ module Grape
     def build_middleware
       b = Rack::Builder.new
 
-      aggregate_setting(:middleware).each do |m|
-        m = m.dup
-        block = m.pop if m.last.is_a?(Proc)
-        if block
-          b.use *m, &block
-        else
-          b.use *m
-        end
-      end
-
       b.use Rack::Head
       b.use Grape::Middleware::Error,
         :default_status => settings[:default_error_status] || 403,
@@ -412,6 +402,16 @@ module Grape
         :error_formatters => settings[:error_formatters],
         :rescue_options => settings[:rescue_options],
         :rescue_handlers => merged_setting(:rescue_handlers)
+
+      aggregate_setting(:middleware).each do |m|
+        m = m.dup
+        block = m.pop if m.last.is_a?(Proc)
+        if block
+          b.use *m, &block
+        else
+          b.use *m
+        end
+      end
 
       b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
       b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
