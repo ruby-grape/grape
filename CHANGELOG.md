@@ -1,5 +1,6 @@
-Next Release
-============
+0.4.0 (3/17/2013)
+=================
+
 * [#356](https://github.com/intridea/grape/pull/356): Fix: presenting collections other than `Array` (eg. `ActiveRecord::Relation`) - [@zimbatm](https://github.com/zimbatm).
 * [#352](https://github.com/intridea/grape/pull/352): Fix: using `Rack::JSONP` with `Grape::Entity` responses - [@deckchair](https://github.com/deckchair).
 * [#347](https://github.com/intridea/grape/issues/347): Grape will accept any valid JSON as PUT or POST, including strings, symbols and arrays - [@qqshfox](https://github.com/qqshfox), [@dblock](https://github.com/dblock).
@@ -11,7 +12,6 @@ Next Release
 * [#320](https://github.com/intridea/grape/issues/320): API `namespace` now supports `requirements` - [@niedhui](https://github.com/niedhui).
 * [#353](https://github.com/intridea/grape/issues/353): Revert to standard Ruby logger formatter, `require active_support/all` if you want old behavior - [@rhunter](https://github.com/rhunter), [@dblock](https://github.com/dblock).
 * Fix: `undefined method `call' for nil:NilClass` for an API method implementation without a block, now returns an empty string - [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 0.3.2 (2/28/2013)
 =================
