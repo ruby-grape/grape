@@ -991,6 +991,28 @@ end
 
 Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
+## Protection
+
+A simple way to describe how to protect from access(By Authentication
+or Authorization).
+```ruby
+  protection do
+    User.find_by_token(params[:api_token])
+  end
+```
+In the protection block, you can access `params`, `headers` and `env`. The
+value returned by the block will be set to `env['api.currTnt_user']`, which
+you can access by `current_user` method.
+
+```ruby
+  namespace :post, :protect => true do
+    get :id, :protect => :optional do
+    end
+  end
+```
+You can specify which namespace or endpoint need to protect by adding a
+`protect` option , the protect option should be `true`, `false` or `:optional`.
+
 ## Describing and Inspecting an API
 
 Grape routes can be reflected at runtime. This can notably be useful for generating

@@ -7,6 +7,7 @@ require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
 require 'hashie'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/module/delegation'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/object/conversions'
 require 'grape/util/deep_merge'
@@ -24,6 +25,7 @@ module Grape
   autoload :Route,               'grape/route'
   autoload :Namespace,           'grape/namespace'
   autoload :Cookies,             'grape/cookies'
+  autoload :Protection,          'grape/protection'
   autoload :Validations,         'grape/validations'
 
   module Exceptions

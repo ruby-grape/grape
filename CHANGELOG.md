@@ -1,6 +1,7 @@
 0.4.1 (Next Release)
 ====================
 
+* [#5](https://github.com/intridea/grape/issues/5): Added basic protection ability. [@niedhui](https://github.com/niedhui)
 * Your contribution here.
 
 0.4.0 (3/17/2013)

@@ -270,6 +270,10 @@ module Grape
         end
       end
 
+      def protection(&block)
+        set(:protection, block)
+      end
+
       # Add an authentication type to the API. Currently
       # only `:http_basic`, `:http_digest` and `:oauth2` are supported.
       def auth(type = nil, options = {}, &block)
