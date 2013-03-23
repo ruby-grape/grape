@@ -1140,7 +1140,7 @@ describe Twitter::API do
 end
 ```
 
-In Rails, HTTP request tests would go into the `spec/request` group. You may want your API code to go into
+In Rails, HTTP request tests would go into the `spec/requests` group. You may want your API code to go into
 `app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
 
 ```ruby
