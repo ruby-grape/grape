@@ -687,6 +687,7 @@ describe Grape::API do
       end
     end
   end
+
   describe '.basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u,p|
@@ -1932,4 +1933,51 @@ XML
       last_response.headers.keys.should_not include "X-Cascade"
     end
   end
+
+  describe '.protection' do
+    User = Struct.new(:username, :password)
+    before :each do
+      subject.protection do
+        User.new('user') if params[:api_token] == 'apitoken' || headers['Api-Token'] == 'apitoken'
+      end
+      subject.get(:hello) { "Hello: Guest"}
+      subject.get(:protected_hello, :protect => true) { "Hello: #{current_user.username}"}
+      subject.get(:optional_hello, :protect => :optional) { "Hello: #{current_user ? current_user.username : 'Guest'}"}
+    end
+
+    it "can access request params" do
+      get '/protected_hello', "api_token" => 'apitoken'
+      last_response.body.should == 'Hello: user'
+    end
+
+    it "can access request headers" do
+      get '/protected_hello', {}, {"HTTP_API_TOKEN" => "apitoken"}
+      last_response.body.should == 'Hello: user'
+    end
+
+    context 'optional protection' do
+      it "should have current_user when protect pass" do
+        get '/optional_hello', :api_token => 'apitoken'
+        last_response.body.should == 'Hello: user'
+      end
+
+      it "current_user will be nil when protect fail" do
+        get 'optional_hello'
+        last_response.body.should == 'Hello: Guest'
+      end
+    end
+
+    context 'protection return nil' do
+      it "status should be 200 if protect is not need" do
+        get '/hello'
+        last_response.status.should == 200
+      end
+
+      it "status shuld be 401" do
+        get '/protected_hello'
+        last_response.status.should == 401
+      end
+    end
+  end
+
 end

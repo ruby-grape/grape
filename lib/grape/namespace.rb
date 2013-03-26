@@ -12,6 +12,14 @@ module Grape
       options[:requirements] || {}
     end
 
+    def protect_option
+      options[:protect]
+    end
+
+    def self.gather_protect_options(settings)
+      settings.gather(:namespace).map(&:protect_option)
+    end
+
     def self.joined_space(settings)
       settings.gather(:namespace).map(&:space).join("/")
     end

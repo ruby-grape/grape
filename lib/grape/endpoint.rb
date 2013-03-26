@@ -376,6 +376,8 @@ module Grape
 
       run_filters befores
 
+      run_protection
+
       # Retieve validations from this namespace and all parent namespaces.
       settings.gather(:validations).each do |validator|
         validator.validate!(params)
@@ -458,8 +460,20 @@ module Grape
       end
     end
 
+    def run_protection
+      protect_strategy = (Namespace.gather_protect_options(settings) << options[:route_options][:protect]).compact.last
+      if settings[:protection] && protect_strategy
+        Grape::Protection.new(self, {:protect_strategy => protect_strategy}, &settings[:protection]).protect
+      end
+    end
+
     def befores; aggregate_setting(:befores) end
     def after_validations; aggregate_setting(:after_validations) end
     def afters; aggregate_setting(:afters) end
+
+    def current_user
+      env['api.current_user']
+    end
+
   end
 end
