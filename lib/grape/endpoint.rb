@@ -395,6 +395,7 @@ module Grape
 
       b.use Rack::Head
       b.use Grape::Middleware::Error,
+        :format => settings[:format],
         :default_status => settings[:default_error_status] || 403,
         :rescue_all => settings[:rescue_all],
         :rescued_errors => aggregate_setting(:rescued_errors),

@@ -1,6 +1,7 @@
 0.4.1 (Next Release)
 ====================
 
+* [#375](https://github.com/intridea/grape/pull/375): Fix: throwing an `:error` inside a middleware doesn't respect the `format` settings - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.4.0 (3/17/2013)

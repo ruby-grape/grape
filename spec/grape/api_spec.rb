@@ -1739,7 +1739,7 @@ describe Grape::API do
       end
     end
   end
-  context 'format' do
+  describe '.format' do
     context ':txt' do
       before(:each) do
         subject.format :txt
@@ -1801,33 +1801,48 @@ describe Grape::API do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
         last_response.body.should == { :meaning_of_life => 42 }.to_json
       end
+      it 'raised :error from middleware' do
+        middleware = Class.new(Grape::Middleware::Base) do
+          def before
+            throw :error, :message => "Unauthorized", :status => 42
+          end
+        end
+        subject.use middleware
+        subject.get do
+
+        end
+        get "/"
+        last_response.status.should == 42
+        last_response.body.should == { :error => "Unauthorized" }.to_json
+      end
+
     end
     context ':serializable_hash' do
       before(:each) do
-        class SimpleExample
+        class SerializableHashExample
           def serializable_hash
-            {:abc => 'def'}
+            { :abc => 'def' }
           end
         end
         subject.format :serializable_hash
       end
       it 'instance' do
         subject.get '/example' do
-          SimpleExample.new
+          SerializableHashExample.new
         end
         get '/example'
         last_response.body.should == '{"abc":"def"}'
       end
       it 'root' do
         subject.get '/example' do
-          { "root" => SimpleExample.new }
+          { "root" => SerializableHashExample.new }
         end
         get '/example'
         last_response.body.should == '{"root":{"abc":"def"}}'
       end
       it 'array' do
         subject.get '/examples' do
-          [ SimpleExample.new, SimpleExample.new ]
+          [ SerializableHashExample.new, SerializableHashExample.new ]
         end
         get '/examples'
         last_response.body.should == '[{"abc":"def"},{"abc":"def"}]'
@@ -1879,6 +1894,25 @@ XML
   <string>example1</string>
   <string>example2</string>
 </strings>
+XML
+      end
+      it 'raised :error from middleware' do
+        middleware = Class.new(Grape::Middleware::Base) do
+          def before
+            throw :error, :message => "Unauthorized", :status => 42
+          end
+        end
+        subject.use middleware
+        subject.get do
+
+        end
+        get "/"
+        last_response.status.should == 42
+        last_response.body.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<error>
+  <message>Unauthorized</message>
+</error>
 XML
       end
     end
