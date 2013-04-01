@@ -12,7 +12,8 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the stable 0.4.1 release of Grape.
+You're reading the documentation for the next release of Grape, which should be 0.4.2.
+The current stable release is [0.4.1](https://github.com/intridea/grape/blob/v0.4.1/README.md).
 
 ## Project Tracking
 
