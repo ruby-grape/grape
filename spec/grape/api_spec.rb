@@ -928,6 +928,21 @@ describe Grape::API do
       last_response.status.should == 400
       last_response.body.should == 'New Error'
     end
+
+    it 'can rescue exceptions raised in the formatter' do
+      formatter = stub(:formatter)
+      formatter.stub(:call) { raise StandardError }
+      Grape::Formatter::Base.stub(:formatter_for) { formatter }
+
+      subject.rescue_from :all do |e|
+        rack_response('Formatter Error', 500)
+      end
+      subject.get('/formatter_exception') { 'Hello world' }
+
+      get '/formatter_exception'
+      last_response.status.should eql 500
+      last_response.body.should == 'Formatter Error'
+    end
   end
 
   describe '.rescue_from klass, block' do

@@ -36,6 +36,29 @@ describe Grape::Middleware::Formatter do
     end
   end
 
+  context 'error handling' do
+    let(:formatter) { stub(:formatter) }
+    before do
+      Grape::Formatter::Base.stub(:formatter_for) { formatter }
+    end
+
+    it 'rescues formatter-specific exceptions' do
+      formatter.stub(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
+
+      expect {
+        catch(:error){subject.call({'PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json'})}
+      }.to_not raise_error
+    end
+
+    it 'does not rescue other exceptions' do
+      formatter.stub(:call) { raise StandardError }
+
+      expect {
+        catch(:error){subject.call({'PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json'})}
+      }.to raise_error
+    end
+  end
+
   context 'detection' do
 
     it 'uses the extension if one is provided' do

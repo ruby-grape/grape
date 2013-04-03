@@ -28,7 +28,7 @@ module Grape
           bodymap = bodies.collect do |body|
             formatter.call body, env
           end
-        rescue Exception => e
+        rescue Grape::Exceptions::InvalidFormatter => e
           throw :error, :status => 500, :message => e.message
         end
         headers['Content-Type'] = content_type_for(env['api.format']) unless headers['Content-Type']
