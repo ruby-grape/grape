@@ -137,6 +137,33 @@ And would respond to the following routes:
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
+### Alongside Sinatra (or other frameworks)
+
+If you wish to mount Grape alongside another Rack framework such as Sinatra, you can do so easily using
+`Rack::Cascade`:
+
+```ruby
+# Example config.ru
+
+require 'sinatra'
+require 'grape'
+
+class API < Grape::API
+  get :hello do
+    {:hello => "world"}
+  end
+end
+
+class Web < Sinatra::Base
+  get '/' do
+    "Hello world."
+  end
+end
+
+use Rack::Session::Cookie
+run Rack::Cascade.new [API, Web]
+```
+
 ### Rails
 
 Place API files into `app/api` and modify `application.rb`.
