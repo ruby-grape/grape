@@ -72,7 +72,7 @@ module Twitter
       params do
         requires :id, :type => Integer, :desc => "Status id."
       end
-      route_param ':id' do
+      route_param :id do
         get do
           Status.find(params[:id])
         end
