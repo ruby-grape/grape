@@ -410,6 +410,12 @@ module Grape
         @versions ||= []
       end
 
+      def cascade(value = nil)
+        value.nil? ? 
+          (settings.has_key?(:cascade) ? !! settings[:cascade] : true) :
+          set(:cascade, value)
+      end
+
       protected
 
       def prepare_routes
@@ -471,8 +477,9 @@ module Grape
     # errors from reaching upstream. This is effectivelly done by unsetting
     # X-Cascade. Default :cascade is true.
     def cascade?
-      cascade = ((self.class.settings || {})[:version_options] || {})[:cascade]
-      cascade.nil? ? true : cascade
+      return !! self.class.settings[:cascade] if self.class.settings.has_key?(:cascade)
+      return !! self.class.settings[:version_options][:cascade] if self.class.settings[:version_options] && self.class.settings[:version_options].has_key?(:cascade)
+      true
     end
 
     reset!

@@ -1991,18 +1991,33 @@ XML
   end
 
   context "cascading" do
-    it "cascades" do
-      subject.version 'v1', :using => :path, :cascade => true
-      get "/v1/hello"
-      last_response.status.should == 404
-      last_response.headers["X-Cascade"].should == "pass"
+    context "via version" do
+      it "cascades" do
+        subject.version 'v1', :using => :path, :cascade => true
+        get "/v1/hello"
+        last_response.status.should == 404
+        last_response.headers["X-Cascade"].should == "pass"
+      end
+      it "does not cascade" do
+        subject.version 'v2', :using => :path, :cascade => false
+        get "/v2/hello"
+        last_response.status.should == 404
+        last_response.headers.keys.should_not include "X-Cascade"
+      end
     end
-
-    it "does not cascade" do
-      subject.version 'v2', :using => :path, :cascade => false
-      get "/v2/hello"
-      last_response.status.should == 404
-      last_response.headers.keys.should_not include "X-Cascade"
+    context "via endpoint" do
+      it "cascades" do
+        subject.cascade true
+        get "/hello"
+        last_response.status.should == 404
+        last_response.headers["X-Cascade"].should == "pass"
+      end
+      it "does not cascade" do
+        subject.cascade false
+        get "/hello"
+        last_response.status.should == 404
+        last_response.headers.keys.should_not include "X-Cascade"
+      end
     end
   end
 end

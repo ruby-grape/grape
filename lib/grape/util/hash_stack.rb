@@ -42,6 +42,17 @@ module Grape
       end
       alias_method :[], :get
 
+      # Looks through the stack for the first frame that matches :key
+      #
+      # @param key [Symbol] key to look for in hash frames
+      # @return true if key exists, false otherwise
+      def has_key?(key)
+        (@stack.length - 1).downto(0).each do |i|
+          return true if @stack[i].key? key
+        end
+        false
+      end
+
       # Replace a value on the top hash of the stack.
       #
       # @param key [Symbol] The key to set.

@@ -693,19 +693,23 @@ end
 
 #### Rails 3.x
 
-When mounted inside Rails 3.x, errors like "404 Not Found" or "406 Not Acceptable" will likely be
-handled and rendered by Rails handlers. For instance, accessing a nonexistent route "/api/foo"
-raises a 404, which inside rails will ultimately be translated to an `ActionController::RoutingError`,
-which most likely will get rendered to a HTML error page.
+When mounted inside containers, such as Rails 3.x, errors like "404 Not Found" or 
+"406 Not Acceptable" will likely be handled and rendered by Rails handlers. For instance, 
+accessing a nonexistent route "/api/foo" raises a 404, which inside rails will ultimately 
+be translated to an `ActionController::RoutingError`, which most likely will get rendered 
+to a HTML error page.
 
-Most APIs will enjoy avoiding Rails exceptions and have their own exceptions reaching the client.
-In that case, the `:cascade` option can be set to `false` on the versioning definition.
+Most APIs will enjoy preventing downstream handlers from handling errors. You may set the 
+`:cascade` option to `false` for the entire API or separately on specific `version` definitions,
+which will remove the `X-Cascade: true` header from API responses.
+
+```ruby
+cascade false
+```
 
 ```ruby
 version 'v1', :using => :header, :vendor => 'twitter', :cascade => false
 ```
-
-The `:cascade` option can also be used with the other versioning strategies (`:param` and `:path`).
 
 ## Logging
 
