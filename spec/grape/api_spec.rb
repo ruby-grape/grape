@@ -181,6 +181,36 @@ describe Grape::API do
     end
   end
 
+  describe '.route_param' do
+    it 'adds a parameterized route segment namespace' do
+      subject.namespace :users do
+        route_param :id do
+          get do
+            params[:id]
+          end
+        end
+      end
+
+      get '/users/23'
+      last_response.body.should == '23'
+    end
+
+    it 'should be able to define requirements with a single hash' do
+      subject.namespace :users do
+        route_param :id, :requirements => /[0-9]+/ do
+          get do
+            params[:id]
+          end
+        end
+      end
+
+      get '/users/michael'
+      last_response.status.should == 404
+      get '/users/23'
+      last_response.status.should == 200
+    end
+  end
+
   describe '.route' do
     it 'allows for no path' do
       subject.namespace :votes do
