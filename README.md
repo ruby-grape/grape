@@ -920,6 +920,8 @@ You can invoke the above API as follows.
 curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom -v
 ```
 
+You can disable parsing for a content-type with `nil`. For example, `parser :json, nil` will disable JSON parsing altogether. The request data is then available as-is in `env['api.request.body']`.
+
 ## RESTful Model Representations
 
 Grape supports a range of ways to present your data with some help from a generic `present` method,

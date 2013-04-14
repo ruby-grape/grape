@@ -1266,6 +1266,19 @@ describe Grape::API do
         last_response.body.should eql 'Disallowed type attribute: "symbol"'
       end
     end
+    context "none parser class" do
+      before :each do
+        subject.parser :json, nil
+        subject.put "data" do
+          "body: #{env['api.request.body']}"
+        end
+      end
+      it "does not parse data" do
+        put '/data', 'not valid json', "CONTENT_TYPE" => "application/json"
+        last_response.status.should == 200
+        last_response.body.should == "body: not valid json"
+      end
+    end
   end
 
   describe '.default_error_status' do

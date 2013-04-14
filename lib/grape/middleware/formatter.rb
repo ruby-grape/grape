@@ -67,6 +67,8 @@ module Grape
                 rescue Exception => e
                   throw :error, :status => 400, :message => e.message
                 end
+              else
+                env['api.request.body'] = body
               end
             else
               throw :error, :status => 406, :message => "The requested content-type '#{request.media_type}' is not supported."
