@@ -376,6 +376,7 @@ module Grape
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
       def route_param(param, options = {}, &block)
+        options = options.dup
         options[:requirements] = {param.to_sym => options[:requirements]} if options[:requirements].is_a? Regexp
         namespace(":#{param}", options, &block)
       end
