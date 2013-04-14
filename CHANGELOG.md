@@ -5,6 +5,7 @@ Next Release
 * [#380](https://github.com/intridea/grape/pull/380): Fix: `Formatter#read_body_input` when transfer encoding is chunked - [@paulnicholon](https://github.com/paulnicholson).
 * [#344](https://github.com/intridea/grape/pull/344): Added `parser :type, nil` which disables input parsing for a given content-type - [@dblock](https://github.com/dblock).
 * [#381](https://github.com/intridea/grape/issues/381): Added `cascade false` definition at API level to remove the `X-Cascade: true` header from the API response - [@dblock](https://github.com/dblock).
+* [#376](https://github.com/intridea/grape/pull/376): Added `route_param`, syntax sugar for quick declaration of route parameters - [@mbleigh](https://github.com/mbleigh).
 * Your contribution here.
 
 0.4.1 (4/1/2013)
