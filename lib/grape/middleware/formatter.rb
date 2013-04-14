@@ -39,7 +39,10 @@ module Grape
 
         # store read input in env['api.request.input']
         def read_body_input
-          if (request.post? || request.put? || request.patch?) && (! request.form_data?) && (! request.parseable_data?) && (request.content_length.to_i > 0)
+          if (request.post? || request.put? || request.patch?) &&
+            (! request.form_data?) && (! request.parseable_data?) &&
+            (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
+
             if env['rack.input'] && (body = (env['api.request.input'] = env['rack.input'].read)).length > 0
               read_rack_input body
             end

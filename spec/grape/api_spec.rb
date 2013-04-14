@@ -339,6 +339,17 @@ describe Grape::API do
             last_response.status.should == (verb == :post ? 201 : 200)
             last_response.body.should eql MultiJson.dump(object).to_json
           end
+          context "chunked transfer encoding" do
+            it "stores input in api.request.input" do
+              subject.format :json
+              subject.send(verb) do
+                env['api.request.input']
+              end
+              send verb, '/', MultiJson.dump(object), { 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil  }
+              last_response.status.should == (verb == :post ? 201 : 200)
+              last_response.body.should eql MultiJson.dump(object).to_json
+            end
+          end
         end
       end
     end

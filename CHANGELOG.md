@@ -2,6 +2,7 @@ Next Release
 ============
 
 * [#378](https://github.com/intridea/grape/pull/378): Fix: stop rescuing all exceptions during formatting - [@kbarrette](https://github.com/kbarrette).
+* [#380](https://github.com/intridea/grape/pull/380): Fix: Formatter#read_body_input when transfer encoding is chunked - [@paulnicholon](https://github.com/paulnicholson).
 * Your contribution here.
 
 0.4.1 (4/1/2013)
