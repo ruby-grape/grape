@@ -15,5 +15,5 @@ group :development, :test do
   gem 'github-markup'
   gem 'cookiejar'
   gem 'rack-contrib'
-  gem 'redcarpet'
+  gem 'redcarpet', :platforms => :ruby
 end
