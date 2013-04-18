@@ -1217,7 +1217,9 @@ See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-
 
 ## Performance Monitoring
 
-Grape integrates with NewRelic via the [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem.
+Grape integrates with NewRelic via the
+[newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem, and
+with Librato Metrics with the [grape-librato](https://github.com/seanmoon/grape-librato) gem.
 
 ## Contributing to Grape
 
