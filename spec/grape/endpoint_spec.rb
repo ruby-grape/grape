@@ -167,7 +167,7 @@ describe Grape::Endpoint do
       subject.params do
         requires :first
         optional :second
-        optional :third, default: 'third-default'
+        optional :third, :default => 'third-default'
       end
     end
 

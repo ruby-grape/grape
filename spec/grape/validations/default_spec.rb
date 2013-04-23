@@ -9,15 +9,15 @@ describe Grape::Validations::DefaultValidator do
 
         params do
           optional :id
-          optional :type, default: 'default-type'
+          optional :type, :default => 'default-type'
         end
         get '/' do
           { :id => params[:id], :type => params[:type] }
         end
 
         params do
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
+          optional :type1, :default => 'default-type1'
+          optional :type2, :default => 'default-type2'
         end
         get '/user' do
           { :type1 => params[:type1], :type2 => params[:type2] }
@@ -25,8 +25,8 @@ describe Grape::Validations::DefaultValidator do
 
         params do
           requires :id
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
+          optional :type1, :default => 'default-type1'
+          optional :type2, :default => 'default-type2'
         end
 
         get '/message' do
