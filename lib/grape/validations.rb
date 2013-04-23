@@ -19,12 +19,27 @@ module Grape
       end
 
       def validate!(params)
-        params = @scope.params(params)
+        attributes = AttributesIterator.new(self, @scope, params)
+        attributes.each do |resource_params, attr_name|
+          if @required || resource_params.has_key?(attr_name)
+            validate_param!(attr_name, resource_params)
+          end
+        end
+      end
 
-        (params.is_a?(Array) ? params : [params]).each do |resource_params|
-          @attrs.each do |attr_name|
-            if @required || resource_params.has_key?(attr_name)
-              validate_param!(attr_name, resource_params)
+      class AttributesIterator
+        include Enumerable
+
+        def initialize(validator, scope, params)
+          @attrs = validator.attrs
+          @params = scope.params(params)
+          @params = (@params.is_a?(Array) ? @params : [@params])
+        end
+
+        def each
+          @params.each do |resource_params|
+            @attrs.each do |attr_name|
+              yield resource_params, attr_name
             end
           end
         end
@@ -131,6 +146,10 @@ module Grape
 
         if desc = validations.delete(:desc)
           doc_attrs[:desc] = desc
+        end
+
+        if default = validations[:default]
+          doc_attrs[:default] = default
         end
 
         full_attrs = attrs.collect{ |name| { :name => name, :full_name => full_name(name)} }

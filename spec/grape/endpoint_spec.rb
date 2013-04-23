@@ -167,16 +167,27 @@ describe Grape::Endpoint do
       subject.params do
         requires :first
         optional :second
+        optional :third, default: 'third-default'
       end
     end
 
     it 'has as many keys as there are declared params' do
       subject.get '/declared' do
-        declared(params).keys.size.should == 2
+        declared(params).keys.size.should == 3
         ""
       end
 
       get '/declared?first=present'
+      last_response.status.should == 200
+    end
+
+    it 'has a optional param with default value all the time' do
+      subject.get '/declared' do
+        params[:third].should == 'third-default'
+        ""
+      end
+
+      get '/declared?first=one'
       last_response.status.should == 200
     end
 
