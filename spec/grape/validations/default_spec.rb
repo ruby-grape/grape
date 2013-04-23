@@ -52,6 +52,12 @@ describe Grape::Validations::DefaultValidator do
     last_response.body.should == { :type1 => 'default-type1', :type2 => 'default-type2' }.to_json
   end
 
+  it 'set default values for missing params in the request' do
+    get("/user?type2=value2")
+    last_response.status.should == 200
+    last_response.body.should == { :type1 => 'default-type1', :type2 => 'value2' }.to_json
+  end
+
   it 'set default values for optional params and allow to use required fields in the same time' do
     get("/message?id=1")
     last_response.status.should == 200
