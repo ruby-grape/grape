@@ -59,11 +59,11 @@ module Grape
                 begin
                   body = (env['api.request.body'] = parser.call(body, env))
                   if body.is_a?(Hash)
-                    env['rack.request.form_hash'] = env['rack.request.form_hash'] ? 
-                      env['rack.request.form_hash'].merge(body) : 
+                    env['rack.request.form_hash'] = env['rack.request.form_hash'] ?
+                      env['rack.request.form_hash'].merge(body) :
                       body
+                    env['rack.request.form_input'] = env['rack.input']
                   end
-                  env['rack.request.form_input'] = env['rack.input']
                 rescue Exception => e
                   throw :error, :status => 400, :message => e.message
                 end
