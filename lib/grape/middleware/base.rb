@@ -34,7 +34,7 @@ module Grape
       def after; end
 
       def request
-        Rack::Request.new(self.env)
+        Grape::Request.new(self.env)
       end
 
       def response
