@@ -169,9 +169,7 @@ module Grape
     # The parameters passed into the request as
     # well as parsed from URL segments.
     def params
-      @params ||= Hashie::Mash.new.
-        deep_merge(request.params).
-        deep_merge(env['rack.routing_args'] || {})
+      @params ||= @request.params
     end
 
     # A filtering method that will return a hash
@@ -257,13 +255,7 @@ module Grape
 
     # Retrieves all available request headers.
     def headers
-      @headers ||= @env.dup.inject({}) { |h, (k, v)|
-        if k.start_with? 'HTTP_'
-          k = k[5..-1].gsub('_', '-').downcase.gsub(/^.|[-_\s]./) { |x| x.upcase }
-          h[k] = v
-        end
-        h
-      }
+      @headers ||= @request.headers
     end
 
     # Set response content-type
@@ -369,7 +361,7 @@ module Grape
     def run(env)
       @env = env
       @header = {}
-      @request = Rack::Request.new(@env)
+      @request = Grape::Request.new(@env)
 
       self.extend helpers
       cookies.read(@request)

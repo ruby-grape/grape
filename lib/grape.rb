@@ -25,6 +25,7 @@ module Grape
   autoload :Namespace,           'grape/namespace'
   autoload :Cookies,             'grape/cookies'
   autoload :Validations,         'grape/validations'
+  autoload :Request,             'grape/http/request'
 
   module Exceptions
     autoload :Base,                           'grape/exceptions/base'
