@@ -532,6 +532,5 @@ module Grape
         end
       end
     end
-
   end
 end

@@ -62,8 +62,8 @@ describe Grape::API do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
         {
-          :using => :param,
-          :parameter => "apiver"
+          :using     => :param,
+          :parameter => 'apiver'
         }
       end
     end

@@ -7,7 +7,7 @@ Next Release
 * [#381](https://github.com/intridea/grape/issues/381): Added `cascade false` definition at API level to remove the `X-Cascade: true` header from the API response - [@dblock](https://github.com/dblock).
 * [#376](https://github.com/intridea/grape/pull/376): Added `route_param`, syntax sugar for quick declaration of route parameters - [@mbleigh](https://github.com/mbleigh).
 * [#347](https://github.com/intridea/grape/issues/347): Handle non-hash body params. - [@paulnicholon](https://github.com/paulnicholson).
-* Your contribution here.
+* [#394](https://github.com/intridea/grape/pull/394): path version no longer overwrites version param - [@tmornini](https://github.com/tmornini)
 
 0.4.1 (4/1/2013)
 ================

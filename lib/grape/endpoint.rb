@@ -81,52 +81,64 @@ module Grape
 
     def prepare_routes
       routes = []
+
+      route_options = options[:route_options]
+
       options[:method].each do |method|
         options[:path].each do |path|
           prepared_path = prepare_path(path)
 
-          anchor = options[:route_options][:anchor]
+          anchor = route_options[:anchor]
           anchor = anchor.nil? ? true : anchor
 
-          endpoint_requirements = options[:route_options][:requirements] || {}
+          endpoint_requirements = route_options[:requirements] || {}
           all_requirements = (settings.gather(:namespace).map(&:requirements) << endpoint_requirements)
+
           requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
             base_requirements.merge!(single_requirements)
           end
 
           path = compile_path(prepared_path, anchor && !options[:app], requirements)
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-          path_params = {}
+
           # named parameters in the api path
-          named_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+          path_params = {}
+          named_params = regex.named_captures.map { |nc| nc[0] }
+          named_params -= [ 'version','format' ]
           named_params.each { |named_param| path_params[named_param] = "" }
+
           # route parameters declared via desc or appended to the api declaration
-          route_params = (options[:route_options][:params] || {})
-          path_params.merge!(route_params)
-          request_method = (method.to_s.upcase unless method == :any)
-          routes << Route.new(options[:route_options].clone.merge({
-            :prefix => settings[:root_prefix],
-            :version => settings[:version] ? settings[:version].join('|') : nil,
-            :namespace => namespace,
-            :method => request_method,
-            :path => prepared_path,
-            :params => path_params,
-            :compiled => path,
-            })
-          )
+          route_params = route_options[:params] || { }
+          all_params = path_params.merge route_params
+
+          request_method = method.to_s.upcase unless method == :any
+
+          versions = settings[:version]
+          version = versions.join('|') if versions
+
+          routes << Route.new( route_options.merge(
+                                 :prefix    => settings[:root_prefix],
+                                 :version   => version,
+                                 :namespace => namespace,
+                                 :method    => request_method,
+                                 :path      => prepared_path,
+                                 :params    => all_params,
+                                 :compiled  => path ) )
         end
       end
+
       routes
     end
 
     def prepare_path(path)
       parts = []
+
       parts << settings[:mount_path].to_s.split("/") if settings[:mount_path]
       parts << settings[:root_prefix].to_s.split("/") if settings[:root_prefix]
 
       uses_path_versioning = settings[:version] && settings[:version_options][:using] == :path
-      namespace_is_empty = namespace && (namespace.to_s =~ /^\s*$/ || namespace.to_s == '/')
-      path_is_empty = path && (path.to_s =~ /^\s*$/ || path.to_s == '/')
+      namespace_is_empty   = namespace && (namespace.to_s =~ /^\s*$/ || namespace.to_s == '/')
+      path_is_empty        = path && (path.to_s =~ /^\s*$/ || path.to_s == '/')
 
       parts << ':version' if uses_path_versioning
       if ! uses_path_versioning || (! namespace_is_empty || ! path_is_empty)
@@ -137,6 +149,7 @@ module Grape
         format_suffix = '(/.:format)'
       end
       parts = parts.flatten.select { |part| part != '/' }
+
       Rack::Mount::Utils.normalize_path(parts.join('/') + format_suffix)
     end
 
