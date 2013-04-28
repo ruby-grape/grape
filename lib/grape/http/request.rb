@@ -2,9 +2,15 @@ module Grape
   class Request < Rack::Request
 
     def params
-      @env['grape.request.params'] ||= Hashie::Mash.new.
-        deep_merge(super).
-        deep_merge(env['rack.routing_args'] || {})
+      params = Hashie::Mash.new.deep_merge super
+
+      version = params.version
+
+      params = params.deep_merge( env['rack.routing_args'] || {} )
+
+      params.version = version
+
+      params
     end
 
     def headers
