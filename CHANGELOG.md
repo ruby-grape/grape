@@ -4,6 +4,7 @@ Next Release
 #### Features
 
 * [#617](https://github.com/intridea/grape/pull/617): Running tests on Ruby 2.1.1, Rubinius 2.1 and 2.2, Ruby and JRuby HEAD - [@dblock](https://github.com/dblock).
+* [#397](https://github.com/intridea/grape/pull/397): Adds `Grape::Endpoint.before_each` to allow easy helper stubbing - [@mbleigh](https://github.com/mbleigh).
 * Your contribution here.
 
 #### Fixes

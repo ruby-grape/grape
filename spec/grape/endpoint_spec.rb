@@ -7,6 +7,37 @@ describe Grape::Endpoint do
     subject
   end
 
+  describe '.before_each' do
+    after { Grape::Endpoint.before_each(nil) }
+
+    it 'should be settable via block' do
+      block = lambda { |endpoint| "noop" }
+      Grape::Endpoint.before_each(&block)
+      expect(Grape::Endpoint.before_each).to eq(block)
+    end
+
+    it 'should be settable via reference' do
+      block = lambda { |endpoint| "noop" }
+      Grape::Endpoint.before_each block
+      expect(Grape::Endpoint.before_each).to eq(block)
+    end
+
+    it 'should be able to override a helper' do
+      subject.get("/") { current_user }
+      expect { get '/' }.to raise_error(NameError)
+
+      Grape::Endpoint.before_each do |endpoint|
+        endpoint.stub(:current_user).and_return("Bob")
+      end
+
+      get '/'
+      expect(last_response.body).to eq("Bob")
+
+      Grape::Endpoint.before_each(nil)
+      expect { get '/' }.to raise_error(NameError)
+    end
+  end
+
   describe '#initialize' do
     it 'takes a settings stack, options, and a block' do
       p = proc {}
