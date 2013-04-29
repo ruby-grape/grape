@@ -11,7 +11,7 @@ shared_examples_for 'versioning' do
 
   it 'adds the prefix before the API version' do
     subject.format :txt
-    subject.prefix 'api'    
+    subject.prefix 'api'
     subject.version 'v1', macro_options
     subject.get :hello do
       "Version: #{request.env['api.version']}"
@@ -106,4 +106,16 @@ shared_examples_for 'versioning' do
       end
     end
   end
+
+  it 'does not overwrite version parameter with API version' do
+    subject.format :txt
+    subject.version 'v1', macro_options
+    subject.params { requires :version }
+    subject.get :api_version_with_version_param do
+      params[:version]
+    end
+    versioned_get '/api_version_with_version_param?version=1', 'v1', macro_options
+    last_response.body.should eql '1'
+  end
+
 end

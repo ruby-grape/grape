@@ -8,6 +8,7 @@ Next Release
 * [#376](https://github.com/intridea/grape/pull/376): Added `route_param`, syntax sugar for quick declaration of route parameters - [@mbleigh](https://github.com/mbleigh).
 * [#347](https://github.com/intridea/grape/issues/347): Fix: handling non-hash body params - [@paulnicholon](https://github.com/paulnicholson).
 * [#392](https://github.com/intridea/grape/pull/392): Extracedt headers and params from `Endpoint` to `Grape::Request` - [@niedhui](https://github.com/niedhui).
+* [#394](https://github.com/intridea/grape/pull/394): Path version no longer overwrites a `version` parameter - [@tmornini](https://github.com/tmornini).
 * Your contribution here.
 
 0.4.1 (4/1/2013)

@@ -2,9 +2,16 @@ module Grape
   class Request < Rack::Request
 
     def params
-      @env['grape.request.params'] ||= Hashie::Mash.new.
-        deep_merge(super).
-        deep_merge(env['rack.routing_args'] || {})
+      @env['grape.request.params'] ||= begin
+        params = Hashie::Mash.new(super)
+        if env['rack.routing_args']
+          args = env['rack.routing_args'].dup
+          # preserve version from query string parameters
+          args.delete(:version)
+          params.deep_merge!(args)
+        end
+        params
+      end
     end
 
     def headers
