@@ -1194,6 +1194,34 @@ RSpec.configure do |config|
 end
 ```
 
+### Mocking and Stubbing helper methods
+
+helpers are defined on a helper object which can be stubbed out.
+
+```ruby
+require 'spec_helper'
+
+describe Twitter::API do
+  describe "logged in behaviour" do
+    it "returns an the user's statuses" do
+      user = double(statuses: [1])
+      Twitter::API.helper.stub(:current_user).and_return(user)
+      get "/api/v1/statuses"
+      response.status.should == 200
+      JSON.parse(response.body).should == [1]
+    end
+
+    it "returns an empty array when user's logged out" do
+      Twitter::API.helper.stub(:current_user).and_return(nil)
+      get "/api/v1/statuses"
+      response.status.should == 200
+      JSON.parse(response.body).should == []
+    end
+  end
+end
+````
+
+
 ## Reloading API Changes in Development
 
 ### Rails 3.x
