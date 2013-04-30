@@ -359,14 +359,14 @@ module Grape
       end
     end
 
-    def helper
+    def helpers_container
       @klass.helper if @klass
     end
 
     def method_missing(method_name, *args, &block)
-      if helper.respond_to?(method_name)
-        helper.set_context(params, request, env)
-        helper.send(method_name, *args, &block)
+      if helpers_container.respond_to?(method_name)
+        helpers_container.set(params, request, env)
+        helpers_container.send(method_name, *args, &block)
       else
         super
       end
@@ -377,7 +377,6 @@ module Grape
       @header = {}
       @request = Grape::Request.new(@env)
 
-      #self.extend helpers
       cookies.read(@request)
 
       run_filters befores

@@ -273,7 +273,7 @@ module Grape
       end
 
       def helper
-        @helper ||= HelperObject.new
+        @helper ||= HelperContext.new
       end
 
       # Add an authentication type to the API. Currently
