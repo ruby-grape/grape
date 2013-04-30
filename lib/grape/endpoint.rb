@@ -45,6 +45,7 @@ module Grape
         @block = self.class.generate_api_method(method_name, &block)
       end
       @options = options
+      @klass = options[:klass]
 
       raise Grape::Exceptions::MissingOption.new(:path) unless options.key?(:path)
       options[:path] = Array(options[:path])
@@ -358,12 +359,25 @@ module Grape
       end
     end
 
+    def helper
+      @klass.helper if @klass
+    end
+
+    def method_missing(method_name, *args, &block)
+      if helper.respond_to?(method_name)
+        helper.set_context(params, request, env)
+        helper.send(method_name, *args, &block)
+      else
+        super
+      end
+    end
+
     def run(env)
       @env = env
       @header = {}
       @request = Grape::Request.new(@env)
 
-      self.extend helpers
+      #self.extend helpers
       cookies.read(@request)
 
       run_filters befores

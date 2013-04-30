@@ -19,6 +19,7 @@ require 'i18n'
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
+  autoload :HelperObject,        'grape/helper_object'
   autoload :API,                 'grape/api'
   autoload :Endpoint,            'grape/endpoint'
   autoload :Route,               'grape/route'
