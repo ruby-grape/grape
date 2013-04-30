@@ -10,7 +10,7 @@ module Grape
 
     def reset_context
       instance_variables.each do |name|
-        next if name == :@mock_proxy
+        next if name.to_s == "@mock_proxy"
         instance_variable_set(name, nil)
       end
     end
