@@ -1210,6 +1210,9 @@ describe Twitter::API do
       response.status.should == 200
       JSON.parse(response.body).should == [1]
     end
+  end
+
+  describe "logged out behaviour" do
 
     it "returns an empty array when user's logged out" do
       Twitter::API.helper.stub(:current_user).and_return(nil)
