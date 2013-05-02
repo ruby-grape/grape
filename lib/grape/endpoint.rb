@@ -311,6 +311,12 @@ module Grape
     def present(object, options = {})
       entity_class = options.delete(:with)
 
+      # Prevent additional queries when using ActiveRecord.
+      # Since calling `.first` on an ActiveRecord::Relation will
+      # trigger a `LIMIT 1` query, we convert the collection into
+      # an array first.
+      object = object.to_ary if object.respond_to?(:to_ary)
+
       # auto-detect the entity from the first object in the collection
       object_instance = object.respond_to?(:first) ? object.first : object
 
