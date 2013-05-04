@@ -42,7 +42,7 @@ the context of recreating parts of the Twitter API.
 module Twitter
   class API < Grape::API
 
-    version 'v1', :using => :header, :vendor => 'twitter'
+    version 'v1', using: :header, vendor: 'twitter'
     format :json
 
     helpers do
@@ -70,7 +70,7 @@ module Twitter
 
       desc "Return a status."
       params do
-        requires :id, :type => Integer, :desc => "Status id."
+        requires :id, type: Integer, desc: "Status id."
       end
       route_param :id do
         get do
@@ -80,32 +80,32 @@ module Twitter
 
       desc "Create a status."
       params do
-        requires :status, :type => String, :desc => "Your status."
+        requires :status, type: String, desc: "Your status."
       end
       post do
         authenticate!
         Status.create!({
-          :user => current_user,
-          :text => params[:status]
+          user: current_user,
+          text: params[:status]
         })
       end
 
       desc "Update a status."
       params do
-        requires :id, :type => String, :desc => "Status ID."
-        requires :status, :type => String, :desc => "Your status."
+        requires :id, type: String, desc: "Status ID."
+        requires :status, type: String, desc: "Your status."
       end
       put ':id' do
         authenticate!
         current_user.statuses.find(params[:id]).update({
-          :user => current_user,
-          :text => params[:status]
+          user: current_user,
+          text: params[:status]
         })
       end
 
       desc "Delete a status."
       params do
-        requires :id, :type => String, :desc => "Status ID."
+        requires :id, type: String, desc: "Status ID."
       end
       delete ':id' do
         authenticate!
@@ -152,7 +152,7 @@ require 'grape'
 
 class API < Grape::API
   get :hello do
-    {:hello => "world"}
+    {hello: "world"}
   end
 end
 
@@ -171,7 +171,7 @@ run Rack::Cascade.new [API, Web]
 Place API files into `app/api` and modify `application.rb`.
 
 ```ruby
-config.paths.add "app/api", :glob => "**/*.rb"
+config.paths.add "app/api", glob: "**/*.rb"
 config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
 ```
 
@@ -211,7 +211,7 @@ There are three strategies in which clients can reach your API's endpoints: `:pa
 ### Path
 
 ```ruby
-version 'v1', :using => :path
+version 'v1', using: :path
 ```
 
 Using this versioning strategy, clients should pass the desired version in the URL.
@@ -221,7 +221,7 @@ Using this versioning strategy, clients should pass the desired version in the U
 ### Header
 
 ```ruby
-version 'v1', :using => :header, :vendor => 'twitter'
+version 'v1', using: :header, vendor: 'twitter'
 ```
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
@@ -236,7 +236,7 @@ is returned when no correct `Accept` header is supplied.
 ### Param
 
 ```ruby
-version 'v1', :using => :param
+version 'v1', using: :param
 ```
 
 Using this versioning strategy, clients should pass the desired version as a request parameter,
@@ -247,7 +247,7 @@ either in the URL query string or in the request body.
 The default name for the query parameter is 'apiver' but can be specified using the `:parameter` option.
 
 ```ruby
-version 'v1', :using => :param, :parameter => "v"
+version 'v1', using: :param, parameter: "v"
 ```
 
     curl -H http://localhost:9292/statuses/public_timeline?v=v1
@@ -288,7 +288,7 @@ The Grape endpoint:
 
 ```ruby
 post '/statuses' do
-  Status.create!({ :text => params[:text] })
+  Status.create!({ text: params[:text] })
 end
 ```
 
@@ -369,7 +369,7 @@ The `namespace` method has a number of aliases, including: `group`, `resource`,
 class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
-      throw :error, :status => 400, :message => "#{attr_name}: must consist of alpha-numeric characters"
+      throw :error, status: 400, message: "#{attr_name}: must consist of alpha-numeric characters"
     end
   end
 end
@@ -377,7 +377,7 @@ end
 
 ```ruby
 params do
-  requires :text, :alpha_numeric => true
+  requires :text, alpha_numeric: true
 end
 ```
 
@@ -387,7 +387,7 @@ You can also create custom classes that take parameters.
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
-      throw :error, :status => 400, :message => "#{attr_name}: must be at the most #{@option} characters long"
+      throw :error, status: 400, message: "#{attr_name}: must be at the most #{@option} characters long"
     end
   end
 end
@@ -395,7 +395,7 @@ end
 
 ```ruby
 params do
-  requires :text, :length => 140
+  requires :text, length: 140
 end
 ```
 
@@ -443,11 +443,11 @@ Optionally, you can define requirements for your named route parameters using re
 expressions on namespace or endpoint. The route will match only if all requirements are met.
 
 ```ruby
-get ':id', :requirements => { :id => /[0-9]*/ } do
+get ':id', requirements: { id: /[0-9]*/ } do
   Status.find(params[:id])
 end
 
-namespace :outer, :requirements => { :id => /[0-9]*/ } do
+namespace :outer, requirements: { id: /[0-9]*/ } do
   get :id do
   end
 
@@ -496,11 +496,11 @@ class API < Grape::API
   get 'status_count' do
     cookies[:status_count] ||= 0
     cookies[:status_count] += 1
-    { :status_count => cookies[:status_count] }
+    { status_count: cookies[:status_count] }
   end
 
   delete 'status_count' do
-    { :status_count => cookies.delete(:status_count) }
+    { status_count: cookies.delete(:status_count) }
   end
 
 end
@@ -510,10 +510,10 @@ Use a hash-based syntax to set more than one value.
 
 ```ruby
 cookies[:status_count] = {
-    :value => 0,
-    :expires => Time.tomorrow,
-    :domain => '.twitter.com',
-    :path => '/'
+    value: 0,
+    expires: Time.tomorrow,
+    domain: '.twitter.com',
+    path: '/'
 }
 
 cookies[:status_count][:value] +=1
@@ -528,7 +528,7 @@ cookies.delete :status_count
 Specify an optional path.
 
 ```ruby
-cookies.delete :status_count, :path => '/'
+cookies.delete :status_count, path: '/'
 ```
 
 ## Redirecting
@@ -540,7 +540,7 @@ redirect "/statuses"
 ```
 
 ```ruby
-redirect "/statuses", :permanent => true
+redirect "/statuses", permanent: true
 ```
 
 ## Allowed Methods
@@ -569,15 +569,15 @@ include an "Allow" header listing the supported methods.
 class API < Grape::API
 
   get '/rt_count' do
-    { :rt_count => current_user.rt_count }
+    { rt_count: current_user.rt_count }
   end
 
   params do
-    requires :value, :type => Integer, :desc => 'Value to add to the rt count.'
+    requires :value, type: Integer, desc: 'Value to add to the rt count.'
   end
   put '/rt_count' do
     current_user.rt_count += params[:value].to_i
-    { :rt_count => current_user.rt_count }
+    { rt_count: current_user.rt_count }
   end
 
 end
@@ -672,7 +672,7 @@ automatically sets the default error code and content-type.
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    rack_response({ :message => "rescued from #{e.class.name}" })
+    rack_response({ message: "rescued from #{e.class.name}" })
   end
 end
 ```
@@ -718,7 +718,7 @@ cascade false
 ```
 
 ```ruby
-version 'v1', :using => :header, :vendor => 'twitter', :cascade => false
+version 'v1', using: :header, vendor: 'twitter', cascade: false
 ```
 
 ## Logging
@@ -873,7 +873,7 @@ class API < Grape::API
   use Rack::Cors do
     allow do
       origins '*'
-      resource '*', :headers => :any, :methods => :get
+      resource '*', headers: :any, methods: :get
     end
   end
   format :json
@@ -913,7 +913,7 @@ to `:value`. The parameter will be available via `params[:value]` inside the API
 ```ruby
 module CustomParser
   def self.call(object, env)
-    { :value => object.to_s }
+    { value: object.to_s }
   end
 end
 ```
@@ -956,11 +956,11 @@ module API
   module Entities
     class Status < Grape::Entity
       expose :user_name
-      expose :text, :documentation => { :type => "string", :desc => "Status update text." }
-      expose :ip, :if => { :type => :full }
-      expose :user_type, user_id, :if => lambda{ |status, options| status.user.public? }
+      expose :text, documentation: { type: "string", desc: "Status update text." }
+      expose :ip, if: { type: :full }
+      expose :user_type, user_id, if: lambda{ |status, options| status.user.public? }
       expose :digest { |status, options| Digest::MD5.hexdigest(status.txt) }
-      expose :replies, :using => API::Status, :as => :replies
+      expose :replies, using: API::Status, as: :replies
     end
   end
 
@@ -968,12 +968,12 @@ module API
     version 'v1'
 
     desc 'Statuses index', {
-      :object_fields => API::Entities::Status.documentation
+      object_fields: API::Entities::Status.documentation
     }
     get '/statuses' do
       statuses = Status.all
       type = current_user.admin? ? :full : :default
-      present statuses, with: API::Entities::Status, :type => type
+      present statuses, with: API::Entities::Status, type: type
     end
   end
 end
@@ -1026,7 +1026,7 @@ end
 ```
 
 ```ruby
-http_digest({ :realm => 'Test Api', :opaque => 'app secret' }) do |username|
+http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
   # lookup the user's password here
   { 'user1' => 'password1' }[username]
 end
@@ -1061,7 +1061,7 @@ call with `route`.
 class MyAPI < Grape::API
   desc "Returns a description of a parameter."
   params do
-    requires :id, :type => Integer, :desc => "Identity."
+    requires :id, type: Integer, desc: "Identity."
   end
   get "params/:id" do
     route.route_params[params[:id]] # yields the parameter description
@@ -1101,7 +1101,7 @@ should match from start to end to match, otherwise a `404 Not Found` is
 returned. However, this is sometimes not what you want, because it is not always
 known upfront what can be expected from the call. This is because Rack-mount by
 default anchors requests to match from the start to the end, or not at all.
-Rails solves this problem by using a `:anchor => false` option in your routes.
+Rails solves this problem by using a `anchor: false` option in your routes.
 In Grape this option can be used as well when a method is defined.
 
 For instance when you're API needs to get part of an URL, for instance:
@@ -1109,7 +1109,7 @@ For instance when you're API needs to get part of an URL, for instance:
 ```ruby
 class TwitterAPI < Grape::API
   namespace :statuses do
-    get '/(*:status)', :anchor => false do
+    get '/(*:status)', anchor: false do
 
     end
   end
@@ -1188,8 +1188,8 @@ In Rails, HTTP request tests would go into the `spec/requests` group. You may wa
 
 ```ruby
 RSpec.configure do |config|
-  config.include RSpec::Rails::RequestExampleGroup, :type => :request, :example_group => {
-    :file_path => /spec\/api/
+  config.include RSpec::Rails::RequestExampleGroup, type: :request, example_group: {
+    file_path: /spec\/api/
   }
 end
 ```
@@ -1202,7 +1202,7 @@ Add API paths to `config/application.rb`.
 
 ```ruby
 # Auto-load API and its subdirectories
-config.paths.add "app/api", :glob => "**/*.rb"
+config.paths.add "app/api", glob: "**/*.rb"
 config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
 ```
 
