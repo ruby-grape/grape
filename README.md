@@ -205,8 +205,8 @@ end
 
 ## Versioning
 
-There are three strategies in which clients can reach your API's endpoints: `:path`,
-`:header` and `:param`. The default strategy is `:path`.
+There are four strategies in which clients can reach your API's endpoints: `:path`,
+`:header`, `:accept_version_header` and `:param`. The default strategy is `:path`.
 
 ### Path
 
@@ -229,6 +229,21 @@ Using this versioning strategy, clients should pass the desired version in the H
     curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no `Accept` header is
+supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
+one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
+is returned when no correct `Accept` header is supplied.
+
+### Accept-Version Header
+
+```ruby
+version 'v1', using: :accept_version_header
+```
+
+Using this versioning strategy, clients should pass the desired version in the HTTP `Accept-Version` header.
+
+    curl -H "Accept-Version=v1" http://localhost:9292/statuses/public_timeline
+
+By default, the first matching version is used when no `Accept-Version` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
 one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
 is returned when no correct `Accept` header is supplied.
