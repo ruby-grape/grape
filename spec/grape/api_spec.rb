@@ -97,6 +97,16 @@ describe Grape::API do
     # pending 'routes if any media type is allowed'
   end
 
+  describe '.version using accept_version_header' do
+    it_should_behave_like 'versioning' do
+      let(:macro_options) do
+        {
+          :using  => :accept_version_header
+        }
+      end
+    end
+  end  
+
   describe '.represent' do
     it 'requires a :with option' do
       expect{ subject.represent Object, {} }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
@@ -273,6 +283,13 @@ describe Grape::API do
         subject.enable_root_route!
 
         versioned_get "/", "v1", :using => :param
+      end
+
+      it 'Accept-Version header versioned APIs' do
+        subject.version 'v1', :using => :accept_version_header
+        subject.enable_root_route!
+
+        versioned_get "/", "v1", :using => :accept_version_header
       end
 
       it 'unversioned APIs' do

@@ -16,4 +16,7 @@ describe Grape::Middleware::Versioner do
     klass.using(:param).should == Grape::Middleware::Versioner::Param
   end
 
+  it 'recognizes :accept_version_header' do
+    klass.using(:accept_version_header).should == Grape::Middleware::Versioner::AcceptVersionHeader
+  end
 end

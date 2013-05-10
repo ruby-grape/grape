@@ -21,6 +21,8 @@ module Grape
           Header
         when :param
           Param
+        when :accept_version_header
+          AcceptVersionHeader
         else
           raise Grape::Exceptions::InvalidVersionerOption.new(strategy)
         end
