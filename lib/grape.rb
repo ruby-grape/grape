@@ -74,9 +74,10 @@ module Grape
     end
 
     module Versioner
-      autoload :Path,           'grape/middleware/versioner/path'
-      autoload :Header,         'grape/middleware/versioner/header'
-      autoload :Param,          'grape/middleware/versioner/param'
+      autoload :Path,                 'grape/middleware/versioner/path'
+      autoload :Header,               'grape/middleware/versioner/header'
+      autoload :Param,                'grape/middleware/versioner/param'
+      autoload :AcceptVersionHeader,  'grape/middleware/versioner/accept_version_header'
     end
   end
 
