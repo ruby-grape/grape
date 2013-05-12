@@ -959,8 +959,8 @@ hash may include `:with`, which defines the entity to expose.
 
 ### Grape Entities
 
-Add the [grape-entity](https://github.com/agileanimal/grape-entity) gem to your Gemfile.
-Please refer to the [grape-entity documentation](https://github.com/agileanimal/grape-entity/blob/master/README.markdown)
+Add the [grape-entity](https://github.com/intridea/grape-entity) gem to your Gemfile.
+Please refer to the [grape-entity documentation](https://github.com/intridea/grape-entity/blob/master/README.markdown)
 for more details.
 
 The following example exposes statuses.
