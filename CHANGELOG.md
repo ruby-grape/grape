@@ -10,7 +10,7 @@ Next Release
 * [#392](https://github.com/intridea/grape/pull/392): Extracted headers and params from `Endpoint` to `Grape::Request` - [@niedhui](https://github.com/niedhui).
 * [#394](https://github.com/intridea/grape/pull/394): Path version no longer overwrites a `version` parameter - [@tmornini](https://github.com/tmornini).
 * [#390](https://github.com/intridea/grape/pull/390): Added default value for an `optional` parameter - [@oivoodoo](https://github.com/oivoodoo).
-* [#403](https://github.com/intridea/grape/pull/403): Added support for versioning using the 'Accept-Version' header - [@politician](https://github.com/politician). 
+* [#403](https://github.com/intridea/grape/pull/403): Added support for versioning using the `Accept-Version` header - [@politician](https://github.com/politician). 
 * Your contribution here.
 
 0.4.1 (4/1/2013)
