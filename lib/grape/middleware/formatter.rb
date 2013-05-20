@@ -40,7 +40,8 @@ module Grape
         # store read input in env['api.request.input']
         def read_body_input
           if (request.post? || request.put? || request.patch?) &&
-            (! request.form_data?) && (! request.parseable_data?) &&
+            (! request.form_data? || ! request.media_type) &&
+            (! request.parseable_data?) &&
             (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
 
             if env['rack.input'] && (body = (env['api.request.input'] = env['rack.input'].read)).length > 0
@@ -53,6 +54,7 @@ module Grape
         def read_rack_input(body)
           begin
             fmt = mime_types[request.media_type] if request.media_type
+            fmt ||= options[:default_format]
             if content_type_for(fmt)
               parser = Grape::Parser::Base.parser_for fmt, options
               if parser

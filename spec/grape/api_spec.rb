@@ -1267,6 +1267,15 @@ describe Grape::API do
   end
 
   describe '.parser' do
+    it 'parses data in format requested by content-type' do
+      subject.format :json
+      subject.post '/data' do
+        { :x => params[:x] }
+      end
+      post "/data", '{"x":42}', { 'CONTENT_TYPE' => 'application/json' }
+      last_response.status.should == 201
+      last_response.body.should == '{"x":42}'
+    end
     context 'lambda parser' do
       before :each do
         subject.content_type :txt, "text/plain"
@@ -1326,6 +1335,29 @@ describe Grape::API do
         last_response.status.should == 200
         last_response.body.should == "body: not valid json"
       end
+    end
+  end
+
+  describe '.default_format' do
+    before :each do
+      subject.format :json
+      subject.default_format :json
+    end
+    it 'returns data in default format' do
+      subject.get '/data' do
+        { :x => 42 }
+      end
+      get "/data"
+      last_response.status.should == 200
+      last_response.body.should == '{"x":42}'
+    end
+    it 'parses data in default format' do
+      subject.post '/data' do
+        { :x => params[:x] }
+      end
+      post "/data", '{"x":42}', "CONTENT_TYPE" => ""
+      last_response.status.should == 201
+      last_response.body.should == '{"x":42}'
     end
   end
 

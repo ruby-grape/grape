@@ -799,6 +799,16 @@ class Twitter::API < Grape::API
 end
 ```
 
+When the content-type is omitted, Grape will return a 406 error code unless `default_format` is specified. 
+The following API will try to parse any data without a content-type using a JSON parser.
+
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  default_format :json
+end
+```
+
 If you combine `format` with `rescue_from :all`, errors will be rendered using the same format.
 If you do not want this behavior, set the default error formatter with `default_error_formatter`.
 
