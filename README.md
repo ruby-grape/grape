@@ -799,7 +799,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-When the content-type is omitted, Grape will return a 406 error code unless `default_format` is specified. 
+When the content-type is omitted, Grape will return a 406 error code unless `default_format` is specified.
 The following API will try to parse any data without a content-type using a JSON parser.
 
 ```ruby
@@ -1002,6 +1002,27 @@ module API
     end
   end
 end
+```
+
+You can present with multiple entities using an optional Symbol argument.
+
+```ruby
+  get '/statuses' do
+    statuses = Status.all.page(1).per(20)
+    present :total_page, 10
+    present :per_page, 20
+    present :statuses, statuses, with: API::Entities::Status
+  end
+```
+
+The response will be
+
+```
+  {
+    total_page: 10,
+    per_page: 20,
+    statuses: []
+  }
 ```
 
 In addition to separately organizing entities, it may be useful to put them as namespaced

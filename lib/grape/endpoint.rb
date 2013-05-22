@@ -308,7 +308,13 @@ module Grape
     #       :with => API::Entities::User,
     #       :admin => current_user.admin?
     #   end
-    def present(object, options = {})
+    def present(*args)
+      options = args.count > 1 ? args.extract_options! : {}
+      key, object = if args.count == 2 && args.first.is_a?(Symbol)
+                      args
+                    else
+                      [nil, args.first]
+                    end
       entity_class = options.delete(:with)
 
       # auto-detect the entity from the first object in the collection
@@ -331,6 +337,7 @@ module Grape
       end
 
       representation = { root => representation } if root
+      representation = (@body || {}).merge({key => representation}) if key
       body representation
     end
 
