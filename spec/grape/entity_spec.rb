@@ -239,39 +239,37 @@ XML
     end
 
     context "present with multiple entities" do
-      let(:expect_response_json) do
-        {"page"  => 1,
-         "user1" => {"name" => "user1"},
-         "user2" => {"name" => "user2"}
-        }
+      let(:user) do
       end
 
-      let(:user) do
-        Class.new do
+      before :each do
+      end
+
+      it "present with multiple entities using optional symbol" do
+        user = Class.new do
           attr_reader :name
           def initialize(args)
             @name = args[:name] || "no name set"
           end
         end
-      end
-
-      before :each do
-        subject.format :json
-      end
-
-      it "present with multiple entities using optional symbol" do
         user1 = user.new({:name => 'user1'})
         user2 = user.new({:name => 'user2'})
-        # if using let, entity will not visible in subject#get block
+
         entity = Class.new(Grape::Entity)
         entity.expose :name
 
+        subject.format :json
         subject.get '/example' do
           present :page, 1
           present :user1, user1, :with => entity
           present :user2, user2, :with => entity
         end
         get '/example'
+        expect_response_json = {
+          "page"  => 1,
+          "user1" => {"name" => "user1"},
+          "user2" => {"name" => "user2"}
+        }
         JSON(last_response.body).should == expect_response_json
       end
 

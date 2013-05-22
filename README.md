@@ -1004,8 +1004,7 @@ module API
 end
 ```
 
-You can present with multiple entities using an optional Symbol
-argument.
+You can present with multiple entities using an optional Symbol argument.
 
 ```ruby
   get '/statuses' do
