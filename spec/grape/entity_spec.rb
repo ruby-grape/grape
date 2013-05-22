@@ -268,8 +268,8 @@ XML
 
         subject.get '/example' do
           present :page, 1
-          present :user1, user1, with: entity
-          present :user2, user2, with: entity
+          present :user1, user1, :with => entity
+          present :user2, user2, :with => entity
         end
         get '/example'
         JSON(last_response.body).should == expect_response_json
