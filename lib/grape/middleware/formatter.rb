@@ -23,7 +23,9 @@ module Grape
 
       def after
         status, headers, bodies = *@app_response
-        formatter = Grape::Formatter::Base.formatter_for env['api.format'], options
+        # allow content-type to be explicitly overwritten
+        api_format = mime_types[headers["Content-Type"]] || env['api.format']
+        formatter = Grape::Formatter::Base.formatter_for api_format, options
         begin
           bodymap = bodies.collect do |body|
             formatter.call body, env

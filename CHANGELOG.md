@@ -12,7 +12,8 @@ Next Release
 * [#390](https://github.com/intridea/grape/pull/390): Added default value for an `optional` parameter - [@oivoodoo](https://github.com/oivoodoo).
 * [#403](https://github.com/intridea/grape/pull/403): Added support for versioning using the `Accept-Version` header - [@politician](https://github.com/politician).
 * [#407](https://github.com/intridea/grape/issues/407): Specifying `default_format` will also set the default POST/PUT data parser to the given format - [@dblock](https://github.com/dblock).
-* [#241](https://github.com/intridea/grape/issues/241): Present with multiple entities using an optional Symbol. - [@niedhui](https://github.com/niedhui).
+* [#241](https://github.com/intridea/grape/issues/241): Present with multiple entities using an optional Symbol - [@niedhui](https://github.com/niedhui).
+* [#412](https://github.com/intridea/grape/issues/412): Fix: specifying `content_type` will also override the selection of the data formatter - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.4.1 (4/1/2013)

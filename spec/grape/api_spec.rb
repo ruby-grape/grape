@@ -105,7 +105,7 @@ describe Grape::API do
         }
       end
     end
-  end  
+  end
 
   describe '.represent' do
     it 'requires a :with option' do
@@ -1919,6 +1919,14 @@ describe Grape::API do
       it 'forces json from a non-accepting header' do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
         last_response.body.should == { :meaning_of_life => 42 }.to_json
+      end
+      it 'can be overwritten with an explicit content type' do
+        subject.get '/meaning_of_life_with_content_type' do
+          content_type "text/plain"
+          { :meaning_of_life => 42 }.to_s
+        end
+        get '/meaning_of_life_with_content_type'
+        last_response.body.should == { :meaning_of_life => 42 }.to_s
       end
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
