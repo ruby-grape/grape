@@ -14,6 +14,7 @@ Next Release
 * [#407](https://github.com/intridea/grape/issues/407): Specifying `default_format` will also set the default POST/PUT data parser to the given format - [@dblock](https://github.com/dblock).
 * [#241](https://github.com/intridea/grape/issues/241): Present with multiple entities using an optional Symbol - [@niedhui](https://github.com/niedhui).
 * [#412](https://github.com/intridea/grape/issues/412): Fix: specifying `content_type` will also override the selection of the data formatter - [@dblock](https://github.com/dblock).
+* [#383](https://github.com/intridea/grape/issues/383): Fix: Mounted APIs not inheriting settings (such as before/after filters) properly [@seanmoon](https://github.com/seanmoon).
 * Your contribution here.
 
 0.4.1 (4/1/2013)

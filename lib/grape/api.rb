@@ -460,7 +460,10 @@ module Grape
 
       def inherit_settings(other_stack)
         settings.prepend other_stack
-        endpoints.each{|e| e.settings.prepend(other_stack)}
+        endpoints.each do |e|
+          e.settings.prepend(other_stack)
+          e.options[:app].inherit_settings(other_stack) if e.options[:app].respond_to?(:inherit_settings, true)
+        end
       end
     end
 

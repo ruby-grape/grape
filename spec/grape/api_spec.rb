@@ -1720,6 +1720,24 @@ describe Grape::API do
         last_response.body.should == 'yo'
       end
 
+      it 'applies the settings to nested mounted apis' do
+        subject.version 'v1', :using => :path
+
+        subject.namespace :cool do
+          inner_app = Class.new(Grape::API)
+          inner_app.get('/awesome') do
+            "yo"
+          end
+
+          app = Class.new(Grape::API)
+          app.mount inner_app
+          mount app
+        end
+
+        get '/v1/cool/awesome'
+        last_response.body.should == 'yo'
+      end
+
       it 'inherits rescues even when some defined by mounted' do
         subject.rescue_from :all do |e|
           rack_response("rescued from #{e.message}", 202)
