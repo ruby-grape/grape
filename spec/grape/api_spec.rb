@@ -551,9 +551,20 @@ describe Grape::API do
         "example"
       end
     end
+
     it 'options does not exist' do
       options '/example'
       last_response.status.should eql 405
+    end
+
+    it 'should be handled by middleware' do
+      subject.use Class.new(Grape::Middleware::Base) do
+        def call(env)
+          raise env.inspect
+        end
+      end
+
+      -> { options '/example' }.should raise_error
     end
   end
 
