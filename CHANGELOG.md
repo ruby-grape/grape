@@ -1,6 +1,6 @@
 Next Release
 ============
-
+* [#398](https://github.com/intridea/grape/pull/398): Feature: apply helpers onto a helper object which can then be stubbed in tests
 * [#378](https://github.com/intridea/grape/pull/378): Fix: stop rescuing all exceptions during formatting - [@kbarrette](https://github.com/kbarrette).
 * [#380](https://github.com/intridea/grape/pull/380): Fix: `Formatter#read_body_input` when transfer encoding is chunked - [@paulnicholon](https://github.com/paulnicholson).
 * [#344](https://github.com/intridea/grape/pull/344): Added `parser :type, nil` which disables input parsing for a given content-type - [@dblock](https://github.com/dblock).

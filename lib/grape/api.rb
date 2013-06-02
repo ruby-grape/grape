@@ -268,6 +268,12 @@ module Grape
           change!
           mod
         end
+        helper.extend(mod)
+        mod
+      end
+
+      def helper
+        @helper ||= HelperContext.new
       end
 
       # Add an authentication type to the API. Currently
@@ -307,7 +313,8 @@ module Grape
           endpoints << Grape::Endpoint.new(settings.clone, {
             :method => :any,
             :path => path,
-            :app => app
+            :app => app,
+            :klass => self
           })
         end
       end
@@ -328,6 +335,7 @@ module Grape
         endpoint_options = {
           :method => methods,
           :path => paths,
+          :klass => self,
           :route_options => (@namespace_description || {}).deep_merge(@last_description || {}).deep_merge(route_options || {})
         }
         endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)

@@ -1240,6 +1240,23 @@ RSpec.configure do |config|
 end
 ```
 
+### Mocking and Stubbing helper methods
+
+Helpers are defined on a helper object which can be stubbed out.
+
+```ruby
+context "logged in" do
+  it "returns an the current_user's statuses" do
+    user = double(statuses: [1])
+    Twitter::API.helper.stub(:current_user).and_return(user)
+    get "/api/v1/statuses"
+    response.status.should == 200
+    JSON.parse(response.body).should == [1]
+  end
+end
+````
+
+
 ## Reloading API Changes in Development
 
 ### Rails 3.x

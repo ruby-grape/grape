@@ -852,6 +852,26 @@ describe Grape::API do
       last_response.body.should eql 'always there:only in admin'
     end
 
+    it "allows stubbing helpers" do
+      subject.helpers do
+        def foo
+          'foo'
+        end
+      end
+
+      subject.get "/" do
+        foo
+      end
+
+      get "/"
+      last_response.body.should eql "foo"
+
+      subject.helper.stub!(:foo).and_return("bar")
+
+      get "/"
+      last_response.body.should eql "bar"
+    end
+
     it 'is reopenable' do
       subject.helpers do
         def one
