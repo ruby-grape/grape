@@ -15,6 +15,7 @@ Next Release
 * [#241](https://github.com/intridea/grape/issues/241): Present with multiple entities using an optional Symbol - [@niedhui](https://github.com/niedhui).
 * [#412](https://github.com/intridea/grape/issues/412): Fix: specifying `content_type` will also override the selection of the data formatter - [@dblock](https://github.com/dblock).
 * [#383](https://github.com/intridea/grape/issues/383): Fix: Mounted APIs aren't inheriting settings (including `before` and `after` filters) - [@seanmoon](https://github.com/seanmoon).
+* [#408](https://github.com/intridea/grape/pull/408): Fix: Goliath passes request header keys as symbols not strings - [@bobek](https://github.com/bobek).
 * Your contribution here.
 
 0.4.1 (4/1/2013)
