@@ -1,17 +1,17 @@
 require 'spec_helper'
 
-class BadMethodApp < Grape::API
+class MethodApp < Grape::API
   get '/' do
     'got'
   end
 end
 
-describe Grape::Middleware::BadMethod do
+describe Grape::Middleware::Method do
   def app
     Rack::Builder.new do |b|
       b.use Grape::Middleware::Error
-      b.use Grape::Middleware::BadMethod
-      b.run BadMethodApp
+      b.use Grape::Middleware::Method
+      b.run MethodApp
     end
   end
 
@@ -28,5 +28,10 @@ describe Grape::Middleware::BadMethod do
   it 'sets the Allow header when an unsupported method is called' do
     post '/'
     last_response.headers['Allow'].should == 'GET, OPTIONS, HEAD'
+  end
+
+  it 'sets the content-type header to text/plain' do
+    post '/'
+    last_response.headers['Content-type'].should == 'text/plain'
   end
 end
