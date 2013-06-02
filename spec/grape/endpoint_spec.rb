@@ -64,6 +64,12 @@ describe Grape::Endpoint do
       get '/headers', nil, { "HTTP_X_GRAPE_CLIENT" => "1" }
       JSON.parse(last_response.body)["X-Grape-Client"].should == "1"
     end
+    it 'includes headers passed as symbols' do
+      env = Rack::MockRequest.env_for("/headers")
+      env[:HTTP_SYMBOL_HEADER] = "Goliath passes symbols"
+      body = subject.call(env)[2].body.first
+      JSON.parse(body)["Symbol-Header"].should == "Goliath passes symbols"
+    end
   end
 
   describe '#cookies' do
