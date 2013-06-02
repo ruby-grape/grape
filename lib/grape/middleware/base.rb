@@ -57,6 +57,24 @@ module Grape
         content_types.invert
       end
 
+      private
+      # Loop through the application endpoints, find routes that match the current path,
+      # Collect the methods and return
+      def allowed_methods_for_route
+        methods = app.endpoints.map do |endpoint|
+          # If the route has no namespace, it'll return '/', so we'll cover for that
+          namespace = (endpoint.namespace == '/') ? '' : endpoint.namespace
+          path = endpoint.options[:path].join
+          method = endpoint.options[:method]
+
+          method if (namespace + path) == env['PATH_INFO']
+        end.compact
+
+        methods << 'OPTIONS' unless app.settings[:do_not_route_options]
+        methods << 'HEAD' unless app.settings[:do_not_route_head]
+
+        methods
+      end
     end
   end
 end
