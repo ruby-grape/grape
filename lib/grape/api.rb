@@ -422,7 +422,7 @@ module Grape
       end
 
       def cascade(value = nil)
-        value.nil? ? 
+        value.nil? ?
           (settings.has_key?(:cascade) ? !! settings[:cascade] : true) :
           set(:cascade, value)
       end
