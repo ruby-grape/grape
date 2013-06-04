@@ -46,40 +46,41 @@ module Grape
             (! request.parseable_data?) &&
             (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
 
-            input = env['rack.input']
-            input.rewind if input
-            body = env['api.request.input'] = input.read if input
-            read_rack_input(body) if body && body.length > 0
+            if (input = env['rack.input'])
+              input.rewind
+              body = env['api.request.input'] = input.read
+              begin
+                read_rack_input(body) if body && body.length > 0
+              ensure
+                input.rewind
+              end
+            end
           end
         end
 
         # store parsed input in env['api.request.body']
         def read_rack_input(body)
-          begin
-            fmt = mime_types[request.media_type] if request.media_type
-            fmt ||= options[:default_format]
-            if content_type_for(fmt)
-              parser = Grape::Parser::Base.parser_for fmt, options
-              if parser
-                begin
-                  body = (env['api.request.body'] = parser.call(body, env))
-                  if body.is_a?(Hash)
-                    env['rack.request.form_hash'] = env['rack.request.form_hash'] ?
-                      env['rack.request.form_hash'].merge(body) :
-                      body
-                    env['rack.request.form_input'] = env['rack.input']
-                  end
-                rescue Exception => e
-                  throw :error, :status => 400, :message => e.message
+          fmt = mime_types[request.media_type] if request.media_type
+          fmt ||= options[:default_format]
+          if content_type_for(fmt)
+            parser = Grape::Parser::Base.parser_for fmt, options
+            if parser
+              begin
+                body = (env['api.request.body'] = parser.call(body, env))
+                if body.is_a?(Hash)
+                  env['rack.request.form_hash'] = env['rack.request.form_hash'] ?
+                    env['rack.request.form_hash'].merge(body) :
+                    body
+                  env['rack.request.form_input'] = env['rack.input']
                 end
-              else
-                env['api.request.body'] = body
+              rescue Exception => e
+                throw :error, :status => 400, :message => e.message
               end
             else
-              throw :error, :status => 406, :message => "The requested content-type '#{request.media_type}' is not supported."
+              env['api.request.body'] = body
             end
-          ensure
-            env['rack.input'].rewind
+          else
+            throw :error, :status => 406, :message => "The requested content-type '#{request.media_type}' is not supported."
           end
         end
 
