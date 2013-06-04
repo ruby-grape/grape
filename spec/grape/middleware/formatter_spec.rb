@@ -201,6 +201,19 @@ describe Grape::Middleware::Formatter do
         subject.env['rack.request.form_hash']['is_boolean'].should be_true
         subject.env['rack.request.form_hash']['string'].should == 'thing'
       end
+      it "rewinds IO" do
+        io = StringIO.new('{"is_boolean":true,"string":"thing"}')
+        io.read
+        subject.call({
+          'PATH_INFO' => '/infol',
+          'REQUEST_METHOD' => method,
+          'CONTENT_TYPE' => 'application/json',
+          'rack.input' => io,
+          'HTTP_TRANSFER_ENCODING' => 'chunked'
+        })
+        subject.env['rack.request.form_hash']['is_boolean'].should be_true
+        subject.env['rack.request.form_hash']['string'].should == 'thing'
+      end
       it 'parses the body from an xml #{method} and copies values into rack.request.from_hash' do
         io = StringIO.new('<thing><name>Test</name></thing>')
         subject.call({
