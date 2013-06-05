@@ -1244,24 +1244,36 @@ end
 
 ### Rails 3.x
 
+If you have API classes defined in `lib/api/api.rb` as following:
+```ruby
+module API
+  class APIv1 << ::Grape::API
+  ...
+  end
+end
+```
+
 Add API paths to `config/application.rb`.
 
 ```ruby
 # Auto-load API and its subdirectories
-config.paths.add "app/api", glob: "**/*.rb"
-config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
+config.autoload_paths += Dir["#{config.root}/lib/**/*"]
+config.autoload_paths += %W(#{config.root}/lib)
+
 ```
 
 Create `config/initializers/reload_api.rb`.
 
 ```ruby
 if Rails.env.development?
-  api_files = Dir["#{Rails.root}/app/api/**/*.rb"]
-  api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
-    Rails.application.reload_routes!
+  ActiveSupport::Dependencies.explicitly_unloadable_constants << "API"
+
+  lib_reloader = ActiveSupport::FileUpdateChecker.new(Dir["lib/**/*"]) do
+    Rails.application.reload_routes! # or do something better here
   end
+
   ActionDispatch::Callbacks.to_prepare do
-    api_reloader.execute_if_updated
+    lib_reloader.execute_if_updated
   end
 end
 ```
