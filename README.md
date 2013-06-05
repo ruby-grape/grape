@@ -152,7 +152,7 @@ require 'grape'
 
 class API < Grape::API
   get :hello do
-    {hello: "world"}
+    {:hello => "world"}
   end
 end
 
