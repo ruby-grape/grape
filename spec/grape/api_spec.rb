@@ -496,12 +496,14 @@ describe Grape::API do
 
     it 'adds an OPTIONS route that returns a 204 and an Allow header' do
       subject.get 'example' do
+        header 'My-Header', "helloworld"
         "example"
       end
       options '/example'
       last_response.status.should eql 204
       last_response.body.should eql ''
       last_response.headers['Allow'].should eql 'OPTIONS, GET, HEAD'
+      last_response.headers['My-Header'].should eql 'helloworld'
     end
 
     it 'allows HEAD on a GET request' do
