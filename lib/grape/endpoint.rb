@@ -178,20 +178,29 @@ module Grape
     #
     # @param params [Hash] The initial hash to filter. Usually this will just be `params`
     # @param options [Hash] Can pass `:include_missing` and `:stringify` options.
-    def declared(params, options = {})
+    def declared(params, options = {}, declared_params = settings[:declared_params])
       options[:include_missing] = true unless options.key?(:include_missing)
 
-      unless settings[:declared_params]
+      unless declared_params
         raise ArgumentError, "Tried to filter for declared parameters but none exist."
       end
 
-      settings[:declared_params].inject({}){|h,k|
-        output_key = options[:stringify] ? k.to_s : k.to_sym
-        if params.key?(output_key) || options[:include_missing]
-          h[output_key] = params[k]
+      declared_params.inject({}) do |hash, key|
+        key = { key => nil } unless key.is_a? Hash
+
+        key.each_pair do |parent, children|
+          output_key = options[:stringify] ? parent.to_s : parent.to_sym
+          if params.key?(parent) || options[:include_missing]
+            hash[output_key] = if children
+              declared(params[parent] || {}, options, Array(children))
+            else
+              params[parent]
+            end
+          end
         end
-        h
-      }
+
+        hash
+      end
     end
 
     # The API version as specified in the URL.

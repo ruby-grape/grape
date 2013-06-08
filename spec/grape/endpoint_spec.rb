@@ -174,12 +174,15 @@ describe Grape::Endpoint do
         requires :first
         optional :second
         optional :third, :default => 'third-default'
+        group :nested do
+          optional :fourth
+        end
       end
     end
 
     it 'has as many keys as there are declared params' do
       subject.get '/declared' do
-        declared(params).keys.size.should == 3
+        declared(params).keys.size.should == 4
         ""
       end
 
@@ -194,6 +197,16 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=one'
+      last_response.status.should == 200
+    end
+
+    it 'builds nested params' do
+      subject.get '/declared' do
+        declared(params)[:nested].keys.size.should == 1
+        ""
+      end
+
+      get '/declared?first=present&nested[fourth]=1'
       last_response.status.should == 200
     end
 

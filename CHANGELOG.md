@@ -17,6 +17,7 @@ Next Release
 * [#383](https://github.com/intridea/grape/issues/383): Fix: Mounted APIs aren't inheriting settings (including `before` and `after` filters) - [@seanmoon](https://github.com/seanmoon).
 * [#408](https://github.com/intridea/grape/pull/408): Fix: Goliath passes request header keys as symbols not strings - [@bobek](https://github.com/bobek).
 * [#417](https://github.com/intridea/grape/issues/417): Fix: Rails 4 does not rewind input, causes POSTed data to be empty - [@dblock](https://github.com/dblock).
+* [#423](https://github.com/intridea/grape/pull/423): Fix: `Grape::Endpoint#declared` now correctly handles nested params (ie. params declared with `group`) - [@jbarreneche](https://github.com/jbarreneche).
 * Your contribution here.
 
 0.4.1 (4/1/2013)

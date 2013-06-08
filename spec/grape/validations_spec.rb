@@ -79,6 +79,15 @@ describe Grape::Validations do
         last_response.status.should == 200
         last_response.body.should == 'required works'
       end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          group :items do
+            requires :key
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key]]
+      end
     end
 
     context 'custom validation' do

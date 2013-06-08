@@ -91,9 +91,13 @@ module Grape
 
       def initialize(api, element, parent, &block)
         @element = element
-        @parent = parent
-        @api = api
+        @parent  = parent
+        @api     = api
+        @declared_params = []
+
         instance_eval(&block)
+
+        configure_declared_params
       end
 
       def requires(*attrs)
@@ -131,7 +135,24 @@ module Grape
         name.to_s
       end
 
+    protected
+
+      def push_declared_params(attrs)
+        @declared_params.concat attrs
+      end
+
     private
+
+      # Pushes declared params to parent or settings
+      def configure_declared_params
+        if @parent
+          @parent.push_declared_params [element => @declared_params]
+        else
+          @api.settings.peek[:declared_params] ||= []
+          @api.settings[:declared_params].concat @declared_params
+        end
+      end
+
       def validates(attrs, validations)
         doc_attrs = { :required => validations.keys.include?(:presence) }
 
@@ -183,10 +204,6 @@ module Grape
         end
       end
 
-      def push_declared_params(attrs)
-        @api.settings.peek[:declared_params] ||= []
-        @api.settings[:declared_params] += attrs
-      end
     end
 
     # This module is mixed into the API Class.
