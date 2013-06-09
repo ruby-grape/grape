@@ -889,9 +889,8 @@ end
 ### CORS
 
 Grape supports CORS via [Rack::CORS](https://github.com/cyu/rack-cors), part of the
-[rack-cors](https://github.com/cyu/rack-cors) gem. Add `rack-cors` to your `Gemfile`.
-
-Then, use the middleware in your config.ru file.  
+[rack-cors](https://github.com/cyu/rack-cors) gem. Add `rack-cors` to your `Gemfile`,
+then use the middleware in your config.ru file.  
 
 ```ruby
 require 'rack/cors'
