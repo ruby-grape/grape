@@ -185,21 +185,27 @@ module Grape
         raise ArgumentError, "Tried to filter for declared parameters but none exist."
       end
 
-      declared_params.inject({}) do |hash, key|
-        key = { key => nil } unless key.is_a? Hash
+      if params.is_a? Array
+        params.map do |param|
+          declared(param || {}, options, declared_params)
+        end
+      else
+        declared_params.inject({}) do |hash, key|
+          key = { key => nil } unless key.is_a? Hash
 
-        key.each_pair do |parent, children|
-          output_key = options[:stringify] ? parent.to_s : parent.to_sym
-          if params.key?(parent) || options[:include_missing]
-            hash[output_key] = if children
-              declared(params[parent] || {}, options, Array(children))
-            else
-              params[parent]
+          key.each_pair do |parent, children|
+            output_key = options[:stringify] ? parent.to_s : parent.to_sym
+            if params.key?(parent) || options[:include_missing]
+              hash[output_key] = if children
+                declared(params[parent] || {}, options, Array(children))
+              else
+                params[parent]
+              end
             end
           end
-        end
 
-        hash
+          hash
+        end
       end
     end
 
