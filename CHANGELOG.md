@@ -1,23 +1,28 @@
 Next Release
 ============
 
-* [#378](https://github.com/intridea/grape/pull/378): Fix: stop rescuing all exceptions during formatting - [@kbarrette](https://github.com/kbarrette).
-* [#380](https://github.com/intridea/grape/pull/380): Fix: `Formatter#read_body_input` when transfer encoding is chunked - [@paulnicholon](https://github.com/paulnicholson).
+#### Features
+
 * [#344](https://github.com/intridea/grape/pull/344): Added `parser :type, nil` which disables input parsing for a given content-type - [@dblock](https://github.com/dblock).
-* [#381](https://github.com/intridea/grape/issues/381): Added `cascade false` definition at API level to remove the `X-Cascade: true` header from the API response - [@dblock](https://github.com/dblock).
-* [#376](https://github.com/intridea/grape/pull/376): Added `route_param`, syntax sugar for quick declaration of route parameters - [@mbleigh](https://github.com/mbleigh).
-* [#347](https://github.com/intridea/grape/issues/347): Fix: handling non-hash body params - [@paulnicholon](https://github.com/paulnicholson).
+* [#381](https://github.com/intridea/grape/issues/381): Added `cascade false` option at API level to remove the `X-Cascade: true` header from the API response - [@dblock](https://github.com/dblock).
 * [#392](https://github.com/intridea/grape/pull/392): Extracted headers and params from `Endpoint` to `Grape::Request` - [@niedhui](https://github.com/niedhui).
-* [#394](https://github.com/intridea/grape/pull/394): Path version no longer overwrites a `version` parameter - [@tmornini](https://github.com/tmornini).
+* [#376](https://github.com/intridea/grape/pull/376): Added `route_param`, syntax sugar for quick declaration of route parameters - [@mbleigh](https://github.com/mbleigh).
 * [#390](https://github.com/intridea/grape/pull/390): Added default value for an `optional` parameter - [@oivoodoo](https://github.com/oivoodoo).
 * [#403](https://github.com/intridea/grape/pull/403): Added support for versioning using the `Accept-Version` header - [@politician](https://github.com/politician).
 * [#407](https://github.com/intridea/grape/issues/407): Specifying `default_format` will also set the default POST/PUT data parser to the given format - [@dblock](https://github.com/dblock).
 * [#241](https://github.com/intridea/grape/issues/241): Present with multiple entities using an optional Symbol - [@niedhui](https://github.com/niedhui).
+
+#### Fixes
+
+* [#378](https://github.com/intridea/grape/pull/378): Fix: stop rescuing all exceptions during formatting - [@kbarrette](https://github.com/kbarrette).
+* [#380](https://github.com/intridea/grape/pull/380): Fix: `Formatter#read_body_input` when transfer encoding is chunked - [@paulnicholon](https://github.com/paulnicholson).
+* [#347](https://github.com/intridea/grape/issues/347): Fix: handling non-hash body params - [@paulnicholon](https://github.com/paulnicholson).
+* [#394](https://github.com/intridea/grape/pull/394): Fix: path version no longer overwrites a `version` parameter - [@tmornini](https://github.com/tmornini).
 * [#412](https://github.com/intridea/grape/issues/412): Fix: specifying `content_type` will also override the selection of the data formatter - [@dblock](https://github.com/dblock).
 * [#383](https://github.com/intridea/grape/issues/383): Fix: Mounted APIs aren't inheriting settings (including `before` and `after` filters) - [@seanmoon](https://github.com/seanmoon).
 * [#408](https://github.com/intridea/grape/pull/408): Fix: Goliath passes request header keys as symbols not strings - [@bobek](https://github.com/bobek).
 * [#417](https://github.com/intridea/grape/issues/417): Fix: Rails 4 does not rewind input, causes POSTed data to be empty - [@dblock](https://github.com/dblock).
-* [#423](https://github.com/intridea/grape/pull/423): Fix: `Grape::Endpoint#declared` now correctly handles nested params (ie. params declared with `group`) - [@jbarreneche](https://github.com/jbarreneche).
+* [#423](https://github.com/intridea/grape/pull/423): Fix: `Grape::Endpoint#declared` now correctly handles nested params (ie. declared with `group`) - [@jbarreneche](https://github.com/jbarreneche).
 * [#427](https://github.com/intridea/grape/issues/427): Fix: `declared(params)` breaks when `params` contains array - [@timhabermaas](https://github.com/timhabermaas)
 * Your contribution here.
 
@@ -123,8 +128,7 @@ Next Release
 0.2.2
 =====
 
-Features
---------
+#### Features
 
 * [#201](https://github.com/intridea/grape/pull/201), [#236](https://github.com/intridea/grape/pull/236), [#221](https://github.com/intridea/grape/pull/221): Added coercion and validations support to `params` DSL - [@schmurfy](https://github.com/schmurfy), [@tim-vandecasteele](https://github.com/tim-vandecasteele), [@adamgotterer](https://github.com/adamgotterer).
 * [#204](https://github.com/intridea/grape/pull/204): Added ability to declare shared `params` at `namespace` level - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
@@ -132,8 +136,7 @@ Features
 * [#240](https://github.com/intridea/grape/pull/240): Define API response format from a query string `format` parameter, if specified - [@neetiraj](https://github.com/neetiraj).
 * Adds Endpoint#declared to easily filter out unexpected params. - [@mbleigh](https://github.com/mbleigh)
 
-Fixes
------
+#### Fixes
 
 * [#248](https://github.com/intridea/grape/pull/248): Fix: API `version` returns last version set - [@narkoz](https://github.com/narkoz).
 * [#242](https://github.com/intridea/grape/issues/242): Fix: permanent redirect status should be `301`, was `304` - [@adamgotterer](https://github.com/adamgotterer).
