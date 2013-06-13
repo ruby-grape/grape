@@ -210,6 +210,16 @@ describe Grape::Endpoint do
       last_response.status.should == 200
     end
 
+    it 'builds nested params when given array' do
+      subject.get '/declared' do
+        declared(params)[:nested].size.should == 2
+        ""
+      end
+
+      get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
+      last_response.status.should == 200
+    end
+
     it 'filters out any additional params that are given' do
       subject.get '/declared' do
         declared(params).key?(:other).should == false
