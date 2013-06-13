@@ -15,9 +15,9 @@ content negotiation, versioning and much more.
 You're reading the documentation for the next release of Grape, which should be 0.4.2.
 The current stable release is [0.4.1](https://github.com/intridea/grape/blob/v0.4.1/README.md).
 
-## Project Tracking
+## Project Resources
 
-* [Grape Google Group](http://groups.google.com/group/ruby-grape)
+* Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
 * [Grape Wiki](https://github.com/intridea/grape/wiki)
 
 ## Installation
