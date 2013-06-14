@@ -10,11 +10,6 @@ content negotiation, versioning and much more.
 
 [![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape)
 
-## Stable Release
-
-You're reading the documentation for the next release of Grape, which should be 0.4.2.
-The current stable release is [0.4.1](https://github.com/intridea/grape/blob/v0.4.1/README.md).
-
 ## Project Resources
 
 * Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
@@ -890,7 +885,7 @@ end
 
 Grape supports CORS via [Rack::CORS](https://github.com/cyu/rack-cors), part of the
 [rack-cors](https://github.com/cyu/rack-cors) gem. Add `rack-cors` to your `Gemfile`,
-then use the middleware in your config.ru file.  
+then use the middleware in your config.ru file.
 
 ```ruby
 require 'rack/cors'
