@@ -10,6 +10,11 @@ content negotiation, versioning and much more.
 
 [![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape)
 
+## Stable Release
+
+You're reading the documentation for the next release of Grape, which should be 0.5.1.
+The current stable release is [0.5.0](https://github.com/intridea/grape/blob/v0.5.0/README.md).
+
 ## Project Resources
 
 * Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
