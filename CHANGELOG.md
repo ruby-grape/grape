@@ -1,9 +1,12 @@
 Next Release
 ============
+#### Features
+
+* Your contribution here.
 
 #### Fixes
 
-* [#428](https://github.com/intridea/grape/issues/428): Removes memoization from `Grape::Request` params to prevent middleware from freezing parameter values before `Formatter` can get them.
+* [#428](https://github.com/intridea/grape/issues/428): Removes memoization from `Grape::Request` params to prevent middleware from freezing parameter values before `Formatter` can get them - [@mbleigh](https://github.com/mbleigh).
 
 0.5.0 (6/14/2013)
 =================
