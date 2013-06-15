@@ -2,7 +2,7 @@ module Grape
   class Request < Rack::Request
 
     def params
-      @env['grape.request.params'] ||= begin
+      @env['grape.request.params'] = begin
         params = Hashie::Mash.new(super)
         if env['rack.routing_args']
           args = env['rack.routing_args'].dup
