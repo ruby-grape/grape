@@ -634,7 +634,7 @@ You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 
 ```ruby
-error! { "error" => "unexpected error", "detail" => "missing widget" }, 500
+error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 ```
 
 ## Exception Handling
