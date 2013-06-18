@@ -12,7 +12,6 @@ module Grape
       attr_reader :settings
       attr_writer :logger
       attr_reader :endpoints
-      attr_reader :mountings
       attr_reader :instance
 
       def logger(logger = nil)
@@ -27,7 +26,6 @@ module Grape
         @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
-        @mountings = []
         @routes = nil
         reset_validations!
       end
@@ -422,7 +420,7 @@ module Grape
       end
 
       def cascade(value = nil)
-        value.nil? ? 
+        value.nil? ?
           (settings.has_key?(:cascade) ? !! settings[:cascade] : true) :
           set(:cascade, value)
       end
