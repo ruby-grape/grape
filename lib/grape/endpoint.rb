@@ -391,8 +391,21 @@ module Grape
       run_filters befores
 
       # Retieve validations from this namespace and all parent namespaces.
+      validation_errors = []
       settings.gather(:validations).each do |validator|
-        validator.validate!(params)
+        begin
+          validator.validate!(params)
+        rescue Grape::Exceptions::Validation => e
+          validation_errors << e
+        end
+      end
+
+      if validation_errors.any?
+        if settings[:collect_validation_errors]
+          raise Grape::Exceptions::Validations, errors: validation_errors
+        else
+          raise validation_errors.first
+        end
       end
 
       run_filters after_validations
@@ -416,7 +429,8 @@ module Grape
         :default_error_formatter => settings[:default_error_formatter],
         :error_formatters => settings[:error_formatters],
         :rescue_options => settings[:rescue_options],
-        :rescue_handlers => merged_setting(:rescue_handlers)
+        :rescue_handlers => merged_setting(:rescue_handlers),
+        :validation_handlers => aggregate_setting(:validation_handlers)
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup
