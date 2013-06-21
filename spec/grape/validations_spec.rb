@@ -95,7 +95,7 @@ describe Grape::Validations do
         class Customvalidator < Grape::Validations::Validator
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
-              throw :error, :status => 400, :message => "#{attr_name}: is not custom!"
+              raise Grape::Exceptions::Validation, :status => 400, :message => "#{attr_name}: is not custom!"
             end
           end
         end
