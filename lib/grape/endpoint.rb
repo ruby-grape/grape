@@ -429,8 +429,7 @@ module Grape
         :default_error_formatter => settings[:default_error_formatter],
         :error_formatters => settings[:error_formatters],
         :rescue_options => settings[:rescue_options],
-        :rescue_handlers => merged_setting(:rescue_handlers),
-        :validation_handlers => aggregate_setting(:validation_handlers)
+        :rescue_handlers => merged_setting(:rescue_handlers)
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup
