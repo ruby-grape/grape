@@ -1,7 +1,7 @@
 module Grape
   module Validations
     class DefaultValidator < Validator
-      def initialize(attrs, options, required, scope)
+      def initialize(attrs, options, required, scope, doc_attrs)
         @default = options
         super
       end
