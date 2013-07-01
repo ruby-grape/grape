@@ -403,7 +403,7 @@ module Grape
       if validation_errors.any?
         if settings[:collect_validation_errors]
           raise Grape::Exceptions::Validations, errors: validation_errors
-        else
+        else # for backward compatibility
           raise validation_errors.first
         end
       end
