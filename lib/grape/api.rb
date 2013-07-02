@@ -125,6 +125,10 @@ module Grape
         new_format ? set(:default_format, new_format.to_sym) : settings[:default_format]
       end
 
+      def collect_validation_errors(new_collect_validation_errors)
+        set(:collect_validation_errors, new_collect_validation_errors)
+      end
+
       # Specify the format for the API's serializers.
       # May be `:json`, `:xml`, `:txt`, etc.
       def format(new_format = nil)

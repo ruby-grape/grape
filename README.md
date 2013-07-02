@@ -430,6 +430,19 @@ rescue_from Grape::Exceptions::Validation do |e|
 end
 ```
 
+If you would like to get a list of all validation errors, you can set `collect_validation_errors` and rescue `Grape::Exceptions::Validations`.
+```ruby
+collect_validation_errors true
+
+rescue_from Grape::Exceptions::Validations do |e|
+    Rack::Response.new({
+        'status' => e.status,
+        'message' => e.message,
+        'errors' => e.errors
+    }.to_json, e.status)
+end
+```
+
 ## Headers
 
 Request headers are available through the `headers` helper or from `env` in their original form.
