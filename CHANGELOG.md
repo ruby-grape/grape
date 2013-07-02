@@ -2,6 +2,7 @@ Next Release
 ============
 #### Features
 
+* Grape is no longer tested against Ruby 1.8.7.
 * Your contribution here.
 
 #### Fixes
