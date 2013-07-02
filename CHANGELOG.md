@@ -2,7 +2,7 @@ Next Release
 ============
 #### Features
 
-* Your contribution here.
+* [#433](https://github.com/intridea/grape/issues/433): Adds support for the collection of validation errors via `collect_validation_errors`. Validation errors will be collected and `Grape::Exceptions::Validations` will be raised - [@stevschmid](https://github.com/stevschmid).
 
 #### Fixes
 
