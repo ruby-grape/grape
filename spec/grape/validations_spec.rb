@@ -90,14 +90,13 @@ describe Grape::Validations do
       end
     end
 
-    context 'collect validation errors' do
+    context 'multiple validation errors' do
       before do
-        subject.collect_validation_errors true
         subject.params { requires :yolo; requires :swag }
         subject.get '/two_required' do 'two required works'; end
       end
 
-      it 'collects the validation errors' do
+      it 'throws the validation errors' do
         get '/two_required'
         last_response.status.should == 400
         last_response.body.should =~ /missing parameter: yolo/
@@ -166,7 +165,7 @@ describe Grape::Validations do
         it 'validates when param is not present' do
           get '/required_custom'
           last_response.status.should == 400
-          last_response.body.should == 'missing parameter: custom'
+          last_response.body.should == 'missing parameter: custom, custom: is not custom!'
         end
 
         context 'nested namespaces' do

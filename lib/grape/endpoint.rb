@@ -401,11 +401,7 @@ module Grape
       end
 
       if validation_errors.any?
-        if settings[:collect_validation_errors]
-          raise Grape::Exceptions::Validations, errors: validation_errors
-        else # for backward compatibility
-          raise validation_errors.first
-        end
+        raise Grape::Exceptions::Validations, errors: validation_errors
       end
 
       run_filters after_validations
