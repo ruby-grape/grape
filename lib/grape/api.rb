@@ -6,13 +6,8 @@ module Grape
     extend Validations::ClassMethods
 
     class << self
-      attr_reader :route_set
-      attr_reader :versions
-      attr_reader :routes
-      attr_reader :settings
+      attr_reader :endpoints, :instance, :routes, :route_set, :settings, :versions
       attr_writer :logger
-      attr_reader :endpoints
-      attr_reader :instance
 
       def logger(logger = nil)
         if logger
