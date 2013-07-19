@@ -1,13 +1,18 @@
 Next Release
 ============
+
 #### Features
 
 * Grape is no longer tested against Ruby 1.8.7.
+* [#442](https://github.com/intridea/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
+* [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
+
 * Your contribution here.
 
 #### Fixes
 
 * [#428](https://github.com/intridea/grape/issues/428): Removes memoization from `Grape::Request` params to prevent middleware from freezing parameter values before `Formatter` can get them - [@mbleigh](https://github.com/mbleigh).
+
 
 0.5.0 (6/14/2013)
 =================
