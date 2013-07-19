@@ -90,6 +90,94 @@ describe Grape::Validations do
       end
     end
 
+    context 'optional group' do
+      before do
+        subject.params {
+          group(:items, required: false) do
+            requires :key
+          end
+        }
+        subject.get '/optional_group' do 'optional group works'; end
+      end
+
+      it "doesn't throw a missing param when the group isn't present" do
+        get '/optional_group'
+        last_response.status.should == 200
+        last_response.body.should == 'optional group works'
+      end
+
+      it "doesn't throw a missing param when both group and param are given" do
+        get '/optional_group', { :items => {:key => 'foo'} }
+        last_response.status.should == 200
+        last_response.body.should == 'optional group works'
+      end
+
+      it "errors when group is present, but required param is not" do
+        get '/optional_group', { :items => {:NOT_key => 'foo'} }
+        last_response.status.should == 400
+        last_response.body.should == 'missing parameter: items[key]'
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          group(:items, required: false) do
+            requires :key
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key]]
+      end
+    end
+
+    context 'nested optional groups' do
+      before do
+        subject.params {
+          group(:items, required: false) do
+            requires :key
+            group(:optional_subitems, required: false) { requires :value }
+            group(:required_subitems) { requires :value }
+          end
+        }
+        subject.get('/nested_optional_group') { 'nested optional group works' }
+      end
+
+      it 'does no internal validations if the outer group is blank' do
+        get '/nested_optional_group'
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'does internal validations if the outer group is present' do
+        get '/nested_optional_group', { :items => {:key => 'foo' }}
+        last_response.status.should == 400
+        last_response.body.should == 'missing parameter: items[required_subitems][value]'
+
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}}}
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'handles deep nesting' do
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}, :optional_subitems => {:NOT_value => 'baz'}}}
+        last_response.status.should == 400
+        last_response.body.should == 'missing parameter: items[optional_subitems][value]'
+
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}, :optional_subitems => {:value => 'baz'}}}
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          group(:items, required: false) do
+            requires :key
+            group(:optional_subitems, required: false) { requires :value }
+            group(:required_subitems) { requires :value }
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key, {:optional_subitems => [:value]}, {:required_subitems => [:value]}]]
+      end
+    end
+
     context 'custom validation' do
       module CustomValidations
         class Customvalidator < Grape::Validations::Validator
