@@ -226,7 +226,7 @@ version 'v1', using: :header, vendor: 'twitter'
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
 
-    curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
+    curl -H Accept:application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
@@ -241,7 +241,7 @@ version 'v1', using: :accept_version_header
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept-Version` header.
 
-    curl -H "Accept-Version=v1" http://localhost:9292/statuses/public_timeline
+    curl -H "Accept-Version:v1" http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no `Accept-Version` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
