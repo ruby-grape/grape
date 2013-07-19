@@ -89,15 +89,20 @@ module Grape
     class ParamsScope
       attr_accessor :element, :parent
 
-      def initialize(api, element, parent, &block)
-        @element = element
-        @parent  = parent
-        @api     = api
+      def initialize(api, element, parent, optional=false, &block)
+        @element  = element
+        @parent   = parent
+        @api      = api
+        @optional = optional
         @declared_params = []
 
         instance_eval(&block)
 
         configure_declared_params
+      end
+
+      def optional?
+        @optional
       end
 
       def requires(*attrs)
@@ -120,8 +125,9 @@ module Grape
         validates(attrs, validations)
       end
 
-      def group(element, &block)
-        ParamsScope.new(@api, element, self, &block)
+      def group(element, opts={}, &block)
+        optional = (opts[:optional] || opts[:required] == false)
+        ParamsScope.new(@api, element, self, optional, &block)
       end
 
       def params(params)
