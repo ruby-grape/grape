@@ -125,9 +125,12 @@ module Grape
         validates(attrs, validations)
       end
 
-      def group(element, opts={}, &block)
-        optional = (opts[:optional] || opts[:required] == false)
-        ParamsScope.new(@api, element, self, optional, &block)
+      def group(element, &block)
+        ParamsScope.new(@api, element, self, &block)
+      end
+
+      def optional_group(element, &block)
+        ParamsScope.new(@api, element, self, true, &block)
       end
 
       def params(params)

@@ -93,7 +93,7 @@ describe Grape::Validations do
     context 'optional group' do
       before do
         subject.params {
-          group(:items, required: false) do
+          optional_group :items do
             requires :key
           end
         }
@@ -120,7 +120,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params {
-          group(:items, required: false) do
+          optional_group :items do
             requires :key
           end
         }
@@ -131,9 +131,9 @@ describe Grape::Validations do
     context 'nested optional groups' do
       before do
         subject.params {
-          group(:items, required: false) do
+          optional_group :items do
             requires :key
-            group(:optional_subitems, required: false) { requires :value }
+            optional_group(:optional_subitems) { requires :value }
             group(:required_subitems) { requires :value }
           end
         }
@@ -168,9 +168,9 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params {
-          group(:items, required: false) do
+          optional_group :items do
             requires :key
-            group(:optional_subitems, required: false) { requires :value }
+            optional_group(:optional_subitems) { requires :value }
             group(:required_subitems) { requires :value }
           end
         }
