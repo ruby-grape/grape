@@ -6,8 +6,7 @@ module Grape
         # for which params is blank, then we should skip validation
         scope = @scope
         while scope
-          scoped_params = scope.params(params)
-          return if scope.optional? && scoped_params.blank?
+          return if scope.optional? && scope.params(params).blank?
           scope = scope.parent
         end
         super
