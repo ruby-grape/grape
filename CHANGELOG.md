@@ -3,6 +3,7 @@ Next Release
 #### Features
 
 * Grape is no longer tested against Ruby 1.8.7.
+* [#443](https://github.com/intridea/grape/pull/443): Added `optional_group` to ParamsScope to let users validate the internal structure of a group without requiring its presence. - [@asross](https://github.com/asross).
 * Your contribution here.
 
 #### Fixes
