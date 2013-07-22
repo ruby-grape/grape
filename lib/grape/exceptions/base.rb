@@ -4,6 +4,7 @@ module Grape
 
       BASE_MESSAGES_KEY = 'grape.errors.messages'
       BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'
+      FALLBACK_LOCALE = :en
 
       attr_reader :status, :message, :headers
 
@@ -58,7 +59,8 @@ module Grape
       end
 
       def translate(key, options = {})
-        ::I18n.translate(key, options)
+        message = ::I18n.translate(key, options)
+        message.present? ? message : ::I18n.translate(key, options.merge({:locale => FALLBACK_LOCALE}))
       end
 
     end

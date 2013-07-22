@@ -6,6 +6,7 @@ Next Release
 * Grape is no longer tested against Ruby 1.8.7.
 * [#442](https://github.com/intridea/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
 * [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
+* [#444](https://github.com/intridea/grape/issues/444): Added :en as fallback locale for I18n - [@aew](https://github.com/aew).
 
 * Your contribution here.
 
