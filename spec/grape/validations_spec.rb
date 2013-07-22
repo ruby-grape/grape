@@ -58,6 +58,48 @@ describe Grape::Validations do
       end
     end
 
+    context 'required with a block' do
+      before do
+        subject.params {
+          requires :items do
+            requires :key
+          end
+        }
+        subject.get '/required' do 'required works'; end
+      end
+
+      it 'errors when param not present' do
+        get '/required'
+        last_response.status.should == 400
+        last_response.body.should == 'missing parameter: items[key]'
+      end
+
+      it "doesn't throw a missing param when param is present" do
+        get '/required', { :items => [:key => 'hello', :key => 'world'] }
+        last_response.status.should == 200
+        last_response.body.should == 'required works'
+      end
+
+      it "doesn't allow more than one parameter" do
+        expect {
+          subject.params {
+            requires(:items, desc: 'Foo') do
+              requires :key
+            end
+          }
+        }.to raise_error ArgumentError
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          requires :items do
+            requires :key
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key]]
+      end
+    end
+
     context 'group' do
       before do
         subject.params {
@@ -90,10 +132,10 @@ describe Grape::Validations do
       end
     end
 
-    context 'optional group' do
+    context 'optional with a block' do
       before do
         subject.params {
-          optional_group :items do
+          optional :items do
             requires :key
           end
         }
@@ -120,7 +162,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params {
-          optional_group :items do
+          optional :items do
             requires :key
           end
         }
@@ -128,13 +170,13 @@ describe Grape::Validations do
       end
     end
 
-    context 'nested optional groups' do
+    context 'nested optional blocks' do
       before do
         subject.params {
-          optional_group :items do
+          optional :items do
             requires :key
-            optional_group(:optional_subitems) { requires :value }
-            group(:required_subitems) { requires :value }
+            optional(:optional_subitems) { requires :value }
+            requires(:required_subitems) { requires :value }
           end
         }
         subject.get('/nested_optional_group') { 'nested optional group works' }
@@ -168,10 +210,10 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params {
-          optional_group :items do
+          optional :items do
             requires :key
-            optional_group(:optional_subitems) { requires :value }
-            group(:required_subitems) { requires :value }
+            optional(:optional_subitems) { requires :value }
+            requires(:required_subitems) { requires :value }
           end
         }
         subject.settings[:declared_params].should == [:items => [:key, {:optional_subitems => [:value]}, {:required_subitems => [:value]}]]

@@ -105,7 +105,9 @@ module Grape
         @optional
       end
 
-      def requires(*attrs)
+      def requires(*attrs, &block)
+        return new_scope(attrs, &block) if block_given?
+
         validations = {:presence => true}
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
@@ -115,7 +117,9 @@ module Grape
         validates(attrs, validations)
       end
 
-      def optional(*attrs)
+      def optional(*attrs, &block)
+        return new_scope(attrs, true, &block) if block_given?
+
         validations = {}
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
@@ -126,11 +130,7 @@ module Grape
       end
 
       def group(element, &block)
-        ParamsScope.new(api: @api, element: element, parent: self, &block)
-      end
-
-      def optional_group(element, &block)
-        ParamsScope.new(api: @api, element: element, parent: self, optional: true, &block)
+        requires(element, &block)
       end
 
       def params(params)
@@ -151,6 +151,11 @@ module Grape
       end
 
     private
+
+      def new_scope(attrs, optional=false, &block)
+        raise ArgumentError unless attrs.size == 1
+        ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, &block)
+      end
 
       # Pushes declared params to parent or settings
       def configure_declared_params
