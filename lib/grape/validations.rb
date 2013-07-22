@@ -89,11 +89,11 @@ module Grape
     class ParamsScope
       attr_accessor :element, :parent
 
-      def initialize(api, element, parent, optional=false, &block)
-        @element  = element
-        @parent   = parent
-        @api      = api
-        @optional = optional
+      def initialize(opts, &block)
+        @element  = opts[:element]
+        @parent   = opts[:parent]
+        @api      = opts[:api]
+        @optional = opts[:optional] || false
         @declared_params = []
 
         instance_eval(&block)
@@ -126,11 +126,11 @@ module Grape
       end
 
       def group(element, &block)
-        ParamsScope.new(@api, element, self, &block)
+        ParamsScope.new(api: @api, element: element, parent: self, &block)
       end
 
       def optional_group(element, &block)
-        ParamsScope.new(@api, element, self, true, &block)
+        ParamsScope.new(api: @api, element: element, parent: self, optional: true, &block)
       end
 
       def params(params)
@@ -223,7 +223,7 @@ module Grape
       end
 
       def params(&block)
-        ParamsScope.new(self, nil, nil, &block)
+        ParamsScope.new(api: self, &block)
       end
 
       def document_attribute(names, opts)
