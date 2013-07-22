@@ -25,7 +25,10 @@ def versioned_headers(options)
     {}  # no-op
   when :header
     {
-      'HTTP_ACCEPT' => "application/vnd.#{options[:vendor]}-#{options[:version]}+#{options[:format]}"
+      'HTTP_ACCEPT' => [
+        "application/vnd.#{options[:vendor]}-#{options[:version]}",
+        options[:format]
+      ].compact.join("+")
     }
   when :accept_version_header
     {
@@ -41,7 +44,7 @@ def versioned_get(path, version_name, version_options = {})
   headers = versioned_headers(version_options.merge(:version => version_name))
   params = {}
   if version_options[:using] == :param
-    params = { version_options[:parameter] => version_name } 
+    params = { version_options[:parameter] => version_name }
   end
   get path, params, headers
 end

@@ -275,7 +275,15 @@ describe Grape::API do
         subject.version 'v1', :using => :header, :vendor => 'test'
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :header
+        versioned_get "/", "v1", :using => :header, :vendor => 'test'
+      end
+
+      it 'header versioned APIs with multiple headers' do
+        subject.version ['v1', 'v2'], :using => :header, :vendor => 'test'
+        subject.enable_root_route!
+
+        versioned_get "/", "v1", :using => :header, :vendor => 'test'
+        versioned_get "/", "v2", :using => :header, :vendor => 'test'
       end
 
       it 'param versioned APIs' do
