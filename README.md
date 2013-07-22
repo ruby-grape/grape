@@ -433,7 +433,7 @@ end
 ### I18n
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if 
-translations for the default locale have not been provided. See [en.yml](https://github.com/intridea/grape/blob/master/lib/grape/locale/en.yml) for message keys.
+translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
 
 ## Headers
