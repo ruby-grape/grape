@@ -89,10 +89,11 @@ module Grape
     class ParamsScope
       attr_accessor :element, :parent
 
-      def initialize(api, element, parent, &block)
-        @element = element
-        @parent  = parent
-        @api     = api
+      def initialize(opts, &block)
+        @element  = opts[:element]
+        @parent   = opts[:parent]
+        @api      = opts[:api]
+        @optional = opts[:optional] || false
         @declared_params = []
 
         instance_eval(&block)
@@ -100,7 +101,15 @@ module Grape
         configure_declared_params
       end
 
-      def requires(*attrs)
+      def should_validate?(parameters)
+        return false if @optional && params(parameters).blank?
+        return true if parent.nil?
+        parent.should_validate?(parameters)
+      end
+
+      def requires(*attrs, &block)
+        return new_scope(attrs, &block) if block_given?
+
         validations = {:presence => true}
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
@@ -110,7 +119,9 @@ module Grape
         validates(attrs, validations)
       end
 
-      def optional(*attrs)
+      def optional(*attrs, &block)
+        return new_scope(attrs, true, &block) if block_given?
+
         validations = {}
         if attrs.last.is_a?(Hash)
           validations.merge!(attrs.pop)
@@ -121,7 +132,7 @@ module Grape
       end
 
       def group(element, &block)
-        ParamsScope.new(@api, element, self, &block)
+        requires(element, &block)
       end
 
       def params(params)
@@ -142,6 +153,11 @@ module Grape
       end
 
     private
+
+      def new_scope(attrs, optional=false, &block)
+        raise ArgumentError unless attrs.size == 1
+        ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, &block)
+      end
 
       # Pushes declared params to parent or settings
       def configure_declared_params
@@ -214,7 +230,7 @@ module Grape
       end
 
       def params(&block)
-        ParamsScope.new(self, nil, nil, &block)
+        ParamsScope.new(api: self, &block)
       end
 
       def document_attribute(names, opts)

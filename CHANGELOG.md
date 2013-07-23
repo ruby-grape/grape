@@ -7,7 +7,7 @@ Next Release
 * [#442](https://github.com/intridea/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
 * [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
 * [#444](https://github.com/intridea/grape/issues/444): Added :en as fallback locale for I18n - [@aew](https://github.com/aew).
-
+* [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
 * Your contribution here.
 
 #### Fixes

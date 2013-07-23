@@ -334,6 +334,9 @@ params do
   group :media do
     requires :url
   end
+  optional :audio do
+    requires :mp3
+  end
 end
 put ':id' do
   # params[:id] is an Integer
@@ -351,8 +354,9 @@ params do
 end
 ```
 
-Parameters can be nested using `group`. In the above example, this means
-`params[:media][:url]` is required along with `params[:id]`.
+Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
+In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
+and `params[:audio][:mp3]` is required only if `params[:audio]` is present.
 
 ### Namespace Validation and Coercion
 
