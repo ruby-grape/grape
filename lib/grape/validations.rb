@@ -101,8 +101,10 @@ module Grape
         configure_declared_params
       end
 
-      def optional?
-        @optional
+      def should_validate?(parameters)
+        return false if @optional && params(parameters).blank?
+        return true if parent.nil?
+        parent.should_validate?(parameters)
       end
 
       def requires(*attrs, &block)

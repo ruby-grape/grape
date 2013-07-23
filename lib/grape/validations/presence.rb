@@ -2,13 +2,7 @@ module Grape
   module Validations
     class PresenceValidator < Validator
       def validate!(params)
-        # If this validator is for a parameter inside an optional group
-        # for which params is blank, then we should skip validation
-        scope = @scope
-        while scope
-          return if scope.optional? && scope.params(params).blank?
-          scope = scope.parent
-        end
+        return unless @scope.should_validate?(params)
         super
       end
 
