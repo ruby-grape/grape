@@ -172,7 +172,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'input' do
-    [ "POST", "PATCH", "PUT" ].each do |method|
+    [ "POST", "PATCH", "PUT", "DELETE" ].each do |method|
       [ "application/json", "application/json; charset=utf-8" ].each do |content_type|
         context content_type do
           it 'parses the body from #{method} and copies values into rack.request.form_hash' do
