@@ -7,8 +7,7 @@ Next Release
 * [#442](https://github.com/intridea/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
 * [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
 * [#444](https://github.com/intridea/grape/issues/444): Added :en as fallback locale for I18n - [@aew](https://github.com/aew).
-* [#448](https://github.com/intridea/grape/pull/448): Adding POST style parameters for DELETE request. - [@dquimper](https://github.com/dquimper)
-
+* [#448](https://github.com/intridea/grape/pull/448): Adding POST style parameters for DELETE request - [@dquimper](https://github.com/dquimper).
 * Your contribution here.
 
 #### Fixes
