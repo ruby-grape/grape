@@ -188,12 +188,21 @@ module Grape
       #   @param [Block] block Execution block to handle the given exception.
       #   @param [Hash] options Options for the rescue usage.
       #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
+      #   @param [Proc] handler Execution proc to handle the given exception as an
+      #     alternative to passing a block
       def rescue_from(*args, &block)
-        if block_given?
+        if args.last.is_a?(Proc)
+          handler = args.pop
+        elsif block_given?
+          handler = block
+        end
+
+        if handler
           args.each do |arg|
-            imbue(:rescue_handlers, { arg => block })
+            imbue(:rescue_handlers, { arg => handler })
           end
         end
+
         imbue(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
         imbue(:rescued_errors, args)
