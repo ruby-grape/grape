@@ -33,12 +33,21 @@ module Grape
             raise unless is_rescuable
             handler = options[:rescue_handlers][e.class] || options[:rescue_handlers][:all]
           end
-          handler.nil? ? handle_error(e) : self.instance_exec(e, &handler)
+
+          handler.nil? ? handle_error(e) : exec_handler(e, &handler)
         end
       end
 
       def rescuable?(klass)
         options[:rescue_all] || (options[:rescued_errors] || []).include?(klass)
+      end
+
+      def exec_handler(e, &handler)
+        if handler.lambda? && handler.arity == 0
+          self.instance_exec(&handler)
+        else
+          self.instance_exec(e, &handler)
+        end
       end
 
       def handle_error(e)
