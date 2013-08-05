@@ -1082,6 +1082,30 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, lambda' do
+    it 'rescues an error with the lambda' do
+      subject.rescue_from ArgumentError, lambda {
+        rack_response("rescued with a lambda", 400)
+      }
+      subject.get('/rescue_lambda') { raise ArgumentError }
+
+      get '/rescue_lambda'
+      last_response.status.should == 400
+      last_response.body.should == "rescued with a lambda"
+    end
+
+    it 'can execute the lambda with an argument' do
+      subject.rescue_from ArgumentError, lambda {|e|
+        rack_response(e.message, 400)
+      }
+      subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
+
+      get '/rescue_lambda'
+      last_response.status.should == 400
+      last_response.body.should == 'lambda takes an argument'
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
