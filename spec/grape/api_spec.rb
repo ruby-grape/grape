@@ -975,17 +975,6 @@ describe Grape::API do
       lambda{ get '/unrescued' }.should raise_error
     end
 
-    it 'can rescue errors with a method instead of a block' do
-      def rescue_arg_err; Rack::Response.new('Error via method', 400); end
-      subject.rescue_from ArgumentError, with: rescue_arg_err
-
-      subject.get('/exception'){ raise ArgumentError }
-      get '/exception'
-
-      last_response.status.should  == 400
-      last_response.body.should == 'Error via method'
-    end
-
     it 'does not re-raise exceptions of type Grape::Exception::Base' do
       class CustomError < Grape::Exceptions::Base; end
       subject.get('/custom_exception'){ raise CustomError }

@@ -189,19 +189,12 @@ module Grape
       #   @param [Hash] options Options for the rescue usage.
       #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
       def rescue_from(*args, &block)
-        options = args.last.is_a?(Hash) ? args.pop : {}
-
         if block_given?
-          handler = block
-        elsif options.has_key?(:with)
-          handler = proc { options[:with] }
+          args.each do |arg|
+            imbue(:rescue_handlers, { arg => block })
+          end
         end
-
-        args.each do |arg|
-          imbue(:rescue_handlers, { arg => handler })
-        end
-
-        imbue(:rescue_options, options)
+        imbue(:rescue_options, args.pop) if args.last.is_a?(Hash)
         set(:rescue_all, true) and return if args.include?(:all)
         imbue(:rescued_errors, args)
       end
