@@ -8,7 +8,7 @@ Next Release
 * [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
 * [#444](https://github.com/intridea/grape/issues/444): Added :en as fallback locale for I18n - [@aew](https://github.com/aew).
 * [#448](https://github.com/intridea/grape/pull/448): Adding POST style parameters for DELETE request - [@dquimper](https://github.com/dquimper).
-* [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to rescue_from - [@robertopedroso](https://github.com/robertopedroso)
+* [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
 * Your contribution here.
 
 #### Fixes
