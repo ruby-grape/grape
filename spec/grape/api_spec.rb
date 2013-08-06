@@ -1106,6 +1106,18 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, with: method' do
+    it 'rescues an error with the specified message' do
+      def rescue_arg_error; Rack::Response.new('rescued with a method', 400); end
+      subject.rescue_from ArgumentError, with: rescue_arg_error
+      subject.get('/rescue_method') { raise ArgumentError }
+
+      get '/rescue_method'
+      last_response.status.should == 400
+      last_response.body.should == 'rescued with a method'
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all

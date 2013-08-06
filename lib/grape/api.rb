@@ -197,13 +197,18 @@ module Grape
           handler = block
         end
 
+        options = args.last.is_a?(Hash) ? args.pop : {}
+        if options.has_key?(:with)
+          handler ||= proc { options[:with] }
+        end
+
         if handler
           args.each do |arg|
             imbue(:rescue_handlers, { arg => handler })
           end
         end
 
-        imbue(:rescue_options, args.pop) if args.last.is_a?(Hash)
+        imbue(:rescue_options, options)
         set(:rescue_all, true) and return if args.include?(:all)
         imbue(:rescued_errors, args)
       end
