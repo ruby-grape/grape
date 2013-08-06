@@ -151,8 +151,14 @@ module Grape
         new_formatter ? set(:default_error_formatter, new_formatter) : settings[:default_error_formatter]
       end
 
-      def error_formatter(format, new_formatter)
-        settings.imbue(:error_formatters, format.to_sym => new_formatter)
+      def error_formatter(format, options)
+        if options.is_a?(Hash) && options.has_key?(:with)
+          formatter = options[:with]
+        else
+          formatter = options
+        end
+
+        settings.imbue(:error_formatters, format.to_sym => formatter)
       end
 
       # Specify additional content-types, e.g.:

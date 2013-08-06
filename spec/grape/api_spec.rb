@@ -1183,6 +1183,27 @@ describe Grape::API do
       end
     end
 
+    describe 'with' do
+      context 'class' do
+        before :each do
+          class CustomErrorFormatter
+            def self.call(message, backtrace, option, env)
+              "message: #{message} @backtrace"
+            end
+          end
+        end
+
+        it 'returns a custom error format' do
+          subject.rescue_from :all, backtrace: true
+          subject.error_formatter :txt, with: CustomErrorFormatter
+          subject.get('/exception') { raise "rain!" }
+
+          get '/exception'
+          last_response.body.should == 'message: rain! @backtrace'
+        end
+      end
+    end
+
     it 'rescues all errors and return :json' do
       subject.rescue_from :all
       subject.format :json
