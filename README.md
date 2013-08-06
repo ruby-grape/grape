@@ -384,7 +384,7 @@ The `namespace` method has a number of aliases, including: `group`, `resource`,
 class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
-      throw :error, status: 400, message: "#{attr_name}: must consist of alpha-numeric characters"
+      raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: "must consist of alpha-numeric characters"
     end
   end
 end
@@ -402,7 +402,7 @@ You can also create custom classes that take parameters.
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
-      throw :error, status: 400, message: "#{attr_name}: must be at the most #{@option} characters long"
+      raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: "must be at the most #{@option} characters long"
     end
   end
 end
@@ -416,12 +416,12 @@ end
 
 ### Validation Errors
 
-Validation and coercion errors are collected and an exception of type `Grape::Exceptions::Validations` is raised.
+Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised.
 If the exception goes uncaught it will respond with a status of 400 and an error message.
-You can rescue a `Grape::Exceptions::Validations` and respond with a custom response.
+You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom response.
 
 ```ruby
-rescue_from Grape::Exceptions::Validations do |e|
+rescue_from Grape::Exceptions::ValidationErrors do |e|
     Rack::Response.new({
         'status' => e.status,
         'message' => e.message,

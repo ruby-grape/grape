@@ -19,13 +19,14 @@ describe Grape::Validations::CoerceValidator do
       I18n.locale = :en
 
     end
+
     it 'error on malformed input' do
       subject.params { requires :int, :type => Integer }
       subject.get '/single' do 'int works'; end
 
       get '/single', :int => '43a'
       last_response.status.should == 400
-      last_response.body.should == 'invalid parameter: int'
+      last_response.body.should == 'int is invalid'
 
       get '/single', :int => '43'
       last_response.status.should == 200
@@ -38,7 +39,7 @@ describe Grape::Validations::CoerceValidator do
 
       get 'array', { :ids => ['1', '2', 'az'] }
       last_response.status.should == 400
-      last_response.body.should == 'invalid parameter: ids'
+      last_response.body.should == 'ids is invalid'
 
       get 'array', { :ids => ['1', '2', '890'] }
       last_response.status.should == 200
@@ -60,7 +61,7 @@ describe Grape::Validations::CoerceValidator do
 
         get '/user', :user => "32"
         last_response.status.should == 400
-        last_response.body.should == 'invalid parameter: user'
+        last_response.body.should == 'user is invalid'
 
         get '/user', :user => { :id => 32, :name => 'Bob' }
         last_response.status.should == 200

@@ -2,7 +2,7 @@ Next Release
 ============
 #### Features
 
-* [#433](https://github.com/intridea/grape/issues/433): Validation errors are now collected and a `Grape::Exceptions::Validations` is raised. The individual validation errors can be accessed via `Grape::Exceptions::Validations#errors` - [@stevschmid](https://github.com/stevschmid).
+* [#433](https://github.com/intridea/grape/issues/433): Validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised. The individual validation errors can be accessed via `#errors` - [@stevschmid](https://github.com/stevschmid).
 
 #### Fixes
 

@@ -1,10 +1,11 @@
 en:
   grape:
     errors:
+      format: ! '%{attribute} %{message}'
       messages:
-        coerce: 'invalid parameter: %{attribute}'
-        presence: 'missing parameter: %{attribute}'
-        regexp: 'invalid parameter: %{attribute}'
+        coerce: 'is invalid'
+        presence: 'is missing'
+        regexp: 'is invalid'
         missing_vendor_option:
           problem: 'missing :vendor option.'
           summary: 'when version using header, you must specify :vendor option. '

@@ -54,7 +54,7 @@ module Grape
       end
 
       def translate_message(key, options = {})
-        translate("#{BASE_MESSAGES_KEY}.#{key}", {:default => '' }.merge(options))
+        translate("#{BASE_MESSAGES_KEY}.#{key}", { :default => '' }.merge(options))
       end
 
       def translate(key, options = {})

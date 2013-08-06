@@ -12,7 +12,7 @@ describe Grape::Validations do
 
         get '/optional', { :a_number => 'string' }
         last_response.status.should == 400
-        last_response.body.should == 'invalid parameter: a_number'
+        last_response.body.should == 'a_number is invalid'
 
         get '/optional', { :a_number => 45 }
         last_response.status.should == 200
@@ -43,7 +43,7 @@ describe Grape::Validations do
       it 'errors when param not present' do
         get '/required'
         last_response.status.should == 400
-        last_response.body.should == 'missing parameter: key'
+        last_response.body.should == 'key is missing'
       end
 
       it "doesn't throw a missing param when param is present" do
@@ -71,7 +71,7 @@ describe Grape::Validations do
       it 'errors when param not present' do
         get '/required'
         last_response.status.should == 400
-        last_response.body.should == 'missing parameter: items[key]'
+        last_response.body.should == 'items[key] is missing'
       end
 
       it "doesn't throw a missing param when param is present" do
@@ -99,8 +99,8 @@ describe Grape::Validations do
       it 'throws the validation errors' do
         get '/two_required'
         last_response.status.should == 400
-        last_response.body.should =~ /missing parameter: yolo/
-        last_response.body.should =~ /missing parameter: swag/
+        last_response.body.should =~ /yolo is missing/
+        last_response.body.should =~ /swag is missing/
       end
     end
 
@@ -109,7 +109,7 @@ describe Grape::Validations do
         class Customvalidator < Grape::Validations::Validator
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
-              raise Grape::Exceptions::Validation, :status => 400, :message => "#{attr_name}: is not custom!"
+              raise Grape::Exceptions::Validation, :param => @scope.full_name(attr_name), :message => "is not custom!"
             end
           end
         end
@@ -128,7 +128,7 @@ describe Grape::Validations do
 
           get '/optional_custom', { :custom => 'im wrong' }
           last_response.status.should == 400
-          last_response.body.should == 'custom: is not custom!'
+          last_response.body.should == 'custom is not custom!'
         end
 
         it "skips validation when parameter isn't present" do
@@ -142,7 +142,7 @@ describe Grape::Validations do
 
           get '/optional_custom', { :custom => 123 }
           last_response.status.should == 400
-          last_response.body.should == 'custom: is not custom!'
+          last_response.body.should == 'custom is not custom!'
         end
       end
 
@@ -155,7 +155,7 @@ describe Grape::Validations do
         it 'validates when param is present' do
           get '/required_custom', { :custom => 'im wrong, validate me' }
           last_response.status.should == 400
-          last_response.body.should == 'custom: is not custom!'
+          last_response.body.should == 'custom is not custom!'
 
           get '/required_custom', { :custom => 'im custom' }
           last_response.status.should == 200
@@ -165,7 +165,7 @@ describe Grape::Validations do
         it 'validates when param is not present' do
           get '/required_custom'
           last_response.status.should == 400
-          last_response.body.should == 'missing parameter: custom, custom: is not custom!'
+          last_response.body.should == 'custom is missing, custom is not custom!'
         end
 
         context 'nested namespaces' do
@@ -197,13 +197,13 @@ describe Grape::Validations do
           specify 'the parent namespace uses the validator' do
             get '/nested/one', { :custom => 'im wrong, validate me'}
             last_response.status.should == 400
-            last_response.body.should == 'custom: is not custom!'
+            last_response.body.should == 'custom is not custom!'
           end
 
           specify 'the nested namesapce inherits the custom validator' do
             get '/nested/nested/two', { :custom => 'im wrong, validate me'}
             last_response.status.should == 400
-            last_response.body.should == 'custom: is not custom!'
+            last_response.body.should == 'custom is not custom!'
           end
 
           specify 'peer namesapces does not have the validator' do
