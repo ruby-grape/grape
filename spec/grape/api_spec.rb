@@ -1106,6 +1106,18 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, with: method' do
+    it 'rescues an error with the specified message' do
+      def rescue_arg_error; Rack::Response.new('rescued with a method', 400); end
+      subject.rescue_from ArgumentError, with: rescue_arg_error
+      subject.get('/rescue_method') { raise ArgumentError }
+
+      get '/rescue_method'
+      last_response.status.should == 400
+      last_response.body.should == 'rescued with a method'
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
@@ -1168,6 +1180,27 @@ describe Grape::API do
         end
         get '/exception'
         last_response.body.should == "message: rain! @backtrace"
+      end
+    end
+
+    describe 'with' do
+      context 'class' do
+        before :each do
+          class CustomErrorFormatter
+            def self.call(message, backtrace, option, env)
+              "message: #{message} @backtrace"
+            end
+          end
+        end
+
+        it 'returns a custom error format' do
+          subject.rescue_from :all, backtrace: true
+          subject.error_formatter :txt, with: CustomErrorFormatter
+          subject.get('/exception') { raise "rain!" }
+
+          get '/exception'
+          last_response.body.should == 'message: rain! @backtrace'
+        end
       end
     end
 
