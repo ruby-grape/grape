@@ -25,7 +25,7 @@ describe Grape::Entity do
 
     it 'pulls a representation from the class options if it exists' do
       entity = Class.new(Grape::Entity)
-      entity.stub!(:represent).and_return("Hiya")
+      entity.stub(:represent).and_return("Hiya")
 
       subject.represent Object, :with => entity
       subject.get '/example' do
@@ -37,7 +37,7 @@ describe Grape::Entity do
 
     it 'pulls a representation from the class options if the presented object is a collection of objects' do
       entity = Class.new(Grape::Entity)
-      entity.stub!(:represent).and_return("Hiya")
+      entity.stub(:represent).and_return("Hiya")
 
       class TestObject; end
       class FakeCollection
@@ -62,7 +62,7 @@ describe Grape::Entity do
 
     it 'pulls a representation from the class ancestor if it exists' do
       entity = Class.new(Grape::Entity)
-      entity.stub!(:represent).and_return("Hiya")
+      entity.stub(:represent).and_return("Hiya")
 
       subclass = Class.new(Object)
 
@@ -77,7 +77,7 @@ describe Grape::Entity do
     it 'automatically uses Klass::Entity if that exists' do
       some_model = Class.new
       entity = Class.new(Grape::Entity)
-      entity.stub!(:represent).and_return("Auto-detect!")
+      entity.stub(:represent).and_return("Auto-detect!")
 
       some_model.const_set :Entity, entity
 
@@ -91,7 +91,7 @@ describe Grape::Entity do
     it 'automatically uses Klass::Entity based on the first object in the collection being presented' do
       some_model = Class.new
       entity = Class.new(Grape::Entity)
-      entity.stub!(:represent).and_return("Auto-detect!")
+      entity.stub(:represent).and_return("Auto-detect!")
 
       some_model.const_set :Entity, entity
 
