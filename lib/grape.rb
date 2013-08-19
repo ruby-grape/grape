@@ -70,6 +70,7 @@ module Grape
 
     module Auth
       autoload :OAuth2,         'grape/middleware/auth/oauth2'
+      autoload :Base,	          'grape/middleware/auth/base'
       autoload :Basic,          'grape/middleware/auth/basic'
       autoload :Digest,	        'grape/middleware/auth/digest'
     end
