@@ -662,18 +662,18 @@ describe Grape::API do
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub!(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
-        subject.stub!(:settings).and_return(settings)
+        settings.stub(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
+        subject.stub(:settings).and_return(settings)
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
 
       it 'includes all middleware from stacked settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub!(:stack).and_return [
+        settings.stub(:stack).and_return [
           {:middleware => [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]},
           {:middleware => [[ApiSpec::PhonyMiddleware, 'foo']]}
         ]
-        subject.stub!(:settings).and_return(settings)
+        subject.stub(:settings).and_return(settings)
 
         subject.middleware.should eql [
           [ApiSpec::PhonyMiddleware, 123],
@@ -997,7 +997,7 @@ describe Grape::API do
     end
 
     it 'can rescue exceptions raised in the formatter' do
-      formatter = stub(:formatter)
+      formatter = double(:formatter)
       formatter.stub(:call) { raise StandardError }
       Grape::Formatter::Base.stub(:formatter_for) { formatter }
 
