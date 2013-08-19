@@ -420,16 +420,16 @@ end
 
 ### Validation Errors
 
-When validation and coercion errors occur an exception of type `Grape::Exceptions::Validation` is raised.
+Validation and coercion errors are collected and an exception of type `Grape::Exceptions::Validations` is raised.
 If the exception goes uncaught it will respond with a status of 400 and an error message.
-You can rescue a `Grape::Exceptions::Validation` and respond with a custom response.
+You can rescue a `Grape::Exceptions::Validations` and respond with a custom response.
 
 ```ruby
-rescue_from Grape::Exceptions::Validation do |e|
+rescue_from Grape::Exceptions::Validations do |e|
     Rack::Response.new({
         'status' => e.status,
         'message' => e.message,
-        'param' => e.param
+        'errors' => e.errors
     }.to_json, e.status)
 end
 ```

@@ -195,6 +195,7 @@ module Grape
         # Validate for presence before any other validators
         if validations.has_key?(:presence) && validations[:presence]
           validate('presence', validations[:presence], attrs, doc_attrs)
+          validations.delete(:presence)
         end
 
         # Before we run the rest of the validators, lets handle

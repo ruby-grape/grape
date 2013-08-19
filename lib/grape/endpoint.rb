@@ -391,8 +391,17 @@ module Grape
       run_filters befores
 
       # Retieve validations from this namespace and all parent namespaces.
+      validation_errors = []
       settings.gather(:validations).each do |validator|
-        validator.validate!(params)
+        begin
+          validator.validate!(params)
+        rescue Grape::Exceptions::Validation => e
+          validation_errors << e
+        end
+      end
+
+      if validation_errors.any?
+        raise Grape::Exceptions::Validations, errors: validation_errors
       end
 
       run_filters after_validations

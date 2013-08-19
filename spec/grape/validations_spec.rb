@@ -220,12 +220,26 @@ describe Grape::Validations do
       end
     end
 
+    context 'multiple validation errors' do
+      before do
+        subject.params { requires :yolo; requires :swag }
+        subject.get '/two_required' do 'two required works'; end
+      end
+
+      it 'throws the validation errors' do
+        get '/two_required'
+        last_response.status.should == 400
+        last_response.body.should =~ /missing parameter: yolo/
+        last_response.body.should =~ /missing parameter: swag/
+      end
+    end
+
     context 'custom validation' do
       module CustomValidations
         class Customvalidator < Grape::Validations::Validator
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
-              throw :error, :status => 400, :message => "#{attr_name}: is not custom!"
+              raise Grape::Exceptions::Validation, :status => 400, :message => "#{attr_name}: is not custom!"
             end
           end
         end
@@ -281,7 +295,7 @@ describe Grape::Validations do
         it 'validates when param is not present' do
           get '/required_custom'
           last_response.status.should == 400
-          last_response.body.should == 'missing parameter: custom'
+          last_response.body.should == 'missing parameter: custom, custom: is not custom!'
         end
 
         context 'nested namespaces' do

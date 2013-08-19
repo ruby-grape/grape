@@ -114,23 +114,23 @@ describe Grape::Validations::PresenceValidator do
   it 'validates triple nested parameters' do
     get('/nested_triple')
     last_response.status.should == 400
-    last_response.body.should == '{"error":"missing parameter: admin[admin_name]"}'
+    last_response.body.should == '{"error":"missing parameter: admin[admin_name], missing parameter: admin[super][user][first_name]"}'
 
     get('/nested_triple', :user => {:first_name => "Billy"})
     last_response.status.should == 400
-    last_response.body.should == '{"error":"missing parameter: admin[admin_name]"}'
+    last_response.body.should == '{"error":"missing parameter: admin[admin_name], missing parameter: admin[super][user][first_name]"}'
 
     get('/nested_triple', :admin => {:super => {:first_name => "Billy"}})
     last_response.status.should == 400
-    last_response.body.should == '{"error":"missing parameter: admin[admin_name]"}'
+    last_response.body.should == '{"error":"missing parameter: admin[admin_name], missing parameter: admin[super][user][first_name]"}'
 
     get('/nested_triple', :super => {:user => {:first_name => "Billy", :last_name => "Bob"}})
     last_response.status.should == 400
-    last_response.body.should == '{"error":"missing parameter: admin[admin_name]"}'
+    last_response.body.should == '{"error":"missing parameter: admin[admin_name], missing parameter: admin[super][user][first_name]"}'
 
     get('/nested_triple', :admin => {:super => {:user => {:first_name => "Billy"}}})
     last_response.status.should == 400
-    last_response.body.should == '{"error":"missing parameter: admin[admin_name]"}'
+    last_response.body.should == '{"error":"missing parameter: admin[admin_name], missing parameter: admin[super][user][last_name]"}'
 
     get('/nested_triple', :admin => { :admin_name => 'admin', :super => {:user => {:first_name => "Billy"}}})
     last_response.status.should == 400
