@@ -33,27 +33,34 @@ module Grape
     end
 
     def initialize(settings, options = {}, &block)
+      require_option(options, :path)
+      require_option(options, :method)
+
       @settings = settings
+      @options = options
+
+      @options[:path] = Array(options[:path])
+      @options[:path] << '/' if options[:path].empty?
+
+      @options[:method] = Array(options[:method])
+      @options[:route_options] ||= {}
+
       if block_given?
-        method_name = [
-          options[:method],
-          Namespace.joined_space(settings),
-          settings.gather(:mount_path).join("/"),
-          Array(options[:path]).join("/")
-        ].join(" ")
         @source = block
         @block = self.class.generate_api_method(method_name, &block)
       end
-      @options = options
+    end
 
-      raise Grape::Exceptions::MissingOption.new(:path) unless options.key?(:path)
-      options[:path] = Array(options[:path])
-      options[:path] = ['/'] if options[:path].empty?
+    def require_option(options, key)
+      options.has_key?(key) or raise Grape::Exceptions::MissingOption.new(key)
+    end
 
-      raise Grape::Exceptions::MissingOption.new(:method) unless options.key?(:method)
-      options[:method] = Array(options[:method])
-
-      options[:route_options] ||= {}
+    def method_name
+      [ options[:method],
+        Namespace.joined_space(settings),
+        settings.gather(:mount_path).join('/'),
+        options[:path].join('/')
+      ].join(" ")
     end
 
     def routes
