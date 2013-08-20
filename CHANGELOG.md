@@ -1,6 +1,5 @@
 Next Release
 ============
-
 #### Features
 
 * Grape is no longer tested against Ruby 1.8.7.
@@ -11,13 +10,12 @@ Next Release
 * [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
 * [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
 * [#452](https://github.com/intridea/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
-* [#433](https://github.com/intridea/grape/issues/433): API change: validation errors are now collected and a `Grape::Exceptions::Validations` is raised; the individual validation errors can be accessed via `Grape::Exceptions::Validations#errors` - [@stevschmid](https://github.com/stevschmid).
+* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
 * Your contribution here.
 
 #### Fixes
 
 * [#428](https://github.com/intridea/grape/issues/428): Removes memoization from `Grape::Request` params to prevent middleware from freezing parameter values before `Formatter` can get them - [@mbleigh](https://github.com/mbleigh).
-
 
 0.5.0 (6/14/2013)
 =================

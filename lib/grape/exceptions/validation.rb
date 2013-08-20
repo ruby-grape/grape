@@ -6,10 +6,20 @@ module Grape
       attr_accessor :param
 
       def initialize(args = {})
-        @param = args[:param].to_s if args.has_key? :param
-        attribute = translate_attribute(@param)
-        args[:message] = translate_message(args[:message_key], :attribute => attribute) if args.has_key? :message_key
+        raise "Param is missing:" unless args.has_key? :param
+        @param = args[:param]
+        args[:message] = translate_message(args[:message_key]) if args.has_key? :message_key
         super
+      end
+
+      # remove all the unnecessary stuff from Grape::Exceptions::Base like status
+      # and headers when converting a validation error to json or string
+      def as_json(*a)
+        self.to_s
+      end
+
+      def to_s
+        message
       end
     end
   end
