@@ -68,6 +68,8 @@ module Grape
     autoload :Versioner,         'grape/middleware/versioner'
     autoload :Formatter,         'grape/middleware/formatter'
     autoload :Error,             'grape/middleware/error'
+    autoload :Options,           'grape/middleware/options'
+    autoload :Method,            'grape/middleware/method'
 
     module Auth
       autoload :OAuth2,         'grape/middleware/auth/oauth2'

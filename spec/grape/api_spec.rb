@@ -559,6 +559,7 @@ describe Grape::API do
         "example"
       end
     end
+
     it 'options does not exist' do
       options '/example'
       last_response.status.should eql 405
