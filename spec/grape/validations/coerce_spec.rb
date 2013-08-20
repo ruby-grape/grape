@@ -6,17 +6,34 @@ describe Grape::Validations::CoerceValidator do
   def app; subject end
 
   describe 'coerce' do
-    it "i18n error on malformed input" do
-      I18n.load_path << File.expand_path('../zh-CN.yml',__FILE__)
-      I18n.reload!
-      I18n.locale = :'zh-CN'
-      subject.params { requires :age, :type => Integer }
-      subject.get '/single' do 'int works'; end
 
-      get '/single', :age => '43a'
-      last_response.status.should == 400
-      last_response.body.should == '年龄格式不正确'
-      I18n.locale = :en
+    context "i18n" do
+
+      after :each do
+        I18n.locale = :en
+      end
+
+      it "i18n error on malformed input" do
+        I18n.load_path << File.expand_path('../zh-CN.yml',__FILE__)
+        I18n.reload!
+        I18n.locale = :'zh-CN'
+        subject.params { requires :age, :type => Integer }
+        subject.get '/single' do 'int works'; end
+
+        get '/single', :age => '43a'
+        last_response.status.should == 400
+        last_response.body.should == '年龄格式不正确'
+      end
+
+      it 'gives an english fallback error when default locale message is blank' do
+        I18n.locale = :'pt-BR'
+        subject.params { requires :age, :type => Integer }
+        subject.get '/single' do 'int works'; end
+
+        get '/single', :age => '43a'
+        last_response.status.should == 400
+        last_response.body.should == 'age is invalid'
+      end
 
     end
 

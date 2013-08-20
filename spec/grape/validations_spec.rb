@@ -58,6 +58,48 @@ describe Grape::Validations do
       end
     end
 
+    context 'required with a block' do
+      before do
+        subject.params {
+          requires :items do
+            requires :key
+          end
+        }
+        subject.get '/required' do 'required works'; end
+      end
+
+      it 'errors when param not present' do
+        get '/required'
+        last_response.status.should == 400
+        last_response.body.should == 'items[key] is missing'
+      end
+
+      it "doesn't throw a missing param when param is present" do
+        get '/required', { :items => [:key => 'hello', :key => 'world'] }
+        last_response.status.should == 200
+        last_response.body.should == 'required works'
+      end
+
+      it "doesn't allow more than one parameter" do
+        expect {
+          subject.params {
+            requires(:items, desc: 'Foo') do
+              requires :key
+            end
+          }
+        }.to raise_error ArgumentError
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          requires :items do
+            requires :key
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key]]
+      end
+    end
+
     context 'group' do
       before do
         subject.params {
@@ -87,6 +129,94 @@ describe Grape::Validations do
           end
         }
         subject.settings[:declared_params].should == [:items => [:key]]
+      end
+    end
+
+    context 'optional with a block' do
+      before do
+        subject.params {
+          optional :items do
+            requires :key
+          end
+        }
+        subject.get '/optional_group' do 'optional group works'; end
+      end
+
+      it "doesn't throw a missing param when the group isn't present" do
+        get '/optional_group'
+        last_response.status.should == 200
+        last_response.body.should == 'optional group works'
+      end
+
+      it "doesn't throw a missing param when both group and param are given" do
+        get '/optional_group', { :items => {:key => 'foo'} }
+        last_response.status.should == 200
+        last_response.body.should == 'optional group works'
+      end
+
+      it "errors when group is present, but required param is not" do
+        get '/optional_group', { :items => {:NOT_key => 'foo'} }
+        last_response.status.should == 400
+        last_response.body.should == 'items[key] is missing'
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          optional :items do
+            requires :key
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key]]
+      end
+    end
+
+    context 'nested optional blocks' do
+      before do
+        subject.params {
+          optional :items do
+            requires :key
+            optional(:optional_subitems) { requires :value }
+            requires(:required_subitems) { requires :value }
+          end
+        }
+        subject.get('/nested_optional_group') { 'nested optional group works' }
+      end
+
+      it 'does no internal validations if the outer group is blank' do
+        get '/nested_optional_group'
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'does internal validations if the outer group is present' do
+        get '/nested_optional_group', { :items => {:key => 'foo' }}
+        last_response.status.should == 400
+        last_response.body.should == 'items[required_subitems][value] is missing'
+
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}}}
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'handles deep nesting' do
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}, :optional_subitems => {:NOT_value => 'baz'}}}
+        last_response.status.should == 400
+        last_response.body.should == 'items[optional_subitems][value] is missing'
+
+        get '/nested_optional_group', { :items => { :key => 'foo', :required_subitems => {:value => 'bar'}, :optional_subitems => {:value => 'baz'}}}
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+      end
+
+      it 'adds to declared parameters' do
+        subject.params {
+          optional :items do
+            requires :key
+            optional(:optional_subitems) { requires :value }
+            requires(:required_subitems) { requires :value }
+          end
+        }
+        subject.settings[:declared_params].should == [:items => [:key, {:optional_subitems => [:value]}, {:required_subitems => [:value]}]]
       end
     end
 

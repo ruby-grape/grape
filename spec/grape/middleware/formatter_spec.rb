@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
   subject{ Grape::Middleware::Formatter.new(app) }
-  before{ subject.stub!(:dup).and_return(subject) }
+  before{ subject.stub(:dup).and_return(subject) }
 
   let(:app){ lambda{|env| [200, {}, [@body || { "foo" => "bar" }]]} }
 
@@ -37,7 +37,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'error handling' do
-    let(:formatter) { stub(:formatter) }
+    let(:formatter) { double(:formatter) }
     before do
       Grape::Formatter::Base.stub(:formatter_for) { formatter }
     end
@@ -172,7 +172,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'input' do
-    [ "POST", "PATCH", "PUT" ].each do |method|
+    [ "POST", "PATCH", "PUT", "DELETE" ].each do |method|
       [ "application/json", "application/json; charset=utf-8" ].each do |content_type|
         context content_type do
           it 'parses the body from #{method} and copies values into rack.request.form_hash' do

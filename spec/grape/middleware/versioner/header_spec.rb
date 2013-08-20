@@ -274,4 +274,29 @@ describe Grape::Middleware::Versioner::Header do
       subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
     end
   end
+
+  context 'when multiple versions are specified' do
+    before do
+      @options[:versions] = ['v1', 'v2']
+    end
+
+    it 'succeeds with v1' do
+      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
+    end
+
+    it 'succeeds with v2' do
+      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').first.should == 200
+    end
+
+    it 'fails with another version' do
+      expect {
+        subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v3+json')
+      }.to throw_symbol(
+        :error,
+        :status => 406,
+        :headers => {'X-Cascade' => 'pass'},
+        :message => 'API vendor or version not found.'
+      )
+    end
+  end
 end

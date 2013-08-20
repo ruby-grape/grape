@@ -11,7 +11,7 @@ module Grape
       #
       # The following rack env variables are set:
       #
-      #    env['api.version]  => 'v1'
+      #    env['api.version']  => 'v1'
       #
       # If version does not match this route, then a 406 is raised with
       # X-Cascade header to alert Rack::Mount to attempt the next matched

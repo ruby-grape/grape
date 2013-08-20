@@ -6,7 +6,7 @@ describe Grape::Middleware::Base do
 
   before do
     # Keep it one object for testing.
-    subject.stub!(:dup).and_return(subject)
+    subject.stub(:dup).and_return(subject)
   end
 
   it 'has the app as an accessor' do

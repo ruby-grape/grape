@@ -41,7 +41,7 @@ module Grape
 
         # store read input in env['api.request.input']
         def read_body_input
-          if (request.post? || request.put? || request.patch?) &&
+          if (request.post? || request.put? || request.patch? || request.delete?) &&
             (! request.form_data? || ! request.media_type) &&
             (! request.parseable_data?) &&
             (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')

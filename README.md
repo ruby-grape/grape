@@ -226,7 +226,7 @@ version 'v1', using: :header, vendor: 'twitter'
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
 
-    curl -H Accept=application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
+    curl -H Accept:application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no `Accept` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
@@ -241,7 +241,7 @@ version 'v1', using: :accept_version_header
 
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept-Version` header.
 
-    curl -H "Accept-Version=v1" http://localhost:9292/statuses/public_timeline
+    curl -H "Accept-Version:v1" http://localhost:9292/statuses/public_timeline
 
 By default, the first matching version is used when no `Accept-Version` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
@@ -334,6 +334,9 @@ params do
   group :media do
     requires :url
   end
+  optional :audio do
+    requires :mp3
+  end
 end
 put ':id' do
   # params[:id] is an Integer
@@ -351,8 +354,9 @@ params do
 end
 ```
 
-Parameters can be nested using `group`. In the above example, this means
-`params[:media][:url]` is required along with `params[:id]`.
+Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
+In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
+and `params[:audio][:mp3]` is required only if `params[:audio]` is present.
 
 ### Namespace Validation and Coercion
 
@@ -429,6 +433,12 @@ rescue_from Grape::Exceptions::ValidationErrors do |e|
     }.to_json, e.status)
 end
 ```
+
+### I18n
+
+Grape supports I18n for parameter-related error messages, but will fallback to English if 
+translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
+
 
 ## Headers
 
@@ -1049,6 +1059,8 @@ representative entity. This can still be overridden by using the `:with` option 
 You can use any Hypermedia representer, including [Roar](https://github.com/apotonick/roar).
 Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON`
 into your models or call `to_json` explicitly in your API implementation.
+
+Other alternatives include `ActiveModel::Serializers` via [grape-active_model_serializers](https://github.com/jrhe/grape-active_model_serializers).
 
 ### Rabl
 

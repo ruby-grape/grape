@@ -6,13 +6,8 @@ module Grape
     extend Validations::ClassMethods
 
     class << self
-      attr_reader :route_set
-      attr_reader :versions
-      attr_reader :routes
-      attr_reader :settings
+      attr_reader :endpoints, :instance, :routes, :route_set, :settings, :versions
       attr_writer :logger
-      attr_reader :endpoints
-      attr_reader :instance
 
       def logger(logger = nil)
         if logger
@@ -156,8 +151,14 @@ module Grape
         new_formatter ? set(:default_error_formatter, new_formatter) : settings[:default_error_formatter]
       end
 
-      def error_formatter(format, new_formatter)
-        settings.imbue(:error_formatters, format.to_sym => new_formatter)
+      def error_formatter(format, options)
+        if options.is_a?(Hash) && options.has_key?(:with)
+          formatter = options[:with]
+        else
+          formatter = options
+        end
+
+        settings.imbue(:error_formatters, format.to_sym => formatter)
       end
 
       # Specify additional content-types, e.g.:
@@ -193,13 +194,27 @@ module Grape
       #   @param [Block] block Execution block to handle the given exception.
       #   @param [Hash] options Options for the rescue usage.
       #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
+      #   @param [Proc] handler Execution proc to handle the given exception as an
+      #     alternative to passing a block
       def rescue_from(*args, &block)
-        if block_given?
+        if args.last.is_a?(Proc)
+          handler = args.pop
+        elsif block_given?
+          handler = block
+        end
+
+        options = args.last.is_a?(Hash) ? args.pop : {}
+        if options.has_key?(:with)
+          handler ||= proc { options[:with] }
+        end
+
+        if handler
           args.each do |arg|
-            imbue(:rescue_handlers, { arg => block })
+            imbue(:rescue_handlers, { arg => handler })
           end
         end
-        imbue(:rescue_options, args.pop) if args.last.is_a?(Hash)
+
+        imbue(:rescue_options, options)
         set(:rescue_all, true) and return if args.include?(:all)
         imbue(:rescued_errors, args)
       end

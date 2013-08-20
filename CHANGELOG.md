@@ -2,7 +2,16 @@ Next Release
 ============
 #### Features
 
-* [#433](https://github.com/intridea/grape/issues/433): Validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised. The individual validation errors can be accessed via `#errors` - [@stevschmid](https://github.com/stevschmid).
+* Grape is no longer tested against Ruby 1.8.7.
+* [#442](https://github.com/intridea/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
+* [#442](https://github.com/intridea/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
+* [#444](https://github.com/intridea/grape/issues/444): Added `:en` as fallback locale for I18n - [@aew](https://github.com/aew).
+* [#448](https://github.com/intridea/grape/pull/448): Adding POST style parameters for DELETE requests - [@dquimper](https://github.com/dquimper).
+* [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
+* [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
+* [#452](https://github.com/intridea/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
+* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and a `Grape::Exceptions::ValidationErrors` is raised; the individual validation errors be accessed via `Grape::Exceptions::ValidationErrors#errors` (hash in the format ``{"parameter_name": [validation_error1, validation_error2, ...]}``) - [@stevschmid](https://github.com/stevschmid).
+* Your contribution here.
 
 #### Fixes
 

@@ -275,7 +275,15 @@ describe Grape::API do
         subject.version 'v1', :using => :header, :vendor => 'test'
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :header
+        versioned_get "/", "v1", :using => :header, :vendor => 'test'
+      end
+
+      it 'header versioned APIs with multiple headers' do
+        subject.version ['v1', 'v2'], :using => :header, :vendor => 'test'
+        subject.enable_root_route!
+
+        versioned_get "/", "v1", :using => :header, :vendor => 'test'
+        versioned_get "/", "v2", :using => :header, :vendor => 'test'
       end
 
       it 'param versioned APIs' do
@@ -654,18 +662,18 @@ describe Grape::API do
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub!(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
-        subject.stub!(:settings).and_return(settings)
+        settings.stub(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
+        subject.stub(:settings).and_return(settings)
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
 
       it 'includes all middleware from stacked settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub!(:stack).and_return [
+        settings.stub(:stack).and_return [
           {:middleware => [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]},
           {:middleware => [[ApiSpec::PhonyMiddleware, 'foo']]}
         ]
-        subject.stub!(:settings).and_return(settings)
+        subject.stub(:settings).and_return(settings)
 
         subject.middleware.should eql [
           [ApiSpec::PhonyMiddleware, 123],
@@ -989,7 +997,7 @@ describe Grape::API do
     end
 
     it 'can rescue exceptions raised in the formatter' do
-      formatter = stub(:formatter)
+      formatter = double(:formatter)
       formatter.stub(:call) { raise StandardError }
       Grape::Formatter::Base.stub(:formatter_for) { formatter }
 
@@ -1074,6 +1082,42 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, lambda' do
+    it 'rescues an error with the lambda' do
+      subject.rescue_from ArgumentError, lambda {
+        rack_response("rescued with a lambda", 400)
+      }
+      subject.get('/rescue_lambda') { raise ArgumentError }
+
+      get '/rescue_lambda'
+      last_response.status.should == 400
+      last_response.body.should == "rescued with a lambda"
+    end
+
+    it 'can execute the lambda with an argument' do
+      subject.rescue_from ArgumentError, lambda {|e|
+        rack_response(e.message, 400)
+      }
+      subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
+
+      get '/rescue_lambda'
+      last_response.status.should == 400
+      last_response.body.should == 'lambda takes an argument'
+    end
+  end
+
+  describe '.rescue_from klass, with: method' do
+    it 'rescues an error with the specified message' do
+      def rescue_arg_error; Rack::Response.new('rescued with a method', 400); end
+      subject.rescue_from ArgumentError, with: rescue_arg_error
+      subject.get('/rescue_method') { raise ArgumentError }
+
+      get '/rescue_method'
+      last_response.status.should == 400
+      last_response.body.should == 'rescued with a method'
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
@@ -1136,6 +1180,27 @@ describe Grape::API do
         end
         get '/exception'
         last_response.body.should == "message: rain! @backtrace"
+      end
+    end
+
+    describe 'with' do
+      context 'class' do
+        before :each do
+          class CustomErrorFormatter
+            def self.call(message, backtrace, option, env)
+              "message: #{message} @backtrace"
+            end
+          end
+        end
+
+        it 'returns a custom error format' do
+          subject.rescue_from :all, backtrace: true
+          subject.error_formatter :txt, with: CustomErrorFormatter
+          subject.get('/exception') { raise "rain!" }
+
+          get '/exception'
+          last_response.body.should == 'message: rain! @backtrace'
+        end
       end
     end
 

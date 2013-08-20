@@ -442,7 +442,7 @@ module Grape
 
       if settings[:version]
         b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
-          :versions        => settings[:version],
+          :versions        => settings[:version] ? settings[:version].flatten : nil,
           :version_options => settings[:version_options],
           :prefix          => settings[:root_prefix]
         }
