@@ -10,7 +10,7 @@ Next Release
 * [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
 * [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
 * [#452](https://github.com/intridea/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
-* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and a `Grape::Exceptions::ValidationErrors` is raised; the individual validation errors be accessed via `Grape::Exceptions::ValidationErrors#errors` (hash in the format ``{"parameter_name": [validation_error1, validation_error2, ...]}``) - [@stevschmid](https://github.com/stevschmid).
+* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
 * Your contribution here.
 
 #### Fixes

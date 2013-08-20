@@ -434,6 +434,8 @@ rescue_from Grape::Exceptions::ValidationErrors do |e|
 end
 ```
 
+The validation errors are grouped by parameter name and can be accessed via ``Grape::Exceptions::ValidationErrors#errors``.
+
 ### I18n
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if 
