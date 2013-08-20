@@ -401,7 +401,7 @@ module Grape
       end
 
       if validation_errors.any?
-        raise Grape::Exceptions::Validations, errors: validation_errors
+        raise Grape::Exceptions::ValidationErrors, errors: validation_errors
       end
 
       run_filters after_validations

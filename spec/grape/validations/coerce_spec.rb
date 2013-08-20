@@ -6,13 +6,13 @@ describe Grape::Validations::CoerceValidator do
   def app; subject end
 
   describe 'coerce' do
-    
+
     context "i18n" do
-    
+
       after :each do
         I18n.locale = :en
       end
-    
+
       it "i18n error on malformed input" do
         I18n.load_path << File.expand_path('../zh-CN.yml',__FILE__)
         I18n.reload!
@@ -24,7 +24,7 @@ describe Grape::Validations::CoerceValidator do
         last_response.status.should == 400
         last_response.body.should == '年龄格式不正确'
       end
-    
+
       it 'gives an english fallback error when default locale message is blank' do
         I18n.locale = :'pt-BR'
         subject.params { requires :age, :type => Integer }
@@ -32,18 +32,18 @@ describe Grape::Validations::CoerceValidator do
 
         get '/single', :age => '43a'
         last_response.status.should == 400
-        last_response.body.should == 'invalid parameter: age'
+        last_response.body.should == 'age is invalid'
       end
 
     end
-    
+
     it 'error on malformed input' do
       subject.params { requires :int, :type => Integer }
       subject.get '/single' do 'int works'; end
 
       get '/single', :int => '43a'
       last_response.status.should == 400
-      last_response.body.should == 'invalid parameter: int'
+      last_response.body.should == 'int is invalid'
 
       get '/single', :int => '43'
       last_response.status.should == 200
@@ -56,7 +56,7 @@ describe Grape::Validations::CoerceValidator do
 
       get 'array', { :ids => ['1', '2', 'az'] }
       last_response.status.should == 400
-      last_response.body.should == 'invalid parameter: ids'
+      last_response.body.should == 'ids is invalid'
 
       get 'array', { :ids => ['1', '2', '890'] }
       last_response.status.should == 200
@@ -78,7 +78,7 @@ describe Grape::Validations::CoerceValidator do
 
         get '/user', :user => "32"
         last_response.status.should == 400
-        last_response.body.should == 'invalid parameter: user'
+        last_response.body.should == 'user is invalid'
 
         get '/user', :user => { :id => 32, :name => 'Bob' }
         last_response.status.should == 200
