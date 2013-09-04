@@ -22,8 +22,12 @@ I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 module Grape
   autoload :API,                 'grape/api'
   autoload :Endpoint,            'grape/endpoint'
+
   autoload :Route,               'grape/route'
   autoload :Namespace,           'grape/namespace'
+
+  autoload :Path,                'grape/path'
+
   autoload :Cookies,             'grape/cookies'
   autoload :Validations,         'grape/validations'
   autoload :Request,             'grape/http/request'
