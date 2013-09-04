@@ -18,6 +18,11 @@ module Grape
     def to_s
       "version=#{route_version}, method=#{route_method}, path=#{route_path}"
     end
-    
+
+    private
+    def to_ary
+      nil
+    end
+
   end
 end
