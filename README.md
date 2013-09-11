@@ -438,7 +438,7 @@ The validation errors are grouped by parameter name and can be accessed via ``Gr
 
 ### I18n
 
-Grape supports I18n for parameter-related error messages, but will fallback to English if 
+Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
 
@@ -648,6 +648,20 @@ instead of a message.
 ```ruby
 error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 ```
+
+### Handling 404
+
+For Grape to handle all the 404s for your API, it can be useful to use a catch-all.
+In its simplest form, it can be like:
+
+```ruby
+route :any, '*path' do
+  error! # or something else
+end
+```
+
+It is very crucial to __define this endpoint at the very end of your API__, as it
+literally accepts every request.
 
 ## Exception Handling
 
