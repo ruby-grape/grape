@@ -47,4 +47,18 @@ describe Grape::Validations::ValuesValidator do
     last_response.body.should eq({ :type => "valid-type2" }.to_json)
   end
 
+  it 'should raise IncompatibleOptionValues on an invalid default value' do
+    subject = Class.new(Grape::API)
+    expect {
+      subject.params { optional :type, :values => ['valid-type1', 'valid-type2', 'valid-type3'], :default => 'invalid-type' }
+    }.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
+  it 'should raise IncompatibleOptionValues when type is incompatible with values array' do
+    subject = Class.new(Grape::API)
+    expect {
+      subject.params { optional :type, :values => ['valid-type1', 'valid-type2', 'valid-type3'], :type => Symbol }
+    }.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
 end

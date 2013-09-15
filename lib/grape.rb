@@ -44,6 +44,7 @@ module Grape
     autoload :UnknownValidator,               'grape/exceptions/unknown_validator'
     autoload :UnknownOptions,                 'grape/exceptions/unknown_options'
     autoload :InvalidWithOptionForRepresent,  'grape/exceptions/invalid_with_option_for_represent'
+    autoload :IncompatibleOptionValues,       'grape/exceptions/incompatible_option_values'
   end
 
   module ErrorFormatter
