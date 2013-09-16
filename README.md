@@ -335,7 +335,7 @@ params do
     requires :url
   end
   optional :audio do
-    requires :mp3
+    requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg], default: :mp3
   end
 end
 put ':id' do
@@ -351,6 +351,14 @@ Optional parameters can have a default value.
 ```ruby
 params do
   optional :color, type: String, default: 'blue'
+end
+```
+
+Parameters can be restricted to a specific set of values with the `:values` option.
+
+```ruby
+params do
+  requires :status, type: Symbol, values: [:not_started, :processing, :done]
 end
 ```
 
