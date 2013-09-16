@@ -8,17 +8,17 @@ describe Grape::Validations::ValuesValidator do
         default_format :json
 
         params do
-          requires :type, :values => ['valid-type1', 'valid-type2', 'valid-type3']
+          requires :type, values: ['valid-type1', 'valid-type2', 'valid-type3']
         end
         get '/' do
-          { :type => params[:type] }
+          { type: params[:type] }
         end
 
         params do
-          optional :type, :values => ['valid-type1', 'valid-type2', 'valid-type3'], :default => 'valid-type2'
+          optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: 'valid-type2'
         end
         get '/default/valid' do
-          { :type => params[:type] }
+          { type: params[:type] }
         end
 
       end
@@ -30,34 +30,34 @@ describe Grape::Validations::ValuesValidator do
   end
 
   it 'should allow a valid value for a parameter' do
-    get("/", :type => 'valid-type1')
+    get("/", type: 'valid-type1')
     last_response.status.should eq 200
-    last_response.body.should eq({ :type => "valid-type1" }.to_json)
+    last_response.body.should eq({ type: "valid-type1" }.to_json)
   end
 
   it 'should not allow an invalid value for a parameter' do
-    get("/", :type => 'invalid-type')
+    get("/", type: 'invalid-type')
     last_response.status.should eq 400
-    last_response.body.should eq({ :error => "type does not have a valid value" }.to_json)
+    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'should allow a valid default value' do
     get("/default/valid")
     last_response.status.should eq 200
-    last_response.body.should eq({ :type => "valid-type2" }.to_json)
+    last_response.body.should eq({ type: "valid-type2" }.to_json)
   end
 
   it 'should raise IncompatibleOptionValues on an invalid default value' do
     subject = Class.new(Grape::API)
     expect {
-      subject.params { optional :type, :values => ['valid-type1', 'valid-type2', 'valid-type3'], :default => 'invalid-type' }
+      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: 'invalid-type' }
     }.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
   it 'should raise IncompatibleOptionValues when type is incompatible with values array' do
     subject = Class.new(Grape::API)
     expect {
-      subject.params { optional :type, :values => ['valid-type1', 'valid-type2', 'valid-type3'], :type => Symbol }
+      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], type: Symbol }
     }.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
