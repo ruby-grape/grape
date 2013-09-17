@@ -1,8 +1,10 @@
 Next Release
 ============
 
-* Your contribution here.
+#### Features
 
+* [#471](https://github.com/intridea/grape/issues/471): Added param validator for allowed values - [@vickychijwani](https://github.com/vickychijwani).
+* Your contribution here.
 
 0.6.0 (9/16/2013)
 =================

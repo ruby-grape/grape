@@ -189,6 +189,20 @@ module Grape
           doc_attrs[:default] = default
         end
 
+        if values = validations[:values]
+          doc_attrs[:values] = values
+        end
+
+        # default value should be present in values array, if both exist
+        if default && values && (! values.include? default)
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
+        end
+
+        # type should be compatible with values array, if both exist
+        if coerce_type && values && values.any? { |v| not v.instance_of? coerce_type }
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+        end
+
         full_attrs = attrs.collect{ |name| { :name => name, :full_name => full_name(name)} }
         @api.document_attribute(full_attrs, doc_attrs)
 

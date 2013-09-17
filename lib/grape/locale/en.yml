@@ -6,6 +6,7 @@ en:
         coerce: 'is invalid'
         presence: 'is missing'
         regexp: 'is invalid'
+        values: 'does not have a valid value'
         missing_vendor_option:
           problem: 'missing :vendor option.'
           summary: 'when version using header, you must specify :vendor option. '
@@ -26,3 +27,4 @@ en:
           resolution: 'available strategy for :using is :path, :header, :param'
         unknown_validator: 'unknown validator: %{validator_type}'
         unknown_options: 'unknown options: %{options}'
+        incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
