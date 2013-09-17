@@ -12,8 +12,8 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.5.1.
-The current stable release is [0.5.0](https://github.com/intridea/grape/blob/v0.5.0/README.md).
+You're reading the documentation for the next release of Grape, which should be 0.6.1.
+The current stable release is [0.6.0](https://github.com/intridea/grape/blob/v0.6.0/README.md).
 
 ## Project Resources
 
@@ -1002,7 +1002,7 @@ hash may include `:with`, which defines the entity to expose.
 ### Grape Entities
 
 Add the [grape-entity](https://github.com/intridea/grape-entity) gem to your Gemfile.
-Please refer to the [grape-entity documentation](https://github.com/intridea/grape-entity/blob/master/README.markdown)
+Please refer to the [grape-entity documentation](https://github.com/intridea/grape-entity/blob/master/README.md)
 for more details.
 
 The following example exposes statuses.

@@ -1,5 +1,14 @@
 Next Release
 ============
+
+#### Features
+
+* [#471](https://github.com/intridea/grape/issues/471): Added param validator for allowed values - [@vickychijwani](https://github.com/vickychijwani).
+* Your contribution here.
+
+0.6.0 (9/16/2013)
+=================
+
 #### Features
 
 * Grape is no longer tested against Ruby 1.8.7.
@@ -11,8 +20,6 @@ Next Release
 * [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
 * [#452](https://github.com/intridea/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
 * [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
-* [#471](https://github.com/intridea/grape/issues/471): Added param validator for allowed values - [@vickychijwani](https://github.com/vickychijwani).
-* Your contribution here.
 
 #### Fixes
 
