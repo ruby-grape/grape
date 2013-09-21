@@ -5,6 +5,7 @@ module Grape
       :xml,  'application/xml',
       :serializable_hash, 'application/json',
       :json, 'application/json',
+      :jsonapi, 'application/vnd.api+json',
       :atom, 'application/atom+xml',
       :rss,  'application/rss+xml',
       :txt,  'text/plain',

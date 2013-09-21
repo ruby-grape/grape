@@ -7,6 +7,7 @@ module Grape
         FORMATTERS = {
           :serializable_hash => Grape::ErrorFormatter::Json,
           :json => Grape::ErrorFormatter::Json,
+          :jsonapi => Grape::ErrorFormatter::Json,
           :txt => Grape::ErrorFormatter::Txt,
           :xml => Grape::ErrorFormatter::Xml
         }
