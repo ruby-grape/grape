@@ -6,6 +6,7 @@ module Grape
 
         PARSERS = {
           :json => Grape::Parser::Json,
+          :jsonapi => Grape::Parser::Json,
           :xml => Grape::Parser::Xml
         }
 
