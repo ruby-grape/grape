@@ -105,6 +105,25 @@ describe Grape::Middleware::Error do
        '{"detail":"missing widget","error":"rain!"}'].should include(last_response.body)
     end
 
+    it 'is possible to return errors in jsonapi format' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, :rescue_all => true, :format => :jsonapi
+        run ExceptionApp
+      end
+      get '/'
+      last_response.body.should == '{"error":"rain!"}'
+    end
+
+    it 'is possible to return hash errors in jsonapi format' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, :rescue_all => true, :format => :jsonapi
+        run ErrorHashApp
+      end
+      get '/'
+      ['{"error":"rain!","detail":"missing widget"}',
+       '{"detail":"missing widget","error":"rain!"}'].should include(last_response.body)
+    end
+
     it 'is possible to return errors in xml format' do
       @app ||= Rack::Builder.app do
         use Grape::Middleware::Error, :rescue_all => true, :format => :xml
