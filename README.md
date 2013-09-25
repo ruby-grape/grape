@@ -707,13 +707,13 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can rescue all exceptions with a code block. The `rack_response` wrapper
+You can rescue all exceptions with a code block. The `error_response` wrapper
 automatically sets the default error code and content-type.
 
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    rack_response({ message: "rescued from #{e.class.name}" })
+    error_response({ message: "rescued from #{e.class.name}" })
   end
 end
 ```
