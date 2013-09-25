@@ -1,8 +1,10 @@
 Next Release
 ============
 
-* Your contribution here.
+#### Features
 
+* [#475](https://github.com/intridea/grape/pull/475): Added support for the `:jsonapi`, `application/vnd.api+json` media type registered at http://jsonapi.org - [@bcm](https://github.com/bcm).
+* Your contribution here.
 
 0.6.0 (9/16/2013)
 =================

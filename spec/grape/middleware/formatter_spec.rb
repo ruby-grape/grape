@@ -24,6 +24,17 @@ describe Grape::Middleware::Formatter do
       subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json'}).last.each{|b| b.should == '"bar"'}
     end
 
+    it 'calls #to_json if the content type is jsonapi' do
+      @body = {'foos' => [{'bar' => 'baz'}]}
+      @body.instance_eval do
+        def to_json
+          "{\"foos\":[{\"bar\":\"baz\"}]}"
+        end
+      end
+
+      subject.call({'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json'}).last.each{|b| b.should == '{"foos":[{"bar":"baz"}]}'}
+    end
+
     it 'calls #to_xml if the content type is xml' do
       @body = "string"
       @body.instance_eval do
