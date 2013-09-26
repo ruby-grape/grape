@@ -2191,4 +2191,17 @@ XML
       end
     end
   end
+
+  context 'with json default_error_formatter' do
+    it 'returns json error' do
+      subject.content_type :json, "application/json"
+      subject.default_error_formatter :json
+      subject.get '/something' do
+        'foo'
+      end
+      get '/something'
+      last_response.status.should == 406
+      last_response.body.should == "{\"error\":\"The requested format 'txt' is not supported.\"}"
+    end
+  end
 end
