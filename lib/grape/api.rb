@@ -147,8 +147,13 @@ module Grape
       end
 
       # Specify a default error formatter.
-      def default_error_formatter(new_formatter = nil)
-        new_formatter ? set(:default_error_formatter, new_formatter) : settings[:default_error_formatter]
+      def default_error_formatter(new_formatter_name = nil)
+        if new_formatter_name
+          new_formatter = Grape::ErrorFormatter::Base.formatter_for(new_formatter_name, {})
+          set(:default_error_formatter, new_formatter)
+        else
+          settings[:default_error_formatter]
+        end
       end
 
       def error_formatter(format, options)
