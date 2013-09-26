@@ -4,6 +4,7 @@ Next Release
 #### Features
 
 * [#475](https://github.com/intridea/grape/pull/475): Added support for the `:jsonapi`, `application/vnd.api+json` media type registered at http://jsonapi.org - [@bcm](https://github.com/bcm).
+* [#471](https://github.com/intridea/grape/issues/471): Added parameter validator for a list of allowed values - [@vickychijwani](https://github.com/vickychijwani).
 * Your contribution here.
 
 0.6.0 (9/16/2013)
