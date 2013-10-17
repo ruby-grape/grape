@@ -5,6 +5,7 @@ Next Release
 
 * [#475](https://github.com/intridea/grape/pull/475): Added support for the `:jsonapi`, `application/vnd.api+json` media type registered at http://jsonapi.org - [@bcm](https://github.com/bcm).
 * [#471](https://github.com/intridea/grape/issues/471): Added parameter validator for a list of allowed values - [@vickychijwani](https://github.com/vickychijwani).
+* [#488](https://github.com/intridea/grape/issues/488): Upgraded to Virtus 1.0 - [@dblock](https://github.com/dblock).
 
 #### Fixes
 

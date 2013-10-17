@@ -66,7 +66,7 @@ describe Grape::Validations::CoerceValidator do
     context 'complex objects' do
       module CoerceValidatorSpec
         class User
-          include Virtus
+          include Virtus.model
           attribute :id, Integer
           attribute :name, String
         end
