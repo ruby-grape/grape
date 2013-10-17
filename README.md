@@ -905,7 +905,7 @@ The order for choosing the format is the following.
 
 ### JSONP
 
-Grape suports JSONP via [Rack::JSONP](https://github.com/rack/rack-contrib), part of the
+Grape supports JSONP via [Rack::JSONP](https://github.com/rack/rack-contrib), part of the
 [rack-contrib](https://github.com/rack/rack-contrib) gem. Add `rack-contrib` to your `Gemfile`.
 
 ```ruby
