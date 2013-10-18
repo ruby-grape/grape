@@ -84,7 +84,7 @@ module Grape
 
       # Prepend another HashStack's to self
       def prepend(hash_stack)
-        @stack.unshift *hash_stack.stack
+        @stack.unshift(*hash_stack.stack)
         self
       end
 
@@ -100,7 +100,7 @@ module Grape
       # @param key [Symbol] The key to gather
       # @return [Array]
       def gather(key)
-        stack.map{|s| s[key] }.flatten.compact.uniq
+        stack.map { |s| s[key] }.flatten.compact.uniq
       end
 
       def to_s

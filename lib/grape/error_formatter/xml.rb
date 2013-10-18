@@ -4,11 +4,11 @@ module Grape
       class << self
 
         def call(message, backtrace, options = {}, env = nil)
-          result = message.is_a?(Hash) ? message : { :message => message }
-          if (options[:rescue_options] || {})[:backtrace] && backtrace && ! backtrace.empty?
-            result = result.merge({ :backtrace => backtrace })
+          result = message.is_a?(Hash) ? message : { message: message }
+          if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
+            result = result.merge(backtrace: backtrace)
           end
-          result.respond_to?(:to_xml) ? result.to_xml(:root => :error) : result.to_s
+          result.respond_to?(:to_xml) ? result.to_xml(root: :error) : result.to_s
         end
 
       end

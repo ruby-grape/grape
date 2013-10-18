@@ -21,4 +21,3 @@ module Grape
     end
   end
 end
-

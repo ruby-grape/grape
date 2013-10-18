@@ -2,22 +2,25 @@ require 'spec_helper'
 
 describe Grape::Endpoint do
   subject { Class.new(Grape::API) }
-  def app; subject end
+
+  def app
+    subject
+  end
 
   describe '#initialize' do
     it 'takes a settings stack, options, and a block' do
-      p = Proc.new {}
+      p = proc { }
       expect {
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
-          :path => '/',
-          :method => :get
+          path: '/',
+          method: :get
         }, &p)
       }.not_to raise_error
     end
   end
 
   it 'sets itself in the env upon call' do
-    subject.get('/'){ "Hello world." }
+    subject.get('/') { "Hello world." }
     get '/'
     last_request.env['api.endpoint'].should be_kind_of(Grape::Endpoint)
   end
@@ -66,7 +69,7 @@ describe Grape::Endpoint do
     end
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for("/headers")
-      env[:HTTP_SYMBOL_HEADER] = "Goliath passes symbols"
+      env["HTTP_SYMBOL_HEADER".to_sym] = "Goliath passes symbols"
       body = subject.call(env)[2].body.first
       JSON.parse(body)["Symbol-Header"].should == "Goliath passes symbols"
     end
@@ -77,10 +80,10 @@ describe Grape::Endpoint do
       subject.get('/get/cookies') do
         cookies['my-awesome-cookie1'] = 'is cool'
         cookies['my-awesome-cookie2'] = {
-            :value => 'is cool too',
-            :domain => 'my.example.com',
-            :path => '/',
-            :secure => true,
+            value: 'is cool too',
+            domain: 'my.example.com',
+            path: '/',
+            secure: true,
         }
         cookies[:cookie3] = 'symbol'
         cookies['cookie4'] = 'secret code here'
@@ -93,7 +96,7 @@ describe Grape::Endpoint do
         "cookie4=secret+code+here",
         "my-awesome-cookie1=is+cool",
         "my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure"
-      ]
+     ]
     end
 
     it 'sets browser cookies and does not set response cookies' do
@@ -127,14 +130,14 @@ describe Grape::Endpoint do
         end
         sum
       end
-      get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
+      get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
       last_response.body.should == '3'
       cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [ cookie.name, cookie ]
+        [cookie.name, cookie]
       end]
       cookies.size.should == 2
-      [ "and_this", "delete_this_cookie" ].each do |cookie_name|
+      ["and_this", "delete_this_cookie"].each do |cookie_name|
         cookie = cookies[cookie_name]
         cookie.should_not be_nil
         cookie.value.should == "deleted"
@@ -147,7 +150,7 @@ describe Grape::Endpoint do
         sum = 0
         cookies.each do |name, val|
           sum += val.to_i
-          cookies.delete name, { :path => '/test' }
+          cookies.delete name, { path: '/test' }
         end
         sum
       end
@@ -155,10 +158,10 @@ describe Grape::Endpoint do
       last_response.body.should == '3'
       cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [ cookie.name, cookie ]
+        [cookie.name, cookie]
       end]
       cookies.size.should == 2
-      [ "and_this", "delete_this_cookie" ].each do |cookie_name|
+      ["and_this", "delete_this_cookie"].each do |cookie_name|
         cookie = cookies[cookie_name]
         cookie.should_not be_nil
         cookie.value.should == "deleted"
@@ -173,7 +176,7 @@ describe Grape::Endpoint do
       subject.params do
         requires :first
         optional :second
-        optional :third, :default => 'third-default'
+        optional :third, default: 'third-default'
         group :nested do
           optional :fourth
         end
@@ -232,7 +235,7 @@ describe Grape::Endpoint do
 
     it 'stringifies if that option is passed' do
       subject.get '/declared' do
-        declared(params, :stringify => true)["first"].should == "one"
+        declared(params, stringify: true)["first"].should == "one"
         ""
       end
 
@@ -242,7 +245,7 @@ describe Grape::Endpoint do
 
     it 'does not include missing attributes if that option is passed' do
       subject.get '/declared' do
-        declared(params, :include_missing => false)[:second].should == nil
+        error! 400, "expected nil" if declared(params, include_missing: false)[:second]
         ""
       end
 
@@ -280,8 +283,8 @@ describe Grape::Endpoint do
 
     context 'with special requirements' do
       it 'parses email param with provided requirements for params' do
-        subject.get('/:person_email', :requirements => { :person_email => /.*/ }) do
-        params[:person_email]
+        subject.get('/:person_email', requirements: { person_email: /.*/ }) do
+          params[:person_email]
         end
 
         get '/someone@example.com'
@@ -292,11 +295,8 @@ describe Grape::Endpoint do
       end
 
       it 'parses many params with provided regexps' do
-        subject.get('/:person_email/test/:number',
-          :requirements => {
-            :person_email => /someone@(.*).com/,
-            :number => /[0-9]/ }) do
-        params[:person_email] << params[:number]
+        subject.get('/:person_email/test/:number', requirements: { person_email: /someone@(.*).com/, number: /[0-9]/ }) do
+          params[:person_email] << params[:number]
         end
 
         get '/someone@example.com/test/1'
@@ -314,12 +314,12 @@ describe Grape::Endpoint do
 
       context 'namespace requirements' do
         before :each do
-          subject.namespace :outer, :requirements => { :person_email => /abc@(.*).com/ } do
+          subject.namespace :outer, requirements: { person_email: /abc@(.*).com/ } do
             get('/:person_email') do
               params[:person_email]
             end
 
-            namespace :inner, :requirements => {:number => /[0-9]/, :person_email => /someone@(.*).com/ }do
+            namespace :inner, requirements: { number: /[0-9]/, person_email: /someone@(.*).com/ }do
               get '/:person_email/test/:number' do
                 params[:person_email] << params[:number]
               end
@@ -354,31 +354,33 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', MultiJson.dump(:user => 'Bobby T.'), {'CONTENT_TYPE' => 'application/json'}
+        post '/request_body', MultiJson.dump(user: 'Bobby T.'), { 'CONTENT_TYPE' => 'application/json' }
         last_response.body.should == 'Bobby T.'
       end
 
       it 'does not convert empty JSON bodies to params' do
-        put '/request_body', '', {'CONTENT_TYPE' => 'application/json'}
+        put '/request_body', '', { 'CONTENT_TYPE' => 'application/json' }
         last_response.body.should == ''
       end
 
       it 'converts XML bodies to params' do
-        post '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+        post '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
         last_response.body.should == 'Bobby T.'
       end
 
       it 'converts XML bodies to params' do
-        put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+        put '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
         last_response.body.should == 'Bobby T.'
       end
 
       it 'does not include parameters not defined by the body' do
         subject.post '/omitted_params' do
-          params[:version].should == nil
-          params[:user].should == 'Bob'
+          error! 400, "expected nil" if params[:version]
+          params[:user]
         end
-        post '/omitted_params', MultiJson.dump(:user => 'Bob'), {'CONTENT_TYPE' => 'application/json'}
+        post '/omitted_params', MultiJson.dump(user: 'Bob'), { 'CONTENT_TYPE' => 'application/json' }
+        last_response.status.should == 201
+        last_response.body.should == "Bob"
       end
     end
 
@@ -388,7 +390,7 @@ describe Grape::Endpoint do
       subject.put '/request_body' do
         params[:user]
       end
-      put '/request_body', '<user>Bobby T.</user>', {'CONTENT_TYPE' => 'application/xml'}
+      put '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
       last_response.status.should == 406
       last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
     end
@@ -419,7 +421,7 @@ describe Grape::Endpoint do
 
     it 'accepts an object and render it in format' do
       subject.get '/hey' do
-        error!({'dude' => 'rad'}, 403)
+        error!({ 'dude' => 'rad' }, 403)
       end
 
       get '/hey.json'
@@ -450,7 +452,7 @@ describe Grape::Endpoint do
 
     it 'support permanent redirect' do
       subject.get('/hey') do
-        redirect "/ha", :permanent => true
+        redirect "/ha", permanent: true
       end
       get '/hey'
       last_response.status.should eq 301
@@ -464,10 +466,10 @@ describe Grape::Endpoint do
       params[:text]
     end
 
-    post '/new', :text => 'abc'
+    post '/new', text: 'abc'
     last_response.body.should == 'abc'
 
-    post '/new', :text => 'def'
+    post '/new', text: 'def'
     last_response.body.should == 'def'
   end
 
@@ -501,7 +503,7 @@ describe Grape::Endpoint do
   describe '.generate_api_method' do
     it 'raises NameError if the method name is already in use' do
       expect {
-        Grape::Endpoint.generate_api_method("version", &proc{})
+        Grape::Endpoint.generate_api_method("version", &proc { })
       }.to raise_error(NameError)
     end
     it 'raises ArgumentError if a block is not given' do
@@ -510,15 +512,15 @@ describe Grape::Endpoint do
       }.to raise_error(ArgumentError)
     end
     it 'returns a Proc' do
-      Grape::Endpoint.generate_api_method("GET test for a proc", &proc{}).should be_a Proc
+      Grape::Endpoint.generate_api_method("GET test for a proc", &proc { }).should be_a Proc
     end
   end
 
   context 'filters' do
     describe 'before filters' do
       it 'runs the before filter if set' do
-        subject.before{ env['before_test'] = "OK" }
-        subject.get('/before_test'){ env['before_test'] }
+        subject.before { env['before_test'] = "OK" }
+        subject.get('/before_test') { env['before_test'] }
 
         get '/before_test'
         last_response.body.should == "OK"
@@ -527,15 +529,15 @@ describe Grape::Endpoint do
 
     describe 'after filters' do
       it 'overrides the response body if it sets it' do
-        subject.after{ body "after" }
-        subject.get('/after_test'){ "during" }
+        subject.after { body "after" }
+        subject.get('/after_test') { "during" }
         get '/after_test'
         last_response.body.should == 'after'
       end
 
       it 'does not override the response body with its return' do
-        subject.after{ "after" }
-        subject.get('/after_test'){ "body" }
+        subject.after { "after" }
+        subject.get('/after_test') { "body" }
         get '/after_test'
         last_response.body.should == "body"
       end
@@ -547,7 +549,7 @@ describe Grape::Endpoint do
 
     verbs.each do |verb|
       it 'allows for the anchoring option with a #{verb.upcase} method' do
-        subject.send(verb, '/example', :anchor => true) do
+        subject.send(verb, '/example', anchor: true) do
           verb
         end
         send(verb, '/example/and/some/more')
@@ -563,7 +565,7 @@ describe Grape::Endpoint do
       end
 
       it 'responds to /example/and/some/more for the non-anchored #{verb.upcase} method' do
-        subject.send(verb, '/example', :anchor => false) do
+        subject.send(verb, '/example', anchor: false) do
           verb
         end
         send(verb, '/example/and/some/more')
@@ -581,9 +583,9 @@ describe Grape::Endpoint do
       get '/url'
       last_response.body.should == "http://example.org/url"
     end
-    [ 'v1', :v1 ].each do |version|
+    ['v1', :v1].each do |version|
       it 'should include version #{version}' do
-        subject.version version, :using => :path
+        subject.version version, using: :path
         subject.get('/url') do
           request.url
         end
@@ -592,7 +594,7 @@ describe Grape::Endpoint do
       end
     end
     it 'should include prefix' do
-      subject.version 'v1', :using => :path
+      subject.version 'v1', using: :path
       subject.prefix 'api'
       subject.get('/url') do
         request.url

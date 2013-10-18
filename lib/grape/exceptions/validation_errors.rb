@@ -31,7 +31,7 @@ module Grape
       end
 
       def full_message(attribute, error)
-        I18n.t(:"grape.errors.format", {
+        I18n.t("grape.errors.format".to_sym, {
           default:  "%{attribute} %{message}",
           attribute: translate_attribute(attribute),
           message:   error.message

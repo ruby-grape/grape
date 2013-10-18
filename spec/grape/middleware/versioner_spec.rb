@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Versioner do
-  
+
   let(:klass) { Grape::Middleware::Versioner }
 
   it 'recognizes :path' do

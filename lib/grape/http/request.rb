@@ -15,13 +15,13 @@ module Grape
     end
 
     def headers
-      @env['grape.request.headers'] ||= @env.dup.inject({}) { |h, (k, v)|
+      @env['grape.request.headers'] ||= @env.dup.inject({}) do |h, (k, v)|
         if k.to_s.start_with? 'HTTP_'
           k = k[5..-1].gsub('_', '-').downcase.gsub(/^.|[-_\s]./) { |x| x.upcase }
           h[k] = v
         end
         h
-      }
+      end
     end
 
   end

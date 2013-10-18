@@ -9,12 +9,12 @@ RSpec::Matchers.define :be_challenge do
 end
 
 class Test < Grape::API
-  http_digest({:realm => 'Test Api', :opaque => 'secret'}) do |username|
-    {'foo' => 'bar'}[username]
+  http_digest(realm: 'Test Api', opaque: 'secret') do |username|
+    { 'foo' => 'bar' }[username]
   end
 
   get '/test' do
-    [{:hey => 'you'},{:there => 'bar'},{:foo => 'baz'}]
+    [{ hey: 'you' }, { there: 'bar' }, { foo: 'baz' }]
   end
 end
 
@@ -22,12 +22,12 @@ describe Grape::Middleware::Auth::Digest do
   def app
     Test
   end
-  
+
   it 'is a digest authentication challenge' do
     get '/test'
     last_response.should be_challenge
   end
-  
+
   it 'throws a 401 if no auth is given' do
     get '/test'
     last_response.status.should == 401

@@ -5,9 +5,9 @@ module Grape
       class << self
 
         PARSERS = {
-          :json => Grape::Parser::Json,
-          :jsonapi => Grape::Parser::Json,
-          :xml => Grape::Parser::Xml
+          json: Grape::Parser::Json,
+          jsonapi: Grape::Parser::Json,
+          xml: Grape::Parser::Xml
         }
 
         def parsers(options)

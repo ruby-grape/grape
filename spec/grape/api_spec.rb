@@ -4,7 +4,9 @@ require 'shared/versioning_examples'
 describe Grape::API do
   subject { Class.new(Grape::API) }
 
-  def app; subject end
+  def app
+    subject
+  end
 
   describe '.prefix' do
 
@@ -52,7 +54,7 @@ describe Grape::API do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
         {
-          :using => :path
+          using: :path
         }
       end
     end
@@ -62,8 +64,8 @@ describe Grape::API do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
         {
-          :using => :param,
-          :parameter => "apiver"
+          using: :param,
+          parameter: "apiver"
         }
       end
     end
@@ -73,9 +75,9 @@ describe Grape::API do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
         {
-          :using  => :header,
-          :vendor => 'mycompany',
-          :format => 'json'
+          using: :header,
+          vendor: 'mycompany',
+          format: 'json'
         }
       end
     end
@@ -83,7 +85,7 @@ describe Grape::API do
     # Behavior as defined by rfc2616 when no header is defined
     # http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
     describe 'no specified accept header' do
-      # subject.version 'v1', :using => :header
+      # subject.version 'v1', using: :header
       # subject.get '/hello' do
       #   'hello'
       # end
@@ -101,7 +103,7 @@ describe Grape::API do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
         {
-          :using  => :accept_version_header
+          using: :accept_version_header
         }
       end
     end
@@ -109,12 +111,12 @@ describe Grape::API do
 
   describe '.represent' do
     it 'requires a :with option' do
-      expect{ subject.represent Object, {} }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
+      expect { subject.represent Object, {} }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
     end
 
     it 'adds the association to the :representations setting' do
       klass = Class.new
-      subject.represent Object, :with => klass
+      subject.represent Object, with: klass
       subject.settings[:representations][Object].should == klass
     end
   end
@@ -128,10 +130,10 @@ describe Grape::API do
 
     it 'comes after the prefix and version' do
       subject.prefix :rad
-      subject.version 'v1', :using => :path
+      subject.version 'v1', using: :path
 
       subject.namespace :awesome do
-        get('/hello'){ "worked" }
+        get('/hello') { "worked" }
       end
 
       get "/rad/v1/awesome/hello"
@@ -171,10 +173,10 @@ describe Grape::API do
 
     it 'is callable with nil just to push onto the stack' do
       subject.namespace do
-        version 'v2', :using => :path
-        get('/hello'){ "inner" }
+        version 'v2', using: :path
+        get('/hello') { "inner" }
       end
-      subject.get('/hello'){ "outer" }
+      subject.get('/hello') { "outer" }
 
       get '/v2/hello'
       last_response.body.should == "inner"
@@ -207,7 +209,7 @@ describe Grape::API do
 
     it 'should be able to define requirements with a single hash' do
       subject.namespace :users do
-        route_param :id, :requirements => /[0-9]+/ do
+        route_param :id, requirements: /[0-9]+/ do
           get do
             params[:id]
           end
@@ -248,7 +250,7 @@ describe Grape::API do
       before do
         subject.format :txt
         def subject.enable_root_route!
-          self.get("/") { "root" }
+          get("/") { "root" }
         end
       end
 
@@ -258,12 +260,12 @@ describe Grape::API do
 
       describe 'path versioned APIs' do
         before do
-          subject.version 'v1', :using => :path
+          subject.version 'v1', using: :path
           subject.enable_root_route!
         end
 
         it 'without a format' do
-          versioned_get "/", "v1", :using => :path
+          versioned_get "/", "v1", using: :path
         end
 
         it 'with a format' do
@@ -272,32 +274,32 @@ describe Grape::API do
       end
 
       it 'header versioned APIs' do
-        subject.version 'v1', :using => :header, :vendor => 'test'
+        subject.version 'v1', using: :header, vendor: 'test'
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :header, :vendor => 'test'
+        versioned_get "/", "v1", using: :header, vendor: 'test'
       end
 
       it 'header versioned APIs with multiple headers' do
-        subject.version ['v1', 'v2'], :using => :header, :vendor => 'test'
+        subject.version ['v1', 'v2'], using: :header, vendor: 'test'
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :header, :vendor => 'test'
-        versioned_get "/", "v2", :using => :header, :vendor => 'test'
+        versioned_get "/", "v1", using: :header, vendor: 'test'
+        versioned_get "/", "v2", using: :header, vendor: 'test'
       end
 
       it 'param versioned APIs' do
-        subject.version 'v1', :using => :param
+        subject.version 'v1', using: :param
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :param
+        versioned_get "/", "v1", using: :param
       end
 
       it 'Accept-Version header versioned APIs' do
-        subject.version 'v1', :using => :accept_version_header
+        subject.version 'v1', using: :accept_version_header
         subject.enable_root_route!
 
-        versioned_get "/", "v1", :using => :accept_version_header
+        versioned_get "/", "v1", using: :accept_version_header
       end
 
       it 'unversioned APIs' do
@@ -321,7 +323,7 @@ describe Grape::API do
     context 'format' do
       before(:each) do
         subject.get("/abc") do
-          RSpec::Mocks::Mock.new(:to_json => 'abc', :to_txt => 'def')
+          RSpec::Mocks::Mock.new(to_json: 'abc', to_txt: 'def')
         end
       end
 
@@ -340,7 +342,7 @@ describe Grape::API do
 
     it 'allows for format without corrupting a param' do
       subject.get('/:id') do
-        {"id" => params[:id]}
+        { "id" => params[:id] }
       end
 
       get '/awesome.json'
@@ -373,9 +375,9 @@ describe Grape::API do
       last_response.body.should eql 'hiya'
     end
 
-    [ :put, :post ].each do |verb|
+    [:put, :post].each do |verb|
       context verb do
-        [ 'string', :symbol, 1, -1.1, {}, [], true, false, nil ].each do |object|
+        ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
             subject.send(verb) do
@@ -457,7 +459,7 @@ describe Grape::API do
         last_response.body.should eql verb == 'head' ? '' : verb
         # Call it with a method other than the properly constrained one.
         send(used_verb = verbs[(verbs.index(verb) + 2) % verbs.size], '/example')
-        last_response.status.should eql used_verb == 'options' ? 204 :405
+        last_response.status.should eql used_verb == 'options' ? 204 : 405
       end
     end
 
@@ -578,16 +580,16 @@ describe Grape::API do
     end
 
     it 'adds a after_validation filter' do
-      subject.after_validation { @foo = "first #{params[:id]}:#{params[:id].class}"  }
+      subject.after_validation { @foo = "first #{params[:id] }:#{params[:id].class}"  }
       subject.after_validation { @bar = 'second' }
       subject.params do
-        requires :id, :type => Integer
+        requires :id, type: Integer
       end
       subject.get '/' do
         "#{@foo} #{@bar}"
       end
 
-      get '/', :id => "32"
+      get '/', id: "32"
       last_response.body.should eql 'first 32:Fixnum second'
     end
 
@@ -662,7 +664,7 @@ describe Grape::API do
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
         settings = Grape::Util::HashStack.new
-        settings.stub(:stack).and_return([{:middleware => [[ApiSpec::PhonyMiddleware, 'abc', 123]]}])
+        settings.stub(:stack).and_return([{ middleware: [[ApiSpec::PhonyMiddleware, 'abc', 123]] }])
         subject.stub(:settings).and_return(settings)
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
@@ -670,9 +672,10 @@ describe Grape::API do
       it 'includes all middleware from stacked settings' do
         settings = Grape::Util::HashStack.new
         settings.stub(:stack).and_return [
-          {:middleware => [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]},
-          {:middleware => [[ApiSpec::PhonyMiddleware, 'foo']]}
+          { middleware: [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']] },
+          { middleware: [[ApiSpec::PhonyMiddleware, 'foo']] }
         ]
+
         subject.stub(:settings).and_return(settings)
 
         subject.middleware.should eql [
@@ -693,7 +696,7 @@ describe Grape::API do
         subject.use ApiSpec::PhonyMiddleware, 123
         subject.namespace :awesome do
           use ApiSpec::PhonyMiddleware, 'abc'
-          middleware.should == [[ApiSpec::PhonyMiddleware, 123],[ApiSpec::PhonyMiddleware, 'abc']]
+          middleware.should == [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']]
         end
 
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, 123]]
@@ -710,13 +713,13 @@ describe Grape::API do
       end
 
       it 'adds a block if one is given' do
-        block = lambda{ }
+        block = lambda { }
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, block]]
       end
 
       it 'uses a block if one is given' do
-        block = lambda{ }
+        block = lambda { }
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
@@ -727,7 +730,7 @@ describe Grape::API do
       end
 
       it 'does not destroy the middleware settings on multiple runs' do
-        block = lambda{ }
+        block = lambda { }
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
@@ -742,7 +745,7 @@ describe Grape::API do
       it 'mounts behind error middleware' do
         m = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, :message => "Caught in the Net", :status => 400
+            throw :error, message: "Caught in the Net", status: 400
           end
         end
         subject.use m
@@ -756,24 +759,24 @@ describe Grape::API do
   end
   describe '.basic' do
     it 'protects any resources on the same scope' do
-      subject.http_basic do |u,p|
+      subject.http_basic do |u, p|
         u == 'allow'
       end
-      subject.get(:hello){ "Hello, world."}
+      subject.get(:hello) { "Hello, world." }
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
       last_response.status.should eql 200
     end
 
     it 'is scopable' do
-      subject.get(:hello){ "Hello, world."}
+      subject.get(:hello) { "Hello, world." }
       subject.namespace :admin do
-        http_basic do |u,p|
+        http_basic do |u, p|
           u == 'allow'
         end
 
-        get(:hello){ "Hello, world." }
+        get(:hello) { "Hello, world." }
       end
 
       get '/hello'
@@ -783,14 +786,14 @@ describe Grape::API do
     end
 
     it 'is callable via .auth as well' do
-      subject.auth :http_basic do |u,p|
+      subject.auth :http_basic do |u, p|
         u == 'allow'
       end
 
-      subject.get(:hello){ "Hello, world."}
+      subject.get(:hello) { "Hello, world." }
       get '/hello'
       last_response.status.should eql 401
-      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow','whatever')
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
       last_response.status.should eql 200
     end
   end
@@ -877,7 +880,7 @@ describe Grape::API do
         [one, two]
       end
 
-      lambda{get '/howdy'}.should_not raise_error
+      lambda { get '/howdy' }.should_not raise_error
     end
 
     it 'allows for modules' do
@@ -915,7 +918,7 @@ describe Grape::API do
       subject.get 'howdy' do
         [one, two, three]
       end
-      lambda{get '/howdy'}.should_not raise_error
+      lambda { get '/howdy' }.should_not raise_error
     end
   end
 
@@ -966,20 +969,20 @@ describe Grape::API do
 
     it 'rescues only certain errors if rescue_from is called with specific errors' do
       subject.rescue_from ArgumentError
-      subject.get('/rescued'){ raise ArgumentError }
-      subject.get('/unrescued'){ raise "beefcake" }
+      subject.get('/rescued') { raise ArgumentError }
+      subject.get('/unrescued') { raise "beefcake" }
 
       get '/rescued'
       last_response.status.should eql 403
 
-      lambda{ get '/unrescued' }.should raise_error
+      lambda { get '/unrescued' }.should raise_error
     end
 
     it 'does not re-raise exceptions of type Grape::Exception::Base' do
       class CustomError < Grape::Exceptions::Base; end
-      subject.get('/custom_exception'){ raise CustomError }
+      subject.get('/custom_exception') { raise CustomError }
 
-      lambda{ get '/custom_exception' }.should_not raise_error
+      lambda { get '/custom_exception' }.should_not raise_error
     end
 
     it 'rescues custom grape exceptions' do
@@ -988,7 +991,7 @@ describe Grape::API do
         rack_response('New Error', e.status)
       end
       subject.get '/custom_error' do
-        raise CustomError, :status => 400, :message => 'Custom Error'
+        raise CustomError, status: 400, message: 'Custom Error'
       end
 
       get '/custom_error'
@@ -1095,7 +1098,7 @@ describe Grape::API do
     end
 
     it 'can execute the lambda with an argument' do
-      subject.rescue_from ArgumentError, lambda {|e|
+      subject.rescue_from ArgumentError, lambda { |e|
         rack_response(e.message, 400)
       }
       subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
@@ -1108,7 +1111,10 @@ describe Grape::API do
 
   describe '.rescue_from klass, with: method' do
     it 'rescues an error with the specified message' do
-      def rescue_arg_error; Rack::Response.new('rescued with a method', 400); end
+      def rescue_arg_error
+        Rack::Response.new('rescued with a method', 400)
+      end
+
       subject.rescue_from ArgumentError, with: rescue_arg_error
       subject.get('/rescue_method') { raise ArgumentError }
 
@@ -1130,7 +1136,7 @@ describe Grape::API do
     end
 
     it 'rescues all errors and return :txt with backtrace' do
-      subject.rescue_from :all, :backtrace => true
+      subject.rescue_from :all, backtrace: true
       subject.format :txt
       subject.get '/exception' do
         raise "rain!"
@@ -1173,7 +1179,7 @@ describe Grape::API do
         end
       end
       it 'returns a custom error format' do
-        subject.rescue_from :all, :backtrace => true
+        subject.rescue_from :all, backtrace: true
         subject.error_formatter :txt, CustomErrorFormatter
         subject.get '/exception' do
           raise "rain!"
@@ -1214,7 +1220,7 @@ describe Grape::API do
       last_response.body.should eql '{"error":"rain!"}'
     end
     it 'rescues all errors and return :json with backtrace' do
-      subject.rescue_from :all, :backtrace => true
+      subject.rescue_from :all, backtrace: true
       subject.format :json
       subject.get '/exception' do
         raise "rain!"
@@ -1273,10 +1279,10 @@ describe Grape::API do
   describe '.formatter' do
     context 'multiple formatters' do
       before :each do
-        subject.formatter :json, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some]}\"}" }
-        subject.formatter :txt, lambda { |object, env| "custom_formatter: #{object[:some]}" }
+        subject.formatter :json, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some] }\"}" }
+        subject.formatter :txt, lambda { |object, env| "custom_formatter: #{object[:some] }" }
         subject.get :simple do
-          {:some => 'hash'}
+          { some: 'hash' }
         end
       end
       it 'sets one formatter' do
@@ -1292,9 +1298,9 @@ describe Grape::API do
       before :each do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.formatter :custom, lambda { |object, env| "{\"custom_formatter\":\"#{object[:some] }\"}" }
         subject.get :simple do
-          {:some => 'hash'}
+          { some: 'hash' }
         end
       end
       it 'uses json' do
@@ -1309,7 +1315,7 @@ describe Grape::API do
     context 'custom formatter class' do
       module CustomFormatter
         def self.call(object, env)
-          "{\"custom_formatter\":\"#{object[:some]}\"}"
+          "{\"custom_formatter\":\"#{object[:some] }\"}"
         end
       end
       before :each do
@@ -1317,7 +1323,7 @@ describe Grape::API do
         subject.content_type :custom, 'application/custom'
         subject.formatter :custom, CustomFormatter
         subject.get :simple do
-          {:some => 'hash'}
+          { some: 'hash' }
         end
       end
       it 'uses json' do
@@ -1335,7 +1341,7 @@ describe Grape::API do
     it 'parses data in format requested by content-type' do
       subject.format :json
       subject.post '/data' do
-        { :x => params[:x] }
+        { x: params[:x] }
       end
       post "/data", '{"x":42}', { 'CONTENT_TYPE' => 'application/json' }
       last_response.status.should == 201
@@ -1350,7 +1356,7 @@ describe Grape::API do
           params[:simple]
         end
       end
-      [ "text/custom", "text/custom; charset=UTF-8" ].each do |content_type|
+      ["text/custom", "text/custom; charset=UTF-8"].each do |content_type|
         it "uses parser for #{content_type}" do
           put '/simple', "simple", "CONTENT_TYPE" => content_type
           last_response.status.should == 200
@@ -1392,7 +1398,7 @@ describe Grape::API do
       before :each do
         subject.parser :json, nil
         subject.put "data" do
-          "body: #{env['api.request.body']}"
+          "body: #{env['api.request.body'] }"
         end
       end
       it "does not parse data" do
@@ -1410,7 +1416,7 @@ describe Grape::API do
     end
     it 'returns data in default format' do
       subject.get '/data' do
-        { :x => 42 }
+        { x: 42 }
       end
       get "/data"
       last_response.status.should == 200
@@ -1418,7 +1424,7 @@ describe Grape::API do
     end
     it 'parses data in default format' do
       subject.post '/data' do
-        { :x => params[:x] }
+        { x: params[:x] }
       end
       post "/data", '{"x":42}', "CONTENT_TYPE" => ""
       last_response.status.should == 201
@@ -1455,76 +1461,76 @@ describe Grape::API do
     describe 'single method api structure' do
       before(:each) do
         subject.get :ping do
-           'pong'
+          'pong'
         end
       end
       it 'returns one route' do
-         subject.routes.size.should == 1
-         route = subject.routes[0]
-         route.route_version.should be_nil
-         route.route_path.should == "/ping(.:format)"
-         route.route_method.should == "GET"
+        subject.routes.size.should == 1
+        route = subject.routes[0]
+        route.route_version.should be_nil
+        route.route_path.should == "/ping(.:format)"
+        route.route_method.should == "GET"
       end
     end
     describe 'api structure with two versions and a namespace' do
       before :each do
-        subject.version 'v1', :using => :path
+        subject.version 'v1', using: :path
         subject.get 'version' do
-           api.version
+          api.version
         end
         # version v2
-        subject.version 'v2', :using => :path
+        subject.version 'v2', using: :path
         subject.prefix 'p'
         subject.namespace 'n1' do
           namespace 'n2' do
             get 'version' do
-               api.version
+              api.version
             end
           end
         end
       end
       it 'returns the latest version set' do
-         subject.version.should == 'v2'
+        subject.version.should == 'v2'
       end
       it 'returns versions' do
-         subject.versions.should == [ 'v1', 'v2' ]
+        subject.versions.should == ['v1', 'v2']
       end
       it 'sets route paths' do
-         subject.routes.size.should >= 2
-         subject.routes[0].route_path.should == "/:version/version(.:format)"
-         subject.routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
+        subject.routes.size.should >= 2
+        subject.routes[0].route_path.should == "/:version/version(.:format)"
+        subject.routes[1].route_path.should == "/p/:version/n1/n2/version(.:format)"
       end
       it 'sets route versions' do
-         subject.routes[0].route_version.should == 'v1'
-         subject.routes[1].route_version.should == 'v2'
+        subject.routes[0].route_version.should == 'v1'
+        subject.routes[1].route_version.should == 'v2'
       end
       it 'sets a nested namespace' do
-         subject.routes[1].route_namespace.should == "/n1/n2"
+        subject.routes[1].route_namespace.should == "/n1/n2"
       end
       it 'sets prefix' do
-         subject.routes[1].route_prefix.should == 'p'
+        subject.routes[1].route_prefix.should == 'p'
       end
     end
     describe 'api structure with additional parameters' do
       before(:each) do
-        subject.get 'split/:string', { :params => { "token" => "a token" }, :optional_params => { "limit" => "the limit" } } do
+        subject.get 'split/:string', { params: { "token" => "a token" }, optional_params: { "limit" => "the limit" } } do
           params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
       it 'splits a string' do
-        get "/split/a,b,c.json", :token => ','
+        get "/split/a,b,c.json", token: ','
         last_response.body.should == '["a","b","c"]'
       end
       it 'splits a string with limit' do
-        get "/split/a,b,c.json", :token => ',', :limit => '2'
+        get "/split/a,b,c.json", token: ',', limit: '2'
         last_response.body.should == '["a","b,c"]'
       end
       it 'sets route_params' do
         subject.routes.map { |route|
-          { :params => route.route_params, :optional_params => route.route_optional_params }
+          { params: route.route_params, optional_params: route.route_optional_params }
         }.should eq [
-          { :params => { "string" => "", "token" => "a token" }, :optional_params => { "limit" => "the limit" } }
-        ]
+          { params: { "string" => "", "token" => "a token" }, optional_params: { "limit" => "the limit" } }
+      ]
       end
     end
   end
@@ -1553,122 +1559,122 @@ describe Grape::API do
       subject.get :second do ; end
       subject.routes.count.should == 2
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "first method", :params => {} },
-        { :description => "second method", :params => {} }
-      ]
+        { description: "first method", params: {} },
+        { description: "second method", params: {} }
+    ]
     end
     it 'resets desc' do
       subject.desc "first method"
       subject.get :first do ; end
       subject.get :second do ; end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "first method", :params => {} },
-        { :description => nil, :params => {} }
-      ]
+        { description: "first method", params: {} },
+        { description: nil, params: {} }
+    ]
     end
     it 'namespaces and describe arbitrary parameters' do
       subject.namespace 'ns' do
-        desc "ns second", :foo => "bar"
+        desc "ns second", foo: "bar"
         get 'second' do ; end
       end
       subject.routes.map { |route|
-        { :description => route.route_description, :foo => route.route_foo, :params => route.route_params }
+        { description: route.route_description, foo: route.route_foo, params: route.route_params }
       }.should eq [
-        { :description => "ns second", :foo => "bar", :params => {} },
-      ]
+        { description: "ns second", foo: "bar", params: {} },
+    ]
     end
     it 'includes details' do
-      subject.desc "method", :details => "method details"
+      subject.desc "method", details: "method details"
       subject.get 'method' do ; end
       subject.routes.map { |route|
-        { :description => route.route_description, :details => route.route_details, :params => route.route_params }
+        { description: route.route_description, details: route.route_details, params: route.route_params }
       }.should eq [
-        { :description => "method", :details => "method details", :params => {} },
-      ]
+        { description: "method", details: "method details", params: {} },
+    ]
     end
     it 'describes a method with parameters' do
-      subject.desc "Reverses a string.", { :params =>
-        { "s" => { :desc => "string to reverse", :type => "string" }}
+      subject.desc "Reverses a string.", { params:
+        { "s" => { desc: "string to reverse", type: "string" } }
       }
       subject.get 'reverse' do
         params[:s].reverse
       end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
-      ]
+        { description: "Reverses a string.", params: { "s" => { desc: "string to reverse", type: "string" } } }
+    ]
     end
     it 'merges the parameters of the namespace with the parameters of the method' do
       subject.desc "namespace"
       subject.params do
-        requires :ns_param, :desc => "namespace parameter"
+        requires :ns_param, desc: "namespace parameter"
       end
       subject.namespace 'ns' do
         desc "method"
         params do
-          optional :method_param, :desc => "method parameter"
+          optional :method_param, desc: "method parameter"
         end
         get 'method' do ; end
       end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "method",
-          :params => {
-            "ns_param" => { :required => true, :desc => "namespace parameter" },
-            "method_param" => { :required => false, :desc => "method parameter" }
+        { description: "method",
+          params: {
+            "ns_param" => { required: true, desc: "namespace parameter" },
+            "method_param" => { required: false, desc: "method parameter" }
           }
         }
-      ]
+    ]
     end
     it 'merges the parameters of nested namespaces' do
       subject.desc "ns1"
       subject.params do
-        optional :ns_param, :desc => "ns param 1"
-        requires :ns1_param, :desc => "ns1 param"
+        optional :ns_param, desc: "ns param 1"
+        requires :ns1_param, desc: "ns1 param"
       end
       subject.namespace 'ns1' do
         desc "ns2"
         params do
-          requires :ns_param, :desc => "ns param 2"
-          requires :ns2_param, :desc => "ns2 param"
+          requires :ns_param, desc: "ns param 2"
+          requires :ns2_param, desc: "ns2 param"
         end
         namespace 'ns2' do
           desc "method"
           params do
-            optional :method_param, :desc => "method param"
+            optional :method_param, desc: "method param"
           end
           get 'method' do ; end
         end
       end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "method",
-          :params => {
-            "ns_param" => { :required => true, :desc => "ns param 2" },
-            "ns1_param" => { :required => true, :desc => "ns1 param" },
-            "ns2_param" => { :required => true, :desc => "ns2 param" },
-            "method_param" => { :required => false, :desc => "method param" }
+        { description: "method",
+          params: {
+            "ns_param" => { required: true, desc: "ns param 2" },
+            "ns1_param" => { required: true, desc: "ns1 param" },
+            "ns2_param" => { required: true, desc: "ns2 param" },
+            "method_param" => { required: false, desc: "method param" }
           }
         }
-      ]
+    ]
     end
     it "groups nested params and prevents overwriting of params with same name in different groups" do
       subject.desc "method"
       subject.params do
         group :group1 do
-          optional :param1, :desc => "group1 param1 desc"
-          requires :param2, :desc => "group1 param2 desc"
+          optional :param1, desc: "group1 param1 desc"
+          requires :param2, desc: "group1 param2 desc"
         end
         group :group2 do
-          optional :param1, :desc => "group2 param1 desc"
-          requires :param2, :desc => "group2 param2 desc"
+          optional :param1, desc: "group2 param1 desc"
+          requires :param2, desc: "group2 param2 desc"
         end
       end
       subject.get "method" do ; end
@@ -1676,60 +1682,60 @@ describe Grape::API do
       subject.routes.map { |route|
         route.route_params
       }.should eq [{
-        "group1[param1]" => { :required => false, :desc => "group1 param1 desc" },
-        "group1[param2]" => { :required => true, :desc => "group1 param2 desc" },
-        "group2[param1]" => { :required => false, :desc => "group2 param1 desc" },
-        "group2[param2]" => { :required => true, :desc => "group2 param2 desc" }
+        "group1[param1]" => { required: false, desc: "group1 param1 desc" },
+        "group1[param2]" => { required: true, desc: "group1 param2 desc" },
+        "group2[param1]" => { required: false, desc: "group2 param1 desc" },
+        "group2[param2]" => { required: true, desc: "group2 param2 desc" }
       }]
     end
     it 'uses full name of parameters in nested groups' do
       subject.desc "nesting"
       subject.params do
-        requires :root_param, :desc => "root param"
+        requires :root_param, desc: "root param"
         group :nested do
-          requires :nested_param, :desc => "nested param"
+          requires :nested_param, desc: "nested param"
         end
       end
       subject.get 'method' do ; end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "nesting",
-          :params => {
-            "root_param" => { :required => true, :desc => "root param" },
-            "nested[nested_param]" => { :required => true, :desc => "nested param" }
+        { description: "nesting",
+          params: {
+            "root_param" => { required: true, desc: "root param" },
+            "nested[nested_param]" => { required: true, desc: "nested param" }
           }
         }
-      ]
+    ]
     end
     it 'parses parameters when no description is given' do
       subject.params do
-        requires :one_param, :desc => "one param"
+        requires :one_param, desc: "one param"
       end
       subject.get 'method' do ; end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => nil, :params => { "one_param" => { :required => true, :desc => "one param" } } }
-      ]
+        { description: nil, params: { "one_param" => { required: true, desc: "one param" } } }
+    ]
     end
     it 'does not symbolize params' do
-      subject.desc "Reverses a string.", { :params =>
-        { "s" => { :desc => "string to reverse", :type => "string" }}
+      subject.desc "Reverses a string.", { params:
+        { "s" => { desc: "string to reverse", type: "string" } }
       }
       subject.get 'reverse/:s' do
         params[:s].reverse
       end
       subject.routes.map { |route|
-        { :description => route.route_description, :params => route.route_params }
+        { description: route.route_description, params: route.route_params }
       }.should eq [
-        { :description => "Reverses a string.", :params => { "s" => { :desc => "string to reverse", :type => "string" } } }
-      ]
+        { description: "Reverses a string.", params: { "s" => { desc: "string to reverse", type: "string" } } }
+    ]
     end
   end
 
   describe '.mount' do
-    let(:mounted_app){ lambda{|env| [200, {}, ["MOUNTED"]]} }
+    let(:mounted_app) { lambda { |env| [200, { }, ["MOUNTED"]] } }
 
     context 'with a bare rack app' do
       before do
@@ -1747,7 +1753,7 @@ describe Grape::API do
       end
 
       it 'is able to cascade' do
-        subject.mount lambda{ |env|
+        subject.mount lambda { |env|
           headers = {}
           headers['X-Cascade'] == 'pass' unless env['PATH_INFO'].include?('boo')
           [200, headers, ["Farfegnugen"]]
@@ -1770,7 +1776,7 @@ describe Grape::API do
 
     context 'mounting an API' do
       it 'applies the settings of the mounting api' do
-        subject.version 'v1', :using => :path
+        subject.version 'v1', using: :path
 
         subject.namespace :cool do
           app = Class.new(Grape::API)
@@ -1786,7 +1792,7 @@ describe Grape::API do
       end
 
       it 'applies the settings to nested mounted apis' do
-        subject.version 'v1', :using => :path
+        subject.version 'v1', using: :path
 
         subject.namespace :cool do
           inner_app = Class.new(Grape::API)
@@ -1821,13 +1827,13 @@ describe Grape::API do
       it 'collects the routes of the mounted api' do
         subject.namespace :cool do
           app = Class.new(Grape::API)
-          app.get('/awesome') {}
-          app.post('/sauce') {}
+          app.get('/awesome') { }
+          app.post('/sauce') { }
           mount app
         end
         subject.routes.size.should == 2
-        subject.routes.first.route_path.should =~ /\/cool\/awesome/
-        subject.routes.last.route_path.should =~ /\/cool\/sauce/
+        subject.routes.first.route_path.should =~ %r{\/cool\/awesome}
+        subject.routes.last.route_path.should =~ %r{\/cool\/sauce}
       end
 
       it 'mounts on a path' do
@@ -1889,8 +1895,8 @@ describe Grape::API do
       subject.format :json
       subject.get '/endpoint/options' do
         {
-          :path => options[:path],
-          :source_location => source.source_location
+          path: options[:path],
+          source_location: source.source_location
         }
       end
     end
@@ -1926,7 +1932,7 @@ describe Grape::API do
         subject.get '/description' do
           route.route_description
         end
-        subject.desc 'returns parameters', { :params => { "x" => "y" }}
+        subject.desc 'returns parameters', { params: { "x" => "y" } }
         subject.get '/params/:id' do
           route.route_params[params[:id]]
         end
@@ -1947,40 +1953,40 @@ describe Grape::API do
         subject.format :txt
         subject.content_type :json, "application/json"
         subject.get '/meaning_of_life' do
-          { :meaning_of_life => 42 }
+          { meaning_of_life: 42 }
         end
       end
       it 'forces txt without an extension' do
         get '/meaning_of_life'
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'does not force txt with an extension' do
         get '/meaning_of_life.json'
-        last_response.body.should == { :meaning_of_life => 42 }.to_json
+        last_response.body.should == { meaning_of_life: 42 }.to_json
       end
       it 'forces txt from a non-accepting header' do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
     end
     context ':txt only' do
       before(:each) do
         subject.format :txt
         subject.get '/meaning_of_life' do
-          { :meaning_of_life => 42 }
+          { meaning_of_life: 42 }
         end
       end
       it 'forces txt without an extension' do
         get '/meaning_of_life'
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'forces txt with the wrong extension' do
         get '/meaning_of_life.json'
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'forces txt from a non-accepting header' do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
     end
     context ':json' do
@@ -1988,33 +1994,33 @@ describe Grape::API do
         subject.format :json
         subject.content_type :txt, "text/plain"
         subject.get '/meaning_of_life' do
-          { :meaning_of_life => 42 }
+          { meaning_of_life: 42 }
         end
       end
       it 'forces json without an extension' do
         get '/meaning_of_life'
-        last_response.body.should == { :meaning_of_life => 42 }.to_json
+        last_response.body.should == { meaning_of_life: 42 }.to_json
       end
       it 'does not force json with an extension' do
         get '/meaning_of_life.txt'
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'forces json from a non-accepting header' do
         get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
-        last_response.body.should == { :meaning_of_life => 42 }.to_json
+        last_response.body.should == { meaning_of_life: 42 }.to_json
       end
       it 'can be overwritten with an explicit content type' do
         subject.get '/meaning_of_life_with_content_type' do
           content_type "text/plain"
-          { :meaning_of_life => 42 }.to_s
+          { meaning_of_life: 42 }.to_s
         end
         get '/meaning_of_life_with_content_type'
-        last_response.body.should == { :meaning_of_life => 42 }.to_s
+        last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, :message => "Unauthorized", :status => 42
+            throw :error, message: "Unauthorized", status: 42
           end
         end
         subject.use middleware
@@ -2023,7 +2029,7 @@ describe Grape::API do
         end
         get "/"
         last_response.status.should == 42
-        last_response.body.should == { :error => "Unauthorized" }.to_json
+        last_response.body.should == { error: "Unauthorized" }.to_json
       end
 
     end
@@ -2031,7 +2037,7 @@ describe Grape::API do
       before(:each) do
         class SerializableHashExample
           def serializable_hash
-            { :abc => 'def' }
+            { abc: 'def' }
           end
         end
         subject.format :serializable_hash
@@ -2052,7 +2058,7 @@ describe Grape::API do
       end
       it 'array' do
         subject.get '/examples' do
-          [ SerializableHashExample.new, SerializableHashExample.new ]
+          [SerializableHashExample.new, SerializableHashExample.new]
         end
         get '/examples'
         last_response.body.should == '[{"abc":"def"},{"abc":"def"}]'
@@ -2080,7 +2086,7 @@ XML
           ActiveSupport::OrderedHash[
             :example1, "example1",
             :example2, "example2"
-          ]
+        ]
         end
         get '/example'
         last_response.status.should == 200
@@ -2094,7 +2100,7 @@ XML
       end
       it 'array' do
         subject.get "/example" do
-          [ "example1", "example2" ]
+          ["example1", "example2"]
         end
         get '/example'
         last_response.status.should == 200
@@ -2109,7 +2115,7 @@ XML
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, :message => "Unauthorized", :status => 42
+            throw :error, message: "Unauthorized", status: 42
           end
         end
         subject.use middleware
@@ -2131,22 +2137,22 @@ XML
   context "catch-all" do
     before do
       api1 = Class.new(Grape::API)
-      api1.version 'v1', :using => :path
+      api1.version 'v1', using: :path
       api1.get "hello" do
         "v1"
       end
       api2 = Class.new(Grape::API)
-      api2.version 'v2', :using => :path
+      api2.version 'v2', using: :path
       api2.get "hello" do
         "v2"
       end
       subject.mount api1
       subject.mount api2
     end
-    [ true, false ].each do |anchor|
+    [true, false].each do |anchor|
       it "anchor=#{anchor}" do
-        subject.route :any, '*path', :anchor => anchor do
-          error!("Unrecognized request path: #{params[:path]} - #{env['PATH_INFO']}#{env['SCRIPT_NAME']}", 404)
+        subject.route :any, '*path', anchor: anchor do
+          error!("Unrecognized request path: #{params[:path] } - #{env['PATH_INFO'] }#{env['SCRIPT_NAME'] }", 404)
         end
         get "/v1/hello"
         last_response.status.should == 200
@@ -2164,13 +2170,13 @@ XML
   context "cascading" do
     context "via version" do
       it "cascades" do
-        subject.version 'v1', :using => :path, :cascade => true
+        subject.version 'v1', using: :path, cascade: true
         get "/v1/hello"
         last_response.status.should == 404
         last_response.headers["X-Cascade"].should == "pass"
       end
       it "does not cascade" do
-        subject.version 'v2', :using => :path, :cascade => false
+        subject.version 'v2', using: :path, cascade: false
         get "/v2/hello"
         last_response.status.should == 404
         last_response.headers.keys.should_not include "X-Cascade"

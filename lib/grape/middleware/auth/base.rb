@@ -12,16 +12,16 @@ module Grape
         end
 
         def base_request
-          raise NotImplementedError.new("You must implement base_request.")
+          raise NotImplementedError, "You must implement base_request."
         end
 
         def credentials
-          base_request.provided?? base_request.credentials : [nil, nil]
+          base_request.provided? ? base_request.credentials : [nil, nil]
         end
 
         def before
           unless authenticator.call(*credentials)
-            throw :error, :status => 401, :message => "API Authorization Failed."
+            throw :error, status: 401, message: "API Authorization Failed."
           end
         end
       end

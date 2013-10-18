@@ -7,19 +7,19 @@ module Grape
       # based on the uri path and removes the version substring from the uri
       # path. If the version substring does not match any potential initialized
       # versions, a 404 error is thrown.
-      # 
+      #
       # Example: For a uri path
       #   /v1/resource
-      # 
+      #
       # The following rack env variables are set and path is rewritten to
       # '/resource':
-      # 
+      #
       #   env['api.version'] => 'v1'
-      # 
+      #
       class Path < Base
         def default_options
           {
-            :pattern => /.*/i
+            pattern: /.*/i
           }
         end
 
@@ -34,11 +34,9 @@ module Grape
           pieces = path.split('/')
           potential_version = pieces[1]
           if potential_version =~ options[:pattern]
-            if options[:versions] && ! options[:versions].find { |v| v.to_s == potential_version }
-              throw :error, :status => 404, :message => "404 API Version Not Found"
+            if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
+              throw :error, status: 404, message: "404 API Version Not Found"
             end
-
-            truncated_path = "/#{pieces[2..-1].join('/')}"
             env['api.version'] = potential_version
           end
         end

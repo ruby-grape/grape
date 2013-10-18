@@ -5,11 +5,11 @@ module Grape
       class << self
 
         FORMATTERS = {
-          :json => Grape::Formatter::Json,
-          :jsonapi => Grape::Formatter::Json,
-          :serializable_hash => Grape::Formatter::SerializableHash,
-          :txt => Grape::Formatter::Txt,
-          :xml => Grape::Formatter::Xml
+          json: Grape::Formatter::Json,
+          jsonapi: Grape::Formatter::Json,
+          serializable_hash: Grape::Formatter::SerializableHash,
+          txt: Grape::Formatter::Txt,
+          xml: Grape::Formatter::Xml
         }
 
         def formatters(options)

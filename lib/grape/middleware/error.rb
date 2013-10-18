@@ -6,15 +6,15 @@ module Grape
 
       def default_options
         {
-          :default_status => 403, # default status returned on error
-          :default_message => "",
-          :format => :txt,
-          :formatters => {},
-          :error_formatters => {},
-          :rescue_all => false, # true to rescue all exceptions
-          :rescue_options => { :backtrace => false }, # true to display backtrace
-          :rescue_handlers => {}, # rescue handler blocks
-          :rescued_errors => []
+          default_status: 403, # default status returned on error
+          default_message: "",
+          format: :txt,
+          formatters: {},
+          error_formatters: {},
+          rescue_all: false, # true to rescue all exceptions
+          rescue_options: { backtrace: false }, # true to display backtrace
+          rescue_handlers: {}, # rescue handler blocks
+          rescued_errors: []
         }
       end
 
@@ -22,13 +22,13 @@ module Grape
         @env = env
 
         begin
-          error_response(catch(:error){
+          error_response(catch(:error) do
             return @app.call(@env)
-          })
-        rescue Exception => e
+          end)
+        rescue StandardError => e
           is_rescuable = rescuable?(e.class)
           if e.is_a?(Grape::Exceptions::Base) && !is_rescuable
-            handler = lambda {|e| error_response(e) }
+            handler = lambda { |arg| error_response(arg) }
           else
             raise unless is_rescuable
             handler = options[:rescue_handlers][e.class] || options[:rescue_handlers][:all]
@@ -44,33 +44,33 @@ module Grape
 
       def exec_handler(e, &handler)
         if handler.lambda? && handler.arity == 0
-          self.instance_exec(&handler)
+          instance_exec(&handler)
         else
-          self.instance_exec(e, &handler)
+          instance_exec(e, &handler)
         end
       end
 
       def handle_error(e)
-        error_response({ :message => e.message, :backtrace => e.backtrace })
+        error_response(message: e.message, backtrace: e.backtrace)
       end
 
       def error_response(error = {})
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]
-        headers = {'Content-Type' => content_type}
+        headers = { 'Content-Type' => content_type }
         headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         backtrace = error[:backtrace] || []
         rack_response(format_message(message, backtrace), status, headers)
       end
 
       def rack_response(message, status = options[:default_status], headers = { 'Content-Type' => content_type })
-        Rack::Response.new([ message ], status, headers).finish
+        Rack::Response.new([message], status, headers).finish
       end
 
       def format_message(message, backtrace)
         format = env['api.format'] || options[:format]
         formatter = Grape::ErrorFormatter::Base.formatter_for(format, options)
-        throw :error, :status => 406, :message => "The requested format '#{format}' is not supported." unless formatter
+        throw :error, status: 406, message: "The requested format '#{format}' is not supported." unless formatter
         formatter.call(message, backtrace, options, env)
       end
 

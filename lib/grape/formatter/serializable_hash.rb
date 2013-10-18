@@ -13,18 +13,19 @@ module Grape
         private
 
           def serializable?(object)
-           object.respond_to?(:serializable_hash) ||
-             object.kind_of?(Array) && !object.map {|o| o.respond_to? :serializable_hash }.include?(false) ||
-             object.kind_of?(Hash)
+            object.respond_to?(:serializable_hash) || object.kind_of?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false) || object.kind_of?(Hash)
           end
 
           def serialize(object)
             if object.respond_to? :serializable_hash
               object.serializable_hash
-            elsif object.kind_of?(Array) && !object.map {|o| o.respond_to? :serializable_hash }.include?(false)
-              object.map {|o| o.serializable_hash }
+            elsif object.kind_of?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false)
+              object.map { |o| o.serializable_hash }
             elsif object.kind_of?(Hash)
-              object.inject({}) { |h,(k,v)| h[k] = serialize(v); h }
+              object.inject({}) do |h, (k, v)|
+                h[k] = serialize(v)
+                h
+              end
             else
               object
             end

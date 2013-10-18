@@ -24,21 +24,21 @@ module Grape
           if strict?
             # If no Accept-Version header:
             if potential_version.empty?
-              throw :error, :status => 406, :headers => error_headers, :message => 'Accept-Version header must be set.'
+              throw :error, status: 406, headers: error_headers, message: 'Accept-Version header must be set.'
             end
           end
 
           unless potential_version.empty?
             # If the requested version is not supported:
-            if !versions.any? { |v| v.to_s == potential_version }
-              throw :error, :status => 406, :headers => error_headers, :message => 'The requested version is not supported.'
+            unless versions.any? { |v| v.to_s == potential_version }
+              throw :error, status: 406, headers: error_headers, message: 'The requested version is not supported.'
             end
 
             env['api.version'] = potential_version
           end
         end
 
-      private
+        private
 
         def versions
           options[:versions] || []
@@ -52,9 +52,11 @@ module Grape
         # of routes (see [Rack::Mount](https://github.com/josh/rack-mount) for more information). To prevent
         # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
-          options[:version_options] && options[:version_options].has_key?(:cascade) ? 
-            !! options[:version_options][:cascade] : 
+          if options[:version_options] && options[:version_options].has_key?(:cascade)
+            !!options[:version_options][:cascade]
+          else
             true
+          end
         end
 
         def error_headers

@@ -1,0 +1,61 @@
+LineLength:
+  Enabled: false
+
+MethodLength:
+  Enabled: false
+
+ClassLength:
+  Enabled: false
+
+Documentation:
+  # don't require classes to be documented
+  Enabled: false
+
+CollectionMethods:
+  # don't prefer map to collect, recuce to inject
+  Enabled: false
+
+Encoding:
+  # no need to always specify encoding
+  Enabled: false
+
+HashMethods:
+  # key? instead of has_key?
+  # value? instead of has_value?
+  Enabled: false
+
+StringLiterals:
+  # use single or double-quoted strings, as you please
+  Enabled: false
+
+Void:
+  # == operator used in void context in specs
+  Enabled: false
+
+SignalException:
+  # prefer raise to fail
+  EnforcedStyle: only_raise
+
+RaiseArgs:
+  # don't care for what kind of raise
+  Enabled: false
+
+PerlBackrefs:
+  # TODO: regular expression matching with $1, $2, etc.
+  Enabled: false
+
+BlockNesting:
+  # TODO: fix too much nesting
+  Max: 4
+
+Lambda:
+  # TODO: replace all lambda with -> or Proc
+  Enabled: false
+
+Blocks:
+  # allow multi-line blocks like expect { }
+  Enabled: false
+
+WordArray:
+  # %w vs. [ '', ... ]
+  Enabled: false

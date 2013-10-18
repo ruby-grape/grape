@@ -13,12 +13,10 @@ module Grape
     end
 
     def write(header)
-      @cookies.select { |key, value|
-        @send_cookies[key] == true
-      }.each { |name, value|
-        cookie_value = value.is_a?(Hash) ? value : { :value => value }
+      @cookies.select { |key, value| @send_cookies[key] == true }.each do |name, value|
+        cookie_value = value.is_a?(Hash) ? value : { value: value }
         Rack::Utils.set_cookie_header! header, name, cookie_value
-      }
+      end
     end
 
     def [](name)
@@ -35,7 +33,7 @@ module Grape
     end
 
     def delete(name, opts = {})
-      options = opts.merge({ :value => 'deleted', :expires => Time.at(0) })
+      options = opts.merge(value: 'deleted', expires: Time.at(0))
       self.[]=(name, options)
     end
 

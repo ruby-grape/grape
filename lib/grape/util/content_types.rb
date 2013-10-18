@@ -9,7 +9,7 @@ module Grape
       :atom, 'application/atom+xml',
       :rss,  'application/rss+xml',
       :txt,  'text/plain',
-    ]
+   ]
 
     def self.content_types_for(from_settings)
       from_settings || Grape::ContentTypes::CONTENT_TYPES

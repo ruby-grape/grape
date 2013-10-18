@@ -62,7 +62,7 @@ module Grape
       parts << raw_path.to_s
       parts.flatten.reject { |part| part == '/' }
     end
-    
+
     def split_setting(key, delimiter)
       return if settings[key].nil?
       settings[key].to_s.split("/")

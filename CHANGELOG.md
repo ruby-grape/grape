@@ -12,6 +12,10 @@ Next Release
 * [#477](https://github.com/intridea/grape/pull/477): Fixed `default_error_formatter` which takes a format symbol - [@vad4msiu](https://github.com/vad4msiu).
 * Your contribution here.
 
+#### Development
+
+* Implemented Rubocop, a Ruby code static code analyzer - [@dblock](https://github.com/dblock).
+
 0.6.0 (9/16/2013)
 =================
 

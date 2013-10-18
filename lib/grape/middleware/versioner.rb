@@ -9,7 +9,7 @@
 module Grape
   module Middleware
     module Versioner
-      extend self
+      module_function
 
       # @param strategy [Symbol] :path, :header or :param
       # @return a middleware class based on strategy

@@ -6,14 +6,17 @@ module Grape
 
       def default_options
         {
-          :default_format => :txt,
-          :formatters => {},
-          :parsers => {}
+          default_format: :txt,
+          formatters: {},
+          parsers: {}
         }
       end
 
       def headers
-        env.dup.inject({}){|h,(k,v)| h[k.to_s.downcase[5..-1]] = v if k.to_s.downcase.start_with?('http_'); h}
+        env.dup.inject({}) do |h, (k, v)|
+          h[k.to_s.downcase[5..-1]] = v if k.to_s.downcase.start_with?('http_')
+          h
+        end
       end
 
       def before
@@ -31,7 +34,7 @@ module Grape
             formatter.call body, env
           end
         rescue Grape::Exceptions::InvalidFormatter => e
-          throw :error, :status => 500, :message => e.message
+          throw :error, status: 500, message: e.message
         end
         headers['Content-Type'] = content_type_for(env['api.format']) unless headers['Content-Type']
         Rack::Response.new(bodymap, status, headers).to_a
@@ -42,8 +45,8 @@ module Grape
         # store read input in env['api.request.input']
         def read_body_input
           if (request.post? || request.put? || request.patch? || request.delete?) &&
-            (! request.form_data? || ! request.media_type) &&
-            (! request.parseable_data?) &&
+            (!request.form_data? || !request.media_type) &&
+            (!request.parseable_data?) &&
             (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
 
             if (input = env['rack.input'])
@@ -68,19 +71,21 @@ module Grape
               begin
                 body = (env['api.request.body'] = parser.call(body, env))
                 if body.is_a?(Hash)
-                  env['rack.request.form_hash'] = env['rack.request.form_hash'] ?
-                    env['rack.request.form_hash'].merge(body) :
-                    body
+                  if env['rack.request.form_hash']
+                    env['rack.request.form_hash'] = env['rack.request.form_hash'].merge(body)
+                  else
+                    env['rack.request.form_hash'] = body
+                  end
                   env['rack.request.form_input'] = env['rack.input']
                 end
-              rescue Exception => e
-                throw :error, :status => 400, :message => e.message
+              rescue StandardError => e
+                throw :error, status: 400, message: e.message
               end
             else
               env['api.request.body'] = body
             end
           else
-            throw :error, :status => 406, :message => "The requested content-type '#{request.media_type}' is not supported."
+            throw :error, status: 406, message: "The requested content-type '#{request.media_type}' is not supported."
           end
         end
 
@@ -89,7 +94,7 @@ module Grape
           if content_type_for(fmt)
             env['api.format'] = fmt
           else
-            throw :error, :status => 406, :message => "The requested format '#{fmt}' is not supported."
+            throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
           end
         end
 
@@ -113,15 +118,15 @@ module Grape
 
         def format_from_header
           mime_array.each do |t|
-            if mime_types.key?(t)
-              return mime_types[t]
-            end
+            return mime_types[t] if mime_types.key?(t)
           end
           nil
         end
 
         def mime_array
-          accept = headers['accept'] or return []
+          accept = headers['accept']
+          return [] unless accept
+
           accept_into_mime_and_quality = %r(
             (
               \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
@@ -129,12 +134,13 @@ module Grape
              (?:;[^,]*?)?       # optionally multiple formats in a row
              ;\s*q=([\d.]+)     # optional "quality" preference (eg q=0.5)
             )?
-          )x  # x = extended regular expression with comments etc
-          vendor_prefix_pattern = %r(vnd\.[^+]+\+)
+          )x
 
-          accept.scan(accept_into_mime_and_quality).
-            sort_by { |_, quality_preference| -quality_preference.to_f }.
-            map {|mime, _| mime.sub(vendor_prefix_pattern, '') }
+          vendor_prefix_pattern = /vnd\.[^+]+\+/
+
+          accept.scan(accept_into_mime_and_quality)
+            .sort_by { |_, quality_preference| -quality_preference.to_f }
+            .map { |mime, _| mime.sub(vendor_prefix_pattern, '') }
         end
 
     end

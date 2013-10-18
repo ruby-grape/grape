@@ -29,15 +29,15 @@ module Grape
           if strict?
             # If no Accept header:
             if header.qvalues.empty?
-              throw :error, :status => 406, :headers => error_headers, :message => 'Accept header must be set.'
+              throw :error, status: 406, headers: error_headers, message: 'Accept header must be set.'
             end
             # Remove any acceptable content types with ranges.
-            header.qvalues.reject! do |media_type,_|
-              Rack::Accept::Header.parse_media_type(media_type).find{|s| s == '*'}
+            header.qvalues.reject! do |media_type, _|
+              Rack::Accept::Header.parse_media_type(media_type).find { |s| s == '*' }
             end
             # If all Accept headers included a range:
             if header.qvalues.empty?
-              throw :error, :status => 406, :headers => error_headers, :message => 'Accept header must not contain ranges ("*").'
+              throw :error, status: 406, headers: error_headers, message: 'Accept header must not contain ranges ("*").'
             end
           end
 
@@ -55,19 +55,19 @@ module Grape
             end
           # If none of the available content types are acceptable:
           elsif strict?
-            throw :error, :status => 406, :headers => error_headers, :message => '406 Not Acceptable'
+            throw :error, status: 406, headers: error_headers, message: '406 Not Acceptable'
           # If all acceptable content types specify a vendor or version that doesn't exist:
-          elsif header.values.all?{ |media_type| has_vendor?(media_type) || has_version?(media_type)}
-            throw :error, :status => 406, :headers => error_headers, :message => 'API vendor or version not found.'
+          elsif header.values.all? { |header_value| has_vendor?(header_value) || has_version?(header_value) }
+            throw :error, status: 406, headers: error_headers, message: 'API vendor or version not found.'
           end
         end
 
-      private
+        private
 
         def available_media_types
           available_media_types = []
 
-          content_types.each do |extension,media_type|
+          content_types.each do |extension, media_type|
             versions.reverse.each do |version|
               available_media_types += ["application/vnd.#{vendor}-#{version}+#{extension}", "application/vnd.#{vendor}-#{version}"]
             end
@@ -76,7 +76,7 @@ module Grape
 
           available_media_types << "application/vnd.#{vendor}"
 
-          content_types.each do |_,media_type|
+          content_types.each do |_, media_type|
             available_media_types << media_type
           end
 
@@ -99,9 +99,11 @@ module Grape
         # of routes (see [Rack::Mount](https://github.com/josh/rack-mount) for more information). To prevent
         # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
-          options[:version_options] && options[:version_options].has_key?(:cascade) ?
-            !! options[:version_options][:cascade] :
+          if options[:version_options] && options[:version_options].has_key?(:cascade)
+            !!options[:version_options][:cascade]
+          else
             true
+          end
         end
 
         def error_headers
@@ -111,14 +113,14 @@ module Grape
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets a vendor
         def has_vendor?(media_type)
-          type, subtype = Rack::Accept::Header.parse_media_type media_type
+          _, subtype = Rack::Accept::Header.parse_media_type media_type
           subtype[/\Avnd\.[a-z0-9*.]+/]
         end
 
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets an API version
         def has_version?(media_type)
-          type, subtype = Rack::Accept::Header.parse_media_type media_type
+          _, subtype = Rack::Accept::Header.parse_media_type media_type
           subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end
 

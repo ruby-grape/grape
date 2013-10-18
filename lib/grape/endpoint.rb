@@ -52,15 +52,15 @@ module Grape
     end
 
     def require_option(options, key)
-      options.has_key?(key) or raise Grape::Exceptions::MissingOption.new(key)
+      raise Grape::Exceptions::MissingOption.new(key) unless options.has_key?(key)
     end
 
     def method_name
-      [ options[:method],
-        Namespace.joined_space(settings),
-        settings.gather(:mount_path).join('/'),
-        options[:path].join('/')
-      ].join(" ")
+      [options[:method],
+       Namespace.joined_space(settings),
+       settings.gather(:mount_path).join('/'),
+       options[:path].join('/')
+     ].join(" ")
     end
 
     def routes
@@ -72,15 +72,15 @@ module Grape
         endpoints.each { |e| e.mount_in(route_set) }
       else
         routes.each do |route|
-          methods = [ route.route_method ]
-          if ! settings[:do_not_route_head] && route.route_method == "GET"
+          methods = [route.route_method]
+          if !settings[:do_not_route_head] && route.route_method == "GET"
             methods << "HEAD"
           end
           methods.each do |method|
             route_set.add_route(self, {
-              :path_info => route.route_compiled,
-              :request_method => method,
-            }, { :route_info => route })
+              path_info: route.route_compiled,
+              request_method: method,
+            }, { route_info: route })
           end
         end
       end
@@ -105,21 +105,21 @@ module Grape
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
-          named_params = regex.named_captures.map { |nc| nc[0] } - [ 'version', 'format' ]
+          named_params = regex.named_captures.map { |nc| nc[0] } - %w{ version format }
           named_params.each { |named_param| path_params[named_param] = "" }
           # route parameters declared via desc or appended to the api declaration
           route_params = (options[:route_options][:params] || {})
           path_params.merge!(route_params)
           request_method = (method.to_s.upcase unless method == :any)
-          routes << Route.new(options[:route_options].clone.merge({
-            :prefix => settings[:root_prefix],
-            :version => settings[:version] ? settings[:version].join('|') : nil,
-            :namespace => namespace,
-            :method => request_method,
-            :path => prepared_path,
-            :params => path_params,
-            :compiled => path,
-            })
+          routes << Route.new(options[:route_options].clone.merge(
+            prefix: settings[:root_prefix],
+            version: settings[:version] ? settings[:version].join('|') : nil,
+            namespace: namespace,
+            method: request_method,
+            path: prepared_path,
+            params: path_params,
+            compiled: path,
+          )
           )
         end
       end
@@ -151,7 +151,7 @@ module Grape
         options[:app].call(env)
       else
         builder = build_middleware
-        builder.run options[:app] || lambda{|env| self.run(env) }
+        builder.run options[:app] || lambda { |arg| run(arg) }
         builder.call(env)
       end
     end
@@ -187,10 +187,10 @@ module Grape
             output_key = options[:stringify] ? parent.to_s : parent.to_sym
             if params.key?(parent) || options[:include_missing]
               hash[output_key] = if children
-                declared(params[parent] || {}, options, Array(children))
-              else
-                params[parent]
-              end
+                                   declared(params[parent] || {}, options, Array(children))
+                                 else
+                                   params[parent]
+                                 end
             end
           end
 
@@ -200,15 +200,17 @@ module Grape
     end
 
     # The API version as specified in the URL.
-    def version; env['api.version'] end
+    def version
+      env['api.version']
+    end
 
     # End the request and display an error to the
     # end user with the specified message.
     #
     # @param message [String] The message to display.
     # @param status [Integer] the HTTP Status Code. Defaults to 403.
-    def error!(message, status=403)
-      throw :error, :message => message, :status => status
+    def error!(message, status = 403)
+      throw :error, message: message, status: status
     end
 
     # Redirect to a new url.
@@ -217,7 +219,7 @@ module Grape
     # @param options [Hash] The options used when redirect.
     #                       :permanent, default true.
     def redirect(url, options = {})
-      merged_options = {:permanent => false }.merge(options)
+      merged_options = { permanent: false }.merge(options)
       if merged_options[:permanent]
         status 301
       else
@@ -240,10 +242,10 @@ module Grape
       else
         return @status if @status
         case request.request_method.to_s.upcase
-          when 'POST'
-            201
-          else
-            200
+        when 'POST'
+          201
+        else
+          200
         end
       end
     end
@@ -273,7 +275,7 @@ module Grape
     # @example
     #   cookies[:mycookie] = 'mycookie val'
     #   cookies['mycookie-string'] = 'mycookie string val'
-    #   cookies[:more] = { :value => '123', :expires => Time.at(0) }
+    #   cookies[:more] = { value: '123', expires: Time.at(0) }
     #   cookies.delete :more
     #
     def cookies
@@ -310,8 +312,8 @@ module Grape
     #
     #   get '/users/:id' do
     #     present User.find(params[:id]),
-    #       :with => API::Entities::User,
-    #       :admin => current_user.admin?
+    #       with: API::Entities::User,
+    #       admin: current_user.admin?
     #   end
     def present(*args)
       options = args.count > 1 ? args.extract_options! : {}
@@ -334,15 +336,15 @@ module Grape
       root = options.delete(:root)
 
       representation = if entity_class
-        embeds = {:env => env}
-        embeds[:version] = env['api.version'] if env['api.version']
-        entity_class.represent(object, embeds.merge(options))
-      else
-        object
-      end
+                         embeds = { env: env }
+                         embeds[:version] = env['api.version'] if env['api.version']
+                         entity_class.represent(object, embeds.merge(options))
+                       else
+                         object
+                       end
 
       representation = { root => representation } if root
-      representation = (@body || {}).merge({key => representation}) if key
+      representation = (@body || {}).merge(key => representation) if key
       body representation
     end
 
@@ -375,7 +377,7 @@ module Grape
       @header = {}
       @request = Grape::Request.new(@env)
 
-      self.extend helpers
+      extend helpers
       cookies.read(@request)
 
       run_filters befores
@@ -408,22 +410,22 @@ module Grape
 
       b.use Rack::Head
       b.use Grape::Middleware::Error,
-        :format => settings[:format],
-        :default_status => settings[:default_error_status] || 403,
-        :rescue_all => settings[:rescue_all],
-        :rescued_errors => aggregate_setting(:rescued_errors),
-        :default_error_formatter => settings[:default_error_formatter],
-        :error_formatters => settings[:error_formatters],
-        :rescue_options => settings[:rescue_options],
-        :rescue_handlers => merged_setting(:rescue_handlers)
+            format: settings[:format],
+            default_status: settings[:default_error_status] || 403,
+            rescue_all: settings[:rescue_all],
+            rescued_errors: aggregate_setting(:rescued_errors),
+            default_error_formatter: settings[:default_error_formatter],
+            error_formatters: settings[:error_formatters],
+            rescue_options: settings[:rescue_options],
+            rescue_handlers: merged_setting(:rescue_handlers)
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup
         block = m.pop if m.last.is_a?(Proc)
         if block
-          b.use *m, &block
+          b.use(*m, &block)
         else
-          b.use *m
+          b.use(*m)
         end
       end
 
@@ -432,31 +434,33 @@ module Grape
 
       if settings[:version]
         b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
-          :versions        => settings[:version] ? settings[:version].flatten : nil,
-          :version_options => settings[:version_options],
-          :prefix          => settings[:root_prefix]
+          versions: settings[:version] ? settings[:version].flatten : nil,
+          version_options: settings[:version_options],
+          prefix: settings[:root_prefix]
         }
       end
 
       b.use Grape::Middleware::Formatter,
-        :format => settings[:format],
-        :default_format => settings[:default_format] || :txt,
-        :content_types => settings[:content_types],
-        :formatters => settings[:formatters],
-        :parsers => settings[:parsers]
+            format: settings[:format],
+            default_format: settings[:default_format] || :txt,
+            content_types: settings[:content_types],
+            formatters: settings[:formatters],
+            parsers: settings[:parsers]
 
       b
     end
 
     def helpers
       m = Module.new
-      settings.stack.each{|frame| m.send :include, frame[:helpers] if frame[:helpers]}
+      settings.stack.each do |frame|
+        m.send :include, frame[:helpers] if frame[:helpers]
+      end
       m
     end
 
     def aggregate_setting(key)
       settings.stack.inject([]) do |aggregate, frame|
-        aggregate += (frame[key] || [])
+        aggregate + (frame[key] || [])
       end
     end
 
@@ -468,12 +472,20 @@ module Grape
 
     def run_filters(filters)
       (filters || []).each do |filter|
-        instance_eval &filter
+        instance_eval(&filter)
       end
     end
 
-    def befores; aggregate_setting(:befores) end
-    def after_validations; aggregate_setting(:after_validations) end
-    def afters; aggregate_setting(:afters) end
+    def befores
+      aggregate_setting(:befores)
+    end
+
+    def after_validations
+      aggregate_setting(:after_validations)
+    end
+
+    def afters
+      aggregate_setting(:afters)
+    end
   end
 end
