@@ -1,5 +1,5 @@
-Next Release
-============
+0.6.1
+=====
 
 #### Features
 
@@ -10,7 +10,6 @@ Next Release
 #### Fixes
 
 * [#477](https://github.com/intridea/grape/pull/477): Fixed `default_error_formatter` which takes a format symbol - [@vad4msiu](https://github.com/vad4msiu).
-* Your contribution here.
 
 #### Development
 
