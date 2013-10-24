@@ -3,6 +3,10 @@ Next Release
 
 * Your contribution here.
 
+#### Fixes
+
+* [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values. - [@Antti](https://github.com/Antti)
+
 0.6.1
 =====
 
