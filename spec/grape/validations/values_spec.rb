@@ -41,6 +41,12 @@ describe Grape::Validations::ValuesValidator do
     last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
   end
 
+  it 'does not allow nil value for a parameter' do
+    get("/", type: nil)
+    last_response.status.should eq 400
+    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+  end
+
   it 'allows a valid default value' do
     get("/default/valid")
     last_response.status.should eq 200
