@@ -102,7 +102,7 @@ module Grape
       end
 
       def should_validate?(parameters)
-        return false if @optional && params(parameters).blank?
+        return false if @optional && params(parameters).all?(&:blank?)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
@@ -133,7 +133,13 @@ module Grape
 
       def params(params)
         params = @parent.params(params) if @parent
-        params = params[@element] || {} if @element
+        if @element
+          if params.is_a?(Array)
+            params = params.map { |el| el[@element] || {} }
+          else
+            params = params[@element] || {}
+          end
+        end
         params
       end
 
