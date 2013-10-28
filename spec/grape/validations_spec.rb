@@ -156,6 +156,49 @@ describe Grape::Validations do
       end
     end
 
+    context 'validation within arrays' do
+      before do
+        subject.params do
+          group :children do
+            requires :name
+            group :mother do
+              requires :name
+            end
+          end
+        end
+        subject.get '/within_array' do
+          'within array works'
+        end
+      end
+
+      it 'can handle new scopes within child elements' do
+        get '/within_array', children: [
+          { name: 'John', mother: { name: 'Jane' } },
+          { name: 'Joe', mother: { name: 'Josie' } }
+        ]
+        last_response.status.should == 200
+        last_response.body.should == 'within array works'
+      end
+
+      it 'errors when a parameter is not present' do
+        get '/within_array', children: [
+          { name: 'Jim', mother: {} },
+          { name: 'Job', mother: { name: 'Joy' } }
+        ]
+        last_response.status.should == 400
+        last_response.body.should == 'children[mother][name] is missing'
+      end
+
+      it 'safely handles empty arrays and blank parameters' do
+        get '/within_array', children: []
+        last_response.status.should == 400
+        last_response.body.should == 'children[name] is missing, children[mother][name] is missing'
+        get '/within_array', children: [name: 'Jay']
+        last_response.status.should == 400
+        last_response.body.should == 'children[mother][name] is missing'
+      end
+    end
+
     context 'optional with a block' do
       before do
         subject.params do
@@ -232,6 +275,20 @@ describe Grape::Validations do
         get '/nested_optional_group', items: { key: 'foo', required_subitems: { value: 'bar' }, optional_subitems: { value: 'baz' } }
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
+      end
+
+      it 'handles validation within arrays' do
+        get '/nested_optional_group', items: [key: 'foo']
+        last_response.status.should == 400
+        last_response.body.should == 'items[required_subitems][value] is missing'
+
+        get '/nested_optional_group', items: [key: 'foo', required_subitems: { value: 'bar' }]
+        last_response.status.should == 200
+        last_response.body.should == 'nested optional group works'
+
+        get '/nested_optional_group', items: [key: 'foo', required_subitems: { value: 'bar' }, optional_subitems: { not_value: 'baz' }]
+        last_response.status.should == 400
+        last_response.body.should == 'items[optional_subitems][value] is missing'
       end
 
       it 'adds to declared parameters' do

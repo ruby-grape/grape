@@ -6,6 +6,7 @@ Next Release
 #### Fixes
 
 * [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values. - [@Antti](https://github.com/Antti)
+* [#495](https://github.com/intridea/grape/pull/495): Fix `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
 
 0.6.1
 =====
