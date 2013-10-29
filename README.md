@@ -1063,7 +1063,7 @@ classes underneath the model they represent.
 ```ruby
 class Status
   def entity
-    Status.new(self)
+    Entity.new(self)
   end
 
   class Entity < Grape::Entity
