@@ -579,6 +579,31 @@ describe Grape::API do
       last_response.body.should eql 'first second'
     end
 
+    it 'adds a before filter to current and child namespaces only' do
+      subject.get '/' do
+        "root - #{@foo}"
+      end
+      subject.namespace :blah do
+        before { @foo = 'foo' }
+        get '/' do
+          "blah - #{@foo}"
+        end
+
+        namespace :bar do
+          get '/' do
+            "blah - bar - #{@foo}"
+          end
+        end
+      end
+
+      get '/'
+      last_response.body.should eql 'root - '
+      get '/blah'
+      last_response.body.should eql 'blah - foo'
+      get '/blah/bar'
+      last_response.body.should eql 'blah - bar - foo'
+    end
+
     it 'adds a after_validation filter' do
       subject.after_validation { @foo = "first #{params[:id] }:#{params[:id].class}"  }
       subject.after_validation { @bar = 'second' }
