@@ -35,4 +35,10 @@ tmp
 ## Rubinius
 .rbx
 
+## Bundler binstubs
+bin
+
+## ripper-tags and gem-ctags
+tags
+
 ## PROJECT::SPECIFIC
