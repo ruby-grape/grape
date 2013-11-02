@@ -1174,6 +1174,38 @@ before do
 end
 ```
 
+The block applies to every API call within and below the current namespace:
+
+```ruby
+class MyAPI < Grape::API
+  get '/' do
+    "root - #{@blah}"
+  end
+
+  namespace :foo do
+    before { @blah = 'blah' }
+    get '/' do
+      "root - foo - #{@blah}"
+    end
+
+    namespace :bar do
+      get '/' do
+        "root - foo - bar - #{@blah}"
+      end
+    end
+  end
+end
+```
+
+The behaviour is then:
+
+```bash
+GET /           # 'root - '
+GET /foo        # 'root - foo - blah'
+GET /foo/bar    # 'root - foo - bar - blah'
+```
+
+
 ## Anchoring
 
 Grape by default anchors all request paths, which means that the request URL
