@@ -473,13 +473,15 @@ describe Grape::API do
       last_response.body.should eql 'Created'
     end
 
-    it 'returns a 405 for an unsupported method' do
+    it 'returns a 405 for an unsupported method with an X-Custom-Header' do
+      subject.before { header 'X-Custom-Header', 'foo' }
       subject.get 'example' do
         "example"
       end
       put '/example'
       last_response.status.should eql 405
       last_response.body.should eql ''
+      last_response.headers['X-Custom-Header'].should eql 'foo'
     end
 
     specify '405 responses includes an Allow header specifying supported methods' do
@@ -504,7 +506,8 @@ describe Grape::API do
       last_response.headers['Content-Type'].should eql 'text/plain'
     end
 
-    it 'adds an OPTIONS route that returns a 204 and an Allow header' do
+    it 'adds an OPTIONS route that returns a 204, an Allow header and a X-Custom-Header' do
+      subject.before { header 'X-Custom-Header', 'foo' }
       subject.get 'example' do
         "example"
       end
@@ -512,6 +515,7 @@ describe Grape::API do
       last_response.status.should eql 204
       last_response.body.should eql ''
       last_response.headers['Allow'].should eql 'OPTIONS, GET, HEAD'
+      last_response.headers['X-Custom-Header'].should eql 'foo'
     end
 
     it 'allows HEAD on a GET request' do

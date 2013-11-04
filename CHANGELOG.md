@@ -7,6 +7,7 @@ Next Release
 
 * [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values. - [@Antti](https://github.com/Antti)
 * [#495](https://github.com/intridea/grape/pull/495): Fix `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
+* [#498](https://github.com/intridea/grape/pull/498): Dry up options and headers logic, allow headers to be passed to OPTIONS requests  - [@karlfreeman](https://github.com/karlfreeman).
 
 0.6.1
 =====

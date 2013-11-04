@@ -514,10 +514,10 @@ module Grape
 
     def initialize
       @route_set = Rack::Mount::RouteSet.new
+      add_head_not_allowed_methods_and_options_methods
       self.class.endpoints.each do |endpoint|
         endpoint.mount_in(@route_set)
       end
-      add_head_not_allowed_methods
       @route_set.freeze
     end
 
@@ -549,7 +549,7 @@ module Grape
     # with a list of HTTP methods that can be called. Also add a route that
     # will return an HTTP 405 response for any HTTP method that the resource
     # cannot handle.
-    def add_head_not_allowed_methods
+    def add_head_not_allowed_methods_and_options_methods
       allowed_methods = Hash.new { |h, k| h[k] = [] }
       resources = self.class.endpoints.map do |endpoint|
         if endpoint.options[:app] && endpoint.options[:app].respond_to?(:endpoints)
@@ -559,27 +559,27 @@ module Grape
         end
       end
       resources.flatten.each do |route|
-        allowed_methods[route.route_compiled] << route.route_method
+        allowed_methods[route.route_path] << route.route_method
       end
-      allowed_methods.each do |path_info, methods|
-        if methods.include?('GET') && !methods.include?("HEAD") && !self.class.settings[:do_not_route_head]
+      allowed_methods.each do |path, methods|
+        if methods.include?('GET') && !methods.include?('HEAD') && !self.class.settings[:do_not_route_head]
           methods = methods | ['HEAD']
         end
-        allow_header = (["OPTIONS"] | methods).join(", ")
-        unless methods.include?("OPTIONS") || self.class.settings[:do_not_route_options]
-          @route_set.add_route(proc { [204, { 'Allow' => allow_header }, []] }, {
-            path_info: path_info,
-            request_method: "OPTIONS"
-          })
+        allow_header = (['OPTIONS'] | methods).join(', ')
+        if methods.include?('OPTIONS') || !self.class.settings[:do_not_route_options]
+          self.class.options(path, {}) {
+            header 'Allow', allow_header
+            status 204
+            ''
+          }
         end
         not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
-        not_allowed_methods << "OPTIONS" if self.class.settings[:do_not_route_options]
-        not_allowed_methods.each do |bad_method|
-          @route_set.add_route(proc { [405, { 'Allow' => allow_header, 'Content-Type' => 'text/plain' }, []] }, {
-            path_info: path_info,
-            request_method: bad_method
-          })
-        end
+        not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
+        self.class.route(not_allowed_methods, path) {
+          header 'Allow', allow_header
+          status 405
+          ''
+        }
       end
     end
 
