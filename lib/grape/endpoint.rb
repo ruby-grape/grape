@@ -324,14 +324,16 @@ module Grape
                     end
       entity_class = options.delete(:with)
 
-      # auto-detect the entity from the first object in the collection
-      object_instance = object.respond_to?(:first) ? object.first : object
+      if entity_class.nil?
+        # entity class not explicitely defined, auto-detect from first object in the collection
+        object_instance = object.respond_to?(:first) ? object.first : object
 
-      object_instance.class.ancestors.each do |potential|
-        entity_class ||= (settings[:representations] || {})[potential]
+        object_instance.class.ancestors.each do |potential|
+          entity_class ||= (settings[:representations] || {})[potential]
+        end
+
+        entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
       end
-
-      entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
 
       root = options.delete(:root)
 
