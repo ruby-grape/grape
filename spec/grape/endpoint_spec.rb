@@ -254,6 +254,35 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared; call from child namespace' do
+    it 'should include params defined in the parent namespace' do
+      subject.namespace :something do
+        params do
+          requires :id, type: Integer
+        end
+        resource ':id' do
+          params do
+            requires :foo
+            optional :bar
+          end
+          get do
+            params[:id].should == 123
+            params[:foo].should == 'test'
+            params[:extra].should == 'hello'
+
+            declared(params).key?(:foo).should == true
+            declared(params).key?(:bar).should == true
+            declared(params).key?(:id).should == true
+            ""
+          end
+        end
+      end
+
+      get '/something/123', foo: 'test', extra: 'hello'
+      last_response.status.should == 200
+    end
+  end
+
   describe '#params' do
     it 'is available to the caller' do
       subject.get('/hey') do
