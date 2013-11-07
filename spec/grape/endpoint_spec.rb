@@ -395,6 +395,44 @@ describe Grape::Endpoint do
       last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
     end
 
+    context 'precedence' do
+
+      before do
+        subject.format :json
+        subject.namespace '/:id' do
+          get do
+            {
+              params: params[:id]
+            }
+          end
+          post do
+            {
+              params: params[:id]
+            }
+          end
+          put do
+            {
+              params: params[:id]
+            }
+          end
+        end
+      end
+
+      it 'route string params have higher precedence than body params' do
+        post '/123', { id: 456 }.to_json
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+        put '/123', { id: 456 }.to_json
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+
+      it 'route string params have higher precedence than URL params' do
+        get '/123?id=456'
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+        post '/123?id=456'
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+    end
+
   end
 
   describe '#error!' do
