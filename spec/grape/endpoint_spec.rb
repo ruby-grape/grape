@@ -255,7 +255,7 @@ describe Grape::Endpoint do
   end
 
   describe '#declared; call from child namespace' do
-    it 'should include params defined in the parent namespace' do
+    before do
       subject.namespace :something do
         params do
           requires :id, type: Integer
@@ -265,21 +265,22 @@ describe Grape::Endpoint do
             requires :foo
             optional :bar
           end
-          get do
-            params[:id].should == 123
-            params[:foo].should == 'test'
-            params[:extra].should == 'hello'
-
-            declared(params).key?(:foo).should == true
-            declared(params).key?(:bar).should == true
-            declared(params).key?(:id).should == true
-            ""
+          get do 
+            {
+              params: params,
+              declared_params: declared(params)
+            }.to_json
           end
         end
       end
+    end
 
+    it 'should include params defined in the parent namespace' do
       get '/something/123', foo: 'test', extra: 'hello'
-      last_response.status.should == 200
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json[:params][:id]).to eq 123
+      expect(json[:declared_params].keys).to include :foo, :bar, :id
     end
   end
 
