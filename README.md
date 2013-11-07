@@ -290,7 +290,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on POST and PUT for form input, JSON and
+Parameters are automatically populated from the request body on `POST` and `PUT` for form input, JSON and
 XML content-types.
 
 The request:
@@ -322,6 +322,14 @@ post "upload" do
   # file in params[:image_file]
 end
 ```
+
+In the case of conflict between either of:
+
+* route string parameters
+* `GET`, `POST` and `PUT` parameters
+* the contents of the request body on `POST` and `PUT` 
+
+route string parameters will have precedence. 
 
 ## Parameter Validation and Coercion
 
