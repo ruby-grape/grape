@@ -265,7 +265,7 @@ describe Grape::Endpoint do
             requires :foo
             optional :bar
           end
-          get do 
+          get do
             {
               params: params,
               declared_params: declared(params)
