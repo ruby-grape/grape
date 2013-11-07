@@ -6,4 +6,5 @@ rvm:
   - jruby-19mode
   - rbx-19mode
 script:
+ - "bundle exec rake spec"
  - "bundle exec rubocop"
