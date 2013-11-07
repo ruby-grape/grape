@@ -256,6 +256,7 @@ describe Grape::Endpoint do
 
   describe '#declared; call from child namespace' do
     before do
+      subject.format :json
       subject.namespace :something do
         params do
           requires :id, type: Integer
@@ -269,7 +270,7 @@ describe Grape::Endpoint do
             {
               params: params,
               declared_params: declared(params)
-            }.to_json
+            }
           end
         end
       end
