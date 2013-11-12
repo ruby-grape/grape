@@ -395,6 +395,27 @@ describe Grape::Endpoint do
       last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
     end
 
+    context 'content type with params' do
+      before do
+        subject.format :json
+        subject.content_type :json, 'application/json; charset=utf-8'
+
+        subject.post do
+          params[:data]
+        end
+        post '/', MultiJson.dump(data: { some: 'payload' }), { 'CONTENT_TYPE' => 'application/json' }
+      end
+
+      it "should not response with 406 for same type without params" do
+        last_response.status.should_not be 406
+      end
+
+      it "should response with given content type in headers" do
+        last_response.headers['Content-Type'].should eq 'application/json; charset=utf-8'
+      end
+
+    end
+
     context 'precedence' do
 
       before do
