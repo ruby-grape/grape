@@ -472,4 +472,29 @@ describe Grape::Validations do
       end
     end # end custom validation
   end
+
+  describe 'concern params' do
+
+    before do
+      subject.param_concern :pageable do
+        optional :page
+        optional :per_page
+      end
+    end
+
+    it 'should be added as usual params defined in block' do
+      subject.params concerns: :pageable do
+        requires :id
+      end
+
+      subject.settings[:declared_params].should == [:page, :per_page, :id]
+    end
+
+    it 'can be used without block' do
+      subject.params concerns: :pageable
+      subject.settings[:declared_params].should == [:page, :per_page]
+    end
+
+  end
+
 end

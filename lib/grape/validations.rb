@@ -240,8 +240,37 @@ module Grape
         settings.peek[:validations] = []
       end
 
-      def params(&block)
-        ParamsScope.new(api: self, &block)
+      def params(opts = {}, &block)
+        concerns = opts.delete(:concerns)
+
+        if concerns
+          params_scope_witn_concerns(concerns, &block)
+        else
+          ParamsScope.new(api: self, &block)
+        end
+      end
+
+      def params_scope_witn_concerns(names, &block)
+        procs = Array(names).collect { |name| proc_for_concern(name) }
+        procs << block if block_given?
+
+        ParamsScope.new api: self do
+          procs.each { |proc| instance_eval(&proc) }
+        end
+      end
+
+      def proc_for_concern(name)
+        if @concerns && @concerns[name]
+          @concerns[name]
+        else
+          raise ArgumentError.new "Concern #{name} not found"
+        end
+      end
+      private :proc_for_concern, :params_scope_witn_concerns
+
+      def param_concern(name, &block)
+        @concerns ||= {}
+        @concerns[name] = block
       end
 
       def document_attribute(names, opts)
