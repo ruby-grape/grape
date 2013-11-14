@@ -327,9 +327,9 @@ In the case of conflict between either of:
 
 * route string parameters
 * `GET`, `POST` and `PUT` parameters
-* the contents of the request body on `POST` and `PUT` 
+* the contents of the request body on `POST` and `PUT`
 
-route string parameters will have precedence. 
+route string parameters will have precedence.
 
 ## Parameter Validation and Coercion
 
@@ -397,6 +397,23 @@ end
 
 The `namespace` method has a number of aliases, including: `group`, `resource`,
 `resources`, and `segment`. Use whichever reads the best for your API.
+
+You can conveniently define a route parameter as a namespace using `route_param`.
+
+```ruby
+namespace :statuses do
+  route_param :id do
+    desc "Returns all replies for a status."
+    get 'replies' do
+      Status.find(params[:id]).replies
+    end
+    desc "Returns a status."
+    get do
+      Status.find(params[:id])
+    end
+  end
+end
+```
 
 ### Custom Validators
 
