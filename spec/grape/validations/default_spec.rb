@@ -32,6 +32,14 @@ describe Grape::Validations::DefaultValidator do
         get '/message' do
           { id: params[:id], type1: params[:type1], type2: params[:type2] }
         end
+
+        params do
+          optional :random, default: -> { Random.rand }
+          optional :not_random, default: Random.rand
+        end
+        get '/numbers' do
+          { random_number: params[:random], non_random_number: params[:non_random_number] }
+        end
       end
     end
   end
@@ -62,5 +70,17 @@ describe Grape::Validations::DefaultValidator do
     get("/message?id=1")
     last_response.status.should == 200
     last_response.body.should == { id: '1', type1: 'default-type1', type2: 'default-type2' }.to_json
+  end
+
+  it 'sets lambda based defaults at the time of call' do
+    get("/numbers")
+    last_response.status.should == 200
+    before = JSON.parse(last_response.body)
+    get("/numbers")
+    last_response.status.should == 200
+    after = JSON.parse(last_response.body)
+
+    before['non_random_number'].should == after['non_random_number']
+    before['random_number'].should_not == after['random_number']
   end
 end
