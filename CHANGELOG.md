@@ -1,6 +1,8 @@
 Next Release
 ============
 
+#### Features
+* [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
 * Your contribution here.
 
 #### Fixes

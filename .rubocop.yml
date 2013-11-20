@@ -1,6 +1,7 @@
 AllCops:
   Excludes:
     - vendor/**
+    - bin/**
 
 LineLength:
   Enabled: false
