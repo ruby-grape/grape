@@ -2,6 +2,7 @@ Next Release
 ============
 
 #### Features
+
 * [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
 * [#511](https://github.com/intridea/grape/pull/511): Add `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
 * Your contribution here.
@@ -13,6 +14,7 @@ Next Release
 * [#495](https://github.com/intridea/grape/pull/495): Fix `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
 * [#498](https://github.com/intridea/grape/pull/498): Dry up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
 * [#500](https://github.com/intridea/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
+* [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 

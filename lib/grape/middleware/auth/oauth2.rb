@@ -16,9 +16,17 @@ module Grape::Middleware::Auth
       verify_token(token_parameter || token_header)
     end
 
+    def request
+      @request ||= Grape::Request.new(env)
+    end
+
+    def params
+      @params ||= request.params
+    end
+
     def token_parameter
       Array(options[:parameter]).each do |p|
-        return request[p] if request[p]
+        return params[p] if params[p]
       end
       nil
     end

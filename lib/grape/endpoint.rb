@@ -5,7 +5,7 @@ module Grape
   # from inside a `get`, `post`, etc.
   class Endpoint
     attr_accessor :block, :source, :options, :settings
-    attr_reader :env, :request
+    attr_reader :env, :request, :headers, :params
 
     class << self
       # @api private
@@ -156,12 +156,6 @@ module Grape
       end
     end
 
-    # The parameters passed into the request as
-    # well as parsed from URL segments.
-    def params
-      @params ||= @request.params
-    end
-
     # A filtering method that will return a hash
     # consisting only of keys that have been declared by a
     # `params` statement.
@@ -258,11 +252,6 @@ module Grape
       else
         @header
       end
-    end
-
-    # Retrieves all available request headers.
-    def headers
-      @headers ||= @request.headers
     end
 
     # Set response content-type
@@ -377,7 +366,10 @@ module Grape
     def run(env)
       @env = env
       @header = {}
-      @request = Grape::Request.new(@env)
+
+      @request = Grape::Request.new(env)
+      @params = @request.params
+      @headers = @request.headers
 
       extend helpers
       cookies.read(@request)
