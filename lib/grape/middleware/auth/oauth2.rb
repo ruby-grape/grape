@@ -7,7 +7,8 @@ module Grape::Middleware::Auth
         realm: 'OAuth API',
         parameter: %w(bearer_token oauth_token),
         accepted_headers: %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION),
-        header: [/Bearer (.*)/i, /OAuth (.*)/i]
+        header: [/Bearer (.*)/i, /OAuth (.*)/i],
+        required: true
       }
     end
 
@@ -53,7 +54,7 @@ module Grape::Middleware::Auth
             error_out(403, 'insufficient_scope')
           end
         end
-      else
+      elsif !!options[:required]
         error_out(401, 'invalid_token')
       end
     end
