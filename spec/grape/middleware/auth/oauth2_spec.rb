@@ -5,7 +5,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     attr_accessor :token
 
     def self.verify(token)
-      FakeToken.new(token) if %w(g e).include?(token[0..0])
+      FakeToken.new(token) if !!token && %w(g e).include?(token[0..0])
     end
 
     def initialize(token)
@@ -86,5 +86,30 @@ describe Grape::Middleware::Auth::OAuth2 do
 
     it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='insufficient_scope'" }
     it { @err[:status].should == 403 }
+  end
+
+  context 'when authorization is not required' do
+    def app
+      Rack::Builder.app do
+        use Grape::Middleware::Auth::OAuth2, token_class: 'FakeToken', required: false
+        run lambda { |env| [200, {}, [(env['api.token'].token if env['api.token'])]] }
+      end
+    end
+
+    context 'with no token' do
+      before { post '/awesome' }
+
+      it 'succeeds anyway' do
+        last_response.status.should == 200
+      end
+    end
+
+    context 'with a valid token' do
+      before { get '/awesome?oauth_token=g123' }
+
+      it 'sets env["api.token"]' do
+        last_response.body.should == 'g123'
+      end
+    end
   end
 end
