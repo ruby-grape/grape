@@ -3,7 +3,6 @@ require 'grape/middleware/base'
 module Grape
   module Middleware
     class Error < Base
-
       def default_options
         {
           default_status: 403, # default status returned on error
@@ -73,7 +72,6 @@ module Grape
         throw :error, status: 406, message: "The requested format '#{format}' is not supported." unless formatter
         formatter.call(message, backtrace, options, env)
       end
-
     end
   end
 end

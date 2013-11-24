@@ -1,11 +1,9 @@
 module Grape
-
   class API
     Boolean = Virtus::Attribute::Boolean # rubocop:disable ConstantName
   end
 
   module Validations
-
     class CoerceValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
         new_value = coerce_value(@option, params[attr_name])
@@ -55,8 +53,6 @@ module Grape
       rescue
         InvalidValue.new
       end
-
     end
-
   end
 end

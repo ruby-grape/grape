@@ -19,6 +19,5 @@ module Grape
     def self.joined_space_path(settings)
       Rack::Mount::Utils.normalize_path(joined_space(settings))
     end
-
   end
 end

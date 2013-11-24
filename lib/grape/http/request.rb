@@ -1,6 +1,5 @@
 module Grape
   class Request < Rack::Request
-
     def params
       @params ||= begin
         params = Hashie::Mash.new(super)
@@ -23,6 +22,5 @@ module Grape
         h
       end
     end
-
   end
 end

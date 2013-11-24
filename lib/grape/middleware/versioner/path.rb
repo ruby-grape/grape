@@ -43,10 +43,9 @@ module Grape
 
         private
 
-          def prefix
-            Rack::Mount::Utils.normalize_path(options[:prefix].to_s) if options[:prefix]
-          end
-
+        def prefix
+          Rack::Mount::Utils.normalize_path(options[:prefix].to_s) if options[:prefix]
+        end
       end
     end
   end

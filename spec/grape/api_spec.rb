@@ -383,7 +383,7 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.body']
             end
-            send verb, '/', MultiJson.dump(object), { 'CONTENT_TYPE' => 'application/json' }
+            send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
             last_response.status.should == (verb == :post ? 201 : 200)
             last_response.body.should eql MultiJson.dump(object)
             last_request.params.should eql Hash.new
@@ -393,7 +393,7 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.input']
             end
-            send verb, '/', MultiJson.dump(object), { 'CONTENT_TYPE' => 'application/json' }
+            send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
             last_response.status.should == (verb == :post ? 201 : 200)
             last_response.body.should eql MultiJson.dump(object).to_json
           end
@@ -403,7 +403,7 @@ describe Grape::API do
               subject.send(verb) do
                 env['api.request.input']
               end
-              send verb, '/', MultiJson.dump(object), { 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil  }
+              send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
               last_response.status.should == (verb == :post ? 201 : 200)
               last_response.body.should eql MultiJson.dump(object).to_json
             end
@@ -742,13 +742,13 @@ describe Grape::API do
       end
 
       it 'adds a block if one is given' do
-        block = lambda { }
+        block = lambda {}
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.middleware.should eql [[ApiSpec::PhonyMiddleware, block]]
       end
 
       it 'uses a block if one is given' do
-        block = lambda { }
+        block = lambda {}
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
@@ -759,7 +759,7 @@ describe Grape::API do
       end
 
       it 'does not destroy the middleware settings on multiple runs' do
-        block = lambda { }
+        block = lambda {}
         subject.use ApiSpec::PhonyMiddleware, &block
         subject.get '/' do
           env['phony.block'].inspect
@@ -1337,7 +1337,7 @@ describe Grape::API do
         last_response.body.should eql '{"some":"hash"}'
       end
       it 'uses custom formatter' do
-        get '/simple.custom', { 'HTTP_ACCEPT' => 'application/custom' }
+        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
         last_response.body.should eql '{"custom_formatter":"hash"}'
       end
     end
@@ -1360,7 +1360,7 @@ describe Grape::API do
         last_response.body.should eql '{"some":"hash"}'
       end
       it 'uses custom formatter' do
-        get '/simple.custom', { 'HTTP_ACCEPT' => 'application/custom' }
+        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
         last_response.body.should eql '{"custom_formatter":"hash"}'
       end
     end
@@ -1372,7 +1372,7 @@ describe Grape::API do
       subject.post '/data' do
         { x: params[:x] }
       end
-      post "/data", '{"x":42}', { 'CONTENT_TYPE' => 'application/json' }
+      post "/data", '{"x":42}', 'CONTENT_TYPE' => 'application/json'
       last_response.status.should == 201
       last_response.body.should == '{"x":42}'
     end
@@ -1542,7 +1542,7 @@ describe Grape::API do
     end
     describe 'api structure with additional parameters' do
       before(:each) do
-        subject.get 'split/:string', { params: { "token" => "a token" }, optional_params: { "limit" => "the limit" } } do
+        subject.get 'split/:string', params: { "token" => "a token" }, optional_params: { "limit" => "the limit" } do
           params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
@@ -1579,7 +1579,7 @@ describe Grape::API do
       route = subject.routes.first
       route.route_description.should == "first method"
       route.route_foo.should be_nil
-      route.route_params.should == { }
+      route.route_params.should == {}
     end
     it 'describes methods separately' do
       subject.desc "first method"
@@ -1626,9 +1626,7 @@ describe Grape::API do
     ]
     end
     it 'describes a method with parameters' do
-      subject.desc "Reverses a string.", { params:
-        { "s" => { desc: "string to reverse", type: "string" } }
-      }
+      subject.desc "Reverses a string.", params: { "s" => { desc: "string to reverse", type: "string" } }
       subject.get 'reverse' do
         params[:s].reverse
       end
@@ -1749,9 +1747,7 @@ describe Grape::API do
     ]
     end
     it 'does not symbolize params' do
-      subject.desc "Reverses a string.", { params:
-        { "s" => { desc: "string to reverse", type: "string" } }
-      }
+      subject.desc "Reverses a string.", params: { "s" => { desc: "string to reverse", type: "string" } }
       subject.get 'reverse/:s' do
         params[:s].reverse
       end
@@ -1764,7 +1760,7 @@ describe Grape::API do
   end
 
   describe '.mount' do
-    let(:mounted_app) { lambda { |env| [200, { }, ["MOUNTED"]] } }
+    let(:mounted_app) { lambda { |env| [200, {}, ["MOUNTED"]] } }
 
     context 'with a bare rack app' do
       before do
@@ -1856,8 +1852,8 @@ describe Grape::API do
       it 'collects the routes of the mounted api' do
         subject.namespace :cool do
           app = Class.new(Grape::API)
-          app.get('/awesome') { }
-          app.post('/sauce') { }
+          app.get('/awesome') {}
+          app.post('/sauce') {}
           mount app
         end
         subject.routes.size.should == 2
@@ -1961,7 +1957,7 @@ describe Grape::API do
         subject.get '/description' do
           route.route_description
         end
-        subject.desc 'returns parameters', { params: { "x" => "y" } }
+        subject.desc 'returns parameters', params: { "x" => "y" }
         subject.get '/params/:id' do
           route.route_params[params[:id]]
         end
@@ -1994,7 +1990,7 @@ describe Grape::API do
         last_response.body.should == { meaning_of_life: 42 }.to_json
       end
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
         last_response.body.should == { meaning_of_life: 42 }.to_s
       end
     end
@@ -2014,7 +2010,7 @@ describe Grape::API do
         last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'application/json' }
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
         last_response.body.should == { meaning_of_life: 42 }.to_s
       end
     end
@@ -2035,7 +2031,7 @@ describe Grape::API do
         last_response.body.should == { meaning_of_life: 42 }.to_s
       end
       it 'forces json from a non-accepting header' do
-        get '/meaning_of_life', {}, { 'HTTP_ACCEPT' => 'text/html' }
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'text/html'
         last_response.body.should == { meaning_of_life: 42 }.to_json
       end
       it 'can be overwritten with an explicit content type' do

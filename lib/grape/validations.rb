@@ -1,7 +1,5 @@
 module Grape
-
   module Validations
-
     ##
     # All validators must inherit from this class.
     #
@@ -64,7 +62,6 @@ module Grape
         @option = options
         super
       end
-
     end
 
     # We define Validator::inherited here so SingleOptionValidator
@@ -230,7 +227,6 @@ module Grape
           raise Grape::Exceptions::UnknownValidator.new(type)
         end
       end
-
     end
 
     # This module is mixed into the API Class.
@@ -252,9 +248,7 @@ module Grape
           @last_description[:params][name[:full_name].to_s].merge!(opts)
         end
       end
-
     end
-
   end
 end
 

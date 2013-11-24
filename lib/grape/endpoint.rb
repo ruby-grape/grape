@@ -80,7 +80,7 @@ module Grape
             route_set.add_route(self, {
               path_info: route.route_compiled,
               request_method: method,
-            }, { route_info: route })
+            },  route_info: route)
           end
         end
       end
@@ -427,11 +427,11 @@ module Grape
       b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
 
       if settings[:version]
-        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
-          versions: settings[:version] ? settings[:version].flatten : nil,
-          version_options: settings[:version_options],
-          prefix: settings[:root_prefix]
-        }
+        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]),
+              versions: settings[:version] ? settings[:version].flatten : nil,
+              version_options: settings[:version_options],
+              prefix: settings[:root_prefix]
+
       end
 
       b.use Grape::Middleware::Formatter,

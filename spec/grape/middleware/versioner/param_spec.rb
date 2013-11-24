@@ -6,12 +6,12 @@ describe Grape::Middleware::Versioner::Param do
   subject { Grape::Middleware::Versioner::Param.new(app, @options || {}) }
 
   it 'sets the API version based on the default param (apiver)' do
-    env = Rack::MockRequest.env_for("/awesome", { params: { "apiver" => "v1" } })
+    env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v1" })
     subject.call(env)[1]["api.version"].should == 'v1'
   end
 
   it 'cuts (only) the version out of the params', focus: true do
-    env = Rack::MockRequest.env_for("/awesome", { params: { "apiver" => "v1", "other_param" => "5" } })
+    env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v1", "other_param" => "5" })
     env['rack.request.query_hash'] = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
     subject.call(env)[1]['rack.request.query_hash']["apiver"].should be_nil
     subject.call(env)[1]['rack.request.query_hash']["other_param"].should == "5"
@@ -25,11 +25,11 @@ describe Grape::Middleware::Versioner::Param do
   context 'with specified parameter name' do
     before { @options = { parameter: 'v' } }
     it 'sets the API version based on the custom parameter name' do
-      env = Rack::MockRequest.env_for("/awesome", { params: { "v" => "v1" } })
+      env = Rack::MockRequest.env_for("/awesome", params: { "v" => "v1" })
       subject.call(env)[1]["api.version"].should == "v1"
     end
     it 'does not set the API version based on the default param' do
-      env = Rack::MockRequest.env_for("/awesome", { params: { "apiver" => "v1" } })
+      env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v1" })
       subject.call(env)[1]["api.version"].should be_nil
     end
   end
@@ -37,11 +37,11 @@ describe Grape::Middleware::Versioner::Param do
   context 'with specified versions' do
     before { @options = { versions: ['v1', 'v2'] } }
     it 'throws an error if a non-allowed version is specified' do
-      env = Rack::MockRequest.env_for("/awesome", { params: { "apiver" => "v3" } })
+      env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v3" })
       catch(:error) { subject.call(env) }[:status].should == 404
     end
     it 'allows versions that have been specified' do
-      env = Rack::MockRequest.env_for("/awesome", { params: { "apiver" => "v1" } })
+      env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v1" })
       subject.call(env)[1]["api.version"].should == 'v1'
     end
   end
@@ -51,7 +51,7 @@ describe Grape::Middleware::Versioner::Param do
       versions: ['v1'],
       version_options: { using: :header }
     }
-    env = Rack::MockRequest.env_for("/awesome", { params: {} })
+    env = Rack::MockRequest.env_for("/awesome", params: {})
     subject.call(env).first.should == 200
   end
 

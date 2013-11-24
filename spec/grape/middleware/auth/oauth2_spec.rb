@@ -73,7 +73,7 @@ describe Grape::Middleware::Auth::OAuth2 do
   end
 
   context 'with the token in the POST body' do
-    before { post '/awesome', { 'oauth_token' => 'g123' } }
+    before { post '/awesome', 'oauth_token' => 'g123' }
     it { last_response.body.should == 'g123' }
   end
 

@@ -1,8 +1,6 @@
 module Grape
-
   # A compiled route for inspection.
   class Route
-
     def initialize(options = {})
       @options = options || {}
     end
@@ -25,6 +23,5 @@ module Grape
     def to_ary
       nil
     end
-
   end
 end

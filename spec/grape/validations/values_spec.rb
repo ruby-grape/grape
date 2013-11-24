@@ -20,7 +20,6 @@ describe Grape::Validations::ValuesValidator do
         get '/default/valid' do
           { type: params[:type] }
         end
-
       end
     end
   end

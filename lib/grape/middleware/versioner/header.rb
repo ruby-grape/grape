@@ -22,7 +22,6 @@ module Grape
       # X-Cascade header to alert Rack::Mount to attempt the next matched
       # route.
       class Header < Base
-
         def before
           header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
 
@@ -123,7 +122,6 @@ module Grape
           _, subtype = Rack::Accept::Header.parse_media_type media_type
           subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end
-
       end
     end
   end

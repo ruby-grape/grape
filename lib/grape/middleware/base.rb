@@ -57,7 +57,6 @@ module Grape
           types_without_params[k] = v.split(';').first
         }.invert
       end
-
     end
   end
 end

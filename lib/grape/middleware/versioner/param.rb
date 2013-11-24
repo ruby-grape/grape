@@ -36,7 +36,6 @@ module Grape
             env['rack.request.query_hash'].delete(paramkey) if env.key? 'rack.request.query_hash'
           end
         end
-
       end
     end
   end
