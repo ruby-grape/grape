@@ -72,9 +72,12 @@ describe Grape::Middleware::Formatter do
 
   context 'detection' do
 
-    it 'uses the extension if one is provided' do
+    it 'uses the xml extension if one is provided' do
       subject.call('PATH_INFO' => '/info.xml')
       subject.env['api.format'].should == :xml
+    end
+
+    it 'uses the json extension if one is provided' do
       subject.call('PATH_INFO' => '/info.json')
       subject.env['api.format'].should == :json
     end

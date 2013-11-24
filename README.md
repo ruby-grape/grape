@@ -360,14 +360,14 @@ Optional parameters can have a default value.
 params do
   optional :color, type: String, default: 'blue'
   optional :random_number, type: Integer, default: -> { Random.rand(1..100) }
-  optional :non_random_number, type: Integer, default:  Random.rand(1..100) 
+  optional :non_random_number, type: Integer, default:  Random.rand(1..100)
 end
 ```
 
 Parameters can be restricted to a specific set of values with the `:values` option.
 
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
-number for each call to the endpoint of this `params` block. To have the default evaluate 
+number for each call to the endpoint of this `params` block. To have the default evaluate
 at calltime use a lambda, like `:random_number` above.
 
 ```ruby
@@ -1235,7 +1235,6 @@ GET /           # 'root - '
 GET /foo        # 'root - foo - blah'
 GET /foo/bar    # 'root - foo - bar - blah'
 ```
-
 
 ## Anchoring
 

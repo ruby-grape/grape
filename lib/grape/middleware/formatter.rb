@@ -42,6 +42,10 @@ module Grape
 
       private
 
+        def request
+          @request ||= Rack::Request.new(env)
+        end
+
         # store read input in env['api.request.input']
         def read_body_input
           if (request.post? || request.put? || request.patch? || request.delete?) &&
