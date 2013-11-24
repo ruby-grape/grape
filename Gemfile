@@ -18,3 +18,11 @@ group :development, :test do
   gem 'redcarpet', :platforms => :ruby
   gem 'rubocop', '~> 0.14.1'
 end
+
+platforms :rbx do
+  gem 'parser', '2.1.0.pre1'
+  gem 'syntax', github: 'distler/syntax'
+  gem 'rubysl', '~> 2.0'
+  gem 'racc'
+  gem 'iconv', github: 'nurse/iconv'
+end
