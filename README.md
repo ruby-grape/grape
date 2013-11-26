@@ -378,7 +378,7 @@ end
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
-and `params[:audio][:mp3]` is required only if `params[:audio]` is present.
+and `params[:audio][:format]` is required only if `params[:audio]` is present.
 
 ### Namespace Validation and Coercion
 
