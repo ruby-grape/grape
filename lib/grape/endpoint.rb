@@ -203,8 +203,13 @@ module Grape
     #
     # @param message [String] The message to display.
     # @param status [Integer] the HTTP Status Code. Defaults to 403.
-    def error!(message, status = 403)
-      throw :error, message: message, status: status
+    # @param headers [Hash] Response headers.
+    def error!(message, status = 403, headers = nil)
+      allow_origin = header['Access-Control-Allow-Origin']
+      if allow_origin
+        headers = { 'Access-Control-Allow-Origin' => allow_origin }.merge(headers || {})
+      end
+      throw :error, message: message, status: status, headers: headers
     end
 
     # Redirect to a new url.

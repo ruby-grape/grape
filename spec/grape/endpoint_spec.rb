@@ -487,6 +487,18 @@ describe Grape::Endpoint do
       last_response.status.should == 403
       last_response.body.should == '{"dude":"rad"}'
     end
+
+    it 'passes on Access-Control-Allow-Origin in error responses' do
+      subject.get '/hey' do
+        header('Access-Control-Allow-Origin', 'example.com')
+        error!({ 'dude' => 'not cool' }, 401)
+      end
+
+      get '/hey.json'
+      last_response.status.should == 401
+      last_response.headers['Access-Control-Allow-Origin'].should == 'example.com'
+      last_response.body.should == '{"dude":"not cool"}'
+    end
   end
 
   describe '#redirect' do
