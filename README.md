@@ -688,6 +688,22 @@ instead of a message.
 error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 ```
 
+### Default Error HTTP Status Code
+
+You can specify the default error http status code sent if none is specified when calling the error functions.
+
+``` ruby
+class API < Grape::API
+
+  default_error_status 400
+
+  get '/example' do
+    error! "This should have http status code 400"
+  end
+
+end
+```
+
 ### Handling 404
 
 For Grape to handle all the 404s for your API, it can be useful to use a catch-all.
