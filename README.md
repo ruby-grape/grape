@@ -1377,14 +1377,10 @@ with Librato Metrics with the [grape-librato](https://github.com/seanmoon/grape-
 
 ## Contributing to Grape
 
-Grape is work of dozens of contributors. You're encouraged to submit pull requests, propose
+Grape is work of hundreds of contributors. You're encouraged to submit pull requests, propose
 features and discuss issues.
 
-* Fork the project
-* Write tests for your new feature or a test that reproduces a bug
-* Implement your feature or make a bug fix
-* Add a line to `CHANGELOG.md` describing your change
-* Commit, push and make a pull request. Bonus points for topic branches.
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 
