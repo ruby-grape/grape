@@ -361,6 +361,8 @@ module Grape
         imbue(:befores, [block])
       end
 
+      alias_method :before_validation, :before
+
       def after_validation(&block)
         imbue(:after_validations, [block])
       end

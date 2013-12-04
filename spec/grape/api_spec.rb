@@ -634,6 +634,64 @@ describe Grape::API do
       get '/'
       last_response.body.should eql 'default'
     end
+
+    it 'calls all filters when validation passes' do
+      a = double('before mock')
+      b = double('before_validation mock')
+      c = double('after_validation mock')
+      d = double('after mock')
+
+      subject.params do
+        requires :id, type: Integer
+      end
+      subject.resource ':id' do
+        before { a.do_something! }
+        before_validation { b.do_something! }
+        after_validation { c.do_something! }
+        after { d.do_something! }
+        get do
+          'got it'
+        end
+      end
+
+      a.should_receive(:do_something!).exactly(1).times
+      b.should_receive(:do_something!).exactly(1).times
+      c.should_receive(:do_something!).exactly(1).times
+      d.should_receive(:do_something!).exactly(1).times
+
+      get '/123'
+      last_response.status.should eql 200
+      last_response.body.should eql 'got it'
+    end
+
+    it 'calls only before filters when validation fails' do
+      a = double('before mock')
+      b = double('before_validation mock')
+      c = double('after_validation mock')
+      d = double('after mock')
+
+      subject.params do
+        requires :id, type: Integer
+      end
+      subject.resource ':id' do
+        before { a.do_something! }
+        before_validation { b.do_something! }
+        after_validation { c.do_something! }
+        after { d.do_something! }
+        get do
+          'got it'
+        end
+      end
+
+      a.should_receive(:do_something!).exactly(1).times
+      b.should_receive(:do_something!).exactly(1).times
+      c.should_receive(:do_something!).exactly(0).times
+      d.should_receive(:do_something!).exactly(0).times
+
+      get '/abc'
+      last_response.status.should eql 400
+      last_response.body.should eql 'id is invalid'
+    end
   end
 
   context 'format' do
