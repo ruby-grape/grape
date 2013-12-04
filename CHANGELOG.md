@@ -5,6 +5,7 @@ Next Release
 
 * [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
 * [#511](https://github.com/intridea/grape/pull/511): Add `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
+* [#520](https://github.com/intridea/grape/pull/520): Use default_error_status if set in error! function - [@salimane](https://github.com/salimane).
 * Your contribution here.
 
 #### Fixes

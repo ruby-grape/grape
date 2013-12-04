@@ -1479,6 +1479,15 @@ describe Grape::API do
       get '/exception'
       last_response.status.should eql 403
     end
+    it 'uses the default error status in error!' do
+      subject.rescue_from :all
+      subject.default_error_status 400
+      subject.get '/exception' do
+        error! "rain!"
+      end
+      get '/exception'
+      last_response.status.should eql 400
+    end
   end
 
   context 'routes' do
