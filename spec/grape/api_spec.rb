@@ -993,7 +993,7 @@ describe Grape::API do
         raise "rain!"
       end
       get '/exception'
-      last_response.status.should eql 403
+      last_response.status.should eql 500
     end
 
     it 'rescues only certain errors if rescue_from is called with specific errors' do
@@ -1002,7 +1002,7 @@ describe Grape::API do
       subject.get('/unrescued') { raise "beefcake" }
 
       get '/rescued'
-      last_response.status.should eql 403
+      last_response.status.should eql 500
 
       lambda { get '/unrescued' }.should raise_error
     end
@@ -1477,7 +1477,7 @@ describe Grape::API do
         raise "rain!"
       end
       get '/exception'
-      last_response.status.should eql 403
+      last_response.status.should eql 500
     end
     it 'uses the default error status in error!' do
       subject.rescue_from :all

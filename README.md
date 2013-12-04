@@ -690,7 +690,7 @@ error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
 
 ### Default Error HTTP Status Code
 
-By default Grape returns a 403 status code from `error!`. You can change this with `default_error_status`.
+By default Grape returns a 500 status code from `error!`. You can change this with `default_error_status`.
 
 ``` ruby
 class API < Grape::API

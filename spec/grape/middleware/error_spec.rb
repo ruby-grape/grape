@@ -31,10 +31,10 @@ describe Grape::Middleware::Error do
     last_response.body.should == 'Awesome stuff.'
   end
 
-  it 'defaults to a 403 status' do
+  it 'defaults to a 500 status' do
     ErrApp.error = {}
     get '/'
-    last_response.status.should == 403
+    last_response.status.should == 500
   end
 
   it 'has a default message' do
