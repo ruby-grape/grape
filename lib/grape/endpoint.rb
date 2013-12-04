@@ -203,9 +203,9 @@ module Grape
     #
     # @param message [String] The message to display.
     # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
-    def error!(message, status = nil)
+    def error!(message, status = nil, headers = nil)
       status = settings[:default_error_status] unless status
-      throw :error, message: message, status: status
+      throw :error, message: message, status: status, headers: headers
     end
 
     # Redirect to a new url.

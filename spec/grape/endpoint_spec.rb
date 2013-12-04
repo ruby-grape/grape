@@ -487,6 +487,16 @@ describe Grape::Endpoint do
       last_response.status.should == 403
       last_response.body.should == '{"dude":"rad"}'
     end
+
+    it 'can specifiy headers' do
+      subject.get '/hey' do
+        error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
+      end
+
+      get '/hey.json'
+      last_response.status.should == 403
+      last_response.headers['X-Custom'].should == 'value'
+    end
   end
 
   describe '#redirect' do

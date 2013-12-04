@@ -7,6 +7,7 @@ Next Release
 * [#511](https://github.com/intridea/grape/pull/511): Add `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
 * [#520](https://github.com/intridea/grape/pull/520): Use `default_error_status` to specify the default status code returned from `error!` - [@salimane](https://github.com/salimane).
 * [#525](https://github.com/intridea/grape/pull/525): The default status code returned from `error!` has been changed from 403 to 500 - [@dblock](https://github.com/dblock).
+* [#526](https://github.com/intridea/grape/pull/526): Allow specifying headers in `error!` - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
