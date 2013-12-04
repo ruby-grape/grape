@@ -15,6 +15,7 @@ Next Release
 * [#498](https://github.com/intridea/grape/pull/498): Dry up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
 * [#500](https://github.com/intridea/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
 * [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
+* [#518](https://github.com/intridea/grape/pull/518): Pass on `Access-Control-Allow-Origin` headers in `Grape::Endpoint#error!` - [@simonask](https://github.com/simonask)
 * Your contribution here.
 
 
