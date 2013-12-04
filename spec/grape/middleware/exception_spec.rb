@@ -15,7 +15,7 @@ describe Grape::Middleware::Error do
   # raises a hash error
   class ErrorHashApp
     class << self
-      def error!(message, status = 403)
+      def error!(message, status)
         throw :error, message: { error: message, detail: "missing widget" }, status: status
       end
 
@@ -28,7 +28,7 @@ describe Grape::Middleware::Error do
   # raises an error!
   class AccessDeniedApp
     class << self
-      def error!(message, status = 403)
+      def error!(message, status)
         throw :error, message: message, status: status
       end
 
@@ -70,13 +70,13 @@ describe Grape::Middleware::Error do
       last_response.body.should == "rain!"
     end
 
-    it 'defaults to a 403 status' do
+    it 'defaults to a 500 status' do
       @app ||= Rack::Builder.app do
         use Grape::Middleware::Error, rescue_all: true
         run ExceptionApp
       end
       get '/'
-      last_response.status.should == 403
+      last_response.status.should == 500
     end
 
     it 'is possible to specify a different default status code' do

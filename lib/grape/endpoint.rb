@@ -202,8 +202,9 @@ module Grape
     # end user with the specified message.
     #
     # @param message [String] The message to display.
-    # @param status [Integer] the HTTP Status Code. Defaults to 403.
-    def error!(message, status = 403)
+    # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
+    def error!(message, status = nil)
+      status = settings[:default_error_status] unless status
       throw :error, message: message, status: status
     end
 
@@ -405,7 +406,7 @@ module Grape
       b.use Rack::Head
       b.use Grape::Middleware::Error,
             format: settings[:format],
-            default_status: settings[:default_error_status] || 403,
+            default_status: settings[:default_error_status] || 500,
             rescue_all: settings[:rescue_all],
             rescued_errors: aggregate_setting(:rescued_errors),
             default_error_formatter: settings[:default_error_formatter],

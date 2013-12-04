@@ -5,7 +5,7 @@ module Grape
     class Error < Base
       def default_options
         {
-          default_status: 403, # default status returned on error
+          default_status: 500, # default status returned on error
           default_message: "",
           format: :txt,
           formatters: {},

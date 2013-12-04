@@ -464,7 +464,7 @@ describe Grape::Endpoint do
       end
 
       get '/hey'
-      last_response.status.should == 403
+      last_response.status.should == 500
       last_response.body.should == "This is not valid."
     end
 
