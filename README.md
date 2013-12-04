@@ -41,7 +41,6 @@ the context of recreating parts of the Twitter API.
 ```ruby
 module Twitter
   class API < Grape::API
-
     version 'v1', using: :header, vendor: 'twitter'
     format :json
 
@@ -56,7 +55,6 @@ module Twitter
     end
 
     resource :statuses do
-
       desc "Return a public timeline."
       get :public_timeline do
         Status.limit(20)
@@ -111,7 +109,6 @@ module Twitter
         authenticate!
         current_user.statuses.find(params[:id]).destroy
       end
-
     end
   end
 end
@@ -152,7 +149,7 @@ require 'grape'
 
 class API < Grape::API
   get :hello do
-    {hello: "world"}
+    { hello: "world" }
   end
 end
 
@@ -303,7 +300,7 @@ The Grape endpoint:
 
 ```ruby
 post '/statuses' do
-  Status.create!({ text: params[:text] })
+  Status.create!(text: params[:text])
 end
 ```
 
@@ -465,10 +462,10 @@ You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom
 
 ```ruby
 rescue_from Grape::Exceptions::ValidationErrors do |e|
-    Rack::Response.new({
-        'status' => e.status,
-        'message' => e.message,
-        'errors' => e.errors
+    Rack::Response.new(
+      status: e.status,
+      message: e.message,
+      errors: e.errors
     }.to_json, e.status)
 end
 ```
@@ -479,7 +476,6 @@ The validation errors are grouped by parameter name and can be accessed via ``Gr
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
-
 
 ## Headers
 
@@ -500,7 +496,13 @@ end
 You can set a response header with `header` inside an API.
 
 ```ruby
-header "X-Robots-Tag", "noindex"
+header 'X-Robots-Tag', 'noindex'
+```
+
+When raising `error!`, pass additional headers as arguments.
+
+```ruby
+error! 'Unauthorized', 401, 'X-Error-Detail' => 'Invalid token.'
 ```
 
 ## Routes
@@ -558,7 +560,6 @@ You can set, get and delete your cookies very simply using `cookies` method.
 
 ```ruby
 class API < Grape::API
-
   get 'status_count' do
     cookies[:status_count] ||= 0
     cookies[:status_count] += 1
@@ -568,7 +569,6 @@ class API < Grape::API
   delete 'status_count' do
     { status_count: cookies.delete(:status_count) }
   end
-
 end
 ```
 
@@ -576,10 +576,10 @@ Use a hash-based syntax to set more than one value.
 
 ```ruby
 cookies[:status_count] = {
-    value: 0,
-    expires: Time.tomorrow,
-    domain: '.twitter.com',
-    path: '/'
+  value: 0,
+  expires: Time.tomorrow,
+  domain: '.twitter.com',
+  path: '/'
 }
 
 cookies[:status_count][:value] +=1
@@ -602,11 +602,11 @@ cookies.delete :status_count, path: '/'
 You can redirect to a new url temporarily (302) or permanently (301).
 
 ```ruby
-redirect "/statuses"
+redirect '/statuses'
 ```
 
 ```ruby
-redirect "/statuses", permanent: true
+redirect '/statuses', permanent: true
 ```
 
 ## Allowed Methods
@@ -617,13 +617,11 @@ behavior with `do_not_route_head!`.
 
 ``` ruby
 class API < Grape::API
-
   do_not_route_head!
 
   get '/example' do
     # only responds to GET
   end
-
 end
 ```
 
@@ -633,7 +631,6 @@ include an "Allow" header listing the supported methods.
 
 ```ruby
 class API < Grape::API
-
   get '/rt_count' do
     { rt_count: current_user.rt_count }
   end
@@ -645,7 +642,6 @@ class API < Grape::API
     current_user.rt_count += params[:value].to_i
     { rt_count: current_user.rt_count }
   end
-
 end
 ```
 
@@ -678,14 +674,14 @@ curl -X DELETE -v http://localhost:3000/rt_count/
 You can abort the execution of an API method by raising errors with `error!`.
 
 ```ruby
-error! "Access Denied", 401
+error! 'Access Denied', 401
 ```
 
 You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 
 ```ruby
-error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
+error!({ error: "unexpected error", detail: "missing widget" }, 500)
 ```
 
 ### Default Error HTTP Status Code
@@ -1365,7 +1361,6 @@ Create `config/initializers/reload_api.rb`.
 
 ```ruby
 if Rails.env.development?
-
   ActiveSupport::Dependencies.explicitly_unloadable_constants << "Twitter::API"
 
   api_files = Dir["#{Rails.root}/app/api/**/*.rb"]
@@ -1375,12 +1370,10 @@ if Rails.env.development?
   ActionDispatch::Callbacks.to_prepare do
     api_reloader.execute_if_updated
   end
-
 end
 ```
 
 See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
-
 
 ## Performance Monitoring
 
