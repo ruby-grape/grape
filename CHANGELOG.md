@@ -9,6 +9,7 @@ Next Release
 * [#525](https://github.com/intridea/grape/pull/525): The default status code returned from `error!` has been changed from 403 to 500 - [@dblock](https://github.com/dblock).
 * [#526](https://github.com/intridea/grape/pull/526): Allow specifying headers in `error!` - [@dblock](https://github.com/dblock).
 * [#523](https://github.com/intridea/grape/pull/523): Aliased `before` as `before_validation` - [@myitcv](https://github.com/myitcv).
+* [#527](https://github.com/intridea/grape/pull/527): `before_validation` now a distinct callback (supersedes [#523](https://github.com/intridea/grape/pull/523)) - [@myitcv](https://github.com/myitcv).
 * Your contribution here.
 
 #### Fixes
