@@ -213,7 +213,7 @@ module Grape
 
         if handler
           args.each do |arg|
-            imbue(:rescue_handlers, { arg => handler })
+            imbue :rescue_handlers, arg => handler
           end
         end
 
@@ -324,11 +324,12 @@ module Grape
             app_settings.set :mount_path, mount_path
             app.inherit_settings(app_settings)
           end
-          endpoints << Grape::Endpoint.new(settings.clone, {
+          endpoints << Grape::Endpoint.new(
+            settings.clone,
             method: :any,
             path: path,
             app: app
-          })
+          )
         end
       end
 
@@ -359,6 +360,8 @@ module Grape
       def before(&block)
         imbue(:befores, [block])
       end
+
+      alias_method :before_validation, :before
 
       def after_validation(&block)
         imbue(:after_validations, [block])
@@ -567,21 +570,20 @@ module Grape
         end
         allow_header = (['OPTIONS'] | methods).join(', ')
         if methods.include?('OPTIONS') || !self.class.settings[:do_not_route_options]
-          self.class.options(path, {}) {
+          self.class.options(path, {}) do
             header 'Allow', allow_header
             status 204
             ''
-          }
+          end
         end
         not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
         not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
-        self.class.route(not_allowed_methods, path) {
+        self.class.route(not_allowed_methods, path) do
           header 'Allow', allow_header
           status 405
           ''
-        }
+        end
       end
     end
-
   end
 end

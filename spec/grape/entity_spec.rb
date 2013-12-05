@@ -109,6 +109,18 @@ describe Grape::Entity do
       last_response.body.should == 'Auto-detect!'
     end
 
+    it 'does not run autodetection for Entity when explicitely provided' do
+      entity = Class.new(Grape::Entity)
+      some_array = Array.new
+
+      subject.get '/example' do
+        present some_array, with: entity
+      end
+
+      some_array.should_not_receive(:first)
+      get '/example'
+    end
+
     it 'adds a root key to the output if one is given' do
       subject.get '/example' do
         present({ abc: 'def' }, root: :root)

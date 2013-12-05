@@ -1,9 +1,7 @@
 module Grape
   module Formatter
     module Base
-
       class << self
-
         FORMATTERS = {
           json: Grape::Formatter::Json,
           jsonapi: Grape::Formatter::Json,
@@ -27,7 +25,6 @@ module Grape
             spec
           end
         end
-
       end
     end
   end

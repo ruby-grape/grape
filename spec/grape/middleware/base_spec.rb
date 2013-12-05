@@ -13,11 +13,6 @@ describe Grape::Middleware::Base do
     subject.app.should == blank_app
   end
 
-  it 'is able to access the request' do
-    subject.call({})
-    subject.request.should be_kind_of(Rack::Request)
-  end
-
   it 'calls through to the app' do
     subject.call({}).should == [200, {}, 'Hi there.']
   end

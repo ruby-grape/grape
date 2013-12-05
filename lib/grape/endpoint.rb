@@ -5,7 +5,7 @@ module Grape
   # from inside a `get`, `post`, etc.
   class Endpoint
     attr_accessor :block, :source, :options, :settings
-    attr_reader :env, :request
+    attr_reader :env, :request, :headers, :params
 
     class << self
       # @api private
@@ -80,7 +80,7 @@ module Grape
             route_set.add_route(self, {
               path_info: route.route_compiled,
               request_method: method,
-            }, { route_info: route })
+            },  route_info: route)
           end
         end
       end
@@ -156,12 +156,6 @@ module Grape
       end
     end
 
-    # The parameters passed into the request as
-    # well as parsed from URL segments.
-    def params
-      @params ||= @request.params
-    end
-
     # A filtering method that will return a hash
     # consisting only of keys that have been declared by a
     # `params` statement.
@@ -208,9 +202,10 @@ module Grape
     # end user with the specified message.
     #
     # @param message [String] The message to display.
-    # @param status [Integer] the HTTP Status Code. Defaults to 403.
-    def error!(message, status = 403)
-      throw :error, message: message, status: status
+    # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
+    def error!(message, status = nil, headers = nil)
+      status = settings[:default_error_status] unless status
+      throw :error, message: message, status: status, headers: headers
     end
 
     # Redirect to a new url.
@@ -258,11 +253,6 @@ module Grape
       else
         @header
       end
-    end
-
-    # Retrieves all available request headers.
-    def headers
-      @headers ||= @request.headers
     end
 
     # Set response content-type
@@ -324,14 +314,16 @@ module Grape
                     end
       entity_class = options.delete(:with)
 
-      # auto-detect the entity from the first object in the collection
-      object_instance = object.respond_to?(:first) ? object.first : object
+      if entity_class.nil?
+        # entity class not explicitely defined, auto-detect from first object in the collection
+        object_instance = object.respond_to?(:first) ? object.first : object
 
-      object_instance.class.ancestors.each do |potential|
-        entity_class ||= (settings[:representations] || {})[potential]
+        object_instance.class.ancestors.each do |potential|
+          entity_class ||= (settings[:representations] || {})[potential]
+        end
+
+        entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
       end
-
-      entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
 
       root = options.delete(:root)
 
@@ -375,7 +367,10 @@ module Grape
     def run(env)
       @env = env
       @header = {}
-      @request = Grape::Request.new(@env)
+
+      @request = Grape::Request.new(env)
+      @params = @request.params
+      @headers = @request.headers
 
       extend helpers
       cookies.read(@request)
@@ -411,7 +406,7 @@ module Grape
       b.use Rack::Head
       b.use Grape::Middleware::Error,
             format: settings[:format],
-            default_status: settings[:default_error_status] || 403,
+            default_status: settings[:default_error_status] || 500,
             rescue_all: settings[:rescue_all],
             rescued_errors: aggregate_setting(:rescued_errors),
             default_error_formatter: settings[:default_error_formatter],
@@ -433,11 +428,11 @@ module Grape
       b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
 
       if settings[:version]
-        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]), {
-          versions: settings[:version] ? settings[:version].flatten : nil,
-          version_options: settings[:version_options],
-          prefix: settings[:root_prefix]
-        }
+        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]),
+              versions: settings[:version] ? settings[:version].flatten : nil,
+              version_options: settings[:version_options],
+              prefix: settings[:root_prefix]
+
       end
 
       b.use Grape::Middleware::Formatter,

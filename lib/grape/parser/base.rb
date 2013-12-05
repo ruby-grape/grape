@@ -1,9 +1,7 @@
 module Grape
   module Parser
     module Base
-
       class << self
-
         PARSERS = {
           json: Grape::Parser::Json,
           jsonapi: Grape::Parser::Json,
@@ -25,7 +23,6 @@ module Grape
             spec
           end
         end
-
       end
     end
   end

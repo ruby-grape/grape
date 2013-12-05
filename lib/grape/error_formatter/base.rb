@@ -1,9 +1,7 @@
 module Grape
   module ErrorFormatter
     module Base
-
       class << self
-
         FORMATTERS = {
           serializable_hash: Grape::ErrorFormatter::Json,
           json: Grape::ErrorFormatter::Json,
@@ -27,7 +25,6 @@ module Grape
             spec
           end
         end
-
       end
     end
   end

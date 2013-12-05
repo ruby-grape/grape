@@ -1,7 +1,6 @@
 module Grape
   module Exceptions
     class Base < StandardError
-
       BASE_MESSAGES_KEY = 'grape.errors.messages'
       BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'
       FALLBACK_LOCALE = :en
@@ -62,7 +61,6 @@ module Grape
         message = ::I18n.translate(key, options)
         message.present? ? message : ::I18n.translate(key, options.merge(locale: FALLBACK_LOCALE))
       end
-
     end
   end
 end

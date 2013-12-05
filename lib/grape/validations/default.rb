@@ -7,7 +7,7 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
-        params[attr_name] = @default unless params.has_key?(attr_name)
+        params[attr_name] = @default.is_a?(Proc) ? @default.call : @default unless params.has_key?(attr_name)
       end
 
       def validate!(params)

@@ -1,6 +1,5 @@
 module Grape
   class Cookies
-
     def initialize
       @cookies = {}
       @send_cookies = {}
@@ -36,6 +35,5 @@ module Grape
       options = opts.merge(value: 'deleted', expires: Time.at(0))
       self.[]=(name, options)
     end
-
   end
 end

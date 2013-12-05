@@ -17,7 +17,6 @@ module Grape
       # X-Cascade header to alert Rack::Mount to attempt the next matched
       # route.
       class AcceptVersionHeader < Base
-
         def before
           potential_version = (env['HTTP_ACCEPT_VERSION'] || '').strip
 
@@ -62,7 +61,6 @@ module Grape
         def error_headers
           cascade? ? { 'X-Cascade' => 'pass' } : {}
         end
-
       end
     end
   end

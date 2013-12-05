@@ -61,19 +61,23 @@ module Grape
       end
 
       it "is false when the version option is header" do
-        path = Path.new(anything, anything, {
+        path = Path.new(
+          anything,
+          anything,
           version: 'v1',
           version_options: { using: :header }
-        })
+        )
 
         expect(path.uses_path_versioning?).to be_false
       end
 
       it "is true when the version option is path" do
-        path = Path.new(anything, anything, {
+        path = Path.new(
+          anything,
+          anything,
           version: 'v1',
           version_options: { using: :path }
-        })
+        )
 
         expect(path.uses_path_versioning?).to be_true
       end
@@ -126,7 +130,7 @@ module Grape
     describe "#path" do
       context "mount_path" do
         it "is not included when it is nil" do
-          path = Path.new(nil, nil, { mount_path: '/foo/bar' })
+          path = Path.new(nil, nil, mount_path: '/foo/bar')
           expect(path.path).to eql '/foo/bar'
         end
 
@@ -143,29 +147,35 @@ module Grape
         end
 
         it "is included after the mount path" do
-          path = Path.new(nil, nil, {
+          path = Path.new(
+            nil,
+            nil,
             mount_path: '/foo',
             root_prefix: '/hello'
-          })
+          )
 
           expect(path.path).to eql('/foo/hello')
         end
       end
 
       it "uses the namespace after the mount path and root prefix" do
-        path = Path.new(nil, 'namespace', {
+        path = Path.new(
+          nil,
+          'namespace',
           mount_path: '/foo',
           root_prefix: '/hello'
-        })
+        )
 
         expect(path.path).to eql('/foo/hello/namespace')
       end
 
       it "uses the raw path after the namespace" do
-        path = Path.new('raw_path', 'namespace', {
+        path = Path.new(
+          'raw_path',
+          'namespace',
           mount_path: '/foo',
           root_prefix: '/hello'
-        })
+        )
 
         expect(path.path).to eql('/foo/hello/namespace/raw_path')
       end

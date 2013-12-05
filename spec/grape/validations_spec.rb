@@ -344,11 +344,11 @@ describe Grape::Validations do
         end
 
         it 'validates when param is present' do
-          get '/optional_custom', { custom: 'im custom' }
+          get '/optional_custom', custom: 'im custom'
           last_response.status.should == 200
           last_response.body.should == 'optional with custom works!'
 
-          get '/optional_custom', { custom: 'im wrong' }
+          get '/optional_custom', custom: 'im wrong'
           last_response.status.should == 400
           last_response.body.should == 'custom is not custom!'
         end

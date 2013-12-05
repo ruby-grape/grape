@@ -25,31 +25,31 @@ describe Grape::Util::HashStack do
   describe '#imbue' do
     it 'pushes a new value onto the end of an array' do
       subject[:abc] = []
-      subject.imbue(:abc, [123])
-      subject.imbue(:abc, [456])
+      subject.imbue :abc, [123]
+      subject.imbue :abc, [456]
       subject[:abc].should == [123, 456]
     end
 
     it 'merges a hash that is passed' do
       subject[:abc] = { foo: 'bar' }
-      subject.imbue(:abc, { baz: 'wich' })
+      subject.imbue :abc, baz: 'wich'
       subject[:abc].should == { foo: 'bar', baz: 'wich' }
     end
 
     it 'sets the value if not a hash or array' do
-      subject.imbue(:abc, 123)
+      subject.imbue :abc, 123
       subject[:abc].should == 123
     end
 
     it 'is able to imbue an array without explicit setting' do
-      subject.imbue(:arr, [1])
-      subject.imbue(:arr, [2])
+      subject.imbue :arr, [1]
+      subject.imbue :arr, [2]
       subject[:arr].should == [1, 2]
     end
 
     it 'is able to imbue a hash without explicit setting' do
-      subject.imbue(:hash, foo: 'bar')
-      subject.imbue(:hash, baz: 'wich')
+      subject.imbue :hash, foo: 'bar'
+      subject.imbue :hash, baz: 'wich'
       subject[:hash].should == { foo: 'bar', baz: 'wich' }
     end
   end

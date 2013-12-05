@@ -16,5 +16,5 @@ group :development, :test do
   gem 'cookiejar'
   gem 'rack-contrib'
   gem 'redcarpet', :platforms => :ruby
-  gem 'rubocop', '~> 0.14.1'
+  gem 'rubocop', '~> 0.15.0'
 end

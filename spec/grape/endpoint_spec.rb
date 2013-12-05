@@ -9,7 +9,7 @@ describe Grape::Endpoint do
 
   describe '#initialize' do
     it 'takes a settings stack, options, and a block' do
-      p = proc { }
+      p = proc {}
       expect {
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
           path: '/',
@@ -64,7 +64,7 @@ describe Grape::Endpoint do
       }
     end
     it 'includes additional request headers' do
-      get '/headers', nil, { "HTTP_X_GRAPE_CLIENT" => "1" }
+      get '/headers', nil, "HTTP_X_GRAPE_CLIENT" => "1"
       JSON.parse(last_response.body)["X-Grape-Client"].should == "1"
     end
     it 'includes headers passed as symbols' do
@@ -150,7 +150,7 @@ describe Grape::Endpoint do
         sum = 0
         cookies.each do |name, val|
           sum += val.to_i
-          cookies.delete name, { path: '/test' }
+          cookies.delete name, path: '/test'
         end
         sum
       end
@@ -385,22 +385,22 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', MultiJson.dump(user: 'Bobby T.'), { 'CONTENT_TYPE' => 'application/json' }
+        post '/request_body', MultiJson.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
         last_response.body.should == 'Bobby T.'
       end
 
       it 'does not convert empty JSON bodies to params' do
-        put '/request_body', '', { 'CONTENT_TYPE' => 'application/json' }
+        put '/request_body', '', 'CONTENT_TYPE' => 'application/json'
         last_response.body.should == ''
       end
 
       it 'converts XML bodies to params' do
-        post '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
+        post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
         last_response.body.should == 'Bobby T.'
       end
 
       it 'converts XML bodies to params' do
-        put '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
+        put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
         last_response.body.should == 'Bobby T.'
       end
 
@@ -409,7 +409,7 @@ describe Grape::Endpoint do
           error! 400, "expected nil" if params[:version]
           params[:user]
         end
-        post '/omitted_params', MultiJson.dump(user: 'Bob'), { 'CONTENT_TYPE' => 'application/json' }
+        post '/omitted_params', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
         last_response.status.should == 201
         last_response.body.should == "Bob"
       end
@@ -421,9 +421,68 @@ describe Grape::Endpoint do
       subject.put '/request_body' do
         params[:user]
       end
-      put '/request_body', '<user>Bobby T.</user>', { 'CONTENT_TYPE' => 'application/xml' }
+      put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
       last_response.status.should == 406
       last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
+    end
+
+    context 'content type with params' do
+      before do
+        subject.format :json
+        subject.content_type :json, 'application/json; charset=utf-8'
+
+        subject.post do
+          params[:data]
+        end
+        post '/', MultiJson.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
+      end
+
+      it "should not response with 406 for same type without params" do
+        last_response.status.should_not be 406
+      end
+
+      it "should response with given content type in headers" do
+        last_response.headers['Content-Type'].should eq 'application/json; charset=utf-8'
+      end
+
+    end
+
+    context 'precedence' do
+
+      before do
+        subject.format :json
+        subject.namespace '/:id' do
+          get do
+            {
+              params: params[:id]
+            }
+          end
+          post do
+            {
+              params: params[:id]
+            }
+          end
+          put do
+            {
+              params: params[:id]
+            }
+          end
+        end
+      end
+
+      it 'route string params have higher precedence than body params' do
+        post '/123', { id: 456 }.to_json
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+        put '/123', { id: 456 }.to_json
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+
+      it 'route string params have higher precedence than URL params' do
+        get '/123?id=456'
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+        post '/123?id=456'
+        expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
     end
 
   end
@@ -436,7 +495,7 @@ describe Grape::Endpoint do
       end
 
       get '/hey'
-      last_response.status.should == 403
+      last_response.status.should == 500
       last_response.body.should == "This is not valid."
     end
 
@@ -458,6 +517,16 @@ describe Grape::Endpoint do
       get '/hey.json'
       last_response.status.should == 403
       last_response.body.should == '{"dude":"rad"}'
+    end
+
+    it 'can specifiy headers' do
+      subject.get '/hey' do
+        error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
+      end
+
+      get '/hey.json'
+      last_response.status.should == 403
+      last_response.headers['X-Custom'].should == 'value'
     end
   end
 
@@ -534,7 +603,7 @@ describe Grape::Endpoint do
   describe '.generate_api_method' do
     it 'raises NameError if the method name is already in use' do
       expect {
-        Grape::Endpoint.generate_api_method("version", &proc { })
+        Grape::Endpoint.generate_api_method("version", &proc {})
       }.to raise_error(NameError)
     end
     it 'raises ArgumentError if a block is not given' do
@@ -543,7 +612,7 @@ describe Grape::Endpoint do
       }.to raise_error(ArgumentError)
     end
     it 'returns a Proc' do
-      Grape::Endpoint.generate_api_method("GET test for a proc", &proc { }).should be_a Proc
+      Grape::Endpoint.generate_api_method("GET test for a proc", &proc {}).should be_a Proc
     end
   end
 

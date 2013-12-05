@@ -41,7 +41,6 @@ the context of recreating parts of the Twitter API.
 ```ruby
 module Twitter
   class API < Grape::API
-
     version 'v1', using: :header, vendor: 'twitter'
     format :json
 
@@ -56,7 +55,6 @@ module Twitter
     end
 
     resource :statuses do
-
       desc "Return a public timeline."
       get :public_timeline do
         Status.limit(20)
@@ -111,7 +109,6 @@ module Twitter
         authenticate!
         current_user.statuses.find(params[:id]).destroy
       end
-
     end
   end
 end
@@ -152,7 +149,7 @@ require 'grape'
 
 class API < Grape::API
   get :hello do
-    {hello: "world"}
+    { hello: "world" }
   end
 end
 
@@ -290,7 +287,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on POST and PUT for form input, JSON and
+Parameters are automatically populated from the request body on `POST` and `PUT` for form input, JSON and
 XML content-types.
 
 The request:
@@ -303,7 +300,7 @@ The Grape endpoint:
 
 ```ruby
 post '/statuses' do
-  Status.create!({ text: params[:text] })
+  Status.create!(text: params[:text])
 end
 ```
 
@@ -322,6 +319,14 @@ post "upload" do
   # file in params[:image_file]
 end
 ```
+
+In the case of conflict between either of:
+
+* route string parameters
+* `GET`, `POST` and `PUT` parameters
+* the contents of the request body on `POST` and `PUT`
+
+route string parameters will have precedence.
 
 ## Parameter Validation and Coercion
 
@@ -351,10 +356,16 @@ Optional parameters can have a default value.
 ```ruby
 params do
   optional :color, type: String, default: 'blue'
+  optional :random_number, type: Integer, default: -> { Random.rand(1..100) }
+  optional :non_random_number, type: Integer, default:  Random.rand(1..100)
 end
 ```
 
 Parameters can be restricted to a specific set of values with the `:values` option.
+
+Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
+number for each call to the endpoint of this `params` block. To have the default evaluate
+at calltime use a lambda, like `:random_number` above.
 
 ```ruby
 params do
@@ -364,7 +375,7 @@ end
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
-and `params[:audio][:mp3]` is required only if `params[:audio]` is present.
+and `params[:audio][:format]` is required only if `params[:audio]` is present.
 
 ### Namespace Validation and Coercion
 
@@ -389,6 +400,23 @@ end
 
 The `namespace` method has a number of aliases, including: `group`, `resource`,
 `resources`, and `segment`. Use whichever reads the best for your API.
+
+You can conveniently define a route parameter as a namespace using `route_param`.
+
+```ruby
+namespace :statuses do
+  route_param :id do
+    desc "Returns all replies for a status."
+    get 'replies' do
+      Status.find(params[:id]).replies
+    end
+    desc "Returns a status."
+    get do
+      Status.find(params[:id])
+    end
+  end
+end
+```
 
 ### Custom Validators
 
@@ -434,10 +462,10 @@ You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom
 
 ```ruby
 rescue_from Grape::Exceptions::ValidationErrors do |e|
-    Rack::Response.new({
-        'status' => e.status,
-        'message' => e.message,
-        'errors' => e.errors
+    Rack::Response.new(
+      status: e.status,
+      message: e.message,
+      errors: e.errors
     }.to_json, e.status)
 end
 ```
@@ -448,7 +476,6 @@ The validation errors are grouped by parameter name and can be accessed via ``Gr
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
-
 
 ## Headers
 
@@ -469,7 +496,13 @@ end
 You can set a response header with `header` inside an API.
 
 ```ruby
-header "X-Robots-Tag", "noindex"
+header 'X-Robots-Tag', 'noindex'
+```
+
+When raising `error!`, pass additional headers as arguments.
+
+```ruby
+error! 'Unauthorized', 401, 'X-Error-Detail' => 'Invalid token.'
 ```
 
 ## Routes
@@ -527,7 +560,6 @@ You can set, get and delete your cookies very simply using `cookies` method.
 
 ```ruby
 class API < Grape::API
-
   get 'status_count' do
     cookies[:status_count] ||= 0
     cookies[:status_count] += 1
@@ -537,7 +569,6 @@ class API < Grape::API
   delete 'status_count' do
     { status_count: cookies.delete(:status_count) }
   end
-
 end
 ```
 
@@ -545,10 +576,10 @@ Use a hash-based syntax to set more than one value.
 
 ```ruby
 cookies[:status_count] = {
-    value: 0,
-    expires: Time.tomorrow,
-    domain: '.twitter.com',
-    path: '/'
+  value: 0,
+  expires: Time.tomorrow,
+  domain: '.twitter.com',
+  path: '/'
 }
 
 cookies[:status_count][:value] +=1
@@ -571,11 +602,11 @@ cookies.delete :status_count, path: '/'
 You can redirect to a new url temporarily (302) or permanently (301).
 
 ```ruby
-redirect "/statuses"
+redirect '/statuses'
 ```
 
 ```ruby
-redirect "/statuses", permanent: true
+redirect '/statuses', permanent: true
 ```
 
 ## Allowed Methods
@@ -586,13 +617,11 @@ behavior with `do_not_route_head!`.
 
 ``` ruby
 class API < Grape::API
-
   do_not_route_head!
 
   get '/example' do
     # only responds to GET
   end
-
 end
 ```
 
@@ -602,7 +631,6 @@ include an "Allow" header listing the supported methods.
 
 ```ruby
 class API < Grape::API
-
   get '/rt_count' do
     { rt_count: current_user.rt_count }
   end
@@ -614,7 +642,6 @@ class API < Grape::API
     current_user.rt_count += params[:value].to_i
     { rt_count: current_user.rt_count }
   end
-
 end
 ```
 
@@ -647,14 +674,27 @@ curl -X DELETE -v http://localhost:3000/rt_count/
 You can abort the execution of an API method by raising errors with `error!`.
 
 ```ruby
-error! "Access Denied", 401
+error! 'Access Denied', 401
 ```
 
 You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 
 ```ruby
-error!({ "error" => "unexpected error", "detail" => "missing widget" }, 500)
+error!({ error: "unexpected error", detail: "missing widget" }, 500)
+```
+
+### Default Error HTTP Status Code
+
+By default Grape returns a 500 status code from `error!`. You can change this with `default_error_status`.
+
+``` ruby
+class API < Grape::API
+  default_error_status 400
+  get '/example' do
+    error! "This should have http status code 400"
+  end
+end
 ```
 
 ### Handling 404
@@ -1166,7 +1206,20 @@ end
 
 ## Before and After
 
-Execute a block before or after every API call with `before` and `after`.
+Blocks can be executed before or after every API call, using `before`, `after`,
+`before_validation` and `after_validation`.
+
+Before and after callbacks execute in the following order:
+
+1. `before` and `before_validation` (these are aliases - no ordering between them,
+execution could be interleaved)
+2. `after_validation`
+3. the API call
+4. `after`
+
+Steps 2, 3 and 4 only happen if validation succeeds.
+
+E.g. using `before`:
 
 ```ruby
 before do
@@ -1183,7 +1236,10 @@ class MyAPI < Grape::API
   end
 
   namespace :foo do
-    before { @blah = 'blah' }
+    before do
+      @blah = 'blah'
+    end
+
     get '/' do
       "root - foo - #{@blah}"
     end
@@ -1205,6 +1261,33 @@ GET /foo        # 'root - foo - blah'
 GET /foo/bar    # 'root - foo - bar - blah'
 ```
 
+Params on a `namespace` (or whatever alias you are using) also work when using
+`before_validation` or `after_validation`:
+
+```ruby
+class MyAPI < Grape::API
+  params do
+    requires :blah, type: Integer
+  end
+  resource ':blah' do
+    after_validation do
+      # if we reach this point validations will have passed
+      @blah = declared(params, include_missing: false)[:blah]
+    end
+
+    get '/' do
+      @blah.class
+    end
+  end
+end
+```
+
+The behaviour is then:
+
+```bash
+GET /123        # 'Fixnum'
+GET /foo        # 400 error - 'blah is invalid'
+```
 
 ## Anchoring
 
@@ -1322,7 +1405,6 @@ Create `config/initializers/reload_api.rb`.
 
 ```ruby
 if Rails.env.development?
-
   ActiveSupport::Dependencies.explicitly_unloadable_constants << "Twitter::API"
 
   api_files = Dir["#{Rails.root}/app/api/**/*.rb"]
@@ -1332,12 +1414,10 @@ if Rails.env.development?
   ActionDispatch::Callbacks.to_prepare do
     api_reloader.execute_if_updated
   end
-
 end
 ```
 
 See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
-
 
 ## Performance Monitoring
 
@@ -1347,14 +1427,10 @@ with Librato Metrics with the [grape-librato](https://github.com/seanmoon/grape-
 
 ## Contributing to Grape
 
-Grape is work of dozens of contributors. You're encouraged to submit pull requests, propose
+Grape is work of hundreds of contributors. You're encouraged to submit pull requests, propose
 features and discuss issues.
 
-* Fork the project
-* Write tests for your new feature or a test that reproduces a bug
-* Implement your feature or make a bug fix
-* Add a line to `CHANGELOG.md` describing your change
-* Commit, push and make a pull request. Bonus points for topic branches.
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 

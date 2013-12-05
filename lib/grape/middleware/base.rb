@@ -27,14 +27,13 @@ module Grape
 
       # @abstract
       # Called before the application is called in the middleware lifecycle.
-      def before; end
+      def before
+      end
+
       # @abstract
       # Called after the application is called in the middleware lifecycle.
       # @return [Response, nil] a Rack SPEC response or nil to call the application afterwards.
-      def after; end
-
-      def request
-        Grape::Request.new(env)
+      def after
       end
 
       def response
@@ -54,9 +53,10 @@ module Grape
       end
 
       def mime_types
-        content_types.invert
+        content_types.each_with_object({}) { |(k, v), types_without_params|
+          types_without_params[k] = v.split(';').first
+        }.invert
       end
-
     end
   end
 end
