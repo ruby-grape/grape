@@ -1206,7 +1206,20 @@ end
 
 ## Before and After
 
-Execute a block before or after every API call with `before` and `after`.
+Blocks can be executed before or after every API call, using `before`, `after`,
+`before_validation` and `after_validation`.
+
+Before and after callbacks execute in the following order:
+
+1. `before` and `before_validation` (these are aliases - no ordering between them,
+execution could be interleaved)
+2. `after_validation`
+3. the API call
+4. `after`
+
+Steps 2, 3 and 4 only happen if validation succeeds.
+
+E.g. using `before`:
 
 ```ruby
 before do
@@ -1223,7 +1236,10 @@ class MyAPI < Grape::API
   end
 
   namespace :foo do
-    before { @blah = 'blah' }
+    before do
+      @blah = 'blah'
+    end
+
     get '/' do
       "root - foo - #{@blah}"
     end
@@ -1243,6 +1259,34 @@ The behaviour is then:
 GET /           # 'root - '
 GET /foo        # 'root - foo - blah'
 GET /foo/bar    # 'root - foo - bar - blah'
+```
+
+Params on a `namespace` (or whatever alias you are using) also work when using
+`before_validation` or `after_validation`:
+
+```ruby
+class MyAPI < Grape::API
+  params do
+    requires :blah, type: Integer
+  end
+  resource ':blah' do
+    after_validation do
+      # if we reach this point validations will have passed
+      @blah = declared(params, include_missing: false)[:blah]
+    end
+
+    get '/' do
+      @blah.class
+    end
+  end
+end
+```
+
+The behaviour is then:
+
+```bash
+GET /123        # 'Fixnum'
+GET /foo        # 400 error - 'blah is invalid'
 ```
 
 ## Anchoring
