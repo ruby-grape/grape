@@ -162,7 +162,7 @@ module Grape
     #
     # @param params [Hash] The initial hash to filter. Usually this will just be `params`
     # @param options [Hash] Can pass `:include_missing` and `:stringify` options.
-    def declared(params, options = {}, declared_params = settings[:declared_params])
+    def declared(params, options = {}, declared_params = settings.gather(:declared_params))
       options[:include_missing] = true unless options.key?(:include_missing)
 
       unless declared_params
