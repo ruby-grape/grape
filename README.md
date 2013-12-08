@@ -1211,11 +1211,12 @@ Blocks can be executed before or after every API call, using `before`, `after`,
 
 Before and after callbacks execute in the following order:
 
-1. `before` and `before_validation` (these are aliases - no ordering between them,
-execution could be interleaved)
-2. `after_validation`
-3. the API call
-4. `after`
+1. `before`
+2. `before_validation`
+3. _validations_
+4. `after_validation`
+5. _the API call_
+6. `after`
 
 Steps 2, 3 and 4 only happen if validation succeeds.
 

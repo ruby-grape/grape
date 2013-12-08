@@ -692,6 +692,36 @@ describe Grape::API do
       last_response.status.should eql 400
       last_response.body.should eql 'id is invalid'
     end
+
+    it 'calls filters in the correct order' do
+      i = 0
+      a = double('before mock')
+      b = double('before_validation mock')
+      c = double('after_validation mock')
+      d = double('after mock')
+
+      subject.params do
+        requires :id, type: Integer
+      end
+      subject.resource ':id' do
+        before { a.here(i += 1) }
+        before_validation { b.here(i += 1) }
+        after_validation { c.here(i += 1) }
+        after { d.here(i += 1) }
+        get do
+          'got it'
+        end
+      end
+
+      a.should_receive(:here).with(1).exactly(1).times
+      b.should_receive(:here).with(2).exactly(1).times
+      c.should_receive(:here).with(3).exactly(1).times
+      d.should_receive(:here).with(4).exactly(1).times
+
+      get '/123'
+      last_response.status.should eql 200
+      last_response.body.should eql 'got it'
+    end
   end
 
   context 'format' do

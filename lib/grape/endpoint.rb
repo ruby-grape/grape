@@ -377,6 +377,8 @@ module Grape
 
       run_filters befores
 
+      run_filters before_validations
+
       # Retieve validations from this namespace and all parent namespaces.
       validation_errors = []
       settings.gather(:validations).each do |validator|
@@ -473,6 +475,10 @@ module Grape
 
     def befores
       aggregate_setting(:befores)
+    end
+
+    def before_validations
+      aggregate_setting(:before_validations)
     end
 
     def after_validations
