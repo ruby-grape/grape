@@ -146,6 +146,8 @@ module Grape
     end
 
     def call!(env)
+      extend helpers
+      
       env['api.endpoint'] = self
       if options[:app]
         options[:app].call(env)
@@ -372,7 +374,6 @@ module Grape
       @params = @request.params
       @headers = @request.headers
 
-      extend helpers
       cookies.read(@request)
 
       run_filters befores
