@@ -309,7 +309,7 @@ Multipart POSTs and PUTs are supported as well.
 The request:
 
 ```
-curl --form image_file=image.jpg http://localhost:9292/upload
+curl --form image_file=@image.jpg http://localhost:9292/upload
 ```
 
 The Grape endpoint:
