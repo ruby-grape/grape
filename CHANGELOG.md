@@ -10,6 +10,7 @@ Next Release
 * [#526](https://github.com/intridea/grape/pull/526): Allow specifying headers in `error!` - [@dblock](https://github.com/dblock).
 * [#523](https://github.com/intridea/grape/pull/523): Aliased `before` as `before_validation` - [@myitcv](https://github.com/myitcv).
 * [#527](https://github.com/intridea/grape/pull/527): `before_validation` now a distinct callback (supersedes [#523](https://github.com/intridea/grape/pull/523)) - [@myitcv](https://github.com/myitcv).
+* [#531](https://github.com/intridea/grape/pull/531): Helpers are now available to auth middleware, executing in the context of the endpoint - [@joelvh](https://github.com/joelvh).
 * Your contribution here.
 
 #### Fixes

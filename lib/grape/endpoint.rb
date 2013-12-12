@@ -146,6 +146,8 @@ module Grape
     end
 
     def call!(env)
+      extend helpers
+
       env['api.endpoint'] = self
       if options[:app]
         options[:app].call(env)
@@ -372,7 +374,6 @@ module Grape
       @params = @request.params
       @headers = @request.headers
 
-      extend helpers
       cookies.read(@request)
 
       run_filters befores
@@ -426,8 +427,21 @@ module Grape
         end
       end
 
-      b.use Rack::Auth::Basic, settings[:auth][:realm], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_basic
-      b.use Rack::Auth::Digest::MD5, settings[:auth][:realm], settings[:auth][:opaque], &settings[:auth][:proc] if settings[:auth] && settings[:auth][:type] == :http_digest
+      if settings[:auth]
+        auth_proc         = settings[:auth][:proc]
+        auth_proc_context = self
+        auth_middleware   = {
+          http_basic:   { class: Rack::Auth::Basic,       args: [settings[:auth][:realm]] },
+          http_digest:  { class: Rack::Auth::Digest::MD5, args: [settings[:auth][:realm], settings[:auth][:opaque]] }
+        }[settings[:auth][:type]]
+
+        # evaluate auth proc in context of endpoint
+        if auth_middleware
+          b.use auth_middleware[:class], *auth_middleware[:args] do |*args|
+            auth_proc_context.instance_exec(*args, &auth_proc)
+          end
+        end
+      end
 
       if settings[:version]
         b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]),

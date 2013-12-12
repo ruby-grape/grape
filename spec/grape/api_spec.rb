@@ -874,7 +874,7 @@ describe Grape::API do
       end
     end
   end
-  describe '.basic' do
+  describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, p|
         u == 'allow'
@@ -912,6 +912,51 @@ describe Grape::API do
       last_response.status.should eql 401
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
       last_response.status.should eql 200
+    end
+
+    it 'has access to the current endpoint' do
+      basic_auth_context = nil
+
+      subject.http_basic do |u, p|
+        basic_auth_context = self
+
+        u == 'allow'
+      end
+
+      subject.get(:hello) { "Hello, world." }
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
+      basic_auth_context.should be_an_instance_of(Grape::Endpoint)
+    end
+
+    it 'has access to helper methods' do
+      subject.helpers do
+        def authorize(u, p)
+          u == 'allow' && p == 'whatever'
+        end
+      end
+
+      subject.http_basic do |u, p|
+        authorize(u, p)
+      end
+
+      subject.get(:hello) { "Hello, world." }
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
+      last_response.status.should eql 200
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('disallow', 'whatever')
+      last_response.status.should eql 401
+    end
+
+    it 'can set instance variables accessible to routes' do
+      subject.http_basic do |u, p|
+        @hello = "Hello, world."
+
+        u == 'allow'
+      end
+
+      subject.get(:hello) { @hello }
+      get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
+      last_response.status.should eql 200
+      last_response.body.should eql "Hello, world."
     end
   end
 
