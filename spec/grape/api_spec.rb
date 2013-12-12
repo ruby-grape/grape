@@ -874,7 +874,7 @@ describe Grape::API do
       end
     end
   end
-  describe '.basic' do
+  describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, p|
         u == 'allow'
@@ -912,6 +912,28 @@ describe Grape::API do
       last_response.status.should eql 401
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
       last_response.status.should eql 200
+    end
+
+    it 'has access to the current endpoint' do
+      subject.auth :http_basic do |u, p|
+        self.class.should == Grape::Endpoint
+        
+        u == 'allow'
+      end
+    end
+
+    it 'has access to helper methods' do
+      subject.helpers do
+        def hello
+          "Hello, world."
+        end
+      end
+      
+      subject.auth :http_basic do |u, p|
+        hello.should == "Hello, world."
+        
+        u == 'allow'
+      end
     end
   end
 
