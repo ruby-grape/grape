@@ -12,6 +12,15 @@ describe Grape::Middleware::Error do
     end
   end
 
+  # raises a NotImplementedError
+  class NotImplementedErrorApp
+    class << self
+      def call(env)
+        raise NotImplementedError
+      end
+    end
+  end
+
   # raises a hash error
   class ErrorHashApp
     class << self
@@ -178,6 +187,21 @@ describe Grape::Middleware::Error do
       get '/'
       last_response.status.should == 400
       last_response.body.should == 'failed validation'
+    end
+
+    it 'is possible to rescue NotImplementedError' do
+      @app ||= Rack::Builder.app do
+        use Grape::Middleware::Error, rescue_all: true,
+                                      rescue_handlers: {
+                                        all: lambda { |e|
+                                          error_response(message: 'Rescued!', status: 200)
+                                        }
+                                      }
+        run NotImplementedErrorApp
+      end
+      get '/'
+      last_response.body.should == 'Rescued!'
+      last_response.status.should == 200
     end
 
   end

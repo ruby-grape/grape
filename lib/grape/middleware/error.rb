@@ -24,7 +24,7 @@ module Grape
           error_response(catch(:error) do
             return @app.call(@env)
           end)
-        rescue StandardError => e
+        rescue StandardError, NotImplementedError => e
           is_rescuable = rescuable?(e.class)
           if e.is_a?(Grape::Exceptions::Base) && !is_rescuable
             handler = lambda { |arg| error_response(arg) }
