@@ -40,6 +40,15 @@ describe Grape::Validations::DefaultValidator do
         get '/numbers' do
           { random_number: params[:random], non_random_number: params[:non_random_number] }
         end
+
+        params do
+          group :foo do
+            optional :bar, default: 'foo-bar'
+          end
+        end
+        get '/group' do
+          { foo_bar: params[:foo][:bar] }
+        end
       end
     end
   end
@@ -83,4 +92,11 @@ describe Grape::Validations::DefaultValidator do
     before['non_random_number'].should == after['non_random_number']
     before['random_number'].should_not == after['random_number']
   end
+
+  it 'set default values for optional grouped params' do
+    get('/group')
+    last_response.status.should == 200
+    last_response.body.should == { foo_bar: 'foo-bar' }.to_json
+  end
+
 end
