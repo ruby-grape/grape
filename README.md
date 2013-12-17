@@ -725,9 +725,11 @@ You can also rescue specific exceptions.
 
 ```ruby
 class Twitter::API < Grape::API
-  rescue_from ArgumentError, NotImplementedError
+  rescue_from ArgumentError, UserDefinedError
 end
 ```
+
+In this case ```UserDefinedError``` must be inherited from ```StandardError```.
 
 The error format will match the request format. See "Content-Types" below.
 
