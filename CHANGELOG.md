@@ -22,6 +22,7 @@ Next Release
 * [#500](https://github.com/intridea/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
 * [#503](https://github.com/intridea/grape/pull/503): Calling declared(params) from child namespace fails to include parent namespace defined params - [@myitcv](https://github.com/myitcv).
 * [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
+* [#538](https://github.com/intridea/grape/pull/538): Fix default values for grouped params - [@dm1try](https://github.com/dm1try).
 * Your contribution here.
 
 

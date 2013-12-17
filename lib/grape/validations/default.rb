@@ -11,10 +11,12 @@ module Grape
       end
 
       def validate!(params)
-        params = AttributesIterator.new(self, @scope, params)
-        params.each do |resource_params, attr_name|
+        attrs = AttributesIterator.new(self, @scope, params)
+        parent_element = @scope.element
+        attrs.each do |resource_params, attr_name|
           if resource_params[attr_name].nil?
             validate_param!(attr_name, resource_params)
+            params[parent_element] = resource_params if parent_element
           end
         end
       end
