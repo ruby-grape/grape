@@ -1126,13 +1126,18 @@ You can use any Hypermedia representer, including [Roar](https://github.com/apot
 Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON`
 into your models or call `to_json` explicitly in your API implementation.
 
-Other alternatives include `ActiveModel::Serializers` via [grape-active_model_serializers](https://github.com/jrhe/grape-active_model_serializers).
-
 ### Rabl
 
 You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of the
 [grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl
 formatter.
+
+### Active Model Serializers
+
+You can use [Active Model Serializers](https://github.com/rails-api/active_model_serializers) serializers with the help of the
+[grape-active_model_serializers](https://github.com/jrhe/grape-active_model_serializers) gem, which defines a custom Grape AMS
+formatter.
+
 
 ## Authentication
 
