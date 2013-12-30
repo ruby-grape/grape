@@ -41,7 +41,7 @@ module Grape
       def find_handler(klass)
         handler = options[:rescue_handlers][klass]
         unless handler
-          handler = options[:rescue_children_handlers].find(-> {[]}) { |error, handler| klass <= error }[1]
+          handler = options[:rescue_children_handlers].find(-> { [] }) { |error, _| klass <= error }[1]
         end
         handler || options[:rescue_handlers][:all]
       end

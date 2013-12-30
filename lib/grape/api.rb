@@ -217,9 +217,7 @@ module Grape
 
         imbue(:rescue_options, options)
 
-        if args.include?(:all)
-          set(:rescue_all, true)
-        end
+        set(:rescue_all, true) if args.include?(:all)
       end
 
       # Allows you to specify a default representation entity for a
