@@ -1286,6 +1286,57 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, children: method' do
+    it 'rescues error as well as child errors with rescue_children option set' do
+      class CommunicationError < RuntimeError; end
+      subject.rescue_from RuntimeError, rescue_children: true do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/caught_child' do
+        raise CommunicationError
+      end
+      subject.get '/caught_parent' do
+        raise RuntimeError
+      end
+      subject.get '/uncaught_parent' do
+        raise StandardError
+      end
+
+      get '/caught_child'
+      last_response.status.should eql 500
+      get '/caught_parent'
+      last_response.status.should eql 500
+      lambda { get '/uncaught_parent' }.should raise_error(StandardError)
+    end
+
+    it 'does not rescue child errors for other rescue_from instances' do
+      class CommunicationError < RuntimeError; end
+      class BadCommunicationError < CommunicationError; end
+
+      class ProcessingError < RuntimeError; end
+      class BadProcessingError < ProcessingError; end
+
+      subject.rescue_from CommunicationError, rescue_children: true do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+
+      subject.rescue_from ProcessingError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+
+      subject.get '/caught_child' do
+        raise BadCommunicationError
+      end
+      subject.get '/uncaught_child' do
+        raise BadProcessingError
+      end
+
+      get '/caught_child'
+      last_response.status.should eql 500
+      lambda { get '/uncaught_child' }.should raise_error(BadProcessingError)
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
