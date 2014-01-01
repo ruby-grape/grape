@@ -792,6 +792,41 @@ class Twitter::API < Grape::API
 end
 ```
 
+By default, `rescue_from` will rescue the exceptions listed and all their subclasses.
+
+Assume you have the following exception classes defined.
+
+```ruby
+module APIErrors
+  class ParentError < StandardError; end
+  class ChildError < ParentError; end
+end
+```
+
+Then the following `rescue_from` clause will rescue exceptions of type `APIErrors::ParentError` and its subclasses (in this case `APIErrors::ChildError`).
+
+```ruby
+rescue_from APIErrors::ParentError do |e|
+    Rack::Response.new({
+      error: "#{e.class} error",
+      message: e.message
+      }.to_json, e.status)
+end
+```
+
+To only rescue the base exception class, set `rescue_subclasses: false`.
+The code below will rescue exceptions of type `RuntimeError` but _not_ its subclasses.
+
+```ruby
+rescue_from RuntimeError, rescue_subclasses: false do |e|
+    Rack::Response.new(
+      status: e.status,
+      message: e.message,
+      errors: e.errors
+      }.to_json, e.status)
+end
+```
+
 #### Rails 3.x
 
 When mounted inside containers, such as Rails 3.x, errors like "404 Not Found" or
