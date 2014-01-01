@@ -1236,7 +1236,7 @@ describe Grape::API do
       last_response.body.should == 'rescued from DatabaseError'
     end
     it 'does not rescue a different error' do
-      class CommunicationError < RuntimeError; end
+      class CommunicationError < StandardError; end
       subject.rescue_from RuntimeError do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
@@ -1288,12 +1288,12 @@ describe Grape::API do
 
   describe '.rescue_from klass, children: method' do
     it 'rescues error as well as child errors with rescue_children option set' do
-      class CommunicationError < RuntimeError; end
-      subject.rescue_from RuntimeError, rescue_children: true do |e|
+      class CommunicationsError < RuntimeError; end
+      subject.rescue_from RuntimeError, rescue_subclasses: true do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        raise CommunicationError
+        raise CommunicationsError
       end
       subject.get '/caught_parent' do
         raise RuntimeError
@@ -1310,17 +1310,17 @@ describe Grape::API do
     end
 
     it 'does not rescue child errors for other rescue_from instances' do
-      class CommunicationError < RuntimeError; end
+      class CommunicationsError < RuntimeError; end
       class BadCommunicationError < CommunicationError; end
 
       class ProcessingError < RuntimeError; end
       class BadProcessingError < ProcessingError; end
 
-      subject.rescue_from CommunicationError, rescue_children: true do |e|
+      subject.rescue_from CommunicationError, rescue_subclasses: true do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
 
-      subject.rescue_from ProcessingError do |e|
+      subject.rescue_from ProcessingError, rescue_subclasses: false do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
 
@@ -1334,6 +1334,17 @@ describe Grape::API do
       get '/caught_child'
       last_response.status.should eql 500
       lambda { get '/uncaught_child' }.should raise_error(BadProcessingError)
+    end
+
+    it 'does not rescue child errors if rescue_subclasses is false' do
+      class CommunicationsError < RuntimeError; end
+      subject.rescue_from RuntimeError, rescue_subclasses: false do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/uncaught' do
+        raise CommunicationError
+      end
+      lambda { get '/uncaught' }.should raise_error(CommunicationError)
     end
   end
 

@@ -199,7 +199,7 @@ module Grape
       #   @param [Block] block Execution block to handle the given exception.
       #   @param [Hash] options Options for the rescue usage.
       #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
-      #   @option options [Boolean] :rescue_children Also rescue children of exception classes
+      #   @option options [Boolean] :rescue_subclasses Also rescue subclasses of exception classes
       #   @param [Proc] handler Execution proc to handle the given exception as an
       #     alternative to passing a block
       def rescue_from(*args, &block)
@@ -212,7 +212,7 @@ module Grape
         options = args.last.is_a?(Hash) ? args.pop : {}
         handler ||= proc { options[:with] } if options.has_key?(:with)
 
-        handler_type = !!options[:rescue_children] ? :rescue_children_handlers : :rescue_handlers
+        handler_type = !!options[:rescue_subclasses] ? :rescue_handlers : :base_only_rescue_handlers
         imbue handler_type, Hash[args.map { |arg| [arg, handler] }]
 
         imbue(:rescue_options, options)

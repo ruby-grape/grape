@@ -415,7 +415,7 @@ module Grape
             error_formatters: settings[:error_formatters],
             rescue_options: settings[:rescue_options],
             rescue_handlers: merged_setting(:rescue_handlers),
-            rescue_children_handlers: merged_setting(:rescue_children_handlers)
+            base_only_rescue_handlers: merged_setting(:base_only_rescue_handlers)
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup
