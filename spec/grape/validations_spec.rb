@@ -78,10 +78,10 @@ describe Grape::Validations do
       end
     end
 
-    context 'required with a block' do
+    context 'required with an Array block' do
       before do
         subject.params do
-          requires :items do
+          requires :items, type: Array do
             requires :key
           end
         end
@@ -93,16 +93,80 @@ describe Grape::Validations do
       it 'errors when param not present' do
         get '/required'
         last_response.status.should == 400
-        last_response.body.should == 'items[key] is missing'
+        last_response.body.should == 'items is missing'
+      end
+
+      it "errors when param is not an Array" do
+        get '/required', items: "hello"
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid, items[key] is missing'
+
+        get '/required', items: { key: 'foo' }
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid'
       end
 
       it "doesn't throw a missing param when param is present" do
-        get '/required', items: [key: 'hello', key: 'world']
+        get '/required', items: [{ key: 'hello' }, { key: 'world' }]
         last_response.status.should == 200
         last_response.body.should == 'required works'
       end
 
-      it "doesn't allow more than one parameter" do
+      it "doesn't allow any key in the options hash other than type" do
+        expect {
+          subject.params do
+            requires(:items, desc: 'Foo') do
+              requires :key
+            end
+          end
+        }.to raise_error ArgumentError
+      end
+
+      it 'adds to declared parameters' do
+        subject.params do
+          requires :items do
+            requires :key
+          end
+        end
+        subject.settings[:declared_params].should == [items: [:key]]
+      end
+    end
+
+    context 'required with a Hash block' do
+      before do
+        subject.params do
+          requires :items, type: Hash do
+            requires :key
+          end
+        end
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'errors when param not present' do
+        get '/required'
+        last_response.status.should == 400
+        last_response.body.should == 'items is missing, items[key] is missing'
+      end
+
+      it "errors when param is not a Hash" do
+        get '/required', items: "hello"
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid, items[key] is missing'
+
+        get '/required', items: [{ key: 'foo' }]
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid'
+      end
+
+      it "doesn't throw a missing param when param is present" do
+        get '/required', items: { key: 'hello' }
+        last_response.status.should == 200
+        last_response.body.should == 'required works'
+      end
+
+      it "doesn't allow any key in the options hash other than type" do
         expect {
           subject.params do
             requires(:items, desc: 'Foo') do
@@ -137,7 +201,7 @@ describe Grape::Validations do
       it 'errors when param not present' do
         get '/required'
         last_response.status.should == 400
-        last_response.body.should == 'items[key] is missing'
+        last_response.body.should == 'items is missing'
       end
 
       it "doesn't throw a missing param when param is present" do
@@ -161,7 +225,7 @@ describe Grape::Validations do
         subject.params do
           group :children do
             requires :name
-            group :mother do
+            group :parents do
               requires :name
             end
           end
@@ -173,8 +237,8 @@ describe Grape::Validations do
 
       it 'can handle new scopes within child elements' do
         get '/within_array', children: [
-          { name: 'John', mother: { name: 'Jane' } },
-          { name: 'Joe', mother: { name: 'Josie' } }
+          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob' }] },
+          { name: 'Joe', parents: [{ name: 'Josie' }] }
         ]
         last_response.status.should == 200
         last_response.body.should == 'within array works'
@@ -182,27 +246,180 @@ describe Grape::Validations do
 
       it 'errors when a parameter is not present' do
         get '/within_array', children: [
-          { name: 'Jim', mother: {} },
-          { name: 'Job', mother: { name: 'Joy' } }
+          { name: 'Jim', parents: [{}] },
+          { name: 'Job', parents: [{ name: 'Joy' }] }
         ]
+        # NOTE: with body parameters in json or XML or similar this
+        # should actually fail with: children[parents][name] is missing.
         last_response.status.should == 400
-        last_response.body.should == 'children[mother][name] is missing'
+        last_response.body.should == 'children[parents] is missing'
       end
 
       it 'safely handles empty arrays and blank parameters' do
+        # NOTE: with body parameters in json or XML or similar this
+        # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         last_response.status.should == 400
-        last_response.body.should == 'children[name] is missing, children[mother][name] is missing'
+        last_response.body.should == 'children is missing'
         get '/within_array', children: [name: 'Jay']
         last_response.status.should == 400
-        last_response.body.should == 'children[mother][name] is missing'
+        last_response.body.should == 'children[parents] is missing'
+      end
+
+      it "errors when param is not an Array" do
+        # NOTE: would be nicer if these just returned 'children is invalid'
+        get '/within_array', children: "hello"
+        last_response.status.should == 400
+        last_response.body.should == 'children is invalid, children[name] is missing, children[parents] is missing, children[parents] is invalid, children[parents][name] is missing'
+
+        get '/within_array', children: { name: 'foo' }
+        last_response.status.should == 400
+        last_response.body.should == 'children is invalid, children[parents] is missing'
+
+        get '/within_array', children: [name: 'Jay', parents: { name: 'Fred' }]
+        last_response.status.should == 400
+        last_response.body.should == 'children[parents] is invalid'
       end
     end
 
-    context 'optional with a block' do
+    context 'with block param' do
       before do
         subject.params do
-          optional :items do
+          requires :planets do
+            requires :name
+          end
+        end
+        subject.get '/req' do
+          'within array works'
+        end
+        subject.put '/req' do
+          ''
+        end
+
+        subject.params do
+          group :stars do
+            requires :name
+          end
+        end
+        subject.get '/grp' do
+          'within array works'
+        end
+        subject.put '/grp' do
+          ''
+        end
+
+        subject.params do
+          requires :name
+          optional :moons do
+            requires :name
+          end
+        end
+        subject.get '/opt' do
+          'within array works'
+        end
+        subject.put '/opt' do
+          ''
+        end
+      end
+
+      it 'requires defaults to Array type' do
+        get '/req', planets: "Jupiter, Saturn"
+        last_response.status.should == 400
+        last_response.body.should == 'planets is invalid, planets[name] is missing'
+
+        get '/req', planets: { name: 'Jupiter' }
+        last_response.status.should == 400
+        last_response.body.should == 'planets is invalid'
+
+        get '/req', planets: [{ name: 'Venus' }, { name: 'Mars' }]
+        last_response.status.should == 200
+
+        put_with_json '/req', planets: []
+        last_response.status.should == 200
+      end
+
+      it 'optional defaults to Array type' do
+        get '/opt', name: "Jupiter", moons: "Europa, Ganymede"
+        last_response.status.should == 400
+        last_response.body.should == 'moons is invalid, moons[name] is missing'
+
+        get '/opt', name: "Jupiter", moons: { name: 'Ganymede' }
+        last_response.status.should == 400
+        last_response.body.should == 'moons is invalid'
+
+        get '/opt', name: "Jupiter", moons: [{ name: 'Io' }, { name: 'Callisto' }]
+        last_response.status.should == 200
+
+        put_with_json '/opt', name: "Venus"
+        last_response.status.should == 200
+
+        put_with_json '/opt', name: "Mercury", moons: []
+        last_response.status.should == 200
+      end
+
+      it 'group defaults to Array type' do
+        get '/grp', stars: "Sun"
+        last_response.status.should == 400
+        last_response.body.should == 'stars is invalid, stars[name] is missing'
+
+        get '/grp', stars: { name: 'Sun' }
+        last_response.status.should == 400
+        last_response.body.should == 'stars is invalid'
+
+        get '/grp', stars: [{ name: 'Sun' }]
+        last_response.status.should == 200
+
+        put_with_json '/grp', stars: []
+        last_response.status.should == 200
+      end
+    end
+
+    context 'validation within arrays with JSON' do
+      before do
+        subject.params do
+          group :children do
+            requires :name
+            group :parents do
+              requires :name
+            end
+          end
+        end
+        subject.put '/within_array' do
+          'within array works'
+        end
+      end
+
+      it 'can handle new scopes within child elements' do
+        put_with_json '/within_array', children: [
+          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob' }] },
+          { name: 'Joe', parents: [{ name: 'Josie' }] }
+        ]
+        last_response.status.should == 200
+        last_response.body.should == 'within array works'
+      end
+
+      it 'errors when a parameter is not present' do
+        put_with_json '/within_array', children: [
+          { name: 'Jim', parents: [{}] },
+          { name: 'Job', parents: [{ name: 'Joy' }] }
+        ]
+        last_response.status.should == 400
+        last_response.body.should == 'children[parents][name] is missing'
+      end
+
+      it 'safely handles empty arrays and blank parameters' do
+        put_with_json '/within_array', children: []
+        last_response.status.should == 200
+        put_with_json '/within_array', children: [name: 'Jay']
+        last_response.status.should == 400
+        last_response.body.should == 'children[parents] is missing'
+      end
+    end
+
+    context 'optional with an Array block' do
+      before do
+        subject.params do
+          optional :items, type: Array do
             requires :key
           end
         end
@@ -218,15 +435,25 @@ describe Grape::Validations do
       end
 
       it "doesn't throw a missing param when both group and param are given" do
-        get '/optional_group', items: { key: 'foo' }
+        get '/optional_group', items: [{ key: 'foo' }]
         last_response.status.should == 200
         last_response.body.should == 'optional group works'
       end
 
       it "errors when group is present, but required param is not" do
-        get '/optional_group', items: { not_key: 'foo' }
+        get '/optional_group', items: [{ not_key: 'foo' }]
         last_response.status.should == 400
         last_response.body.should == 'items[key] is missing'
+      end
+
+      it "errors when param is present but isn't an Array" do
+        get '/optional_group', items: "hello"
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid, items[key] is missing'
+
+        get '/optional_group', items: { key: 'foo' }
+        last_response.status.should == 400
+        last_response.body.should == 'items is invalid'
       end
 
       it 'adds to declared parameters' do
@@ -239,13 +466,13 @@ describe Grape::Validations do
       end
     end
 
-    context 'nested optional blocks' do
+    context 'nested optional Array blocks' do
       before do
         subject.params do
-          optional :items do
+          optional :items, type: Array do
             requires :key
-            optional(:optional_subitems) { requires :value }
-            requires(:required_subitems) { requires :value }
+            optional(:optional_subitems, type: Array) { requires :value }
+            requires(:required_subitems, type: Array) { requires :value }
           end
         end
         subject.get('/nested_optional_group') { 'nested optional group works' }
@@ -258,35 +485,35 @@ describe Grape::Validations do
       end
 
       it 'does internal validations if the outer group is present' do
-        get '/nested_optional_group', items: { key: 'foo' }
+        get '/nested_optional_group', items: [{ key: 'foo' }]
         last_response.status.should == 400
-        last_response.body.should == 'items[required_subitems][value] is missing'
+        last_response.body.should == 'items[required_subitems] is missing'
 
-        get '/nested_optional_group', items: { key: 'foo', required_subitems: { value: 'bar' } }
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
       end
 
       it 'handles deep nesting' do
-        get '/nested_optional_group', items: { key: 'foo', required_subitems: { value: 'bar' }, optional_subitems: { not_value: 'baz' } }
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }] }]
         last_response.status.should == 400
         last_response.body.should == 'items[optional_subitems][value] is missing'
 
-        get '/nested_optional_group', items: { key: 'foo', required_subitems: { value: 'bar' }, optional_subitems: { value: 'baz' } }
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ value: 'baz' }] }]
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
       end
 
       it 'handles validation within arrays' do
-        get '/nested_optional_group', items: [key: 'foo']
+        get '/nested_optional_group', items: [{ key: 'foo' }]
         last_response.status.should == 400
-        last_response.body.should == 'items[required_subitems][value] is missing'
+        last_response.body.should == 'items[required_subitems] is missing'
 
-        get '/nested_optional_group', items: [key: 'foo', required_subitems: { value: 'bar' }]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
 
-        get '/nested_optional_group', items: [key: 'foo', required_subitems: { value: 'bar' }, optional_subitems: { not_value: 'baz' }]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }] }]
         last_response.status.should == 400
         last_response.body.should == 'items[optional_subitems][value] is missing'
       end

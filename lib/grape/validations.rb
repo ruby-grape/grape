@@ -91,6 +91,7 @@ module Grape
         @parent   = opts[:parent]
         @api      = opts[:api]
         @optional = opts[:optional] || false
+        @type     = opts[:type]
         @declared_params = []
 
         instance_eval(&block)
@@ -99,29 +100,33 @@ module Grape
       end
 
       def should_validate?(parameters)
-        return false if @optional && params(parameters).all?(&:blank?)
+        return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
 
       def requires(*attrs, &block)
-        return new_scope(attrs, &block) if block_given?
+        orig_attrs = attrs.clone
 
         validations = { presence: true }
         validations.merge!(attrs.pop) if attrs.last.is_a?(Hash)
-
-        push_declared_params(attrs)
+        validations[:type] ||= Array if block_given?
         validates(attrs, validations)
+
+        block_given? ? new_scope(orig_attrs, &block) :
+          push_declared_params(attrs)
       end
 
       def optional(*attrs, &block)
-        return new_scope(attrs, true, &block) if block_given?
+        orig_attrs = attrs
 
         validations = {}
         validations.merge!(attrs.pop) if attrs.last.is_a?(Hash)
-
-        push_declared_params(attrs)
+        validations[:type] ||= Array if block_given?
         validates(attrs, validations)
+
+        block_given? ? new_scope(orig_attrs, true, &block) :
+          push_declared_params(attrs)
       end
 
       def group(element, &block)
@@ -132,9 +137,11 @@ module Grape
         params = @parent.params(params) if @parent
         if @element
           if params.is_a?(Array)
-            params = params.map { |el| el[@element] || {} }
-          else
+            params = params.map { |el| el[@element] || {} }.flatten
+          elsif params.is_a?(Hash)
             params = params[@element] || {}
+          else
+            params = {}
           end
         end
         params
@@ -154,8 +161,9 @@ module Grape
       private
 
       def new_scope(attrs, optional = false, &block)
-        raise ArgumentError unless attrs.size == 1
-        ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, &block)
+        opts = attrs[1] || { type: Array }
+        raise ArgumentError unless opts.keys.to_set.subset? [:type].to_set
+        ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
       end
 
       # Pushes declared params to parent or settings
@@ -237,7 +245,7 @@ module Grape
       end
 
       def params(&block)
-        ParamsScope.new(api: self, &block)
+        ParamsScope.new(api: self, type: Hash, &block)
       end
 
       def document_attribute(names, opts)

@@ -191,7 +191,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'Nests integers' do
         subject.params do
-          group :integers do
+          requires :integers, type: Hash do
             requires :int, coerce: Integer
           end
         end
