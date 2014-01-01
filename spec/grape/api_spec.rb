@@ -1342,9 +1342,9 @@ describe Grape::API do
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
-        raise CommunicationError
+        raise CommunicationsError
       end
-      lambda { get '/uncaught' }.should raise_error(CommunicationError)
+      lambda { get '/uncaught' }.should raise_error(CommunicationsError)
     end
   end
 
