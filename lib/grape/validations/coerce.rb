@@ -6,6 +6,7 @@ module Grape
   module Validations
     class CoerceValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
+        raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message_key: :coerce unless params.is_a? Hash
         new_value = coerce_value(@option, params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
@@ -45,6 +46,10 @@ module Grape
       end
 
       def coerce_value(type, val)
+        # Don't coerce things other than nil to Arrays or Hashes
+        return val || [] if type == Array
+        return val || {} if type == Hash
+
         converter = Virtus::Attribute.build(type)
         converter.coerce(val)
 
