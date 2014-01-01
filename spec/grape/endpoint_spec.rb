@@ -177,7 +177,7 @@ describe Grape::Endpoint do
         requires :first
         optional :second
         optional :third, default: 'third-default'
-        group :nested do
+        optional :nested, type: Hash do
           optional :fourth
         end
       end
@@ -214,6 +214,16 @@ describe Grape::Endpoint do
     end
 
     it 'builds nested params when given array' do
+      subject.get '/dummy' do
+      end
+      subject.params do
+        requires :first
+        optional :second
+        optional :third, default: 'third-default'
+        optional :nested, type: Array do
+          optional :fourth
+        end
+      end
       subject.get '/declared' do
         declared(params)[:nested].size.should == 2
         ""

@@ -28,8 +28,9 @@ describe Grape::Validations::PresenceValidator do
         end
 
         params do
-          group :user do
-            requires :first_name, :last_name
+          requires :user, type: Hash do
+            requires :first_name
+            requires :last_name
           end
         end
         get '/nested' do
@@ -37,11 +38,12 @@ describe Grape::Validations::PresenceValidator do
         end
 
         params do
-          group :admin do
+          requires :admin, type: Hash do
             requires :admin_name
-            group :super do
-              group :user do
-                requires :first_name, :last_name
+            requires :super, type: Hash do
+              requires :user, type: Hash do
+                requires :first_name
+                requires :last_name
               end
             end
           end
@@ -96,7 +98,7 @@ describe Grape::Validations::PresenceValidator do
   it 'validates nested parameters' do
     get '/nested'
     last_response.status.should == 400
-    last_response.body.should == '{"error":"user[first_name] is missing"}'
+    last_response.body.should == '{"error":"user is missing, user[first_name] is missing, user[last_name] is missing"}'
 
     get '/nested', user: { first_name: "Billy" }
     last_response.status.should == 400
@@ -110,19 +112,19 @@ describe Grape::Validations::PresenceValidator do
   it 'validates triple nested parameters' do
     get '/nested_triple'
     last_response.status.should == 400
-    last_response.body.should == '{"error":"admin[admin_name] is missing, admin[super][user][first_name] is missing"}'
+    last_response.body.should include '{"error":"admin is missing'
 
     get '/nested_triple', user: { first_name: "Billy" }
     last_response.status.should == 400
-    last_response.body.should == '{"error":"admin[admin_name] is missing, admin[super][user][first_name] is missing"}'
+    last_response.body.should include '{"error":"admin is missing'
 
     get '/nested_triple', admin: { super: { first_name: "Billy" } }
     last_response.status.should == 400
-    last_response.body.should == '{"error":"admin[admin_name] is missing, admin[super][user][first_name] is missing"}'
+    last_response.body.should == '{"error":"admin[admin_name] is missing, admin[super][user] is missing, admin[super][user][first_name] is missing, admin[super][user][last_name] is missing"}'
 
     get '/nested_triple', super: { user: { first_name: "Billy", last_name: "Bob" } }
     last_response.status.should == 400
-    last_response.body.should == '{"error":"admin[admin_name] is missing, admin[super][user][first_name] is missing"}'
+    last_response.body.should include '{"error":"admin is missing'
 
     get '/nested_triple', admin: { super: { user: { first_name: "Billy" } } }
     last_response.status.should == 400
