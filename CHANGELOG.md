@@ -12,6 +12,7 @@ Next Release
 * [#527](https://github.com/intridea/grape/pull/527): `before_validation` now a distinct callback (supersedes [#523](https://github.com/intridea/grape/pull/523)) - [@myitcv](https://github.com/myitcv).
 * [#531](https://github.com/intridea/grape/pull/531): Helpers are now available to auth middleware, executing in the context of the endpoint - [@joelvh](https://github.com/joelvh).
 * [#540](https://github.com/intridea/grape/pull/540): Ruby 2.1.0 is now supported - [@salimane](https://github.com/salimane).
+* [#544](https://github.com/intridea/grape/pull/544): `rescue_from` now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
 * Your contribution here.
 
 #### Fixes
