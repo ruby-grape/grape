@@ -42,7 +42,7 @@ describe Grape::Validations::DefaultValidator do
         end
 
         params do
-          # XXX: The :foo parameter could be made required with json body
+          # NOTE: The :foo parameter could be made required with json body
           # params, and then an empty hash would be valid. With query parameters
           # it must be optional if it isn't provided at all, as otherwise
           # the validaton for the Hash itself fails because there is no such

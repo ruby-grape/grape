@@ -249,14 +249,14 @@ describe Grape::Validations do
           { name: 'Jim', parents: [{}] },
           { name: 'Job', parents: [{ name: 'Joy' }] }
         ]
-        # XXX: with body parameters in json or XML or similar this
+        # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         last_response.status.should == 400
         last_response.body.should == 'children[parents] is missing'
       end
 
       it 'safely handles empty arrays and blank parameters' do
-        # XXX: with body parameters in json or XML or similar this
+        # NOTE: with body parameters in json or XML or similar this
         # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         last_response.status.should == 400
@@ -267,7 +267,7 @@ describe Grape::Validations do
       end
 
       it "errors when param is not an Array" do
-        # XXX: would be nicer if these just returned 'children is invalid'
+        # NOTE: would be nicer if these just returned 'children is invalid'
         get '/within_array', children: "hello"
         last_response.status.should == 400
         last_response.body.should == 'children is invalid, children[name] is missing, children[parents] is missing, children[parents] is invalid, children[parents][name] is missing'
