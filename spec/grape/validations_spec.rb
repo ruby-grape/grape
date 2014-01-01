@@ -272,7 +272,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'children is invalid, children[name] is missing, children[parents] is missing, children[parents] is invalid, children[parents][name] is missing'
 
-        get '/within_array', children: { :name => 'foo' }
+        get '/within_array', children: { name: 'foo' }
         last_response.status.should == 400
         last_response.body.should == 'children is invalid, children[parents] is missing'
 
@@ -327,11 +327,11 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'planets is invalid, planets[name] is missing'
 
-        get '/req', planets: { :name => 'Jupiter' }
+        get '/req', planets: { name: 'Jupiter' }
         last_response.status.should == 400
         last_response.body.should == 'planets is invalid'
 
-        get '/req', planets: [{ :name => 'Venus' }, { :name => 'Mars' }]
+        get '/req', planets: [{ name: 'Venus' }, { name: 'Mars' }]
         last_response.status.should == 200
 
         put_with_json '/req', planets: []
@@ -343,11 +343,11 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'moons is invalid, moons[name] is missing'
 
-        get '/opt', name: "Jupiter", moons: { :name => 'Ganymede' }
+        get '/opt', name: "Jupiter", moons: { name: 'Ganymede' }
         last_response.status.should == 400
         last_response.body.should == 'moons is invalid'
 
-        get '/opt', name: "Jupiter", moons: [{ :name => 'Io' }, { :name => 'Callisto' }]
+        get '/opt', name: "Jupiter", moons: [{ name: 'Io' }, { name: 'Callisto' }]
         last_response.status.should == 200
 
         put_with_json '/opt', name: "Venus"
@@ -362,11 +362,11 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'stars is invalid, stars[name] is missing'
 
-        get '/grp', stars: { :name => 'Sun' }
+        get '/grp', stars: { name: 'Sun' }
         last_response.status.should == 400
         last_response.body.should == 'stars is invalid'
 
-        get '/grp', stars: [{ :name => 'Sun' }]
+        get '/grp', stars: [{ name: 'Sun' }]
         last_response.status.should == 200
 
         put_with_json '/grp', stars: []
@@ -509,11 +509,11 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'items[required_subitems] is missing'
 
-        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }]}]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
 
-        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }]}]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }] }]
         last_response.status.should == 400
         last_response.body.should == 'items[optional_subitems][value] is missing'
       end
