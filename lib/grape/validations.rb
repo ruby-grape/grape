@@ -163,8 +163,8 @@ module Grape
       private
 
       def new_scope(attrs, optional = false, &block)
-        opts = attrs[1] || { :type => Array }
-        raise ArgumentError unless opts.keys.to_set.subset? [ :type ].to_set
+        opts = attrs[1] || { type: Array }
+        raise ArgumentError unless opts.keys.to_set.subset? [:type].to_set
         ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
       end
 

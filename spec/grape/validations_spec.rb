@@ -101,13 +101,13 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'items is invalid, items[key] is missing'
 
-        get '/required', items: { :key => 'foo' }
+        get '/required', items: { key: 'foo' }
         last_response.status.should == 400
         last_response.body.should == 'items is invalid'
       end
 
       it "doesn't throw a missing param when param is present" do
-        get '/required', items: [{key: 'hello'}, {key: 'world'}]
+        get '/required', items: [{ key: 'hello' }, { key: 'world' }]
         last_response.status.should == 200
         last_response.body.should == 'required works'
       end
@@ -155,13 +155,13 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'items is invalid, items[key] is missing'
 
-        get '/required', items: [{ :key => 'foo' }]
+        get '/required', items: [{ key: 'foo' }]
         last_response.status.should == 400
         last_response.body.should == 'items is invalid'
       end
 
       it "doesn't throw a missing param when param is present" do
-        get '/required', items: {key: 'hello'}
+        get '/required', items: { key: 'hello' }
         last_response.status.should == 200
         last_response.body.should == 'required works'
       end
@@ -237,7 +237,7 @@ describe Grape::Validations do
 
       it 'can handle new scopes within child elements' do
         get '/within_array', children: [
-          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob'}] },
+          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob' }] },
           { name: 'Joe', parents: [{ name: 'Josie' }] }
         ]
         last_response.status.should == 200
@@ -276,7 +276,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'children is invalid, children[parents] is missing'
 
-        get '/within_array', children: [name: 'Jay', parents: { name: 'Fred'}]
+        get '/within_array', children: [name: 'Jay', parents: { name: 'Fred' }]
         last_response.status.should == 400
         last_response.body.should == 'children[parents] is invalid'
       end
@@ -331,7 +331,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'planets is invalid'
 
-        get '/req', planets: [{:name => 'Venus'}, {:name => 'Mars'}]
+        get '/req', planets: [{ :name => 'Venus' }, { :name => 'Mars' }]
         last_response.status.should == 200
 
         put_with_json '/req', planets: []
@@ -347,7 +347,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'moons is invalid'
 
-        get '/opt', name: "Jupiter", moons: [{:name => 'Io'}, {:name => 'Callisto'}]
+        get '/opt', name: "Jupiter", moons: [{ :name => 'Io' }, { :name => 'Callisto' }]
         last_response.status.should == 200
 
         put_with_json '/opt', name: "Venus"
@@ -357,7 +357,7 @@ describe Grape::Validations do
         last_response.status.should == 200
       end
 
-     it 'group defaults to Array type' do
+      it 'group defaults to Array type' do
         get '/grp', stars: "Sun"
         last_response.status.should == 400
         last_response.body.should == 'stars is invalid, stars[name] is missing'
@@ -366,7 +366,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'stars is invalid'
 
-        get '/grp', stars: [{:name => 'Sun'}]
+        get '/grp', stars: [{ :name => 'Sun' }]
         last_response.status.should == 200
 
         put_with_json '/grp', stars: []
@@ -391,7 +391,7 @@ describe Grape::Validations do
 
       it 'can handle new scopes within child elements' do
         put_with_json '/within_array', children: [
-          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob'}] },
+          { name: 'John', parents: [{ name: 'Jane' }, { name: 'Bob' }] },
           { name: 'Joe', parents: [{ name: 'Josie' }] }
         ]
         last_response.status.should == 200
@@ -451,7 +451,7 @@ describe Grape::Validations do
         last_response.status.should == 400
         last_response.body.should == 'items is invalid, items[key] is missing'
 
-        get '/optional_group', items: { :key => 'foo' }
+        get '/optional_group', items: { key: 'foo' }
         last_response.status.should == 400
         last_response.body.should == 'items is invalid'
       end
@@ -505,15 +505,15 @@ describe Grape::Validations do
       end
 
       it 'handles validation within arrays' do
-        get '/nested_optional_group', items: [{key: 'foo'}]
+        get '/nested_optional_group', items: [{ key: 'foo' }]
         last_response.status.should == 400
         last_response.body.should == 'items[required_subitems] is missing'
 
-        get '/nested_optional_group', items: [{key: 'foo', required_subitems: [{ value: 'bar' }]}]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }]}]
         last_response.status.should == 200
         last_response.body.should == 'nested optional group works'
 
-        get '/nested_optional_group', items: [{key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }]}]
+        get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }], optional_subitems: [{ not_value: 'baz' }]}]
         last_response.status.should == 400
         last_response.body.should == 'items[optional_subitems][value] is missing'
       end
