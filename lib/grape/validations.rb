@@ -100,7 +100,7 @@ module Grape
       end
 
       def should_validate?(parameters)
-        return false if @optional && params(parameters).respond_to?(:'all?') && params(parameters).all?(&:blank?)
+        return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
