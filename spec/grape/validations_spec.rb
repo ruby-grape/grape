@@ -282,6 +282,98 @@ describe Grape::Validations do
       end
     end
 
+    context 'with block param' do
+      before do
+        subject.params do
+          requires :planets do
+            requires :name
+          end
+        end
+        subject.get '/req' do
+          'within array works'
+        end
+        subject.put '/req' do
+          ''
+        end
+
+        subject.params do
+          group :stars do
+            requires :name
+          end
+        end
+        subject.get '/grp' do
+          'within array works'
+        end
+        subject.put '/grp' do
+          ''
+        end
+
+        subject.params do
+          requires :name
+          optional :moons do
+            requires :name
+          end
+        end
+        subject.get '/opt' do
+          'within array works'
+        end
+        subject.put '/opt' do
+          ''
+        end
+      end
+
+      it 'requires defaults to Array type' do
+        get '/req', planets: "Jupiter, Saturn"
+        last_response.status.should == 400
+        last_response.body.should == 'planets is invalid, planets[name] is missing'
+
+        get '/req', planets: { :name => 'Jupiter' }
+        last_response.status.should == 400
+        last_response.body.should == 'planets is invalid'
+
+        get '/req', planets: [{:name => 'Venus'}, {:name => 'Mars'}]
+        last_response.status.should == 200
+
+        put_with_json '/req', planets: []
+        last_response.status.should == 200
+      end
+
+      it 'optional defaults to Array type' do
+        get '/opt', name: "Jupiter", moons: "Europa, Ganymede"
+        last_response.status.should == 400
+        last_response.body.should == 'moons is invalid, moons[name] is missing'
+
+        get '/opt', name: "Jupiter", moons: { :name => 'Ganymede' }
+        last_response.status.should == 400
+        last_response.body.should == 'moons is invalid'
+
+        get '/opt', name: "Jupiter", moons: [{:name => 'Io'}, {:name => 'Callisto'}]
+        last_response.status.should == 200
+
+        put_with_json '/opt', name: "Venus"
+        last_response.status.should == 200
+
+        put_with_json '/opt', name: "Mercury", moons: []
+        last_response.status.should == 200
+      end
+
+     it 'group defaults to Array type' do
+        get '/grp', stars: "Sun"
+        last_response.status.should == 400
+        last_response.body.should == 'stars is invalid, stars[name] is missing'
+
+        get '/grp', stars: { :name => 'Sun' }
+        last_response.status.should == 400
+        last_response.body.should == 'stars is invalid'
+
+        get '/grp', stars: [{:name => 'Sun'}]
+        last_response.status.should == 200
+
+        put_with_json '/grp', stars: []
+        last_response.status.should == 200
+      end
+    end
+
     context 'validation within arrays with JSON' do
       before do
         subject.params do
