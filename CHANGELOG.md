@@ -4,29 +4,27 @@ Next Release
 #### Features
 
 * [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
-* [#511](https://github.com/intridea/grape/pull/511): Add `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
+* [#511](https://github.com/intridea/grape/pull/511): Added `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
 * [#520](https://github.com/intridea/grape/pull/520): Use `default_error_status` to specify the default status code returned from `error!` - [@salimane](https://github.com/salimane).
 * [#525](https://github.com/intridea/grape/pull/525): The default status code returned from `error!` has been changed from 403 to 500 - [@dblock](https://github.com/dblock).
-* [#526](https://github.com/intridea/grape/pull/526): Allow specifying headers in `error!` - [@dblock](https://github.com/dblock).
-* [#523](https://github.com/intridea/grape/pull/523): Aliased `before` as `before_validation` - [@myitcv](https://github.com/myitcv).
-* [#527](https://github.com/intridea/grape/pull/527): `before_validation` now a distinct callback (supersedes [#523](https://github.com/intridea/grape/pull/523)) - [@myitcv](https://github.com/myitcv).
+* [#526](https://github.com/intridea/grape/pull/526): Allowed specifying headers in `error!` - [@dblock](https://github.com/dblock).
+* [#527](https://github.com/intridea/grape/pull/527): The `before_validation` callback is now a distinct one - [@myitcv](https://github.com/myitcv).
 * [#531](https://github.com/intridea/grape/pull/531): Helpers are now available to auth middleware, executing in the context of the endpoint - [@joelvh](https://github.com/joelvh).
 * [#540](https://github.com/intridea/grape/pull/540): Ruby 2.1.0 is now supported - [@salimane](https://github.com/salimane).
-* [#544](https://github.com/intridea/grape/pull/544): `rescue_from` now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
-* [#545](https://github.com/intridea/grape/pull/545): Add `type` (Array or Hash) support to `requires`, `optional` and `group` with block and fix several validation issues around these - [@bwalex](https://github.com/bwalex).
+* [#544](https://github.com/intridea/grape/pull/544): The `rescue_from` keyword now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
+* [#545](https://github.com/intridea/grape/pull/545): Added `type` (Array or Hash) support to `requires`, `optional` and `group` - [@bwalex](https://github.com/bwalex).
 * Your contribution here.
 
 #### Fixes
 
 * [#508](https://github.com/intridea/grape/pull/508): Allow parameters, such as content encoding, in `content_type` - [@dm1try](https://github.com/dm1try).
 * [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values - [@Antti](https://github.com/Antti).
-* [#495](https://github.com/intridea/grape/pull/495): Fix `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
-* [#498](https://github.com/intridea/grape/pull/498): Dry up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
+* [#495](https://github.com/intridea/grape/pull/495): Fixed `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
+* [#498](https://github.com/intridea/grape/pull/498): Dry'ed up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
 * [#500](https://github.com/intridea/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
 * [#503](https://github.com/intridea/grape/pull/503): Calling declared(params) from child namespace fails to include parent namespace defined params - [@myitcv](https://github.com/myitcv).
 * [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
-* [#538](https://github.com/intridea/grape/pull/538): Fix default values for grouped params - [@dm1try](https://github.com/dm1try).
-* Your contribution here.
+* [#538](https://github.com/intridea/grape/pull/538): Fixed default values for grouped params - [@dm1try](https://github.com/dm1try).
 
 
 0.6.1
@@ -59,7 +57,7 @@ Next Release
 * [#450](https://github.com/intridea/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
 * [#443](https://github.com/intridea/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
 * [#452](https://github.com/intridea/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
-* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): API change: validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
+* [#433](https://github.com/intridea/grape/issues/433), [#462](https://github.com/intridea/grape/issues/462): Validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
 
 #### Fixes
 
