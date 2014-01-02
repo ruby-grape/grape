@@ -1286,8 +1286,8 @@ describe Grape::API do
     end
   end
 
-  describe '.rescue_from klass, children: method' do
-    it 'rescues error as well as child errors with rescue_children option set' do
+  describe '.rescue_from klass, rescue_subclasses: boolean' do
+    it 'rescues error as well as subclass errors with rescue_subclasses option set' do
       class CommunicationsError < RuntimeError; end
       subject.rescue_from RuntimeError, rescue_subclasses: true do |e|
         rack_response("rescued from #{e.class.name}", 500)
