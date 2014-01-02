@@ -376,6 +376,23 @@ end
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
 and `params[:audio][:format]` is required only if `params[:audio]` is present.
+With a block, `group`, `requires` and `optional` accept an additional option `type` which can
+be either `Array` or `Hash`, and defaults to `Array`. Depending on the value, the nested
+parameters will be treated either as values of a hash or as values of hashes in an array.
+
+```ruby
+params do
+  optional :preferences, type: Array do
+    requires :key
+    requires :value
+  end
+
+  requires :name, type: Hash do
+    requires :first_name
+    requires :last_name
+  end
+end
+```
 
 ### Namespace Validation and Coercion
 
