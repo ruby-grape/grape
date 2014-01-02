@@ -1309,33 +1309,6 @@ describe Grape::API do
       lambda { get '/uncaught_parent' }.should raise_error(StandardError)
     end
 
-    it 'does not rescue child errors for other rescue_from instances' do
-      class CommunicationsError < RuntimeError; end
-      class BadCommunicationError < CommunicationError; end
-
-      class ProcessingError < RuntimeError; end
-      class BadProcessingError < ProcessingError; end
-
-      subject.rescue_from CommunicationError, rescue_subclasses: true do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-
-      subject.rescue_from ProcessingError, rescue_subclasses: false do |e|
-        rack_response("rescued from #{e.class.name}", 500)
-      end
-
-      subject.get '/caught_child' do
-        raise BadCommunicationError
-      end
-      subject.get '/uncaught_child' do
-        raise BadProcessingError
-      end
-
-      get '/caught_child'
-      last_response.status.should eql 500
-      lambda { get '/uncaught_child' }.should raise_error(BadProcessingError)
-    end
-
     it 'does not rescue child errors if rescue_subclasses is false' do
       class CommunicationsError < RuntimeError; end
       subject.rescue_from RuntimeError, rescue_subclasses: false do |e|
