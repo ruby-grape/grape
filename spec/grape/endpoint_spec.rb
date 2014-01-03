@@ -282,6 +282,16 @@ describe Grape::Endpoint do
               declared_params: declared(params)
             }
           end
+          params do
+            requires :happy
+            optional :days
+          end
+          get '/test' do
+            {
+              params: params,
+              declared_params: declared(params, include_parent_namespaces: false)
+            }
+          end
         end
       end
     end
@@ -291,7 +301,15 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq 200
       json = JSON.parse(last_response.body, symbolize_names: true)
       expect(json[:params][:id]).to eq 123
-      expect(json[:declared_params].keys).to include :foo, :bar, :id
+      expect(json[:declared_params].keys).to match_array [:foo, :bar, :id]
+    end
+
+    it 'does not include params defined in the parent namespace with include_parent_namespaces: false' do
+      get '/something/123/test', happy: 'test', extra: 'hello'
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json[:params][:id]).to eq 123
+      expect(json[:declared_params].keys).to match_array [:happy, :days]
     end
   end
 
