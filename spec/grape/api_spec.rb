@@ -1296,18 +1296,21 @@ describe Grape::API do
 
   describe '.rescue_from klass, rescue_subclasses: boolean' do
     before do
-      class CommunicationsError < RuntimeError; end
+      module APIErrors
+        class ParentError < StandardError; end
+        class ChildError < ParentError; end
+      end
     end
 
     it 'rescues error as well as subclass errors with rescue_subclasses option set' do
-      subject.rescue_from RuntimeError, rescue_subclasses: true do |e|
+      subject.rescue_from APIErrors::ParentError, rescue_subclasses: true do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        raise CommunicationsError
+        raise APIErrors::ChildError
       end
       subject.get '/caught_parent' do
-        raise RuntimeError
+        raise APIErrors::ParentError
       end
       subject.get '/uncaught_parent' do
         raise StandardError
@@ -1321,13 +1324,13 @@ describe Grape::API do
     end
 
     it 'does not rescue child errors if rescue_subclasses is false' do
-      subject.rescue_from RuntimeError, rescue_subclasses: false do |e|
+      subject.rescue_from APIErrors::ParentError, rescue_subclasses: false do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
-        raise CommunicationsError
+        raise APIErrors::ChildError
       end
-      lambda { get '/uncaught' }.should raise_error(CommunicationsError)
+      lambda { get '/uncaught' }.should raise_error(APIErrors::ChildError)
     end
   end
 
