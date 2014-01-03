@@ -23,7 +23,11 @@ module Grape
       # route.
       class Header < Base
         def before
-          header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
+          begin
+            header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
+          rescue RuntimeError => e
+            throw :error, status: 406, headers: error_headers, message: e.message
+          end
 
           if strict?
             # If no Accept header:

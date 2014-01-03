@@ -231,6 +231,10 @@ supplied. This behavior is similar to routing in Rails. To circumvent this defau
 one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
 is returned when no correct `Accept` header is supplied.
 
+When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is returned if the `:cascade`
+option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route
+matches.
+
 ### Accept-Version Header
 
 ```ruby

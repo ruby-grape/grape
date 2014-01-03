@@ -714,4 +714,23 @@ describe Grape::Endpoint do
     end
   end
 
+  context 'version headers' do
+    before do
+      # NOTE: a 404 is returned instead of the 406 if cascade: false is not set.
+      subject.version 'v1', using: :header, vendor: 'ohanapi', cascade: false
+      subject.get '/test' do
+        "Hello!"
+      end
+    end
+
+    it 'result in a 406 response if they are invalid' do
+      get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json'
+      last_response.status.should == 406
+    end
+
+    it 'result in a 406 response if they cannot be parsed by rack-accept' do
+      get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json; version=1'
+      last_response.status.should == 406
+    end
+  end
 end
