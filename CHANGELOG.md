@@ -26,6 +26,7 @@ Next Release
 * [#503](https://github.com/intridea/grape/pull/503): Calling declared(params) from child namespace fails to include parent namespace defined params - [@myitcv](https://github.com/myitcv).
 * [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
 * [#538](https://github.com/intridea/grape/pull/538): Fixed default values for grouped params - [@dm1try](https://github.com/dm1try).
+* [#549](https://github.com/intridea/grape/pull/549): Fixed handling of invalid version headers to return 406 if a header cannot be parsed - [@bwalex](https://github.com/bwalex).
 
 
 0.6.1
