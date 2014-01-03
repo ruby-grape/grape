@@ -160,12 +160,20 @@ module Grape
 
     # A filtering method that will return a hash
     # consisting only of keys that have been declared by a
-    # `params` statement.
+    # `params` statement against the current/target endpoint or parent
+    # namespaces
     #
     # @param params [Hash] The initial hash to filter. Usually this will just be `params`
-    # @param options [Hash] Can pass `:include_missing` and `:stringify` options.
-    def declared(params, options = {}, declared_params = settings.gather(:declared_params))
+    # @param options [Hash] Can pass `:include_missing`, `:stringify` and `:include_parent_namespaces`
+    # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
+    # you want only to return params declared against the current/target endpoint
+    def declared(params, options = {}, declared_params = nil)
       options[:include_missing] = true unless options.key?(:include_missing)
+      options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
+      if declared_params.nil?
+        declared_params = !options[:include_parent_namespaces] ? settings[:declared_params] :
+          settings.gather(:declared_params)
+      end
 
       unless declared_params
         raise ArgumentError, "Tried to filter for declared parameters but none exist."

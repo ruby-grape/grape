@@ -9,6 +9,7 @@ Next Release
 * [#525](https://github.com/intridea/grape/pull/525): The default status code returned from `error!` has been changed from 403 to 500 - [@dblock](https://github.com/dblock).
 * [#526](https://github.com/intridea/grape/pull/526): Allowed specifying headers in `error!` - [@dblock](https://github.com/dblock).
 * [#527](https://github.com/intridea/grape/pull/527): The `before_validation` callback is now a distinct one - [@myitcv](https://github.com/myitcv).
+* [#530](https://github.com/intridea/grape/pull/530): Added ability to restrict `declared(params)` to the local endpoint with `include_parent_namespaces: false` - [@myitcv](https://github.com/myitcv).
 * [#531](https://github.com/intridea/grape/pull/531): Helpers are now available to auth middleware, executing in the context of the endpoint - [@joelvh](https://github.com/joelvh).
 * [#540](https://github.com/intridea/grape/pull/540): Ruby 2.1.0 is now supported - [@salimane](https://github.com/salimane).
 * [#544](https://github.com/intridea/grape/pull/544): The `rescue_from` keyword now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
