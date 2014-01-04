@@ -268,11 +268,16 @@ module Grape
         if block_given? || new_mod
           mod = settings.peek[:helpers] || Module.new
           if new_mod
+            inject_api_helpers_to_mod(new_mod) if new_mod.is_a?(Helpers)
             mod.class_eval do
               include new_mod
             end
           end
-          mod.class_eval(&block) if block_given?
+          if block_given?
+            inject_api_helpers_to_mod(mod) do
+              mod.class_eval(&block)
+            end
+          end
           set(:helpers, mod)
         else
           mod = Module.new
@@ -509,6 +514,12 @@ module Grape
           e.options[:app].inherit_settings(other_stack) if e.options[:app].respond_to?(:inherit_settings, true)
         end
       end
+
+      def inject_api_helpers_to_mod(mod, &block)
+        mod.extend(Helpers)
+        yield if block_given?
+        mod.api_changed(self)
+      end
     end
 
     def initialize
@@ -578,6 +589,29 @@ module Grape
           header 'Allow', allow_header
           status 405
           ''
+        end
+      end
+    end
+
+    # This module extends user defined helpers
+    # to provide some API-specific functionality
+    module Helpers
+      attr_accessor :api
+      def params(name, &block)
+        @named_params ||= {}
+        @named_params.merge! name => block
+      end
+
+      def api_changed(new_api)
+        @api = new_api
+        process_named_params
+      end
+
+      protected
+
+      def process_named_params
+        if @named_params && @named_params.any?
+          api.imbue(:named_params, @named_params)
         end
       end
     end
