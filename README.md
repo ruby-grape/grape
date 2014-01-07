@@ -576,6 +576,58 @@ class API < Grape::API
 end
 ```
 
+You can define reusable `params` using `helpers`.
+
+```ruby
+class API < Grape::API
+  helpers do
+    params :pagination do
+      optional :page, type: Integer
+      optional :per_page, type: Integer
+    end
+  end
+
+  desc "Get collection"
+  params do
+    use :pagination # aliases: includes, use_scope
+  end
+  get do
+    Collection.page(params[:page]).per(params[:per_page])
+  end
+end
+```
+
+You can also define reusable `params` using shared helpers.
+
+```ruby
+module SharedParams
+  extend Grape::API::Helpers
+
+  params :period do
+    optional :start_date
+    optional :end_date
+  end
+
+  params :pagination do
+    optional :page, type: Integer
+    optional :per_page, type: Integer
+  end
+end
+
+class API < Grape::API
+  helpers SharedParams
+
+  desc "Get collection"
+  params do
+    use :period, :pagination
+  end
+  get do
+    Collection.from(params[:start_date]).to(params[:end_date])
+              .page(params[:page]).per(params[:per_page])
+  end
+end
+```
+
 ## Cookies
 
 You can set, get and delete your cookies very simply using `cookies` method.

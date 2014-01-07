@@ -698,5 +698,60 @@ describe Grape::Validations do
         end
       end
     end # end custom validation
+
+    context 'named' do
+      context 'can be defined' do
+        it 'in helpers' do
+          subject.helpers do
+            params :pagination do
+            end
+          end
+        end
+
+        it 'in helper module which kind of Grape::API::Helpers' do
+          module SharedParams
+            extend Grape::API::Helpers
+            params :pagination do
+            end
+          end
+          subject.helpers SharedParams
+        end
+      end
+
+      context 'can be included in usual params' do
+        before do
+          module SharedParams
+            extend Grape::API::Helpers
+            params :period do
+              optional :start_date
+              optional :end_date
+            end
+          end
+          subject.helpers SharedParams
+
+          subject.helpers do
+            params :pagination do
+              optional :page, type: Integer
+              optional :per_page, type: Integer
+            end
+          end
+        end
+
+        it 'by #use' do
+          subject.params do
+            use :pagination
+          end
+          subject.settings[:declared_params].should eq [:page, :per_page]
+        end
+
+        it 'by #use with multiple params' do
+          subject.params do
+            use :pagination, :period
+          end
+          subject.settings[:declared_params].should eq [:page, :per_page, :start_date, :end_date]
+        end
+
+      end
+    end
   end
 end
