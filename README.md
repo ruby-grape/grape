@@ -484,7 +484,7 @@ You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom
 
 ```ruby
 rescue_from Grape::Exceptions::ValidationErrors do |e|
-    Rack::Response.new(
+    Rack::Response.new({
       status: e.status,
       message: e.message,
       errors: e.errors
