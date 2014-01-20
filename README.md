@@ -1176,7 +1176,7 @@ module API
     version 'v1'
 
     desc 'Statuses index', {
-      object_fields: API::Entities::Status.documentation
+      params: API::Entities::Status.documentation
     }
     get '/statuses' do
       statuses = Status.all
