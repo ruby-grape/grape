@@ -108,13 +108,30 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        validations = { presence: true }
-        validations.merge!(attrs.pop) if attrs.last.is_a?(Hash)
-        validations[:type] ||= Array if block_given?
-        validates(attrs, validations)
+        opts = attrs.last.is_a?(Hash) ? attrs.pop : nil
+        if opts && opts[:using]
+          if attrs.first == :all
+            optional_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+            required_fields = opts[:using].keys - optional_fields
+          else # attrs.first == :none
+            required_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+            optional_fields = opts[:using].keys - required_fields
+          end
+          required_fields.each do |field|
+            requires(field, opts[:using][field])
+          end
+          optional_fields.each do |field|
+            optional(field, opts[:using][field])
+          end
+        else
+          validations = { presence: true }
+          validations.merge!(opts) if opts
+          validations[:type] ||= Array if block_given?
+          validates(attrs, validations)
 
-        block_given? ? new_scope(orig_attrs, &block) :
-          push_declared_params(attrs)
+          block_given? ? new_scope(orig_attrs, &block) :
+            push_declared_params(attrs)
+        end
       end
 
       def optional(*attrs, &block)
