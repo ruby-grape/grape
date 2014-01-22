@@ -1169,7 +1169,6 @@ The following example exposes statuses.
 
 ```ruby
 module API
-
   module Entities
     class Status < Grape::Entity
       expose :user_name
@@ -1191,6 +1190,23 @@ module API
       statuses = Status.all
       type = current_user.admin? ? :full : :default
       present statuses, with: API::Entities::Status, type: type
+    end
+  end
+end
+```
+
+You can use entity documentation directly in the params block with `using: Entity.documentation`.
+
+```ruby
+module API
+  class Statuses < Grape::API
+    version 'v1'
+
+    desc 'Create a status', {
+      requires :all, except: [:ip], using: API::Entities::Status.documentation.except(:id)
+    }
+    post '/status' do
+      Status.create! params
     end
   end
 end
