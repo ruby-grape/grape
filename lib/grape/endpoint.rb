@@ -417,6 +417,7 @@ module Grape
       b.use Rack::Head
       b.use Grape::Middleware::Error,
             format: settings[:format],
+            content_types: settings[:content_types],
             default_status: settings[:default_error_status] || 500,
             rescue_all: settings[:rescue_all],
             default_error_formatter: settings[:default_error_formatter],
