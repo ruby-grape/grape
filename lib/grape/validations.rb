@@ -204,6 +204,7 @@ module Grape
         doc_attrs[:default] = default if default
 
         values = validations[:values]
+        values = (values.is_a?(Proc) ? values.call : values)
         doc_attrs[:values] = values if values
 
         # default value should be present in values array, if both exist
@@ -212,7 +213,7 @@ module Grape
         end
 
         # type should be compatible with values array, if both exist
-        if coerce_type && values && values.any? { |v| !v.instance_of?(coerce_type) }
+        if coerce_type && values && (values.is_a?(Proc) ? values.call : values).any? { |v| !v.instance_of?(coerce_type) }
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
 
