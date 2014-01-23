@@ -758,6 +758,26 @@ describe Grape::API do
       get '/error.xml'
       last_response.headers['Content-Type'].should eql 'application/xml'
     end
+
+    context 'with a custom content_type' do
+      before do
+        subject.content_type :custom, 'application/custom'
+        subject.formatter :custom, lambda { |object, env| "custom" }
+
+        subject.get('/custom') { 'bar' }
+        subject.get('/error') { error!('error in custom', 500) }
+      end
+
+      it 'sets content type' do
+        get '/custom.custom'
+        last_response.headers['Content-Type'].should eql 'application/custom'
+      end
+
+      it 'sets content type for error' do
+        get '/error.custom'
+        last_response.headers['Content-Type'].should eql 'application/custom'
+      end
+    end
   end
 
   context 'custom middleware' do

@@ -28,6 +28,7 @@ Next Release
 * [#512](https://github.com/intridea/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
 * [#538](https://github.com/intridea/grape/pull/538): Fixed default values for grouped params - [@dm1try](https://github.com/dm1try).
 * [#549](https://github.com/intridea/grape/pull/549): Fixed handling of invalid version headers to return 406 if a header cannot be parsed - [@bwalex](https://github.com/bwalex).
+* [#557](https://github.com/intridea/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 
 
 0.6.1
