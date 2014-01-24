@@ -378,6 +378,14 @@ params do
 end
 ```
 
+The :values option can also be supplied with a Proc to be evalutated at runtime
+
+```ruby
+params do
+  required :status, type: Symbol, values: -> { [:not_started, :processing, :done] }
+end
+```
+
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
 and `params[:audio][:format]` is required only if `params[:audio]` is present.
