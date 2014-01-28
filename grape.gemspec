@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'multi_xml', '>= 0.5.2'
   s.add_runtime_dependency 'hashie', '>= 1.2.0'
   s.add_runtime_dependency 'virtus', '>= 1.0.0'
-  s.add_runtime_dependency 'builder'
+  s.add_runtime_dependency 'builder', '~> 3.1'
 
   s.add_development_dependency 'grape-entity', '>= 0.2.0'
   s.add_development_dependency 'rake'
