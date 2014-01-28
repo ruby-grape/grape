@@ -31,8 +31,8 @@ Next Release
 * [#557](https://github.com/intridea/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 
 
-0.6.1
-=====
+0.6.1 (10/19/2013)
+==================
 
 #### Features
 
