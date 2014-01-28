@@ -22,7 +22,7 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
-          optional :type, values: lambda{ ['valid-type1', 'valid-type2', 'valid-type3'] }, default: 'valid-type2'
+          optional :type, values: -> { ['valid-type1', 'valid-type2', 'valid-type3'] }, default: 'valid-type2'
         end
         get '/lambda' do
           { type: params[:type] }
