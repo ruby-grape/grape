@@ -191,6 +191,10 @@ module Grape
       def validates(attrs, validations)
         doc_attrs = { required: validations.keys.include?(:presence) }
 
+        values = validations[:values]
+        values = (values.is_a?(Proc) ? values.call : values)
+        validations[:values] = doc_attrs[:values] = values if values
+
         # special case (type = coerce)
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
@@ -204,7 +208,6 @@ module Grape
         doc_attrs[:default] = default if default
 
         values = validations[:values]
-        values = (values.is_a?(Proc) ? values.call : values)
         doc_attrs[:values] = values if values
 
         # default value should be present in values array, if both exist

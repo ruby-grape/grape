@@ -2,7 +2,7 @@ module Grape
   module Validations
     class ValuesValidator < Validator
       def initialize(attrs, options, required, scope)
-        @values = (options.is_a?(Proc) ? options.call : options)
+        @values = options
         @required = required
         super
       end
