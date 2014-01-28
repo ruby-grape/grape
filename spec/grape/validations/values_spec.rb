@@ -20,6 +20,13 @@ describe Grape::Validations::ValuesValidator do
         get '/default/valid' do
           { type: params[:type] }
         end
+
+        params do
+          optional :type, values: -> { ['valid-type1', 'valid-type2', 'valid-type3'] }, default: 'valid-type2'
+        end
+        get '/lambda' do
+          { type: params[:type] }
+        end
       end
     end
   end
@@ -50,6 +57,18 @@ describe Grape::Validations::ValuesValidator do
     get("/default/valid")
     last_response.status.should eq 200
     last_response.body.should eq({ type: "valid-type2" }.to_json)
+  end
+
+  it 'allows a proc for values' do
+    get('/lambda', type: 'valid-type1')
+    last_response.status.should eq 200
+    last_response.body.should eq({ type: "valid-type1" }.to_json)
+  end
+
+  it 'does not allow an invalid value for a parameter using lambda' do
+    get("/lambda", type: 'invalid-type')
+    last_response.status.should eq 400
+    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'raises IncompatibleOptionValues on an invalid default value' do
