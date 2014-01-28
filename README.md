@@ -378,11 +378,12 @@ params do
 end
 ```
 
-The :values option can also be supplied with a Proc to be evalutated at runtime
+The :values option can also be supplied with a Proc to be evalutated at runtime, for example given a status
+model you may want to restrict by hashtags that you have previously defined in the HashTag model.
 
 ```ruby
 params do
-  required :status, type: Symbol, values: -> { [:not_started, :processing, :done] }
+  required :hashtag, type: String, values: -> { Hashtag.all.map{|ht| ht.tag} }
 end
 ```
 
