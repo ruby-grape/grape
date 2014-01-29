@@ -78,6 +78,76 @@ describe Grape::Validations do
       end
     end
 
+    context 'requires :all using Grape::Entity documentation' do
+      def define_requires_all
+        documentation = {
+            required_field: { type: String },
+            optional_field: { type: String }
+        }
+        subject.params do
+          requires :all, except: :optional_field, using: documentation
+        end
+      end
+      before do
+        define_requires_all
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'adds entity documentation to declared params' do
+        define_requires_all
+        subject.settings[:declared_params].should == [:required_field, :optional_field]
+      end
+
+      it 'errors when required_field is not present' do
+        get '/required'
+        last_response.status.should == 400
+        last_response.body.should == 'required_field is missing'
+      end
+
+      it 'works when required_field is present' do
+        get '/required', required_field: 'woof'
+        last_response.status.should == 200
+        last_response.body.should == 'required works'
+      end
+    end
+
+    context 'requires :none using Grape::Entity documentation' do
+      def define_requires_none
+        documentation = {
+            required_field: { type: String },
+            optional_field: { type: String }
+        }
+        subject.params do
+          requires :none, except: :required_field, using: documentation
+        end
+      end
+      before do
+        define_requires_none
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'adds entity documentation to declared params' do
+        define_requires_none
+        subject.settings[:declared_params].should == [:required_field, :optional_field]
+      end
+
+      it 'errors when required_field is not present' do
+        get '/required'
+        last_response.status.should == 400
+        last_response.body.should == 'required_field is missing'
+      end
+
+      it 'works when required_field is present' do
+        get '/required', required_field: 'woof'
+        last_response.status.should == 200
+        last_response.body.should == 'required works'
+      end
+    end
+
     context 'required with an Array block' do
       before do
         subject.params do

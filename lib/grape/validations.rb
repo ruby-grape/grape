@@ -108,13 +108,18 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        validations = { presence: true }
-        validations.merge!(attrs.pop) if attrs.last.is_a?(Hash)
-        validations[:type] ||= Array if block_given?
-        validates(attrs, validations)
+        opts = attrs.last.is_a?(Hash) ? attrs.pop : nil
+        if opts && opts[:using]
+          requires_using_entity_doc(attrs.first, opts)
+        else
+          validations = { presence: true }
+          validations.merge!(opts) if opts
+          validations[:type] ||= Array if block_given?
+          validates(attrs, validations)
 
-        block_given? ? new_scope(orig_attrs, &block) :
-          push_declared_params(attrs)
+          block_given? ? new_scope(orig_attrs, &block) :
+            push_declared_params(attrs)
+        end
       end
 
       def optional(*attrs, &block)
@@ -171,6 +176,22 @@ module Grape
       end
 
       private
+
+      def requires_using_entity_doc(mode, opts)
+        if mode == :all
+          optional_fields = Array(opts[:except])
+          required_fields = opts[:using].keys - optional_fields
+        else # mode == :none
+          required_fields = Array(opts[:except])
+          optional_fields = opts[:using].keys - required_fields
+        end
+        required_fields.each do |field|
+          requires(field, opts[:using][field])
+        end
+        optional_fields.each do |field|
+          optional(field, opts[:using][field])
+        end
+      end
 
       def new_scope(attrs, optional = false, &block)
         opts = attrs[1] || { type: Array }
