@@ -110,7 +110,7 @@ module Grape
 
         opts = attrs.last.is_a?(Hash) ? attrs.pop : nil
         if opts && opts[:using]
-          requires_using_entity_doc(attrs, opts)
+          requires_using_entity_doc(attrs.first, opts)
         else
           validations = { presence: true }
           validations.merge!(opts) if opts
@@ -177,12 +177,12 @@ module Grape
 
       private
 
-      def requires_using_entity_doc(attrs, opts)
-        if attrs.first == :all
-          optional_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+      def requires_using_entity_doc(mode, opts)
+        if mode == :all
+          optional_fields = Array(opts[:except])
           required_fields = opts[:using].keys - optional_fields
-        else # attrs.first == :none
-          required_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+        else # mode == :none
+          required_fields = Array(opts[:except])
           optional_fields = opts[:using].keys - required_fields
         end
         required_fields.each do |field|
