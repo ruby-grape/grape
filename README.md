@@ -1196,6 +1196,27 @@ module API
 end
 ```
 
+You can use entity documentation in the params block
+```ruby
+class User::Entity < Grape::Entity
+  expose :id,          documentation: { type: Integer}
+  expose :name,        documentation: { type: String, desc: "Name" }
+  expose :email,       documentation: { type: String, desc: "Email address" }
+end
+
+class Users < Grape::API
+  desc 'Create user'
+  params do
+    requires :all, except: [:name], using: User::Entity.documentation.except(:id)
+  end
+  post 'users' do
+    # implement create user
+  end
+end
+
+```
+
+
 You can present with multiple entities using an optional Symbol argument.
 
 ```ruby
