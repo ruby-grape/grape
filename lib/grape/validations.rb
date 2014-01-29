@@ -110,19 +110,7 @@ module Grape
 
         opts = attrs.last.is_a?(Hash) ? attrs.pop : nil
         if opts && opts[:using]
-          if attrs.first == :all
-            optional_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
-            required_fields = opts[:using].keys - optional_fields
-          else # attrs.first == :none
-            required_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
-            optional_fields = opts[:using].keys - required_fields
-          end
-          required_fields.each do |field|
-            requires(field, opts[:using][field])
-          end
-          optional_fields.each do |field|
-            optional(field, opts[:using][field])
-          end
+          requires_using_entity_doc(attrs, opts)
         else
           validations = { presence: true }
           validations.merge!(opts) if opts
@@ -188,6 +176,22 @@ module Grape
       end
 
       private
+
+      def requires_using_entity_doc(attrs, opts)
+        if attrs.first == :all
+          optional_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+          required_fields = opts[:using].keys - optional_fields
+        else # attrs.first == :none
+          required_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+          optional_fields = opts[:using].keys - required_fields
+        end
+        required_fields.each do |field|
+          requires(field, opts[:using][field])
+        end
+        optional_fields.each do |field|
+          optional(field, opts[:using][field])
+        end
+      end
 
       def new_scope(attrs, optional = false, &block)
         opts = attrs[1] || { type: Array }
