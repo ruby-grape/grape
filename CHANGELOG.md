@@ -2,6 +2,7 @@ Next Release
 ============
 
 * [#871](https://github.com/intridea/grape/pull/871): Fixed Grape::Middleware::Base#response - [@galathius](https://github.com/galathius).
+* [#559](https://github.com/intridea/grape/issues/559): Support Rack 1.6.0 to parse requests larger than 128KB - [@myitcv](https://github.com/myitcv).
 * Your contribution here.
 
 0.10.1 (12/28/2014)

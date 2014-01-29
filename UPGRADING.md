@@ -1,6 +1,16 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.10.2
+
+Grape now supports, but doesn't require Rack 1.6.0. If you encounter an issue with parsing requests larger than 128KB, explictly require Rack 1.6.0 in your Gemfile.
+
+```ruby
+gem 'rack', '~> 1.6.0'
+```
+
+See [#559](https://github.com/intridea/grape/issues/559) for more information.
+
 ### Upgrading to >= 0.10.1
 
 #### Changes to `declared(params, include_missing: false)`
