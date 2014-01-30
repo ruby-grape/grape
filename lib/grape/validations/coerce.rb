@@ -47,7 +47,7 @@ module Grape
 
       def coerce_value(type, val)
         # Don't coerce things other than nil to Arrays or Hashes
-        return val || [] if type == Array
+        return val || [] if type == Array || type.is_a?(Array)
         return val || {} if type == Hash
 
         converter = Virtus::Attribute.build(type)
