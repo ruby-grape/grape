@@ -1359,7 +1359,7 @@ Before and after callbacks execute in the following order:
 5. _the API call_
 6. `after`
 
-Steps 2, 3 and 4 only happen if validation succeeds.
+Steps 4, 5 and 6 only happen if validation succeeds.
 
 E.g. using `before`:
 
