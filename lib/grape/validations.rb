@@ -177,10 +177,10 @@ module Grape
 
       def require_required_and_optional_fields(context, opts)
         if context == :all
-          optional_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+          optional_fields = Array(opts[:except])
           required_fields = opts[:using].keys - optional_fields
-        else # attrs.first == :none
-          required_fields = opts[:except].is_a?(Array) ? opts[:except] : [opts[:except]].compact
+        else # context == :none
+          required_fields = Array(opts[:except])
           optional_fields = opts[:using].keys - required_fields
         end
         required_fields.each do |field|
