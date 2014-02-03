@@ -378,12 +378,12 @@ params do
 end
 ```
 
-The :values option can also be supplied with a Proc to be evalutated at runtime, for example given a status
-model you may want to restrict by hashtags that you have previously defined in the HashTag model.
+The :values option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
+model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
 
 ```ruby
 params do
-  required :hashtag, type: String, values: -> { Hashtag.all.map{|ht| ht.tag} }
+  required :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
 end
 ```
 
@@ -1169,7 +1169,6 @@ The following example exposes statuses.
 
 ```ruby
 module API
-
   module Entities
     class Status < Grape::Entity
       expose :user_name
@@ -1191,6 +1190,23 @@ module API
       statuses = Status.all
       type = current_user.admin? ? :full : :default
       present statuses, with: API::Entities::Status, type: type
+    end
+  end
+end
+```
+
+You can use entity documentation directly in the params block with `using: Entity.documentation`.
+
+```ruby
+module API
+  class Statuses < Grape::API
+    version 'v1'
+
+    desc 'Create a status', {
+      requires :all, except: [:ip], using: API::Entities::Status.documentation.except(:id)
+    }
+    post '/status' do
+      Status.create! params
     end
   end
 end
@@ -1343,7 +1359,7 @@ Before and after callbacks execute in the following order:
 5. _the API call_
 6. `after`
 
-Steps 2, 3 and 4 only happen if validation succeeds.
+Steps 4, 5 and 6 only happen if validation succeeds.
 
 E.g. using `before`:
 

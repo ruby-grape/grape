@@ -15,6 +15,7 @@ Next Release
 * [#544](https://github.com/intridea/grape/pull/544): The `rescue_from` keyword now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
 * [#545](https://github.com/intridea/grape/pull/545): Added `type` (Array or Hash) support to `requires`, `optional` and `group` - [@bwalex](https://github.com/bwalex).
 * [#550](https://github.com/intridea/grape/pull/550): Added possibility to define reusable params - [@dm1try](https://github.com/dm1try).
+* [#560](https://github.com/intridea/grape/pull/560): Use `Grape::Entity` documentation to define required and optional parameters with `requires using:` - [@reynardmh](https://github.com/reynardmh).
 * Your contribution here.
 
 #### Fixes
@@ -31,8 +32,8 @@ Next Release
 * [#557](https://github.com/intridea/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 
 
-0.6.1
-=====
+0.6.1 (10/19/2013)
+==================
 
 #### Features
 
