@@ -230,8 +230,9 @@ module Grape
         doc_attrs[:default] = default if default
 
         values = validations[:values]
+        doc_attrs[:values] = values if values
+
         values = (values.is_a?(Proc) ? values.call : values)
-        validations[:values] = doc_attrs[:values] = values if values
 
         # default value should be present in values array, if both exist
         if default && values && !values.include?(default)
