@@ -2,27 +2,42 @@ require 'spec_helper'
 
 describe Grape::Validations::ValuesValidator do
 
+  class ValuesModel
+    DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3']
+    class << self
+      def values
+        @values ||= []
+        [DEFAULT_VALUES + @values].flatten.uniq
+      end
+
+      def add_value(value)
+        @values ||= []
+        @values << value
+      end
+    end
+  end
+
   module ValidationsSpec
     module ValuesValidatorSpec
       class API < Grape::API
         default_format :json
 
         params do
-          requires :type, values: ['valid-type1', 'valid-type2', 'valid-type3']
+          requires :type, values: ValuesModel.values
         end
         get '/' do
           { type: params[:type] }
         end
 
         params do
-          optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: 'valid-type2'
+          optional :type, values: ValuesModel.values, default: 'valid-type2'
         end
         get '/default/valid' do
           { type: params[:type] }
         end
 
         params do
-          optional :type, values: -> { ['valid-type1', 'valid-type2', 'valid-type3'] }, default: 'valid-type2'
+          optional :type, values: -> { ValuesModel.values }, default: 'valid-type2'
         end
         get '/lambda' do
           { type: params[:type] }
@@ -65,6 +80,22 @@ describe Grape::Validations::ValuesValidator do
     last_response.body.should eq({ type: "valid-type1" }.to_json)
   end
 
+  it 'does not validate updated values without proc' do
+    ValuesModel.add_value('valid-type4')
+
+    get('/', type: 'valid-type4')
+    last_response.status.should eq 400
+    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+  end
+
+  it 'validates against values in a proc' do
+    ValuesModel.add_value('valid-type4')
+
+    get('/lambda', type: 'valid-type4')
+    last_response.status.should eq 200
+    last_response.body.should eq({ type: "valid-type4" }.to_json)
+  end
+
   it 'does not allow an invalid value for a parameter using lambda' do
     get("/lambda", type: 'invalid-type')
     last_response.status.should eq 400
@@ -84,5 +115,4 @@ describe Grape::Validations::ValuesValidator do
       subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], type: Symbol }
     }.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
-
 end

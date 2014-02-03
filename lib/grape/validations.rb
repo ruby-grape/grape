@@ -191,10 +191,6 @@ module Grape
       def validates(attrs, validations)
         doc_attrs = { required: validations.keys.include?(:presence) }
 
-        values = validations[:values]
-        values = (values.is_a?(Proc) ? values.call : values)
-        validations[:values] = doc_attrs[:values] = values if values
-
         # special case (type = coerce)
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
@@ -210,13 +206,15 @@ module Grape
         values = validations[:values]
         doc_attrs[:values] = values if values
 
+        values = (values.is_a?(Proc) ? values.call : values)
+
         # default value should be present in values array, if both exist
         if default && values && !values.include?(default)
           raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
         end
 
         # type should be compatible with values array, if both exist
-        if coerce_type && values && (values.is_a?(Proc) ? values.call : values).any? { |v| !v.instance_of?(coerce_type) }
+        if coerce_type && values && values.any? { |v| !v.instance_of?(coerce_type) }
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
 
