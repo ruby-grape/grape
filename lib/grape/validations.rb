@@ -230,8 +230,7 @@ module Grape
         doc_attrs[:default] = default if default
 
         values = validations[:values]
-        values = (values.is_a?(Proc) ? values.call : values)
-        validations[:values] = doc_attrs[:values] = values if values
+        doc_attrs[:values] = values if values
 
         values = (values.is_a?(Proc) ? values.call : values)
 
