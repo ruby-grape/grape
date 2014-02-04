@@ -244,6 +244,8 @@ module Grape
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
 
+        doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
+
         full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
         @api.document_attribute(full_attrs, doc_attrs)
 
