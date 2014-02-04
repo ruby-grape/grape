@@ -637,6 +637,17 @@ class API < Grape::API
 end
 ```
 
+## Parameter Documentation
+
+You can attach additional documentation to `params` using a `documentation` hash.
+
+```ruby
+params do
+  optional :first_name, type: String, documentation: { example: 'Jim' }
+  requires :last_name, type: String, documentation: { example: 'Smith' }
+end
+```
+
 ## Cookies
 
 You can set, get and delete your cookies very simply using `cookies` method.
