@@ -878,10 +878,10 @@ Or rescue specific exceptions.
 ```ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError do |e|
-    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500)
+    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500).finish
   end
   rescue_from NotImplementedError do |e|
-    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500)
+    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500).finish
   end
 end
 ```
@@ -904,7 +904,7 @@ rescue_from APIErrors::ParentError do |e|
     Rack::Response.new({
       error: "#{e.class} error",
       message: e.message
-      }.to_json, e.status)
+      }.to_json, e.status).finish
 end
 ```
 
@@ -917,7 +917,7 @@ rescue_from RuntimeError, rescue_subclasses: false do |e|
       status: e.status,
       message: e.message,
       errors: e.errors
-      }.to_json, e.status)
+      }.to_json, e.status).finish
 end
 ```
 
