@@ -2101,7 +2101,6 @@ describe Grape::API do
         last_response.body.should == "play"
       end
 
-
       it 'responds to options' do
         subject.namespace :apples do
           app = Class.new(Grape::API)
