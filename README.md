@@ -169,8 +169,8 @@ run Rack::Cascade.new [API, Web]
 Place API files into `app/api` and modify `application.rb`.
 
 ```ruby
-config.paths.add "app/api", glob: "**/*.rb"
-config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
+config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
+config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
 ```
 
 Modify `config/routes`:
@@ -1560,7 +1560,7 @@ Create `config/initializers/reload_api.rb`.
 if Rails.env.development?
   ActiveSupport::Dependencies.explicitly_unloadable_constants << "Twitter::API"
 
-  api_files = Dir["#{Rails.root}/app/api/**/*.rb"]
+  api_files = Dir[Rails.root.join('app', 'api', '**', '*.rb')]
   api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
     Rails.application.reload_routes!
   end
