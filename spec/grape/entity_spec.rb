@@ -121,6 +121,19 @@ describe Grape::Entity do
       get '/example'
     end
 
+    it 'autodetection does not use Entity if it is not a presenter' do
+      some_model = Class.new
+      entity = Class.new
+
+      some_model.class.const_set :Entity, entity
+
+      subject.get '/example' do
+        present some_model
+      end
+      get '/example'
+      entity.should_not_receive(:represent)
+    end
+
     it 'adds a root key to the output if one is given' do
       subject.get '/example' do
         present({ abc: 'def' }, root: :root)
