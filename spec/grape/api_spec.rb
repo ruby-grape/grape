@@ -2101,6 +2101,38 @@ describe Grape::API do
         last_response.body.should == "play"
       end
 
+      it 'responds to options' do
+        subject.namespace :apples do
+          app = Class.new(Grape::API)
+          app.get('/colour') do
+            "red"
+          end
+          mount app
+        end
+        get '/apples/colour'
+        last_response.status.should eql 200
+        last_response.body.should == 'red'
+        options '/apples/colour'
+        last_response.status.should eql 204
+      end
+
+      it 'responds to options with versioning' do
+        subject.version 'v1', using: :path
+        subject.namespace :apples do
+          app = Class.new(Grape::API)
+          app.get('/colour') do
+            "red"
+          end
+          mount app
+        end
+
+        get '/v1/apples/colour'
+        last_response.status.should eql 200
+        last_response.body.should == 'red'
+        options '/v1/apples/colour'
+        last_response.status.should eql 204
+      end
+
     end
   end
 

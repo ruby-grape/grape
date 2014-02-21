@@ -362,8 +362,6 @@ module Grape
       env["rack.routing_args"][:route_info]
     end
 
-    protected
-
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
@@ -373,6 +371,8 @@ module Grape
         nil
       end
     end
+
+    protected
 
     def run(env)
       @env = env

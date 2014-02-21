@@ -561,23 +561,21 @@ module Grape
     # cannot handle.
     def add_head_not_allowed_methods_and_options_methods
       allowed_methods = Hash.new { |h, k| h[k] = [] }
-      resources = self.class.endpoints.map do |endpoint|
-        if endpoint.options[:app] && endpoint.options[:app].respond_to?(:endpoints)
-          endpoint.options[:app].endpoints.map(&:routes)
-        else
-          endpoint.routes
+      self.class.endpoints.each do |endpoint|
+        app = endpoint.endpoints ? endpoint.options[:app] : self.class
+        (endpoint.endpoints || [endpoint]).each do |e|
+          e.options[:path].each do |path|
+            allowed_methods[[app, path]] |= e.options[:method]
+          end
         end
       end
-      resources.flatten.each do |route|
-        allowed_methods[route.route_path] << route.route_method
-      end
-      allowed_methods.each do |path, methods|
+      allowed_methods.each do |(app, path), methods|
         if methods.include?('GET') && !methods.include?('HEAD') && !self.class.settings[:do_not_route_head]
           methods = methods | ['HEAD']
         end
         allow_header = (['OPTIONS'] | methods).join(', ')
-        if methods.include?('OPTIONS') || !self.class.settings[:do_not_route_options]
-          self.class.options(path, {}) do
+        if !methods.include?('OPTIONS') && !self.class.settings[:do_not_route_options]
+          app.options(path, {}) do
             header 'Allow', allow_header
             status 204
             ''
@@ -585,7 +583,7 @@ module Grape
         end
         not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
         not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
-        self.class.route(not_allowed_methods, path) do
+        app.route(not_allowed_methods, path) do
           header 'Allow', allow_header
           status 405
           ''
