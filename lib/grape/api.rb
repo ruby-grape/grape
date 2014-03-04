@@ -9,6 +9,8 @@ module Grape
       attr_reader :endpoints, :instance, :routes, :route_set, :settings, :versions
       attr_writer :logger
 
+      LOCK = Mutex.new
+
       def logger(logger = nil)
         if logger
           @logger = logger
@@ -26,7 +28,7 @@ module Grape
       end
 
       def compile
-        @instance = new
+        @instance ||= new
       end
 
       def change!
@@ -34,7 +36,7 @@ module Grape
       end
 
       def call(env)
-        compile unless instance
+        LOCK.synchronize { compile } unless instance
         call!(env)
       end
 
