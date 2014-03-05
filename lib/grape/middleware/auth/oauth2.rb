@@ -5,7 +5,7 @@ module Grape::Middleware::Auth
       {
         token_class: 'AccessToken',
         realm: 'OAuth API',
-        parameter: %w(bearer_token oauth_token),
+        parameter: %w(bearer_token oauth_token access_token),
         accepted_headers: %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION),
         header: [/Bearer (.*)/i, /OAuth (.*)/i],
         required: true
