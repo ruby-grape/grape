@@ -140,7 +140,7 @@ module Grape
         params = @parent.params(params) if @parent
         if @element
           if params.is_a?(Array)
-            params = params.map { |el| el[@element] || {} }.flatten
+            params = params.flat_map { |el| el[@element] || {} }
           elsif params.is_a?(Hash)
             params = params[@element] || {}
           else

@@ -100,7 +100,7 @@ module Grape
       # @param key [Symbol] The key to gather
       # @return [Array]
       def gather(key)
-        stack.map { |s| s[key] }.flatten.compact.uniq
+        stack.flat_map { |s| s[key] }.compact.uniq
       end
 
       def to_s
