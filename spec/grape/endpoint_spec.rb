@@ -141,7 +141,7 @@ describe Grape::Endpoint do
         cookie = cookies[cookie_name]
         cookie.should_not be_nil
         cookie.value.should == "deleted"
-        cookie.expired?.should be_true
+        cookie.expired?.should be true
       end
     end
 
@@ -166,7 +166,7 @@ describe Grape::Endpoint do
         cookie.should_not be_nil
         cookie.value.should == "deleted"
         cookie.path.should == "/test"
-        cookie.expired?.should be_true
+        cookie.expired?.should be true
       end
     end
   end

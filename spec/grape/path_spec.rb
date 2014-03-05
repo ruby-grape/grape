@@ -57,7 +57,7 @@ module Grape
     describe "#uses_path_versioning?" do
       it "is false when the version setting is nil" do
         path = Path.new(anything, anything, version: nil)
-        expect(path.uses_path_versioning?).to be_false
+        expect(path.uses_path_versioning?).to be false
       end
 
       it "is false when the version option is header" do
@@ -68,7 +68,7 @@ module Grape
           version_options: { using: :header }
         )
 
-        expect(path.uses_path_versioning?).to be_false
+        expect(path.uses_path_versioning?).to be false
       end
 
       it "is true when the version option is path" do
@@ -79,7 +79,7 @@ module Grape
           version_options: { using: :path }
         )
 
-        expect(path.uses_path_versioning?).to be_true
+        expect(path.uses_path_versioning?).to be true
       end
     end
 

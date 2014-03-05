@@ -198,7 +198,7 @@ describe Grape::Middleware::Formatter do
               'rack.input' => io,
               'CONTENT_LENGTH' => io.length
             )
-            subject.env['rack.request.form_hash']['is_boolean'].should be_true
+            subject.env['rack.request.form_hash']['is_boolean'].should be true
             subject.env['rack.request.form_hash']['string'].should == 'thing'
           end
         end
@@ -212,7 +212,7 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
-        subject.env['rack.request.form_hash']['is_boolean'].should be_true
+        subject.env['rack.request.form_hash']['is_boolean'].should be true
         subject.env['rack.request.form_hash']['string'].should == 'thing'
       end
       it "rewinds IO" do
@@ -225,7 +225,7 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
-        subject.env['rack.request.form_hash']['is_boolean'].should be_true
+        subject.env['rack.request.form_hash']['is_boolean'].should be true
         subject.env['rack.request.form_hash']['string'].should == 'thing'
       end
       it 'parses the body from an xml #{method} and copies values into rack.request.from_hash' do

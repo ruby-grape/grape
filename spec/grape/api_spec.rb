@@ -1372,7 +1372,7 @@ describe Grape::API do
         raise "rain!"
       end
       get '/exception'
-      last_response.body.start_with?("rain!\r\n").should be_true
+      last_response.body.start_with?("rain!\r\n").should be true
     end
 
     it 'rescues all errors with a default formatter' do

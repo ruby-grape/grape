@@ -21,7 +21,7 @@ module Grape
     end
 
     def uses_path_versioning?
-      settings[:version] && settings[:version_options][:using] == :path
+      !!(settings[:version] && settings[:version_options][:using] == :path)
     end
 
     def has_namespace?
