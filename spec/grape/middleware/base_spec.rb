@@ -51,7 +51,7 @@ describe Grape::Middleware::Base do
       end
 
       it 'overrides default options when provided' do
-        ExampleWare.new(blank_app, monkey: false).options[:monkey].should be_false
+        ExampleWare.new(blank_app, monkey: false).options[:monkey].should be false
       end
     end
   end
