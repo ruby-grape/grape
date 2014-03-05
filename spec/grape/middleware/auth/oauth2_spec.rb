@@ -30,7 +30,7 @@ describe Grape::Middleware::Auth::OAuth2 do
 
   context 'with the token in the query string' do
     context 'and a valid token' do
-      before { get '/awesome?oauth_token=g123' }
+      before { get '/awesome?access_token=g123' }
 
       it 'sets env["api.token"]' do
         last_response.body.should == 'g123'
@@ -40,7 +40,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     context 'and an invalid token' do
       before do
         @err = catch :error do
-          get '/awesome?oauth_token=b123'
+          get '/awesome?access_token=b123'
         end
       end
 
@@ -49,7 +49,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
 
       it 'sets the WWW-Authenticate header in the response' do
-        @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_token'"
+        @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
       end
     end
   end
@@ -57,12 +57,12 @@ describe Grape::Middleware::Auth::OAuth2 do
   context 'with an expired token' do
     before do
       @err = catch :error do
-        get '/awesome?oauth_token=e123'
+        get '/awesome?access_token=e123'
       end
     end
 
     it { @err[:status].should == 401 }
-    it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='expired_token'" }
+    it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'" }
   end
 
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|
@@ -73,14 +73,14 @@ describe Grape::Middleware::Auth::OAuth2 do
   end
 
   context 'with the token in the POST body' do
-    before { post '/awesome', 'oauth_token' => 'g123' }
+    before { post '/awesome', 'access_token' => 'g123' }
     it { last_response.body.should == 'g123' }
   end
 
   context 'when accessing something outside its scope' do
     before do
       @err = catch :error do
-        get '/forbidden?oauth_token=g123'
+        get '/forbidden?access_token=g123'
       end
     end
 
@@ -105,7 +105,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     context 'with a valid token' do
-      before { get '/awesome?oauth_token=g123' }
+      before { get '/awesome?access_token=g123' }
 
       it 'sets env["api.token"]' do
         last_response.body.should == 'g123'
