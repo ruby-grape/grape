@@ -27,7 +27,7 @@ module Grape
       private
 
       def full_messages
-        map { |attribute, error| full_message(attribute, error) }
+        map { |attribute, error| full_message(attribute, error) }.uniq
       end
 
       def full_message(attribute, error)
