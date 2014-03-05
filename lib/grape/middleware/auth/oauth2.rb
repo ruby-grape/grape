@@ -54,7 +54,7 @@ module Grape::Middleware::Auth
       token = token_class.verify(token)
       if token
         if token.respond_to?(:expired?) && token.expired?
-          error_out(401, 'expired_token')
+          error_out(401, 'invalid_grant')
         else
           if !token.respond_to?(:permission_for?) || token.permission_for?(env)
             env['api.token'] = token
@@ -63,7 +63,7 @@ module Grape::Middleware::Auth
           end
         end
       elsif !!options[:required]
-        error_out(401, 'invalid_token')
+        error_out(401, 'invalid_grant')
       end
     end
 
