@@ -36,7 +36,7 @@ describe Grape::Middleware::Base do
 
   context 'options' do
     it 'persists options passed at initialization' do
-      Grape::Middleware::Base.new(blank_app, abc: true).options[:abc].should be_true
+      Grape::Middleware::Base.new(blank_app, abc: true).options[:abc].should be true
     end
 
     context 'defaults' do
@@ -47,7 +47,7 @@ describe Grape::Middleware::Base do
       end
 
       it 'persists the default options' do
-        ExampleWare.new(blank_app).options[:monkey].should be_true
+        ExampleWare.new(blank_app).options[:monkey].should be true
       end
 
       it 'overrides default options when provided' do

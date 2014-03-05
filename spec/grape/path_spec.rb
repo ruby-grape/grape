@@ -79,7 +79,7 @@ module Grape
           version_options: { using: :path }
         )
 
-        expect(path.uses_path_versioning?).to be_true
+        expect(path.uses_path_versioning?).to be true
       end
     end
 
