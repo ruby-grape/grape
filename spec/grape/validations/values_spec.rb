@@ -42,6 +42,13 @@ describe Grape::Validations::ValuesValidator do
         get '/lambda' do
           { type: params[:type] }
         end
+
+        params do
+          requires :type, type: Integer, desc: "An integer", values: [10, 11], default: 10
+        end
+        get '/values/coercion' do
+          { type: params[:type] }
+        end
       end
     end
   end
@@ -113,6 +120,19 @@ describe Grape::Validations::ValuesValidator do
     subject = Class.new(Grape::API)
     expect {
       subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], type: Symbol }
+    }.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
+  it 'allows values to be a kind of the coerced type not just an instance of it' do
+    get("/values/coercion", type: 10)
+    last_response.status.should eq 200
+    last_response.body.should eq({ type: 10 }.to_json)
+  end
+
+  it 'raises IncompatibleOptionValues when values contains a value that is not a kind of the type' do
+    subject = Class.new(Grape::API)
+    expect {
+      subject.params { requires :type, values: [10.5, 11], type: Integer }
     }.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 end

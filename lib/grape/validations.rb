@@ -240,7 +240,7 @@ module Grape
         end
 
         # type should be compatible with values array, if both exist
-        if coerce_type && values && values.any? { |v| !v.instance_of?(coerce_type) }
+        if coerce_type && values && values.any? { |v| !v.kind_of?(coerce_type) }
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
 
