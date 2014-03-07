@@ -21,6 +21,7 @@ Next Release
 
 #### Fixes
 
+* [#590](https://github.com/intridea/grape/pull/590): Fix Issue Where Endpoint Param of Type Integer Cannot Set Values Array - [@xevix](https://github.com/xevix)
 * [#586](https://github.com/intridea/grape/pull/586): Do not repeat the same validation error messages - [@kiela](https://github.com/kiela)
 * [#508](https://github.com/intridea/grape/pull/508): Allow parameters, such as content encoding, in `content_type` - [@dm1try](https://github.com/dm1try).
 * [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values - [@Antti](https://github.com/Antti).
