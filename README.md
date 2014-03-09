@@ -8,7 +8,7 @@ providing a simple DSL to easily develop RESTful APIs. It has built-in support
 for common conventions, including multiple formats, subdomain/prefix restriction,
 content negotiation, versioning and much more.
 
-[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape)
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
 
 ## Stable Release
 
