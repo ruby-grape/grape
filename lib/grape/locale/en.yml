@@ -14,7 +14,7 @@ en:
         missing_mime_type:
           problem: 'missing mime type for %{new_format}'
           resolution:
-            "you can choose exist mime type from Grape::ContentTypes::CONTENT_TYPES
+            "you can choose existing mime type from Grape::ContentTypes::CONTENT_TYPES
             or add your own with content_type :%{new_format}, 'application/%{new_format}'
             "
         invalid_with_option_for_represent:
