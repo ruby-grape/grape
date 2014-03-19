@@ -61,8 +61,13 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
     end
 
-    it { @err[:status].should == 401 }
-    it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'" }
+    it 'throws an error' do
+      @err[:status].should == 401
+    end
+
+    it 'sets the WWW-Authenticate header in the response to error' do
+      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
+    end
   end
 
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|
