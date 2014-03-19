@@ -71,7 +71,7 @@ describe Grape::Middleware::Auth::OAuth2 do
   end
 
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|
-    context 'with the token in the #{head} header' do
+    context "with the token in the #{head} header" do
       before { get '/awesome', {}, head => 'OAuth g123' }
       it { last_response.body.should == 'g123' }
     end
