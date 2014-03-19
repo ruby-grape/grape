@@ -72,14 +72,24 @@ describe Grape::Middleware::Auth::OAuth2 do
 
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|
     context "with the token in the #{head} header" do
-      before { get '/awesome', {}, head => 'OAuth g123' }
-      it { last_response.body.should == 'g123' }
+      before do
+        get '/awesome', {}, head => 'OAuth g123'
+      end
+
+      it 'sets env["api.token"]' do
+        last_response.body.should == 'g123'
+      end
     end
   end
 
   context 'with the token in the POST body' do
-    before { post '/awesome', 'access_token' => 'g123' }
-    it { last_response.body.should == 'g123' }
+    before do
+      post '/awesome', 'access_token' => 'g123'
+    end
+
+    it 'sets env["api.token"]' do
+      last_response.body.should == 'g123'
+    end
   end
 
   context 'when accessing something outside its scope' do
@@ -89,8 +99,13 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
     end
 
-    it { @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='insufficient_scope'" }
-    it { @err[:status].should == 403 }
+    it 'throws an error' do
+      @err[:status].should == 403
+    end
+
+    it 'sets the WWW-Authenticate header in the response to error' do
+      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='insufficient_scope'"
+    end
   end
 
   context 'when authorization is not required' do
