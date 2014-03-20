@@ -18,7 +18,7 @@ module Grape::Middleware::Auth
     end
 
     def can_verify?(env)
-      path_info = env['PATH_INFO']
+      path_info = env['PATH_INFO'][/([^.]*).*/, 1]
       path_info.start_with?(options[:root]) && !path_info.end_with?(*options[:exclude])
     end
 

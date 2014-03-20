@@ -204,12 +204,9 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     context 'calling the excluded urls' do
-      %w(version ping).each do |url|
-        before do
-          get "/api/#{url}"
-        end
-
+      %w(version ping ping.json).each do |url|
         it 'succeeds' do
+          get "/api/#{url}"
           last_response.status.should == 200
         end
       end
