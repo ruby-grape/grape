@@ -21,6 +21,7 @@ Next Release
 
 #### Fixes
 
+* [#600](https://github.com/intridea/grape/pull/600): Do not use any Entity constant that is available in namespace as presenter - [@fuksito](https://github.com/fuksito)
 * [#590](https://github.com/intridea/grape/pull/590): Fix Issue Where Endpoint Param of Type Integer Cannot Set Values Array - [@xevix](https://github.com/xevix)
 * [#586](https://github.com/intridea/grape/pull/586): Do not repeat the same validation error messages - [@kiela](https://github.com/kiela)
 * [#508](https://github.com/intridea/grape/pull/508): Allow parameters, such as content encoding, in `content_type` - [@dm1try](https://github.com/dm1try).

@@ -332,7 +332,7 @@ module Grape
           entity_class ||= (settings[:representations] || {})[potential]
         end
 
-        entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity)
+        entity_class ||= object_instance.class.const_get(:Entity) if object_instance.class.const_defined?(:Entity) && object_instance.class.const_get(:Entity).respond_to?(:represent)
       end
 
       root = options.delete(:root)
