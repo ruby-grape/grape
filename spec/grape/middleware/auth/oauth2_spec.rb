@@ -175,4 +175,44 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
     end
   end
+
+  context 'when exclude is set to a string' do
+    def app
+      Rack::Builder.app do
+        use Grape::Middleware::Auth::OAuth2, token_class: 'FakeToken', root: '/api', exclude: 'version'
+        run lambda { |env| [200, {}, [(env['api.token'].token if env['api.token'])]] }
+      end
+    end
+
+    context 'calling the excluded url' do
+      before do
+        get '/api/version'
+      end
+
+      it 'succeeds' do
+        last_response.status.should == 200
+      end
+    end
+  end
+
+  context 'when exclude is set to an array' do
+    def app
+      Rack::Builder.app do
+        use Grape::Middleware::Auth::OAuth2, token_class: 'FakeToken', root: '/api', exclude: %w(version ping)
+        run lambda { |env| [200, {}, [(env['api.token'].token if env['api.token'])]] }
+      end
+    end
+
+    context 'calling the excluded urls' do
+      %w(version ping).each do |url|
+        before do
+          get "/api/#{url}"
+        end
+
+        it 'succeeds' do
+          last_response.status.should == 200
+        end
+      end
+    end
+  end
 end
