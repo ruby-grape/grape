@@ -28,13 +28,36 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
   end
 
+  shared_examples 'success to authenticate api' do
+    let(:access_token) { 'g123' }
+
+    it 'sets status code to 200' do
+      last_response.status.should == 200
+    end
+
+    it 'sets env["api.token"]' do
+      last_response.body.should == access_token
+    end
+  end
+
+  shared_examples 'fail to authenticate api' do
+    let(:error_code) { 401 }
+    let(:error_message) { "OAuth realm='OAuth API', error='invalid_grant'" }
+
+    it 'throws an error' do
+      @err[:status].should == error_code
+    end
+
+    it 'sets the WWW-Authenticate header in the response' do
+      @err[:headers]['WWW-Authenticate'].should == error_message
+    end
+  end
+
   context 'with the token in the query string' do
     context 'and a valid token' do
       before { get '/awesome?access_token=g123' }
 
-      it 'sets env["api.token"]' do
-        last_response.body.should == 'g123'
-      end
+      it_behaves_like 'success to authenticate api'
     end
 
     context 'and an invalid token' do
@@ -44,13 +67,7 @@ describe Grape::Middleware::Auth::OAuth2 do
         end
       end
 
-      it 'throws an error' do
-        @err[:status].should == 401
-      end
-
-      it 'sets the WWW-Authenticate header in the response' do
-        @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
-      end
+      it_behaves_like 'fail to authenticate api'
     end
   end
 
@@ -61,13 +78,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
     end
 
-    it 'throws an error' do
-      @err[:status].should == 401
-    end
-
-    it 'sets the WWW-Authenticate header in the response to error' do
-      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
-    end
+    it_behaves_like 'fail to authenticate api'
   end
 
   %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION).each do |head|
@@ -76,9 +87,7 @@ describe Grape::Middleware::Auth::OAuth2 do
         get '/awesome', {}, head => 'OAuth g123'
       end
 
-      it 'sets env["api.token"]' do
-        last_response.body.should == 'g123'
-      end
+      it_behaves_like 'success to authenticate api'
     end
   end
 
@@ -87,9 +96,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       post '/awesome', 'access_token' => 'g123'
     end
 
-    it 'sets env["api.token"]' do
-      last_response.body.should == 'g123'
-    end
+    it_behaves_like 'success to authenticate api'
   end
 
   context 'when accessing something outside its scope' do
@@ -99,12 +106,9 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
     end
 
-    it 'throws an error' do
-      @err[:status].should == 403
-    end
-
-    it 'sets the WWW-Authenticate header in the response to error' do
-      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='insufficient_scope'"
+    it_behaves_like 'fail to authenticate api' do
+      let(:error_code) { 403 }
+      let(:error_message) { "OAuth realm='OAuth API', error='insufficient_scope'" }
     end
   end
 
@@ -129,6 +133,45 @@ describe Grape::Middleware::Auth::OAuth2 do
 
       it 'sets env["api.token"]' do
         last_response.body.should == 'g123'
+      end
+    end
+  end
+
+  context 'when root is set' do
+    def app
+      Rack::Builder.app do
+        use Grape::Middleware::Auth::OAuth2, token_class: 'FakeToken', root: '/api'
+        run lambda { |env| [200, {}, [(env['api.token'].token if env['api.token'])]] }
+      end
+    end
+
+    context 'call outside of the root' do
+      before do
+        get '/awesome'
+      end
+
+      it 'succeeds' do
+        last_response.status.should == 200
+      end
+    end
+
+    context 'call inside root' do
+      context 'with valid token' do
+        before do
+          get '/api/awesome?access_token=g123'
+        end
+
+        it_behaves_like 'success to authenticate api'
+      end
+
+      context 'with an expired token' do
+        before do
+          @err = catch :error do
+            get '/api/awesome?access_token=e123'
+          end
+        end
+
+        it_behaves_like 'fail to authenticate api'
       end
     end
   end

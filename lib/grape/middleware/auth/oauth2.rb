@@ -8,12 +8,18 @@ module Grape::Middleware::Auth
         parameter: %w(bearer_token oauth_token access_token),
         accepted_headers: %w(HTTP_AUTHORIZATION X_HTTP_AUTHORIZATION X-HTTP_AUTHORIZATION REDIRECT_X_HTTP_AUTHORIZATION),
         header: [/Bearer (.*)/i, /OAuth (.*)/i],
-        required: true
+        required: true,
+        root: '/'
       }
     end
 
     def before
-      verify_token(token_parameter || token_header)
+      verify_token(token_parameter || token_header) if can_verify?(env)
+    end
+
+    def can_verify?(env)
+      path_info = env['PATH_INFO']
+      path_info.start_with?(options[:root])
     end
 
     def request
