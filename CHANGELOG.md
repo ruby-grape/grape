@@ -2,7 +2,7 @@ Next Release
 ============
 
 #### Features
-* [#558](https://github.com/intridea/grape/pull/558): Support lambda-based values for params - [@wpschallenger](https://github.com/wpschallenger)
+* [#558](https://github.com/intridea/grape/pull/558): Support lambda-based values for params - [@wpschallenger](https://github.com/wpschallenger).
 * [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
 * [#511](https://github.com/intridea/grape/pull/511): Added `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).
 * [#520](https://github.com/intridea/grape/pull/520): Use `default_error_status` to specify the default status code returned from `error!` - [@salimane](https://github.com/salimane).
@@ -13,7 +13,7 @@ Next Release
 * [#531](https://github.com/intridea/grape/pull/531): Helpers are now available to auth middleware, executing in the context of the endpoint - [@joelvh](https://github.com/joelvh).
 * [#540](https://github.com/intridea/grape/pull/540): Ruby 2.1.0 is now supported - [@salimane](https://github.com/salimane).
 * [#544](https://github.com/intridea/grape/pull/544): The `rescue_from` keyword now handles subclasses of exceptions by default - [@xevix](https://github.com/xevix).
-* [#545](https://github.com/intridea/grape/pull/545): Added `type` (Array or Hash) support to `requires`, `optional` and `group` - [@bwalex](https://github.com/bwalex).
+* [#545](https://github.com/intridea/grape/pull/545): Added `type` (`Array` or `Hash`) support to `requires`, `optional` and `group` - [@bwalex](https://github.com/bwalex).
 * [#550](https://github.com/intridea/grape/pull/550): Added possibility to define reusable params - [@dm1try](https://github.com/dm1try).
 * [#560](https://github.com/intridea/grape/pull/560): Use `Grape::Entity` documentation to define required and optional parameters with `requires using:` - [@reynardmh](https://github.com/reynardmh).
 * [#572](https://github.com/intridea/grape/pull/572): Added `documentation` support to `requires`, `optional` and `group` parameters - [@johnallen3d](https://github.com/johnallen3d).
@@ -21,9 +21,9 @@ Next Release
 
 #### Fixes
 
-* [#600](https://github.com/intridea/grape/pull/600): Do not use any Entity constant that is available in namespace as presenter - [@fuksito](https://github.com/fuksito)
-* [#590](https://github.com/intridea/grape/pull/590): Fix Issue Where Endpoint Param of Type Integer Cannot Set Values Array - [@xevix](https://github.com/xevix)
-* [#586](https://github.com/intridea/grape/pull/586): Do not repeat the same validation error messages - [@kiela](https://github.com/kiela)
+* [#600](https://github.com/intridea/grape/pull/600): Don't use an `Entity` constant that is available in the namespace as presenter - [@fuksito](https://github.com/fuksito).
+* [#590](https://github.com/intridea/grape/pull/590): Fix issue where endpoint param of type `Integer` cannot set values array - [@xevix](https://github.com/xevix).
+* [#586](https://github.com/intridea/grape/pull/586): Do not repeat the same validation error messages - [@kiela](https://github.com/kiela).
 * [#508](https://github.com/intridea/grape/pull/508): Allow parameters, such as content encoding, in `content_type` - [@dm1try](https://github.com/dm1try).
 * [#492](https://github.com/intridea/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values - [@Antti](https://github.com/Antti).
 * [#495](https://github.com/intridea/grape/pull/495): Fixed `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
@@ -35,7 +35,7 @@ Next Release
 * [#549](https://github.com/intridea/grape/pull/549): Fixed handling of invalid version headers to return 406 if a header cannot be parsed - [@bwalex](https://github.com/bwalex).
 * [#557](https://github.com/intridea/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 * [#585](https://github.com/intridea/grape/pull/585): Fix after boot thread-safety issue - [@etehtsea](https://github.com/etehtsea).
-* [#587](https://github.com/intridea/grape/pull/587): Fix oauth2 middleware compatibility with draft-ietf-oauth-v2-31 spec - [@etehtsea](https://github.com/etehtsea).
+* [#587](https://github.com/intridea/grape/pull/587): Fix oauth2 middleware compatibility with [draft-ietf-oauth-v2-31](http://tools.ietf.org/html/draft-ietf-oauth-v2-31) spec - [@etehtsea](https://github.com/etehtsea).
 
 0.6.1 (10/19/2013)
 ==================
