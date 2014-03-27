@@ -562,35 +562,54 @@ module Grape
     # will return an HTTP 405 response for any HTTP method that the resource
     # cannot handle.
     def add_head_not_allowed_methods_and_options_methods
-      allowed_methods = Hash.new { |h, k| h[k] = [] }
+      methods_per_path = {}
       self.class.endpoints.each do |endpoint|
-        app = endpoint.endpoints ? endpoint.options[:app] : self.class
-        (endpoint.endpoints || [endpoint]).each do |e|
-          e.options[:path].each do |path|
-            allowed_methods[[app, path]] |= e.options[:method]
-          end
+        routes = endpoint.routes
+        routes.each do |route|
+          methods_per_path[route.route_path] ||= []
+          methods_per_path[route.route_path] << route.route_method
         end
       end
-      allowed_methods.each do |(app, path), methods|
-        if methods.include?('GET') && !methods.include?('HEAD') && !self.class.settings[:do_not_route_head]
-          methods = methods | ['HEAD']
-        end
-        allow_header = (['OPTIONS'] | methods).join(', ')
-        if !methods.include?('OPTIONS') && !self.class.settings[:do_not_route_options]
-          app.options(path, {}) do
+
+      # The paths we collected are prepared (cf. Path#prepare), so they
+      # contain already versioning information when using path versioning.
+      # Disable versioning so adding a route won't prepend versioning
+      # informations again.
+      without_versioning do
+        methods_per_path.each do |path, methods|
+          allowed_methods = methods.dup
+          unless self.class.settings[:do_not_route_head]
+            if allowed_methods.include?('GET')
+              allowed_methods = allowed_methods | ['HEAD']
+            end
+          end
+
+          allow_header = (['OPTIONS'] | allowed_methods).join(', ')
+          unless self.class.settings[:do_not_route_options]
+            unless allowed_methods.include?('OPTIONS')
+              self.class.options(path, {}) do
+                header 'Allow', allow_header
+                status 204
+                ''
+              end
+            end
+          end
+
+          not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+          not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
+          self.class.route(not_allowed_methods, path) do
             header 'Allow', allow_header
-            status 204
+            status 405
             ''
           end
         end
-        not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - methods
-        not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
-        app.route(not_allowed_methods, path) do
-          header 'Allow', allow_header
-          status 405
-          ''
-        end
       end
+    end
+
+    def without_versioning(&block)
+      self.class.settings.push(version: nil, version_options: nil)
+      yield
+      self.class.settings.pop
     end
 
     # This module extends user defined helpers
