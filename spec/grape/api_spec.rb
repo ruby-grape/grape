@@ -1948,6 +1948,13 @@ describe Grape::API do
         }
     ]
     end
+    it 'allows to set the type attribute on :group element' do
+      subject.params do
+        group :foo, type: Array do
+          optional :bar
+        end
+      end
+    end
     it 'parses parameters when no description is given' do
       subject.params do
         requires :one_param, desc: "one param"

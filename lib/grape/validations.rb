@@ -132,8 +132,8 @@ module Grape
           push_declared_params(attrs)
       end
 
-      def group(element, &block)
-        requires(element, &block)
+      def group(*attrs, &block)
+        requires(*attrs, &block)
       end
 
       def params(params)

@@ -36,6 +36,7 @@ Next Release
 * [#557](https://github.com/intridea/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 * [#585](https://github.com/intridea/grape/pull/585): Fix after boot thread-safety issue - [@etehtsea](https://github.com/etehtsea).
 * [#587](https://github.com/intridea/grape/pull/587): Fix oauth2 middleware compatibility with [draft-ietf-oauth-v2-31](http://tools.ietf.org/html/draft-ietf-oauth-v2-31) spec - [@etehtsea](https://github.com/etehtsea).
+* [#610](https://github.com/intridea/grape/pull/610): Fixed group keyword was not working with type parameter - [@klausmeyer](https://github.com/klausmeyer/).
 
 0.6.1 (10/19/2013)
 ==================
