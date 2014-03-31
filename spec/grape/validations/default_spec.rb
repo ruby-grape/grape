@@ -54,6 +54,16 @@ describe Grape::Validations::DefaultValidator do
         get '/group' do
           { foo_bar: params[:foo][:bar] }
         end
+
+        params do
+          optional :array, type: Array do
+            requires :name
+            optional :with_default, default: 'default'
+          end
+        end
+        get '/array' do
+          { array: params[:array] }
+        end
       end
     end
   end
@@ -102,6 +112,12 @@ describe Grape::Validations::DefaultValidator do
     get('/group')
     last_response.status.should == 200
     last_response.body.should == { foo_bar: 'foo-bar' }.to_json
+  end
+
+  it 'sets default values for grouped arrays' do
+    get('/array?array[][name]=name&array[][name]=name2&array[][with_default]=bar2')
+    last_response.status.should == 200
+    last_response.body.should == { array: [{ name: "name", with_default: "default" }, { name: "name2", with_default: "bar2" }] }.to_json
   end
 
 end

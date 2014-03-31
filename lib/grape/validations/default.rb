@@ -16,7 +16,7 @@ module Grape
         attrs.each do |resource_params, attr_name|
           if resource_params[attr_name].nil?
             validate_param!(attr_name, resource_params)
-            params[parent_element] = resource_params if parent_element
+            params[parent_element] = resource_params if parent_element && params[parent_element].nil?
           end
         end
       end
