@@ -78,9 +78,9 @@ end
 
 This caused the ambiguity and unexpected errors described in [#543](https://github.com/intridea/Grape/issues/543).
 
-In Grape 0.6.2, the `group`, `optional` and `requires` keywords take an additional `type` attribute which defaults to `Array`. This means that without a `type` attribute, these nested parameters will no longer accept a single hash, only an array (of hashes).
+In Grape 0.7.0, the `group`, `optional` and `requires` keywords take an additional `type` attribute which defaults to `Array`. This means that without a `type` attribute, these nested parameters will no longer accept a single hash, only an array (of hashes).
 
-Whereas in 0.6.1 the API above accepted the following json, it no longer does in 0.6.2.
+Whereas in 0.6.1 the API above accepted the following json, it no longer does in 0.7.0.
 
 ```json
 {
