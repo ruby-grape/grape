@@ -2161,6 +2161,12 @@ describe Grape::API do
       subject.post '/'
       subject.endpoints.size.should == 2
     end
+
+    it "should not duplicate routes" do
+      subject.get "/test_route"
+      subject.get "/test_route"
+      subject.endpoints.size.should == 1
+    end
   end
 
   describe '.compile' do

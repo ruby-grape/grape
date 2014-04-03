@@ -352,10 +352,20 @@ module Grape
           path: paths,
           route_options: (@namespace_description || {}).deep_merge(@last_description || {}).deep_merge(route_options || {})
         }
-        endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)
+        endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block) if unique_endpoint(endpoints, endpoint_options)
 
         @last_description = nil
         reset_validations!
+      end
+
+      def unique_endpoint(endpoints, endpoint_options)
+        endpoints.each_with_index do |endpoint, n|
+          if n == 0
+            endpoint_options[:method] = [endpoint_options[:method]]
+            endpoint_options[:path] = [endpoint_options[:path]]
+          end
+          return false if endpoint.options == endpoint_options
+        end
       end
 
       def before(&block)
