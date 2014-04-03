@@ -166,7 +166,9 @@ run Rack::Cascade.new [API, Web]
 
 ### Rails
 
-Place API files into `app/api` and modify `application.rb`.
+Place API files into `app/api`. Rails expects a subdirectory that matches the name of the Ruby module and a file name that matches the name of the class. In our example, the file name location and directory for `Twitter::API` should be `app/api/twitter/api.rb`.
+
+Modify `application.rb`:
 
 ```ruby
 config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
