@@ -3,6 +3,10 @@ Next Release
 
 * Your contribution here.
 
+#### Fixes
+
+* [#614](https://github.com/intridea/grape/pull/614): Params with `nil` value are now refused by `RegexpValidator` - [@dm1try](https://github.com/dm1try).
+
 0.7.0 (4/2/2013)
 =================
 

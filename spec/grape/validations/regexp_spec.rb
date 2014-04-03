@@ -20,9 +20,16 @@ describe Grape::Validations::RegexpValidator do
     ValidationsSpec::RegexpValidatorSpec::API
   end
 
-  it 'refuses invalid input' do
-    get '/', name: "invalid name"
-    last_response.status.should == 400
+  context 'invalid input' do
+    it 'refuses inapppopriate' do
+      get '/', name: "invalid name"
+      last_response.status.should == 400
+    end
+
+    it 'refuses nil' do
+      get '/', name: nil
+      last_response.status.should == 400
+    end
   end
 
   it 'accepts valid input' do
