@@ -513,6 +513,22 @@ describe Grape::Endpoint do
       end
     end
 
+    describe "hash array with default value" do
+      it do
+        subject.params do
+          optional :my_simple_value, type: String
+          optional :my_array, type: Array do
+            requires :foo, default: "bar"
+          end
+        end
+        subject.post("/array") do
+          params[:my_simple_value].should == nil
+          params[:my_array].should == nil
+        end
+
+        post "/array"
+      end
+    end
   end
 
   describe '#error!' do
