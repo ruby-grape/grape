@@ -514,7 +514,7 @@ describe Grape::Endpoint do
     end
 
     describe "hash array with default value" do
-      it do
+      it "is nil when value is not provided" do
         subject.params do
           optional :my_simple_value, type: String
           optional :my_array, type: Array do
@@ -522,11 +522,15 @@ describe Grape::Endpoint do
           end
         end
         subject.post("/array") do
-          params[:my_simple_value].should == nil
-          params[:my_array].should == nil
+          {
+            my_array: params[:my_array].nil?,
+            my_simple_value: params[:my_simple_value].nil?
+          }.to_json
         end
 
         post "/array"
+
+        expect(JSON.parse(last_response.body)).to eq(my_array: true, my_simple_value: true)
       end
     end
   end
