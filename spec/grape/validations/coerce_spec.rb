@@ -30,8 +30,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/single', age: '43a'
-        last_response.status.should == 400
-        last_response.body.should == '年龄格式不正确'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('年龄格式不正确')
       end
 
       it 'gives an english fallback error when default locale message is blank' do
@@ -44,8 +44,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/single', age: '43a'
-        last_response.status.should == 400
-        last_response.body.should == 'age is invalid'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('age is invalid')
       end
 
     end
@@ -59,12 +59,12 @@ describe Grape::Validations::CoerceValidator do
       end
 
       get '/single', int: '43a'
-      last_response.status.should == 400
-      last_response.body.should == 'int is invalid'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('int is invalid')
 
       get '/single', int: '43'
-      last_response.status.should == 200
-      last_response.body.should == 'int works'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('int works')
     end
 
     it 'error on malformed input (Array)' do
@@ -76,12 +76,12 @@ describe Grape::Validations::CoerceValidator do
       end
 
       get 'array', ids: ['1', '2', 'az']
-      last_response.status.should == 400
-      last_response.body.should == 'ids is invalid'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('ids is invalid')
 
       get 'array', ids: ['1', '2', '890']
-      last_response.status.should == 200
-      last_response.body.should == 'array int works'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('array int works')
     end
 
     context 'complex objects' do
@@ -102,12 +102,12 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/user', user: "32"
-        last_response.status.should == 400
-        last_response.body.should == 'user is invalid'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('user is invalid')
 
         get '/user', user: { id: 32, name: 'Bob' }
-        last_response.status.should == 200
-        last_response.body.should == 'complex works'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('complex works')
       end
     end
 
@@ -121,8 +121,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/int', int: "45"
-        last_response.status.should == 200
-        last_response.body.should == 'Fixnum'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum')
       end
 
       it 'Array of Integers' do
@@ -134,8 +134,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/array', arry: ['1', '2', '3']
-        last_response.status.should == 200
-        last_response.body.should == 'Fixnum'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum')
       end
 
       it 'Array of Bools' do
@@ -147,8 +147,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get 'array', arry: [1, 0]
-        last_response.status.should == 200
-        last_response.body.should == 'TrueClass'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
       end
 
       it 'Bool' do
@@ -160,20 +160,20 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/bool', bool: 1
-        last_response.status.should == 200
-        last_response.body.should == 'TrueClass'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
 
         get '/bool', bool: 0
-        last_response.status.should == 200
-        last_response.body.should == 'FalseClass'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('FalseClass')
 
         get '/bool', bool: 'false'
-        last_response.status.should == 200
-        last_response.body.should == 'FalseClass'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('FalseClass')
 
         get '/bool', bool: 'true'
-        last_response.status.should == 200
-        last_response.body.should == 'TrueClass'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
       end
 
       it 'file' do
@@ -185,8 +185,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
-        last_response.status.should == 201
-        last_response.body.should == File.basename(__FILE__).to_s
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
       end
 
       it 'Nests integers' do
@@ -200,8 +200,8 @@ describe Grape::Validations::CoerceValidator do
         end
 
         get '/int', integers: { int: "45" }
-        last_response.status.should == 200
-        last_response.body.should == 'Fixnum'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum')
       end
     end
   end

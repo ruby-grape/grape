@@ -8,11 +8,11 @@ describe Grape::Exceptions::MissingMimeType do
     end
 
     it "contains the problem in the message" do
-      error.message.should include "missing mime type for new_json"
+      expect(error.message).to include "missing mime type for new_json"
     end
 
     it "contains the resolution in the message" do
-      error.message.should include "or add your own with content_type :new_json, 'application/new_json' "
+      expect(error.message).to include "or add your own with content_type :new_json, 'application/new_json' "
     end
   end
 end

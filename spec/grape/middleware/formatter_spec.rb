@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
   subject { Grape::Middleware::Formatter.new(app) }
-  before { subject.stub(:dup).and_return(subject) }
+  before { allow(subject).to receive(:dup).and_return(subject) }
 
   let(:app) { lambda { |env| [200, {}, [@body || { "foo" => "bar" }]] } }
 
@@ -10,7 +10,7 @@ describe Grape::Middleware::Formatter do
     it 'looks at the bodies for possibly serializable data' do
       @body = { "abc" => "def" }
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      bodies.each { |b| b.should == MultiJson.dump(@body) }
+      bodies.each { |b| expect(b).to eq(MultiJson.dump(@body)) }
     end
 
     it 'calls #to_json since default format is json' do
@@ -21,7 +21,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').last.each { |b| b.should == '"bar"' }
+      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').last.each { |b| expect(b).to eq('"bar"') }
     end
 
     it 'calls #to_json if the content type is jsonapi' do
@@ -32,7 +32,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').last.each { |b| b.should == '{"foos":[{"bar":"baz"}] }' }
+      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
     end
 
     it 'calls #to_xml if the content type is xml' do
@@ -43,18 +43,18 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').last.each { |b| b.should == '<bar/>' }
+      subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').last.each { |b| expect(b).to eq('<bar/>') }
     end
   end
 
   context 'error handling' do
     let(:formatter) { double(:formatter) }
     before do
-      Grape::Formatter::Base.stub(:formatter_for) { formatter }
+      allow(Grape::Formatter::Base).to receive(:formatter_for) { formatter }
     end
 
     it 'rescues formatter-specific exceptions' do
-      formatter.stub(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
+      allow(formatter).to receive(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
 
       expect {
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
@@ -62,7 +62,7 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'does not rescue other exceptions' do
-      formatter.stub(:call) { raise StandardError }
+      allow(formatter).to receive(:call) { raise StandardError }
 
       expect {
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
@@ -74,94 +74,94 @@ describe Grape::Middleware::Formatter do
 
     it 'uses the xml extension if one is provided' do
       subject.call('PATH_INFO' => '/info.xml')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'uses the json extension if one is provided' do
       subject.call('PATH_INFO' => '/info.json')
-      subject.env['api.format'].should == :json
+      expect(subject.env['api.format']).to eq(:json)
     end
 
     it 'uses the format parameter if one is provided' do
       subject.call('PATH_INFO' => '/info', 'QUERY_STRING' => 'format=json')
-      subject.env['api.format'].should == :json
+      expect(subject.env['api.format']).to eq(:json)
       subject.call('PATH_INFO' => '/info', 'QUERY_STRING' => 'format=xml')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'uses the default format if none is provided' do
       subject.call('PATH_INFO' => '/info')
-      subject.env['api.format'].should == :txt
+      expect(subject.env['api.format']).to eq(:txt)
     end
 
     it 'uses the requested format if provided in headers' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json')
-      subject.env['api.format'].should == :json
+      expect(subject.env['api.format']).to eq(:json)
     end
 
     it 'uses the file extension format if provided before headers' do
       subject.call('PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json')
-      subject.env['api.format'].should == :txt
+      expect(subject.env['api.format']).to eq(:txt)
     end
   end
 
   context 'accept header detection' do
     it 'detects from the Accept header' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'looks for case-indifferent headers' do
       subject.call('PATH_INFO' => '/info', 'http_accept' => 'application/xml')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'uses quality rankings to determine formats' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=0.3,application/xml; q=1.0')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=1.0,application/xml; q=0.3')
-      subject.env['api.format'].should == :json
+      expect(subject.env['api.format']).to eq(:json)
     end
 
     it 'handles quality rankings mixed with nothing' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'parses headers with other attributes' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7')
-      subject.env['api.format'].should == :json
+      expect(subject.env['api.format']).to eq(:json)
     end
 
     it 'parses headers with vendor and api version' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test-v1+xml')
-      subject.env['api.format'].should == :xml
+      expect(subject.env['api.format']).to eq(:xml)
     end
 
     it 'parses headers with symbols as hash keys' do
       subject.call('PATH_INFO' => '/info', 'http_accept' => 'application/xml', system_time: '091293')
-      subject.env[:system_time].should == '091293'
+      expect(subject.env[:system_time]).to eq('091293')
     end
   end
 
   context 'content-type' do
     it 'is set for json' do
       _, headers, _ = subject.call('PATH_INFO' => '/info.json')
-      headers['Content-type'].should == 'application/json'
+      expect(headers['Content-type']).to eq('application/json')
     end
     it 'is set for xml' do
       _, headers, _ = subject.call('PATH_INFO' => '/info.xml')
-      headers['Content-type'].should == 'application/xml'
+      expect(headers['Content-type']).to eq('application/xml')
     end
     it 'is set for txt' do
       _, headers, _ = subject.call('PATH_INFO' => '/info.txt')
-      headers['Content-type'].should == 'text/plain'
+      expect(headers['Content-type']).to eq('text/plain')
     end
     it 'is set for custom' do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = 'application/x-custom'
       _, headers, _ = subject.call('PATH_INFO' => '/info.custom')
-      headers['Content-type'].should == 'application/x-custom'
+      expect(headers['Content-type']).to eq('application/x-custom')
     end
   end
 
@@ -171,17 +171,17 @@ describe Grape::Middleware::Formatter do
       subject.options[:content_types][:custom] = "don't care"
       subject.options[:formatters][:custom] = lambda { |obj, env| 'CUSTOM FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
-      body.body.should == ['CUSTOM FORMAT']
+      expect(body.body).to eq(['CUSTOM FORMAT'])
     end
     it 'uses default json formatter' do
       @body = ['blah']
       _, _, body = subject.call('PATH_INFO' => '/info.json')
-      body.body.should == ['["blah"]']
+      expect(body.body).to eq(['["blah"]'])
     end
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = lambda { |obj, env| 'CUSTOM JSON FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.json')
-      body.body.should == ['CUSTOM JSON FORMAT']
+      expect(body.body).to eq(['CUSTOM JSON FORMAT'])
     end
   end
 
@@ -198,8 +198,8 @@ describe Grape::Middleware::Formatter do
               'rack.input' => io,
               'CONTENT_LENGTH' => io.length
             )
-            subject.env['rack.request.form_hash']['is_boolean'].should be true
-            subject.env['rack.request.form_hash']['string'].should == 'thing'
+            expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
+            expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
           end
         end
       end
@@ -212,8 +212,8 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
-        subject.env['rack.request.form_hash']['is_boolean'].should be true
-        subject.env['rack.request.form_hash']['string'].should == 'thing'
+        expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
+        expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
       it "rewinds IO" do
         io = StringIO.new('{"is_boolean":true,"string":"thing"}')
@@ -225,8 +225,8 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
-        subject.env['rack.request.form_hash']['is_boolean'].should be true
-        subject.env['rack.request.form_hash']['string'].should == 'thing'
+        expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
+        expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
       it 'parses the body from an xml #{method} and copies values into rack.request.from_hash' do
         io = StringIO.new('<thing><name>Test</name></thing>')
@@ -237,7 +237,7 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'CONTENT_LENGTH' => io.length
         )
-        subject.env['rack.request.form_hash']['thing']['name'].should == 'Test'
+        expect(subject.env['rack.request.form_hash']['thing']['name']).to eq('Test')
       end
       [Rack::Request::FORM_DATA_MEDIA_TYPES, Rack::Request::PARSEABLE_DATA_MEDIA_TYPES].flatten.each do |content_type|
         it "ignores #{content_type}" do
@@ -249,7 +249,7 @@ describe Grape::Middleware::Formatter do
             'rack.input' => io,
             'CONTENT_LENGTH' => io.length
           )
-          subject.env['rack.request.form_hash'].should be_nil
+          expect(subject.env['rack.request.form_hash']).to be_nil
         end
       end
     end

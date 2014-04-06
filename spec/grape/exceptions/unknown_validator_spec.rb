@@ -8,7 +8,7 @@ describe Grape::Exceptions::UnknownValidator do
     end
 
     it "contains the problem in the message" do
-      error.message.should include(
+      expect(error.message).to include(
         "unknown validator: gt_10"
       )
     end

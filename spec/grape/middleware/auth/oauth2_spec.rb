@@ -33,7 +33,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       before { get '/awesome?access_token=g123' }
 
       it 'sets env["api.token"]' do
-        last_response.body.should == 'g123'
+        expect(last_response.body).to eq('g123')
       end
     end
 
@@ -45,11 +45,11 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
 
       it 'throws an error' do
-        @err[:status].should == 401
+        expect(@err[:status]).to eq(401)
       end
 
       it 'sets the WWW-Authenticate header in the response' do
-        @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
+        expect(@err[:headers]['WWW-Authenticate']).to eq("OAuth realm='OAuth API', error='invalid_grant'")
       end
     end
   end
@@ -62,11 +62,11 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     it 'throws an error' do
-      @err[:status].should == 401
+      expect(@err[:status]).to eq(401)
     end
 
     it 'sets the WWW-Authenticate header in the response to error' do
-      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='invalid_grant'"
+      expect(@err[:headers]['WWW-Authenticate']).to eq("OAuth realm='OAuth API', error='invalid_grant'")
     end
   end
 
@@ -77,7 +77,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
 
       it 'sets env["api.token"]' do
-        last_response.body.should == 'g123'
+        expect(last_response.body).to eq('g123')
       end
     end
   end
@@ -88,7 +88,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     it 'sets env["api.token"]' do
-      last_response.body.should == 'g123'
+      expect(last_response.body).to eq('g123')
     end
   end
 
@@ -100,11 +100,11 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     it 'throws an error' do
-      @err[:status].should == 403
+      expect(@err[:status]).to eq(403)
     end
 
     it 'sets the WWW-Authenticate header in the response to error' do
-      @err[:headers]['WWW-Authenticate'].should == "OAuth realm='OAuth API', error='insufficient_scope'"
+      expect(@err[:headers]['WWW-Authenticate']).to eq("OAuth realm='OAuth API', error='insufficient_scope'")
     end
   end
 
@@ -120,7 +120,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       before { post '/awesome' }
 
       it 'succeeds anyway' do
-        last_response.status.should == 200
+        expect(last_response.status).to eq(200)
       end
     end
 
@@ -128,7 +128,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       before { get '/awesome?access_token=g123' }
 
       it 'sets env["api.token"]' do
-        last_response.body.should == 'g123'
+        expect(last_response.body).to eq('g123')
       end
     end
   end
