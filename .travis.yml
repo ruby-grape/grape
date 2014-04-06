@@ -1,9 +1,19 @@
 language: ruby
+
 cache: bundler
-before_install:
-  - gem install bundler -v '= 1.5.1'
+
 rvm:
+  - ruby-head
+  - 2.1.1
   - 2.1.0
   - 2.0.0
   - 1.9.3
   - jruby-19mode
+  - jruby-head
+  - rbx-2.1
+  - rbx-2.2
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head

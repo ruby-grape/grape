@@ -9,7 +9,6 @@ require 'bundler'
 Bundler.setup :default, :test
 
 require 'rack/test'
-require 'pry'
 require 'base64'
 require 'cookiejar'
 require 'json'
