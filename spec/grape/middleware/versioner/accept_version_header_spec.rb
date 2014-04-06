@@ -8,7 +8,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     @options = {
       version_options: {
         using: :accept_version_header
-      },
+      }
     }
   end
 

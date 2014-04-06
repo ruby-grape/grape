@@ -7,7 +7,7 @@ group :development, :test do
   gem 'rack-test', '~> 0.6.2', require: 'rack/test'
   gem 'cookiejar'
   gem 'rack-contrib'
-  gem 'rubocop', '~> 0.15.0'
+  gem 'rubocop', '~> 0.20.1'
 end
 
 platforms :rbx do

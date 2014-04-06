@@ -46,7 +46,7 @@ module Grape
       #
       # @param key [Symbol] key to look for in hash frames
       # @return true if key exists, false otherwise
-      def has_key?(key)
+      def key?(key)
         (@stack.length - 1).downto(0).each do |i|
           return true if @stack[i].key? key
         end

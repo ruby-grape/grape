@@ -6,9 +6,9 @@ module Grape
       attr_accessor :param
 
       def initialize(args = {})
-        raise "Param is missing:" unless args.has_key? :param
+        raise "Param is missing:" unless args.key? :param
         @param = args[:param]
-        args[:message] = translate_message(args[:message_key]) if args.has_key? :message_key
+        args[:message] = translate_message(args[:message_key]) if args.key? :message_key
         super
       end
 

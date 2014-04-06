@@ -99,7 +99,7 @@ module Grape
           options ||= {}
           options = { using: :path }.merge(options)
 
-          raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.has_key?(:vendor)
+          raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
           @versions = versions | args
           nest(block) do
@@ -159,7 +159,7 @@ module Grape
       end
 
       def error_formatter(format, options)
-        if options.is_a?(Hash) && options.has_key?(:with)
+        if options.is_a?(Hash) && options.key?(:with)
           formatter = options[:with]
         else
           formatter = options
@@ -212,7 +212,7 @@ module Grape
         end
 
         options = args.last.is_a?(Hash) ? args.pop : {}
-        handler ||= proc { options[:with] } if options.has_key?(:with)
+        handler ||= proc { options[:with] } if options.key?(:with)
 
         handler_type = !!options[:rescue_subclasses] ? :rescue_handlers : :base_only_rescue_handlers
         imbue handler_type, Hash[args.map { |arg| [arg, handler] }]
@@ -472,7 +472,7 @@ module Grape
 
       def cascade(value = nil)
         if value.nil?
-          settings.has_key?(:cascade) ? !!settings[:cascade] : true
+          settings.key?(:cascade) ? !!settings[:cascade] : true
         else
           set(:cascade, value)
         end
@@ -548,8 +548,8 @@ module Grape
     # errors from reaching upstream. This is effectivelly done by unsetting
     # X-Cascade. Default :cascade is true.
     def cascade?
-      return !!self.class.settings[:cascade] if self.class.settings.has_key?(:cascade)
-      return !!self.class.settings[:version_options][:cascade] if self.class.settings[:version_options] && self.class.settings[:version_options].has_key?(:cascade)
+      return !!self.class.settings[:cascade] if self.class.settings.key?(:cascade)
+      return !!self.class.settings[:version_options][:cascade] if self.class.settings[:version_options] && self.class.settings[:version_options].key?(:cascade)
       true
     end
 
@@ -579,9 +579,7 @@ module Grape
         methods_per_path.each do |path, methods|
           allowed_methods = methods.dup
           unless self.class.settings[:do_not_route_head]
-            if allowed_methods.include?('GET')
-              allowed_methods = allowed_methods | ['HEAD']
-            end
+            allowed_methods |= ['HEAD'] if allowed_methods.include?('GET')
           end
 
           allow_header = (['OPTIONS'] | allowed_methods).join(', ')

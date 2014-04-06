@@ -19,7 +19,7 @@ module Grape
       def validate!(params)
         attributes = AttributesIterator.new(self, @scope, params)
         attributes.each do |resource_params, attr_name|
-          if @required || resource_params.has_key?(attr_name)
+          if @required || resource_params.key?(attr_name)
             validate_param!(attr_name, resource_params)
           end
         end
@@ -42,8 +42,6 @@ module Grape
           end
         end
       end
-
-      private
 
       def self.convert_to_short_name(klass)
         ret = klass.name.gsub(/::/, '/')
@@ -250,7 +248,7 @@ module Grape
         @api.document_attribute(full_attrs, doc_attrs)
 
         # Validate for presence before any other validators
-        if validations.has_key?(:presence) && validations[:presence]
+        if validations.key?(:presence) && validations[:presence]
           validate('presence', validations[:presence], attrs, doc_attrs)
           validations.delete(:presence)
         end
@@ -258,7 +256,7 @@ module Grape
         # Before we run the rest of the validators, lets handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        if validations.has_key? :coerce
+        if validations.key? :coerce
           validate('coerce', validations[:coerce], attrs, doc_attrs)
           validations.delete(:coerce)
         end

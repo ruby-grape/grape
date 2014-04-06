@@ -81,8 +81,8 @@ describe Grape::Validations do
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
-            required_field: { type: String },
-            optional_field: { type: String }
+          required_field: { type: String },
+          optional_field: { type: String }
         }
         subject.params do
           requires :all, except: :optional_field, using: documentation
@@ -116,8 +116,8 @@ describe Grape::Validations do
     context 'requires :none using Grape::Entity documentation' do
       def define_requires_none
         documentation = {
-            required_field: { type: String },
-            optional_field: { type: String }
+          required_field: { type: String },
+          optional_field: { type: String }
         }
         subject.params do
           requires :none, except: :required_field, using: documentation

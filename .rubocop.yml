@@ -1,5 +1,5 @@
 AllCops:
-  Excludes:
+  Exclude:
     - vendor/**
     - bin/**
 
@@ -22,11 +22,6 @@ CollectionMethods:
 
 Encoding:
   # no need to always specify encoding
-  Enabled: false
-
-HashMethods:
-  # key? instead of has_key?
-  # value? instead of has_value?
   Enabled: false
 
 StringLiterals:
@@ -68,3 +63,8 @@ WordArray:
 CyclomaticComplexity:
   Enabled: false
 
+DoubleNegation:
+  Enabled: false
+
+PredicateName:
+  Enabled: false

@@ -60,7 +60,7 @@ module Grape
           elsif strict?
             throw :error, status: 406, headers: error_headers, message: '406 Not Acceptable'
           # If all acceptable content types specify a vendor or version that doesn't exist:
-          elsif header.values.all? { |header_value| has_vendor?(header_value) || has_version?(header_value) }
+          elsif header.values.all? { |header_value| has_vendor?(header_value) || version?(header_value) }
             throw :error, status: 406, headers: error_headers, message: 'API vendor or version not found.'
           end
         end
@@ -102,7 +102,7 @@ module Grape
         # of routes (see [Rack::Mount](https://github.com/josh/rack-mount) for more information). To prevent
         # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
-          if options[:version_options] && options[:version_options].has_key?(:cascade)
+          if options[:version_options] && options[:version_options].key?(:cascade)
             !!options[:version_options][:cascade]
           else
             true
@@ -122,7 +122,7 @@ module Grape
 
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets an API version
-        def has_version?(media_type)
+        def version?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type media_type
           subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
         end

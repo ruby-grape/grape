@@ -52,7 +52,7 @@ module Grape
     end
 
     def require_option(options, key)
-      raise Grape::Exceptions::MissingOption.new(key) unless options.has_key?(key)
+      raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
     end
 
     def method_name
@@ -78,8 +78,8 @@ module Grape
           end
           methods.each do |method|
             route_set.add_route(self, {
-              path_info: route.route_compiled,
-              request_method: method,
+                                  path_info: route.route_compiled,
+                                  request_method: method
             },  route_info: route)
           end
         end
@@ -105,7 +105,7 @@ module Grape
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
-          named_params = regex.named_captures.map { |nc| nc[0] } - %w{ version format }
+          named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
           named_params.each { |named_param| path_params[named_param] = "" }
           # route parameters declared via desc or appended to the api declaration
           route_params = (options[:route_options][:params] || {})
@@ -118,9 +118,8 @@ module Grape
             method: request_method,
             path: prepared_path,
             params: path_params,
-            compiled: path,
-          )
-          )
+            compiled: path
+          ))
         end
       end
       routes

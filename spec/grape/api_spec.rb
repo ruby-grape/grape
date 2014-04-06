@@ -1823,7 +1823,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { description: route.route_description, foo: route.route_foo, params: route.route_params }
       }.should eq [
-        { description: "ns second", foo: "bar", params: {} },
+        { description: "ns second", foo: "bar", params: {} }
     ]
     end
     it 'includes details' do
@@ -1832,7 +1832,7 @@ describe Grape::API do
       subject.routes.map { |route|
         { description: route.route_description, details: route.route_details, params: route.route_params }
       }.should eq [
-        { description: "method", details: "method details", params: {} },
+        { description: "method", details: "method details", params: {} }
     ]
     end
     it 'describes a method with parameters' do

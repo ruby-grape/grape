@@ -1,6 +1,9 @@
 Next Release
 ============
 
+#### Features
+
+* [#617](https://github.com/intridea/grape/pull/617): Running tests on Ruby 2.1.1, Rubinius 2.1 and 2.2, Ruby and JRuby HEAD - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
@@ -12,6 +15,7 @@ Next Release
 =================
 
 #### Features
+
 * [#558](https://github.com/intridea/grape/pull/558): Support lambda-based values for params - [@wpschallenger](https://github.com/wpschallenger).
 * [#510](https://github.com/intridea/grape/pull/510): Support lambda-based default values for params - [@myitcv](https://github.com/myitcv).
 * [#511](https://github.com/intridea/grape/pull/511): Added `required` option for OAuth2 middleware - [@bcm](https://github.com/bcm).

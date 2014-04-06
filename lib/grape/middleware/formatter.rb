@@ -130,14 +130,14 @@ module Grape
         accept = headers['accept']
         return [] unless accept
 
-        accept_into_mime_and_quality = %r(
+        accept_into_mime_and_quality = %r{
           (
             \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
           (?:
            (?:;[^,]*?)?       # optionally multiple formats in a row
            ;\s*q=([\d.]+)     # optional "quality" preference (eg q=0.5)
           )?
-        )x
+        }x
 
         vendor_prefix_pattern = /vnd\.[^+]+\+/
 

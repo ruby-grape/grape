@@ -12,8 +12,8 @@ describe Grape::Endpoint do
       p = proc {}
       expect {
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
-          path: '/',
-          method: :get
+                              path: '/',
+                              method: :get
         }, &p)
       }.not_to raise_error
     end
@@ -80,10 +80,10 @@ describe Grape::Endpoint do
       subject.get('/get/cookies') do
         cookies['my-awesome-cookie1'] = 'is cool'
         cookies['my-awesome-cookie2'] = {
-            value: 'is cool too',
-            domain: 'my.example.com',
-            path: '/',
-            secure: true,
+          value: 'is cool too',
+          domain: 'my.example.com',
+          path: '/',
+          secure: true
         }
         cookies[:cookie3] = 'symbol'
         cookies['cookie4'] = 'secret code here'

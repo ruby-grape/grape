@@ -8,8 +8,8 @@ describe Grape::Middleware::Versioner::Header do
     @options = {
       version_options: {
         using: :header,
-        vendor: 'vendor',
-      },
+        vendor: 'vendor'
+      }
     }
   end
 
