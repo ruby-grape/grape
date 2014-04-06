@@ -23,18 +23,18 @@ describe Grape::Validations::RegexpValidator do
   context 'invalid input' do
     it 'refuses inapppopriate' do
       get '/', name: "invalid name"
-      last_response.status.should == 400
+      expect(last_response.status).to eq(400)
     end
 
     it 'refuses nil' do
       get '/', name: nil
-      last_response.status.should == 400
+      expect(last_response.status).to eq(400)
     end
   end
 
   it 'accepts valid input' do
     get '/', name: "bob"
-    last_response.status.should == 200
+    expect(last_response.status).to eq(200)
   end
 
 end

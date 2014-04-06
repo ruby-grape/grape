@@ -22,7 +22,7 @@ describe Grape::Endpoint do
   it 'sets itself in the env upon call' do
     subject.get('/') { "Hello world." }
     get '/'
-    last_request.env['api.endpoint'].should be_kind_of(Grape::Endpoint)
+    expect(last_request.env['api.endpoint']).to be_kind_of(Grape::Endpoint)
   end
 
   describe '#status' do
@@ -33,8 +33,8 @@ describe Grape::Endpoint do
       end
 
       get '/home'
-      last_response.status.should == 206
-      last_response.body.should == "Hello"
+      expect(last_response.status).to eq(206)
+      expect(last_response.body).to eq("Hello")
     end
   end
 
@@ -46,7 +46,7 @@ describe Grape::Endpoint do
       end
 
       get '/hey'
-      last_response.headers['X-Awesome'].should == 'true'
+      expect(last_response.headers['X-Awesome']).to eq('true')
     end
   end
 
@@ -58,20 +58,20 @@ describe Grape::Endpoint do
     end
     it 'includes request headers' do
       get '/headers'
-      JSON.parse(last_response.body).should == {
-        "Host" => "example.org",
-        "Cookie" => ""
-      }
+      expect(JSON.parse(last_response.body)).to eq(
+          "Host" => "example.org",
+          "Cookie" => ""
+      )
     end
     it 'includes additional request headers' do
       get '/headers', nil, "HTTP_X_GRAPE_CLIENT" => "1"
-      JSON.parse(last_response.body)["X-Grape-Client"].should == "1"
+      expect(JSON.parse(last_response.body)["X-Grape-Client"]).to eq("1")
     end
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for("/headers")
       env["HTTP_SYMBOL_HEADER".to_sym] = "Goliath passes symbols"
       body = subject.call(env)[2].body.first
-      JSON.parse(body)["Symbol-Header"].should == "Goliath passes symbols"
+      expect(JSON.parse(body)["Symbol-Header"]).to eq("Goliath passes symbols")
     end
   end
 
@@ -91,7 +91,7 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
 
-      last_response.headers['Set-Cookie'].split("\n").sort.should eql [
+      expect(last_response.headers['Set-Cookie'].split("\n").sort).to eql [
         "cookie3=symbol",
         "cookie4=secret+code+here",
         "my-awesome-cookie1=is+cool",
@@ -105,9 +105,8 @@ describe Grape::Endpoint do
       end
       get('/username', {}, 'HTTP_COOKIE' => 'username=mrplum; sandbox=true')
 
-      last_response.body.should == 'mrplum'
-      last_response.headers['Set-Cookie'].should_not =~ /username=mrplum/
-      last_response.headers['Set-Cookie'].should_not =~ /sandbox=true/
+      expect(last_response.body).to eq('mrplum')
+      expect(last_response.headers['Set-Cookie']).to be_nil
     end
 
     it 'sets and update browser cookies' do
@@ -116,9 +115,9 @@ describe Grape::Endpoint do
         cookies[:username] += "_test"
       end
       get('/username', {}, 'HTTP_COOKIE' => 'username=user; sandbox=false')
-      last_response.body.should == 'user_test'
-      last_response.headers['Set-Cookie'].should =~ /username=user_test/
-      last_response.headers['Set-Cookie'].should =~ /sandbox=true/
+      expect(last_response.body).to eq('user_test')
+      expect(last_response.headers['Set-Cookie']).to match(/username=user_test/)
+      expect(last_response.headers['Set-Cookie']).to match(/sandbox=true/)
     end
 
     it 'deletes cookie' do
@@ -131,17 +130,17 @@ describe Grape::Endpoint do
         sum
       end
       get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
-      last_response.body.should == '3'
+      expect(last_response.body).to eq('3')
       cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
       end]
-      cookies.size.should == 2
+      expect(cookies.size).to eq(2)
       ["and_this", "delete_this_cookie"].each do |cookie_name|
         cookie = cookies[cookie_name]
-        cookie.should_not be_nil
-        cookie.value.should == "deleted"
-        cookie.expired?.should be true
+        expect(cookie).not_to be_nil
+        expect(cookie.value).to eq("deleted")
+        expect(cookie.expired?).to be true
       end
     end
 
@@ -155,18 +154,18 @@ describe Grape::Endpoint do
         sum
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
-      last_response.body.should == '3'
+      expect(last_response.body).to eq('3')
       cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
       end]
-      cookies.size.should == 2
+      expect(cookies.size).to eq(2)
       ["and_this", "delete_this_cookie"].each do |cookie_name|
         cookie = cookies[cookie_name]
-        cookie.should_not be_nil
-        cookie.value.should == "deleted"
-        cookie.path.should == "/test"
-        cookie.expired?.should be true
+        expect(cookie).not_to be_nil
+        expect(cookie.value).to eq("deleted")
+        expect(cookie.path).to eq("/test")
+        expect(cookie.expired?).to be true
       end
     end
   end
@@ -190,7 +189,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=present'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'has a optional param with default value all the time' do
@@ -200,7 +199,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=one'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'builds nested params' do
@@ -210,7 +209,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=present&nested[fourth]=1'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'builds nested params when given array' do
@@ -230,7 +229,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'filters out any additional params that are given' do
@@ -240,7 +239,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=one&other=two'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'stringifies if that option is passed' do
@@ -250,7 +249,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=one&other=two'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
 
     it 'does not include missing attributes if that option is passed' do
@@ -260,7 +259,7 @@ describe Grape::Endpoint do
       end
 
       get '/declared?first=one&other=two'
-      last_response.status.should == 200
+      expect(last_response.status).to eq(200)
     end
   end
 
@@ -320,7 +319,7 @@ describe Grape::Endpoint do
       end
 
       get '/hey?howdy=hey'
-      last_response.body.should == 'hey'
+      expect(last_response.body).to eq('hey')
     end
 
     it 'parses from path segments' do
@@ -329,7 +328,7 @@ describe Grape::Endpoint do
       end
 
       get '/hey/12'
-      last_response.body.should == '12'
+      expect(last_response.body).to eq('12')
     end
 
     it 'deeply converts nested params' do
@@ -337,7 +336,7 @@ describe Grape::Endpoint do
         params[:location][:city]
       end
       get '/location?location[city]=Dallas'
-      last_response.body.should == 'Dallas'
+      expect(last_response.body).to eq('Dallas')
     end
 
     context 'with special requirements' do
@@ -347,10 +346,10 @@ describe Grape::Endpoint do
         end
 
         get '/someone@example.com'
-        last_response.body.should == 'someone@example.com'
+        expect(last_response.body).to eq('someone@example.com')
 
         get 'someone@example.com.pl'
-        last_response.body.should == 'someone@example.com.pl'
+        expect(last_response.body).to eq('someone@example.com.pl')
       end
 
       it 'parses many params with provided regexps' do
@@ -359,16 +358,16 @@ describe Grape::Endpoint do
         end
 
         get '/someone@example.com/test/1'
-        last_response.body.should == 'someone@example.com1'
+        expect(last_response.body).to eq('someone@example.com1')
 
         get '/someone@testing.wrong/test/1'
-        last_response.status.should == 404
+        expect(last_response.status).to eq(404)
 
         get 'someone@test.com/test/wrong_number'
-        last_response.status.should == 404
+        expect(last_response.status).to eq(404)
 
         get 'someone@test.com/wrong_middle/1'
-        last_response.status.should == 404
+        expect(last_response.status).to eq(404)
       end
 
       context 'namespace requirements' do
@@ -387,16 +386,16 @@ describe Grape::Endpoint do
         end
         it "parse email param with provided requirements for params" do
           get '/outer/abc@example.com'
-          last_response.body.should == 'abc@example.com'
+          expect(last_response.body).to eq('abc@example.com')
         end
 
         it "should override outer namespace's requirements" do
           get '/outer/inner/someone@testing.wrong/test/1'
-          last_response.status.should == 404
+          expect(last_response.status).to eq(404)
 
           get '/outer/inner/someone@testing.com/test/1'
-          last_response.status.should == 200
-          last_response.body.should == 'someone@testing.com1'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('someone@testing.com1')
         end
 
       end
@@ -414,22 +413,22 @@ describe Grape::Endpoint do
 
       it 'converts JSON bodies to params' do
         post '/request_body', MultiJson.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
-        last_response.body.should == 'Bobby T.'
+        expect(last_response.body).to eq('Bobby T.')
       end
 
       it 'does not convert empty JSON bodies to params' do
         put '/request_body', '', 'CONTENT_TYPE' => 'application/json'
-        last_response.body.should == ''
+        expect(last_response.body).to eq('')
       end
 
       it 'converts XML bodies to params' do
         post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-        last_response.body.should == 'Bobby T.'
+        expect(last_response.body).to eq('Bobby T.')
       end
 
       it 'converts XML bodies to params' do
         put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-        last_response.body.should == 'Bobby T.'
+        expect(last_response.body).to eq('Bobby T.')
       end
 
       it 'does not include parameters not defined by the body' do
@@ -438,8 +437,8 @@ describe Grape::Endpoint do
           params[:user]
         end
         post '/omitted_params', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
-        last_response.status.should == 201
-        last_response.body.should == "Bob"
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq("Bob")
       end
     end
 
@@ -450,8 +449,8 @@ describe Grape::Endpoint do
         params[:user]
       end
       put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-      last_response.status.should == 406
-      last_response.body.should == '{"error":"The requested content-type \'application/xml\' is not supported."}'
+      expect(last_response.status).to eq(406)
+      expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
 
     context 'content type with params' do
@@ -466,11 +465,11 @@ describe Grape::Endpoint do
       end
 
       it "should not response with 406 for same type without params" do
-        last_response.status.should_not be 406
+        expect(last_response.status).not_to be 406
       end
 
       it "should response with given content type in headers" do
-        last_response.headers['Content-Type'].should eq 'application/json; charset=utf-8'
+        expect(last_response.headers['Content-Type']).to eq 'application/json; charset=utf-8'
       end
 
     end
@@ -523,8 +522,8 @@ describe Grape::Endpoint do
       end
 
       get '/hey'
-      last_response.status.should == 500
-      last_response.body.should == "This is not valid."
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq("This is not valid.")
     end
 
     it 'accepts a code' do
@@ -533,8 +532,8 @@ describe Grape::Endpoint do
       end
 
       get '/hey'
-      last_response.status.should == 401
-      last_response.body.should == "Unauthorized."
+      expect(last_response.status).to eq(401)
+      expect(last_response.body).to eq("Unauthorized.")
     end
 
     it 'accepts an object and render it in format' do
@@ -543,8 +542,8 @@ describe Grape::Endpoint do
       end
 
       get '/hey.json'
-      last_response.status.should == 403
-      last_response.body.should == '{"dude":"rad"}'
+      expect(last_response.status).to eq(403)
+      expect(last_response.body).to eq('{"dude":"rad"}')
     end
 
     it 'can specifiy headers' do
@@ -553,8 +552,8 @@ describe Grape::Endpoint do
       end
 
       get '/hey.json'
-      last_response.status.should == 403
-      last_response.headers['X-Custom'].should == 'value'
+      expect(last_response.status).to eq(403)
+      expect(last_response.headers['X-Custom']).to eq('value')
     end
   end
 
@@ -564,9 +563,9 @@ describe Grape::Endpoint do
         redirect "/ha"
       end
       get '/hey'
-      last_response.status.should eq 302
-      last_response.headers['Location'].should eq "/ha"
-      last_response.body.should eq ""
+      expect(last_response.status).to eq 302
+      expect(last_response.headers['Location']).to eq "/ha"
+      expect(last_response.body).to eq ""
     end
 
     it 'has status code 303 if it is not get request and it is http 1.1' do
@@ -574,8 +573,8 @@ describe Grape::Endpoint do
         redirect "/ha"
       end
       post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
-      last_response.status.should eq 303
-      last_response.headers['Location'].should eq "/ha"
+      expect(last_response.status).to eq 303
+      expect(last_response.headers['Location']).to eq "/ha"
     end
 
     it 'support permanent redirect' do
@@ -583,9 +582,9 @@ describe Grape::Endpoint do
         redirect "/ha", permanent: true
       end
       get '/hey'
-      last_response.status.should eq 301
-      last_response.headers['Location'].should eq "/ha"
-      last_response.body.should eq ""
+      expect(last_response.status).to eq 301
+      expect(last_response.headers['Location']).to eq "/ha"
+      expect(last_response.body).to eq ""
     end
   end
 
@@ -595,10 +594,10 @@ describe Grape::Endpoint do
     end
 
     post '/new', text: 'abc'
-    last_response.body.should == 'abc'
+    expect(last_response.body).to eq('abc')
 
     post '/new', text: 'def'
-    last_response.body.should == 'def'
+    expect(last_response.body).to eq('def')
   end
 
   it 'resets all instance variables (except block) between calls' do
@@ -613,9 +612,9 @@ describe Grape::Endpoint do
     end
 
     get '/hello?howdy=hey'
-    last_response.body.should == 'hey'
+    expect(last_response.body).to eq('hey')
     get '/hello?howdy=yo'
-    last_response.body.should == 'yo'
+    expect(last_response.body).to eq('yo')
   end
 
   it 'allows explicit return calls' do
@@ -624,8 +623,8 @@ describe Grape::Endpoint do
     end
 
     get '/home'
-    last_response.status.should == 200
-    last_response.body.should == "Hello"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("Hello")
   end
 
   describe '.generate_api_method' do
@@ -640,7 +639,7 @@ describe Grape::Endpoint do
       }.to raise_error(ArgumentError)
     end
     it 'returns a Proc' do
-      Grape::Endpoint.generate_api_method("GET test for a proc", &proc {}).should be_a Proc
+      expect(Grape::Endpoint.generate_api_method("GET test for a proc", &proc {})).to be_a Proc
     end
   end
 
@@ -651,7 +650,7 @@ describe Grape::Endpoint do
         subject.get('/before_test') { env['before_test'] }
 
         get '/before_test'
-        last_response.body.should == "OK"
+        expect(last_response.body).to eq("OK")
       end
     end
 
@@ -660,14 +659,14 @@ describe Grape::Endpoint do
         subject.after { body "after" }
         subject.get('/after_test') { "during" }
         get '/after_test'
-        last_response.body.should == 'after'
+        expect(last_response.body).to eq('after')
       end
 
       it 'does not override the response body with its return' do
         subject.after { "after" }
         subject.get('/after_test') { "body" }
         get '/after_test'
-        last_response.body.should == "body"
+        expect(last_response.body).to eq("body")
       end
     end
   end
@@ -681,7 +680,7 @@ describe Grape::Endpoint do
           verb
         end
         send(verb, '/example/and/some/more')
-        last_response.status.should eql 404
+        expect(last_response.status).to eql 404
       end
 
       it 'anchors paths by default for the #{verb.upcase} method' do
@@ -689,7 +688,7 @@ describe Grape::Endpoint do
           verb
         end
         send(verb, '/example/and/some/more')
-        last_response.status.should eql 404
+        expect(last_response.status).to eql 404
       end
 
       it 'responds to /example/and/some/more for the non-anchored #{verb.upcase} method' do
@@ -697,8 +696,8 @@ describe Grape::Endpoint do
           verb
         end
         send(verb, '/example/and/some/more')
-        last_response.status.should eql verb == "post" ? 201 : 200
-        last_response.body.should eql verb == 'head' ? '' : verb
+        expect(last_response.status).to eql verb == "post" ? 201 : 200
+        expect(last_response.body).to eql verb == 'head' ? '' : verb
       end
     end
   end
@@ -709,7 +708,7 @@ describe Grape::Endpoint do
         request.url
       end
       get '/url'
-      last_response.body.should == "http://example.org/url"
+      expect(last_response.body).to eq("http://example.org/url")
     end
     ['v1', :v1].each do |version|
       it 'should include version #{version}' do
@@ -718,7 +717,7 @@ describe Grape::Endpoint do
           request.url
         end
         get "/#{version}/url"
-        last_response.body.should == "http://example.org/#{version}/url"
+        expect(last_response.body).to eq("http://example.org/#{version}/url")
       end
     end
     it 'should include prefix' do
@@ -728,7 +727,7 @@ describe Grape::Endpoint do
         request.url
       end
       get '/api/v1/url'
-      last_response.body.should == "http://example.org/api/v1/url"
+      expect(last_response.body).to eq("http://example.org/api/v1/url")
     end
   end
 
@@ -743,12 +742,12 @@ describe Grape::Endpoint do
 
     it 'result in a 406 response if they are invalid' do
       get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json'
-      last_response.status.should == 406
+      expect(last_response.status).to eq(406)
     end
 
     it 'result in a 406 response if they cannot be parsed by rack-accept' do
       get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json; version=1'
-      last_response.status.should == 406
+      expect(last_response.status).to eq(406)
     end
   end
 end

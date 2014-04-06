@@ -19,14 +19,14 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
 
     it 'is set' do
       status, _, env = subject.call('HTTP_ACCEPT_VERSION' => 'v1')
-      env['api.version'].should eql 'v1'
-      status.should == 200
+      expect(env['api.version']).to eql 'v1'
+      expect(status).to eq(200)
     end
 
     it 'is set if format provided' do
       status, _, env = subject.call('HTTP_ACCEPT_VERSION' => 'v1')
-      env['api.version'].should eql 'v1'
-      status.should == 200
+      expect(env['api.version']).to eql 'v1'
+      expect(status).to eq(200)
     end
 
     it 'fails with 406 Not Acceptable if version is not supported' do
@@ -42,14 +42,14 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
   end
 
   it 'succeeds if :strict is not set' do
-    subject.call('HTTP_ACCEPT_VERSION' => '').first.should == 200
-    subject.call({}).first.should == 200
+    expect(subject.call('HTTP_ACCEPT_VERSION' => '').first).to eq(200)
+    expect(subject.call({}).first).to eq(200)
   end
 
   it 'succeeds if :strict is set to false' do
     @options[:version_options][:strict] = false
-    subject.call('HTTP_ACCEPT_VERSION' => '').first.should == 200
-    subject.call({}).first.should == 200
+    expect(subject.call('HTTP_ACCEPT_VERSION' => '').first).to eq(200)
+    expect(subject.call({}).first).to eq(200)
   end
 
   context 'when :strict is set' do
@@ -81,7 +81,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'succeeds if proper header is set' do
-      subject.call('HTTP_ACCEPT_VERSION' => 'v1').first.should == 200
+      expect(subject.call('HTTP_ACCEPT_VERSION' => 'v1').first).to eq(200)
     end
   end
 
@@ -115,7 +115,7 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'succeeds if proper header is set' do
-      subject.call('HTTP_ACCEPT_VERSION' => 'v1').first.should == 200
+      expect(subject.call('HTTP_ACCEPT_VERSION' => 'v1').first).to eq(200)
     end
   end
 end

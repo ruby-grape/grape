@@ -8,7 +8,7 @@ describe Grape::Exceptions::InvalidVersionerOption do
     end
 
     it "contains the problem in the message" do
-      error.message.should include(
+      expect(error.message).to include(
         "Unknown :using for versioner: headers"
       )
     end

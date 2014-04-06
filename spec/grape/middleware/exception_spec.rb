@@ -57,7 +57,7 @@ describe Grape::Middleware::Error do
       use Grape::Middleware::Error
       run ExceptionApp
     end
-    lambda { get '/' }.should raise_error
+    expect { get '/' }.to raise_error
   end
 
   context 'with rescue_all set to true' do
@@ -67,7 +67,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == "rain!"
+      expect(last_response.body).to eq("rain!")
     end
 
     it 'defaults to a 500 status' do
@@ -76,7 +76,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.status.should == 500
+      expect(last_response.status).to eq(500)
     end
 
     it 'is possible to specify a different default status code' do
@@ -85,7 +85,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.status.should == 500
+      expect(last_response.status).to eq(500)
     end
 
     it 'is possible to return errors in json format' do
@@ -94,7 +94,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == '{"error":"rain!"}'
+      expect(last_response.body).to eq('{"error":"rain!"}')
     end
 
     it 'is possible to return hash errors in json format' do
@@ -103,8 +103,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      ['{"error":"rain!","detail":"missing widget"}',
-       '{"detail":"missing widget","error":"rain!"}'].should include(last_response.body)
+      expect(['{"error":"rain!","detail":"missing widget"}',
+              '{"detail":"missing widget","error":"rain!"}']).to include(last_response.body)
     end
 
     it 'is possible to return errors in jsonapi format' do
@@ -113,7 +113,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == '{"error":"rain!"}'
+      expect(last_response.body).to eq('{"error":"rain!"}')
     end
 
     it 'is possible to return hash errors in jsonapi format' do
@@ -122,8 +122,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      ['{"error":"rain!","detail":"missing widget"}',
-       '{"detail":"missing widget","error":"rain!"}'].should include(last_response.body)
+      expect(['{"error":"rain!","detail":"missing widget"}',
+              '{"detail":"missing widget","error":"rain!"}']).to include(last_response.body)
     end
 
     it 'is possible to return errors in xml format' do
@@ -132,7 +132,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n"
+      expect(last_response.body).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n")
     end
 
     it 'is possible to return hash errors in xml format' do
@@ -141,8 +141,8 @@ describe Grape::Middleware::Error do
         run ErrorHashApp
       end
       get '/'
-      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
-       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <error>rain!</error>\n  <detail>missing widget</detail>\n</error>\n"].should include(last_response.body)
+      expect(["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
+              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <error>rain!</error>\n  <detail>missing widget</detail>\n</error>\n"]).to include(last_response.body)
     end
 
     it 'is possible to specify a custom formatter' do
@@ -157,7 +157,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      last_response.body.should == '{:custom_formatter=>"rain!"}'
+      expect(last_response.body).to eq('{:custom_formatter=>"rain!"}')
     end
 
     it 'does not trap regular error! codes' do
@@ -166,7 +166,7 @@ describe Grape::Middleware::Error do
         run AccessDeniedApp
       end
       get '/'
-      last_response.status.should == 401
+      expect(last_response.status).to eq(401)
     end
 
     it 'responds to custom Grape exceptions appropriately' do
@@ -176,8 +176,8 @@ describe Grape::Middleware::Error do
       end
 
       get '/'
-      last_response.status.should == 400
-      last_response.body.should == 'failed validation'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('failed validation')
     end
 
   end

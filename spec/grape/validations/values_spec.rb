@@ -59,54 +59,54 @@ describe Grape::Validations::ValuesValidator do
 
   it 'allows a valid value for a parameter' do
     get("/", type: 'valid-type1')
-    last_response.status.should eq 200
-    last_response.body.should eq({ type: "valid-type1" }.to_json)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: "valid-type1" }.to_json)
   end
 
   it 'does not allow an invalid value for a parameter' do
     get("/", type: 'invalid-type')
-    last_response.status.should eq 400
-    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'does not allow nil value for a parameter' do
     get("/", type: nil)
-    last_response.status.should eq 400
-    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'allows a valid default value' do
     get("/default/valid")
-    last_response.status.should eq 200
-    last_response.body.should eq({ type: "valid-type2" }.to_json)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: "valid-type2" }.to_json)
   end
 
   it 'allows a proc for values' do
     get('/lambda', type: 'valid-type1')
-    last_response.status.should eq 200
-    last_response.body.should eq({ type: "valid-type1" }.to_json)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: "valid-type1" }.to_json)
   end
 
   it 'does not validate updated values without proc' do
     ValuesModel.add_value('valid-type4')
 
     get('/', type: 'valid-type4')
-    last_response.status.should eq 400
-    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'validates against values in a proc' do
     ValuesModel.add_value('valid-type4')
 
     get('/lambda', type: 'valid-type4')
-    last_response.status.should eq 200
-    last_response.body.should eq({ type: "valid-type4" }.to_json)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: "valid-type4" }.to_json)
   end
 
   it 'does not allow an invalid value for a parameter using lambda' do
     get("/lambda", type: 'invalid-type')
-    last_response.status.should eq 400
-    last_response.body.should eq({ error: "type does not have a valid value" }.to_json)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
 
   it 'raises IncompatibleOptionValues on an invalid default value' do
@@ -125,8 +125,8 @@ describe Grape::Validations::ValuesValidator do
 
   it 'allows values to be a kind of the coerced type not just an instance of it' do
     get("/values/coercion", type: 10)
-    last_response.status.should eq 200
-    last_response.body.should eq({ type: 10 }.to_json)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 10 }.to_json)
   end
 
   it 'raises IncompatibleOptionValues when values contains a value that is not a kind of the type' do

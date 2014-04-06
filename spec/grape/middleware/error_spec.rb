@@ -22,24 +22,24 @@ describe Grape::Middleware::Error do
   it 'sets the status code appropriately' do
     ErrApp.error = { status: 410 }
     get '/'
-    last_response.status.should == 410
+    expect(last_response.status).to eq(410)
   end
 
   it 'sets the error message appropriately' do
     ErrApp.error = { message: 'Awesome stuff.' }
     get '/'
-    last_response.body.should == 'Awesome stuff.'
+    expect(last_response.body).to eq('Awesome stuff.')
   end
 
   it 'defaults to a 500 status' do
     ErrApp.error = {}
     get '/'
-    last_response.status.should == 500
+    expect(last_response.status).to eq(500)
   end
 
   it 'has a default message' do
     ErrApp.error = {}
     get '/'
-    last_response.body.should == 'Aww, hamburgers.'
+    expect(last_response.body).to eq('Aww, hamburgers.')
   end
 end

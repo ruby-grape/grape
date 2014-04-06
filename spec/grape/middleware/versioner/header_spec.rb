@@ -16,37 +16,37 @@ describe Grape::Middleware::Versioner::Header do
   context 'api.type and api.subtype' do
     it 'sets type and subtype to first choice of content type if no preference given' do
       status, _, env = subject.call('HTTP_ACCEPT' => '*/*')
-      env['api.type'].should eql 'application'
-      env['api.subtype'].should eql 'vnd.vendor+xml'
-      status.should == 200
+      expect(env['api.type']).to eql 'application'
+      expect(env['api.subtype']).to eql 'vnd.vendor+xml'
+      expect(status).to eq(200)
     end
 
     it 'sets preferred type' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/*')
-      env['api.type'].should eql 'application'
-      env['api.subtype'].should eql 'vnd.vendor+xml'
-      status.should == 200
+      expect(env['api.type']).to eql 'application'
+      expect(env['api.subtype']).to eql 'vnd.vendor+xml'
+      expect(status).to eq(200)
     end
 
     it 'sets preferred type and subtype' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'text/plain')
-      env['api.type'].should eql 'text'
-      env['api.subtype'].should eql 'plain'
-      status.should == 200
+      expect(env['api.type']).to eql 'text'
+      expect(env['api.subtype']).to eql 'plain'
+      expect(status).to eq(200)
     end
   end
 
   context 'api.format' do
     it 'is set' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
-      env['api.format'].should eql 'json'
-      status.should == 200
+      expect(env['api.format']).to eql 'json'
+      expect(status).to eq(200)
     end
 
     it 'is nil if not provided' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
-      env['api.format'].should eql nil
-      status.should == 200
+      expect(env['api.format']).to eql nil
+      expect(status).to eq(200)
     end
 
     ['v1', :v1].each do |version|
@@ -57,14 +57,14 @@ describe Grape::Middleware::Versioner::Header do
 
         it 'is set' do
           status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
-          env['api.format'].should eql 'json'
-          status.should == 200
+          expect(env['api.format']).to eql 'json'
+          expect(status).to eq(200)
         end
 
         it 'is nil if not provided' do
           status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
-          env['api.format'].should eql nil
-          status.should == 200
+          expect(env['api.format']).to eql nil
+          expect(status).to eq(200)
         end
       end
     end
@@ -73,14 +73,14 @@ describe Grape::Middleware::Versioner::Header do
   context 'api.vendor' do
     it 'is set' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
-      env['api.vendor'].should eql 'vendor'
-      status.should == 200
+      expect(env['api.vendor']).to eql 'vendor'
+      expect(status).to eq(200)
     end
 
     it 'is set if format provided' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
-      env['api.vendor'].should eql 'vendor'
-      status.should == 200
+      expect(env['api.vendor']).to eql 'vendor'
+      expect(status).to eq(200)
     end
 
     it 'fails with 406 Not Acceptable if vendor is invalid' do
@@ -101,14 +101,14 @@ describe Grape::Middleware::Versioner::Header do
 
       it 'is set' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
-        env['api.vendor'].should eql 'vendor'
-        status.should == 200
+        expect(env['api.vendor']).to eql 'vendor'
+        expect(status).to eq(200)
       end
 
       it 'is set if format provided' do
         status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
-        env['api.vendor'].should eql 'vendor'
-        status.should == 200
+        expect(env['api.vendor']).to eql 'vendor'
+        expect(status).to eq(200)
       end
 
       it 'fails with 406 Not Acceptable if vendor is invalid' do
@@ -131,14 +131,14 @@ describe Grape::Middleware::Versioner::Header do
 
     it 'is set' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
-      env['api.version'].should eql 'v1'
-      status.should == 200
+      expect(env['api.version']).to eql 'v1'
+      expect(status).to eq(200)
     end
 
     it 'is set if format provided' do
       status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
-      env['api.version'].should eql 'v1'
-      status.should == 200
+      expect(env['api.version']).to eql 'v1'
+      expect(status).to eq(200)
     end
 
     it 'fails with 406 Not Acceptable if version is invalid' do
@@ -154,14 +154,14 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   it 'succeeds if :strict is not set' do
-    subject.call('HTTP_ACCEPT' => '').first.should == 200
-    subject.call({}).first.should == 200
+    expect(subject.call('HTTP_ACCEPT' => '').first).to eq(200)
+    expect(subject.call({}).first).to eq(200)
   end
 
   it 'succeeds if :strict is set to false' do
     @options[:version_options][:strict] = false
-    subject.call('HTTP_ACCEPT' => '').first.should == 200
-    subject.call({}).first.should == 200
+    expect(subject.call('HTTP_ACCEPT' => '').first).to eq(200)
+    expect(subject.call({}).first).to eq(200)
   end
 
   context 'when :strict is set' do
@@ -215,7 +215,7 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'succeeds if proper header is set' do
-      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
+      expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first).to eq(200)
     end
   end
 
@@ -271,7 +271,7 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'succeeds if proper header is set' do
-      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
+      expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first).to eq(200)
     end
   end
 
@@ -281,11 +281,11 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'succeeds with v1' do
-      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first.should == 200
+      expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first).to eq(200)
     end
 
     it 'succeeds with v2' do
-      subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').first.should == 200
+      expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').first).to eq(200)
     end
 
     it 'fails with another version' do

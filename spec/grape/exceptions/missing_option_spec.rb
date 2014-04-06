@@ -8,7 +8,7 @@ describe Grape::Exceptions::MissingOption do
     end
 
     it "contains the problem in the message" do
-      error.message.should include(
+      expect(error.message).to include(
         "You must specify :path options."
       )
     end

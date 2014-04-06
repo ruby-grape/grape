@@ -5,25 +5,25 @@ describe Grape::Middleware::Versioner::Path do
   subject { Grape::Middleware::Versioner::Path.new(app, @options || {}) }
 
   it 'sets the API version based on the first path' do
-    subject.call('PATH_INFO' => '/v1/awesome').last.should == 'v1'
+    expect(subject.call('PATH_INFO' => '/v1/awesome').last).to eq('v1')
   end
 
   it 'does not cut the version out of the path' do
-    subject.call('PATH_INFO' => '/v1/awesome')[1]['PATH_INFO'].should == '/v1/awesome'
+    expect(subject.call('PATH_INFO' => '/v1/awesome')[1]['PATH_INFO']).to eq('/v1/awesome')
   end
 
   it 'provides a nil version if no path is given' do
-    subject.call('PATH_INFO' => '/').last.should be_nil
+    expect(subject.call('PATH_INFO' => '/').last).to be_nil
   end
 
   context 'with a pattern' do
     before { @options = { pattern: /v./i } }
     it 'sets the version if it matches' do
-      subject.call('PATH_INFO' => '/v1/awesome').last.should == 'v1'
+      expect(subject.call('PATH_INFO' => '/v1/awesome').last).to eq('v1')
     end
 
     it 'ignores the version if it fails to match' do
-      subject.call('PATH_INFO' => '/awesome/radical').last.should be_nil
+      expect(subject.call('PATH_INFO' => '/awesome/radical').last).to be_nil
     end
   end
 
@@ -32,11 +32,11 @@ describe Grape::Middleware::Versioner::Path do
       before { @options = { versions: versions } }
 
       it 'throws an error if a non-allowed version is specified' do
-        catch(:error) { subject.call('PATH_INFO' => '/v3/awesome') }[:status].should == 404
+        expect(catch(:error) { subject.call('PATH_INFO' => '/v3/awesome') }[:status]).to eq(404)
       end
 
       it 'allows versions that have been specified' do
-        subject.call('PATH_INFO' => '/v1/asoasd').last.should == 'v1'
+        expect(subject.call('PATH_INFO' => '/v1/asoasd').last).to eq('v1')
       end
     end
   end
