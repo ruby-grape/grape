@@ -24,6 +24,11 @@ describe Grape::Middleware::Formatter do
       subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').last.each { |b| b.should == '"bar"' }
     end
 
+    it 'returns an empty body instead of "" when the body is a blank string or nil' do
+      @body = ''
+      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').last.each { |b| b.should == '' }
+    end
+
     it 'calls #to_json if the content type is jsonapi' do
       @body = { 'foos' => [{ 'bar' => 'baz' }] }
       @body.instance_eval do

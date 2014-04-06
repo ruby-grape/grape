@@ -10,6 +10,7 @@ Next Release
 
 * [#614](https://github.com/intridea/grape/pull/614): Params with `nil` value are now refused by `RegexpValidator` - [@dm1try](https://github.com/dm1try).
 * [#494](https://github.com/intridea/grape/issues/494): Fixed performance issue with requests carrying a large payload - [@dblock](https://github.com/dblock).
+* [#618](https://github.com/intridea/grape/pull/618): When body is `nil` or `''`, make the response a blank body even for JSON - [@mbleigh](https://github.com/mbleigh)
 
 0.7.0 (4/2/2013)
 =================

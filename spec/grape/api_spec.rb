@@ -381,11 +381,11 @@ describe Grape::API do
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
             subject.send(verb) do
-              env['api.request.body']
+              { val: env['api.request.body'] }
             end
             send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
             last_response.status.should == (verb == :post ? 201 : 200)
-            last_response.body.should eql MultiJson.dump(object)
+            last_response.body.should eql MultiJson.dump(val: object)
             last_request.params.should eql Hash.new
           end
           it "stores input in api.request.input" do
