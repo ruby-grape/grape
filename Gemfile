@@ -18,3 +18,9 @@ group :development, :test do
   gem 'redcarpet', platforms: :ruby
   gem 'rubocop', '~> 0.15.0'
 end
+
+platforms :rbx do
+  gem 'rubysl'
+  gem 'rubinius-developer_tools'
+  gem 'racc'
+end
