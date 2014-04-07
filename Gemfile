@@ -8,6 +8,9 @@ group :development, :test do
   gem 'cookiejar'
   gem 'rack-contrib'
   gem 'rubocop', '~> 0.20.1'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'guard-rubocop'
 end
 
 platforms :rbx do
