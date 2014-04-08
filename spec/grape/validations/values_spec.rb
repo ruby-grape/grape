@@ -56,6 +56,14 @@ describe Grape::Validations::ValuesValidator do
           end
         end
         get '/optional_with_required_values'
+
+        params do
+          requires :type, type: Integer
+        end
+        get '/values/not_nil' do
+          { type: params[:type] }
+        end
+
       end
     end
   end
@@ -122,6 +130,14 @@ describe Grape::Validations::ValuesValidator do
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
+
+  #### New test
+  it 'does not allow a nil value when an integer is expected', focus: true do
+    get("/values/not_nil", type: nil)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
+  end
+  ####
 
   it 'raises IncompatibleOptionValues on an invalid default value' do
     subject = Class.new(Grape::API)
