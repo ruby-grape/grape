@@ -1,5 +1,7 @@
 ![grape logo](https://github.com/intridea/grape/wiki/grape_logo.png)
 
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-pages.github.io/github/intridea/grape.png)](http://inch-pages.github.io/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
+
 ## Table of Contents
 
 - [What is Grape?](#what-is-grape)
@@ -69,8 +71,6 @@ or complement existing web application frameworks such as Rails and Sinatra by
 providing a simple DSL to easily develop RESTful APIs. It has built-in support
 for common conventions, including multiple formats, subdomain/prefix restriction,
 content negotiation, versioning and much more.
-
-[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-pages.github.io/github/intridea/grape.png)](http://inch-pages.github.io/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
 
 ## Stable Release
 
