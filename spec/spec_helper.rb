@@ -8,6 +8,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :test
 
+require 'json'
 require 'rack/test'
 require 'base64'
 require 'cookiejar'

@@ -57,6 +57,7 @@
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
   - [Writing Tests with Rails](#writing-tests-with-rails)
+  - [Stubbing Helpers](#stubbing-helpers)
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
   - [Rails 3.x](#rails-3x)
 - [Performance Monitoring](#performance-monitoring)
@@ -1603,6 +1604,31 @@ RSpec.configure do |config|
   config.include RSpec::Rails::RequestExampleGroup, type: :request, example_group: {
     file_path: /spec\/api/
   }
+end
+```
+
+### Stubbing Helpers
+
+Because helpers are mixed in based on the context when an endpoint is defined, it can
+be difficult to stub or mock them for testing. The `Grape::Endpoint.before_each` method
+can help by allowing you to define behavior on the endpoint that will run before every
+request.
+
+```ruby
+describe 'an endpoint that needs helpers stubbed' do
+  before do
+    Grape::Endpoint.before_each do |endpoint|
+      endpoint.stub!(:helper_name).and_return('desired_value')
+    end
+  end
+  
+  after do
+    Grape::Endpoint.before_each nil
+  end
+  
+  it 'should properly stub the helper' do
+    # ...
+  end
 end
 ```
 

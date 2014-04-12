@@ -8,6 +8,18 @@ module Grape
     attr_reader :env, :request, :headers, :params
 
     class << self
+      def before_each(new_setup = false, &block)
+        if new_setup == false
+          if block_given?
+            @before_each = block
+          else
+            return @before_each
+          end
+        else
+          @before_each = new_setup
+        end
+      end
+
       # @api private
       #
       # Create an UnboundMethod that is appropriate for executing an endpoint
@@ -382,6 +394,8 @@ module Grape
       @headers = @request.headers
 
       cookies.read(@request)
+
+      self.class.before_each.call(self) if self.class.before_each
 
       run_filters befores
 
