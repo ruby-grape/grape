@@ -401,7 +401,7 @@ module Grape
 
       run_filters before_validations
 
-      # Retieve validations from this namespace and all parent namespaces.
+      # Retrieve validations from this namespace and all parent namespaces.
       validation_errors = []
       settings.gather(:validations).each do |validator|
         begin

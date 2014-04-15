@@ -130,6 +130,10 @@ module Grape
           push_declared_params(attrs)
       end
 
+      def mutually_exclusive(*attrs)
+        validates(attrs, mutual_exclusion: true)
+      end
+
       def group(*attrs, &block)
         requires(*attrs, &block)
       end
