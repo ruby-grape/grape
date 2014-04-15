@@ -837,5 +837,46 @@ describe Grape::Validations do
         expect(subject.routes.first.route_params['first_name'][:documentation]).to eq(documentation)
       end
     end
+
+    context 'mutually exclusive' do
+      context 'optional params' do
+        it 'errors when two or more are present' do
+          subject.params do
+            optional :beer
+            optional :wine
+            optional :juice
+            mutually_exclusive :beer, :wine, :juice
+          end
+          subject.get '/mutually_exclusive' do
+            'mutually_exclusive works!'
+          end
+
+          get '/mutually_exclusive', beer: 'string', wine: 'anotherstring'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq("[:beer, :wine] are mutually exclusive")
+        end
+      end
+
+      context 'more than one set of mutually exclusive params' do
+        it 'errors for all sets' do
+          subject.params do
+            optional :beer
+            optional :wine
+            mutually_exclusive :beer, :wine
+            optional :scotch
+            optional :aquavit
+            mutually_exclusive :scotch, :aquavit
+          end
+          subject.get '/mutually_exclusive' do
+            'mutually_exclusive works!'
+          end
+
+          get '/mutually_exclusive', beer: 'true', wine: 'true', scotch: 'true', aquavit: 'true'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to match(/\[:beer, :wine\] are mutually exclusive/)
+          expect(last_response.body).to match(/\[:scotch, :aquavit\] are mutually exclusive/)
+        end
+      end
+    end
   end
 end

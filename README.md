@@ -411,6 +411,7 @@ params do
   optional :audio do
     requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg], default: :mp3
   end
+  mutually_exclusive :media, :audio
 end
 put ':id' do
   # params[:id] is an Integer
@@ -471,6 +472,31 @@ params do
   end
 end
 ```
+
+Parameters can be defined as `mutually_exclusive`, ensuring that they aren't present at the same time in a request.
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  mutually_exclusive :beer, :wine
+end
+```
+
+Multiple sets can be defined:
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  mutually_exclusive :beer, :wine
+  optional :scotch
+  optional :aquavit
+  mutually_exclusive :scotch, :aquavit
+end
+```
+
+**Warning**: Never define mutually exclusive sets with any required params. Two mutually exclusive required params will mean params are never valid, thus making the endpoint useless. One required param mutually exclusive with an optional param will mean the latter is never valid.
 
 ### Namespace Validation and Coercion
 

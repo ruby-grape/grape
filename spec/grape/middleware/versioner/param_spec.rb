@@ -10,7 +10,7 @@ describe Grape::Middleware::Versioner::Param do
     expect(subject.call(env)[1]["api.version"]).to eq('v1')
   end
 
-  it 'cuts (only) the version out of the params', focus: true do
+  it 'cuts (only) the version out of the params' do
     env = Rack::MockRequest.env_for("/awesome", params: { "apiver" => "v1", "other_param" => "5" })
     env['rack.request.query_hash'] = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
     expect(subject.call(env)[1]['rack.request.query_hash']["apiver"]).to be_nil
