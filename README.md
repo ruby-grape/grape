@@ -62,6 +62,7 @@
   - [Rails 3.x](#rails-3x)
 - [Performance Monitoring](#performance-monitoring)
 - [Contributing to Grape](#contributing-to-grape)
+- [Hacking on Grape](#hacking-on-grape)
 - [License](#license)
 - [Copyright](#copyright)
 
@@ -1700,6 +1701,13 @@ Grape is work of hundreds of contributors. You're encouraged to submit pull requ
 features and discuss issues.
 
 See [CONTRIBUTING](CONTRIBUTING.md).
+
+## Hacking on Grape
+
+You can start hacking on Grape on
+[Nitrous.IO](https://www.nitrous.io/?utm_source=github.com&utm_campaign=grape&utm_medium=hackonnitrous) in a matter of seconds:
+
+[![Hack intridea/grape on Nitrous.IO](https://d3o0mnbgv6k92a.cloudfront.net/assets/hack-l-v1-3cc067e71372f6045e1949af9d96095b.png)](https://www.nitrous.io/hack_button?source=embed&runtime=rails&repo=intridea%2Fgrape&file_to_open=README.md)
 
 ## License
 
