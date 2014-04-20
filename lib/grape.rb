@@ -94,6 +94,11 @@ module Grape
   module Util
     autoload :HashStack,         'grape/util/hash_stack'
   end
+
+  module Meta
+    autoload :Description, 'grape/meta/description'
+    autoload :Response,    'grape/meta/response'
+  end
 end
 
 require 'grape/version'
