@@ -879,4 +879,16 @@ describe Grape::Validations do
       end
     end
   end
+
+  context 'When an empty array is passed in via PUT' do
+    it 'arrives as part of the params' do
+      subject.put '/with_array' do
+        params[:non_empty_array].should == ['1']
+        params[:empty_array].should == []
+      end
+
+      put '/with_array', non_empty_array: [1], empty_array: []
+    end
+  end
+
 end
