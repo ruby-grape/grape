@@ -121,6 +121,26 @@ describe Grape::Entity do
       get '/example'
     end
 
+    it 'does not use #first method on ActiveRecord::Relation to prevent needless sql query' do
+      entity = Class.new(Grape::Entity)
+      some_relation = Class.new
+      some_model = Class.new
+
+      allow(entity).to receive(:represent).and_return("Auto-detect!")
+      allow(some_relation).to receive(:first)
+      allow(some_relation).to receive(:klass).and_return(some_model)
+
+      some_model.const_set :Entity, entity
+
+      subject.get '/example' do
+        present some_relation
+      end
+
+      expect(some_relation).not_to receive(:first)
+      get '/example'
+      expect(last_response.body).to eq('Auto-detect!')
+    end
+
     it 'autodetection does not use Entity if it is not a presenter' do
       some_model = Class.new
       entity = Class.new

@@ -13,6 +13,7 @@ Next Release
 * [#614](https://github.com/intridea/grape/pull/614): Params with `nil` value are now refused by `RegexpValidator` - [@dm1try](https://github.com/dm1try).
 * [#494](https://github.com/intridea/grape/issues/494): Fixed performance issue with requests carrying a large payload - [@dblock](https://github.com/dblock).
 * [#619](https://github.com/intridea/grape/pull/619): Convert specs to RSpec 3 syntax with Transpec - [@danielspector](https://github.com/danielspector).
+* [#632](https://github.com/intridea/grape/pull/632): `Grape::Endpoint#present` causes ActiveRecord to make an extra query during entity's detection - [@fixme](https://github.com/fixme).
 
 0.7.0 (4/2/2013)
 =================
