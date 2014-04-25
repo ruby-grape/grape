@@ -134,6 +134,10 @@ module Grape
         validates(attrs, mutual_exclusion: true)
       end
 
+      def exactly_one_of(*attrs)
+        validates(attrs, exactly_one_of: true)
+      end
+
       def group(*attrs, &block)
         requires(*attrs, &block)
       end

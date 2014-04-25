@@ -878,5 +878,41 @@ describe Grape::Validations do
         end
       end
     end
+
+    context 'exactly one of' do
+      context 'params' do
+        it 'errors when two or more are present' do
+          subject.params do
+            optional :beer
+            optional :wine
+            optional :juice
+            exactly_one_of :beer, :wine, :juice
+          end
+          subject.get '/exactly_one_of' do
+            'exactly_one_of works!'
+          end
+
+          get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq("[:beer, :wine] are mutually exclusive")
+        end
+
+        it 'errors when none is selected' do
+          subject.params do
+            optional :beer
+            optional :wine
+            optional :juice
+            exactly_one_of :beer, :wine, :juice
+          end
+          subject.get '/exactly_one_of' do
+            'exactly_one_of works!'
+          end
+
+          get '/exactly_one_of'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq("[:beer, :wine, :juice] - exactly one parameter must be provided")
+        end
+      end
+    end
   end
 end
