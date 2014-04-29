@@ -29,3 +29,4 @@ en:
         unknown_options: 'unknown options: %{options}'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
         mutual_exclusion: 'are mutually exclusive'
+        exactly_one: "- exactly one parameter must be provided"

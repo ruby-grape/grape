@@ -500,6 +500,16 @@ end
 
 **Warning**: Never define mutually exclusive sets with any required params. Two mutually exclusive required params will mean params are never valid, thus making the endpoint useless. One required param mutually exclusive with an optional param will mean the latter is never valid.
 
+Parameters can be defined as 'exactly_one_of', ensuring that exactly one parameter gets selected.
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  exactly_one_of :beer, :wine
+end
+```
+
 ### Namespace Validation and Coercion
 
 Namespaces allow parameter definitions and apply to every method within the namespace.
