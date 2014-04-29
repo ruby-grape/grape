@@ -16,7 +16,7 @@ Next Release
 * [#619](https://github.com/intridea/grape/pull/619): Convert specs to RSpec 3 syntax with Transpec - [@danielspector](https://github.com/danielspector).
 * [#632](https://github.com/intridea/grape/pull/632): `Grape::Endpoint#present` causes ActiveRecord to make an extra query during entity's detection - [@fixme](https://github.com/fixme).
 
-0.7.0 (4/2/2013)
+0.7.0 (4/2/2014)
 =================
 
 #### Features
