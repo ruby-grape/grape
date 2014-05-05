@@ -719,6 +719,11 @@ module SharedParams
     optional :end_date
   end
 
+  params :order do |options|
+    optional :order_by, type:Symbol, values:options[:order_by], default:options[:default_order_by]
+    optional :order,    type:Symbol, values:%i(asc desc), default:options[:default_order]
+  end
+
   params :pagination do
     optional :page, type: Integer
     optional :per_page, type: Integer
@@ -731,7 +736,9 @@ class API < Grape::API
   desc "Get collection"
   params do
     use :period, :pagination
+    use :order, order_by:%i(id created_at), default_order_by: :created_at, default_order: :asc
   end
+
   get do
     Collection.from(params[:start_date]).to(params[:end_date])
               .page(params[:page]).per(params[:per_page])
