@@ -800,9 +800,13 @@ describe Grape::Validations do
           subject.helpers SharedParams
 
           subject.helpers do
-            params :pagination do
+            params :pagination do |options|
               optional :page, type: Integer
               optional :per_page, type: Integer
+            end
+            params :order do |options|
+              optional :order, type: Symbol, values: [:asc, :desc], default: options[:default_order]
+              optional :order_by, type: Symbol, values: options[:order_by], default: options[:default_order_by]
             end
           end
         end
@@ -810,8 +814,9 @@ describe Grape::Validations do
         it 'by #use' do
           subject.params do
             use :pagination
+            use :order, default_order: :asc, order_by: [:name, :created_at], default_order_by: :created_at
           end
-          expect(subject.settings[:declared_params]).to eq [:page, :per_page]
+          expect(subject.settings[:declared_params]).to eq [:page, :per_page, :order, :order_by]
         end
 
         it 'by #use with multiple params' do
