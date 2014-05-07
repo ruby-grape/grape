@@ -822,6 +822,47 @@ describe Grape::Validations do
         end
 
       end
+
+      context 'with block' do
+        before do
+          subject.helpers do
+            params :order do |options|
+              optional :order, type: Symbol, values: [:asc, :desc], default: options[:default_order]
+              optional :order_by, type: Symbol, values: options[:order_by], default: options[:default_order_by]
+            end
+          end
+          subject.format :json
+          subject.params do
+            use :order, default_order: :asc, order_by: [:name, :created_at], default_order_by: :created_at
+          end
+          subject.get '/order' do
+            {
+              order: params[:order],
+              order_by: params[:order_by]
+            }
+          end
+        end
+        it 'returns defaults' do
+          get '/order'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq({ order: :asc, order_by: :created_at }.to_json)
+        end
+        it 'overrides default value for order' do
+          get '/order?order=desc'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq({ order: :desc, order_by: :created_at }.to_json)
+        end
+        it 'overrides default value for order_by' do
+          get '/order?order_by=name'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq({ order: :asc, order_by: :name }.to_json)
+        end
+        it 'fails with invalid value' do
+          get '/order?order=invalid'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('{"error":"order does not have a valid value"}')
+        end
+      end
     end
 
     context 'documentation' do

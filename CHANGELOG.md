@@ -3,6 +3,7 @@ Next Release
 
 #### Features
 
+* [#639](https://github.com/intridea/grape/pull/639): Added support for blocks with reusable params - [@mibon](https://github.com/mibon).
 * [#637](https://github.com/intridea/grape/pull/637): Added 'exactly_one_of' validation - [@Morred](https://github.com/Morred).
 * [#626](https://github.com/intridea/grape/pull/626): Mutually exclusive params - [@oliverbarnes](https://github.com/oliverbarnes).
 * [#617](https://github.com/intridea/grape/pull/617): Running tests on Ruby 2.1.1, Rubinius 2.1 and 2.2, Ruby and JRuby HEAD - [@dblock](https://github.com/dblock).

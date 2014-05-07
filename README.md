@@ -728,13 +728,43 @@ end
 class API < Grape::API
   helpers SharedParams
 
-  desc "Get collection"
+  desc "Get collection."
   params do
     use :period, :pagination
   end
+
   get do
-    Collection.from(params[:start_date]).to(params[:end_date])
-              .page(params[:page]).per(params[:per_page])
+    Collection
+      .from(params[:start_date])
+      .to(params[:end_date])
+      .page(params[:page])
+      .per(params[:per_page])
+  end
+end
+```
+
+Helpers support blocks that can help set default values. The following API can return a collection sorted by `id` or `created_at` in `asc` or `desc` order.
+
+```ruby
+module SharedParams
+  extend Grape::API::Helpers
+
+  params :order do |options|
+    optional :order_by, type:Symbol, values:options[:order_by], default:options[:default_order_by]
+    optional :order, type:Symbol, values:%i(asc desc), default:options[:default_order]
+  end
+end
+
+class API < Grape::API
+  helpers SharedParams
+
+  desc "Get a sorted collection."
+  params do
+    use :order, order_by:%i(id created_at), default_order_by: :created_at, default_order: :asc
+  end
+
+  get do
+    Collection.send(params[:order], params[:order_by])
   end
 end
 ```
@@ -1658,11 +1688,11 @@ describe 'an endpoint that needs helpers stubbed' do
       endpoint.stub!(:helper_name).and_return('desired_value')
     end
   end
-  
+
   after do
     Grape::Endpoint.before_each nil
   end
-  
+
   it 'should properly stub the helper' do
     # ...
   end

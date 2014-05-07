@@ -158,11 +158,12 @@ module Grape
 
       def use(*names)
         named_params = @api.settings[:named_params] || {}
+        options = names.last.is_a?(Hash) ? names.pop : {}
         names.each do |name|
           params_block = named_params.fetch(name) do
             raise "Params :#{name} not found!"
           end
-          instance_eval(&params_block)
+          instance_exec(options, &params_block)
         end
       end
       alias_method :use_scope, :use
