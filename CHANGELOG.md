@@ -3,6 +3,7 @@
 
 #### Features
 
+* [#995](https://github.com/intridea/grape/issues/995): Added support for coercion to Set or Set[Other] - [@jordansexton](https://github.com/jordansexton) [@u2](https://github.com/u2).
 * [#980](https://github.com/intridea/grape/issues/980): Grape is now eager-loaded - [@u2](https://github.com/u2).
 * [#956](https://github.com/intridea/grape/issues/956): Support `present` with `Grape::Presenters::Presenter`  - [@u2](https://github.com/u2).
 * [#974](https://github.com/intridea/grape/pull/974): Added `error!` to `rescue_from` blocks - [@whatasunnyday](https://github.com/whatasunnyday).
