@@ -1397,9 +1397,28 @@ Grape will automatically detect that there is a `Status::Entity` class and use t
 representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
-### Hypermedia
+### Roar And Hypermedia
 
-You can use any Hypermedia representer, including [Roar](https://github.com/apotonick/roar).
+Representers in [Roar](https://github.com/apotonick/roar) allow you to both render _and_ parse documents by declaring documents
+in modules or decorators.
+
+```ruby
+  class Status < Roar::Decorator
+    include Roar::Representer::JSON
+
+    property :user_name
+
+    collection :replies do
+      property :text
+    end
+
+    link :self do
+      "http://statuses/#{user_name}"
+    end
+```
+
+The DSL provides support for scalars, collection, nested models, hypermedia, HAL-JSON, and much more.
+
 Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON`
 into your models or call `to_json` explicitly in your API implementation.
 
