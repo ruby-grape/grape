@@ -38,8 +38,8 @@ module Grape
       end
 
       def valid_type?(val)
-        if @option.is_a?(Array)
-          _valid_array_type?(@option[0], val)
+        if @option.is_a?(Array) || @option.is_a?(Set)
+          _valid_array_type?(@option.first, val)
         else
           _valid_single_type?(@option, val)
         end
@@ -47,8 +47,9 @@ module Grape
 
       def coerce_value(type, val)
         # Don't coerce things other than nil to Arrays or Hashes
-        return val || [] if type == Array
-        return val || {} if type == Hash
+        return val || []      if type == Array
+        return val || Set.new if type == Set
+        return val || {}      if type == Hash
 
         converter = Virtus::Attribute.build(type)
         converter.coerce(val)
