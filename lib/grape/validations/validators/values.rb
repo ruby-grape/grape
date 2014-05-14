@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    class ValuesValidator < Validator
+    class ValuesValidator < Base
       def initialize(attrs, options, required, scope)
         @values = options
         @required = required

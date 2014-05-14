@@ -32,6 +32,19 @@ module Grape
 
   autoload :Cookies,             'grape/cookies'
   autoload :Validations,         'grape/validations'
+
+  # module Validations
+  #   autoload :Base,                         'grape/validations/validators/base'
+  #   autoload :SingleOptionValidator,        'grape/validations/validators/single_option'
+  #   autoload :CoerceValidator,              'grape/validations/validators/coerce'
+  #   autoload :DefaultValidator,             'grape/validations/validators/default'
+  #   autoload :ExactlyOneOfValidator,        'grape/validations/validators/exactly_one_of'
+  #   autoload :MutualExclusionValidator,     'grape/validations/validators/mutual_exclusion'
+  #   autoload :PresenceValidator,            'grape/validations/validators/presence'
+  #   autoload :RegexpValidator,              'grape/validations/validators/regexp'
+  #   autoload :ValuesValidator,              'grape/validations/validators/values'
+  # end
+
   autoload :Request,             'grape/http/request'
 
   module Exceptions
