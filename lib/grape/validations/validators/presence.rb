@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    class PresenceValidator < Validator
+    class PresenceValidator < Base
       def validate!(params)
         return unless @scope.should_validate?(params)
         super

@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    class MutualExclusionValidator < Validator
+    class MutualExclusionValidator < Base
       attr_reader :params
 
       def validate!(params)
