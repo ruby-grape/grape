@@ -19,7 +19,7 @@ describe Grape::Validations::CoerceValidator do
       end
 
       it "i18n error on malformed input" do
-        I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
+        I18n.load_path << File.expand_path('../../zh-CN.yml', __FILE__)
         I18n.reload!
         I18n.locale = 'zh-CN'.to_sym
         subject.params do

@@ -310,6 +310,6 @@ module Grape
 end
 
 # Load all defined validations.
-Dir[File.expand_path('../validations/*.rb', __FILE__)].each do |path|
+Dir[File.expand_path('../validations/validators/*.rb', __FILE__)].each do |path|
   require(path)
 end
