@@ -1343,6 +1343,18 @@ describe Grape::API do
       expect { get '/uncaught_parent' }.to raise_error(StandardError)
     end
 
+    it 'sets rescue_subclasses to true by default' do
+      subject.rescue_from APIErrors::ParentError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/caught_child' do
+        raise APIErrors::ChildError
+      end
+
+      get '/caught_child'
+      expect(last_response.status).to eql 500
+    end
+
     it 'does not rescue child errors if rescue_subclasses is false' do
       subject.rescue_from APIErrors::ParentError, rescue_subclasses: false do |e|
         rack_response("rescued from #{e.class.name}", 500)
