@@ -214,7 +214,13 @@ module Grape
         options = args.last.is_a?(Hash) ? args.pop : {}
         handler ||= proc { options[:with] } if options.key?(:with)
 
-        handler_type = !!options[:rescue_subclasses] ? :rescue_handlers : :base_only_rescue_handlers
+        handler_type =
+          case options[:rescue_subclasses]
+          when nil, true
+            :rescue_handlers
+          else
+            :base_only_rescue_handlers
+          end
         imbue handler_type, Hash[args.map { |arg| [arg, handler] }]
 
         imbue(:rescue_options, options)
