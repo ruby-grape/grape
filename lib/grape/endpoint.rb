@@ -441,7 +441,8 @@ module Grape
             error_formatters: settings[:error_formatters],
             rescue_options: settings[:rescue_options],
             rescue_handlers: merged_setting(:rescue_handlers),
-            base_only_rescue_handlers: merged_setting(:base_only_rescue_handlers)
+            base_only_rescue_handlers: merged_setting(:base_only_rescue_handlers),
+            all_rescue_handler: settings[:all_rescue_handler]
 
       aggregate_setting(:middleware).each do |m|
         m = m.dup

@@ -1243,6 +1243,17 @@ describe Grape::API do
         expect(last_response.status).to eql 500
         expect(last_response.body).to eq('rescued from ConnectionError')
       end
+      it 'rescues a subclass of an error by default' do
+        subject.rescue_from RuntimeError do |e|
+          rack_response("rescued from #{e.class.name}", 500)
+        end
+        subject.get '/exception' do
+          raise ConnectionError
+        end
+        get '/exception'
+        expect(last_response.status).to eql 500
+        expect(last_response.body).to eq('rescued from ConnectionError')
+      end
       it 'rescues multiple specific errors' do
         subject.rescue_from ConnectionError do |e|
           rack_response("rescued from #{e.class.name}", 500)
@@ -1341,6 +1352,18 @@ describe Grape::API do
       get '/caught_parent'
       expect(last_response.status).to eql 500
       expect { get '/uncaught_parent' }.to raise_error(StandardError)
+    end
+
+    it 'sets rescue_subclasses to true by default' do
+      subject.rescue_from APIErrors::ParentError do |e|
+        rack_response("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/caught_child' do
+        raise APIErrors::ChildError
+      end
+
+      get '/caught_child'
+      expect(last_response.status).to eql 500
     end
 
     it 'does not rescue child errors if rescue_subclasses is false' do

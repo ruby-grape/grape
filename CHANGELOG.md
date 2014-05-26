@@ -12,6 +12,7 @@ Next Release
 
 #### Fixes
 
+* [#651](https://github.com/intridea/grape/pull/651): The `rescue_from` keyword now properly defaults to rescuing subclasses of exceptions - [@xevix](https://github.com/xevix).
 * [#614](https://github.com/intridea/grape/pull/614): Params with `nil` value are now refused by `RegexpValidator` - [@dm1try](https://github.com/dm1try).
 * [#494](https://github.com/intridea/grape/issues/494): Fixed performance issue with requests carrying a large payload - [@dblock](https://github.com/dblock).
 * [#619](https://github.com/intridea/grape/pull/619): Convert specs to RSpec 3 syntax with Transpec - [@danielspector](https://github.com/danielspector).

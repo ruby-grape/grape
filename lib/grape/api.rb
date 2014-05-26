@@ -214,12 +214,22 @@ module Grape
         options = args.last.is_a?(Hash) ? args.pop : {}
         handler ||= proc { options[:with] } if options.key?(:with)
 
-        handler_type = !!options[:rescue_subclasses] ? :rescue_handlers : :base_only_rescue_handlers
-        imbue handler_type, Hash[args.map { |arg| [arg, handler] }]
+        if args.include?(:all)
+          set(:rescue_all, true)
+          imbue :all_rescue_handler, handler
+        else
+          handler_type =
+            case options[:rescue_subclasses]
+            when nil, true
+              :rescue_handlers
+            else
+              :base_only_rescue_handlers
+            end
+
+          imbue handler_type, Hash[args.map { |arg| [arg, handler] }]
+        end
 
         imbue(:rescue_options, options)
-
-        set(:rescue_all, true) if args.include?(:all)
       end
 
       # Allows you to specify a default representation entity for a
