@@ -1040,11 +1040,11 @@ rescue_from APIErrors::ParentError do |e|
 end
 ```
 
-To only rescue the base exception class, set `rescue_subclasses: false`.
-The code below will rescue exceptions of type `RuntimeError` but _not_ its subclasses.
+By default, Grape will only rescue the base exception class. To rescue subclasses, set `rescue_subclasses: true`.
+The code below will rescue exceptions of type `RuntimeError` and all its subclasses.
 
 ```ruby
-rescue_from RuntimeError, rescue_subclasses: false do |e|
+rescue_from RuntimeError, rescue_subclasses: true do |e|
     Rack::Response.new(
       status: e.status,
       message: e.message,
