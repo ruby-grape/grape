@@ -47,8 +47,7 @@ module Grape
       end
 
       def rescuable?(klass)
-        res = options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
-        res
+        options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
       end
 
       def exec_handler(e, &handler)
