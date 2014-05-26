@@ -14,7 +14,8 @@ module Grape
           rescue_subclasses: true, # rescue subclasses of exceptions listed
           rescue_options: { backtrace: false }, # true to display backtrace
           rescue_handlers: {}, # rescue handler blocks
-          base_only_rescue_handlers: {} # rescue handler blocks rescuing only the base class
+          base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
+          all_rescue_handler: nil # rescue handler block to rescue from all exceptions
         }
       end
 
@@ -39,13 +40,15 @@ module Grape
       end
 
       def find_handler(klass)
-        handler = options[:rescue_handlers].find(-> { [] }) { |error, _| error.is_a?(Class) && klass <= error }[1] || options[:rescue_handlers][:all]
-        handler = options[:base_only_rescue_handlers][klass] || options[:base_only_rescue_handlers][:all] unless handler
+        handler = options[:rescue_handlers].find(-> { [] }) { |error, _| error.is_a?(Class) && klass <= error }[1]
+        handler = options[:base_only_rescue_handlers][klass] unless handler
+        handler = options[:all_rescue_handler] unless handler
         handler
       end
 
       def rescuable?(klass)
-        options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
+        res = options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
+        res
       end
 
       def exec_handler(e, &handler)
