@@ -13,6 +13,7 @@ require 'rack/test'
 require 'base64'
 require 'cookiejar'
 require 'json'
+require 'mime/types'
 
 Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
   require file

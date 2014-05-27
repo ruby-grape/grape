@@ -1,4 +1,4 @@
-![grape logo](https://github.com/intridea/grape/wiki/grape_logo.png)
+![grape logo](grape.png)
 
 [![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-pages.github.io/github/intridea/grape.png)](http://inch-pages.github.io/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
 
@@ -1205,6 +1205,21 @@ The order for choosing the format is the following.
 * Attempt to find an acceptable format from the `Accept` header.
 * Use the default format, if specified by the `default_format` option.
 * Default to `:txt`.
+
+You can override this process explicitly by specifying `env['api.format']` in the API itself.
+For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
+
+```ruby
+class Twitter::API < Grape::API
+  post "attachment" do
+    filename = params[:file][:filename]
+    content_type MIME::Types.type_for(filename)[0].to_s
+    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+    params[:file][:tempfile].read
+  end
+end
+```
 
 ### JSONP
 

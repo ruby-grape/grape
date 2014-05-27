@@ -9,7 +9,6 @@ describe Grape::API do
   end
 
   describe '.prefix' do
-
     it 'routes root through with the prefix' do
       subject.prefix 'awesome/sauce'
       subject.get do
@@ -32,7 +31,6 @@ describe Grape::API do
       get '/hello'
       expect(last_response.status).to eql 404
     end
-
   end
 
   describe '.version' do
@@ -776,6 +774,42 @@ describe Grape::API do
       it 'sets content type for error' do
         get '/error.custom'
         expect(last_response.headers['Content-Type']).to eql 'application/custom'
+      end
+    end
+
+    context 'env["api.format"]' do
+      before do
+        subject.post "attachment" do
+          filename = params[:file][:filename]
+          content_type MIME::Types.type_for(filename)[0].to_s
+          env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+          header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+          params[:file][:tempfile].read
+        end
+      end
+
+      ['/attachment.png', 'attachment'].each do |url|
+        it "uploads and downloads a PNG file via #{url}" do
+          image_filename = "grape.png"
+          post url, file: Rack::Test::UploadedFile.new(image_filename, 'image/png', true)
+          last_response.status.should == 201
+          last_response.headers['Content-Type'].should == "image/png"
+          last_response.headers['Content-Disposition'].should == "attachment; filename*=UTF-8''grape.png"
+          File.open(image_filename, 'rb') do |io|
+            last_response.body.should eq io.read
+          end
+        end
+      end
+
+      it "uploads and downloads a Ruby file" do
+        filename = __FILE__
+        post "/attachment.rb", file: Rack::Test::UploadedFile.new(filename, 'application/x-ruby', true)
+        last_response.status.should == 201
+        last_response.headers['Content-Type'].should == "application/x-ruby"
+        last_response.headers['Content-Disposition'].should == "attachment; filename*=UTF-8''api_spec.rb"
+        File.open(filename, 'rb') do |io|
+          last_response.body.should eq io.read
+        end
       end
     end
   end
