@@ -1716,6 +1716,30 @@ end
 
 ## Reloading API Changes in Development
 
+### Rails 4.x
+
+Add API paths to `config/application.rb`.
+
+```ruby
+# Auto-load API and its subdirectories
+config.paths.add File.join("app", "api"), glob: File.join("**", "*.rb")
+config.autoload_paths += Dir[Rails.root.join("app", "api", "*")]
+```
+
+Create `config/initializers/reload_api.rb`.
+
+```ruby
+if Rails.env.development?
+  api_files = Dir[Rails.root.join('app', 'api', '**', '*.rb')]
+  api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
+    Rails.application.reload_routes!
+  end
+  ActionDispatch::Callbacks.to_prepare do
+    api_reloader.execute_if_updated
+  end
+end
+```
+
 ### Rails 3.x
 
 Add API paths to `config/application.rb`.
