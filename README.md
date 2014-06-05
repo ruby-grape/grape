@@ -1599,7 +1599,7 @@ default anchors requests to match from the start to the end, or not at all.
 Rails solves this problem by using a `anchor: false` option in your routes.
 In Grape this option can be used as well when a method is defined.
 
-For instance when you're API needs to get part of an URL, for instance:
+For instance when your API needs to get part of an URL, for instance:
 
 ```ruby
 class TwitterAPI < Grape::API
