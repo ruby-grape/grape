@@ -1,6 +1,6 @@
 ![grape logo](grape.png)
 
-[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-ci.org/github/intridea/grape.png)](http://inch-ci.org/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-ci.org/github/intridea/grape.png)](http://inch-ci.org/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.7.0/badge.png)](https://www.versioneye.com/ruby/grape/0.7.0)
 
 ## Table of Contents
 
