@@ -1045,7 +1045,7 @@ The code below will rescue exceptions of type `RuntimeError` but _not_ its subcl
 
 ```ruby
 rescue_from RuntimeError, rescue_subclasses: false do |e|
-    Rack::Response.new(
+    Rack::Response.new({
       status: e.status,
       message: e.message,
       errors: e.errors
