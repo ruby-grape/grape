@@ -2,7 +2,7 @@ Next Release
 ============
 
 #### Features
-
+* Added support for crud_resources, allowing the 7 typical crud routes to be added with a single line - @Halloran(https://github.com/halloran)
 * [#639](https://github.com/intridea/grape/pull/639): Added support for blocks with reusable params - [@mibon](https://github.com/mibon).
 * [#637](https://github.com/intridea/grape/pull/637): Added 'exactly_one_of' validation - [@Morred](https://github.com/Morred).
 * [#626](https://github.com/intridea/grape/pull/626): Mutually exclusive params - [@oliverbarnes](https://github.com/oliverbarnes).

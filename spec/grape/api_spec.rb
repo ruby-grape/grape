@@ -191,6 +191,83 @@ describe Grape::API do
     end
   end
 
+  describe '.crud_resource' do
+    context "when run with only a resource name" do  
+      before(:all) do 
+        @route_methods = { index: ['get', '/posts', nil], 
+                          :new => ['get', '/posts/new', nil], 
+                          create: ['post', '/posts', { :post => { text: 'test' } } ],
+                          show: ['get', '/posts/1', nil],
+                          edit: ['get', '/posts/1/edit', nil],
+                          update: ['patch', '/posts/1', {post: { text: 'test' } } ],
+                          destroy: ['delete', '/posts/1', nil]}
+      end
+      it 'creates seven crud routes by default' do
+        Post = double("Post")
+        @route_methods.keys.each do |r|
+          allow(Post).to receive(r).and_return("this is #{r.to_s}")
+        end
+
+        subject.crud_resources :post
+        
+        @route_methods.each do |k,v|
+          send(v[0], v[1], v[2])
+          expect(last_response.body).to eql "this is #{k.to_s}"
+          expect(last_response.status).to eq(v[0] == 'post' ? 201 : 200)
+        end
+      end
+      it 'routes to a named Controller model when :controller is used' do
+        PostsController = double("PostsController")
+        
+        subject.crud_resources :post, controller: 'PostsController'
+        PostsController.should_receive(:index)
+        get '/posts'
+        PostsController.should_receive(:new)
+        get '/posts/new'
+        PostsController.should_receive(:create)
+        post '/posts', :post => { text: 'test' }
+        PostsController.should_receive(:show).with(1)
+        get '/posts/1'
+        PostsController.should_receive(:edit).with(1)
+        get '/posts/1/edit'
+        PostsController.should_receive(:update)
+        patch 'posts/1', :post => { text: 'test' }
+        PostsController.should_receive(:destroy).with(1)
+        delete 'posts/1'
+      end
+      it 'generates only the the appropriate routes when :only is used' do
+        [:index, :show].each do |r|
+          allow(Post).to receive(r).and_return("this is #{r.to_s}")
+        end
+        subject.crud_resources :post, only: [:index, :show]
+        
+        get '/posts'
+        expect(last_response.status).to eq(200)
+        get '/posts/new'
+        expect(last_response.status).to eq(400)
+        post '/posts', :post => { text: 'test' }
+        expect(last_response.status).to eq(405)
+        get '/posts/1'
+        expect(last_response.status).to eq(200)
+      end
+      it 'generates the unnamed routes when :except is used' do
+        subject.crud_resources :post, except: [:update, :destroy]
+        Post.should_receive(:index)
+        get '/posts'
+        Post.should_receive(:new)
+        get '/posts/new'
+        Post.should_receive(:create)
+        post '/posts', :post => { text: 'test' }
+        Post.should_receive(:show).with(1)
+        get '/posts/1'
+        Post.should_not_receive(:update)
+        patch 'posts/1', :post => { text: 'test' }
+        Post.should_not_receive(:destroy).with(1)
+        delete 'posts/1'  
+      end
+    end
+  end
+
   describe '.route_param' do
     it 'adds a parameterized route segment namespace' do
       subject.namespace :users do
