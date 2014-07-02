@@ -553,24 +553,24 @@ end
 
 ### crud_resource
 
-Use crud_resource (also aliased as crud_resources) to create seven default routes for you resource(s)
+Use crud_resource (also aliased as crud_resources) to create seven default routes for your resource(s)
 
 ```ruby
 crud_resources [:tweets, :other_model]
 ```
-will create routes into the Tweet and OtherModel objects, rails style:
-get /tweets -> Tweet.index
-get /tweets/new -> Tweet.new
-post /tweets -> Tweet.create
-get /tweets/:id -> Tweet.show
-get /tweets/:id/edit -> Tweet.edit
-patch /tweets/:id -> Tweet.update
-delete /tweets/:id -> Tweet.destroy
-[and similar for OtherModel]
+will create routes into the Tweet and OtherModel objects,  rails style:  
+get /tweets -> Tweet.index  
+get /tweets/new -> Tweet.new  
+post /tweets -> Tweet.create  
+get /tweets/:id -> Tweet.show  
+get /tweets/:id/edit -> Tweet.edit  
+patch /tweets/:id -> Tweet.update  
+delete /tweets/:id -> Tweet.destroy  
+[and similar for OtherModel]  
 
 Add the :controller parameter to specify a Controller model rather than the object of resource name:
 ```ruby
-crud_resources [:tweets, :other_model], controller: ['TweetsController', OtherModelsController]
+crud_resources [:tweets, :other_model], controller: ['TweetsController', 'OtherModelsController']
 ```
 will route into the XxxController model instead
 
