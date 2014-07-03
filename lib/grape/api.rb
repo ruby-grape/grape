@@ -437,10 +437,106 @@ module Grape
         namespace(":#{param}", options, &block)
       end
 
+      # returns a block to be used for creating CRUD routes on the
+      # specified resource
+      def build_crud_block(namespace, crud_routes, controller_name = nil)
+        klass = Object.const_get(namespace.to_s.camelize)
+        controller_klass = controller_name ? Object.const_get(controller_name.to_s.camelize) : klass
+        klass_plural = namespace.to_s.pluralize
+        Proc.new{ 
+          # Generate a 400 if an assumed method does not exist,
+          # rather than passing along internal error
+          rescue_from NoMethodError do |e|
+            Rack::Response.new([ "Bad Request" ], 400, { "Content-type" => "text/error" }).finish
+          end
+          if crud_routes.include? :index
+            desc "Returns a listing of #{klass} objects"
+            get do
+              controller_klass.send(:index)
+            end
+          end
+          if crud_routes.include? :new
+            desc "Returns a new #{klass} object for later creation"
+            get :new do
+              controller_klass.send(:new)
+            end
+          end
+          if crud_routes.include? :create  
+            desc "Creates a #{klass}"
+            params do 
+              requires namespace, type: Hash, desc: "Your #{klass}"
+            end
+            post do 
+              controller_klass.send(:create, params[namespace])
+            end 
+          end
+          if crud_routes.include? :show
+            params do 
+              requires :id, type: Integer, desc: "#{klass} id"
+            end
+            get ':id' do 
+              controller_klass.send(:show, params[:id])
+            end
+          end
+          if crud_routes.include? :edit
+            params do 
+              requires :id, type: Integer, desc: "#{klass} id"
+            end
+            get ':id/edit' do
+              controller_klass.send(:edit, params[:id])
+            end
+          end
+          if crud_routes.include? :destroy
+            desc "Destroys a #{klass}"
+            params do 
+              requires :id, type: Integer, desc: "#{klass} id"
+            end
+            delete ':id' do
+              controller_klass.send(:destroy, params[:id])
+            end
+          end
+          if crud_routes.include? :update
+            desc "Updates a #{klass}"
+            params do 
+              requires :id, type: Integer, desc: "ID of the #{namespace} to be updated"
+              requires namespace, type: Hash, desc: "Your #{namespace}"
+            end
+            patch ':id' do 
+              controller_klass.send(:update, params[:id], params[namespace])
+            end 
+          end
+        }
+      end
+
+      # allow for the creation of seven default routes, Rails-syle
+      def crud_resource(space = nil, options = {},  &block)
+        crud_options = options.extract!(:controller, :only, :except)
+        space = Array(space)
+        if crud_options[:controller]
+          crud_options[:controller] = Array(crud_options[:controller])
+          unless space.size == crud_options[:controller].size
+            raise "If specifying the controller, you must provide the same number of controller names as crud_resource names"
+          end
+        end
+        if crud_options.slice(:except, :only).size > 1
+          raise "You may not specify both :except and :only when using crud_resource"
+        end
+
+        crud_routes = crud_options[:only] ? Array(crud_options[:only]) & [:index, :new, :create, :show, :edit, :update, :destroy] : [:index, :new, :create, :show, :edit, :update, :destroy]
+        if crud_options[:except] 
+          crud_routes = crud_routes - Array(crud_options[:except]) 
+        end
+        space.size.times do |i|
+          crud_block = build_crud_block(space[i], crud_routes, crud_options[:controller] ? crud_options[:controller][i] : nil)
+          namespace(space[i].to_s.pluralize.to_sym, options, &crud_block)
+        end
+      end
+
       alias_method :group, :namespace
       alias_method :resource, :namespace
       alias_method :resources, :namespace
       alias_method :segment, :namespace
+      alias_method :crud_resources, :crud_resource
 
       # Create a scope without affecting the URL.
       #
