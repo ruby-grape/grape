@@ -174,6 +174,10 @@ module Grape
         name.to_s
       end
 
+      def root?
+        !@parent
+      end
+
       protected
 
       def push_declared_params(attrs)
