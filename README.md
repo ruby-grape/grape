@@ -1360,9 +1360,10 @@ module API
   class Statuses < Grape::API
     version 'v1'
 
-    desc 'Create a status', {
+    desc 'Create a status'
+    params do
       requires :all, except: [:ip], using: API::Entities::Status.documentation.except(:id)
-    }
+    end
     post '/status' do
       Status.create! params
     end
