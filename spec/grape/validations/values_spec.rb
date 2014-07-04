@@ -49,6 +49,13 @@ describe Grape::Validations::ValuesValidator do
         get '/values/coercion' do
           { type: params[:type] }
         end
+
+        params do
+          optional :optional do
+            requires :type, values: ["a", "b"]
+          end
+        end
+        get '/optional_with_required_values'
       end
     end
   end
@@ -69,10 +76,17 @@ describe Grape::Validations::ValuesValidator do
     expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
   end
 
-  it 'does not allow nil value for a parameter' do
-    get("/", type: nil)
-    expect(last_response.status).to eq 400
-    expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
+  context 'nil value for a parameter' do
+    it 'does not allow for root params scope' do
+      get("/", type: nil)
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
+    end
+
+    it 'allows for a required param in child scope' do
+      get('/optional_with_required_values')
+      expect(last_response.status).to eq 200
+    end
   end
 
   it 'allows a valid default value' do
