@@ -63,6 +63,8 @@
 - [Performance Monitoring](#performance-monitoring)
 - [Contributing to Grape](#contributing-to-grape)
 - [Hacking on Grape](#hacking-on-grape)
+- [Supported Ruby Versions](#supported-ruby-versions)
+- [Supported Rails Versions](#supported-rails-versions)
 - [License](#license)
 - [Copyright](#copyright)
 
@@ -1764,6 +1766,46 @@ You can start hacking on Grape on
 [Nitrous.IO](https://www.nitrous.io/?utm_source=github.com&utm_campaign=grape&utm_medium=hackonnitrous) in a matter of seconds:
 
 [![Hack intridea/grape on Nitrous.IO](https://d3o0mnbgv6k92a.cloudfront.net/assets/hack-l-v1-3cc067e71372f6045e1949af9d96095b.png)](https://www.nitrous.io/hack_button?source=embed&runtime=rails&repo=intridea%2Fgrape&file_to_open=README.md)
+
+## Supported Ruby Versions
+
+This library aims to support and is [tested against][travis] the following Ruby
+implementations:
+
+* Ruby 1.9.3
+* Ruby 2.0.0
+* Ruby 2.1.0
+* Ruby 2.1.1
+* JRuby (1.9.3 compatible)
+* Rubinius 2.1
+* Rubinius 2.2
+
+[travis]: https://travis-ci.org/intridea/grape
+
+If something doesn't work on one of these Ruby versions, please open an
+[issue](https://github.com/intridea/grape/issues).
+
+This library may inadvertently work (or seem to work) on other Ruby
+implementations, however support will only be provided for the versions listed
+above.
+
+If you would like this library to support another Ruby version, you may
+volunteer to be a maintainer. Being a maintainer entails making sure all tests
+run and pass on that implementation. When something breaks on your
+implementation, you will be responsible for providing patches in a timely
+fashion. If critical issues for a particular implementation exist at the time
+of a major release, support for that Ruby version may be dropped.
+
+## Supported Rails Versions
+
+This library aims to support the following versions of Rails:
+
+* Rails 2.x
+* Rails 3.x
+* Rails 4.x
+
+If something doesn't work on one of these Rails versions, please open an
+[issue](https://github.com/intridea/grape/issues).
 
 ## License
 
