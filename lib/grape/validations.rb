@@ -195,10 +195,13 @@ module Grape
           optional_fields = opts[:using].keys - required_fields
         end
         required_fields.each do |field|
-          requires(field, opts[:using][field])
+          field_opts = opts[:using][field]
+          raise ArgumentError, "required field not exist: #{field}" unless field_opts
+          requires(field, field_opts)
         end
         optional_fields.each do |field|
-          optional(field, opts[:using][field])
+          field_opts = opts[:using][field]
+          optional(field, field_opts) if field_opts
         end
       end
 

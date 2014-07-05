@@ -148,6 +148,41 @@ describe Grape::Validations do
       end
     end
 
+    context 'requires :all or :none but except a non-existent field using Grape::Entity documentation' do
+      context 'requires :all' do
+        def define_requires_all
+          documentation = {
+            required_field: { type: String },
+            optional_field: { type: String }
+          }
+          subject.params do
+            requires :all, except: :non_existent_field, using: documentation
+          end
+        end
+
+        it 'adds only the entity documentation to declared params, nothing more' do
+          define_requires_all
+          expect(subject.settings[:declared_params]).to eq([:required_field, :optional_field])
+        end
+      end
+
+      context 'requires :none' do
+        def define_requires_none
+          documentation = {
+            required_field: { type: String },
+            optional_field: { type: String }
+          }
+          subject.params do
+            requires :none, except: :non_existent_field, using: documentation
+          end
+        end
+
+        it 'adds only the entity documentation to declared params, nothing more' do
+          expect { define_requires_none }.to raise_error(ArgumentError)
+        end
+      end
+    end
+
     context 'required with an Array block' do
       before do
         subject.params do
