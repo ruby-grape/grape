@@ -14,6 +14,12 @@ group :development, :test do
   gem 'guard-rspec'
   gem 'guard-rubocop'
   gem 'mime-types'
+
+  if RUBY_VERSION >= '2.0.0'
+    gem 'pry-byebug'
+  else
+    gem 'pry-debugger'
+  end
 end
 
 platforms :rbx do

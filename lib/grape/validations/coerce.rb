@@ -26,8 +26,8 @@ module Grape
       end
 
       def _valid_single_type?(klass, val)
-        # allow nil, to ignore when a parameter is absent
-        return true if val.nil?
+        # no longer allowing nil as a valid type if a different type specified
+        return false if val.nil?
         if klass == Virtus::Attribute::Boolean
           val.is_a?(TrueClass) || val.is_a?(FalseClass)
         elsif klass == Rack::Multipart::UploadedFile
