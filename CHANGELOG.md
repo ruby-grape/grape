@@ -1,5 +1,5 @@
-Next Release
-============
+0.8.0 (7/10/2014)
+=================
 
 #### Features
 
@@ -9,7 +9,6 @@ Next Release
 * [#617](https://github.com/intridea/grape/pull/617): Running tests on Ruby 2.1.1, Rubinius 2.1 and 2.2, Ruby and JRuby HEAD - [@dblock](https://github.com/dblock).
 * [#397](https://github.com/intridea/grape/pull/397): Adds `Grape::Endpoint.before_each` to allow easy helper stubbing - [@mbleigh](https://github.com/mbleigh).
 * [#673](https://github.com/intridea/grape/pull/673): Avoid requiring non-existent fields when using Grape::Entity documentation - [@qqshfox](https://github.com/qqshfox).
-* Your contribution here.
 
 #### Fixes
 

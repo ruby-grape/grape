@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to 0.7.0
+### Upgrading to >= 0.7.0
 
 #### Changes in Exception Handling
 
