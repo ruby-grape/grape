@@ -146,6 +146,21 @@ describe Grape::Validations::ValuesValidator do
 
   context 'when type is Integer' do
     context 'when parameter is optional' do
+
+      context 'when parameter value is an integer' do
+        it 'does not raise an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: 5)
+          expect(last_response.status).to eq 200
+        end
+      end
+
+      context 'when parameter value is an integer-valued string' do
+        it 'does not raise an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: '5')
+          expect(last_response.status).to eq 200
+        end
+      end
+
       context 'when parameter is not passed in at all' do
         it 'does not raise an error' do
           get("/values/optional_does_not_allow_nil_for_integer")
@@ -153,9 +168,33 @@ describe Grape::Validations::ValuesValidator do
         end
       end
 
-      context 'when paramter is explicitly set to nil' do
+      context 'when parameter value is explicitly set to nil' do
         it 'raises an error' do
           get("/values/optional_does_not_allow_nil_for_integer", type: nil)
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is a non-numeric string' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: 'gofish')
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is an empty string' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: '')
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is an Array' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: ['howdy'])
           expect(last_response.status).to eq 400
           expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
         end
@@ -163,6 +202,21 @@ describe Grape::Validations::ValuesValidator do
     end
 
     context 'when parameter is required' do
+
+      context 'when parameter value is an integer' do
+        it 'does not raise an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: 5)
+          expect(last_response.status).to eq 200
+        end
+      end
+
+      context 'when parameter value is an integer-valued string' do
+        it 'does not raise an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: '5')
+          expect(last_response.status).to eq 200
+        end
+      end
+
       context 'when parameter is not passed in at all' do
         it 'raises an error' do
           get("/values/required_does_not_allow_nil_for_integer")
@@ -171,9 +225,33 @@ describe Grape::Validations::ValuesValidator do
         end
       end
 
-      context 'when paramter is explicitly set to nil' do
+      context 'when parameter value is explicitly set to nil' do
         it 'raises an error' do
           get("/values/required_does_not_allow_nil_for_integer", type: nil)
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is a non-numeric string' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: 'gofish')
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is an empty string' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: '')
+          expect(last_response.status).to eq 400
+          expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
+        end
+      end
+
+      context 'when parameter value is an Array' do
+        it 'raises an error' do
+          get("/values/optional_does_not_allow_nil_for_integer", type: ['howdy'])
           expect(last_response.status).to eq 400
           expect(last_response.body).to eq({ error: "type is invalid" }.to_json)
         end
