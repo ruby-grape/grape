@@ -1413,11 +1413,9 @@ Grape will automatically detect that there is a `Status::Entity` class and use t
 representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
-### Hypermedia
+### Hypermedia and Roar
 
-You can use any Hypermedia representer, including [Roar](https://github.com/apotonick/roar).
-Roar renders JSON and works with the built-in Grape JSON formatter. Add `Roar::Representer::JSON`
-into your models or call `to_json` explicitly in your API implementation.
+You can use [Roar](https://github.com/apotonick/roar) to render HAL or Collection+JSON with the help of [grape-roar](https://github.com/dblock/grape-roar), which defines a custom JSON formatter and enables presenting entities with Grape's `present` keyword.
 
 ### Rabl
 
