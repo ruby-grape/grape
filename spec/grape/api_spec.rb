@@ -2151,6 +2151,26 @@ describe Grape::API do
         expect(last_response.body).to eq("sauce")
       end
 
+      it 'mounts on two different paths' do
+        subject.namespace :cool do
+          class TestAPI < Grape::API
+            get '/awesome' do
+              "sauce"
+            end
+          end
+          mount TestAPI => '/mounted'
+          mount TestAPI => '/double'
+        end
+
+        get "/mounted/cool/awesome"
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq("sauce")
+
+        get "/double/cool/awesome"
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq("sauce")
+      end
+
       it 'mounts on a nested path' do
         app1 = Class.new(Grape::API)
         app2 = Class.new(Grape::API)
