@@ -3,11 +3,11 @@ require 'grape/exceptions/base'
 module Grape
   module Exceptions
     class Validation < Grape::Exceptions::Base
-      attr_accessor :param
+      attr_accessor :params
 
       def initialize(args = {})
-        raise "Param is missing:" unless args.key? :param
-        @param = args[:param]
+        raise "Params are missing:" unless args.key? :params
+        @params = args[:params]
         args[:message] = translate_message(args[:message_key]) if args.key? :message_key
         super
       end

@@ -659,7 +659,7 @@ describe Grape::Validations do
         class Customvalidator < Grape::Validations::Validator
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
-              raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: "is not custom!"
+              raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "is not custom!"
             end
           end
         end
@@ -929,7 +929,7 @@ describe Grape::Validations do
 
           get '/mutually_exclusive', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq("[:beer, :wine] are mutually exclusive")
+          expect(last_response.body).to eq "beer, wine are mutually exclusive"
         end
       end
 
@@ -949,8 +949,7 @@ describe Grape::Validations do
 
           get '/mutually_exclusive', beer: 'true', wine: 'true', scotch: 'true', aquavit: 'true'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to match(/\[:beer, :wine\] are mutually exclusive/)
-          expect(last_response.body).to match(/\[:scotch, :aquavit\] are mutually exclusive/)
+          expect(last_response.body).to eq "beer, wine are mutually exclusive, scotch, aquavit are mutually exclusive"
         end
       end
     end
@@ -970,7 +969,8 @@ describe Grape::Validations do
 
           get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq("[:beer, :wine] are mutually exclusive")
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq "beer, wine are mutually exclusive"
         end
 
         it 'errors when none is selected' do
@@ -986,7 +986,8 @@ describe Grape::Validations do
 
           get '/exactly_one_of'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq("[:beer, :wine, :juice] - exactly one parameter must be provided")
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq "beer, wine, juice are missing, exactly one parameter must be provided"
         end
       end
     end

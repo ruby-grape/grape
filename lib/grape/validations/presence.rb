@@ -8,7 +8,7 @@ module Grape
 
       def validate_param!(attr_name, params)
         unless params.respond_to?(:key?) && params.key?(attr_name)
-          raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message_key: :presence
+          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :presence
         end
       end
     end

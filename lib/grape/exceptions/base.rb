@@ -49,6 +49,12 @@ module Grape
         translate_message("#{key}.resolution", attributes)
       end
 
+      def translate_attributes(keys, options = {})
+        keys.map do |key|
+          translate("#{BASE_ATTRIBUTES_KEY}.#{key}", { default: key }.merge(options))
+        end.join(", ")
+      end
+
       def translate_attribute(key, options = {})
         translate("#{BASE_ATTRIBUTES_KEY}.#{key}", { default: key }.merge(options))
       end
