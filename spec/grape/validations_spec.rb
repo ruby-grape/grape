@@ -969,8 +969,30 @@ describe Grape::Validations do
 
           get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.status).to eq(400)
           expect(last_response.body).to eq "beer, wine are mutually exclusive"
+        end
+
+        it 'can return structured json with separate fields' do
+          subject.format :json
+          subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
+            rack_response e.to_json, 400
+          end
+          subject.params do
+            optional :beer
+            optional :wine
+            optional :juice
+            exactly_one_of :beer, :wine, :juice
+          end
+          subject.get '/exactly_one_of' do
+            'exactly_one_of works!'
+          end
+
+          get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
+          expect(last_response.status).to eq(400)
+          expect(JSON.parse(last_response.body)).to eq([
+            "params" => ["beer", "wine"],
+            "messages" => ["are mutually exclusive"]
+          ])
         end
 
         it 'errors when none is selected' do
@@ -985,7 +1007,6 @@ describe Grape::Validations do
           end
 
           get '/exactly_one_of'
-          expect(last_response.status).to eq(400)
           expect(last_response.status).to eq(400)
           expect(last_response.body).to eq "beer, wine, juice are missing, exactly one parameter must be provided"
         end

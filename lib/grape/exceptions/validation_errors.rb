@@ -24,6 +24,19 @@ module Grape
         end
       end
 
+      def as_json
+        errors.map do |k, v|
+          {
+            params: k,
+            messages: v.map(&:to_s)
+          }
+        end
+      end
+
+      def to_json
+        as_json.to_json
+      end
+
       private
 
       def full_messages
