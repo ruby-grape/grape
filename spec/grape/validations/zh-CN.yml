@@ -1,7 +1,7 @@
 zh-CN:
   grape:
     errors:
-      format: ! '%{attribute}%{message}'
+      format: ! '%{attributes}%{message}'
       attributes:
         age: 年龄
       messages:

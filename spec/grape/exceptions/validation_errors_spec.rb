@@ -3,7 +3,7 @@ require 'ostruct'
 
 describe Grape::Exceptions::ValidationErrors do
   let(:validation_message) { "FooBar is invalid" }
-  let(:validation_error) { OpenStruct.new(param: validation_message) }
+  let(:validation_error) { OpenStruct.new(params: [validation_message]) }
 
   context "message" do
     context "is not repeated" do

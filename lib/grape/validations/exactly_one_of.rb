@@ -7,7 +7,7 @@ module Grape
       def validate!(params)
         super
         if none_of_restricted_params_is_present
-          raise Grape::Exceptions::Validation, param: "#{all_keys}", message_key: :exactly_one
+          raise Grape::Exceptions::Validation, params: all_keys, message_key: :exactly_one
         end
         params
       end
@@ -19,7 +19,7 @@ module Grape
       end
 
       def all_keys
-        attrs.map(&:to_sym)
+        attrs.map(&:to_s)
       end
     end
   end

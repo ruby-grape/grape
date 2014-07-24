@@ -6,12 +6,12 @@ module Grape
   module Validations
     class CoerceValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
-        raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message_key: :coerce unless params.is_a? Hash
+        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce unless params.is_a? Hash
         new_value = coerce_value(@option, params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
         else
-          raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message_key: :coerce
+          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce
         end
       end
 

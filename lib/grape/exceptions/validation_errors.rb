@@ -10,8 +10,8 @@ module Grape
       def initialize(args = {})
         @errors = {}
         args[:errors].each do |validation_error|
-          @errors[validation_error.param] ||= []
-          @errors[validation_error.param] << validation_error
+          @errors[validation_error.params] ||= []
+          @errors[validation_error.params] << validation_error
         end
         super message: full_messages.join(', '), status: 400
       end
@@ -24,17 +24,30 @@ module Grape
         end
       end
 
+      def as_json
+        errors.map do |k, v|
+          {
+            params: k,
+            messages: v.map(&:to_s)
+          }
+        end
+      end
+
+      def to_json
+        as_json.to_json
+      end
+
       private
 
       def full_messages
-        map { |attribute, error| full_message(attribute, error) }.uniq
+        map { |attributes, error| full_message(attributes, error) }.uniq
       end
 
-      def full_message(attribute, error)
+      def full_message(attributes, error)
         I18n.t(
           "grape.errors.format".to_sym,
-          default: "%{attribute} %{message}",
-          attribute: translate_attribute(attribute),
+          default: "%{attributes} %{message}",
+          attributes: attributes.count > 1 ? translate_attributes(attributes) : translate_attribute(attributes.first),
           message: error.message
         )
       end

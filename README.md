@@ -445,7 +445,7 @@ params do
 end
 ```
 
-The :values option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
+The `:values` option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
 model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
 
 ```ruby
@@ -589,21 +589,28 @@ end
 
 ### Validation Errors
 
-Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised.
-If the exception goes uncaught it will respond with a status of 400 and an error message.
-You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom response.
+Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.
+
+
+The default response from a `Grape::Exceptions::ValidationErrors` is a humanly readable string, such as "beer, wine are mutually exclusive", in the following example.
 
 ```ruby
-rescue_from Grape::Exceptions::ValidationErrors do |e|
-    Rack::Response.new({
-      status: e.status,
-      message: e.message,
-      errors: e.errors
-    }.to_json, e.status)
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  exactly_one_of :beer, :wine, :juice
 end
 ```
 
-The validation errors are grouped by parameter name and can be accessed via ``Grape::Exceptions::ValidationErrors#errors``.
+You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom response or turn the response into well-formatted JSON for a JSON API that separates individual parameters and the corresponding error messages. The following `rescue_from` example produces `[{"params":["beer","wine"],"messages":["are mutually exclusive"]}]`.
+
+```ruby
+format :json
+subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
+  rack_response e.to_json, 400
+end
+```
 
 ### I18n
 

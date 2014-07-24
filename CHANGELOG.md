@@ -1,6 +1,7 @@
 0.8.1 (Next)
 ============
 
+* [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.8.0 (7/10/2014)
@@ -9,8 +10,8 @@
 #### Features
 
 * [#639](https://github.com/intridea/grape/pull/639): Added support for blocks with reusable params - [@mibon](https://github.com/mibon).
-* [#637](https://github.com/intridea/grape/pull/637): Added 'exactly_one_of' validation - [@Morred](https://github.com/Morred).
-* [#626](https://github.com/intridea/grape/pull/626): Mutually exclusive params - [@oliverbarnes](https://github.com/oliverbarnes).
+* [#637](https://github.com/intridea/grape/pull/637): Added support for `exactly_one_of` parameter validation - [@Morred](https://github.com/Morred).
+* [#626](https://github.com/intridea/grape/pull/626): Added support for `mutually_exclusive` parameters - [@oliverbarnes](https://github.com/oliverbarnes).
 * [#617](https://github.com/intridea/grape/pull/617): Running tests on Ruby 2.1.1, Rubinius 2.1 and 2.2, Ruby and JRuby HEAD - [@dblock](https://github.com/dblock).
 * [#397](https://github.com/intridea/grape/pull/397): Adds `Grape::Endpoint.before_each` to allow easy helper stubbing - [@mbleigh](https://github.com/mbleigh).
 * [#673](https://github.com/intridea/grape/pull/673): Avoid requiring non-existent fields when using Grape::Entity documentation - [@qqshfox](https://github.com/qqshfox).
