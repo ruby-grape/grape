@@ -3,14 +3,14 @@ language: ruby
 cache: bundler
 
 rvm:
-  - ruby-head
   - 2.1.2
   - 2.1.0
   - 2.0.0
   - 1.9.3
+  - rbx-2.2.10
   - jruby-19mode
+  - ruby-head
   - jruby-head
-  - rbx-2
 
 matrix:
   allow_failures:
