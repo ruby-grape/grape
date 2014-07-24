@@ -1,6 +1,7 @@
 0.8.1 (Next)
 ============
 
+* [#691](https://github.com/intridea/grape/issues/691): Added `at_least_one_of` parameter validator - [@dblock](https://github.com/dblock).
 * [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
 * Your contribution here.
 

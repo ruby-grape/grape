@@ -138,6 +138,10 @@ module Grape
         validates(attrs, exactly_one_of: true)
       end
 
+      def at_least_one_of(*attrs)
+        validates(attrs, at_least_one_of: true)
+      end
+
       def group(*attrs, &block)
         requires(*attrs, &block)
       end

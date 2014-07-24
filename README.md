@@ -510,6 +510,17 @@ params do
 end
 ```
 
+Parameters can be defined as 'at_least_one_of', ensuring that at least one parameter gets selected.
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  at_least_one :beer, :wine, :juice
+end
+```
+
 ### Namespace Validation and Coercion
 
 Namespaces allow parameter definitions and apply to every method within the namespace.
