@@ -49,6 +49,8 @@ module Grape
       require_option(options, :method)
 
       @settings = settings
+      @settings[:default_error_status] ||= 500
+
       @options = options
 
       @options[:path] = Array(options[:path])
@@ -225,8 +227,8 @@ module Grape
     # @param message [String] The message to display.
     # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
     def error!(message, status = nil, headers = nil)
-      status = settings[:default_error_status] unless status
-      throw :error, message: message, status: status, headers: headers
+      self.status(status || settings[:default_error_status])
+      throw :error, message: message, status: self.status, headers: headers
     end
 
     # Redirect to a new url.
@@ -435,7 +437,7 @@ module Grape
       b.use Grape::Middleware::Error,
             format: settings[:format],
             content_types: settings[:content_types],
-            default_status: settings[:default_error_status] || 500,
+            default_status: settings[:default_error_status],
             rescue_all: settings[:rescue_all],
             default_error_formatter: settings[:default_error_formatter],
             error_formatters: settings[:error_formatters],
