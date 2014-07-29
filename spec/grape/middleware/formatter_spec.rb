@@ -253,6 +253,28 @@ describe Grape::Middleware::Formatter do
         end
       end
     end
+
+    it 'parses the body when the body is a TempFile' do
+      method = 'POST'
+      content_type = 'application/json'
+
+      io = Tempfile.new('body.txt')
+      io.write('{"is_boolean":true,"string":"thing"}')
+      io.rewind
+
+      subject.call(
+                'PATH_INFO' => '/info',
+                'REQUEST_METHOD' => method,
+                'CONTENT_TYPE' => content_type,
+                'rack.input' => io,
+                'CONTENT_LENGTH' => io.length
+      )
+
+      params = subject.send(:request).params
+
+      expect(params).to eq('is_boolean' => true, 'string' => 'thing')
+    end
+
   end
 
 end
