@@ -73,12 +73,18 @@ module Grape
           if parser
             begin
               body = (env['api.request.body'] = parser.call(body, env))
+
               if body.is_a?(Hash)
                 if env['rack.request.form_hash']
                   env['rack.request.form_hash'] = env['rack.request.form_hash'].merge(body)
                 else
                   env['rack.request.form_hash'] = body
                 end
+
+                unless env['rack.input'].eql?(env['rack.input'])
+                  env['rack.input'] = StringIO.new(env['api.request.input']) # dirty walkaround that Tempfiles are not eql?
+                end
+
                 env['rack.request.form_input'] = env['rack.input']
               end
             rescue StandardError => e

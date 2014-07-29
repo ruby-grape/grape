@@ -2,6 +2,7 @@
 ============
 
 * [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
+* [#700](https://github.com/intridea/grape/pull/700): Fix: Parameter parsing when `rack.input` is a Tempfile [@dspaeth-faber](https://github.com/dspaeth-faber).
 * Your contribution here.
 
 0.8.0 (7/10/2014)
