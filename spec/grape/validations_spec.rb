@@ -956,7 +956,7 @@ describe Grape::Validations do
 
     context 'exactly one of' do
       context 'params' do
-        it 'errors when two or more are present' do
+        before :each do
           subject.params do
             optional :beer
             optional :wine
@@ -966,49 +966,58 @@ describe Grape::Validations do
           subject.get '/exactly_one_of' do
             'exactly_one_of works!'
           end
+        end
 
+        it 'errors when none are present' do
+          get '/exactly_one_of'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq "beer, wine, juice are missing, exactly one parameter must be provided"
+        end
+
+        it 'succeeds when one is present' do
+          get '/exactly_one_of', beer: 'string'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq 'exactly_one_of works!'
+        end
+
+        it 'errors when two or more are present' do
           get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
           expect(last_response.body).to eq "beer, wine are mutually exclusive"
         end
+      end
+    end
 
-        it 'can return structured json with separate fields' do
-          subject.format :json
-          subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
-            rack_response e.to_json, 400
-          end
+    context 'at least one of' do
+      context 'params' do
+        before :each do
           subject.params do
             optional :beer
             optional :wine
             optional :juice
-            exactly_one_of :beer, :wine, :juice
+            at_least_one_of :beer, :wine, :juice
           end
-          subject.get '/exactly_one_of' do
-            'exactly_one_of works!'
+          subject.get '/at_least_one_of' do
+            'at_least_one_of works!'
           end
-
-          get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
-          expect(last_response.status).to eq(400)
-          expect(JSON.parse(last_response.body)).to eq([
-            "params" => ["beer", "wine"],
-            "messages" => ["are mutually exclusive"]
-          ])
         end
 
-        it 'errors when none is selected' do
-          subject.params do
-            optional :beer
-            optional :wine
-            optional :juice
-            exactly_one_of :beer, :wine, :juice
-          end
-          subject.get '/exactly_one_of' do
-            'exactly_one_of works!'
-          end
-
-          get '/exactly_one_of'
+        it 'errors when none are present' do
+          get '/at_least_one_of'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine, juice are missing, exactly one parameter must be provided"
+          expect(last_response.body).to eq "beer, wine, juice are missing, at least one parameter must be provided"
+        end
+
+        it 'does not error when one is present' do
+          get '/at_least_one_of', beer: 'string'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq 'at_least_one_of works!'
+        end
+
+        it 'does not error when two are present' do
+          get '/at_least_one_of', beer: 'string', wine: 'string'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq 'at_least_one_of works!'
         end
       end
     end
