@@ -1084,10 +1084,9 @@ describe Grape::Validations do
           'exactly_one_of_group works!'
         end
 
-        get '/exactly_one_of_group', drink: {  }
+        get '/exactly_one_of_group', drink: {}
         expect(last_response.status).to eq(400)
       end
-
 
       it 'errors when more than one from the set is present' do
         subject.params do
