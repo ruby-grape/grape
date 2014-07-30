@@ -586,6 +586,19 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(403)
       expect(last_response.headers['X-Custom']).to eq('value')
     end
+
+    it 'sets the status code for the endpoint' do
+      memoized_endpoint = nil
+
+      subject.get '/hey' do
+        memoized_endpoint = self
+        error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
+      end
+
+      get '/hey.json'
+
+      expect(memoized_endpoint.status).to eq(403)
+    end
   end
 
   describe '#redirect' do
