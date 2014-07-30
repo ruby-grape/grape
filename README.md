@@ -31,6 +31,7 @@
 - [Helpers](#helpers)
 - [Parameter Documentation](#parameter-documentation)
 - [Cookies](#cookies)
+- [HTTP Status Code](#http-status-code)
 - [Redirecting](#redirecting)
 - [Allowed Methods](#allowed-methods)
 - [Raising Exceptions](#raising-exceptions)
@@ -300,6 +301,21 @@ is returned when no correct `Accept` header is supplied.
 When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is returned if the `:cascade`
 option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route
 matches.
+
+### HTTP Status Code
+
+By default Grape returns a 200 status code for `GET`-Requests and 201 for `POST`-Requests.
+You can use `status` to query and set the actual HTTP Status Code
+
+```ruby
+post do
+  status 202
+  
+  if status == 200
+     # do some thing
+  end 
+end
+```
 
 ### Accept-Version Header
 

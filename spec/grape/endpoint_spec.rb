@@ -67,6 +67,33 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(206)
       expect(last_response.body).to eq("Hello")
     end
+
+    it 'is set as default to 200 for get' do
+      memoized_status = nil
+      subject.get('/home') do
+        memoized_status = status
+        "Hello"
+      end
+
+      get '/home'
+      expect(last_response.status).to eq(200)
+      expect(memoized_status).to eq(200)
+      expect(last_response.body).to eq("Hello")
+    end
+
+    it 'is set as default to 201 for post' do
+      memoized_status = nil
+      subject.post('/home') do
+        memoized_status = status
+        "Hello"
+      end
+
+      post '/home'
+      expect(last_response.status).to eq(201)
+      expect(memoized_status).to eq(201)
+      expect(last_response.body).to eq("Hello")
+    end
+
   end
 
   describe '#header' do
