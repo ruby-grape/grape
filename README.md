@@ -1664,8 +1664,6 @@ end
 ### Writing Tests with Rails
 
 ```ruby
-require 'spec_helper'
-
 describe Twitter::API do
   describe "GET /api/v1/statuses" do
     it "returns an empty array of statuses" do
