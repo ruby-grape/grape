@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'shared/versioning_examples'
+require 'grape-entity'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -1760,6 +1761,54 @@ describe Grape::API do
       get '/exception'
       expect(last_response.status).to eql 400
     end
+  end
+
+  describe '.add_http_code_on_error' do
+    it 'allows adding http status code' do
+      subject.add_http_code_on_error true
+
+      subject.desc 'some desc', http_codes: [[401, 'Unauthorized', Class.new(Grape::Entity)]]
+
+      subject.get '/exception' do
+        error!({}, 408)
+      end
+
+      get '/exception'
+      expect(last_response.status).to eql 408
+      expect(last_response.body).to eql({ code: 408 }.to_json)
+    end
+  end
+
+  describe 'http_codes' do
+
+    let(:error_presenter) do
+      Class.new(Grape::Entity) do
+        expose :code
+        expose :static
+
+        def static
+          'some static text'
+        end
+
+      end
+
+    end
+
+    it 'is used as presenter' do
+
+      subject.add_http_code_on_error true
+
+      subject.desc 'some desc', http_codes: [[401, 'Error'], [408, 'Unauthorized', error_presenter], [409, 'Error']]
+
+      subject.get '/exception' do
+        error!({}, 408)
+      end
+
+      get '/exception'
+      expect(last_response.status).to eql 408
+      expect(last_response.body).to eql({ code: 408, static: 'some static text' }.to_json)
+    end
+
   end
 
   context 'routes' do
