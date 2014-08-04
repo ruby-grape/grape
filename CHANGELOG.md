@@ -4,6 +4,10 @@
 * [#691](https://github.com/intridea/grape/issues/691): Added `at_least_one_of` parameter validator - [@dblock](https://github.com/dblock).
 * [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
 * [#698](https://github.com/intridea/grape/pull/698): `error!` sets `status` for `Endpoint` too - [@dspaeth-faber](https://github.com/dspaeth-faber).
+* [#703](https://github.com/intridea/grape/pull/703): Added support for Auth-Middleware extension - [@dspaeth-faber](https://github.com/dspaeth-faber).
+* [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Basic` - [@dspaeth-faber](https://github.com/dspaeth-faber).
+* [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Digest` - [@dspaeth-faber](https://github.com/dspaeth-faber).
+* [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::OAuth2` - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * Your contribution here.
 
 0.8.0 (7/10/2014)

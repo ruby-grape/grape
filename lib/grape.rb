@@ -77,10 +77,10 @@ module Grape
     autoload :Error,             'grape/middleware/error'
 
     module Auth
-      autoload :OAuth2,         'grape/middleware/auth/oauth2'
-      autoload :Base,	          'grape/middleware/auth/base'
-      autoload :Basic,          'grape/middleware/auth/basic'
-      autoload :Digest,	        'grape/middleware/auth/digest'
+      autoload :Base,            'grape/middleware/auth/base'
+      autoload :DSL,             'grape/middleware/auth/dsl'
+      autoload :StrategyInfo,    'grape/middleware/auth/strategy_info'
+      autoload :Strategies,      'grape/middleware/auth/strategies'
     end
 
     module Versioner

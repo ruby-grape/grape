@@ -4,6 +4,7 @@ module Grape
   # class in order to build an API.
   class API
     extend Validations::ClassMethods
+    extend Grape::Middleware::Auth::DSL
 
     class << self
       attr_reader :endpoints, :instance, :routes, :route_set, :settings, :versions
@@ -299,31 +300,6 @@ module Grape
           change!
           mod
         end
-      end
-
-      # Add an authentication type to the API. Currently
-      # only `:http_basic`, `:http_digest` and `:oauth2` are supported.
-      def auth(type = nil, options = {}, &block)
-        if type
-          set(:auth, { type: type.to_sym, proc: block }.merge(options))
-        else
-          settings[:auth]
-        end
-      end
-
-      # Add HTTP Basic authorization to the API.
-      #
-      # @param [Hash] options A hash of options.
-      # @option options [String] :realm "API Authorization" The HTTP Basic realm.
-      def http_basic(options = {}, &block)
-        options[:realm] ||= "API Authorization"
-        auth :http_basic, options, &block
-      end
-
-      def http_digest(options = {}, &block)
-        options[:realm] ||= "API Authorization"
-        options[:opaque] ||= "secret"
-        auth :http_digest, options, &block
       end
 
       def mount(mounts)

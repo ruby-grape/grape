@@ -3,25 +3,41 @@ require 'rack/auth/basic'
 module Grape
   module Middleware
     module Auth
-      class Base < Grape::Middleware::Base
-        attr_reader :authenticator
+      class Base
+        attr_accessor :options, :app, :env
 
-        def initialize(app, options = {}, &authenticator)
-          super(app, options)
-          @authenticator = authenticator
+        def initialize(app, options = {})
+          @app = app
+          @options = options || {}
         end
 
-        def base_request
-          raise NotImplementedError, "You must implement base_request."
+        def context
+          env['api.endpoint']
         end
 
-        def credentials
-          base_request.provided? ? base_request.credentials : [nil, nil]
+        def call(env)
+          dup._call(env)
         end
 
-        def before
-          unless authenticator.call(*credentials)
-            throw :error, status: 401, message: "API Authorization Failed."
+        def _call(env)
+          self.env = env
+
+          if options.key?(:type)
+            auth_proc         = options[:proc]
+            auth_proc_context = context
+
+            strategy_info   = Grape::Middleware::Auth::Strategies[options[:type]]
+
+            throw(:error, status: 401, message: "API Authorization Failed.") unless strategy_info.present?
+
+            strategy = strategy_info.create(@app, options) do |*args|
+              auth_proc_context.instance_exec(*args, &auth_proc)
+            end
+
+            strategy.call(env)
+
+          else
+            app.call(env)
           end
         end
       end
