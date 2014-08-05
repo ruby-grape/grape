@@ -45,7 +45,7 @@ describe Grape::Middleware::Auth::OAuth2 do
       end
 
       it 'throws an error' do
-        expect(@err[:status]).to eq(401)
+        expect(@err[:status]).to eq(400)
       end
 
       it 'sets the WWW-Authenticate header in the response' do
@@ -62,7 +62,7 @@ describe Grape::Middleware::Auth::OAuth2 do
     end
 
     it 'throws an error' do
-      expect(@err[:status]).to eq(401)
+      expect(@err[:status]).to eq(400)
     end
 
     it 'sets the WWW-Authenticate header in the response to error' do
