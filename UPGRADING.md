@@ -1,6 +1,41 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.9.0 
+
+#### Changes in Authentication
+
+The following middleware classes have been removed:
+
+* `Grape::Middleware::Auth::Basic` 
+* `Grape::Middleware::Auth::Digest`
+* `Grape::Middleware::Auth::OAuth2`
+
+When you use theses classes directly like:
+
+```ruby
+ module API
+   class Root < Grape::API
+     class Protected < Grape::API
+       use Grape::Middleware::Auth::OAuth2,
+           token_class: 'AccessToken',
+           parameter: %w(access_token api_key)
+           
+```
+
+you have to replace these classes.
+
+As replacement can be used
+
+* `Grape::Middleware::Auth::Basic`  => [`Rack::Auth::Basic`](https://github.com/rack/rack/blob/master/lib/rack/auth/basic.rb)
+* `Grape::Middleware::Auth::Digest` => [`Rack::Auth::Digest::MD5`](https://github.com/rack/rack/blob/master/lib/rack/auth/digest/md5.rb)
+* `Grape::Middleware::Auth::OAuth2` => [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2)
+
+If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/intridea/grape/tree/v0.7.0/lib/grape/middleware/auth)
+and host these files within your application
+
+See [#703](https://github.com/intridea/Grape/pull/703) for more information.
+
 ### Upgrading to >= 0.7.0
 
 #### Changes in Exception Handling
