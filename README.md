@@ -1468,7 +1468,8 @@ formatter.
 
 ### Basic and Digest Auth
 
-Grape has built-in Basic and Digest authentication.
+Grape has built-in Basic and Digest authentication (the given `block` 
+is executed in the context of the current `Endpoint`).
 
 ```ruby
 http_basic do |username, password|
@@ -1482,6 +1483,33 @@ http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
   # lookup the user's password here
   { 'user1' => 'password1' }[username]
 end
+```
+
+### Register custom middleware for authentication
+
+Grape can use custom Middleware for authentication. How to implement these
+Middleware have a look at `Rack::Auth::Basic` or similar implementations.
+
+
+For registering a Middlewar you need the following options:
+
+* `label` - the name for your authenticator to use it later
+* `MiddlewareClass` - the MiddlewareClass to use for authentication
+* `option_lookup_proc` - A Proc with one Argument to lookup the options at 
+runtime (return value is an `Array` as Paramter for the Middleware).
+
+Example:
+
+```ruby
+
+Grape::Middleware::Auth::Strategies.add(:my_auth, AuthMiddleware, ->(options) { [options[:realm]] } )
+
+
+auth :my_auth ,{ real: 'Test Api'} do |credentials|
+  # lookup the user's password here
+  { 'user1' => 'password1' }[username]
+end
+
 ```
 
 Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
