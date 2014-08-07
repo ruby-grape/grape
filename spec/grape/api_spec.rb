@@ -321,7 +321,8 @@ describe Grape::API do
     context 'format' do
       before(:each) do
         subject.get("/abc") do
-          RSpec::Mocks::Mock.new(to_json: 'abc', to_txt: 'def')
+          Object.any_instance.stub(:to_json).and_return("abc")
+          Object.any_instance.stub(:to_txt).and_return("def")
         end
       end
 

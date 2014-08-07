@@ -1701,15 +1701,15 @@ describe Twitter::API do
     describe "GET /api/v1/statuses" do
       it "returns an empty array of statuses" do
         get "/api/v1/statuses"
-        last_response.status.should == 200
-        JSON.parse(last_response.body).should == []
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq []
       end
     end
     describe "GET /api/v1/statuses/:id" do
       it "returns a status by id" do
         status = Status.create!
         get "/api/v1/statuses/#{status.id}"
-        last_response.body.should == status.to_json
+        expect(last_response.body).to eq status.to_json
       end
     end
   end
@@ -1723,15 +1723,15 @@ describe Twitter::API do
   describe "GET /api/v1/statuses" do
     it "returns an empty array of statuses" do
       get "/api/v1/statuses"
-      response.status.should == 200
-      JSON.parse(response.body).should == []
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)).to eq []
     end
   end
   describe "GET /api/v1/statuses/:id" do
     it "returns a status by id" do
       status = Status.create!
       get "/api/v1/statuses/#{status.id}"
-      response.body.should == status.to_json
+      expect(response.body).to eq status.to_json
     end
   end
 end
