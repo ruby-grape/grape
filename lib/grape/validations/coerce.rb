@@ -7,6 +7,11 @@ module Grape
     class CoerceValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce unless params.is_a? Hash
+
+        # If the parameter is required and no such key was passed in,
+        # do nothing here since the "required" validator will mark it as invalid
+        return if params['route_info'].options[:params][attr_name.to_s][:required] == true && ( !params.has_key?(attr_name) )
+
         new_value = coerce_value(@option, params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
