@@ -58,6 +58,21 @@ describe Grape::Validations::ValuesValidator do
         get '/optional_with_required_values'
 
         ################# New stuff from Jack ###############################
+
+        params do
+          optional :type, type: String
+        end
+        get '/values/optional_does_not_allow_nil_for_string' do
+          { type: params[:type] }
+        end
+
+        params do
+          requires :type, type: String
+        end
+        get '/values/required_does_not_allow_nil_for_string' do
+          { type: params[:type] }
+        end
+
         params do
           optional :type, type: Integer
         end
@@ -200,6 +215,58 @@ describe Grape::Validations::ValuesValidator do
   end
 
 
+  context 'when type is String' do
+    cases = {
+              {}              => 200,
+              { type: 'yo' }  => 200,
+              { type: '5'}    => 200,
+              { type: nil }        => { error: 'type is invalid' },
+              { type: ['howdy'] }  => { error: 'type is invalid' } }
+
+
+    context 'when parameter is optional' do
+      cases.each do |params, status_or_response_body|
+        context "when params is #{params}" do
+          before do
+            get("/values/optional_does_not_allow_nil_for_string", params)
+          end
+
+          it "returns #{status_or_response_body}" do
+            if status_or_response_body == 200
+              expect(last_response.status).to eq 200
+            else
+              expect(last_response.status).to eq 400
+              expect(last_response.body).to eq(status_or_response_body.to_json)
+            end
+          end
+        end
+      end
+    end
+
+    context 'when parameter is required' do
+
+      # The only difference between optional and required is
+      # what happens if you don't pass that key in at all
+      cases = cases.merge({} => { error: "type is missing" })
+
+      cases.each do |params, status_or_response_body|
+        context "when params is #{params}" do
+          before do
+            get("/values/required_does_not_allow_nil_for_string", params)
+          end
+
+          it "returns #{status_or_response_body}" do
+            if status_or_response_body == 200
+              expect(last_response.status).to eq 200
+            else
+              expect(last_response.status).to eq 400
+              expect(last_response.body).to eq(status_or_response_body.to_json)
+            end
+          end
+        end
+      end
+    end
+  end
 
 
 
