@@ -1469,7 +1469,8 @@ formatter.
 ### Basic and Digest Auth
 
 Grape has built-in Basic and Digest authentication (the given `block` 
-is executed in the context of the current `Endpoint`).
+is executed in the context of the current `Endpoint`).  Authentication 
+applies to the current namespace and any children, but not parents.
 
 ```ruby
 http_basic do |username, password|
