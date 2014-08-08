@@ -28,7 +28,7 @@ module Grape
 
             strategy_info   = Grape::Middleware::Auth::Strategies[options[:type]]
 
-            throw(:error, status: 401, message: "API Authorization Failed.") unless strategy_info.present?
+            throw(:error, status: 401, message: 'API Authorization Failed.') unless strategy_info.present?
 
             strategy = strategy_info.create(@app, options) do |*args|
               auth_proc_context.instance_exec(*args, &auth_proc)
