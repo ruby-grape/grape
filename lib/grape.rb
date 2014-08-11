@@ -94,6 +94,17 @@ module Grape
   module Util
     autoload :HashStack,         'grape/util/hash_stack'
   end
+
+  module DSL
+    autoload :Callbacks,         'grape/dsl/callbacks'
+    autoload :Configuration,     'grape/dsl/configuration'
+    autoload :Helpers,           'grape/dsl/helpers'
+    autoload :Middleware,        'grape/dsl/middleware'
+    autoload :Parameters,        'grape/dsl/parameters'
+    autoload :RequestResponse,   'grape/dsl/request_response'
+    autoload :Routing,           'grape/dsl/routing'
+    autoload :Validations,       'grape/dsl/validations'
+  end
 end
 
 require 'grape/version'
