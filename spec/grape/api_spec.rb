@@ -121,9 +121,14 @@ describe Grape::API do
 
   describe '.namespace' do
     it 'is retrievable and converted to a path' do
+      internal_namespace = nil
+      
       subject.namespace :awesome do
-        namespace.should == '/awesome'
+        internal_namespace = namespace
       end
+
+      expect(internal_namespace).to eql("/awesome")
+      
     end
 
     it 'comes after the prefix and version' do
@@ -139,21 +144,29 @@ describe Grape::API do
     end
 
     it 'cancels itself after the block is over' do
+      internal_namespace = nil
+      
       subject.namespace :awesome do
-        namespace.should == '/awesome'
+        internal_namespace = namespace
       end
-
-      expect(subject.namespace).to eq('/')
+            
+      expect(subject.namespace).to eql("/")      
     end
 
     it 'is stackable' do
+      internal_namespace = nil
+      internal_second_namespace = nil
+      
       subject.namespace :awesome do
+        internal_namespace = namespace
+        
         namespace :rad do
-          namespace.should == '/awesome/rad'
+          internal_second_namespace = namespace
         end
-        namespace.should == '/awesome'
       end
-      expect(subject.namespace).to eq('/')
+      
+      expect(internal_namespace).to eq('/awesome')
+      expect(internal_second_namespace).to eq('/awesome/rad')
     end
 
     it 'accepts path segments correctly' do
@@ -320,19 +333,21 @@ describe Grape::API do
 
     context 'format' do
       before(:each) do
+        allow_any_instance_of(Object).to receive(:to_json).and_return("abc")
+        allow_any_instance_of(Object).to receive(:to_txt).and_return("def")        
+
         subject.get("/abc") do
-          Object.any_instance.stub(:to_json).and_return("abc")
-          Object.any_instance.stub(:to_txt).and_return("def")
+          Object.new
         end
       end
 
-      it 'allows .json' do
+      it 'allows .json' do        
         get '/abc.json'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eql 'abc' # json-encoded symbol
       end
 
-      it 'allows .txt' do
+      it 'allows .txt' do        
         get '/abc.txt'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eql 'def' # raw text
