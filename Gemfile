@@ -5,6 +5,7 @@ gemspec
 group :development, :test do
   gem 'rspec', '~> 3.0.0'
   gem 'rspec-mocks'
+  gem 'rspec-expectations'
   
   gem 'rack-test', '~> 0.6.2', require: 'rack/test'
   gem 'cookiejar'
