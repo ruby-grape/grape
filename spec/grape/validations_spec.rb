@@ -813,9 +813,9 @@ describe Grape::Validations do
           end
         end
 
-        it 'in helper module which kind of Grape::API::Helpers' do
+        it 'in helper module which kind of Grape::DSL::Helpers::BaseHelper' do
           module SharedParams
-            extend Grape::API::Helpers
+            extend Grape::DSL::Helpers::BaseHelper
             params :pagination do
             end
           end
@@ -826,7 +826,7 @@ describe Grape::Validations do
       context 'can be included in usual params' do
         before do
           module SharedParams
-            extend Grape::API::Helpers
+            extend Grape::DSL::Helpers::BaseHelper
             params :period do
               optional :start_date
               optional :end_date
