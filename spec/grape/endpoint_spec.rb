@@ -27,7 +27,7 @@ describe Grape::Endpoint do
       expect { get '/' }.to raise_error(NameError)
 
       Grape::Endpoint.before_each do |endpoint|
-        allow(endpoint).to receive(:current_user).and_return("Bob")        
+        allow(endpoint).to receive(:current_user).and_return("Bob")
       end
 
       get '/'

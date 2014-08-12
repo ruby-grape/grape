@@ -18,10 +18,10 @@ describe Grape::Entity do
     end
 
     it 'calls through to the provided entity class if one is given' do
-      entity_mock = Object.new      
+      entity_mock = Object.new
       allow(entity_mock).to receive(:represent)
 
-      subject.get '/example' do        
+      subject.get '/example' do
         present Object.new, with: entity_mock
       end
       get '/example'

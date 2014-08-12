@@ -122,13 +122,10 @@ describe Grape::API do
   describe '.namespace' do
     it 'is retrievable and converted to a path' do
       internal_namespace = nil
-      
       subject.namespace :awesome do
         internal_namespace = namespace
       end
-
       expect(internal_namespace).to eql("/awesome")
-      
     end
 
     it 'comes after the prefix and version' do
@@ -145,26 +142,21 @@ describe Grape::API do
 
     it 'cancels itself after the block is over' do
       internal_namespace = nil
-      
       subject.namespace :awesome do
         internal_namespace = namespace
       end
-            
-      expect(subject.namespace).to eql("/")      
+      expect(subject.namespace).to eql("/")
     end
 
     it 'is stackable' do
       internal_namespace = nil
       internal_second_namespace = nil
-      
       subject.namespace :awesome do
         internal_namespace = namespace
-        
         namespace :rad do
           internal_second_namespace = namespace
         end
       end
-      
       expect(internal_namespace).to eq('/awesome')
       expect(internal_second_namespace).to eq('/awesome/rad')
     end
@@ -334,7 +326,7 @@ describe Grape::API do
     context 'format' do
       before(:each) do
         allow_any_instance_of(Object).to receive(:to_json).and_return("abc")
-        allow_any_instance_of(Object).to receive(:to_txt).and_return("def")        
+        allow_any_instance_of(Object).to receive(:to_txt).and_return("def")
 
         subject.get("/abc") do
           Object.new
@@ -342,7 +334,6 @@ describe Grape::API do
       end
 
       it 'allows .json' do
-        
         get '/abc.json'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eql 'abc' # json-encoded symbol
