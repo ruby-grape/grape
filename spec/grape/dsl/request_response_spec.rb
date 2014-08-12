@@ -38,8 +38,13 @@ module Grape
         end
       end
 
-      xdescribe '.format' do
+      describe '.format' do
+        it 'sets a new format' do
+          expect(subject).to receive(:set).with(:format, format.to_sym)
+          expect(subject).to receive(:set).with(:default_error_formatter, Grape::ErrorFormatter::Txt)
 
+          subject.format format
+        end
       end
 
       describe '.formatter' do
@@ -56,8 +61,11 @@ module Grape
         end
       end
 
-      xdescribe '.default_error_formatter' do
-        it 'does some thing'
+      describe '.default_error_formatter' do
+        it 'sets a new error formatter' do
+          expect(subject).to receive(:set).with(:default_error_formatter, Grape::ErrorFormatter::Json)
+          subject.default_error_formatter :json
+        end
       end
 
       describe '.error_formatter' do

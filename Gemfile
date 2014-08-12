@@ -9,7 +9,7 @@ group :development, :test do
   gem 'rack-test', '~> 0.6.2', require: 'rack/test'
   gem 'cookiejar'
   gem 'rack-contrib'
-  gem 'rubocop', '~> 0.20.1'
+  gem 'rubocop', '~> 0.24.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'

@@ -45,7 +45,7 @@ describe Grape::Endpoint do
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
                               path: '/',
                               method: :get
-        }, &p)
+                            }, &p)
       }.not_to raise_error
     end
   end

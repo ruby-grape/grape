@@ -98,6 +98,7 @@ module Grape
   module DSL
     autoload :Callbacks,         'grape/dsl/callbacks'
     autoload :Configuration,     'grape/dsl/configuration'
+    autoload :InsideRoute,       'grape/dsl/inside_route'
     autoload :Helpers,           'grape/dsl/helpers'
     autoload :Middleware,        'grape/dsl/middleware'
     autoload :Parameters,        'grape/dsl/parameters'
