@@ -341,13 +341,14 @@ describe Grape::API do
         end
       end
 
-      it 'allows .json' do        
+      it 'allows .json' do
+        
         get '/abc.json'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eql 'abc' # json-encoded symbol
       end
 
-      it 'allows .txt' do        
+      it 'allows .txt' do
         get '/abc.txt'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eql 'def' # raw text
