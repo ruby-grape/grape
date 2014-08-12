@@ -17,15 +17,29 @@ module Grape
       xdescribe '.version' do
         it 'does some thing'
       end
-      xdescribe '.prefix' do
-        it 'does some thing'
+
+      describe '.prefix' do
+        it 'sets a prefix for route' do
+          prefix = '/api'
+          expect(subject).to receive(:set).with(:root_prefix, prefix)
+          subject.prefix prefix
+        end
       end
-      xdescribe '.do_not_route_head!' do
-        it 'does some thing'
+
+      describe '.do_not_route_head!' do
+        it 'sets do not route head option' do
+          expect(subject).to receive(:set).with(:do_not_route_head, true)
+          subject.do_not_route_head!
+        end
       end
-      xdescribe '.do_not_route_options!' do
-        it 'does some thing'
+
+      describe '.do_not_route_options!' do
+        it 'sets do not route options option' do
+          expect(subject).to receive(:set).with(:do_not_route_options, true)
+          subject.do_not_route_options!
+        end
       end
+
       xdescribe '.mount' do
         it 'does some thing'
       end
@@ -89,12 +103,15 @@ module Grape
       xdescribe '.group' do
         it 'does some thing'
       end
+
       xdescribe '.resource' do
         it 'does some thing'
       end
+
       xdescribe '.resources' do
         it 'does some thing'
       end
+
       xdescribe '.segment' do
         it 'does some thing'
       end
@@ -102,9 +119,11 @@ module Grape
       xdescribe '.routes' do
         it 'does some thing'
       end
+
       xdescribe '.route_param' do
         it 'does some thing'
       end
+
       xdescribe '.versions' do
         it 'does some thing'
       end
