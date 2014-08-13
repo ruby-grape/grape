@@ -162,9 +162,10 @@ describe Grape::API do
     end
 
     it 'accepts path segments correctly' do
+      inner_namespace = nil
       subject.namespace :members do
         namespace '/:member_id' do
-          namespace.should == '/members/:member_id'
+          inner_namespace = namespace
           get '/' do
             params[:member_id]
           end
@@ -172,6 +173,7 @@ describe Grape::API do
       end
       get '/members/23'
       expect(last_response.body).to eq("23")
+      expect(inner_namespace).to eq('/members/:member_id')
     end
 
     it 'is callable with nil just to push onto the stack' do
@@ -189,9 +191,11 @@ describe Grape::API do
 
     %w(group resource resources segment).each do |als|
       it '`.#{als}` is an alias' do
+        inner_namespace = nil
         subject.send(als, :awesome) do
-          namespace.should ==  "/awesome"
+          inner_namespace = namespace
         end
+        expect(inner_namespace).to eq "/awesome"
       end
     end
   end
@@ -800,11 +804,11 @@ describe Grape::API do
         it "uploads and downloads a PNG file via #{url}" do
           image_filename = "grape.png"
           post url, file: Rack::Test::UploadedFile.new(image_filename, 'image/png', true)
-          last_response.status.should == 201
-          last_response.headers['Content-Type'].should == "image/png"
-          last_response.headers['Content-Disposition'].should == "attachment; filename*=UTF-8''grape.png"
+          expect(last_response.status).to eq(201)
+          expect(last_response.headers['Content-Type']).to eq("image/png")
+          expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
           File.open(image_filename, 'rb') do |io|
-            last_response.body.should eq io.read
+            expect(last_response.body).to eq io.read
           end
         end
       end
@@ -812,11 +816,11 @@ describe Grape::API do
       it "uploads and downloads a Ruby file" do
         filename = __FILE__
         post "/attachment.rb", file: Rack::Test::UploadedFile.new(filename, 'application/x-ruby', true)
-        last_response.status.should == 201
-        last_response.headers['Content-Type'].should == "application/x-ruby"
-        last_response.headers['Content-Disposition'].should == "attachment; filename*=UTF-8''api_spec.rb"
+        expect(last_response.status).to eq(201)
+        expect(last_response.headers['Content-Type']).to eq("application/x-ruby")
+        expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
         File.open(filename, 'rb') do |io|
-          last_response.body.should eq io.read
+          expect(last_response.body).to eq io.read
         end
       end
     end
@@ -872,13 +876,15 @@ describe Grape::API do
       end
 
       it 'does not show up outside the namespace' do
+        inner_middleware = nil
         subject.use ApiSpec::PhonyMiddleware, 123
         subject.namespace :awesome do
           use ApiSpec::PhonyMiddleware, 'abc'
-          middleware.should == [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']]
+          inner_middleware = middleware
         end
 
         expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, 123]]
+        expect(inner_middleware).to eql [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']]
       end
 
       it 'calls the middleware' do
