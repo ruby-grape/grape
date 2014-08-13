@@ -27,7 +27,7 @@ describe Grape::Endpoint do
       expect { get '/' }.to raise_error(NameError)
 
       Grape::Endpoint.before_each do |endpoint|
-        endpoint.stub(:current_user).and_return("Bob")
+        allow(endpoint).to receive(:current_user).and_return("Bob")
       end
 
       get '/'
@@ -241,33 +241,37 @@ describe Grape::Endpoint do
     end
 
     it 'has as many keys as there are declared params' do
+      inner_params = nil
       subject.get '/declared' do
-        declared(params).keys.size.should == 4
+        inner_params = declared(params).keys
         ""
       end
-
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
+      expect(inner_params.size).to eq(4)
     end
 
     it 'has a optional param with default value all the time' do
+      inner_params = nil
       subject.get '/declared' do
-        params[:third].should == 'third-default'
+        inner_params = declared(params)
         ""
       end
-
       get '/declared?first=one'
       expect(last_response.status).to eq(200)
+      expect(inner_params[:third]).to eql('third-default')
     end
 
     it 'builds nested params' do
+      inner_params = nil
       subject.get '/declared' do
-        declared(params)[:nested].keys.size.should == 1
+        inner_params = declared(params)
         ""
       end
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
+      expect(inner_params[:nested].keys.size).to eq 1
     end
 
     it 'builds nested params when given array' do
@@ -281,33 +285,38 @@ describe Grape::Endpoint do
           optional :fourth
         end
       end
+      inner_params = nil
       subject.get '/declared' do
-        declared(params)[:nested].size.should == 2
+        inner_params = declared(params)
         ""
       end
 
       get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
       expect(last_response.status).to eq(200)
+      expect(inner_params[:nested].size).to eq 2
     end
 
     it 'filters out any additional params that are given' do
+      inner_params = nil
       subject.get '/declared' do
-        declared(params).key?(:other).should == false
+        inner_params = declared(params)
         ""
       end
-
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
+      expect(inner_params.key?(:other)).to eq false
     end
 
     it 'stringifies if that option is passed' do
+      inner_params = nil
       subject.get '/declared' do
-        declared(params, stringify: true)["first"].should == "one"
+        inner_params = declared(params, stringify: true)
         ""
       end
 
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
+      expect(inner_params["first"]).to eq "one"
     end
 
     it 'does not include missing attributes if that option is passed' do

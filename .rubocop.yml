@@ -1,7 +1,7 @@
 AllCops:
   Exclude:
-    - vendor/**
-    - bin/**
+    - vendor/**/*
+    - bin/**/*
 
 LineLength:
   Enabled: false

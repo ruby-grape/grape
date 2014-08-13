@@ -23,4 +23,5 @@ I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
+  config.raise_errors_for_deprecations!
 end
