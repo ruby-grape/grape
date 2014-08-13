@@ -10,11 +10,13 @@ describe Grape::Entity do
 
   describe '#present' do
     it 'sets the object as the body if no options are provided' do
+      inner_body = nil
       subject.get '/example' do
         present(abc: 'def')
-        body.should == { abc: 'def' }
+        inner_body = body
       end
       get '/example'
+      expect(inner_body).to eql(abc: 'def')
     end
 
     it 'calls through to the provided entity class if one is given' do
@@ -156,11 +158,13 @@ describe Grape::Entity do
     end
 
     it 'adds a root key to the output if one is given' do
+      inner_body = nil
       subject.get '/example' do
         present({ abc: 'def' }, root: :root)
-        body.should == { root: { abc: 'def' } }
+        inner_body = body
       end
       get '/example'
+      expect(inner_body).to eql(root: { abc: 'def' })
     end
 
     [:json, :serializable_hash].each do |format|
