@@ -1,6 +1,9 @@
 module Grape
   # A compiled route for inspection.
   class Route
+
+    attr_reader :options
+
     def initialize(options = {})
       @options = options || {}
     end

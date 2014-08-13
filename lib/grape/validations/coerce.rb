@@ -7,6 +7,15 @@ module Grape
     class CoerceValidator < SingleOptionValidator
       def validate_param!(attr_name, params)
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce unless params.is_a? Hash
+
+        # If the parameter is required and no such key was passed in, do
+        # nothing here since the "required" validator will mark it as invalid later on.
+        # Note that his does not apply if type == 'Array', since that would mess with array_name[key] errors downstream
+        return if params['route_info'] &&
+                  (params['route_info'].options[:params][attr_name.to_s][:required] == true) &&
+                  (params['route_info'].options[:params][attr_name.to_s][:type] != 'Array') &&
+                  (!params.has_key?(attr_name))
+
         new_value = coerce_value(@option, params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
@@ -26,8 +35,8 @@ module Grape
       end
 
       def _valid_single_type?(klass, val)
-        # allow nil, to ignore when a parameter is absent
-        return true if val.nil?
+        # no longer allowing nil as a valid type if a different type specified
+        return false if val.nil?
         if klass == Virtus::Attribute::Boolean
           val.is_a?(TrueClass) || val.is_a?(FalseClass)
         elsif klass == Rack::Multipart::UploadedFile

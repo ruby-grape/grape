@@ -43,3 +43,6 @@ tags
 
 ## PROJECT::SPECIFIC
 .project
+
+# Ruby Version
+.ruby-version
