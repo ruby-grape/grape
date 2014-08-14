@@ -8,6 +8,7 @@
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Basic` - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Digest` - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::OAuth2` - [@dspaeth-faber](https://github.com/dspaeth-faber).
+* [#719](https://github.com/intridea/grape/pull/719): Allow passing options hash to a custom validator - [@elado](https://github.com/elado).
 * Your contribution here.
 
 0.8.0 (7/10/2014)

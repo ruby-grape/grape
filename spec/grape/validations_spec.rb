@@ -816,7 +816,7 @@ describe Grape::Validations do
 
         before do
           subject.params do
-            optional :custom, customvalidator_with_options: {text: 'im custom with options', error_message: "is not custom with options!"}
+            optional :custom, customvalidator_with_options: { text: 'im custom with options', error_message: "is not custom with options!" }
           end
           subject.get '/optional_custom' do
             'optional with custom works!'
