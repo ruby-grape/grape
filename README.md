@@ -59,6 +59,9 @@
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
 - [Anchoring](#anchoring)
+- [Using Custom Middleware](#using-custom-middleware)
+  - [Rails Middleware](#rails-middleware)
+    - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
   - [Writing Tests with Rails](#writing-tests-with-rails)
@@ -405,7 +408,7 @@ end
 ```
 
 * `detail`: A more enhanced description
-* `params`: Define parameters directly from an `Entity` 
+* `params`: Define parameters directly from an `Entity`
 * `success`: (former entity) The `Entity` to be used to present by default this route
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
@@ -475,7 +478,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, declared will return an empty hash. 
+If we do not specify any params, declared will return an empty hash.
 
 **Request**
 
@@ -852,7 +855,7 @@ params do
     optional :icecream
     mutually_exclusive :cake, :icecream
   end
-  optional :recipe do 
+  optional :recipe do
     optional :oil
     optional :meat
     all_or_none_of :oil, :meat
@@ -2098,6 +2101,35 @@ Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
+
+# Using Custom Middleware
+
+## Rails Middleware
+
+Note that when you're using Grape mounted on Rails you don't have to use Rails middleware because it's already included into your middleware stack.
+You only have to implement the helpers to access the specific `env` variable.
+
+### Remote IP
+
+By default you can access remote IP with `request.ip`. This is the remote IP address implemented by Rack. Sometimes it is desirable to get the remote IP [Rails-style](http://stackoverflow.com/questions/10997005/whats-the-difference-between-request-remote-ip-and-request-ip-in-rails) with `ActionDispatch::RemoteIp`.
+
+Add `gem 'actionpack'` to your Gemfile and `require 'action_dispatch/middleware/remote_ip.rb'`. Use the middleware in your API and expose a `client_ip` helper. See [this documentation](http://api.rubyonrails.org/classes/ActionDispatch/RemoteIp.html) for additional options.
+
+```ruby
+class API < Grape::API
+  use ActionDispatch::RemoteIp
+
+  helpers do
+    def client_ip
+      env["action_dispatch.remote_ip"].to_s
+    end
+  end
+
+  get :remopte_ip do
+    { ip: client_ip }
+  end
+end
+```
 
 ## Writing Tests
 
