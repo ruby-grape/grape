@@ -802,6 +802,37 @@ describe Grape::Validations do
           end
         end
       end
+
+      context 'when using options on param' do
+        module CustomValidations
+          class CustomvalidatorWithOptions < Grape::Validations::SingleOptionValidator
+            def validate_param!(attr_name, params)
+              unless params[attr_name] == @option[:text]
+                raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
+              end
+            end
+          end
+        end
+
+        before do
+          subject.params do
+            optional :custom, customvalidator_with_options: { text: 'im custom with options', error_message: "is not custom with options!" }
+          end
+          subject.get '/optional_custom' do
+            'optional with custom works!'
+          end
+        end
+
+        it 'validates param with custom validator with options' do
+          get '/optional_custom', custom: 'im custom with options'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional with custom works!')
+
+          get '/optional_custom', custom: 'im wrong'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('custom is not custom with options!')
+        end
+      end
     end # end custom validation
 
     context 'named' do

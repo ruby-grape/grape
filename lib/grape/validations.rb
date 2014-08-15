@@ -10,10 +10,6 @@ module Grape
         @attrs = Array(attrs)
         @required = required
         @scope = scope
-
-        if options.is_a?(Hash) && !options.empty?
-          raise Grape::Exceptions.UnknownOptions.new(options.keys)
-        end
       end
 
       def validate!(params)
