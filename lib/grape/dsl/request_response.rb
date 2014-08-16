@@ -5,10 +5,6 @@ module Grape
     module RequestResponse
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         # Specify the default format for the API's serializers.
         # May be `:json` or `:txt` (default).

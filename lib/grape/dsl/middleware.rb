@@ -5,10 +5,6 @@ module Grape
     module Middleware
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         # Apply a custom middleware to the API. Applies
         # to the current namespace and any children, but

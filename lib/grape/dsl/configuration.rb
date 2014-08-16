@@ -5,10 +5,6 @@ module Grape
     module Configuration
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         attr_writer :logger
         attr_reader :settings

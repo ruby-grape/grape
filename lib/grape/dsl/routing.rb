@@ -5,10 +5,6 @@ module Grape
     module Routing
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         attr_reader :endpoints, :routes, :route_set
 

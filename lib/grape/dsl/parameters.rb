@@ -5,13 +5,6 @@ module Grape
     module Parameters
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
-      module ClassMethods
-      end
-
       def use(*names)
         named_params = @api.settings[:named_params] || {}
         options = names.last.is_a?(Hash) ? names.pop : {}

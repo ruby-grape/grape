@@ -5,10 +5,6 @@ module Grape
     module Helpers
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         # Add helper methods that will be accessible from any
         # endpoint within this namespace (and child namespaces).

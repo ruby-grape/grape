@@ -5,10 +5,6 @@ module Grape
     module Callbacks
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         def before(&block)
           imbue(:befores, [block])

@@ -42,7 +42,7 @@ module Grape
         it 'uses provided modules' do
           mod = Module.new
 
-          expect(subject).to receive(:set).with(:helpers,  kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original
+          expect(subject).to receive(:set).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original
           subject.helpers(mod, &proc)
 
           expect(subject.mod).not_to eq mod

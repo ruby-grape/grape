@@ -90,7 +90,7 @@ module Grape
         @type     = opts[:type]
         @declared_params = []
 
-        instance_eval(&block)
+        instance_eval(&block) if block_given?
 
         configure_declared_params
       end

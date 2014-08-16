@@ -5,10 +5,6 @@ module Grape
     module Validations
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       module ClassMethods
         def reset_validations!
           settings.peek[:declared_params] = []
