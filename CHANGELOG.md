@@ -9,6 +9,7 @@
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Digest` - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::OAuth2` - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#719](https://github.com/intridea/grape/pull/719): Allow passing options hash to a custom validator - [@elado](https://github.com/elado).
+* [#716](https://github.com/intridea/grape/pull/716): Calling `content-type` will now return the current content-type - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.8.0 (7/10/2014)

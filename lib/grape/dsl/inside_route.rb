@@ -5,10 +5,6 @@ module Grape
     module InsideRoute
       extend ActiveSupport::Concern
 
-      included do
-
-      end
-
       # A filtering method that will return a hash
       # consisting only of keys that have been declared by a
       # `params` statement against the current/target endpoint or parent
@@ -117,8 +113,12 @@ module Grape
       end
 
       # Set response content-type
-      def content_type(val)
-        header('Content-Type', val)
+      def content_type(val = nil)
+        if val
+          header('Content-Type', val)
+        else
+          header['Content-Type']
+        end
       end
 
       # Set or get a cookie
@@ -215,9 +215,6 @@ module Grape
       #   end
       def route
         env["rack.routing_args"][:route_info]
-      end
-
-      module ClassMethods
       end
     end
   end
