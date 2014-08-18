@@ -146,7 +146,6 @@ module Grape
           raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
           imbue(:representations, model_class => options[:with])
         end
-
       end
     end
   end

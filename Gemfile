@@ -14,3 +14,6 @@ platforms :rbx do
   gem 'rubinius-developer_tools'
   gem 'racc'
 end
+
+gem 'pry'
+gem 'pry-byebug'

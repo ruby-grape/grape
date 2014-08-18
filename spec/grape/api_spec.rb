@@ -1782,7 +1782,7 @@ describe Grape::API do
       subject.desc 'some desc', http_codes: [[401, 'Error'], [408, 'Unauthorized', error_presenter], [409, 'Error']]
 
       subject.get '/exception' do
-        error!({code: 408}, 408)
+        error!({ code: 408 }, 408)
       end
 
       get '/exception'
