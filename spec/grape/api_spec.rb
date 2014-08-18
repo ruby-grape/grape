@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'shared/versioning_examples'
+require 'grape-entity'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -1759,6 +1760,44 @@ describe Grape::API do
       end
       get '/exception'
       expect(last_response.status).to eql 400
+    end
+  end
+
+  context 'http_codes' do
+    let(:error_presenter) do
+      Class.new(Grape::Entity) do
+        expose :code
+        expose :static
+
+        def static
+          'some static text'
+        end
+      end
+    end
+
+    it 'is used as presenter' do
+      subject.desc 'some desc', http_codes: [
+        [408, 'Unauthorized', error_presenter]
+      ]
+
+      subject.get '/exception' do
+        error!({ code: 408 }, 408)
+      end
+
+      get '/exception'
+      expect(last_response.status).to eql 408
+      expect(last_response.body).to eql({ code: 408, static: 'some static text' }.to_json)
+    end
+
+    it 'presented with' do
+      error = { code: 408, with: error_presenter }
+      subject.get '/exception' do
+        error! error, 408
+      end
+
+      get '/exception'
+      expect(last_response.status).to eql 408
+      expect(last_response.body).to eql({ code: 408, static: 'some static text' }.to_json)
     end
   end
 

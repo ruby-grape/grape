@@ -173,22 +173,7 @@ module Grape
                       else
                         [nil, args.first]
                       end
-        entity_class = options.delete(:with)
-
-        if entity_class.nil?
-          # entity class not explicitely defined, auto-detect from relation#klass or first object in the collection
-          object_class = if object.respond_to?(:klass)
-                           object.klass
-                         else
-                           object.respond_to?(:first) ? object.first.class : object.class
-                         end
-
-          object_class.ancestors.each do |potential|
-            entity_class ||= (settings[:representations] || {})[potential]
-          end
-
-          entity_class ||= object_class.const_get(:Entity) if object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)
-        end
+        entity_class = entity_class_for_obj(object, options)
 
         root = options.delete(:root)
 
@@ -215,6 +200,27 @@ module Grape
       #   end
       def route
         env["rack.routing_args"][:route_info]
+      end
+
+      def entity_class_for_obj(object, options)
+        entity_class = options.delete(:with)
+
+        if entity_class.nil?
+          # entity class not explicitely defined, auto-detect from relation#klass or first object in the collection
+          object_class = if object.respond_to?(:klass)
+                           object.klass
+                         else
+                           object.respond_to?(:first) ? object.first.class : object.class
+                         end
+
+          object_class.ancestors.each do |potential|
+            entity_class ||= (settings[:representations] || {})[potential]
+          end
+
+          entity_class ||= object_class.const_get(:Entity) if object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)
+        end
+
+        entity_class
       end
     end
   end

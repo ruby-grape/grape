@@ -1,6 +1,17 @@
 require 'spec_helper'
+require 'grape-entity'
 
 describe Grape::Middleware::Error do
+  module ErrorSpec
+    class ErrorEntity < Grape::Entity
+      expose :code
+      expose :static
+
+      def static
+        'static text'
+      end
+    end
+  end
   class ErrApp
     class << self
       attr_accessor :error
@@ -13,11 +24,15 @@ describe Grape::Middleware::Error do
   end
 
   def app
+    opts = options
     Rack::Builder.app do
-      use Grape::Middleware::Error, default_message: 'Aww, hamburgers.'
+      use Spec::Support::EndpointFaker
+      use Grape::Middleware::Error, opts
       run ErrApp
     end
   end
+
+  let(:options) {  { default_message: 'Aww, hamburgers.' } }
 
   it 'sets the status code appropriately' do
     ErrApp.error = { status: 410 }
@@ -41,5 +56,22 @@ describe Grape::Middleware::Error do
     ErrApp.error = {}
     get '/'
     expect(last_response.body).to eq('Aww, hamburgers.')
+  end
+
+  context 'with http code' do
+    let(:options) {  { default_message: 'Aww, hamburgers.' } }
+    it 'adds the status code if wanted' do
+      ErrApp.error = { message: { code: 200 } }
+      get '/'
+
+      expect(last_response.body).to eq({ code: 200 }.to_json)
+    end
+
+    it 'presents an error message' do
+      ErrApp.error = { message: { code: 200, with: ErrorSpec::ErrorEntity } }
+      get '/'
+
+      expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)
+    end
   end
 end

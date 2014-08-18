@@ -310,10 +310,10 @@ You can use `status` to query and set the actual HTTP Status Code
 ```ruby
 post do
   status 202
-  
+
   if status == 200
      # do some thing
-  end 
+  end
 end
 ```
 
@@ -944,6 +944,31 @@ instead of a message.
 error!({ error: "unexpected error", detail: "missing widget" }, 500)
 ```
 
+You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/intridea/grape-entity) gem.
+
+```ruby
+module API
+  class Error < Grape::Entity
+    expose :code
+    expose :message
+  end
+end
+```
+
+The following example specifies the entity to use in the `http_codes` definition.
+
+```
+desc 'My Route', http_codes: [[408, 'Unauthorized', API::Error]]
+error!({ message: 'Unauthorized' }, 408)
+```
+
+The following example specifies the presented entity explicitly in the error message.
+
+```ruby
+desc 'My Route', http_codes: [[408, 'Unauthorized']]
+error!({ message: 'Unauthorized', with: API::Error }, 408)
+```
+
 ### Default Error HTTP Status Code
 
 By default Grape returns a 500 status code from `error!`. You can change this with `default_error_status`.
@@ -1468,8 +1493,8 @@ formatter.
 
 ### Basic and Digest Auth
 
-Grape has built-in Basic and Digest authentication (the given `block` 
-is executed in the context of the current `Endpoint`).  Authentication 
+Grape has built-in Basic and Digest authentication (the given `block`
+is executed in the context of the current `Endpoint`).  Authentication
 applies to the current namespace and any children, but not parents.
 
 ```ruby
@@ -1496,7 +1521,7 @@ For registering a Middlewar you need the following options:
 
 * `label` - the name for your authenticator to use it later
 * `MiddlewareClass` - the MiddlewareClass to use for authentication
-* `option_lookup_proc` - A Proc with one Argument to lookup the options at 
+* `option_lookup_proc` - A Proc with one Argument to lookup the options at
 runtime (return value is an `Array` as Paramter for the Middleware).
 
 Example:
