@@ -944,6 +944,22 @@ instead of a message.
 error!({ error: "unexpected error", detail: "missing widget" }, 500)
 ```
 
+When you'r error message is representable, a Hash with an option `with` or your
+status is documented with an `Entity` it will be presented.
+
+Examples:
+
+```ruby
+
+
+desc 'my route' , http_code:  [[408, 'Unauthorized', API::Error]],
+
+error!(Error.new(...), 400)
+error!({ message: 'An Error', with: API::Error }, 401)
+error!({ message: 'An Error' }, 408)
+
+```
+
 ### Default Error HTTP Status Code
 
 By default Grape returns a 500 status code from `error!`. You can change this with `default_error_status`.
