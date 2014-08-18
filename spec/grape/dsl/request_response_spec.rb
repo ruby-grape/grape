@@ -118,13 +118,6 @@ module Grape
           subject.represent :ThisClass, with: presenter
         end
       end
-
-      describe '.add_http_code_on_error' do
-        it 'sets a flag if the error code should be added to the error' do
-          expect(subject).to receive(:set).with(:add_http_code_on_error, true)
-          subject.add_http_code_on_error true
-        end
-      end
     end
   end
 end

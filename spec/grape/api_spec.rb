@@ -1763,22 +1763,6 @@ describe Grape::API do
     end
   end
 
-  describe '.add_http_code_on_error' do
-    it 'allows adding http status code' do
-      subject.add_http_code_on_error true
-
-      subject.desc 'some desc', http_codes: [[401, 'Unauthorized', Class.new(Grape::Entity)]]
-
-      subject.get '/exception' do
-        error!({}, 408)
-      end
-
-      get '/exception'
-      expect(last_response.status).to eql 408
-      expect(last_response.body).to eql({ code: 408 }.to_json)
-    end
-  end
-
   describe 'http_codes' do
 
     let(:error_presenter) do
@@ -1795,13 +1779,10 @@ describe Grape::API do
     end
 
     it 'is used as presenter' do
-
-      subject.add_http_code_on_error true
-
       subject.desc 'some desc', http_codes: [[401, 'Error'], [408, 'Unauthorized', error_presenter], [409, 'Error']]
 
       subject.get '/exception' do
-        error!({}, 408)
+        error!({code: 408}, 408)
       end
 
       get '/exception'

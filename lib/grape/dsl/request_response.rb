@@ -147,15 +147,6 @@ module Grape
           imbue(:representations, model_class => options[:with])
         end
 
-        # Specify if the http code should be added to
-        # the error message
-        def add_http_code_on_error(new_value = nil)
-          if new_value.nil?
-            settings[:add_http_code_on_error]
-          else
-            set(:add_http_code_on_error, new_value)
-          end
-        end
       end
     end
   end

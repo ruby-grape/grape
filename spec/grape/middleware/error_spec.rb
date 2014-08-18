@@ -59,19 +59,19 @@ describe Grape::Middleware::Error do
   end
 
   context 'with http code' do
-    let(:options) {  { default_message: 'Aww, hamburgers.', add_http_code_on_error: true } }
+    let(:options) {  { default_message: 'Aww, hamburgers.'} }
     it 'adds the status code if wanted' do
-      ErrApp.error = { message: {} }
+      ErrApp.error = { message: {code: 200} }
       get '/'
 
       expect(last_response.body).to eq({ code: 200 }.to_json)
     end
 
     it 'presents an error message' do
-      ErrApp.error = { message: { with: ErrorSpec::ErrorEntity } }
+      ErrApp.error = { message: {code: 200, with: ErrorSpec::ErrorEntity } }
       get '/'
 
-      expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)
+      expect(last_response.body).to eq({code: 200, static: 'static text' }.to_json)
     end
   end
 end

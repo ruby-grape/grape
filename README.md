@@ -960,22 +960,6 @@ error!({ message: 'An Error' }, 408)
 
 ```
 
-Error messages can be enriched with the status code, when you use a Hash or your message respond to
-`code`
-
-```ruby
-
-class API < Grape::API
-  add_http_code_on_error true
-  
-  get '/' do
-    error!({message: 'Error'}, 404) # => result as json "{"message":"Error", "code":404}"
-  end
-end
-
-
-```
-
 ### Default Error HTTP Status Code
 
 By default Grape returns a 500 status code from `error!`. You can change this with `default_error_status`.

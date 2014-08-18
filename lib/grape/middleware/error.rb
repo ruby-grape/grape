@@ -15,8 +15,7 @@ module Grape
           rescue_options: { backtrace: false }, # true to display backtrace
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
-          all_rescue_handler: nil, # rescue handler block to rescue from all exceptions
-          add_http_code_on_error: false # add http code to error messages
+          all_rescue_handler: nil # rescue handler block to rescue from all exceptions
         }
       end
 
@@ -77,11 +76,6 @@ module Grape
       end
 
       def format_message(message, backtrace)
-        if options[:add_http_code_on_error]
-          message.code = env['api.endpoint'].status if message.respond_to? :code
-          message =  message.merge(code: env['api.endpoint'].status) if message.respond_to? :merge
-        end
-
         format = env['api.format'] || options[:format]
         formatter = Grape::ErrorFormatter::Base.formatter_for(format, options)
         throw :error, status: 406, message: "The requested format '#{format}' is not supported." unless formatter
