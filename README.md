@@ -466,7 +466,7 @@ model you may want to restrict by hashtags that you have previously defined in t
 
 ```ruby
 params do
-  required :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
+  requires :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
 end
 ```
 
