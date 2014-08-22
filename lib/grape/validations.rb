@@ -77,6 +77,26 @@ module Grape
       validators[short_name] = klass
     end
 
+    class ParamsValidationChain
+      include Enumerable
+
+      def initialize(chain=[])
+        @chain = [].concat chain
+      end
+
+      def <<(item)
+        self.tap { @chain << item }
+      end
+
+      def each(&blk)
+        @chain.each(&blk)
+      end
+
+      def validate!(params)
+        each { |item| item.validate!(params) }
+      end
+    end
+
     class ParamsScope
       attr_accessor :element, :parent
 
@@ -89,6 +109,7 @@ module Grape
         @optional = opts[:optional] || false
         @type     = opts[:type]
         @declared_params = []
+        @validation_chain = ParamsValidationChain.new
 
         instance_eval(&block) if block_given?
 
@@ -218,7 +239,7 @@ module Grape
         validator_class = Validations.validators[type.to_s]
 
         if validator_class
-          (@api.settings.peek[:validations] ||= []) << validator_class.new(attrs, options, doc_attrs[:required], self)
+          (@api.settings.peek[:validations] ||= @validation_chain) << validator_class.new(attrs, options, doc_attrs[:required], self)
         else
           raise Grape::Exceptions::UnknownValidator.new(type)
         end
