@@ -106,6 +106,10 @@ module Grape
     autoload :Routing,           'grape/dsl/routing'
     autoload :Validations,       'grape/dsl/validations'
   end
+
+  class API
+    autoload :Helpers,           'grape/api/helpers'
+  end
 end
 
 require 'grape/version'
