@@ -3,6 +3,45 @@ Upgrading Grape
 
 ### Upgrading to >= 0.9.0 
 
+### Changes in Shared Params
+
+Extending a helper Module from `Grape::API::Helpers` to share parameters is deprecated. Instead you should use the following code:
+  
+```ruby
+
+module SharedParams
+   extend Grape::SharedParams
+
+   params :period do
+       optional :start_date
+       optional :end_date
+   end
+   
+   params :pagination do
+     optional :page, type: Integer
+     optional :per_page, type: Integer
+   end
+end
+
+class API < Grape::API
+  include_params SharedParams
+
+  desc "Get collection."
+  params do
+    use :period, :pagination
+  end
+
+  get do
+    Collection
+      .from(params[:start_date])
+      .to(params[:end_date])
+      .page(params[:page])
+      .per(params[:per_page])
+  end
+end
+
+```
+
 #### Changes in Authentication
 
 The following middleware classes have been removed:
