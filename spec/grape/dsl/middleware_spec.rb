@@ -5,14 +5,6 @@ module Grape
     module MiddlewareSpec
       class Dummy
         include Grape::DSL::Middleware
-
-        def self.settings
-          @settings ||= Grape::Util::HashStack.new
-        end
-
-        def self.imbue(key, value)
-          settings.imbue(key, value)
-        end
       end
     end
     describe Middleware do
@@ -21,7 +13,7 @@ module Grape
 
       describe '.use' do
         it 'adds a middleware' do
-          expect(subject).to receive(:imbue).with(:middleware, [[:my_middleware, :arg1, proc]])
+          expect(subject).to receive(:namespace_stackable).with(:middleware, [:my_middleware, :arg1, proc])
 
           subject.use :my_middleware, :arg1, &proc
         end

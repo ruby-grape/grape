@@ -44,7 +44,7 @@ describe Grape::Validations do
         subject.params do
           optional :some_param
         end
-        expect(subject.settings[:declared_params]).to eq([:some_param])
+        expect(subject.route_setting(:declared_params)).to eq([:some_param])
       end
     end
 
@@ -74,7 +74,7 @@ describe Grape::Validations do
         subject.params do
           requires :some_param
         end
-        expect(subject.settings[:declared_params]).to eq([:some_param])
+        expect(subject.route_setting(:declared_params)).to eq([:some_param])
       end
     end
 
@@ -97,7 +97,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(subject.settings[:declared_params]).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -132,7 +132,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_none
-        expect(subject.settings[:declared_params]).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -162,7 +162,7 @@ describe Grape::Validations do
 
         it 'adds only the entity documentation to declared params, nothing more' do
           define_requires_all
-          expect(subject.settings[:declared_params]).to eq([:required_field, :optional_field])
+          expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
         end
       end
 
@@ -233,7 +233,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.settings[:declared_params]).to eq([items: [:key]])
+        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
       end
     end
 
@@ -287,7 +287,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.settings[:declared_params]).to eq([items: [:key]])
+        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
       end
     end
 
@@ -321,7 +321,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.settings[:declared_params]).to eq([items: [:key]])
+        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
       end
     end
 
@@ -567,7 +567,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.settings[:declared_params]).to eq([items: [:key]])
+        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
       end
     end
 
@@ -631,7 +631,7 @@ describe Grape::Validations do
             requires(:required_subitems) { requires :value }
           end
         end
-        expect(subject.settings[:declared_params]).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
+        expect(subject.route_setting(:declared_params)).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
       end
     end
 
@@ -776,13 +776,13 @@ describe Grape::Validations do
             expect(last_response.body).to eq('custom is not custom!')
           end
 
-          specify 'the nested namesapce inherits the custom validator' do
+          specify 'the nested namespace inherits the custom validator' do
             get '/nested/nested/two', custom: 'im wrong, validate me'
             expect(last_response.status).to eq(400)
             expect(last_response.body).to eq('custom is not custom!')
           end
 
-          specify 'peer namesapces does not have the validator' do
+          specify 'peer namespaces does not have the validator' do
             get '/peer/one', custom: 'im not validated'
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('no validation required')
@@ -877,14 +877,14 @@ describe Grape::Validations do
           subject.params do
             use :pagination
           end
-          expect(subject.settings[:declared_params]).to eq [:page, :per_page]
+          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page]
         end
 
         it 'by #use with multiple params' do
           subject.params do
             use :pagination, :period
           end
-          expect(subject.settings[:declared_params]).to eq [:page, :per_page, :start_date, :end_date]
+          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page, :start_date, :end_date]
         end
 
       end

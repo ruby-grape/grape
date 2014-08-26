@@ -21,27 +21,44 @@ module Grape
       describe '.prefix' do
         it 'sets a prefix for route' do
           prefix = '/api'
-          expect(subject).to receive(:set).with(:root_prefix, prefix)
+          expect(subject).to receive(:namespace_inheritable).with(:root_prefix, prefix)
           subject.prefix prefix
         end
       end
 
       describe '.do_not_route_head!' do
         it 'sets do not route head option' do
-          expect(subject).to receive(:set).with(:do_not_route_head, true)
+          expect(subject).to receive(:namespace_inheritable).with(:do_not_route_head, true)
           subject.do_not_route_head!
         end
       end
 
       describe '.do_not_route_options!' do
         it 'sets do not route options option' do
-          expect(subject).to receive(:set).with(:do_not_route_options, true)
+          expect(subject).to receive(:namespace_inheritable).with(:do_not_route_options, true)
           subject.do_not_route_options!
         end
       end
 
-      xdescribe '.mount' do
-        it 'does some thing'
+      describe '.mount' do
+        it 'mounts on a nested path' do
+          subject = Class.new(Grape::API)
+          app1 = Class.new(Grape::API)
+          app2 = Class.new(Grape::API)
+          app2.get '/nice' do
+            "play"
+          end
+
+          subject.mount app1 => '/app1'
+          app1.mount app2 => '/app2'
+
+          expect(subject.inheritable_setting.to_hash[:namespace]).to eq({})
+          expect(subject.inheritable_setting.to_hash[:namespace_inheritable]).to eq({})
+          expect(app1.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1'])
+
+          expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1', '/app2'])
+
+        end
       end
       xdescribe '.route' do
         it 'does some thing'

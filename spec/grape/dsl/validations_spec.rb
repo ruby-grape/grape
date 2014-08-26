@@ -17,17 +17,17 @@ module Grape
 
       describe '.reset_validations!' do
         before do
-          subject.settings.peek[:declared_params] = ['dummy']
-          subject.settings.peek[:validations] = ['dummy']
+          subject.namespace_stackable :declared_params, ['dummy']
+          subject.namespace_stackable :validations, ['dummy']
           subject.reset_validations!
         end
 
         it 'resets declared params' do
-          expect(subject.settings.peek[:declared_params]).to be_empty
+          expect(subject.namespace_stackable(:declared_params)).to eq []
         end
 
         it 'resets validations' do
-          expect(subject.settings.peek[:validations]).to be_empty
+          expect(subject.namespace_stackable(:validations)).to eq []
         end
       end
 
@@ -46,8 +46,9 @@ module Grape
           subject.document_attribute([full_name: 'xxx'], foo: 'bar')
         end
 
-        it 'creates last_description' do
-          expect(subject.instance_variable_get(:'@last_description')).to eq(params: { 'xxx' => { foo: 'bar' } })
+        it 'creates a param documentation' do
+          expect(subject.namespace_stackable(:params)).to eq(['xxx' => { foo: 'bar' }])
+          expect(subject.route_setting(:description)).to eq(params: { 'xxx' => { foo: 'bar' } })
         end
       end
     end
