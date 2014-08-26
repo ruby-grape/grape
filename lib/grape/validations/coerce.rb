@@ -31,7 +31,7 @@ module Grape
         if klass == Virtus::Attribute::Boolean
           val.is_a?(TrueClass) || val.is_a?(FalseClass)
         elsif klass == Rack::Multipart::UploadedFile
-          val.is_a?(Hashie::Mash) && val.key?(:tempfile)
+          val.is_a?(Hash) && val.key?(:tempfile)
         else
           val.is_a?(klass)
         end

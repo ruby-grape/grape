@@ -1,8 +1,23 @@
 module Grape
   class Request < Rack::Request
+    class Params < ::Hash
+      include Hashie::Extensions::MergeInitializer
+      include Hashie::Extensions::IndifferentAccess
+      include Hashie::Extensions::MethodAccess
+
+      def convert_value(value)
+        super(value).tap do |converted_value|
+          if converted_value.is_a?(Hash)
+            value_self = (class << converted_value; self; end)
+            value_self.send :include, Hashie::Extensions::MethodAccess
+          end
+        end
+      end
+    end
+
     def params
       @params ||= begin
-        params = Hashie::Mash.new(super)
+        params = Params.new(super)
         if env['rack.routing_args']
           args = env['rack.routing_args'].dup
           # preserve version from query string parameters
