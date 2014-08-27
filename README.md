@@ -450,7 +450,7 @@ params do
 end
 ```
 
-#### Validating nested parameters
+#### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
