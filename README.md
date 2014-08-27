@@ -1517,7 +1517,7 @@ Grape can use custom Middleware for authentication. How to implement these
 Middleware have a look at `Rack::Auth::Basic` or similar implementations.
 
 
-For registering a Middlewar you need the following options:
+For registering a Middleware you need the following options:
 
 * `label` - the name for your authenticator to use it later
 * `MiddlewareClass` - the MiddlewareClass to use for authentication
