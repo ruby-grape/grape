@@ -1,8 +1,9 @@
-0.8.1 (Next)
-============
+0.9.0 (8/27/2014)
+=================
+
+#### Features
 
 * [#691](https://github.com/intridea/grape/issues/691): Added `at_least_one_of` parameter validator - [@dblock](https://github.com/dblock).
-* [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
 * [#698](https://github.com/intridea/grape/pull/698): `error!` sets `status` for `Endpoint` too - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#703](https://github.com/intridea/grape/pull/703): Added support for Auth-Middleware extension - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#703](https://github.com/intridea/grape/pull/703): Removed `Grape::Middleware::Auth::Basic` - [@dspaeth-faber](https://github.com/dspaeth-faber).
@@ -11,7 +12,10 @@
 * [#719](https://github.com/intridea/grape/pull/719): Allow passing options hash to a custom validator - [@elado](https://github.com/elado).
 * [#716](https://github.com/intridea/grape/pull/716): Calling `content-type` will now return the current content-type - [@dblock](https://github.com/dblock).
 * [#705](https://github.com/intridea/grape/pull/705): Errors can now be presented with a `Grape::Entity` class - [@dspaeth-faber](https://github.com/dspaeth-faber).
-* Your contribution here.
+
+#### Fixes
+
+* [#687](https://github.com/intridea/grape/pull/687): Fix: `mutually_exclusive` and `exactly_one_of` validation error messages now label parameters as strings, consistently with `requires` and `optional` - [@dblock](https://github.com/dblock).
 
 0.8.0 (7/10/2014)
 =================
