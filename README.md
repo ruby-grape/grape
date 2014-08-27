@@ -481,8 +481,14 @@ Parameters can be defined as `non_empty`, ensuring that they contain a value. By
 only validates that a parameter was sent in the request, regardless its value. With `non_empty`,
 empty values or whitespace only values are invalid.
 
+`non_empty` can be combined with both `requires` and `optional`. If the parameter is required, it has to contain
+a value. If it's optional, it's possible to not send it in the request, but if it's being sent, it has to have
+some value, and not an empty string/only whitespaces.
+
+
 ```ruby
 params do
+  requires :username, non_empty: true
   optional :first_name, non_empty: true
 end
 ```
