@@ -475,21 +475,21 @@ end
 
 ### Built-in Validators
 
-#### `non_empty`
+#### `allow_blank`
 
-Parameters can be defined as `non_empty`, ensuring that they contain a value. By default, `requires`
-only validates that a parameter was sent in the request, regardless its value. With `non_empty`,
+Parameters can be defined as `allow_blank`, ensuring that they contain a value. By default, `requires`
+only validates that a parameter was sent in the request, regardless its value. With `allow_blank`,
 empty values or whitespace only values are invalid.
 
-`non_empty` can be combined with both `requires` and `optional`. If the parameter is required, it has to contain
+`allow_blank` can be combined with both `requires` and `optional`. If the parameter is required, it has to contain
 a value. If it's optional, it's possible to not send it in the request, but if it's being sent, it has to have
 some value, and not an empty string/only whitespaces.
 
 
 ```ruby
 params do
-  requires :username, non_empty: true
-  optional :first_name, non_empty: true
+  requires :username, allow_blank: false
+  optional :first_name, allow_blank: false
 end
 ```
 
