@@ -15,14 +15,14 @@ module Grape
 
         key_exists = params.key?(attr_name)
 
-        should_validate = if @scope.root?
+        if @scope.root?
           # root scope. validate if it's a required param. if it's optional, validate only if key exists in hash
-          @required || key_exists
+          should_validate = @required || key_exists
         else # nested scope
-          # required param, and scope contains some values (if scoping element contains no values, treat as blank)
-          (@required && params.present?) ||
-          # optional param but key inside scoping element exists
-          (!@required && params.key?(attr_name))
+          should_validate = # required param, and scope contains some values (if scoping element contains no values, treat as blank)
+            (@required && params.present?) ||
+            # optional param but key inside scoping element exists
+            (!@required && params.key?(attr_name))
         end
 
         return unless should_validate
