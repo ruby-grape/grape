@@ -742,12 +742,37 @@ describe Grape::API do
 
     it 'sets content type for txt format' do
       get '/foo'
-      expect(last_response.headers['Content-Type']).to eql 'text/plain'
+      expect(last_response.headers['Content-Type']).to eq('text/plain')
+    end
+
+    it 'sets content type for xml' do
+      get '/foo.xml'
+      expect(last_response.headers['Content-Type']).to eq('application/xml')
     end
 
     it 'sets content type for json' do
       get '/foo.json'
-      expect(last_response.headers['Content-Type']).to eql 'application/json'
+      expect(last_response.headers['Content-Type']).to eq('application/json')
+    end
+
+    it 'sets content type for serializable hash format' do
+      get '/foo.serializable_hash'
+      expect(last_response.headers['Content-Type']).to eq('application/json')
+    end
+
+    it 'sets content type for binary format' do
+      get '/foo.binary'
+      expect(last_response.headers['Content-Type']).to eq('application/octet-stream')
+    end
+
+    it 'returns raw data when content type binary' do
+      image_filename = 'grape.png'
+      file = File.open(image_filename, 'rb') { |io| io.read }
+      subject.format :binary
+      subject.get('/binary_file') { File.binread(image_filename) }
+      get '/binary_file'
+      expect(last_response.headers['Content-Type']).to eq('application/octet-stream')
+      expect(last_response.body).to eq(file)
     end
 
     it 'sets content type for error' do
@@ -756,14 +781,14 @@ describe Grape::API do
       expect(last_response.headers['Content-Type']).to eql 'text/plain'
     end
 
-    it 'sets content type for error' do
+    it 'sets content type for json error' do
       subject.format :json
       subject.get('/error') { error!('error in json', 500) }
       get '/error.json'
       expect(last_response.headers['Content-Type']).to eql 'application/json'
     end
 
-    it 'sets content type for xml' do
+    it 'sets content type for xml error' do
       subject.format :xml
       subject.get('/error') { error!('error in xml', 500) }
       get '/error.xml'

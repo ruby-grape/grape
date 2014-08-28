@@ -1178,7 +1178,7 @@ end
 
 ## API Formats
 
-By default, Grape supports _XML_, _JSON_, and _TXT_ content-types. The default format is `:txt`.
+By default, Grape supports _XML_, _JSON_, _BINARY_, and _TXT_ content-types. The default format is `:txt`.
 
 Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
 
@@ -1242,10 +1242,11 @@ end
 
 Built-in formats are the following.
 
-* `:json` and `:jsonapi`: use object's `to_json` when available, otherwise call `MultiJson.dump`
+* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
+* `:binary`
 
 Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header.
 See below for the order for choosing the API format.
