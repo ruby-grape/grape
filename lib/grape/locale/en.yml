@@ -6,6 +6,7 @@ en:
         coerce: 'is invalid'
         presence: 'is missing'
         regexp: 'is invalid'
+        blank: 'is empty'
         values: 'does not have a valid value'
         missing_vendor_option:
           problem: 'missing :vendor option.'

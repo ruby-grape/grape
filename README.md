@@ -22,6 +22,7 @@
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
+  - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
@@ -449,26 +450,7 @@ params do
 end
 ```
 
-Parameters can be restricted to a specific set of values with the `:values` option.
-
-Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
-number for each call to the endpoint of this `params` block. To have the default evaluate
-at calltime use a lambda, like `:random_number` above.
-
-```ruby
-params do
-  requires :status, type: Symbol, values: [:not_started, :processing, :done]
-end
-```
-
-The `:values` option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
-model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
-
-```ruby
-params do
-  requires :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
-end
-```
+#### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
@@ -490,6 +472,51 @@ params do
   end
 end
 ```
+
+### Built-in Validators
+
+#### `allow_blank`
+
+Parameters can be defined as `allow_blank`, ensuring that they contain a value. By default, `requires`
+only validates that a parameter was sent in the request, regardless its value. With `allow_blank`,
+empty values or whitespace only values are invalid.
+
+`allow_blank` can be combined with both `requires` and `optional`. If the parameter is required, it has to contain
+a value. If it's optional, it's possible to not send it in the request, but if it's being sent, it has to have
+some value, and not an empty string/only whitespaces.
+
+
+```ruby
+params do
+  requires :username, allow_blank: false
+  optional :first_name, allow_blank: false
+end
+```
+
+#### `values`
+
+Parameters can be restricted to a specific set of values with the `:values` option.
+
+Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
+number for each call to the endpoint of this `params` block. To have the default evaluate
+at calltime use a lambda, like `:random_number` above.
+
+```ruby
+params do
+  requires :status, type: Symbol, values: [:not_started, :processing, :done]
+end
+```
+
+The `:values` option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
+model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
+
+```ruby
+params do
+  requires :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
+end
+```
+
+#### `mutually_exclusive`
 
 Parameters can be defined as `mutually_exclusive`, ensuring that they aren't present at the same time in a request.
 
@@ -516,6 +543,8 @@ end
 
 **Warning**: Never define mutually exclusive sets with any required params. Two mutually exclusive required params will mean params are never valid, thus making the endpoint useless. One required param mutually exclusive with an optional param will mean the latter is never valid.
 
+#### `exactly_one_of`
+
 Parameters can be defined as 'exactly_one_of', ensuring that exactly one parameter gets selected.
 
 ```ruby
@@ -525,6 +554,8 @@ params do
   exactly_one_of :beer, :wine
 end
 ```
+
+#### `at_least_one_of`
 
 Parameters can be defined as 'at_least_one_of', ensuring that at least one parameter gets selected.
 
@@ -584,7 +615,7 @@ end
 class AlphaNumeric < Grape::Validations::Validator
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
-      raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: "must consist of alpha-numeric characters"
+      raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must consist of alpha-numeric characters"
     end
   end
 end
@@ -602,7 +633,7 @@ You can also create custom classes that take parameters.
 class Length < Grape::Validations::SingleOptionValidator
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
-      raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: "must be at the most #{@option} characters long"
+      raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
     end
   end
 end

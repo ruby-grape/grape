@@ -1,6 +1,7 @@
 0.9.1 (Next)
 ============
 
+* [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
