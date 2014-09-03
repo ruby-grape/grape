@@ -3,6 +3,8 @@
 
 * [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * Your contribution here.
+* [#745](https://github.com/intridea/grape/pull/745): Removed `atom+xml`, `rss+xml`, and `jsonapi` content-types - [@akabraham](https://github.com/akabraham).
+* [#745](https://github.com/intridea/grape/pull/745): Added `:binary, application/octet-stream` content-type - [@akabraham](https://github.com/akabraham).
 
 0.9.0 (8/27/2014)
 =================

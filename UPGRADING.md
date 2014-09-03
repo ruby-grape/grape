@@ -1,6 +1,18 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.9.1
+
+#### Changes to content-types
+
+The following content-types have been removed:
+
+* atom (application/atom+xml)
+* rss (application/rss+xml)
+* jsonapi (application/jsonapi)
+
+This is because they have never been properly supported.
+
 ### Upgrading to >= 0.9.0 
 
 #### Changes in Authentication
