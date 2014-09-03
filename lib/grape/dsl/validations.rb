@@ -8,7 +8,7 @@ module Grape
       module ClassMethods
         def reset_validations!
           settings.peek[:declared_params] = []
-          settings.peek[:validations] = []
+          settings.peek[:validations] = nil
         end
 
         def params(&block)

@@ -78,6 +78,29 @@ describe Grape::Validations do
       end
     end
 
+    context 'required with regexp validator' do
+      before do
+        subject.params do
+          requires :key, type: String, regexp: /^[0-9]$/
+        end
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'provides the right error message when the key is not provided' do
+        get '/required'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('key is missing')
+      end
+
+      it 'provides the right error message when the key is present but invalid' do
+        get '/required', key: "ABC"
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('key is invalid')
+      end
+    end
+
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
