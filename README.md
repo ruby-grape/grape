@@ -564,7 +564,7 @@ params do
   optional :beer
   optional :wine
   optional :juice
-  at_least_one :beer, :wine, :juice
+  at_least_one_of :beer, :wine, :juice
 end
 ```
 
