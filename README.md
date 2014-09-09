@@ -450,6 +450,23 @@ params do
 end
 ```
 
+Note that default values will be passed through to any validation options specified.
+The following example will always fail if `:color` is not expliclity provided.
+
+```ruby
+params do
+  optional :color, type: String, default: 'blue', values: ['red, 'green']
+end
+```
+
+The correct implementation is to ensure the default value passes all validations.
+
+```ruby
+params do
+  optional :color, type: String, default: 'blue', values: ['blue', 'red, 'green']
+end
+```
+
 #### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
