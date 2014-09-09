@@ -516,6 +516,19 @@ params do
 end
 ```
 
+#### `regexp`
+
+Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value
+is nil or does not match the regular expression an error will be returned. Note that this is true for both `requires`
+and `optional` parameters.
+
+```ruby
+params do
+  requires :email, regexp: /.+@.+/
+end
+```
+
+
 #### `mutually_exclusive`
 
 Parameters can be defined as `mutually_exclusive`, ensuring that they aren't present at the same time in a request.
