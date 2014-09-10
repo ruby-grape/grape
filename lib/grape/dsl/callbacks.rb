@@ -5,21 +5,23 @@ module Grape
     module Callbacks
       extend ActiveSupport::Concern
 
+      include Grape::DSL::Configuration
+
       module ClassMethods
         def before(&block)
-          imbue(:befores, [block])
+          namespace_stackable(:befores, block)
         end
 
         def before_validation(&block)
-          imbue(:before_validations, [block])
+          namespace_stackable(:before_validations, block)
         end
 
         def after_validation(&block)
-          imbue(:after_validations, [block])
+          namespace_stackable(:after_validations, block)
         end
 
         def after(&block)
-          imbue(:afters, [block])
+          namespace_stackable(:afters, block)
         end
       end
     end

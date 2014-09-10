@@ -116,7 +116,7 @@ describe Grape::API do
     it 'adds the association to the :representations setting' do
       klass = Class.new
       subject.represent Object, with: klass
-      expect(subject.settings[:representations][Object]).to eq(klass)
+      expect(Grape::DSL::Configuration.stacked_hash_to_hash(subject.namespace_stackable(:representations))[Object]).to eq(klass)
     end
   end
 
@@ -872,20 +872,14 @@ describe Grape::API do
 
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
-        settings = Grape::Util::HashStack.new
-        allow(settings).to receive(:stack).and_return([{ middleware: [[ApiSpec::PhonyMiddleware, 'abc', 123]] }])
-        allow(subject).to receive(:settings).and_return(settings)
+        subject.use ApiSpec::PhonyMiddleware, 'abc', 123
         expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
 
       it 'includes all middleware from stacked settings' do
-        settings = Grape::Util::HashStack.new
-        allow(settings).to receive(:stack).and_return [
-          { middleware: [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']] },
-          { middleware: [[ApiSpec::PhonyMiddleware, 'foo']] }
-        ]
-
-        allow(subject).to receive(:settings).and_return(settings)
+        subject.use ApiSpec::PhonyMiddleware, 123
+        subject.use ApiSpec::PhonyMiddleware, 'abc'
+        subject.use ApiSpec::PhonyMiddleware, 'foo'
 
         expect(subject.middleware).to eql [
           [ApiSpec::PhonyMiddleware, 123],
@@ -1993,9 +1987,11 @@ describe Grape::API do
         end
         get 'method' do ; end
       end
-      expect(subject.routes.map { |route|
+
+      routes_doc = subject.routes.map { |route|
         { description: route.route_description, params: route.route_params }
-      }).to eq [
+      }
+      expect(routes_doc).to eq [
         { description: "method",
           params: {
             "ns_param" => { required: true, desc: "namespace parameter" },
@@ -2193,12 +2189,16 @@ describe Grape::API do
         subject.rescue_from :all do |e|
           rack_response("rescued from #{e.message}", 202)
         end
+
+        app = Class.new(Grape::API)
+
         subject.namespace :mounted do
-          app = Class.new(Grape::API)
+
           app.rescue_from ArgumentError
           app.get('/fail') { raise "doh!" }
           mount app
         end
+
         get '/mounted/fail'
         expect(last_response.status).to eql 202
         expect(last_response.body).to eq('rescued from doh!')
@@ -2230,14 +2230,15 @@ describe Grape::API do
       end
 
       it 'mounts on a nested path' do
-        app1 = Class.new(Grape::API)
-        app2 = Class.new(Grape::API)
-        app2.get '/nice' do
+        APP1 = Class.new(Grape::API)
+        APP2 = Class.new(Grape::API)
+        APP2.get '/nice' do
           "play"
         end
         # note that the reverse won't work, mount from outside-in
-        subject.mount app1 => '/app1'
-        app1.mount app2 => '/app2'
+        APP3 = subject
+        APP3.mount APP1 => '/app1'
+        APP1.mount APP2 => '/app2'
         get "/app1/app2/nice"
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq("play")
@@ -2258,6 +2259,9 @@ describe Grape::API do
         subject.namespace :apples do
           mount app
         end
+
+        # require 'pry-byebug'; binding.pry
+
         get '/apples/colour'
         expect(last_response.status).to eql 200
         expect(last_response.body).to eq('red')

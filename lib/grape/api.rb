@@ -3,23 +3,13 @@ module Grape
   # creating Grape APIs.Users should subclass this
   # class in order to build an API.
   class API
-    extend Grape::Middleware::Auth::DSL
-
-    include Grape::DSL::Validations
-    include Grape::DSL::Callbacks
-    include Grape::DSL::Configuration
-    include Grape::DSL::Helpers
-    include Grape::DSL::Middleware
-    include Grape::DSL::RequestResponse
-    include Grape::DSL::Routing
+    include Grape::DSL::API
 
     class << self
       attr_reader :instance
-
       LOCK = Mutex.new
 
       def reset!
-        @settings  = Grape::Util::HashStack.new
         @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
         @routes = nil
@@ -47,32 +37,17 @@ module Grape
       #
       # @param name [Symbol] Purely placebo, just allows to to name the scope to make the code more readable.
       def scope(name = nil, &block)
-        nest(block)
+        within_namespace do
+          nest(block)
+        end
       end
 
       def cascade(value = nil)
         if value.nil?
-          settings.key?(:cascade) ? !!settings[:cascade] : true
+          inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !!namespace_inheritable(:cascade) : true
         else
-          set(:cascade, value)
+          namespace_inheritable(:cascade, value)
         end
-      end
-
-      # Set a configuration value for this namespace.
-      #
-      # @param key [Symbol] The key of the configuration variable.
-      # @param value [Object] The value to which to set the configuration variable.
-      def set(key, value)
-        settings[key.to_sym] = value
-      end
-
-      # Add to a configuration value for this
-      # namespace.
-      #
-      # @param key [Symbol] The key of the configuration variable.
-      # @param value [Object] The value to which to set the configuration variable.
-      def imbue(key, value)
-        settings.imbue(key, value)
       end
 
       protected
@@ -91,10 +66,8 @@ module Grape
       def nest(*blocks, &block)
         blocks.reject! { |b| b.nil? }
         if blocks.any?
-          settings.push  # create a new context to eval the follow
           instance_eval(&block) if block_given?
           blocks.each { |b| instance_eval(&b) }
-          settings.pop # when finished, we pop the context
           reset_validations!
         else
           instance_eval(&block)
@@ -106,12 +79,14 @@ module Grape
         subclass.logger = logger.clone
       end
 
-      def inherit_settings(other_stack)
-        settings.prepend other_stack
+      def inherit_settings(other_settings)
+        top_level_setting.inherit_from other_settings.point_in_time_copy
+
         endpoints.each do |e|
-          e.settings.prepend(other_stack)
-          e.options[:app].inherit_settings(other_stack) if e.options[:app].respond_to?(:inherit_settings, true)
+          e.reset_routes!
         end
+
+        @routes = nil
       end
     end
 
@@ -121,6 +96,7 @@ module Grape
       self.class.endpoints.each do |endpoint|
         endpoint.mount_in(@route_set)
       end
+
       @route_set.freeze
     end
 
@@ -139,8 +115,8 @@ module Grape
     # errors from reaching upstream. This is effectivelly done by unsetting
     # X-Cascade. Default :cascade is true.
     def cascade?
-      return !!self.class.settings[:cascade] if self.class.settings.key?(:cascade)
-      return !!self.class.settings[:version_options][:cascade] if self.class.settings[:version_options] && self.class.settings[:version_options].key?(:cascade)
+      return !!self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.keys.include?(:cascade)
+      return !!self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options) && self.class.namespace_inheritable(:version_options).key?(:cascade)
       true
     end
 
@@ -154,6 +130,7 @@ module Grape
     # cannot handle.
     def add_head_not_allowed_methods_and_options_methods
       methods_per_path = {}
+
       self.class.endpoints.each do |endpoint|
         routes = endpoint.routes
         routes.each do |route|
@@ -169,13 +146,14 @@ module Grape
       without_versioning do
         methods_per_path.each do |path, methods|
           allowed_methods = methods.dup
-          unless self.class.settings[:do_not_route_head]
+          unless self.class.namespace_inheritable(:do_not_route_head)
             allowed_methods |= ['HEAD'] if allowed_methods.include?('GET')
           end
 
           allow_header = (['OPTIONS'] | allowed_methods).join(', ')
-          unless self.class.settings[:do_not_route_options]
+          unless self.class.namespace_inheritable(:do_not_route_options)
             unless allowed_methods.include?('OPTIONS')
+              # require 'pry-byebug'; binding.pry
               self.class.options(path, {}) do
                 header 'Allow', allow_header
                 status 204
@@ -185,7 +163,7 @@ module Grape
           end
 
           not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
-          not_allowed_methods << 'OPTIONS' if self.class.settings[:do_not_route_options]
+          not_allowed_methods << 'OPTIONS' if self.class.namespace_inheritable(:do_not_route_options)
           self.class.route(not_allowed_methods, path) do
             header 'Allow', allow_header
             status 405
@@ -196,9 +174,16 @@ module Grape
     end
 
     def without_versioning(&block)
-      self.class.settings.push(version: nil, version_options: nil)
+      old_version = self.class.namespace_inheritable(:version)
+      old_version_options = self.class.namespace_inheritable(:version_options)
+
+      self.class.namespace_inheritable_to_nil(:version)
+      self.class.namespace_inheritable_to_nil(:version_options)
+
       yield
-      self.class.settings.pop
+
+      self.class.namespace_inheritable(:version, old_version)
+      self.class.namespace_inheritable(:version_options, old_version_options)
     end
   end
 end

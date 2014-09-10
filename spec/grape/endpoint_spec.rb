@@ -42,7 +42,7 @@ describe Grape::Endpoint do
     it 'takes a settings stack, options, and a block' do
       p = proc {}
       expect {
-        Grape::Endpoint.new(Grape::Util::HashStack.new, {
+        Grape::Endpoint.new(Grape::Util::InheritableSetting.new, {
                               path: '/',
                               method: :get
                             }, &p)

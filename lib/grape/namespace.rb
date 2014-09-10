@@ -13,7 +13,7 @@ module Grape
     end
 
     def self.joined_space(settings)
-      settings.gather(:namespace).map(&:space).join("/")
+      (settings || []).map(&:space).join("/")
     end
 
     def self.joined_space_path(settings)

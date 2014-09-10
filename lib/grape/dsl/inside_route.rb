@@ -4,6 +4,7 @@ module Grape
   module DSL
     module InsideRoute
       extend ActiveSupport::Concern
+      include Grape::DSL::Settings
 
       # A filtering method that will return a hash
       # consisting only of keys that have been declared by a
@@ -18,8 +19,8 @@ module Grape
         options[:include_missing] = true unless options.key?(:include_missing)
         options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
         if declared_params.nil?
-          declared_params = !options[:include_parent_namespaces] ? settings[:declared_params] :
-              settings.gather(:declared_params)
+          declared_params = (!options[:include_parent_namespaces] ? route_setting(:declared_params) :
+              (route_setting(:saved_declared_params) || [])).flatten(1) || []
         end
 
         unless declared_params
@@ -61,7 +62,7 @@ module Grape
       # @param message [String] The message to display.
       # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
       def error!(message, status = nil, headers = nil)
-        self.status(status || settings[:default_error_status])
+        self.status(status || namespace_inheritable(:default_error_status))
         throw :error, message: message, status: self.status, headers: headers
       end
 
@@ -214,7 +215,7 @@ module Grape
                          end
 
           object_class.ancestors.each do |potential|
-            entity_class ||= (settings[:representations] || {})[potential]
+            entity_class ||= (Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:representations)) || {})[potential]
           end
 
           entity_class ||= object_class.const_get(:Entity) if object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)

@@ -6,12 +6,12 @@ module Grape
       class Dummy
         include Grape::DSL::InsideRoute
 
-        attr_reader :env, :request, :settings
+        attr_reader :env, :request, :new_settings
 
         def initialize
           @env = {}
           @header = {}
-          @settings = Grape::Util::HashStack.new
+          @new_settings = { namespace_inheritable: {}, namespace_stackable: {} }
         end
       end
     end
@@ -46,7 +46,7 @@ module Grape
 
         describe 'default_error_status' do
           before do
-            subject.settings[:default_error_status] = 500
+            subject.namespace_inheritable(:default_error_status, 500)
             catch(:error) { subject.error! 'Unknown' }
           end
           it 'sets status to default_error_status' do

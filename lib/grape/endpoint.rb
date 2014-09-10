@@ -4,7 +4,9 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc.
   class Endpoint
-    attr_accessor :block, :source, :options, :settings
+    include Grape::DSL::Settings
+
+    attr_accessor :block, :source, :options
     attr_reader :env, :request, :headers, :params
 
     include Grape::DSL::InsideRoute
@@ -46,12 +48,17 @@ module Grape
       end
     end
 
-    def initialize(settings, options = {}, &block)
+    def initialize(new_settings, options = {}, &block)
       require_option(options, :path)
       require_option(options, :method)
 
-      @settings = settings
-      @settings[:default_error_status] ||= 500
+      self.inheritable_setting = new_settings.point_in_time_copy
+
+      route_setting(:saved_declared_params, namespace_stackable(:declared_params))
+      route_setting(:saved_validations, namespace_stackable(:validations))
+
+      namespace_stackable(:representations, []) unless namespace_stackable(:representations)
+      namespace_inheritable(:default_error_status, 500) unless namespace_inheritable(:default_error_status)
 
       @options = options
 
@@ -73,8 +80,8 @@ module Grape
 
     def method_name
       [options[:method],
-       Namespace.joined_space(settings),
-       settings.gather(:mount_path).join('/'),
+       Namespace.joined_space(namespace_stackable(:namespace)),
+       (namespace_stackable(:mount_path) || []).join('/'),
        options[:path].join('/')
      ].join(" ")
     end
@@ -83,13 +90,24 @@ module Grape
       @routes ||= endpoints ? endpoints.collect(&:routes).flatten : prepare_routes
     end
 
+    def reset_routes!
+      endpoints.map(&:reset_routes!) if endpoints
+      @namespace = nil
+      @routes = nil
+    end
+
     def mount_in(route_set)
       if endpoints
-        endpoints.each { |e| e.mount_in(route_set) }
+        endpoints.each { |e|
+          e.inheritable_setting.inherit_from inheritable_setting
+          e.mount_in(route_set)
+        }
       else
+        @routes = nil
+
         routes.each do |route|
           methods = [route.route_method]
-          if !settings[:do_not_route_head] && route.route_method == "GET"
+          if !namespace_inheritable(:do_not_route_head) && route.route_method == "GET"
             methods << "HEAD"
           end
           methods.each do |method|
@@ -105,6 +123,8 @@ module Grape
     def prepare_routes
       routes = []
       options[:method].each do |method|
+        # pp "Method #{method} #{object_id}"
+
         options[:path].each do |path|
           prepared_path = prepare_path(path)
 
@@ -112,7 +132,7 @@ module Grape
           anchor = anchor.nil? ? true : anchor
 
           endpoint_requirements = options[:route_options][:requirements] || {}
-          all_requirements = (settings.gather(:namespace).map(&:requirements) << endpoint_requirements)
+          all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
           requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
             base_requirements.merge!(single_requirements)
           end
@@ -128,8 +148,8 @@ module Grape
           path_params.merge!(route_params)
           request_method = (method.to_s.upcase unless method == :any)
           routes << Route.new(options[:route_options].clone.merge(
-            prefix: settings[:root_prefix],
-            version: settings[:version] ? settings[:version].join('|') : nil,
+            prefix: namespace_inheritable(:root_prefix),
+            version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
             namespace: namespace,
             method: request_method,
             path: prepared_path,
@@ -142,16 +162,19 @@ module Grape
     end
 
     def prepare_path(path)
-      Path.prepare(path, namespace, settings)
+      path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
+      # require 'pry-byebug'; binding.pry
+      # pp  Path.prepare(path, namespace, path_settings)
+      Path.prepare(path, namespace, path_settings)
     end
 
     def namespace
-      @namespace ||= Namespace.joined_space_path(settings)
+      @namespace ||= Namespace.joined_space_path(namespace_stackable(:namespace))
     end
 
     def compile_path(prepared_path, anchor = true, requirements = {})
       endpoint_options = {}
-      endpoint_options[:version] = /#{settings[:version].join('|')}/ if settings[:version]
+      endpoint_options[:version] = /#{namespace_inheritable(:version).join('|')}/ if namespace_inheritable(:version)
       endpoint_options.merge!(requirements)
       Rack::Mount::Strexp.compile(prepared_path, endpoint_options, %w( / . ? ), anchor)
     end
@@ -203,7 +226,10 @@ module Grape
 
       # Retrieve validations from this namespace and all parent namespaces.
       validation_errors = []
-      settings.gather(:validations).each do |validator|
+
+      # require 'pry-byebug'; binding.pry
+
+      route_setting(:saved_validations).each do |validator|
         begin
           validator.validate!(params)
         rescue Grape::Exceptions::Validation => e
@@ -229,18 +255,18 @@ module Grape
 
       b.use Rack::Head
       b.use Grape::Middleware::Error,
-            format: settings[:format],
-            content_types: settings[:content_types],
-            default_status: settings[:default_error_status],
-            rescue_all: settings[:rescue_all],
-            default_error_formatter: settings[:default_error_formatter],
-            error_formatters: settings[:error_formatters],
-            rescue_options: settings[:rescue_options],
-            rescue_handlers: merged_setting(:rescue_handlers),
-            base_only_rescue_handlers: merged_setting(:base_only_rescue_handlers),
-            all_rescue_handler: settings[:all_rescue_handler]
+            format: namespace_inheritable(:format),
+            content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
+            default_status: namespace_inheritable(:default_error_status),
+            rescue_all: namespace_inheritable(:rescue_all),
+            default_error_formatter: namespace_inheritable(:default_error_formatter),
+            error_formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:error_formatters)),
+            rescue_options: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:rescue_options)) || {},
+            rescue_handlers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:rescue_handlers)) || {},
+            base_only_rescue_handlers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:base_only_rescue_handlers)) || {},
+            all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
-      aggregate_setting(:middleware).each do |m|
+      (namespace_stackable(:middleware) || []).each do |m|
         m = m.dup
         block = m.pop if m.last.is_a?(Proc)
         if block
@@ -250,42 +276,30 @@ module Grape
         end
       end
 
-      if settings[:version]
-        b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]),
-              versions: settings[:version] ? settings[:version].flatten : nil,
-              version_options: settings[:version_options],
-              prefix: settings[:root_prefix]
+      if namespace_inheritable(:version)
+        b.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
+              versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
+              version_options: namespace_inheritable(:version_options),
+              prefix: namespace_inheritable(:root_prefix)
 
       end
 
       b.use Grape::Middleware::Formatter,
-            format: settings[:format],
-            default_format: settings[:default_format] || :txt,
-            content_types: settings[:content_types],
-            formatters: settings[:formatters],
-            parsers: settings[:parsers]
+            format: namespace_inheritable(:format),
+            default_format: namespace_inheritable(:default_format) || :txt,
+            content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
+            formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:formatters)),
+            parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers))
 
       b
     end
 
     def helpers
-      m = Module.new
-      settings.stack.each do |frame|
-        m.send :include, frame[:helpers] if frame[:helpers]
+      mod = Module.new
+      (namespace_stackable(:helpers) || []).each do |mod_to_include|
+        mod.send :include, mod_to_include
       end
-      m
-    end
-
-    def aggregate_setting(key)
-      settings.stack.inject([]) do |aggregate, frame|
-        aggregate + (frame[key] || [])
-      end
-    end
-
-    def merged_setting(key)
-      settings.stack.inject({}) do |merged, frame|
-        merged.merge(frame[key] || {})
-      end
+      mod
     end
 
     def run_filters(filters)
@@ -295,19 +309,19 @@ module Grape
     end
 
     def befores
-      aggregate_setting(:befores)
+      namespace_stackable(:befores) || []
     end
 
     def before_validations
-      aggregate_setting(:before_validations)
+      namespace_stackable(:before_validations) || []
     end
 
     def after_validations
-      aggregate_setting(:after_validations)
+      namespace_stackable(:after_validations) || []
     end
 
     def afters
-      aggregate_setting(:afters)
+      namespace_stackable(:afters) || []
     end
   end
 end

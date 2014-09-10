@@ -32,7 +32,7 @@ module Grape
       end
 
       it "splits the mount path" do
-        path = Path.new(anything, anything, mount_path: 'foo/bar')
+        path = Path.new(anything, anything, mount_path: ['foo', 'bar'])
         expect(path.mount_path).to eql(['foo', 'bar'])
       end
     end

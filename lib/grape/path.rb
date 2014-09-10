@@ -13,7 +13,7 @@ module Grape
     end
 
     def mount_path
-      split_setting(:mount_path, '/')
+      settings[:mount_path]
     end
 
     def root_prefix

@@ -155,8 +155,10 @@ module Grape
         if @parent
           @parent.push_declared_params [element => @declared_params]
         else
-          @api.settings.peek[:declared_params] ||= []
-          @api.settings[:declared_params].concat @declared_params
+          @api.namespace_stackable(:declared_params, @declared_params)
+
+          @api.route_setting(:declared_params, []) unless @api.route_setting(:declared_params)
+          @api.route_setting(:declared_params).concat @declared_params
         end
       end
 
@@ -218,7 +220,8 @@ module Grape
         validator_class = Validations.validators[type.to_s]
 
         if validator_class
-          (@api.settings.peek[:validations] ||= []) << validator_class.new(attrs, options, doc_attrs[:required], self)
+          value = validator_class.new(attrs, options, doc_attrs[:required], self)
+          @api.namespace_stackable(:validations, value)
         else
           raise Grape::Exceptions::UnknownValidator.new(type)
         end

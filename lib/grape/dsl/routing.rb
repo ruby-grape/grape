@@ -4,6 +4,7 @@ module Grape
   module DSL
     module Routing
       extend ActiveSupport::Concern
+      include Grape::DSL::Configuration
 
       module ClassMethods
         attr_reader :endpoints, :routes, :route_set
@@ -35,8 +36,8 @@ module Grape
 
             @versions = versions | args
             nest(block) do
-              set(:version, args)
-              set(:version_options, options)
+              namespace_inheritable(:version, args)
+              namespace_inheritable(:version_options, options)
             end
           end
 
@@ -45,33 +46,44 @@ module Grape
 
         # Define a root URL prefix for your entire API.
         def prefix(prefix = nil)
-          prefix ? set(:root_prefix, prefix) : settings[:root_prefix]
+          namespace_inheritable(:root_prefix, prefix)
         end
 
         # Do not route HEAD requests to GET requests automatically
         def do_not_route_head!
-          set(:do_not_route_head, true)
+          namespace_inheritable(:do_not_route_head, true)
         end
 
         # Do not automatically route OPTIONS
         def do_not_route_options!
-          set(:do_not_route_options, true)
+          namespace_inheritable(:do_not_route_options, true)
         end
 
         def mount(mounts)
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
-            if app.respond_to?(:inherit_settings, true)
-              app_settings = settings.clone
-              mount_path = Rack::Mount::Utils.normalize_path([settings[:mount_path], path].compact.join("/"))
-              app_settings.set :mount_path, mount_path
-              app.inherit_settings(app_settings)
+            in_setting = inheritable_setting
+
+            if app.respond_to?(:inheritable_setting, true)
+              mount_path = Rack::Mount::Utils.normalize_path(path)
+              app.top_level_setting.namespace_stackable[:mount_path] =  mount_path
+
+              app.inherit_settings(inheritable_setting)
+
+              in_setting = app.top_level_setting
+
+              # app.regenerate_endpoints(in_setting)
+
+              app.change!
+              change!
             end
+
             endpoints << Grape::Endpoint.new(
-                settings.clone,
+                in_setting,
                 method: :any,
                 path: path,
-                app: app
+                app: app,
+                for: self
             )
           end
         end
@@ -92,11 +104,14 @@ module Grape
           endpoint_options = {
             method: methods,
             path: paths,
-            route_options: (@namespace_description || {}).deep_merge(@last_description || {}).deep_merge(route_options || {})
+            for: self,
+            route_options: ({
+              params: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:params)) || {}
+            }).deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
           }
-          endpoints << Grape::Endpoint.new(settings.clone, endpoint_options, &block)
+          endpoints << Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
 
-          @last_description = nil
+          route_end
           reset_validations!
         end
 
@@ -130,15 +145,18 @@ module Grape
 
         def namespace(space = nil, options = {},  &block)
           if space || block_given?
-            previous_namespace_description = @namespace_description
-            @namespace_description = (@namespace_description || {}).deep_merge(@last_description || {})
-            @last_description = nil
-            nest(block) do
-              set(:namespace, Namespace.new(space, options)) if space
+            within_namespace do
+              previous_namespace_description = @namespace_description
+              @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
+              nest(block) do
+                if space
+                  namespace_stackable(:namespace, Namespace.new(space, options))
+                end
+              end
+              @namespace_description = previous_namespace_description
             end
-            @namespace_description = previous_namespace_description
           else
-            Namespace.joined_space_path(settings)
+            Namespace.joined_space_path(namespace_stackable(:namespace))
           end
         end
 
@@ -150,6 +168,10 @@ module Grape
         # An array of API routes.
         def routes
           @routes ||= prepare_routes
+        end
+
+        def reset_routes!
+          @routes = nil
         end
 
         # Thie method allows you to quickly define a parameter route segment

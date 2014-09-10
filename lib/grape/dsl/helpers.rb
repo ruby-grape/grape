@@ -4,6 +4,7 @@ module Grape
   module DSL
     module Helpers
       extend ActiveSupport::Concern
+      include Grape::DSL::Configuration
 
       module ClassMethods
         # Add helper methods that will be accessible from any
@@ -27,23 +28,21 @@ module Grape
         #
         def helpers(new_mod = nil, &block)
           if block_given? || new_mod
-            mod = settings.peek[:helpers] || Module.new
+            mod = new_mod || Module.new
             if new_mod
               inject_api_helpers_to_mod(new_mod) if new_mod.is_a?(BaseHelper)
-              mod.class_eval do
-                include new_mod
-              end
             end
             if block_given?
               inject_api_helpers_to_mod(mod) do
                 mod.class_eval(&block)
               end
             end
-            set(:helpers, mod)
+
+            namespace_stackable(:helpers, mod)
           else
             mod = Module.new
-            settings.stack.each do |s|
-              mod.send :include, s[:helpers] if s[:helpers]
+            namespace_stackable(:helpers).each do |mod_to_include|
+              mod.send :include, mod_to_include
             end
             change!
             mod
@@ -77,7 +76,7 @@ module Grape
 
         def process_named_params
           if @named_params && @named_params.any?
-            api.imbue(:named_params, @named_params)
+            api.namespace_stackable(:named_params, @named_params)
           end
         end
       end

@@ -5,10 +5,12 @@ module Grape
     module Validations
       extend ActiveSupport::Concern
 
+      include Grape::DSL::Configuration
+
       module ClassMethods
         def reset_validations!
-          settings.peek[:declared_params] = []
-          settings.peek[:validations] = []
+          unset_namespace_stackable :declared_params
+          unset_namespace_stackable :validations
         end
 
         def params(&block)
@@ -16,11 +18,16 @@ module Grape
         end
 
         def document_attribute(names, opts)
-          @last_description ||= {}
-          @last_description[:params] ||= {}
+          route_setting(:description, {}) unless route_setting(:description)
+
+          route_setting(:description)[:params] ||= {}
+
+          setting = route_setting(:description)[:params]
           Array(names).each do |name|
-            @last_description[:params][name[:full_name].to_s] ||= {}
-            @last_description[:params][name[:full_name].to_s].merge!(opts)
+            setting[name[:full_name].to_s] ||= {}
+            setting[name[:full_name].to_s].merge!(opts)
+
+            namespace_stackable(:params, name[:full_name].to_s => opts)
           end
         end
       end

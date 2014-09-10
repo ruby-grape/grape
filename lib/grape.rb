@@ -8,6 +8,7 @@ require 'rack/auth/digest/md5'
 require 'hashie'
 require 'set'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/object/deep_dup'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/object/conversions'
 require 'active_support/core_ext/array/extract_options'
@@ -92,11 +93,16 @@ module Grape
   end
 
   module Util
-    autoload :HashStack,         'grape/util/hash_stack'
+    autoload :LoggingValue,      'grape/util/logging_value'
+    autoload :InheritableValues, 'grape/util/inheritable_values'
+    autoload :StackableValues,   'grape/util/stackable_values'
+    autoload :InheritableSetting, 'grape/util/inheritable_setting'
   end
 
   module DSL
+    autoload :API, 'grape/dsl/api'
     autoload :Callbacks,         'grape/dsl/callbacks'
+    autoload :Settings,          'grape/dsl/settings'
     autoload :Configuration,     'grape/dsl/configuration'
     autoload :InsideRoute,       'grape/dsl/inside_route'
     autoload :Helpers,           'grape/dsl/helpers'

@@ -5,12 +5,6 @@ module Grape
     module ConfigurationSpec
       class Dummy
         include Grape::DSL::Configuration
-
-        # rubocop:disable TrivialAccessors
-        def self.last_desc
-          @last_description
-        end
-        # rubocop:enable TrivialAccessors
       end
     end
     describe Configuration do
@@ -28,7 +22,8 @@ module Grape
         it 'sets a description' do
           options = { message: 'none' }
           subject.desc options
-          expect(subject.last_desc).to eq(description: options)
+          expect(subject.namespace_setting(:description)).to eq(description: options)
+          expect(subject.route_setting(:description)).to eq(description: options)
         end
       end
 
