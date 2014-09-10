@@ -450,6 +450,23 @@ params do
 end
 ```
 
+Note that default values will be passed through to any validation options specified.
+The following example will always fail if `:color` is not expliclity provided.
+
+```ruby
+params do
+  optional :color, type: String, default: 'blue', values: ['red, 'green']
+end
+```
+
+The correct implementation is to ensure the default value passes all validations.
+
+```ruby
+params do
+  optional :color, type: String, default: 'blue', values: ['blue', 'red, 'green']
+end
+```
+
 #### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
@@ -515,6 +532,19 @@ params do
   requires :hashtag, type: String, values: -> { Hashtag.all.map(&:tag) }
 end
 ```
+
+#### `regexp`
+
+Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value
+is nil or does not match the regular expression an error will be returned. Note that this is true for both `requires`
+and `optional` parameters.
+
+```ruby
+params do
+  requires :email, regexp: /.+@.+/
+end
+```
+
 
 #### `mutually_exclusive`
 
