@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    class AtLeastOneOfValidator < Validator
+    class AtLeastOneOfValidator < Base
       attr_reader :params
 
       def validate!(params)

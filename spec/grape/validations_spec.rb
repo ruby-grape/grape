@@ -656,7 +656,7 @@ describe Grape::Validations do
 
     context 'custom validation' do
       module CustomValidations
-        class Customvalidator < Grape::Validations::Validator
+        class Customvalidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
               raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "is not custom!"
@@ -805,7 +805,7 @@ describe Grape::Validations do
 
       context 'when using options on param' do
         module CustomValidations
-          class CustomvalidatorWithOptions < Grape::Validations::SingleOptionValidator
+          class CustomvalidatorWithOptions < Grape::Validations::Base
             def validate_param!(attr_name, params)
               unless params[attr_name] == @option[:text]
                 raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]

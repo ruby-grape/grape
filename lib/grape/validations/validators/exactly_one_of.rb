@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    require 'grape/validations/mutual_exclusion'
+    require 'grape/validations/validators/mutual_exclusion'
     class ExactlyOneOfValidator < MutualExclusionValidator
       attr_reader :params
 
