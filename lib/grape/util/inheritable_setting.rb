@@ -8,7 +8,7 @@ module Grape
         @global ||= {}
       end
 
-      def self.reset_global # only for testing
+      def self.reset_global! # only for testing
         @global = {}
       end
 

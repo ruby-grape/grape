@@ -25,5 +25,5 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.raise_errors_for_deprecations!
 
-  config.before(:each) { Grape::Util::InheritableSetting.reset_global }
+  config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
 end
