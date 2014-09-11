@@ -34,7 +34,7 @@ module Grape
       end
 
       def to_hash
-        keys.each_with_object({}) do |(key), result|
+        keys.each_with_object({}) do |key, result|
           result[key] = self[key].dup
         end
       end

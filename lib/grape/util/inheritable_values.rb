@@ -46,7 +46,7 @@ module Grape
       def values
         result = LoggingValue.new
 
-        @inherited_values.keys.each_with_object(result) do |(key), res|
+        @inherited_values.keys.each_with_object(result) do |key, res|
           begin
             res[key] = @inherited_values[key].clone
           rescue
