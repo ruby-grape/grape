@@ -4,7 +4,7 @@ module Grape
     describe InheritableSetting do
 
       before :each do
-        InheritableSetting.reset_global
+        InheritableSetting.reset_global!
       end
 
       let(:parent) do

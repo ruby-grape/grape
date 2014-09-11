@@ -2260,8 +2260,6 @@ describe Grape::API do
           mount app
         end
 
-        # require 'pry-byebug'; binding.pry
-
         get '/apples/colour'
         expect(last_response.status).to eql 200
         expect(last_response.body).to eq('red')

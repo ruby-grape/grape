@@ -5,10 +5,6 @@ module Grape
     module ValidationsSpec
       class Dummy
         include Grape::DSL::Validations
-
-        def self.settings
-          @settings ||= Grape::Util::HashStack.new
-        end
       end
     end
 

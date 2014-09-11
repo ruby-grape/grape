@@ -6,10 +6,6 @@ module Grape
       class Dummy
         include Grape::DSL::RequestResponse
 
-        def self.settings
-          @settings ||= Grape::Util::HashStack.new
-        end
-
         def self.set(key, value)
           settings[key.to_sym] = value
         end
