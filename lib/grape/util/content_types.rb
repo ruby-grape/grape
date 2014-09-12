@@ -12,7 +12,7 @@ module Grape
     def self.content_types_for_settings(settings)
       return nil if settings.nil? || settings.blank?
 
-      settings.each_with_object(ActiveSupport::OrderedHash.new) { |(value), result| result.merge!(value) }
+      settings.each_with_object(ActiveSupport::OrderedHash.new) { |value, result| result.merge!(value) }
     end
 
     def self.content_types_for(from_settings)
