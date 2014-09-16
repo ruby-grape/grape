@@ -1,12 +1,6 @@
 module Grape
   module Validations
-    class AllowBlankValidator < Validator
-      def initialize(attrs, options, required, scope)
-        @option = options
-        @required = required
-        super
-      end
-
+    class AllowBlankValidator < Base
       def validate_param!(attr_name, params)
         return if @option
 

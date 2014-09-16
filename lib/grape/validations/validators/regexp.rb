@@ -1,6 +1,6 @@
 module Grape
   module Validations
-    class RegexpValidator < SingleOptionValidator
+    class RegexpValidator < Base
       def validate_param!(attr_name, params)
         if params.key?(attr_name) &&
           (params[attr_name].nil? || !(params[attr_name].to_s =~ @option))

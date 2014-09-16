@@ -100,7 +100,7 @@ module Grape
   end
 
   module DSL
-    autoload :API, 'grape/dsl/api'
+    autoload :API,               'grape/dsl/api'
     autoload :Callbacks,         'grape/dsl/callbacks'
     autoload :Settings,          'grape/dsl/settings'
     autoload :Configuration,     'grape/dsl/configuration'
@@ -117,5 +117,18 @@ module Grape
     autoload :Helpers,           'grape/api/helpers'
   end
 end
+
+require 'grape/validations/validators/base'
+require 'grape/validations/attributes_iterator'
+require 'grape/validations/validators/allow_blank'
+require 'grape/validations/validators/at_least_one_of'
+require 'grape/validations/validators/coerce'
+require 'grape/validations/validators/default'
+require 'grape/validations/validators/exactly_one_of'
+require 'grape/validations/validators/mutual_exclusion'
+require 'grape/validations/validators/presence'
+require 'grape/validations/validators/regexp'
+require 'grape/validations/validators/values'
+require 'grape/validations/params_scope'
 
 require 'grape/version'
