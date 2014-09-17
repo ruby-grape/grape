@@ -13,6 +13,58 @@ The following content-types have been removed:
 
 This is because they have never been properly supported.
 
+
+#### Changes to desc
+
+New block syntax:
+
+Former:
+
+```ruby
+  desc "some descs",
+           detail: 'more details',
+           entity: API::Entities::Entity,
+           params;  API::Entities::Status.documentation,
+           named: 'a name',
+           headers :[XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              }
+  get nil, http_codes: [
+            [401, 'Unauthorized', API::Entities::BaseError],
+            [404, 'not found', API::Entities::Error]
+  
+  ] do
+  
+```
+
+Now:
+
+```ruby
+
+desc "some descs" do
+  detail 'more details'
+  params  API::Entities::Status.documentation
+  success API::Entities::Entity
+  failure [
+            [401, 'Unauthorized', API::Entities::BaseError],
+            [404, 'not found', API::Entities::Error]  
+          ]
+    named 'a name'
+    headers [XAuthToken: {
+               description: 'Valdates your identity',
+               required: true
+             },
+             XOptionalHeader: {
+               description: 'Not really needed',
+              required: false
+             }
+            ]
+end
+  
+
+```
+
 ### Upgrading to >= 0.9.0 
 
 #### Changes in Authentication

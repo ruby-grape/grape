@@ -24,10 +24,51 @@ module Grape
 
       describe '.desc' do
         it 'sets a description' do
+          desc_text = 'The description'
           options = { message: 'none' }
-          subject.desc options
-          expect(subject.namespace_setting(:description)).to eq(description: options)
-          expect(subject.route_setting(:description)).to eq(description: options)
+          subject.desc desc_text, options
+          expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
+          expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
+        end
+
+        it 'can be set with a block' do
+          expected_options = {
+            description: 'The description',
+            detail: 'more details',
+            params: { first: :param },
+            entity: Object,
+            http_codes: [[401, 'Unauthorized', "Entities::Error"]],
+            named: "My named route",
+            headers: [XAuthToken: {
+              description: 'Valdates your identity',
+              required: true
+            },
+                      XOptionalHeader: {
+                        description: 'Not really needed',
+                        required: false
+                      }
+              ]
+          }
+
+          subject.desc 'The description' do
+            detail 'more details'
+            params(first: :param)
+            success Object
+            failure [[401, 'Unauthorized', "Entities::Error"]]
+            named 'My named route'
+            headers [XAuthToken: {
+              description: 'Valdates your identity',
+              required: true
+            },
+                     XOptionalHeader: {
+                       description: 'Not really needed',
+                       required: false
+                     }
+            ]
+          end
+
+          expect(subject.namespace_setting(:description)).to eq(expected_options)
+          expect(subject.route_setting(:description)).to eq(expected_options)
         end
       end
 

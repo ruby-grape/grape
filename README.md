@@ -358,11 +358,33 @@ version 'v1', using: :param, parameter: "v"
 You can add a description to API methods and namespaces.
 
 ```ruby
-desc "Returns your public timeline."
+desc "Returns your public timeline." do
+  detail 'more details'
+  params  API::Entities::Status.documentation
+  success API::Entities::Entity
+  failure [[401, 'Unauthorized', "Entities::Error"]]
+  named 'My named route'
+  headers [XAuthToken: {
+             description: 'Valdates your identity',
+             required: true
+           },
+           XOptionalHeader: {
+             description: 'Not really needed',
+            required: false
+           }
+          ]
+end
 get :public_timeline do
   Status.limit(20)
 end
 ```
+
+* `detail`: A more enhanced description
+* `params`: Define parameters directly from an `Entity` 
+* `success`: (former entity) The `Entity` to be used to present by default this route
+* `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
+* `named`: A helper to give a route a name and find it with this name in the documentation Hash
+* `headers`: A definition of the used Headers
 
 ## Parameters
 
@@ -1019,14 +1041,18 @@ end
 The following example specifies the entity to use in the `http_codes` definition.
 
 ```
-desc 'My Route', http_codes: [[408, 'Unauthorized', API::Error]]
+desc 'My Route' do
+ failure [[408, 'Unauthorized', API::Error]]
+end
 error!({ message: 'Unauthorized' }, 408)
 ```
 
 The following example specifies the presented entity explicitly in the error message.
 
 ```ruby
-desc 'My Route', http_codes: [[408, 'Unauthorized']]
+desc 'My Route' do
+ failure [[408, 'Unauthorized']]
+end
 error!({ message: 'Unauthorized', with: API::Error }, 408)
 ```
 
@@ -1462,9 +1488,9 @@ module API
   class Statuses < Grape::API
     version 'v1'
 
-    desc 'Statuses index', {
+    desc 'Statuses index' do
       params: API::Entities::Status.documentation
-    }
+    end
     get '/statuses' do
       statuses = Status.all
       type = current_user.admin? ? :full : :default
