@@ -15,8 +15,7 @@ module Grape
           if logger
             global_setting(:logger, logger)
           else
-            global_setting(:logger, Logger.new($stdout)) unless global_setting(:logger)
-            global_setting(:logger)
+            global_setting(:logger) || global_setting(:logger, Logger.new($stdout))
           end
         end
 
