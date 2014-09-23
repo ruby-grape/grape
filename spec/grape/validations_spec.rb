@@ -51,11 +51,10 @@ describe Grape::Validations do
     context 'required' do
       before do
         subject.params do
-          requires :key
+          requires :key, type: String
         end
-        subject.get '/required' do
-          'required works'
-        end
+        subject.get('/required') { 'required works' }
+        subject.put('/required') { { key: params[:key] }.to_json }
       end
 
       it 'errors when param not present' do
@@ -75,6 +74,12 @@ describe Grape::Validations do
           requires :some_param
         end
         expect(subject.route_setting(:declared_params)).to eq([:some_param])
+      end
+
+      it 'works when required field is present but nil' do
+        put '/required', { key: nil }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq('key' => nil)
       end
     end
 
@@ -190,9 +195,8 @@ describe Grape::Validations do
             requires :key
           end
         end
-        subject.get '/required' do
-          'required works'
-        end
+        subject.get('/required') { 'required works' }
+        subject.put('/required') { { items: params[:items] }.to_json }
       end
 
       it 'errors when param not present' do
@@ -215,6 +219,12 @@ describe Grape::Validations do
         get '/required', items: [{ key: 'hello' }, { key: 'world' }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('required works')
+      end
+
+      it "doesn't throw a missing param when param is present but empty" do
+        put '/required', { items: [] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq('items' => [])
       end
 
       it "doesn't allow any key in the options hash other than type" do
