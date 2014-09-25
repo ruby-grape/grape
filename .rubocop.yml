@@ -2,6 +2,7 @@ AllCops:
   Exclude:
     - vendor/**/*
     - bin/**/*
+    - gemfiles/**/*
 
 LineLength:
   Enabled: false
