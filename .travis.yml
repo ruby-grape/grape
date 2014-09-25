@@ -16,3 +16,7 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
+
+gemfile:
+  - gemfiles/rails_3.gemfile
+  - gemfiles/rails_4.gemfile
