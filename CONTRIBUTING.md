@@ -32,6 +32,13 @@ bundle install
 bundle exec rake
 ```
 
+Run tests against all supported versions of Rails.
+
+```
+appraisal install
+appraisal rake spec
+```
+
 #### Write Tests
 
 Try to write a test that reproduces the problem you're trying to fix or describes a feature that you want to build. Add to [spec/grape](spec/grape).
