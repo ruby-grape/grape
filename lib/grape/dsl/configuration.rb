@@ -7,7 +7,6 @@ module Grape
 
       module ClassMethods
         attr_writer :logger
-        # attr_reader :settings
 
         include Grape::DSL::Settings
 

@@ -35,7 +35,7 @@ module Grape
 
       # Create a scope without affecting the URL.
       #
-      # @param name [Symbol] Purely placebo, just allows to to name the scope to make the code more readable.
+      # @param name [Symbol] Purely placebo, just allows to name the scope to make the code more readable.
       def scope(name = nil, &block)
         within_namespace do
           nest(block)
@@ -153,7 +153,6 @@ module Grape
           allow_header = (['OPTIONS'] | allowed_methods).join(', ')
           unless self.class.namespace_inheritable(:do_not_route_options)
             unless allowed_methods.include?('OPTIONS')
-              # require 'pry-byebug'; binding.pry
               self.class.options(path, {}) do
                 header 'Allow', allow_header
                 status 204
