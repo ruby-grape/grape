@@ -120,24 +120,24 @@ module Grape
       end
     end
 
+    def prepare_routes_requirements
+      endpoint_requirements = options[:route_options][:requirements] || {}
+      all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
+      requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
+        base_requirements.merge!(single_requirements)
+      end
+    end
+
     def prepare_routes
       routes = []
       options[:method].each do |method|
-        # pp "Method #{method} #{object_id}"
 
         options[:path].each do |path|
           prepared_path = prepare_path(path)
 
-          anchor = options[:route_options][:anchor]
-          anchor = anchor.nil? ? true : anchor
+          anchor = options[:route_options].fetch(:anchor) { |_| true }
 
-          endpoint_requirements = options[:route_options][:requirements] || {}
-          all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
-          requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
-            base_requirements.merge!(single_requirements)
-          end
-
-          path = compile_path(prepared_path, anchor && !options[:app], requirements)
+          path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
           regex = Rack::Mount::RegexpWithNamedGroups.new(path)
           path_params = {}
           # named parameters in the api path
@@ -163,8 +163,6 @@ module Grape
 
     def prepare_path(path)
       path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
-      # require 'pry-byebug'; binding.pry
-      # pp  Path.prepare(path, namespace, path_settings)
       Path.prepare(path, namespace, path_settings)
     end
 
