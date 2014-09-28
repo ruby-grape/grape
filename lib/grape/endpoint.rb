@@ -143,7 +143,7 @@ module Grape
       options[:method].map do |method|
         options[:path].map do |path|
           prepared_path = prepare_path(path)
-          anchor = options[:route_options].fetch(:anchor) { |_| true }
+          anchor = options[:route_options].fetch(:anchor, true)
           path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
           request_method = (method.to_s.upcase unless method == :any)
 
