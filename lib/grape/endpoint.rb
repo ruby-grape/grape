@@ -140,16 +140,14 @@ module Grape
     end
 
     def prepare_routes
-      routes = []
-      options[:method].each do |method|
-
-        options[:path].each do |path|
+      options[:method].map do |method|
+        options[:path].map do |path|
           prepared_path = prepare_path(path)
           anchor = options[:route_options].fetch(:anchor) { |_| true }
           path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
-
           request_method = (method.to_s.upcase unless method == :any)
-          routes << Route.new(options[:route_options].clone.merge(
+
+          Route.new(options[:route_options].clone.merge(
             prefix: namespace_inheritable(:root_prefix),
             version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
             namespace: namespace,
@@ -159,8 +157,7 @@ module Grape
             compiled: path
           ))
         end
-      end
-      routes
+      end.flatten
     end
 
     def prepare_path(path)
