@@ -128,24 +128,26 @@ module Grape
       end
     end
 
+    def prepare_routes_path_params(path)
+      regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+      path_params = {}
+      # named parameters in the api path
+      named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
+      named_params.each { |named_param| path_params[named_param] = "" }
+      # route parameters declared via desc or appended to the api declaration
+      route_params = (options[:route_options][:params] || {})
+      path_params.merge!(route_params)
+    end
+
     def prepare_routes
       routes = []
       options[:method].each do |method|
 
         options[:path].each do |path|
           prepared_path = prepare_path(path)
-
           anchor = options[:route_options].fetch(:anchor) { |_| true }
-
           path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
-          regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-          path_params = {}
-          # named parameters in the api path
-          named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
-          named_params.each { |named_param| path_params[named_param] = "" }
-          # route parameters declared via desc or appended to the api declaration
-          route_params = (options[:route_options][:params] || {})
-          path_params.merge!(route_params)
+
           request_method = (method.to_s.upcase unless method == :any)
           routes << Route.new(options[:route_options].clone.merge(
             prefix: namespace_inheritable(:root_prefix),
@@ -153,7 +155,7 @@ module Grape
             namespace: namespace,
             method: request_method,
             path: prepared_path,
-            params: path_params,
+            params: prepare_routes_path_params(path),
             compiled: path
           ))
         end
