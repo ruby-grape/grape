@@ -120,51 +120,48 @@ module Grape
       end
     end
 
+    def prepare_routes_requirements
+      endpoint_requirements = options[:route_options][:requirements] || {}
+      all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
+      all_requirements.reduce({}) do |base_requirements, single_requirements|
+        base_requirements.merge!(single_requirements)
+      end
+    end
+
+    def prepare_routes_path_params(path)
+      regex = Rack::Mount::RegexpWithNamedGroups.new(path)
+      path_params = {}
+      # named parameters in the api path
+      named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
+      named_params.each { |named_param| path_params[named_param] = "" }
+      # route parameters declared via desc or appended to the api declaration
+      route_params = (options[:route_options][:params] || {})
+      path_params.merge!(route_params)
+    end
+
     def prepare_routes
-      routes = []
-      options[:method].each do |method|
-        # pp "Method #{method} #{object_id}"
-
-        options[:path].each do |path|
+      options[:method].map do |method|
+        options[:path].map do |path|
           prepared_path = prepare_path(path)
-
-          anchor = options[:route_options][:anchor]
-          anchor = anchor.nil? ? true : anchor
-
-          endpoint_requirements = options[:route_options][:requirements] || {}
-          all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
-          requirements = all_requirements.reduce({}) do |base_requirements, single_requirements|
-            base_requirements.merge!(single_requirements)
-          end
-
-          path = compile_path(prepared_path, anchor && !options[:app], requirements)
-          regex = Rack::Mount::RegexpWithNamedGroups.new(path)
-          path_params = {}
-          # named parameters in the api path
-          named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
-          named_params.each { |named_param| path_params[named_param] = "" }
-          # route parameters declared via desc or appended to the api declaration
-          route_params = (options[:route_options][:params] || {})
-          path_params.merge!(route_params)
+          anchor = options[:route_options].fetch(:anchor, true)
+          path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
           request_method = (method.to_s.upcase unless method == :any)
-          routes << Route.new(options[:route_options].clone.merge(
+
+          Route.new(options[:route_options].clone.merge(
             prefix: namespace_inheritable(:root_prefix),
             version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
             namespace: namespace,
             method: request_method,
             path: prepared_path,
-            params: path_params,
+            params: prepare_routes_path_params(path),
             compiled: path
           ))
         end
-      end
-      routes
+      end.flatten
     end
 
     def prepare_path(path)
       path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
-      # require 'pry-byebug'; binding.pry
-      # pp  Path.prepare(path, namespace, path_settings)
       Path.prepare(path, namespace, path_settings)
     end
 
