@@ -188,7 +188,7 @@ module Grape
         options[:app].call(env)
       else
         builder = build_middleware
-        builder.run options[:app] || lambda { |arg| run(arg) }
+        builder.run lambda { |arg| run(arg) }
         builder.call(env)
       end
     end
