@@ -104,6 +104,7 @@ module Grape
     autoload :InheritableValues, 'grape/util/inheritable_values'
     autoload :StackableValues,   'grape/util/stackable_values'
     autoload :InheritableSetting, 'grape/util/inheritable_setting'
+    autoload :StrictHashConfiguration, 'grape/util/strict_hash_configuration'
   end
 
   module DSL
