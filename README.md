@@ -110,6 +110,7 @@ module Twitter
   class API < Grape::API
     version 'v1', using: :header, vendor: 'twitter'
     format :json
+    prefix :api
 
     helpers do
       def current_user
@@ -617,6 +618,32 @@ params do
   optional :wine
   optional :juice
   at_least_one_of :beer, :wine, :juice
+end
+```
+
+#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`
+
+All of these methods can be used at any nested level.
+
+```ruby
+params do
+  requires :food do
+    optional :meat
+    optional :fish
+    optional :rice
+    at_least_one_of :meat, :fish, :rice
+  end
+  group :drink do
+    optional :beer
+    optional :wine
+    optional :juice
+    exactly_one_of :beer, :wine, :juice
+  end
+  optional :dessert do
+    optional :cake
+    optional :icecream
+    mutually_exclusive :cake, :icecream
+  end
 end
 ```
 
@@ -1812,17 +1839,17 @@ describe Twitter::API do
   end
 
   describe Twitter::API do
-    describe "GET /api/v1/statuses" do
+    describe "GET /api/statuses/public_timeline" do
       it "returns an empty array of statuses" do
-        get "/api/v1/statuses"
+        get "/api/statuses/public_timeline"
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq []
       end
     end
-    describe "GET /api/v1/statuses/:id" do
+    describe "GET /api/statuses/:id" do
       it "returns a status by id" do
         status = Status.create!
-        get "/api/v1/statuses/#{status.id}"
+        get "/api/statuses/#{status.id}"
         expect(last_response.body).to eq status.to_json
       end
     end
@@ -1834,17 +1861,17 @@ end
 
 ```ruby
 describe Twitter::API do
-  describe "GET /api/v1/statuses" do
+  describe "GET /api/statuses/public_timeline" do
     it "returns an empty array of statuses" do
-      get "/api/v1/statuses"
+      get "/api/statuses/public_timeline"
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)).to eq []
     end
   end
-  describe "GET /api/v1/statuses/:id" do
+  describe "GET /api/statuses/:id" do
     it "returns a status by id" do
       status = Status.create!
-      get "/api/v1/statuses/#{status.id}"
+      get "/api/statuses/#{status.id}"
       expect(response.body).to eq status.to_json
     end
   end

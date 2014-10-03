@@ -1,12 +1,13 @@
 module Grape
   module Validations
-    class MutualExclusionValidator < Base
-      attr_reader :params
+    require 'grape/validations/validators/multiple_params_base'
+    class MutualExclusionValidator < MultipleParamsBase
+      attr_reader :processing_keys_in_common
 
       def validate!(params)
-        @params = params
+        super
         if two_or_more_exclusive_params_are_present
-          raise Grape::Exceptions::Validation, params: keys_in_common, message_key: :mutual_exclusion
+          raise Grape::Exceptions::Validation, params: processing_keys_in_common, message_key: :mutual_exclusion
         end
         params
       end
@@ -14,11 +15,10 @@ module Grape
       private
 
       def two_or_more_exclusive_params_are_present
-        keys_in_common.length > 1
-      end
-
-      def keys_in_common
-        (attrs.map(&:to_s) & params.stringify_keys.keys).map(&:to_s)
+        scoped_params.any? do |resource_params|
+          @processing_keys_in_common = keys_in_common(resource_params)
+          @processing_keys_in_common.length > 1
+        end
       end
     end
   end
