@@ -4,7 +4,11 @@ describe Grape::Validations::AtLeastOneOfValidator do
   describe '#validate!' do
     let(:scope) do
       Struct.new(:opts) do
-        def params(arg); end
+        def params(arg)
+          arg
+        end
+
+        def required?; end
       end
     end
     let(:at_least_one_of_params) { [:beer, :wine, :grapefruit] }

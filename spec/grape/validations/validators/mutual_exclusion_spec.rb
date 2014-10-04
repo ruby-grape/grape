@@ -4,7 +4,9 @@ describe Grape::Validations::MutualExclusionValidator do
   describe '#validate!' do
     let(:scope) do
       Struct.new(:opts) do
-        def params(arg); end
+        def params(arg)
+          arg
+        end
       end
     end
     let(:mutually_exclusive_params) { [:beer, :wine, :grapefruit] }

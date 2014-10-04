@@ -1,12 +1,11 @@
 module Grape
   module Validations
-    class AtLeastOneOfValidator < Base
-      attr_reader :params
-
+    require 'grape/validations/validators/multiple_params_base'
+    class AtLeastOneOfValidator < MultipleParamsBase
       def validate!(params)
-        @params = params
-        if no_exclusive_params_are_present
-          raise Grape::Exceptions::Validation, params: attrs.map(&:to_s), message_key: :at_least_one
+        super
+        if scope_requires_params && no_exclusive_params_are_present
+          raise Grape::Exceptions::Validation, params: all_keys, message_key: :at_least_one
         end
         params
       end
@@ -14,11 +13,7 @@ module Grape
       private
 
       def no_exclusive_params_are_present
-        keys_in_common.length == 0
-      end
-
-      def keys_in_common
-        (attrs.map(&:to_s) & params.stringify_keys.keys).map(&:to_s)
+        scoped_params.any? { |resource_params| keys_in_common(resource_params).empty? }
       end
     end
   end

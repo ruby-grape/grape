@@ -621,6 +621,32 @@ params do
 end
 ```
 
+#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`
+
+All of these methods can be used at any nested level.
+
+```ruby
+params do
+  requires :food do
+    optional :meat
+    optional :fish
+    optional :rice
+    at_least_one_of :meat, :fish, :rice
+  end
+  group :drink do
+    optional :beer
+    optional :wine
+    optional :juice
+    exactly_one_of :beer, :wine, :juice
+  end
+  optional :dessert do
+    optional :cake
+    optional :icecream
+    mutually_exclusive :cake, :icecream
+  end
+end
+```
+
 ### Namespace Validation and Coercion
 
 Namespaces allow parameter definitions and apply to every method within the namespace.
