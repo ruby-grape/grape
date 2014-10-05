@@ -46,6 +46,7 @@
   - [CORS](#cors)
 - [Content-type](#content-type)
 - [API Data Formats](#api-data-formats)
+  - [Raw Input](#raw-input)
 - [RESTful Model Representations](#restful-model-representations)
   - [Grape Entities](#grape-entities)
   - [Hypermedia](#hypermedia)
@@ -1484,6 +1485,32 @@ curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom 
 ```
 
 You can disable parsing for a content-type with `nil`. For example, `parser :json, nil` will disable JSON parsing altogether. The request data is then available as-is in `env['api.request.body']`.
+
+### Raw Input
+
+You may also make your endpoint "raw" by using the `raw_input` method.
+
+This will bypass the parsing of the request entierly.
+
+```ruby
+format :json # This will still be used to format the response
+raw_input # This will set the endpoint to use raw input mode for this namespace
+
+put "/upload" do
+  # You must access the request input directly through rack
+  input = env['rack.input']
+
+  # Incoming Content-Type is ignored, everything is accepted
+  request_content_type = env['CONTENT_TYPE']
+
+  # You must check the content type yourself
+  request_content_type =~ %r{video/.+} or error!('Content type not supported', 406)
+
+  # The response will be formated as usual
+  {:success => 'Upload was successful'}
+end
+```
+
 
 ## RESTful Model Representations
 

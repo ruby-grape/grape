@@ -239,6 +239,21 @@ describe Grape::Middleware::Formatter do
         )
         expect(subject.env['rack.request.form_hash']['thing']['name']).to eq('Test')
       end
+      it 'ignores the input' do
+        io = StringIO.new(SecureRandom.random_bytes(512 * SecureRandom.random_number(10) + 1024))
+        subject.options[:raw_input] = true
+        subject.call(
+          'PATH_INFO' => '/upload',
+          'REQUEST_METHOD' => method,
+          'CONTENT_TYPE' => 'video/mp4',
+          'rack.input' => io,
+          'CONTENT_LENGTH' => io.length
+        )
+        expect(subject.env['api.request.body']).to be_nil
+        expect(subject.env['api.request.input']).to be_nil
+        expect(subject.env['rack.input'].length).to eq(io.length)
+        expect(subject.env['api.format']).to eq(:txt)
+      end
       [Rack::Request::FORM_DATA_MEDIA_TYPES, Rack::Request::PARSEABLE_DATA_MEDIA_TYPES].flatten.each do |content_type|
         it "ignores #{content_type}" do
           io = StringIO.new('name=Other+Test+Thing')

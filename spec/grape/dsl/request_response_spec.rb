@@ -84,6 +84,13 @@ module Grape
         end
       end
 
+      describe '.raw_input' do
+        it 'sets raw_input' do
+          expect(subject).to receive(:namespace_inheritable).with(:raw_input, true)
+          subject.raw_input
+        end
+      end
+
       describe '.content_types' do
         it 'returns all content types' do
           expect(subject.content_types).to eq(xml: "application/xml",

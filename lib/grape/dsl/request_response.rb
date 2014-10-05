@@ -66,6 +66,13 @@ module Grape
           namespace_stackable(:content_types, key.to_sym => val)
         end
 
+        # Put the endpoint in raw mode input
+        # this bypass content type checking and
+        # input parsing
+        def raw_input(enabled = true)
+          namespace_inheritable(:raw_input, enabled)
+        end
+
         # All available content types.
         def content_types
           c_types = Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types))

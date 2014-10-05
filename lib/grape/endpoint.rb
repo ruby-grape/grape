@@ -284,6 +284,7 @@ module Grape
       b.use Grape::Middleware::Formatter,
             format: namespace_inheritable(:format),
             default_format: namespace_inheritable(:default_format) || :txt,
+            raw_input: namespace_inheritable(:raw_input),
             content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
             formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:formatters)),
             parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers))
