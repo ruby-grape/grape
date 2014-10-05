@@ -1,6 +1,8 @@
 0.9.1 (Next)
 ============
 
+* [#776](https://github.com/intridea/grape/pull/776): Added a `raw_input` option
+that disable the parsing of the request body.
 * [#774](https://github.com/intridea/grape/pull/774): Extended `mutually_exclusive`, `exactly_one_of`, `at_least_one_of` to work inside any kind of group: `requires` or `optional`, `Hash` or `Array` - [@ShPakvel](https://github.com/ShPakvel).
 * [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * Your contribution here.

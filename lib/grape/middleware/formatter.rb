@@ -50,6 +50,7 @@ module Grape
         if (request.post? || request.put? || request.patch? || request.delete?) &&
           (!request.form_data? || !request.media_type) &&
           (!request.parseable_data?) &&
+          (!options[:raw_input]) &&
           (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
 
           if (input = env['rack.input'])
