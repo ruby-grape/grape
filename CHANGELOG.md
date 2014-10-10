@@ -1,6 +1,7 @@
 0.9.1 (Next)
 ============
 
+* [#779](https://github.com/intridea/grape/pull/779): Bugfix for params option `default` with proc value when used together with params option `values` - [@ShPakvel](https://github.com/ShPakvel).
 * [#774](https://github.com/intridea/grape/pull/774): Extended `mutually_exclusive`, `exactly_one_of`, `at_least_one_of` to work inside any kind of group: `requires` or `optional`, `Hash` or `Array` - [@ShPakvel](https://github.com/ShPakvel).
 * [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * [#745](https://github.com/intridea/grape/pull/745): Removed `atom+xml`, `rss+xml`, and `jsonapi` content-types - [@akabraham](https://github.com/akabraham).
