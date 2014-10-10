@@ -44,6 +44,20 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          optional :type, values: ValuesModel.values, default: -> { ValuesModel.values.sample }
+        end
+        get '/default_lambda' do
+          { type: params[:type] }
+        end
+
+        params do
+          optional :type, values: -> { ValuesModel.values }, default: -> { ValuesModel.values.sample }
+        end
+        get '/default_and_values_lambda' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, type: Integer, desc: "An integer", values: [10, 11], default: 10
         end
         get '/values/coercion' do
@@ -121,6 +135,30 @@ describe Grape::Validations::ValuesValidator do
     get("/lambda", type: 'invalid-type')
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: "type does not have a valid value" }.to_json)
+  end
+
+  it 'validates default value from proc' do
+    get("/default_lambda")
+    expect(last_response.status).to eq 200
+  end
+
+  it 'validates default value from proc against values in a proc' do
+    get("/default_and_values_lambda")
+    expect(last_response.status).to eq 200
+  end
+
+  it 'raises IncompatibleOptionValues on an invalid default value from proc' do
+    subject = Class.new(Grape::API)
+    expect {
+      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: -> { ValuesModel.values.sample + "_invalid" } }
+    }.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
+  it 'raises IncompatibleOptionValues on an invalid default value from proc validating against values in a proc' do
+    subject = Class.new(Grape::API)
+    expect {
+      subject.params { optional :type, values: -> { ValuesModel.values }, default: -> { ValuesModel.values.sample + "_invalid" } }
+    }.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
   it 'raises IncompatibleOptionValues on an invalid default value' do
