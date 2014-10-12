@@ -248,6 +248,13 @@ Modify `config/routes`:
 mount Twitter::API => '/'
 ```
 
+Additionally, if the version of your Rails is 4.0+ and the application uses the default model layer of ActiveRecord, you will want to use the `hashie_rails` [gem](http://rubygems.org/gems/hashie_rails). This gem disables the security feature of `strong_params` at the model layer, allowing you the use of Grape's own params validation instead.
+
+```ruby
+# Gemfile
+gem "hashie_rails"
+```
+
 See below for additional code that enables reloading of API changes in development.
 
 ### Modules
