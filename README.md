@@ -485,7 +485,7 @@ The following example will always fail if `:color` is not expliclity provided.
 
 ```ruby
 params do
-  optional :color, type: String, default: 'blue', values: ['red, 'green']
+  optional :color, type: String, default: 'blue', values: ['red', 'green']
 end
 ```
 
@@ -493,7 +493,7 @@ The correct implementation is to ensure the default value passes all validations
 
 ```ruby
 params do
-  optional :color, type: String, default: 'blue', values: ['blue', 'red, 'green']
+  optional :color, type: String, default: 'blue', values: ['blue', 'red', 'green']
 end
 ```
 
