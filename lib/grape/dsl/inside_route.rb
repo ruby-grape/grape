@@ -188,6 +188,13 @@ module Grape
 
         representation = { root => representation } if root
         representation = (@body || {}).merge(key => representation) if key
+
+        # If root and key are nil but we have entity, merge using the representation from entity.
+        if root.nil? && key.nil? && entity_class.present?
+          if representation.respond_to?('merge')
+            representation = (@body || {}).merge(representation)
+          end
+        end
         body representation
       end
 
