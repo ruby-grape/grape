@@ -7,7 +7,7 @@
 * [#745](https://github.com/intridea/grape/pull/745): Added `:binary, application/octet-stream` content-type - [@akabraham](https://github.com/akabraham).
 * [#757](https://github.com/intridea/grape/pull/757): Changed `desc` can now be used with a block syntax - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#779](https://github.com/intridea/grape/pull/779): Fixed using `values` with a `default` proc - [@ShPakvel](https://github.com/ShPakvel).
-* [#784](https://github.com/intridea/grape/pull/784): Fix bug in inside_route#present that would overwrite the the contents of the response body when using multiple presenters - [@mfunaro](https://github.com/mfunaro).
+* [#784](https://github.com/intridea/grape/pull/784): Fix issue in inside_route#present that would overwrite the previously added contents of the response body when calling `present` with Grape Entities more than once in an endpoint.  - [@mfunaro](https://github.com/mfunaro).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
