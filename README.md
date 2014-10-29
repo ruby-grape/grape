@@ -1653,7 +1653,7 @@ Example:
 Grape::Middleware::Auth::Strategies.add(:my_auth, AuthMiddleware, ->(options) { [options[:realm]] } )
 
 
-auth :my_auth ,{ real: 'Test Api'} do |credentials|
+auth :my_auth, { realm: 'Test Api'} do |credentials|
   # lookup the user's password here
   { 'user1' => 'password1' }[username]
 end
