@@ -187,7 +187,12 @@ module Grape
                          end
 
         representation = { root => representation } if root
-        representation = (@body || {}).merge(key => representation) if key
+        if key
+          representation = (@body || {}).merge(key => representation)
+        elsif entity_class.present? && representation.respond_to?('merge')
+          representation = (@body || {}).merge(representation)
+        end
+
         body representation
       end
 
