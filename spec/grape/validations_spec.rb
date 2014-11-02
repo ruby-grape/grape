@@ -227,16 +227,6 @@ describe Grape::Validations do
         expect(JSON.parse(last_response.body)).to eq('items' => [])
       end
 
-      it "doesn't allow any key in the options hash other than type" do
-        expect {
-          subject.params do
-            requires(:items, desc: 'Foo') do
-              requires :key
-            end
-          end
-        }.to raise_error ArgumentError
-      end
-
       it 'adds to declared parameters' do
         subject.params do
           requires :items do
@@ -281,16 +271,6 @@ describe Grape::Validations do
         expect(last_response.body).to eq('required works')
       end
 
-      it "doesn't allow any key in the options hash other than type" do
-        expect {
-          subject.params do
-            requires(:items, desc: 'Foo') do
-              requires :key
-            end
-          end
-        }.to raise_error ArgumentError
-      end
-
       it 'adds to declared parameters' do
         subject.params do
           requires :items do
@@ -332,6 +312,63 @@ describe Grape::Validations do
           end
         end
         expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
+      end
+    end
+
+    context 'custom validator for a Hash' do
+      module DateRangeValidations
+        class DateRangeValidator < Grape::Validations::Base
+          def validate_param!(attr_name, params)
+            unless params[attr_name][:from] <= params[attr_name][:to]
+              raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
+            end
+          end
+        end
+      end
+
+      before do
+        subject.params do
+          optional :date_range, date_range: true, type: Hash do
+            requires :from, type: Integer
+            requires :to, type: Integer
+          end
+        end
+        subject.get('/optional') do
+          'optional works'
+        end
+        subject.params do
+          requires :date_range, date_range: true, type: Hash do
+            requires :from, type: Integer
+            requires :to, type: Integer
+          end
+        end
+        subject.get('/required') do
+          'required works'
+        end
+      end
+
+      context 'which is optional' do
+        it "doesn't throw an error if the validation passes" do
+          get '/optional', date_range: { from: 1, to: 2 }
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'errors if the validation fails' do
+          get '/optional', date_range: { from: 2, to: 1 }
+          expect(last_response.status).to eq(400)
+        end
+      end
+
+      context 'which is required' do
+        it "doesn't throw an error if the validation passes" do
+          get '/required', date_range: { from: 1, to: 2 }
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'errors if the validation fails' do
+          get '/required', date_range: { from: 2, to: 1 }
+          expect(last_response.status).to eq(400)
+        end
       end
     end
 
