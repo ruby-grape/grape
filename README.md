@@ -11,6 +11,7 @@
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
   - [Rack](#rack)
+  - [ActiveRecord without Rails](#activerecord-without-rails)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
   - [Modules](#modules)
@@ -203,6 +204,20 @@ And would respond to the following routes:
     DELETE /statuses/:id(.json)
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
+
+### ActiveRecord without Rails
+
+If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool
+is handled correctly.
+
+The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement` middleware in your
+`config.ru` before mounting Grape, e.g.:
+
+```ruby
+use ActiveRecord::ConnectionAdapters::ConnectionManagement
+
+run Twitter::API
+```
 
 ### Alongside Sinatra (or other frameworks)
 
