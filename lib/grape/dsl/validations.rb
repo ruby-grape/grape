@@ -9,6 +9,7 @@ module Grape
 
       module ClassMethods
         def reset_validations!
+          unset_namespace_stackable :params
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
         end
