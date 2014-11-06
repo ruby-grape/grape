@@ -32,4 +32,5 @@ en:
         mutual_exclusion: 'are mutually exclusive'
         at_least_one: 'are missing, at least one parameter must be provided'
         exactly_one: 'are missing, exactly one parameter must be provided'
+        all_or_none: 'provide all or none of parameters'
 
