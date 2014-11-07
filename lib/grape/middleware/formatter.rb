@@ -93,7 +93,7 @@ module Grape
       end
 
       def negotiate_content_type
-        fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
+        fmt = reduce_formats(format_from_extension, format_from_params, options[:format], format_from_header,  options[:default_format])
         if content_type_for(fmt)
           env['api.format'] = fmt
         else
@@ -107,16 +107,15 @@ module Grape
         if parts.size > 1
           extension = parts.last
           # avoid symbol memory leak on an unknown format
-          return extension.to_sym if content_type_for(extension)
+          return format_to_sym(extension) #negative for fishing (for extension)
         end
         nil
       end
 
       def format_from_params
-        fmt = Rack::Utils.parse_nested_query(env['QUERY_STRING'])["format"]
+        fmt = Rack::Utils.parse_nested_query(env['QUERY_STRING'])['format']
         # avoid symbol memory leak on an unknown format
-        return fmt.to_sym if content_type_for(fmt)
-        fmt
+        format_to_sym(fmt)
       end
 
       def format_from_header
