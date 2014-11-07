@@ -643,7 +643,20 @@ params do
 end
 ```
 
-#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`
+#### `all_or_none_of`
+
+Parameters can be defined as 'all_or_none_of', ensuring that all or none of parameters gets selected.
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  all_or_none_of :beer, :wine, :juice
+end
+```
+
+#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`
 
 All of these methods can be used at any nested level.
 
@@ -665,6 +678,11 @@ params do
     optional :cake
     optional :icecream
     mutually_exclusive :cake, :icecream
+  end
+  optional :recipe do 
+    optional :oil
+    optional :meat
+    all_or_none_of :oil, :meat
   end
 end
 ```
