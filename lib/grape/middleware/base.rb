@@ -57,6 +57,34 @@ module Grape
           types_without_params[k] = v.split(';').first
         }.invert
       end
+
+      def is_strict_content_types
+        options[:is_strict_content_types] == true
+      end
+
+      def is_format_fished(fmt)
+        return fmt == fished if is_strict_content_types
+        false
+      end
+
+      def reduce_formats(*formats)
+        formats.each do |f|
+          return f if not is_format_fished(f) and f
+          return nil if is_format_fished(f)
+        end
+      end
+
+      def format_to_sym(fmt,default=nil)
+        default =  fished if  is_strict_content_types and default.nil?
+        # avoid symbol memory leak on an unknown format / (rogue attacks could increase symbol graph at will)
+        return fmt.to_sym if content_type_for(fmt)
+        return nil if fmt.nil?
+        default
+      end
+
+      def fished
+        -1
+      end
     end
   end
 end
