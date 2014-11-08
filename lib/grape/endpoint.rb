@@ -277,7 +277,8 @@ module Grape
         b.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
               versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
               version_options: namespace_inheritable(:version_options),
-              prefix: namespace_inheritable(:root_prefix)
+              prefix: namespace_inheritable(:root_prefix),
+              is_strict_content_types: namespace_inheritable(:is_strict_content_types)
 
       end
 
@@ -286,7 +287,8 @@ module Grape
             default_format: namespace_inheritable(:default_format) || :txt,
             content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
             formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:formatters)),
-            parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers))
+            parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers)),
+            is_strict_content_types: namespace_inheritable(:is_strict_content_types)
 
       b
     end
