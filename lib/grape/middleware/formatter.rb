@@ -110,15 +110,13 @@ module Grape
 
         if parts.size > 1
           extension = parts.last
-          # avoid symbol memory leak on an unknown format
-          return format_to_sym(extension) #negative for fishing (for extension)
+          return format_to_sym(extension)
         end
         nil
       end
 
       def format_from_params
         fmt = Rack::Utils.parse_nested_query(env['QUERY_STRING'])['format']
-        # avoid symbol memory leak on an unknown format
         format_to_sym(fmt)
       end
 
