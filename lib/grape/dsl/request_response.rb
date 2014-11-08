@@ -64,6 +64,10 @@ module Grape
           settings.imbue(:content_types, key.to_sym => val)
         end
 
+        def is_strict_content_types(val)
+          set(:is_strict_content_types, val)
+        end
+
         # All available content types.
         def content_types
           Grape::ContentTypes.content_types_for(settings[:content_types])

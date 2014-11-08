@@ -93,11 +93,15 @@ module Grape
       end
 
       def negotiate_content_type
-        fmt = reduce_formats(format_from_extension, format_from_params, options[:format], format_from_header,  options[:default_format])
+        error_fmt = nil
+        fmt = reduce_formats(format_from_extension, format_from_params,
+                             options[:format], format_from_header,  options[:default_format]) do |errored_format|
+          error_fmt = errored_format
+        end
         if content_type_for(fmt)
           env['api.format'] = fmt
         else
-          throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
+          throw :error, status: 406, message: "The requested format '#{error_fmt or fmt}' is not supported."
         end
       end
 

@@ -254,7 +254,8 @@ module Grape
         b.use Grape::Middleware::Versioner.using(settings[:version_options][:using]),
               versions: settings[:version] ? settings[:version].flatten : nil,
               version_options: settings[:version_options],
-              prefix: settings[:root_prefix]
+              prefix: settings[:root_prefix],
+              is_strict_content_types: settings[:is_strict_content_types]
 
       end
 
@@ -263,7 +264,8 @@ module Grape
             default_format: settings[:default_format] || :txt,
             content_types: settings[:content_types],
             formatters: settings[:formatters],
-            parsers: settings[:parsers]
+            parsers: settings[:parsers],
+            is_strict_content_types: settings[:is_strict_content_types]
 
       b
     end

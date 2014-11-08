@@ -43,9 +43,9 @@ describe Grape::Endpoint do
       p = proc {}
       expect {
         Grape::Endpoint.new(Grape::Util::HashStack.new, {
-                              path: '/',
-                              method: :get
-                            }, &p)
+          path: '/',
+          method: :get
+        }, &p)
       }.not_to raise_error
     end
   end
@@ -117,9 +117,9 @@ describe Grape::Endpoint do
     it 'includes request headers' do
       get '/headers'
       expect(JSON.parse(last_response.body)).to eq(
-          "Host" => "example.org",
-          "Cookie" => ""
-      )
+                                                  "Host" => "example.org",
+                                                  "Cookie" => ""
+                                                )
     end
     it 'includes additional request headers' do
       get '/headers', nil, "HTTP_X_GRAPE_CLIENT" => "1"
@@ -150,11 +150,11 @@ describe Grape::Endpoint do
       get('/get/cookies')
 
       expect(last_response.headers['Set-Cookie'].split("\n").sort).to eql [
-        "cookie3=symbol",
-        "cookie4=secret+code+here",
-        "my-awesome-cookie1=is+cool",
-        "my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure"
-     ]
+                                                                            "cookie3=symbol",
+                                                                            "cookie4=secret+code+here",
+                                                                            "my-awesome-cookie1=is+cool",
+                                                                            "my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure"
+                                                                          ]
     end
 
     it 'sets browser cookies and does not set response cookies' do
@@ -408,7 +408,7 @@ describe Grape::Endpoint do
 
     context 'with special requirements' do
       it 'parses email param with provided requirements for params' do
-        subject.get('/:person_email', requirements: { person_email: /.*/ }) do
+        subject.get('/:person_email', requirements: {person_email: /.*/}) do
           params[:person_email]
         end
 
@@ -420,7 +420,7 @@ describe Grape::Endpoint do
       end
 
       it 'parses many params with provided regexps' do
-        subject.get('/:person_email/test/:number', requirements: { person_email: /someone@(.*).com/, number: /[0-9]/ }) do
+        subject.get('/:person_email/test/:number', requirements: {person_email: /someone@(.*).com/, number: /[0-9]/}) do
           params[:person_email] << params[:number]
         end
 
@@ -439,12 +439,12 @@ describe Grape::Endpoint do
 
       context 'namespace requirements' do
         before :each do
-          subject.namespace :outer, requirements: { person_email: /abc@(.*).com/ } do
+          subject.namespace :outer, requirements: {person_email: /abc@(.*).com/} do
             get('/:person_email') do
               params[:person_email]
             end
 
-            namespace :inner, requirements: { number: /[0-9]/, person_email: /someone@(.*).com/ }do
+            namespace :inner, requirements: {number: /[0-9]/, person_email: /someone@(.*).com/} do
               get '/:person_email/test/:number' do
                 params[:person_email] << params[:number]
               end
@@ -509,7 +509,7 @@ describe Grape::Endpoint do
       end
     end
 
-    it "responds with a 406 for an unsupported content-type" do
+    it 'responds with a 406 for an unsupported content-type' do
       subject.format :json
       # subject.content_type :json, "application/json"
       subject.put '/request_body' do
@@ -520,6 +520,47 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
 
+    it 'responds with a 200 for an supported content-type' do
+      subject.format :json
+      subject.content_type :json, 'application/json'
+      subject.get '/request_body' do
+
+      end
+      get '/request_body'
+      expect(last_response.status).to eq(200)
+    end
+
+    context ':is_strict_content_types' do
+      it 'responds with a 406 for an unsupported content-type' do
+        subject.format :json
+        subject.default_format :json
+        subject.is_strict_content_types true
+        subject.content_type :json, 'application/json'
+        subject.get '/strict_endpoint' do
+          'hola'
+        end
+        get '/strict_endpoint.png'
+
+        expect(last_response.status).to eq(406)
+        expect(last_response.body).to eq('{"error":"The requested format \'png\' is not supported."}')
+      end
+
+      it 'responds with a 200 for an supported content-type' do
+        subject.format :json
+        subject.default_format :json
+        subject.is_strict_content_types true
+        subject.content_type :json, 'application/json'
+        subject.get '/strict_endpoint' do
+          'hola'
+        end
+        get '/strict_endpoint.json'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq("\"hola\"")
+      end
+    end
+
+
     context 'content type with params' do
       before do
         subject.format :json
@@ -528,7 +569,7 @@ describe Grape::Endpoint do
         subject.post do
           params[:data]
         end
-        post '/', MultiJson.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
+        post '/', MultiJson.dump(data: {some: 'payload'}), 'CONTENT_TYPE' => 'application/json'
       end
 
       it "should not response with 406 for same type without params" do
@@ -565,9 +606,9 @@ describe Grape::Endpoint do
       end
 
       it 'route string params have higher precedence than body params' do
-        post '/123', { id: 456 }.to_json
+        post '/123', {id: 456}.to_json
         expect(JSON.parse(last_response.body)['params']).to eq '123'
-        put '/123', { id: 456 }.to_json
+        put '/123', {id: 456}.to_json
         expect(JSON.parse(last_response.body)['params']).to eq '123'
       end
 
@@ -605,7 +646,7 @@ describe Grape::Endpoint do
 
     it 'accepts an object and render it in format' do
       subject.get '/hey' do
-        error!({ 'dude' => 'rad' }, 403)
+        error!({'dude' => 'rad'}, 403)
       end
 
       get '/hey.json'
@@ -615,7 +656,7 @@ describe Grape::Endpoint do
 
     it 'can specifiy headers' do
       subject.get '/hey' do
-        error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
+        error!({'dude' => 'rad'}, 403, 'X-Custom' => 'value')
       end
 
       get '/hey.json'
@@ -628,7 +669,7 @@ describe Grape::Endpoint do
 
       subject.get '/hey' do
         memoized_endpoint = self
-        error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
+        error!({'dude' => 'rad'}, 403, 'X-Custom' => 'value')
       end
 
       get '/hey.json'
