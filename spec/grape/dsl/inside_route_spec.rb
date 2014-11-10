@@ -208,6 +208,35 @@ module Grape
             end
           end
         end
+
+        describe 'with' do
+          describe 'multiple entities' do
+            let(:entity_mock1) do
+              entity_mock1 = Object.new
+              allow(entity_mock1).to receive(:represent).and_return(dummy1: 'dummy1')
+              entity_mock1
+            end
+
+            let(:entity_mock2) do
+              entity_mock2 = Object.new
+              allow(entity_mock2).to receive(:represent).and_return(dummy2: 'dummy2')
+              entity_mock2
+            end
+
+            describe 'instance' do
+              before do
+                subject.present 'dummy1', with: entity_mock1
+                subject.present 'dummy2', with: entity_mock2
+              end
+
+              it 'presents both dummy objects' do
+                expect(subject.body[:dummy1]).to eq 'dummy1'
+                expect(subject.body[:dummy2]).to eq 'dummy2'
+              end
+            end
+
+          end
+        end
       end
 
       describe '#declared' do
