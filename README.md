@@ -111,7 +111,7 @@ module Twitter
   class API < Grape::API
     version 'v1', using: :header, vendor: 'twitter'
     format :json
-    prefix :api # This corresponds to http://[your_domain]/api/...
+    prefix :api
 
     helpers do
       def current_user
