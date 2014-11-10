@@ -111,7 +111,7 @@ module Twitter
   class API < Grape::API
     version 'v1', using: :header, vendor: 'twitter'
     format :json
-    prefix :api
+    prefix :api # This corresponds to http://[your_domain]/api/...
 
     helpers do
       def current_user
@@ -196,12 +196,12 @@ run Twitter::API
 
 And would respond to the following routes:
 
-    GET /statuses/public_timeline(.json)
-    GET /statuses/home_timeline(.json)
-    GET /statuses/:id(.json)
-    POST /statuses(.json)
-    PUT /statuses/:id(.json)
-    DELETE /statuses/:id(.json)
+    GET /api/statuses/public_timeline(.json)
+    GET /api/statuses/home_timeline(.json)
+    GET /api/statuses/:id(.json)
+    POST /api/statuses(.json)
+    PUT /api/statuses/:id(.json)
+    DELETE /api/statuses/:id(.json)
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
