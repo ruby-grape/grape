@@ -20,6 +20,10 @@ module Grape
       split_setting(:root_prefix, '/')
     end
 
+    def uses_specific_format?
+      !!(settings[:format] && settings[:content_types].size == 1)
+    end
+
     def uses_path_versioning?
       !!(settings[:version] && settings[:version_options][:using] == :path)
     end
@@ -33,7 +37,9 @@ module Grape
     end
 
     def suffix
-      if !uses_path_versioning? || (has_namespace? || has_path?)
+      if uses_specific_format?
+        ''
+      elsif !uses_path_versioning? || (has_namespace? || has_path?)
         '(.:format)'
       else
         '(/.:format)'

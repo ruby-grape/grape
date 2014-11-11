@@ -257,6 +257,8 @@ describe Grape::API do
     describe 'root routes should work with' do
       before do
         subject.format :txt
+        subject.content_type :json, "application/json"
+        subject.formatter :json, lambda { |object, env| object }
         def subject.enable_root_route!
           get("/") { "root" }
         end
@@ -784,14 +786,14 @@ describe Grape::API do
     it 'sets content type for json error' do
       subject.format :json
       subject.get('/error') { error!('error in json', 500) }
-      get '/error.json'
+      get '/error'
       expect(last_response.headers['Content-Type']).to eql 'application/json'
     end
 
     it 'sets content type for xml error' do
       subject.format :xml
       subject.get('/error') { error!('error in xml', 500) }
-      get '/error.xml'
+      get '/error'
       expect(last_response.headers['Content-Type']).to eql 'application/xml'
     end
 
@@ -2420,9 +2422,9 @@ describe Grape::API do
         get '/meaning_of_life'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
-      it 'forces txt with the wrong extension' do
+      it 'does not accept any extensions' do
         get '/meaning_of_life.json'
-        expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
+        expect(last_response.status).to eq(404)
       end
       it 'forces txt from a non-accepting header' do
         get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
