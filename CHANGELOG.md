@@ -9,6 +9,7 @@
 * [#779](https://github.com/intridea/grape/pull/779): Fixed using `values` with a `default` proc - [@ShPakvel](https://github.com/ShPakvel).
 * [#799](https://github.com/intridea/grape/pull/799): Fixed custom validators with required `Hash`, `Array` types - [@bwalex](https://github.com/bwalex).
 * [#784](https://github.com/intridea/grape/pull/784): Fixed `present` to not overwrite the previously added contents of the response body whebn called more than once - [@mfunaro](https://github.com/mfunaro).
+* [#809](https://github.com/intridea/grape/pull/809): Removed automatic `(.:format)` suffix on paths if you're using only one format (e.g., with `format :json`, `/path` will respond with JSON but `/path.xml` will be a 404) - [@ajvondrak](https://github.com/ajvondrak).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
