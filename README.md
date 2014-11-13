@@ -196,12 +196,12 @@ run Twitter::API
 
 And would respond to the following routes:
 
-    GET /api/statuses/public_timeline(.json)
-    GET /api/statuses/home_timeline(.json)
-    GET /api/statuses/:id(.json)
-    POST /api/statuses(.json)
-    PUT /api/statuses/:id(.json)
-    DELETE /api/statuses/:id(.json)
+    GET /api/statuses/public_timeline
+    GET /api/statuses/home_timeline
+    GET /api/statuses/:id
+    POST /api/statuses
+    PUT /api/statuses/:id
+    DELETE /api/statuses/:id
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
@@ -1332,16 +1332,115 @@ end
 
 ## API Formats
 
-By default, Grape supports _XML_, _JSON_, _BINARY_, and _TXT_ content-types. The default format is `:txt`.
+Your API can declare which content-types to support by using `content_type`. If you do not specify any, Grape will support
+_XML_, _JSON_, _BINARY_, and _TXT_ content-types. The default format is `:txt`; you can change this with `default_format`.
+Essentially, the two APIs below are equivalent.
 
-Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
+```ruby
+class Twitter::API < Grape::API
+  # no content_type declarations, so Grape uses the defaults
+end
 
-Your API can declare which types to support by using `content_type`. Response format is determined by the
-request's extension, an explicit `format` parameter in the query string, or `Accept` header.
+class Twitter::API < Grape::API
+  # the following declarations are equivalent to the defaults
 
-The following API will only respond to the JSON content-type and will not parse any other input than `application/json`,
-`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests
-will fail with an HTTP 406 error code.
+  content_type :xml, 'application/xml'
+  content_type :json, 'application/json'
+  content_type :binary, 'application/octet-stream'
+  content_type :txt, 'text/plain'
+
+  default_format :txt
+end
+```
+
+If you declare any `content_type` whatsoever, the Grape defaults will be overridden. For example, the following API will only
+support the `:xml` and `:rss` content-types, but not `:txt`, `:json`, or `:binary`. Importantly, this means the `:txt`
+default format is not supported! So, make sure to set a new `default_format`.
+
+```ruby
+class Twitter::API < Grape::API
+  content_type :xml, 'application/xml'
+  content_type :rss, 'application/xml+rss'
+
+  default_format :xml
+end
+```
+
+Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API endpoint
+implementation. The response format (and thus the automatic serialization) is determined in the following order:
+* Use the file extension, if specified. If the file is .json, choose the JSON format.
+* Use the value of the `format` parameter in the query string, if specified.
+* Use the format set by the `format` option, if specified.
+* Attempt to find an acceptable format from the `Accept` header.
+* Use the default format, if specified by the `default_format` option.
+* Default to `:txt`.
+
+For example, consider the following API.
+
+```ruby
+class MultipleFormatAPI < Grape::API
+  content_type :xml, 'application/xml'
+  content_type :json, 'application/json'
+
+  default_format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+* `GET /hello` (with an `Accept: */*` header) does not have an extension or a `format` parameter, so it will respond with
+  JSON (the default format).
+* `GET /hello.xml` has a recognized extension, so it will respond with XML.
+* `GET /hello?format=xml` has a recognized `format` parameter, so it will respond with XML.
+* `GET /hello.xml?format=json` has a recognized extension (which takes precedence over the `format` parameter), so it will
+  respond with XML.
+* `GET /hello.xls` (with an `Accept: */*` header) has an extension, but that extension is not recognized, so it will respond
+  with JSON (the default format).
+* `GET /hello.xls` with an `Accept: application/xml` header has an unrecognized extension, but the `Accept` header
+  corresponds to a recognized format, so it will respond with XML.
+* `GET /hello.xls` with an `Accept: text/plain` header has an unrecognized extension *and* an unrecognized `Accept` header,
+  so it will respond with JSON (the default format).
+
+You can override this process explicitly by specifying `env['api.format']` in the API itself.
+For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
+
+```ruby
+class Twitter::API < Grape::API
+  post "attachment" do
+    filename = params[:file][:filename]
+    content_type MIME::Types.type_for(filename)[0].to_s
+    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+    params[:file][:tempfile].read
+  end
+end
+```
+
+You can have your API only respond to a single format with `format`. If you use this, the API will **not** respond to file
+extensions. For example, consider the following API.
+
+```ruby
+class SingleFormatAPI < Grape::API
+  format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+* `GET /hello` will respond with JSON.
+* `GET /hello.xml`, `GET /hello.json`, `GET /hello.foobar`, or *any* other extension will respond with an HTTP 404 error code.
+* `GET /hello?format=xml` will respond with an HTTP 406 error code, because the XML format specified by the request parameter
+  is not supported.
+* `GET /hello` with an `Accept: application/xml` header will still respond with JSON, since it could not negotiate a
+  recognized content-type from the headers and JSON is the effective default.
+
+The formats apply to parsing, too. The following API will only respond to the JSON content-type and will not parse any other
+input than `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and
+`multipart/mixed`. All other requests will fail with an HTTP 406 error code.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -1394,46 +1493,13 @@ class Twitter::API < Grape::API
 end
 ```
 
-Built-in formats are the following.
+Built-in formatters are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
-* `:binary`
-
-Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header.
-See below for the order for choosing the API format.
-
-```ruby
-class Twitter::API < Grape::API
-  default_format :json
-end
-```
-
-The order for choosing the format is the following.
-
-* Use the file extension, if specified. If the file is .json, choose the JSON format.
-* Use the value of the `format` parameter in the query string, if specified.
-* Use the format set by the `format` option, if specified.
-* Attempt to find an acceptable format from the `Accept` header.
-* Use the default format, if specified by the `default_format` option.
-* Default to `:txt`.
-
-You can override this process explicitly by specifying `env['api.format']` in the API itself.
-For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
-
-```ruby
-class Twitter::API < Grape::API
-  post "attachment" do
-    filename = params[:file][:filename]
-    content_type MIME::Types.type_for(filename)[0].to_s
-    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
-    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
-    params[:file][:tempfile].read
-  end
-end
-```
+* `:binary`: data will be returned "as is"
 
 ### JSONP
 

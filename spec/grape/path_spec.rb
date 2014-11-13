@@ -182,9 +182,19 @@ module Grape
     end
 
     describe "#suffix" do
+      context "when using a specific format" do
+        it "is empty" do
+          path = Path.new(nil, nil, {})
+          allow(path).to receive(:uses_specific_format?) { true }
+
+          expect(path.suffix).to eql('')
+        end
+      end
+
       context "when path versioning is used" do
         it "includes a '/'" do
           path = Path.new(nil, nil, {})
+          allow(path).to receive(:uses_specific_format?) { false }
           allow(path).to receive(:uses_path_versioning?) { true }
 
           expect(path.suffix).to eql('(/.:format)')
@@ -194,6 +204,7 @@ module Grape
       context "when path versioning is not used" do
         it "does not include a '/' when the path has a namespace" do
           path = Path.new(nil, 'namespace', {})
+          allow(path).to receive(:uses_specific_format?) { false }
           allow(path).to receive(:uses_path_versioning?) { true }
 
           expect(path.suffix).to eql('(.:format)')
@@ -201,6 +212,7 @@ module Grape
 
         it "does not include a '/' when the path has a path" do
           path = Path.new('/path', nil, {})
+          allow(path).to receive(:uses_specific_format?) { false }
           allow(path).to receive(:uses_path_versioning?) { true }
 
           expect(path.suffix).to eql('(.:format)')
@@ -208,6 +220,7 @@ module Grape
 
         it "includes a '/' otherwise" do
           path = Path.new(nil, nil, {})
+          allow(path).to receive(:uses_specific_format?) { false }
           allow(path).to receive(:uses_path_versioning?) { true }
 
           expect(path.suffix).to eql('(/.:format)')
@@ -222,6 +235,16 @@ module Grape
         allow(path).to receive(:suffix) { 'suffix' }
 
         expect(path.path_with_suffix).to eql('/the/pathsuffix')
+      end
+
+      context "when using a specific format" do
+        it "does not have a suffix" do
+          path = Path.new(nil, nil, {})
+          allow(path).to receive(:path) { '/the/path' }
+          allow(path).to receive(:uses_specific_format?) { true }
+
+          expect(path.path_with_suffix).to eql('/the/path')
+        end
       end
     end
 
