@@ -46,6 +46,15 @@ module Grape
       end
 
       def coerce_value(type, val)
+        # Try to convert from JSON if an array or hash is expected
+        if [Array, Hash].include?(type) && val.kind_of?(String)
+          begin
+            json = JSON.parse(val)
+            return json if json.kind_of?(type)
+          rescue
+          end
+        end
+
         # Don't coerce things other than nil to Arrays or Hashes
         return val || [] if type == Array
         return val || {} if type == Hash
