@@ -115,32 +115,12 @@ module Grape
           reset_validations!
         end
 
-        def get(paths = ['/'], options = {}, &block)
-          route('GET', paths, options, &block)
-        end
-
-        def post(paths = ['/'], options = {}, &block)
-          route('POST', paths, options, &block)
-        end
-
-        def put(paths = ['/'], options = {}, &block)
-          route('PUT', paths, options, &block)
-        end
-
-        def head(paths = ['/'], options = {}, &block)
-          route('HEAD', paths, options, &block)
-        end
-
-        def delete(paths = ['/'], options = {}, &block)
-          route('DELETE', paths, options, &block)
-        end
-
-        def options(paths = ['/'], options = {}, &block)
-          route('OPTIONS', paths, options, &block)
-        end
-
-        def patch(paths = ['/'], options = {}, &block)
-          route('PATCH', paths, options, &block)
+        %w"get post put head delete options patch".each do |meth|
+          define_method meth do |*args, &block|
+            options = args.extract_options!
+            paths = args.first || ['/']
+            route(meth.upcase, paths, options, &block)
+          end
         end
 
         def namespace(space = nil, options = {},  &block)
