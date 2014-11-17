@@ -328,6 +328,40 @@ describe Grape::Endpoint do
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
     end
+
+    it 'does not include missing attributes when there are nested hashes' do
+      subject.get '/dummy' do
+      end
+
+      subject.params do
+        requires :first
+        optional :second
+        optional :third, default: nil
+        optional :nested, type: Hash do
+          optional :fourth, default: nil
+          optional :fifth, default: nil
+          requires :nested_nested, type: Hash do
+            optional :sixth, default: 'sixth-default'
+            optional :seven, default: nil
+          end
+        end
+      end
+
+      inner_params = nil
+      subject.get '/declared' do
+        inner_params = declared(params, include_missing: false)
+        ""
+      end
+
+      get '/declared?first=present&nested[fourth]=&nested[nested_nested][sixth]=sixth'
+
+      expect(last_response.status).to eq(200)
+      expect(inner_params[:first]).to eq "present"
+      expect(inner_params[:nested].keys).to eq [:fourth, :nested_nested]
+      expect(inner_params[:nested][:fourth]).to eq ""
+      expect(inner_params[:nested][:nested_nested].keys).to eq [:sixth]
+      expect(inner_params[:nested][:nested_nested][:sixth]).to eq "sixth"
+    end
   end
 
   describe '#declared; call from child namespace' do
