@@ -57,6 +57,10 @@ module Grape
         validates(attrs, at_least_one_of: true)
       end
 
+      def all_or_none_of(*attrs)
+        validates(attrs, all_or_none_of: true)
+      end
+
       def group(*attrs, &block)
         requires(*attrs, &block)
       end
