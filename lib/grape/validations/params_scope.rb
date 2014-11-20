@@ -97,7 +97,7 @@ module Grape
         coerce_type = validations[:coerce]
         doc_attrs[:type] = coerce_type.to_s if coerce_type
 
-        desc = validations.delete(:desc)
+        desc = validations.delete(:desc) || validations.delete(:description)
         doc_attrs[:desc] = desc if desc
 
         default = validations[:default]
