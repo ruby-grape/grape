@@ -95,6 +95,14 @@ module Grape
         end
       end
 
+      describe '#all_or_none_of' do
+        it 'adds an all or none of parameter validation' do
+          subject.all_or_none_of :media, :audio
+
+          expect(subject.valids).to eq([[:media, :audio], { all_or_none_of: true }])
+        end
+      end
+
       xdescribe '#group' do
         it 'does some thing'
       end
