@@ -22,6 +22,8 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Declared](#declared)
+  - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
@@ -460,6 +462,66 @@ In the case of conflict between either of:
 * the contents of the request body on `POST` and `PUT`
 
 route string parameters will have precedence.
+
+#### Declared
+
+Grape allows to access only those parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Let's have the following api:
+
+````ruby
+format :json
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+If we do not specify any params, declared will return an empty hash. 
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name"}}'
+````
+
+**Restponse**
+
+````json
+{ "declared_params": { } }
+
+````
+
+Once we add parameters requirements:
+
+````ruby
+format :json
+
+params do
+  requires :user, type: Hash do
+    requires :first_name, type: String
+    requires :last_name, type: String
+  end
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name", "random": "never shown"}}'
+````
+
+**Restponse**
+
+````json
+{"declared_params":{"user":{"first_name":"first name","last_name":"last name"}}}
+````
+
+#### Include missing
+
+
 
 ## Parameter Validation and Coercion
 
