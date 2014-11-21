@@ -22,6 +22,8 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Declared](#declared)
+  - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
@@ -460,6 +462,176 @@ In the case of conflict between either of:
 * the contents of the request body on `POST` and `PUT`
 
 route string parameters will have precedence.
+
+#### Declared
+
+Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Let's have the following api:
+
+````ruby
+format :json
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+If we do not specify any params, declared will return an empty hash. 
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name"}}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {}
+}
+
+````
+
+Once we add parameters requirements, grape will start returning only the declared params.
+
+````ruby
+format :json
+
+params do
+  requires :user, type: Hash do
+    requires :first_name, type: String
+    requires :last_name, type: String
+  end
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name", "random": "never shown"}}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "last_name": "last name"
+    }
+  }
+}
+````
+
+#### Include missing
+
+By default `declared(params)` returns parameters that has `nil` value. If you want to return only the parameters that have any value, you can use the `include_missing` option. By default it is `true`. Let's have the following api:
+
+````ruby
+format :json
+
+params do
+  requires :first_name, type: String
+  optional :last_name, type: String
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params, include_missing: false) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown"}}'
+````
+
+**Response with include_missing:false**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name"
+    }
+  }
+}
+````
+
+**Response with include_missing:true**
+
+````json
+{
+  "declared_params": {
+    "first_name": "first name",
+    "last_name": null
+  }
+}
+````
+
+It also works on nested hashes:
+
+````ruby
+format :json
+
+params do
+  requires :user, :type => Hash do
+    requires :first_name, type: String
+    optional :last_name, type: String
+    requires :address, :type => Hash do
+      requires :city, type: String
+      optional :region, type: String
+    end
+  end
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params, include_missing: false) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown", "address": { "city": "SF"}}}'
+````
+
+**Response with include_missing:false**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "address": {
+        "city": "SF"
+      }
+    }
+  }
+}
+````
+
+**Response with include_missing:true**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "last_name": null,
+      "address": {
+        "city": "Zurich",
+        "region": null
+      }
+    }
+  }
+}
+````
 
 ## Parameter Validation and Coercion
 
