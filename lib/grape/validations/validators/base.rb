@@ -13,7 +13,7 @@ module Grape
       def validate!(params)
         attributes = AttributesIterator.new(self, @scope, params)
         attributes.each do |resource_params, attr_name|
-          if @required || resource_params.key?(attr_name)
+          if @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
             validate_param!(attr_name, resource_params)
           end
         end

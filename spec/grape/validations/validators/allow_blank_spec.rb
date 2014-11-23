@@ -45,10 +45,24 @@ describe Grape::Validations::AllowBlankValidator do
 
         params do
           requires :user, type: Hash do
+            requires :name, allow_blank: false
+          end
+        end
+        get '/disallow_string_value_in_a_required_hash_group'
+
+        params do
+          requires :user, type: Hash do
             optional :name, allow_blank: false
           end
         end
         get '/disallow_blank_optional_param_in_a_required_group'
+
+        params do
+          optional :user, type: Hash do
+            optional :name, allow_blank: false
+          end
+        end
+        get '/disallow_string_value_in_an_optional_hash_group'
       end
     end
   end
@@ -129,6 +143,11 @@ describe Grape::Validations::AllowBlankValidator do
         get '/disallow_blank_required_param_in_a_required_group', user: { name: "" }
         expect(last_response.status).to eq(400)
       end
+
+      it 'refuses a string value in a required hash group' do
+        get '/disallow_string_value_in_a_required_hash_group', user: ""
+        expect(last_response.status).to eq(400)
+      end
     end
 
     context 'as an optional param' do
@@ -139,6 +158,11 @@ describe Grape::Validations::AllowBlankValidator do
 
       it 'refuses a blank existing value in an existing scope' do
         get '/disallow_blank_optional_param_in_a_required_group', user: { age: "29", name: "" }
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'refuses a string value in an optional hash group' do
+        get '/disallow_string_value_in_an_optional_hash_group', user: ""
         expect(last_response.status).to eq(400)
       end
     end
