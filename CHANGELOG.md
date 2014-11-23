@@ -1,7 +1,7 @@
 0.9.1 (Next)
 ============
-
 * [#803](https://github.com/intridea/grape/pull/803), [#820](https://github.com/intridea/grape/pull/820): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic), [@natecj](https://github.com/natecj).
+* [#803](https://github.com/intridea/grape/pull/803): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic).
 * [#774](https://github.com/intridea/grape/pull/774): Extended `mutually_exclusive`, `exactly_one_of`, `at_least_one_of` to work inside any kind of group: `requires` or `optional`, `Hash` or `Array` - [@ShPakvel](https://github.com/ShPakvel).
 * [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * [#745](https://github.com/intridea/grape/pull/745): Removed `atom+xml`, `rss+xml`, and `jsonapi` content-types - [@akabraham](https://github.com/akabraham).
@@ -13,6 +13,7 @@
 * [#809](https://github.com/intridea/grape/pull/809): Removed automatic `(.:format)` suffix on paths if you're using only one format (e.g., with `format :json`, `/path` will respond with JSON but `/path.xml` will be a 404) - [@ajvondrak](https://github.com/ajvondrak).
 * [#816](https://github.com/intridea/grape/pull/816): Added ability to filter out missing params if params is a nested hash with `declared(params, include_missing: false)` - [@georgimitev](https://github.com/georgimitev).
 * [#819](https://github.com/intridea/grape/pull/819): Allowed both `desc` and `description` in the params DSL - [@mzikherman](https://github.com/mzikherman).
+* [#813](https://github.com/intridea/grape/pull/813): Routing methods dsl refactored to get rid of explicit `paths` parameter - [@AlexYankee](https://github.com/AlexYankee).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
