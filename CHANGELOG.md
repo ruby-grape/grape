@@ -13,6 +13,7 @@
 * [#809](https://github.com/intridea/grape/pull/809): Removed automatic `(.:format)` suffix on paths if you're using only one format (e.g., with `format :json`, `/path` will respond with JSON but `/path.xml` will be a 404) - [@ajvondrak](https://github.com/ajvondrak).
 * [#816](https://github.com/intridea/grape/pull/816): Added ability to filter out missing params if params is a nested hash with `declared(params, include_missing: false)` - [@georgimitev](https://github.com/georgimitev).
 * [#819](https://github.com/intridea/grape/pull/819): Allowed both `desc` and `description` in the params DSL - [@mzikherman](https://github.com/mzikherman).
+* [#821](https://github.com/intridea/grape/pull/821): Fixed passing string value when hash is expected in params - [@rebelact](https://github.com/rebelact).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
