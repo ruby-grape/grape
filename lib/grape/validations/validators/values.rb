@@ -7,7 +7,11 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
-        if (params[attr_name] || required_for_root_scope?) && !(@values.is_a?(Proc) ? @values.call : @values).include?(params[attr_name])
+        return unless (params[attr_name] || required_for_root_scope?) 
+
+        values = @values.is_a?(Proc) ? @values.call : @values
+        param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
+        unless (param_array - values).empty?
           raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :values
         end
       end
