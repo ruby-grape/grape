@@ -14,6 +14,7 @@
 * [#816](https://github.com/intridea/grape/pull/816): Added ability to filter out missing params if params is a nested hash with `declared(params, include_missing: false)` - [@georgimitev](https://github.com/georgimitev).
 * [#819](https://github.com/intridea/grape/pull/819): Allowed both `desc` and `description` in the params DSL - [@mzikherman](https://github.com/mzikherman).
 * [#821](https://github.com/intridea/grape/pull/821): Fixed passing string value when hash is expected in params - [@rebelact](https://github.com/rebelact).
+* [#824](https://github.com/intridea/grape/pull/824): Validate array params against list of acceptable values - [@dnd](https://github.com/dnd).
 * Your contribution here.
 
 0.9.0 (8/27/2014)

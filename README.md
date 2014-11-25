@@ -738,6 +738,7 @@ at calltime use a lambda, like `:random_number` above.
 ```ruby
 params do
   requires :status, type: Symbol, values: [:not_started, :processing, :done]
+  optional :numbers, type: Array[Integer], default: 1, values: [1, 2, 3, 5, 8]
 end
 ```
 
