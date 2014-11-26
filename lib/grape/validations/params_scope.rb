@@ -116,9 +116,7 @@ module Grape
         end
 
         # type should be compatible with values array, if both exist
-        if coerce_type && values && values.any? { |v| !v.kind_of?(coerce_type) }
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
-        end
+        validate_value_coercion(coerce_type, values) if coerce_type && values
 
         doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
 
@@ -152,6 +150,13 @@ module Grape
           @api.namespace_stackable(:validations, value)
         else
           raise Grape::Exceptions::UnknownValidator.new(type)
+        end
+      end
+
+      def validate_value_coercion(coerce_type, values)
+        coerce_type = coerce_type.first if coerce_type.kind_of?(Array)
+        if values.any? { |v| !v.kind_of?(coerce_type) }
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
       end
     end
