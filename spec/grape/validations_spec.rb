@@ -1037,6 +1037,44 @@ describe Grape::Validations do
           expect(last_response.body).to eq "beer, wine are mutually exclusive, scotch, aquavit are mutually exclusive, scotch2, aquavit2 are mutually exclusive"
         end
       end
+
+      context 'in a group' do
+        it 'works when only one from the set is present' do
+          subject.params do
+            group :drink, type: Hash do
+              optional :wine
+              optional :beer
+              optional :juice
+
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.get '/mutually_exclusive_group' do
+            'mutually_exclusive_group works!'
+          end
+
+          get '/mutually_exclusive_group', drink: { beer: 'true' }
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'errors when more than one from the set is present' do
+          subject.params do
+            group :drink, type: Hash do
+              optional :wine
+              optional :beer
+              optional :juice
+
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.get '/mutually_exclusive_group' do
+            'mutually_exclusive_group works!'
+          end
+
+          get '/mutually_exclusive_group', drink: { beer: 'true', juice: 'true', wine: 'true' }
+          expect(last_response.status).to eq(400)
+        end
+      end
     end
 
     context 'exactly one of' do
@@ -1186,5 +1224,81 @@ describe Grape::Validations do
         end
       end
     end
+
+    context 'in a group' do
+      it 'works when only one from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { beer: 'true' }
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'errors when no parameter from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: {}
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'errors when more than one from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { beer: 'true', juice: 'true', wine: 'true' }
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'does not falsely think the param is there if it is provided outside the block' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { foo: 'bar' }, beer: 'true'
+        expect(last_response.status).to eq(400)
+      end
+
+    end
+
   end
 end
