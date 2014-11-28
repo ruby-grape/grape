@@ -59,6 +59,9 @@
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
 - [Anchoring](#anchoring)
+- [Use Custom Middleware](#use-custom-middleware)
+  - [Rails middleware](#rails-middleware)
+    - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
   - [Writing Tests with Rails](#writing-tests-with-rails)
@@ -2098,6 +2101,57 @@ Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
+
+# Use custom middleware
+
+## Rails middleware
+
+When you're using grape inside of Rails you don't have to use Rails middleware because it is already included into your middleware stack. 
+You only have to implement the helpers to access the specific `env` variable.
+
+### Remote IP
+
+By default you can access remote IP with `request.ip`. This is the RACK remote IP.
+Sometimes it is desirable to get the Rails like remote IP ([this](http://stackoverflow.com/questions/10997005/whats-the-difference-between-request-remote-ip-and-request-ip-in-rails)
+will explain the difference between booth). You can use Rails `ActionDispatch::RemoteIp` middleware to get Rails style
+remote IP.
+
+Usage:
+
+```ruby
+
+# in your Gemfile
+gem 'actionpack'
+
+# in your Root-API-Class
+
+require 'action_dispatch/middleware/remote_ip.rb'
+class APIRoot < Grape::API
+  use ActionDispatch::RemoteIp, opts # opts are documented here: http://api.rubyonrails.org/classes/ActionDispatch/RemoteIp.html
+  
+  helpers do
+    def client_ip
+      env["action_dispatch.remote_ip"].to_s()
+    end
+  end
+  
+  mount OtherAPI, ...
+end
+
+
+class OtherAPI < Grape::API
+
+  get '/test' do
+    {ip: client_ip}
+  end
+end
+
+``` 
+
+But keep this Warning in mind (taken from [here](http://api.rubyonrails.org/classes/ActionDispatch/RemoteIp.html)):
+
+*If you don't use a proxy, this makes you vulnerable to ip spoofing.*
+
 
 ## Writing Tests
 
