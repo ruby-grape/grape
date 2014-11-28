@@ -315,6 +315,27 @@ describe Grape::Validations do
       end
     end
 
+    context 'group params with nested params which has a type' do
+      let(:invalid_items){ { items: '' } }
+
+      before do
+        subject.params do
+          optional :items do
+            optional :key1, type: String
+            optional :key2, type: String
+          end
+        end
+        subject.post '/group_with_nested' do
+          'group with nested works'
+        end
+      end
+
+      it 'errors when group param is invalid'do
+        post '/group_with_nested', items: invalid_items
+        expect(last_response.status).to eq(400)
+      end
+    end
+
     context 'custom validator for a Hash' do
       module DateRangeValidations
         class DateRangeValidator < Grape::Validations::Base
