@@ -8,7 +8,7 @@ module Grape
 
       def initialize(inherited_values = {})
         @inherited_values = inherited_values
-        @new_values = LoggingValue.new
+        @new_values = {}
         @froozen_values = {}
       end
 
@@ -35,7 +35,7 @@ module Grape
 
       def to_hash
         keys.each_with_object({}) do |key, result|
-          result[key] = self[key].dup
+          result[key] = self[key]
         end
       end
 
