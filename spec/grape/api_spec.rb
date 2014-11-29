@@ -1897,7 +1897,11 @@ describe Grape::API do
     end
     describe 'api structure with additional parameters' do
       before(:each) do
-        subject.get 'split/:string', params: { "token" => "a token" }, optional_params: { "limit" => "the limit" } do
+        subject.params do
+          requires :token, desc: 'a token'
+          optional :limit, desc: 'the limit'
+        end
+        subject.get 'split/:string' do
           params[:string].split(params[:token], (params[:limit] || 0).to_i)
         end
       end
@@ -1911,10 +1915,51 @@ describe Grape::API do
       end
       it 'sets route_params' do
         expect(subject.routes.map { |route|
-          { params: route.route_params, optional_params: route.route_optional_params }
+          { params: route.route_params }
         }).to eq [
-          { params: { "string" => "", "token" => "a token" }, optional_params: { "limit" => "the limit" } }
-      ]
+          {
+            params: {
+              "string" => "",
+              "token" => { required: true, desc: "a token" },
+              "limit" => { required: false, desc: "the limit" }
+            }
+          }
+        ]
+      end
+    end
+    describe 'api structure with two apis' do
+      before(:each) do
+        subject.params do
+          requires :one, desc: 'a token'
+          optional :two, desc: 'the limit'
+        end
+        subject.get 'one' do
+        end
+
+        subject.params do
+          requires :three, desc: 'a token'
+          optional :four, desc: 'the limit'
+        end
+        subject.get 'two' do
+        end
+      end
+      it 'sets route_params' do
+        expect(subject.routes.map { |route|
+          { params: route.route_params }
+        }).to eq [
+          {
+            params: {
+              "one" => { required: true, desc: "a token" },
+              "two" => { required: false, desc: "the limit" }
+            }
+          },
+          {
+            params: {
+              "three" => { required: true, desc: "a token" },
+              "four" => { required: false, desc: "the limit" }
+            }
+          }
+        ]
       end
     end
   end

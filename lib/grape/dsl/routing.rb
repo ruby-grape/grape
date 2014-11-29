@@ -109,6 +109,7 @@ module Grape
               params: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:params)) || {}
             }).deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
           }
+
           endpoints << Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
 
           route_end

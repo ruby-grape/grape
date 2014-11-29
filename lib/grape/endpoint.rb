@@ -129,14 +129,18 @@ module Grape
     end
 
     def prepare_routes_path_params(path)
-      regex = Rack::Mount::RegexpWithNamedGroups.new(path)
       path_params = {}
+
       # named parameters in the api path
+      regex = Rack::Mount::RegexpWithNamedGroups.new(path)
       named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
       named_params.each { |named_param| path_params[named_param] = "" }
+
       # route parameters declared via desc or appended to the api declaration
-      route_params = (options[:route_options][:params] || {})
-      path_params.merge!(route_params)
+      route_params = options[:route_options][:params]
+      path_params.merge! route_params if route_params
+
+      path_params
     end
 
     def prepare_routes
