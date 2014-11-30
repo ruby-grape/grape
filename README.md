@@ -1939,26 +1939,34 @@ Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2]
 
 ## Describing and Inspecting an API
 
-Grape routes can be reflected at runtime. This can notably be useful for generating
-documentation.
+Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
 
-Grape exposes arrays of API versions and compiled routes. Each route
-contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`,
-`route_path` and `route_params`. The description and the optional hash that
-follows the API path may contain any number of keys and its values are also
-accessible via dynamically-generated `route_[name]` functions.
+Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`. You can add custom route settings to the route metadata with `route_setting`.
+
+```ruby
+class TwitterAPI < Grape::API
+  version 'v1'
+  desc "Includes custom settings."
+  route_setting :custom, key: 'value'
+  get do
+
+  end
+end
+```
+
+Examine the routes at runtime.
 
 ```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
-TwitterAPI::routes[0].route_version # yields 'v1'
-TwitterAPI::routes[0].route_description # etc.
+TwitterAPI::routes[0].route_version # => 'v1'
+TwitterAPI::routes[0].route_description # => 'Includes custom settings.'
+TwitterAPI::routes[0].route_settings[:custom] # => { key: 'value' }
 ```
 
 ## Current Route and Endpoint
 
-It's possible to retrieve the information about the current route from within an API
-call with `route`.
+It's possible to retrieve the information about the current route from within an API call with `route`.
 
 ```ruby
 class MyAPI < Grape::API
