@@ -158,7 +158,8 @@ module Grape
             method: request_method,
             path: prepared_path,
             params: prepare_routes_path_params(path),
-            compiled: path
+            compiled: path,
+            settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations)
           ))
         end
       end.flatten

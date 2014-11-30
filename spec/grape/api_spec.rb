@@ -1962,6 +1962,17 @@ describe Grape::API do
         ]
       end
     end
+    describe 'api with a custom route setting' do
+      before(:each) do
+        subject.route_setting :custom, key: 'value'
+        subject.get 'one'
+      end
+      it 'exposed' do
+        expect(subject.routes.count).to eq 1
+        route = subject.routes.first
+        expect(route.route_settings[:custom]).to eq(key: 'value')
+      end
+    end
   end
 
   context 'desc' do
