@@ -13,6 +13,8 @@ module Grape
         @type     = opts[:type]
         @declared_params = []
 
+        @api.unset(:namespace_stackable, :params)
+
         instance_eval(&block) if block_given?
 
         configure_declared_params
