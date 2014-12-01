@@ -292,7 +292,7 @@ XML
       get '/example?callback=abcDef'
       expect(last_response.status).to eq(200)
       expect(last_response.headers['Content-type']).to eq("application/javascript")
-      expect(last_response.body).to eq('abcDef({"example":{"name":"johnnyiller"}})')
+      expect(last_response.body).to include 'abcDef({"example":{"name":"johnnyiller"}})'
     end
 
     context "present with multiple entities" do
