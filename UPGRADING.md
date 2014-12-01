@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.9.1
+### Upgrading to >= 0.10.0
 
 #### Changes to content-types
 
@@ -12,7 +12,6 @@ The following content-types have been removed:
 * jsonapi (application/jsonapi)
 
 This is because they have never been properly supported.
-
 
 #### Changes to desc
 
@@ -33,22 +32,21 @@ Former:
   get nil, http_codes: [
             [401, 'Unauthorized', API::Entities::BaseError],
             [404, 'not found', API::Entities::Error]
-  
+
   ] do
-  
+
 ```
 
 Now:
 
 ```ruby
-
 desc "some descs" do
   detail 'more details'
   params  API::Entities::Status.documentation
   success API::Entities::Entity
   failure [
             [401, 'Unauthorized', API::Entities::BaseError],
-            [404, 'not found', API::Entities::Error]  
+            [404, 'not found', API::Entities::Error]
           ]
     named 'a name'
     headers [XAuthToken: {
@@ -61,17 +59,92 @@ desc "some descs" do
              }
             ]
 end
-  
-
 ```
 
-### Upgrading to >= 0.9.0 
+#### Changes to Route Options and Descriptions
+
+A common hack to extend Grape with custom DSL methods was manipulating `@last_description`.
+
+``` ruby
+module Grape
+  module Extensions
+    module SortExtension
+      def sort(value)
+        @last_description ||= {}
+        @last_description[:sort] ||= {}
+        @last_description[:sort].merge! value
+        value
+      end
+    end
+
+    Grape::API.extend self
+  end
+end
+```
+
+You could access this value from within the API with `route.route_sort` or, more generally, via `env['api.endpoint'].options[:route_options][:sort]`.
+
+This will no longer work, use the documented and supported `route_setting`.
+
+``` ruby
+module Grape
+  module Extensions
+    module SortExtension
+      def sort(value)
+        route_setting :sort, sort: value
+        value
+      end
+    end
+
+    Grape::API.extend self
+  end
+end
+```
+
+To retrieve this value at runtime from within an API, use `env['api.endpoint'].route_setting(:sort)` and when introspecting a mounted API, use `route.route_settings[:sort]`.
+
+#### Accessing Class Variables from Helpers
+
+It used to be possible to fetch an API class variable from a helper function. For example:
+
+```ruby
+@@static_variable = 42
+
+helpers do
+  def get_static_variable
+    @@static_variable
+  end
+end
+
+get do
+  get_static_variable
+end
+```
+
+This will no longer work. Use a class method instead of a helper.
+
+```ruby
+@@static_variable = 42
+
+def self.get_static_variable
+  @@static_variable
+end
+
+get do
+  get_static_variable
+end
+```
+
+For more information see [#836](https://github.com/intridea/grape/issues/836).
+
+
+### Upgrading to >= 0.9.0
 
 #### Changes in Authentication
 
 The following middleware classes have been removed:
 
-* `Grape::Middleware::Auth::Basic` 
+* `Grape::Middleware::Auth::Basic`
 * `Grape::Middleware::Auth::Digest`
 * `Grape::Middleware::Auth::OAuth2`
 
@@ -84,7 +157,7 @@ When you use theses classes directly like:
        use Grape::Middleware::Auth::OAuth2,
            token_class: 'AccessToken',
            parameter: %w(access_token api_key)
-           
+
 ```
 
 you have to replace these classes.
