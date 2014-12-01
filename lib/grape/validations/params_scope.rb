@@ -97,6 +97,7 @@ module Grape
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
         coerce_type = validations[:coerce]
+
         doc_attrs[:type] = coerce_type.to_s if coerce_type
 
         desc = validations.delete(:desc) || validations.delete(:description)
@@ -111,6 +112,8 @@ module Grape
         doc_attrs[:values] = values if values
 
         values = values.call if values.is_a?(Proc)
+
+        coerce_type = values.first.class if values && coerce_type == Array && !values.empty?
 
         # default value should be present in values array, if both exist
         if default && values && !values.include?(default)
