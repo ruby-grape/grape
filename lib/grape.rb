@@ -100,7 +100,6 @@ module Grape
   end
 
   module Util
-    autoload :LoggingValue,      'grape/util/logging_value'
     autoload :InheritableValues, 'grape/util/inheritable_values'
     autoload :StackableValues,   'grape/util/stackable_values'
     autoload :InheritableSetting, 'grape/util/inheritable_setting'

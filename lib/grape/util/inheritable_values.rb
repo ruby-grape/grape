@@ -6,7 +6,7 @@ module Grape
 
       def initialize(inherited_values = {})
         self.inherited_values = inherited_values
-        self.new_values = LoggingValue.new
+        self.new_values = {}
       end
 
       def [](name)
@@ -44,17 +44,7 @@ module Grape
       protected
 
       def values
-        result = LoggingValue.new
-
-        @inherited_values.keys.each_with_object(result) do |key, res|
-          begin
-            res[key] = @inherited_values[key].clone
-          rescue
-            res[key] = @inherited_values[key]
-          end
-        end
-
-        result.merge(@new_values)
+        @inherited_values.merge(@new_values)
       end
     end
   end
