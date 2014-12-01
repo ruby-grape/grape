@@ -1,6 +1,5 @@
 module Grape
   module Util
-    require 'pp'
     class StackableValues
       attr_accessor :inherited_values
       attr_reader :new_values
