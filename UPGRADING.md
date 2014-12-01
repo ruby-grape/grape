@@ -137,6 +137,11 @@ end
 
 For more information see [#836](https://github.com/intridea/grape/issues/836).
 
+### Changes to Custom Validators
+
+To implement a custom validator, you need to inherit from `Grape::Validations::Base` instead of `Grape::Validations::Validator`.
+
+For more information see [Custom Validators](https://github.com/intridea/grape#custom-validators) in the documentation.
 
 ### Upgrading to >= 0.9.0
 
