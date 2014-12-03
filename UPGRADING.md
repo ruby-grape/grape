@@ -137,11 +137,44 @@ end
 
 For more information see [#836](https://github.com/intridea/grape/issues/836).
 
-### Changes to Custom Validators
+#### Changes to Custom Validators
 
 To implement a custom validator, you need to inherit from `Grape::Validations::Base` instead of `Grape::Validations::Validator`.
 
 For more information see [Custom Validators](https://github.com/intridea/grape#custom-validators) in the documentation.
+
+#### Changes to routes when using `format`
+
+Routes will no longer get file-type suffixes added if you declare a single API `format`. For example,
+
+```ruby
+class API < Grape::API
+  format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+Pre-0.9.1, this would respond with JSON to `/hello`, `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+Now, this will only respond with JSON to `/hello`, but will be a 404 when trying to access `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+If you declare further `content_type`s, this behavior will be circumvented. For example, the following API will respond with JSON to `/hello`, `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+```ruby
+class API < Grape::API
+  format :json
+  content_type :json, 'application/json'
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+See the [the updated API Formats documentation](https://github.com/intridea/grape#api-formats) and [#809](https://github.com/intridea/grape/pull/809) for more info.
 
 ### Upgrading to >= 0.9.0
 
