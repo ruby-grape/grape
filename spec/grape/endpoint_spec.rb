@@ -613,6 +613,26 @@ describe Grape::Endpoint do
       end
     end
 
+    describe "hash array with default value" do
+      it "is nil when value is not provided" do
+        subject.params do
+          optional :my_simple_value, type: String
+          optional :my_array, type: Array do
+            requires :foo, default: "bar"
+          end
+        end
+        subject.post("/array") do
+          {
+            my_array: params[:my_array].nil?,
+            my_simple_value: params[:my_simple_value].nil?
+          }.to_json
+        end
+
+        post "/array"
+
+        expect(JSON.parse(last_response.body)).to eq(my_array: true, my_simple_value: true)
+      end
+    end
   end
 
   describe '#error!' do
