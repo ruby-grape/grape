@@ -275,8 +275,11 @@ XML
       entity.root "examples", "example"
       entity.expose :name
 
-      # Rack::JSONP expects a standard JSON response
+      # Rack::JSONP expects a standard JSON response in UTF-8 format
       subject.format :json
+      subject.formatter :json, lambda { |object, _|
+        object.to_json.encode('utf-8')
+      }
 
       subject.get '/example' do
         c = Class.new do
