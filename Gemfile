@@ -8,10 +8,3 @@ group :development, :test do
   gem 'guard-rspec'
   gem 'guard-rubocop'
 end
-
-platforms :rbx do
-  gem 'rubysl'
-  gem 'rubinius-developer_tools'
-  gem 'racc'
-end
-
