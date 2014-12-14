@@ -21,20 +21,18 @@ Former:
 
 ```ruby
   desc "some descs",
-           detail: 'more details',
-           entity: API::Entities::Entity,
-           params:  API::Entities::Status.documentation,
-           named: 'a name',
-           headers :[XAuthToken: {
-                description: 'Valdates your identity',
-                required: true
-              }
+    detail: 'more details',
+    entity: API::Entities::Entity,
+    params:  API::Entities::Status.documentation,
+    named: 'a name',
+    headers: [XAuthToken: {
+      description: 'Valdates your identity',
+      required: true
+    }
   get nil, http_codes: [
-            [401, 'Unauthorized', API::Entities::BaseError],
-            [404, 'not found', API::Entities::Error]
-
+    [401, 'Unauthorized', API::Entities::BaseError],
+    [404, 'not found', API::Entities::Error]
   ] do
-
 ```
 
 Now:
@@ -45,19 +43,20 @@ desc "some descs" do
   params  API::Entities::Status.documentation
   success API::Entities::Entity
   failure [
-            [401, 'Unauthorized', API::Entities::BaseError],
-            [404, 'not found', API::Entities::Error]
-          ]
-    named 'a name'
-    headers [XAuthToken: {
-               description: 'Valdates your identity',
-               required: true
-             },
-             XOptionalHeader: {
-               description: 'Not really needed',
-              required: false
-             }
-            ]
+    [401, 'Unauthorized', API::Entities::BaseError],
+    [404, 'not found', API::Entities::Error]
+  ]
+  named 'a name'
+  headers [
+    XAuthToken: {
+      description: 'Valdates your identity',
+      required: true
+    },
+    XOptionalHeader: {
+      description: 'Not really needed',
+      required: false
+    }
+  ]
 end
 ```
 
