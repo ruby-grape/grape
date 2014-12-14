@@ -67,7 +67,8 @@
   - [Writing Tests with Rails](#writing-tests-with-rails)
   - [Stubbing Helpers](#stubbing-helpers)
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
-  - [Rails 3.x](#rails-3x)
+  - [Reloading in Rack Applications](#reloading-in-rack-applications)
+  - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
 - [Contributing to Grape](#contributing-to-grape)
 - [Hacking on Grape](#hacking-on-grape)
@@ -2233,7 +2234,11 @@ end
 
 ## Reloading API Changes in Development
 
-### Rails 3.x
+### Reloading in Rack Applications
+
+Use [grape-reload](https://github.com/AlexYankee/grape-reload).
+
+### Reloading in Rails Applications
 
 Add API paths to `config/application.rb`.
 
