@@ -23,7 +23,7 @@ Former:
   desc "some descs",
            detail: 'more details',
            entity: API::Entities::Entity,
-           params;  API::Entities::Status.documentation,
+           params:  API::Entities::Status.documentation,
            named: 'a name',
            headers :[XAuthToken: {
                 description: 'Valdates your identity',
