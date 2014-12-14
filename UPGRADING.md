@@ -23,7 +23,7 @@ Former:
   desc "some descs",
     detail: 'more details',
     entity: API::Entities::Entity,
-    params:  API::Entities::Status.documentation,
+    params: API::Entities::Status.documentation,
     named: 'a name',
     headers: [XAuthToken: {
       description: 'Valdates your identity',
@@ -40,7 +40,7 @@ Now:
 ```ruby
 desc "some descs" do
   detail 'more details'
-  params  API::Entities::Status.documentation
+  params API::Entities::Status.documentation
   success API::Entities::Entity
   failure [
     [401, 'Unauthorized', API::Entities::BaseError],
@@ -141,6 +141,20 @@ For more information see [#836](https://github.com/intridea/grape/issues/836).
 To implement a custom validator, you need to inherit from `Grape::Validations::Base` instead of `Grape::Validations::Validator`.
 
 For more information see [Custom Validators](https://github.com/intridea/grape#custom-validators) in the documentation.
+
+#### Changes to Raising Grape::Exceptions::Validation
+
+In previous versions raising `Grape::Exceptions::Validation` required a single `param`.
+
+```ruby
+raise Grape::Exceptions::Validation, param: :id, message_key: :presence
+```
+
+The `param` argument has been deprecated and is now an array of `params`, accepting multiple values.
+
+```ruby
+raise Grape::Exceptions::Validation, params: [:id], message_key: :presence
+```
 
 #### Changes to routes when using `format`
 
