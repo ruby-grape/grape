@@ -11,14 +11,12 @@ describe Grape::Validations::CoerceValidator do
   end
 
   describe 'coerce' do
-
-    context "i18n" do
-
+    context 'i18n' do
       after :each do
         I18n.locale = :en
       end
 
-      it "i18n error on malformed input" do
+      it 'i18n error on malformed input' do
         I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
         I18n.reload!
         I18n.locale = 'zh-CN'.to_sym
@@ -47,7 +45,6 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('age is invalid')
       end
-
     end
 
     it 'error on malformed input' do
@@ -75,11 +72,11 @@ describe Grape::Validations::CoerceValidator do
         'array int works'
       end
 
-      get 'array', ids: ['1', '2', 'az']
+      get 'array', ids: %w(1 2 az)
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('ids is invalid')
 
-      get 'array', ids: ['1', '2', '890']
+      get 'array', ids: %w(1 2 890)
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('array int works')
     end
@@ -101,7 +98,7 @@ describe Grape::Validations::CoerceValidator do
           'complex works'
         end
 
-        get '/user', user: "32"
+        get '/user', user: '32'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('user is invalid')
 
@@ -120,7 +117,7 @@ describe Grape::Validations::CoerceValidator do
           params[:int].class
         end
 
-        get '/int', int: "45"
+        get '/int', int: '45'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Fixnum')
       end
@@ -133,7 +130,7 @@ describe Grape::Validations::CoerceValidator do
           params[:arry][0].class
         end
 
-        get '/array', arry: ['1', '2', '3']
+        get '/array', arry: %w(1 2 3)
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Fixnum')
       end
@@ -199,7 +196,7 @@ describe Grape::Validations::CoerceValidator do
           params[:integers][:int].class
         end
 
-        get '/int', integers: { int: "45" }
+        get '/int', integers: { int: '45' }
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Fixnum')
       end

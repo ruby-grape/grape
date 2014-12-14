@@ -4,7 +4,7 @@ module Grape
       class << self
         def call(object, env)
           return object.to_xml if object.respond_to?(:to_xml)
-          raise Grape::Exceptions::InvalidFormatter.new(object.class, 'xml')
+          fail Grape::Exceptions::InvalidFormatter.new(object.class, 'xml')
         end
       end
     end

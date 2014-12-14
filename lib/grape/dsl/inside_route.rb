@@ -24,7 +24,7 @@ module Grape
         end
 
         unless declared_params
-          raise ArgumentError, "Tried to filter for declared parameters but none exist."
+          fail ArgumentError, 'Tried to filter for declared parameters but none exist.'
         end
 
         if params.is_a? Array
@@ -79,14 +79,14 @@ module Grape
         if merged_options[:permanent]
           status 301
         else
-          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
+          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != 'GET'
             status 303
           else
             status 302
           end
         end
-        header "Location", url
-        body ""
+        header 'Location', url
+        body ''
       end
 
       # Set or retrieve the HTTP status code.
@@ -208,7 +208,7 @@ module Grape
       #     route.route_description
       #   end
       def route
-        env["rack.routing_args"][:route_info]
+        env['rack.routing_args'][:route_info]
       end
 
       def entity_class_for_obj(object, options)

@@ -55,7 +55,7 @@ module Grape
         end
         required_fields.each do |field|
           field_opts = opts[:using][field]
-          raise ArgumentError, "required field not exist: #{field}" unless field_opts
+          fail ArgumentError, "required field not exist: #{field}" unless field_opts
           requires(field, field_opts)
         end
         optional_fields.each do |field|
@@ -115,7 +115,7 @@ module Grape
 
         # default value should be present in values array, if both exist
         if default && values && !values.include?(default)
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
+          fail Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
         end
 
         # type should be compatible with values array, if both exist
@@ -152,14 +152,14 @@ module Grape
           value = validator_class.new(attrs, options, doc_attrs[:required], self)
           @api.namespace_stackable(:validations, value)
         else
-          raise Grape::Exceptions::UnknownValidator.new(type)
+          fail Grape::Exceptions::UnknownValidator.new(type)
         end
       end
 
       def validate_value_coercion(coerce_type, values)
         coerce_type = coerce_type.first if coerce_type.kind_of?(Array)
         if values.any? { |v| !v.kind_of?(coerce_type) }
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+          fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
       end
     end

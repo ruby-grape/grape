@@ -89,7 +89,7 @@ module Grape
       end
 
       describe '#status' do
-        ['GET', 'PUT', 'DELETE', 'OPTIONS'].each do |method|
+        %w(GET PUT DELETE OPTIONS).each do |method|
           it 'defaults to 200 on GET' do
             request = Grape::Request.new(Rack::MockRequest.env_for('/', method: method))
             expect(subject).to receive(:request).and_return(request)
@@ -234,7 +234,6 @@ module Grape
                 expect(subject.body[:dummy2]).to eq 'dummy2'
               end
             end
-
           end
         end
       end

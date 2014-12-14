@@ -2,11 +2,11 @@ require 'spec_helper'
 require 'ostruct'
 
 describe Grape::Exceptions::ValidationErrors do
-  let(:validation_message) { "FooBar is invalid" }
+  let(:validation_message) { 'FooBar is invalid' }
   let(:validation_error) { OpenStruct.new(params: [validation_message]) }
 
-  context "message" do
-    context "is not repeated" do
+  context 'message' do
+    context 'is not repeated' do
       let(:error) do
         described_class.new(errors: [validation_error, validation_error])
       end
@@ -41,8 +41,8 @@ describe Grape::Exceptions::ValidationErrors do
       get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
       expect(last_response.status).to eq(400)
       expect(JSON.parse(last_response.body)).to eq([
-        "params" => ["beer", "wine"],
-        "messages" => ["are mutually exclusive"]
+        'params' => %w(beer wine),
+        'messages' => ['are mutually exclusive']
       ])
     end
   end

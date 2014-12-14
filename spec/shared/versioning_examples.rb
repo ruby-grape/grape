@@ -6,7 +6,7 @@ shared_examples_for 'versioning' do
       "Version: #{request.env['api.version'] }"
     end
     versioned_get '/hello', 'v1', macro_options
-    expect(last_response.body).to eql "Version: v1"
+    expect(last_response.body).to eql 'Version: v1'
   end
 
   it 'adds the prefix before the API version' do
@@ -17,18 +17,18 @@ shared_examples_for 'versioning' do
       "Version: #{request.env['api.version'] }"
     end
     versioned_get '/hello', 'v1', macro_options.merge(prefix: 'api')
-    expect(last_response.body).to eql "Version: v1"
+    expect(last_response.body).to eql 'Version: v1'
   end
 
   it 'is able to specify version as a nesting' do
     subject.version 'v2', macro_options
     subject.get '/awesome' do
-      "Radical"
+      'Radical'
     end
 
     subject.version 'v1', macro_options do
       get '/legacy' do
-        "Totally"
+        'Totally'
       end
     end
 
@@ -46,7 +46,7 @@ shared_examples_for 'versioning' do
   it 'is able to specify multiple versions' do
     subject.version 'v1', 'v2', macro_options
     subject.get 'awesome' do
-      "I exist"
+      'I exist'
     end
 
     versioned_get '/awesome', 'v1', macro_options
@@ -68,7 +68,7 @@ shared_examples_for 'versioning' do
 
         subject.version 'v1', macro_options do
           get 'version' do
-            "version " + request.env['api.version']
+            'version ' + request.env['api.version']
           end
         end
 
@@ -92,7 +92,7 @@ shared_examples_for 'versioning' do
 
         subject.version 'v1', macro_options do
           get 'version' do
-            "version " + request.env['api.version']
+            'version ' + request.env['api.version']
           end
         end
 
@@ -117,5 +117,4 @@ shared_examples_for 'versioning' do
     versioned_get '/api_version_with_version_param?version=1', 'v1', macro_options
     expect(last_response.body).to eql '1'
   end
-
 end

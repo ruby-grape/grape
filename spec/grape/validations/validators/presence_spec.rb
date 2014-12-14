@@ -10,22 +10,22 @@ describe Grape::Validations::PresenceValidator do
     subject
   end
 
-  context "without validation" do
+  context 'without validation' do
     before do
       subject.resource :bacons do
         get do
-          "All the bacon"
+          'All the bacon'
         end
       end
     end
     it 'does not validate for any params' do
-      get "/bacons"
+      get '/bacons'
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq("All the bacon".to_json)
+      expect(last_response.body).to eq('All the bacon'.to_json)
     end
   end
 
-  context "with a required regexp parameter supplied in the POST body" do
+  context 'with a required regexp parameter supplied in the POST body' do
     before do
       subject.format :json
       subject.params do
@@ -52,13 +52,13 @@ describe Grape::Validations::PresenceValidator do
     end
   end
 
-  context "with a required non-empty string" do
+  context 'with a required non-empty string' do
     before do
       subject.params do
         requires :email, type: String, regexp: /^\S+$/
       end
       subject.get do
-        "Hello"
+        'Hello'
       end
     end
     it 'requires when missing' do
@@ -67,24 +67,24 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.body).to eq('{"error":"email is missing, email is invalid"}')
     end
     it 'requires when empty' do
-      get '/', email: ""
+      get '/', email: ''
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"email is invalid"}')
     end
-    it "valid when set" do
-      get '/', email: "bob@example.com"
+    it 'valid when set' do
+      get '/', email: 'bob@example.com'
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq("Hello".to_json)
+      expect(last_response.body).to eq('Hello'.to_json)
     end
   end
 
-  context "with required parameters and no type" do
+  context 'with required parameters and no type' do
     before do
       subject.params do
         requires :name, :company
       end
       subject.get do
-        "Hello"
+        'Hello'
       end
     end
     it 'validates name, company' do
@@ -92,17 +92,17 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"name is missing"}')
 
-      get '/', name: "Bob"
+      get '/', name: 'Bob'
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"company is missing"}')
 
-      get '/', name: "Bob", company: "TestCorp"
+      get '/', name: 'Bob', company: 'TestCorp'
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq("Hello".to_json)
+      expect(last_response.body).to eq('Hello'.to_json)
     end
   end
 
-  context "with nested parameters" do
+  context 'with nested parameters' do
     before do
       subject.params do
         requires :user, type: Hash do
@@ -111,7 +111,7 @@ describe Grape::Validations::PresenceValidator do
         end
       end
       subject.get '/nested' do
-        "Nested"
+        'Nested'
       end
     end
     it 'validates nested parameters' do
@@ -119,17 +119,17 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"user is missing, user[first_name] is missing, user[last_name] is missing"}')
 
-      get '/nested', user: { first_name: "Billy" }
+      get '/nested', user: { first_name: 'Billy' }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"user[last_name] is missing"}')
 
-      get '/nested', user: { first_name: "Billy", last_name: "Bob" }
+      get '/nested', user: { first_name: 'Billy', last_name: 'Bob' }
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq("Nested".to_json)
+      expect(last_response.body).to eq('Nested'.to_json)
     end
   end
 
-  context "with triply nested required parameters" do
+  context 'with triply nested required parameters' do
     before do
       subject.params do
         requires :admin, type: Hash do
@@ -143,7 +143,7 @@ describe Grape::Validations::PresenceValidator do
         end
       end
       subject.get '/nested_triple' do
-        "Nested triple"
+        'Nested triple'
       end
     end
     it 'validates triple nested parameters' do
@@ -151,29 +151,29 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to include '{"error":"admin is missing'
 
-      get '/nested_triple', user: { first_name: "Billy" }
+      get '/nested_triple', user: { first_name: 'Billy' }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to include '{"error":"admin is missing'
 
-      get '/nested_triple', admin: { super: { first_name: "Billy" } }
+      get '/nested_triple', admin: { super: { first_name: 'Billy' } }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"admin[admin_name] is missing, admin[super][user] is missing, admin[super][user][first_name] is missing, admin[super][user][last_name] is missing"}')
 
-      get '/nested_triple', super: { user: { first_name: "Billy", last_name: "Bob" } }
+      get '/nested_triple', super: { user: { first_name: 'Billy', last_name: 'Bob' } }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to include '{"error":"admin is missing'
 
-      get '/nested_triple', admin: { super: { user: { first_name: "Billy" } } }
+      get '/nested_triple', admin: { super: { user: { first_name: 'Billy' } } }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"admin[admin_name] is missing, admin[super][user][last_name] is missing"}')
 
-      get '/nested_triple', admin: { admin_name: 'admin', super: { user: { first_name: "Billy" } } }
+      get '/nested_triple', admin: { admin_name: 'admin', super: { user: { first_name: 'Billy' } } }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"admin[super][user][last_name] is missing"}')
 
-      get '/nested_triple', admin: { admin_name: 'admin', super: { user: { first_name: "Billy", last_name: "Bob" } } }
+      get '/nested_triple', admin: { admin_name: 'admin', super: { user: { first_name: 'Billy', last_name: 'Bob' } } }
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq("Nested triple".to_json)
+      expect(last_response.body).to eq('Nested triple'.to_json)
     end
   end
 end

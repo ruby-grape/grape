@@ -17,7 +17,7 @@ module Grape
       end
 
       def []=(name, value)
-        raise if @froozen_values.key? name
+        fail if @froozen_values.key? name
         @new_values[name] ||= []
         @new_values[name].push value
       end

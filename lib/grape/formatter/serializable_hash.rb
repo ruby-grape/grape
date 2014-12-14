@@ -19,7 +19,7 @@ module Grape
           if object.respond_to? :serializable_hash
             object.serializable_hash
           elsif object.kind_of?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false)
-            object.map { |o| o.serializable_hash }
+            object.map(&:serializable_hash)
           elsif object.kind_of?(Hash)
             object.inject({}) do |h, (k, v)|
               h[k] = serialize(v)

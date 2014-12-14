@@ -2,65 +2,64 @@ require 'spec_helper'
 
 module Grape
   describe Path do
-
-    describe "#initialize" do
-      it "remembers the path" do
+    describe '#initialize' do
+      it 'remembers the path' do
         path = Path.new('/:id', anything, anything)
         expect(path.raw_path).to eql('/:id')
       end
 
-      it "remembers the namespace" do
+      it 'remembers the namespace' do
         path = Path.new(anything, '/users', anything)
         expect(path.namespace).to eql('/users')
       end
 
-      it "remebers the settings" do
+      it 'remebers the settings' do
         path = Path.new(anything, anything, foo: 'bar')
         expect(path.settings).to eql(foo: 'bar')
       end
     end
 
-    describe "#mount_path" do
-      it "is nil when no mount path setting exists" do
+    describe '#mount_path' do
+      it 'is nil when no mount path setting exists' do
         path = Path.new(anything, anything, {})
         expect(path.mount_path).to be_nil
       end
 
-      it "is nil when the mount path is nil" do
+      it 'is nil when the mount path is nil' do
         path = Path.new(anything, anything, mount_path: nil)
         expect(path.mount_path).to be_nil
       end
 
-      it "splits the mount path" do
-        path = Path.new(anything, anything, mount_path: ['foo', 'bar'])
-        expect(path.mount_path).to eql(['foo', 'bar'])
+      it 'splits the mount path' do
+        path = Path.new(anything, anything, mount_path: %w(foo bar))
+        expect(path.mount_path).to eql(%w(foo bar))
       end
     end
 
-    describe "#root_prefix" do
-      it "is nil when no root prefix setting exists" do
+    describe '#root_prefix' do
+      it 'is nil when no root prefix setting exists' do
         path = Path.new(anything, anything, {})
         expect(path.root_prefix).to be_nil
       end
 
-      it "is nil when the mount path is nil" do
+      it 'is nil when the mount path is nil' do
         path = Path.new(anything, anything, root_prefix: nil)
         expect(path.root_prefix).to be_nil
       end
 
-      it "splits the mount path" do
+      it 'splits the mount path' do
         path = Path.new(anything, anything, root_prefix: 'hello/world')
-        expect(path.root_prefix).to eql(['hello', 'world'])
+        expect(path.root_prefix).to eql(%w(hello world))
       end
     end
 
-    describe "#uses_path_versioning?" do
-      it "is false when the version setting is nil" do
+    describe '#uses_path_versioning?' do
+      it 'is false when the version setting is nil' do
         path = Path.new(anything, anything, version: nil)
         expect(path.uses_path_versioning?).to be false
       end
 
-      it "is false when the version option is header" do
+      it 'is false when the version option is header' do
         path = Path.new(
           anything,
           anything,
@@ -71,7 +70,7 @@ module Grape
         expect(path.uses_path_versioning?).to be false
       end
 
-      it "is true when the version option is path" do
+      it 'is true when the version option is path' do
         path = Path.new(
           anything,
           anything,
@@ -83,70 +82,70 @@ module Grape
       end
     end
 
-    describe "#has_namespace?" do
-      it "is false when the namespace is nil" do
+    describe '#has_namespace?' do
+      it 'is false when the namespace is nil' do
         path = Path.new(anything, nil, anything)
         expect(path).not_to have_namespace
       end
 
-      it "is false when the namespace starts with whitespace" do
+      it 'is false when the namespace starts with whitespace' do
         path = Path.new(anything, ' /foo', anything)
         expect(path).not_to have_namespace
       end
 
-      it "is false when the namespace is the root path" do
+      it 'is false when the namespace is the root path' do
         path = Path.new(anything, '/', anything)
         expect(path).not_to have_namespace
       end
 
-      it "is true otherwise" do
+      it 'is true otherwise' do
         path = Path.new(anything, '/world', anything)
         expect(path).to have_namespace
       end
     end
 
-    describe "#has_path?" do
-      it "is false when the path is nil" do
+    describe '#has_path?' do
+      it 'is false when the path is nil' do
         path = Path.new(nil, anything, anything)
         expect(path).not_to have_path
       end
 
-      it "is false when the path starts with whitespace" do
+      it 'is false when the path starts with whitespace' do
         path = Path.new(' /foo', anything, anything)
         expect(path).not_to have_path
       end
 
-      it "is false when the path is the root path" do
+      it 'is false when the path is the root path' do
         path = Path.new('/', anything, anything)
         expect(path).not_to have_path
       end
 
-      it "is true otherwise" do
+      it 'is true otherwise' do
         path = Path.new('/hello', anything, anything)
         expect(path).to have_path
       end
     end
 
-    describe "#path" do
-      context "mount_path" do
-        it "is not included when it is nil" do
+    describe '#path' do
+      context 'mount_path' do
+        it 'is not included when it is nil' do
           path = Path.new(nil, nil, mount_path: '/foo/bar')
           expect(path.path).to eql '/foo/bar'
         end
 
-        it "is included when it is not nil" do
+        it 'is included when it is not nil' do
           path = Path.new(nil, nil, {})
           expect(path.path).to eql('/')
         end
       end
 
-      context "root_prefix" do
-        it "is not included when it is nil" do
+      context 'root_prefix' do
+        it 'is not included when it is nil' do
           path = Path.new(nil, nil, {})
           expect(path.path).to eql('/')
         end
 
-        it "is included after the mount path" do
+        it 'is included after the mount path' do
           path = Path.new(
             nil,
             nil,
@@ -158,7 +157,7 @@ module Grape
         end
       end
 
-      it "uses the namespace after the mount path and root prefix" do
+      it 'uses the namespace after the mount path and root prefix' do
         path = Path.new(
           nil,
           'namespace',
@@ -169,7 +168,7 @@ module Grape
         expect(path.path).to eql('/foo/hello/namespace')
       end
 
-      it "uses the raw path after the namespace" do
+      it 'uses the raw path after the namespace' do
         path = Path.new(
           'raw_path',
           'namespace',
@@ -181,9 +180,9 @@ module Grape
       end
     end
 
-    describe "#suffix" do
-      context "when using a specific format" do
-        it "is empty" do
+    describe '#suffix' do
+      context 'when using a specific format' do
+        it 'is empty' do
           path = Path.new(nil, nil, {})
           allow(path).to receive(:uses_specific_format?) { true }
 
@@ -191,7 +190,7 @@ module Grape
         end
       end
 
-      context "when path versioning is used" do
+      context 'when path versioning is used' do
         it "includes a '/'" do
           path = Path.new(nil, nil, {})
           allow(path).to receive(:uses_specific_format?) { false }
@@ -201,7 +200,7 @@ module Grape
         end
       end
 
-      context "when path versioning is not used" do
+      context 'when path versioning is not used' do
         it "does not include a '/' when the path has a namespace" do
           path = Path.new(nil, 'namespace', {})
           allow(path).to receive(:uses_specific_format?) { false }
@@ -228,8 +227,8 @@ module Grape
       end
     end
 
-    describe "#path_with_suffix" do
-      it "combines the path and suffix" do
+    describe '#path_with_suffix' do
+      it 'combines the path and suffix' do
         path = Path.new(nil, nil, {})
         allow(path).to receive(:path) { '/the/path' }
         allow(path).to receive(:suffix) { 'suffix' }
@@ -237,8 +236,8 @@ module Grape
         expect(path.path_with_suffix).to eql('/the/pathsuffix')
       end
 
-      context "when using a specific format" do
-        it "does not have a suffix" do
+      context 'when using a specific format' do
+        it 'does not have a suffix' do
           path = Path.new(nil, nil, {})
           allow(path).to receive(:path) { '/the/path' }
           allow(path).to receive(:uses_specific_format?) { true }
@@ -247,6 +246,5 @@ module Grape
         end
       end
     end
-
   end
 end

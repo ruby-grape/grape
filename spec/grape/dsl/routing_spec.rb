@@ -46,7 +46,7 @@ module Grape
           app1 = Class.new(Grape::API)
           app2 = Class.new(Grape::API)
           app2.get '/nice' do
-            "play"
+            'play'
           end
 
           subject.mount app1 => '/app1'
@@ -57,7 +57,6 @@ module Grape
           expect(app1.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1'])
 
           expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1', '/app2'])
-
         end
       end
       xdescribe '.route' do

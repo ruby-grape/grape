@@ -28,7 +28,7 @@ module Grape
           @problem = problem(key, attributes)
           @summary = summary(key, attributes)
           @resolution = resolution(key, attributes)
-          [["Problem", @problem], ["Summary", @summary], ["Resolution", @resolution]].reduce("") do |message, detail_array|
+          [['Problem', @problem], ['Summary', @summary], ['Resolution', @resolution]].reduce('') do |message, detail_array|
             message <<  "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
             message
           end
@@ -52,7 +52,7 @@ module Grape
       def translate_attributes(keys, options = {})
         keys.map do |key|
           translate("#{BASE_ATTRIBUTES_KEY}.#{key}", { default: key }.merge(options))
-        end.join(", ")
+        end.join(', ')
       end
 
       def translate_attribute(key, options = {})

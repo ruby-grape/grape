@@ -4,11 +4,11 @@ describe Grape::Middleware::Formatter do
   subject { Grape::Middleware::Formatter.new(app) }
   before { allow(subject).to receive(:dup).and_return(subject) }
 
-  let(:app) { lambda { |env| [200, {}, [@body || { "foo" => "bar" }]] } }
+  let(:app) { lambda { |env| [200, {}, [@body || { 'foo' => 'bar' }]] } }
 
   context 'serialization' do
     it 'looks at the bodies for possibly serializable data' do
-      @body = { "abc" => "def" }
+      @body = { 'abc' => 'def' }
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
       bodies.each { |b| expect(b).to eq(MultiJson.dump(@body)) }
     end
@@ -36,10 +36,10 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'calls #to_xml if the content type is xml' do
-      @body = "string"
+      @body = 'string'
       @body.instance_eval do
         def to_xml
-          "<bar/>"
+          '<bar/>'
         end
       end
 
@@ -54,24 +54,23 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'rescues formatter-specific exceptions' do
-      allow(formatter).to receive(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
+      allow(formatter).to receive(:call) { fail Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
 
-      expect {
+      expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
-      }.to_not raise_error
+      end.to_not raise_error
     end
 
     it 'does not rescue other exceptions' do
-      allow(formatter).to receive(:call) { raise StandardError }
+      allow(formatter).to receive(:call) { fail StandardError }
 
-      expect {
+      expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
-      }.to raise_error
+      end.to raise_error
     end
   end
 
   context 'detection' do
-
     it 'uses the xml extension if one is provided' do
       subject.call('PATH_INFO' => '/info.xml')
       expect(subject.env['api.format']).to eq(:xml)
@@ -186,8 +185,8 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'input' do
-    ["POST", "PATCH", "PUT", "DELETE"].each do |method|
-      ["application/json", "application/json; charset=utf-8"].each do |content_type|
+    %w(POST PATCH PUT DELETE).each do |method|
+      ['application/json', 'application/json; charset=utf-8'].each do |content_type|
         context content_type do
           it 'parses the body from #{method} and copies values into rack.request.form_hash' do
             io = StringIO.new('{"is_boolean":true,"string":"thing"}')
@@ -215,7 +214,7 @@ describe Grape::Middleware::Formatter do
         expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
         expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
-      it "rewinds IO" do
+      it 'rewinds IO' do
         io = StringIO.new('{"is_boolean":true,"string":"thing"}')
         io.read
         subject.call(
@@ -254,5 +253,4 @@ describe Grape::Middleware::Formatter do
       end
     end
   end
-
 end

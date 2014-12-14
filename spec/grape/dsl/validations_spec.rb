@@ -33,7 +33,7 @@ module Grape
         end
 
         it 'evaluates block' do
-          expect { subject.params { raise 'foo' } }.to raise_error RuntimeError, 'foo'
+          expect { subject.params { fail 'foo' } }.to raise_error RuntimeError, 'foo'
         end
       end
 

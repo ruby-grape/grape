@@ -86,11 +86,11 @@ module Grape
 
       describe '.content_types' do
         it 'returns all content types' do
-          expect(subject.content_types).to eq(xml: "application/xml",
-                                              serializable_hash: "application/json",
-                                              json: "application/json",
-                                              txt: "text/plain",
-                                              binary: "application/octet-stream")
+          expect(subject.content_types).to eq(xml: 'application/xml',
+                                              serializable_hash: 'application/json',
+                                              json: 'application/json',
+                                              txt: 'text/plain',
+                                              binary: 'application/octet-stream')
         end
       end
 

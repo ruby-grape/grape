@@ -26,21 +26,20 @@ describe Grape::Validations::ParamsScope do
   end
 
   context 'array without coerce type explicitly given' do
-
     it 'sets the type based on first element' do
       subject.params do
-        requires :periods, type: Array, values: -> { ['day', 'month'] }
+        requires :periods, type: Array, values: -> { %w(day month) }
       end
       subject.get('/required') { 'required works' }
 
-      get '/required', periods: ['day', 'month']
+      get '/required', periods: %w(day month)
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('required works')
     end
 
     it 'fails to call API without Array type' do
       subject.params do
-        requires :periods, type: Array, values: -> { ['day', 'month'] }
+        requires :periods, type: Array, values: -> { %w(day month) }
       end
       subject.get('/required') { 'required works' }
 
@@ -50,9 +49,9 @@ describe Grape::Validations::ParamsScope do
     end
 
     it 'raises exception when values are of different type' do
-      expect {
-        subject.params { requires :numbers, type: Array, values: -> { [1, "definitely not a number", 3] } }
-      }.to raise_error Grape::Exceptions::IncompatibleOptionValues
+      expect do
+        subject.params { requires :numbers, type: Array, values: -> { [1, 'definitely not a number', 3] } }
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
     end
   end
 end

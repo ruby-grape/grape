@@ -12,7 +12,7 @@ module Grape
         values = @values.is_a?(Proc) ? @values.call : @values
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
         unless (param_array - values).empty?
-          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :values
+          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :values
         end
       end
 

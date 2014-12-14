@@ -37,8 +37,8 @@ module Grape
             detail: 'more details',
             params: { first: :param },
             entity: Object,
-            http_codes: [[401, 'Unauthorized', "Entities::Error"]],
-            named: "My named route",
+            http_codes: [[401, 'Unauthorized', 'Entities::Error']],
+            named: 'My named route',
             headers: [XAuthToken: {
               description: 'Valdates your identity',
               required: true
@@ -54,7 +54,7 @@ module Grape
             detail 'more details'
             params(first: :param)
             success Object
-            failure [[401, 'Unauthorized', "Entities::Error"]]
+            failure [[401, 'Unauthorized', 'Entities::Error']]
             named 'My named route'
             headers [XAuthToken: {
               description: 'Valdates your identity',
@@ -71,7 +71,6 @@ module Grape
           expect(subject.route_setting(:description)).to eq(expected_options)
         end
       end
-
     end
   end
 end

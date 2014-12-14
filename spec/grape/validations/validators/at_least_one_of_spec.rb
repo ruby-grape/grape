@@ -50,9 +50,9 @@ describe Grape::Validations::AtLeastOneOfValidator do
       let(:params) { { somethingelse: true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
     end
 

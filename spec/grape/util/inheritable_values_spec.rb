@@ -2,7 +2,6 @@ require 'spec_helper'
 module Grape
   module Util
     describe InheritableValues do
-
       let(:parent){ InheritableValues.new }
       subject { InheritableValues.new(parent) }
 

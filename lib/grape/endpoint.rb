@@ -39,7 +39,7 @@ module Grape
       # @raise [NameError] an instance method with the same name already exists
       def generate_api_method(method_name, &block)
         if instance_methods.include?(method_name.to_sym) || instance_methods.include?(method_name.to_s)
-          raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
+          fail NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
         end
         define_method(method_name, &block)
         method = instance_method(method_name)
@@ -75,7 +75,7 @@ module Grape
     end
 
     def require_option(options, key)
-      raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
+      fail Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
     end
 
     def method_name
@@ -83,7 +83,7 @@ module Grape
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
        options[:path].join('/')
-     ].join(" ")
+     ].join(' ')
     end
 
     def routes
@@ -98,17 +98,17 @@ module Grape
 
     def mount_in(route_set)
       if endpoints
-        endpoints.each { |e|
+        endpoints.each do |e|
           e.inheritable_setting.inherit_from inheritable_setting
           e.mount_in(route_set)
-        }
+        end
       else
         @routes = nil
 
         routes.each do |route|
           methods = [route.route_method]
-          if !namespace_inheritable(:do_not_route_head) && route.route_method == "GET"
-            methods << "HEAD"
+          if !namespace_inheritable(:do_not_route_head) && route.route_method == 'GET'
+            methods << 'HEAD'
           end
           methods.each do |method|
             route_set.add_route(self, {
@@ -134,7 +134,7 @@ module Grape
       # named parameters in the api path
       regex = Rack::Mount::RegexpWithNamedGroups.new(path)
       named_params = regex.named_captures.map { |nc| nc[0] } - %w(version format)
-      named_params.each { |named_param| path_params[named_param] = "" }
+      named_params.each { |named_param| path_params[named_param] = '' }
 
       # route parameters declared via desc or appended to the api declaration
       route_params = options[:route_options][:params]
@@ -240,7 +240,7 @@ module Grape
       end
 
       if validation_errors.any?
-        raise Grape::Exceptions::ValidationErrors, errors: validation_errors
+        fail Grape::Exceptions::ValidationErrors, errors: validation_errors
       end
 
       run_filters after_validations

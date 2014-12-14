@@ -70,7 +70,7 @@ module Grape
 
     def split_setting(key, delimiter)
       return if settings[key].nil?
-      settings[key].to_s.split("/")
+      settings[key].to_s.split('/')
     end
   end
 end

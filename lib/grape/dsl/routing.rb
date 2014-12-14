@@ -32,7 +32,7 @@ module Grape
             options ||= {}
             options = { using: :path }.merge(options)
 
-            raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
+            fail Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
             @versions = versions | args
             nest(block) do

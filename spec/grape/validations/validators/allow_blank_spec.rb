@@ -73,12 +73,12 @@ describe Grape::Validations::AllowBlankValidator do
 
   context 'invalid input' do
     it 'refuses empty string' do
-      get '/', name: ""
+      get '/', name: ''
       expect(last_response.status).to eq(400)
     end
 
     it 'refuses only whitespaces' do
-      get '/', name: "   "
+      get '/', name: '   '
       expect(last_response.status).to eq(400)
 
       get '/', name: "  \n "
@@ -96,12 +96,12 @@ describe Grape::Validations::AllowBlankValidator do
 
   context 'valid input' do
     it 'accepts valid input' do
-      get '/', name: "bob"
+      get '/', name: 'bob'
       expect(last_response.status).to eq(200)
     end
 
     it 'accepts empty input when allow_blank is false' do
-      get '/allow_blank', name: ""
+      get '/allow_blank', name: ''
       expect(last_response.status).to eq(200)
     end
   end
@@ -114,7 +114,7 @@ describe Grape::Validations::AllowBlankValidator do
       end
 
       it 'refuses a blank value in an existing group' do
-        get '/disallow_blank_required_param_in_an_optional_group', user: { name: "" }
+        get '/disallow_blank_required_param_in_an_optional_group', user: { name: '' }
         expect(last_response.status).to eq(400)
       end
     end
@@ -126,12 +126,12 @@ describe Grape::Validations::AllowBlankValidator do
       end
 
       it 'accepts a nested missing optional value' do
-        get '/disallow_blank_optional_param_in_an_optional_group', user: { age: "29" }
+        get '/disallow_blank_optional_param_in_an_optional_group', user: { age: '29' }
         expect(last_response.status).to eq(200)
       end
 
       it 'refuses a blank existing value in an existing scope' do
-        get '/disallow_blank_optional_param_in_an_optional_group', user: { age: "29", name: "" }
+        get '/disallow_blank_optional_param_in_an_optional_group', user: { age: '29', name: '' }
         expect(last_response.status).to eq(400)
       end
     end
@@ -140,29 +140,29 @@ describe Grape::Validations::AllowBlankValidator do
   context 'in a required group' do
     context 'as a required param' do
       it 'refuses a blank value in a required existing group' do
-        get '/disallow_blank_required_param_in_a_required_group', user: { name: "" }
+        get '/disallow_blank_required_param_in_a_required_group', user: { name: '' }
         expect(last_response.status).to eq(400)
       end
 
       it 'refuses a string value in a required hash group' do
-        get '/disallow_string_value_in_a_required_hash_group', user: ""
+        get '/disallow_string_value_in_a_required_hash_group', user: ''
         expect(last_response.status).to eq(400)
       end
     end
 
     context 'as an optional param' do
       it 'accepts a nested missing value' do
-        get '/disallow_blank_optional_param_in_a_required_group', user: { age: "29" }
+        get '/disallow_blank_optional_param_in_a_required_group', user: { age: '29' }
         expect(last_response.status).to eq(200)
       end
 
       it 'refuses a blank existing value in an existing scope' do
-        get '/disallow_blank_optional_param_in_a_required_group', user: { age: "29", name: "" }
+        get '/disallow_blank_optional_param_in_a_required_group', user: { age: '29', name: '' }
         expect(last_response.status).to eq(400)
       end
 
       it 'refuses a string value in an optional hash group' do
-        get '/disallow_string_value_in_an_optional_hash_group', user: ""
+        get '/disallow_string_value_in_an_optional_hash_group', user: ''
         expect(last_response.status).to eq(400)
       end
     end

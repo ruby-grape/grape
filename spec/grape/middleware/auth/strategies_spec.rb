@@ -9,7 +9,7 @@ describe Grape::Middleware::Auth::Strategies do
       Rack::Builder.new do |b|
         b.use Grape::Middleware::Error
         b.use(Grape::Middleware::Auth::Base, type: :http_basic, proc: proc)
-        b.run lambda { |env| [200, {}, ["Hello there."]] }
+        b.run lambda { |env| [200, {}, ['Hello there.']] }
       end
     end
 
@@ -34,8 +34,8 @@ describe Grape::Middleware::Auth::Strategies do
     RSpec::Matchers.define :be_challenge do
       match do |actual_response|
         actual_response.status == 401 &&
-            actual_response['WWW-Authenticate'] =~ /^Digest / &&
-            actual_response.body.empty?
+          actual_response['WWW-Authenticate'] =~ /^Digest / &&
+          actual_response.body.empty?
       end
     end
 
@@ -66,16 +66,15 @@ describe Grape::Middleware::Auth::Strategies do
     end
 
     it 'authenticates if given valid creds' do
-      digest_authorize "foo", "bar"
+      digest_authorize 'foo', 'bar'
       get '/test'
       expect(last_response.status).to eq(200)
     end
 
     it 'throws a 401 if given invalid creds' do
-      digest_authorize "bar", "foo"
+      digest_authorize 'bar', 'foo'
       get '/test'
       expect(last_response.status).to eq(401)
     end
   end
-
 end

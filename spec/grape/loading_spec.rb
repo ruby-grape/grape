@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::API do
-  let(:jobs_api) {
+  let(:jobs_api) do
     Class.new(Grape::API) do
       namespace :one do
         namespace :two do
@@ -14,23 +14,23 @@ describe Grape::API do
         end
       end
     end
-  }
+  end
 
-  let(:combined_api) {
+  let(:combined_api) do
     JobsApi = jobs_api
     Class.new(Grape::API) do
       version :v1, using: :accept_version_header, cascade: true
       mount JobsApi
     end
-  }
+  end
 
-  subject {
+  subject do
     CombinedApi = combined_api
     Class.new(Grape::API) do
       format :json
       mount CombinedApi => '/'
     end
-  }
+  end
 
   def app
     subject

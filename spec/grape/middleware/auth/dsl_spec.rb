@@ -6,9 +6,9 @@ describe Grape::Middleware::Auth::DSL do
   let(:block) { ->() {} }
   let(:settings) do
     {
-      opaque: "secret",
+      opaque: 'secret',
       proc: block,
-      realm: "API Authorization",
+      realm: 'API Authorization',
       type: :http_digest
     }
   end
@@ -33,7 +33,6 @@ describe Grape::Middleware::Auth::DSL do
       expect(subject.auth).to eq(settings.merge(realm: 'super_secret'))
       expect(subject.auth.object_id).not_to eq(first_settings.object_id)
     end
-
   end
 
   describe '.http_basic' do
@@ -49,5 +48,4 @@ describe Grape::Middleware::Auth::DSL do
       expect(subject.auth).to eq(realm: 'my_realm', type: :http_digest, proc: block, opaque: 'my_opaque')
     end
   end
-
 end

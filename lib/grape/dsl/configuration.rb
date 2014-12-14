@@ -64,7 +64,6 @@ module Grape
           def config_context.failure(*args)
             http_codes(*args)
           end
-
         end
       end
     end

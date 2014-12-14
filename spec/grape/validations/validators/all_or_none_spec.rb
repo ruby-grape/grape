@@ -42,20 +42,19 @@ describe Grape::Validations::AllOrNoneOfValidator do
       let(:params) { { beer: true, grapefruit: true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
       context 'mixed with other params' do
         let(:mixed_params) { params.merge!(other: true, andanother: true) }
 
         it 'raise a validation exception' do
-          expect {
+          expect do
             validator.validate! params
-          }.to raise_error(Grape::Exceptions::Validation)
+          end.to raise_error(Grape::Exceptions::Validation)
         end
       end
     end
-
   end
 end

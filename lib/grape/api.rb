@@ -64,7 +64,7 @@ module Grape
       # block passed in. Allows for simple 'before' setups
       # of settings stack pushes.
       def nest(*blocks, &block)
-        blocks.reject! { |b| b.nil? }
+        blocks.reject!(&:nil?)
         if blocks.any?
           instance_eval(&block) if block_given?
           blocks.each { |b| instance_eval(&b) }
@@ -82,9 +82,7 @@ module Grape
       def inherit_settings(other_settings)
         top_level_setting.inherit_from other_settings.point_in_time_copy
 
-        endpoints.each do |e|
-          e.reset_routes!
-        end
+        endpoints.each(&:reset_routes!)
 
         @routes = nil
       end

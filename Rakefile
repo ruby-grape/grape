@@ -37,17 +37,16 @@ begin
     end
 
     namespace :pages do
-
-      desc "Check out gh-pages."
+      desc 'Check out gh-pages.'
       task :checkout do
         dir = File.dirname(__FILE__) + '/../grape.doc'
         unless Dir.exist?(dir)
           Dir.mkdir(dir)
           Dir.chdir(dir) do
-            system("git init")
-            system("git remote add origin git@github.com:intridea/grape.git")
-            system("git pull")
-            system("git checkout gh-pages")
+            system('git init')
+            system('git remote add origin git@github.com:intridea/grape.git')
+            system('git pull')
+            system('git checkout gh-pages')
           end
         end
       end
@@ -55,15 +54,15 @@ begin
       desc 'Generate and publish YARD docs to GitHub pages.'
       task :publish => ['doc:pages:checkout', 'doc:pages'] do
         Dir.chdir(File.dirname(__FILE__) + '/../grape.doc') do
-          system("git checkout gh-pages")
-          system("git add .")
-          system("git add -u")
+          system('git checkout gh-pages')
+          system('git add .')
+          system('git add -u')
           system("git commit -m 'Generating docs for version #{Grape::VERSION}.'")
-          system("git push origin gh-pages")
+          system('git push origin gh-pages')
         end
       end
     end
   end
 rescue LoadError
-  puts "You need to install YARD."
+  puts 'You need to install YARD.'
 end

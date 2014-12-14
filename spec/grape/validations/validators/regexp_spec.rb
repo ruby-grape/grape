@@ -10,7 +10,6 @@ describe Grape::Validations::RegexpValidator do
           requires :name, regexp: /^[a-z]+$/
         end
         get do
-
         end
       end
     end
@@ -22,7 +21,7 @@ describe Grape::Validations::RegexpValidator do
 
   context 'invalid input' do
     it 'refuses inapppopriate' do
-      get '/', name: "invalid name"
+      get '/', name: 'invalid name'
       expect(last_response.status).to eq(400)
     end
 
@@ -33,8 +32,7 @@ describe Grape::Validations::RegexpValidator do
   end
 
   it 'accepts valid input' do
-    get '/', name: "bob"
+    get '/', name: 'bob'
     expect(last_response.status).to eq(200)
   end
-
 end

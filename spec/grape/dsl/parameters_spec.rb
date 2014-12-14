@@ -110,7 +110,6 @@ module Grape
       xdescribe '#params' do
         it 'does some thing'
       end
-
     end
   end
 end

@@ -159,7 +159,6 @@ module Grape
           expect(subject).to receive :namespace_end
 
           subject.within_namespace do
-
           end
         end
 
@@ -213,7 +212,6 @@ module Grape
           obj2.top_level_setting.inherit_from obj3_copy.point_in_time_copy
 
           expect(obj1_copy.namespace_stackable[:some_thing]).to eq [:obj3, :obj2, :obj1]
-
         end
       end
     end

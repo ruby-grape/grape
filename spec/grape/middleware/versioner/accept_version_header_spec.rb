@@ -30,9 +30,9 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if version is not supported' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT_VERSION' => 'v2').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -59,9 +59,9 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect {
+      expect do
         subject.call({}).last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -70,9 +70,9 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT_VERSION' => '').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -93,9 +93,9 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect {
+      expect do
         subject.call({}).last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
@@ -104,9 +104,9 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT_VERSION' => '').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
