@@ -1,4 +1,4 @@
-0.9.1 (Next)
+0.10.0 (Next)
 ============
 
 * [#803](https://github.com/intridea/grape/pull/803), [#820](https://github.com/intridea/grape/pull/820): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic), [@natecj](https://github.com/natecj).
@@ -16,7 +16,7 @@
 * [#821](https://github.com/intridea/grape/pull/821): Fixed passing string value when hash is expected in params - [@rebelact](https://github.com/rebelact).
 * [#824](https://github.com/intridea/grape/pull/824): Validate array params against list of acceptable values - [@dnd](https://github.com/dnd).
 * [#813](https://github.com/intridea/grape/pull/813): Routing methods dsl refactored to get rid of explicit `paths` parameter - [@AlexYankee](https://github.com/AlexYankee).
-* [#826](https://github.com/intridea/grape/pull/826): Find coerce_type for Array when not specified - [@manovotn](https://github.com/manovotn).
+* [#826](https://github.com/intridea/grape/pull/826): Find `coerce_type` for `Array` when not specified - [@manovotn](https://github.com/manovotn).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
