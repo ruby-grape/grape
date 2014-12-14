@@ -1927,7 +1927,7 @@ describe Grape::API do
         ]
       end
     end
-    describe 'api structure with two apis' do
+    describe 'api structure with multiple apis' do
       before(:each) do
         subject.params do
           requires :one, desc: 'a token'
@@ -1958,6 +1958,34 @@ describe Grape::API do
               "three" => { required: true, desc: "a token" },
               "four" => { required: false, desc: "the limit" }
             }
+          }
+        ]
+      end
+    end
+    describe 'api structure with an api without params' do
+      before(:each) do
+        subject.params do
+          requires :one, desc: 'a token'
+          optional :two, desc: 'the limit'
+        end
+        subject.get 'one' do
+        end
+
+        subject.get 'two' do
+        end
+      end
+      it 'sets route_params' do
+        expect(subject.routes.map { |route|
+          { params: route.route_params }
+        }).to eq [
+          {
+            params: {
+              "one" => { required: true, desc: "a token" },
+              "two" => { required: false, desc: "the limit" }
+            }
+          },
+          {
+            params: {}
           }
         ]
       end
