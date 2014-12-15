@@ -160,6 +160,17 @@ module Grape
           end
         end
 
+        describe 'false' do
+          before do
+            subject.body false
+          end
+
+          it 'sets status to 204' do
+            expect(subject.body).to eq ''
+            expect(subject.status).to eq 204
+          end
+        end
+
         it 'returns default' do
           expect(subject.body).to be nil
         end

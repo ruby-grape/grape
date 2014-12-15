@@ -54,6 +54,7 @@
   - [Hypermedia](#hypermedia)
   - [Rabl](#rabl)
   - [Active Model Serializers](#active-model-serializers)
+- [Sending Raw or No Data](#sending-raw-or-no-data)
 - [Authentication](#authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
@@ -1886,6 +1887,32 @@ You can use [Active Model Serializers](https://github.com/rails-api/active_model
 [grape-active_model_serializers](https://github.com/jrhe/grape-active_model_serializers) gem, which defines a custom Grape AMS
 formatter.
 
+## Sending Raw or No Data
+
+In general, use the binary format to send raw data.
+
+```ruby
+class API < Grape::API
+  get '/file' do
+    content_type 'application/octet-stream'
+    File.binread 'file.bin'
+  end
+end
+```
+
+You can also set the response body explicitly with `body`.
+
+```ruby
+class API < Grape::API
+  get '/' do
+    content_type 'text/plain'
+    body 'Hello World'
+    # return value ignored
+  end
+end
+```
+
+Use `body false` to return `204 No Content` without any data or content-type.
 
 ## Authentication
 

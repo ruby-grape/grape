@@ -2726,4 +2726,33 @@ XML
       expect(last_response.body).to eq("{\"error\":\"The requested format 'txt' is not supported.\"}")
     end
   end
+
+  context 'body' do
+    context 'false' do
+      before do
+        subject.get '/blank' do
+          body false
+        end
+      end
+      it 'returns blank body' do
+        get '/blank'
+        expect(last_response.status).to eq(204)
+        expect(last_response.body).to be_blank
+      end
+    end
+    context 'plain text' do
+      before do
+        subject.get '/text' do
+          content_type 'text/plain'
+          body 'Hello World'
+          'ignored'
+        end
+      end
+      it 'returns blank body' do
+        get '/text'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq 'Hello World'
+      end
+    end
+  end
 end
