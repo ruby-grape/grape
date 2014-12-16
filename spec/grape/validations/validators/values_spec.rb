@@ -76,6 +76,11 @@ describe Grape::Validations::ValuesValidator do
           end
         end
         get '/optional_with_required_values'
+
+        params do
+          optional :type, type: String, values: -> { [SecureRandom.uuid] }
+        end
+        get '/random_values'
       end
     end
   end
@@ -198,5 +203,11 @@ describe Grape::Validations::ValuesValidator do
     expect do
       subject.params { requires :type, values: [10.5, 11], type: Integer }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
+  it 'evaluates values dynamically with each request' do
+    allow(SecureRandom).to receive(:uuid).and_return('foo')
+    get '/random_values', type: 'foo'
+    expect(last_response.status).to eq 200
   end
 end
