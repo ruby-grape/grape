@@ -19,6 +19,8 @@
 * [#826](https://github.com/intridea/grape/pull/826): Find `coerce_type` for `Array` when not specified - [@manovotn](https://github.com/manovotn).
 * [#645](https://github.com/intridea/grape/issues/645): Invoking `body false` will return `204 No Content` - [@dblock](https://github.com/dblock).
 * [#801](https://github.com/intridea/grape/issues/801): Evaluate permitted parameter `values` lazily on each request when declared as a proc - [@dblock](https://github.com/dblock).
+* [#679](https://github.com/intridea/grape/issues/679): Fixed `OPTIONS` method returning 404 when combined with `prefix`- [@dblock](https://github.com/dblock).
+* [#679](https://github.com/intridea/grape/issues/679): Fixed unsupported methods returning 404 instead of 405 when combined with `prefix`- [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.9.0 (8/27/2014)
