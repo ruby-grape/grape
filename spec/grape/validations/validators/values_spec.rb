@@ -76,11 +76,6 @@ describe Grape::Validations::ValuesValidator do
           end
         end
         get '/optional_with_required_values'
-
-        params do
-          optional :type, type: String, values: -> { [SecureRandom.uuid] }
-        end
-        get '/random_values'
       end
     end
   end
@@ -161,14 +156,7 @@ describe Grape::Validations::ValuesValidator do
   it 'raises IncompatibleOptionValues on an invalid default value from proc' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: -> { ValuesModel.values.sample + '_invalid' } }
-    end.to raise_error Grape::Exceptions::IncompatibleOptionValues
-  end
-
-  it 'raises IncompatibleOptionValues on an invalid default value from proc validating against values in a proc' do
-    subject = Class.new(Grape::API)
-    expect do
-      subject.params { optional :type, values: -> { ValuesModel.values }, default: -> { ValuesModel.values.sample + '_invalid' } }
+      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: ValuesModel.values.sample + '_invalid' }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
@@ -205,9 +193,32 @@ describe Grape::Validations::ValuesValidator do
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
-  it 'evaluates values dynamically with each request' do
-    allow(SecureRandom).to receive(:uuid).and_return('foo')
-    get '/random_values', type: 'foo'
-    expect(last_response.status).to eq 200
+  context 'with a lambda values' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          optional :type, type: String, values: -> { [SecureRandom.uuid] }, default: -> { SecureRandom.uuid }
+        end
+        get '/random_values'
+      end
+    end
+
+    def app
+      subject
+    end
+
+    before do
+      expect(SecureRandom).to receive(:uuid).and_return('foo').once
+    end
+
+    it 'only evaluates values dynamically with each request' do
+      get '/random_values', type: 'foo'
+      expect(last_response.status).to eq 200
+    end
+
+    it 'chooses default' do
+      get '/random_values'
+      expect(last_response.status).to eq 200
+    end
   end
 end

@@ -191,11 +191,11 @@ See the [the updated API Formats documentation](https://github.com/intridea/grap
 
 #### Changes to Evaluation of Permitted Parameter Values
 
-Permitted parameter values are now evaluated lazily for each request when declared as a proc. The following code would produce the same allowed value in 0.9.0 for each request and a new value since 0.10.0.
+Permitted and default parameter values are now only evaluated lazily for each request when declared as a proc. The following code would raise an error at startup time.
 
 ```ruby
 params do
-  optional :v, values: -> { [SecureRandom.uuid] }
+  optional :v, values: -> { [:x, :y] }, default: -> { :z } }
 end
 ```
 
@@ -203,7 +203,7 @@ Remove the proc to get the previous behavior.
 
 ```ruby
 params do
-  optional :v, values: [SecureRandom.uuid]
+  optional :v, values: [:x, :y], default: :z }
 end
 ```
 
