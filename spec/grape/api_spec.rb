@@ -1228,6 +1228,19 @@ describe Grape::API do
       end
       get '/exception'
       expect(last_response.status).to eql 500
+      expect(last_response.body).to eq 'rain!'
+    end
+
+    it 'rescues all errors with a json formatter' do
+      subject.format :json
+      subject.default_format :json
+      subject.rescue_from :all
+      subject.get '/exception' do
+        fail 'rain!'
+      end
+      get '/exception'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eq({ error: 'rain!' }.to_json)
     end
 
     it 'rescues only certain errors if rescue_from is called with specific errors' do
