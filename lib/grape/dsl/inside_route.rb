@@ -150,6 +150,9 @@ module Grape
       def body(value = nil)
         if value
           @body = value
+        elsif value == false
+          @body = ''
+          status 204
         else
           @body
         end
