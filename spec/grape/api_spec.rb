@@ -17,6 +17,7 @@ describe Grape::API do
       end
 
       get 'awesome/sauce/'
+      expect(last_response.status).to eql 200
       expect(last_response.body).to eql 'Hello there.'
     end
 
@@ -31,6 +32,25 @@ describe Grape::API do
 
       get '/hello'
       expect(last_response.status).to eql 404
+    end
+
+    it 'supports OPTIONS' do
+      subject.prefix 'awesome/sauce'
+      subject.get do
+        'Hello there.'
+      end
+
+      options 'awesome/sauce'
+      expect(last_response.status).to eql 204
+      expect(last_response.body).to be_blank
+    end
+
+    it 'disallows POST' do
+      subject.prefix 'awesome/sauce'
+      subject.get
+
+      post 'awesome/sauce'
+      expect(last_response.status).to eql 405
     end
   end
 
