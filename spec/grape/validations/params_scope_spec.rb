@@ -50,7 +50,7 @@ describe Grape::Validations::ParamsScope do
 
     it 'raises exception when values are of different type' do
       expect do
-        subject.params { requires :numbers, type: Array, values: -> { [1, 'definitely not a number', 3] } }
+        subject.params { requires :numbers, type: Array, values: [1, 'definitely not a number', 3] }
       end.to raise_error Grape::Exceptions::IncompatibleOptionValues
     end
   end

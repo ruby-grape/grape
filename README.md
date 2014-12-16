@@ -738,7 +738,7 @@ Parameters can be restricted to a specific set of values with the `:values` opti
 
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
 number for each call to the endpoint of this `params` block. To have the default evaluate
-at calltime use a lambda, like `:random_number` above.
+lazily with each request use a lambda, like `:random_number` above.
 
 ```ruby
 params do
@@ -747,8 +747,9 @@ params do
 end
 ```
 
-The `:values` option can also be supplied with a `Proc` to be evalutated at runtime for each request. For example, given a status
-model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
+The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
+For example, given a status model you may want to restrict by hashtags that you have
+previously defined in the `HashTag` model.
 
 ```ruby
 params do
