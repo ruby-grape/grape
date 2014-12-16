@@ -189,6 +189,26 @@ end
 
 See the [the updated API Formats documentation](https://github.com/intridea/grape#api-formats) and [#809](https://github.com/intridea/grape/pull/809) for more info.
 
+#### Changes to Evaluation of Permitted Parameter Values
+
+Permitted parameter values are now evaluated lazily for each request when declared as a proc. The following code would produce the same allowed value in 0.9.0 for each request and a new value since 0.10.0.
+
+```ruby
+params do
+  optional :v, values: -> { [SecureRandom.uuid] }
+end
+```
+
+Remove the proc to get the previous behavior.
+
+```ruby
+params do
+  optional :v, values: [SecureRandom.uuid]
+end
+```
+
+See [#801](https://github.com/intridea/grape/issues/801) for more information.
+
 ### Upgrading to >= 0.9.0
 
 #### Changes in Authentication

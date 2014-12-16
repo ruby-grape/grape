@@ -747,7 +747,7 @@ params do
 end
 ```
 
-The `:values` option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
+The `:values` option can also be supplied with a `Proc` to be evalutated at runtime for each request. For example, given a status
 model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
 
 ```ruby
