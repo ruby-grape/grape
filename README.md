@@ -673,7 +673,7 @@ end
 ```
 
 Note that default values will be passed through to any validation options specified.
-The following example will always fail if `:color` is not expliclity provided.
+The following example will always fail if `:color` is not explicitly provided.
 
 ```ruby
 params do
