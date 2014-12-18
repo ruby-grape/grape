@@ -928,7 +928,7 @@ end
 You can also create custom classes that take parameters.
 
 ```ruby
-class Length < Grape::Validations::SingleOptionValidator
+class Length < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
       raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
