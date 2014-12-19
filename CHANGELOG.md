@@ -1,5 +1,5 @@
-0.10.0 (Next)
-============
+0.10.0 (12/19/2014)
+===================
 
 * [#803](https://github.com/intridea/grape/pull/803), [#820](https://github.com/intridea/grape/pull/820): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic), [@natecj](https://github.com/natecj).
 * [#774](https://github.com/intridea/grape/pull/774): Extended `mutually_exclusive`, `exactly_one_of`, `at_least_one_of` to work inside any kind of group: `requires` or `optional`, `Hash` or `Array` - [@ShPakvel](https://github.com/ShPakvel).
@@ -21,7 +21,6 @@
 * [#801](https://github.com/intridea/grape/issues/801): Only evaluate permitted parameter `values` and `default` lazily on each request when declared as a proc - [@dblock](https://github.com/dblock).
 * [#679](https://github.com/intridea/grape/issues/679): Fixed `OPTIONS` method returning 404 when combined with `prefix`- [@dblock](https://github.com/dblock).
 * [#679](https://github.com/intridea/grape/issues/679): Fixed unsupported methods returning 404 instead of 405 when combined with `prefix`- [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 0.9.0 (8/27/2014)
 =================
