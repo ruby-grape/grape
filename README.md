@@ -1075,7 +1075,7 @@ You can also define reusable `params` using shared helpers.
 
 ```ruby
 module SharedParams
-  extend Grape::API::Helpers
+  extend Grape::SharedParams
 
   params :period do
     optional :start_date
@@ -1089,7 +1089,7 @@ module SharedParams
 end
 
 class API < Grape::API
-  helpers SharedParams
+  include_params SharedParams
 
   desc "Get collection."
   params do

@@ -42,6 +42,8 @@ module Grape
   autoload :Validations,         'grape/validations'
   autoload :Request,             'grape/http/request'
 
+  autoload :SharedParams,        'grape/shared_params'
+
   module Exceptions
     autoload :Base,                           'grape/exceptions/base'
     autoload :Validation,                     'grape/exceptions/validation'
