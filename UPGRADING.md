@@ -1,6 +1,12 @@
 Upgrading Grape
 ===============
 
+### Upgrading to Next Release
+
+#### Changes to `include_missing`
+
+Attributes with `nil` values or with valus that evaluate to `false` are no longer considered *missing* and will be returned when `include_missing` is `false`.
+
 ### Upgrading to >= 0.10.0
 
 #### Changes to content-types

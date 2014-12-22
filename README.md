@@ -638,6 +638,29 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
+Note that an attribute with a `nil` value is not considered *missing* and will also be returned
+when `include_missing` is set to `false`:
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": null, "address": { "city": "SF"}}}'
+````
+
+**Response with include_missing:false**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "last_name": null,
+      "address": { "city": "SF"}
+    }
+  }
+}
+````
+
 ## Parameter Validation and Coercion
 
 You can define validations and coercion options for your parameters using a `params` block.

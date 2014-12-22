@@ -38,7 +38,7 @@ module Grape
             key.each_pair do |parent, children|
               output_key = options[:stringify] ? parent.to_s : parent.to_sym
 
-              next unless options[:include_missing] || children || params[parent]
+              next unless options[:include_missing] || children || params.key?(parent)
 
               if params.key?(parent) || options[:include_missing]
                 hash[output_key] = if children

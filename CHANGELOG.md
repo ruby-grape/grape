@@ -1,7 +1,7 @@
 Next Release
 ============
 
-* Your contribution here.
+* [#864](https://github.com/intridea/grape/pull/864): Attributes with nil values should not be considered "missing"Your contribution here. - [@ppadron](https://github.com/ppadron).
 
 0.10.0 (12/19/2014)
 ===================
