@@ -1,7 +1,7 @@
 Releasing Grape
 ===============
 
-There're no particular rules about when to release Grape. Release bug fixes frequenty, features not so frequently and breaking API changes rarely.
+There're no particular rules about when to release Grape. Release bug fixes frequently, features not so frequently and breaking API changes rarely.
 
 ### Release
 

@@ -45,8 +45,8 @@ module Grape
 
       def full_message(attributes, error)
         I18n.t(
-          "grape.errors.format".to_sym,
-          default: "%{attributes} %{message}",
+          'grape.errors.format'.to_sym,
+          default: '%{attributes} %{message}',
           attributes: attributes.count == 1 ? translate_attribute(attributes.first) : translate_attributes(attributes),
           message: error.message
         )

@@ -4,16 +4,13 @@ require 'base64'
 describe Grape::Middleware::Auth::Base do
   subject do
     Class.new(Grape::API) do
-
       http_basic realm: 'my_realm' do |user, password|
         user && password && user == password
       end
       get '/authorized' do
         'DONE'
       end
-
     end
-
   end
 
   def app
@@ -30,5 +27,4 @@ describe Grape::Middleware::Auth::Base do
     get '/authorized', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('admin', 'wrong')
     expect(last_response.status).to eq(401)
   end
-
 end

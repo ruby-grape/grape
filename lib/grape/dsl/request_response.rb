@@ -23,7 +23,7 @@ module Grape
             namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter::Base.formatter_for(new_format, {}))
             # define a single mime type
             mime_type = content_types[new_format.to_sym]
-            raise Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
+            fail Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
             namespace_stackable(:content_types, new_format.to_sym => mime_type)
           else
             namespace_inheritable(:format)
@@ -150,7 +150,7 @@ module Grape
         # @param model_class [Class] The model class that will be represented.
         # @option options [Class] :with The entity class that will represent the model.
         def represent(model_class, options)
-          raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
+          fail Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
           namespace_stackable(:representations, model_class => options[:with])
         end
       end

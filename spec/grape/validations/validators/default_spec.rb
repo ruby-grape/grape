@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Grape::Validations::DefaultValidator do
-
   module ValidationsSpec
     module DefaultValidatorSpec
       class API < Grape::API
@@ -73,34 +72,34 @@ describe Grape::Validations::DefaultValidator do
   end
 
   it 'set default value for optional param' do
-    get("/")
+    get('/')
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ id: nil, type: 'default-type' }.to_json)
   end
 
   it 'set default values for optional params' do
-    get("/user")
+    get('/user')
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ type1: 'default-type1', type2: 'default-type2' }.to_json)
   end
 
   it 'set default values for missing params in the request' do
-    get("/user?type2=value2")
+    get('/user?type2=value2')
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ type1: 'default-type1', type2: 'value2' }.to_json)
   end
 
   it 'set default values for optional params and allow to use required fields in the same time' do
-    get("/message?id=1")
+    get('/message?id=1')
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ id: '1', type1: 'default-type1', type2: 'default-type2' }.to_json)
   end
 
   it 'sets lambda based defaults at the time of call' do
-    get("/numbers")
+    get('/numbers')
     expect(last_response.status).to eq(200)
     before = JSON.parse(last_response.body)
-    get("/numbers")
+    get('/numbers')
     expect(last_response.status).to eq(200)
     after = JSON.parse(last_response.body)
 
@@ -117,7 +116,6 @@ describe Grape::Validations::DefaultValidator do
   it 'sets default values for grouped arrays' do
     get('/array?array[][name]=name&array[][name]=name2&array[][with_default]=bar2')
     expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ array: [{ name: "name", with_default: "default" }, { name: "name2", with_default: "bar2" }] }.to_json)
+    expect(last_response.body).to eq({ array: [{ name: 'name', with_default: 'default' }, { name: 'name2', with_default: 'bar2' }] }.to_json)
   end
-
 end

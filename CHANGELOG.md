@@ -1,6 +1,12 @@
-0.9.1 (Next)
+Next Release
 ============
-* [#803](https://github.com/intridea/grape/pull/803): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic).
+
+* Your contribution here.
+
+0.10.0 (12/19/2014)
+===================
+
+* [#803](https://github.com/intridea/grape/pull/803), [#820](https://github.com/intridea/grape/pull/820): Added `all_or_none_of` parameter validator - [@loveltyoic](https://github.com/loveltyoic), [@natecj](https://github.com/natecj).
 * [#774](https://github.com/intridea/grape/pull/774): Extended `mutually_exclusive`, `exactly_one_of`, `at_least_one_of` to work inside any kind of group: `requires` or `optional`, `Hash` or `Array` - [@ShPakvel](https://github.com/ShPakvel).
 * [#743](https://github.com/intridea/grape/pull/743): Added `allow_blank` parameter validator to validate non-empty strings - [@elado](https://github.com/elado).
 * [#745](https://github.com/intridea/grape/pull/745): Removed `atom+xml`, `rss+xml`, and `jsonapi` content-types - [@akabraham](https://github.com/akabraham).
@@ -8,7 +14,18 @@
 * [#757](https://github.com/intridea/grape/pull/757): Changed `desc` can now be used with a block syntax - [@dspaeth-faber](https://github.com/dspaeth-faber).
 * [#779](https://github.com/intridea/grape/pull/779): Fixed using `values` with a `default` proc - [@ShPakvel](https://github.com/ShPakvel).
 * [#799](https://github.com/intridea/grape/pull/799): Fixed custom validators with required `Hash`, `Array` types - [@bwalex](https://github.com/bwalex).
-* Your contribution here.
+* [#784](https://github.com/intridea/grape/pull/784): Fixed `present` to not overwrite the previously added contents of the response body whebn called more than once - [@mfunaro](https://github.com/mfunaro).
+* [#809](https://github.com/intridea/grape/pull/809): Removed automatic `(.:format)` suffix on paths if you're using only one format (e.g., with `format :json`, `/path` will respond with JSON but `/path.xml` will be a 404) - [@ajvondrak](https://github.com/ajvondrak).
+* [#816](https://github.com/intridea/grape/pull/816): Added ability to filter out missing params if params is a nested hash with `declared(params, include_missing: false)` - [@georgimitev](https://github.com/georgimitev).
+* [#819](https://github.com/intridea/grape/pull/819): Allowed both `desc` and `description` in the params DSL - [@mzikherman](https://github.com/mzikherman).
+* [#821](https://github.com/intridea/grape/pull/821): Fixed passing string value when hash is expected in params - [@rebelact](https://github.com/rebelact).
+* [#824](https://github.com/intridea/grape/pull/824): Validate array params against list of acceptable values - [@dnd](https://github.com/dnd).
+* [#813](https://github.com/intridea/grape/pull/813): Routing methods dsl refactored to get rid of explicit `paths` parameter - [@AlexYankee](https://github.com/AlexYankee).
+* [#826](https://github.com/intridea/grape/pull/826): Find `coerce_type` for `Array` when not specified - [@manovotn](https://github.com/manovotn).
+* [#645](https://github.com/intridea/grape/issues/645): Invoking `body false` will return `204 No Content` - [@dblock](https://github.com/dblock).
+* [#801](https://github.com/intridea/grape/issues/801): Only evaluate permitted parameter `values` and `default` lazily on each request when declared as a proc - [@dblock](https://github.com/dblock).
+* [#679](https://github.com/intridea/grape/issues/679): Fixed `OPTIONS` method returning 404 when combined with `prefix`- [@dblock](https://github.com/dblock).
+* [#679](https://github.com/intridea/grape/issues/679): Fixed unsupported methods returning 404 instead of 405 when combined with `prefix`- [@dblock](https://github.com/dblock).
 
 0.9.0 (8/27/2014)
 =================

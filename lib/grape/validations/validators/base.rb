@@ -13,7 +13,7 @@ module Grape
       def validate!(params)
         attributes = AttributesIterator.new(self, @scope, params)
         attributes.each do |resource_params, attr_name|
-          if @required || resource_params.key?(attr_name)
+          if @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
             validate_param!(attr_name, resource_params)
           end
         end
@@ -21,10 +21,10 @@ module Grape
 
       def self.convert_to_short_name(klass)
         ret = klass.name.gsub(/::/, '/')
-          .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
-          .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-          .tr("-", "_")
-          .downcase
+              .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+              .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+              .tr('-', '_')
+              .downcase
         File.basename(ret, '_validator')
       end
 

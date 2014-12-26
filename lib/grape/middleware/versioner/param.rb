@@ -21,7 +21,7 @@ module Grape
       class Param < Base
         def default_options
           {
-            parameter: "apiver"
+            parameter: 'apiver'
           }
         end
 
@@ -30,7 +30,7 @@ module Grape
           potential_version = Rack::Utils.parse_nested_query(env['QUERY_STRING'])[paramkey]
           unless potential_version.nil?
             if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
-              throw :error, status: 404, message: "404 API Version Not Found", headers: { 'X-Cascade' => 'pass' }
+              throw :error, status: 404, message: '404 API Version Not Found', headers: { 'X-Cascade' => 'pass' }
             end
             env['api.version'] = potential_version
             env['rack.request.query_hash'].delete(paramkey) if env.key? 'rack.request.query_hash'

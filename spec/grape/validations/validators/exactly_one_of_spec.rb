@@ -18,18 +18,18 @@ describe Grape::Validations::ExactlyOneOfValidator do
       let(:params) { { beer: true, wine: true, grapefruit: true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
 
       context 'mixed with other params' do
         let(:mixed_params) { params.merge!(other: true, andanother: true) }
 
         it 'still raises a validation exception' do
-          expect {
+          expect do
             validator.validate! mixed_params
-          }.to raise_error(Grape::Exceptions::Validation)
+          end.to raise_error(Grape::Exceptions::Validation)
         end
       end
     end
@@ -38,9 +38,9 @@ describe Grape::Validations::ExactlyOneOfValidator do
       let(:params) { { beer: true, grapefruit: true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
     end
 
@@ -48,9 +48,9 @@ describe Grape::Validations::ExactlyOneOfValidator do
       let(:params) { { 'beer' => true, 'grapefruit' => true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
     end
 
@@ -58,9 +58,9 @@ describe Grape::Validations::ExactlyOneOfValidator do
       let(:params) { { somethingelse: true } }
 
       it 'raises a validation exception' do
-        expect {
+        expect do
           validator.validate! params
-        }.to raise_error(Grape::Exceptions::Validation)
+        end.to raise_error(Grape::Exceptions::Validation)
       end
     end
 

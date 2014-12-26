@@ -1,6 +1,5 @@
 module Grape
   module Util
-    require 'pp'
     class StackableValues
       attr_accessor :inherited_values
       attr_reader :new_values
@@ -8,7 +7,7 @@ module Grape
 
       def initialize(inherited_values = {})
         @inherited_values = inherited_values
-        @new_values = LoggingValue.new
+        @new_values = {}
         @froozen_values = {}
       end
 
@@ -18,7 +17,7 @@ module Grape
       end
 
       def []=(name, value)
-        raise if @froozen_values.key? name
+        fail if @froozen_values.key? name
         @new_values[name] ||= []
         @new_values[name].push value
       end
@@ -35,7 +34,7 @@ module Grape
 
       def to_hash
         keys.each_with_object({}) do |key, result|
-          result[key] = self[key].dup
+          result[key] = self[key]
         end
       end
 

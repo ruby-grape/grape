@@ -2,7 +2,6 @@ require 'spec_helper'
 module Grape
   module Util
     describe InheritableSetting do
-
       before :each do
         InheritableSetting.reset_global!
       end
@@ -55,7 +54,6 @@ module Grape
           expect(parent.global[:global_thing]).to eq :global_new_foo_bar
           expect(other_parent.global[:global_thing]).to eq :global_new_foo_bar
         end
-
       end
 
       describe '#api_class' do
@@ -69,7 +67,6 @@ module Grape
       end
 
       describe '#namespace' do
-
         it 'sets a value until the end of a namespace' do
           subject.namespace[:some_thing] = :foo_bar
           expect(subject.namespace[:some_thing]).to eq :foo_bar
@@ -149,7 +146,6 @@ module Grape
           expect(new_settings).to receive(:inherit_from).with(other_parent)
 
           subject.inherit_from other_parent
-
         end
       end
 

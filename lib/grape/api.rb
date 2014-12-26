@@ -64,7 +64,7 @@ module Grape
       # block passed in. Allows for simple 'before' setups
       # of settings stack pushes.
       def nest(*blocks, &block)
-        blocks.reject! { |b| b.nil? }
+        blocks.reject!(&:nil?)
         if blocks.any?
           instance_eval(&block) if block_given?
           blocks.each { |b| instance_eval(&b) }
@@ -82,9 +82,7 @@ module Grape
       def inherit_settings(other_settings)
         top_level_setting.inherit_from other_settings.point_in_time_copy
 
-        endpoints.each do |e|
-          e.reset_routes!
-        end
+        endpoints.each(&:reset_routes!)
 
         @routes = nil
       end
@@ -143,30 +141,32 @@ module Grape
       # contain already versioning information when using path versioning.
       # Disable versioning so adding a route won't prepend versioning
       # informations again.
-      without_versioning do
-        methods_per_path.each do |path, methods|
-          allowed_methods = methods.dup
-          unless self.class.namespace_inheritable(:do_not_route_head)
-            allowed_methods |= ['HEAD'] if allowed_methods.include?('GET')
-          end
+      without_root_prefix do
+        without_versioning do
+          methods_per_path.each do |path, methods|
+            allowed_methods = methods.dup
+            unless self.class.namespace_inheritable(:do_not_route_head)
+              allowed_methods |= ['HEAD'] if allowed_methods.include?('GET')
+            end
 
-          allow_header = (['OPTIONS'] | allowed_methods).join(', ')
-          unless self.class.namespace_inheritable(:do_not_route_options)
-            unless allowed_methods.include?('OPTIONS')
-              self.class.options(path, {}) do
-                header 'Allow', allow_header
-                status 204
-                ''
+            allow_header = (['OPTIONS'] | allowed_methods).join(', ')
+            unless self.class.namespace_inheritable(:do_not_route_options)
+              unless allowed_methods.include?('OPTIONS')
+                self.class.options(path, {}) do
+                  header 'Allow', allow_header
+                  status 204
+                  ''
+                end
               end
             end
-          end
 
-          not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
-          not_allowed_methods << 'OPTIONS' if self.class.namespace_inheritable(:do_not_route_options)
-          self.class.route(not_allowed_methods, path) do
-            header 'Allow', allow_header
-            status 405
-            ''
+            not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+            not_allowed_methods << 'OPTIONS' if self.class.namespace_inheritable(:do_not_route_options)
+            self.class.route(not_allowed_methods, path) do
+              header 'Allow', allow_header
+              status 405
+              ''
+            end
           end
         end
       end
@@ -183,6 +183,16 @@ module Grape
 
       self.class.namespace_inheritable(:version, old_version)
       self.class.namespace_inheritable(:version_options, old_version_options)
+    end
+
+    def without_root_prefix(&block)
+      old_prefix = self.class.namespace_inheritable(:root_prefix)
+
+      self.class.namespace_inheritable_to_nil(:root_prefix)
+
+      yield
+
+      self.class.namespace_inheritable(:root_prefix, old_prefix)
     end
   end
 end

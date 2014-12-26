@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.9.1
+### Upgrading to >= 0.10.0
 
 #### Changes to content-types
 
@@ -13,7 +13,6 @@ The following content-types have been removed:
 
 This is because they have never been properly supported.
 
-
 #### Changes to desc
 
 New block syntax:
@@ -22,56 +21,201 @@ Former:
 
 ```ruby
   desc "some descs",
-           detail: 'more details',
-           entity: API::Entities::Entity,
-           params;  API::Entities::Status.documentation,
-           named: 'a name',
-           headers :[XAuthToken: {
-                description: 'Valdates your identity',
-                required: true
-              }
+    detail: 'more details',
+    entity: API::Entities::Entity,
+    params: API::Entities::Status.documentation,
+    named: 'a name',
+    headers: [XAuthToken: {
+      description: 'Valdates your identity',
+      required: true
+    }
   get nil, http_codes: [
-            [401, 'Unauthorized', API::Entities::BaseError],
-            [404, 'not found', API::Entities::Error]
-  
+    [401, 'Unauthorized', API::Entities::BaseError],
+    [404, 'not found', API::Entities::Error]
   ] do
-  
 ```
 
 Now:
 
 ```ruby
-
 desc "some descs" do
   detail 'more details'
-  params  API::Entities::Status.documentation
+  params API::Entities::Status.documentation
   success API::Entities::Entity
   failure [
-            [401, 'Unauthorized', API::Entities::BaseError],
-            [404, 'not found', API::Entities::Error]  
-          ]
-    named 'a name'
-    headers [XAuthToken: {
-               description: 'Valdates your identity',
-               required: true
-             },
-             XOptionalHeader: {
-               description: 'Not really needed',
-              required: false
-             }
-            ]
+    [401, 'Unauthorized', API::Entities::BaseError],
+    [404, 'not found', API::Entities::Error]
+  ]
+  named 'a name'
+  headers [
+    XAuthToken: {
+      description: 'Valdates your identity',
+      required: true
+    },
+    XOptionalHeader: {
+      description: 'Not really needed',
+      required: false
+    }
+  ]
 end
-  
-
 ```
 
-### Upgrading to >= 0.9.0 
+#### Changes to Route Options and Descriptions
+
+A common hack to extend Grape with custom DSL methods was manipulating `@last_description`.
+
+``` ruby
+module Grape
+  module Extensions
+    module SortExtension
+      def sort(value)
+        @last_description ||= {}
+        @last_description[:sort] ||= {}
+        @last_description[:sort].merge! value
+        value
+      end
+    end
+
+    Grape::API.extend self
+  end
+end
+```
+
+You could access this value from within the API with `route.route_sort` or, more generally, via `env['api.endpoint'].options[:route_options][:sort]`.
+
+This will no longer work, use the documented and supported `route_setting`.
+
+``` ruby
+module Grape
+  module Extensions
+    module SortExtension
+      def sort(value)
+        route_setting :sort, sort: value
+        value
+      end
+    end
+
+    Grape::API.extend self
+  end
+end
+```
+
+To retrieve this value at runtime from within an API, use `env['api.endpoint'].route_setting(:sort)` and when introspecting a mounted API, use `route.route_settings[:sort]`.
+
+#### Accessing Class Variables from Helpers
+
+It used to be possible to fetch an API class variable from a helper function. For example:
+
+```ruby
+@@static_variable = 42
+
+helpers do
+  def get_static_variable
+    @@static_variable
+  end
+end
+
+get do
+  get_static_variable
+end
+```
+
+This will no longer work. Use a class method instead of a helper.
+
+```ruby
+@@static_variable = 42
+
+def self.get_static_variable
+  @@static_variable
+end
+
+get do
+  get_static_variable
+end
+```
+
+For more information see [#836](https://github.com/intridea/grape/issues/836).
+
+#### Changes to Custom Validators
+
+To implement a custom validator, you need to inherit from `Grape::Validations::Base` instead of `Grape::Validations::Validator`.
+
+For more information see [Custom Validators](https://github.com/intridea/grape#custom-validators) in the documentation.
+
+#### Changes to Raising Grape::Exceptions::Validation
+
+In previous versions raising `Grape::Exceptions::Validation` required a single `param`.
+
+```ruby
+raise Grape::Exceptions::Validation, param: :id, message_key: :presence
+```
+
+The `param` argument has been deprecated and is now an array of `params`, accepting multiple values.
+
+```ruby
+raise Grape::Exceptions::Validation, params: [:id], message_key: :presence
+```
+
+#### Changes to routes when using `format`
+
+Routes will no longer get file-type suffixes added if you declare a single API `format`. For example,
+
+```ruby
+class API < Grape::API
+  format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+Pre-0.10.0, this would respond with JSON to `/hello`, `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+Now, this will only respond with JSON to `/hello`, but will be a 404 when trying to access `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+If you declare further `content_type`s, this behavior will be circumvented. For example, the following API will respond with JSON to `/hello`, `/hello.json`, `/hello.xml`, `/hello.txt`, etc.
+
+```ruby
+class API < Grape::API
+  format :json
+  content_type :json, 'application/json'
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+See the [the updated API Formats documentation](https://github.com/intridea/grape#api-formats) and [#809](https://github.com/intridea/grape/pull/809) for more info.
+
+#### Changes to Evaluation of Permitted Parameter Values
+
+Permitted and default parameter values are now only evaluated lazily for each request when declared as a proc. The following code would raise an error at startup time.
+
+```ruby
+params do
+  optional :v, values: -> { [:x, :y] }, default: -> { :z } }
+end
+```
+
+Remove the proc to get the previous behavior.
+
+```ruby
+params do
+  optional :v, values: [:x, :y], default: :z }
+end
+```
+
+See [#801](https://github.com/intridea/grape/issues/801) for more information.
+
+### Upgrading to >= 0.9.0
 
 #### Changes in Authentication
 
 The following middleware classes have been removed:
 
-* `Grape::Middleware::Auth::Basic` 
+* `Grape::Middleware::Auth::Basic`
 * `Grape::Middleware::Auth::Digest`
 * `Grape::Middleware::Auth::OAuth2`
 
@@ -84,7 +228,7 @@ When you use theses classes directly like:
        use Grape::Middleware::Auth::OAuth2,
            token_class: 'AccessToken',
            parameter: %w(access_token api_key)
-           
+
 ```
 
 you have to replace these classes.

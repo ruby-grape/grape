@@ -31,7 +31,7 @@ describe Grape::Entity do
 
     it 'pulls a representation from the class options if it exists' do
       entity = Class.new(Grape::Entity)
-      allow(entity).to receive(:represent).and_return("Hiya")
+      allow(entity).to receive(:represent).and_return('Hiya')
 
       subject.represent Object, with: entity
       subject.get '/example' do
@@ -43,7 +43,7 @@ describe Grape::Entity do
 
     it 'pulls a representation from the class options if the presented object is a collection of objects' do
       entity = Class.new(Grape::Entity)
-      allow(entity).to receive(:represent).and_return("Hiya")
+      allow(entity).to receive(:represent).and_return('Hiya')
 
       class TestObject
       end
@@ -64,15 +64,15 @@ describe Grape::Entity do
       end
 
       get '/example'
-      expect(last_response.body).to eq("Hiya")
+      expect(last_response.body).to eq('Hiya')
 
       get '/example2'
-      expect(last_response.body).to eq("Hiya")
+      expect(last_response.body).to eq('Hiya')
     end
 
     it 'pulls a representation from the class ancestor if it exists' do
       entity = Class.new(Grape::Entity)
-      allow(entity).to receive(:represent).and_return("Hiya")
+      allow(entity).to receive(:represent).and_return('Hiya')
 
       subclass = Class.new(Object)
 
@@ -87,7 +87,7 @@ describe Grape::Entity do
     it 'automatically uses Klass::Entity if that exists' do
       some_model = Class.new
       entity = Class.new(Grape::Entity)
-      allow(entity).to receive(:represent).and_return("Auto-detect!")
+      allow(entity).to receive(:represent).and_return('Auto-detect!')
 
       some_model.const_set :Entity, entity
 
@@ -101,7 +101,7 @@ describe Grape::Entity do
     it 'automatically uses Klass::Entity based on the first object in the collection being presented' do
       some_model = Class.new
       entity = Class.new(Grape::Entity)
-      allow(entity).to receive(:represent).and_return("Auto-detect!")
+      allow(entity).to receive(:represent).and_return('Auto-detect!')
 
       some_model.const_set :Entity, entity
 
@@ -129,7 +129,7 @@ describe Grape::Entity do
       some_relation = Class.new
       some_model = Class.new
 
-      allow(entity).to receive(:represent).and_return("Auto-detect!")
+      allow(entity).to receive(:represent).and_return('Auto-detect!')
       allow(some_relation).to receive(:first)
       allow(some_relation).to receive(:klass).and_return(some_model)
 
@@ -168,10 +168,9 @@ describe Grape::Entity do
     end
 
     [:json, :serializable_hash].each do |format|
-
       it 'presents with #{format}' do
         entity = Class.new(Grape::Entity)
-        entity.root "examples", "example"
+        entity.root 'examples', 'example'
         entity.expose :id
 
         subject.format format
@@ -192,7 +191,7 @@ describe Grape::Entity do
 
       it 'presents with #{format} collection' do
         entity = Class.new(Grape::Entity)
-        entity.root "examples", "example"
+        entity.root 'examples', 'example'
         entity.expose :id
 
         subject.format format
@@ -211,12 +210,11 @@ describe Grape::Entity do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('{"examples":[{"id":1},{"id":2}]}')
       end
-
     end
 
     it 'presents with xml' do
       entity = Class.new(Grape::Entity)
-      entity.root "examples", "example"
+      entity.root 'examples', 'example'
       entity.expose :name
 
       subject.format :xml
@@ -225,14 +223,14 @@ describe Grape::Entity do
         c = Class.new do
           attr_reader :name
           def initialize(args)
-            @name = args[:name] || "no name set"
+            @name = args[:name] || 'no name set'
           end
         end
-        present c.new(name: "johnnyiller"), with: entity
+        present c.new(name: 'johnnyiller'), with: entity
       end
       get '/example'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq("application/xml")
+      expect(last_response.headers['Content-type']).to eq('application/xml')
       expect(last_response.body).to eq <<-XML
 <?xml version="1.0" encoding="UTF-8"?>
 <hash>
@@ -245,7 +243,7 @@ XML
 
     it 'presents with json' do
       entity = Class.new(Grape::Entity)
-      entity.root "examples", "example"
+      entity.root 'examples', 'example'
       entity.expose :name
 
       subject.format :json
@@ -254,14 +252,14 @@ XML
         c = Class.new do
           attr_reader :name
           def initialize(args)
-            @name = args[:name] || "no name set"
+            @name = args[:name] || 'no name set'
           end
         end
-        present c.new(name: "johnnyiller"), with: entity
+        present c.new(name: 'johnnyiller'), with: entity
       end
       get '/example'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq("application/json")
+      expect(last_response.headers['Content-type']).to eq('application/json')
       expect(last_response.body).to eq('{"example":{"name":"johnnyiller"}}')
     end
 
@@ -272,35 +270,38 @@ XML
       subject.use Rack::JSONP
 
       entity = Class.new(Grape::Entity)
-      entity.root "examples", "example"
+      entity.root 'examples', 'example'
       entity.expose :name
 
-      # Rack::JSONP expects a standard JSON response
+      # Rack::JSONP expects a standard JSON response in UTF-8 format
       subject.format :json
+      subject.formatter :json, lambda { |object, _|
+        object.to_json.encode('utf-8')
+      }
 
       subject.get '/example' do
         c = Class.new do
           attr_reader :name
           def initialize(args)
-            @name = args[:name] || "no name set"
+            @name = args[:name] || 'no name set'
           end
         end
 
-        present c.new(name: "johnnyiller"), with: entity
+        present c.new(name: 'johnnyiller'), with: entity
       end
 
       get '/example?callback=abcDef'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq("application/javascript")
-      expect(last_response.body).to eq('abcDef({"example":{"name":"johnnyiller"}})')
+      expect(last_response.headers['Content-type']).to eq('application/javascript')
+      expect(last_response.body).to include 'abcDef({"example":{"name":"johnnyiller"}})'
     end
 
-    context "present with multiple entities" do
-      it "present with multiple entities using optional symbol" do
+    context 'present with multiple entities' do
+      it 'present with multiple entities using optional symbol' do
         user = Class.new do
           attr_reader :name
           def initialize(args)
-            @name = args[:name] || "no name set"
+            @name = args[:name] || 'no name set'
           end
         end
         user1 = user.new(name: 'user1')
@@ -317,13 +318,12 @@ XML
         end
         get '/example'
         expect_response_json = {
-          "page"  => 1,
-          "user1" => { "name" => "user1" },
-          "user2" => { "name" => "user2" }
+          'page'  => 1,
+          'user1' => { 'name' => 'user1' },
+          'user2' => { 'name' => 'user2' }
         }
         expect(JSON(last_response.body)).to eq(expect_response_json)
       end
-
     end
   end
 end

@@ -24,7 +24,7 @@ module Grape
         end
 
         unless declared_params
-          raise ArgumentError, "Tried to filter for declared parameters but none exist."
+          fail ArgumentError, 'Tried to filter for declared parameters but none exist.'
         end
 
         if params.is_a? Array
@@ -37,6 +37,9 @@ module Grape
 
             key.each_pair do |parent, children|
               output_key = options[:stringify] ? parent.to_s : parent.to_sym
+
+              next unless options[:include_missing] || children || params[parent]
+
               if params.key?(parent) || options[:include_missing]
                 hash[output_key] = if children
                                      declared(params[parent] || {}, options, Array(children))
@@ -76,14 +79,14 @@ module Grape
         if merged_options[:permanent]
           status 301
         else
-          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != "GET"
+          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != 'GET'
             status 303
           else
             status 302
           end
         end
-        header "Location", url
-        body ""
+        header 'Location', url
+        body ''
       end
 
       # Set or retrieve the HTTP status code.
@@ -147,6 +150,9 @@ module Grape
       def body(value = nil)
         if value
           @body = value
+        elsif value == false
+          @body = ''
+          status 204
         else
           @body
         end
@@ -187,7 +193,12 @@ module Grape
                          end
 
         representation = { root => representation } if root
-        representation = (@body || {}).merge(key => representation) if key
+        if key
+          representation = (@body || {}).merge(key => representation)
+        elsif entity_class.present? && representation.respond_to?('merge')
+          representation = (@body || {}).merge(representation)
+        end
+
         body representation
       end
 
@@ -200,7 +211,7 @@ module Grape
       #     route.route_description
       #   end
       def route
-        env["rack.routing_args"][:route_info]
+        env['rack.routing_args'][:route_info]
       end
 
       def entity_class_for_obj(object, options)

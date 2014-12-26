@@ -26,7 +26,7 @@ module Grape
       def after
         status, headers, bodies = *@app_response
         # allow content-type to be explicitly overwritten
-        api_format = mime_types[headers["Content-Type"]] || env['api.format']
+        api_format = mime_types[headers['Content-Type']] || env['api.format']
         formatter = Grape::Formatter::Base.formatter_for api_format, options
         begin
           bodymap = bodies.collect do |body|
@@ -48,9 +48,9 @@ module Grape
       # store read input in env['api.request.input']
       def read_body_input
         if (request.post? || request.put? || request.patch? || request.delete?) &&
-          (!request.form_data? || !request.media_type) &&
-          (!request.parseable_data?) &&
-          (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
+           (!request.form_data? || !request.media_type) &&
+           (!request.parseable_data?) &&
+           (request.content_length.to_i > 0 || request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
 
           if (input = env['rack.input'])
             input.rewind

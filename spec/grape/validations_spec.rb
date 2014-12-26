@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Grape::Validations do
-
   subject { Class.new(Grape::API) }
 
   def app
@@ -205,8 +204,8 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items is missing')
       end
 
-      it "errors when param is not an Array" do
-        get '/required', items: "hello"
+      it 'errors when param is not an Array' do
+        get '/required', items: 'hello'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('items is invalid, items[key] is missing')
 
@@ -255,8 +254,8 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items is missing, items[key] is missing')
       end
 
-      it "errors when param is not a Hash" do
-        get '/required', items: "hello"
+      it 'errors when param is not a Hash' do
+        get '/required', items: 'hello'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('items is invalid, items[key] is missing')
 
@@ -315,12 +314,33 @@ describe Grape::Validations do
       end
     end
 
+    context 'group params with nested params which has a type' do
+      let(:invalid_items){ { items: '' } }
+
+      before do
+        subject.params do
+          optional :items do
+            optional :key1, type: String
+            optional :key2, type: String
+          end
+        end
+        subject.post '/group_with_nested' do
+          'group with nested works'
+        end
+      end
+
+      it 'errors when group param is invalid'do
+        post '/group_with_nested', items: invalid_items
+        expect(last_response.status).to eq(400)
+      end
+    end
+
     context 'custom validator for a Hash' do
       module DateRangeValidations
         class DateRangeValidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
             unless params[attr_name][:from] <= params[attr_name][:to]
-              raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
+              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
             end
           end
         end
@@ -418,9 +438,9 @@ describe Grape::Validations do
         expect(last_response.body).to eq('children[parents] is missing')
       end
 
-      it "errors when param is not an Array" do
+      it 'errors when param is not an Array' do
         # NOTE: would be nicer if these just returned 'children is invalid'
-        get '/within_array', children: "hello"
+        get '/within_array', children: 'hello'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children is invalid, children[name] is missing, children[parents] is missing, children[parents] is invalid, children[parents][name] is missing')
 
@@ -475,7 +495,7 @@ describe Grape::Validations do
       end
 
       it 'requires defaults to Array type' do
-        get '/req', planets: "Jupiter, Saturn"
+        get '/req', planets: 'Jupiter, Saturn'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('planets is invalid, planets[name] is missing')
 
@@ -491,26 +511,26 @@ describe Grape::Validations do
       end
 
       it 'optional defaults to Array type' do
-        get '/opt', name: "Jupiter", moons: "Europa, Ganymede"
+        get '/opt', name: 'Jupiter', moons: 'Europa, Ganymede'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('moons is invalid, moons[name] is missing')
 
-        get '/opt', name: "Jupiter", moons: { name: 'Ganymede' }
+        get '/opt', name: 'Jupiter', moons: { name: 'Ganymede' }
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('moons is invalid')
 
-        get '/opt', name: "Jupiter", moons: [{ name: 'Io' }, { name: 'Callisto' }]
+        get '/opt', name: 'Jupiter', moons: [{ name: 'Io' }, { name: 'Callisto' }]
         expect(last_response.status).to eq(200)
 
-        put_with_json '/opt', name: "Venus"
+        put_with_json '/opt', name: 'Venus'
         expect(last_response.status).to eq(200)
 
-        put_with_json '/opt', name: "Mercury", moons: []
+        put_with_json '/opt', name: 'Mercury', moons: []
         expect(last_response.status).to eq(200)
       end
 
       it 'group defaults to Array type' do
-        get '/grp', stars: "Sun"
+        get '/grp', stars: 'Sun'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('stars is invalid, stars[name] is missing')
 
@@ -592,14 +612,14 @@ describe Grape::Validations do
         expect(last_response.body).to eq('optional group works')
       end
 
-      it "errors when group is present, but required param is not" do
+      it 'errors when group is present, but required param is not' do
         get '/optional_group', items: [{ not_key: 'foo' }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('items[key] is missing')
       end
 
       it "errors when param is present but isn't an Array" do
-        get '/optional_group', items: "hello"
+        get '/optional_group', items: 'hello'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('items is invalid, items[key] is missing')
 
@@ -706,7 +726,7 @@ describe Grape::Validations do
         class Customvalidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
             unless params[attr_name] == 'im custom'
-              raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "is not custom!"
+              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'is not custom!'
             end
           end
         end
@@ -855,7 +875,7 @@ describe Grape::Validations do
           class CustomvalidatorWithOptions < Grape::Validations::Base
             def validate_param!(attr_name, params)
               unless params[attr_name] == @option[:text]
-                raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
+                fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
               end
             end
           end
@@ -863,7 +883,7 @@ describe Grape::Validations do
 
         before do
           subject.params do
-            optional :custom, customvalidator_with_options: { text: 'im custom with options', error_message: "is not custom with options!" }
+            optional :custom, customvalidator_with_options: { text: 'im custom with options', error_message: 'is not custom with options!' }
           end
           subject.get '/optional_custom' do
             'optional with custom works!'
@@ -933,7 +953,6 @@ describe Grape::Validations do
           end
           expect(subject.route_setting(:declared_params)).to eq [:page, :per_page, :start_date, :end_date]
         end
-
       end
 
       context 'with block' do
@@ -1007,7 +1026,7 @@ describe Grape::Validations do
 
           get '/mutually_exclusive', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine are mutually exclusive"
+          expect(last_response.body).to eq 'beer, wine are mutually exclusive'
         end
       end
 
@@ -1034,7 +1053,45 @@ describe Grape::Validations do
 
           get '/mutually_exclusive', beer: 'true', wine: 'true', nested: { scotch: 'true', aquavit: 'true' }, nested2: [{ scotch2: 'true' }, { scotch2: 'true', aquavit2: 'true' }]
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine are mutually exclusive, scotch, aquavit are mutually exclusive, scotch2, aquavit2 are mutually exclusive"
+          expect(last_response.body).to eq 'beer, wine are mutually exclusive, scotch, aquavit are mutually exclusive, scotch2, aquavit2 are mutually exclusive'
+        end
+      end
+
+      context 'in a group' do
+        it 'works when only one from the set is present' do
+          subject.params do
+            group :drink, type: Hash do
+              optional :wine
+              optional :beer
+              optional :juice
+
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.get '/mutually_exclusive_group' do
+            'mutually_exclusive_group works!'
+          end
+
+          get '/mutually_exclusive_group', drink: { beer: 'true' }
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'errors when more than one from the set is present' do
+          subject.params do
+            group :drink, type: Hash do
+              optional :wine
+              optional :beer
+              optional :juice
+
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.get '/mutually_exclusive_group' do
+            'mutually_exclusive_group works!'
+          end
+
+          get '/mutually_exclusive_group', drink: { beer: 'true', juice: 'true', wine: 'true' }
+          expect(last_response.status).to eq(400)
         end
       end
     end
@@ -1056,7 +1113,7 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/exactly_one_of'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine, juice are missing, exactly one parameter must be provided"
+          expect(last_response.body).to eq 'beer, wine, juice are missing, exactly one parameter must be provided'
         end
 
         it 'succeeds when one is present' do
@@ -1068,7 +1125,7 @@ describe Grape::Validations do
         it 'errors when two or more are present' do
           get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine are mutually exclusive"
+          expect(last_response.body).to eq 'beer, wine are mutually exclusive'
         end
       end
 
@@ -1096,7 +1153,7 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/exactly_one_of_nested'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "nested is missing, beer_nested, wine_nested, juice_nested are missing, exactly one parameter must be provided"
+          expect(last_response.body).to eq 'nested is missing, beer_nested, wine_nested, juice_nested are missing, exactly one parameter must be provided'
         end
 
         it 'succeeds when one is present' do
@@ -1108,7 +1165,7 @@ describe Grape::Validations do
         it 'errors when two or more are present' do
           get '/exactly_one_of_nested', nested: { beer_nested: 'string' }, nested2: [{ beer_nested2: 'string', wine_nested2: 'anotherstring' }]
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer_nested2, wine_nested2 are mutually exclusive"
+          expect(last_response.body).to eq 'beer_nested2, wine_nested2 are mutually exclusive'
         end
       end
     end
@@ -1130,7 +1187,7 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/at_least_one_of'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "beer, wine, juice are missing, at least one parameter must be provided"
+          expect(last_response.body).to eq 'beer, wine, juice are missing, at least one parameter must be provided'
         end
 
         it 'does not error when one is present' do
@@ -1170,7 +1227,7 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/at_least_one_of_nested'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq "nested is missing, beer_nested, wine_nested, juice_nested are missing, at least one parameter must be provided"
+          expect(last_response.body).to eq 'nested is missing, beer_nested, wine_nested, juice_nested are missing, at least one parameter must be provided'
         end
 
         it 'does not error when one is present' do
@@ -1184,6 +1241,80 @@ describe Grape::Validations do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq 'at_least_one_of works!'
         end
+      end
+    end
+
+    context 'in a group' do
+      it 'works when only one from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { beer: 'true' }
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'errors when no parameter from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: {}
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'errors when more than one from the set is present' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { beer: 'true', juice: 'true', wine: 'true' }
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'does not falsely think the param is there if it is provided outside the block' do
+        subject.params do
+          group :drink, type: Hash do
+            optional :wine
+            optional :beer
+            optional :juice
+
+            exactly_one_of :beer, :wine, :juice
+          end
+        end
+        subject.get '/exactly_one_of_group' do
+          'exactly_one_of_group works!'
+        end
+
+        get '/exactly_one_of_group', drink: { foo: 'bar' }, beer: 'true'
+        expect(last_response.status).to eq(400)
       end
     end
   end

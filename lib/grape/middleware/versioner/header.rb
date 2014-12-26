@@ -52,9 +52,9 @@ module Grape
             env['api.subtype'] = subtype
 
             if /\Avnd\.([a-z0-9*.]+)(?:-([a-z0-9*\-.]+))?(?:\+([a-z0-9*\-.+]+))?\z/ =~ subtype
-              env['api.vendor']  = $1
-              env['api.version'] = $2
-              env['api.format']  = $3  # weird that Grape::Middleware::Formatter also does this
+              env['api.vendor']  = Regexp.last_match[1]
+              env['api.version'] = Regexp.last_match[2]
+              env['api.format']  = Regexp.last_match[3]  # weird that Grape::Middleware::Formatter also does this
             end
           # If none of the available content types are acceptable:
           elsif strict?

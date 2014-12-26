@@ -42,7 +42,7 @@ module Grape
       end
 
       def point_in_time_copy
-        self.class.new.tap { |new_setting|
+        self.class.new.tap do |new_setting|
           point_in_time_copies << new_setting
           new_setting.point_in_time_copies = []
 
@@ -53,8 +53,7 @@ module Grape
           new_setting.api_class = api_class
 
           new_setting.inherit_from(parent)
-
-        }
+        end
       end
 
       def route_end

@@ -70,7 +70,6 @@ module Grape
               merge_hash
             )
           end
-
         end
       end
 
@@ -81,11 +80,9 @@ module Grape
         end
 
         new_module.tap do |mod|
-
           class_mod = create_class_mod(args)
 
           mod.const_set(:ClassMethods, class_mod)
-
         end
       end
 

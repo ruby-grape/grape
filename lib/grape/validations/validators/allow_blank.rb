@@ -2,7 +2,7 @@ module Grape
   module Validations
     class AllowBlankValidator < Base
       def validate_param!(attr_name, params)
-        return if @option
+        return if @option || !params.is_a?(Hash)
 
         value = params[attr_name]
         value = value.strip if value.respond_to?(:strip)
@@ -22,7 +22,7 @@ module Grape
         return unless should_validate
 
         unless value.present?
-          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :blank
+          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :blank
         end
       end
     end

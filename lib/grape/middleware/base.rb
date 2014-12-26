@@ -53,9 +53,9 @@ module Grape
       end
 
       def mime_types
-        content_types.each_with_object({}) { |(k, v), types_without_params|
+        content_types.each_with_object({}) do |(k, v), types_without_params|
           types_without_params[k] = v.split(';').first
-        }.invert
+        end.invert
       end
 
       def is_strict_content_types

@@ -33,7 +33,6 @@ module Grape
                                        config5: { config6: { config7: 7, config8: 8 } }
                                     )
       end
-
     end
   end
 end

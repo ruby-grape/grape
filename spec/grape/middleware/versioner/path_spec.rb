@@ -27,7 +27,7 @@ describe Grape::Middleware::Versioner::Path do
     end
   end
 
-  [['v1', 'v2'], [:v1, :v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
+  [%w(v1 v2), [:v1, :v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
     context 'with specified versions as #{versions}' do
       before { @options = { versions: versions } }
 
@@ -40,5 +40,4 @@ describe Grape::Middleware::Versioner::Path do
       end
     end
   end
-
 end

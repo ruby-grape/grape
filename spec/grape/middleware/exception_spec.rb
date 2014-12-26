@@ -2,12 +2,11 @@ require 'spec_helper'
 require 'active_support/core_ext/hash'
 
 describe Grape::Middleware::Error do
-
   # raises a text exception
   class ExceptionApp
     class << self
       def call(env)
-        raise "rain!"
+        fail 'rain!'
       end
     end
   end
@@ -16,11 +15,11 @@ describe Grape::Middleware::Error do
   class ErrorHashApp
     class << self
       def error!(message, status)
-        throw :error, message: { error: message, detail: "missing widget" }, status: status
+        throw :error, message: { error: message, detail: 'missing widget' }, status: status
       end
 
       def call(env)
-        error!("rain!", 401)
+        error!('rain!', 401)
       end
     end
   end
@@ -33,7 +32,7 @@ describe Grape::Middleware::Error do
       end
 
       def call(env)
-        error!("Access Denied", 401)
+        error!('Access Denied', 401)
       end
     end
   end
@@ -45,7 +44,7 @@ describe Grape::Middleware::Error do
   class CustomErrorApp
     class << self
       def call(env)
-        raise CustomError, status: 400, message: 'failed validation'
+        fail CustomError, status: 400, message: 'failed validation'
       end
     end
   end
@@ -69,7 +68,7 @@ describe Grape::Middleware::Error do
         run ExceptionApp
       end
       get '/'
-      expect(last_response.body).to eq("rain!")
+      expect(last_response.body).to eq('rain!')
     end
 
     it 'defaults to a 500 status' do
@@ -161,9 +160,9 @@ describe Grape::Middleware::Error do
         use Grape::Middleware::Error, rescue_all: true,
                                       format: :custom,
                                       error_formatters: {
-                                        custom: lambda { |message, backtrace, options, env|
+                                        custom: lambda do |message, backtrace, options, env|
                                           { custom_formatter: message }.inspect
-                                        }
+                                        end
                                       }
         run ExceptionApp
       end
@@ -192,6 +191,5 @@ describe Grape::Middleware::Error do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('failed validation')
     end
-
   end
 end

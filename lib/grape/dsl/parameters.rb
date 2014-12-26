@@ -10,7 +10,7 @@ module Grape
         options = names.last.is_a?(Hash) ? names.pop : {}
         names.each do |name|
           params_block = named_params.fetch(name) do
-            raise "Params :#{name} not found!"
+            fail "Params :#{name} not found!"
           end
           instance_exec(options, &params_block)
         end
@@ -55,6 +55,10 @@ module Grape
 
       def at_least_one_of(*attrs)
         validates(attrs, at_least_one_of: true)
+      end
+
+      def all_or_none_of(*attrs)
+        validates(attrs, all_or_none_of: true)
       end
 
       def group(*attrs, &block)

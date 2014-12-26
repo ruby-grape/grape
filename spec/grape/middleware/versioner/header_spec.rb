@@ -84,9 +84,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if vendor is invalid' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor+json').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -112,9 +112,9 @@ describe Grape::Middleware::Versioner::Header do
       end
 
       it 'fails with 406 Not Acceptable if vendor is invalid' do
-        expect {
+        expect do
           subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last
-        }.to throw_symbol(
+        end.to throw_symbol(
           :error,
           status: 406,
           headers: { 'X-Cascade' => 'pass' },
@@ -142,9 +142,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if version is invalid' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -171,9 +171,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect {
+      expect do
         subject.call({}).last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -182,9 +182,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => '').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -193,9 +193,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if type is a range' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => '*/*').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -204,9 +204,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => 'application/*').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },
@@ -227,9 +227,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect {
+      expect do
         subject.call({}).last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
@@ -238,9 +238,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => '').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
@@ -249,9 +249,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if type is a range' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => '*/*').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
@@ -260,9 +260,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => 'application/*').last
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: {},
@@ -277,7 +277,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when multiple versions are specified' do
     before do
-      @options[:versions] = ['v1', 'v2']
+      @options[:versions] = %w(v1 v2)
     end
 
     it 'succeeds with v1' do
@@ -289,9 +289,9 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with another version' do
-      expect {
+      expect do
         subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v3+json')
-      }.to throw_symbol(
+      end.to throw_symbol(
         :error,
         status: 406,
         headers: { 'X-Cascade' => 'pass' },

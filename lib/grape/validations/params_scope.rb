@@ -55,7 +55,7 @@ module Grape
         end
         required_fields.each do |field|
           field_opts = opts[:using][field]
-          raise ArgumentError, "required field not exist: #{field}" unless field_opts
+          fail ArgumentError, "required field not exist: #{field}" unless field_opts
           requires(field, field_opts)
         end
         optional_fields.each do |field|
@@ -95,30 +95,25 @@ module Grape
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
         coerce_type = validations[:coerce]
+
         doc_attrs[:type] = coerce_type.to_s if coerce_type
 
-        desc = validations.delete(:desc)
+        desc = validations.delete(:desc) || validations.delete(:description)
         doc_attrs[:desc] = desc if desc
 
         default = validations[:default]
         doc_attrs[:default] = default if default
 
-        default = default.call if default.is_a?(Proc)
-
         values = validations[:values]
         doc_attrs[:values] = values if values
 
-        values = values.call if values.is_a?(Proc)
+        coerce_type = guess_coerce_type(coerce_type, values)
 
-        # default value should be present in values array, if both exist
-        if default && values && !values.include?(default)
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
-        end
+        # default value should be present in values array, if both exist and are not procs
+        check_incompatible_option_values(values, default)
 
         # type should be compatible with values array, if both exist
-        if coerce_type && values && values.any? { |v| !v.kind_of?(coerce_type) }
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
-        end
+        validate_value_coercion(coerce_type, values)
 
         doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
 
@@ -144,6 +139,19 @@ module Grape
         end
       end
 
+      def guess_coerce_type(coerce_type, values)
+        return coerce_type if !values || values.is_a?(Proc)
+        return values.first.class if coerce_type == Array && !values.empty?
+        coerce_type
+      end
+
+      def check_incompatible_option_values(values, default)
+        return unless values && default
+        return if values.is_a?(Proc) || default.is_a?(Proc)
+        return if values.include?(default)
+        fail Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
+      end
+
       def validate(type, options, attrs, doc_attrs)
         validator_class = Validations.validators[type.to_s]
 
@@ -151,7 +159,16 @@ module Grape
           value = validator_class.new(attrs, options, doc_attrs[:required], self)
           @api.namespace_stackable(:validations, value)
         else
-          raise Grape::Exceptions::UnknownValidator.new(type)
+          fail Grape::Exceptions::UnknownValidator.new(type)
+        end
+      end
+
+      def validate_value_coercion(coerce_type, values)
+        return unless coerce_type && values
+        return if values.is_a?(Proc)
+        coerce_type = coerce_type.first if coerce_type.kind_of?(Array)
+        if values.any? { |v| !v.kind_of?(coerce_type) }
+          fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
       end
     end

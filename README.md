@@ -1,6 +1,6 @@
 ![grape logo](grape.png)
 
-[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-ci.org/github/intridea/grape.png)](http://inch-ci.org/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.7.0/badge.png)](https://www.versioneye.com/ruby/grape/0.7.0)
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-ci.org/github/intridea/grape.png)](http://inch-ci.org/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/badge.png)](https://www.versioneye.com/ruby/grape)
 
 ## Table of Contents
 
@@ -22,6 +22,8 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Declared](#declared)
+  - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
@@ -52,17 +54,22 @@
   - [Hypermedia](#hypermedia)
   - [Rabl](#rabl)
   - [Active Model Serializers](#active-model-serializers)
+- [Sending Raw or No Data](#sending-raw-or-no-data)
 - [Authentication](#authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
 - [Anchoring](#anchoring)
+- [Using Custom Middleware](#using-custom-middleware)
+  - [Rails Middleware](#rails-middleware)
+    - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
   - [Writing Tests with Rails](#writing-tests-with-rails)
   - [Stubbing Helpers](#stubbing-helpers)
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
-  - [Rails 3.x](#rails-3x)
+  - [Reloading in Rack Applications](#reloading-in-rack-applications)
+  - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
 - [Contributing to Grape](#contributing-to-grape)
 - [Hacking on Grape](#hacking-on-grape)
@@ -79,9 +86,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.9.1.
+You're reading the documentation for the next release of Grape, which should be 0.10.1.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.9.0](https://github.com/intridea/grape/blob/v0.9.0/README.md).
+The current stable release is [0.10.0](https://github.com/intridea/grape/blob/v0.10.0/README.md).
 
 ## Project Resources
 
@@ -196,12 +203,12 @@ run Twitter::API
 
 And would respond to the following routes:
 
-    GET /statuses/public_timeline(.json)
-    GET /statuses/home_timeline(.json)
-    GET /statuses/:id(.json)
-    POST /statuses(.json)
-    PUT /statuses/:id(.json)
-    DELETE /statuses/:id(.json)
+    GET /api/statuses/public_timeline
+    GET /api/statuses/home_timeline
+    GET /api/statuses/:id
+    POST /api/statuses
+    PUT /api/statuses/:id
+    DELETE /api/statuses/:id
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
@@ -403,7 +410,7 @@ end
 ```
 
 * `detail`: A more enhanced description
-* `params`: Define parameters directly from an `Entity` 
+* `params`: Define parameters directly from an `Entity`
 * `success`: (former entity) The `Entity` to be used to present by default this route
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
@@ -461,6 +468,176 @@ In the case of conflict between either of:
 
 route string parameters will have precedence.
 
+#### Declared
+
+Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Let's have the following api:
+
+````ruby
+format :json
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+If we do not specify any params, declared will return an empty hash.
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name"}}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {}
+}
+
+````
+
+Once we add parameters requirements, grape will start returning only the declared params.
+
+````ruby
+format :json
+
+params do
+  requires :user, type: Hash do
+    requires :first_name, type: String
+    requires :last_name, type: String
+  end
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "last_name": "last name", "random": "never shown"}}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "last_name": "last name"
+    }
+  }
+}
+````
+
+#### Include missing
+
+By default `declared(params)` returns parameters that has `nil` value. If you want to return only the parameters that have any value, you can use the `include_missing` option. By default it is `true`. Let's have the following api:
+
+````ruby
+format :json
+
+params do
+  requires :first_name, type: String
+  optional :last_name, type: String
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params, include_missing: false) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown"}}'
+````
+
+**Response with include_missing:false**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name"
+    }
+  }
+}
+````
+
+**Response with include_missing:true**
+
+````json
+{
+  "declared_params": {
+    "first_name": "first name",
+    "last_name": null
+  }
+}
+````
+
+It also works on nested hashes:
+
+````ruby
+format :json
+
+params do
+  requires :user, :type => Hash do
+    requires :first_name, type: String
+    optional :last_name, type: String
+    requires :address, :type => Hash do
+      requires :city, type: String
+      optional :region, type: String
+    end
+  end
+end
+
+post 'users/signup' do
+  { "declared_params" => declared(params, include_missing: false) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown", "address": { "city": "SF"}}}'
+````
+
+**Response with include_missing:false**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "address": {
+        "city": "SF"
+      }
+    }
+  }
+}
+````
+
+**Response with include_missing:true**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": "first name",
+      "last_name": null,
+      "address": {
+        "city": "Zurich",
+        "region": null
+      }
+    }
+  }
+}
+````
+
 ## Parameter Validation and Coercion
 
 You can define validations and coercion options for your parameters using a `params` block.
@@ -496,7 +673,7 @@ end
 ```
 
 Note that default values will be passed through to any validation options specified.
-The following example will always fail if `:color` is not expliclity provided.
+The following example will always fail if `:color` is not explicitly provided.
 
 ```ruby
 params do
@@ -561,16 +738,18 @@ Parameters can be restricted to a specific set of values with the `:values` opti
 
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
 number for each call to the endpoint of this `params` block. To have the default evaluate
-at calltime use a lambda, like `:random_number` above.
+lazily with each request use a lambda, like `:random_number` above.
 
 ```ruby
 params do
   requires :status, type: Symbol, values: [:not_started, :processing, :done]
+  optional :numbers, type: Array[Integer], default: 1, values: [1, 2, 3, 5, 8]
 end
 ```
 
-The `:values` option can also be supplied with a `Proc` to be evalutated at runtime. For example, given a status
-model you may want to restrict by hashtags that you have previously defined in the `HashTag` model.
+The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
+For example, given a status model you may want to restrict by hashtags that you have
+previously defined in the `HashTag` model.
 
 ```ruby
 params do
@@ -679,7 +858,7 @@ params do
     optional :icecream
     mutually_exclusive :cake, :icecream
   end
-  optional :recipe do 
+  optional :recipe do
     optional :oil
     optional :meat
     all_or_none_of :oil, :meat
@@ -731,7 +910,7 @@ end
 ### Custom Validators
 
 ```ruby
-class AlphaNumeric < Grape::Validations::Validator
+class AlphaNumeric < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
       raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must consist of alpha-numeric characters"
@@ -749,7 +928,7 @@ end
 You can also create custom classes that take parameters.
 
 ```ruby
-class Length < Grape::Validations::SingleOptionValidator
+class Length < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
       raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
@@ -1332,16 +1511,115 @@ end
 
 ## API Formats
 
-By default, Grape supports _XML_, _JSON_, _BINARY_, and _TXT_ content-types. The default format is `:txt`.
+Your API can declare which content-types to support by using `content_type`. If you do not specify any, Grape will support
+_XML_, _JSON_, _BINARY_, and _TXT_ content-types. The default format is `:txt`; you can change this with `default_format`.
+Essentially, the two APIs below are equivalent.
 
-Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API implementation.
+```ruby
+class Twitter::API < Grape::API
+  # no content_type declarations, so Grape uses the defaults
+end
 
-Your API can declare which types to support by using `content_type`. Response format is determined by the
-request's extension, an explicit `format` parameter in the query string, or `Accept` header.
+class Twitter::API < Grape::API
+  # the following declarations are equivalent to the defaults
 
-The following API will only respond to the JSON content-type and will not parse any other input than `application/json`,
-`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests
-will fail with an HTTP 406 error code.
+  content_type :xml, 'application/xml'
+  content_type :json, 'application/json'
+  content_type :binary, 'application/octet-stream'
+  content_type :txt, 'text/plain'
+
+  default_format :txt
+end
+```
+
+If you declare any `content_type` whatsoever, the Grape defaults will be overridden. For example, the following API will only
+support the `:xml` and `:rss` content-types, but not `:txt`, `:json`, or `:binary`. Importantly, this means the `:txt`
+default format is not supported! So, make sure to set a new `default_format`.
+
+```ruby
+class Twitter::API < Grape::API
+  content_type :xml, 'application/xml'
+  content_type :rss, 'application/xml+rss'
+
+  default_format :xml
+end
+```
+
+Serialization takes place automatically. For example, you do not have to call `to_json` in each JSON API endpoint
+implementation. The response format (and thus the automatic serialization) is determined in the following order:
+* Use the file extension, if specified. If the file is .json, choose the JSON format.
+* Use the value of the `format` parameter in the query string, if specified.
+* Use the format set by the `format` option, if specified.
+* Attempt to find an acceptable format from the `Accept` header.
+* Use the default format, if specified by the `default_format` option.
+* Default to `:txt`.
+
+For example, consider the following API.
+
+```ruby
+class MultipleFormatAPI < Grape::API
+  content_type :xml, 'application/xml'
+  content_type :json, 'application/json'
+
+  default_format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+* `GET /hello` (with an `Accept: */*` header) does not have an extension or a `format` parameter, so it will respond with
+  JSON (the default format).
+* `GET /hello.xml` has a recognized extension, so it will respond with XML.
+* `GET /hello?format=xml` has a recognized `format` parameter, so it will respond with XML.
+* `GET /hello.xml?format=json` has a recognized extension (which takes precedence over the `format` parameter), so it will
+  respond with XML.
+* `GET /hello.xls` (with an `Accept: */*` header) has an extension, but that extension is not recognized, so it will respond
+  with JSON (the default format).
+* `GET /hello.xls` with an `Accept: application/xml` header has an unrecognized extension, but the `Accept` header
+  corresponds to a recognized format, so it will respond with XML.
+* `GET /hello.xls` with an `Accept: text/plain` header has an unrecognized extension *and* an unrecognized `Accept` header,
+  so it will respond with JSON (the default format).
+
+You can override this process explicitly by specifying `env['api.format']` in the API itself.
+For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
+
+```ruby
+class Twitter::API < Grape::API
+  post "attachment" do
+    filename = params[:file][:filename]
+    content_type MIME::Types.type_for(filename)[0].to_s
+    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+    params[:file][:tempfile].read
+  end
+end
+```
+
+You can have your API only respond to a single format with `format`. If you use this, the API will **not** respond to file
+extensions. For example, consider the following API.
+
+```ruby
+class SingleFormatAPI < Grape::API
+  format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+* `GET /hello` will respond with JSON.
+* `GET /hello.xml`, `GET /hello.json`, `GET /hello.foobar`, or *any* other extension will respond with an HTTP 404 error code.
+* `GET /hello?format=xml` will respond with an HTTP 406 error code, because the XML format specified by the request parameter
+  is not supported.
+* `GET /hello` with an `Accept: application/xml` header will still respond with JSON, since it could not negotiate a
+  recognized content-type from the headers and JSON is the effective default.
+
+The formats apply to parsing, too. The following API will only respond to the JSON content-type and will not parse any other
+input than `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and
+`multipart/mixed`. All other requests will fail with an HTTP 406 error code.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -1394,46 +1672,13 @@ class Twitter::API < Grape::API
 end
 ```
 
-Built-in formats are the following.
+Built-in formatters are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
-* `:binary`
-
-Use `default_format` to set the fallback format when the format could not be determined from the `Accept` header.
-See below for the order for choosing the API format.
-
-```ruby
-class Twitter::API < Grape::API
-  default_format :json
-end
-```
-
-The order for choosing the format is the following.
-
-* Use the file extension, if specified. If the file is .json, choose the JSON format.
-* Use the value of the `format` parameter in the query string, if specified.
-* Use the format set by the `format` option, if specified.
-* Attempt to find an acceptable format from the `Accept` header.
-* Use the default format, if specified by the `default_format` option.
-* Default to `:txt`.
-
-You can override this process explicitly by specifying `env['api.format']` in the API itself.
-For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
-
-```ruby
-class Twitter::API < Grape::API
-  post "attachment" do
-    filename = params[:file][:filename]
-    content_type MIME::Types.type_for(filename)[0].to_s
-    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
-    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
-    params[:file][:tempfile].read
-  end
-end
-```
+* `:binary`: data will be returned "as is"
 
 ### JSONP
 
@@ -1643,6 +1888,32 @@ You can use [Active Model Serializers](https://github.com/rails-api/active_model
 [grape-active_model_serializers](https://github.com/jrhe/grape-active_model_serializers) gem, which defines a custom Grape AMS
 formatter.
 
+## Sending Raw or No Data
+
+In general, use the binary format to send raw data.
+
+```ruby
+class API < Grape::API
+  get '/file' do
+    content_type 'application/octet-stream'
+    File.binread 'file.bin'
+  end
+end
+```
+
+You can also set the response body explicitly with `body`.
+
+```ruby
+class API < Grape::API
+  get '/' do
+    content_type 'text/plain'
+    body 'Hello World'
+    # return value ignored
+  end
+end
+```
+
+Use `body false` to return `204 No Content` without any data or content-type.
 
 ## Authentication
 
@@ -1697,26 +1968,34 @@ Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2]
 
 ## Describing and Inspecting an API
 
-Grape routes can be reflected at runtime. This can notably be useful for generating
-documentation.
+Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
 
-Grape exposes arrays of API versions and compiled routes. Each route
-contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`,
-`route_path` and `route_params`. The description and the optional hash that
-follows the API path may contain any number of keys and its values are also
-accessible via dynamically-generated `route_[name]` functions.
+Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`. You can add custom route settings to the route metadata with `route_setting`.
+
+```ruby
+class TwitterAPI < Grape::API
+  version 'v1'
+  desc "Includes custom settings."
+  route_setting :custom, key: 'value'
+  get do
+
+  end
+end
+```
+
+Examine the routes at runtime.
 
 ```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
-TwitterAPI::routes[0].route_version # yields 'v1'
-TwitterAPI::routes[0].route_description # etc.
+TwitterAPI::routes[0].route_version # => 'v1'
+TwitterAPI::routes[0].route_description # => 'Includes custom settings.'
+TwitterAPI::routes[0].route_settings[:custom] # => { key: 'value' }
 ```
 
 ## Current Route and Endpoint
 
-It's possible to retrieve the information about the current route from within an API
-call with `route`.
+It's possible to retrieve the information about the current route from within an API call with `route`.
 
 ```ruby
 class MyAPI < Grape::API
@@ -1860,6 +2139,35 @@ specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
 
+# Using Custom Middleware
+
+## Rails Middleware
+
+Note that when you're using Grape mounted on Rails you don't have to use Rails middleware because it's already included into your middleware stack.
+You only have to implement the helpers to access the specific `env` variable.
+
+### Remote IP
+
+By default you can access remote IP with `request.ip`. This is the remote IP address implemented by Rack. Sometimes it is desirable to get the remote IP [Rails-style](http://stackoverflow.com/questions/10997005/whats-the-difference-between-request-remote-ip-and-request-ip-in-rails) with `ActionDispatch::RemoteIp`.
+
+Add `gem 'actionpack'` to your Gemfile and `require 'action_dispatch/middleware/remote_ip.rb'`. Use the middleware in your API and expose a `client_ip` helper. See [this documentation](http://api.rubyonrails.org/classes/ActionDispatch/RemoteIp.html) for additional options.
+
+```ruby
+class API < Grape::API
+  use ActionDispatch::RemoteIp
+
+  helpers do
+    def client_ip
+      env["action_dispatch.remote_ip"].to_s
+    end
+  end
+
+  get :remopte_ip do
+    { ip: client_ip }
+  end
+end
+```
+
 ## Writing Tests
 
 You can test a Grape API with RSpec by making HTTP requests and examining the response.
@@ -1954,7 +2262,11 @@ end
 
 ## Reloading API Changes in Development
 
-### Rails 3.x
+### Reloading in Rack Applications
+
+Use [grape-reload](https://github.com/AlexYankee/grape-reload).
+
+### Reloading in Rails Applications
 
 Add API paths to `config/application.rb`.
 

@@ -5,7 +5,7 @@ module Grape
       def validate!(params)
         super
         if scope_requires_params && only_subset_present
-          raise Grape::Exceptions::Validation, params: all_keys, message_key: :all_or_none
+          fail Grape::Exceptions::Validation, params: all_keys, message_key: :all_or_none
         end
         params
       end

@@ -17,7 +17,6 @@ module Grape
 
           subject.use :my_middleware, :arg1, &proc
         end
-
       end
 
       describe '.middleware' do

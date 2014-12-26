@@ -89,7 +89,7 @@ module Grape
       end
 
       describe '#status' do
-        ['GET', 'PUT', 'DELETE', 'OPTIONS'].each do |method|
+        %w(GET PUT DELETE OPTIONS).each do |method|
           it 'defaults to 200 on GET' do
             request = Grape::Request.new(Rack::MockRequest.env_for('/', method: method))
             expect(subject).to receive(:request).and_return(request)
@@ -160,6 +160,17 @@ module Grape
           end
         end
 
+        describe 'false' do
+          before do
+            subject.body false
+          end
+
+          it 'sets status to 204' do
+            expect(subject.body).to eq ''
+            expect(subject.status).to eq 204
+          end
+        end
+
         it 'returns default' do
           expect(subject.body).to be nil
         end
@@ -204,6 +215,34 @@ module Grape
 
               it 'presents dummy object' do
                 expect(subject.body).to eq 'dummy'
+              end
+            end
+          end
+        end
+
+        describe 'with' do
+          describe 'multiple entities' do
+            let(:entity_mock1) do
+              entity_mock1 = Object.new
+              allow(entity_mock1).to receive(:represent).and_return(dummy1: 'dummy1')
+              entity_mock1
+            end
+
+            let(:entity_mock2) do
+              entity_mock2 = Object.new
+              allow(entity_mock2).to receive(:represent).and_return(dummy2: 'dummy2')
+              entity_mock2
+            end
+
+            describe 'instance' do
+              before do
+                subject.present 'dummy1', with: entity_mock1
+                subject.present 'dummy2', with: entity_mock2
+              end
+
+              it 'presents both dummy objects' do
+                expect(subject.body[:dummy1]).to eq 'dummy1'
+                expect(subject.body[:dummy2]).to eq 'dummy2'
               end
             end
           end
