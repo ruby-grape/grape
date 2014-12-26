@@ -99,7 +99,6 @@ module Grape
     def mount_in(route_set)
       if endpoints
         endpoints.each do |e|
-          e.inheritable_setting.inherit_from inheritable_setting
           e.mount_in(route_set)
         end
       else

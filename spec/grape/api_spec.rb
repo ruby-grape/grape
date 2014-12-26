@@ -2415,6 +2415,21 @@ describe Grape::API do
         options '/v1/apples/colour'
         expect(last_response.status).to eql 204
       end
+
+      it 'mounts a versioned API with nested resources' do
+        class User < Grape::API
+          version 'v1'
+          resources :users do
+            get :hello do
+              'hello users'
+            end
+          end
+        end
+        subject.mount User
+
+        get '/v1/users/hello'
+        expect(last_response.body).to eq('hello users')
+      end
     end
   end
 
