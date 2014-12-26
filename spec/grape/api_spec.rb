@@ -2417,35 +2417,32 @@ describe Grape::API do
       end
 
       it 'mounts a versioned API with nested resources' do
-        class User < Grape::API
-          version 'v1'
-          resources :users do
-            get :hello do
-              'hello users'
-            end
+        app = Class.new(Grape::API)
+        app.version 'v1'
+        app.resources :users do
+          get :hello do
+            'hello users'
           end
         end
-        subject.mount User
+        subject.mount app
 
         get '/v1/users/hello'
         expect(last_response.body).to eq('hello users')
       end
 
       it 'mounts a prefixed API with nested resources' do
-        class User < Grape::API
-          prefix "api"
-          resource :users do
-            get :hello do
-              'hello users'
-            end
+        app = Class.new(Grape::API)
+        app.prefix 'api'
+        app.resources :users do
+          get :hello do
+            'hello users'
           end
         end
-        subject.mount User
+        subject.mount app
 
         get '/api/users/hello'
         expect(last_response.body).to eq('hello users')
       end
-
     end
   end
 
