@@ -2430,6 +2430,22 @@ describe Grape::API do
         get '/v1/users/hello'
         expect(last_response.body).to eq('hello users')
       end
+
+      it 'mounts a prefixed API with nested resources' do
+        class User < Grape::API
+          prefix "api"
+          resource :users do
+            get :hello do
+              'hello users'
+            end
+          end
+        end
+        subject.mount User
+
+        get '/api/users/hello'
+        expect(last_response.body).to eq('hello users')
+      end
+
     end
   end
 
