@@ -3,6 +3,11 @@ Next Release
 
 * Your contribution here.
 
+0.10.1
+===================
+
+*[#868](https://github.com/intridea/grape/pull/868), Fixed `version` and `preifx` would be overrided when inheriting from parent's inheritable settings.
+
 0.10.0 (12/19/2014)
 ===================
 
