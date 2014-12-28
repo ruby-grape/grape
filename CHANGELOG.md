@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* [#868](https://github.com/intridea/grape/pull/868): Fixed `version` and `preifx` being overridden when mounting API - [@yesmeck](https://github.com/yesmeck).
 * Your contribution here.
 
 0.10.0 (12/19/2014)
