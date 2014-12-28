@@ -39,8 +39,6 @@ module Grape
         self.new_values = other.new_values.deep_dup
       end
 
-      attr_writer :new_values
-
       protected
 
       def values
