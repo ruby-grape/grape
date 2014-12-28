@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to Next Release
+### Upgrading to >= 0.10.1
 
 #### Changes to `declared(params, include_missing: false)`
 

@@ -1,9 +1,8 @@
-Next Release
-============
+0.10.1 (12/28/2014)
+===================
 
 * [#868](https://github.com/intridea/grape/pull/868), [#862](https://github.com/intridea/grape/pull/862), [#861](https://github.com/intridea/grape/pull/861): Fixed `version`, `prefix`, and other settings being overridden or changing scope when mounting API - [@yesmeck](https://github.com/yesmeck).
 * [#864](https://github.com/intridea/grape/pull/864): Fixed `declared(params, include_missing: false)` now returning attributes with `nil` and `false` values - [@ppadron](https://github.com/ppadron).
-* Your contribution here.
 
 0.10.0 (12/19/2014)
 ===================
