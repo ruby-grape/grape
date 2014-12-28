@@ -328,6 +328,36 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(200)
     end
 
+    it 'includes attributes with value that evaluates to false' do
+      subject.params do
+        requires :first
+        optional :boolean
+      end
+
+      subject.post '/declared' do
+        error!('expected false', 400) if declared(params, include_missing: false)[:boolean] != false
+        ''
+      end
+
+      post '/declared', MultiJson.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+    end
+
+    it 'includes attributes with value that evaluates to nil' do
+      subject.params do
+        requires :first
+        optional :second
+      end
+
+      subject.post '/declared' do
+        error!('expected nil', 400) unless declared(params, include_missing: false)[:second].nil?
+        ''
+      end
+
+      post '/declared', MultiJson.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+    end
+
     it 'does not include missing attributes when there are nested hashes' do
       subject.get '/dummy' do
       end
@@ -356,9 +386,9 @@ describe Grape::Endpoint do
 
       expect(last_response.status).to eq(200)
       expect(inner_params[:first]).to eq 'present'
-      expect(inner_params[:nested].keys).to eq [:fourth, :nested_nested]
+      expect(inner_params[:nested].keys).to eq [:fourth, :fifth, :nested_nested]
       expect(inner_params[:nested][:fourth]).to eq ''
-      expect(inner_params[:nested][:nested_nested].keys).to eq [:sixth]
+      expect(inner_params[:nested][:nested_nested].keys).to eq [:sixth, :seven]
       expect(inner_params[:nested][:nested_nested][:sixth]).to eq 'sixth'
     end
   end

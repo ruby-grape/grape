@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to Next Release
+
+#### Changes to `declared(params, include_missing: false)`
+
+Attributes with `nil` values or with values that evaluate to `false` are no longer considered *missing* and will be returned when `include_missing` is set to `false`.
+
+See [#864](https://github.com/intridea/grape/pull/864) for more information.
+
 ### Upgrading to >= 0.10.0
 
 #### Changes to content-types

@@ -2,6 +2,7 @@ Next Release
 ============
 
 * [#868](https://github.com/intridea/grape/pull/868): Fixed `version` and `preifx` being overridden when mounting API - [@yesmeck](https://github.com/yesmeck).
+* [#864](https://github.com/intridea/grape/pull/864): Fixed `declared(params, include_missing: false)` now returning attributes with `nil` and `false` values - [@ppadron](https://github.com/ppadron).
 * Your contribution here.
 
 0.10.0 (12/19/2014)
