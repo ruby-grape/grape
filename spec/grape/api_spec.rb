@@ -2446,6 +2446,42 @@ describe Grape::API do
         expect(last_response.body).to eq('hello users')
       end
 
+      it 'applies format to a mounted API with nested resources' do
+        api = Class.new(Grape::API) do
+          format :json
+          resources :users do
+            get do
+              { users: true }
+            end
+          end
+        end
+        subject.mount api
+
+        get '/users'
+        expect(last_response.body).to eq({ users: true }.to_json)
+      end
+
+      it 'applies auth to a mounted API with nested resources' do
+        api = Class.new(Grape::API) do
+          format :json
+          http_basic do |username, password|
+            username == 'username' && password == 'password'
+          end
+          resources :users do
+            get do
+              { users: true }
+            end
+          end
+        end
+        subject.mount api
+
+        get '/users'
+        expect(last_response.status).to eq(401)
+
+        get '/users', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('username', 'password')
+        expect(last_response.body).to eq({ users: true }.to_json)
+      end
+
       it 'mounts multiple versioned APIs with nested resources' do
         api1 = Class.new(Grape::API) do
           version 'one', using: :header, vendor: 'test'
