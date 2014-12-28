@@ -2445,6 +2445,34 @@ describe Grape::API do
         get '/api/users/hello'
         expect(last_response.body).to eq('hello users')
       end
+
+      it 'mounts multiple versioned APIs with nested resources' do
+        api1 = Class.new(Grape::API) do
+          version 'one', using: :header, vendor: 'test'
+          resources :users do
+            get :hello do
+              'one'
+            end
+          end
+        end
+
+        api2 = Class.new(Grape::API) do
+          version 'two', using: :header, vendor: 'test'
+          resources :users do
+            get :hello do
+              'two'
+            end
+          end
+        end
+
+        subject.mount api1
+        subject.mount api2
+
+        versioned_get '/users/hello', 'one', using: :header, vendor: 'test'
+        expect(last_response.body).to eq('one')
+        versioned_get '/users/hello', 'two', using: :header, vendor: 'test'
+        expect(last_response.body).to eq('two')
+      end
     end
   end
 
