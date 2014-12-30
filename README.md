@@ -5,7 +5,7 @@
 [![Dependency Status](https://gemnasium.com/intridea/grape.svg)](https://gemnasium.com/intridea/grape)
 [![Code Climate](https://codeclimate.com/github/intridea/grape.svg)](https://codeclimate.com/github/intridea/grape)
 [![Coverage Status](https://codeclimate.com/github/intridea/grape/badges/coverage.svg)](https://codeclimate.com/github/intridea/grape)
-[![Inline docs](http://inch-ci.org/github/intridea/grape.png)](http://inch-ci.org/github/intridea/grape) 
+[![Inline docs](http://inch-ci.org/github/intridea/grape.svg)](http://inch-ci.org/github/intridea/grape) 
 
 ## Table of Contents
 
