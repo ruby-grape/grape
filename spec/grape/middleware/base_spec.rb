@@ -34,6 +34,26 @@ describe Grape::Middleware::Base do
     expect(subject.response).to be_kind_of(Rack::Response)
   end
 
+  describe '#response' do
+    subject { Grape::Middleware::Base.new(response) }
+    let(:response) { lambda { |_| [204, { abc: 1 }, 'test'] } }
+
+    it 'status' do
+      subject.call({})
+      expect(subject.response.status).to eq(204)
+    end
+
+    it 'body' do
+      subject.call({})
+      expect(subject.response.body).to eq(['test'])
+    end
+
+    it 'header' do
+      subject.call({})
+      expect(subject.response.header).to have_key(:abc)
+    end
+  end
+
   context 'options' do
     it 'persists options passed at initialization' do
       expect(Grape::Middleware::Base.new(blank_app, abc: true).options[:abc]).to be true
