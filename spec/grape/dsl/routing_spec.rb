@@ -14,8 +14,13 @@ module Grape
       let(:options) { { a: :b } }
       let(:path) { '/dummy' }
 
-      xdescribe '.version' do
-        it 'does some thing'
+      describe '.version' do
+        it 'sets a version for route' do
+          version = 'v1'
+          expect(subject).to receive(:namespace_inheritable).with(:version, [version])
+          expect(subject).to receive(:namespace_inheritable).with(:version_options, using: :path)
+          expect(subject.version(version)).to eq(version)
+        end
       end
 
       describe '.prefix' do
@@ -140,8 +145,12 @@ module Grape
         it 'does some thing'
       end
 
-      xdescribe '.versions' do
-        it 'does some thing'
+      describe '.versions' do
+        it 'returns last defined version' do
+          subject.version 'v1'
+          subject.version 'v2'
+          expect(subject.version).to eq('v2')
+        end
       end
     end
   end

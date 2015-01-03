@@ -35,10 +35,13 @@ module Grape
             fail Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
             @versions = versions | args
-            nest(block) do
-              namespace_inheritable(:version, args)
-              namespace_inheritable(:version_options, options)
-            end
+
+            namespace_inheritable(:version, args)
+            namespace_inheritable(:version_options, options)
+
+            instance_eval(&block) if block_given?
+
+            # reset_validations!
           end
 
           @versions.last unless @versions.nil?
