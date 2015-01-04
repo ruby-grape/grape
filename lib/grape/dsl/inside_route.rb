@@ -18,6 +18,7 @@ module Grape
       def declared(params, options = {}, declared_params = nil)
         options[:include_missing] = true unless options.key?(:include_missing)
         options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
+
         if declared_params.nil?
           declared_params = (!options[:include_parent_namespaces] ? route_setting(:declared_params) :
               (route_setting(:saved_declared_params) || [])).flatten(1) || []
@@ -32,7 +33,7 @@ module Grape
             declared(param || {}, options, declared_params)
           end
         else
-          declared_params.inject({}) do |hash, key|
+          declared_params.inject(Hashie::Mash.new) do |hash, key|
             key = { key => nil } unless key.is_a? Hash
 
             key.each_pair do |parent, children|
