@@ -7,6 +7,7 @@ module Grape
           args = env['rack.routing_args'].dup
           # preserve version from query string parameters
           args.delete(:version)
+          args.delete(:route_info)
           params.deep_merge!(args)
         end
         params
