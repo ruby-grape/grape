@@ -2,12 +2,14 @@ module Grape
   module Validations
     class Base
       attr_reader :attrs
+      attr_writer :context
 
       def initialize(attrs, options, required, scope)
         @attrs = Array(attrs)
         @option = options
         @required = required
         @scope = scope
+        @context = Hashie::Mash.new
       end
 
       def validate!(params)
