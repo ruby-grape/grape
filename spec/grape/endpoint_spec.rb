@@ -582,6 +582,17 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
 
+    it 'responds with a 406 for when no content-type provided' do
+      subject.format :json
+
+      subject.put '/request_body' do
+        params[:user]
+      end
+      put '/request_body', '<user>Bobby T.</user>'
+      expect(last_response.status).to eq(406)
+      expect(last_response.body).to eq('{"error":"The requested content-type \'application/x-www-form-urlencoded\' is not supported."}')
+    end
+
     context 'content type with params' do
       before do
         subject.format :json
@@ -604,7 +615,7 @@ describe Grape::Endpoint do
 
     context 'precedence' do
       before do
-        subject.format :json
+        subject.default_format :json
         subject.namespace '/:id' do
           get do
             {
