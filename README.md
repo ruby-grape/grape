@@ -704,13 +704,12 @@ params do
   optional :non_random_number, type: Integer, default:  Random.rand(1..100)
 end
 ```
-Default value provided by lambda can take zero, one or two arguments
+Default value provided by lambda can take request as an argument
 
 ```ruby
 params do
   optional :random_number, type: Integer, default: -> () { Random.rand(1..100) }
   optional :random_number, type: Integer, default: -> (request) { Random.rand(1..100) }
-  optional :random_number, type: Integer, default: -> (request, cookies) { Random.rand(1..100) }
 end
 ```
 
