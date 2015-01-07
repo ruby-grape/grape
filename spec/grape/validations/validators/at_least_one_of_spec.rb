@@ -12,7 +12,7 @@ describe Grape::Validations::AtLeastOneOfValidator do
       end
     end
     let(:request) do
-      instance_double("Request", :params => params)
+      instance_double('Request', :params => params)
     end
 
     let(:at_least_one_of_params) { [:beer, :wine, :grapefruit] }

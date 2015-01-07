@@ -13,7 +13,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
     end
 
     let(:request) do
-      instance_double("Request", :params => params)
+      instance_double('Request', :params => params)
     end
 
     let(:exactly_one_of_params) { [:beer, :wine, :grapefruit] }
@@ -29,7 +29,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
       end
 
       context 'mixed with other params' do
-        let(:params) { { beer: true, wine: true, grapefruit: true, other: true, andanother: true} }
+        let(:params) { { beer: true, wine: true, grapefruit: true, other: true, andanother: true } }
 
         it 'still raises a validation exception' do
           expect do

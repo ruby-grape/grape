@@ -13,7 +13,7 @@ describe Grape::Validations::AllOrNoneOfValidator do
     end
 
     let(:request) do
-      instance_double("Request", :params => params)
+      instance_double('Request', :params => params)
     end
 
     let(:all_or_none_params) { [:beer, :wine, :grapefruit] }
