@@ -4,12 +4,12 @@ module Grape
     class MutualExclusionValidator < MultipleParamsBase
       attr_reader :processing_keys_in_common
 
-      def validate!(params)
+      def validate!(request)
         super
         if two_or_more_exclusive_params_are_present
           fail Grape::Exceptions::Validation, params: processing_keys_in_common, message_key: :mutual_exclusion
         end
-        params
+        request.params
       end
 
       private

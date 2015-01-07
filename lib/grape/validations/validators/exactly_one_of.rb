@@ -2,12 +2,12 @@ module Grape
   module Validations
     require 'grape/validations/validators/mutual_exclusion'
     class ExactlyOneOfValidator < MutualExclusionValidator
-      def validate!(params)
+      def validate!(request)
         super
         if scope_requires_params && none_of_restricted_params_is_present
           fail Grape::Exceptions::Validation, params: all_keys, message_key: :exactly_one
         end
-        params
+        request.params
       end
 
       private

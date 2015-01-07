@@ -11,6 +11,11 @@ describe Grape::Validations::ExactlyOneOfValidator do
         def required?; end
       end
     end
+
+    let(:request) do
+      instance_double("Request", :params => params)
+    end
+
     let(:exactly_one_of_params) { [:beer, :wine, :grapefruit] }
     let(:validator) { described_class.new(exactly_one_of_params, {}, false, scope.new) }
 
@@ -19,16 +24,16 @@ describe Grape::Validations::ExactlyOneOfValidator do
 
       it 'raises a validation exception' do
         expect do
-          validator.validate! params
+          validator.validate! request
         end.to raise_error(Grape::Exceptions::Validation)
       end
 
       context 'mixed with other params' do
-        let(:mixed_params) { params.merge!(other: true, andanother: true) }
+        let(:params) { { beer: true, wine: true, grapefruit: true, other: true, andanother: true} }
 
         it 'still raises a validation exception' do
           expect do
-            validator.validate! mixed_params
+            validator.validate! request
           end.to raise_error(Grape::Exceptions::Validation)
         end
       end
@@ -39,7 +44,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
 
       it 'raises a validation exception' do
         expect do
-          validator.validate! params
+          validator.validate! request
         end.to raise_error(Grape::Exceptions::Validation)
       end
     end
@@ -49,7 +54,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
 
       it 'raises a validation exception' do
         expect do
-          validator.validate! params
+          validator.validate! request
         end.to raise_error(Grape::Exceptions::Validation)
       end
     end
@@ -59,7 +64,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
 
       it 'raises a validation exception' do
         expect do
-          validator.validate! params
+          validator.validate! request
         end.to raise_error(Grape::Exceptions::Validation)
       end
     end
@@ -68,7 +73,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
       let(:params) { { beer: true, somethingelse: true } }
 
       it 'does not raise a validation exception' do
-        expect(validator.validate!(params)).to eql params
+        expect(validator.validate!(request)).to eql params
       end
     end
   end

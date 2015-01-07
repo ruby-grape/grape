@@ -11,6 +11,10 @@ describe Grape::Validations::AtLeastOneOfValidator do
         def required?; end
       end
     end
+    let(:request) do
+      instance_double("Request", :params => params)
+    end
+
     let(:at_least_one_of_params) { [:beer, :wine, :grapefruit] }
     let(:validator) { described_class.new(at_least_one_of_params, {}, false, scope.new) }
 
@@ -18,14 +22,14 @@ describe Grape::Validations::AtLeastOneOfValidator do
       let(:params) { { beer: true, wine: true, grapefruit: true } }
 
       it 'does not raise a validation exception' do
-        expect(validator.validate!(params)).to eql params
+        expect(validator.validate!(request)).to eql params
       end
 
       context 'mixed with other params' do
-        let(:mixed_params) { params.merge!(other: true, andanother: true) }
+        let(:params) { { beer: true, wine: true, grapefruit: true, other: true, andanother: true } }
 
         it 'does not raise a validation exception' do
-          expect(validator.validate!(mixed_params)).to eql mixed_params
+          expect(validator.validate!(request)).to eql params
         end
       end
     end
@@ -34,7 +38,7 @@ describe Grape::Validations::AtLeastOneOfValidator do
       let(:params) { { beer: true, grapefruit: true } }
 
       it 'does not raise a validation exception' do
-        expect(validator.validate!(params)).to eql params
+        expect(validator.validate!(request)).to eql params
       end
     end
 
@@ -42,7 +46,7 @@ describe Grape::Validations::AtLeastOneOfValidator do
       let(:params) { { 'beer' => true, 'grapefruit' => true } }
 
       it 'does not raise a validation exception' do
-        expect(validator.validate!(params)).to eql params
+        expect(validator.validate!(request)).to eql params
       end
     end
 
@@ -51,7 +55,7 @@ describe Grape::Validations::AtLeastOneOfValidator do
 
       it 'raises a validation exception' do
         expect do
-          validator.validate! params
+          validator.validate! request
         end.to raise_error(Grape::Exceptions::Validation)
       end
     end
@@ -60,7 +64,7 @@ describe Grape::Validations::AtLeastOneOfValidator do
       let(:params) { { beer: true, somethingelse: true } }
 
       it 'does not raise a validation exception' do
-        expect(validator.validate!(params)).to eql params
+        expect(validator.validate!(request)).to eql params
       end
     end
   end
