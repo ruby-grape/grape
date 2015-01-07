@@ -588,7 +588,7 @@ describe Grape::Validations do
       end
     end
 
-    context 'optional params with lambda and params' do
+    context 'optional params with lambda and request' do
       it 'is fine without params' do
         subject.params do
           optional :id, default: ->{ return 1 }
@@ -617,26 +617,6 @@ describe Grape::Validations do
 
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq 'true'
-      end
-
-      it 'is fine with request and cookies' do
-        subject.params do
-          optional :id, default: ->(request, cookies) { return request.get? }
-        end
-
-        subject.put '/' do
-          cookies[:test] = 1
-        end
-
-        subject.get '/' do
-          cookies[:test]
-        end
-
-        put '/'
-        get '/'
-
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq '1'
       end
     end
 
