@@ -101,6 +101,12 @@ describe Grape::Validations do
           expect(last_response.body).to eq('optional works!')
         end
 
+        it 'validates when the optional group is an empty array' do
+          get '/optional', opt_group: []
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
         it 'validates when the optional group is present with required parameters' do
           get '/optional', opt_group: [{ a_number: 45 }]
           expect(last_response.status).to eq(200)
