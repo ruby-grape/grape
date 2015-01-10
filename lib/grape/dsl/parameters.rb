@@ -38,6 +38,13 @@ module Grape
         orig_attrs = attrs.clone
 
         opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        type = opts[:type]
+
+        # check type for optional parameter group
+        if attrs && block_given?
+          fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
+          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash].include?(type)
+        end
 
         validate_attributes(attrs, opts, &block)
 

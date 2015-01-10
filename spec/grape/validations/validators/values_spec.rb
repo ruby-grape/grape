@@ -71,7 +71,7 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
-          optional :optional do
+          optional :optional, type: Array do
             requires :type, values: %w(a b)
           end
         end

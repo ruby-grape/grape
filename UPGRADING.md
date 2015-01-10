@@ -26,6 +26,14 @@ Callbacks defined in a version block are only called for the routes defined in t
 
 See [#901](https://github.com/intridea/grape/pull/901) for more information.
 
+
+#### Make type of group of parameters required
+
+Groups of parameters now require their type to be set explicitly as Array or Hash.
+Not setting the type now results in MissingGroupTypeError, unsupported type will raise UnsupportedTypeError.
+
+See [#886](https://github.com/intridea/grape/pull/886) for more information.
+
 ### Upgrading to >= 0.10.1
 
 #### Changes to `declared(params, include_missing: false)`

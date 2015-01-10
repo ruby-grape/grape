@@ -7,6 +7,7 @@ Next Release
 * [#879](https://github.com/intridea/grape/pull/879): The `route_info` value is no longer included in `params` Hash - [@rodzyn](https://github.com/rodzyn).
 * [#881](https://github.com/intridea/grape/issues/881): Fixed `Grape::Validations::ValuesValidator` support for `Range` type - [@ajvondrak](https://github.com/ajvondrak).
 * [#901](https://github.com/intridea/grape/pull/901): Fix: callbacks defined in a version block are only called for the routes defined in that block - [@kushkella](https://github.com/kushkella).
+* [#886](https://github.com/intridea/grape/pull/886): Group of parameters made to require an explicit type of Hash or Array - [@jrichter1](https://github.com/jrichter1).
 * Your contribution here.
 
 0.10.1 (12/28/2014)

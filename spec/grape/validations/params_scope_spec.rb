@@ -102,4 +102,80 @@ describe Grape::Validations::ParamsScope do
       end
     end
   end
+
+  context 'parameters in group' do
+    it 'errors when no type is provided' do
+      expect do
+        subject.params do
+          group :a do
+            requires :b
+          end
+        end
+      end.to raise_error Grape::Exceptions::MissingGroupTypeError
+
+      expect do
+        subject.params do
+          optional :a do
+            requires :b
+          end
+        end
+      end.to raise_error Grape::Exceptions::MissingGroupTypeError
+    end
+
+    it 'allows Hash as type' do
+      subject.params do
+        group :a, type: Hash do
+          requires :b
+        end
+      end
+      subject.get('/group') { 'group works' }
+      get '/group', a: { b: true }
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('group works')
+
+      subject.params do
+        optional :a, type: Hash do
+          requires :b
+        end
+      end
+      get '/optional_type_hash'
+    end
+
+    it 'allows Array as type' do
+      subject.params do
+        group :a, type: Array do
+          requires :b
+        end
+      end
+      subject.get('/group') { 'group works' }
+      get '/group', a: [{ b: true }]
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('group works')
+
+      subject.params do
+        optional :a, type: Array do
+          requires :b
+        end
+      end
+      get '/optional_type_array'
+    end
+
+    it 'errors with an unsupported type' do
+      expect do
+        subject.params do
+          group :a, type: Set do
+            requires :b
+          end
+        end
+      end.to raise_error Grape::Exceptions::UnsupportedGroupTypeError
+
+      expect do
+        subject.params do
+          optional :a, type: Set do
+            requires :b
+          end
+        end
+      end.to raise_error Grape::Exceptions::UnsupportedGroupTypeError
+    end
+  end
 end
