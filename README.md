@@ -4,7 +4,7 @@
 [![Build Status](http://img.shields.io/travis/intridea/grape.svg)](https://travis-ci.org/intridea/grape)
 [![Dependency Status](https://gemnasium.com/intridea/grape.svg)](https://gemnasium.com/intridea/grape)
 [![Code Climate](https://codeclimate.com/github/intridea/grape.svg)](https://codeclimate.com/github/intridea/grape)
-[![Inline docs](http://inch-ci.org/github/intridea/grape.svg)](http://inch-ci.org/github/intridea/grape) 
+[![Inline docs](http://inch-ci.org/github/intridea/grape.svg)](http://inch-ci.org/github/intridea/grape)
 
 ## Table of Contents
 
@@ -484,7 +484,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, declared will return an empty hash.
+If we do not specify any params, declared will return an empty Hashie::Mash instance.
 
 **Request**
 
@@ -536,6 +536,12 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
   }
 }
 ````
+
+Returned hash is a Hashie::Mash instance so you can access parameters via dot notation:
+
+```ruby
+  declared(params).user == declared(params)["user"]
+```
 
 #### Include missing
 
@@ -2203,6 +2209,8 @@ You can test a Grape API with RSpec by making HTTP requests and examining the re
 
 Use `rack-test` and define your API as `app`.
 
+#### RSpec
+
 ```ruby
 require 'spec_helper'
 
@@ -2232,7 +2240,35 @@ describe Twitter::API do
 end
 ```
 
+#### MiniTest
+
+```ruby
+require "test_helper"
+
+class Twitter::APITest < MiniTest::Unit::TestCase
+  include Rack::Test::Methods
+
+  def app
+    Twitter::API
+  end
+  
+  def test_get_api_statuses_public_timeline_returns_an_empty_array_of_statuses
+    get "/api/statuses/public_timeline"
+    assert last_response.ok?
+    assert_equal JSON.parse(last_response.body), []
+  end
+  
+  def test_get_api_statuses_id_returns_a_status_by_id
+    status = Status.create!
+    get "/api/statuses/#{status.id}"
+    assert_equal last_response.body, status.to_json
+  end
+end
+```
+
 ### Writing Tests with Rails
+
+#### RSpec
 
 ```ruby
 describe Twitter::API do
@@ -2259,6 +2295,30 @@ In Rails, HTTP request tests would go into the `spec/requests` group. You may wa
 ```ruby
 RSpec.configure do |config|
   config.include RSpec::Rails::RequestExampleGroup, type: :request, file_path: /spec\/api/
+end
+```
+
+#### MiniTest
+
+```ruby
+class Twitter::APITest < ActiveSupport::TestCase
+  include Rack::Test::Methods
+
+  def app
+    Rails.application
+  end
+  
+  test "GET /api/statuses/public_timeline returns an empty array of statuses" do
+    get "/api/statuses/public_timeline"
+    assert last_response.ok?
+    assert_equal JSON.parse(last_response.body), []
+  end
+  
+  test "GET /api/statuses/:id returns a status by id" do
+    status = Status.create!
+    get "/api/statuses/#{status.id}"
+    assert_equal last_response.body, status.to_json
+  end
 end
 ```
 

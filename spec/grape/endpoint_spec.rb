@@ -386,9 +386,9 @@ describe Grape::Endpoint do
 
       expect(last_response.status).to eq(200)
       expect(inner_params[:first]).to eq 'present'
-      expect(inner_params[:nested].keys).to eq [:fourth, :fifth, :nested_nested]
+      expect(inner_params[:nested].keys).to eq %w(fourth fifth nested_nested)
       expect(inner_params[:nested][:fourth]).to eq ''
-      expect(inner_params[:nested][:nested_nested].keys).to eq [:sixth, :seven]
+      expect(inner_params[:nested][:nested_nested].keys).to eq %w(sixth seven)
       expect(inner_params[:nested][:nested_nested][:sixth]).to eq 'sixth'
     end
   end
