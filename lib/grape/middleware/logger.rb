@@ -8,12 +8,11 @@ require 'grape/middleware/globals'
 module Grape
   module Middleware
     class Logger < Globals
-
       def before
         super
-        logger.info "[api] Requested#{request_log}" if !request_log.blank?
-        logger.info "[api] HEADERS: #{@env['grape.request.headers']}" if !@env['grape.request.headers'].blank?
-        logger.info "[api] PARAMS: #{@env['grape.request.params']}" if !@env['grape.request.params'].blank?
+        logger.info "[api] Requested#{request_log}" unless request_log.nil? || request_log.empty?
+        logger.info "[api] HEADERS: #{@env['grape.request.headers']}" unless @env['grape.request.headers'].nil? || @env['grape.request.headers'].empty?
+        logger.info "[api] PARAMS: #{@env['grape.request.params']}" unless @env['grape.request.params'].nil? || @env['grape.request.params'].empty?
       end
 
       # Example of what you might do in a subclass in an after hook:
@@ -40,7 +39,7 @@ module Grape
       def request_log
         @request_log ||= begin
           res = ''
-          res << " #{request_log_data}" if !request_log_data.blank?
+          res << " #{request_log_data}" unless request_log_data.nil? || request_log_data.empty?
           res
         end
       end
