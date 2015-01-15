@@ -2333,7 +2333,7 @@ request.
 describe 'an endpoint that needs helpers stubbed' do
   before do
     Grape::Endpoint.before_each do |endpoint|
-      endpoint.stub(:helper_name).and_return('desired_value')
+      allow(endpoint).to receive(:helper_name).and_return('desired_value')
     end
   end
 
