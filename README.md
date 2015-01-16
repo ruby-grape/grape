@@ -780,6 +780,25 @@ params do
 end
 ```
 
+Supplying a range to the `:values` option ensures that the parameter is (or parameters are) included in that range (using `Range#include?`).
+
+```ruby
+params do
+  requires :latitude, type: Float, values: -90.0..+90.0
+  requires :longitude, type: Float, values: -180.0..+180.0
+  optional :letters, type: Array[String], values: 'a'..'z'
+end
+```
+
+Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supplied the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
+
+```ruby
+params do
+  requires :invalid1, type: Float, values: 0..10 # 0.kind_of?(Float) => false
+  optional :invalid2, values: 0..10.0 # 10.0.kind_of?(0.class) => false
+end
+```
+
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
 For example, given a status model you may want to restrict by hashtags that you have
 previously defined in the `HashTag` model.

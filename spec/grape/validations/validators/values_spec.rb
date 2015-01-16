@@ -221,4 +221,48 @@ describe Grape::Validations::ValuesValidator do
       expect(last_response.status).to eq 200
     end
   end
+
+  context 'with a range of values' do
+    subject(:app) do
+      Class.new(Grape::API) do
+        params do
+          optional :value, type: Float, values: 0.0..10.0
+        end
+        get '/value' do
+          { value: params[:value] }.to_json
+        end
+
+        params do
+          optional :values, type: Array[Float], values: 0.0..10.0
+        end
+        get '/values' do
+          { values: params[:values] }.to_json
+        end
+      end
+    end
+
+    it 'allows a single value inside of the range' do
+      get('/value', value: 5.2)
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ value: 5.2 }.to_json)
+    end
+
+    it 'allows an array of values inside of the range' do
+      get('/values', values: [8.6, 7.5, 3, 0.9])
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ values: [8.6, 7.5, 3.0, 0.9] }.to_json)
+    end
+
+    it 'rejects a single value outside the range' do
+      get('/value', value: 'a')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq('value is invalid, value does not have a valid value')
+    end
+
+    it 'rejects an array of values if any of them are outside the range' do
+      get('/values', values: [8.6, 75, 3, 0.9])
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq('values does not have a valid value')
+    end
+  end
 end

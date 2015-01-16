@@ -141,7 +141,7 @@ module Grape
 
       def guess_coerce_type(coerce_type, values)
         return coerce_type if !values || values.is_a?(Proc)
-        return values.first.class if coerce_type == Array && !values.empty?
+        return values.first.class if coerce_type == Array && (values.is_a?(Range) || !values.empty?)
         coerce_type
       end
 
@@ -167,7 +167,8 @@ module Grape
         return unless coerce_type && values
         return if values.is_a?(Proc)
         coerce_type = coerce_type.first if coerce_type.kind_of?(Array)
-        if values.any? { |v| !v.kind_of?(coerce_type) }
+        value_types = values.is_a?(Range) ? [values.begin, values.end] : values
+        if value_types.any? { |v| !v.kind_of?(coerce_type) }
           fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
       end
