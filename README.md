@@ -2195,7 +2195,7 @@ class API < Grape::API
     end
   end
 
-  get :remopte_ip do
+  get :remote_ip do
     { ip: client_ip }
   end
 end
