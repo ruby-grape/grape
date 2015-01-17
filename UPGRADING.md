@@ -235,6 +235,39 @@ end
 
 See [#801](https://github.com/intridea/grape/issues/801) for more information.
 
+#### Changes to version
+
+If version is used with a block, the callbacks defined within that version block are not scoped to that individual block. In other words, the callback would be inherited by all versions blocks that follow the first one e.g
+
+```ruby
+class API < Grape::API
+  resource :foo do
+    version 'v1', :using => :path do
+      before do
+        @output ||= 'hello1'
+      end
+      get '/' do
+        @output += '-v1'
+      end
+    end
+
+    version 'v2', :using => :path do
+      before do
+        @output ||= 'hello2'
+      end
+      get '/:id' do
+        @output += '-v2'
+      end
+    end
+  end
+end
+```
+
+when making a API call `GET /foo/v2/1`, the API would set instance variable `@output` to `hello1-v2`
+
+See [#898](https://github.com/intridea/grape/issues/898) for more information.
+
+
 ### Upgrading to >= 0.9.0
 
 #### Changes in Authentication
