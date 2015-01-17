@@ -5,6 +5,7 @@ Next Release
 * [#559](https://github.com/intridea/grape/issues/559): Support Rack 1.6.0 to parse requests larger than 128KB - [@myitcv](https://github.com/myitcv).
 * [#876](https://github.com/intridea/grape/pull/876): declared(params) now returning Hashie::Mash - [@rodzyn](https://github.com/rodzyn).
 * [#879](https://github.com/intridea/grape/pull/879): route_info is not included in params Hash anymore -  [@rodzyn](https://github.com/rodzyn).
+* [#881](https://github.com/intridea/grape/issues/881): fix bug so that values validator could accept ranges again - [@ajvondrak](https://github.com/ajvondrak).
 * Your contribution here.
 
 0.10.1 (12/28/2014)
