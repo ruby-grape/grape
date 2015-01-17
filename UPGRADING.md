@@ -19,6 +19,13 @@ Key route_info is excluded from params.
 
 See [#879](https://github.com/intridea/grape/pull/879) for more information.
 
+
+#### Fix callbacks within a version block
+
+Callbacks defined in a version block are only called for the routes defined in that block. This was a regression introduced in Grape 0.10.0, and is fixed in this version.
+
+See [#901](https://github.com/intridea/grape/pull/901) for more information.
+
 ### Upgrading to >= 0.10.1
 
 #### Changes to `declared(params, include_missing: false)`

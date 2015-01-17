@@ -2162,6 +2162,39 @@ GET /123        # 'Fixnum'
 GET /foo        # 400 error - 'blah is invalid'
 ```
 
+When a callback is defined within a version block, it's only called for the routes defined in that block.
+
+```ruby
+class Test < Grape::API
+  resource :foo do
+    version 'v1', :using => :path do
+      before do
+        @output ||= 'v1-'
+      end
+      get '/' do
+        @output += 'hello'
+      end
+    end
+
+    version 'v2', :using => :path do
+      before do
+        @output ||= 'v2-'
+      end
+      get '/' do
+        @output += 'hello'
+      end
+    end
+  end
+end
+```
+
+The behaviour is then:
+
+```bash
+GET /foo/v1       # 'v1-hello'
+GET /foo/v2       # 'v2-hello'
+```
+
 ## Anchoring
 
 Grape by default anchors all request paths, which means that the request URL
@@ -2270,13 +2303,13 @@ class Twitter::APITest < MiniTest::Unit::TestCase
   def app
     Twitter::API
   end
-  
+
   def test_get_api_statuses_public_timeline_returns_an_empty_array_of_statuses
     get "/api/statuses/public_timeline"
     assert last_response.ok?
     assert_equal JSON.parse(last_response.body), []
   end
-  
+
   def test_get_api_statuses_id_returns_a_status_by_id
     status = Status.create!
     get "/api/statuses/#{status.id}"
@@ -2326,13 +2359,13 @@ class Twitter::APITest < ActiveSupport::TestCase
   def app
     Rails.application
   end
-  
+
   test "GET /api/statuses/public_timeline returns an empty array of statuses" do
     get "/api/statuses/public_timeline"
     assert last_response.ok?
     assert_equal JSON.parse(last_response.body), []
   end
-  
+
   test "GET /api/statuses/:id returns a status by id" do
     status = Status.create!
     get "/api/statuses/#{status.id}"

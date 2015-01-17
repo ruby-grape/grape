@@ -36,10 +36,17 @@ module Grape
 
             @versions = versions | args
 
-            namespace_inheritable(:version, args)
-            namespace_inheritable(:version_options, options)
+            if block_given?
+              within_namespace do
+                namespace_inheritable(:version, args)
+                namespace_inheritable(:version_options, options)
 
-            instance_eval(&block) if block_given?
+                instance_eval(&block)
+              end
+            else
+              namespace_inheritable(:version, args)
+              namespace_inheritable(:version_options, options)
+            end
 
             # reset_validations!
           end

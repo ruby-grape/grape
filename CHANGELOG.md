@@ -6,6 +6,7 @@ Next Release
 * [#876](https://github.com/intridea/grape/pull/876): Call to `declared(params)` now returns a `Hashie::Mash` - [@rodzyn](https://github.com/rodzyn).
 * [#879](https://github.com/intridea/grape/pull/879): The `route_info` value is no longer included in `params` Hash - [@rodzyn](https://github.com/rodzyn).
 * [#881](https://github.com/intridea/grape/issues/881): Fixed `Grape::Validations::ValuesValidator` support for `Range` type - [@ajvondrak](https://github.com/ajvondrak).
+* [#901](https://github.com/intridea/grape/pull/901): Fix: callbacks defined in a version block are only called for the routes defined in that block - [@kushkella](https://github.com/kushkella).
 * Your contribution here.
 
 0.10.1 (12/28/2014)
