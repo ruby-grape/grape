@@ -107,6 +107,38 @@ shared_examples_for 'versioning' do
     end
   end
 
+  context 'with before block defined within a version block' do
+    it 'calls before block that is defined within the version block' do
+      subject.format :txt
+      subject.prefix 'api'
+      subject.version 'v2', macro_options do
+        before do
+          @output ||= 'v2-'
+        end
+        get 'version' do
+          @output += 'version'
+        end
+      end
+
+      subject.version 'v1', macro_options do
+        before do
+          @output ||= 'v1-'
+        end
+        get 'version' do
+          @output += 'version'
+        end
+      end
+
+      versioned_get '/version', 'v1', macro_options.merge(prefix: subject.prefix)
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('v1-version')
+
+      versioned_get '/version', 'v2', macro_options.merge(prefix: subject.prefix)
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('v2-version')
+    end
+  end
+
   it 'does not overwrite version parameter with API version' do
     subject.format :txt
     subject.version 'v1', macro_options
