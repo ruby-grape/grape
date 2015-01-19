@@ -16,7 +16,7 @@ module Grape
       #    env['api.subtype'] => 'vnd.mycompany-v1+json'
       #    env['api.vendor]   => 'mycompany'
       #    env['api.version]  => 'v1'
-      #    env['api.format]   => 'format'
+      #    env['api.format]   => 'json'
       #
       # If version does not match this route, then a 406 is raised with
       # X-Cascade header to alert Rack::Mount to attempt the next matched
