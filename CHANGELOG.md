@@ -9,6 +9,7 @@ Next Release
 * [#901](https://github.com/intridea/grape/pull/901): Fix: callbacks defined in a version block are only called for the routes defined in that block - [@kushkella](https://github.com/kushkella).
 * [#886](https://github.com/intridea/grape/pull/886): Group of parameters made to require an explicit type of Hash or Array - [@jrichter1](https://github.com/jrichter1).
 * [#912](https://github.com/intridea/grape/pull/912): Extended the `:using` feature for param documentation to `optional` fields - [@croeck](https://github.com/croeck).
+* [#906](https://github.com/intridea/grape/pull/906): Fix: invalid body parse errors are not rescued by handlers - [@croeck](https://github.com/croeck).
 * Your contribution here.
 
 0.10.1 (12/28/2014)
