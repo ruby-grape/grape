@@ -28,6 +28,10 @@ module Grape
       !!(settings[:version] && settings[:version_options][:using] == :path)
     end
 
+    def optional_path_versioning?
+      uses_path_versioning? && !!settings[:version_options][:default]
+    end
+
     def has_namespace?
       namespace && namespace.to_s =~ /^\S/ && namespace != '/'
     end
@@ -47,7 +51,15 @@ module Grape
     end
 
     def path
-      Rack::Mount::Utils.normalize_path(parts.join('/'))
+      path = Rack::Mount::Utils.normalize_path(parts.join('/'))
+      if optional_path_versioning?
+        case path
+        when %r{./:version} then path.sub!('/:version', '(/:version)')
+        when %r{:version/.} then path.sub!(':version/', '(:version/)')
+        else path.sub!(':version', '(:version)')
+        end
+      end
+      path
     end
 
     def path_with_suffix

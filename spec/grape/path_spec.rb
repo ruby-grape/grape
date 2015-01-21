@@ -70,6 +70,17 @@ module Grape
         expect(path.uses_path_versioning?).to be false
       end
 
+      it 'is false when the version option is header with a default' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :header, default: 'v2' }
+        )
+
+        expect(path.uses_path_versioning?).to be false
+      end
+
       it 'is true when the version option is path' do
         path = Path.new(
           anything,
@@ -79,6 +90,68 @@ module Grape
         )
 
         expect(path.uses_path_versioning?).to be true
+      end
+
+      it 'is true when the version option is path with a default' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :path, default: 'v2' }
+        )
+
+        expect(path.uses_path_versioning?).to be true
+      end
+    end
+
+    describe '#optional_path_versioning?' do
+      it 'is false when the version setting is nil' do
+        path = Path.new(anything, anything, version: nil)
+        expect(path.optional_path_versioning?).to be false
+      end
+
+      it 'is false when the version option is header' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :header }
+        )
+
+        expect(path.optional_path_versioning?).to be false
+      end
+
+      it 'is false when the version option is header with a default' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :header, default: 'v2' }
+        )
+
+        expect(path.optional_path_versioning?).to be false
+      end
+
+      it 'is false when the version option is path without a default' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :path }
+        )
+
+        expect(path.optional_path_versioning?).to be false
+      end
+
+      it 'is true when the version option is path with a default' do
+        path = Path.new(
+          anything,
+          anything,
+          version: 'v1',
+          version_options: { using: :path, default: 'v2' }
+        )
+
+        expect(path.optional_path_versioning?).to be true
       end
     end
 
@@ -154,6 +227,67 @@ module Grape
           )
 
           expect(path.path).to eql('/foo/hello')
+        end
+      end
+
+      context ':version' do
+        it 'is included when given the path version option' do
+          path = Path.new(
+            'raw_path',
+            'namespace',
+            version: 'v1',
+            version_options: { using: :path }
+          )
+
+          expect(path.path).to eql('/:version/namespace/raw_path')
+        end
+
+        it 'is excluded when given the header version option' do
+          path = Path.new(
+            'raw_path',
+            'namespace',
+            version: 'v1',
+            version_options: { using: :header }
+          )
+
+          expect(path.path).to eql('/namespace/raw_path')
+        end
+
+        context 'with a default version' do
+          it 'is made optional at the beginning of the path' do
+            path = Path.new(
+              'raw_path',
+              'namespace',
+              version: 'v1|v2',
+              version_options: { using: :path, default: 'v2' }
+            )
+
+            expect(path.path).to eql('/(:version/)namespace/raw_path')
+          end
+
+          it 'is made optional in the middle of the path' do
+            path = Path.new(
+              'raw_path',
+              'namespace',
+              mount_path: '/foo',
+              root_prefix: '/hello',
+              version: 'v1|v2',
+              version_options: { using: :path, default: 'v2' }
+            )
+
+            expect(path.path).to eql('/foo/hello(/:version)/namespace/raw_path')
+          end
+
+          it 'is made optional at the end of the path' do
+            path = Path.new(
+              nil,
+              nil,
+              version: 'v1|v2',
+              version_options: { using: :path, default: 'v2' }
+            )
+
+            expect(path.path).to eql('/(:version)')
+          end
         end
       end
 

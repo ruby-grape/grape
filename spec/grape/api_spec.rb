@@ -79,6 +79,131 @@ describe Grape::API do
     end
   end
 
+  describe '.version using path with a default' do
+    context 'when the version is specified in the path' do
+      it_should_behave_like 'versioning' do
+        let(:macro_options) do
+          {
+            using: :path,
+            default: 'default_version',
+          }
+        end
+      end
+    end
+
+    context 'when the version is not specified in the path' do
+      it 'sets the API version to the default' do
+        subject.format :txt
+        subject.version 'v1', using: :path, default: 'default_version'
+        subject.get :hello do
+          "Version: #{env['api.version']}"
+        end
+        get '/hello'
+        expect(last_response.body).to eql 'Version: default_version'
+      end
+
+      it 'adds the prefix before the empty API version' do
+        subject.format :txt
+        subject.prefix 'api'
+        subject.version 'v1', using: :path, default: 'default_version'
+        subject.get :hello do
+          "Version: #{env['api.version']}"
+        end
+        get '/api/hello'
+        expect(last_response.body).to eql 'Version: default_version'
+      end
+
+      it 'defaults versions in nestings' do
+        subject.format :txt
+        subject.version 'v2', using: :path, default: 'Radical'
+        subject.get '/awesome' do
+          "Version: #{env['api.version']}"
+        end
+
+        subject.version 'v1', using: :path, default: 'Totally' do
+          get '/legacy' do
+            "Version: #{env['api.version']}"
+          end
+        end
+
+        get '/awesome'
+        expect(last_response.body).to eql 'Version: Radical'
+        get '/legacy'
+        expect(last_response.body).to eql 'Version: Totally'
+      end
+
+      it 'handles multiple versions' do
+        subject.format :txt
+        subject.version 'v1', 'v2', using: :path, default: 'v2'
+        subject.get 'awesome' do
+          "Version: #{env['api.version']}"
+        end
+
+        versioned_get '/awesome', 'v1', using: :path
+        expect(last_response.body).to eql 'Version: v1'
+        versioned_get '/awesome', 'v2', using: :path
+        expect(last_response.body).to eql 'Version: v2'
+        versioned_get '/awesome', 'v3', using: :path
+        expect(last_response.status).to eql 404
+        get '/awesome'
+        expect(last_response.body).to eql 'Version: v2'
+      end
+
+      context 'with different optional versions for the same endpoint' do
+        context 'without a prefix' do
+          it "uses the first declared endpoint's default" do
+            subject.format :txt
+            subject.version 'v2', using: :path, default: 'v2_default'
+            subject.get 'version' do
+              env['api.version']
+            end
+
+            subject.version 'v1', using: :path, default: 'v1_default' do
+              get 'version' do
+                'version ' + env['api.version']
+              end
+            end
+
+            get '/version'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq('v2_default')
+          end
+        end
+
+        context 'with a prefix' do
+          it "uses the first declared endpoint's default" do
+            subject.format :txt
+            subject.prefix 'api'
+            subject.version 'v2', using: :path, default: 'v2_default'
+            subject.get 'version' do
+              env['api.version']
+            end
+
+            subject.version 'v1', using: :path, default: 'v1_default' do
+              get 'version' do
+                env['api.version']
+              end
+            end
+
+            get '/api/version'
+            expect(last_response.body).to eq('v2_default')
+          end
+        end
+      end
+
+      it 'does not overwrite version parameter with API version' do
+        subject.format :txt
+        subject.version 'v1', using: :path, default: 'blah'
+        subject.params { requires :version }
+        subject.get :api_version_with_version_param do
+          params[:version]
+        end
+        get '/api_version_with_version_param?version=1'
+        expect(last_response.body).to eql '1'
+      end
+    end
+  end
+
   describe '.version using param' do
     it_should_behave_like 'versioning' do
       let(:macro_options) do
