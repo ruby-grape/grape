@@ -318,6 +318,30 @@ Using this versioning strategy, clients should pass the desired version in the U
 
     curl -H http://localhost:9292/v1/statuses/public_timeline
 
+You may optionally specify the `:default` option for a path version, which will make the version in the URL optional. For example, the following API will respond to either the URL `/v1/foo` or just `/foo`. In either case, the value of `env['api.version']` will be `'v1'`.
+
+```ruby
+class API < Grape::API
+  version 'v1', using: :path, default: 'v1'
+
+  get :foo do
+    # ...
+  end
+end
+```
+
+This is also useful for "evolving" your APIs (see [this blog post](http://code.dblock.org/2013/07/19/evolving-apis-using-grape-api-versioning.html)). For example, the following API responds to `/v1/foo` or `/v2/foo`, but `/foo` will behave like `/v2/foo`:
+
+```ruby
+class API < Grape::API
+  version 'v1', 'v2', default: 'v2'
+
+  get :foo do
+    # ...
+  end
+end
+```
+
 ### Header
 
 ```ruby
