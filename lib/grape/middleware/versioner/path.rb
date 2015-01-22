@@ -31,13 +31,13 @@ module Grape
             path = Rack::Mount::Utils.normalize_path(path)
           end
 
+          env['api.version'] = default_version if default_version
+
           pieces = path.split('/')
           potential_version = pieces[1]
           if potential_version =~ options[:pattern]
             if unrecognized_version?(potential_version)
-              if default_version
-                env['api.version'] = default_version
-              else
+              unless default_version
                 throw :error, status: 404, message: '404 API Version Not Found'
               end
             else

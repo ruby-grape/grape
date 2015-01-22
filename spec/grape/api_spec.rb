@@ -95,10 +95,10 @@ describe Grape::API do
       it 'sets the API version to the default' do
         subject.format :txt
         subject.version 'v1', using: :path, default: 'default_version'
-        subject.get :hello do
+        subject.get do
           "Version: #{env['api.version']}"
         end
-        get '/hello'
+        get '/'
         expect(last_response.body).to eql 'Version: default_version'
       end
 
