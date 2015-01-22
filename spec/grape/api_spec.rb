@@ -85,7 +85,7 @@ describe Grape::API do
         let(:macro_options) do
           {
             using: :path,
-            default: 'default_version',
+            default: 'default_version'
           }
         end
       end
