@@ -750,7 +750,7 @@ end
 #### `allow_blank`
 
 Parameters can be defined as `allow_blank`, ensuring that they contain a value. By default, `requires`
-only validates that a parameter was sent in the request, regardless its value. With `allow_blank`,
+only validates that a parameter was sent in the request, regardless its value. With `allow_blank: false`,
 empty values or whitespace only values are invalid.
 
 `allow_blank` can be combined with both `requires` and `optional`. If the parameter is required, it has to contain
