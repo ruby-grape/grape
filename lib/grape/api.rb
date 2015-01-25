@@ -53,11 +53,7 @@ module Grape
       protected
 
       def prepare_routes
-        routes = []
-        endpoints.each do |endpoint|
-          routes.concat(endpoint.routes)
-        end
-        routes
+        endpoints.map(&:routes).flatten
       end
 
       # Execute first the provided block, then each of the
