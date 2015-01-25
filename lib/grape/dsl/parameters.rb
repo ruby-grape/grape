@@ -21,9 +21,10 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : nil
+        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        opts.merge!(presence: true)
 
-        if opts && opts[:using]
+        if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)
         else
           validate_attributes(attrs, opts, &block)
@@ -34,12 +35,11 @@ module Grape
       end
 
       def optional(*attrs, &block)
-        orig_attrs = attrs
+        orig_attrs = attrs.clone
 
-        validations = {}
-        validations.merge!(attrs.pop) if attrs.last.is_a?(Hash)
-        validations[:type] ||= Array if block_given?
-        validates(attrs, validations)
+        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+
+        validate_attributes(attrs, opts, &block)
 
         block_given? ? new_scope(orig_attrs, true, &block) :
             push_declared_params(attrs)

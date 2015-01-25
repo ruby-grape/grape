@@ -65,8 +65,7 @@ module Grape
       end
 
       def validate_attributes(attrs, opts, &block)
-        validations = { presence: true }
-        validations.merge!(opts) if opts
+        validations = opts.clone
         validations[:type] ||= Array if block
         validates(attrs, validations)
       end

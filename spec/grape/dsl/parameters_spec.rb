@@ -11,7 +11,7 @@ module Grape
         end
 
         # rubocop:disable TrivialAccessors
-        def validate_attrs
+        def validate_attributes_reader
           @validate_attributes
         end
         # rubocop:enable TrivialAccessors
@@ -21,7 +21,7 @@ module Grape
         end
 
         # rubocop:disable TrivialAccessors
-        def push_declared_paras
+        def push_declared_params_reader
           @push_declared_params
         end
         # rubocop:enable TrivialAccessors
@@ -31,7 +31,7 @@ module Grape
         end
 
         # rubocop:disable TrivialAccessors
-        def valids
+        def validates_reader
           @validates
         end
         # rubocop:enable TrivialAccessors
@@ -57,8 +57,8 @@ module Grape
         it 'adds a required parameter' do
           subject.requires :id, type: Integer, desc: 'Identity.'
 
-          expect(subject.validate_attrs).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-          expect(subject.push_declared_paras).to eq([[:id]])
+          expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: true }])
+          expect(subject.push_declared_params_reader).to eq([[:id]])
         end
       end
 
@@ -66,8 +66,8 @@ module Grape
         it 'adds an optional parameter' do
           subject.optional :id, type: Integer, desc: 'Identity.'
 
-          expect(subject.valids).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-          expect(subject.push_declared_paras).to eq([[:id]])
+          expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+          expect(subject.push_declared_params_reader).to eq([[:id]])
         end
       end
 
@@ -75,7 +75,7 @@ module Grape
         it 'adds an mutally exclusive parameter validation' do
           subject.mutually_exclusive :media, :audio
 
-          expect(subject.valids).to eq([[:media, :audio], { mutual_exclusion: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { mutual_exclusion: true }])
         end
       end
 
@@ -83,7 +83,7 @@ module Grape
         it 'adds an exactly of one parameter validation' do
           subject.exactly_one_of :media, :audio
 
-          expect(subject.valids).to eq([[:media, :audio], { exactly_one_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { exactly_one_of: true }])
         end
       end
 
@@ -91,7 +91,7 @@ module Grape
         it 'adds an at least one of parameter validation' do
           subject.at_least_one_of :media, :audio
 
-          expect(subject.valids).to eq([[:media, :audio], { at_least_one_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { at_least_one_of: true }])
         end
       end
 
@@ -99,7 +99,7 @@ module Grape
         it 'adds an all or none of parameter validation' do
           subject.all_or_none_of :media, :audio
 
-          expect(subject.valids).to eq([[:media, :audio], { all_or_none_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { all_or_none_of: true }])
         end
       end
 
