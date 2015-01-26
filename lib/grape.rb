@@ -55,6 +55,8 @@ module Grape
     autoload :UnknownOptions,                 'grape/exceptions/unknown_options'
     autoload :InvalidWithOptionForRepresent,  'grape/exceptions/invalid_with_option_for_represent'
     autoload :IncompatibleOptionValues,       'grape/exceptions/incompatible_option_values'
+    autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
+    autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
   end
 
   module ErrorFormatter

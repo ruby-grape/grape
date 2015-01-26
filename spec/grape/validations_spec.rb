@@ -228,7 +228,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params do
-          requires :items do
+          requires :items, type: Array do
             requires :key
           end
         end
@@ -272,7 +272,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params do
-          requires :items do
+          requires :items, type: Array do
             requires :key
           end
         end
@@ -283,7 +283,7 @@ describe Grape::Validations do
     context 'group' do
       before do
         subject.params do
-          group :items do
+          group :items, type: Array do
             requires :key
           end
         end
@@ -306,7 +306,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params do
-          group :items do
+          group :items, type: Array do
             requires :key
           end
         end
@@ -319,7 +319,7 @@ describe Grape::Validations do
 
       before do
         subject.params do
-          optional :items do
+          optional :items, type: Array do
             optional :key1, type: String
             optional :key2, type: String
           end
@@ -395,9 +395,9 @@ describe Grape::Validations do
     context 'validation within arrays' do
       before do
         subject.params do
-          group :children do
+          group :children, type: Array do
             requires :name
-            group :parents do
+            group :parents, type: Array do
               requires :name
             end
           end
@@ -457,7 +457,7 @@ describe Grape::Validations do
     context 'with block param' do
       before do
         subject.params do
-          requires :planets do
+          requires :planets, type: Array do
             requires :name
           end
         end
@@ -469,7 +469,7 @@ describe Grape::Validations do
         end
 
         subject.params do
-          group :stars do
+          group :stars, type: Array do
             requires :name
           end
         end
@@ -482,7 +482,7 @@ describe Grape::Validations do
 
         subject.params do
           requires :name
-          optional :moons do
+          optional :moons, type: Array do
             requires :name
           end
         end
@@ -549,9 +549,9 @@ describe Grape::Validations do
     context 'validation within arrays with JSON' do
       before do
         subject.params do
-          group :children do
+          group :children, type: Array do
             requires :name
-            group :parents do
+            group :parents, type: Array do
               requires :name
             end
           end
@@ -630,7 +630,7 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params do
-          optional :items do
+          optional :items, type: Array do
             requires :key
           end
         end
@@ -692,10 +692,10 @@ describe Grape::Validations do
 
       it 'adds to declared parameters' do
         subject.params do
-          optional :items do
+          optional :items, type: Array do
             requires :key
-            optional(:optional_subitems) { requires :value }
-            requires(:required_subitems) { requires :value }
+            optional(:optional_subitems, type: Array) { requires :value }
+            requires(:required_subitems, type: Array) { requires :value }
           end
         end
         expect(subject.route_setting(:declared_params)).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])

@@ -71,6 +71,13 @@ module Grape
       end
 
       def new_scope(attrs, optional = false, &block)
+        # if required params are grouped and no type or unsupported type is provided, raise an error
+        type = attrs[1] ? attrs[1][:type] : nil
+        if attrs.first && !optional
+          fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
+          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash].include?(type)
+        end
+
         opts = attrs[1] || { type: Array }
         ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
       end

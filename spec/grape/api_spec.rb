@@ -2166,11 +2166,11 @@ describe Grape::API do
     it 'groups nested params and prevents overwriting of params with same name in different groups' do
       subject.desc 'method'
       subject.params do
-        group :group1 do
+        group :group1, type: Array do
           optional :param1, desc: 'group1 param1 desc'
           requires :param2, desc: 'group1 param2 desc'
         end
-        group :group2 do
+        group :group2, type: Array do
           optional :param1, desc: 'group2 param1 desc'
           requires :param2, desc: 'group2 param2 desc'
         end
@@ -2190,7 +2190,7 @@ describe Grape::API do
       subject.desc 'nesting'
       subject.params do
         requires :root_param, desc: 'root param'
-        group :nested do
+        group :nested, type: Array do
           requires :nested_param, desc: 'nested param'
         end
       end
