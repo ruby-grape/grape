@@ -47,6 +47,44 @@ describe Grape::Validations do
       end
     end
 
+    context 'optional using Grape::Entity documentation' do
+      def define_optional_using
+        documentation = { field_a: { type: String }, field_b: { type: String } }
+        subject.params do
+          optional :all, using: documentation
+        end
+      end
+      before do
+        define_optional_using
+        subject.get '/optional' do
+          'optional with using works'
+        end
+      end
+
+      it 'adds entity documentation to declared params' do
+        define_optional_using
+        expect(subject.route_setting(:declared_params)).to eq([:field_a, :field_b])
+      end
+
+      it 'works when field_a and field_b are not present' do
+        get '/optional'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('optional with using works')
+      end
+
+      it 'works when field_a is present' do
+        get '/optional', field_a: 'woof'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('optional with using works')
+      end
+
+      it 'works when field_b is present' do
+        get '/optional', field_b: 'woof'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('optional with using works')
+      end
+    end
+
     context 'required' do
       before do
         subject.params do
