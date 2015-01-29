@@ -46,10 +46,14 @@ module Grape
           fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash].include?(type)
         end
 
-        validate_attributes(attrs, opts, &block)
+        if opts[:using]
+          require_optional_fields(attrs.first, opts)
+        else
+          validate_attributes(attrs, opts, &block)
 
-        block_given? ? new_scope(orig_attrs, true, &block) :
-            push_declared_params(attrs)
+          block_given? ? new_scope(orig_attrs, true, &block) :
+              push_declared_params(attrs)
+        end
       end
 
       def mutually_exclusive(*attrs)

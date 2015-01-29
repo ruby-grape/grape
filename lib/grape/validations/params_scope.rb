@@ -64,6 +64,15 @@ module Grape
         end
       end
 
+      def require_optional_fields(context, opts)
+        optional_fields = opts[:using].keys
+        optional_fields -= Array(opts[:except]) unless context == :all
+        optional_fields.each do |field|
+          field_opts = opts[:using][field]
+          optional(field, field_opts) if field_opts
+        end
+      end
+
       def validate_attributes(attrs, opts, &block)
         validations = opts.clone
         validations[:type] ||= Array if block
