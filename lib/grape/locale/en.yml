@@ -41,4 +41,7 @@ en:
             "when specifying %{body_format} as content-type, you must pass valid
             %{body_format} in the request's 'body'
             "
+        invalid_accept_header:
+          problem: 'Invalid accept header'
+          resolution: '%{message}'
 

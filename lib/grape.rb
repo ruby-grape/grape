@@ -58,6 +58,7 @@ module Grape
     autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
     autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
     autoload :InvalidMessageBody,             'grape/exceptions/invalid_message_body'
+    autoload :InvalidAcceptHeader,            'grape/exceptions/invalid_accept_header'
   end
 
   module ErrorFormatter
