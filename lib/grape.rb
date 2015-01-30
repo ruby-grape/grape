@@ -57,6 +57,7 @@ module Grape
     autoload :IncompatibleOptionValues,       'grape/exceptions/incompatible_option_values'
     autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
     autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
+    autoload :InvalidAcceptHeader,            'grape/exceptions/invalid_accept_header'
   end
 
   module ErrorFormatter

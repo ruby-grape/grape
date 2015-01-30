@@ -23,16 +23,12 @@ module Grape
       # route.
       class Header < Base
         def before
-          begin
-            header = Rack::Accept::MediaType.new env['HTTP_ACCEPT']
-          rescue RuntimeError => e
-            throw :error, status: 406, headers: error_headers, message: e.message
-          end
+          header = rack_accept_header
 
           if strict?
             # If no Accept header:
             if header.qvalues.empty?
-              throw :error, status: 406, headers: error_headers, message: 'Accept header must be set.'
+              fail Grape::Exceptions::InvalidAcceptHeader.new('Accept header must be set.', error_headers)
             end
             # Remove any acceptable content types with ranges.
             header.qvalues.reject! do |media_type, _|
@@ -40,7 +36,8 @@ module Grape
             end
             # If all Accept headers included a range:
             if header.qvalues.empty?
-              throw :error, status: 406, headers: error_headers, message: 'Accept header must not contain ranges ("*").'
+              fail Grape::Exceptions::InvalidAcceptHeader.new('Accept header must not contain ranges ("*").',
+                                                              error_headers)
             end
           end
 
@@ -58,10 +55,10 @@ module Grape
             end
           # If none of the available content types are acceptable:
           elsif strict?
-            throw :error, status: 406, headers: error_headers, message: '406 Not Acceptable'
+            fail Grape::Exceptions::InvalidAcceptHeader.new('406 Not Acceptable', error_headers)
           # If all acceptable content types specify a vendor or version that doesn't exist:
           elsif header.values.all? { |header_value| has_vendor?(header_value) || version?(header_value) }
-            throw :error, status: 406, headers: error_headers, message: 'API vendor or version not found.'
+            fail Grape::Exceptions::InvalidAcceptHeader.new('API vendor or version not found.', error_headers)
           end
         end
 
@@ -83,7 +80,13 @@ module Grape
             available_media_types << media_type
           end
 
-          available_media_types = available_media_types.flatten
+          available_media_types.flatten
+        end
+
+        def rack_accept_header
+          Rack::Accept::MediaType.new env['HTTP_ACCEPT']
+        rescue RuntimeError => e
+          raise Grape::Exceptions::InvalidAcceptHeader.new(e.message, error_headers)
         end
 
         def versions

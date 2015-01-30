@@ -41,7 +41,7 @@ module Grape
           http_codes = env['rack.routing_args'][:route_info].route_http_codes || []
           found_code = http_codes.find do |http_code|
             (http_code[0].to_i == env['api.endpoint'].status) && http_code[2].respond_to?(:represent)
-          end
+          end if env['api.endpoint'].request
 
           presenter = found_code[2] if found_code
         end
