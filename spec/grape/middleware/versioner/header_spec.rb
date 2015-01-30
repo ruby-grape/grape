@@ -84,14 +84,13 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if vendor is invalid' do
-      expect do
-        subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor+json').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'API vendor or version not found.'
-      )
+      expect { subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor+json').last }
+        .to raise_exception do |exception|
+          expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+          expect(exception.headers).to eql('X-Cascade' => 'pass')
+          expect(exception.status).to eql 406
+          expect(exception.message).to include 'API vendor or version not found'
+        end
     end
 
     context 'when version is set' do
@@ -112,14 +111,13 @@ describe Grape::Middleware::Versioner::Header do
       end
 
       it 'fails with 406 Not Acceptable if vendor is invalid' do
-        expect do
-          subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last
-        end.to throw_symbol(
-          :error,
-          status: 406,
-          headers: { 'X-Cascade' => 'pass' },
-          message: 'API vendor or version not found.'
-        )
+        expect { subject.call('HTTP_ACCEPT' => 'application/vnd.othervendor-v1+json').last }
+          .to raise_exception do |exception|
+            expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+            expect(exception.headers).to eql('X-Cascade' => 'pass')
+            expect(exception.status).to eql 406
+            expect(exception.message).to include('API vendor or version not found')
+          end
       end
     end
   end
@@ -142,14 +140,12 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if version is invalid' do
-      expect do
-        subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'API vendor or version not found.'
-      )
+      expect { subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('API vendor or version not found')
+      end
     end
   end
 
@@ -171,47 +167,39 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect do
-        subject.call({}).last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept header must be set.'
-      )
+      expect { subject.call({}).last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must be set.')
+      end
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect do
-        subject.call('HTTP_ACCEPT' => '').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept header must be set.'
-      )
+      expect { subject.call('HTTP_ACCEPT' => '').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must be set.')
+      end
     end
 
     it 'fails with 406 Not Acceptable if type is a range' do
-      expect do
-        subject.call('HTTP_ACCEPT' => '*/*').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept header must not contain ranges ("*").'
-      )
+      expect { subject.call('HTTP_ACCEPT' => '*/*').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must not contain ranges ("*").')
+      end
     end
 
     it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect do
-        subject.call('HTTP_ACCEPT' => 'application/*').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept header must not contain ranges ("*").'
-      )
+      expect { subject.call('HTTP_ACCEPT' => 'application/*').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must not contain ranges ("*").')
+      end
     end
 
     it 'succeeds if proper header is set' do
@@ -227,47 +215,39 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect do
-        subject.call({}).last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept header must be set.'
-      )
+      expect { subject.call({}).last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must be set.')
+      end
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect do
-        subject.call('HTTP_ACCEPT' => '').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept header must be set.'
-      )
+      expect { subject.call('HTTP_ACCEPT' => '').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must be set.')
+      end
     end
 
     it 'fails with 406 Not Acceptable if type is a range' do
-      expect do
-        subject.call('HTTP_ACCEPT' => '*/*').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept header must not contain ranges ("*").'
-      )
+      expect { subject.call('HTTP_ACCEPT' => '*/*').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must not contain ranges ("*").')
+      end
     end
 
     it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect do
-        subject.call('HTTP_ACCEPT' => 'application/*').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept header must not contain ranges ("*").'
-      )
+      expect { subject.call('HTTP_ACCEPT' => 'application/*').last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('Accept header must not contain ranges ("*").')
+      end
     end
 
     it 'succeeds if proper header is set' do
@@ -289,14 +269,12 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'fails with another version' do
-      expect do
-        subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v3+json')
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'API vendor or version not found.'
-      )
+      expect { subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v3+json') }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql('X-Cascade' => 'pass')
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('API vendor or version not found')
+      end
     end
   end
 end
