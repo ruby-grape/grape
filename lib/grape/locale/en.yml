@@ -35,4 +35,10 @@ en:
         all_or_none: 'provide all or none of parameters'
         missing_group_type: 'group type is required'
         unsupported_group_type: 'group type must be Array or Hash'
+        invalid_message_body:
+          problem: "message body does not match declared format"
+          resolution:
+            "when specifying %{body_format} as content-type, you must pass valid
+            %{body_format} in the request's 'body'
+            "
 
