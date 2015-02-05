@@ -7,5 +7,4 @@ group :development, :test do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
-  gem 'rspec-core', '~> 3.1.7'
 end
