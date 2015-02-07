@@ -29,9 +29,12 @@ module Grape
         # allow nil, to ignore when a parameter is absent
         return true if val.nil?
         if klass == Virtus::Attribute::Boolean
-          val.is_a?(TrueClass) || val.is_a?(FalseClass)
+          val.is_a?(TrueClass) || val.is_a?(FalseClass) || (val.is_a?(String) && val.empty?)
         elsif klass == Rack::Multipart::UploadedFile
           val.is_a?(Hashie::Mash) && val.key?(:tempfile)
+        elsif [Virtus::Attribute::DateTime, Virtus::Attribute::Date, Virtus::Attribute::Numeric].any?{ |vclass| vclass >= klass }
+          return true if val.is_a?(String) && val.empty?
+          val.is_a?(klass)
         else
           val.is_a?(klass)
         end

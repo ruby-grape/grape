@@ -22,11 +22,63 @@ describe Grape::Validations::AllowBlankValidator do
         get '/allow_blank'
 
         params do
+          requires :val, type: DateTime, allow_blank: true
+        end
+        get '/allow_datetime_blank'
+
+        params do
+          requires :val, type: DateTime, allow_blank: false
+        end
+        get '/disallow_datetime_blank'
+
+        params do
+          requires :val, type: DateTime
+        end
+        get '/default_allow_datetime_blank'
+
+        params do
+          requires :val, type: Date, allow_blank: true
+        end
+        get '/allow_date_blank'
+
+        params do
+          requires :val, type: Integer, allow_blank: true
+        end
+        get '/allow_integer_blank'
+
+        params do
+          requires :val, type: Float, allow_blank: true
+        end
+        get '/allow_float_blank'
+
+        params do
+          requires :val, type: Fixnum, allow_blank: true
+        end
+        get '/allow_fixnum_blank'
+
+        params do
+          requires :val, type: Symbol, allow_blank: true
+        end
+        get '/allow_symbol_blank'
+
+        params do
+          requires :val, type: Boolean, allow_blank: true
+        end
+        get '/allow_boolean_blank'
+
+        params do
           optional :user, type: Hash do
             requires :name, allow_blank: false
           end
         end
         get '/disallow_blank_required_param_in_an_optional_group'
+
+        params do
+          optional :user, type: Hash do
+            requires :name, type: Date, allow_blank: true
+          end
+        end
+        get '/allow_blank_date_param_in_an_optional_group'
 
         params do
           optional :user, type: Hash do
@@ -75,6 +127,9 @@ describe Grape::Validations::AllowBlankValidator do
     it 'refuses empty string' do
       get '/', name: ''
       expect(last_response.status).to eq(400)
+
+      get '/disallow_datetime_blank', val: ''
+      expect(last_response.status).to eq(400)
     end
 
     it 'refuses only whitespaces' do
@@ -104,12 +159,59 @@ describe Grape::Validations::AllowBlankValidator do
       get '/allow_blank', name: ''
       expect(last_response.status).to eq(200)
     end
+
+    it 'accepts empty input' do
+      get '/default_allow_datetime_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'accepts empty when datetime allow_blank' do
+      get '/allow_datetime_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'accepts empty when date allow_blank' do
+      get '/allow_date_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
+
+    context 'allow_blank when Numeric' do
+      it 'accepts empty when integer allow_blank' do
+        get '/allow_integer_blank', val: ''
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'accepts empty when float allow_blank' do
+        get '/allow_float_blank', val: ''
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'accepts empty when fixnum allow_blank' do
+        get '/allow_fixnum_blank', val: ''
+        expect(last_response.status).to eq(200)
+      end
+    end
+
+    it 'accepts empty when symbol allow_blank' do
+      get '/allow_symbol_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'accepts empty when boolean allow_blank' do
+      get '/allow_boolean_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
   end
 
   context 'in an optional group' do
     context 'as a required param' do
       it 'accepts a missing group, even with a disallwed blank param' do
         get '/disallow_blank_required_param_in_an_optional_group'
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'accepts a nested missing date value' do
+        get '/allow_blank_date_param_in_an_optional_group', user: { name: '' }
         expect(last_response.status).to eq(200)
       end
 
