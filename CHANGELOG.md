@@ -12,6 +12,7 @@ Next Release
 * [#906](https://github.com/intridea/grape/pull/906): Fix: invalid body parse errors are not rescued by handlers - [@croeck](https://github.com/croeck).
 * [#913](https://github.com/intridea/grape/pull/913): Fix: Invalid accept headers are not processed by rescue handlers - [@croeck](https://github.com/croeck).
 * [#913](https://github.com/intridea/grape/pull/913): Fix: Invalid accept headers cause internal processing errors (500) when http_codes are defined - [@croeck](https://github.com/croeck).
+* [#917](https://github.com/intridea/grape/pull/917): Use HTTPS for rubygems.org - [@O-I](https://github.com/O-I).
 * Your contribution here.
 
 0.10.1 (12/28/2014)
