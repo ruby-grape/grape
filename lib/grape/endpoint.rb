@@ -324,5 +324,10 @@ module Grape
     def afters
       namespace_stackable(:afters) || []
     end
+
+    def initialize_copy(other)
+      super
+      self.options = other.options.deep_dup
+    end
   end
 end

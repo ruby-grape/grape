@@ -766,6 +766,19 @@ describe Grape::Endpoint do
     expect(last_response.body).to eq('Hello')
   end
 
+  it 'reset options between calls' do
+    subject.get('/options') do
+      if params[:rabl]
+        env['api.endpoint'].options[:route_options][:rabl] = params[:rabl]
+      end
+    end
+
+    get '/options?rabl=index'
+    expect(last_request.env['api.endpoint'].options[:route_options][:rabl]).to eq 'index'
+    get '/options'
+    expect(last_request.env['api.endpoint'].options[:route_options][:rabl]).to eq nil
+  end
+
   describe '.generate_api_method' do
     it 'raises NameError if the method name is already in use' do
       expect do
