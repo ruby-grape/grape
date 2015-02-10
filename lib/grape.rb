@@ -30,18 +30,6 @@ require 'thread'
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
-  require 'grape/api'
-  require 'grape/endpoint'
-
-  require 'grape/route'
-  require 'grape/namespace'
-
-  require 'grape/path'
-
-  require 'grape/cookies'
-  require 'grape/validations'
-  require 'grape/http/request'
-
   module Exceptions
     require 'grape/exceptions/base'
     require 'grape/exceptions/validation'
@@ -61,25 +49,25 @@ module Grape
     require 'grape/exceptions/invalid_accept_header'
   end
 
-  module ErrorFormatter
-    require 'grape/error_formatter/base'
-    require 'grape/error_formatter/json'
-    require 'grape/error_formatter/txt'
-    require 'grape/error_formatter/xml'
-  end
-
   module Formatter
-    require 'grape/formatter/base'
     require 'grape/formatter/json'
     require 'grape/formatter/serializable_hash'
     require 'grape/formatter/txt'
     require 'grape/formatter/xml'
+    require 'grape/formatter/base'
+  end
+
+  module ErrorFormatter
+    require 'grape/error_formatter/json'
+    require 'grape/error_formatter/txt'
+    require 'grape/error_formatter/xml'
+    require 'grape/error_formatter/base'
   end
 
   module Parser
-    require 'grape/parser/base'
     require 'grape/parser/json'
     require 'grape/parser/xml'
+    require 'grape/parser/base'
   end
 
   module Middleware
@@ -111,10 +99,9 @@ module Grape
   end
 
   module DSL
-    require 'grape/dsl/api'
-    require 'grape/dsl/callbacks'
     require 'grape/dsl/settings'
     require 'grape/dsl/configuration'
+    require 'grape/dsl/callbacks'
     require 'grape/dsl/inside_route'
     require 'grape/dsl/helpers'
     require 'grape/dsl/middleware'
@@ -122,11 +109,25 @@ module Grape
     require 'grape/dsl/request_response'
     require 'grape/dsl/routing'
     require 'grape/dsl/validations'
+    require 'grape/dsl/api'
   end
 
   class API
     require 'grape/api/helpers'
   end
+
+  require 'grape/api'
+  require 'grape/endpoint'
+
+  require 'grape/route'
+  require 'grape/namespace'
+
+  require 'grape/path'
+
+  require 'grape/cookies'
+  require 'grape/validations'
+  require 'grape/http/request'
+
 end
 
 require 'grape/validations/validators/base'
