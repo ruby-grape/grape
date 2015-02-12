@@ -28,7 +28,7 @@ module Grape
             end
 
             config_class.configure(&config_block)
-            options = config_class.settings
+            options = options.merge(config_class.settings)
           else
             options = options.merge(description: description)
           end

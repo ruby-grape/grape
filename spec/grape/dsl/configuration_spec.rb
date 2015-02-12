@@ -70,6 +70,22 @@ module Grape
           expect(subject.namespace_setting(:description)).to eq(expected_options)
           expect(subject.route_setting(:description)).to eq(expected_options)
         end
+
+        it 'can merge options and block' do
+          expected_options = {
+            description: 'The description',
+            detail: 'more details',
+            params: { first: :param },
+            authorizations: { oauth2: [] }
+          }
+          subject.desc 'The description', authorizations: { oauth2: [] } do
+            detail 'more details'
+            params(first: :param)
+          end
+
+          expect(subject.namespace_setting(:description)).to eq(expected_options)
+          expect(subject.route_setting(:description)).to eq(expected_options)
+        end
       end
     end
   end
