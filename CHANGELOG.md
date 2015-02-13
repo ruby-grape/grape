@@ -1,6 +1,6 @@
 Next Release
 ============
-
+* [#925](https://github.com/intridea/grape/pull/925): Fixed `toplevel constant DateTime referenced by Virtus::Attribute::DateTime` - [@u2](https://github.com/u2).
 * [#916](https://github.com/intridea/grape/pull/916): Added `DateTime/Date/Numeric/Boolean` type support `allow_blank` - [@u2](https://github.com/u2).
 * [#871](https://github.com/intridea/grape/pull/871): Fixed `Grape::Middleware::Base#response` - [@galathius](https://github.com/galathius).
 * [#559](https://github.com/intridea/grape/issues/559): Added support for Rack 1.6.0, which parses requests larger than 128KB - [@myitcv](https://github.com/myitcv).
