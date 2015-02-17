@@ -7,4 +7,5 @@ group :development, :test do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
+  gem 'warden', '~> 1.2.3'
 end
