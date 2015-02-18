@@ -282,7 +282,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested]).to eq nil
+      expect(inner_params[:nested]).to be_a(Hash)
     end
 
     context 'with a nested given array' do
@@ -320,7 +320,7 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to eq nil
+        expect(inner_params[:nested]).to be_an(Array)
       end
     end
 
