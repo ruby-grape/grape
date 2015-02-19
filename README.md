@@ -281,7 +281,7 @@ Additionally, if the version of your Rails is 4.0+ and the application uses the 
 gem "hashie_rails"
 ```
 
-See below for additional code that enables reloading of API changes in development.
+See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
 
