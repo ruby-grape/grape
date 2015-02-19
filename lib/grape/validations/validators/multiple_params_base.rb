@@ -3,9 +3,9 @@ module Grape
     class MultipleParamsBase < Base
       attr_reader :scoped_params
 
-      def validate!(params)
-        @scoped_params = [@scope.params(params)].flatten
-        params
+      def validate!(request)
+        @scoped_params = [@scope.params(request.params)].flatten
+        request.params
       end
 
       private

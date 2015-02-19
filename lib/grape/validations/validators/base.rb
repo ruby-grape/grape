@@ -10,13 +10,16 @@ module Grape
         @scope = scope
       end
 
-      def validate!(params)
-        attributes = AttributesIterator.new(self, @scope, params)
+      def validate!(request)
+        attributes = AttributesIterator.new(self, @scope, request.params)
         attributes.each do |resource_params, attr_name|
           if @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
             validate_param!(attr_name, resource_params)
           end
         end
+      end
+
+      def validate_param(attr_name, params, request = nil)
       end
 
       def self.convert_to_short_name(klass)

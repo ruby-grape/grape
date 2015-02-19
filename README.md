@@ -704,6 +704,14 @@ params do
   optional :non_random_number, type: Integer, default:  Random.rand(1..100)
 end
 ```
+Default value provided by lambda can take request as an argument
+
+```ruby
+params do
+  optional :random_number, type: Integer, default: -> () { Random.rand(1..100) }
+  optional :random_number, type: Integer, default: -> (request) { Random.rand(1..100) }
+end
+```
 
 Note that default values will be passed through to any validation options specified.
 The following example will always fail if `:color` is not explicitly provided.

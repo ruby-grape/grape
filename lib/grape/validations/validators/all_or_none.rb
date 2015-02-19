@@ -2,12 +2,12 @@ module Grape
   module Validations
     require 'grape/validations/validators/multiple_params_base'
     class AllOrNoneOfValidator < MultipleParamsBase
-      def validate!(params)
+      def validate!(request)
         super
         if scope_requires_params && only_subset_present
           fail Grape::Exceptions::Validation, params: all_keys, message_key: :all_or_none
         end
-        params
+        request.params
       end
 
       private

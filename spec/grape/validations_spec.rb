@@ -626,6 +626,38 @@ describe Grape::Validations do
       end
     end
 
+    context 'optional params with lambda and request' do
+      it 'is fine without params' do
+        subject.params do
+          optional :id, default: ->{ return 1 }
+        end
+
+        subject.get '/' do
+          params[:id]
+        end
+
+        get '/'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq '1'
+      end
+
+      it 'is fine with just request' do
+        subject.params do
+          optional :id, default: ->(request) { return request.get? }
+        end
+
+        subject.get '/' do
+          params[:id]
+        end
+
+        get '/'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq 'true'
+      end
+    end
+
     context 'optional with an Array block' do
       before do
         subject.params do

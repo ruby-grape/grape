@@ -2,12 +2,12 @@ module Grape
   module Validations
     require 'grape/validations/validators/multiple_params_base'
     class AtLeastOneOfValidator < MultipleParamsBase
-      def validate!(params)
+      def validate!(request)
         super
         if scope_requires_params && no_exclusive_params_are_present
           fail Grape::Exceptions::Validation, params: all_keys, message_key: :at_least_one
         end
-        params
+        request.params
       end
 
       private
