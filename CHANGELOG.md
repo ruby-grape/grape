@@ -1,6 +1,10 @@
 0.11.1 (Next)
 =============
 
+#### Fixes
+
+* [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
+
 * Your contribution here.
 
 0.11.0 (2/23/2015)
