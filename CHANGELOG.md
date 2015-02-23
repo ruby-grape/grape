@@ -1,5 +1,6 @@
-Next Release
-============
+0.11.0 (2/23/2015)
+==================
+
 * [#925](https://github.com/intridea/grape/pull/925): Fixed `toplevel constant DateTime referenced by Virtus::Attribute::DateTime` - [@u2](https://github.com/u2).
 * [#916](https://github.com/intridea/grape/pull/916): Added `DateTime/Date/Numeric/Boolean` type support `allow_blank` - [@u2](https://github.com/u2).
 * [#871](https://github.com/intridea/grape/pull/871): Fixed `Grape::Middleware::Base#response` - [@galathius](https://github.com/galathius).
@@ -14,7 +15,6 @@ Next Release
 * [#913](https://github.com/intridea/grape/pull/913): Fix: Invalid accept headers are not processed by rescue handlers - [@croeck](https://github.com/croeck).
 * [#913](https://github.com/intridea/grape/pull/913): Fix: Invalid accept headers cause internal processing errors (500) when http_codes are defined - [@croeck](https://github.com/croeck).
 * [#917](https://github.com/intridea/grape/pull/917): Use HTTPS for rubygems.org - [@O-I](https://github.com/O-I).
-* Your contribution here.
 
 0.10.1 (12/28/2014)
 ===================

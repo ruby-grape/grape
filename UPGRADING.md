@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.10.2
+### Upgrading to >= 0.11.0
 
 #### Added Rack 1.6.0 Support
 
