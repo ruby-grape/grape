@@ -76,6 +76,20 @@ describe Grape::Validations::ValuesValidator do
           end
         end
         get '/optional_with_required_values'
+
+        params do
+          optional :videos, type: Array do
+            optional :id, type: Integer
+          end
+        end
+        get '/optional_array_values'
+
+        params do
+          optional :videos, type: Array do
+            optional :id, type: Integer, default: 1
+          end
+        end
+        get '/optional_array_with_default_values'
       end
     end
   end
@@ -105,6 +119,22 @@ describe Grape::Validations::ValuesValidator do
 
     it 'allows for a required param in child scope' do
       get('/optional_with_required_values')
+      expect(last_response.status).to eq 200
+    end
+
+    it 'allows for a array param' do
+      json = 'videos[][id]=1'
+      get('/optional_array_values', json)
+      expect(last_response.status).to eq 200
+
+      json = 'videos[][]'
+      get('/optional_array_values', json)
+      expect(last_response.status).to eq 200
+    end
+
+    it 'allows for a array param with default value' do
+      json = 'videos[][]'
+      get('/optional_array_with_default_values', json)
       expect(last_response.status).to eq 200
     end
   end
