@@ -1,7 +1,7 @@
 0.11.1 (Next)
 =============
 
-* Your contribution here.
+* [#937](https://github.com/intridea/grape/pull/937): Fixed empty array with default value validates - [@u2](https://github.com/u2).
 
 0.11.0 (2/23/2015)
 ==================
