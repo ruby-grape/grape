@@ -41,20 +41,6 @@ describe Grape::Validations::DefaultValidator do
         end
 
         params do
-          # NOTE: The :foo parameter could be made required with json body
-          # params, and then an empty hash would be valid. With query parameters
-          # it must be optional if it isn't provided at all, as otherwise
-          # the validaton for the Hash itself fails because there is no such
-          # thing as an empty hash.
-          optional :foo, type: Hash do
-            optional :bar, default: 'foo-bar'
-          end
-        end
-        get '/group' do
-          { foo_bar: params[:foo][:bar] }
-        end
-
-        params do
           optional :array, type: Array do
             requires :name
             optional :with_default, default: 'default'
@@ -107,15 +93,119 @@ describe Grape::Validations::DefaultValidator do
     expect(before['random_number']).not_to eq(after['random_number'])
   end
 
-  it 'set default values for optional grouped params' do
-    get('/group')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ foo_bar: 'foo-bar' }.to_json)
-  end
-
   it 'sets default values for grouped arrays' do
     get('/array?array[][name]=name&array[][name]=name2&array[][with_default]=bar2')
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ array: [{ name: 'name', with_default: 'default' }, { name: 'name2', with_default: 'bar2' }] }.to_json)
+  end
+
+  context 'optional group with defaults' do
+    subject do
+      Class.new(Grape::API) do
+        default_format :json
+      end
+    end
+
+    def app
+      subject
+    end
+
+    context 'optional array without default value includes optional param with default value' do
+      before do
+        subject.params do
+          optional :optional_array, type: Array do
+            optional :foo_in_optional_array, default: 'bar'
+          end
+        end
+        subject.post '/optional_array' do
+          { optional_array: params[:optional_array] }
+        end
+      end
+
+      it 'returns nil for optional array if param is not provided' do
+        post '/optional_array'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ optional_array: nil }.to_json)
+      end
+    end
+
+    context 'optional array with default value includes optional param with default value' do
+      before do
+        subject.params do
+          optional :optional_array_with_default, type: Array, default: [] do
+            optional :foo_in_optional_array, default: 'bar'
+          end
+        end
+        subject.post '/optional_array_with_default' do
+          { optional_array_with_default: params[:optional_array_with_default] }
+        end
+      end
+
+      it 'sets default value for optional array if param is not provided' do
+        post '/optional_array_with_default'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ optional_array_with_default: [] }.to_json)
+      end
+    end
+
+    context 'optional hash without default value includes optional param with default value' do
+      before do
+        subject.params do
+          optional :optional_hash_without_default, type: Hash do
+            optional :foo_in_optional_hash, default: 'bar'
+          end
+        end
+        subject.post '/optional_hash_without_default' do
+          { optional_hash_without_default: params[:optional_hash_without_default] }
+        end
+      end
+
+      it 'returns nil for optional hash if param is not provided' do
+        post '/optional_hash_without_default'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ optional_hash_without_default: nil }.to_json)
+      end
+    end
+
+    context 'optional hash with default value includes optional param with default value' do
+      before do
+        subject.params do
+          optional :optional_hash_with_default, type: Hash, default: {} do
+            optional :foo_in_optional_hash, default: 'bar'
+          end
+        end
+        subject.post '/optional_hash_with_default_empty_hash' do
+          { optional_hash_with_default: params[:optional_hash_with_default] }
+        end
+
+        subject.params do
+          optional :optional_hash_with_default, type: Hash, default: { foo_in_optional_hash: 'parent_default' } do
+            optional :some_param
+            optional :foo_in_optional_hash, default: 'own_default'
+          end
+        end
+        subject.post '/optional_hash_with_default_inner_params' do
+          { foo_in_optional_hash: params[:optional_hash_with_default][:foo_in_optional_hash] }
+        end
+      end
+
+      it 'sets default value for optional hash if param is not provided' do
+        post '/optional_hash_with_default_empty_hash'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ optional_hash_with_default: {} }.to_json)
+      end
+
+      it 'sets default value from parent defaults for inner param if parent param is not provided' do
+        post '/optional_hash_with_default_inner_params'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ foo_in_optional_hash: 'parent_default' }.to_json)
+      end
+
+      it 'sets own default value for inner param if parent param is provided' do
+        post '/optional_hash_with_default_inner_params', optional_hash_with_default: { some_param: 'param' }
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq({ foo_in_optional_hash: 'own_default' }.to_json)
+      end
+    end
   end
 end
