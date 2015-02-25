@@ -1251,6 +1251,20 @@ describe Grape::API do
       expect(last_response.body).to eq 'rain!'
     end
 
+    it ':all respects the status code of the error object' do
+      class ErrorWithHttpStatus < StandardError
+        def status
+          420
+        end
+      end
+      subject.rescue_from :all
+      subject.get '/exception' do
+        fail ErrorWithHttpStatus
+      end
+      get '/exception'
+      expect(last_response.status).to eql 420
+    end
+
     it 'rescues all errors with a json formatter' do
       subject.format :json
       subject.default_format :json

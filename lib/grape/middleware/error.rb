@@ -59,7 +59,7 @@ module Grape
       end
 
       def handle_error(e)
-        error_response(message: e.message, backtrace: e.backtrace)
+        error_response(message: e.message, backtrace: e.backtrace, status: e.try(:status))
       end
 
       def error_response(error = {})
