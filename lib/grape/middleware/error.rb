@@ -59,7 +59,8 @@ module Grape
       end
 
       def handle_error(e)
-        error_response(message: e.message, backtrace: e.backtrace, status: e.try(:status))
+        status = (e.respond_to?(:status) && e.status.is_a?(Integer)) ? e.status : nil
+        error_response(message: e.message, backtrace: e.backtrace, status: status)
       end
 
       def error_response(error = {})

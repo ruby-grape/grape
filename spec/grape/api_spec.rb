@@ -1265,6 +1265,20 @@ describe Grape::API do
       expect(last_response.status).to eql 420
     end
 
+    it ':all does not pass thru non-Integer status codes' do
+      class ErrorWithBadStatusMethod < StandardError
+        def status
+          'foo'
+        end
+      end
+      subject.rescue_from :all
+      subject.get '/exception' do
+        fail ErrorWithBadStatusMethod
+      end
+      get '/exception'
+      expect(last_response.status).to eql 500
+    end
+
     it 'rescues all errors with a json formatter' do
       subject.format :json
       subject.default_format :json
