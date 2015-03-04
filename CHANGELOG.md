@@ -4,6 +4,7 @@
 #### Fixes
 
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
+* [#943](https://github.com/intridea/grape/pull/943): Add specs for Grape::DSL::RequestResponse#rescue_from method - [@dabrorius](https://github.com/dabrorius).
 
 * Your contribution here.
 
