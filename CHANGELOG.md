@@ -4,7 +4,7 @@
 #### Fixes
 
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
-* [#](https://github.com/intridea/grape/pull/): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
+* [#942](https://github.com/intridea/grape/pull/942): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
 
 * Your contribution here.
 

@@ -101,8 +101,68 @@ module Grape
         end
       end
 
-      xdescribe '.rescue_from' do
-        it 'does some thing'
+      describe '.rescue_from' do
+        describe ':all' do
+          it 'sets rescue all to true' do
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, nil)
+            subject.rescue_from :all
+          end
+
+          it 'sets given proc as rescue handler' do
+            rescue_handler_proc = proc {}
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, rescue_handler_proc)
+            subject.rescue_from :all, rescue_handler_proc
+          end
+
+          it 'sets given block as rescue handler' do
+            rescue_handler_proc = proc {}
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, rescue_handler_proc)
+            subject.rescue_from :all, &rescue_handler_proc
+          end
+
+          it 'sets a rescue handler declared through :with option' do
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, an_instance_of(Proc))
+            subject.rescue_from :all, with: 'ExampleHandler'
+          end
+        end
+
+        describe 'list of exceptions is passed' do
+          it 'sets hash of exceptions as rescue handlers' do
+            expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => nil)
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
+            subject.rescue_from StandardError
+          end
+
+          it 'rescues only base handlers if rescue_subclasses: false option is passed' do
+            expect(subject).to receive(:namespace_stackable).with(:base_only_rescue_handlers, StandardError => nil)
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, rescue_subclasses: false)
+            subject.rescue_from StandardError, rescue_subclasses: false
+          end
+
+          it 'sets given proc as rescue handler for each key in hash' do
+            rescue_handler_proc = proc {}
+            expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => rescue_handler_proc)
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
+            subject.rescue_from StandardError, rescue_handler_proc
+          end
+
+          it 'sets given block as rescue handler for each key in hash' do
+            rescue_handler_proc = proc {}
+            expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => rescue_handler_proc)
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
+            subject.rescue_from StandardError, &rescue_handler_proc
+          end
+
+          it 'sets a rescue handler declared through :with option for each key in hash' do
+            expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => an_instance_of(Proc))
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, with: 'ExampleHandler')
+            subject.rescue_from StandardError, with: 'ExampleHandler'
+          end
+        end
       end
 
       describe '.represent' do
