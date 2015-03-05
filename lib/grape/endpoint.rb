@@ -177,7 +177,6 @@ module Grape
       endpoint_options = {}
       endpoint_options[:version] = /#{namespace_inheritable(:version).join('|')}/ if namespace_inheritable(:version)
       endpoint_options.merge!(requirements)
-
       Rack::Mount::Strexp.compile(prepared_path.to_s, endpoint_options, prepared_path.route_param_illegal_chars, anchor)
     end
 
