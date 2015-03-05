@@ -107,8 +107,10 @@ module Grape
         end
       end
 
-      xdescribe '#group' do
-        it 'does some thing'
+      describe '#group' do
+        it 'is alias to #requires' do
+          expect(subject.method(:group)).to eq subject.method(:requires)
+        end
       end
 
       xdescribe '#params' do

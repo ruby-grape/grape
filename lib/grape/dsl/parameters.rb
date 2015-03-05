@@ -72,9 +72,7 @@ module Grape
         validates(attrs, all_or_none_of: true)
       end
 
-      def group(*attrs, &block)
-        requires(*attrs, &block)
-      end
+      alias_method :group, :requires
 
       def params(params)
         params = @parent.params(params) if @parent
