@@ -21,7 +21,7 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
         opts.merge!(presence: true)
 
         if opts[:using]
@@ -37,7 +37,7 @@ module Grape
       def optional(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
         type = opts[:type]
 
         # check type for optional parameter group
