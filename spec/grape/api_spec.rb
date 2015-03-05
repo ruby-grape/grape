@@ -253,6 +253,7 @@ describe Grape::API do
     context 'only support JSON format' do
       before(:each) do
         subject.format :json
+        subject.content_type :json, 'application/json'
       end
 
       it 'should pass along full string parameter containing an "extension"' do
