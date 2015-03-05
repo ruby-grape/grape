@@ -249,6 +249,25 @@ describe Grape::API do
       get '/users/23'
       expect(last_response.status).to eq(200)
     end
+
+    context 'only support JSON format' do
+      before(:each) do
+        subject.format :json
+      end
+
+      it 'should pass along full string parameter containing an "extension"' do
+        subject.namespace :domains do
+          route_param :domain do
+            get do
+              params[:domain]
+            end
+          end
+        end
+
+        get '/domains/example.com'
+        expect(last_response.body).to eq('example.com'.to_json)
+      end
+    end
   end
 
   describe '.route' do
