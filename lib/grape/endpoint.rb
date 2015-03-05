@@ -147,7 +147,7 @@ module Grape
         options[:path].map do |path|
           prepared_path = prepare_path(path)
           anchor = options[:route_options].fetch(:anchor, true)
-          path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
+          compiled_path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
           request_method = (method.to_s.upcase unless method == :any)
 
           Route.new(options[:route_options].clone.merge(
@@ -155,9 +155,9 @@ module Grape
             version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
             namespace: namespace,
             method: request_method,
-            path: prepared_path,
-            params: prepare_routes_path_params(path),
-            compiled: path,
+            path: prepared_path.to_s,
+            params: prepare_routes_path_params(compiled_path),
+            compiled: compiled_path,
             settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations)
           ))
         end
@@ -165,15 +165,8 @@ module Grape
     end
 
     def prepare_path(path)
-      Path.prepare(path, namespace, path_settings)
-    end
-
-    def path_settings
-      inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
-    end
-
-    def uses_specific_format?
-      !!(path_settings[:format] && path_settings[:content_types].size == 1)
+      path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
+      Path.new(path, namespace, path_settings)
     end
 
     def namespace
@@ -185,10 +178,7 @@ module Grape
       endpoint_options[:version] = /#{namespace_inheritable(:version).join('|')}/ if namespace_inheritable(:version)
       endpoint_options.merge!(requirements)
 
-      param_illegal_chars = %w( / ? )
-      param_illegal_chars << '.' unless uses_specific_format?
-
-      Rack::Mount::Strexp.compile(prepared_path, endpoint_options, param_illegal_chars, anchor)
+      Rack::Mount::Strexp.compile(prepared_path.to_s, endpoint_options, prepared_path.route_param_illegal_chars, anchor)
     end
 
     def call(env)
