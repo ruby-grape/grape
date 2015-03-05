@@ -1,9 +1,5 @@
 module Grape
   class Path
-    def self.prepare(raw_path, namespace, settings)
-      Path.new(raw_path, namespace, settings).path_with_suffix
-    end
-
     attr_reader :raw_path, :namespace, :settings
 
     def initialize(raw_path, namespace, settings)
@@ -43,6 +39,14 @@ module Grape
         '(.:format)'
       else
         '(/.:format)'
+      end
+    end
+
+    def route_param_illegal_chars
+      if uses_specific_format?
+        %w( / ? )
+      else
+        %w( / . ? )
       end
     end
 
