@@ -45,12 +45,16 @@ module Grape
         it 'does some thing'
       end
 
-      xdescribe '#use_scope' do
-        it 'does some thing'
+      describe '#use_scope' do
+        it 'is alias to #use' do
+          expect(subject.method(:use_scope)).to eq subject.method(:use)
+        end
       end
 
-      xdescribe '#includes' do
-        it 'does some thing'
+      describe '#includes' do
+        it 'is alias to #use' do
+          expect(subject.method(:includes)).to eq subject.method(:use)
+        end
       end
 
       describe '#requires' do
