@@ -165,8 +165,15 @@ module Grape
     end
 
     def prepare_path(path)
-      path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
       Path.prepare(path, namespace, path_settings)
+    end
+
+    def path_settings
+      inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
+    end
+
+    def uses_specific_format?
+      !!(path_settings[:format] && path_settings[:content_types].size == 1)
     end
 
     def namespace
@@ -177,7 +184,11 @@ module Grape
       endpoint_options = {}
       endpoint_options[:version] = /#{namespace_inheritable(:version).join('|')}/ if namespace_inheritable(:version)
       endpoint_options.merge!(requirements)
-      Rack::Mount::Strexp.compile(prepared_path, endpoint_options, %w( / . ? ), anchor)
+
+      param_illegal_chars = %w( / ? )
+      param_illegal_chars << '.' unless uses_specific_format?
+
+      Rack::Mount::Strexp.compile(prepared_path, endpoint_options, param_illegal_chars, anchor)
     end
 
     def call(env)
