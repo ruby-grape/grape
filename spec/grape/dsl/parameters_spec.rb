@@ -5,6 +5,7 @@ module Grape
     module ParametersSpec
       class Dummy
         include Grape::DSL::Parameters
+        attr_accessor :api
 
         def validate_attributes(*args)
           @validate_attributes = *args
@@ -41,8 +42,21 @@ module Grape
     describe Parameters do
       subject { ParametersSpec::Dummy.new }
 
-      xdescribe '#use' do
-        it 'does some thing'
+      describe '#use' do
+        before { allow(subject.api).to receive(:namespace_stackable).with(:named_params) }
+        let(:options) { { option: 'value' } }
+        let(:named_params) { { params_group: proc {} } }
+
+        it 'calls processes associated with named params' do
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(named_params)
+          expect(subject).to receive(:instance_exec).with(options).and_yield
+          subject.use :params_group, options
+        end
+
+        it 'raises error when non-existent named param is called' do
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return({})
+          expect { subject.use :params_group }.to raise_error('Params :params_group not found!')
+        end
       end
 
       describe '#use_scope' do
