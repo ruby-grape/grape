@@ -5,7 +5,7 @@ module Grape
     module ParametersSpec
       class Dummy
         include Grape::DSL::Parameters
-        attr_accessor :api
+        attr_accessor :api, :element, :parent
 
         def validate_attributes(*args)
           @validate_attributes = *args
@@ -127,8 +127,34 @@ module Grape
         end
       end
 
-      xdescribe '#params' do
-        it 'does some thing'
+      describe '#params' do
+        it 'inherits params from parent' do
+          parent_params = { foo: 'bar' }
+          subject.parent = Object.new
+          allow(subject.parent).to receive(:params).and_return(parent_params)
+          expect(subject.params({})).to eq parent_params
+        end
+
+        describe 'when params argument is an array of hashes' do
+          it 'returns values of each hash for @element key' do
+            subject.element = :foo
+            expect(subject.params([{ foo: 'bar' }, { foo: 'baz' }])).to eq(%w(bar baz))
+          end
+        end
+
+        describe 'when params argument is a hash' do
+          it 'returns value for @element key' do
+            subject.element = :foo
+            expect(subject.params(foo: 'bar')).to eq('bar')
+          end
+        end
+
+        describe 'when params argument is not a array or a hash' do
+          it 'returns empty hash' do
+            subject.element = Object.new
+            expect(subject.params(Object.new)).to eq({})
+          end
+        end
       end
     end
   end
