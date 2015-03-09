@@ -64,8 +64,43 @@ module Grape
           expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1', '/app2'])
         end
       end
-      xdescribe '.route' do
-        it 'does some thing'
+
+      describe '.route' do
+        before do
+          allow(subject).to receive(:endpoints).and_return([])
+          allow(subject).to receive(:route_end)
+          allow(subject).to receive(:reset_validations!)
+        end
+
+        it 'marks end of the route' do
+          expect(subject).to receive(:route_end)
+          subject.route(:any)
+        end
+
+        it 'resets validations' do
+          expect(subject).to receive(:reset_validations!)
+          subject.route(:any)
+        end
+
+        it 'defines a new endpoint' do
+          expect { subject.route(:any) }
+            .to change{ subject.endpoints.count }.from(0).to(1)
+        end
+
+        it 'generates correct endpoint options' do
+          allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(nuz: 'naz')
+
+          expect(Grape::Endpoint).to receive(:new) do |inheritable_setting, endpoint_options|
+            puts endpoint_options
+            expect(endpoint_options[:method]).to eq :get
+            expect(endpoint_options[:path]).to eq '/foo'
+            expect(endpoint_options[:for]).to eq subject
+            expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
+          end.and_yield
+
+          subject.route(:get, '/foo', { foo: 'bar' }, &proc{})
+        end
       end
 
       describe '.get' do
