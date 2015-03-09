@@ -145,8 +145,24 @@ module Grape
         end
       end
 
-      xdescribe '.routes' do
-        it 'does some thing'
+      describe '.routes' do
+        let(:routes) { Object.new }
+
+        it 'returns value received from #prepare_routes' do
+          expect(subject).to receive(:prepare_routes).and_return(routes)
+          expect(subject.routes).to eq routes
+        end
+
+        context 'when #routes was already called once' do
+          before do
+            allow(subject).to receive(:prepare_routes).and_return(routes)
+            subject.routes
+          end
+          it 'it does not call prepare_routes again' do
+            expect(subject).to_not receive(:prepare_routes)
+            expect(subject.routes).to eq routes
+          end
+        end
       end
 
       xdescribe '.route_param' do
