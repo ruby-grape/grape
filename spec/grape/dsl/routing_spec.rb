@@ -152,8 +152,24 @@ module Grape
         end
       end
 
-      xdescribe '.namespace' do
-        it 'does some thing'
+      describe '.namespace' do
+        let(:new_namespace) { Object.new }
+
+        it 'creates a new namespace with given name and options' do
+          expect(subject).to receive(:within_namespace).and_yield
+          expect(subject).to receive(:nest).and_yield
+          expect(Namespace).to receive(:new).with(:foo, foo: 'bar').and_return(new_namespace)
+          expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)
+
+          subject.namespace :foo, foo: 'bar', &proc{}
+        end
+
+        it 'calls #joined_space_path on Namespace' do
+          result_of_namspace_stackable = Object.new
+          allow(subject).to receive(:namespace_stackable).and_return(result_of_namspace_stackable)
+          expect(Namespace).to receive(:joined_space_path).with(result_of_namspace_stackable)
+          subject.namespace
+        end
       end
 
       describe '.group' do

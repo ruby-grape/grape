@@ -134,7 +134,7 @@ module Grape
           end
         end
 
-        def namespace(space = nil, options = {},  &block)
+        def namespace(space = nil, options = {}, &block)
           if space || block_given?
             within_namespace do
               previous_namespace_description = @namespace_description
