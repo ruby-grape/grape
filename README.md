@@ -352,6 +352,14 @@ post do
 end
 ```
 
+You can also use one of status codes symbols that are provided by [Rack utils](http://www.rubydoc.info/github/rack/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
+
+```ruby
+post do
+  status :no_content
+end
+```
+
 ### Accept-Version Header
 
 ```ruby
