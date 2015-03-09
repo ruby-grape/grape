@@ -5,6 +5,7 @@ module Grape
     module ParametersSpec
       class Dummy
         include Grape::DSL::Parameters
+        attr_accessor :api, :element, :parent
 
         def validate_attributes(*args)
           @validate_attributes = *args
@@ -41,16 +42,33 @@ module Grape
     describe Parameters do
       subject { ParametersSpec::Dummy.new }
 
-      xdescribe '#use' do
-        it 'does some thing'
+      describe '#use' do
+        before { allow(subject.api).to receive(:namespace_stackable).with(:named_params) }
+        let(:options) { { option: 'value' } }
+        let(:named_params) { { params_group: proc {} } }
+
+        it 'calls processes associated with named params' do
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(named_params)
+          expect(subject).to receive(:instance_exec).with(options).and_yield
+          subject.use :params_group, options
+        end
+
+        it 'raises error when non-existent named param is called' do
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return({})
+          expect { subject.use :params_group }.to raise_error('Params :params_group not found!')
+        end
       end
 
-      xdescribe '#use_scope' do
-        it 'does some thing'
+      describe '#use_scope' do
+        it 'is alias to #use' do
+          expect(subject.method(:use_scope)).to eq subject.method(:use)
+        end
       end
 
-      xdescribe '#includes' do
-        it 'does some thing'
+      describe '#includes' do
+        it 'is alias to #use' do
+          expect(subject.method(:includes)).to eq subject.method(:use)
+        end
       end
 
       describe '#requires' do
@@ -103,12 +121,40 @@ module Grape
         end
       end
 
-      xdescribe '#group' do
-        it 'does some thing'
+      describe '#group' do
+        it 'is alias to #requires' do
+          expect(subject.method(:group)).to eq subject.method(:requires)
+        end
       end
 
-      xdescribe '#params' do
-        it 'does some thing'
+      describe '#params' do
+        it 'inherits params from parent' do
+          parent_params = { foo: 'bar' }
+          subject.parent = Object.new
+          allow(subject.parent).to receive(:params).and_return(parent_params)
+          expect(subject.params({})).to eq parent_params
+        end
+
+        describe 'when params argument is an array of hashes' do
+          it 'returns values of each hash for @element key' do
+            subject.element = :foo
+            expect(subject.params([{ foo: 'bar' }, { foo: 'baz' }])).to eq(%w(bar baz))
+          end
+        end
+
+        describe 'when params argument is a hash' do
+          it 'returns value for @element key' do
+            subject.element = :foo
+            expect(subject.params(foo: 'bar')).to eq('bar')
+          end
+        end
+
+        describe 'when params argument is not a array or a hash' do
+          it 'returns empty hash' do
+            subject.element = Object.new
+            expect(subject.params(Object.new)).to eq({})
+          end
+        end
       end
     end
   end
