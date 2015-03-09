@@ -165,8 +165,26 @@ module Grape
         end
       end
 
-      xdescribe '.route_param' do
-        it 'does some thing'
+      describe '.route_param' do
+        it 'calls #namespace with given params' do
+          expect(subject).to receive(:namespace).with(':foo', {}).and_yield
+          subject.route_param('foo', {}, &proc{})
+        end
+
+        let(:regex) { /(.*)/ }
+        let!(:options) {  { requirements: regex } }
+        it 'nests requirements option under param name' do
+          expect(subject).to receive(:namespace) do |param, options|
+            expect(options[:requirements][:foo]).to eq regex
+          end
+          subject.route_param('foo', options, &proc{})
+        end
+
+        it 'does not modify options parameter' do
+          allow(subject).to receive(:namespace)
+          expect { subject.route_param('foo', options, &proc{}) }
+            .to_not change { options }
+        end
       end
 
       describe '.versions' do
