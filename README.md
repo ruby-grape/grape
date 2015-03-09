@@ -2297,7 +2297,7 @@ end
 ```ruby
 require "test_helper"
 
-class Twitter::APITest < MiniTest::Unit::TestCase
+class Twitter::APITest < MiniTest::Test
   include Rack::Test::Methods
 
   def app
