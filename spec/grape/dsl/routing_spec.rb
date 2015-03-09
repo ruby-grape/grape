@@ -121,20 +121,28 @@ module Grape
         it 'does some thing'
       end
 
-      xdescribe '.group' do
-        it 'does some thing'
+      describe '.group' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:group)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.resource' do
-        it 'does some thing'
+      describe '.resource' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:resource)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.resources' do
-        it 'does some thing'
+      describe '.resources' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:resources)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.segment' do
-        it 'does some thing'
+      describe '.segment' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:segment)).to eq subject.method(:namespace)
+        end
       end
 
       xdescribe '.routes' do
