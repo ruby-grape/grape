@@ -94,15 +94,20 @@ module Grape
       #
       # @param status [Integer] The HTTP Status Code to return for this request.
       def status(status = nil)
-        if status.is_a? Symbol
+        case status
+        when Symbol
           if Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
             @status = Rack::Utils.status_code(status)
           else
             fail ArgumentError, "Status code :#{status} is invalid."
           end
-        elsif status
-          @status = status
-        else
+        when Fixnum
+          if Rack::Utils::HTTP_STATUS_CODES.keys.include?(status)
+            @status = status
+          else
+            fail ArgumentError, "Status code #{status} is invalid."
+          end
+        when nil
           return @status if @status
           case request.request_method.to_s.upcase
           when 'POST'
@@ -110,6 +115,8 @@ module Grape
           else
             200
           end
+        else
+          fail ArgumentError, 'Status code must be Fixnum or Symbol.'
         end
       end
 
