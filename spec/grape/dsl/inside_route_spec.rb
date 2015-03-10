@@ -118,9 +118,8 @@ module Grape
             .to raise_error(ArgumentError, 'Status code :foo_bar is invalid.')
         end
 
-        it 'raises error if unknow status code is passed' do
-          expect { subject.status 210 }
-            .to raise_error(ArgumentError, 'Status code 210 is invalid.')
+        it 'accepts unknown Fixnum status codes' do
+          expect { subject.status 210 }.to_not raise_error
         end
 
         it 'raises error if status is not a fixnum or symbol' do

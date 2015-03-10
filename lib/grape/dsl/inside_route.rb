@@ -102,11 +102,7 @@ module Grape
             fail ArgumentError, "Status code :#{status} is invalid."
           end
         when Fixnum
-          if Rack::Utils::HTTP_STATUS_CODES.keys.include?(status)
-            @status = status
-          else
-            fail ArgumentError, "Status code #{status} is invalid."
-          end
+          @status = status
         when nil
           return @status if @status
           case request.request_method.to_s.upcase
