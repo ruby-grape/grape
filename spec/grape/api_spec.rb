@@ -2031,6 +2031,22 @@ describe Grape::API do
         expect(route.route_settings[:custom]).to eq(key: 'value')
       end
     end
+    describe 'status' do
+      it 'can be set to arbitrary Fixnum value' do
+        subject.get '/foo' do
+          status 210
+        end
+        get '/foo'
+        expect(last_response.status).to eq 210
+      end
+      it 'can be set with a status code symbol' do
+        subject.get '/foo' do
+          status :see_other
+        end
+        get '/foo'
+        expect(last_response.status).to eq 303
+      end
+    end
   end
 
   context 'desc' do
