@@ -107,6 +107,16 @@ module Grape
           subject.status 501
           expect(subject.status).to eq 501
         end
+
+        it 'accepts symbol for status' do
+          subject.status :see_other
+          expect(subject.status).to eq 303
+        end
+
+        it 'raises error if unknow symbol is passed' do
+          expect { subject.status :foo_bar }
+            .to raise_error(ArgumentError, 'Status code :foo_bar is invalid.')
+        end
       end
 
       describe '#header' do

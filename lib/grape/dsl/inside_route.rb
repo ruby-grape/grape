@@ -94,7 +94,13 @@ module Grape
       #
       # @param status [Integer] The HTTP Status Code to return for this request.
       def status(status = nil)
-        if status
+        if status.is_a? Symbol
+          if Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
+            @status = Rack::Utils.status_code(status)
+          else
+            fail ArgumentError, "Status code :#{status} is invalid."
+          end
+        elsif status
           @status = status
         else
           return @status if @status
