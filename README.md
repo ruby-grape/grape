@@ -1939,6 +1939,31 @@ Grape will automatically detect that there is a `Status::Entity` class and use t
 representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
+You can present `hash` with `Grape::Presenters::Presenter` to keep things consistent.
+
+```ruby
+get '/users' do
+  present { id: 10, name: :dgz }, with: Grape::Presenters::Presenter
+end
+````
+The response will be
+
+```ruby
+{
+  id:   10,
+  name: 'dgz'
+}
+```
+
+It has the same result with
+
+```ruby
+get '/users' do
+  present :id, 10
+  present :name, :dgz
+end
+```
+
 ### Hypermedia and Roar
 
 You can use [Roar](https://github.com/apotonick/roar) to render HAL or Collection+JSON with the help of [grape-roar](https://github.com/dblock/grape-roar), which defines a custom JSON formatter and enables presenting entities with Grape's `present` keyword.
