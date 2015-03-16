@@ -820,7 +820,7 @@ end
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value
-is nil or does not match the regular expression an error will be returned. Note that this is true for both `requires`
+does not match the regular expression an error will be returned. Note that this is true for both `requires`
 and `optional` parameters.
 
 ```ruby
@@ -829,6 +829,14 @@ params do
 end
 ```
 
+`regexp` will not fail if the parameter was sent without value. To ensure that the parameter contain
+a value, use `allow_blank` validator.
+
+```ruby
+params do
+  requires :email, allow_blank: false, regexp: /.+@.+/
+end
+```
 
 #### `mutually_exclusive`
 
