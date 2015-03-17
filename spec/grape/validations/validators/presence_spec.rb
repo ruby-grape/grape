@@ -55,7 +55,7 @@ describe Grape::Validations::PresenceValidator do
   context 'with a required non-empty string' do
     before do
       subject.params do
-        requires :email, type: String, regexp: /^\S+$/
+        requires :email, type: String, allow_blank: false, regexp: /^\S+$/
       end
       subject.get do
         'Hello'
@@ -64,12 +64,12 @@ describe Grape::Validations::PresenceValidator do
     it 'requires when missing' do
       get '/'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is missing, email is invalid"}')
+      expect(last_response.body).to eq('{"error":"email is missing, email is empty"}')
     end
     it 'requires when empty' do
       get '/', email: ''
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is invalid"}')
+      expect(last_response.body).to eq('{"error":"email is empty, email is invalid"}')
     end
     it 'valid when set' do
       get '/', email: 'bob@example.com'
