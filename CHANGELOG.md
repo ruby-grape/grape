@@ -1,13 +1,13 @@
-0.11.1 (Next)
+0.12.0 (Next)
 =============
 
 #### Fixes
 
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
 * [#942](https://github.com/intridea/grape/pull/942): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
-* [#950](https://github.com/intridea/grape/pull/950): Status method can now accept one of Rack::Utils status code symbols (:ok, :found, :bad_request, etc.). - [@dabrorius](https://github.com/dabrorius).
-* [#952](https://github.com/intridea/grape/pull/952): Status method now raises error when called with invalid status code. - [@dabrorius](https://github.com/dabrorius).
-
+* [#950](https://github.com/intridea/grape/pull/950): Status method can now accept one of Rack::Utils status code symbols (:ok, :found, :bad_request, etc.) - [@dabrorius](https://github.com/dabrorius).
+* [#952](https://github.com/intridea/grape/pull/952): Status method now raises error when called with invalid status code - [@dabrorius](https://github.com/dabrorius).
+* [#957](https://github.com/intridea/grape/pull/957): Regexp validator now supports `allow_blank`, `nil` value behavior changed - [@calfzhou](https://giihub.com/calfzhou).
 * Your contribution here.
 
 0.11.0 (2/23/2015)

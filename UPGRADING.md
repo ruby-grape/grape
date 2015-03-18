@@ -1,9 +1,23 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.12.0
+
+#### Changes to regexp validator
+
+Parameters with `nil` value will now pass `regexp` validation. To disallow `nil` value for an endpoint, add `allow_blank: false`.
+
+```ruby
+params do
+  requires :email, allow_blank: false, regexp: /.+@.+/
+end
+```
+
+See [#957](https://github.com/intridea/grape/pull/957) for more information.
+
 ### Upgrading to >= 0.11.0
 
-#### Added Rack 1.6.0 Support
+#### Added Rack 1.6.0 support
 
 Grape now supports, but doesn't require Rack 1.6.0. If you encounter an issue with parsing requests larger than 128KB, explictly require Rack 1.6.0 in your Gemfile.
 
