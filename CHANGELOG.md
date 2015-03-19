@@ -1,6 +1,10 @@
 0.12.0 (Next)
 =============
 
+#### Features
+
+* [#956](https://github.com/intridea/grape/issues/956): Support `present` with `Grape::Presenters::Presenter`  - [@u2](https://github.com/u2).
+
 #### Fixes
 
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).

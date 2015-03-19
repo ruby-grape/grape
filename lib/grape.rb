@@ -127,6 +127,10 @@ module Grape
   class API
     autoload :Helpers,           'grape/api/helpers'
   end
+
+  module Presenters
+    autoload :Presenter,         'grape/presenters/presenter'
+  end
 end
 
 require 'grape/validations/validators/base'
