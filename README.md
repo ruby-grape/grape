@@ -2295,13 +2295,13 @@ end
 
 ## Writing Tests
 
-You can test a Grape API with RSpec by making HTTP requests and examining the response.
-
 ### Writing Tests with Rack
 
 Use `rack-test` and define your API as `app`.
 
 #### RSpec
+
+You can test a Grape API with RSpec by making HTTP requests and examining the response.
 
 ```ruby
 require 'spec_helper'
@@ -2327,6 +2327,28 @@ describe Twitter::API do
         get "/api/statuses/#{status.id}"
         expect(last_response.body).to eq status.to_json
       end
+    end
+  end
+end
+```
+
+#### Airborne
+
+You can test with other RSpec-based frameworks, including [Airborne](https://github.com/brooklynDev/airborne), which uses `rack-test` to make requests.
+
+```ruby
+require 'airborne'
+
+Airborne.configure do |config|
+  config.rack_app = Twitter::API
+end
+
+describe Twitter::API do
+  describe "GET /api/statuses/:id" do
+    it "returns a status by id" do
+      status = Status.create!
+      get "/api/statuses/#{status.id}"
+      expect_json(status.as_json)
     end
   end
 end
