@@ -12,6 +12,7 @@
 * [#950](https://github.com/intridea/grape/pull/950): Status method can now accept one of Rack::Utils status code symbols (:ok, :found, :bad_request, etc.) - [@dabrorius](https://github.com/dabrorius).
 * [#952](https://github.com/intridea/grape/pull/952): Status method now raises error when called with invalid status code - [@dabrorius](https://github.com/dabrorius).
 * [#957](https://github.com/intridea/grape/pull/957): Regexp validator now supports `allow_blank`, `nil` value behavior changed - [@calfzhou](https://giihub.com/calfzhou).
+* [#962](https://github.com/intridea/grape/pull/962): The `default` attribute with `false` value is documented now - [@ajvondrak](https://github.com/ajvondrak).
 * Your contribution here.
 
 0.11.0 (2/23/2015)

@@ -117,7 +117,7 @@ module Grape
         doc_attrs[:desc] = desc if desc
 
         default = validations[:default]
-        doc_attrs[:default] = default if default
+        doc_attrs[:default] = default if validations.key?(:default)
 
         values = validations[:values]
         doc_attrs[:values] = values if values
