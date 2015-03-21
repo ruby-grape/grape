@@ -43,7 +43,7 @@ module Grape
         orig_attrs = attrs.clone
 
         opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
-        opts.merge!(presence: true)
+        opts[:presence] = true
 
         if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)

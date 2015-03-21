@@ -95,9 +95,9 @@ module Grape
     end
 
     def call(env)
-      status, headers, body = @route_set.call(env)
-      headers.delete('X-Cascade') unless cascade?
-      [status, headers, body]
+      result = @route_set.call(env)
+      result[1].delete('X-Cascade') unless cascade?
+      result
     end
 
     # Some requests may return a HTTP 404 error if grape cannot find a matching
