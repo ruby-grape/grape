@@ -58,10 +58,16 @@ module Grape
         end
       end
 
+      def error!(message, status = options[:default_status], headers = {}, backtrace = [])
+        headers = { 'Content-Type' => content_type }.merge(headers)
+        rack_response(format_message(message, backtrace), status, headers)
+      end
+
       def handle_error(e)
         error_response(message: e.message, backtrace: e.backtrace)
       end
 
+      # TODO: This method is deprecated. Refactor out.
       def error_response(error = {})
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]

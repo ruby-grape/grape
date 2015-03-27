@@ -1031,7 +1031,7 @@ You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom
 ```ruby
 format :json
 subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
-  rack_response e.to_json, 400
+  error! e, 400
 end
 ```
 
@@ -1442,16 +1442,28 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can rescue all exceptions with a code block. The `error_response` wrapper
+You can rescue all exceptions with a code block. The `error!` wrapper
 automatically sets the default error code and content-type.
 
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    error_response({ message: "rescued from #{e.class.name}" })
+    error!("rescued from #{e.class.name}")
   end
 end
 ```
+
+Optionally, you can set the format, status code and headers.
+
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  rescue_from :all do |e|
+    error!({ error: "Server error.", 500, { 'Content-Type' => 'text/error' } })
+  end
+end
+```
+
 
 You can also rescue specific exceptions with a code block and handle the Rack
 response at the lowest level.
@@ -1469,10 +1481,11 @@ Or rescue specific exceptions.
 ```ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError do |e|
-    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500).finish
+    error!("ArgumentError: #{e.message}")
   end
+
   rescue_from NotImplementedError do |e|
-    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500).finish
+    error!("NotImplementedError: #{e.message}")
   end
 end
 ```
@@ -1492,10 +1505,10 @@ Then the following `rescue_from` clause will rescue exceptions of type `APIError
 
 ```ruby
 rescue_from APIErrors::ParentError do |e|
-    Rack::Response.new({
+    error!({
       error: "#{e.class} error",
       message: e.message
-      }.to_json, e.status).finish
+    }, e.status)
 end
 ```
 
@@ -1504,11 +1517,11 @@ The code below will rescue exceptions of type `RuntimeError` but _not_ its subcl
 
 ```ruby
 rescue_from RuntimeError, rescue_subclasses: false do |e|
-    Rack::Response.new({
+    error!({
       status: e.status,
       message: e.message,
       errors: e.errors
-      }.to_json, e.status).finish
+    }, e.status)
 end
 ```
 
