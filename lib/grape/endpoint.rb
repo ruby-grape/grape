@@ -106,8 +106,8 @@ module Grape
 
         routes.each do |route|
           methods = [route.route_method]
-          if !namespace_inheritable(:do_not_route_head) && route.route_method == 'GET'
-            methods << 'HEAD'
+          if !namespace_inheritable(:do_not_route_head) && route.route_method == Grape::Http::Headers::GET
+            methods << Grape::Http::Headers::HEAD
           end
           methods.each do |method|
             route_set.add_route(self, {
