@@ -114,7 +114,7 @@ describe Grape::Entity do
 
     it 'does not run autodetection for Entity when explicitely provided' do
       entity = Class.new(Grape::Entity)
-      some_array = Array.new
+      some_array = []
 
       subject.get '/example' do
         present some_array, with: entity

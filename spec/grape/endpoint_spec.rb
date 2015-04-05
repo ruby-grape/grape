@@ -116,8 +116,8 @@ describe Grape::Endpoint do
     it 'includes request headers' do
       get '/headers'
       expect(JSON.parse(last_response.body)).to eq(
-          'Host' => 'example.org',
-          'Cookie' => ''
+        'Host' => 'example.org',
+        'Cookie' => ''
       )
     end
     it 'includes additional request headers' do
