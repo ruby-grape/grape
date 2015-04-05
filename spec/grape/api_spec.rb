@@ -419,7 +419,7 @@ describe Grape::API do
             send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
             expect(last_response.body).to eql MultiJson.dump(object)
-            expect(last_request.params).to eql Hash.new
+            expect(last_request.params).to eql({})
           end
           it 'stores input in api.request.input' do
             subject.format :json

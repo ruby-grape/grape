@@ -48,13 +48,13 @@ module Grape
       def desc_container
         Module.new do
           include Grape::Util::StrictHashConfiguration.module(
-                      :description,
-                      :detail,
-                      :params,
-                      :entity,
-                      :http_codes,
-                      :named,
-                      :headers
+            :description,
+            :detail,
+            :params,
+            :entity,
+            :http_codes,
+            :named,
+            :headers
           )
 
           def config_context.success(*args)
