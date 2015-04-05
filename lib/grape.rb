@@ -42,6 +42,10 @@ module Grape
   autoload :Validations,         'grape/validations'
   autoload :Request,             'grape/http/request'
 
+  module Http
+    autoload :Headers,           'grape/http/headers'
+  end
+
   module Exceptions
     autoload :Base,                           'grape/exceptions/base'
     autoload :Validation,                     'grape/exceptions/validation'

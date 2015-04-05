@@ -80,7 +80,7 @@ module Grape
         if merged_options[:permanent]
           status 301
         else
-          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != 'GET'
+          if env[Grape::Http::Headers::HTTP_VERSION] == 'HTTP/1.1' && request.request_method.to_s.upcase != Grape::Http::Headers::GET
             status 303
           else
             status 302
@@ -106,7 +106,7 @@ module Grape
         when nil
           return @status if @status
           case request.request_method.to_s.upcase
-          when 'POST'
+          when Grape::Http::Headers::POST
             201
           else
             200
@@ -129,9 +129,9 @@ module Grape
       # Set response content-type
       def content_type(val = nil)
         if val
-          header('Content-Type', val)
+          header(Grape::Http::Headers::CONTENT_TYPE, val)
         else
-          header['Content-Type']
+          header[Grape::Http::Headers::CONTENT_TYPE]
         end
       end
 

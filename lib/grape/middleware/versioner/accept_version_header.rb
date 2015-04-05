@@ -18,7 +18,7 @@ module Grape
       # route.
       class AcceptVersionHeader < Base
         def before
-          potential_version = (env['HTTP_ACCEPT_VERSION'] || '').strip
+          potential_version = (env[Grape::Http::Headers::HTTP_ACCEPT_VERSION] || '').strip
 
           if strict?
             # If no Accept-Version header:
@@ -59,7 +59,7 @@ module Grape
         end
 
         def error_headers
-          cascade? ? { 'X-Cascade' => 'pass' } : {}
+          cascade? ? { Grape::Http::Headers::X_CASCADE => 'pass' } : {}
         end
       end
     end

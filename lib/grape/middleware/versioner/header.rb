@@ -84,7 +84,7 @@ module Grape
         end
 
         def rack_accept_header
-          Rack::Accept::MediaType.new env['HTTP_ACCEPT']
+          Rack::Accept::MediaType.new env[Grape::Http::Headers::HTTP_ACCEPT]
         rescue RuntimeError => e
           raise Grape::Exceptions::InvalidAcceptHeader.new(e.message, error_headers)
         end
@@ -113,7 +113,7 @@ module Grape
         end
 
         def error_headers
-          cascade? ? { 'X-Cascade' => 'pass' } : {}
+          cascade? ? { Grape::Http::Headers::X_CASCADE => 'pass' } : {}
         end
 
         # @param [String] media_type a content type
