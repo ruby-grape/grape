@@ -57,6 +57,37 @@ module Grape
           types_without_params[k] = v.split(';').first
         end.invert
       end
+
+      def is_strict_content_types
+        options[:is_strict_content_types] == true
+      end
+
+      def is_format_fished(fmt)
+        return fmt[:fished] if fmt and fmt.is_a?(Hash) and is_strict_content_types
+        false
+      end
+
+      def reduce_formats(*formats)
+        formats.each do |f|
+          return f if not is_format_fished(f) and f
+          if is_format_fished(f)
+            yield(f[:fmt]) if block_given?
+            return nil
+          end
+        end
+      end
+
+      def format_to_sym(fmt, default=nil)
+        default = fished(fmt) if  is_strict_content_types and default.nil?
+        # avoid symbol memory leak on an unknown format / (rogue attacks could increase symbol graph at will)
+        return fmt.to_sym if content_type_for(fmt)
+        return nil if fmt.nil?
+        default
+      end
+
+      def fished(fmt)
+        {:fished => true, :fmt => fmt}
+      end
     end
   end
 end

@@ -320,8 +320,8 @@ describe Grape::Endpoint do
 
     it 'does not include missing attributes if that option is passed' do
       subject.get '/declared' do
-        error! 400, 'expected nil' if declared(params, include_missing: false)[:second]
-        ''
+        error! 400, "expected nil" if declared(params, include_missing: false)[:second]
+        ""
       end
 
       get '/declared?first=one&other=two'
@@ -581,6 +581,47 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(406)
       expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
+
+    it 'responds with a 200 for an supported content-type' do
+      subject.format :json
+      subject.content_type :json, 'application/json'
+      subject.get '/request_body' do
+
+      end
+      get '/request_body'
+      expect(last_response.status).to eq(200)
+    end
+
+    context ':is_strict_content_types' do
+      it 'responds with a 406 for an unsupported content-type' do
+        subject.format :json
+        subject.default_format :json
+        subject.is_strict_content_types true
+        subject.content_type :json, 'application/json'
+        subject.get '/strict_endpoint' do
+          'hola'
+        end
+        get '/strict_endpoint.png'
+
+        expect(last_response.status).to eq(406)
+        expect(last_response.body).to eq('{"error":"The requested format \'png\' is not supported."}')
+      end
+
+      it 'responds with a 200 for an supported content-type' do
+        subject.format :json
+        subject.default_format :json
+        subject.is_strict_content_types true
+        subject.content_type :json, 'application/json'
+        subject.get '/strict_endpoint' do
+          'hola'
+        end
+        get '/strict_endpoint.json'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq("\"hola\"")
+      end
+    end
+
 
     context 'content type with params' do
       before do

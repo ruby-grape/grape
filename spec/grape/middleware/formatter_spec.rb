@@ -102,6 +102,77 @@ describe Grape::Middleware::Formatter do
       subject.call('PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json')
       expect(subject.env['api.format']).to eq(:txt)
     end
+
+
+    describe 'strict' do
+      subject { Grape::Middleware::Formatter.new(app,{:is_strict_content_types => true}) }
+
+      context 'existing should pass' do
+        it 'uses the xml extension if one is provided' do
+          subject.call('PATH_INFO' => '/info.xml')
+          expect(subject.env['api.format']).to eq(:xml)
+        end
+
+        it 'uses the json extension if one is provided' do
+          subject.call('PATH_INFO' => '/info.json')
+          expect(subject.env['api.format']).to eq(:json)
+        end
+
+        it 'uses the format parameter if one is provided' do
+          subject.call('PATH_INFO' => '/info', 'QUERY_STRING' => 'format=json')
+          expect(subject.env['api.format']).to eq(:json)
+          subject.call('PATH_INFO' => '/info', 'QUERY_STRING' => 'format=xml')
+          expect(subject.env['api.format']).to eq(:xml)
+        end
+
+        it 'uses the default format if none is provided' do
+          subject.call('PATH_INFO' => '/info')
+          expect(subject.env['api.format']).to eq(:txt)
+        end
+
+        it 'uses the requested format if provided in headers' do
+          subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json')
+          expect(subject.env['api.format']).to eq(:json)
+        end
+
+        it 'uses the file extension format if provided before headers' do
+          subject.call('PATH_INFO' => '/info.txt', 'HTTP_ACCEPT' => 'application/json')
+          expect(subject.env['api.format']).to eq(:txt)
+        end
+
+      end
+
+      context 'fails: with default ({}) options' do
+        it 'using the junk extension' do
+          expect { subject.call('PATH_INFO' => '/1info.junk') }.to raise_error
+        end
+
+        it 'using the png extension if one is prov :junk' do
+          expect { subject.call('PATH_INFO' => '/1info.png') }.to raise_error
+        end
+      end
+      context 'passes: when added to options or content_types' do
+        ctypes = {
+          :png  => 'application/png',
+          :junk => 'junk',
+        }
+        subject { Grape::Middleware::Formatter.new(app,{:is_strict_content_types => true, :content_types => ctypes}) }
+
+        after{
+          subject { Grape::Middleware::Formatter.new(app,{:is_strict_content_types => true}) }
+        }
+
+        it 'using the junk extension' do
+          subject.call('PATH_INFO' => '/1info.junk')
+          expect(subject.env['api.format']).to eq(:junk)
+        end
+
+        it 'using the png extension if one is prov :junk' do
+          subject.call('PATH_INFO' => '/1info.png')
+          expect(subject.env['api.format']).to eq(:png)
+        end
+      end
+    end
   end
 
   context 'accept header detection' do
