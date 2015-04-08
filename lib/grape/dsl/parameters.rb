@@ -5,6 +5,27 @@ module Grape
     module Parameters
       extend ActiveSupport::Concern
 
+      # Include reusable params rules among current.
+      # You can define reusable params with helpers method.
+      #
+      # @example
+      #
+      #     class API < Grape::API
+      #       helpers do
+      #         params :pagination do
+      #           optional :page, type: Integer
+      #           optional :per_page, type: Integer
+      #         end
+      #       end
+      #
+      #       desc "Get collection"
+      #       params do
+      #         use :pagination
+      #       end
+      #       get do
+      #         Collection.page(params[:page]).per(params[:per_page])
+      #       end
+      #     end
       def use(*names)
         named_params = Grape::DSL::Configuration.stacked_hash_to_hash(@api.namespace_stackable(:named_params)) || {}
         options = names.last.is_a?(Hash) ? names.pop : {}
@@ -21,8 +42,8 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
-        opts.merge!(presence: true)
+        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
+        opts[:presence] = true
 
         if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)
@@ -37,7 +58,7 @@ module Grape
       def optional(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
         type = opts[:type]
 
         # check type for optional parameter group
@@ -72,9 +93,7 @@ module Grape
         validates(attrs, all_or_none_of: true)
       end
 
-      def group(*attrs, &block)
-        requires(*attrs, &block)
-      end
+      alias_method :group, :requires
 
       def params(params)
         params = @parent.params(params) if @parent

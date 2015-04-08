@@ -59,12 +59,12 @@ module Grape
       end
 
       # This module extends user defined helpers
-      # to provide some API-specific functionality
+      # to provide some API-specific functionality.
       module BaseHelper
         attr_accessor :api
         def params(name, &block)
           @named_params ||= {}
-          @named_params.merge! name => block
+          @named_params[name] = block
         end
 
         def api_changed(new_api)

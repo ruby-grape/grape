@@ -96,7 +96,7 @@ module Grape
         #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
         #   @option options [Boolean] :rescue_subclasses Also rescue subclasses of exception classes
         #   @param [Proc] handler Execution proc to handle the given exception as an
-        #     alternative to passing a block
+        #     alternative to passing a block.
         def rescue_from(*args, &block)
           if args.last.is_a?(Proc)
             handler = args.pop

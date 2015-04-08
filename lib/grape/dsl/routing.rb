@@ -59,12 +59,12 @@ module Grape
           namespace_inheritable(:root_prefix, prefix)
         end
 
-        # Do not route HEAD requests to GET requests automatically
+        # Do not route HEAD requests to GET requests automatically.
         def do_not_route_head!
           namespace_inheritable(:do_not_route_head, true)
         end
 
-        # Do not automatically route OPTIONS
+        # Do not automatically route OPTIONS.
         def do_not_route_options!
           namespace_inheritable(:do_not_route_options, true)
         end
@@ -89,11 +89,11 @@ module Grape
             end
 
             endpoints << Grape::Endpoint.new(
-                in_setting,
-                method: :any,
-                path: path,
-                app: app,
-                for: self
+              in_setting,
+              method: :any,
+              path: path,
+              app: app,
+              for: self
             )
           end
         end
@@ -134,7 +134,7 @@ module Grape
           end
         end
 
-        def namespace(space = nil, options = {},  &block)
+        def namespace(space = nil, options = {}, &block)
           if space || block_given?
             within_namespace do
               previous_namespace_description = @namespace_description

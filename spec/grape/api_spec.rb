@@ -419,7 +419,7 @@ describe Grape::API do
             send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
             expect(last_response.body).to eql MultiJson.dump(object)
-            expect(last_request.params).to eql Hash.new
+            expect(last_request.params).to eql({})
           end
           it 'stores input in api.request.input' do
             subject.format :json
@@ -2029,6 +2029,22 @@ describe Grape::API do
         expect(subject.routes.count).to eq 1
         route = subject.routes.first
         expect(route.route_settings[:custom]).to eq(key: 'value')
+      end
+    end
+    describe 'status' do
+      it 'can be set to arbitrary Fixnum value' do
+        subject.get '/foo' do
+          status 210
+        end
+        get '/foo'
+        expect(last_response.status).to eq 210
+      end
+      it 'can be set with a status code symbol' do
+        subject.get '/foo' do
+          status :see_other
+        end
+        get '/foo'
+        expect(last_response.status).to eq 303
       end
     end
   end

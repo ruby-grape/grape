@@ -30,6 +30,14 @@ require 'thread'
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
+  module Http
+    require 'grape/http/headers'
+  end
+
+  module Presenters
+    require 'grape/presenters/presenter'
+  end
+
   module Exceptions
     require 'grape/exceptions/base'
     require 'grape/exceptions/validation'
@@ -127,7 +135,6 @@ module Grape
   require 'grape/cookies'
   require 'grape/validations'
   require 'grape/http/request'
-
 end
 
 require 'grape/validations/validators/base'

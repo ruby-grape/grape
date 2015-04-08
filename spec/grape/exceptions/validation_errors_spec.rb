@@ -27,7 +27,7 @@ describe Grape::Exceptions::ValidationErrors do
     it 'can return structured json with separate fields' do
       subject.format :json
       subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
-        rack_response e.to_json, 400
+        error!(e, 400)
       end
       subject.params do
         optional :beer

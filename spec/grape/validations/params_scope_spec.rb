@@ -9,6 +9,70 @@ describe Grape::Validations::ParamsScope do
     subject
   end
 
+  context 'setting a default' do
+    let(:documentation) { subject.routes.first.route_params }
+
+    context 'when the default value is truthy' do
+      before do
+        subject.params do
+          optional :int, type: Integer, default: 42
+        end
+        subject.get
+      end
+
+      it 'adds documentation about the default value' do
+        expect(documentation).to have_key('int')
+        expect(documentation['int']).to have_key(:default)
+        expect(documentation['int'][:default]).to eq(42)
+      end
+    end
+
+    context 'when the default value is false' do
+      before do
+        subject.params do
+          optional :bool, type: Virtus::Attribute::Boolean, default: false
+        end
+        subject.get
+      end
+
+      it 'adds documentation about the default value' do
+        expect(documentation).to have_key('bool')
+        expect(documentation['bool']).to have_key(:default)
+        expect(documentation['bool'][:default]).to eq(false)
+      end
+    end
+
+    context 'when the default value is nil' do
+      before do
+        subject.params do
+          optional :object, type: Object, default: nil
+        end
+        subject.get
+      end
+
+      it 'adds documentation about the default value' do
+        expect(documentation).to have_key('object')
+        expect(documentation['object']).to have_key(:default)
+        expect(documentation['object'][:default]).to eq(nil)
+      end
+    end
+  end
+
+  context 'without a default' do
+    before do
+      subject.params do
+        optional :object, type: Object
+      end
+      subject.get
+    end
+
+    it 'does not add documentation for the default value' do
+      documentation = subject.routes.first.route_params
+      expect(documentation).to have_key('object')
+      expect(documentation['object']).not_to have_key(:default)
+    end
+  end
+
   context 'setting description' do
     [:desc, :description].each do |description_type|
       it "allows setting #{description_type}" do
