@@ -30,111 +30,111 @@ require 'thread'
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
-  autoload :API,                 'grape/api'
-  autoload :Endpoint,            'grape/endpoint'
-
-  autoload :Route,               'grape/route'
-  autoload :Namespace,           'grape/namespace'
-
-  autoload :Path,                'grape/path'
-
-  autoload :Cookies,             'grape/cookies'
-  autoload :Validations,         'grape/validations'
-  autoload :Request,             'grape/http/request'
-
   module Http
-    autoload :Headers,           'grape/http/headers'
+    require 'grape/http/headers'
+  end
+
+  module Presenters
+    require 'grape/presenters/presenter'
   end
 
   module Exceptions
-    autoload :Base,                           'grape/exceptions/base'
-    autoload :Validation,                     'grape/exceptions/validation'
-    autoload :ValidationErrors,               'grape/exceptions/validation_errors'
-    autoload :MissingVendorOption,            'grape/exceptions/missing_vendor_option'
-    autoload :MissingMimeType,                'grape/exceptions/missing_mime_type'
-    autoload :MissingOption,                  'grape/exceptions/missing_option'
-    autoload :InvalidFormatter,               'grape/exceptions/invalid_formatter'
-    autoload :InvalidVersionerOption,         'grape/exceptions/invalid_versioner_option'
-    autoload :UnknownValidator,               'grape/exceptions/unknown_validator'
-    autoload :UnknownOptions,                 'grape/exceptions/unknown_options'
-    autoload :InvalidWithOptionForRepresent,  'grape/exceptions/invalid_with_option_for_represent'
-    autoload :IncompatibleOptionValues,       'grape/exceptions/incompatible_option_values'
-    autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
-    autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
-    autoload :InvalidMessageBody,             'grape/exceptions/invalid_message_body'
-    autoload :InvalidAcceptHeader,            'grape/exceptions/invalid_accept_header'
-  end
-
-  module ErrorFormatter
-    autoload :Base,              'grape/error_formatter/base'
-    autoload :Json,              'grape/error_formatter/json'
-    autoload :Txt,               'grape/error_formatter/txt'
-    autoload :Xml,               'grape/error_formatter/xml'
+    require 'grape/exceptions/base'
+    require 'grape/exceptions/validation'
+    require 'grape/exceptions/validation_errors'
+    require 'grape/exceptions/missing_vendor_option'
+    require 'grape/exceptions/missing_mime_type'
+    require 'grape/exceptions/missing_option'
+    require 'grape/exceptions/invalid_formatter'
+    require 'grape/exceptions/invalid_versioner_option'
+    require 'grape/exceptions/unknown_validator'
+    require 'grape/exceptions/unknown_options'
+    require 'grape/exceptions/invalid_with_option_for_represent'
+    require 'grape/exceptions/incompatible_option_values'
+    require 'grape/exceptions/missing_group_type'
+    require 'grape/exceptions/unsupported_group_type'
+    require 'grape/exceptions/invalid_message_body'
+    require 'grape/exceptions/invalid_accept_header'
   end
 
   module Formatter
-    autoload :Base,              'grape/formatter/base'
-    autoload :Json,              'grape/formatter/json'
-    autoload :SerializableHash,  'grape/formatter/serializable_hash'
-    autoload :Txt,               'grape/formatter/txt'
-    autoload :Xml,               'grape/formatter/xml'
+    require 'grape/formatter/json'
+    require 'grape/formatter/serializable_hash'
+    require 'grape/formatter/txt'
+    require 'grape/formatter/xml'
+    require 'grape/formatter/base'
+  end
+
+  module ErrorFormatter
+    require 'grape/error_formatter/json'
+    require 'grape/error_formatter/txt'
+    require 'grape/error_formatter/xml'
+    require 'grape/error_formatter/base'
   end
 
   module Parser
-    autoload :Base,              'grape/parser/base'
-    autoload :Json,              'grape/parser/json'
-    autoload :Xml,               'grape/parser/xml'
+    require 'grape/parser/json'
+    require 'grape/parser/xml'
+    require 'grape/parser/base'
   end
 
   module Middleware
-    autoload :Base,              'grape/middleware/base'
-    autoload :Versioner,         'grape/middleware/versioner'
-    autoload :Formatter,         'grape/middleware/formatter'
-    autoload :Error,             'grape/middleware/error'
+    require 'grape/middleware/base'
+    require 'grape/middleware/versioner'
+    require 'grape/middleware/formatter'
+    require 'grape/middleware/error'
 
     module Auth
-      autoload :Base,            'grape/middleware/auth/base'
-      autoload :DSL,             'grape/middleware/auth/dsl'
-      autoload :StrategyInfo,    'grape/middleware/auth/strategy_info'
-      autoload :Strategies,      'grape/middleware/auth/strategies'
+      require 'grape/middleware/auth/base'
+      require 'grape/middleware/auth/dsl'
+      require 'grape/middleware/auth/strategy_info'
+      require 'grape/middleware/auth/strategies'
     end
 
     module Versioner
-      autoload :Path,                 'grape/middleware/versioner/path'
-      autoload :Header,               'grape/middleware/versioner/header'
-      autoload :Param,                'grape/middleware/versioner/param'
-      autoload :AcceptVersionHeader,  'grape/middleware/versioner/accept_version_header'
+      require 'grape/middleware/versioner/path'
+      require 'grape/middleware/versioner/header'
+      require 'grape/middleware/versioner/param'
+      require 'grape/middleware/versioner/accept_version_header'
     end
   end
 
   module Util
-    autoload :InheritableValues, 'grape/util/inheritable_values'
-    autoload :StackableValues,   'grape/util/stackable_values'
-    autoload :InheritableSetting, 'grape/util/inheritable_setting'
-    autoload :StrictHashConfiguration, 'grape/util/strict_hash_configuration'
+    require 'grape/util/inheritable_values'
+    require 'grape/util/stackable_values'
+    require 'grape/util/inheritable_setting'
+    require 'grape/util/strict_hash_configuration'
   end
 
   module DSL
-    autoload :API,               'grape/dsl/api'
-    autoload :Callbacks,         'grape/dsl/callbacks'
-    autoload :Settings,          'grape/dsl/settings'
-    autoload :Configuration,     'grape/dsl/configuration'
-    autoload :InsideRoute,       'grape/dsl/inside_route'
-    autoload :Helpers,           'grape/dsl/helpers'
-    autoload :Middleware,        'grape/dsl/middleware'
-    autoload :Parameters,        'grape/dsl/parameters'
-    autoload :RequestResponse,   'grape/dsl/request_response'
-    autoload :Routing,           'grape/dsl/routing'
-    autoload :Validations,       'grape/dsl/validations'
+    require 'grape/dsl/settings'
+    require 'grape/dsl/configuration'
+    require 'grape/dsl/callbacks'
+    require 'grape/dsl/inside_route'
+    require 'grape/dsl/helpers'
+    require 'grape/dsl/middleware'
+    require 'grape/dsl/parameters'
+    require 'grape/dsl/request_response'
+    require 'grape/dsl/routing'
+    require 'grape/dsl/validations'
+    require 'grape/dsl/api'
   end
 
   class API
-    autoload :Helpers,           'grape/api/helpers'
+    require 'grape/api/helpers'
   end
 
-  module Presenters
-    autoload :Presenter,         'grape/presenters/presenter'
-  end
+  require 'grape/api'
+  require 'grape/endpoint'
+
+  require 'grape/route'
+  require 'grape/namespace'
+
+  require 'grape/path'
+
+  require 'grape/cookies'
+  require 'grape/validations'
+  require 'grape/http/request'
 end
 
 require 'grape/validations/validators/base'
