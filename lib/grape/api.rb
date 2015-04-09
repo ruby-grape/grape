@@ -53,7 +53,7 @@ module Grape
       protected
 
       def prepare_routes
-        endpoints.map(&:routes).flatten
+        endpoints.flat_map(&:routes)
       end
 
       # Execute first the provided block, then each of the
