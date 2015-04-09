@@ -87,7 +87,7 @@ module Grape
     end
 
     def routes
-      @routes ||= endpoints ? endpoints.collect(&:routes).flatten : prepare_routes
+      @routes ||= endpoints ? endpoints.flat_map(&:routes) : prepare_routes
     end
 
     def reset_routes!
