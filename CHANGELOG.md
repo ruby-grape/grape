@@ -3,6 +3,7 @@
 
 #### Features
 
+* [#980](https://github.com/intridea/grape/issues/980): Grape is now eager-loaded - [@u2](https://github.com/u2).
 * [#956](https://github.com/intridea/grape/issues/956): Support `present` with `Grape::Presenters::Presenter`  - [@u2](https://github.com/u2).
 
 #### Fixes
