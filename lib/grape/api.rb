@@ -95,9 +95,9 @@ module Grape
     end
 
     def call(env)
-      status, headers, body = @route_set.call(env)
-      headers.delete('X-Cascade') unless cascade?
-      [status, headers, body]
+      result = @route_set.call(env)
+      result[1].delete(Grape::Http::Headers::X_CASCADE) unless cascade?
+      result
     end
 
     # Some requests may return a HTTP 404 error if grape cannot find a matching
@@ -142,12 +142,12 @@ module Grape
           methods_per_path.each do |path, methods|
             allowed_methods = methods.dup
             unless self.class.namespace_inheritable(:do_not_route_head)
-              allowed_methods |= ['HEAD'] if allowed_methods.include?('GET')
+              allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
             end
 
-            allow_header = (['OPTIONS'] | allowed_methods).join(', ')
+            allow_header = ([Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
             unless self.class.namespace_inheritable(:do_not_route_options)
-              unless allowed_methods.include?('OPTIONS')
+              unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
                 self.class.options(path, {}) do
                   header 'Allow', allow_header
                   status 204
@@ -157,7 +157,7 @@ module Grape
             end
 
             not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
-            not_allowed_methods << 'OPTIONS' if self.class.namespace_inheritable(:do_not_route_options)
+            not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
             self.class.route(not_allowed_methods, path) do
               header 'Allow', allow_header
               status 405

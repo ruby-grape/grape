@@ -24,7 +24,7 @@ module Grape
         end
       end
 
-      def as_json
+      def as_json(_opts = {})
         errors.map do |k, v|
           {
             params: k,
@@ -33,7 +33,7 @@ module Grape
         end
       end
 
-      def to_json
+      def to_json(_opts = {})
         as_json.to_json
       end
 

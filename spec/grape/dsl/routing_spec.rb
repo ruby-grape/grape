@@ -64,8 +64,43 @@ module Grape
           expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1', '/app2'])
         end
       end
-      xdescribe '.route' do
-        it 'does some thing'
+
+      describe '.route' do
+        before do
+          allow(subject).to receive(:endpoints).and_return([])
+          allow(subject).to receive(:route_end)
+          allow(subject).to receive(:reset_validations!)
+        end
+
+        it 'marks end of the route' do
+          expect(subject).to receive(:route_end)
+          subject.route(:any)
+        end
+
+        it 'resets validations' do
+          expect(subject).to receive(:reset_validations!)
+          subject.route(:any)
+        end
+
+        it 'defines a new endpoint' do
+          expect { subject.route(:any) }
+            .to change{ subject.endpoints.count }.from(0).to(1)
+        end
+
+        it 'generates correct endpoint options' do
+          allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
+          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(nuz: 'naz')
+
+          expect(Grape::Endpoint).to receive(:new) do |inheritable_setting, endpoint_options|
+            puts endpoint_options
+            expect(endpoint_options[:method]).to eq :get
+            expect(endpoint_options[:path]).to eq '/foo'
+            expect(endpoint_options[:for]).to eq subject
+            expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
+          end.and_yield
+
+          subject.route(:get, '/foo', { foo: 'bar' }, &proc{})
+        end
       end
 
       describe '.get' do
@@ -117,32 +152,90 @@ module Grape
         end
       end
 
-      xdescribe '.namespace' do
-        it 'does some thing'
+      describe '.namespace' do
+        let(:new_namespace) { Object.new }
+
+        it 'creates a new namespace with given name and options' do
+          expect(subject).to receive(:within_namespace).and_yield
+          expect(subject).to receive(:nest).and_yield
+          expect(Namespace).to receive(:new).with(:foo, foo: 'bar').and_return(new_namespace)
+          expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)
+
+          subject.namespace :foo, foo: 'bar', &proc{}
+        end
+
+        it 'calls #joined_space_path on Namespace' do
+          result_of_namspace_stackable = Object.new
+          allow(subject).to receive(:namespace_stackable).and_return(result_of_namspace_stackable)
+          expect(Namespace).to receive(:joined_space_path).with(result_of_namspace_stackable)
+          subject.namespace
+        end
       end
 
-      xdescribe '.group' do
-        it 'does some thing'
+      describe '.group' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:group)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.resource' do
-        it 'does some thing'
+      describe '.resource' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:resource)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.resources' do
-        it 'does some thing'
+      describe '.resources' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:resources)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.segment' do
-        it 'does some thing'
+      describe '.segment' do
+        it 'is alias to #namespace' do
+          expect(subject.method(:segment)).to eq subject.method(:namespace)
+        end
       end
 
-      xdescribe '.routes' do
-        it 'does some thing'
+      describe '.routes' do
+        let(:routes) { Object.new }
+
+        it 'returns value received from #prepare_routes' do
+          expect(subject).to receive(:prepare_routes).and_return(routes)
+          expect(subject.routes).to eq routes
+        end
+
+        context 'when #routes was already called once' do
+          before do
+            allow(subject).to receive(:prepare_routes).and_return(routes)
+            subject.routes
+          end
+          it 'it does not call prepare_routes again' do
+            expect(subject).to_not receive(:prepare_routes)
+            expect(subject.routes).to eq routes
+          end
+        end
       end
 
-      xdescribe '.route_param' do
-        it 'does some thing'
+      describe '.route_param' do
+        it 'calls #namespace with given params' do
+          expect(subject).to receive(:namespace).with(':foo', {}).and_yield
+          subject.route_param('foo', {}, &proc{})
+        end
+
+        let(:regex) { /(.*)/ }
+        let!(:options) {  { requirements: regex } }
+        it 'nests requirements option under param name' do
+          expect(subject).to receive(:namespace) do |param, options|
+            expect(options[:requirements][:foo]).to eq regex
+          end
+          subject.route_param('foo', options, &proc{})
+        end
+
+        it 'does not modify options parameter' do
+          allow(subject).to receive(:namespace)
+          expect { subject.route_param('foo', options, &proc{}) }
+            .to_not change { options }
+        end
       end
 
       describe '.versions' do

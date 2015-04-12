@@ -25,10 +25,15 @@ describe Grape::Validations::RegexpValidator do
       expect(last_response.status).to eq(400)
     end
 
-    it 'refuses nil' do
-      get '/', name: nil
+    it 'refuses empty' do
+      get '/', name: ''
       expect(last_response.status).to eq(400)
     end
+  end
+
+  it 'accepts nil' do
+    get '/', name: nil
+    expect(last_response.status).to eq(200)
   end
 
   it 'accepts valid input' do

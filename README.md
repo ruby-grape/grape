@@ -90,9 +90,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.10.2.
+You're reading the documentation for the next release of Grape, which should be 0.11.1.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.10.1](https://github.com/intridea/grape/blob/v0.10.1/README.md).
+The current stable release is [0.11.0](https://github.com/intridea/grape/blob/v0.11.0/README.md).
 
 ## Project Resources
 
@@ -274,14 +274,14 @@ Modify `config/routes`:
 mount Twitter::API => '/'
 ```
 
-Additionally, if the version of your Rails is 4.0+ and the application uses the default model layer of ActiveRecord, you will want to use the `hashie_rails` [gem](https://rubygems.org/gems/hashie_rails). This gem disables the security feature of `strong_params` at the model layer, allowing you the use of Grape's own params validation instead.
+Additionally, if the version of your Rails is 4.0+ and the application uses the default model layer of ActiveRecord, you will want to use the `hashie-forbidden_attributes` [gem](https://rubygems.org/gems/hashie-forbidden_attributes). This gem disables the security feature of `strong_params` at the model layer, allowing you the use of Grape's own params validation instead.
 
 ```ruby
 # Gemfile
-gem "hashie_rails"
+gem "hashie-forbidden_attributes"
 ```
 
-See below for additional code that enables reloading of API changes in development.
+See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
 
@@ -349,6 +349,14 @@ post do
   if status == 200
      # do some thing
   end
+end
+```
+
+You can also use one of status codes symbols that are provided by [Rack utils](http://www.rubydoc.info/github/rack/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
+
+```ruby
+post do
+  status :no_content
 end
 ```
 
@@ -812,7 +820,7 @@ end
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value
-is nil or does not match the regular expression an error will be returned. Note that this is true for both `requires`
+does not match the regular expression an error will be returned. Note that this is true for both `requires`
 and `optional` parameters.
 
 ```ruby
@@ -821,6 +829,13 @@ params do
 end
 ```
 
+The validator will pass if the parameter was sent without value. To ensure that the parameter contains a value, use `allow_blank: false`.
+
+```ruby
+params do
+  requires :email, allow_blank: false, regexp: /.+@.+/
+end
+```
 
 #### `mutually_exclusive`
 
@@ -1016,7 +1031,7 @@ You can rescue a `Grape::Exceptions::ValidationErrors` and respond with a custom
 ```ruby
 format :json
 subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
-  rack_response e.to_json, 400
+  error! e, 400
 end
 ```
 
@@ -1427,16 +1442,28 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can rescue all exceptions with a code block. The `error_response` wrapper
+You can rescue all exceptions with a code block. The `error!` wrapper
 automatically sets the default error code and content-type.
 
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    error_response({ message: "rescued from #{e.class.name}" })
+    error!("rescued from #{e.class.name}")
   end
 end
 ```
+
+Optionally, you can set the format, status code and headers.
+
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  rescue_from :all do |e|
+    error!({ error: "Server error.", 500, { 'Content-Type' => 'text/error' } })
+  end
+end
+```
+
 
 You can also rescue specific exceptions with a code block and handle the Rack
 response at the lowest level.
@@ -1454,10 +1481,11 @@ Or rescue specific exceptions.
 ```ruby
 class Twitter::API < Grape::API
   rescue_from ArgumentError do |e|
-    Rack::Response.new([ "ArgumentError: #{e.message}" ], 500).finish
+    error!("ArgumentError: #{e.message}")
   end
+
   rescue_from NotImplementedError do |e|
-    Rack::Response.new([ "NotImplementedError: #{e.message}" ], 500).finish
+    error!("NotImplementedError: #{e.message}")
   end
 end
 ```
@@ -1477,10 +1505,10 @@ Then the following `rescue_from` clause will rescue exceptions of type `APIError
 
 ```ruby
 rescue_from APIErrors::ParentError do |e|
-    Rack::Response.new({
+    error!({
       error: "#{e.class} error",
       message: e.message
-      }.to_json, e.status).finish
+    }, e.status)
 end
 ```
 
@@ -1489,11 +1517,11 @@ The code below will rescue exceptions of type `RuntimeError` but _not_ its subcl
 
 ```ruby
 rescue_from RuntimeError, rescue_subclasses: false do |e|
-    Rack::Response.new({
+    error!({
       status: e.status,
       message: e.message,
       errors: e.errors
-      }.to_json, e.status).finish
+    }, e.status)
 end
 ```
 
@@ -1924,6 +1952,31 @@ Grape will automatically detect that there is a `Status::Entity` class and use t
 representative entity. This can still be overridden by using the `:with` option or an explicit
 `represents` call.
 
+You can present `hash` with `Grape::Presenters::Presenter` to keep things consistent.
+
+```ruby
+get '/users' do
+  present { id: 10, name: :dgz }, with: Grape::Presenters::Presenter
+end
+````
+The response will be
+
+```ruby
+{
+  id:   10,
+  name: 'dgz'
+}
+```
+
+It has the same result with
+
+```ruby
+get '/users' do
+  present :id, 10
+  present :name, :dgz
+end
+```
+
 ### Hypermedia and Roar
 
 You can use [Roar](https://github.com/apotonick/roar) to render HAL or Collection+JSON with the help of [grape-roar](https://github.com/dblock/grape-roar), which defines a custom JSON formatter and enables presenting entities with Grape's `present` keyword.
@@ -2255,13 +2308,13 @@ end
 
 ## Writing Tests
 
-You can test a Grape API with RSpec by making HTTP requests and examining the response.
-
 ### Writing Tests with Rack
 
 Use `rack-test` and define your API as `app`.
 
 #### RSpec
+
+You can test a Grape API with RSpec by making HTTP requests and examining the response.
 
 ```ruby
 require 'spec_helper'
@@ -2292,12 +2345,34 @@ describe Twitter::API do
 end
 ```
 
+#### Airborne
+
+You can test with other RSpec-based frameworks, including [Airborne](https://github.com/brooklynDev/airborne), which uses `rack-test` to make requests.
+
+```ruby
+require 'airborne'
+
+Airborne.configure do |config|
+  config.rack_app = Twitter::API
+end
+
+describe Twitter::API do
+  describe "GET /api/statuses/:id" do
+    it "returns a status by id" do
+      status = Status.create!
+      get "/api/statuses/#{status.id}"
+      expect_json(status.as_json)
+    end
+  end
+end
+```
+
 #### MiniTest
 
 ```ruby
 require "test_helper"
 
-class Twitter::APITest < MiniTest::Unit::TestCase
+class Twitter::APITest < MiniTest::Test
   include Rack::Test::Methods
 
   def app
@@ -2459,4 +2534,4 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2013 Michael Bleigh, and Intridea, Inc.
+Copyright (c) 2010-2015 Michael Bleigh, and Intridea, Inc.

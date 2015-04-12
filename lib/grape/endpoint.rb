@@ -106,8 +106,8 @@ module Grape
 
         routes.each do |route|
           methods = [route.route_method]
-          if !namespace_inheritable(:do_not_route_head) && route.route_method == 'GET'
-            methods << 'HEAD'
+          if !namespace_inheritable(:do_not_route_head) && route.route_method == Grape::Http::Headers::GET
+            methods << Grape::Http::Headers::HEAD
           end
           methods.each do |method|
             route_set.add_route(self, {
@@ -151,14 +151,14 @@ module Grape
           request_method = (method.to_s.upcase unless method == :any)
 
           Route.new(options[:route_options].clone.merge(
-            prefix: namespace_inheritable(:root_prefix),
-            version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
-            namespace: namespace,
-            method: request_method,
-            path: prepared_path,
-            params: prepare_routes_path_params(path),
-            compiled: path,
-            settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations)
+                      prefix: namespace_inheritable(:root_prefix),
+                      version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
+                      namespace: namespace,
+                      method: request_method,
+                      path: prepared_path,
+                      params: prepare_routes_path_params(path),
+                      compiled: path,
+                      settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations)
           ))
         end
       end.flatten

@@ -9,12 +9,12 @@ module Grape
       # A filtering method that will return a hash
       # consisting only of keys that have been declared by a
       # `params` statement against the current/target endpoint or parent
-      # namespaces
+      # namespaces.
       #
       # @param params [Hash] The initial hash to filter. Usually this will just be `params`
       # @param options [Hash] Can pass `:include_missing`, `:stringify` and `:include_parent_namespaces`
       # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
-      # you want only to return params declared against the current/target endpoint
+      # you want only to return params declared against the current/target endpoint.
       def declared(params, options = {}, declared_params = nil)
         options[:include_missing] = true unless options.key?(:include_missing)
         options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
@@ -80,7 +80,7 @@ module Grape
         if merged_options[:permanent]
           status 301
         else
-          if env['HTTP_VERSION'] == 'HTTP/1.1' && request.request_method.to_s.upcase != 'GET'
+          if env[Grape::Http::Headers::HTTP_VERSION] == 'HTTP/1.1' && request.request_method.to_s.upcase != Grape::Http::Headers::GET
             status 303
           else
             status 302
@@ -94,16 +94,25 @@ module Grape
       #
       # @param status [Integer] The HTTP Status Code to return for this request.
       def status(status = nil)
-        if status
+        case status
+        when Symbol
+          if Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
+            @status = Rack::Utils.status_code(status)
+          else
+            fail ArgumentError, "Status code :#{status} is invalid."
+          end
+        when Fixnum
           @status = status
-        else
+        when nil
           return @status if @status
           case request.request_method.to_s.upcase
-          when 'POST'
+          when Grape::Http::Headers::POST
             201
           else
             200
           end
+        else
+          fail ArgumentError, 'Status code must be Fixnum or Symbol.'
         end
       end
 
@@ -120,9 +129,9 @@ module Grape
       # Set response content-type
       def content_type(val = nil)
         if val
-          header('Content-Type', val)
+          header(Grape::Http::Headers::CONTENT_TYPE, val)
         else
-          header['Content-Type']
+          header[Grape::Http::Headers::CONTENT_TYPE]
         end
       end
 

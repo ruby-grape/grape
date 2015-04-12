@@ -55,7 +55,7 @@ describe Grape::Validations::PresenceValidator do
   context 'with a required non-empty string' do
     before do
       subject.params do
-        requires :email, type: String, regexp: /^\S+$/
+        requires :email, type: String, allow_blank: false, regexp: /^\S+$/
       end
       subject.get do
         'Hello'
@@ -64,12 +64,12 @@ describe Grape::Validations::PresenceValidator do
     it 'requires when missing' do
       get '/'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is missing, email is invalid"}')
+      expect(last_response.body).to eq('{"error":"email is missing, email is empty"}')
     end
     it 'requires when empty' do
       get '/', email: ''
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"email is invalid"}')
+      expect(last_response.body).to eq('{"error":"email is empty, email is invalid"}')
     end
     it 'valid when set' do
       get '/', email: 'bob@example.com'
@@ -174,6 +174,44 @@ describe Grape::Validations::PresenceValidator do
       get '/nested_triple', admin: { admin_name: 'admin', super: { user: { first_name: 'Billy', last_name: 'Bob' } } }
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('Nested triple'.to_json)
+    end
+  end
+
+  context 'with reused parameter documentation once required and once optional' do
+    before do
+      docs = { name: { type: String, desc: 'some name' } }
+
+      subject.params do
+        requires :all, using: docs
+      end
+      subject.get '/required' do
+        'Hello required'
+      end
+
+      subject.params do
+        optional :all, using: docs
+      end
+      subject.get '/optional' do
+        'Hello optional'
+      end
+    end
+    it 'works with required' do
+      get '/required'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"name is missing"}')
+
+      get '/required', name: 'Bob'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello required'.to_json)
+    end
+    it 'works with optional' do
+      get '/optional'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello optional'.to_json)
+
+      get '/optional', name: 'Bob'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello optional'.to_json)
     end
   end
 end
