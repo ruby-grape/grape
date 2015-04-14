@@ -15,6 +15,47 @@ end
 
 See [#957](https://github.com/intridea/grape/pull/957) for more information.
 
+#### Replace error_response with error! in rescue_from blocks
+
+Note: `error_response` is being deprecated, not removed.
+
+```ruby
+def error!(message, status = options[:default_status], headers = {}, backtrace = [])
+  headers = { 'Content-Type' => content_type }.merge(headers)
+  rack_response(format_message(message, backtrace), status, headers)
+end
+```
+
+For example,
+
+```
+error_response({ message: { message: 'No such page.', id: 'missing_page' }, status: 404, headers: { 'Content-Type' => 'api/error' })
+```
+
+becomes
+
+```
+error!({ message: 'No such page.', id: 'missing_page' }, 404, { 'Content-Type' => 'api/error' })
+```
+
+`error!` also supports just passing a message. `error!('Server error.')` and `format: :json` returns the following JSON response
+
+```
+{ 'error': 'Server error. }
+```
+
+with a status code of 500 and a Content Type of text/error.
+
+Optionally, also replace `Rack::Response.new` with `error!.`
+The following are equivalent:
+
+```
+Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finish
+error!(e)
+```
+
+See [#889](https://github.com/intridea/grape/issues/889) for more information.
+
 ### Upgrading to >= 0.11.0
 
 #### Added Rack 1.6.0 support

@@ -89,11 +89,11 @@ module Grape
             end
 
             endpoints << Grape::Endpoint.new(
-                in_setting,
-                method: :any,
-                path: path,
-                app: app,
-                for: self
+              in_setting,
+              method: :any,
+              path: path,
+              app: app,
+              for: self
             )
           end
         end

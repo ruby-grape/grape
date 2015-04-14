@@ -43,7 +43,10 @@ module Grape
       subject { ParametersSpec::Dummy.new }
 
       describe '#use' do
-        before { allow(subject.api).to receive(:namespace_stackable).with(:named_params) }
+        before {
+          allow_message_expectations_on_nil
+          allow(subject.api).to receive(:namespace_stackable).with(:named_params)
+        }
         let(:options) { { option: 'value' } }
         let(:named_params) { { params_group: proc {} } }
 
