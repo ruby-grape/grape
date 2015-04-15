@@ -316,7 +316,7 @@ version 'v1', using: :path
 
 Using this versioning strategy, clients should pass the desired version in the URL.
 
-    curl -H http://localhost:9292/v1/statuses/public_timeline
+    curl http://localhost:9292/v1/statuses/public_timeline
 
 ### Header
 
@@ -384,7 +384,7 @@ version 'v1', using: :param
 Using this versioning strategy, clients should pass the desired version as a request parameter,
 either in the URL query string or in the request body.
 
-    curl -H http://localhost:9292/statuses/public_timeline?apiver=v1
+    curl http://localhost:9292/statuses/public_timeline?apiver=v1
 
 The default name for the query parameter is 'apiver' but can be specified using the `:parameter` option.
 
@@ -392,7 +392,7 @@ The default name for the query parameter is 'apiver' but can be specified using 
 version 'v1', using: :param, parameter: "v"
 ```
 
-    curl -H http://localhost:9292/statuses/public_timeline?v=v1
+    curl http://localhost:9292/statuses/public_timeline?v=v1
 
 
 ## Describing Methods
