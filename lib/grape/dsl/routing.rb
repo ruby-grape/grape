@@ -120,7 +120,8 @@ module Grape
             }).deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
           }
 
-          endpoints << Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
+          new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
+          endpoints << new_endpoint unless endpoints.any?{ |e| e.equals?(new_endpoint) }
 
           route_end
           reset_validations!

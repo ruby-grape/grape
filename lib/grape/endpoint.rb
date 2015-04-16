@@ -207,6 +207,10 @@ module Grape
       end
     end
 
+    def equals?(e)
+      (options == e.options) && (inheritable_setting.to_hash == e.inheritable_setting.to_hash)
+    end
+
     protected
 
     def run(env)
