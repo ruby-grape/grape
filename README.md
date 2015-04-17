@@ -980,7 +980,7 @@ end
 class AlphaNumeric < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
-      raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must consist of alpha-numeric characters"
+      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must consist of alpha-numeric characters"
     end
   end
 end
@@ -998,7 +998,7 @@ You can also create custom classes that take parameters.
 class Length < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
-      raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
     end
   end
 end
