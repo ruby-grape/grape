@@ -87,12 +87,17 @@ module Grape
             .to change{ subject.endpoints.count }.from(0).to(1)
         end
 
+        it 'does not duplicate identical endpoints' do
+          subject.route(:any)
+          expect { subject.route(:any) }
+            .to_not change(subject.endpoints, :count)
+        end
+
         it 'generates correct endpoint options' do
           allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
           allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(nuz: 'naz')
 
           expect(Grape::Endpoint).to receive(:new) do |inheritable_setting, endpoint_options|
-            puts endpoint_options
             expect(endpoint_options[:method]).to eq :get
             expect(endpoint_options[:path]).to eq '/foo'
             expect(endpoint_options[:for]).to eq subject
