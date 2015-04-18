@@ -43,7 +43,8 @@ module Grape
 
               if params.key?(parent) || options[:include_missing]
                 hash[output_key] = if children
-                                     declared(params[parent] || {}, options, Array(children))
+                                     children_params = params[parent] || (children.is_a?(Array) ? [] : {})
+                                     declared(children_params, options, Array(children))
                                    else
                                      params[parent]
                                    end

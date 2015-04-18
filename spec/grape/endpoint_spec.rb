@@ -295,6 +295,44 @@ describe Grape::Endpoint do
       expect(inner_params[:nested].size).to eq 2
     end
 
+    it 'builds nested params' do
+      inner_params = nil
+      subject.get '/declared' do
+        inner_params = declared(params)
+        ''
+      end
+
+      get '/declared?first=present&nested[fourth]=1'
+      expect(last_response.status).to eq(200)
+      expect(inner_params[:nested].keys.size).to eq 1
+    end
+
+    context 'sets nested array when the param is missing' do
+      it 'to be array when include_missing is true' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params, include_missing: true)
+          ''
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:nested]).to be_a(Array)
+      end
+
+      it 'to be nil when include_missing is false' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params, include_missing: false)
+          ''
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:nested]).to be_nil
+      end
+    end
+
     it 'filters out any additional params that are given' do
       inner_params = nil
       subject.get '/declared' do
