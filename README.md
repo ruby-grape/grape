@@ -1589,6 +1589,8 @@ class API < Grape::API
 end
 ```
 
+For similar to Rails request logging try the [grape_logging](https://github.com/aserafin/grape_logging) gem.
+
 ## API Formats
 
 Your API can declare which content-types to support by using `content_type`. If you do not specify any, Grape will support
