@@ -122,30 +122,60 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('Fixnum')
       end
 
-      it 'Array of Integers' do
-        subject.params do
-          requires :arry, coerce: Array[Integer]
-        end
-        subject.get '/array' do
-          params[:arry][0].class
+      context 'Array' do
+        it 'Array of Integers' do
+          subject.params do
+            requires :arry, coerce: Array[Integer]
+          end
+          subject.get '/array' do
+            params[:arry][0].class
+          end
+
+          get '/array', arry: %w(1 2 3)
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Fixnum')
         end
 
-        get '/array', arry: %w(1 2 3)
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Fixnum')
+        it 'Array of Bools' do
+          subject.params do
+            requires :arry, coerce: Array[Virtus::Attribute::Boolean]
+          end
+          subject.get '/array' do
+            params[:arry][0].class
+          end
+
+          get 'array', arry: [1, 0]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('TrueClass')
+        end
       end
 
-      it 'Array of Bools' do
-        subject.params do
-          requires :arry, coerce: Array[Virtus::Attribute::Boolean]
-        end
-        subject.get '/array' do
-          params[:arry][0].class
+      context 'Set' do
+        it 'Set of Integers' do
+          subject.params do
+            requires :set, coerce: Set[Integer]
+          end
+          subject.get '/set' do
+            params[:set].first.class
+          end
+
+          get '/set', set: Set.new([1, 2, 3, 4]).to_a
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Fixnum')
         end
 
-        get 'array', arry: [1, 0]
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('TrueClass')
+        it 'Set of Bools' do
+          subject.params do
+            requires :set, coerce: Set[Virtus::Attribute::Boolean]
+          end
+          subject.get '/set' do
+            params[:set].first.class
+          end
+
+          get '/set', set: Set.new([1, 0]).to_a
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('TrueClass')
+        end
       end
 
       it 'Bool' do
