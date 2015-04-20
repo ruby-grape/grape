@@ -28,7 +28,7 @@ module Grape
           fail ArgumentError, 'Tried to filter for declared parameters but none exist.'
         end
 
-        if params.is_a? Array
+        if params.is_a?(Array) || params.is_a?(Set)
           params.map do |param|
             declared(param || {}, options, declared_params)
           end

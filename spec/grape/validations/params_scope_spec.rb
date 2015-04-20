@@ -224,10 +224,15 @@ describe Grape::Validations::ParamsScope do
       get '/optional_type_array'
     end
 
+    before do
+      class Tweet < Set
+      end
+    end
+
     it 'errors with an unsupported type' do
       expect do
         subject.params do
-          group :a, type: Set do
+          group :a, type: Tweet do
             requires :b
           end
         end
@@ -235,7 +240,7 @@ describe Grape::Validations::ParamsScope do
 
       expect do
         subject.params do
-          optional :a, type: Set do
+          optional :a, type: Tweet do
             requires :b
           end
         end
