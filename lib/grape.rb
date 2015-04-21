@@ -171,5 +171,6 @@ require 'grape/validations/validators/regexp'
 require 'grape/validations/validators/values'
 require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
+require 'grape/validations/validators/split'
 
 require 'grape/version'
