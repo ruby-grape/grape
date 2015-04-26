@@ -1680,7 +1680,7 @@ end
 ```
 
 You can have your API only respond to a single format with `format`. If you use this, the API will **not** respond to file
-extensions. For example, consider the following API.
+extensions other than specified in `format`. For example, consider the following API.
 
 ```ruby
 class SingleFormatAPI < Grape::API
@@ -1693,7 +1693,8 @@ end
 ```
 
 * `GET /hello` will respond with JSON.
-* `GET /hello.xml`, `GET /hello.json`, `GET /hello.foobar`, or *any* other extension will respond with an HTTP 404 error code.
+* `GET /hello.json` will respond with JSON.
+* `GET /hello.xml`, `GET /hello.foobar`, or *any* other extension will respond with an HTTP 404 error code.
 * `GET /hello?format=xml` will respond with an HTTP 406 error code, because the XML format specified by the request parameter
   is not supported.
 * `GET /hello` with an `Accept: application/xml` header will still respond with JSON, since it could not negotiate a

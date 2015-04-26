@@ -804,7 +804,8 @@ describe Grape::API do
     it 'sets content type for json error' do
       subject.format :json
       subject.get('/error') { error!('error in json', 500) }
-      get '/error'
+      get '/error.json'
+      expect(last_response.status).to eql 500
       expect(last_response.headers['Content-Type']).to eql 'application/json'
     end
 
@@ -812,6 +813,7 @@ describe Grape::API do
       subject.format :xml
       subject.get('/error') { error!('error in xml', 500) }
       get '/error'
+      expect(last_response.status).to eql 500
       expect(last_response.headers['Content-Type']).to eql 'application/xml'
     end
 
@@ -2642,7 +2644,11 @@ describe Grape::API do
         get '/meaning_of_life'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
-      it 'does not accept any extensions' do
+      it 'accepts specified extension' do
+        get '/meaning_of_life.txt'
+        expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
+      end
+      it 'does not accept extensions other than specified' do
         get '/meaning_of_life.json'
         expect(last_response.status).to eq(404)
       end

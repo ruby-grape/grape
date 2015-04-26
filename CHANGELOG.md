@@ -18,6 +18,7 @@
 * [#988](https://github.com/intridea/grape/pull/988): Fixed duplicate identical endpoints - [@u2](https://github.com/u2).
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
 * [#942](https://github.com/intridea/grape/pull/942): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
+* [#1001](https://github.com/intridea/grape/pull/1001): Fixed calling endpoint with specified format with format in its path - [@hodak](https://github.com/hodak).
 
 * Your contribution here.
 

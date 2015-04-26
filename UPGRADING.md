@@ -56,6 +56,26 @@ error!(e)
 
 See [#889](https://github.com/intridea/grape/issues/889) for more information.
 
+#### Changes to routes when using `format`
+
+Now it's possible to call API with proper suffix when single `format` is defined. I. e.
+
+```ruby
+class API < Grape::API
+  format :json
+
+  get :hello do
+    { hello: 'world' }
+  end
+end
+```
+
+Will respond with JSON to `/hello` **and** `/hello.json`.
+
+Will respond with 404 to `/hello.xml`, `/hello.txt` etc.
+
+See the [#1001](https://github.com/intridea/grape/pull/1001) for more info.
+
 ### Upgrading to >= 0.11.0
 
 #### Added Rack 1.6.0 support

@@ -182,11 +182,12 @@ module Grape
 
     describe '#suffix' do
       context 'when using a specific format' do
-        it 'is empty' do
+        it 'accepts specified format' do
           path = Path.new(nil, nil, {})
           allow(path).to receive(:uses_specific_format?) { true }
+          allow(path).to receive(:settings) { { format: :json } }
 
-          expect(path.suffix).to eql('')
+          expect(path.suffix).to eql('(.json)')
         end
       end
 
@@ -237,12 +238,13 @@ module Grape
       end
 
       context 'when using a specific format' do
-        it 'does not have a suffix' do
+        it 'might have a suffix with specified format' do
           path = Path.new(nil, nil, {})
           allow(path).to receive(:path) { '/the/path' }
           allow(path).to receive(:uses_specific_format?) { true }
+          allow(path).to receive(:settings) { { format: :json } }
 
-          expect(path.path_with_suffix).to eql('/the/path')
+          expect(path.path_with_suffix).to eql('/the/path(.json)')
         end
       end
     end

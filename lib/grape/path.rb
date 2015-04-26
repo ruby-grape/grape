@@ -38,7 +38,7 @@ module Grape
 
     def suffix
       if uses_specific_format?
-        ''
+        "(.#{settings[:format]})"
       elsif !uses_path_versioning? || (has_namespace? || has_path?)
         '(.:format)'
       else
