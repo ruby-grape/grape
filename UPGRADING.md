@@ -58,7 +58,7 @@ See [#889](https://github.com/intridea/grape/issues/889) for more information.
 
 #### Changes to routes when using `format`
 
-Now it's possible to call API with proper suffix when single `format` is defined. I. e.
+Version 0.10.0 has introduced a change via [#809](https://github.com/intridea/grape/pull/809) whereas routes no longer got file-type suffixes added if you declared a single API `format`. This has been reverted, it's now again possible to call API with proper suffix when single `format` is defined:
 
 ```ruby
 class API < Grape::API
@@ -74,7 +74,7 @@ Will respond with JSON to `/hello` **and** `/hello.json`.
 
 Will respond with 404 to `/hello.xml`, `/hello.txt` etc.
 
-See the [#1001](https://github.com/intridea/grape/pull/1001) for more info.
+See the [#1001](https://github.com/intridea/grape/pull/1001) and [#914](https://github.com/intridea/grape/issues/914) for more info.
 
 ### Upgrading to >= 0.11.0
 
