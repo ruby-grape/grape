@@ -2385,13 +2385,13 @@ class Twitter::APITest < MiniTest::Test
   def test_get_api_statuses_public_timeline_returns_an_empty_array_of_statuses
     get "/api/statuses/public_timeline"
     assert last_response.ok?
-    assert_equal JSON.parse(last_response.body), []
+    assert_equal [], JSON.parse(last_response.body)
   end
 
   def test_get_api_statuses_id_returns_a_status_by_id
     status = Status.create!
     get "/api/statuses/#{status.id}"
-    assert_equal last_response.body, status.to_json
+    assert_equal status.to_json, last_response.body
   end
 end
 ```
@@ -2441,13 +2441,13 @@ class Twitter::APITest < ActiveSupport::TestCase
   test "GET /api/statuses/public_timeline returns an empty array of statuses" do
     get "/api/statuses/public_timeline"
     assert last_response.ok?
-    assert_equal JSON.parse(last_response.body), []
+    assert_equal [], JSON.parse(last_response.body)
   end
 
   test "GET /api/statuses/:id returns a status by id" do
     status = Status.create!
     get "/api/statuses/#{status.id}"
-    assert_equal last_response.body, status.to_json
+    assert_equal status.to_json, last_response.body
   end
 end
 ```
