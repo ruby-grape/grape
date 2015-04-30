@@ -104,6 +104,7 @@ module Grape
     autoload :Versioner
     autoload :Formatter
     autoload :Error
+    autoload :Globals
 
     module Auth
       extend ActiveSupport::Autoload

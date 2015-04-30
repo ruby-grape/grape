@@ -19,6 +19,7 @@
 * [#936](https://github.com/intridea/grape/pull/936): Fixed default params processing for optional groups - [@dm1try](https://github.com/dm1try).
 * [#942](https://github.com/intridea/grape/pull/942): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
 * [#1001](https://github.com/intridea/grape/pull/1001): Fixed calling endpoint with specified format with format in its path - [@hodak](https://github.com/hodak).
+* [#1005](https://github.com/intridea/grape/pull/1005): Fixed the Grape::Middleware::Globals - [@urkle](https://github.com/urkle).
 
 * Your contribution here.
 
