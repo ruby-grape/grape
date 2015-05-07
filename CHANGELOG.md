@@ -20,7 +20,7 @@
 * [#942](https://github.com/intridea/grape/pull/942): Fixed forced presence for optional params when based on a reused entity that was also required in another context - [@croeck](https://github.com/croeck).
 * [#1001](https://github.com/intridea/grape/pull/1001): Fixed calling endpoint with specified format with format in its path - [@hodak](https://github.com/hodak).
 * [#1005](https://github.com/intridea/grape/pull/1005): Fixed the Grape::Middleware::Globals - [@urkle](https://github.com/urkle).
-
+* [#1012](https://github.com/intridea/grape/pull/1012): Fixed `allow_blank: false` with a Boolean value of `false` - [@mfunaro](https://github.com/mfunaro).
 * Your contribution here.
 
 0.11.0 (2/23/2015)

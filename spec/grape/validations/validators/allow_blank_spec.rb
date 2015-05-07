@@ -67,6 +67,11 @@ describe Grape::Validations::AllowBlankValidator do
         get '/allow_boolean_blank'
 
         params do
+          requires :val, type: Boolean, allow_blank: false
+        end
+        get '/disallow_boolean_blank'
+
+        params do
           optional :user, type: Hash do
             requires :name, allow_blank: false
           end
@@ -199,6 +204,11 @@ describe Grape::Validations::AllowBlankValidator do
 
     it 'accepts empty when boolean allow_blank' do
       get '/allow_boolean_blank', val: ''
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'accepts false when boolean allow_blank' do
+      get '/disallow_boolean_blank', val: false
       expect(last_response.status).to eq(200)
     end
   end
