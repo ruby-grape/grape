@@ -21,6 +21,7 @@
 * [#1001](https://github.com/intridea/grape/pull/1001): Fixed calling endpoint with specified format with format in its path - [@hodak](https://github.com/hodak).
 * [#1005](https://github.com/intridea/grape/pull/1005): Fixed the Grape::Middleware::Globals - [@urkle](https://github.com/urkle).
 * [#1012](https://github.com/intridea/grape/pull/1012): Fixed `allow_blank: false` with a Boolean value of `false` - [@mfunaro](https://github.com/mfunaro).
+* [#1023](https://github.com/intridea/grape/issues/1023): Fixes unexpected beahvior with `present` and an object that responds to `merge` but isn't a Hash - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.11.0 (2/23/2015)

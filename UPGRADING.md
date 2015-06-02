@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 0.12.0
 
+#### Changes in present
+
+Using `present` with objects that responded to `merge` would cause early evaluation of the represented object, with unexpected side-effects, such as missing parameters or environment within rendering code. Grape now only merges represented objects with a previously rendered body, usually when multiple `present` calls are made in the same route.
+
+See [grape-with-roar#5](https://github.com/dblock/grape-with-roar/issues/5) and [#1023](https://github.com/intridea/grape/issues/1023).
+
 #### Changes to regexp validator
 
 Parameters with `nil` value will now pass `regexp` validation. To disallow `nil` value for an endpoint, add `allow_blank: false`.

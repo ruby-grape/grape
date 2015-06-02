@@ -196,9 +196,7 @@ module Grape
         root = options.delete(:root)
 
         representation = if entity_class
-                           embeds = { env: env }
-                           embeds[:version] = env['api.version'] if env['api.version']
-                           entity_class.represent(object, embeds.merge(options))
+                           entity_representation_for(entity_class, object, options)
                          else
                            object
                          end
@@ -206,8 +204,9 @@ module Grape
         representation = { root => representation } if root
         if key
           representation = (@body || {}).merge(key => representation)
-        elsif entity_class.present? && representation.respond_to?('merge')
-          representation = (@body || {}).merge(representation)
+        elsif entity_class.present? && @body
+          fail ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?('merge')
+          representation = @body.merge(representation)
         end
 
         body representation
@@ -244,6 +243,12 @@ module Grape
         end
 
         entity_class
+      end
+
+      def entity_representation_for(entity_class, object, options)
+        embeds = { env: env }
+        embeds[:version] = env['api.version'] if env['api.version']
+        entity_class.represent(object, embeds.merge(options))
       end
     end
   end
