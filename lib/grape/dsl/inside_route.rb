@@ -169,6 +169,22 @@ module Grape
         end
       end
 
+      # Allows you to define the response as a file-like object.
+      #
+      # @example
+      #   get '/file' do
+      #     file FileStreamer.new(...)
+      #   end
+      #
+      #   GET /file # => "contents of file"
+      def file(value = nil)
+        if value
+          @file = value
+        else
+          @file
+        end
+      end
+
       # Allows you to make use of Grape Entities by setting
       # the response body to the serializable hash of the
       # entity provided in the `:with` option. This has the

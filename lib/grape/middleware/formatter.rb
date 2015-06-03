@@ -29,9 +29,13 @@ module Grape
         api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env['api.format']
         formatter = Grape::Formatter::Base.formatter_for api_format, options
         begin
-          bodymap = bodies.collect do |body|
-            formatter.call body, env
-          end
+          bodymap = if bodies.respond_to?(:collect)
+                      bodies.collect do |body|
+                        formatter.call body, env
+                      end
+                    else
+                      bodies
+                    end
         rescue Grape::Exceptions::InvalidFormatter => e
           throw :error, status: 500, message: e.message
         end

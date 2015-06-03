@@ -195,6 +195,22 @@ module Grape
         end
       end
 
+      describe '#file' do
+        describe 'set' do
+          before do
+            subject.file 'file'
+          end
+
+          it 'returns value' do
+            expect(subject.file).to eq 'file'
+          end
+        end
+
+        it 'returns default' do
+          expect(subject.file).to be nil
+        end
+      end
+
       describe '#route' do
         before do
           subject.env['rack.routing_args'] = {}

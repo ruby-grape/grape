@@ -2009,7 +2009,7 @@ class API < Grape::API
 end
 ```
 
-You can also set the response body explicitly with `body`.
+You can set the response body explicitly with `body`.
 
 ```ruby
 class API < Grape::API
@@ -2022,6 +2022,28 @@ end
 ```
 
 Use `body false` to return `204 No Content` without any data or content-type.
+
+You can also set the response to a file-like object with `file`.
+
+```ruby
+class FileStreamer
+  def initialize(file_path)
+    @file_path = file_path
+  end
+
+  def each(&blk)
+    File.open(@file_path, 'rb') do |file|
+      file.each(10, &blk)
+    end
+  end
+end
+
+class API < Grape::API
+  get '/' do
+    file FileStreamer.new('file.bin')
+  end
+end
+```
 
 ## Authentication
 
