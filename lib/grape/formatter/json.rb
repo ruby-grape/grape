@@ -2,9 +2,12 @@ module Grape
   module Formatter
     module Json
       class << self
-        def call(object, env)
-          return object.to_json if object.respond_to?(:to_json)
-          MultiJson.dump(object)
+        if object.respond_to?(:to_json)
+          obj = object.to_json
+          JSON.pretty_generate(JSON.parse(obj))
+        else
+          obj = MultiJson.dump(object)
+          JSON.pretty_generate(JSON.parse(obj))
         end
       end
     end
