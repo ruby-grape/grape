@@ -248,11 +248,13 @@ module Grape
 
       run_filters after_validations
 
-      response_text = @block ? @block.call(self) : nil
+      response_object = @block ? @block.call(self) : nil
       run_filters afters
       cookies.write(header)
 
-      [status, header, [body || response_text]]
+      # The Body commonly is an Array of Strings, the application instance itself, or a File-like object.
+      response_object = file || [body || response_object]
+      [status, header, response_object]
     end
 
     def build_middleware

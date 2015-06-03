@@ -927,4 +927,18 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(406)
     end
   end
+
+  context 'binary' do
+    before do
+      subject.get do
+        file FileStreamer.new(__FILE__)
+      end
+    end
+
+    it 'suports stream objects in response' do
+      get '/'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq File.read(__FILE__)
+    end
+  end
 end

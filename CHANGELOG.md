@@ -11,6 +11,7 @@
 * [#952](https://github.com/intridea/grape/pull/952): Status method now raises error when called with invalid status code - [@dabrorius](https://github.com/dabrorius).
 * [#957](https://github.com/intridea/grape/pull/957): Regexp validator now supports `allow_blank`, `nil` value behavior changed - [@calfzhou](https://giihub.com/calfzhou).
 * [#962](https://github.com/intridea/grape/pull/962): The `default` attribute with `false` value is documented now - [@ajvondrak](https://github.com/ajvondrak).
+* [#1026](https://github.com/intridea/grape/pull/1026): Added `file` method, explicitly setting a file-like response object - [@dblock](https://github.com/dblock).
 
 #### Fixes
 
