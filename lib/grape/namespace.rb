@@ -5,7 +5,8 @@ module Grape
     # options:
     #   requirements: a hash
     def initialize(space, options = {})
-      @space, @options = space.to_s, options
+      @space = space.to_s
+      @options = options
     end
 
     def requirements

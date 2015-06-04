@@ -121,13 +121,13 @@ module Grape
           }
 
           new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
-          endpoints << new_endpoint unless endpoints.any?{ |e| e.equals?(new_endpoint) }
+          endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
           route_end
           reset_validations!
         end
 
-        %w"get post put head delete options patch".each do |meth|
+        %w(get post put head delete options patch).each do |meth|
           define_method meth do |*args, &block|
             options = args.extract_options!
             paths = args.first || ['/']

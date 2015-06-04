@@ -95,7 +95,7 @@ module Grape
         reset_validations!
       end
 
-      def within_namespace(&block)
+      def within_namespace(&_block)
         namespace_start
 
         result = yield if block_given?

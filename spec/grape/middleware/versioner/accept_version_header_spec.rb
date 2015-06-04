@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Versioner::AcceptVersionHeader do
-  let(:app) { lambda { |env| [200, env, env] } }
+  let(:app) { ->(env) { [200, env, env] } }
   subject { Grape::Middleware::Versioner::AcceptVersionHeader.new(app, @options || {}) }
 
   before do

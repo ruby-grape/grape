@@ -4,7 +4,7 @@ describe Grape::Middleware::Formatter do
   subject { Grape::Middleware::Formatter.new(app) }
   before { allow(subject).to receive(:dup).and_return(subject) }
 
-  let(:app) { lambda { |env| [200, {}, [@body || { 'foo' => 'bar' }]] } }
+  let(:app) { ->(_env) { [200, {}, [@body || { 'foo' => 'bar' }]] } }
 
   context 'serialization' do
     it 'looks at the bodies for possibly serializable data' do
@@ -145,21 +145,21 @@ describe Grape::Middleware::Formatter do
 
   context 'content-type' do
     it 'is set for json' do
-      _, headers, _ = subject.call('PATH_INFO' => '/info.json')
+      _, headers, = subject.call('PATH_INFO' => '/info.json')
       expect(headers['Content-type']).to eq('application/json')
     end
     it 'is set for xml' do
-      _, headers, _ = subject.call('PATH_INFO' => '/info.xml')
+      _, headers, = subject.call('PATH_INFO' => '/info.xml')
       expect(headers['Content-type']).to eq('application/xml')
     end
     it 'is set for txt' do
-      _, headers, _ = subject.call('PATH_INFO' => '/info.txt')
+      _, headers, = subject.call('PATH_INFO' => '/info.txt')
       expect(headers['Content-type']).to eq('text/plain')
     end
     it 'is set for custom' do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = 'application/x-custom'
-      _, headers, _ = subject.call('PATH_INFO' => '/info.custom')
+      _, headers, = subject.call('PATH_INFO' => '/info.custom')
       expect(headers['Content-type']).to eq('application/x-custom')
     end
   end
@@ -168,7 +168,7 @@ describe Grape::Middleware::Formatter do
     it 'uses custom formatter' do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = "don't care"
-      subject.options[:formatters][:custom] = lambda { |obj, env| 'CUSTOM FORMAT' }
+      subject.options[:formatters][:custom] = ->(_obj, _env) { 'CUSTOM FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
       expect(body.body).to eq(['CUSTOM FORMAT'])
     end
@@ -178,7 +178,7 @@ describe Grape::Middleware::Formatter do
       expect(body.body).to eq(['["blah"]'])
     end
     it 'uses custom json formatter' do
-      subject.options[:formatters][:json] = lambda { |obj, env| 'CUSTOM JSON FORMAT' }
+      subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.json')
       expect(body.body).to eq(['CUSTOM JSON FORMAT'])
     end

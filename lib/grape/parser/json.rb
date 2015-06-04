@@ -2,7 +2,7 @@ module Grape
   module Parser
     module Json
       class << self
-        def call(object, env)
+        def call(object, _env)
           MultiJson.load(object)
         rescue MultiJson::ParseError
           # handle JSON parsing errors via the rescue handlers or provide error message

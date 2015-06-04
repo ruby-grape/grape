@@ -17,7 +17,7 @@ module Grape
     end
 
     def root_prefix
-      split_setting(:root_prefix, '/')
+      split_setting(:root_prefix)
     end
 
     def uses_specific_format?
@@ -68,7 +68,7 @@ module Grape
       parts.flatten.reject { |part| part == '/' }
     end
 
-    def split_setting(key, delimiter)
+    def split_setting(key)
       return if settings[key].nil?
       settings[key].to_s.split('/')
     end

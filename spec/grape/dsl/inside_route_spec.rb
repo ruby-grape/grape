@@ -297,9 +297,9 @@ module Grape
           describe 'instance' do
             it 'fails' do
               subject.present 'dummy1', with: entity_mock1
-              expect {
+              expect do
                 subject.present 'dummy2', with: entity_mock2
-              }.to raise_error ArgumentError, 'Representation of type String cannot be merged.'
+              end.to raise_error ArgumentError, 'Representation of type String cannot be merged.'
             end
           end
         end

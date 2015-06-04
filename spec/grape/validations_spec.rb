@@ -353,7 +353,7 @@ describe Grape::Validations do
     end
 
     context 'group params with nested params which has a type' do
-      let(:invalid_items){ { items: '' } }
+      let(:invalid_items) { { items: '' } }
 
       before do
         subject.params do

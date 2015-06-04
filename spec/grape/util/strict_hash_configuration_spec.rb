@@ -31,7 +31,7 @@ module Grape
                                        config2: 'beta',
                                        config3: { config4: 'gamma' },
                                        config5: { config6: { config7: 7, config8: 8 } }
-                                    )
+                                      )
       end
     end
   end

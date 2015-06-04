@@ -36,7 +36,7 @@ module Grape
       # Create a scope without affecting the URL.
       #
       # @param name [Symbol] Purely placebo, just allows to name the scope to make the code more readable.
-      def scope(name = nil, &block)
+      def scope(_name = nil, &block)
         within_namespace do
           nest(block)
         end
@@ -168,7 +168,7 @@ module Grape
       end
     end
 
-    def without_versioning(&block)
+    def without_versioning(&_block)
       old_version = self.class.namespace_inheritable(:version)
       old_version_options = self.class.namespace_inheritable(:version_options)
 
@@ -181,7 +181,7 @@ module Grape
       self.class.namespace_inheritable(:version_options, old_version_options)
     end
 
-    def without_root_prefix(&block)
+    def without_root_prefix(&_block)
       old_prefix = self.class.namespace_inheritable(:root_prefix)
 
       self.class.namespace_inheritable_to_nil(:root_prefix)

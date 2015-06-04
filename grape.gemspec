@@ -1,4 +1,4 @@
-$:.push File.expand_path('../lib', __FILE__)
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require 'grape/version'
 
 Gem::Specification.new do |s|
@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ['Michael Bleigh']
   s.email       = ['michael@intridea.com']
   s.homepage    = 'https://github.com/intridea/grape'
-  s.summary     = %q{A simple Ruby framework for building REST-like APIs.}
-  s.description = %q{A Ruby framework for rapid API development with great conventions.}
+  s.summary     = 'A simple Ruby framework for building REST-like APIs.'
+  s.description = 'A Ruby framework for rapid API development with great conventions.'
   s.license     = 'MIT'
 
   s.rubyforge_project = 'grape'

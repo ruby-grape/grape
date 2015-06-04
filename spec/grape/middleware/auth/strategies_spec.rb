@@ -9,12 +9,12 @@ describe Grape::Middleware::Auth::Strategies do
       Rack::Builder.new do |b|
         b.use Grape::Middleware::Error
         b.use(Grape::Middleware::Auth::Base, type: :http_basic, proc: proc)
-        b.run lambda { |env| [200, {}, ['Hello there.']] }
+        b.run ->(_env) { [200, {}, ['Hello there.']] }
       end
     end
 
     it 'throws a 401 if no auth is given' do
-      @proc = lambda { false }
+      @proc = -> { false }
       get '/whatever'
       expect(last_response.status).to eq(401)
     end

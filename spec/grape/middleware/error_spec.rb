@@ -17,7 +17,7 @@ describe Grape::Middleware::Error do
       attr_accessor :error
       attr_accessor :format
 
-      def call(env)
+      def call(_env)
         throw :error, error
       end
     end

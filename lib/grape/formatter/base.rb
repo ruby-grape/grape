@@ -18,7 +18,7 @@ module Grape
           spec = formatters(options)[api_format]
           case spec
           when nil
-            lambda { |obj, env| obj }
+            ->(obj, _env) { obj }
           when Symbol
             method(spec)
           else

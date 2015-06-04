@@ -29,7 +29,7 @@ module Grape
           @summary = summary(key, attributes)
           @resolution = resolution(key, attributes)
           [['Problem', @problem], ['Summary', @summary], ['Resolution', @resolution]].reduce('') do |message, detail_array|
-            message <<  "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
+            message << "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
             message
           end
         else
