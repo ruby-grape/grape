@@ -1132,6 +1132,25 @@ describe Grape::Validations do
           expect(last_response.status).to eq(400)
         end
       end
+
+      context 'mutually exclusive params inside Hash group' do
+        it 'invalidates if request param is invalid type' do
+          subject.params do
+            optional :wine, type: Hash do
+              optional :grape
+              optional :country
+              mutually_exclusive :grape, :country
+            end
+          end
+          subject.post '/mutually_exclusive' do
+            'mutually_exclusive works!'
+          end
+
+          post '/mutually_exclusive', wine: '2015 sauvignon'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'wine is invalid'
+        end
+      end
     end
 
     context 'exactly one of' do

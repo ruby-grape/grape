@@ -15,6 +15,7 @@ module Grape
       end
 
       def keys_in_common(resource_params)
+        return [] unless resource_params.is_a?(Hash)
         (all_keys & resource_params.stringify_keys.keys).map(&:to_s)
       end
 
