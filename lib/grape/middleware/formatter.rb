@@ -40,7 +40,7 @@ module Grape
           throw :error, status: 500, message: e.message
         end
         headers[Grape::Http::Headers::CONTENT_TYPE] = content_type_for(env['api.format']) unless headers[Grape::Http::Headers::CONTENT_TYPE]
-        Rack::Response.new(bodymap, status, headers).to_a
+        Rack::Response.new(bodymap, status, headers)
       end
 
       private
