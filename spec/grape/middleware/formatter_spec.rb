@@ -21,7 +21,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').last.each { |b| expect(b).to eq('"bar"') }
+      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') }
     end
 
     it 'calls #to_json if the content type is jsonapi' do
@@ -32,7 +32,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
+      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
     end
 
     it 'calls #to_xml if the content type is xml' do
@@ -43,7 +43,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').last.each { |b| expect(b).to eq('<bar/>') }
+      subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') }
     end
   end
 
