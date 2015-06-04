@@ -4,7 +4,7 @@ describe Grape::Middleware::Globals do
   subject { Grape::Middleware::Globals.new(blank_app) }
   before { allow(subject).to receive(:dup).and_return(subject) }
 
-  let(:blank_app) { lambda { |env| [200, {}, 'Hi there.'] } }
+  let(:blank_app) { ->(_env) { [200, {}, 'Hi there.'] } }
 
   it 'calls through to the app' do
     expect(subject.call({})).to eq([200, {}, 'Hi there.'])

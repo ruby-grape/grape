@@ -59,9 +59,9 @@ module Grape
 
           expect(subject.inheritable_setting.to_hash[:namespace]).to eq({})
           expect(subject.inheritable_setting.to_hash[:namespace_inheritable]).to eq({})
-          expect(app1.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1'])
+          expect(app1.inheritable_setting.to_hash[:namespace_stackable]).to eq(mount_path: ['/app1'])
 
-          expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(:mount_path => ['/app1', '/app2'])
+          expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(mount_path: ['/app1', '/app2'])
         end
       end
 
@@ -84,7 +84,7 @@ module Grape
 
         it 'defines a new endpoint' do
           expect { subject.route(:any) }
-            .to change{ subject.endpoints.count }.from(0).to(1)
+            .to change { subject.endpoints.count }.from(0).to(1)
         end
 
         it 'does not duplicate identical endpoints' do
@@ -97,14 +97,14 @@ module Grape
           allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
           allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(nuz: 'naz')
 
-          expect(Grape::Endpoint).to receive(:new) do |inheritable_setting, endpoint_options|
+          expect(Grape::Endpoint).to receive(:new) do |_inheritable_setting, endpoint_options|
             expect(endpoint_options[:method]).to eq :get
             expect(endpoint_options[:path]).to eq '/foo'
             expect(endpoint_options[:for]).to eq subject
             expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
           end.and_yield
 
-          subject.route(:get, '/foo', { foo: 'bar' }, &proc{})
+          subject.route(:get, '/foo', { foo: 'bar' }, &proc {})
         end
       end
 
@@ -166,7 +166,7 @@ module Grape
           expect(Namespace).to receive(:new).with(:foo, foo: 'bar').and_return(new_namespace)
           expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)
 
-          subject.namespace :foo, foo: 'bar', &proc{}
+          subject.namespace :foo, foo: 'bar', &proc {}
         end
 
         it 'calls #joined_space_path on Namespace' do
@@ -224,21 +224,21 @@ module Grape
       describe '.route_param' do
         it 'calls #namespace with given params' do
           expect(subject).to receive(:namespace).with(':foo', {}).and_yield
-          subject.route_param('foo', {}, &proc{})
+          subject.route_param('foo', {}, &proc {})
         end
 
         let(:regex) { /(.*)/ }
         let!(:options) {  { requirements: regex } }
         it 'nests requirements option under param name' do
-          expect(subject).to receive(:namespace) do |param, options|
+          expect(subject).to receive(:namespace) do |_param, options|
             expect(options[:requirements][:foo]).to eq regex
           end
-          subject.route_param('foo', options, &proc{})
+          subject.route_param('foo', options, &proc {})
         end
 
         it 'does not modify options parameter' do
           allow(subject).to receive(:namespace)
-          expect { subject.route_param('foo', options, &proc{}) }
+          expect { subject.route_param('foo', options, &proc {}) }
             .to_not change { options }
         end
       end

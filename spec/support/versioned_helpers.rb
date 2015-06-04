@@ -28,7 +28,7 @@ def versioned_headers(options)
       'HTTP_ACCEPT' => [
         "application/vnd.#{options[:vendor] }-#{options[:version] }",
         options[:format]
-     ].compact.join('+')
+      ].compact.join('+')
     }
   when :accept_version_header
     {

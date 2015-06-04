@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Versioner::Param do
-  let(:app) { lambda { |env| [200, env, env['api.version']] } }
+  let(:app) { ->(env) { [200, env, env['api.version']] } }
   subject { Grape::Middleware::Versioner::Param.new(app, @options || {}) }
 
   it 'sets the API version based on the default param (apiver)' do

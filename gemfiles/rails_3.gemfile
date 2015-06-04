@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 gem 'rails', '3.2.19'
 
 group :development, :test do
-  gem 'rubocop', '~> 0.29.1'
+  gem 'rubocop', '~> 0.31.0'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'

@@ -52,7 +52,7 @@ begin
       end
 
       desc 'Generate and publish YARD docs to GitHub pages.'
-      task :publish => ['doc:pages:checkout', 'doc:pages'] do
+      task publish: ['doc:pages:checkout', 'doc:pages'] do
         Dir.chdir(File.dirname(__FILE__) + '/../grape.doc') do
           system('git checkout gh-pages')
           system('git add .')

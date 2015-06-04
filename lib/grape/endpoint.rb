@@ -83,7 +83,7 @@ module Grape
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
        options[:path].join('/')
-     ].join(' ')
+      ].join(' ')
     end
 
     def routes
@@ -192,7 +192,7 @@ module Grape
         options[:app].call(env)
       else
         builder = build_middleware
-        builder.run lambda { |arg| run(arg) }
+        builder.run ->(arg) { run(arg) }
         builder.call(env)
       end
     end
@@ -200,11 +200,7 @@ module Grape
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
-      if options[:app] && options[:app].respond_to?(:endpoints)
-        options[:app].endpoints
-      else
-        nil
-      end
+      options[:app].endpoints if options[:app] && options[:app].respond_to?(:endpoints)
     end
 
     def equals?(e)

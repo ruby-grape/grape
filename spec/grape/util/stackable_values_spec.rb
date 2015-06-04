@@ -2,7 +2,7 @@ require 'spec_helper'
 module Grape
   module Util
     describe StackableValues do
-      let(:parent){ StackableValues.new }
+      let(:parent) { StackableValues.new }
       subject { StackableValues.new(parent) }
 
       describe '#keys' do

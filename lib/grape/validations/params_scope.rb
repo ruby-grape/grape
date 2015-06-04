@@ -181,9 +181,9 @@ module Grape
       def validate_value_coercion(coerce_type, values)
         return unless coerce_type && values
         return if values.is_a?(Proc)
-        coerce_type = coerce_type.first if coerce_type.kind_of?(Array)
+        coerce_type = coerce_type.first if coerce_type.is_a?(Array)
         value_types = values.is_a?(Range) ? [values.begin, values.end] : values
-        if value_types.any? { |v| !v.kind_of?(coerce_type) }
+        if value_types.any? { |v| !v.is_a?(coerce_type) }
           fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end
       end

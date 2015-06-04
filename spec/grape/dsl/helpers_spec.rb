@@ -16,7 +16,7 @@ module Grape
     describe Helpers do
       subject { Class.new(HelpersSpec::Dummy) }
       let(:proc) do
-        ->(*) do
+        lambda do |*|
           def test
             :test
           end

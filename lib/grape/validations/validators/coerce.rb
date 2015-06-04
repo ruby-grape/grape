@@ -32,7 +32,7 @@ module Grape
           val.is_a?(TrueClass) || val.is_a?(FalseClass) || (val.is_a?(String) && val.empty?)
         elsif klass == Rack::Multipart::UploadedFile
           val.is_a?(Hashie::Mash) && val.key?(:tempfile)
-        elsif [DateTime, Date, Numeric].any?{ |vclass| vclass >= klass }
+        elsif [DateTime, Date, Numeric].any? { |vclass| vclass >= klass }
           return true if val.is_a?(String) && val.empty?
           val.is_a?(klass)
         else

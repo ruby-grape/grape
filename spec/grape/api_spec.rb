@@ -278,7 +278,7 @@ describe Grape::API do
       before do
         subject.format :txt
         subject.content_type :json, 'application/json'
-        subject.formatter :json, ->(object, env) { object }
+        subject.formatter :json, ->(object, _env) { object }
         def subject.enable_root_route!
           get('/') { 'root' }
         end
@@ -820,7 +820,7 @@ describe Grape::API do
     context 'with a custom content_type' do
       before do
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, ->(object, env) { 'custom' }
+        subject.formatter :custom, ->(_object, _env) { 'custom' }
 
         subject.get('/custom') { 'bar' }
         subject.get('/error') { error!('error in custom', 500) }
@@ -986,7 +986,7 @@ describe Grape::API do
   end
   describe '.http_basic' do
     it 'protects any resources on the same scope' do
-      subject.http_basic do |u, p|
+      subject.http_basic do |u, _p|
         u == 'allow'
       end
       subject.get(:hello) { 'Hello, world.' }
@@ -999,7 +999,7 @@ describe Grape::API do
     it 'is scopable' do
       subject.get(:hello) { 'Hello, world.' }
       subject.namespace :admin do
-        http_basic do |u, p|
+        http_basic do |u, _p|
           u == 'allow'
         end
 
@@ -1013,7 +1013,7 @@ describe Grape::API do
     end
 
     it 'is callable via .auth as well' do
-      subject.auth :http_basic do |u, p|
+      subject.auth :http_basic do |u, _p|
         u == 'allow'
       end
 
@@ -1027,7 +1027,7 @@ describe Grape::API do
     it 'has access to the current endpoint' do
       basic_auth_context = nil
 
-      subject.http_basic do |u, p|
+      subject.http_basic do |u, _p|
         basic_auth_context = self
 
         u == 'allow'
@@ -1057,7 +1057,7 @@ describe Grape::API do
     end
 
     it 'can set instance variables accessible to routes' do
-      subject.http_basic do |u, p|
+      subject.http_basic do |u, _p|
         @hello = 'Hello, world.'
 
         u == 'allow'
@@ -1306,7 +1306,7 @@ describe Grape::API do
       allow(formatter).to receive(:call) { fail StandardError }
       allow(Grape::Formatter::Base).to receive(:formatter_for) { formatter }
 
-      subject.rescue_from :all do |e|
+      subject.rescue_from :all do |_e|
         rack_response('Formatter Error', 500)
       end
       subject.get('/formatter_exception') { 'Hello world' }
@@ -1542,7 +1542,7 @@ describe Grape::API do
     context 'class' do
       before :each do
         class CustomErrorFormatter
-          def self.call(message, backtrace, options, env)
+          def self.call(message, _backtrace, _options, _env)
             "message: #{message} @backtrace"
           end
         end
@@ -1562,7 +1562,7 @@ describe Grape::API do
       context 'class' do
         before :each do
           class CustomErrorFormatter
-            def self.call(message, backtrace, option, env)
+            def self.call(message, _backtrace, _option, _env)
               "message: #{message} @backtrace"
             end
           end
@@ -1648,8 +1648,8 @@ describe Grape::API do
   describe '.formatter' do
     context 'multiple formatters' do
       before :each do
-        subject.formatter :json, ->(object, env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
-        subject.formatter :txt, ->(object, env) { "custom_formatter: #{object[:some] }" }
+        subject.formatter :json, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
+        subject.formatter :txt, ->(object, _env) { "custom_formatter: #{object[:some] }" }
         subject.get :simple do
           { some: 'hash' }
         end
@@ -1667,7 +1667,7 @@ describe Grape::API do
       before :each do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, ->(object, env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
+        subject.formatter :custom, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
         subject.get :simple do
           { some: 'hash' }
         end
@@ -1683,7 +1683,7 @@ describe Grape::API do
     end
     context 'custom formatter class' do
       module CustomFormatter
-        def self.call(object, env)
+        def self.call(object, _env)
           "{\"custom_formatter\":\"#{object[:some] }\"}"
         end
       end
@@ -1720,7 +1720,7 @@ describe Grape::API do
       before :each do
         subject.content_type :txt, 'text/plain'
         subject.content_type :custom, 'text/custom'
-        subject.parser :custom, ->(object, env) { { object.to_sym => object.to_s.reverse } }
+        subject.parser :custom, ->(object, _env) { { object.to_sym => object.to_s.reverse } }
         subject.put :simple do
           params[:simple]
         end
@@ -1735,7 +1735,7 @@ describe Grape::API do
     end
     context 'custom parser class' do
       module CustomParser
-        def self.call(object, env)
+        def self.call(object, _env)
           { object.to_sym => object.to_s.reverse }
         end
       end
@@ -2061,7 +2061,7 @@ describe Grape::API do
     end
     it 'describes a method' do
       subject.desc 'first method'
-      subject.get :first do ; end
+      subject.get :first do; end
       expect(subject.routes.length).to eq(1)
       route = subject.routes.first
       expect(route.route_description).to eq('first method')
@@ -2070,47 +2070,47 @@ describe Grape::API do
     end
     it 'describes methods separately' do
       subject.desc 'first method'
-      subject.get :first do ; end
+      subject.get :first do; end
       subject.desc 'second method'
-      subject.get :second do ; end
+      subject.get :second do; end
       expect(subject.routes.count).to eq(2)
       expect(subject.routes.map { |route|
         { description: route.route_description, params: route.route_params }
       }).to eq [
         { description: 'first method', params: {} },
         { description: 'second method', params: {} }
-    ]
+      ]
     end
     it 'resets desc' do
       subject.desc 'first method'
-      subject.get :first do ; end
-      subject.get :second do ; end
+      subject.get :first do; end
+      subject.get :second do; end
       expect(subject.routes.map { |route|
         { description: route.route_description, params: route.route_params }
       }).to eq [
         { description: 'first method', params: {} },
         { description: nil, params: {} }
-    ]
+      ]
     end
     it 'namespaces and describe arbitrary parameters' do
       subject.namespace 'ns' do
         desc 'ns second', foo: 'bar'
-        get 'second' do ; end
+        get 'second' do; end
       end
       expect(subject.routes.map { |route|
         { description: route.route_description, foo: route.route_foo, params: route.route_params }
       }).to eq [
         { description: 'ns second', foo: 'bar', params: {} }
-    ]
+      ]
     end
     it 'includes details' do
       subject.desc 'method', details: 'method details'
-      subject.get 'method' do ; end
+      subject.get 'method' do; end
       expect(subject.routes.map { |route|
         { description: route.route_description, details: route.route_details, params: route.route_params }
       }).to eq [
         { description: 'method', details: 'method details', params: {} }
-    ]
+      ]
     end
     it 'describes a method with parameters' do
       subject.desc 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } }
@@ -2121,7 +2121,7 @@ describe Grape::API do
         { description: route.route_description, params: route.route_params }
       }).to eq [
         { description: 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } } }
-    ]
+      ]
     end
     it 'merges the parameters of the namespace with the parameters of the method' do
       subject.desc 'namespace'
@@ -2133,7 +2133,7 @@ describe Grape::API do
         params do
           optional :method_param, desc: 'method parameter'
         end
-        get 'method' do ; end
+        get 'method' do; end
       end
 
       routes_doc = subject.routes.map { |route|
@@ -2146,7 +2146,7 @@ describe Grape::API do
             'method_param' => { required: false, desc: 'method parameter' }
           }
         }
-    ]
+      ]
     end
     it 'merges the parameters of nested namespaces' do
       subject.desc 'ns1'
@@ -2165,7 +2165,7 @@ describe Grape::API do
           params do
             optional :method_param, desc: 'method param'
           end
-          get 'method' do ; end
+          get 'method' do; end
         end
       end
       expect(subject.routes.map { |route|
@@ -2179,7 +2179,7 @@ describe Grape::API do
             'method_param' => { required: false, desc: 'method param' }
           }
         }
-    ]
+      ]
     end
     it 'groups nested params and prevents overwriting of params with same name in different groups' do
       subject.desc 'method'
@@ -2193,7 +2193,7 @@ describe Grape::API do
           requires :param2, desc: 'group2 param2 desc'
         end
       end
-      subject.get 'method' do ; end
+      subject.get 'method' do; end
 
       expect(subject.routes.map(&:route_params)).to eq [{
         'group1'         => { required: true, type: 'Array' },
@@ -2212,7 +2212,7 @@ describe Grape::API do
           requires :nested_param, desc: 'nested param'
         end
       end
-      subject.get 'method' do ; end
+      subject.get 'method' do; end
       expect(subject.routes.map { |route|
         { description: route.route_description, params: route.route_params }
       }).to eq [
@@ -2223,7 +2223,7 @@ describe Grape::API do
             'nested[nested_param]' => { required: true, desc: 'nested param' }
           }
         }
-    ]
+      ]
     end
     it 'allows to set the type attribute on :group element' do
       subject.params do
@@ -2236,12 +2236,12 @@ describe Grape::API do
       subject.params do
         requires :one_param, desc: 'one param'
       end
-      subject.get 'method' do ; end
+      subject.get 'method' do; end
       expect(subject.routes.map { |route|
         { description: route.route_description, params: route.route_params }
       }).to eq [
         { description: nil, params: { 'one_param' => { required: true, desc: 'one param' } } }
-    ]
+      ]
     end
     it 'does not symbolize params' do
       subject.desc 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } }
@@ -2252,12 +2252,12 @@ describe Grape::API do
         { description: route.route_description, params: route.route_params }
       }).to eq [
         { description: 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } } }
-    ]
+      ]
     end
   end
 
   describe '.mount' do
-    let(:mounted_app) { ->(env) { [200, {}, ['MOUNTED']] } }
+    let(:mounted_app) { ->(_env) { [200, {}, ['MOUNTED']] } }
 
     context 'with a bare rack app' do
       before do

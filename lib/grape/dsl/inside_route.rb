@@ -39,16 +39,14 @@ module Grape
             key.each_pair do |parent, children|
               output_key = options[:stringify] ? parent.to_s : parent.to_sym
 
-              next unless options[:include_missing] || children || params.key?(parent)
+              next unless options[:include_missing] || params.key?(parent)
 
-              if params.key?(parent) || options[:include_missing]
-                hash[output_key] = if children
-                                     children_params = params[parent] || (children.is_a?(Array) ? [] : {})
-                                     declared(children_params, options, Array(children))
-                                   else
-                                     params[parent]
-                                   end
-              end
+              hash[output_key] = if children
+                                   children_params = params[parent] || (children.is_a?(Array) ? [] : {})
+                                   declared(children_params, options, Array(children))
+                                 else
+                                   params[parent]
+                                 end
             end
 
             hash

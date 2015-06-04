@@ -5,7 +5,7 @@ describe Grape::Middleware::Error do
   # raises a text exception
   class ExceptionApp
     class << self
-      def call(env)
+      def call(_env)
         fail 'rain!'
       end
     end
@@ -18,7 +18,7 @@ describe Grape::Middleware::Error do
         throw :error, message: { error: message, detail: 'missing widget' }, status: status
       end
 
-      def call(env)
+      def call(_env)
         error!('rain!', 401)
       end
     end
@@ -31,7 +31,7 @@ describe Grape::Middleware::Error do
         throw :error, message: message, status: status
       end
 
-      def call(env)
+      def call(_env)
         error!('Access Denied', 401)
       end
     end
@@ -43,7 +43,7 @@ describe Grape::Middleware::Error do
 
   class CustomErrorApp
     class << self
-      def call(env)
+      def call(_env)
         fail CustomError, status: 400, message: 'failed validation'
       end
     end
@@ -160,7 +160,7 @@ describe Grape::Middleware::Error do
         use Grape::Middleware::Error, rescue_all: true,
                                       format: :custom,
                                       error_formatters: {
-                                        custom: lambda do |message, backtrace, options, env|
+                                        custom: lambda do |message, _backtrace, _options, _env|
                                           { custom_formatter: message }.inspect
                                         end
                                       }

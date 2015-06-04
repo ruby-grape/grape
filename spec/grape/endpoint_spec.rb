@@ -11,13 +11,13 @@ describe Grape::Endpoint do
     after { Grape::Endpoint.before_each(nil) }
 
     it 'should be settable via block' do
-      block = lambda { |endpoint| 'noop' }
+      block = lambda { |_endpoint| 'noop' }
       Grape::Endpoint.before_each(&block)
       expect(Grape::Endpoint.before_each).to eq(block)
     end
 
     it 'should be settable via reference' do
-      block = lambda { |endpoint| 'noop' }
+      block = lambda { |_endpoint| 'noop' }
       Grape::Endpoint.before_each block
       expect(Grape::Endpoint.before_each).to eq(block)
     end
@@ -153,7 +153,7 @@ describe Grape::Endpoint do
         'cookie4=secret+code+here',
         'my-awesome-cookie1=is+cool',
         'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure'
-     ]
+      ]
     end
 
     it 'sets browser cookies and does not set response cookies' do

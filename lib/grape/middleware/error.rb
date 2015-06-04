@@ -29,7 +29,7 @@ module Grape
         rescue StandardError => e
           is_rescuable = rescuable?(e.class)
           if e.is_a?(Grape::Exceptions::Base) && !is_rescuable
-            handler = lambda { |arg| error_response(arg) }
+            handler = ->(arg) { error_response(arg) }
           else
             raise unless is_rescuable
             handler = find_handler(e.class)
@@ -47,7 +47,7 @@ module Grape
       end
 
       def rescuable?(klass)
-        options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
+        options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, _handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
       end
 
       def exec_handler(e, &handler)

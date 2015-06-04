@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Grape::Middleware::Base do
   subject { Grape::Middleware::Base.new(blank_app) }
-  let(:blank_app) { lambda { |_| [200, {}, 'Hi there.'] } }
+  let(:blank_app) { ->(_) { [200, {}, 'Hi there.'] } }
 
   before do
     # Keep it one object for testing.
@@ -36,7 +36,7 @@ describe Grape::Middleware::Base do
 
   describe '#response' do
     subject { Grape::Middleware::Base.new(response) }
-    let(:response) { lambda { |_| [204, { abc: 1 }, 'test'] } }
+    let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
     it 'status' do
       subject.call({})

@@ -51,7 +51,7 @@ module Grape
 
         protected
 
-        def inject_api_helpers_to_mod(mod, &block)
+        def inject_api_helpers_to_mod(mod, &_block)
           mod.extend(BaseHelper)
           yield if block_given?
           mod.api_changed(self)
