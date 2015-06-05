@@ -14,6 +14,7 @@ require 'base64'
 require 'cookiejar'
 require 'json'
 require 'mime/types'
+require 'warden'
 
 Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
   require file
@@ -23,7 +24,10 @@ I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
+  config.include Warden::Test::Helpers
   config.raise_errors_for_deprecations!
+
+  config.after(:each) { Warden.test_reset! }
 
   config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
 end
