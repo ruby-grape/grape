@@ -3,6 +3,34 @@ Upgrading Grape
 
 ### Upgrading to >= 0.12.0
 
+#### Changes in middleware
+
+The Rack response object is no longer converted to an array by the formatter, enabling streaming. If your custom middleware is accessing `@app_response`, update it to expect a `Rack::Response` instance instead of an array.
+
+For example,
+
+```ruby
+class CacheBusterMiddleware < Grape::Middleware::Base
+  def after
+    @app_response[1]['Expires'] = Time.at(0).utc.to_s
+    @app_response
+  end
+end
+```
+
+becomes
+
+```ruby
+class CacheBusterMiddleware < Grape::Middleware::Base
+  def after
+    @app_response.headers['Expires'] = Time.at(0).utc.to_s
+    @app_response
+  end
+end
+```
+
+See [#1029](https://github.com/intridea/grape/pull/1029) for more information.
+
 #### Changes in present
 
 Using `present` with objects that responded to `merge` would cause early evaluation of the represented object, with unexpected side-effects, such as missing parameters or environment within rendering code. Grape now only merges represented objects with a previously rendered body, usually when multiple `present` calls are made in the same route.
