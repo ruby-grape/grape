@@ -81,11 +81,19 @@ Next Release
 * Your contribution here.
 ```
 
+Bump the minor version in lib/grape/version.rb.
+
+```ruby
+module Grape
+  VERSION = '0.6.1'
+end
+```
+
 Comit your changes.
 
 ```
-git add CHANGELOG.md README.md
-git commit -m "Preparing for next release."
+git add CHANGELOG.md README.md lib/grape/version.rb
+git commit -m "Preparing for next development iteration, 0.6.1."
 git push origin master
 ```
 

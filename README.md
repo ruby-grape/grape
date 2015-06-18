@@ -90,8 +90,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the stable release of Grape 0.12.0.
+You're reading the documentation for the next release of Grape, which should be 0.12.1.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
+The current stable release is [0.12.0](https://github.com/intridea/grape/blob/v0.12.0/README.md).
 
 ## Project Resources
 
