@@ -1,5 +1,5 @@
-0.12.0 (Next)
-=============
+0.12.0 (6/18/2015)
+==================
 
 #### Features
 
@@ -24,7 +24,6 @@
 * [#1012](https://github.com/intridea/grape/pull/1012): Fixed `allow_blank: false` with a Boolean value of `false` - [@mfunaro](https://github.com/mfunaro).
 * [#1023](https://github.com/intridea/grape/issues/1023): Fixes unexpected beahvior with `present` and an object that responds to `merge` but isn't a Hash - [@dblock](https://github.com/dblock).
 * [#1017](https://github.com/intridea/grape/pull/1017): Fixed `undefined method stringify_keys` with nested mutual exclusive params - [@quickpay](https://github.com/quickpay).
-* Your contribution here.
 
 0.11.0 (2/23/2015)
 ==================
