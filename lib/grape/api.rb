@@ -4,6 +4,7 @@ module Grape
   # class in order to build an API.
   class API
     include Grape::DSL::API
+    extend NamedRoutes::NamedPathHelper
 
     class << self
       attr_reader :instance
@@ -13,6 +14,7 @@ module Grape
         @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
         @routes = nil
+        @named_route_seeker = nil
         reset_validations!
       end
 

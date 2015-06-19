@@ -2904,4 +2904,54 @@ XML
       end
     end
   end
+
+  describe '.get_named_path' do
+    before do
+      subject.namespace :users do
+        route_param :id do
+          get as: :user do
+            params[:id]
+          end
+        end
+      end
+    end
+
+    it 'returns path with substituted params' do
+      expect(subject.get_named_path(:user, id: 1, format: 'json')).to eq('/users/1.json')
+    end
+
+    it 'raises Grape::NamedRoutes::NamedRouteNotFound when named_route is missed' do
+      expect {
+        subject.get_named_path(:wrong_route)
+      }.to raise_error(Grape::NamedRoutes::NamedRouteNotFound)
+    end
+
+    it 'raises Grape::NamedRoutes::MissedRequiredParam when required param is missed' do
+      expect {
+        subject.get_named_path(:user)
+      }.to raise_error(Grape::NamedRoutes::MissedRequiredParam)
+    end
+  end
+
+  describe 'dynamic _path methods' do
+    before do
+      subject.namespace :users do
+        route_param :id do
+          get as: :user do
+            params[:id]
+          end
+        end
+      end
+    end
+
+    it 'returns path with substituted params' do
+      expect(subject.user_path(id: 1, format: 'json')).to eq('/users/1.json')
+    end
+
+    it 'raises NoMethodError when named_route is missed' do
+      expect {
+        subject.wrong_route_path
+      }.to raise_error(NoMethodError)
+    end
+  end
 end

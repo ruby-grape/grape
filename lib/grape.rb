@@ -123,6 +123,15 @@ module Grape
     end
   end
 
+  module NamedRoutes
+    extend ActiveSupport::Autoload
+    autoload :NamedRouteNotFound
+    autoload :NamedRouteSeeker
+    autoload :PathCompiler
+    autoload :MissedRequiredParam
+    autoload :NamedPathHelper
+  end
+
   module Util
     extend ActiveSupport::Autoload
     autoload :InheritableValues
