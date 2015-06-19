@@ -15,6 +15,7 @@ if ActiveSupport::VERSION::MAJOR >= 4
 else
   require_relative 'backports/active_support/deep_dup'
 end
+require_relative 'backports/active_support/duplicable'
 
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/object/conversions'
