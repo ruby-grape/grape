@@ -1,7 +1,13 @@
 Next Release
 ============
 
+#### Features
+
 * Your contribution here.
+
+#### Fixes
+
+* [#1038](https://github.com/intridea/grape/pull/1038): Avoid dup-ing the String class when used in inherited params - [@rnubel](https://github.com/rnubel).
 
 0.12.0 (6/18/2015)
 ==================
