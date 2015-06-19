@@ -58,6 +58,13 @@ module Grape
           expect(subject.to_hash).to eq(some_thing: :foo, some_thing_more: :foo_bar)
         end
       end
+
+      describe '#clone' do
+        it 'clones itself even when containing a String class' do
+          subject[:foo] = String
+          expect(subject.clone.to_hash).to eq(foo: String)
+        end
+      end
     end
   end
 end

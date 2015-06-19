@@ -73,6 +73,15 @@ class Numeric
     false
   end
 end
+class String
+  class << self
+    # Rubinius explicitly disallows this. Also, there's no real
+    # reason you'd want to duplicate the String class in a deep_dup.
+    def duplicable?
+      false
+    end
+  end
+end
 require 'bigdecimal'
 # rubocop:disable Lint/HandleExceptions
 class BigDecimal
