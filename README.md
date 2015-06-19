@@ -29,6 +29,8 @@
   - [Declared](#declared)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
+  - [Supported Parameter Types](#supported-parameter-types)
+  - [Custom Types](#custom-types)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
@@ -727,6 +729,54 @@ The correct implementation is to ensure the default value passes all validations
 ```ruby
 params do
   optional :color, type: String, default: 'blue', values: ['blue', 'red', 'green']
+end
+```
+
+#### Supported Parameter Types
+
+The following are all valid types, supported out of the box by Grape:
+
+* Integer
+* Float
+* BigDecimal
+* Numeric
+* Date
+* DateTime
+* Time
+* Boolean
+* String
+* Symbol
+* Rack::Multipart::UploadedFile
+
+#### Custom Types
+
+Aside from the default set of supported types listed above, any class can be
+used as a type so long as it defines a class-level `parse` method. This method
+must take one string argument and return an instance of the correct type, or
+raise an exception to indicate the value was invalid. E.g.,
+
+```ruby
+class Color
+  attr_reader :value
+  def initialize(color)
+    @value = color
+  end
+
+  def self.parse(value)
+    fail 'Invalid color' unless %w(blue red green).include?(value)
+    new(value)
+  end
+end
+
+# ...
+
+params do
+  requires :color, type: Color, default: Color.new('blue')
+end
+
+get '/stuff' do
+  # params[:color] is already a Color.
+  params[:color].value
 end
 ```
 

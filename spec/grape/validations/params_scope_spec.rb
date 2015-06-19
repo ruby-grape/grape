@@ -89,6 +89,35 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'when using custom types' do
+    class CustomType
+      attr_reader :value
+      def self.parse(value)
+        fail if value == 'invalid'
+        new(value)
+      end
+
+      def initialize(value)
+        @value = value
+      end
+    end
+
+    it 'coerces the parameter via the type\'s parse method' do
+      subject.params do
+        requires :foo, type: CustomType
+      end
+      subject.get('/types') { params[:foo].value }
+
+      get '/types', foo: 'valid'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('valid')
+
+      get '/types', foo: 'invalid'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to match(/foo is invalid/)
+    end
+  end
+
   context 'array without coerce type explicitly given' do
     it 'sets the type based on first element' do
       subject.params do
