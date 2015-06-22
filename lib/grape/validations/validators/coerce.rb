@@ -41,7 +41,9 @@ module Grape
       end
 
       def valid_type?(val)
-        if @option.is_a?(Array) || @option.is_a?(Set)
+        if val.instance_of?(InvalidValue)
+          false
+        elsif @option.is_a?(Array) || @option.is_a?(Set)
           _valid_array_type?(@option.first, val)
         else
           _valid_single_type?(@option, val)
