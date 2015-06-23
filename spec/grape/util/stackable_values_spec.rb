@@ -109,6 +109,16 @@ module Grape
 
           expect(grandchild.clone.to_hash).to eq(some_thing: [:foo, [:bar, :more], :grand_foo_bar], some_thing_more: [:foo_bar])
         end
+
+        context 'complex (i.e. not primitive) data types (ex. middleware, please see bug #930)' do
+          let(:middleware) { double }
+
+          before { subject[:middleware] = middleware }
+
+          it 'copies values; does not duplicate them' do
+            expect(obj_cloned[:middleware]).to eq [middleware]
+          end
+        end
       end
     end
   end

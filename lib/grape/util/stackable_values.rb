@@ -45,7 +45,7 @@ module Grape
       def initialize_copy(other)
         super
         self.inherited_values = other.inherited_values
-        self.new_values = other.new_values.deep_dup
+        self.new_values = other.new_values.dup
       end
     end
   end
