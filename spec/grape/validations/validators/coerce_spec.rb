@@ -11,6 +11,14 @@ describe Grape::Validations::CoerceValidator do
   end
 
   describe 'coerce' do
+    module CoerceValidatorSpec
+      class User
+        include Virtus.model
+        attribute :id, Integer
+        attribute :name, String
+      end
+    end
+
     context 'i18n' do
       after :each do
         I18n.locale = :en
@@ -82,14 +90,6 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'complex objects' do
-      module CoerceValidatorSpec
-        class User
-          include Virtus.model
-          attribute :id, Integer
-          attribute :name, String
-        end
-      end
-
       it 'error on malformed input for complex objects' do
         subject.params do
           requires :user, type: CoerceValidatorSpec::User
@@ -147,6 +147,27 @@ describe Grape::Validations::CoerceValidator do
           get 'array', arry: [1, 0]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('TrueClass')
+        end
+
+        it 'Array of Complex' do
+          subject.params do
+            requires :arry, coerce: Array[CoerceValidatorSpec::User]
+          end
+          subject.get '/array' do
+            params[:arry].size
+          end
+
+          get 'array', arry: [31]
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('arry is invalid')
+
+          get 'array', arry: { id: 31, name: 'Alice' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('arry is invalid')
+
+          get 'array', arry: [{ id: 31, name: 'Alice' }]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('1')
         end
       end
 
