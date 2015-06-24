@@ -5,6 +5,10 @@ module Grape
       @options = options || {}
     end
 
+    def route_notes
+      route_details
+    end
+
     def method_missing(method_id, *arguments)
       match = /route_([_a-zA-Z]\w*)/.match(method_id.to_s)
       if match
