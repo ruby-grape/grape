@@ -50,11 +50,15 @@ module Grape
         end
       end
 
-      protected
+      def all_routes
+        subclasses.flat_map(&:prepare_routes)
+      end
 
       def prepare_routes
         endpoints.map(&:routes).flatten
       end
+
+      protected
 
       # Execute first the provided block, then each of the
       # block passed in. Allows for simple 'before' setups

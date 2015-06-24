@@ -10,6 +10,7 @@ module Grape
     attr_reader :env, :request, :headers, :params
 
     include Grape::DSL::InsideRoute
+    include Grape::NamedRouteMatcher
 
     class << self
       def before_each(new_setup = false, &block)

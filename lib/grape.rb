@@ -7,7 +7,9 @@ require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
 require 'hashie'
 require 'set'
+require 'active_support'
 require 'active_support/version'
+require 'active_support/core_ext/class'
 require 'active_support/core_ext/hash/indifferent_access'
 
 if ActiveSupport::VERSION::MAJOR >= 4
@@ -37,6 +39,7 @@ module Grape
     autoload :API
     autoload :Endpoint
 
+    autoload :NamedRouteMatcher
     autoload :Route
     autoload :Namespace
 
