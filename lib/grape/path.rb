@@ -1,4 +1,5 @@
 module Grape
+  # Represents a path to an endpoint.
   class Path
     def self.prepare(raw_path, namespace, settings)
       Path.new(raw_path, namespace, settings).path_with_suffix

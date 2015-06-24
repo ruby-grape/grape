@@ -135,6 +135,18 @@ module Grape
           end
         end
 
+        # Declare a "namespace", which prefixes all subordinate routes with its
+        # name. Any endpoints within a namespace, or group, resource, segment,
+        # etc., will share their parent context as well as any configuration
+        # done in the namespace context.
+        #
+        # @example
+        #
+        #     namespace :foo do
+        #       get 'bar' do
+        #         # defines the endpoint: GET /foo/bar
+        #       end
+        #     end
         def namespace(space = nil, options = {}, &block)
           if space || block_given?
             within_namespace do
@@ -162,6 +174,7 @@ module Grape
           @routes ||= prepare_routes
         end
 
+        # Remove all defined routes.
         def reset_routes!
           @routes = nil
         end
@@ -177,6 +190,7 @@ module Grape
           namespace(":#{param}", options, &block)
         end
 
+        # @return array of defined versions
         def versions
           @versions ||= []
         end

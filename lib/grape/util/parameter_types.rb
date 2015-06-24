@@ -29,14 +29,14 @@ module Grape
     ]
 
     # @param type [Class] type to check
-    # @returns [Boolean] whether or not the type is known by Grape as a valid
+    # @return [Boolean] whether or not the type is known by Grape as a valid
     #   type for a single value
     def self.primitive?(type)
       PRIMITIVES.include?(type)
     end
 
     # @param type [Class] type to check
-    # @returns [Boolean] whether or not the type is known by Grape as a valid
+    # @return [Boolean] whether or not the type is known by Grape as a valid
     #   data structure type
     # @note This method does not yet consider 'complex types', which inherit
     #   Virtus.model.
@@ -47,7 +47,7 @@ module Grape
     # A valid custom type must implement a class-level `parse` method, taking
     #   one String argument and returning the parsed value in its correct type.
     # @param type [Class] type to check
-    # @returns [Boolean] whether or not the type can be used as a custom type
+    # @return [Boolean] whether or not the type can be used as a custom type
     def self.custom_type?(type)
       !primitive?(type) &&
         !structure?(type) &&

@@ -5,6 +5,17 @@ module Grape
 
       include Grape::DSL::Parameters
 
+      # Open up a new ParamsScope, allowing parameter definitions per
+      #   Grape::DSL::Params.
+      # @param opts [Hash] options for this scope
+      # @option opts :element [Symbol] the element that contains this scope; for
+      #   this to be relevant, @parent must be set
+      # @option opts :parent [ParamsScope] the scope containing this scope
+      # @option opts :api [API] the API endpoint to modify
+      # @option opts :optional [Boolean] whether or not this scope needs to have
+      #   any parameters set or not
+      # @option opts :type [Class] a type meant to govern this scope (deprecated)
+      # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
         @element  = opts[:element]
         @parent   = opts[:parent]
@@ -18,27 +29,35 @@ module Grape
         configure_declared_params
       end
 
+      # @return [Boolean] whether or not this entire scope needs to be
+      #   validated
       def should_validate?(parameters)
         return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
 
+      # @return [String] the proper attribute name, with nesting considered.
       def full_name(name)
         return "#{@parent.full_name(@element)}[#{name}]" if @parent
         name.to_s
       end
 
+      # @return [Boolean] whether or not this scope is the root-level scope
       def root?
         !@parent
       end
 
+      # @return [Boolean] whether or not this scope needs to be present, or can
+      #   be blank
       def required?
         !@optional
       end
 
       protected
 
+      # Adds a parameter declaration to our list of validations.
+      # @param attrs [Array] (see Grape::DSL::Parameters#required)
       def push_declared_params(attrs)
         @declared_params.concat attrs
       end
