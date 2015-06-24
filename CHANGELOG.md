@@ -3,7 +3,8 @@ Next Release
 
 #### Features
 
-* Your contribution here.
+* [#1039](https://github.com/intridea/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
+* Your contribution here!
 
 #### Fixes
 

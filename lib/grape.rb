@@ -22,7 +22,6 @@ require 'active_support/core_ext/object/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/dependencies/autoload'
-require 'grape/util/content_types'
 require 'multi_json'
 require 'multi_xml'
 require 'virtus'
@@ -159,6 +158,9 @@ module Grape
     autoload :Presenter
   end
 end
+
+require 'grape/util/content_types'
+require 'grape/util/parameter_types'
 
 require 'grape/validations/validators/base'
 require 'grape/validations/attributes_iterator'

@@ -56,7 +56,14 @@ module Grape
         return val || Set.new if type == Set
         return val || {}      if type == Hash
 
-        converter = Virtus::Attribute.build(type)
+        # To support custom types that Virtus can't easily coerce, pass in an
+        # explicit coercer. Custom types must implement a `parse` class method.
+        converter_options = {}
+        if ParameterTypes.custom_type?(type)
+          converter_options[:coercer] = type.method(:parse)
+        end
+
+        converter = Virtus::Attribute.build(type, converter_options)
         converter.coerce(val)
 
       # not the prettiest but some invalid coercion can currently trigger
