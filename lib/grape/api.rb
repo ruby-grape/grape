@@ -1,14 +1,17 @@
 module Grape
-  # The API class is the primary entry point for
-  # creating Grape APIs.Users should subclass this
-  # class in order to build an API.
+  # The API class is the primary entry point for creating Grape APIs. Users
+  # should subclass this class in order to build an API.
   class API
     include Grape::DSL::API
 
     class << self
       attr_reader :instance
+
+      # A class-level lock to ensure the API is not compiled by multiple
+      # threads simultaneously within the same process.
       LOCK = Mutex.new
 
+      # Clears all defined routes, endpoints, etc., on this API.
       def reset!
         @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
@@ -16,32 +19,42 @@ module Grape
         reset_validations!
       end
 
+      # Parses the API's definition and compiles it into an instance of
+      # Grape::API.
       def compile
         @instance ||= new
       end
 
+      # Wipe the compiled API so we can recompile after changes were made.
       def change!
         @instance = nil
       end
 
+      # This is the interface point between Rack and Grape; it accepts a request
+      # from Rack and ultimately returns an array of three values: the status,
+      # the headers, and the body. See [the rack specification]
+      # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
       def call(env)
         LOCK.synchronize { compile } unless instance
         call!(env)
       end
 
+      # A non-synchronized version of ::call.
       def call!(env)
         instance.call(env)
       end
 
       # Create a scope without affecting the URL.
       #
-      # @param name [Symbol] Purely placebo, just allows to name the scope to make the code more readable.
+      # @param _name [Symbol] Purely placebo, just allows to name the scope to
+      # make the code more readable.
       def scope(_name = nil, &block)
         within_namespace do
           nest(block)
         end
       end
 
+      # (see #cascade?)
       def cascade(value = nil)
         if value.nil?
           inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !!namespace_inheritable(:cascade) : true
@@ -84,6 +97,8 @@ module Grape
       end
     end
 
+    # Builds the routes from the defined endpoints, effectively compiling
+    # this API into a usable form.
     def initialize
       @route_set = Rack::Mount::RouteSet.new
       add_head_not_allowed_methods_and_options_methods
@@ -94,6 +109,7 @@ module Grape
       @route_set.freeze
     end
 
+    # Handle a request. See Rack documentation for what `env` is.
     def call(env)
       result = @route_set.call(env)
       result[1].delete(Grape::Http::Headers::X_CASCADE) unless cascade?
@@ -168,6 +184,8 @@ module Grape
       end
     end
 
+    # Allows definition of endpoints that ignore the versioning configuration
+    # used by the rest of your API.
     def without_versioning(&_block)
       old_version = self.class.namespace_inheritable(:version)
       old_version_options = self.class.namespace_inheritable(:version_options)
@@ -181,6 +199,8 @@ module Grape
       self.class.namespace_inheritable(:version_options, old_version_options)
     end
 
+    # Allows definition of endpoints that ignore the root prefix used by the
+    # rest of your API.
     def without_root_prefix(&_block)
       old_prefix = self.class.namespace_inheritable(:root_prefix)
 

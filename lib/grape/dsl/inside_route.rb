@@ -238,6 +238,14 @@ module Grape
         env['rack.routing_args'][:route_info]
       end
 
+      # Attempt to locate the Entity class for a given object, if not given
+      # explicitly. This is done by looking for the presence of Klass::Entity,
+      # where Klass is the class of the `object` parameter, or one of its
+      # ancestors.
+      # @param object [Object] the object to locate the Entity class for
+      # @param options [Hash]
+      # @option options :with [Class] the explicit entity class to use
+      # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object, options)
         entity_class = options.delete(:with)
 
@@ -259,6 +267,8 @@ module Grape
         entity_class
       end
 
+      # @return the representation of the given object as done through
+      #   the given entity_class.
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
         embeds[:version] = env['api.version'] if env['api.version']

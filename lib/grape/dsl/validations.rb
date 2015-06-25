@@ -8,12 +8,16 @@ module Grape
       include Grape::DSL::Configuration
 
       module ClassMethods
+        # Clears all defined parameters and validations.
         def reset_validations!
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
         end
 
+        # Opens a root-level ParamsScope, defining parameter coercions and
+        # validations for the endpoint.
+        # @yield instance context of the new scope
         def params(&block)
           Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
         end
