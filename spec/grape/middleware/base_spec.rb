@@ -36,21 +36,43 @@ describe Grape::Middleware::Base do
 
   describe '#response' do
     subject { Grape::Middleware::Base.new(response) }
-    let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
-    it 'status' do
-      subject.call({})
-      expect(subject.response.status).to eq(204)
+    context Array do
+      let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
+
+      it 'status' do
+        subject.call({})
+        expect(subject.response.status).to eq(204)
+      end
+
+      it 'body' do
+        subject.call({})
+        expect(subject.response.body).to eq(['test'])
+      end
+
+      it 'header' do
+        subject.call({})
+        expect(subject.response.header).to have_key(:abc)
+      end
     end
 
-    it 'body' do
-      subject.call({})
-      expect(subject.response.body).to eq(['test'])
-    end
+    context Rack::Response do
+      let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
 
-    it 'header' do
-      subject.call({})
-      expect(subject.response.header).to have_key(:abc)
+      it 'status' do
+        subject.call({})
+        expect(subject.response.status).to eq(204)
+      end
+
+      it 'body' do
+        subject.call({})
+        expect(subject.response.body).to eq(['test'])
+      end
+
+      it 'header' do
+        subject.call({})
+        expect(subject.response.header).to have_key(:abc)
+      end
     end
   end
 
