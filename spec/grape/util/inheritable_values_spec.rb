@@ -60,9 +60,16 @@ module Grape
       end
 
       describe '#clone' do
-        it 'clones itself even when containing a String class' do
-          subject[:foo] = String
-          expect(subject.clone.to_hash).to eq(foo: String)
+        let(:obj_cloned) { subject.clone }
+
+        context 'complex (i.e. not primitive) data types (ex. entity classes, please see bug #891)' do
+          let(:description) { { entity: double } }
+
+          before { subject[:description] = description }
+
+          it 'copies values; does not duplicate them' do
+            expect(obj_cloned[:description]).to eq description
+          end
         end
       end
     end
