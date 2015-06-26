@@ -28,6 +28,7 @@ en:
           resolution: 'available strategy for :using is :path, :header, :param'
         unknown_validator: 'unknown validator: %{validator_type}'
         unknown_options: 'unknown options: %{options}'
+        unknown_parameter: 'unknown parameter: %{param}'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
         mutual_exclusion: 'are mutually exclusive'
         at_least_one: 'are missing, at least one parameter must be provided'

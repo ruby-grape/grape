@@ -31,6 +31,7 @@
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Custom Types](#custom-types)
+  - [Dependent Parameters](#dependent-parameters)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
@@ -799,6 +800,21 @@ params do
   requires :name, type: Hash do
     requires :first_name
     requires :last_name
+  end
+end
+```
+
+#### Dependent Parameters
+
+Suppose some of your parameters are only relevant if another parameter is given;
+Grape allows you to express this relationship through the `given` method in your
+parameters block, like so:
+
+```ruby
+params do
+  optional :shelf_id, type: Integer
+  given :shelf_id do
+    requires :bin_id, type: Integer
   end
 end
 ```

@@ -4,6 +4,7 @@ Next Release
 #### Features
 
 * [#1039](https://github.com/intridea/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
+* [#1047](https://github.com/intridea/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * Your contribution here!
 
 #### Fixes
