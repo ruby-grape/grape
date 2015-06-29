@@ -67,6 +67,7 @@
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
 - [Anchoring](#anchoring)
+- [Named Routes](#named-routes)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Rails Middleware](#rails-middleware)
     - [Remote IP](#remote-ip)
@@ -2367,6 +2368,48 @@ Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
+
+# Named Routes
+
+You can set a name to a route to call it later without hardcoding it's path:
+
+```ruby
+module Twitter
+  class API < Grape::API
+    version 'v1', using: :header, vendor: 'twitter'
+    format :json
+    prefix :api
+
+    resource :statuses do
+      desc 'Route without params.'
+      get :home_timeline, as: :home_timeline do
+        Twitter::API.get_named_path(:home_timeline)
+      end
+
+      desc 'Route with route_param.'
+      params do
+        requires :id, type: Integer
+      end
+      route_param :id do
+        get as: :status do
+          Twitter::API.get_named_path(:status, id: params[:id])
+        end
+      end
+
+      desc 'Route with inline param'
+      params do
+        requires :inline, type: String
+      end
+      get '/custom_route/:inline', as: :inline do
+        Twitter::API.get_named_path(:inline, inline: params[:inline])
+      end
+    end
+
+  end
+end
+```
+
+These three endpoints simply return their URL.
 
 # Using Custom Middleware
 
