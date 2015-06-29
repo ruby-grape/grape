@@ -149,6 +149,27 @@ module Grape
         validates(attrs, all_or_none_of: true)
       end
 
+      # Define a block of validations which should be applied if and only if
+      # the given parameter is present. The parameters are not nested.
+      # @param attr [Symbol] the parameter which, if present, triggers the
+      #   validations
+      # @throws Grape::Exceptions::UnknownParameter if `attr` has not been
+      #   defined in this scope yet
+      # @yield a parameter definition DSL
+      def given(attr, &block)
+        fail Grape::Exceptions::UnknownParameter.new(attr) unless declared_param?(attr)
+        new_lateral_scope(dependent_on: attr, &block)
+      end
+
+      # Test for whether a certain parameter has been defined in this params
+      # block yet.
+      # @returns [Boolean] whether the parameter has been defined
+      def declared_param?(param)
+        # @declared_params also includes hashes of options and such, but those
+        # won't be flattened out.
+        @declared_params.flatten.include?(param)
+      end
+
       alias_method :group, :requires
 
       # @param params [Hash] initial hash of parameters

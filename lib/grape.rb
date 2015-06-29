@@ -66,6 +66,7 @@ module Grape
     autoload :InvalidVersionerOption
     autoload :UnknownValidator
     autoload :UnknownOptions
+    autoload :UnknownParameter
     autoload :InvalidWithOptionForRepresent
     autoload :IncompatibleOptionValues
     autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'

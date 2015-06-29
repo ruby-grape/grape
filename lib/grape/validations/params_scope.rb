@@ -15,13 +15,16 @@ module Grape
       # @option opts :optional [Boolean] whether or not this scope needs to have
       #   any parameters set or not
       # @option opts :type [Class] a type meant to govern this scope (deprecated)
+      # @option opts :dependent_on [Symbol] if present, this scope should only
+      #   validate if this param is present in the parent scope
       # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
-        @element  = opts[:element]
-        @parent   = opts[:parent]
-        @api      = opts[:api]
-        @optional = opts[:optional] || false
-        @type     = opts[:type]
+        @element      = opts[:element]
+        @parent       = opts[:parent]
+        @api          = opts[:api]
+        @optional     = opts[:optional] || false
+        @type         = opts[:type]
+        @dependent_on = opts[:dependent_on]
         @declared_params = []
 
         instance_eval(&block) if block_given?
@@ -33,19 +36,43 @@ module Grape
       #   validated
       def should_validate?(parameters)
         return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
+        return false if @dependent_on && params(parameters).try(:[], @dependent_on).blank?
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
 
       # @return [String] the proper attribute name, with nesting considered.
       def full_name(name)
-        return "#{@parent.full_name(@element)}[#{name}]" if @parent
-        name.to_s
+        case
+        when nested?
+          # Find our containing element's name, and append ours.
+          "#{@parent.full_name(@element)}[#{name}]"
+        when lateral?
+          # Find the name of the element as if it was at the
+          # same nesting level as our parent.
+          @parent.full_name(name)
+        else
+          # We must be the root scope, so no prefix needed.
+          name.to_s
+        end
       end
 
       # @return [Boolean] whether or not this scope is the root-level scope
       def root?
         !@parent
+      end
+
+      # A nested scope is contained in one of its parent's elements.
+      # @return [Boolean] whether or not this scope is nested
+      def nested?
+        @parent && @element
+      end
+
+      # A lateral scope is subordinate to its parent, but its keys are at the
+      # same level as its parent and thus is not contained within an element.
+      # @return [Boolean] whether or not this scope is lateral
+      def lateral?
+        @parent && !@element
       end
 
       # @return [Boolean] whether or not this scope needs to be present, or can
@@ -57,7 +84,7 @@ module Grape
       protected
 
       # Adds a parameter declaration to our list of validations.
-      # @param attrs [Array] (see Grape::DSL::Parameters#required)
+      # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs)
         @declared_params.concat attrs
       end
@@ -98,6 +125,13 @@ module Grape
         validates(attrs, validations)
       end
 
+      # Returns a new parameter scope, subordinate to the current one and nested
+      # under the parameter corresponding to `attrs.first`.
+      # @param attrs [Array] the attributes passed to the `requires` or
+      #   `optional` invocation that opened this scope.
+      # @param optional [Boolean] whether the parameter this are nested under
+      #   is optional or not (and hence, whether this block's params will be).
+      # @yield parameter scope
       def new_scope(attrs, optional = false, &block)
         # if required params are grouped and no type or unsupported type is provided, raise an error
         type = attrs[1] ? attrs[1][:type] : nil
@@ -107,12 +141,30 @@ module Grape
         end
 
         opts = attrs[1] || { type: Array }
-        ParamsScope.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
+        self.class.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
+      end
+
+      # Returns a new parameter scope, not nested under any current-level param
+      # but instead at the same level as the current scope.
+      # @param options [Hash] options to control how this new scope behaves
+      # @option options :dependent_on [Symbol] if given, specifies that this
+      #   scope should only validate if this parameter from the above scope is
+      #   present
+      # @yield parameter scope
+      def new_lateral_scope(options, &block)
+        self.class.new(
+          api:          @api,
+          element:      nil,
+          parent:       self,
+          options:      @optional,
+          type:         Hash,
+          dependent_on: options[:dependent_on],
+          &block)
       end
 
       # Pushes declared params to parent or settings
       def configure_declared_params
-        if @parent
+        if nested?
           @parent.push_declared_params [element => @declared_params]
         else
           @api.namespace_stackable(:declared_params, @declared_params)
