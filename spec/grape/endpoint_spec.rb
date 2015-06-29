@@ -560,7 +560,7 @@ describe Grape::Endpoint do
       end
     end
 
-    it "can access parent attributes" do
+    it 'can access parent attributes' do
       get '/something/123/mount_space/456'
       expect(last_response.status).to eq 200
       json = JSON.parse(last_response.body, symbolize_names: true)
