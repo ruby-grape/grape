@@ -37,7 +37,7 @@ module Grape
         end
 
         it 'resets documentation params' do
-          expect(subject.route_setting(:description)[:params]).to eq nil
+          expect(subject.route_setting(:description)[:params]).to be_nil
         end
 
         it 'does not reset documentation description' do
