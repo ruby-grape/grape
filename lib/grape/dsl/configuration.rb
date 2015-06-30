@@ -72,6 +72,21 @@ module Grape
           namespace_setting :description, options
           route_setting :description, options
         end
+
+        def description_field(field, value=nil)
+          if value
+            description = route_setting(:description) || route_setting(:description, {})
+            description[field] = value
+          else
+            description = route_setting(:description)
+            description[field] if description
+          end
+        end
+
+        def unset_description_field(field)
+          description = route_setting(:description)
+          description.delete(field) if description
+        end
       end
 
       module_function
