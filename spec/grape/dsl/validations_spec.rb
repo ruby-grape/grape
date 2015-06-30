@@ -16,7 +16,7 @@ module Grape
           subject.namespace_stackable :declared_params, ['dummy']
           subject.namespace_stackable :validations, ['dummy']
           subject.namespace_stackable :params, ['dummy']
-          subject.route_setting :description, { description: 'lol', params: ['dummy'] }
+          subject.route_setting :description, description: 'lol', params: ['dummy']
           subject.reset_validations!
         end
 
