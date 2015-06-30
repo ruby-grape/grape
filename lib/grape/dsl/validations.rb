@@ -13,6 +13,9 @@ module Grape
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
+          if route_setting(:description)
+            route_setting(:description)[:params] = nil
+          end
         end
 
         # Opens a root-level ParamsScope, defining parameter coercions and
