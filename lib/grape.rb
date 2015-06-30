@@ -9,14 +9,6 @@ require 'hashie'
 require 'set'
 require 'active_support/version'
 require 'active_support/core_ext/hash/indifferent_access'
-
-if ActiveSupport::VERSION::MAJOR >= 4
-  require 'active_support/core_ext/object/deep_dup'
-else
-  require_relative 'backports/active_support/deep_dup'
-end
-require_relative 'backports/active_support/duplicable'
-
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/object/conversions'
 require 'active_support/core_ext/array/extract_options'
