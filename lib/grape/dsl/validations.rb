@@ -13,6 +13,7 @@ module Grape
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
+          unset_description_field :params
         end
 
         # Opens a root-level ParamsScope, defining parameter coercions and
@@ -23,11 +24,8 @@ module Grape
         end
 
         def document_attribute(names, opts)
-          route_setting(:description, {}) unless route_setting(:description)
-
-          route_setting(:description)[:params] ||= {}
-
-          setting = route_setting(:description)[:params]
+          setting = description_field(:params)
+          setting ||= description_field(:params, {})
           Array(names).each do |name|
             setting[name[:full_name].to_s] ||= {}
             setting[name[:full_name].to_s].merge!(opts)

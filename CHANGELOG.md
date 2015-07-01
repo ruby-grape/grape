@@ -13,6 +13,7 @@ Next Release
 * [#1042](https://github.com/intridea/grape/issues/1042): Fix coercion of complex arrays - [@dim](https://github.com/dim).
 * [#1045](https://github.com/intridea/grape/pull/1045): Do not convert `Rack::Response` to `Rack::Response` in middleware - [@dmitry](https://github.com/dmitry).
 * [#1048](https://github.com/intridea/grape/pull/1048): Only dup `InheritableValues`, remove support for `deep_dup` - [@toddmazierski](https://github.com/toddmazierski/)
+* [#1052](https://github.com/intridea/grape/pull/1052): Reset `description[:params]` when resetting validations - [@marshall-lee](https://github.com/marshall-lee).
 
 0.12.0 (6/18/2015)
 ==================

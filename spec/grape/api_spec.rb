@@ -2123,6 +2123,38 @@ describe Grape::API do
         { description: 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } } }
       ]
     end
+    it 'does not inherit param descriptions in consequent namespaces' do
+      subject.desc 'global description'
+      subject.params do
+        requires :param1
+        optional :param2
+      end
+      subject.namespace 'ns1' do
+        get do; end
+      end
+      subject.params do
+        optional :param2
+      end
+      subject.namespace 'ns2' do
+        get do; end
+      end
+      routes_doc = subject.routes.map { |route|
+        { description: route.route_description, params: route.route_params }
+      }
+      expect(routes_doc).to eq [
+        { description: 'global description',
+          params: {
+            'param1' => { required: true },
+            'param2' => { required: false }
+          }
+        },
+        { description: 'global description',
+          params: {
+            'param2' => { required: false }
+          }
+        }
+      ]
+    end
     it 'merges the parameters of the namespace with the parameters of the method' do
       subject.desc 'namespace'
       subject.params do

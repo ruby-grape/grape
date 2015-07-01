@@ -15,7 +15,13 @@ module Grape
         before do
           subject.namespace_stackable :declared_params, ['dummy']
           subject.namespace_stackable :validations, ['dummy']
+          subject.namespace_stackable :params, ['dummy']
+          subject.route_setting :description, description: 'lol', params: ['dummy']
           subject.reset_validations!
+        end
+
+        after do
+          subject.unset_route_setting :description
         end
 
         it 'resets declared params' do
@@ -24,6 +30,18 @@ module Grape
 
         it 'resets validations' do
           expect(subject.namespace_stackable(:validations)).to eq []
+        end
+
+        it 'resets params' do
+          expect(subject.namespace_stackable(:params)).to eq []
+        end
+
+        it 'resets documentation params' do
+          expect(subject.route_setting(:description)[:params]).to be_nil
+        end
+
+        it 'does not reset documentation description' do
+          expect(subject.route_setting(:description)[:description]).to eq 'lol'
         end
       end
 
