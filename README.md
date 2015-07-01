@@ -40,6 +40,7 @@
 - [Headers](#headers)
 - [Routes](#routes)
 - [Helpers](#helpers)
+- [Path Helpers](#path-helpers)
 - [Parameter Documentation](#parameter-documentation)
 - [Cookies](#cookies)
 - [HTTP Status Code](#http-status-code)
@@ -1264,6 +1265,10 @@ class API < Grape::API
   end
 end
 ```
+
+## Path Helpers
+
+If you need methods for generating paths inside your endpoints, please see the [grape-route-helpers](https://github.com/reprah/grape-route-helpers) gem.
 
 ## Parameter Documentation
 
