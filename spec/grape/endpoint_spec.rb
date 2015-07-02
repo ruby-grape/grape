@@ -564,8 +564,8 @@ describe Grape::Endpoint do
       get '/something/123/another/456'
       expect(last_response.status).to eq 200
       json = JSON.parse(last_response.body, symbolize_names: true)
-      expect(json[:declared_params][:id]).to eq 123
       expect(json[:declared_params][:mount_space]).to eq 456
+      expect(json[:declared_params][:id]).to eq 123
     end
   end
 

@@ -87,6 +87,10 @@ module Grape
 
       def inherit_settings(other_settings)
         top_level_setting.inherit_from other_settings.point_in_time_copy
+        endpoints.each { |e|
+          e.inheritable_setting.route[:saved_declared_params] << top_level_setting.route[:declared_params]
+          e.inheritable_setting.route[:saved_validations] += top_level_setting.namespace_stackable[:validations]
+        }
 
         reset_routes!
       end
