@@ -110,11 +110,6 @@ describe Grape::Middleware::Formatter do
       expect(subject.env['api.format']).to eq(:xml)
     end
 
-    it 'looks for case-indifferent headers' do
-      subject.call('PATH_INFO' => '/info', 'http_accept' => 'application/xml')
-      expect(subject.env['api.format']).to eq(:xml)
-    end
-
     it 'uses quality rankings to determine formats' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=0.3,application/xml; q=1.0')
       expect(subject.env['api.format']).to eq(:xml)

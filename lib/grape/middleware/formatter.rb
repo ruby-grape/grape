@@ -11,13 +11,6 @@ module Grape
         }
       end
 
-      def headers
-        env.dup.inject({}) do |h, (k, v)|
-          h[k.to_s.downcase[5..-1]] = v if k.to_s.downcase.start_with?('http_')
-          h
-        end
-      end
-
       def before
         negotiate_content_type
         read_body_input
@@ -133,7 +126,7 @@ module Grape
       end
 
       def mime_array
-        accept = headers[Grape::Http::Headers::ACCEPT]
+        accept = env[Grape::Http::Headers::HTTP_ACCEPT]
         return [] unless accept
 
         accept_into_mime_and_quality = %r{

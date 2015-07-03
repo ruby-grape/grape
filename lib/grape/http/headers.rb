@@ -20,7 +20,6 @@ module Grape
       HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'.freeze
       HTTP_ACCEPT            = 'HTTP_ACCEPT'.freeze
 
-      ACCEPT                 = 'accept'.freeze
       FORMAT                 = 'format'.freeze
     end
   end
