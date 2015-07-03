@@ -68,6 +68,18 @@ module Grape
       end
     end
 
+    # Create a new endpoint.
+    # @param new_settings [InheritableSetting] settings to determine the params,
+    #   validations, and other properties from.
+    # @param options [Hash] attributes of this endpoint
+    # @option options path [String or Array] the path to this endpoint, within
+    #   the current scope.
+    # @option options method [String or Array] which HTTP method(s) can be used
+    #   to reach this endpoint.
+    # @option options route_options [Hash]
+    # @note This happens at the time of API definition, so in this context the
+    # endpoint does not know if it will be mounted under a different endpoint.
+    # @yield a block defining what your API should do when this endpoint is hit
     def initialize(new_settings, options = {}, &block)
       require_option(options, :path)
       require_option(options, :method)
@@ -94,6 +106,15 @@ module Grape
 
       @source = block
       @block = self.class.generate_api_method(method_name, &block)
+    end
+
+    # Update our settings from a given set of stackable parameters. Used when
+    # the endpoint's API is mounted under another one.
+    def inherit_settings(namespace_stackable)
+      inheritable_setting.route[:saved_declared_params] += namespace_stackable[:declared_params]
+      inheritable_setting.route[:saved_validations]     += namespace_stackable[:validations]
+
+      endpoints && endpoints.each { |e| e.inherit_settings(namespace_stackable) }
     end
 
     def require_option(options, key)
