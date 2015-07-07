@@ -14,6 +14,7 @@ module Grape
       DELETE  = 'DELETE'.freeze
       HEAD    = 'HEAD'.freeze
       OPTIONS = 'OPTIONS'.freeze
+      TRACE   = 'TRACE'.freeze
 
       HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'.freeze
       X_CASCADE              = 'X-Cascade'.freeze

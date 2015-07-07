@@ -172,7 +172,18 @@ module Grape
               end
             end
 
-            not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+            unless self.class.namespace_inheritable(:do_not_route_trace)
+              unless allowed_methods.include?(Grape::Http::Headers::TRACE)
+                self.class.options(path, {}) do
+                  status 200
+                  # TODO: Call downstream code and catch result
+                  #       Stitch together request as it would have looked to last receiver in the chain
+                  #       Return that stitched-together requets
+                end
+              end
+            end
+
+            not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD TRACE) - allowed_methods
             not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
             self.class.route(not_allowed_methods, path) do
               header 'Allow', allow_header
