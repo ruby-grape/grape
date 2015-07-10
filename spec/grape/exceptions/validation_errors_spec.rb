@@ -5,6 +5,22 @@ describe Grape::Exceptions::ValidationErrors do
   let(:validation_message) { 'FooBar is invalid' }
   let(:validation_error) { OpenStruct.new(params: [validation_message]) }
 
+  context 'initialize' do
+    let(:headers) {
+      {
+        'A-Header-Key' => 'A-Header-Value'
+      }
+    }
+
+    subject do
+      described_class.new(errors: [validation_error], headers: headers)
+    end
+
+    it 'should assign headers through base class' do
+      expect(subject.headers).to eq(headers)
+    end
+  end
+
   context 'message' do
     context 'is not repeated' do
       let(:error) do
