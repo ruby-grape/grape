@@ -37,11 +37,11 @@ module Grape
         as_json.to_json
       end
 
-      private
-
       def full_messages
         map { |attributes, error| full_message(attributes, error) }.uniq
       end
+
+      private
 
       def full_message(attributes, error)
         I18n.t(

@@ -1102,6 +1102,16 @@ subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
 end
 ```
 
+`Grape::Exceptions::ValidationErrors#full_messages` returns the validation messages as an array. `Grape::Exceptions::ValidationErrors#message` joins the messages to one string.
+
+For responding with an array of validation messages, you can use `Grape::Exceptions::ValidationErrors#full_messages`.
+```ruby
+format :json
+subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
+  error!({ messages: e.full_messages }, 400)
+end
+```
+
 ### I18n
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if
