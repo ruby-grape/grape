@@ -1,6 +1,5 @@
 module Grape
   class Request < Rack::Request
-
     ROUTING_ARGS = 'rack.routing_args'
     HTTP_PREFIX  = 'HTTP_'
     UNDERSCORE   = '_'
