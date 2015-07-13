@@ -941,4 +941,25 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq File.read(__FILE__)
     end
   end
+
+  context 'validation errors' do
+    before do
+      subject.before do
+        header['Access-Control-Allow-Origin'] = '*'
+      end
+      subject.params do
+        requires :id, type: String
+      end
+      subject.get do
+        'should not get here'
+      end
+    end
+
+    it 'returns the errors, and passes headers' do
+      get '/'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'id is missing'
+      expect(last_response.headers['Access-Control-Allow-Origin']).to eq('*')
+    end
+  end
 end

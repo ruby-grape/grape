@@ -3,6 +3,7 @@ Next Release
 
 #### Features
 
+* [#1062](https://github.com/intridea/grape/issues/1062): Fix: `Grape::Exceptions::ValidationErrors` will include headers set by `header` - [@yairgo](https://github.com/yairgo).
 * [#1039](https://github.com/intridea/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
 * [#1047](https://github.com/intridea/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * [#1064](https://github.com/intridea/grape/pull/1064): Add public `Grape::Exception::ValidationErrors#full_messages` - [@romanlehnert](https://github.com/romanlehnert).

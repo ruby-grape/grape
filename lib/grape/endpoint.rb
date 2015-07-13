@@ -239,7 +239,7 @@ module Grape
       end
 
       if validation_errors.any?
-        fail Grape::Exceptions::ValidationErrors, errors: validation_errors
+        fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
       end
 
       run_filters after_validations
