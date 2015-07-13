@@ -13,7 +13,10 @@ module Grape
 
       def [](name)
         return @froozen_values[name] if @froozen_values.key? name
-        [@inherited_values[name], @new_values[name]].compact.flatten(1)
+        value = [@inherited_values[name], @new_values[name]]
+        value.compact!
+        value.flatten!(1)
+        value
       end
 
       def []=(name, value)
