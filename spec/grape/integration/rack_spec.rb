@@ -21,7 +21,7 @@ describe Rack do
 
       unless RUBY_PLATFORM == 'java'
         major, minor, release = Rack.release.split('.').map(&:to_i)
-        pending 'Rack >= 1.5 required' unless ((major == 1 && minor >= 5) || (major > 1))
+        pending 'Rack >= 1.5 required' unless (major == 1 && minor >= 5) || major > 1
       end
 
       expect(JSON.parse(app.call(env)[2].body.first)['params_keys']).to match_array('test')
