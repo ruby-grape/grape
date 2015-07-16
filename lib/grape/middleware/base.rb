@@ -21,8 +21,39 @@ module Grape
       def call!(env)
         @env = env
         before
+
         @app_response = @app.call(@env)
-        after || @app_response
+
+        # Merge Headers from API into @header
+        unless @header.nil?
+          if @app_response.is_a?(Array) && @app_response[1].is_a?(Hash)
+            @header.merge! @app_response[1]
+          elsif @app_response.is_a?(Rack::Response)
+            @header.merge! @app_response.headers
+          end
+        end
+
+        res = after || @app_response
+
+        # Merge Headers from After into return
+        unless @header.nil?
+          if res.is_a?(Rack::Response)
+            @header.each do |k, v| res.headers[k] = v end
+          elsif res.is_a?(Array) && res[1].is_a?(Hash)
+            res[1].merge!(@header)
+          end
+        end
+
+        res
+      end
+
+      def header(key = nil, val = nil)
+        @header ||= {}
+        val ? @header[key.to_s] = val : @header.delete(key.to_s)
+      end
+
+      def headers
+        @header
       end
 
       # @abstract
