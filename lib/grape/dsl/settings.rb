@@ -126,7 +126,6 @@ module Grape
       # next, within a namespace.
       def route_end
         inheritable_setting.route_end
-        reset_validations!
       end
 
       # Execute the block within a context where our inheritable settings are forked
