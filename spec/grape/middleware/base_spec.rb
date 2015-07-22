@@ -76,6 +76,105 @@ describe Grape::Middleware::Base do
     end
   end
 
+  describe '#header' do
+    let(:header_example_ware_a) {
+      Class.new(Grape::Middleware::Base) do
+        def before
+          header 'X-Test-Before', 'Success'
+        end
+
+        def after
+          header 'X-Test-After', 'Success'
+          nil
+        end
+      end
+    }
+
+    let(:header_example_ware_b) {
+      Class.new(header_example_ware_a) do
+        def after
+          super
+          header 'X-Test-Before', 'Overwrite'
+          nil
+        end
+      end
+    }
+
+    describe Array do
+      context 'serving headers' do
+        subject { header_example_ware_a.new(response) }
+
+        let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
+
+        it 'does not write over response headers with before' do
+          ret = subject.call({})
+          expect(ret[1]).to have_key('X-Test-Before')
+          expect(ret[1]).to have_key('X-Test-After')
+          expect(ret[1]).to have_key(:abc)
+        end
+      end
+
+      context 'overwriting api' do
+        subject { header_example_ware_a.new(response) }
+
+        let(:response) { ->(_) { [204, { 'X-Test-Before' => 'Response' }, 'test'] } }
+
+        it 'does not write over response headers with before' do
+          ret = subject.call({})
+          expect(ret[1]['X-Test-Before']).to eq('Response')
+        end
+      end
+
+      context 'overwriting after' do
+        subject { header_example_ware_b.new(response) }
+
+        let(:response) { ->(_) { [204, { 'X-Test-Before' => 'Response' }, 'test'] } }
+
+        it 'writes over response headers with after' do
+          ret = subject.call({})
+          expect(ret[1]['X-Test-Before']).to eq('Overwrite')
+        end
+      end
+    end
+
+    describe Rack::Response do
+      context 'serving headers' do
+        subject { header_example_ware_a.new(response) }
+
+        let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
+
+        it 'does not write over response headers with before' do
+          ret = subject.call({})
+          expect(ret.headers).to have_key('X-Test-Before')
+          expect(ret.headers).to have_key('X-Test-After')
+          expect(ret.headers).to have_key(:abc)
+        end
+      end
+
+      context 'overwriting' do
+        subject { header_example_ware_a.new(response) }
+
+        let(:response) { ->(_) { Rack::Response.new('test', 204, 'X-Test-Before' => 'Response') } }
+
+        it 'does not write over response headers with before' do
+          ret = subject.call({})
+          expect(ret.headers['X-Test-Before']).to eq('Response')
+        end
+      end
+
+      context 'overwriting after' do
+        subject { header_example_ware_b.new(response) }
+
+        let(:response) { ->(_) { Rack::Response.new('test', 204, 'X-Test-Before' => 'Response') } }
+
+        it 'writes over response headers with after' do
+          ret = subject.call({})
+          expect(ret.headers['X-Test-Before']).to eq('Overwrite')
+        end
+      end
+    end
+  end
+
   context 'options' do
     it 'persists options passed at initialization' do
       expect(Grape::Middleware::Base.new(blank_app, abc: true).options[:abc]).to be true

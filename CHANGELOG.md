@@ -7,6 +7,7 @@ Next Release
 * [#1039](https://github.com/intridea/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
 * [#1047](https://github.com/intridea/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * [#1064](https://github.com/intridea/grape/pull/1064): Add public `Grape::Exception::ValidationErrors#full_messages` - [@romanlehnert](https://github.com/romanlehnert).
+* [#1070](https://github.com/intridea/grape/pull/1070): Added header support for Grape::Middleware::Base before and after - [@yukimono](https://github.com/yukimono).
 * Your contribution here!
 
 #### Fixes
