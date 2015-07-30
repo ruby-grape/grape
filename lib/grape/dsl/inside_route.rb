@@ -177,10 +177,32 @@ module Grape
       #   GET /file # => "contents of file"
       def file(value = nil)
         if value
-          @file = value
+          @file = Grape::Util::FileResponse.new(value)
         else
           @file
         end
+      end
+
+      # Allows you to define the response as a streamable object.
+      #
+      # If Content-Length and Transfer-Encoding are blank (among other conditions),
+      # Rack assumes this response can be streamed in chunks.
+      #
+      # @example
+      #   get '/stream' do
+      #     stream FileStreamer.new(...)
+      #   end
+      #
+      #   GET /stream # => "chunked contents of file"
+      #
+      # See:
+      # * https://github.com/rack/rack/blob/99293fa13d86cd48021630fcc4bd5acc9de5bdc3/lib/rack/chunked.rb
+      # * https://github.com/rack/rack/blob/99293fa13d86cd48021630fcc4bd5acc9de5bdc3/lib/rack/etag.rb
+      def stream(value = nil)
+        header 'Content-Length', nil
+        header 'Transfer-Encoding', nil
+        header 'Cache-Control', 'no-cache' # Skips ETag generation (reading the response up front)
+        file(value)
       end
 
       # Allows you to make use of Grape Entities by setting
