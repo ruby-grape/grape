@@ -201,8 +201,43 @@ module Grape
             subject.file 'file'
           end
 
-          it 'returns value' do
-            expect(subject.file).to eq 'file'
+          it 'returns value wrapped in FileResponse' do
+            expect(subject.file).to eq Grape::Util::FileResponse.new('file')
+          end
+        end
+
+        it 'returns default' do
+          expect(subject.file).to be nil
+        end
+      end
+
+      describe '#stream' do
+        describe 'set' do
+          before do
+            subject.header 'Cache-Control', 'cache'
+            subject.header 'Content-Length', 123
+            subject.header 'Transfer-Encoding', 'base64'
+            subject.stream 'file'
+          end
+
+          it 'returns value wrapped in FileResponse' do
+            expect(subject.stream).to eq Grape::Util::FileResponse.new('file')
+          end
+
+          it 'also sets result of file to value wrapped in FileResponse' do
+            expect(subject.file).to eq Grape::Util::FileResponse.new('file')
+          end
+
+          it 'sets Cache-Control header to no-cache' do
+            expect(subject.header['Cache-Control']).to eq 'no-cache'
+          end
+
+          it 'sets Content-Length header to nil' do
+            expect(subject.header['Content-Length']).to eq nil
+          end
+
+          it 'sets Transfer-Encoding header to nil' do
+            expect(subject.header['Transfer-Encoding']).to eq nil
           end
         end
 

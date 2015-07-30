@@ -122,6 +122,7 @@ module Grape
     autoload :StackableValues
     autoload :InheritableSetting
     autoload :StrictHashConfiguration
+    autoload :FileResponse
   end
 
   module DSL

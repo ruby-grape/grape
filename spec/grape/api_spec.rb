@@ -795,6 +795,37 @@ describe Grape::API do
       expect(last_response.body).to eq(file)
     end
 
+    it 'returns the content of the file with file' do
+      file_content = 'This is some file content'
+      test_file = Tempfile.new('test')
+      test_file.write file_content
+      test_file.rewind
+
+      subject.get('/file') { file test_file }
+      get '/file'
+      expect(last_response.headers['Content-Length']).to eq('25')
+      expect(last_response.headers['Content-Type']).to eq('text/plain')
+      expect(last_response.body).to eq(file_content)
+    end
+
+    it 'streams the content of the file with stream' do
+      test_stream = Enumerator.new do |blk|
+        blk.yield 'This is some'
+        blk.yield ' file content'
+      end
+
+      subject.use Rack::Chunked
+      subject.get('/stream') { stream test_stream }
+      get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1'
+
+      expect(last_response.headers['Content-Type']).to eq('text/plain')
+      expect(last_response.headers['Content-Length']).to eq(nil)
+      expect(last_response.headers['Cache-Control']).to eq('no-cache')
+      expect(last_response.headers['Transfer-Encoding']).to eq('chunked')
+
+      expect(last_response.body).to eq("c\r\nThis is some\r\nd\r\n file content\r\n0\r\n\r\n")
+    end
+
     it 'sets content type for error' do
       subject.get('/error') { error!('error in plain text', 500) }
       get '/error'

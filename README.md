@@ -2105,6 +2105,8 @@ end
 Use `body false` to return `204 No Content` without any data or content-type.
 
 You can also set the response to a file-like object with `file`.
+Note: Rack will read your entire Enumerable before returning a response. If
+you would like to stream the response, see `stream`.
 
 ```ruby
 class FileStreamer
@@ -2122,6 +2124,16 @@ end
 class API < Grape::API
   get '/' do
     file FileStreamer.new('file.bin')
+  end
+end
+```
+
+If you want a file-like object to be streamed using Rack::Chunked, use `stream`.
+
+```ruby
+class API < Grape::API
+  get '/' do
+    stream FileStreamer.new('file.bin')
   end
 end
 ```
