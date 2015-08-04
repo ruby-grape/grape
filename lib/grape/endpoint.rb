@@ -41,10 +41,16 @@ module Grape
         if instance_methods.include?(method_name.to_sym) || instance_methods.include?(method_name.to_s)
           fail NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
         end
+
         define_method(method_name, &block)
         method = instance_method(method_name)
         remove_method(method_name)
-        proc { |endpoint_instance| method.bind(endpoint_instance).call }
+
+        proc do |endpoint_instance|
+          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
+            method.bind(endpoint_instance).call
+          end
+        end
       end
     end
 
@@ -210,47 +216,49 @@ module Grape
     protected
 
     def run(env)
-      @env = env
-      @header = {}
+      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
+        @env = env
+        @header = {}
 
-      @request = Grape::Request.new(env)
-      @params = @request.params
-      @headers = @request.headers
+        @request = Grape::Request.new(env)
+        @params = @request.params
+        @headers = @request.headers
 
-      cookies.read(@request)
+        cookies.read(@request)
 
-      self.class.before_each.call(self) if self.class.before_each
+        self.class.before_each.call(self) if self.class.before_each
 
-      run_filters befores
+        run_filters befores, :before
 
-      run_filters before_validations
+        run_filters before_validations, :before_validation
 
-      # Retrieve validations from this namespace and all parent namespaces.
-      validation_errors = []
+        # Retrieve validations from this namespace and all parent namespaces.
+        validation_errors = []
 
-      # require 'pry-byebug'; binding.pry
+        # require 'pry-byebug'; binding.pry
 
-      route_setting(:saved_validations).each do |validator|
-        begin
-          validator.validate!(params)
-        rescue Grape::Exceptions::Validation => e
-          validation_errors << e
+        route_setting(:saved_validations).each do |validator|
+          begin
+            validator.validate!(params)
+          rescue Grape::Exceptions::Validation => e
+            validation_errors << e
+          end
         end
+
+        if validation_errors.any?
+          fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
+        end
+
+        run_filters after_validations, :after_validation
+
+        response_object = @block ? @block.call(self) : nil
+        run_filters afters, :after
+        cookies.write(header)
+
+        # The Body commonly is an Array of Strings, the application instance itself, or a File-like object.
+        response_object = file || [body || response_object]
+        [status, header, response_object]
       end
-
-      if validation_errors.any?
-        fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
-      end
-
-      run_filters after_validations
-
-      response_object = @block ? @block.call(self) : nil
-      run_filters afters
-      cookies.write(header)
-
-      # The Body commonly is an Array of Strings, the application instance itself, or a File-like object.
-      response_object = file || [body || response_object]
-      [status, header, response_object]
     end
 
     def build_middleware
@@ -305,9 +313,11 @@ module Grape
       mod
     end
 
-    def run_filters(filters)
-      (filters || []).each do |filter|
-        instance_eval(&filter)
+    def run_filters(filters, type = :other)
+      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
+        (filters || []).each do |filter|
+          instance_eval(&filter)
+        end
       end
     end
 

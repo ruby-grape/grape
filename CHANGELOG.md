@@ -8,6 +8,7 @@ Next Release
 * [#1047](https://github.com/ruby-grape/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * [#1064](https://github.com/ruby-grape/grape/pull/1064): Add public `Grape::Exception::ValidationErrors#full_messages` - [@romanlehnert](https://github.com/romanlehnert).
 * [#1079](https://github.com/ruby-grape/grape/pull/1079): Added `stream` method to take advantage of `Rack::Chunked` [@zbelzer](https://github.com/zbelzer).
+* [#1086](https://github.com/ruby-grape/grape/pull/1086): Added ActiveSupport::Notifications instrumentation - [@wagenet](https://github.com/wagenet).
 * Your contribution here!
 
 #### Fixes
