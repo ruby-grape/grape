@@ -962,4 +962,66 @@ describe Grape::Endpoint do
       expect(last_response.headers['Access-Control-Allow-Origin']).to eq('*')
     end
   end
+
+  context 'instrumentation' do
+    before do
+      subject.before do
+        # Placeholder
+      end
+      subject.get do
+        'hello'
+      end
+
+      @events = []
+      @subscriber = ActiveSupport::Notifications.subscribe(/grape/) do |*args|
+        @events << ActiveSupport::Notifications::Event.new(*args)
+      end
+    end
+
+    after do
+      ActiveSupport::Notifications.unsubscribe(@subscriber)
+    end
+
+    it 'notifies AS::N' do
+      get '/'
+
+      # In order that the events finalized (time each block ended)
+      expect(@events).to contain_exactly(
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: a_collection_containing_exactly(an_instance_of(Proc)),
+                                                                       type: :before }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :before_validation }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :after_validation }),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: an_instance_of(Grape::Endpoint) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :after }),
+        have_attributes(name: 'endpoint_run.grape',         payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       env: an_instance_of(Hash) })
+      )
+
+      # In order that events were initialized
+      expect(@events.sort_by(&:time)).to contain_exactly(
+        have_attributes(name: 'endpoint_run.grape',         payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       env: an_instance_of(Hash) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: a_collection_containing_exactly(an_instance_of(Proc)),
+                                                                       type: :before }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :before_validation }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :after_validation }),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: an_instance_of(Grape::Endpoint) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :after })
+      )
+    end
+  end
 end
