@@ -12,12 +12,12 @@ bundle install
 rake
 ```
 
-Check that the last build succeeded in [Travis CI](https://travis-ci.org/intridea/grape) for all supported platforms.
+Check that the last build succeeded in [Travis CI](https://travis-ci.org/ruby-grape/grape) for all supported platforms.
 
-Those with r/w permissions to the [master Intridea repository](https://github.com/intridea/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
+Those with r/w permissions to the [master Intridea repository](https://github.com/ruby-grape/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
 
 ```
-gem grape, github: 'intridea/grape'
+gem grape, github: 'ruby-grape/grape'
 ```
 
 Increment the version, modify [lib/grape/version.rb](lib/grape/version.rb).
@@ -69,7 +69,7 @@ Modify the "Stable Release" section in [README.md](README.md). Change the text t
 ## Stable Release
 
 You're reading the documentation for the next release of Grape, which should be 0.6.1.
-The current stable release is [0.6.0](https://github.com/intridea/grape/blob/v0.6.0/README.md).
+The current stable release is [0.6.0](https://github.com/ruby-grape/grape/blob/v0.6.0/README.md).
 ```
 
 Add the next release to [CHANGELOG.md](CHANGELOG.md).

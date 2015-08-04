@@ -29,13 +29,13 @@ class CacheBusterMiddleware < Grape::Middleware::Base
 end
 ```
 
-See [#1029](https://github.com/intridea/grape/pull/1029) for more information.
+See [#1029](https://github.com/ruby-grape/grape/pull/1029) for more information.
 
 #### Changes in present
 
 Using `present` with objects that responded to `merge` would cause early evaluation of the represented object, with unexpected side-effects, such as missing parameters or environment within rendering code. Grape now only merges represented objects with a previously rendered body, usually when multiple `present` calls are made in the same route.
 
-See [grape-with-roar#5](https://github.com/dblock/grape-with-roar/issues/5) and [#1023](https://github.com/intridea/grape/issues/1023).
+See [grape-with-roar#5](https://github.com/dblock/grape-with-roar/issues/5) and [#1023](https://github.com/ruby-grape/grape/issues/1023).
 
 #### Changes to regexp validator
 
@@ -47,7 +47,7 @@ params do
 end
 ```
 
-See [#957](https://github.com/intridea/grape/pull/957) for more information.
+See [#957](https://github.com/ruby-grape/grape/pull/957) for more information.
 
 #### Replace error_response with error! in rescue_from blocks
 
@@ -88,11 +88,11 @@ Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finis
 error!(e)
 ```
 
-See [#889](https://github.com/intridea/grape/issues/889) for more information.
+See [#889](https://github.com/ruby-grape/grape/issues/889) for more information.
 
 #### Changes to routes when using `format`
 
-Version 0.10.0 has introduced a change via [#809](https://github.com/intridea/grape/pull/809) whereas routes no longer got file-type suffixes added if you declared a single API `format`. This has been reverted, it's now again possible to call API with proper suffix when single `format` is defined:
+Version 0.10.0 has introduced a change via [#809](https://github.com/ruby-grape/grape/pull/809) whereas routes no longer got file-type suffixes added if you declared a single API `format`. This has been reverted, it's now again possible to call API with proper suffix when single `format` is defined:
 
 ```ruby
 class API < Grape::API
@@ -108,7 +108,7 @@ Will respond with JSON to `/hello` **and** `/hello.json`.
 
 Will respond with 404 to `/hello.xml`, `/hello.txt` etc.
 
-See the [#1001](https://github.com/intridea/grape/pull/1001) and [#914](https://github.com/intridea/grape/issues/914) for more info.
+See the [#1001](https://github.com/ruby-grape/grape/pull/1001) and [#914](https://github.com/ruby-grape/grape/issues/914) for more info.
 
 ### Upgrading to >= 0.11.0
 
@@ -120,20 +120,20 @@ Grape now supports, but doesn't require Rack 1.6.0. If you encounter an issue wi
 gem 'rack', '~> 1.6.0'
 ```
 
-See [#559](https://github.com/intridea/grape/issues/559) for more information.
+See [#559](https://github.com/ruby-grape/grape/issues/559) for more information.
 
 #### Removed route_info
 
 Key route_info is excluded from params.
 
-See [#879](https://github.com/intridea/grape/pull/879) for more information.
+See [#879](https://github.com/ruby-grape/grape/pull/879) for more information.
 
 
 #### Fix callbacks within a version block
 
 Callbacks defined in a version block are only called for the routes defined in that block. This was a regression introduced in Grape 0.10.0, and is fixed in this version.
 
-See [#901](https://github.com/intridea/grape/pull/901) for more information.
+See [#901](https://github.com/ruby-grape/grape/pull/901) for more information.
 
 
 #### Make type of group of parameters required
@@ -141,7 +141,7 @@ See [#901](https://github.com/intridea/grape/pull/901) for more information.
 Groups of parameters now require their type to be set explicitly as Array or Hash.
 Not setting the type now results in MissingGroupTypeError, unsupported type will raise UnsupportedTypeError.
 
-See [#886](https://github.com/intridea/grape/pull/886) for more information.
+See [#886](https://github.com/ruby-grape/grape/pull/886) for more information.
 
 ### Upgrading to >= 0.10.1
 
@@ -149,7 +149,7 @@ See [#886](https://github.com/intridea/grape/pull/886) for more information.
 
 Attributes with `nil` values or with values that evaluate to `false` are no longer considered *missing* and will be returned when `include_missing` is set to `false`.
 
-See [#864](https://github.com/intridea/grape/pull/864) for more information.
+See [#864](https://github.com/ruby-grape/grape/pull/864) for more information.
 
 ### Upgrading to >= 0.10.0
 
@@ -284,13 +284,13 @@ get do
 end
 ```
 
-For more information see [#836](https://github.com/intridea/grape/issues/836).
+For more information see [#836](https://github.com/ruby-grape/grape/issues/836).
 
 #### Changes to Custom Validators
 
 To implement a custom validator, you need to inherit from `Grape::Validations::Base` instead of `Grape::Validations::Validator`.
 
-For more information see [Custom Validators](https://github.com/intridea/grape#custom-validators) in the documentation.
+For more information see [Custom Validators](https://github.com/ruby-grape/grape#custom-validators) in the documentation.
 
 #### Changes to Raising Grape::Exceptions::Validation
 
@@ -337,7 +337,7 @@ class API < Grape::API
 end
 ```
 
-See the [the updated API Formats documentation](https://github.com/intridea/grape#api-formats) and [#809](https://github.com/intridea/grape/pull/809) for more info.
+See the [the updated API Formats documentation](https://github.com/ruby-grape/grape#api-formats) and [#809](https://github.com/ruby-grape/grape/pull/809) for more info.
 
 #### Changes to Evaluation of Permitted Parameter Values
 
@@ -357,7 +357,7 @@ params do
 end
 ```
 
-See [#801](https://github.com/intridea/grape/issues/801) for more information.
+See [#801](https://github.com/ruby-grape/grape/issues/801) for more information.
 
 #### Changes to version
 
@@ -389,7 +389,7 @@ end
 
 when making a API call `GET /foo/v2/1`, the API would set instance variable `@output` to `hello1-v2`
 
-See [#898](https://github.com/intridea/grape/issues/898) for more information.
+See [#898](https://github.com/ruby-grape/grape/issues/898) for more information.
 
 
 ### Upgrading to >= 0.9.0
@@ -422,10 +422,10 @@ As replacement can be used
 * `Grape::Middleware::Auth::Digest` => [`Rack::Auth::Digest::MD5`](https://github.com/rack/rack/blob/master/lib/rack/auth/digest/md5.rb)
 * `Grape::Middleware::Auth::OAuth2` => [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2)
 
-If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/intridea/grape/tree/v0.7.0/lib/grape/middleware/auth)
+If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/ruby-grape/grape/tree/v0.7.0/lib/grape/middleware/auth)
 and host these files within your application
 
-See [#703](https://github.com/intridea/Grape/pull/703) for more information.
+See [#703](https://github.com/ruby-grape/Grape/pull/703) for more information.
 
 ### Upgrading to >= 0.7.0
 
@@ -462,7 +462,7 @@ rescue_from ParentError, rescue_subclasses: false do |e|
 end
 ```
 
-See [#544](https://github.com/intridea/grape/pull/544) for more information.
+See [#544](https://github.com/ruby-grape/grape/pull/544) for more information.
 
 
 #### Changes in the Default HTTP Status Code
@@ -485,7 +485,7 @@ You may also use `default_error_status` to change the global default.
 default_error_status 400
 ```
 
-See [#525](https://github.com/intridea/Grape/pull/525) for more information.
+See [#525](https://github.com/ruby-grape/Grape/pull/525) for more information.
 
 
 #### Changes in Parameter Declaration and Validation
@@ -502,7 +502,7 @@ params do
 end
 ```
 
-This caused the ambiguity and unexpected errors described in [#543](https://github.com/intridea/Grape/issues/543).
+This caused the ambiguity and unexpected errors described in [#543](https://github.com/ruby-grape/Grape/issues/543).
 
 In Grape 0.7.0, the `group`, `optional` and `requires` keywords take an additional `type` attribute which defaults to `Array`. This means that without a `type` attribute, these nested parameters will no longer accept a single hash, only an array (of hashes).
 
@@ -530,7 +530,7 @@ params do
 end
 ```
 
-See [#545](https://github.com/intridea/Grape/pull/545) for more information.
+See [#545](https://github.com/ruby-grape/Grape/pull/545) for more information.
 
 
 ### Upgrading to 0.6.0
@@ -547,4 +547,4 @@ rescue_from Grape::Exceptions::Validations do |e|
 end
 ```
 
-For more information see [#462](https://github.com/intridea/grape/issues/462).
+For more information see [#462](https://github.com/ruby-grape/grape/issues/462).

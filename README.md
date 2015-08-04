@@ -1,10 +1,10 @@
 ![grape logo](grape.png)
 
 [![Gem Version](http://img.shields.io/gem/v/grape.svg)](http://badge.fury.io/rb/grape)
-[![Build Status](http://img.shields.io/travis/intridea/grape.svg)](https://travis-ci.org/intridea/grape)
-[![Dependency Status](https://gemnasium.com/intridea/grape.svg)](https://gemnasium.com/intridea/grape)
-[![Code Climate](https://codeclimate.com/github/intridea/grape.svg)](https://codeclimate.com/github/intridea/grape)
-[![Inline docs](http://inch-ci.org/github/intridea/grape.svg)](http://inch-ci.org/github/intridea/grape)
+[![Build Status](http://img.shields.io/travis/ruby-grape/grape.svg)](https://travis-ci.org/ruby-grape/grape)
+[![Dependency Status](https://gemnasium.com/ruby-grape/grape.svg)](https://gemnasium.com/ruby-grape/grape)
+[![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
+[![Inline docs](http://inch-ci.org/github/ruby-grape/grape.svg)](http://inch-ci.org/github/ruby-grape/grape)
 
 ## Table of Contents
 
@@ -96,12 +96,12 @@ content negotiation, versioning and much more.
 
 You're reading the documentation for the next release of Grape, which should be 0.12.1.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.12.0](https://github.com/intridea/grape/blob/v0.12.0/README.md).
+The current stable release is [0.12.0](https://github.com/ruby-grape/grape/blob/v0.12.0/README.md).
 
 ## Project Resources
 
 * Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
-* [Grape Wiki](https://github.com/intridea/grape/wiki)
+* [Grape Wiki](https://github.com/ruby-grape/grape/wiki)
 
 ## Installation
 
@@ -1421,7 +1421,7 @@ instead of a message.
 error!({ error: "unexpected error", detail: "missing widget" }, 500)
 ```
 
-You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/intridea/grape-entity) gem.
+You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
 
 ```ruby
 module API
@@ -1942,8 +1942,8 @@ hash may include `:with`, which defines the entity to expose.
 
 ### Grape Entities
 
-Add the [grape-entity](https://github.com/intridea/grape-entity) gem to your Gemfile.
-Please refer to the [grape-entity documentation](https://github.com/intridea/grape-entity/blob/master/README.md)
+Add the [grape-entity](https://github.com/ruby-grape/grape-entity) gem to your Gemfile.
+Please refer to the [grape-entity documentation](https://github.com/ruby-grape/grape-entity/blob/master/README.md)
 for more details.
 
 The following example exposes statuses.
@@ -2644,7 +2644,7 @@ See [CONTRIBUTING](CONTRIBUTING.md).
 You can start hacking on Grape on
 [Nitrous.IO](https://www.nitrous.io/?utm_source=github.com&utm_campaign=grape&utm_medium=hackonnitrous) in a matter of seconds:
 
-[![Hack intridea/grape on Nitrous.IO](https://d3o0mnbgv6k92a.cloudfront.net/assets/hack-l-v1-3cc067e71372f6045e1949af9d96095b.png)](https://www.nitrous.io/hack_button?source=embed&runtime=rails&repo=intridea%2Fgrape&file_to_open=README.md)
+[![Hack ruby-grape/grape on Nitrous.IO](https://d3o0mnbgv6k92a.cloudfront.net/assets/hack-l-v1-3cc067e71372f6045e1949af9d96095b.png)](https://www.nitrous.io/hack_button?source=embed&runtime=rails&repo=intridea%2Fgrape&file_to_open=README.md)
 
 ## License
 

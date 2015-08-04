@@ -44,7 +44,7 @@ begin
           Dir.mkdir(dir)
           Dir.chdir(dir) do
             system('git init')
-            system('git remote add origin git@github.com:intridea/grape.git')
+            system('git remote add origin git@github.com:ruby-grape/grape.git')
             system('git pull')
             system('git checkout gh-pages')
           end
