@@ -508,6 +508,37 @@ describe Grape::API do
       end
     end
 
+    it 'allows for catch-all in a namespace' do
+      subject.namespace :nested do
+        get do
+          'root'
+        end
+
+        get 'something' do
+          'something'
+        end
+
+        route :any, '*path' do
+          'catch-all'
+        end
+      end
+
+      send('get', 'nested')
+      expect(last_response.body).to eql 'root'
+
+      send('get', 'nested/something')
+      expect(last_response.body).to eql 'something'
+
+      send('get', 'nested/missing')
+      expect(last_response.body).to eql 'catch-all'
+
+      send('post', 'nested')
+      expect(last_response.body).to eql 'catch-all'
+
+      send('post', 'nested/something')
+      expect(last_response.body).to eql 'catch-all'
+    end
+
     verbs = %w(post get head delete put options patch)
     verbs.each do |verb|
       it "allows and properly constrain a #{verb.upcase} method" do
