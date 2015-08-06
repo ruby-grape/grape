@@ -14,7 +14,7 @@ rake
 
 Check that the last build succeeded in [Travis CI](https://travis-ci.org/ruby-grape/grape) for all supported platforms.
 
-Those with r/w permissions to the [master Intridea repository](https://github.com/ruby-grape/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
+Those with r/w permissions to the [master Grape repository](https://github.com/ruby-grape/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
 
 ```
 gem grape, github: 'ruby-grape/grape'
