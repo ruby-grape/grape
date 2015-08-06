@@ -79,6 +79,8 @@
   - [Reloading in Rack Applications](#reloading-in-rack-applications)
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
+  - [Active Support Instrumentation](#active-support-instrumentation)
+  - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [Hacking on Grape](#hacking-on-grape)
 - [License](#license)
@@ -2627,6 +2629,34 @@ end
 See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
 
 ## Performance Monitoring
+
+### Active Support Instrumentation
+
+Grape has built-in support for [ActiveSupport::Notifications](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) which provides simple hook points to instrument key parts of your application.
+
+The following are currently supported:
+
+#### endpoint_run.grape
+
+The main execution of an endpoint, includes filters and rendering.
+
+* *endpoint* - The endpoint instance
+
+#### endpoint_render.grape
+
+The execution of the main content block of the endpoint.
+
+* *endpoint* - The endpoint instance
+
+#### endpoint_run_filters.grape
+
+* *endpoint* - The endpoint instance
+* *filters* - The filters being executed
+* *type* - The type of filters (before, before_validation, after_validation, after)
+
+See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html] for information on how to subscripe to these events.
+
+### Monitoring Products
 
 Grape integrates with NewRelic via the
 [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem, and
