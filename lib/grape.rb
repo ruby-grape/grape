@@ -141,6 +141,7 @@ module Grape
       autoload :RequestResponse
       autoload :Routing
       autoload :Validations
+      autoload :Environment
     end
   end
 

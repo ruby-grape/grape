@@ -14,6 +14,7 @@ module Grape
       include Grape::DSL::Middleware
       include Grape::DSL::RequestResponse
       include Grape::DSL::Routing
+      include Grape::DSL::Environment
     end
   end
 end
