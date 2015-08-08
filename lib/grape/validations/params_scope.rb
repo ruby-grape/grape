@@ -254,6 +254,9 @@ module Grape
         return if values.is_a?(Proc)
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)
         value_types = values.is_a?(Range) ? [values.begin, values.end] : values
+        if coerce_type == Virtus::Attribute::Boolean
+          value_types = value_types.map { |type| Virtus::Attribute.build(type) }
+        end
         if value_types.any? { |v| !v.is_a?(coerce_type) }
           fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
         end

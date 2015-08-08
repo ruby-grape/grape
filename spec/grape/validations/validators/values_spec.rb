@@ -57,6 +57,13 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          optional :type, type: Boolean, desc: 'A boolean', values: [true]
+        end
+        get '/values/optional_boolean' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, type: Integer, desc: 'An integer', values: [10, 11], default: 10
         end
         get '/values/coercion' do
@@ -174,6 +181,11 @@ describe Grape::Validations::ValuesValidator do
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
+  it 'allows values to be true or false when setting the type to boolean' do
+    get('/values/optional_boolean', type: true)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: true }.to_json)
+  end
   it 'allows values to be a kind of the coerced type not just an instance of it' do
     get('/values/coercion', type: 10)
     expect(last_response.status).to eq 200
