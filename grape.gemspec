@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = 'A Ruby framework for rapid API development with great conventions.'
   s.license     = 'MIT'
 
-  s.add_runtime_dependency 'rack', '>= 1.3.0'
+  s.add_runtime_dependency 'rack', '>= 1.5.2'
   s.add_runtime_dependency 'rack-mount'
   s.add_runtime_dependency 'rack-accept'
   s.add_runtime_dependency 'activesupport'

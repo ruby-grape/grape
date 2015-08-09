@@ -20,6 +20,7 @@ Next Release
 * [#1052](https://github.com/ruby-grape/grape/pull/1052): Reset `description[:params]` when resetting validations - [@marshall-lee](https://github.com/marshall-lee).
 * [#1088](https://github.com/ruby-grape/grape/pull/1088): Support ActiveSupport 3.x by explicitly requiring Hash#except - [@wagenet](https://github.com/wagenet).
 * [#1096](https://github.com/ruby-grape/grape/pull/1096): Fix coercion on booleans - [@towanda](https://github.com/towanda).
+* [#](https://github.com/ruby-grape/grape/pull/): Rack 1.5.2 is now required - [@towanda](https://github.com/towanda).
 
 0.12.0 (6/18/2015)
 ==================
