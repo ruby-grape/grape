@@ -1,24 +1,23 @@
-Next Release
-============
+0.13.0 (8/10/2015)
+==================
 
 #### Features
 
-* [#1062](https://github.com/ruby-grape/grape/issues/1062): Fix: `Grape::Exceptions::ValidationErrors` will include headers set by `header` - [@yairgo](https://github.com/yairgo).
 * [#1039](https://github.com/ruby-grape/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
 * [#1047](https://github.com/ruby-grape/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * [#1064](https://github.com/ruby-grape/grape/pull/1064): Add public `Grape::Exception::ValidationErrors#full_messages` - [@romanlehnert](https://github.com/romanlehnert).
 * [#1079](https://github.com/ruby-grape/grape/pull/1079): Added `stream` method to take advantage of `Rack::Chunked` [@zbelzer](https://github.com/zbelzer).
-* [#1086](https://github.com/ruby-grape/grape/pull/1086): Added ActiveSupport::Notifications instrumentation - [@wagenet](https://github.com/wagenet).
-* Your contribution here!
+* [#1086](https://github.com/ruby-grape/grape/pull/1086): Added `ActiveSupport::Notifications` instrumentation - [@wagenet](https://github.com/wagenet).
 
 #### Fixes
 
-* [#1038](https://github.com/ruby-grape/grape/pull/1038): Avoid dup-ing the String class when used in inherited params - [@rnubel](https://github.com/rnubel).
+* [#1062](https://github.com/ruby-grape/grape/issues/1062): Fix: `Grape::Exceptions::ValidationErrors` will include headers set by `header` - [@yairgo](https://github.com/yairgo).
+* [#1038](https://github.com/ruby-grape/grape/pull/1038): Avoid dup-ing the `String` class when used in inherited params - [@rnubel](https://github.com/rnubel).
 * [#1042](https://github.com/ruby-grape/grape/issues/1042): Fix coercion of complex arrays - [@dim](https://github.com/dim).
 * [#1045](https://github.com/ruby-grape/grape/pull/1045): Do not convert `Rack::Response` to `Rack::Response` in middleware - [@dmitry](https://github.com/dmitry).
 * [#1048](https://github.com/ruby-grape/grape/pull/1048): Only dup `InheritableValues`, remove support for `deep_dup` - [@toddmazierski](https://github.com/toddmazierski/).
 * [#1052](https://github.com/ruby-grape/grape/pull/1052): Reset `description[:params]` when resetting validations - [@marshall-lee](https://github.com/marshall-lee).
-* [#1088](https://github.com/ruby-grape/grape/pull/1088): Support ActiveSupport 3.x by explicitly requiring Hash#except - [@wagenet](https://github.com/wagenet).
+* [#1088](https://github.com/ruby-grape/grape/pull/1088): Support ActiveSupport 3.x by explicitly requiring `Hash#except` - [@wagenet](https://github.com/wagenet).
 * [#1096](https://github.com/ruby-grape/grape/pull/1096): Fix coercion on booleans - [@towanda](https://github.com/towanda).
 
 0.12.0 (6/18/2015)

@@ -96,14 +96,13 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.12.1.
+You're reading the documentation for the stable release of Grape, 0.13.0.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.12.0](https://github.com/ruby-grape/grape/blob/v0.12.0/README.md).
 
 ## Project Resources
 
+* [Grape Website](http://www.ruby-grape.org)
 * Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
-* [Grape Wiki](https://github.com/ruby-grape/grape/wiki)
 
 ## Installation
 

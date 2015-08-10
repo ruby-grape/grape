@@ -1,4 +1,4 @@
 module Grape
   # The current version of Grape.
-  VERSION = '0.12.1'
+  VERSION = '0.13.0'
 end
