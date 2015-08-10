@@ -2658,9 +2658,11 @@ See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/
 
 ### Monitoring Products
 
-Grape integrates with NewRelic via the
-[newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem, and
-with Librato Metrics with the [grape-librato](https://github.com/seanmoon/grape-librato) gem.
+Grape integrates with following third-party tools:
+
+* **NewRelic** - [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem
+* **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
+* **[Skylight](https://skylight.io)** - [skylight](https://github.com/skylight-ruby/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape)
 
 ## Contributing to Grape
 
