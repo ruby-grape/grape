@@ -8,7 +8,7 @@
 #### Fixes
 
 * [#1109](https://github.com/ruby-grape/grape/pull/1109): Memoize Virtus attribute and fix memory leak - [@marshall-lee](https://github.com/marshall-lee).
-* Your contribution here.
+* [#1101](https://github.com/intridea/grape/pull/1101): Fix: Incorrect media-type `Accept` header now correctly returns 406 with `strict: true` - [@elliotlarson](https://github.com/elliotlarson).
 
 0.13.0 (8/10/2015)
 ==================
