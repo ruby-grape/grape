@@ -184,24 +184,6 @@ describe Grape::Middleware::Versioner::Header do
       end
     end
 
-    it 'fails with 406 Not Acceptable if type is a range' do
-      expect { subject.call('HTTP_ACCEPT' => '*/*').last }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql('X-Cascade' => 'pass')
-        expect(exception.status).to eql 406
-        expect(exception.message).to include('Accept header must not contain ranges ("*").')
-      end
-    end
-
-    it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect { subject.call('HTTP_ACCEPT' => 'application/*').last }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql('X-Cascade' => 'pass')
-        expect(exception.status).to eql 406
-        expect(exception.message).to include('Accept header must not contain ranges ("*").')
-      end
-    end
-
     it 'succeeds if proper header is set' do
       expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first).to eq(200)
     end
@@ -223,30 +205,22 @@ describe Grape::Middleware::Versioner::Header do
       end
     end
 
+    it 'fails with 406 Not Acceptable if header is application/xml' do
+      expect { subject.call('HTTP_ACCEPT' => 'application/xml').last }
+        .to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('API vendor or version not found.')
+      end
+    end
+
     it 'fails with 406 Not Acceptable if header is empty' do
       expect { subject.call('HTTP_ACCEPT' => '').last }.to raise_exception do |exception|
         expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
         expect(exception.headers).to eql({})
         expect(exception.status).to eql 406
         expect(exception.message).to include('Accept header must be set.')
-      end
-    end
-
-    it 'fails with 406 Not Acceptable if type is a range' do
-      expect { subject.call('HTTP_ACCEPT' => '*/*').last }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql({})
-        expect(exception.status).to eql 406
-        expect(exception.message).to include('Accept header must not contain ranges ("*").')
-      end
-    end
-
-    it 'fails with 406 Not Acceptable if subtype is a range' do
-      expect { subject.call('HTTP_ACCEPT' => 'application/*').last }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql({})
-        expect(exception.status).to eql 406
-        expect(exception.message).to include('Accept header must not contain ranges ("*").')
       end
     end
 
