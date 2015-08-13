@@ -2661,7 +2661,7 @@ Grape integrates with following third-party tools:
 
 * **NewRelic** - [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
-* **[Skylight](https://skylight.io)** - [skylight](https://github.com/skylight-ruby/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape)
+* **[Skylight](https://skylight.io)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape)
 
 ## Contributing to Grape
 
