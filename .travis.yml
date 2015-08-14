@@ -18,3 +18,4 @@ gemfile:
   - Gemfile
   - gemfiles/rails_3.gemfile
   - gemfiles/rails_4.gemfile
+  - gemfiles/rack_1.5.2.gemfile
