@@ -487,7 +487,7 @@ route string parameters will have precedence.
 
 #### Declared
 
-Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Let's have the following api:
+Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Consider the following API endpoint:
 
 ````ruby
 format :json
@@ -497,7 +497,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, declared will return an empty Hashie::Mash instance.
+If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
 
 **Request**
 
@@ -550,7 +550,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-Returned hash is a Hashie::Mash instance so you can access parameters via dot notation:
+The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
 
 ```ruby
   declared(params).user == declared(params)["user"]
@@ -558,7 +558,7 @@ Returned hash is a Hashie::Mash instance so you can access parameters via dot no
 
 #### Include missing
 
-By default `declared(params)` returns parameters that has `nil` value. If you want to return only the parameters that have any value, you can use the `include_missing` option. By default it is `true`. Let's have the following api:
+By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:
 
 ````ruby
 format :json
