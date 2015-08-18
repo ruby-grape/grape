@@ -7,7 +7,7 @@ module Grape
     class CoerceValidator < Base
       def validate_param!(attr_name, params)
         fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce unless params.is_a? Hash
-        new_value = coerce_value(@option, params[attr_name])
+        new_value = coerce_value(params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
         else
@@ -50,26 +50,35 @@ module Grape
         end
       end
 
-      def coerce_value(type, val)
+      def coerce_value(val)
         # Don't coerce things other than nil to Arrays or Hashes
         return val || []      if type == Array
         return val || Set.new if type == Set
         return val || {}      if type == Hash
 
-        # To support custom types that Virtus can't easily coerce, pass in an
-        # explicit coercer. Custom types must implement a `parse` class method.
-        converter_options = {}
-        if ParameterTypes.custom_type?(type)
-          converter_options[:coercer] = type.method(:parse)
-        end
-
-        converter = Virtus::Attribute.build(type, converter_options)
         converter.coerce(val)
 
       # not the prettiest but some invalid coercion can currently trigger
       # errors in Virtus (see coerce_spec.rb:75)
       rescue
         InvalidValue.new
+      end
+
+      def type
+        @option
+      end
+
+      def converter
+        @converter ||=
+          begin
+            # To support custom types that Virtus can't easily coerce, pass in an
+            # explicit coercer. Custom types must implement a `parse` class method.
+            converter_options = {}
+            if ParameterTypes.custom_type?(type)
+              converter_options[:coercer] = type.method(:parse)
+            end
+            Virtus::Attribute.build(type, converter_options)
+          end
       end
     end
   end

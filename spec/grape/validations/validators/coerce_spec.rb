@@ -252,5 +252,18 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('Fixnum')
       end
     end
+
+    context 'converter' do
+      it 'does not build Virtus::Attribute multiple times' do
+        subject.params do
+          requires :something, type: Array[String]
+        end
+        subject.get do
+        end
+
+        expect(Virtus::Attribute).to receive(:build).at_most(2).times.and_call_original
+        10.times { get '/' }
+      end
+    end
   end
 end
