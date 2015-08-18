@@ -31,6 +31,7 @@
 * [#1052](https://github.com/ruby-grape/grape/pull/1052): Reset `description[:params]` when resetting validations - [@marshall-lee](https://github.com/marshall-lee).
 * [#1088](https://github.com/ruby-grape/grape/pull/1088): Support ActiveSupport 3.x by explicitly requiring `Hash#except` - [@wagenet](https://github.com/wagenet).
 * [#1096](https://github.com/ruby-grape/grape/pull/1096): Fix coercion on booleans - [@towanda](https://github.com/towanda).
+* [#1101](https://github.com/intridea/grape/pull/1101): With strict version header, 406 response when using media type accept header - [@elliotlarson](https://github.com/elliotlarson).
 
 0.12.0 (6/18/2015)
 ==================
