@@ -20,7 +20,7 @@ Metrics/ClassLength:
 
 # Offense count: 23
 Metrics/CyclomaticComplexity:
-  Max: 20
+  Max: 22
 
 # Offense count: 675
 # Configuration parameters: AllowURI, URISchemes.
@@ -30,7 +30,7 @@ Metrics/LineLength:
 # Offense count: 44
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 35
+  Max: 36
 
 # Offense count: 8
 # Configuration parameters: CountComments.
@@ -39,7 +39,7 @@ Metrics/ModuleLength:
 
 # Offense count: 17
 Metrics/PerceivedComplexity:
-  Max: 22
+  Max: 23
 
 # Offense count: 26
 # Cop supports --auto-correct.
