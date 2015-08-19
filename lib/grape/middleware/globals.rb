@@ -5,9 +5,9 @@ module Grape
     class Globals < Base
       def before
         request = Grape::Request.new(@env)
-        @env['grape.request'] = request
-        @env['grape.request.headers'] = request.headers
-        @env['grape.request.params'] = request.params if @env['rack.input']
+        @env[Grape::Env::GRAPE_REQUEST] = request
+        @env[Grape::Env::GRAPE_REQUEST_HEADERS] = request.headers
+        @env[Grape::Env::GRAPE_REQUEST_PARAMS] = request.params if @env[Grape::Env::RACK_INPUT]
       end
     end
   end

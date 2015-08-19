@@ -2,6 +2,7 @@ module Grape
   module Middleware
     class Base
       attr_reader :app, :env, :options
+      TEXT_HTML = 'text/html'.freeze
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
@@ -50,7 +51,7 @@ module Grape
       end
 
       def content_type
-        content_type_for(env['api.format'] || options[:format]) || 'text/html'
+        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || TEXT_HTML
       end
 
       def mime_types

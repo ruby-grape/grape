@@ -33,7 +33,7 @@ module Grape
               throw :error, status: 406, headers: error_headers, message: 'The requested version is not supported.'
             end
 
-            env['api.version'] = potential_version
+            env[Grape::Env::API_VERSION] = potential_version
           end
         end
 

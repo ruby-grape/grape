@@ -3,6 +3,8 @@ require 'grape/middleware/base'
 module Grape
   module Middleware
     class Formatter < Base
+      CHUNKED = 'chunked'.freeze
+
       def default_options
         {
           default_format: :txt,
@@ -28,7 +30,7 @@ module Grape
             end
         else
           # Allow content-type to be explicitly overwritten
-          api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env['api.format']
+          api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
           formatter = Grape::Formatter::Base.formatter_for(api_format, options)
 
           begin
@@ -57,7 +59,7 @@ module Grape
         if headers[Grape::Http::Headers::CONTENT_TYPE]
           headers
         else
-          headers.merge(Grape::Http::Headers::CONTENT_TYPE => content_type_for(env['api.format']))
+          headers.merge(Grape::Http::Headers::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
         end
       end
 
@@ -70,11 +72,11 @@ module Grape
         if (request.post? || request.put? || request.patch? || request.delete?) &&
            (!request.form_data? || !request.media_type) &&
            (!request.parseable_data?) &&
-           (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == 'chunked')
+           (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
-          if (input = env['rack.input'])
+          if (input = env[Grape::Env::RACK_INPUT])
             input.rewind
-            body = env['api.request.input'] = input.read
+            body = env[Grape::Env::API_REQUEST_INPUT] = input.read
             begin
               read_rack_input(body) if body && body.length > 0
             ensure
@@ -92,14 +94,14 @@ module Grape
           parser = Grape::Parser::Base.parser_for fmt, options
           if parser
             begin
-              body = (env['api.request.body'] = parser.call(body, env))
+              body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
               if body.is_a?(Hash)
-                if env['rack.request.form_hash']
-                  env['rack.request.form_hash'] = env['rack.request.form_hash'].merge(body)
+                if env[Grape::Env::RACK_REQUEST_FORM_HASH]
+                  env[Grape::Env::RACK_REQUEST_FORM_HASH] = env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
                 else
-                  env['rack.request.form_hash'] = body
+                  env[Grape::Env::RACK_REQUEST_FORM_HASH] = body
                 end
-                env['rack.request.form_input'] = env['rack.input']
+                env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
               end
             rescue Grape::Exceptions::Base => e
               raise e
@@ -107,7 +109,7 @@ module Grape
               throw :error, status: 400, message: e.message
             end
           else
-            env['api.request.body'] = body
+            env[Grape::Env::API_REQUEST_BODY] = body
           end
         else
           throw :error, status: 406, message: "The requested content-type '#{request.media_type}' is not supported."
@@ -117,7 +119,7 @@ module Grape
       def negotiate_content_type
         fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
         if content_type_for(fmt)
-          env['api.format'] = fmt
+          env[Grape::Env::API_FORMAT] = fmt
         else
           throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
         end

@@ -56,7 +56,7 @@ module Grape
 
       # The API version as specified in the URL.
       def version
-        env['api.version']
+        env[Grape::Env::API_VERSION]
       end
 
       # End the request and display an error to the
@@ -241,7 +241,7 @@ module Grape
         if key
           representation = (@body || {}).merge(key => representation)
         elsif entity_class.present? && @body
-          fail ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?('merge')
+          fail ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
           representation = @body.merge(representation)
         end
 
@@ -293,7 +293,7 @@ module Grape
       #   the given entity_class.
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
-        embeds[:version] = env['api.version'] if env['api.version']
+        embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
         entity_class.represent(object, embeds.merge(options))
       end
     end
