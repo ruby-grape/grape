@@ -318,7 +318,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that receives' do
       context 'an invalid version in the request' do
-        before { get '/beer', {},  'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
         it_should_behave_like 'a cascaded request'
       end
       context 'an invalid vendor in the request' do

@@ -1,6 +1,6 @@
 module Grape
   class API
-    Boolean = Virtus::Attribute::Boolean # rubocop:disable ConstantName
+    Boolean = Virtus::Attribute::Boolean
   end
 
   module Validations

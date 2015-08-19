@@ -69,20 +69,20 @@ module Grape
 
       # store read input in env['api.request.input']
       def read_body_input
-        if (request.post? || request.put? || request.patch? || request.delete?) &&
-           (!request.form_data? || !request.media_type) &&
-           (!request.parseable_data?) &&
-           (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
+        return unless
+          (request.post? || request.put? || request.patch? || request.delete?) &&
+          (!request.form_data? || !request.media_type) &&
+          (!request.parseable_data?) &&
+          (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
-          if (input = env[Grape::Env::RACK_INPUT])
-            input.rewind
-            body = env[Grape::Env::API_REQUEST_INPUT] = input.read
-            begin
-              read_rack_input(body) if body && body.length > 0
-            ensure
-              input.rewind
-            end
-          end
+        return unless (input = env[Grape::Env::RACK_INPUT])
+
+        input.rewind
+        body = env[Grape::Env::API_REQUEST_INPUT] = input.read
+        begin
+          read_rack_input(body) if body && body.length > 0
+        ensure
+          input.rewind
         end
       end
 

@@ -5,7 +5,7 @@ module Grape
         module_function
 
         def add(label, strategy, option_fetcher = ->(_) { [] })
-          auth_strategies[label] =  StrategyInfo.new(strategy, option_fetcher)
+          auth_strategies[label] = StrategyInfo.new(strategy, option_fetcher)
         end
 
         def auth_strategies

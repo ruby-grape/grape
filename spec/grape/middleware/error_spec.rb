@@ -32,7 +32,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  let(:options) {  { default_message: 'Aww, hamburgers.' } }
+  let(:options) { { default_message: 'Aww, hamburgers.' } }
 
   it 'sets the status code appropriately' do
     ErrApp.error = { status: 410 }

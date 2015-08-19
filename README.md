@@ -1504,7 +1504,7 @@ Custom error formatters for existing and additional types can be defined with a 
 
 ```ruby
 class Twitter::API < Grape::API
-  error_formatter :txt, lambda { |message, backtrace, options, env|
+  error_formatter :txt, ->(message, backtrace, options, env) {
     "error: #{message} from #{backtrace}"
   }
 end
@@ -1818,7 +1818,7 @@ Custom formatters for existing and additional types can be defined with a proc.
 ```ruby
 class Twitter::API < Grape::API
   content_type :xls, "application/vnd.ms-excel"
-  formatter :xls, lambda { |object, env| object.to_xls }
+  formatter :xls, ->(object, env) { object.to_xls }
 end
 ```
 
@@ -1956,7 +1956,7 @@ module API
       expose :user_name
       expose :text, documentation: { type: "string", desc: "Status update text." }
       expose :ip, if: { type: :full }
-      expose :user_type, :user_id, if: lambda { |status, options| status.user.public? }
+      expose :user_type, :user_id, if: ->(status, options) { status.user.public? }
       expose :digest { |status, options| Digest::MD5.hexdigest(status.txt) }
       expose :replies, using: API::Status, as: :replies
     end

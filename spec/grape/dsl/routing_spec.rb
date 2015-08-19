@@ -228,7 +228,7 @@ module Grape
         end
 
         let(:regex) { /(.*)/ }
-        let!(:options) {  { requirements: regex } }
+        let!(:options) { { requirements: regex } }
         it 'nests requirements option under param name' do
           expect(subject).to receive(:namespace) do |_param, options|
             expect(options[:requirements][:foo]).to eq regex

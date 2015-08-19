@@ -27,14 +27,12 @@ module Grape
             end
           end
 
-          unless potential_version.empty?
-            # If the requested version is not supported:
-            unless versions.any? { |v| v.to_s == potential_version }
-              throw :error, status: 406, headers: error_headers, message: 'The requested version is not supported.'
-            end
+          return if potential_version.empty?
 
-            env[Grape::Env::API_VERSION] = potential_version
-          end
+          # If the requested version is not supported:
+          throw :error, status: 406, headers: error_headers, message: 'The requested version is not supported.' unless versions.any? { |v| v.to_s == potential_version }
+
+          env[Grape::Env::API_VERSION] = potential_version
         end
 
         private

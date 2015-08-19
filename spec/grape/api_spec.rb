@@ -640,7 +640,7 @@ describe Grape::API do
     end
 
     it 'adds a after_validation filter' do
-      subject.after_validation { @foo = "first #{params[:id] }:#{params[:id].class}"  }
+      subject.after_validation { @foo = "first #{params[:id]}:#{params[:id].class}" }
       subject.after_validation { @bar = 'second' }
       subject.params do
         requires :id, type: Integer
@@ -1435,7 +1435,7 @@ describe Grape::API do
 
   describe '.rescue_from klass, lambda' do
     it 'rescues an error with the lambda' do
-      subject.rescue_from ArgumentError, -> {
+      subject.rescue_from ArgumentError, lambda {
         rack_response('rescued with a lambda', 400)
       }
       subject.get('/rescue_lambda') { fail ArgumentError }
@@ -1446,7 +1446,7 @@ describe Grape::API do
     end
 
     it 'can execute the lambda with an argument' do
-      subject.rescue_from ArgumentError, ->(e) {
+      subject.rescue_from ArgumentError, lambda { |e|
         rack_response(e.message, 400)
       }
       subject.get('/rescue_lambda') { fail ArgumentError, 'lambda takes an argument' }
@@ -1679,8 +1679,8 @@ describe Grape::API do
   describe '.formatter' do
     context 'multiple formatters' do
       before :each do
-        subject.formatter :json, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
-        subject.formatter :txt, ->(object, _env) { "custom_formatter: #{object[:some] }" }
+        subject.formatter :json, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some]}\"}" }
+        subject.formatter :txt, ->(object, _env) { "custom_formatter: #{object[:some]}" }
         subject.get :simple do
           { some: 'hash' }
         end
@@ -1698,7 +1698,7 @@ describe Grape::API do
       before :each do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some] }\"}" }
+        subject.formatter :custom, ->(object, _env) { "{\"custom_formatter\":\"#{object[:some]}\"}" }
         subject.get :simple do
           { some: 'hash' }
         end
@@ -1715,7 +1715,7 @@ describe Grape::API do
     context 'custom formatter class' do
       module CustomFormatter
         def self.call(object, _env)
-          "{\"custom_formatter\":\"#{object[:some] }\"}"
+          "{\"custom_formatter\":\"#{object[:some]}\"}"
         end
       end
       before :each do
@@ -1798,7 +1798,7 @@ describe Grape::API do
       before :each do
         subject.parser :json, nil
         subject.put 'data' do
-          "body: #{env['api.request.body'] }"
+          "body: #{env['api.request.body']}"
         end
       end
       it 'does not parse data' do
@@ -2880,7 +2880,7 @@ XML
     [true, false].each do |anchor|
       it "anchor=#{anchor}" do
         subject.route :any, '*path', anchor: anchor do
-          error!("Unrecognized request path: #{params[:path] } - #{env['PATH_INFO'] }#{env['SCRIPT_NAME'] }", 404)
+          error!("Unrecognized request path: #{params[:path]} - #{env['PATH_INFO']}#{env['SCRIPT_NAME']}", 404)
         end
         get '/v1/hello'
         expect(last_response.status).to eq(200)

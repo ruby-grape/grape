@@ -3,7 +3,7 @@ shared_examples_for 'versioning' do
     subject.format :txt
     subject.version 'v1', macro_options
     subject.get :hello do
-      "Version: #{request.env['api.version'] }"
+      "Version: #{request.env['api.version']}"
     end
     versioned_get '/hello', 'v1', macro_options
     expect(last_response.body).to eql 'Version: v1'
@@ -14,7 +14,7 @@ shared_examples_for 'versioning' do
     subject.prefix 'api'
     subject.version 'v1', macro_options
     subject.get :hello do
-      "Version: #{request.env['api.version'] }"
+      "Version: #{request.env['api.version']}"
     end
     versioned_get '/hello', 'v1', macro_options.merge(prefix: 'api')
     expect(last_response.body).to eql 'Version: v1'

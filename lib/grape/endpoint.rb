@@ -74,10 +74,10 @@ module Grape
       @options[:method] = Array(options[:method])
       @options[:route_options] ||= {}
 
-      if block_given?
-        @source = block
-        @block = self.class.generate_api_method(method_name, &block)
-      end
+      return unless block_given?
+
+      @source = block
+      @block = self.class.generate_api_method(method_name, &block)
     end
 
     def require_option(options, key)
@@ -119,7 +119,7 @@ module Grape
             route_set.add_route(self, {
                                   path_info: route.route_compiled,
                                   request_method: method
-                                },  route_info: route)
+                                }, route_info: route)
           end
         end
       end

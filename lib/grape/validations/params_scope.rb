@@ -257,9 +257,8 @@ module Grape
         if coerce_type == Virtus::Attribute::Boolean
           value_types = value_types.map { |type| Virtus::Attribute.build(type) }
         end
-        if value_types.any? { |v| !v.is_a?(coerce_type) }
-          fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
-        end
+        return unless value_types.any? { |v| !v.is_a?(coerce_type) }
+        fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
       end
     end
   end

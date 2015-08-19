@@ -94,8 +94,7 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block_given? ? new_scope(orig_attrs, &block) :
-              push_declared_params(attrs)
+          block_given? ? new_scope(orig_attrs, &block) : push_declared_params(attrs)
         end
       end
 
@@ -120,8 +119,7 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block_given? ? new_scope(orig_attrs, true, &block) :
-              push_declared_params(attrs)
+          block_given? ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs)
         end
       end
 

@@ -6,11 +6,9 @@ module Grape
       class Dummy
         include Grape::DSL::Helpers
 
-        # rubocop:disable TrivialAccessors
         def self.mod
           namespace_stackable(:helpers).first
         end
-        # rubocop:enable TrivialAccessors
       end
     end
     describe Helpers do

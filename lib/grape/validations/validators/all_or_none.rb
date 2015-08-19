@@ -13,7 +13,7 @@ module Grape
       private
 
       def only_subset_present
-        scoped_params.any? { |resource_params| keys_in_common(resource_params).length > 0 && keys_in_common(resource_params).length < attrs.length  }
+        scoped_params.any? { |resource_params| keys_in_common(resource_params).length > 0 && keys_in_common(resource_params).length < attrs.length }
       end
     end
   end

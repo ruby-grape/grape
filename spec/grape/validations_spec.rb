@@ -377,9 +377,8 @@ describe Grape::Validations do
       module DateRangeValidations
         class DateRangeValidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
-            unless params[attr_name][:from] <= params[attr_name][:to]
-              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
-            end
+            return if params[attr_name][:from] <= params[attr_name][:to]
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
           end
         end
       end
@@ -763,9 +762,8 @@ describe Grape::Validations do
       module CustomValidations
         class Customvalidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
-            unless params[attr_name] == 'im custom'
-              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'is not custom!'
-            end
+            return if params[attr_name] == 'im custom'
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'is not custom!'
           end
         end
       end
@@ -912,9 +910,8 @@ describe Grape::Validations do
         module CustomValidations
           class CustomvalidatorWithOptions < Grape::Validations::Base
             def validate_param!(attr_name, params)
-              unless params[attr_name] == @option[:text]
-                fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
-              end
+              return if params[attr_name] == @option[:text]
+              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
             end
           end
         end

@@ -29,18 +29,18 @@ module Grape
       !!(settings[:version] && settings[:version_options][:using] == :path)
     end
 
-    def has_namespace?
+    def namespace?
       namespace && namespace.to_s =~ /^\S/ && namespace != '/'
     end
 
-    def has_path?
+    def path?
       raw_path && raw_path.to_s =~ /^\S/ && raw_path != '/'
     end
 
     def suffix
       if uses_specific_format?
         "(.#{settings[:format]})"
-      elsif !uses_path_versioning? || (has_namespace? || has_path?)
+      elsif !uses_path_versioning? || (namespace? || path?)
         '(.:format)'
       else
         '(/.:format)'

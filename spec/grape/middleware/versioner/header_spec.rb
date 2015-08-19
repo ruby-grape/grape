@@ -56,13 +56,13 @@ describe Grape::Middleware::Versioner::Header do
         end
 
         it 'is set' do
-          status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+          status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
           expect(env['api.format']).to eql 'json'
           expect(status).to eq(200)
         end
 
         it 'is nil if not provided' do
-          status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
+          status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
           expect(env['api.format']).to eql nil
           expect(status).to eq(200)
         end
@@ -72,13 +72,13 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'api.vendor' do
     it 'is set' do
-      status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
+      status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
       expect(env['api.vendor']).to eql 'vendor'
       expect(status).to eq(200)
     end
 
     it 'is set if format provided' do
-      status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
+      status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
       expect(env['api.vendor']).to eql 'vendor'
       expect(status).to eq(200)
     end
@@ -99,13 +99,13 @@ describe Grape::Middleware::Versioner::Header do
       end
 
       it 'is set' do
-        status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
+        status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
         expect(env['api.vendor']).to eql 'vendor'
         expect(status).to eq(200)
       end
 
       it 'is set if format provided' do
-        status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+        status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
         expect(env['api.vendor']).to eql 'vendor'
         expect(status).to eq(200)
       end
@@ -128,13 +128,13 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     it 'is set' do
-      status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
+      status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
       expect(env['api.version']).to eql 'v1'
       expect(status).to eq(200)
     end
 
     it 'is set if format provided' do
-      status, _, env =  subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+      status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
       expect(env['api.version']).to eql 'v1'
       expect(status).to eq(200)
     end

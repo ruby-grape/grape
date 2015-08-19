@@ -27,7 +27,7 @@ begin
   DOC_FILES = ['lib/**/*.rb', 'README.md']
 
   YARD::Rake::YardocTask.new(:doc) do |t|
-    t.files   = DOC_FILES
+    t.files = DOC_FILES
   end
 
   namespace :doc do

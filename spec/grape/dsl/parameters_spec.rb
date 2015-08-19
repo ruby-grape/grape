@@ -11,31 +11,25 @@ module Grape
           @validate_attributes = *args
         end
 
-        # rubocop:disable TrivialAccessors
         def validate_attributes_reader
           @validate_attributes
         end
-        # rubocop:enable TrivialAccessors
 
         def push_declared_params(*args)
           @push_declared_params = args
         end
 
-        # rubocop:disable TrivialAccessors
         def push_declared_params_reader
           @push_declared_params
         end
-        # rubocop:enable TrivialAccessors
 
         def validates(*args)
           @validates = *args
         end
 
-        # rubocop:disable TrivialAccessors
         def validates_reader
           @validates
         end
-        # rubocop:enable TrivialAccessors
       end
     end
 

@@ -82,47 +82,47 @@ module Grape
       end
     end
 
-    describe '#has_namespace?' do
+    describe '#namespace?' do
       it 'is false when the namespace is nil' do
         path = Path.new(anything, nil, anything)
-        expect(path).not_to have_namespace
+        expect(path.namespace?).to be nil
       end
 
       it 'is false when the namespace starts with whitespace' do
         path = Path.new(anything, ' /foo', anything)
-        expect(path).not_to have_namespace
+        expect(path.namespace?).to be nil
       end
 
       it 'is false when the namespace is the root path' do
         path = Path.new(anything, '/', anything)
-        expect(path).not_to have_namespace
+        expect(path.namespace?).to be false
       end
 
       it 'is true otherwise' do
         path = Path.new(anything, '/world', anything)
-        expect(path).to have_namespace
+        expect(path.namespace?).to be true
       end
     end
 
-    describe '#has_path?' do
+    describe '#path?' do
       it 'is false when the path is nil' do
         path = Path.new(nil, anything, anything)
-        expect(path).not_to have_path
+        expect(path.path?).to be nil
       end
 
       it 'is false when the path starts with whitespace' do
         path = Path.new(' /foo', anything, anything)
-        expect(path).not_to have_path
+        expect(path.path?).to be nil
       end
 
       it 'is false when the path is the root path' do
         path = Path.new('/', anything, anything)
-        expect(path).not_to have_path
+        expect(path.path?).to be false
       end
 
       it 'is true otherwise' do
         path = Path.new('/hello', anything, anything)
-        expect(path).to have_path
+        expect(path.path?).to be true
       end
     end
 

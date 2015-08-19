@@ -72,12 +72,12 @@ module Grape
           env[Grape::Env::API_TYPE] = type
           env[Grape::Env::API_SUBTYPE] = subtype
 
-          if VENDOR_VERSION_HEADER_REGEX =~ subtype
-            env[Grape::Env::API_VENDOR] = Regexp.last_match[1]
-            env[Grape::Env::API_VERSION] = Regexp.last_match[2]
-            # weird that Grape::Middleware::Formatter also does this
-            env[Grape::Env::API_FORMAT] = Regexp.last_match[3]
-          end
+          return unless VENDOR_VERSION_HEADER_REGEX =~ subtype
+
+          env[Grape::Env::API_VENDOR] = Regexp.last_match[1]
+          env[Grape::Env::API_VERSION] = Regexp.last_match[2]
+          # weird that Grape::Middleware::Formatter also does this
+          env[Grape::Env::API_FORMAT] = Regexp.last_match[3]
         end
 
         def fail_with_invalid_accept_header!(message)
@@ -109,7 +109,7 @@ module Grape
 
         def headers_contain_wrong_vendor_or_version?
           header.values.all? do |header_value|
-            has_vendor?(header_value) || version?(header_value)
+            vendor?(header_value) || version?(header_value)
           end
         end
 
@@ -154,7 +154,7 @@ module Grape
 
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets a vendor
-        def has_vendor?(media_type)
+        def vendor?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
           subtype[/\Avnd\.[a-z0-9*.]+/]
         end

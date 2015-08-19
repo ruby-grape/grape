@@ -19,14 +19,9 @@ module Grape
         options[:include_missing] = true unless options.key?(:include_missing)
         options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
 
-        if declared_params.nil?
-          declared_params = (!options[:include_parent_namespaces] ? route_setting(:declared_params) :
-              (route_setting(:saved_declared_params) || [])).flatten(1) || []
-        end
+        declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
 
-        unless declared_params
-          fail ArgumentError, 'Tried to filter for declared parameters but none exist.'
-        end
+        fail ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
 
         if params.is_a? Array
           params.map do |param|

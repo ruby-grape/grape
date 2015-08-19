@@ -11,9 +11,8 @@ module Grape
 
         values = @values.is_a?(Proc) ? @values.call : @values
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
-        unless param_array.all? { |param| values.include?(param) }
-          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :values
-        end
+        return if param_array.all? { |param| values.include?(param) }
+        fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :values
       end
 
       private
