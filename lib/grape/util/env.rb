@@ -7,7 +7,6 @@ module Grape
     API_TYPE = 'api.type'.freeze
     API_SUBTYPE = 'api.subtype'.freeze
     API_VENDOR = 'api.vendor'.freeze
-    API_VERSION = 'api.version'.freeze
     API_FORMAT = 'api.format'.freeze
 
     RACK_INPUT = 'rack.input'.freeze
