@@ -12,7 +12,7 @@ module Grape
         end
 
         def context
-          env['api.endpoint']
+          env[Grape::Env::API_ENDPOINT]
         end
 
         def call(env)

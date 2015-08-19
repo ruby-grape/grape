@@ -39,6 +39,7 @@ module Grape
     autoload :Cookies
     autoload :Validations
     autoload :Request, 'grape/http/request'
+    autoload :Env, 'grape/util/env'
   end
 
   module Http

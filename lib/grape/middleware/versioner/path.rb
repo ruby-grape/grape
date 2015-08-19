@@ -37,7 +37,7 @@ module Grape
             if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
               throw :error, status: 404, message: '404 API Version Not Found'
             end
-            env['api.version'] = potential_version
+            env[Grape::Env::API_VERSION] = potential_version
           end
         end
 

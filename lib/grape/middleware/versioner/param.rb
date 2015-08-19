@@ -21,7 +21,7 @@ module Grape
       class Param < Base
         def default_options
           {
-            parameter: 'apiver'
+            parameter: 'apiver'.freeze
           }
         end
 
@@ -32,8 +32,8 @@ module Grape
             if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
               throw :error, status: 404, message: '404 API Version Not Found', headers: { Grape::Http::Headers::X_CASCADE => 'pass' }
             end
-            env['api.version'] = potential_version
-            env['rack.request.query_hash'].delete(paramkey) if env.key? 'rack.request.query_hash'
+            env[Grape::Env::API_VERSION] = potential_version
+            env[Grape::Env::RACK_REQUEST_QUERY_HASH].delete(paramkey) if env.key? Grape::Env::RACK_REQUEST_QUERY_HASH
           end
         end
       end

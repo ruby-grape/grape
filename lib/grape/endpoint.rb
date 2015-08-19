@@ -193,7 +193,7 @@ module Grape
     def call!(env)
       extend helpers
 
-      env['api.endpoint'] = self
+      env[Grape::Env::API_ENDPOINT] = self
       if options[:app]
         options[:app].call(env)
       else

@@ -1,15 +1,14 @@
 module Grape
   class Request < Rack::Request
-    ROUTING_ARGS = 'rack.routing_args'
-    HTTP_PREFIX  = 'HTTP_'
-    UNDERSCORE   = '_'
-    MINUS        = '-'
+    HTTP_PREFIX  = 'HTTP_'.freeze
+    UNDERSCORE   = '_'.freeze
+    MINUS        = '-'.freeze
 
     def params
       @params ||= begin
         params = Hashie::Mash.new(super)
-        if env[ROUTING_ARGS]
-          args = env[ROUTING_ARGS].dup
+        if env[Grape::Env::RACK_ROUTING_ARGS]
+          args = env[Grape::Env::RACK_ROUTING_ARGS].dup
           # preserve version from query string parameters
           args.delete(:version)
           args.delete(:route_info)
@@ -20,15 +19,14 @@ module Grape
     end
 
     def headers
-      @headers ||= env.dup.inject({}) do |h, (k, v)|
-        if k.to_s.start_with? HTTP_PREFIX
-          k = k[5..-1]
-          k.tr!(UNDERSCORE, MINUS)
-          k.downcase!
-          k.gsub!(/^.|[-_\s]./, &:upcase!)
-          h[k] = v
-        end
-        h
+      @headers ||= env.each_with_object({}) do |(k, v), h|
+        next unless k.to_s.start_with? HTTP_PREFIX
+
+        k = k[5..-1]
+        k.tr!(UNDERSCORE, MINUS)
+        k.downcase!
+        k.gsub!(/^.|[-\s]./, &:upcase!)
+        h[k] = v
       end
     end
   end

@@ -69,14 +69,14 @@ module Grape
 
         def media_type_header_handler
           type, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          env['api.type'] = type
-          env['api.subtype'] = subtype
+          env[Grape::Env::API_TYPE] = type
+          env[Grape::Env::API_SUBTYPE] = subtype
 
           if VENDOR_VERSION_HEADER_REGEX =~ subtype
-            env['api.vendor'] = Regexp.last_match[1]
-            env['api.version'] = Regexp.last_match[2]
+            env[Grape::Env::API_VENDOR] = Regexp.last_match[1]
+            env[Grape::Env::API_VERSION] = Regexp.last_match[2]
             # weird that Grape::Middleware::Formatter also does this
-            env['api.format'] = Regexp.last_match[3]
+            env[Grape::Env::API_FORMAT] = Regexp.last_match[3]
           end
         end
 
