@@ -70,6 +70,19 @@ module Grape
           expect(subject.namespace_setting(:description)).to eq(expected_options)
           expect(subject.route_setting(:description)).to eq(expected_options)
         end
+
+        it 'can be set with options and a block' do
+          expect(subject).to receive(:warn).with('[DEPRECATION] Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.')
+
+          desc_text = 'The description'
+          detail_text = 'more details'
+          options = { message: 'none' }
+          subject.desc desc_text, options do
+            detail detail_text
+          end
+          expect(subject.namespace_setting(:description)).to eq(description: desc_text, detail: detail_text)
+          expect(subject.route_setting(:description)).to eq(description: desc_text, detail: detail_text)
+        end
       end
     end
   end
