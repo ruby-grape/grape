@@ -1,8 +1,6 @@
 module Grape
   class Request < Rack::Request
-    HTTP_PREFIX  = 'HTTP_'.freeze
-    UNDERSCORE   = '_'.freeze
-    MINUS        = '-'.freeze
+    HTTP_PREFIX = 'HTTP_'.freeze
 
     def params
       @params ||= begin
@@ -22,10 +20,7 @@ module Grape
       @headers ||= env.each_with_object({}) do |(k, v), h|
         next unless k.to_s.start_with? HTTP_PREFIX
 
-        k = k[5..-1]
-        k.tr!(UNDERSCORE, MINUS)
-        k.downcase!
-        k.gsub!(/^.|[-\s]./, &:upcase!)
+        k = k[5..-1].split('_').each(&:capitalize!).join('-')
         h[k] = v
       end
     end
