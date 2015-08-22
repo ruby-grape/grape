@@ -31,6 +31,7 @@
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Custom Types](#custom-types)
+  - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
@@ -59,7 +60,7 @@
 - [API Data Formats](#api-data-formats)
 - [RESTful Model Representations](#restful-model-representations)
   - [Grape Entities](#grape-entities)
-  - [Hypermedia](#hypermedia)
+  - [Hypermedia and Roar](#hypermedia-and-roar)
   - [Rabl](#rabl)
   - [Active Model Serializers](#active-model-serializers)
 - [Sending Raw or No Data](#sending-raw-or-no-data)
@@ -70,7 +71,7 @@
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Rails Middleware](#rails-middleware)
-    - [Remote IP](#remote-ip)
+  - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
   - [Writing Tests with Rails](#writing-tests-with-rails)
@@ -342,29 +343,6 @@ When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is ret
 option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route
 matches.
 
-### HTTP Status Code
-
-By default Grape returns a 200 status code for `GET`-Requests and 201 for `POST`-Requests.
-You can use `status` to query and set the actual HTTP Status Code
-
-```ruby
-post do
-  status 202
-
-  if status == 200
-     # do some thing
-  end
-end
-```
-
-You can also use one of status codes symbols that are provided by [Rack utils](http://www.rubydoc.info/github/rack/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
-
-```ruby
-post do
-  status :no_content
-end
-```
-
 ### Accept-Version Header
 
 ```ruby
@@ -485,7 +463,7 @@ In the case of conflict between either of:
 
 route string parameters will have precedence.
 
-#### Declared
+### Declared
 
 Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Consider the following API endpoint:
 
@@ -556,7 +534,7 @@ The returned hash is a `Hashie::Mash` instance, allowing you to access parameter
   declared(params).user == declared(params)["user"]
 ```
 
-#### Include missing
+### Include missing
 
 By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:
 
@@ -735,7 +713,7 @@ params do
 end
 ```
 
-#### Supported Parameter Types
+### Supported Parameter Types
 
 The following are all valid types, supported out of the box by Grape:
 
@@ -751,7 +729,7 @@ The following are all valid types, supported out of the box by Grape:
 * Symbol
 * Rack::Multipart::UploadedFile
 
-#### Custom Types
+### Custom Types
 
 Aside from the default set of supported types listed above, any class can be
 used as a type so long as it defines a class-level `parse` method. This method
@@ -783,7 +761,7 @@ get '/stuff' do
 end
 ```
 
-#### Validation of Nested Parameters
+### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
@@ -806,7 +784,7 @@ params do
 end
 ```
 
-#### Dependent Parameters
+### Dependent Parameters
 
 Suppose some of your parameters are only relevant if another parameter is given;
 Grape allows you to express this relationship through the `given` method in your
@@ -1335,6 +1313,29 @@ Specify an optional path.
 cookies.delete :status_count, path: '/'
 ```
 
+## HTTP Status Code
+
+By default Grape returns a 200 status code for `GET`-Requests and 201 for `POST`-Requests.
+You can use `status` to query and set the actual HTTP Status Code
+
+```ruby
+post do
+  status 202
+
+  if status == 200
+     # do some thing
+  end
+end
+```
+
+You can also use one of status codes symbols that are provided by [Rack utils](http://www.rubydoc.info/github/rack/rack/Rack/Utils#HTTP_STATUS_CODES-constant)
+
+```ruby
+post do
+  status :no_content
+end
+```
+
 ## Redirecting
 
 You can redirect to a new url temporarily (302) or permanently (301).
@@ -1607,7 +1608,7 @@ rescue_from RuntimeError, rescue_subclasses: false do |e|
 end
 ```
 
-#### Rails 3.x
+### Rails 3.x
 
 When mounted inside containers, such as Rails 3.x, errors like "404 Not Found" or
 "406 Not Acceptable" will likely be handled and rendered by Rails handlers. For instance,
@@ -2396,9 +2397,9 @@ specification and using the `PATH_INFO` Rack environment variable, using
 `env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
 part.
 
-# Using Custom Middleware
+## Using Custom Middleware
 
-## Rails Middleware
+### Rails Middleware
 
 Note that when you're using Grape mounted on Rails you don't have to use Rails middleware because it's already included into your middleware stack.
 You only have to implement the helpers to access the specific `env` variable.
