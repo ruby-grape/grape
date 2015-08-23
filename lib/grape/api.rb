@@ -160,15 +160,15 @@ module Grape
             unless self.class.namespace_inheritable(:do_not_route_head)
               allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
             end
+            allowed_methods |= [Grape::Http::Headers::OPTIONS] unless self.class.namespace_inheritable(:do_not_route_options)
 
-            allow_header = ([Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
+            allow_header = allowed_methods.join(', ')
+
             unless self.class.namespace_inheritable(:do_not_route_options)
-              unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
-                self.class.options(path, {}) do
-                  header 'Allow', allow_header
-                  status 204
-                  ''
-                end
+              self.class.options(path, {}) do
+                header 'Allow', allow_header
+                status 204
+                ''
               end
             end
 
