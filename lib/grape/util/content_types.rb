@@ -1,18 +1,18 @@
 module Grape
   module ContentTypes
     # Content types are listed in order of preference.
-    CONTENT_TYPES = ActiveSupport::OrderedHash[
-                    :xml, 'application/xml',
-                    :serializable_hash, 'application/json',
-                    :json, 'application/json',
-                    :binary, 'application/octet-stream',
-                    :txt, 'text/plain'
-   ]
+    CONTENT_TYPES = {
+      xml: 'application/xml',
+      serializable_hash: 'application/json',
+      json: 'application/json',
+      binary: 'application/octet-stream',
+      txt: 'text/plain'
+    }
 
     def self.content_types_for_settings(settings)
       return nil if settings.nil? || settings.blank?
 
-      settings.each_with_object(ActiveSupport::OrderedHash.new) { |value, result| result.merge!(value) }
+      settings.each_with_object({}) { |value, result| result.merge!(value) }
     end
 
     def self.content_types_for(from_settings)
