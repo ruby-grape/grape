@@ -98,7 +98,7 @@ module Grape
       # Merge multiple layers of settings into one hash.
       def stacked_hash_to_hash(settings)
         return nil if settings.nil? || settings.blank?
-        settings.each_with_object(ActiveSupport::OrderedHash.new) { |value, result| result.deep_merge!(value) }
+        settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
       # Returns an object which configures itself via an instance-context DSL.

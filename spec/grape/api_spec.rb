@@ -2812,10 +2812,10 @@ XML
       end
       it 'hash' do
         subject.get '/example' do
-          ActiveSupport::OrderedHash[
-            :example1, 'example1',
-            :example2, 'example2'
-        ]
+          {
+            example1: 'example1',
+            example2: 'example2'
+          }
         end
         get '/example'
         expect(last_response.status).to eq(200)
