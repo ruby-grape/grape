@@ -28,8 +28,7 @@ module Grape
         #
         def version(*args, &block)
           if args.any?
-            options = args.pop if args.last.is_a? Hash
-            options ||= {}
+            options = args.extract_options!
             options = { using: :path }.merge(options)
 
             fail Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)

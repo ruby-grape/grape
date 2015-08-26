@@ -31,7 +31,7 @@ module Grape
       #     end
       def use(*names)
         named_params = Grape::DSL::Configuration.stacked_hash_to_hash(@api.namespace_stackable(:named_params)) || {}
-        options = names.last.is_a?(Hash) ? names.pop : {}
+        options = names.extract_options!
         names.each do |name|
           params_block = named_params.fetch(name) do
             fail "Params :#{name} not found!"
@@ -86,7 +86,7 @@ module Grape
       def requires(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
+        opts = attrs.extract_options!.clone
         opts[:presence] = true
 
         if opts[:using]
@@ -105,7 +105,7 @@ module Grape
       def optional(*attrs, &block)
         orig_attrs = attrs.clone
 
-        opts = attrs.last.is_a?(Hash) ? attrs.pop.clone : {}
+        opts = attrs.extract_options!.clone
         type = opts[:type]
 
         # check type for optional parameter group
