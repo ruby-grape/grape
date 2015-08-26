@@ -5,8 +5,7 @@ module Grape
 
       def initialize(validator, scope, params)
         @attrs = validator.attrs
-        @params = scope.params(params)
-        @params = (@params.is_a?(Array) ? @params : [@params])
+        @params = Array.wrap(scope.params(params))
       end
 
       def each
