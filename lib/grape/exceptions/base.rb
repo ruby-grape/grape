@@ -51,16 +51,16 @@ module Grape
 
       def translate_attributes(keys, options = {})
         keys.map do |key|
-          translate("#{BASE_ATTRIBUTES_KEY}.#{key}", { default: key }.merge(options))
+          translate("#{BASE_ATTRIBUTES_KEY}.#{key}", options.reverse_merge(default: key))
         end.join(', ')
       end
 
       def translate_attribute(key, options = {})
-        translate("#{BASE_ATTRIBUTES_KEY}.#{key}", { default: key }.merge(options))
+        translate("#{BASE_ATTRIBUTES_KEY}.#{key}", options.reverse_merge(default: key))
       end
 
       def translate_message(key, options = {})
-        translate("#{BASE_MESSAGES_KEY}.#{key}", { default: '' }.merge(options))
+        translate("#{BASE_MESSAGES_KEY}.#{key}", options.reverse_merge(default: ''))
       end
 
       def translate(key, options = {})

@@ -29,7 +29,7 @@ module Grape
         def version(*args, &block)
           if args.any?
             options = args.extract_options!
-            options = { using: :path }.merge(options)
+            options = options.reverse_merge(using: :path)
 
             fail Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 

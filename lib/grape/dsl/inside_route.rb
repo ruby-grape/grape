@@ -70,7 +70,7 @@ module Grape
       # @param options [Hash] The options used when redirect.
       #                       :permanent, default false.
       def redirect(url, options = {})
-        merged_options = { permanent: false }.merge(options)
+        merged_options = options.reverse_merge(permanent: false)
         if merged_options[:permanent]
           status 301
         else

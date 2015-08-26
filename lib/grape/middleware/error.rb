@@ -59,7 +59,7 @@ module Grape
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [])
-        headers = { Grape::Http::Headers::CONTENT_TYPE => content_type }.merge(headers)
+        headers = headers.reverse_merge(Grape::Http::Headers::CONTENT_TYPE => content_type)
         rack_response(format_message(message, backtrace), status, headers)
       end
 
