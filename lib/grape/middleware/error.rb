@@ -47,6 +47,7 @@ module Grape
       end
 
       def rescuable?(klass)
+        return false if klass == Grape::Exceptions::InvalidVersionHeader
         options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, _handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
       end
 

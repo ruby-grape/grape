@@ -30,8 +30,10 @@ module Grape
 
           if media_type
             media_type_header_handler
-          elsif headers_contain_wrong_vendor_or_version?
-            fail_with_invalid_accept_header!('API vendor or version not found.')
+          elsif headers_contain_wrong_vendor?
+            fail_with_invalid_accept_header!('API vendor not found.')
+          elsif headers_contain_wrong_version?
+            fail_with_invalid_version_header!('API version not found.')
           end
         end
 
@@ -39,7 +41,7 @@ module Grape
 
         def strict_header_checks
           strict_accept_header_presence_check
-          strict_verion_vendor_accept_header_presence_check
+          strict_version_vendor_accept_header_presence_check
         end
 
         def strict_accept_header_presence_check
@@ -47,7 +49,7 @@ module Grape
           fail_with_invalid_accept_header!('Accept header must be set.')
         end
 
-        def strict_verion_vendor_accept_header_presence_check
+        def strict_version_vendor_accept_header_presence_check
           return unless versions.present?
           return if an_accept_header_with_version_and_vendor_is_present?
           fail_with_invalid_accept_header!('API vendor or version not found.')
@@ -85,6 +87,11 @@ module Grape
             .new(message, error_headers)
         end
 
+        def fail_with_invalid_version_header!(message)
+          fail Grape::Exceptions::InvalidVersionHeader
+            .new(message, error_headers)
+        end
+
         def available_media_types
           available_media_types = []
 
@@ -107,9 +114,15 @@ module Grape
           available_media_types.flatten
         end
 
-        def headers_contain_wrong_vendor_or_version?
+        def headers_contain_wrong_vendor?
           header.values.all? do |header_value|
-            vendor?(header_value) || version?(header_value)
+            vendor?(header_value) && request_vendor(header_value) != vendor
+          end
+        end
+
+        def headers_contain_wrong_version?
+          header.values.all? do |header_value|
+            version?(header_value)
           end
         end
 
@@ -157,6 +170,11 @@ module Grape
         def vendor?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
           subtype[/\Avnd\.[a-z0-9*.]+/]
+        end
+
+        def request_vendor(media_type)
+          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          subtype.match(VENDOR_VERSION_HEADER_REGEX)[1]
         end
 
         # @param [String] media_type a content type

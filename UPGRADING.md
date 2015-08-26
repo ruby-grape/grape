@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.13.1
+
+#### Changes to header versioning and invalid header version handling
+
+Identical endpoints with different versions now work correctly. A regression introduced in Grape 0.11.0 caused all but the first-mounted version for such an endpoint to wrongly throw an `InvalidAcceptHeader`. As a side effect, requests with a correct vendor but invalid version can no longer be rescued from a `rescue_from` block.
+
+See [#1114](https://github.com/ruby-grape/grape/pull/1114) for more information.
+
 ### Upgrading to >= 0.12.0
 
 #### Changes in middleware

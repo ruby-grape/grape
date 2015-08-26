@@ -54,13 +54,6 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that receives' do
-      context 'an invalid version in the request' do
-        before do
-          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
-                           'CONTENT_TYPE' => 'application/json'
-        end
-        it_should_behave_like 'a rescued request'
-      end
       context 'an invalid vendor in the request' do
         before do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
@@ -128,13 +121,6 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that receives' do
-      context 'an invalid version in the request' do
-        before do
-          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
-                           'CONTENT_TYPE' => 'application/json'
-        end
-        it_should_behave_like 'a rescued request'
-      end
       context 'an invalid vendor in the request' do
         before do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
