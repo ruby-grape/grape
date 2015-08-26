@@ -104,7 +104,7 @@ module Grape
             handler = block
           end
 
-          options = args.last.is_a?(Hash) ? args.pop : {}
+          options = args.extract_options!
           handler ||= proc { options[:with] } if options.key?(:with)
 
           if args.include?(:all)
