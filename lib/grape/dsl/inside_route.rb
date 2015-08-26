@@ -252,7 +252,7 @@ module Grape
       #     route.route_description
       #   end
       def route
-        env['rack.routing_args'][:route_info]
+        env[Grape::Env::RACK_ROUTING_ARGS][:route_info]
       end
 
       # Attempt to locate the Entity class for a given object, if not given
