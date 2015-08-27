@@ -12,7 +12,7 @@ module Grape
           # only `:http_basic`, `:http_digest` are supported.
           def auth(type = nil, options = {}, &block)
             if type
-              namespace_inheritable(:auth, { type: type.to_sym, proc: block }.merge(options))
+              namespace_inheritable(:auth, options.reverse_merge(type: type.to_sym, proc: block))
               use Grape::Middleware::Auth::Base, namespace_inheritable(:auth)
             else
               namespace_inheritable(:auth)
