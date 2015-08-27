@@ -16,8 +16,7 @@ module Grape
       # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
       # you want only to return params declared against the current/target endpoint.
       def declared(params, options = {}, declared_params = nil)
-        options[:include_missing] = true unless options.key?(:include_missing)
-        options[:include_parent_namespaces] = true unless options.key?(:include_parent_namespaces)
+        options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
 
         declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
 
