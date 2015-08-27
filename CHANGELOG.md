@@ -5,6 +5,8 @@
 
 * Your contribution here.
 
+* [#1134](https://github.com/ruby-grape/grape/pull/1134): Adds a code of conduct - [@towanda](https://github.com/towanda).
+
 #### Fixes
 
 * [#1114](https://github.com/ruby-grape/grape/pull/1114): Fix regression which broke identical endpoints with different versions - [@suan](https://github.com/suan).
