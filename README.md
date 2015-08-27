@@ -1608,6 +1608,10 @@ rescue_from RuntimeError, rescue_subclasses: false do |e|
 end
 ```
 
+#### Unrescuable Exceptions
+
+`Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.
+
 ### Rails 3.x
 
 When mounted inside containers, such as Rails 3.x, errors like "404 Not Found" or

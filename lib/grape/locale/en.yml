@@ -45,4 +45,7 @@ en:
         invalid_accept_header:
           problem: 'Invalid accept header'
           resolution: '%{message}'
+        invalid_version_header:
+          problem: 'Invalid version header'
+          resolution: '%{message}'
 

@@ -7,6 +7,7 @@
 
 #### Fixes
 
+* [#1114](https://github.com/ruby-grape/grape/pull/1114): Fix regression which broke identical endpoints with different versions - [@suan](https://github.com/suan).
 * [#1109](https://github.com/ruby-grape/grape/pull/1109): Memoize Virtus attribute and fix memory leak - [@marshall-lee](https://github.com/marshall-lee).
 * [#1101](https://github.com/intridea/grape/pull/1101): Fix: Incorrect media-type `Accept` header now correctly returns 406 with `strict: true` - [@elliotlarson](https://github.com/elliotlarson).
 * [#1108](https://github.com/ruby-grape/grape/pull/1039): Raise a warning when `desc` is called with options hash and block - [@rngtng](https://github.com/rngtng).

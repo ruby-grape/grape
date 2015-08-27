@@ -89,7 +89,7 @@ describe Grape::Middleware::Versioner::Header do
           expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
           expect(exception.headers).to eql('X-Cascade' => 'pass')
           expect(exception.status).to eql 406
-          expect(exception.message).to include 'API vendor or version not found'
+          expect(exception.message).to include 'API vendor not found'
         end
     end
 
@@ -116,7 +116,7 @@ describe Grape::Middleware::Versioner::Header do
             expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
             expect(exception.headers).to eql('X-Cascade' => 'pass')
             expect(exception.status).to eql 406
-            expect(exception.message).to include('API vendor or version not found')
+            expect(exception.message).to include('API vendor not found')
           end
       end
     end
@@ -141,10 +141,10 @@ describe Grape::Middleware::Versioner::Header do
 
     it 'fails with 406 Not Acceptable if version is invalid' do
       expect { subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v2+json').last }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception).to be_a(Grape::Exceptions::InvalidVersionHeader)
         expect(exception.headers).to eql('X-Cascade' => 'pass')
         expect(exception.status).to eql 406
-        expect(exception.message).to include('API vendor or version not found')
+        expect(exception.message).to include('API version not found')
       end
     end
   end
@@ -244,10 +244,60 @@ describe Grape::Middleware::Versioner::Header do
 
     it 'fails with another version' do
       expect { subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v3+json') }.to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception).to be_a(Grape::Exceptions::InvalidVersionHeader)
         expect(exception.headers).to eql('X-Cascade' => 'pass')
         expect(exception.status).to eql 406
-        expect(exception.message).to include('API vendor or version not found')
+        expect(exception.message).to include('API version not found')
+      end
+    end
+  end
+
+  context 'when there are multiple versions specified with rescue_from :all' do
+    subject {
+      Class.new(Grape::API) do
+        rescue_from :all
+      end
+    }
+
+    let(:v1_app) {
+      Class.new(Grape::API) do
+        version 'v1', using: :header, vendor: 'test'
+        resources :users do
+          get :hello do
+            'one'
+          end
+        end
+      end
+    }
+
+    let(:v2_app) {
+      Class.new(Grape::API) do
+        version 'v2', using: :header, vendor: 'test'
+        resources :users do
+          get :hello do
+            'two'
+          end
+        end
+      end
+    }
+
+    def app
+      subject.mount v1_app
+      subject.mount v2_app
+      subject
+    end
+
+    context 'with header versioned endpoints and a rescue_all block defined' do
+      it 'responds correctly to a v1 request' do
+        versioned_get '/users/hello', 'v1', using: :header, vendor: 'test'
+        expect(last_response.body).to eq('one')
+        expect(last_response.body).not_to include('API vendor or version not found')
+      end
+
+      it 'responds correctly to a v2 request' do
+        versioned_get '/users/hello', 'v2', using: :header, vendor: 'test'
+        expect(last_response.body).to eq('two')
+        expect(last_response.body).not_to include('API vendor or version not found')
       end
     end
   end
