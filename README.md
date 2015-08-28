@@ -534,6 +534,10 @@ The returned hash is a `Hashie::Mash` instance, allowing you to access parameter
   declared(params).user == declared(params)["user"]
 ```
 
+
+The `#declared` method is not available to `before` filters, as those are evaluated prior
+to parameter coercion.
+
 ### Include missing
 
 By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:

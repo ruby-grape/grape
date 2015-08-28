@@ -6,44 +6,69 @@ module Grape
       extend ActiveSupport::Concern
       include Grape::DSL::Settings
 
+      # Denotes a situation where a DSL method has been invoked in a
+      # filter which it should not yet be available in
+      class MethodNotYetAvailable < StandardError; end
+
+      # @param type [Symbol] The type of filter for which evaluation has been
+      #   completed
+      # @return [Module] A module containing method overrides suitable for the
+      #   position in the filter evaluation sequence denoted by +type+.  This
+      #   defaults to an empty module if no overrides are defined for the given
+      #   filter +type+.
+      def self.post_filter_methods(type)
+        @post_filter_modules ||= { before: PostBeforeFilter }
+        @post_filter_modules[type] || Module.new
+      end
+
+      # Methods which should not be available in filters until the before filter
+      # has completed
+      module PostBeforeFilter
+        def declared(params, options = {}, declared_params = nil)
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
+
+          declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
+
+          fail ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
+
+          if params.is_a? Array
+            params.map do |param|
+              declared(param || {}, options, declared_params)
+            end
+          else
+            declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
+              key = { key => nil } unless key.is_a? Hash
+
+              key.each_pair do |parent, children|
+                output_key = options[:stringify] ? parent.to_s : parent.to_sym
+
+                next unless options[:include_missing] || params.key?(parent)
+
+                hash[output_key] = if children
+                                     children_params = params[parent] || (children.is_a?(Array) ? [] : {})
+                                     declared(children_params, options, Array(children))
+                                   else
+                                     params[parent]
+                                   end
+              end
+            end
+          end
+        end
+      end
+
       # A filtering method that will return a hash
       # consisting only of keys that have been declared by a
       # `params` statement against the current/target endpoint or parent
       # namespaces.
       #
+      # @see +PostBeforeFilter#declared+
+      #
       # @param params [Hash] The initial hash to filter. Usually this will just be `params`
       # @param options [Hash] Can pass `:include_missing`, `:stringify` and `:include_parent_namespaces`
       # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
       # you want only to return params declared against the current/target endpoint.
-      def declared(params, options = {}, declared_params = nil)
-        options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
-
-        declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
-
-        fail ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
-
-        if params.is_a? Array
-          params.map do |param|
-            declared(param || {}, options, declared_params)
-          end
-        else
-          declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
-            key = { key => nil } unless key.is_a? Hash
-
-            key.each_pair do |parent, children|
-              output_key = options[:stringify] ? parent.to_s : parent.to_sym
-
-              next unless options[:include_missing] || params.key?(parent)
-
-              hash[output_key] = if children
-                                   children_params = params[parent] || (children.is_a?(Array) ? [] : {})
-                                   declared(children_params, options, Array(children))
-                                 else
-                                   params[parent]
-                                 end
-            end
-          end
-        end
+      def declared(*)
+        fail MethodNotYetAvailable, '#declared is not available prior to parameter validation.'
       end
 
       # The API version as specified in the URL.

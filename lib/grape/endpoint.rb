@@ -317,6 +317,7 @@ module Grape
           instance_eval(&filter)
         end
       end
+      extend DSL::InsideRoute.post_filter_methods(type)
     end
 
     def befores

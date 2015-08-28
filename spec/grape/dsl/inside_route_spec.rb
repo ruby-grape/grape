@@ -343,8 +343,9 @@ module Grape
       describe '#declared' do
         # see endpoint_spec.rb#declared for spec coverage
 
-        it 'returns an empty hash' do
-          expect(subject.declared({})).to eq({})
+        it 'is not available by default' do
+          expect { subject.declared({}) }.to raise_error(
+            Grape::DSL::InsideRoute::MethodNotYetAvailable)
         end
       end
     end
