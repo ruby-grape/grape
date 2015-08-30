@@ -235,8 +235,6 @@ module Grape
         # Retrieve validations from this namespace and all parent namespaces.
         validation_errors = []
 
-        # require 'pry-byebug'; binding.pry
-
         route_setting(:saved_validations).each do |validator|
           begin
             validator.validate!(params)
