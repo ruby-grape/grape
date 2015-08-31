@@ -2658,7 +2658,7 @@ The execution of the main content block of the endpoint.
 * *filters* - The filters being executed
 * *type* - The type of filters (before, before_validation, after_validation, after)
 
-See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html] for information on how to subscribe to these events.
+See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
 ### Monitoring Products
 
