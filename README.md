@@ -2177,7 +2177,7 @@ For registering a Middleware you need the following options:
 * `label` - the name for your authenticator to use it later
 * `MiddlewareClass` - the MiddlewareClass to use for authentication
 * `option_lookup_proc` - A Proc with one Argument to lookup the options at
-runtime (return value is an `Array` as Paramter for the Middleware).
+runtime (return value is an `Array` as Parameter for the Middleware).
 
 Example:
 
