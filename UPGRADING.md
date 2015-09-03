@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 0.13.1
 
+#### Changes to availability of DSL methods in filters
+
+The `#declared` method of the route DSL is no longer available in the `before` filter.  Using `declared` in a `before` filter will now raise `Grape::DSL::InsideRoute::MethodNotYetAvailable`.
+
+See [#1074](https://github.com/ruby-grape/grape/issues/1074) for discussion of the issue.
+
 #### Changes to header versioning and invalid header version handling
 
 Identical endpoints with different versions now work correctly. A regression introduced in Grape 0.11.0 caused all but the first-mounted version for such an endpoint to wrongly throw an `InvalidAcceptHeader`. As a side effect, requests with a correct vendor but invalid version can no longer be rescued from a `rescue_from` block.

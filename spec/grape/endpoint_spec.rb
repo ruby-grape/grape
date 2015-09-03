@@ -239,6 +239,16 @@ describe Grape::Endpoint do
       end
     end
 
+    it 'does not work in a before filter' do
+      subject.before do
+        declared(params)
+      end
+      subject.get('/declared') { declared(params) }
+
+      expect { get('/declared') }.to raise_error(
+        Grape::DSL::InsideRoute::MethodNotYetAvailable)
+    end
+
     it 'has as many keys as there are declared params' do
       inner_params = nil
       subject.get '/declared' do
