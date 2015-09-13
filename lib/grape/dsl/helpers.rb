@@ -29,6 +29,7 @@ module Grape
         def helpers(new_mod = nil, &block)
           if block_given? || new_mod
             mod = new_mod || Module.new
+            define_boolean_in_mod(mod)
             if new_mod
               inject_api_helpers_to_mod(new_mod) if new_mod.is_a?(BaseHelper)
             end
@@ -50,6 +51,11 @@ module Grape
         end
 
         protected
+
+        def define_boolean_in_mod(mod)
+          return if defined? mod::Boolean
+          mod.const_set('Boolean', Virtus::Attribute::Boolean)
+        end
 
         def inject_api_helpers_to_mod(mod, &_block)
           mod.extend(BaseHelper)
