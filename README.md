@@ -1529,8 +1529,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can rescue all exceptions with a code block. The `error!` wrapper
-automatically sets the default error code and content-type.
+You can rescue all exceptions with a code block. The `error!` wrapper automatically sets the default error code and content-type.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -1551,9 +1550,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-
-You can also rescue specific exceptions with a code block and handle the Rack
-response at the lowest level.
+You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -1611,6 +1608,8 @@ rescue_from RuntimeError, rescue_subclasses: false do |e|
     }, e.status)
 end
 ```
+
+The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
 
 #### Unrescuable Exceptions
 
