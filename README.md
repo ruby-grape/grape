@@ -141,20 +141,20 @@ module Twitter
     end
 
     resource :statuses do
-      desc "Return a public timeline."
+      desc 'Return a public timeline.'
       get :public_timeline do
         Status.limit(20)
       end
 
-      desc "Return a personal timeline."
+      desc 'Return a personal timeline.'
       get :home_timeline do
         authenticate!
         current_user.statuses.limit(20)
       end
 
-      desc "Return a status."
+      desc 'Return a status.'
       params do
-        requires :id, type: Integer, desc: "Status id."
+        requires :id, type: Integer, desc: 'Status id.'
       end
       route_param :id do
         get do
@@ -162,9 +162,9 @@ module Twitter
         end
       end
 
-      desc "Create a status."
+      desc 'Create a status.'
       params do
-        requires :status, type: String, desc: "Your status."
+        requires :status, type: String, desc: 'Your status.'
       end
       post do
         authenticate!
@@ -174,10 +174,10 @@ module Twitter
         })
       end
 
-      desc "Update a status."
+      desc 'Update a status.'
       params do
-        requires :id, type: String, desc: "Status ID."
-        requires :status, type: String, desc: "Your status."
+        requires :id, type: String, desc: 'Status ID.'
+        requires :status, type: String, desc: 'Your status.'
       end
       put ':id' do
         authenticate!
@@ -187,9 +187,9 @@ module Twitter
         })
       end
 
-      desc "Delete a status."
+      desc 'Delete a status.'
       params do
-        requires :id, type: String, desc: "Status ID."
+        requires :id, type: String, desc: 'Status ID.'
       end
       delete ':id' do
         authenticate!
@@ -249,13 +249,13 @@ require 'grape'
 
 class API < Grape::API
   get :hello do
-    { hello: "world" }
+    { hello: 'world' }
   end
 end
 
 class Web < Sinatra::Base
   get '/' do
-    "Hello world."
+    'Hello world.'
   end
 end
 
@@ -284,7 +284,7 @@ Additionally, if the version of your Rails is 4.0+ and the application uses the 
 
 ```ruby
 # Gemfile
-gem "hashie-forbidden_attributes"
+gem 'hashie-forbidden_attributes'
 ```
 
 See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
@@ -372,7 +372,7 @@ either in the URL query string or in the request body.
 The default name for the query parameter is 'apiver' but can be specified using the `:parameter` option.
 
 ```ruby
-version 'v1', using: :param, parameter: "v"
+version 'v1', using: :param, parameter: 'v'
 ```
 
     curl http://localhost:9292/statuses/public_timeline?v=v1
@@ -383,11 +383,11 @@ version 'v1', using: :param, parameter: "v"
 You can add a description to API methods and namespaces.
 
 ```ruby
-desc "Returns your public timeline." do
+desc 'Returns your public timeline.' do
   detail 'more details'
   params  API::Entities::Status.documentation
   success API::Entities::Entity
-  failure [[401, 'Unauthorized', "Entities::Error"]]
+  failure [[401, 'Unauthorized', 'Entities::Error']]
   named 'My named route'
   headers [XAuthToken: {
              description: 'Valdates your identity',
@@ -450,7 +450,7 @@ curl --form image_file='@image.jpg;type=image/jpg' http://localhost:9292/upload
 The Grape endpoint:
 
 ```ruby
-post "upload" do
+post 'upload' do
   # file in params[:image_file]
 end
 ```
@@ -471,7 +471,7 @@ Grape allows you to access only the parameters that have been declared by your `
 format :json
 
 post 'users/signup' do
-  { "declared_params" => declared(params) }
+  { 'declared_params' => declared(params) }
 end
 ````
 
@@ -505,7 +505,7 @@ params do
 end
 
 post 'users/signup' do
-  { "declared_params" => declared(params) }
+  { 'declared_params' => declared(params) }
 end
 ````
 
@@ -531,7 +531,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
 
 ```ruby
-  declared(params).user == declared(params)["user"]
+  declared(params).user == declared(params)['user']
 ```
 
 
@@ -551,7 +551,7 @@ params do
 end
 
 post 'users/signup' do
-  { "declared_params" => declared(params, include_missing: false) }
+  { 'declared_params' => declared(params, include_missing: false) }
 end
 ````
 
@@ -601,7 +601,7 @@ params do
 end
 
 post 'users/signup' do
-  { "declared_params" => declared(params, include_missing: false) }
+  { 'declared_params' => declared(params, include_missing: false) }
 end
 ````
 
@@ -990,14 +990,14 @@ Namespaces allow parameter definitions and apply to every method within the name
 ```ruby
 namespace :statuses do
   params do
-    requires :user_id, type: Integer, desc: "A user ID."
+    requires :user_id, type: Integer, desc: 'A user ID.'
   end
-  namespace ":user_id" do
-    desc "Retrieve a user's status."
+  namespace ':user_id' do
+    desc 'Retrieve a user's status.'
     params do
-      requires :status_id, type: Integer, desc: "A status ID."
+      requires :status_id, type: Integer, desc: 'A status ID.'
     end
-    get ":status_id" do
+    get ':status_id' do
       User.find(params[:user_id]).statuses.find(params[:status_id])
     end
   end
@@ -1012,11 +1012,11 @@ You can conveniently define a route parameter as a namespace using `route_param`
 ```ruby
 namespace :statuses do
   route_param :id do
-    desc "Returns all replies for a status."
+    desc 'Returns all replies for a status.'
     get 'replies' do
       Status.find(params[:id]).replies
     end
-    desc "Returns a status."
+    desc 'Returns a status.'
     get do
       Status.find(params[:id])
     end
@@ -1030,7 +1030,7 @@ end
 class AlphaNumeric < Grape::Validations::Base
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /^[[:alnum:]]+$/
-      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must consist of alpha-numeric characters"
+      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
     end
   end
 end
@@ -1142,7 +1142,7 @@ namespace :outer, requirements: { id: /[0-9]*/ } do
   get :id do
   end
 
-  get ":id/edit" do
+  get ':id/edit' do
   end
 end
 ```
@@ -1188,7 +1188,7 @@ class API < Grape::API
     end
   end
 
-  desc "Get collection"
+  desc 'Get collection'
   params do
     use :pagination # aliases: includes, use_scope
   end
@@ -1218,7 +1218,7 @@ end
 class API < Grape::API
   helpers SharedParams
 
-  desc "Get collection."
+  desc 'Get collection.'
   params do
     use :period, :pagination
   end
@@ -1248,7 +1248,7 @@ end
 class API < Grape::API
   helpers SharedParams
 
-  desc "Get a sorted collection."
+  desc 'Get a sorted collection.'
   params do
     use :order, order_by:%i(id created_at), default_order_by: :created_at, default_order: :asc
   end
@@ -1424,7 +1424,7 @@ You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 
 ```ruby
-error!({ error: "unexpected error", detail: "missing widget" }, 500)
+error!({ error: 'unexpected error', detail: 'missing widget' }, 500)
 ```
 
 You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
@@ -1464,7 +1464,7 @@ By default Grape returns a 500 status code from `error!`. You can change this wi
 class API < Grape::API
   default_error_status 400
   get '/example' do
-    error! "This should have http status code 400"
+    error! 'This should have http status code 400'
   end
 end
 ```
@@ -1545,7 +1545,7 @@ Optionally, you can set the format, status code and headers.
 class Twitter::API < Grape::API
   format :json
   rescue_from :all do |e|
-    error!({ error: "Server error.", 500, { 'Content-Type' => 'text/error' } })
+    error!({ error: 'Server error.', 500, { 'Content-Type' => 'text/error' } })
   end
 end
 ```
@@ -1555,7 +1555,7 @@ You can also rescue specific exceptions with a code block and handle the Rack re
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    Rack::Response.new([ e.message ], 500, { "Content-type" => "text/error" }).finish
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
   end
 end
 ```
@@ -1617,7 +1617,7 @@ The `rescue_from` block must return a `Rack::Response` object, call `error!` or 
 
 ### Rails 3.x
 
-When mounted inside containers, such as Rails 3.x, errors like "404 Not Found" or
+When mounted inside containers, such as Rails 3.x, errors such as "404 Not Found" or
 "406 Not Acceptable" will likely be handled and rendered by Rails handlers. For instance,
 accessing a nonexistent route "/api/foo" raises a 404, which inside rails will ultimately
 be translated to an `ActionController::RoutingError`, which most likely will get rendered
@@ -1759,11 +1759,11 @@ For example, the following API will let you upload arbitrary files and return th
 
 ```ruby
 class Twitter::API < Grape::API
-  post "attachment" do
+  post 'attachment' do
     filename = params[:file][:filename]
     content_type MIME::Types.type_for(filename)[0].to_s
     env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
-    header "Content-Disposition", "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+    header 'Content-Disposition', "attachment; filename*=UTF-8''#{URI.escape(filename)}"
     params[:file][:tempfile].read
   end
 end
@@ -1816,7 +1816,7 @@ If you do not want this behavior, set the default error formatter with `default_
 ```ruby
 class Twitter::API < Grape::API
   format :json
-  content_type :txt, "text/plain"
+  content_type :txt, 'text/plain'
   default_error_formatter :txt
 end
 ```
@@ -1825,7 +1825,7 @@ Custom formatters for existing and additional types can be defined with a proc.
 
 ```ruby
 class Twitter::API < Grape::API
-  content_type :xls, "application/vnd.ms-excel"
+  content_type :xls, 'application/vnd.ms-excel'
   formatter :xls, ->(object, env) { object.to_xls }
 end
 ```
@@ -1840,7 +1840,7 @@ module XlsFormatter
 end
 
 class Twitter::API < Grape::API
-  content_type :xls, "application/vnd.ms-excel"
+  content_type :xls, 'application/vnd.ms-excel'
   formatter :xls, XlsFormatter
 end
 ```
@@ -1898,7 +1898,7 @@ by setting the `Content-Type` header.
 ```ruby
 class API < Grape::API
   get '/home_timeline_js' do
-    content_type "application/javascript"
+    content_type 'application/javascript'
     "var statuses = ...;"
   end
 end
@@ -1926,11 +1926,11 @@ end
 ```
 
 ```ruby
-content_type :txt, "text/plain"
-content_type :custom, "text/custom"
+content_type :txt, 'text/plain'
+content_type :custom, 'text/custom'
 parser :custom, CustomParser
 
-put "value" do
+put 'value' do
   params[:value]
 end
 ```
@@ -1962,7 +1962,7 @@ module API
   module Entities
     class Status < Grape::Entity
       expose :user_name
-      expose :text, documentation: { type: "string", desc: "Status update text." }
+      expose :text, documentation: { type: 'string', desc: 'Status update text.' }
       expose :ip, if: { type: :full }
       expose :user_type, :user_id, if: ->(status, options) { status.user.public? }
       expose :digest { |status, options| Digest::MD5.hexdigest(status.txt) }
@@ -2207,7 +2207,7 @@ Grape exposes arrays of API versions and compiled routes. Each route contains a 
 ```ruby
 class TwitterAPI < Grape::API
   version 'v1'
-  desc "Includes custom settings."
+  desc 'Includes custom settings.'
   route_setting :custom, key: 'value'
   get do
 
@@ -2231,11 +2231,11 @@ It's possible to retrieve the information about the current route from within an
 
 ```ruby
 class MyAPI < Grape::API
-  desc "Returns a description of a parameter."
+  desc 'Returns a description of a parameter.'
   params do
-    requires :id, type: Integer, desc: "Identity."
+    requires :id, type: Integer, desc: 'Identity.'
   end
-  get "params/:id" do
+  get 'params/:id' do
     route.route_params[params[:id]] # yields the parameter description
   end
 end
@@ -2276,7 +2276,7 @@ E.g. using `before`:
 
 ```ruby
 before do
-  header "X-Robots-Tag", "noindex"
+  header 'X-Robots-Tag', 'noindex'
 end
 ```
 
@@ -2401,7 +2401,7 @@ This will match all paths starting with '/statuses/'. There is one caveat though
 the `params[:status]` parameter only holds the first part of the request url.
 Luckily this can be circumvented by using the described above syntax for path
 specification and using the `PATH_INFO` Rack environment variable, using
-`env["PATH_INFO"]`. This will hold everything that comes after the '/statuses/'
+`env['PATH_INFO']`. This will hold everything that comes after the '/statuses/'
 part.
 
 ## Using Custom Middleware
@@ -2423,7 +2423,7 @@ class API < Grape::API
 
   helpers do
     def client_ip
-      env["action_dispatch.remote_ip"].to_s
+      env['action_dispatch.remote_ip'].to_s
     end
   end
 
@@ -2453,20 +2453,32 @@ describe Twitter::API do
     Twitter::API
   end
 
-  describe Twitter::API do
-    describe "GET /api/statuses/public_timeline" do
-      it "returns an empty array of statuses" do
-        get "/api/statuses/public_timeline"
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq []
-      end
+  context 'GET /api/statuses/public_timeline' do
+    it 'returns an empty array of statuses' do
+      get '/api/statuses/public_timeline'
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq []
     end
-    describe "GET /api/statuses/:id" do
-      it "returns a status by id" do
-        status = Status.create!
-        get "/api/statuses/#{status.id}"
-        expect(last_response.body).to eq status.to_json
-      end
+  end
+  context 'GET /api/statuses/:id' do
+    it 'returns a status by id' do
+      status = Status.create!
+      get "/api/statuses/#{status.id}"
+      expect(last_response.body).to eq status.to_json
+    end
+  end
+end
+```
+
+There's no standard way of sending arrays of objects via an HTTP GET, so POST JSON data and specify the correct content-type.
+
+```ruby
+describe Twitter::API do
+  context 'POST /api/statuses' do
+    it 'creates many statuses' do
+      statuses = [{ text: '...' }, { text: '...'}]
+      post '/api/statuses', statuses.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.body).to eq 201
     end
   end
 end
@@ -2484,8 +2496,8 @@ Airborne.configure do |config|
 end
 
 describe Twitter::API do
-  describe "GET /api/statuses/:id" do
-    it "returns a status by id" do
+  context 'GET /api/statuses/:id' do
+    it 'returns a status by id' do
       status = Status.create!
       get "/api/statuses/#{status.id}"
       expect_json(status.as_json)
@@ -2497,7 +2509,7 @@ end
 #### MiniTest
 
 ```ruby
-require "test_helper"
+require 'test_helper'
 
 class Twitter::APITest < MiniTest::Test
   include Rack::Test::Methods
@@ -2507,7 +2519,7 @@ class Twitter::APITest < MiniTest::Test
   end
 
   def test_get_api_statuses_public_timeline_returns_an_empty_array_of_statuses
-    get "/api/statuses/public_timeline"
+    get '/api/statuses/public_timeline'
     assert last_response.ok?
     assert_equal [], JSON.parse(last_response.body)
   end
@@ -2526,15 +2538,15 @@ end
 
 ```ruby
 describe Twitter::API do
-  describe "GET /api/statuses/public_timeline" do
-    it "returns an empty array of statuses" do
-      get "/api/statuses/public_timeline"
+  context 'GET /api/statuses/public_timeline' do
+    it 'returns an empty array of statuses' do
+      get '/api/statuses/public_timeline'
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)).to eq []
     end
   end
-  describe "GET /api/statuses/:id" do
-    it "returns a status by id" do
+  context 'GET /api/statuses/:id' do
+    it 'returns a status by id' do
       status = Status.create!
       get "/api/statuses/#{status.id}"
       expect(response.body).to eq status.to_json
@@ -2562,13 +2574,13 @@ class Twitter::APITest < ActiveSupport::TestCase
     Rails.application
   end
 
-  test "GET /api/statuses/public_timeline returns an empty array of statuses" do
-    get "/api/statuses/public_timeline"
+  test 'GET /api/statuses/public_timeline returns an empty array of statuses' do
+    get '/api/statuses/public_timeline'
     assert last_response.ok?
     assert_equal [], JSON.parse(last_response.body)
   end
 
-  test "GET /api/statuses/:id returns a status by id" do
+  test 'GET /api/statuses/:id returns a status by id' do
     status = Status.create!
     get "/api/statuses/#{status.id}"
     assert_equal status.to_json, last_response.body
@@ -2613,15 +2625,15 @@ Add API paths to `config/application.rb`.
 
 ```ruby
 # Auto-load API and its subdirectories
-config.paths.add File.join("app", "api"), glob: File.join("**", "*.rb")
-config.autoload_paths += Dir[Rails.root.join("app", "api", "*")]
+config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
+config.autoload_paths += Dir[Rails.root.join('app', 'api', '*'')]
 ```
 
 Create `config/initializers/reload_api.rb`.
 
 ```ruby
 if Rails.env.development?
-  ActiveSupport::Dependencies.explicitly_unloadable_constants << "Twitter::API"
+  ActiveSupport::Dependencies.explicitly_unloadable_constants << 'Twitter::API'
 
   api_files = Dir[Rails.root.join('app', 'api', '**', '*.rb')]
   api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
