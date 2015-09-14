@@ -9,6 +9,7 @@
 
 #### Fixes
 
+* [#1153](https://github.com/ruby-grape/grape/pull/1153): Fixes boolean declaration in an external file - [@towanda](https://github.com/towanda).
 * [#1142](https://github.com/ruby-grape/grape/pull/1142): Makes #declared unavailable to before filters - [@jrforrest](https://github.com/jrforrest).
 * [#1114](https://github.com/ruby-grape/grape/pull/1114): Fix regression which broke identical endpoints with different versions - [@suan](https://github.com/suan).
 * [#1109](https://github.com/ruby-grape/grape/pull/1109): Memoize Virtus attribute and fix memory leak - [@marshall-lee](https://github.com/marshall-lee).

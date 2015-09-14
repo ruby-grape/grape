@@ -11,6 +11,15 @@ module Grape
         end
       end
     end
+
+    module BooleanParam
+      extend Grape::API::Helpers
+
+      params :requires_toggle_prm do
+        requires :toggle_prm, type: Boolean
+      end
+    end
+
     describe Helpers do
       subject { Class.new(HelpersSpec::Dummy) }
       let(:proc) do
@@ -38,6 +47,13 @@ module Grape
           subject.helpers(mod, &proc)
 
           expect(subject.mod).to eq mod
+        end
+
+        context 'with an external file' do
+          it 'sets Boolean as a Virtus::Attribute::Boolean' do
+            subject.helpers BooleanParam
+            expect(subject.mod::Boolean).to eq Virtus::Attribute::Boolean
+          end
         end
       end
     end
