@@ -318,6 +318,35 @@ describe Grape::Validations do
       end
     end
 
+    context 'hash with a required param with validation' do
+      before do
+        subject.params do
+          requires :items, type: Hash do
+            requires :key, type: String, values: %w(a b)
+          end
+        end
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'errors when param is not a Hash' do
+        get '/required', items: 'not a hash'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items is invalid, items[key] is missing, items[key] is invalid')
+
+        get '/required', items: [{ key: 'hash in array' }]
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items is invalid, items[key] does not have a valid value')
+      end
+
+      it 'works when all params match' do
+        get '/required', items: { key: 'a' }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('required works')
+      end
+    end
+
     context 'group' do
       before do
         subject.params do

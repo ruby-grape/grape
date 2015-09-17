@@ -7,6 +7,7 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
+        return unless params.is_a?(Hash)
         return unless params[attr_name] || required_for_root_scope?
 
         values = @values.is_a?(Proc) ? @values.call : @values
