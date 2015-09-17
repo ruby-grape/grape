@@ -9,6 +9,7 @@
 
 #### Fixes
 
+* [#1156](https://github.com/ruby-grape/grape/pull/1156): Fixed `no implicit conversion of Symbol into Integer` with nested `values` validation - [@quickpay](https://github.com/quickpay).
 * [#1153](https://github.com/ruby-grape/grape/pull/1153): Fixes boolean declaration in an external file - [@towanda](https://github.com/towanda).
 * [#1142](https://github.com/ruby-grape/grape/pull/1142): Makes #declared unavailable to before filters - [@jrforrest](https://github.com/jrforrest).
 * [#1114](https://github.com/ruby-grape/grape/pull/1114): Fix regression which broke identical endpoints with different versions - [@suan](https://github.com/suan).
