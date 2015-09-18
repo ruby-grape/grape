@@ -1327,6 +1327,60 @@ describe Grape::Validations do
       end
     end
 
+    context 'declared_only', focus: true do
+      context 'simple' do
+        before do
+          subject.params do
+            declared_only
+            optional :key, type: String
+          end
+          subject.get('/declared_only') { 'declared_only works' }
+        end
+
+        it 'throws error when param too much' do
+          get '/declared_only', key: 'cool', wrongkey: 'foo'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('wrongkey parameter not recognized')
+        end
+
+        it "doesn't throw a unrecognized param error" do
+          get '/declared_only', key: 'cool'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('declared_only works')
+        end
+
+        it "doesn't throw a unrecognized param error for no key" do
+          get '/declared_only'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('declared_only works')
+        end
+      end
+
+      context 'nested params' do
+        before do
+          subject.params do
+            declared_only
+            requires :nested, type: Hash do
+              optional :key
+            end
+          end
+          subject.get('/declared_only') { 'declared_only works' }
+        end
+
+        it 'throws error when param too much' do
+          get '/declared_only', nested: { key: 'cool', wrongkey: 'foo' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('nested.wrongkey parameter not recognized')
+        end
+
+        it "doesn't throw a unrecognized param error" do
+          get '/declared_only', nested: { key: 'cool' }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('declared_only works')
+        end
+      end
+    end
+
     context 'in a group' do
       it 'works when only one from the set is present' do
         subject.params do

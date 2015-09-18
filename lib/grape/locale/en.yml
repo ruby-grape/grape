@@ -34,6 +34,7 @@ en:
         at_least_one: 'are missing, at least one parameter must be provided'
         exactly_one: 'are missing, exactly one parameter must be provided'
         all_or_none: 'provide all or none of parameters'
+        declared_only: 'parameter not recognized'
         missing_group_type: 'group type is required'
         unsupported_group_type: 'group type must be Array, Hash, JSON or Array[JSON]'
         invalid_message_body:
@@ -48,4 +49,3 @@ en:
         invalid_version_header:
           problem: 'Invalid version header'
           resolution: '%{message}'
-
