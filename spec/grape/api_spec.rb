@@ -2810,6 +2810,14 @@ describe Grape::API do
 </error>
 XML
       end
+      it 'OPTIONS request' do
+        subject.get '/example' do
+          'example'
+        end
+        options '/example'
+        expect(last_response.status).to eq(204)
+        expect(last_response.body).to eq ''
+      end
       it 'hash' do
         subject.get '/example' do
           {
