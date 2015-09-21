@@ -3,6 +3,13 @@ module Grape
     class Base
       attr_reader :attrs
 
+      # Creates a new Validator from options specified
+      # by a +requires+ or +optional+ directive during
+      # parameter definition.
+      # @param attrs [Array] names of attributes to which the Validator applies
+      # @param options [Object] implementation-dependent Validator options
+      # @param required [Boolean] attribute(s) are required or optional
+      # @param scope [ParamsScope] parent scope for this Validator
       def initialize(attrs, options, required, scope)
         @attrs = Array(attrs)
         @option = options

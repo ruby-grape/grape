@@ -253,6 +253,64 @@ describe Grape::Validations::CoerceValidator do
       end
     end
 
+    context 'using coerce_with' do
+      it 'uses parse where available' do
+        subject.params do
+          requires :ints, type: Array, coerce_with: JSON do
+            requires :i, type: Integer
+            requires :j
+          end
+        end
+        subject.get '/ints' do
+          ints = params[:ints].first
+          'coercion works' if ints[:i] == 1 && ints[:j] == '2'
+        end
+
+        get '/ints', ints: [{ i: 1, j: '2' }]
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('ints is invalid')
+
+        get '/ints', ints: '{"i":1,"j":"2"}'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('ints[i] is missing, ints[i] is invalid, ints[j] is missing')
+
+        get '/ints', ints: '[{"i":"1","j":"2"}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('coercion works')
+      end
+
+      it 'accepts any callable' do
+        subject.params do
+          requires :ints, type: Hash, coerce_with: JSON.method(:parse) do
+            requires :int, type: Integer, coerce_with: ->(val) { val == 'three' ? 3 : val }
+          end
+        end
+        subject.get '/ints' do
+          params[:ints][:int]
+        end
+
+        get '/ints', ints: '{"int":"3"}'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('ints[int] is invalid')
+
+        get '/ints', ints: '{"int":"three"}'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('3')
+
+        get '/ints', ints: '{"int":3}'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('3')
+      end
+
+      it 'must be supplied with :type or :coerce' do
+        expect do
+          subject.params do
+            requires :ints, coerce_with: JSON
+          end
+        end.to raise_error(ArgumentError)
+      end
+    end
+
     context 'converter' do
       it 'does not build Virtus::Attribute multiple times' do
         subject.params do

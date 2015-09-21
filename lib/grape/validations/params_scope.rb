@@ -180,6 +180,11 @@ module Grape
         # special case (type = coerce)
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
+        # type must be supplied for coerce_with
+        if validations.key?(:coerce_with) && !validations.key?(:coerce)
+          fail ArgumentError, 'must supply type for coerce_with'
+        end
+
         coerce_type = validations[:coerce]
 
         doc_attrs[:type] = coerce_type.to_s if coerce_type
@@ -216,7 +221,12 @@ module Grape
         # whatever coercion so that we are working with correctly
         # type casted values
         if validations.key? :coerce
-          validate('coerce', validations[:coerce], attrs, doc_attrs)
+          coerce_options = {
+            type: validations[:coerce],
+            method: validations[:coerce_with]
+          }
+          validate('coerce', coerce_options, attrs, doc_attrs)
+          validations.delete(:coerce_with)
           validations.delete(:coerce)
         end
 
