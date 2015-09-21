@@ -103,6 +103,7 @@ module Grape
           end
         end
         header 'Location', url
+        content_type 'text/plain'
         body ''
       end
 
