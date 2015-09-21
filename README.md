@@ -30,7 +30,7 @@
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
-  - [Custom Types](#custom-types)
+  - [Custom Types and Coercions](#custom-types-and-coercions)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Built-in Validators](#built-in-validators)
@@ -733,12 +733,13 @@ The following are all valid types, supported out of the box by Grape:
 * Symbol
 * Rack::Multipart::UploadedFile
 
-### Custom Types
+### Custom Types and Coercions
 
 Aside from the default set of supported types listed above, any class can be
-used as a type so long as it defines a class-level `parse` method. This method
-must take one string argument and return an instance of the correct type, or
-raise an exception to indicate the value was invalid. E.g.,
+used as a type so long as an explicit coercion method is supplied. If the type
+implements a class-level `parse` method, Grape will use it automatically.
+This method must take one string argument and return an instance of the correct
+type, or raise an exception to indicate the value was invalid. E.g.,
 
 ```ruby
 class Color
@@ -762,6 +763,23 @@ end
 get '/stuff' do
   # params[:color] is already a Color.
   params[:color].value
+end
+```
+
+Alternatively, a custom coercion method may be supplied for any type of parameter
+using `coerce_with`. Any class or object may be given that implements a `parse` or
+`call` method, in that order of precedence. The method must accept a single string
+parameter, and the return value must match the given `type`.
+
+```ruby
+params do
+  requires :passwd, type: String, coerce_with: Base64.method(:decode)
+  requires :loud_color, type: Color, coerce_with: ->(c) { Color.parse(c.downcase) }
+
+  requires :obj, type: Hash, coerce_with: JSON do
+    requires :words, type: Array[String], coerce_with: ->(val) { val.split(/\s+/) }
+    optional :time, type: Time, coerce_with: Chronic
+  end
 end
 ```
 

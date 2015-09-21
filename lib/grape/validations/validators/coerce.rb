@@ -43,18 +43,20 @@ module Grape
       def valid_type?(val)
         if val.instance_of?(InvalidValue)
           false
-        elsif @option.is_a?(Array) || @option.is_a?(Set)
-          _valid_array_type?(@option.first, val)
+        elsif type.is_a?(Array) || type.is_a?(Set)
+          _valid_array_type?(type.first, val)
         else
-          _valid_single_type?(@option, val)
+          _valid_single_type?(type, val)
         end
       end
 
       def coerce_value(val)
         # Don't coerce things other than nil to Arrays or Hashes
-        return val || []      if type == Array
-        return val || Set.new if type == Set
-        return val || {}      if type == Hash
+        unless @option[:method] && !val.nil?
+          return val || []      if type == Array
+          return val || Set.new if type == Set
+          return val || {}      if type == Hash
+        end
 
         converter.coerce(val)
 
@@ -65,18 +67,50 @@ module Grape
       end
 
       def type
-        @option
+        @option[:type]
       end
 
       def converter
         @converter ||=
           begin
-            # To support custom types that Virtus can't easily coerce, pass in an
-            # explicit coercer. Custom types must implement a `parse` class method.
+            # If any custom conversion method has been supplied
+            # via the coerce_with parameter, pass it on to Virtus.
             converter_options = {}
-            if ParameterTypes.custom_type?(type)
+            if @option[:method]
+              # Accept classes implementing parse()
+              coercer = if @option[:method].respond_to? :parse
+                          @option[:method].method(:parse)
+                        else
+                          # Otherwise expect a lambda function or similar
+                          @option[:method]
+                        end
+
+              # Enforce symbolized keys for complex types
+              # by wrapping the coercion method.
+              # This helps common libs such as JSON to work easily.
+              if type == Array || type == Set
+                converter_options[:coercer] = lambda do |val|
+                  coercer.call(val).tap do |new_value|
+                    new_value.each do |item|
+                      Hashie.symbolize_keys!(item) if item.is_a? Hash
+                    end
+                  end
+                end
+              elsif type == Hash
+                converter_options[:coercer] = lambda do |val|
+                  Hashie.symbolize_keys! coercer.call(val)
+                end
+              else
+                # Simple types do not need a wrapper
+                converter_options[:coercer] = coercer
+              end
+
+            # Custom types may be used without an explicit coercion method
+            # if they implement a `parse` class method.
+            elsif ParameterTypes.custom_type?(type)
               converter_options[:coercer] = type.method(:parse)
             end
+
             Virtus::Attribute.build(type, converter_options)
           end
       end

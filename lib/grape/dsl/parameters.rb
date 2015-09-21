@@ -62,6 +62,9 @@ module Grape
       #   the :using Hash. The meaning of this depends on if :all or :none was
       #   passed; :all + :except will make the :except fields optional, whereas
       #   :none + :except will make the :except fields required
+      # @option attrs :coerce_with [#parse, #call] method to be used when coercing
+      #   the parameter to the type named by +attrs[:type]. Any class or object
+      #   that defines `::parse` or `::call` may be used.
       #
       # @example
       #
