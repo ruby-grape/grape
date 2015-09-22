@@ -31,6 +31,7 @@
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Custom Types and Coercions](#custom-types-and-coercions)
+  - [First-Class `JSON` Types](#first-class-json-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Built-in Validators](#built-in-validators)
@@ -780,6 +781,47 @@ params do
     requires :words, type: Array[String], coerce_with: ->(val) { val.split(/\s+/) }
     optional :time, type: Time, coerce_with: Chronic
   end
+end
+```
+
+### First-Class `JSON` Types
+
+Grape supports complex parameters given as JSON-formatted strings using the special `type: JSON`
+declaration. JSON objects and arrays of objects are accepted equally, with nested validation
+rules applied to all objects in either case:
+
+```ruby
+params do
+  requires :json, type: JSON do
+    requires :int, type: Integer, values: [1, 2, 3]
+  end
+end
+get '/' do
+  params[:json].inspect
+end
+
+# ...
+
+client.get('/', json: '{"int":1}') # => "{:int=>1}"
+client.get('/', json: '[{"int":"1"}]') # => "[{:int=>1}]"
+
+client.get('/', json: '{"int":4}') # => HTTP 400
+client.get('/', json: '[{"int":4}]') # => HTTP 400
+```
+
+Additionally `type: Array[JSON]` may be used, which explicitly marks the parameter as an array
+of objects. If a single object is supplied it will be wrapped. For stricter control over the
+type of JSON structure which may be supplied, use `type: Array, coerce_with: JSON` or
+`type: Hash, coerce_with: JSON`.
+
+```ruby
+params do
+  requires :json, type: Array[JSON] do
+    requires :int, type: Integer
+  end
+end
+get '/' do
+  params[:json].each { |obj| ... } # always works
 end
 ```
 

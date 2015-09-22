@@ -311,6 +311,91 @@ describe Grape::Validations::CoerceValidator do
       end
     end
 
+    context 'first-class JSON' do
+      it 'parses objects and arrays' do
+        subject.params do
+          requires :splines, type: JSON do
+            requires :x, type: Integer, values: [1, 2, 3]
+            optional :ints, type: Array[Integer]
+            optional :obj, type: Hash do
+              optional :y
+            end
+          end
+        end
+        subject.get '/' do
+          if params[:splines].is_a? Hash
+            params[:splines][:obj][:y]
+          else
+            'arrays work' if params[:splines].any? { |s| s.key? :obj }
+          end
+        end
+
+        get '/', splines: '{"x":1,"ints":[1,2,3],"obj":{"y":"woof"}}'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('woof')
+
+        get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('arrays work')
+
+        get '/', splines: '{"x":4,"ints":[2]}'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
+        get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+      end
+
+      it 'accepts Array[JSON] shorthand' do
+        subject.params do
+          requires :splines, type: Array[JSON] do
+            requires :x, type: Integer, values: [1, 2, 3]
+            requires :y
+          end
+        end
+        subject.get '/' do
+          params[:splines].first[:y].class.to_s
+          spline = params[:splines].first
+          "#{spline[:x].class}.#{spline[:y].class}"
+        end
+
+        get '/', splines: '{"x":"1","y":"woof"}'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum.String')
+
+        get '/', splines: '[{"x":1,"y":2},{"x":1,"y":"quack"}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum.Fixnum')
+
+        get '/', splines: '{"x":"4","y":"woof"}'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
+        get '/', splines: '[{"x":"4","y":"woof"}]'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+      end
+
+      it "doesn't make sense using coerce_with" do
+        expect do
+          subject.params do
+            requires :bad, type: JSON, coerce_with: JSON do
+              requires :x
+            end
+          end
+        end.to raise_error(ArgumentError)
+
+        expect do
+          subject.params do
+            requires :bad, type: Array[JSON], coerce_with: JSON do
+              requires :x
+            end
+          end
+        end.to raise_error(ArgumentError)
+      end
+    end
+
     context 'converter' do
       it 'does not build Virtus::Attribute multiple times' do
         subject.params do

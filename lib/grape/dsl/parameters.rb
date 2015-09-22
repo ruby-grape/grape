@@ -49,21 +49,25 @@ module Grape
       #   the :using hash. The last key can be a hash, which specifies
       #   options for the parameters
       # @option attrs :type [Class] the type to coerce this parameter to before
-      #   passing it to the endpoint. See Grape::ParameterTypes for supported
-      #   types, or use a class that defines `::parse` as a custom type
+      #   passing it to the endpoint. See {Grape::ParameterTypes} for a list of
+      #   types that are supported automatically. Custom classes may be used
+      #   where they define a class-level `::parse` method, or in conjunction
+      #   with the `:coerce_with` parameter. `JSON` may be supplied to denote
+      #   `JSON`-formatted objects or arrays of objects. `Array[JSON]` accepts
+      #   the same values as `JSON` but will wrap single objects in an `Array`.
       # @option attrs :desc [String] description to document this parameter
       # @option attrs :default [Object] default value, if parameter is optional
       # @option attrs :values [Array] permissable values for this field. If any
       #   other value is given, it will be handled as a validation error
       # @option attrs :using [Hash[Symbol => Hash]] a hash defining keys and
-      #   options, like that returned by Grape::Entity#documentation. The value
+      #   options, like that returned by {Grape::Entity#documentation}. The value
       #   of each key is an options hash accepting the same parameters
       # @option attrs :except [Array[Symbol]] a list of keys to exclude from
       #   the :using Hash. The meaning of this depends on if :all or :none was
       #   passed; :all + :except will make the :except fields optional, whereas
       #   :none + :except will make the :except fields required
       # @option attrs :coerce_with [#parse, #call] method to be used when coercing
-      #   the parameter to the type named by +attrs[:type]. Any class or object
+      #   the parameter to the type named by `attrs[:type]`. Any class or object
       #   that defines `::parse` or `::call` may be used.
       #
       # @example

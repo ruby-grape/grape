@@ -137,7 +137,7 @@ module Grape
         type = attrs[1] ? attrs[1][:type] : nil
         if attrs.first && !optional
           fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash].include?(type)
+          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash, JSON, Array[JSON]].include?(type)
         end
 
         opts = attrs[1] || { type: Array }
@@ -180,11 +180,6 @@ module Grape
         # special case (type = coerce)
         validations[:coerce] = validations.delete(:type) if validations.key?(:type)
 
-        # type must be supplied for coerce_with
-        if validations.key?(:coerce_with) && !validations.key?(:coerce)
-          fail ArgumentError, 'must supply type for coerce_with'
-        end
-
         coerce_type = validations[:coerce]
 
         doc_attrs[:type] = coerce_type.to_s if coerce_type
@@ -220,19 +215,46 @@ module Grape
         # Before we run the rest of the validators, lets handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        if validations.key? :coerce
-          coerce_options = {
-            type: validations[:coerce],
-            method: validations[:coerce_with]
-          }
-          validate('coerce', coerce_options, attrs, doc_attrs)
-          validations.delete(:coerce_with)
-          validations.delete(:coerce)
-        end
+        coerce_type validations, attrs, doc_attrs
 
         validations.each do |type, options|
           validate(type, options, attrs, doc_attrs)
         end
+      end
+
+      # Enforce correct usage of :coerce_with parameter.
+      # We do not allow coercion without a type, nor with
+      # +JSON+ as a type since this defines its own coercion
+      # method.
+      def check_coerce_with(validations)
+        return unless validations.key?(:coerce_with)
+        # type must be supplied for coerce_with..
+        fail ArgumentError, 'must supply type for coerce_with' unless validations.key?(:coerce)
+
+        # but not special JSON types, which
+        # already imply coercion method
+        return unless [JSON, Array[JSON]].include? validations[:coerce]
+        fail ArgumentError, 'coerce_with disallowed for type: JSON'
+      end
+
+      # Add type coercion validation to this scope,
+      # if any has been specified.
+      # This validation has special handling since it is
+      # composited from more than one +requires+/+optional+
+      # parameter, and needs to be run before most other
+      # validations.
+      def coerce_type(validations, attrs, doc_attrs)
+        check_coerce_with(validations)
+
+        return unless validations.key?(:coerce)
+
+        coerce_options = {
+          type: validations[:coerce],
+          method: validations[:coerce_with]
+        }
+        validate('coerce', coerce_options, attrs, doc_attrs)
+        validations.delete(:coerce_with)
+        validations.delete(:coerce)
       end
 
       def guess_coerce_type(coerce_type, values)
