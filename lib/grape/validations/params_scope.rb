@@ -17,6 +17,8 @@ module Grape
       # @option opts :type [Class] a type meant to govern this scope (deprecated)
       # @option opts :dependent_on [Symbol] if present, this scope should only
       #   validate if this param is present in the parent scope
+      # @option opts :undeclared [Symbol] validation will :error or :warn
+      #   if any undeclared parameters are present in a request
       # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
         @element      = opts[:element]
@@ -25,10 +27,12 @@ module Grape
         @optional     = opts[:optional] || false
         @type         = opts[:type]
         @dependent_on = opts[:dependent_on]
+        @check_undeclared = opts[:undeclared]
         @declared_params = []
 
         instance_eval(&block) if block_given?
 
+        validates([], undeclared: @check_undeclared) if @check_undeclared
         configure_declared_params
       end
 

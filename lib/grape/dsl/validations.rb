@@ -18,9 +18,12 @@ module Grape
 
         # Opens a root-level ParamsScope, defining parameter coercions and
         # validations for the endpoint.
+        # @param opts [Hash] options for this scope
+        # @option opts :undeclared [Symbol] scope validation will :error or :warn
+        #   if any undeclared parameters are present in a request
         # @yield instance context of the new scope
-        def params(&block)
-          Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
+        def params(opts = {}, &block)
+          Grape::Validations::ParamsScope.new(api: self, type: Hash, undeclared: opts[:undeclared], &block)
         end
 
         def document_attribute(names, opts)

@@ -1,6 +1,11 @@
 module Grape
   module Validations
-    class DeclaredOnlyValidator < Base
+    class UndeclaredValidator < Base
+      def initialize(attrs, options, required, scope)
+        super
+        fail Grape::Exceptions::UnknownOptions.new(@option) unless [:error, :warn].include?(@option)
+      end
+
       def validate!(params)
         validate_recursive!([], params)
         super
@@ -15,8 +20,13 @@ module Grape
             validate_recursive!(keys, value)
             next
           end
-          unless @scope.declared_param?(construct_key(keys))
-            fail Grape::Exceptions::Validation, params: [keys.join('.')], message_key: :declared_only
+          next if @scope.declared_param?(construct_key(keys))
+
+          case @option
+          when :error
+            fail Grape::Exceptions::Validation, params: [keys.join('.')], message_key: :undeclared
+          when :warn
+            warn Grape::Exceptions::Validation.new(params: [keys.join('.')], message_key: :undeclared).to_s # TODO: how to log?
           end
         end
       end

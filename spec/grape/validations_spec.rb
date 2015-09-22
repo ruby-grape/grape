@@ -1327,56 +1327,87 @@ describe Grape::Validations do
       end
     end
 
-    context 'declared_only', focus: true do
+    context 'undeclared params', focus: true do
       context 'simple' do
         before do
-          subject.params do
-            declared_only
+          subject.params undeclared: :error do
             optional :key, type: String
           end
-          subject.get('/declared_only') { 'declared_only works' }
+          subject.get('/undeclared') { 'undeclared works' }
         end
 
         it 'throws error when param too much' do
-          get '/declared_only', key: 'cool', wrongkey: 'foo'
+          get '/undeclared', key: 'cool', wrongkey: 'foo'
           expect(last_response.status).to eq(400)
           expect(last_response.body).to eq('wrongkey parameter not recognized')
         end
 
         it "doesn't throw a unrecognized param error" do
-          get '/declared_only', key: 'cool'
+          get '/undeclared', key: 'cool'
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('declared_only works')
+          expect(last_response.body).to eq('undeclared works')
         end
 
         it "doesn't throw a unrecognized param error for no key" do
-          get '/declared_only'
+          get '/undeclared'
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('declared_only works')
+          expect(last_response.body).to eq('undeclared works')
         end
       end
 
       context 'nested params' do
         before do
-          subject.params do
-            declared_only
+          subject.params undeclared: :error do
             requires :nested, type: Hash do
               optional :key
             end
           end
-          subject.get('/declared_only') { 'declared_only works' }
+          subject.get('/undeclared') { 'undeclared works' }
         end
 
         it 'throws error when param too much' do
-          get '/declared_only', nested: { key: 'cool', wrongkey: 'foo' }
+          get '/undeclared', nested: { key: 'cool', wrongkey: 'foo' }
           expect(last_response.status).to eq(400)
           expect(last_response.body).to eq('nested.wrongkey parameter not recognized')
         end
 
         it "doesn't throw a unrecognized param error" do
-          get '/declared_only', nested: { key: 'cool' }
+          get '/undeclared', nested: { key: 'cool' }
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('declared_only works')
+          expect(last_response.body).to eq('undeclared works')
+        end
+      end
+
+      context 'warn' do
+        before do
+          subject.params undeclared: :warn do
+            optional :key, type: String
+          end
+          subject.get('/undeclared') { 'undeclared works' }
+        end
+
+        it 'only warns when param too much', pending: 'how to test warn?' do
+          get '/undeclared', key: 'cool', wrongkey: 'foo'
+          expect(last_response.status).to eq(200)
+          expect(Grape::Validations::UndeclaredValidator).to receive(:warn).with('wrogkey parameter not recognized')
+        end
+      end
+
+      context 'intialization' do
+        it "doesn't throw error for :error" do
+          expect {
+            subject.params undeclared: :error do
+              optional :key, type: String
+            end
+          }.not_to raise_error
+        end
+
+        it 'throws unknown options error for everything else' do
+          expect {
+            subject.params undeclared: :info do
+              optional :key, type: String
+            end
+          }.to raise_error(Grape::Exceptions::UnknownOptions)
         end
       end
     end

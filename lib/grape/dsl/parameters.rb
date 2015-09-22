@@ -154,11 +154,6 @@ module Grape
         validates(attrs, all_or_none_of: true)
       end
 
-      # Require that no paramaters are present besides the declared ones.
-      def declared_only
-        validates([], declared_only: true)
-      end
-
       # Define a block of validations which should be applied if and only if
       # the given parameter is present. The parameters are not nested.
       # @param attr [Symbol] the parameter which, if present, triggers the
