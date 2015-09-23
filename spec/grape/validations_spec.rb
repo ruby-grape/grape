@@ -1374,9 +1374,13 @@ describe Grape::Validations do
           subject.params undeclared: :error do
             optional :hash, type: Hash do
               optional :key
+              optional :unrelated_key
             end
             optional :array, type: Array do
               optional :key
+              optional :unrelated_key, type: Hash do
+                optional :deep_nested
+              end
             end
           end
           subject.get('/undeclared') { 'undeclared works' }

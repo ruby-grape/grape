@@ -170,9 +170,32 @@ module Grape
       # block yet.
       # @returns [Boolean] whether the parameter has been defined
       def declared_param?(param)
-        # @declared_params also includes hashes of options and such, but those
-        # won't be flattened out.
-        @declared_params.flatten.include?(param)
+        # converts params into a nested hash with true as deepest values
+        convert_hash = lambda do |obj|
+          return [obj, true] unless obj.is_a?(Array) || obj.is_a?(Hash)
+          if obj.is_a? Array
+            return obj.map { |e| convert_hash.call(e) }
+          elsif obj.is_a? Hash
+            obj.map do |k, v|
+              return k, convert_hash.call(v).to_h
+            end
+          end
+        end
+
+        # very simple hash inclusion check
+        included = lambda do |bigger, smaller|
+          return true if bigger == smaller
+          return false unless smaller.is_a?(Hash) # no match found and we can't go deeper
+
+          key = smaller.keys.first
+
+          return included.call(bigger[key], smaller[key])
+        end
+
+        conv_declared_params = convert_hash.call(@declared_params).to_h
+        conv_param = convert_hash.call([param]).to_h
+
+        included.call(conv_declared_params, conv_param)
       end
 
       # Test if this parameter has been declared as a block
