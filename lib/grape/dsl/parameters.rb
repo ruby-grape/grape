@@ -175,6 +175,12 @@ module Grape
         @declared_params.flatten.include?(param)
       end
 
+      # Test if this parameter has been declared as a block
+      # @returns [Boolean] whether the parameter has been defined as a block
+      def declared_block?(param)
+        @declared_blocks.flatten.include?(param)
+      end
+
       alias_method :group, :requires
 
       # @param params [Hash] initial hash of parameters

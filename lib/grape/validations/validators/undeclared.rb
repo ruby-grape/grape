@@ -14,20 +14,31 @@ module Grape
       private
 
       def validate_recursive!(nested_keys, obj)
-        obj.each_pair do |key, value|
-          keys = nested_keys + [key]
-          if value.is_a?(Hash)
-            validate_recursive!(keys, value)
-            next
+        if obj.is_a?(Hash)
+          obj.each_pair do |key, value|
+            keys = nested_keys + [key]
+            validate_step(keys, value)
           end
-          next if @scope.declared_param?(construct_key(keys))
+        elsif obj.is_a?(Array)
+          obj.each do |value|
+            validate_step(nested_keys, value)
+          end
+        end
+      end
 
-          case @option
-          when :error
-            fail Grape::Exceptions::Validation, params: [keys.join('.')], message_key: :undeclared
-          when :warn
-            warn Grape::Exceptions::Validation.new(params: [keys.join('.')], message_key: :undeclared).to_s # TODO: how to log?
-          end
+      def validate_step(keys, value)
+        if value.is_a?(Hash) || value.is_a?(Array)
+          return unless @scope.declared_block?(construct_key(keys)) # skip validating for a generic hash
+          validate_recursive!(keys, value)
+          return
+        end
+        return if @scope.declared_param?(construct_key(keys))
+
+        case @option
+        when :error
+          fail Grape::Exceptions::Validation, params: [keys.join('.')], message_key: :undeclared
+        when :warn
+          warn Grape::Exceptions::Validation.new(params: [keys.join('.')], message_key: :undeclared).to_s # TODO: how to log?
         end
       end
 

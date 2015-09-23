@@ -29,6 +29,7 @@ module Grape
         @dependent_on = opts[:dependent_on]
         @check_undeclared = opts[:undeclared]
         @declared_params = []
+        @declared_blocks = []
 
         instance_eval(&block) if block_given?
 
@@ -91,6 +92,12 @@ module Grape
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs)
         @declared_params.concat attrs
+      end
+
+      # Adds a block declaration to our list of declared blocks
+      # @param blocks [Array] list of blocks
+      def push_declared_blocks(blocks)
+        @declared_blocks.concat blocks
       end
 
       private
@@ -170,6 +177,7 @@ module Grape
       def configure_declared_params
         if nested?
           @parent.push_declared_params [element => @declared_params]
+          @parent.push_declared_blocks [element]
         else
           @api.namespace_stackable(:declared_params, @declared_params)
 

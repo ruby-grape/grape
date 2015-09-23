@@ -1332,6 +1332,8 @@ describe Grape::Validations do
         before do
           subject.params undeclared: :error do
             optional :key, type: String
+            optional :key2, type: Hash
+            optional :key3, type: Array
           end
           subject.get('/undeclared') { 'undeclared works' }
         end
@@ -1353,26 +1355,53 @@ describe Grape::Validations do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('undeclared works')
         end
+
+        it "doesn't throw a unrecognized param error for Hash params" do
+          get '/undeclared', key2: { anykey: 'cool' }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('undeclared works')
+        end
+
+        it "doesn't throw a unrecognized param error for Array params" do
+          get '/undeclared', key3: [{ anykey: 'cool' }]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('undeclared works')
+        end
       end
 
       context 'nested params' do
         before do
           subject.params undeclared: :error do
-            requires :nested, type: Hash do
+            optional :hash, type: Hash do
+              optional :key
+            end
+            optional :array, type: Array do
               optional :key
             end
           end
           subject.get('/undeclared') { 'undeclared works' }
         end
 
-        it 'throws error when param too much' do
-          get '/undeclared', nested: { key: 'cool', wrongkey: 'foo' }
+        it 'throws error when hash param too much' do
+          get '/undeclared', hash: { key: 'cool', wrongkey: 'foo' }
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq('nested.wrongkey parameter not recognized')
+          expect(last_response.body).to eq('hash.wrongkey parameter not recognized')
         end
 
-        it "doesn't throw a unrecognized param error" do
-          get '/undeclared', nested: { key: 'cool' }
+        it "doesn't throw a unrecognized param error for hash" do
+          get '/undeclared', hash: { key: 'cool' }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('undeclared works')
+        end
+
+        it 'throws error when array param too much' do
+          get '/undeclared', array: [{ key: 'cool', wrongkey: 'foo' }]
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('array.wrongkey parameter not recognized')
+        end
+
+        it "doesn't throw a unrecognized param error for array" do
+          get '/undeclared', array: [{ key: 'cool' }]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('undeclared works')
         end
