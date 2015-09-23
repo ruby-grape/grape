@@ -38,7 +38,7 @@ module Grape
         when :error
           fail Grape::Exceptions::Validation, params: [keys.join('.')], message_key: :undeclared
         when :warn
-          warn Grape::Exceptions::Validation.new(params: [keys.join('.')], message_key: :undeclared).to_s # TODO: how to log?
+          warn "#{keys.join('.')} #{Grape::Exceptions::Validation.new(params: [keys.join('.')], message_key: :undeclared)}"
         end
       end
 
