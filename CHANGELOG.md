@@ -8,6 +8,7 @@
 * [#1163](https://github.com/ruby-grape/grape/pull/1163): First-class `JSON` parameter type - [@dslh](https://github.com/dslh).
 * [#1161](https://github.com/ruby-grape/grape/pull/1161): Custom parameter coercion using `coerce_with` - [@dslh](https://github.com/dslh).
 * [#1134](https://github.com/ruby-grape/grape/pull/1134): Adds a code of conduct - [@towanda](https://github.com/towanda).
+* [#1158](https://github.com/ruby-grape/grape/pull/1158): Adds validation against undeclared params - [@hobofan](https://github.com/hobofan).
 
 #### Fixes
 

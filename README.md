@@ -863,6 +863,21 @@ params do
 end
 ```
 
+### Undeclared Parameters
+
+For some APIs it makes sense to only allow explicitly declared parameters and
+raise an error if any other parameter is supplied in a request.
+To do so you can use the `undeclared` option for the `params` block with `:error`:
+
+```ruby
+params undeclared: :error do
+  optional :name, type: String
+end
+```
+
+Alternatively you can also use `:warn` instead of `:error` if you don't want to
+impact the success of the request.
+
 ### Built-in Validators
 
 #### `allow_blank`
