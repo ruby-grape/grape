@@ -43,6 +43,13 @@ module Grape
       def valid_type?(val)
         if val.instance_of?(InvalidValue)
           false
+        elsif type == JSON
+          # Special JSON type is ambiguously defined.
+          # We allow both objects and arrays.
+          val.is_a?(Hash) || _valid_array_type?(Hash, val)
+        elsif type == Array[JSON]
+          # Array[JSON] shorthand wraps single objects.
+          _valid_array_type?(Hash, val)
         elsif type.is_a?(Array) || type.is_a?(Set)
           _valid_array_type?(type.first, val)
         else
@@ -51,6 +58,14 @@ module Grape
       end
 
       def coerce_value(val)
+        # JSON is not a type as Virtus understands it,
+        # so we bypass normal coercion.
+        if type == JSON
+          return val ? JSON.parse(val, symbolize_names: true) : {}
+        elsif type == Array[JSON]
+          return val ? Array.wrap(JSON.parse(val, symbolize_names: true)) : []
+        end
+
         # Don't coerce things other than nil to Arrays or Hashes
         unless @option[:method] && !val.nil?
           return val || []      if type == Array

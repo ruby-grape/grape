@@ -35,7 +35,7 @@ en:
         exactly_one: 'are missing, exactly one parameter must be provided'
         all_or_none: 'provide all or none of parameters'
         missing_group_type: 'group type is required'
-        unsupported_group_type: 'group type must be Array or Hash'
+        unsupported_group_type: 'group type must be Array, Hash, JSON or Array[JSON]'
         invalid_message_body:
           problem: "message body does not match declared format"
           resolution:
