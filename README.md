@@ -1,7 +1,7 @@
 ![grape logo](grape.png)
 
-[![Gem Version](http://img.shields.io/gem/v/grape.svg)](http://badge.fury.io/rb/grape)
-[![Build Status](http://img.shields.io/travis/ruby-grape/grape.svg)](https://travis-ci.org/ruby-grape/grape)
+[![Gem Version](https://badge.fury.io/rb/grape.svg)](http://badge.fury.io/rb/grape)
+[![Build Status](https://travis-ci.org/ruby-grape/grape.svg?branch=master)](https://travis-ci.org/ruby-grape/grape)
 [![Dependency Status](https://gemnasium.com/ruby-grape/grape.svg)](https://gemnasium.com/ruby-grape/grape)
 [![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
 [![Inline docs](http://inch-ci.org/github/ruby-grape/grape.svg)](http://inch-ci.org/github/ruby-grape/grape)
