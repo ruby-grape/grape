@@ -1053,7 +1053,7 @@ namespace :statuses do
     requires :user_id, type: Integer, desc: 'A user ID.'
   end
   namespace ':user_id' do
-    desc 'Retrieve a user's status.'
+    desc "Retrieve a user's status."
     params do
       requires :status_id, type: Integer, desc: 'A status ID.'
     end
