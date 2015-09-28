@@ -1309,21 +1309,23 @@ describe Grape::API do
 
     context 'CustomError subclass of Grape::Exceptions::Base' do
       before do
-        class CustomError < Grape::Exceptions::Base; end
+        module ApiSpec
+          class CustomError < Grape::Exceptions::Base; end
+        end
       end
 
       it 'does not re-raise exceptions of type Grape::Exceptions::Base' do
-        subject.get('/custom_exception') { fail CustomError }
+        subject.get('/custom_exception') { fail ApiSpec::CustomError }
 
         expect { get '/custom_exception' }.not_to raise_error
       end
 
       it 'rescues custom grape exceptions' do
-        subject.rescue_from CustomError do |e|
+        subject.rescue_from ApiSpec::CustomError do |e|
           rack_response('New Error', e.status)
         end
         subject.get '/custom_error' do
-          fail CustomError, status: 400, message: 'Custom Error'
+          fail ApiSpec::CustomError, status: 400, message: 'Custom Error'
         end
 
         get '/custom_error'
@@ -1474,21 +1476,23 @@ describe Grape::API do
 
   describe '.rescue_from klass, rescue_subclasses: boolean' do
     before do
-      module APIErrors
-        class ParentError < StandardError; end
-        class ChildError < ParentError; end
+      module ApiSpec
+        module APIErrors
+          class ParentError < StandardError; end
+          class ChildError < ParentError; end
+        end
       end
     end
 
     it 'rescues error as well as subclass errors with rescue_subclasses option set' do
-      subject.rescue_from APIErrors::ParentError, rescue_subclasses: true do |e|
+      subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: true do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        fail APIErrors::ChildError
+        fail ApiSpec::APIErrors::ChildError
       end
       subject.get '/caught_parent' do
-        fail APIErrors::ParentError
+        fail ApiSpec::APIErrors::ParentError
       end
       subject.get '/uncaught_parent' do
         fail StandardError
@@ -1502,11 +1506,11 @@ describe Grape::API do
     end
 
     it 'sets rescue_subclasses to true by default' do
-      subject.rescue_from APIErrors::ParentError do |e|
+      subject.rescue_from ApiSpec::APIErrors::ParentError do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        fail APIErrors::ChildError
+        fail ApiSpec::APIErrors::ChildError
       end
 
       get '/caught_child'
@@ -1514,13 +1518,13 @@ describe Grape::API do
     end
 
     it 'does not rescue child errors if rescue_subclasses is false' do
-      subject.rescue_from APIErrors::ParentError, rescue_subclasses: false do |e|
+      subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: false do |e|
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
-        fail APIErrors::ChildError
+        fail ApiSpec::APIErrors::ChildError
       end
-      expect { get '/uncaught' }.to raise_error(APIErrors::ChildError)
+      expect { get '/uncaught' }.to raise_error(ApiSpec::APIErrors::ChildError)
     end
   end
 
@@ -1572,15 +1576,17 @@ describe Grape::API do
 
     context 'class' do
       before :each do
-        class CustomErrorFormatter
-          def self.call(message, _backtrace, _options, _env)
-            "message: #{message} @backtrace"
+        module ApiSpec
+          class CustomErrorFormatter
+            def self.call(message, _backtrace, _options, _env)
+              "message: #{message} @backtrace"
+            end
           end
         end
       end
       it 'returns a custom error format' do
         subject.rescue_from :all, backtrace: true
-        subject.error_formatter :txt, CustomErrorFormatter
+        subject.error_formatter :txt, ApiSpec::CustomErrorFormatter
         subject.get '/exception' do
           fail 'rain!'
         end
@@ -1592,16 +1598,18 @@ describe Grape::API do
     describe 'with' do
       context 'class' do
         before :each do
-          class CustomErrorFormatter
-            def self.call(message, _backtrace, _option, _env)
-              "message: #{message} @backtrace"
+          module ApiSpec
+            class CustomErrorFormatter
+              def self.call(message, _backtrace, _option, _env)
+                "message: #{message} @backtrace"
+              end
             end
           end
         end
 
         it 'returns a custom error format' do
           subject.rescue_from :all, backtrace: true
-          subject.error_formatter :txt, with: CustomErrorFormatter
+          subject.error_formatter :txt, with: ApiSpec::CustomErrorFormatter
           subject.get('/exception') { fail 'rain!' }
 
           get '/exception'
@@ -1713,15 +1721,17 @@ describe Grape::API do
       end
     end
     context 'custom formatter class' do
-      module CustomFormatter
-        def self.call(object, _env)
-          "{\"custom_formatter\":\"#{object[:some]}\"}"
+      module ApiSpec
+        module CustomFormatter
+          def self.call(object, _env)
+            "{\"custom_formatter\":\"#{object[:some]}\"}"
+          end
         end
       end
       before :each do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, CustomFormatter
+        subject.formatter :custom, ApiSpec::CustomFormatter
         subject.get :simple do
           { some: 'hash' }
         end
@@ -1765,15 +1775,17 @@ describe Grape::API do
       end
     end
     context 'custom parser class' do
-      module CustomParser
-        def self.call(object, _env)
-          { object.to_sym => object.to_s.reverse }
+      module ApiSpec
+        module CustomParser
+          def self.call(object, _env)
+            { object.to_sym => object.to_s.reverse }
+          end
         end
       end
       before :each do
         subject.content_type :txt, 'text/plain'
         subject.content_type :custom, 'text/custom'
-        subject.parser :custom, CustomParser
+        subject.parser :custom, ApiSpec::CustomParser
         subject.put :simple do
           params[:simple]
         end

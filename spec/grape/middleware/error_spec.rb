@@ -11,14 +11,15 @@ describe Grape::Middleware::Error do
         'static text'
       end
     end
-  end
-  class ErrApp
-    class << self
-      attr_accessor :error
-      attr_accessor :format
 
-      def call(_env)
-        throw :error, error
+    class ErrApp
+      class << self
+        attr_accessor :error
+        attr_accessor :format
+
+        def call(_env)
+          throw :error, error
+        end
       end
     end
   end
@@ -28,32 +29,32 @@ describe Grape::Middleware::Error do
     Rack::Builder.app do
       use Spec::Support::EndpointFaker
       use Grape::Middleware::Error, opts
-      run ErrApp
+      run ErrorSpec::ErrApp
     end
   end
 
   let(:options) { { default_message: 'Aww, hamburgers.' } }
 
   it 'sets the status code appropriately' do
-    ErrApp.error = { status: 410 }
+    ErrorSpec::ErrApp.error = { status: 410 }
     get '/'
     expect(last_response.status).to eq(410)
   end
 
   it 'sets the error message appropriately' do
-    ErrApp.error = { message: 'Awesome stuff.' }
+    ErrorSpec::ErrApp.error = { message: 'Awesome stuff.' }
     get '/'
     expect(last_response.body).to eq('Awesome stuff.')
   end
 
   it 'defaults to a 500 status' do
-    ErrApp.error = {}
+    ErrorSpec::ErrApp.error = {}
     get '/'
     expect(last_response.status).to eq(500)
   end
 
   it 'has a default message' do
-    ErrApp.error = {}
+    ErrorSpec::ErrApp.error = {}
     get '/'
     expect(last_response.body).to eq('Aww, hamburgers.')
   end
@@ -61,14 +62,14 @@ describe Grape::Middleware::Error do
   context 'with http code' do
     let(:options) {  { default_message: 'Aww, hamburgers.' } }
     it 'adds the status code if wanted' do
-      ErrApp.error = { message: { code: 200 } }
+      ErrorSpec::ErrApp.error = { message: { code: 200 } }
       get '/'
 
       expect(last_response.body).to eq({ code: 200 }.to_json)
     end
 
     it 'presents an error message' do
-      ErrApp.error = { message: { code: 200, with: ErrorSpec::ErrorEntity } }
+      ErrorSpec::ErrApp.error = { message: { code: 200, with: ErrorSpec::ErrorEntity } }
       get '/'
 
       expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)

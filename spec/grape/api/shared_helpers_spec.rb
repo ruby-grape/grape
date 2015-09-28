@@ -1,18 +1,18 @@
 require 'spec_helper'
 
 describe Grape::API::Helpers do
-  module SharedParams
-    extend Grape::API::Helpers
-
-    params :pagination do
-      optional :page, type: Integer
-      optional :size, type: Integer
-    end
-  end
-
   subject do
+    shared_params = Module.new do
+      extend Grape::API::Helpers
+
+      params :pagination do
+        optional :page, type: Integer
+        optional :size, type: Integer
+      end
+    end
+
     Class.new(Grape::API) do
-      helpers SharedParams
+      helpers shared_params
       format :json
 
       params do

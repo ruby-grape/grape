@@ -1,22 +1,22 @@
 require 'spec_helper'
 
 describe Grape::Validations::ValuesValidator do
-  class ValuesModel
-    DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3']
-    class << self
-      def values
-        @values ||= []
-        [DEFAULT_VALUES + @values].flatten.uniq
-      end
+  module ValidationsSpec
+    class ValuesModel
+      DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3']
+      class << self
+        def values
+          @values ||= []
+          [DEFAULT_VALUES + @values].flatten.uniq
+        end
 
-      def add_value(value)
-        @values ||= []
-        @values << value
+        def add_value(value)
+          @values ||= []
+          @values << value
+        end
       end
     end
-  end
 
-  module ValidationsSpec
     module ValuesValidatorSpec
       class API < Grape::API
         default_format :json
@@ -129,7 +129,7 @@ describe Grape::Validations::ValuesValidator do
   end
 
   it 'does not validate updated values without proc' do
-    ValuesModel.add_value('valid-type4')
+    ValidationsSpec::ValuesModel.add_value('valid-type4')
 
     get('/', type: 'valid-type4')
     expect(last_response.status).to eq 400
@@ -137,7 +137,7 @@ describe Grape::Validations::ValuesValidator do
   end
 
   it 'validates against values in a proc' do
-    ValuesModel.add_value('valid-type4')
+    ValidationsSpec::ValuesModel.add_value('valid-type4')
 
     get('/lambda', type: 'valid-type4')
     expect(last_response.status).to eq 200
@@ -163,7 +163,7 @@ describe Grape::Validations::ValuesValidator do
   it 'raises IncompatibleOptionValues on an invalid default value from proc' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: ValuesModel.values.sample + '_invalid' }
+      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: ValidationsSpec::ValuesModel.values.sample + '_invalid' }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 

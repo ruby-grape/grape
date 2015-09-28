@@ -2,11 +2,13 @@ require 'spec_helper'
 
 describe Grape::Validations do
   before do
-    class DefaultLength < Grape::Validations::Base
-      def validate_param!(attr_name, params)
-        @option = params[:max].to_i if params.key?(:max)
-        return if params[attr_name].length <= @option
-        fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+    module CustomValidationsSpec
+      class DefaultLength < Grape::Validations::Base
+        def validate_param!(attr_name, params)
+          @option = params[:max].to_i if params.key?(:max)
+          return if params[attr_name].length <= @option
+          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+        end
       end
     end
   end

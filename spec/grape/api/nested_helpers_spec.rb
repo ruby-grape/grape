@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Grape::API::Helpers do
-  subject do
+  module NestedHelpersSpec
     module HelperMethods
       extend Grape::API::Helpers
       def current_user
@@ -28,8 +28,10 @@ describe Grape::API::Helpers do
     class Main < Grape::API
       mount Nested
     end
+  end
 
-    Main
+  subject do
+    NestedHelpersSpec::Main
   end
 
   def app

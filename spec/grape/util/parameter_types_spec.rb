@@ -1,13 +1,15 @@
 require 'spec_helper'
 
 describe Grape::ParameterTypes do
-  class FooType
-    def self.parse(_)
+  module ParameterTypesSpec
+    class FooType
+      def self.parse(_)
+      end
     end
-  end
 
-  class BarType
-    def self.parse
+    class BarType
+      def self.parse
+      end
     end
   end
 
@@ -24,7 +26,7 @@ describe Grape::ParameterTypes do
 
     it 'identifies unknown types' do
       expect(described_class.primitive?(Object)).to be_falsy
-      expect(described_class.primitive?(FooType)).to be_falsy
+      expect(described_class.primitive?(ParameterTypesSpec::FooType)).to be_falsy
     end
   end
 
@@ -44,11 +46,11 @@ describe Grape::ParameterTypes do
     end
 
     it 'returns true if the type responds to :parse with one argument' do
-      expect(described_class.custom_type?(FooType)).to be_truthy
+      expect(described_class.custom_type?(ParameterTypesSpec::FooType)).to be_truthy
     end
 
     it 'returns false if the type\'s #parse method takes other than one argument' do
-      expect(described_class.custom_type?(BarType)).to be_falsy
+      expect(described_class.custom_type?(ParameterTypesSpec::BarType)).to be_falsy
     end
   end
 end

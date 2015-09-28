@@ -90,21 +90,23 @@ describe Grape::Validations::ParamsScope do
   end
 
   context 'when using custom types' do
-    class CustomType
-      attr_reader :value
-      def self.parse(value)
-        fail if value == 'invalid'
-        new(value)
-      end
+    module ParamsScopeSpec
+      class CustomType
+        attr_reader :value
+        def self.parse(value)
+          fail if value == 'invalid'
+          new(value)
+        end
 
-      def initialize(value)
-        @value = value
+        def initialize(value)
+          @value = value
+        end
       end
     end
 
     it 'coerces the parameter via the type\'s parse method' do
       subject.params do
-        requires :foo, type: CustomType
+        requires :foo, type: ParamsScopeSpec::CustomType
       end
       subject.get('/types') { params[:foo].value }
 

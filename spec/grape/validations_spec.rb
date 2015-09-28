@@ -403,11 +403,13 @@ describe Grape::Validations do
     end
 
     context 'custom validator for a Hash' do
-      module DateRangeValidations
-        class DateRangeValidator < Grape::Validations::Base
-          def validate_param!(attr_name, params)
-            return if params[attr_name][:from] <= params[attr_name][:to]
-            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
+      module ValuesSpec
+        module DateRangeValidations
+          class DateRangeValidator < Grape::Validations::Base
+            def validate_param!(attr_name, params)
+              return if params[attr_name][:from] <= params[attr_name][:to]
+              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'"
+            end
           end
         end
       end
@@ -976,25 +978,26 @@ describe Grape::Validations do
         end
 
         it 'in helper module which kind of Grape::DSL::Helpers::BaseHelper' do
-          module SharedParams
+          shared_params = Module.new do
             extend Grape::DSL::Helpers::BaseHelper
             params :pagination do
             end
           end
-          subject.helpers SharedParams
+          subject.helpers shared_params
         end
       end
 
       context 'can be included in usual params' do
         before do
-          module SharedParams
+          shared_params = Module.new do
             extend Grape::DSL::Helpers::BaseHelper
             params :period do
               optional :start_date
               optional :end_date
             end
           end
-          subject.helpers SharedParams
+
+          subject.helpers shared_params
 
           subject.helpers do
             params :pagination do

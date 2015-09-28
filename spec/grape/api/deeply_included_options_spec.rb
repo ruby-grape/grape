@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module API
+module DeeplyIncludedOptionsSpec
   module Defaults
     extend ActiveSupport::Concern
     included do
@@ -11,11 +11,11 @@ module API
   module Admin
     module Defaults
       extend ActiveSupport::Concern
-      include API::Defaults
+      include DeeplyIncludedOptionsSpec::Defaults
     end
 
     class Users < Grape::API
-      include API::Admin::Defaults
+      include DeeplyIncludedOptionsSpec::Admin::Defaults
 
       resource :users do
         get do
@@ -24,14 +24,14 @@ module API
       end
     end
   end
-end
 
-class Main < Grape::API
-  mount API::Admin::Users
+  class Main < Grape::API
+    mount DeeplyIncludedOptionsSpec::Admin::Users
+  end
 end
 
 describe Grape::API do
-  subject { Main }
+  subject { DeeplyIncludedOptionsSpec::Main }
 
   def app
     subject

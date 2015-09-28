@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Grape
   module Presenters
-    module InsideRouteSpec
+    module PresenterSpec
       class Dummy
         include Grape::DSL::InsideRoute
 
@@ -27,7 +27,7 @@ module Grape
         end
       end
 
-      subject { InsideRouteSpec::Dummy.new }
+      subject { PresenterSpec::Dummy.new }
 
       describe 'present' do
         let(:hash_mock) do

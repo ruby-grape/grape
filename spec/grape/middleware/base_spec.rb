@@ -82,18 +82,20 @@ describe Grape::Middleware::Base do
     end
 
     context 'defaults' do
-      class ExampleWare < Grape::Middleware::Base
-        def default_options
-          { monkey: true }
+      module BaseSpec
+        class ExampleWare < Grape::Middleware::Base
+          def default_options
+            { monkey: true }
+          end
         end
       end
 
       it 'persists the default options' do
-        expect(ExampleWare.new(blank_app).options[:monkey]).to be true
+        expect(BaseSpec::ExampleWare.new(blank_app).options[:monkey]).to be true
       end
 
       it 'overrides default options when provided' do
-        expect(ExampleWare.new(blank_app, monkey: false).options[:monkey]).to be false
+        expect(BaseSpec::ExampleWare.new(blank_app, monkey: false).options[:monkey]).to be false
       end
     end
   end

@@ -3,48 +3,50 @@ require 'active_support/core_ext/hash'
 
 describe Grape::Middleware::Error do
   # raises a text exception
-  class ExceptionApp
-    class << self
-      def call(_env)
-        fail 'rain!'
+  module ExceptionSpec
+    class ExceptionApp
+      class << self
+        def call(_env)
+          fail 'rain!'
+        end
       end
     end
-  end
 
-  # raises a hash error
-  class ErrorHashApp
-    class << self
-      def error!(message, status)
-        throw :error, message: { error: message, detail: 'missing widget' }, status: status
-      end
+    # raises a hash error
+    class ErrorHashApp
+      class << self
+        def error!(message, status)
+          throw :error, message: { error: message, detail: 'missing widget' }, status: status
+        end
 
-      def call(_env)
-        error!('rain!', 401)
-      end
-    end
-  end
-
-  # raises an error!
-  class AccessDeniedApp
-    class << self
-      def error!(message, status)
-        throw :error, message: message, status: status
-      end
-
-      def call(_env)
-        error!('Access Denied', 401)
+        def call(_env)
+          error!('rain!', 401)
+        end
       end
     end
-  end
 
-  # raises a custom error
-  class CustomError < Grape::Exceptions::Base
-  end
+    # raises an error!
+    class AccessDeniedApp
+      class << self
+        def error!(message, status)
+          throw :error, message: message, status: status
+        end
 
-  class CustomErrorApp
-    class << self
-      def call(_env)
-        fail CustomError, status: 400, message: 'failed validation'
+        def call(_env)
+          error!('Access Denied', 401)
+        end
+      end
+    end
+
+    # raises a custom error
+    class CustomError < Grape::Exceptions::Base
+    end
+
+    class CustomErrorApp
+      class << self
+        def call(_env)
+          fail CustomError, status: 400, message: 'failed validation'
+        end
       end
     end
   end
@@ -55,7 +57,7 @@ describe Grape::Middleware::Error do
     @app ||= Rack::Builder.app do
       use Spec::Support::EndpointFaker
       use Grape::Middleware::Error
-      run ExceptionApp
+      run ExceptionSpec::ExceptionApp
     end
     expect { get '/' }.to raise_error
   end
@@ -65,7 +67,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.body).to eq('rain!')
@@ -75,7 +77,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.status).to eq(500)
@@ -85,7 +87,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, default_status: 500
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.status).to eq(500)
@@ -95,7 +97,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :json
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.body).to eq('{"error":"rain!"}')
@@ -105,7 +107,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :json
-        run ErrorHashApp
+        run ExceptionSpec::ErrorHashApp
       end
       get '/'
       expect(['{"error":"rain!","detail":"missing widget"}',
@@ -116,7 +118,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :jsonapi
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.body).to eq('{"error":"rain!"}')
@@ -126,7 +128,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :jsonapi
-        run ErrorHashApp
+        run ExceptionSpec::ErrorHashApp
       end
       get '/'
       expect(['{"error":"rain!","detail":"missing widget"}',
@@ -137,7 +139,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :xml
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.body).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n")
@@ -147,7 +149,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: true, format: :xml
-        run ErrorHashApp
+        run ExceptionSpec::ErrorHashApp
       end
       get '/'
       expect(["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
@@ -164,7 +166,7 @@ describe Grape::Middleware::Error do
                                           { custom_formatter: message }.inspect
                                         end
                                       }
-        run ExceptionApp
+        run ExceptionSpec::ExceptionApp
       end
       get '/'
       expect(last_response.body).to eq('{:custom_formatter=>"rain!"}')
@@ -174,7 +176,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error
-        run AccessDeniedApp
+        run ExceptionSpec::AccessDeniedApp
       end
       get '/'
       expect(last_response.status).to eq(401)
@@ -184,7 +186,7 @@ describe Grape::Middleware::Error do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
         use Grape::Middleware::Error, rescue_all: false
-        run CustomErrorApp
+        run ExceptionSpec::CustomErrorApp
       end
 
       get '/'
