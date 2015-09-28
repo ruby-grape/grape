@@ -224,9 +224,9 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('TrueClass')
       end
 
-      it 'file' do
+      it 'Rack::Multipart::UploadedFile' do
         subject.params do
-          requires :file, coerce: Rack::Multipart::UploadedFile
+          requires :file, type: Rack::Multipart::UploadedFile
         end
         subject.post '/upload' do
           params[:file].filename
@@ -235,6 +235,27 @@ describe Grape::Validations::CoerceValidator do
         post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+
+        post '/upload', file: 'not a file'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('file is invalid')
+      end
+
+      it 'File' do
+        subject.params do
+          requires :file, coerce: File
+        end
+        subject.post '/upload' do
+          params[:file].filename
+        end
+
+        post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+
+        post '/upload', file: 'not a file'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('file is invalid')
       end
 
       it 'Nests integers' do
