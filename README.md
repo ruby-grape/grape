@@ -31,6 +31,7 @@
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Custom Types and Coercions](#custom-types-and-coercions)
+  - [Multipart File Parameters](#multipart-file-parameters)
   - [First-Class `JSON` Types](#first-class-json-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
@@ -732,7 +733,8 @@ The following are all valid types, supported out of the box by Grape:
 * Boolean
 * String
 * Symbol
-* Rack::Multipart::UploadedFile
+* Rack::Multipart::UploadedFile (alias `File`)
+* JSON
 
 ### Custom Types and Coercions
 
@@ -784,6 +786,23 @@ params do
 end
 ```
 
+### Multipart File Parameters
+
+Grape makes use of `Rack::Request`'s built-in support for multipart
+file parameters. Such parameters can be declared with `type: File`:
+
+```ruby
+params do
+  requires :avatar, type: File
+end
+post '/' do
+  # Parameter will be wrapped using Hashie:
+  params.avatar.filename # => 'avatar.png'
+  params.avatar.type     # => 'image/png'
+  params.avatar.tempfile # => #<File>
+end
+```
+
 ### First-Class `JSON` Types
 
 Grape supports complex parameters given as JSON-formatted strings using the special `type: JSON`
@@ -810,9 +829,7 @@ client.get('/', json: '[{"int":4}]') # => HTTP 400
 ```
 
 Additionally `type: Array[JSON]` may be used, which explicitly marks the parameter as an array
-of objects. If a single object is supplied it will be wrapped. For stricter control over the
-type of JSON structure which may be supplied, use `type: Array, coerce_with: JSON` or
-`type: Hash, coerce_with: JSON`.
+of objects. If a single object is supplied it will be wrapped.
 
 ```ruby
 params do
@@ -824,6 +841,8 @@ get '/' do
   params[:json].each { |obj| ... } # always works
 end
 ```
+For stricter control over the type of JSON structure which may be supplied,
+use `type: Array, coerce_with: JSON` or `type: Hash, coerce_with: JSON`.
 
 ### Validation of Nested Parameters
 

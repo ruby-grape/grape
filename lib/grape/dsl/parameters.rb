@@ -49,7 +49,7 @@ module Grape
       #   the :using hash. The last key can be a hash, which specifies
       #   options for the parameters
       # @option attrs :type [Class] the type to coerce this parameter to before
-      #   passing it to the endpoint. See {Grape::ParameterTypes} for a list of
+      #   passing it to the endpoint. See {Grape::Validations::Types} for a list of
       #   types that are supported automatically. Custom classes may be used
       #   where they define a class-level `::parse` method, or in conjunction
       #   with the `:coerce_with` parameter. `JSON` may be supplied to denote

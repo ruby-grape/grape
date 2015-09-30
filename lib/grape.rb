@@ -19,9 +19,10 @@ require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'multi_json'
 require 'multi_xml'
-require 'virtus'
 require 'i18n'
 require 'thread'
+
+require 'virtus'
 
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
@@ -159,7 +160,6 @@ module Grape
 end
 
 require 'grape/util/content_types'
-require 'grape/util/parameter_types'
 
 require 'grape/validations/validators/base'
 require 'grape/validations/attributes_iterator'
@@ -174,5 +174,6 @@ require 'grape/validations/validators/regexp'
 require 'grape/validations/validators/values'
 require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
+require 'grape/validations/types'
 
 require 'grape/version'
