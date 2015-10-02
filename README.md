@@ -332,6 +332,17 @@ Using this versioning strategy, clients should pass the desired version in the U
 version 'v1', using: :header, vendor: 'twitter'
 ```
 
+Currently, Grape only supports versioned media types in the following format:
+
+```
+vnd.vendor-and-or-resource-v1234+format
+```
+
+Basically all tokens between the final `-` and the `+` will be interpreted as the version.
+Grape also only supports alphanumerics, periods, and dashes in the vendor/resource/version parts
+of the media type, even though [the appropriate RFC](http://tools.ietf.org/html/rfc6838#section-4.2)
+technically allows far more characters.
+
 Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
 
     curl -H Accept:application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline

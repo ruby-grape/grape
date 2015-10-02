@@ -8,13 +8,13 @@ module Grape
       # application/vnd.:vendor-:version+:format
       #
       # Example: For request header
-      #    Accept: application/vnd.mycompany-v1+json
+      #    Accept: application/vnd.mycompany.a-cool-resource-v1+json
       #
       # The following rack env variables are set:
       #
       #    env['api.type']    => 'application'
-      #    env['api.subtype'] => 'vnd.mycompany-v1+json'
-      #    env['api.vendor]   => 'mycompany'
+      #    env['api.subtype'] => 'vnd.mycompany.a-cool-resource-v1+json'
+      #    env['api.vendor]   => 'mycompany.a-cool-resource'
       #    env['api.version]  => 'v1'
       #    env['api.format]   => 'json'
       #
@@ -23,7 +23,10 @@ module Grape
       # route.
       class Header < Base
         VENDOR_VERSION_HEADER_REGEX =
-          /\Avnd\.([a-z0-9*.]+)(?:-([a-z0-9*\-.]+))?(?:\+([a-z0-9*\-.+]+))?\z/
+          /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))?(?:\+([a-z0-9*\-.]+))?\z/
+
+        HAS_VENDOR_REGEX = /\Avnd\.[a-z0-9.\-_!#\$&\^]+/
+        HAS_VERSION_REGEX = /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))+/
 
         def before
           strict_header_checks if strict?
@@ -122,7 +125,7 @@ module Grape
 
         def headers_contain_wrong_version?
           header.values.all? do |header_value|
-            version?(header_value)
+            version?(header_value) && !versions.include?(request_version(header_value))
           end
         end
 
@@ -169,7 +172,7 @@ module Grape
         # @return [Boolean] whether the content type sets a vendor
         def vendor?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[/\Avnd\.[a-z0-9*.]+/]
+          subtype[HAS_VENDOR_REGEX]
         end
 
         def request_vendor(media_type)
@@ -177,11 +180,16 @@ module Grape
           subtype.match(VENDOR_VERSION_HEADER_REGEX)[1]
         end
 
+        def request_version(media_type)
+          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          subtype.match(VENDOR_VERSION_HEADER_REGEX)[2]
+        end
+
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets an API version
         def version?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[/\Avnd\.[a-z0-9*.]+-[a-z0-9*\-.]+/]
+          subtype[HAS_VERSION_REGEX]
         end
       end
     end
