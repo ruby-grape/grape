@@ -97,7 +97,7 @@ module Grape
 
       # Merge multiple layers of settings into one hash.
       def stacked_hash_to_hash(settings)
-        return nil if settings.nil? || settings.blank?
+        return nil if settings.blank?
         settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
