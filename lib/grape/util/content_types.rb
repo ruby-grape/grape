@@ -10,7 +10,7 @@ module Grape
     }
 
     def self.content_types_for_settings(settings)
-      return nil if settings.nil? || settings.blank?
+      return nil if settings.blank?
 
       settings.each_with_object({}) { |value, result| result.merge!(value) }
     end
