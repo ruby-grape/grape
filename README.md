@@ -1624,7 +1624,7 @@ Optionally, you can set the format, status code and headers.
 class Twitter::API < Grape::API
   format :json
   rescue_from :all do |e|
-    error!({ error: 'Server error.', 500, { 'Content-Type' => 'text/error' } })
+    error!({ error: 'Server error.' }, 500, { 'Content-Type' => 'text/error' })
   end
 end
 ```
