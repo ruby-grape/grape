@@ -293,7 +293,7 @@ describe Grape::Validations::CoerceValidator do
 
         get '/ints', ints: '{"i":1,"j":"2"}'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('ints[i] is missing, ints[i] is invalid, ints[j] is missing')
+        expect(last_response.body).to eq('ints[0][i] is missing, ints[0][i] is invalid, ints[0][j] is missing')
 
         get '/ints', ints: '[{"i":"1","j":"2"}]'
         expect(last_response.status).to eq(200)
