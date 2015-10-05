@@ -5,6 +5,7 @@
 
 * Your contribution here.
 
+* [#1170](https://github.com/ruby-grape/grape/pull/1170): Allow dashes and periods in header vendor - [@suan](https://github.com/suan).
 * [#1167](https://github.com/ruby-grape/grape/pull/1167): Convenience wrapper `type: File` for validating multipart file parameters - [@dslh](https://github.com/dslh).
 * [#1167](https://github.com/ruby-grape/grape/pull/1167): Refactor and extend coercion and type validation system - [@dslh](https://github.com/dslh).
 * [#1163](https://github.com/ruby-grape/grape/pull/1163): First-class `JSON` parameter type - [@dslh](https://github.com/dslh).
