@@ -261,8 +261,8 @@ describe Grape::Middleware::Versioner::Header do
 
     let(:v1_app) {
       Class.new(Grape::API) do
-        version 'v1', using: :header, vendor: 'test.a-cool-resource'
-        content_type :v1_test, 'application/vnd.test.a-cool-resource-v1+json'
+        version 'v1', using: :header, vendor: 'test.a-cool_resource', cascade: false, strict: true
+        content_type :v1_test, 'application/vnd.test.a-cool_resource-v1+json'
         formatter :v1_test, ->(object, _) { object }
         format :v1_test
 
@@ -276,8 +276,8 @@ describe Grape::Middleware::Versioner::Header do
 
     let(:v2_app) {
       Class.new(Grape::API) do
-        version 'v2', using: :header, vendor: 'test.a-cool-resource'
-        content_type :v2_test, 'application/vnd.test.a-cool-resource-v2+json'
+        version 'v2', using: :header, vendor: 'test.a-cool_resource', strict: true
+        content_type :v2_test, 'application/vnd.test.a-cool_resource-v2+json'
         formatter :v2_test, ->(object, _) { object }
         format :v2_test
 
@@ -290,20 +290,20 @@ describe Grape::Middleware::Versioner::Header do
     }
 
     def app
-      subject.mount v1_app
       subject.mount v2_app
+      subject.mount v1_app
       subject
     end
 
     context 'with header versioned endpoints and a rescue_all block defined' do
       it 'responds correctly to a v1 request' do
-        versioned_get '/users/hello', 'v1', using: :header, vendor: 'test.a-cool-resource'
+        versioned_get '/users/hello', 'v1', using: :header, vendor: 'test.a-cool_resource'
         expect(last_response.body).to eq('one')
         expect(last_response.body).not_to include('API vendor or version not found')
       end
 
       it 'responds correctly to a v2 request' do
-        versioned_get '/users/hello', 'v2', using: :header, vendor: 'test.a-cool-resource'
+        versioned_get '/users/hello', 'v2', using: :header, vendor: 'test.a-cool_resource'
         expect(last_response.body).to eq('two')
         expect(last_response.body).not_to include('API vendor or version not found')
       end
