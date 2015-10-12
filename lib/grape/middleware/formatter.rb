@@ -167,7 +167,7 @@ module Grape
 
         accept.scan(accept_into_mime_and_quality)
           .sort_by { |_, quality_preference| -quality_preference.to_f }
-          .map { |mime, _| mime.sub(vendor_prefix_pattern, '') }
+          .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
       end
     end
   end
