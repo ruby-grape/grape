@@ -399,15 +399,15 @@ desc 'Returns your public timeline.' do
   success API::Entities::Entity
   failure [[401, 'Unauthorized', 'Entities::Error']]
   named 'My named route'
-  headers [XAuthToken: {
-             description: 'Valdates your identity',
-             required: true
-           },
-           XOptionalHeader: {
-             description: 'Not really needed',
+  headers XAuthToken: {
+            description: 'Valdates your identity',
+            required: true
+          },
+          XOptionalHeader: {
+            description: 'Not really needed',
             required: false
-           }
-          ]
+          }
+          
 end
 get :public_timeline do
   Status.limit(20)
