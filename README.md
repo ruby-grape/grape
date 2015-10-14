@@ -2713,7 +2713,7 @@ Add API paths to `config/application.rb`.
 ```ruby
 # Auto-load API and its subdirectories
 config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-config.autoload_paths += Dir[Rails.root.join('app', 'api', '*'')]
+config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
 ```
 
 Create `config/initializers/reload_api.rb`.
