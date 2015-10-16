@@ -15,6 +15,7 @@
 
 #### Fixes
 
+* [#1185](https://github.com/ruby-grape/grape/pull/1185): Use formatters for custom vendored content types - [@tylerdooling](https://github.com/tylerdooling).
 * [#1156](https://github.com/ruby-grape/grape/pull/1156): Fixed `no implicit conversion of Symbol into Integer` with nested `values` validation - [@quickpay](https://github.com/quickpay).
 * [#1153](https://github.com/ruby-grape/grape/pull/1153): Fixes boolean declaration in an external file - [@towanda](https://github.com/towanda).
 * [#1142](https://github.com/ruby-grape/grape/pull/1142): Makes #declared unavailable to before filters - [@jrforrest](https://github.com/jrforrest).

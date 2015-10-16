@@ -132,6 +132,18 @@ describe Grape::Middleware::Formatter do
       expect(subject.env['api.format']).to eq(:xml)
     end
 
+    context 'with custom vendored content types' do
+      before do
+        subject.options[:content_types] = {}
+        subject.options[:content_types][:custom] = 'application/vnd.test+json'
+      end
+
+      it 'it uses the custom type' do
+        subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
+        expect(subject.env['api.format']).to eq(:custom)
+      end
+    end
+
     it 'parses headers with symbols as hash keys' do
       subject.call('PATH_INFO' => '/info', 'http_accept' => 'application/xml', system_time: '091293')
       expect(subject.env[:system_time]).to eq('091293')
@@ -156,6 +168,16 @@ describe Grape::Middleware::Formatter do
       subject.options[:content_types][:custom] = 'application/x-custom'
       _, headers, = subject.call('PATH_INFO' => '/info.custom')
       expect(headers['Content-type']).to eq('application/x-custom')
+    end
+    it 'is set for vendored with registered type' do
+      subject.options[:content_types] = {}
+      subject.options[:content_types][:custom] = 'application/vnd.test+json'
+      _, headers, = subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
+      expect(headers['Content-type']).to eq('application/vnd.test+json')
+    end
+    it 'is set to closest generic for custom vendored/versioned without registered type' do
+      _, headers, = subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
+      expect(headers['Content-type']).to eq('application/json')
     end
   end
 
