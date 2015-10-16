@@ -271,7 +271,7 @@ module Grape
       end
 
       def validate(type, options, attrs, doc_attrs)
-        validator_class = Validations.validators[type.to_s]
+        validator_class = Validations.validators[type.to_s] || custom_validator_autoload.try_load(type)
 
         if validator_class
           value = validator_class.new(attrs, options, doc_attrs[:required], self)
@@ -291,6 +291,10 @@ module Grape
         end
         return unless value_types.any? { |v| !v.is_a?(coerce_type) }
         fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+      end
+
+      def custom_validator_autoload
+        @custom_validator_autoload ||= Autoload.new(@api)
       end
     end
   end
