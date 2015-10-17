@@ -120,6 +120,7 @@ module Grape
           }
 
           new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
+          new_endpoint.prepare_routes if new_endpoint.is_a?(Grape::Endpoint)
           endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
           route_end
