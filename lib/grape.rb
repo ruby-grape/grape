@@ -34,6 +34,7 @@ module Grape
     autoload :Endpoint
 
     autoload :Route
+    autoload :Routes
     autoload :Namespace
 
     autoload :Path
