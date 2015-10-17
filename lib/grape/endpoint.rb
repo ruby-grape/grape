@@ -74,12 +74,10 @@ module Grape
       @options[:method] = Array(options[:method])
       @options[:route_options] ||= {}
 
-      if block_given?
-        @source = block
-        @block = self.class.generate_api_method(method_name, &block)
-      end
+      return unless block_given?
 
-      return
+      @source = block
+      @block = self.class.generate_api_method(method_name, &block)
     end
 
     def require_option(options, key)
@@ -158,7 +156,7 @@ module Grape
           path = compile_path(prepared_path, anchor && !options[:app], prepare_routes_requirements)
           request_method = (method.to_s.upcase unless method == :any)
 
-          route = Route.new(options[:route_options].clone.merge(
+          Route.new(options[:route_options].clone.merge(
                       prefix: namespace_inheritable(:root_prefix),
                       version: namespace_inheritable(:version) ? namespace_inheritable(:version).join('|') : nil,
                       namespace: namespace,
@@ -168,8 +166,6 @@ module Grape
                       compiled: path,
                       settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations)
           ))
-          Grape::Routes.add(route)
-          route
         end
       end.flatten
     end
