@@ -15,13 +15,11 @@ module Grape
         end
       end
 
-      class InvalidValue; end
-
       private
 
       def valid_type?(val)
         # Special value to denote coercion failure
-        return false if val.instance_of?(InvalidValue)
+        return false if val.instance_of?(Types::InvalidValue)
 
         # Allow nil, to ignore when a parameter is absent
         return true if val.nil?
@@ -42,7 +40,7 @@ module Grape
       # not the prettiest but some invalid coercion can currently trigger
       # errors in Virtus (see coerce_spec.rb:75)
       rescue
-        InvalidValue.new
+        Types::InvalidValue.new
       end
 
       # Type to which the parameter will be coerced.

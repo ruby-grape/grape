@@ -55,6 +55,10 @@ module Grape
       #   with the `:coerce_with` parameter. `JSON` may be supplied to denote
       #   `JSON`-formatted objects or arrays of objects. `Array[JSON]` accepts
       #   the same values as `JSON` but will wrap single objects in an `Array`.
+      # @option attrs :types [Array<Class>] may be supplied in place of +:type+
+      #   to declare an attribute that has multiple allowed types. See
+      #   {Validations::Types::MultipleTypeCoercer} for more details on coercion
+      #   and validation rules for variant-type parameters.
       # @option attrs :desc [String] description to document this parameter
       # @option attrs :default [Object] default value, if parameter is optional
       # @option attrs :values [Array] permissable values for this field. If any
@@ -158,7 +162,7 @@ module Grape
       # the given parameter is present. The parameters are not nested.
       # @param attr [Symbol] the parameter which, if present, triggers the
       #   validations
-      # @throws Grape::Exceptions::UnknownParameter if `attr` has not been
+      # @raise Grape::Exceptions::UnknownParameter if `attr` has not been
       #   defined in this scope yet
       # @yield a parameter definition DSL
       def given(attr, &block)
@@ -168,7 +172,7 @@ module Grape
 
       # Test for whether a certain parameter has been defined in this params
       # block yet.
-      # @returns [Boolean] whether the parameter has been defined
+      # @return [Boolean] whether the parameter has been defined
       def declared_param?(param)
         # @declared_params also includes hashes of options and such, but those
         # won't be flattened out.
