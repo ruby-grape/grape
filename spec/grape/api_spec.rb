@@ -537,16 +537,38 @@ describe Grape::API do
       expect(last_response.headers['Content-Type']).to eql 'text/plain'
     end
 
-    it 'adds an OPTIONS route that returns a 204, an Allow header and a X-Custom-Header' do
-      subject.before { header 'X-Custom-Header', 'foo' }
-      subject.get 'example' do
-        'example'
+    describe 'adds an OPTIONS route that' do
+      before do
+        subject.before { header 'X-Custom-Header', 'foo' }
+        subject.get 'example' do
+          'example'
+        end
+        options '/example'
       end
-      options '/example'
-      expect(last_response.status).to eql 204
-      expect(last_response.body).to eql ''
-      expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, HEAD'
-      expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+
+      it 'returns a 204' do
+        expect(last_response.status).to eql 204
+      end
+
+      it 'has an empty body' do
+        expect(last_response.body).to be_blank
+      end
+
+      it 'has an Allow header' do
+        expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, HEAD'
+      end
+
+      it 'has a X-Custom-Header' do
+        expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+      end
+
+      it 'has no Content-Type' do
+        expect(last_response.content_type).to be_nil
+      end
+
+      it 'has no Content-Length' do
+        expect(last_response.content_length).to be_nil
+      end
     end
 
     it 'allows HEAD on a GET request' do
