@@ -1,5 +1,7 @@
 require_relative 'types/build_coercer'
 require_relative 'types/custom_type_coercer'
+require_relative 'types/multiple_type_coercer'
+require_relative 'types/variant_collection_coercer'
 require_relative 'types/json'
 require_relative 'types/file'
 
@@ -20,6 +22,10 @@ module Grape
     # and {Grape::Dsl::Parameters#optional}. The main
     # entry point for this process is {Types.build_coercer}.
     module Types
+      # Instances of this class may be used as tokens to denote that
+      # a parameter value could not be coerced.
+      class InvalidValue; end
+
       # Types representing a single value, which are coerced through Virtus
       # or special logic in Grape.
       PRIMITIVES = [
@@ -78,6 +84,18 @@ module Grape
         STRUCTURES.include?(type)
       end
 
+      # Is the declared type in fact an array of multiple allowed types?
+      # For example the declaration +types: [Integer,String]+ will attempt
+      # first to coerce given values to integer, but will also accept any
+      # other string.
+      #
+      # @param type [Array<Class>,Set<Class>] type (or type list!) to check
+      # @return [Boolean] +true+ if the given value will be treated as
+      #   a list of types.
+      def self.multiple?(type)
+        (type.is_a?(Array) || type.is_a?(Set)) && type.size > 1
+      end
+
       # Does the given class implement a type system that Grape
       # (i.e. the underlying virtus attribute system) supports
       # out-of-the-box? Currently supported are +axiom-types+
@@ -115,6 +133,7 @@ module Grape
       def self.custom?(type)
         !primitive?(type) &&
           !structure?(type) &&
+          !multiple?(type) &&
           !recognized?(type) &&
           !special?(type) &&
           type.respond_to?(:parse) &&

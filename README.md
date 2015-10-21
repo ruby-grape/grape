@@ -33,6 +33,7 @@
   - [Custom Types and Coercions](#custom-types-and-coercions)
   - [Multipart File Parameters](#multipart-file-parameters)
   - [First-Class `JSON` Types](#first-class-json-types)
+  - [Multiple Allowed Types](#multiple-allowed-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Built-in Validators](#built-in-validators)
@@ -851,6 +852,41 @@ end
 ```
 For stricter control over the type of JSON structure which may be supplied,
 use `type: Array, coerce_with: JSON` or `type: Hash, coerce_with: JSON`.
+
+### Multiple Allowed Types
+
+Variant-type parameters can be declared using the `types` option rather than `type`:
+
+```ruby
+params do
+  requires :status_code, types: [Integer, String, Array[Integer, String]]
+end
+get '/' do
+  params[:status_code].inspect
+end
+
+# ...
+
+client.get('/', status_code: 'OK_GOOD') # => "OK_GOOD"
+client.get('/', status_code: 300) # => 300
+client.get('/', status_code: %w(404 NOT FOUND)) # => [404, "NOT", "FOUND"]
+```
+
+As a special case, variant-member-type collections may also be declared, by
+passing a `Set` or `Array` with more than one member to `type`:
+
+```ruby
+params do
+  requires :status_codes, type: Array[Integer,String]
+end
+get '/' do
+  params[:status_codes].inspect
+end
+
+# ...
+
+client.get('/', status_codes: %w(1 two)) # => [1, "two"]
+```
 
 ### Validation of Nested Parameters
 

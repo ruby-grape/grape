@@ -417,6 +417,162 @@ describe Grape::Validations::CoerceValidator do
       end
     end
 
+    context 'multiple types' do
+      Boolean = Grape::API::Boolean
+
+      it 'coerces to first possible type' do
+        subject.params do
+          requires :a, types: [Boolean, Integer, String]
+        end
+        subject.get '/' do
+          params[:a].class.to_s
+        end
+
+        get '/', a: 'true'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
+
+        get '/', a: '5'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Fixnum')
+
+        get '/', a: 'anything else'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('String')
+      end
+
+      it 'fails when no coercion is possible' do
+        subject.params do
+          requires :a, types: [Boolean, Integer]
+        end
+        subject.get '/' do
+          params[:a].class.to_s
+        end
+
+        get '/', a: true
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
+
+        get '/', a: 'not good'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+      end
+
+      context 'for primitive collections' do
+        before do
+          subject.params do
+            optional :a, types: [String, Array[String]]
+            optional :b, types: [Array[Integer], Array[String]]
+            optional :c, type: Array[Integer, String]
+            optional :d, types: [Integer, String, Set[Integer, String]]
+          end
+          subject.get '/' do
+            (
+              params[:a] ||
+              params[:b] ||
+              params[:c] ||
+              params[:d]
+            ).inspect
+          end
+        end
+
+        it 'allows singular form declaration' do
+          get '/', a: 'one way'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('"one way"')
+
+          get '/', a: %w(the other)
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('["the", "other"]')
+
+          get '/', a: { a: 1, b: 2 }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('a is invalid')
+
+          get '/', a: [1, 2, 3]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('["1", "2", "3"]')
+        end
+
+        it 'allows multiple collection types' do
+          get '/', b: [1, 2, 3]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('[1, 2, 3]')
+
+          get '/', b: %w(1 2 3)
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('[1, 2, 3]')
+
+          get '/', b: [1, true, 'three']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('["1", "true", "three"]')
+        end
+
+        it 'allows collections with multiple types' do
+          get '/', c: [1, '2', true, 'three']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('[1, 2, "true", "three"]')
+
+          get '/', d: '1'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('1')
+
+          get '/', d: 'one'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('"one"')
+
+          get '/', d: %w(1 two)
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('#<Set: {1, "two"}>')
+        end
+      end
+
+      context 'custom coercion rules' do
+        before do
+          subject.params do
+            requires :a, types: [Boolean, String], coerce_with: (lambda do |val|
+              if val == 'yup'
+                true
+              elsif val == 'false'
+                0
+              else
+                val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:a].class.to_s
+          end
+        end
+
+        it 'respects :coerce_with' do
+          get '/', a: 'yup'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('TrueClass')
+        end
+
+        it 'still validates type' do
+          get '/', a: 'false'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('a is invalid')
+        end
+
+        it 'performs no additional coercion' do
+          get '/', a: 'true'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('String')
+        end
+      end
+
+      it 'may not be supplied together with a single type' do
+        expect do
+          subject.params do
+            requires :a, type: Integer, types: [Integer, String]
+          end
+        end.to raise_exception ArgumentError
+      end
+    end
+
     context 'converter' do
       it 'does not build Virtus::Attribute multiple times' do
         subject.params do

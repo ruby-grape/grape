@@ -20,30 +20,33 @@ module Grape
       # @return [Virtus::Attribute] object to be used
       #   for coercion and type validation
       def self.build_coercer(type, method = nil)
-        if type.is_a? Virtus::Attribute
-          # Accept pre-rolled virtus attributes without interference
-          type
-        else
-          converter_options = {
-            nullify_blank: true
-          }
-          conversion_type = type
+        # Accept pre-rolled virtus attributes without interference
+        return type if type.is_a? Virtus::Attribute
 
-          # Use a special coercer for custom types and coercion methods.
-          if method || Types.custom?(type)
-            converter_options[:coercer] = Types::CustomTypeCoercer.new(type, method)
+        converter_options = {
+          nullify_blank: true
+        }
+        conversion_type = type
 
-          # Grape swaps in its own Virtus::Attribute implementations
-          # for certain special types that merit first-class support
-          # (but not if a custom coercion method has been supplied).
-          elsif Types.special?(type)
-            conversion_type = Types::SPECIAL[type]
-          end
+        # Use a special coercer for multiply-typed parameters.
+        if Types.multiple?(type)
+          converter_options[:coercer] = Types::MultipleTypeCoercer.new(type, method)
+          conversion_type = Object
 
-          # Virtus will infer coercion and validation rules
-          # for many common ruby types.
-          Virtus::Attribute.build(conversion_type, converter_options)
+        # Use a special coercer for custom types and coercion methods.
+        elsif method || Types.custom?(type)
+          converter_options[:coercer] = Types::CustomTypeCoercer.new(type, method)
+
+        # Grape swaps in its own Virtus::Attribute implementations
+        # for certain special types that merit first-class support
+        # (but not if a custom coercion method has been supplied).
+        elsif Types.special?(type)
+          conversion_type = Types::SPECIAL[type]
         end
+
+        # Virtus will infer coercion and validation rules
+        # for many common ruby types.
+        Virtus::Attribute.build(conversion_type, converter_options)
       end
     end
   end

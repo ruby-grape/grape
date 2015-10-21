@@ -177,10 +177,7 @@ module Grape
       def validates(attrs, validations)
         doc_attrs = { required: validations.keys.include?(:presence) }
 
-        # special case (type = coerce)
-        validations[:coerce] = validations.delete(:type) if validations.key?(:type)
-
-        coerce_type = validations[:coerce]
+        coerce_type = infer_coercion(validations)
 
         doc_attrs[:type] = coerce_type.to_s if coerce_type
 
@@ -212,7 +209,7 @@ module Grape
           validations.delete(:presence)
         end
 
-        # Before we run the rest of the validators, lets handle
+        # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
         coerce_type validations, attrs, doc_attrs
@@ -220,6 +217,42 @@ module Grape
         validations.each do |type, options|
           validate(type, options, attrs, doc_attrs)
         end
+      end
+
+      # Validate and comprehend the +:type+, +:types+, and +:coerce_with+
+      # options that have been supplied to the parameter declaration.
+      # The +:type+ and +:types+ options will be removed from the
+      # validations list, replaced appropriately with +:coerce+ and
+      # +:coerce_with+ options that will later be passed to
+      # {Validators::CoerceValidator}. The type that is returned may be
+      # used for documentation and further validation of parameter
+      # options.
+      #
+      # @param validations [Hash] list of validations supplied to the
+      #   parameter declaration
+      # @return [class-like] type to which the parameter will be coerced
+      # @raise [ArgumentError] if the given type options are invalid
+      def infer_coercion(validations)
+        if validations.key?(:type) && validations.key?(:types)
+          fail ArgumentError, ':type may not be supplied with :types'
+        end
+
+        validations[:coerce] = validations[:type] if validations.key?(:type)
+        validations[:coerce] = validations.delete(:types) if validations.key?(:types)
+
+        coerce_type = validations[:coerce]
+
+        # Special case - when the argument is a single type that is a
+        # variant-type collection.
+        if Types.multiple?(coerce_type) && validations.key?(:type)
+          validations[:coerce] = Types::VariantCollectionCoercer.new(
+            coerce_type,
+            validations.delete(:coerce_with)
+          )
+        end
+        validations.delete(:type)
+
+        coerce_type
       end
 
       # Enforce correct usage of :coerce_with parameter.
