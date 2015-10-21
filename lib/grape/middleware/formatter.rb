@@ -20,37 +20,37 @@ module Grape
 
       def after
         status, headers, bodies = *@app_response
-        return @app_response if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 
-        if bodies.is_a?(Grape::Util::FileResponse)
-          headers = ensure_content_type(headers)
-
-          response =
-            Rack::Response.new([], status, headers) do |resp|
-              resp.body = bodies.file
-            end
+        if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+          @app_response
         else
-          # Allow content-type to be explicitly overwritten
-          api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
-          formatter = Grape::Formatter::Base.formatter_for(api_format, options)
-
-          begin
-            bodymap = bodies.collect do |body|
-              formatter.call(body, env)
-            end
-
-            headers = ensure_content_type(headers)
-
-            response = Rack::Response.new(bodymap, status, headers)
-          rescue Grape::Exceptions::InvalidFormatter => e
-            throw :error, status: 500, message: e.message
-          end
+          build_formatted_response(status, headers, bodies)
         end
-
-        response
       end
 
       private
+
+      def build_formatted_response(status, headers, bodies)
+        headers = ensure_content_type(headers)
+
+        if bodies.is_a?(Grape::Util::FileResponse)
+          Rack::Response.new([], status, headers) do |resp|
+            resp.body = bodies.file
+          end
+        else
+          # Allow content-type to be explicitly overwritten
+          formatter = fetch_formatter(headers, options)
+          bodymap = bodies.collect { |body| formatter.call(body, env) }
+          Rack::Response.new(bodymap, status, headers)
+        end
+      rescue Grape::Exceptions::InvalidFormatter => e
+        throw :error, status: 500, message: e.message
+      end
+
+      def fetch_formatter(headers, options)
+        api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
+        Grape::Formatter::Base.formatter_for(api_format, options)
+      end
 
       # Set the content type header for the API format if it is not already present.
       #
