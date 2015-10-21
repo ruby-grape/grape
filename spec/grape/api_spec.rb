@@ -523,7 +523,7 @@ describe Grape::API do
         'example'
       end
       put '/example'
-      expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, POST, HEAD'
+      expect(last_response.headers['Allow']).to eql 'GET, POST, HEAD, OPTIONS'
     end
 
     specify '405 responses includes an Content-Type header' do
@@ -545,7 +545,7 @@ describe Grape::API do
       options '/example'
       expect(last_response.status).to eql 204
       expect(last_response.body).to eql ''
-      expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, HEAD'
+      expect(last_response.headers['Allow']).to eql 'GET, HEAD, OPTIONS'
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
     end
 
@@ -581,7 +581,7 @@ describe Grape::API do
       options '/example'
       expect(last_response.status).to eql 204
       expect(last_response.body).to eql ''
-      expect(last_response.headers['Allow']).to eql 'OPTIONS, GET'
+      expect(last_response.headers['Allow']).to eql 'GET, OPTIONS'
     end
     it 'does not allow HEAD on a GET request' do
       head '/example'
