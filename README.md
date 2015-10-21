@@ -1976,6 +1976,11 @@ Built-in formatters are the following.
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
 
+Response statuses that indicate no content as defined by [Rack](https://github.com/rack)
+[here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
+will bypass serialization and the body entity - though there should be none -
+will not be modified.
+
 ### JSONP
 
 Grape supports JSONP via [Rack::JSONP](https://github.com/rack/rack-contrib), part of the

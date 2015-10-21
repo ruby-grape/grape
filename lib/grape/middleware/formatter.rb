@@ -20,6 +20,7 @@ module Grape
 
       def after
         status, headers, bodies = *@app_response
+        return @app_response if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 
         if bodies.is_a?(Grape::Util::FileResponse)
           headers = ensure_content_type(headers)

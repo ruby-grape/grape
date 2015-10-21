@@ -15,6 +15,14 @@ Identical endpoints with different versions now work correctly. A regression int
 
 See [#1114](https://github.com/ruby-grape/grape/pull/1114) for more information.
 
+#### Bypasses formatters when status code indicates no content
+
+To be consistent with rack and it's handling of standard responses
+associated with no content, both default and custom formatters will now
+be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
+
+See [#1190](https://github.com/ruby-grape/grape/pull/1190) for more information.
+
 ### Upgrading to >= 0.12.0
 
 #### Changes in middleware

@@ -5,6 +5,7 @@
 
 * Your contribution here.
 
+* [#1190](https://github.com/ruby-grape/grape/putt/1190): Bypass formatting for statuses with no entity-body - [@tylerdooling](https://github.com/tylerdooling).
 * [#1188](https://github.com/ruby-grape/grape/putt/1188): Allow parameters with more than one type - [@dslh](https://github.com/dslh).
 * [#1179](https://github.com/ruby-grape/grape/pull/1179): Allow all RFC6838 valid characters in header vendor - [@suan](https://github.com/suan).
 * [#1170](https://github.com/ruby-grape/grape/pull/1170): Allow dashes and periods in header vendor - [@suan](https://github.com/suan).
