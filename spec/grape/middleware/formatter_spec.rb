@@ -201,6 +201,18 @@ describe Grape::Middleware::Formatter do
     end
   end
 
+  context 'no content responses' do
+    let(:no_content_response) { ->(status) { [status, {}, ['']] } }
+
+    Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.each do |status|
+      it "does not modify a #{status} response" do
+        expected_response = no_content_response[status]
+        allow(app).to receive(:call).and_return(expected_response)
+        expect(subject.call({})).to eq(expected_response)
+      end
+    end
+  end
+
   context 'input' do
     %w(POST PATCH PUT DELETE).each do |method|
       ['application/json', 'application/json; charset=utf-8'].each do |content_type|
