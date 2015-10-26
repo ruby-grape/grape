@@ -752,7 +752,7 @@ describe Grape::Endpoint do
       get '/hey'
       expect(last_response.status).to eq 302
       expect(last_response.headers['Location']).to eq '/ha'
-      expect(last_response.body).to eq ''
+      expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
     end
 
     it 'has status code 303 if it is not get request and it is http 1.1' do
@@ -762,6 +762,7 @@ describe Grape::Endpoint do
       post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
       expect(last_response.status).to eq 303
       expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.body).to eq 'An alternate resource is located at /ha.'
     end
 
     it 'support permanent redirect' do
@@ -771,7 +772,15 @@ describe Grape::Endpoint do
       get '/hey'
       expect(last_response.status).to eq 301
       expect(last_response.headers['Location']).to eq '/ha'
-      expect(last_response.body).to eq ''
+      expect(last_response.body).to eq 'This resource has been moved permanently to /ha.'
+    end
+
+    it 'allows for an optional redirect body override' do
+      subject.get('/hey') do
+        redirect '/ha', body: 'test body'
+      end
+      get '/hey'
+      expect(last_response.body).to eq 'test body'
     end
   end
 

@@ -91,19 +91,25 @@ module Grape
       # @param url [String] The url to be redirect.
       # @param options [Hash] The options used when redirect.
       #                       :permanent, default false.
+      #                       :body, default a short message including the URL.
       def redirect(url, options = {})
-        merged_options = options.reverse_merge(permanent: false)
-        if merged_options[:permanent]
+        permanent = options.fetch(:permanent, false)
+        body_message = options.fetch(:body, nil)
+        if permanent
           status 301
+          body_message ||= "This resource has been moved permanently to #{url}."
         else
           if env[Grape::Http::Headers::HTTP_VERSION] == 'HTTP/1.1' && request.request_method.to_s.upcase != Grape::Http::Headers::GET
             status 303
+            body_message ||= "An alternate resource is located at #{url}."
           else
             status 302
+            body_message ||= "This resource has been moved temporarily to #{url}."
           end
         end
         header 'Location', url
-        body ''
+        content_type 'text/plain'
+        body body_message
       end
 
       # Set or retrieve the HTTP status code.

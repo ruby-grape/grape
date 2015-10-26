@@ -23,6 +23,15 @@ be bypassed when processing responses for status codes defined [by rack](https:/
 
 See [#1190](https://github.com/ruby-grape/grape/pull/1190) for more information.
 
+#### Redirects respond as plain text with message
+
+`#redirect` now uses `text/plain` regardless of whether that format has
+been enabled. This prevents formatters from attempting to serialize the
+message body and allows for a descriptive message body to be provided - and
+optionally overridden - that better fulfills the theme of the HTTP spec.
+
+See [#1194](https://github.com/ruby-grape/grape/pull/1194) for more information.
+
 ### Upgrading to >= 0.12.0
 
 #### Changes in middleware
