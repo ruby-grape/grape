@@ -684,7 +684,7 @@ You can define validations and coercion options for your parameters using a `par
 ```ruby
 params do
   requires :id, type: Integer
-  optional :text, type: String, regexp: /^[a-z]+$/
+  optional :text, type: String, regexp: /\A[a-z]+\z/
   group :media do
     requires :url
   end
@@ -1152,7 +1152,7 @@ end
 ```ruby
 class AlphaNumeric < Grape::Validations::Base
   def validate_param!(attr_name, params)
-    unless params[attr_name] =~ /^[[:alnum:]]+$/
+    unless params[attr_name] =~ /\A[[:alnum:]]+\z/
       fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
     end
   end
