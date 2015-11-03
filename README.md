@@ -2200,12 +2200,12 @@ end
 
 ### Hypermedia and Roar
 
-You can use [Roar](https://github.com/apotonick/roar) to render HAL or Collection+JSON with the help of [grape-roar](https://github.com/dblock/grape-roar), which defines a custom JSON formatter and enables presenting entities with Grape's `present` keyword.
+You can use [Roar](https://github.com/apotonick/roar) to render HAL or Collection+JSON with the help of [grape-roar](https://github.com/ruby-grape/grape-roar), which defines a custom JSON formatter and enables presenting entities with Grape's `present` keyword.
 
 ### Rabl
 
 You can use [Rabl](https://github.com/nesquena/rabl) templates with the help of the
-[grape-rabl](https://github.com/LTe/grape-rabl) gem, which defines a custom Grape Rabl
+[grape-rabl](https://github.com/ruby-grape/grape-rabl) gem, which defines a custom Grape Rabl
 formatter.
 
 ### Active Model Serializers
@@ -2807,9 +2807,9 @@ See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/
 
 Grape integrates with following third-party tools:
 
-* **New Relic** - [built-in support](https://docs.newrelic.com/docs/agents/ruby-agent/frameworks/grape-instrumentation) from v3.10.0 of the official [newrelic_rpm](https://github.com/newrelic/rpm) gem, also [newrelic-grape](https://github.com/flyerhzm/newrelic-grape) gem
+* **New Relic** - [built-in support](https://docs.newrelic.com/docs/agents/ruby-agent/frameworks/grape-instrumentation) from v3.10.0 of the official [newrelic_rpm](https://github.com/newrelic/rpm) gem, also [newrelic-grape](https://github.com/xinminlabs/newrelic-grape) gem
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
-* **[Skylight](https://skylight.io)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape)
+* **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 
 ## Contributing to Grape
 
