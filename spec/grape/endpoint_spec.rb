@@ -13,13 +13,13 @@ describe Grape::Endpoint do
     it 'should be settable via block' do
       block = ->(_endpoint) { 'noop' }
       Grape::Endpoint.before_each(&block)
-      expect(Grape::Endpoint.before_each).to eq(block)
+      expect(Grape::Endpoint.before_each.first).to eq(block)
     end
 
     it 'should be settable via reference' do
       block = ->(_endpoint) { 'noop' }
       Grape::Endpoint.before_each block
-      expect(Grape::Endpoint.before_each).to eq(block)
+      expect(Grape::Endpoint.before_each.first).to eq(block)
     end
 
     it 'should be able to override a helper' do
@@ -28,6 +28,28 @@ describe Grape::Endpoint do
 
       Grape::Endpoint.before_each do |endpoint|
         allow(endpoint).to receive(:current_user).and_return('Bob')
+      end
+
+      get '/'
+      expect(last_response.body).to eq('Bob')
+
+      Grape::Endpoint.before_each(nil)
+      expect { get '/' }.to raise_error(NameError)
+    end
+
+    it 'should be able to stack helper' do
+      subject.get('/') do
+        authenticate_user!
+        current_user
+      end
+      expect { get '/' }.to raise_error(NameError)
+
+      Grape::Endpoint.before_each do |endpoint|
+        allow(endpoint).to receive(:current_user).and_return('Bob')
+      end
+
+      Grape::Endpoint.before_each do |endpoint|
+        allow(endpoint).to receive(:authenticate_user!).and_return(true)
       end
 
       get '/'
