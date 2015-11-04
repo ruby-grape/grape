@@ -13,14 +13,15 @@ module Grape
 
     class << self
       def before_each(new_setup = false, &block)
+        @before_each ||= []
         if new_setup == false
           if block_given?
-            @before_each = block
+            @before_each << block
           else
             return @before_each
           end
         else
-          @before_each = new_setup
+          @before_each = [new_setup]
         end
       end
 
@@ -226,7 +227,9 @@ module Grape
 
         cookies.read(@request)
 
-        self.class.before_each.call(self) if self.class.before_each
+        self.class.before_each.each do |blk|
+          blk.call(self) if blk.respond_to?(:call)
+        end if self.class.before_each.any?
 
         run_filters befores, :before
 
