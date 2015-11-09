@@ -56,8 +56,8 @@ module Grape
 
       def mime_types
         content_types.each_with_object({}) do |(k, v), types_without_params|
-          types_without_params[k] = v.split(';').first
-        end.invert
+          types_without_params[v.split(';').first] = k
+        end
       end
     end
   end
