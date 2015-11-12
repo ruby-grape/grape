@@ -188,6 +188,7 @@ module Grape
     end
 
     def call(env)
+      build_app
       dup.call!(env)
     end
 
@@ -195,13 +196,8 @@ module Grape
       extend helpers
 
       env[Grape::Env::API_ENDPOINT] = self
-      if options[:app]
-        options[:app].call(env)
-      else
-        builder = build_middleware
-        builder.run ->(arg) { run(arg) }
-        builder.call(env)
-      end
+      @env = env
+      @app.call(env)
     end
 
     # Return the collection of endpoints within this endpoint.
@@ -216,9 +212,8 @@ module Grape
 
     protected
 
-    def run(env)
+    def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
-        @env = env
         @header = {}
 
         @request = Grape::Request.new(env)
@@ -262,7 +257,11 @@ module Grape
       end
     end
 
-    def build_middleware
+    def build_app
+      @app ||= options[:app] || build_stack
+    end
+
+    def build_stack
       b = Rack::Builder.new
 
       b.use Rack::Head
@@ -303,7 +302,9 @@ module Grape
             formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:formatters)),
             parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers))
 
-      b
+      b.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
+
+      b.to_app
     end
 
     def helpers

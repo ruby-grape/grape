@@ -13,7 +13,7 @@ Lint/NestedMethodDefinition:
 
 # Offense count: 37
 Metrics/AbcSize:
-  Max: 46
+  Max: 51
 
 # Offense count: 1
 Metrics/BlockNesting:
@@ -36,7 +36,7 @@ Metrics/LineLength:
 # Offense count: 42
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 35
+  Max: 36
 
 # Offense count: 8
 # Configuration parameters: CountComments.
