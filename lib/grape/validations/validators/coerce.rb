@@ -13,8 +13,16 @@ module Grape
       def validate_param!(attr_name, params)
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
         new_value = coerce_value(params[attr_name])
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless valid_type?(new_value)
-        params[attr_name] = new_value
+        if valid_type?(new_value)
+          params[attr_name] = new_value
+        else
+          bad_value = new_value
+          if bad_value.is_a?(Types::InvalidValue) && !bad_value.message.nil?
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: bad_value.message.to_s
+          else
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce
+          end
+        end
       end
 
       private

@@ -119,6 +119,54 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to match(/foo is invalid/)
     end
+
+    context 'when the parse method returns an InvalidValue' do
+      module ParamsScopeSpec
+        class AnotherCustomType
+          attr_reader :value
+          def self.parse(value)
+            case value
+            when 'invalid with message'
+              Grape::Validations::Types::InvalidValue.new 'is not correct'
+            when 'invalid without message'
+              Grape::Validations::Types::InvalidValue.new
+            else
+              new(value)
+            end
+          end
+
+          def initialize(value)
+            @value = value
+          end
+        end
+      end
+
+      context 'with a message' do
+        it 'fails with the InvalidValue\'s error message' do
+          subject.params do
+            requires :foo, type: ParamsScopeSpec::AnotherCustomType
+          end
+          subject.get('/types') { params[:foo].value }
+
+          get '/types', foo: 'invalid with message'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to match(/foo is not correct/)
+        end
+      end
+
+      context 'without a message' do
+        it 'fails with the default coercion failure message' do
+          subject.params do
+            requires :foo, type: ParamsScopeSpec::AnotherCustomType
+          end
+          subject.get('/types') { params[:foo].value }
+
+          get '/types', foo: 'invalid without message'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to match(/foo is invalid/)
+        end
+      end
+    end
   end
 
   context 'array without coerce type explicitly given' do
