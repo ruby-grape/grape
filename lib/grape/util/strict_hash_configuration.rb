@@ -64,7 +64,8 @@ module Grape
           end
 
           define_method 'to_hash' do
-            merge_hash = setting_name.keys.each_with_object({}) { |k, hash| hash[k] = send("#{k}_context").to_hash }
+            merge_hash = {}
+            setting_name.each_key { |k| merge_hash[k] = send("#{k}_context").to_hash }
 
             @settings.to_hash.merge(
               merge_hash
