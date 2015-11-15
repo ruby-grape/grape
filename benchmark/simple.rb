@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'grape'
-require 'benchmark'
+require 'benchmark/ips'
 
 class API < Grape::API
   prefix :api
@@ -20,12 +20,8 @@ env = Rack::MockRequest.env_for('/api/v1', options)
   env["HTTP_HEADER#{i}"] = '123'
 end
 
-iters = 5000
-
-Benchmark.bm do |bm|
-  bm.report('simple') do
-    iters.times do
-      API.call env
-    end
+Benchmark.ips do |ips|
+  ips.report('simple') do
+    API.call env
   end
 end
