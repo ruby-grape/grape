@@ -189,6 +189,7 @@ module Grape
 
     def call(env)
       build_app
+      build_helpers
       dup.call!(env)
     end
 
@@ -307,12 +308,17 @@ module Grape
       b.to_app
     end
 
-    def helpers
-      mod = Module.new
-      (namespace_stackable(:helpers) || []).each do |mod_to_include|
-        mod.send :include, mod_to_include
+    def build_helpers
+      helpers = namespace_stackable(:helpers) || []
+      Module.new do
+        helpers.each do |mod_to_include|
+          include mod_to_include
+        end
       end
-      mod
+    end
+
+    def helpers
+      @helpers ||= build_helpers
     end
 
     def run_filters(filters, type = :other)
