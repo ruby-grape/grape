@@ -12,6 +12,14 @@ module Grape
     include Grape::DSL::InsideRoute
 
     class << self
+      def new(*args, &block)
+        if self == Endpoint
+          Class.new(Endpoint).new(*args, &block)
+        else
+          super
+        end
+      end
+
       def before_each(new_setup = false, &block)
         @before_each ||= []
         if new_setup == false
@@ -22,6 +30,13 @@ module Grape
           end
         else
           @before_each = [new_setup]
+        end
+      end
+
+      def run_before_each(endpoint)
+        superclass.run_before_each(endpoint) unless self == Endpoint
+        before_each.each do |blk|
+          blk.call(endpoint) if blk.respond_to? :call
         end
       end
 
@@ -74,6 +89,8 @@ module Grape
 
       @options[:method] = Array(options[:method])
       @options[:route_options] ||= {}
+
+      @lazy_initialize_lock = Mutex.new
 
       return unless block_given?
 
@@ -188,14 +205,11 @@ module Grape
     end
 
     def call(env)
-      build_app
-      build_helpers
+      lazy_initialize!
       dup.call!(env)
     end
 
     def call!(env)
-      extend helpers
-
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
       @app.call(env)
@@ -223,9 +237,7 @@ module Grape
 
         cookies.read(@request)
 
-        self.class.before_each.each do |blk|
-          blk.call(self) if blk.respond_to?(:call)
-        end if self.class.before_each.any?
+        self.class.run_before_each(self)
 
         run_filters befores, :before
 
@@ -256,10 +268,6 @@ module Grape
         response_object = file || [body || response_object]
         [status, header, response_object]
       end
-    end
-
-    def build_app
-      @app ||= options[:app] || build_stack
     end
 
     def build_stack
@@ -317,8 +325,25 @@ module Grape
       end
     end
 
+    private :build_stack, :build_helpers
+
     def helpers
-      @helpers ||= build_helpers
+      lazy_initialize! && @helpers
+    end
+
+    def lazy_initialize!
+      return true if @lazy_initialized
+
+      @lazy_initialize_lock.synchronize do
+        return true if @lazy_initialized
+
+        @app = options[:app] || build_stack
+        @helpers = build_helpers.tap do |mod|
+          self.class.send(:include, mod)
+        end
+
+        @lazy_initialized = true
+      end
     end
 
     def run_filters(filters, type = :other)
@@ -327,7 +352,8 @@ module Grape
           instance_eval(&filter)
         end
       end
-      extend DSL::InsideRoute.post_filter_methods(type)
+      post_extension = DSL::InsideRoute.post_filter_methods(type)
+      extend post_extension if post_extension
     end
 
     def befores
