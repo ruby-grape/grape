@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-contrib'
   s.add_development_dependency 'mime-types'
   s.add_development_dependency 'appraisal'
+  s.add_development_dependency 'benchmark-ips'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

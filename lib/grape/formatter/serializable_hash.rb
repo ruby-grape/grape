@@ -21,9 +21,11 @@ module Grape
           elsif object.is_a?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false)
             object.map(&:serializable_hash)
           elsif object.is_a?(Hash)
-            object.each_with_object({}) do |(k, v), h|
+            h = {}
+            object.each_pair do |k, v|
               h[k] = serialize(v)
             end
+            h
           else
             object
           end
