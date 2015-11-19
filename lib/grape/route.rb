@@ -4,6 +4,7 @@ module Grape
     # @api private
     def initialize(options = {})
       @options = options || {}
+      Grape::Routes.add(self)
     end
 
     # @api private
