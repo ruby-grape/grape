@@ -1028,38 +1028,38 @@ describe Grape::Endpoint do
 
       # In order that the events finalized (time each block ended)
       expect(@events).to contain_exactly(
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :before_validation }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after_validation }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: an_instance_of(Grape::Endpoint) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after }),
-        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                env: an_instance_of(Hash) })
       )
 
       # In order that events were initialized
       expect(@events.sort_by(&:time)).to contain_exactly(
-        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                env: an_instance_of(Hash) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :before_validation }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after_validation }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: an_instance_of(Grape::Endpoint) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: an_instance_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after })
       )

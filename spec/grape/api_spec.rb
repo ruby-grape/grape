@@ -1088,7 +1088,7 @@ describe Grape::API do
 
       subject.get(:hello) { 'Hello, world.' }
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(basic_auth_context).to be_an_instance_of(Grape::Endpoint)
+      expect(basic_auth_context).to be_a_kind_of(Grape::Endpoint)
     end
 
     it 'has access to helper methods' do

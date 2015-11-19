@@ -18,7 +18,7 @@ module Grape
       #   filter +type+.
       def self.post_filter_methods(type)
         @post_filter_modules ||= { before: PostBeforeFilter }
-        @post_filter_modules[type] || Module.new
+        @post_filter_modules[type]
       end
 
       # Methods which should not be available in filters until the before filter
