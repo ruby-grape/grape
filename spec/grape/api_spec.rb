@@ -809,7 +809,7 @@ describe Grape::API do
 
     it 'returns raw data when content type binary' do
       image_filename = 'grape.png'
-      file = File.open(image_filename, 'rb') { |io| io.read }
+      file = File.open(image_filename, 'rb', &:read)
       subject.format :binary
       subject.get('/binary_file') { File.binread(image_filename) }
       get '/binary_file'

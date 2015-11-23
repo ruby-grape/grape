@@ -31,9 +31,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'cookiejar'
   s.add_development_dependency 'rack-contrib'
-  s.add_development_dependency 'mime-types'
+  s.add_development_dependency 'mime-types', '< 3.0'
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'benchmark-ips'
+  s.add_development_dependency 'rubocop', '0.35.1'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
