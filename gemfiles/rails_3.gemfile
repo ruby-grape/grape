@@ -6,7 +6,6 @@ gem 'rails', '3.2.19'
 gem 'rack-cache', '<= 1.2'
 
 group :development, :test do
-  gem 'rubocop', '0.35.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'

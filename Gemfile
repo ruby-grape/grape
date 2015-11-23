@@ -3,7 +3,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'rubocop', '0.35.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
