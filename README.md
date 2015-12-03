@@ -1543,6 +1543,12 @@ You can abort the execution of an API method by raising errors with `error!`.
 error! 'Access Denied', 401
 ```
 
+Anything that responds to `#to_s` can be given as a first argument to `error!`.
+
+```ruby
+error! :not_found, 404
+```
+
 You can also return JSON formatted objects by raising error! and passing a hash
 instead of a message.
 

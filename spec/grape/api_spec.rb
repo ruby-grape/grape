@@ -1668,13 +1668,23 @@ describe Grape::API do
       get '/error'
       expect(last_response.body).to eql 'Access Denied'
     end
-    it 'rescues error! and return json' do
-      subject.format :json
-      subject.get '/error' do
-        error!('Access Denied', 401)
+    context 'with json format' do
+      before { subject.format :json }
+
+      it 'rescues error! called with a string and returns json' do
+        subject.get('/error') { error!(:failure, 401) }
       end
-      get '/error'
-      expect(last_response.body).to eql '{"error":"Access Denied"}'
+      it 'rescues error! called with a symbol and returns json' do
+        subject.get('/error') { error!(:failure, 401) }
+      end
+      it 'rescues error! called with a hash and returns json' do
+        subject.get('/error') { error!({ error: :failure }, 401) }
+      end
+
+      after do
+        get '/error'
+        expect(last_response.body).to eql('{"error":"failure"}')
+      end
     end
   end
 
