@@ -1,9 +1,7 @@
-0.13.1 (Next)
-=============
+0.14.0 (12/17/2015)
+===================
 
 #### Features
-
-* Your contribution here.
 
 * [#1218](https://github.com/ruby-grape/grape/pull/1218): Provide array index context in errors - [@towanda](https://github.com/towanda).
 * [#1196](https://github.com/ruby-grape/grape/pull/1196): Allow multiple `before_each` blocks - [@huynhquancam](https://github.com/huynhquancam).

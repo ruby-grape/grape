@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.13.1
+### Upgrading to >= 0.14.0
 
 #### Changes to availability of DSL methods in filters
 
