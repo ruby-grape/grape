@@ -66,7 +66,7 @@ describe Grape::Middleware::Formatter do
 
       expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
-      end.to raise_error
+      end.to raise_error(StandardError)
     end
   end
 

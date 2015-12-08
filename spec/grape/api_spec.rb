@@ -1289,7 +1289,7 @@ describe Grape::API do
       subject.get '/exception' do
         fail 'rain!'
       end
-      expect { get '/exception' }.to raise_error
+      expect { get '/exception' }.to raise_error(RuntimeError, 'rain!')
     end
 
     it 'rescues all errors if rescue_from :all is called' do
@@ -1322,7 +1322,7 @@ describe Grape::API do
       get '/rescued'
       expect(last_response.status).to eql 500
 
-      expect { get '/unrescued' }.to raise_error
+      expect { get '/unrescued' }.to raise_error(RuntimeError, 'beefcake')
     end
 
     context 'CustomError subclass of Grape::Exceptions::Base' do
