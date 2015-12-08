@@ -3,13 +3,22 @@ module Grape
     module Json
       class << self
         def call(message, backtrace, options = {}, env = nil)
-          message = Grape::ErrorFormatter::Base.present(message, env)
+          result = wrap_message(Grape::ErrorFormatter::Base.present(message, env))
 
-          result = message.is_a?(String) ? { error: message } : message
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)
           end
           MultiJson.dump(result)
+        end
+
+        private
+
+        def wrap_message(message)
+          if message.is_a?(Exceptions::ValidationErrors) || message.is_a?(Hash)
+            message
+          else
+            { error: message }
+          end
         end
       end
     end
