@@ -1147,11 +1147,7 @@ describe Grape::API do
     it 'defaults to a standard logger log format' do
       t = Time.at(100)
       allow(Time).to receive(:now).and_return(t)
-      if ActiveSupport::VERSION::MAJOR >= 4
-        expect(subject.io).to receive(:write).with("I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : this will be logged\n")
-      else
-        expect(subject.io).to receive(:write).with("this will be logged\n")
-      end
+      expect(subject.io).to receive(:write).with("I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : this will be logged\n")
       subject.logger.info 'this will be logged'
     end
   end
