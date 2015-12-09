@@ -4,7 +4,7 @@
 * [#1216](https://github.com/ruby-grape/grape/pull/1142): Fix JSON error response when calling `error!` with non-Strings - [@jrforrest](https://github.com/jrforrest).
 * Your contribution here.
 
-0.14.0 (12/17/2015)
+0.14.0 (12/07/2015)
 ===================
 
 #### Features
