@@ -90,7 +90,11 @@ module Grape
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs)
-        @declared_params.concat attrs
+        if lateral?
+          @parent.push_declared_params(attrs)
+        else
+          @declared_params.concat attrs
+        end
       end
 
       private
@@ -145,7 +149,14 @@ module Grape
         end
 
         opts = attrs[1] || { type: Array }
-        self.class.new(api: @api, element: attrs.first, parent: self, optional: optional, type: opts[:type], &block)
+
+        self.class.new(
+          api:      @api,
+          element:  attrs.first,
+          parent:   self,
+          optional: optional,
+          type:     opts[:type],
+          &block)
       end
 
       # Returns a new parameter scope, not nested under any current-level param
