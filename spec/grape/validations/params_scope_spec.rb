@@ -93,6 +93,7 @@ describe Grape::Validations::ParamsScope do
     module ParamsScopeSpec
       class CustomType
         attr_reader :value
+
         def self.parse(value)
           fail if value == 'invalid'
           new(value)
@@ -326,6 +327,38 @@ describe Grape::Validations::ParamsScope do
       get '/nested', bar: { a: true }
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('bar[b] is missing')
+    end
+
+    it 'includes the nested parameter within #declared(params)' do
+      subject.params do
+        requires :bar, type: Hash do
+          optional :a
+          given :a do
+            requires :b
+          end
+        end
+      end
+      subject.get('/nested') { declared(params).to_json }
+
+      get '/nested', bar: { a: true, b: 'yes' }
+      expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'true', 'b' => 'yes' })
+    end
+
+    it 'includes level 2 nested parameters outside the given within #declared(params)' do
+      subject.params do
+        requires :bar, type: Hash do
+          optional :a
+          given :a do
+            requires :c, type: Hash do
+              requires :b
+            end
+          end
+        end
+      end
+      subject.get('/nested') { declared(params).to_json }
+
+      get '/nested', bar: { a: true, c: { b: 'yes' } }
+      expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'true', 'c' => { 'b' => 'yes' } })
     end
   end
 end
