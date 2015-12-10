@@ -224,6 +224,16 @@ describe Grape::Middleware::Versioner::Header do
       end
     end
 
+    it 'fails with 406 Not Acceptable if header contains a single invalid accept' do
+      expect { subject.call('HTTP_ACCEPT' => 'application/json;application/vnd.vendor-v1+json').first }
+        .to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.headers).to eql({})
+        expect(exception.status).to eql 406
+        expect(exception.message).to include('API vendor or version not found.')
+      end
+    end
+
     it 'succeeds if proper header is set' do
       expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json').first).to eq(200)
     end
