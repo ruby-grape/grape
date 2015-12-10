@@ -366,7 +366,7 @@ describe Grape::Validations do
       end
 
       it "doesn't throw a missing param when param is present" do
-        get '/required', items: [key: 'hello', key: 'world']
+        get '/required', items: [key: 'hello']
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('required works')
       end

@@ -59,7 +59,7 @@ describe Grape::Middleware::Error do
       use Grape::Middleware::Error
       run ExceptionSpec::ExceptionApp
     end
-    expect { get '/' }.to raise_error
+    expect { get '/' }.to raise_error(RuntimeError, 'rain!')
   end
 
   context 'with rescue_all set to true' do
