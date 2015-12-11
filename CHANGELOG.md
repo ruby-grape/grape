@@ -1,9 +1,10 @@
 0.14.1 (Next)
 =============
 
+* Your contribution here.
+
 * [#1216](https://github.com/ruby-grape/grape/pull/1142): Fix JSON error response when calling `error!` with non-Strings - [@jrforrest](https://github.com/jrforrest).
 * [#1225](https://github.com/ruby-grape/grape/pull/1225): Fix `given` with nested params not returning correct declared params - [@JanStevens](https://github.com/JanStevens).
-* Your contribution here.
 
 0.14.0 (12/07/2015)
 ===================
@@ -12,8 +13,8 @@
 
 * [#1218](https://github.com/ruby-grape/grape/pull/1218): Provide array index context in errors - [@towanda](https://github.com/towanda).
 * [#1196](https://github.com/ruby-grape/grape/pull/1196): Allow multiple `before_each` blocks - [@huynhquancam](https://github.com/huynhquancam).
-* [#1190](https://github.com/ruby-grape/grape/putt/1190): Bypass formatting for statuses with no entity-body - [@tylerdooling](https://github.com/tylerdooling).
-* [#1188](https://github.com/ruby-grape/grape/putt/1188): Allow parameters with more than one type - [@dslh](https://github.com/dslh).
+* [#1190](https://github.com/ruby-grape/grape/pull/1190): Bypass formatting for statuses with no entity-body - [@tylerdooling](https://github.com/tylerdooling).
+* [#1188](https://github.com/ruby-grape/grape/pull/1188): Allow parameters with more than one type - [@dslh](https://github.com/dslh).
 * [#1179](https://github.com/ruby-grape/grape/pull/1179): Allow all RFC6838 valid characters in header vendor - [@suan](https://github.com/suan).
 * [#1170](https://github.com/ruby-grape/grape/pull/1170): Allow dashes and periods in header vendor - [@suan](https://github.com/suan).
 * [#1167](https://github.com/ruby-grape/grape/pull/1167): Convenience wrapper `type: File` for validating multipart file parameters - [@dslh](https://github.com/dslh).
@@ -30,7 +31,7 @@
 * [#1142](https://github.com/ruby-grape/grape/pull/1142): Makes #declared unavailable to before filters - [@jrforrest](https://github.com/jrforrest).
 * [#1114](https://github.com/ruby-grape/grape/pull/1114): Fix regression which broke identical endpoints with different versions - [@suan](https://github.com/suan).
 * [#1109](https://github.com/ruby-grape/grape/pull/1109): Memoize Virtus attribute and fix memory leak - [@marshall-lee](https://github.com/marshall-lee).
-* [#1101](https://github.com/intridea/grape/pull/1101): Fix: Incorrect media-type `Accept` header now correctly returns 406 with `strict: true` - [@elliotlarson](https://github.com/elliotlarson).
+* [#1101](https://github.com/ruby-grape/grape/pull/1101): Fix: Incorrect media-type `Accept` header now correctly returns 406 with `strict: true` - [@elliotlarson](https://github.com/elliotlarson).
 * [#1108](https://github.com/ruby-grape/grape/pull/1039): Raise a warning when `desc` is called with options hash and block - [@rngtng](https://github.com/rngtng).
 
 0.13.0 (8/10/2015)
