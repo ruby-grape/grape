@@ -1808,7 +1808,7 @@ class API < Grape::API
 end
 ```
 
-For similar to Rails request logging try the [grape_logging](https://github.com/aserafin/grape_logging) gem.
+For similar to Rails request logging try the [grape_logging](https://github.com/aserafin/grape_logging) or [grape-middleware-logger](https://github.com/ridiculous/grape-middleware-logger) gems.
 
 ## API Formats
 
