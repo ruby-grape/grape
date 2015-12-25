@@ -1292,6 +1292,20 @@ describe Grape::API do
       expect { get '/exception' }.to raise_error(RuntimeError, 'rain!')
     end
 
+    it 'uses custom helpers defined by using #helpers method' do
+      subject.helpers do
+        def custom_error!(name)
+          error! "hello #{name}"
+        end
+      end
+      subject.rescue_from(ArgumentError) { custom_error! :bob }
+      subject.get '/custom_error' do
+        fail ArgumentError
+      end
+      get '/custom_error'
+      expect(last_response.body).to eq 'hello bob'
+    end
+
     it 'rescues all errors if rescue_from :all is called' do
       subject.rescue_from :all
       subject.get '/exception' do

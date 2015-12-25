@@ -22,6 +22,8 @@ module Grape
       def call!(env)
         @env = env
 
+        inject_helpers!
+
         begin
           error_response(catch(:error) do
             return @app.call(@env)
@@ -57,6 +59,19 @@ module Grape
         else
           instance_exec(e, &handler)
         end
+      end
+
+      def inject_helpers!
+        return if helpers_available?
+        endpoint = @env['api.endpoint']
+        self.class.instance_eval do
+          include endpoint.send(:helpers)
+        end if endpoint.is_a?(Grape::Endpoint)
+        @helpers = true
+      end
+
+      def helpers_available?
+        @helpers
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [])

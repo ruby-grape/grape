@@ -1,10 +1,16 @@
 0.14.1 (Next)
 =============
 
+#### Features
+
+* [#1227](https://github.com/ruby-grape/grape/pull/1227): Store `message_key` on Grape::Exceptions::Validation - [@stjhimy](https://github.com/sthimy).
+* [#1232](https://github.com/ruby-grape/grape/pull/1232): Helpers are now available inside `rescue_from` - [@namusyaka](https://github.com/namusyaka).
+* Your contribution here.
+
+#### Fixes
+
 * [#1216](https://github.com/ruby-grape/grape/pull/1142): Fix JSON error response when calling `error!` with non-Strings - [@jrforrest](https://github.com/jrforrest).
 * [#1225](https://github.com/ruby-grape/grape/pull/1225): Fix `given` with nested params not returning correct declared params - [@JanStevens](https://github.com/JanStevens).
-* [#1227](https://github.com/ruby-grape/grape/pull/1227): Store `message_key` on Grape::Exceptions::Validation - [@stjhimy](https://github.com/sthimy).
-* Your contribution here.
 
 0.14.0 (12/07/2015)
 ===================

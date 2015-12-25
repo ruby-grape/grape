@@ -1738,6 +1738,23 @@ rescue_from RuntimeError, rescue_subclasses: false do |e|
 end
 ```
 
+Helpers are also available inside `rescue_from`.
+
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  helpers do
+    def server_error!
+      error!({ error: 'Server error.' }, 500, { 'Content-Type' => 'text/error' })
+    end
+  end
+
+  rescue_from :all do |e|
+    server_error!
+  end
+end
+```
+
 The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
 
 #### Unrescuable Exceptions
