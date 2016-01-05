@@ -896,7 +896,7 @@ describe Grape::API do
           filename = params[:file][:filename]
           content_type MIME::Types.type_for(filename)[0].to_s
           env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
-          header 'Content-Disposition', "attachment; filename*=UTF-8''#{URI.escape(filename)}"
+          header 'Content-Disposition', "attachment; filename*=UTF-8''#{CGI.escape(filename)}"
           params[:file][:tempfile].read
         end
       end
