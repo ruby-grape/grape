@@ -165,9 +165,11 @@ module Grape
       # @raise Grape::Exceptions::UnknownParameter if `attr` has not been
       #   defined in this scope yet
       # @yield a parameter definition DSL
-      def given(attr, &block)
-        fail Grape::Exceptions::UnknownParameter.new(attr) unless declared_param?(attr)
-        new_lateral_scope(dependent_on: attr, &block)
+      def given(*attrs, &block)
+        attrs.each do |attr|
+          fail Grape::Exceptions::UnknownParameter.new(attr) unless declared_param?(attr)
+        end
+        new_lateral_scope(dependent_on: attrs, &block)
       end
 
       # Test for whether a certain parameter has been defined in this params

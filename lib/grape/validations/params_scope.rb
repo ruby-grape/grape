@@ -36,7 +36,9 @@ module Grape
       #   validated
       def should_validate?(parameters)
         return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
-        return false if @dependent_on && params(parameters).try(:[], @dependent_on).blank?
+        @dependent_on.each do |dependency|
+          return false if params(parameters).try(:[], dependency).blank?
+        end if @dependent_on
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
