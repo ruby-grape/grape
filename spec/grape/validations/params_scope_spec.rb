@@ -298,6 +298,32 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq(200)
     end
 
+    it 'applies the validations of multiple parameters' do
+      subject.params do
+        optional :a, :b
+        given :a, :b do
+          requires :c
+        end
+      end
+      subject.get('/multiple') { declared(params).to_json }
+
+      get '/multiple'
+      expect(last_response.status).to eq(200)
+
+      get '/multiple', a: true
+      expect(last_response.status).to eq(200)
+
+      get '/multiple', b: true
+      expect(last_response.status).to eq(200)
+
+      get '/multiple', a: true, b: true
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('c is missing')
+
+      get '/multiple', a: true, b: true, c: true
+      expect(last_response.status).to eq(200)
+    end
+
     it 'raises an error if the dependent parameter was never specified' do
       expect do
         subject.params do
