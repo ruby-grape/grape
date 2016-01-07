@@ -29,6 +29,25 @@ describe Grape::Middleware::Base do
     after { subject.call!({}) }
   end
 
+  context 'callbacks on error' do
+    let(:blank_app) { ->(_) { fail StandardError } }
+
+    it 'calls #after' do
+      expect(subject).to receive(:after)
+      expect { subject.call({}) }.to raise_error(StandardError)
+    end
+  end
+
+  context 'after callback' do
+    before do
+      allow(subject).to receive(:after).and_return([200, {}, 'Hello from after callback'])
+    end
+
+    it 'overwrites application response' do
+      expect(subject.call!({}).last).to eq('Hello from after callback')
+    end
+  end
+
   it 'is able to access the response' do
     subject.call({})
     expect(subject.response).to be_kind_of(Rack::Response)

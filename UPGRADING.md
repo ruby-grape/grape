@@ -1,6 +1,25 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.15.0
+
+#### Changes to behavior of `after` method of middleware on error
+
+The `after` method of the middleware is now called on error.
+The following code would work correctly.
+
+```ruby
+class ErrorMiddleware < Grape::Middleware::Base
+  def after
+    if @api_response[0] == 500
+      env['rack.logger'].debug("Raised error on #{env['PATH_INFO']}")
+    end
+  end
+end
+```
+
+See [#1147](https://github.com/ruby-grape/grape/issues/1147) and [#1240](https://github.com/ruby-grape/grape/issues/1240) for discussion of the issues.
+
 ### Upgrading to >= 0.14.0
 
 #### Changes to availability of DSL methods in filters
