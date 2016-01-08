@@ -1569,7 +1569,7 @@ end
 
 The following example specifies the entity to use in the `http_codes` definition.
 
-```
+```ruby
 desc 'My Route' do
  failure [[408, 'Unauthorized', API::Error]]
 end
