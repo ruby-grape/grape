@@ -17,6 +17,22 @@ module Grape
         @scope = scope
       end
 
+      # Validates a given request.
+      # @note This method must be thread-safe.
+      # @note Override #validate! unless you need to access the entire request.
+      # @param request [Grape::Request] the request currently being handled
+      # @raise [Grape::Exceptions::Validation] if validation failed
+      # @return [void]
+      def validate(request)
+        validate!(request.params)
+      end
+
+      # Validates a given parameter hash.
+      # @note This method must be thread-safe.
+      # @note Override #validate iff you need to access the entire request.
+      # @param params [Hash] parameters to validate
+      # @raise [Grape::Exceptions::Validation] if validation failed
+      # @return [void]
       def validate!(params)
         attributes = AttributesIterator.new(self, @scope, params)
         attributes.each do |resource_params, attr_name|

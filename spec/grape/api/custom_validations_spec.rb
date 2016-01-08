@@ -10,25 +10,30 @@ describe Grape::Validations do
           fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
         end
       end
-    end
-  end
-
-  subject do
-    Class.new(Grape::API) do
-      params do
-        requires :text, default_length: 140
-      end
-      get do
-        'bacon'
+      class InBody < Grape::Validations::PresenceValidator
+        def validate(request)
+          validate!(request.env['api.request.body'])
+        end
       end
     end
-  end
-
-  def app
-    subject
   end
 
   context 'using a custom length validator' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, default_length: 140
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    def app
+      subject
+    end
+
     it 'under 140 characters' do
       get '/', text: 'abc'
       expect(last_response.status).to eq 200
@@ -43,6 +48,34 @@ describe Grape::Validations do
       get '/', text: 'a' * 141, max: 141
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq 'bacon'
+    end
+  end
+
+  context 'using a custom body-only validator' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, in_body: true
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'allows field in body' do
+      get '/', text: 'abc'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'bacon'
+    end
+    it 'ignores field in query' do
+      get '/', nil, text: 'abc'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'text is missing'
     end
   end
 end
