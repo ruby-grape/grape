@@ -22,8 +22,12 @@ module Grape
       def call!(env)
         @env = env
         before
-        @app_response = @app.call(@env)
-        after || @app_response
+        begin
+          @app_response = @app.call(@env)
+        ensure
+          after_response = after
+        end
+        after_response || @app_response
       end
 
       # @abstract

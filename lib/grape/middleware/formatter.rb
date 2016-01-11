@@ -19,6 +19,7 @@ module Grape
       end
 
       def after
+        return unless @app_response
         status, headers, bodies = *@app_response
 
         if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)

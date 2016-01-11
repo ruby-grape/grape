@@ -73,6 +73,7 @@
 - [Before and After](#before-and-after)
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
+  - [Grape Middleware](#grape-middleware)
   - [Rails Middleware](#rails-middleware)
   - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
@@ -2556,6 +2557,33 @@ specification and using the `PATH_INFO` Rack environment variable, using
 part.
 
 ## Using Custom Middleware
+
+### Grape Middleware
+
+You can make a custom middleware by using `Grape::Middleware::Base`.
+It's inherited from some grape official middlewares in fact.
+
+For example, you can write a middleware to log application exception.
+
+```ruby
+class LoggingError < Grape::Middleware::Base
+  def after
+    if @api_response[0] == 500
+      env['rack.logger'].error("Raised error on #{env['PATH_INFO']}")
+    end
+  end
+end
+```
+
+Your middleware can overwrite application response as follows, except error case.
+
+```ruby
+class Overwriter < Grape::Middleware::Base
+  def after
+    [200, { 'Content-Type' => 'text/plain' }, ['Overwrited.']]
+  end
+end
+```
 
 ### Rails Middleware
 
