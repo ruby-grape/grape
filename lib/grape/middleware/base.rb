@@ -27,7 +27,7 @@ module Grape
         ensure
           after_response = after
         end
-        after_response || @app_response
+        response_valid?(after_response) ? after_response : @app_response
       end
 
       # @abstract
@@ -64,6 +64,17 @@ module Grape
           types_without_params[v.split(';').first] = k
         end
         types_without_params
+      end
+
+      def response_valid?(response)
+        if response.is_a?(Array)
+          status, headers, body = *response
+          (status >= 100 && status < 600) && (headers.is_a?(Hash)) && body.respond_to?(:each)
+        else
+          response.is_a?(Rack::Response)
+        end
+      rescue
+        false
       end
     end
   end
