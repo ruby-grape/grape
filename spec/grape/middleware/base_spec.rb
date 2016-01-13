@@ -40,11 +40,21 @@ describe Grape::Middleware::Base do
 
   context 'after callback' do
     before do
-      allow(subject).to receive(:after).and_return([200, {}, 'Hello from after callback'])
+      allow(subject).to receive(:after).and_return([200, {}, ['Hello from after callback']])
     end
 
     it 'overwrites application response' do
-      expect(subject.call!({}).last).to eq('Hello from after callback')
+      expect(subject.call!({}).last).to eq(['Hello from after callback'])
+    end
+  end
+
+  context 'after callback with invalid response' do
+    before do
+      allow(subject).to receive(:after).and_return('invalid response')
+    end
+
+    it 'does not overwrite application response' do
+      expect(subject.call!({}).last).to eq('Hi there.')
     end
   end
 
