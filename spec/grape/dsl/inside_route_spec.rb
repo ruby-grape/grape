@@ -128,24 +128,6 @@ module Grape
         end
       end
 
-      describe '#header' do
-        describe 'set' do
-          before do
-            subject.header 'Name', 'Value'
-          end
-
-          it 'returns value' do
-            expect(subject.header['Name']).to eq 'Value'
-            expect(subject.header('Name')).to eq 'Value'
-          end
-        end
-
-        it 'returns nil' do
-          expect(subject.header['Name']).to be nil
-          expect(subject.header('Name')).to be nil
-        end
-      end
-
       describe '#content_type' do
         describe 'set' do
           before do

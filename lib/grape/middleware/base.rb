@@ -1,8 +1,12 @@
+require 'grape/dsl/headers'
+
 module Grape
   module Middleware
     class Base
       attr_reader :app, :env, :options
       TEXT_HTML = 'text/html'.freeze
+
+      include Grape::DSL::Headers
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
@@ -27,7 +31,10 @@ module Grape
         ensure
           after_response = after
         end
-        after_response || @app_response
+
+        response = after_response || @app_response
+        merge_headers response
+        response
       end
 
       # @abstract
@@ -64,6 +71,16 @@ module Grape
           types_without_params[v.split(';').first] = k
         end
         types_without_params
+      end
+
+      private
+
+      def merge_headers(response)
+        return unless headers.is_a?(Hash)
+        case response
+        when Rack::Response then response.headers.merge!(headers)
+        when Array          then response[1].merge!(headers)
+        end
       end
     end
   end

@@ -118,4 +118,66 @@ describe Grape::Middleware::Base do
       end
     end
   end
+
+  context 'header' do
+    module HeaderSpec
+      class ExampleWare < Grape::Middleware::Base
+        def before
+          header 'X-Test-Before', 'Hi'
+        end
+
+        def after
+          header 'X-Test-After', 'Bye'
+          nil
+        end
+      end
+    end
+
+    def app
+      Rack::Builder.app do
+        use HeaderSpec::ExampleWare
+        run ->(_) { [200, {}, ['Yeah']] }
+      end
+    end
+
+    it 'is able to set a header' do
+      get '/'
+      expect(last_response.headers['X-Test-Before']).to eq('Hi')
+      expect(last_response.headers['X-Test-After']).to eq('Bye')
+    end
+  end
+
+  context 'header overwrite' do
+    module HeaderOverwritingSpec
+      class ExampleWare < Grape::Middleware::Base
+        def before
+          header 'X-Test-Overwriting', 'Hi'
+        end
+
+        def after
+          header 'X-Test-Overwriting', 'Bye'
+          nil
+        end
+      end
+
+      class API < Grape::API
+        get('/') do
+          header 'X-Test-Overwriting', 'Yeah'
+          'Hello'
+        end
+      end
+    end
+
+    def app
+      Rack::Builder.app do
+        use HeaderOverwritingSpec::ExampleWare
+        run HeaderOverwritingSpec::API.new
+      end
+    end
+
+    it 'overwrites header by after headers' do
+      get '/'
+      expect(last_response.headers['X-Test-Overwriting']).to eq('Bye')
+    end
+  end
 end

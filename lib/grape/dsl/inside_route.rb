@@ -1,10 +1,12 @@
 require 'active_support/concern'
+require 'grape/dsl/headers'
 
 module Grape
   module DSL
     module InsideRoute
       extend ActiveSupport::Concern
       include Grape::DSL::Settings
+      include Grape::DSL::Headers
 
       # Denotes a situation where a DSL method has been invoked in a
       # filter which it should not yet be available in
@@ -135,16 +137,6 @@ module Grape
           end
         else
           fail ArgumentError, 'Status code must be Fixnum or Symbol.'
-        end
-      end
-
-      # Set an individual header or retrieve
-      # all headers that have been set.
-      def header(key = nil, val = nil)
-        if key
-          val ? @header[key.to_s] = val : @header.delete(key.to_s)
-        else
-          @header
         end
       end
 
