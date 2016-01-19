@@ -165,6 +165,12 @@ describe Grape::Validations::DefaultValidator do
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq({ optional_hash_without_default: nil }.to_json)
       end
+
+      it 'does not fail even if invalid params is passed to default validator' do
+        expect { post '/optional_hash_without_default', optional_hash_without_default: '5678' }.not_to raise_error
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq({ error: 'optional_hash_without_default is invalid' }.to_json)
+      end
     end
 
     context 'optional hash with default value includes optional param with default value' do
