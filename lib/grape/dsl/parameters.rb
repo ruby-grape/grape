@@ -184,9 +184,28 @@ module Grape
       alias_method :group, :requires
 
       # @param params [Hash] initial hash of parameters
-      # @return hash of parameters relevant for the current scope
-      # @api private
+      # @return hash of parameters with index information relevant for the current scope
+      # example:
+      # params: [{"name"=>"Job", "parents"=>[{"name"=>"Joy"}, {"name"=>"Bob"}], "_param_index": {"children_index": 0}}, {"name"=>"Jim", "parents"=>[{}], "_param_index": {"children_index": 1}}]
+      # element: parents
+      # result: [{"name"=>"Joy", "_param_index": {children[parents]: 0, "children": 0}}, {"name"=>"Bob", "_param_index": {children[parents]: 1, "children": 0}}, { "_param_index": {children[parents]: 0, "children": 1}}]
       def params(params)
+        params = @parent.params(params) if @parent
+        if @element
+          if params.is_a?(Array)
+            params = params.map.with_index do |el, index|
+              el[@element] ? convert_to_param_index(el[@element], el['_param_index'], index) : {}
+            end.flatten
+          elsif params.is_a?(Hash)
+            params = params[@element] ? convert_to_param_index(params[@element], params['_param_index']) : {}
+          else
+            params = {}
+          end
+        end
+        params
+      end
+
+      def params_without_index(params)
         params = @parent.params(params) if @parent
         if @element
           if params.is_a?(Array)
@@ -198,6 +217,17 @@ module Grape
           end
         end
         params
+      end
+
+      def convert_to_param_index(item, param_index, index = nil)
+        param_index ||= {}
+        param_index[@parent.full_name(@element)] = index if index && @parent
+        if item.is_a?(Array)
+          item.map.with_index{|e, i| e.merge!('_param_index' => param_index.merge(@parent.full_name(@element) =>i)) if e.respond_to?(:merge!) }
+        else
+          item.merge!('_param_index' => param_index) if item.respond_to?(:merge!)
+        end
+        item
       end
     end
   end

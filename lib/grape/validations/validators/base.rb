@@ -26,6 +26,10 @@ module Grape
         end
       end
 
+      def param_index(params)
+        param_index = params.respond_to?(:key?) ? params['_param_index'] : nil
+      end
+
       def self.convert_to_short_name(klass)
         ret = klass.name.gsub(/::/, '/')
               .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')

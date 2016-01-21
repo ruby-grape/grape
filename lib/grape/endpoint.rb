@@ -1,3 +1,4 @@
+require 'active_support/core_ext/object/deep_dup'
 module Grape
   # An Endpoint is the proxy scope in which all routing
   # blocks are executed. In other words, any methods
@@ -254,6 +255,8 @@ module Grape
           end
         end
 
+        @params = clean_params(params)
+
         if validation_errors.any?
           fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
         end
@@ -268,6 +271,22 @@ module Grape
         response_object = file || [body || response_object]
         [status, header, response_object]
       end
+    end
+
+    def clean_params(params)
+      case params
+      when Array
+        params = params.map do |item|
+          clean_params(item)
+        end
+      when Hash
+        params.delete("_param_index")
+        params.each do |key, value|
+          params[key] = clean_params(value)
+        end
+      end
+
+      params
     end
 
     def build_stack
