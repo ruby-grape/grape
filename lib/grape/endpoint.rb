@@ -107,7 +107,7 @@ module Grape
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
        options[:path].join('/')
-       ].join(' ')
+      ].join(' ')
     end
 
     def routes
@@ -137,7 +137,7 @@ module Grape
             route_set.add_route(self, {
                                   path_info: route.route_compiled,
                                   request_method: method
-            }, route_info: route)
+                                }, route_info: route)
           end
         end
       end

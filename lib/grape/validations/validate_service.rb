@@ -1,7 +1,6 @@
 module Grape
   module Validations
     class ValidateService
-
       def initialize(validators, params)
         @validators = validators
         @params = params
@@ -31,6 +30,7 @@ module Grape
       end
 
       private
+
       def clean_params_index(params)
         case params
         when Array
@@ -38,7 +38,7 @@ module Grape
             clean_params_index(item)
           end
         when Hash
-          params.delete("_param_index")
+          params.delete('_param_index')
           params.each do |key, value|
             params[key] = clean_params_index(value)
           end

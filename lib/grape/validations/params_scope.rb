@@ -60,7 +60,7 @@ module Grape
       end
 
       def full_message(name, param_index = nil)
-        case 
+        case
         when nested?
           "#{@parent.full_message(@element, param_index)}#{locate(param_index)}[#{name}]"
         when lateral?
@@ -71,7 +71,7 @@ module Grape
       end
 
       def locate(param_index)
-        param_index && param_index["#{@parent.full_name(@element)}"] ? %Q([#{param_index["#{@parent.full_name(@element)}"]}]) : nil 
+        param_index && param_index["#{@parent.full_name(@element)}"] ? %([#{param_index["#{@parent.full_name(@element)}"]}]) : nil
       end
 
       # @return [Boolean] whether or not this scope is the root-level scope

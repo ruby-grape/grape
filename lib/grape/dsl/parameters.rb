@@ -200,9 +200,12 @@ module Grape
       # @param params [Hash] initial hash of parameters
       # @return hash of parameters with index information relevant for the current scope
       # example:
-      # params: [{"name"=>"Job", "parents"=>[{"name"=>"Joy"}, {"name"=>"Bob"}], "_param_index": {"children_index": 0}}, {"name"=>"Jim", "parents"=>[{}], "_param_index": {"children_index": 1}}]
+      # params: [{"name"=>"Job", "parents"=>[{"name"=>"Joy"}, {"name"=>"Bob"}], "_param_index": {"children_index": 0}},
+      #   {"name"=>"Jim", "parents"=>[{}], "_param_index": {"children_index": 1}}]
       # element: parents
-      # result: [{"name"=>"Joy", "_param_index": {children[parents]: 0, "children": 0}}, {"name"=>"Bob", "_param_index": {children[parents]: 1, "children": 0}}, { "_param_index": {children[parents]: 0, "children": 1}}]
+      # result: [{"name"=>"Joy", "_param_index": {children[parents]: 0, "children": 0}},
+      #   {"name"=>"Bob", "_param_index": {children[parents]: 1, "children": 0}},
+      #   { "_param_index": {children[parents]: 0, "children": 1}}]
       def params_with_index(params)
         params = @parent.params_with_index(params) if @parent
         if @element
@@ -223,7 +226,7 @@ module Grape
         param_index ||= {}
         param_index[@parent.full_name(@element)] = index if index && @parent
         if item.is_a?(Array)
-          item.map.with_index{|e, i| e.merge!('_param_index' => param_index.merge(@parent.full_name(@element) =>i)) if e.respond_to?(:merge!) }
+          item.map.with_index { |e, i| e.merge!('_param_index' => param_index.merge(@parent.full_name(@element) => i)) if e.respond_to?(:merge!) }
         else
           item.merge!('_param_index' => param_index) if item.respond_to?(:merge!)
         end

@@ -647,14 +647,13 @@ describe Grape::Validations do
         expect(last_response.body).to eq('children[0][parents][0][name] is missing')
       end
 
-      it "should prompt index in array when a parameter is not present" do
+      it 'should prompt index in array when a parameter is not present' do
         put_with_json '/within_array', children: [
-          { name: 'Job', parents: [{ name: 'Joy' }, {name: 'Bob'}] },
+          { name: 'Job', parents: [{ name: 'Joy' }, { name: 'Bob' }] },
           { name: 'Jim', parents: [{}] }
         ]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[1][parents][0][name] is missing')
-
+        expect(last_response.body).to eq('children[0][parents][0][name] is missing')
 
         put_with_json '/within_array', children: [
           { name: 'Job', parents: [{ name: 'Joy' }] },
