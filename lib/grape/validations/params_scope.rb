@@ -35,7 +35,7 @@ module Grape
       # @return [Boolean] whether or not this entire scope needs to be
       #   validated
       def should_validate?(parameters)
-        return false if @optional && params_without_index(parameters).respond_to?(:all?) && params_without_index(parameters).all?(&:blank?)
+        return false if @optional && params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
         @dependent_on.each do |dependency|
           return false if params(parameters).try(:[], dependency).blank?
         end if @dependent_on

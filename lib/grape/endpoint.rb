@@ -340,7 +340,7 @@ module Grape
         @params = validate_service.params
       else
         fail Grape::Exceptions::ValidationErrors, errors: validate_service.errors, headers: header
-      end      
+      end
     end
 
     def run_filters(filters, type = :other)

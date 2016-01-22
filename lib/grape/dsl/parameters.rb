@@ -183,21 +183,13 @@ module Grape
 
       alias_method :group, :requires
 
-      # @param params [Hash] initial hash of parameters
-      # @return hash of parameters with index information relevant for the current scope
-      # example:
-      # params: [{"name"=>"Job", "parents"=>[{"name"=>"Joy"}, {"name"=>"Bob"}], "_param_index": {"children_index": 0}}, {"name"=>"Jim", "parents"=>[{}], "_param_index": {"children_index": 1}}]
-      # element: parents
-      # result: [{"name"=>"Joy", "_param_index": {children[parents]: 0, "children": 0}}, {"name"=>"Bob", "_param_index": {children[parents]: 1, "children": 0}}, { "_param_index": {children[parents]: 0, "children": 1}}]
       def params(params)
         params = @parent.params(params) if @parent
         if @element
           if params.is_a?(Array)
-            params = params.map.with_index do |el, index|
-              el[@element] ? convert_to_param_index(el[@element], el['_param_index'], index) : {}
-            end.flatten
+            params = params.flat_map { |el| el[@element] || {} }
           elsif params.is_a?(Hash)
-            params = params[@element] ? convert_to_param_index(params[@element], params['_param_index']) : {}
+            params = params[@element] || {}
           else
             params = {}
           end
@@ -205,13 +197,21 @@ module Grape
         params
       end
 
-      def params_without_index(params)
-        params = @parent.params(params) if @parent
+      # @param params [Hash] initial hash of parameters
+      # @return hash of parameters with index information relevant for the current scope
+      # example:
+      # params: [{"name"=>"Job", "parents"=>[{"name"=>"Joy"}, {"name"=>"Bob"}], "_param_index": {"children_index": 0}}, {"name"=>"Jim", "parents"=>[{}], "_param_index": {"children_index": 1}}]
+      # element: parents
+      # result: [{"name"=>"Joy", "_param_index": {children[parents]: 0, "children": 0}}, {"name"=>"Bob", "_param_index": {children[parents]: 1, "children": 0}}, { "_param_index": {children[parents]: 0, "children": 1}}]
+      def params_with_index(params)
+        params = @parent.params_with_index(params) if @parent
         if @element
           if params.is_a?(Array)
-            params = params.flat_map { |el| el[@element] || {} }
+            params = params.map.with_index do |el, index|
+              el[@element] ? convert_to_param_index(el[@element], el['_param_index'], index) : {}
+            end.flatten
           elsif params.is_a?(Hash)
-            params = params[@element] || {}
+            params = params[@element] ? convert_to_param_index(params[@element], params['_param_index']) : {}
           else
             params = {}
           end
