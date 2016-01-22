@@ -174,6 +174,24 @@ describe Grape::Validations::ParamsScope do
       end
     end
 
+    context 'when the default is an array' do
+      context 'and is the entire range of allowed values' do
+        it 'does not raise an exception' do
+          expect do
+            subject.params { optional :numbers, type: Array[Integer], values: 0..2, default: 0..2 }
+          end.to_not raise_error
+        end
+      end
+
+      context 'and is a subset of allowed values' do
+        it 'does not raise an exception' do
+          expect do
+            subject.params { optional :numbers, type: Array[Integer], values: [0, 1, 2], default: [1, 0] }
+          end.to_not raise_error
+        end
+      end
+    end
+
     context 'when both range endpoints are #kind_of? the type' do
       it 'accepts values in the range' do
         subject.params do

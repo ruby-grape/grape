@@ -8,6 +8,7 @@
 * [#1237](https://github.com/ruby-grape/grape/pull/1237): Allow multiple parameters in `given`, which behaves as if the scopes were nested in the inputted order - [@ochagata](https://github.com/ochagata).
 * [#1238](https://github.com/ruby-grape/grape/pull/1238): Call `after` of middleware on error - [@namusyaka](https://github.com/namusyaka).
 * [#1243](https://github.com/ruby-grape/grape/pull/1243): Add `header` support for middleware - [@namusyaka](https://github.com/namusyaka).
+* [#1252](https://github.com/ruby-grape/grape/pull/1252): Allow default to be a subset or equal to allowed values without raising IncompatibleOptionValues - [@jeradphelps](https://github.com/jeradphelps).
 * Your contribution here.
 
 #### Fixes

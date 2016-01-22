@@ -316,7 +316,7 @@ module Grape
       def check_incompatible_option_values(values, default)
         return unless values && default
         return if values.is_a?(Proc) || default.is_a?(Proc)
-        return if values.include?(default)
+        return if values.include?(default) || (Array(default) - Array(values)).empty?
         fail Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
       end
 
