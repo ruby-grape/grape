@@ -175,5 +175,6 @@ require 'grape/validations/validators/values'
 require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
 require 'grape/validations/types'
+require 'grape/validations/validate_service'
 
 require 'grape/version'

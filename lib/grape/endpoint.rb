@@ -1,4 +1,3 @@
-require 'active_support/core_ext/object/deep_dup'
 module Grape
   # An Endpoint is the proxy scope in which all routing
   # blocks are executed. In other words, any methods
@@ -108,7 +107,7 @@ module Grape
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
        options[:path].join('/')
-      ].join(' ')
+       ].join(' ')
     end
 
     def routes
@@ -138,7 +137,7 @@ module Grape
             route_set.add_route(self, {
                                   path_info: route.route_compiled,
                                   request_method: method
-                                }, route_info: route)
+            }, route_info: route)
           end
         end
       end
@@ -244,22 +243,7 @@ module Grape
 
         run_filters before_validations, :before_validation
 
-        # Retrieve validations from this namespace and all parent namespaces.
-        validation_errors = []
-
-        route_setting(:saved_validations).each do |validator|
-          begin
-            validator.validate!(params)
-          rescue Grape::Exceptions::Validation => e
-            validation_errors << e
-          end
-        end
-
-        @params = clean_params(params)
-
-        if validation_errors.any?
-          fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
-        end
+        run_validators route_setting(:saved_validations), @params
 
         run_filters after_validations, :after_validation
 
@@ -271,22 +255,6 @@ module Grape
         response_object = file || [body || response_object]
         [status, header, response_object]
       end
-    end
-
-    def clean_params(params)
-      case params
-      when Array
-        params = params.map do |item|
-          clean_params(item)
-        end
-      when Hash
-        params.delete("_param_index")
-        params.each do |key, value|
-          params[key] = clean_params(value)
-        end
-      end
-
-      params
     end
 
     def build_stack
@@ -363,6 +331,16 @@ module Grape
 
         @lazy_initialized = true
       end
+    end
+
+    def run_validators(validators, params)
+      validate_service = Validations.validate_service(validators, params)
+
+      if validate_service.validate!
+        @params = validate_service.params
+      else
+        fail Grape::Exceptions::ValidationErrors, errors: validate_service.errors, headers: header
+      end      
     end
 
     def run_filters(filters, type = :other)
