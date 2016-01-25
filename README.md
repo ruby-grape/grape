@@ -1148,6 +1148,19 @@ namespace :statuses do
 end
 ```
 
+You can also define a route parameter type by passing to `route_param`'s options.
+
+```ruby
+namespace :arithmetic do
+  route_param :n, type: Integer do
+    desc 'Returns in power'
+    get 'power' do
+      params[:n] ** params[:n]
+    end
+  end
+end
+```
+
 ### Custom Validators
 
 ```ruby
