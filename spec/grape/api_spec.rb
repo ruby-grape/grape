@@ -249,6 +249,18 @@ describe Grape::API do
       get '/users/23'
       expect(last_response.status).to eq(200)
     end
+
+    context 'with param type definitions' do
+      it 'is used by passing to options' do
+        subject.namespace :route_param do
+          route_param :foo, type: Integer do
+            get { params.to_json }
+          end
+        end
+        get '/route_param/1234'
+        expect(last_response.body).to eq("{\"foo\":1234}")
+      end
+    end
   end
 
   describe '.route' do
