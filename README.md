@@ -602,10 +602,10 @@ It also works on nested hashes:
 format :json
 
 params do
-  requires :user, :type => Hash do
+  requires :user, type: Hash do
     requires :first_name, type: String
     optional :last_name, type: String
-    requires :address, :type => Hash do
+    requires :address, type: Hash do
       requires :city, type: String
       optional :region, type: String
     end
