@@ -169,7 +169,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
       get '/'
-      expect(last_response.body).to eq('{:custom_formatter=>"rain!"}')
+      expect(last_response.body).to eq('{custom_formatter:"rain!"}')
     end
 
     it 'does not trap regular error! codes' do

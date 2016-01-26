@@ -189,7 +189,7 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
-  context 'when :strict and :cascade=>false are set' do
+  context 'when :strict and cascade:false are set' do
     before do
       @options[:versions] = ['v1']
       @options[:version_options][:strict] = true
