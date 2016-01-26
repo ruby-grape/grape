@@ -45,6 +45,14 @@ module Grape
         handler = options[:rescue_handlers].find(-> { [] }) { |error, _| klass <= error }[1]
         handler ||= options[:base_only_rescue_handlers][klass]
         handler ||= options[:all_rescue_handler]
+        with_option = options[:rescue_options][:with]
+        if with_option.instance_of?(Symbol)
+          if respond_to?(with_option)
+            handler ||= self.class.instance_method(with_option).bind(self)
+          else
+            fail NoMethodError, "undefined method `#{with_option}' for your application"
+          end
+        end
         handler
       end
 

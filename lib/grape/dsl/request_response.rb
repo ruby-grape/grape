@@ -105,7 +105,9 @@ module Grape
           end
 
           options = args.extract_options!
-          handler ||= proc { options[:with] } if options.key?(:with)
+          if options.key?(:with) && !options[:with].instance_of?(Symbol)
+            handler ||= proc { options[:with] }
+          end
 
           if args.include?(:all)
             namespace_inheritable(:rescue_all, true)

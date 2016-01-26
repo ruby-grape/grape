@@ -1518,6 +1518,29 @@ describe Grape::API do
     end
   end
 
+  describe '.rescue_from klass, with: :method_name' do
+    it 'rescues an error with the specified method name' do
+      subject.helpers do
+        def rescue_arg_error
+          error!('500 ArgumentError', 500)
+        end
+      end
+      subject.rescue_from ArgumentError, with: :rescue_arg_error
+      subject.get('/rescue_method') { fail ArgumentError }
+
+      get '/rescue_method'
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('500 ArgumentError')
+    end
+
+    it 'aborts if the specified method name does not exist' do
+      subject.rescue_from :all, with: :not_exist_method
+      subject.get('/rescue_method') { fail StandardError }
+
+      expect { get '/rescue_method' }.to raise_error(NoMethodError, 'undefined method `not_exist_method\' for your application')
+    end
+  end
+
   describe '.rescue_from klass, rescue_subclasses: boolean' do
     before do
       module ApiSpec
