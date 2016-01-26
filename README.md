@@ -1771,6 +1771,22 @@ end
 
 The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
 
+The `with` keyword is available as `rescue_from` options, it can be passed method name or `Rack::Response` object.
+
+```ruby
+class Twitter::API < Grape::API
+  format :json
+  helpers do
+    def server_error!
+      error!({ error: 'Server error.' }, 500, { 'Content-Type' => 'text/error' })
+    end
+  end
+
+  rescue_from :all,          with: :server_error!
+  rescue_from ArgumentError, with: Rack::Response.new('rescued with a method', 400)
+end
+```
+
 #### Unrescuable Exceptions
 
 `Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.
