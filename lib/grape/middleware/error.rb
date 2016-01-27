@@ -50,7 +50,7 @@ module Grape
           if respond_to?(with_option)
             handler ||= self.class.instance_method(with_option).bind(self)
           else
-            fail NoMethodError, "undefined method `#{with_option}' for your application"
+            fail NoMethodError, "undefined method `#{with_option}'"
           end
         end
         handler

@@ -3,14 +3,14 @@
 
 #### Features
 
-* [#1227](https://github.com/ruby-grape/grape/pull/1227): Store `message_key` on Grape::Exceptions::Validation - [@stjhimy](https://github.com/sthimy).
+* [#1227](https://github.com/ruby-grape/grape/pull/1227): Store `message_key` on `Grape::Exceptions::Validation` - [@stjhimy](https://github.com/sthimy).
 * [#1232](https://github.com/ruby-grape/grape/pull/1232): Helpers are now available inside `rescue_from` - [@namusyaka](https://github.com/namusyaka).
 * [#1237](https://github.com/ruby-grape/grape/pull/1237): Allow multiple parameters in `given`, which behaves as if the scopes were nested in the inputted order - [@ochagata](https://github.com/ochagata).
 * [#1238](https://github.com/ruby-grape/grape/pull/1238): Call `after` of middleware on error - [@namusyaka](https://github.com/namusyaka).
 * [#1243](https://github.com/ruby-grape/grape/pull/1243): Add `header` support for middleware - [@namusyaka](https://github.com/namusyaka).
 * [#1252](https://github.com/ruby-grape/grape/pull/1252): Allow default to be a subset or equal to allowed values without raising IncompatibleOptionValues - [@jeradphelps](https://github.com/jeradphelps).
-* [#1255](https://github.com/ruby-grape/grape/pull/1255): Allow param type definition in route_param - [@namusyaka](https://github.com/namusyaka)
-* [#1257](https://github.com/ruby-grape/grape/pull/1257): Allow to pass method name to :with option of rescue_from - [@namusyaka](https://github.com/namusyaka)
+* [#1255](https://github.com/ruby-grape/grape/pull/1255): Allow param type definition in `route_param` - [@namusyaka](https://github.com/namusyaka).
+* [#1257](https://github.com/ruby-grape/grape/pull/1257): Allow Proc, Symbol or String in `rescue_from with: ...` - [@namusyaka](https://github.com/namusyaka).
 * Your contribution here.
 
 #### Fixes

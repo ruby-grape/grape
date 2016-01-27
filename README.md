@@ -1771,7 +1771,7 @@ end
 
 The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
 
-The `with` keyword is available as `rescue_from` options, it can be passed method name or `Rack::Response` object.
+The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -1783,7 +1783,7 @@ class Twitter::API < Grape::API
   end
 
   rescue_from :all,          with: :server_error!
-  rescue_from ArgumentError, with: Rack::Response.new('rescued with a method', 400)
+  rescue_from ArgumentError, with: -> { Rack::Response.new('rescued with a method', 400) }
 end
 ```
 
