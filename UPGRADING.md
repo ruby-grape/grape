@@ -3,6 +3,18 @@ Upgrading Grape
 
 ### Upgrading to >= 0.15.0
 
+#### Changes to availability of `:with` option of `rescue_from` method
+
+The `:with` option of `rescue_from` does not accept value except Proc, String or Symbol now.
+
+If you have been depending the old behavior, you should use lambda block instead.
+
+```ruby
+class API < Grape::API
+  rescue_from :all, with: -> { Rack::Response.new('rescued with a method', 400) }
+end
+```
+
 #### Changes to behavior of `after` method of middleware on error
 
 The `after` method of the middleware is now called on error.

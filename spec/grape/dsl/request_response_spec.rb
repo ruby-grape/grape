@@ -124,9 +124,22 @@ module Grape
           end
 
           it 'sets a rescue handler declared through :with option' do
+            with_block = -> { 'hello' }
             expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
             expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, an_instance_of(Proc))
-            subject.rescue_from :all, with: 'ExampleHandler'
+            subject.rescue_from :all, with: with_block
+          end
+
+          it 'abort if :with option value is not Symbol, String or Proc' do
+            expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, 'with: Fixnum, expected Symbol, String or Proc')
+          end
+
+          it 'abort if both :with option and block are passed' do
+            expect do
+              subject.rescue_from :all, with: -> { 'hello' } do
+                error!('bye')
+              end
+            end.to raise_error(ArgumentError, 'both :with option and block cannot be passed')
           end
         end
 
@@ -158,9 +171,10 @@ module Grape
           end
 
           it 'sets a rescue handler declared through :with option for each key in hash' do
+            with_block = -> { 'hello' }
             expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => an_instance_of(Proc))
-            expect(subject).to receive(:namespace_stackable).with(:rescue_options, with: 'ExampleHandler')
-            subject.rescue_from StandardError, with: 'ExampleHandler'
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, with: with_block)
+            subject.rescue_from StandardError, with: with_block
           end
         end
       end
