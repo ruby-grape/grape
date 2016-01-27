@@ -2799,7 +2799,7 @@ describe 'an endpoint that needs helpers stubbed' do
     Grape::Endpoint.before_each nil
   end
 
-  it 'should properly stub the helper' do
+  it 'stubs the helper' do
     # ...
   end
 end

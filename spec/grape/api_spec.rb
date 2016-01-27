@@ -235,7 +235,7 @@ describe Grape::API do
       expect(last_response.body).to eq('23')
     end
 
-    it 'should be able to define requirements with a single hash' do
+    it 'defines requirements with a single hash' do
       subject.namespace :users do
         route_param :id, requirements: /[0-9]+/ do
           get do

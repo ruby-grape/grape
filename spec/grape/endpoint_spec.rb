@@ -10,19 +10,19 @@ describe Grape::Endpoint do
   describe '.before_each' do
     after { Grape::Endpoint.before_each(nil) }
 
-    it 'should be settable via block' do
+    it 'is settable via block' do
       block = ->(_endpoint) { 'noop' }
       Grape::Endpoint.before_each(&block)
       expect(Grape::Endpoint.before_each.first).to eq(block)
     end
 
-    it 'should be settable via reference' do
+    it 'is settable via reference' do
       block = ->(_endpoint) { 'noop' }
       Grape::Endpoint.before_each block
       expect(Grape::Endpoint.before_each.first).to eq(block)
     end
 
-    it 'should be able to override a helper' do
+    it 'is able to override a helper' do
       subject.get('/') { current_user }
       expect { get '/' }.to raise_error(NameError)
 
@@ -37,7 +37,7 @@ describe Grape::Endpoint do
       expect { get '/' }.to raise_error(NameError)
     end
 
-    it 'should be able to stack helper' do
+    it 'is able to stack helper' do
       subject.get('/') do
         authenticate_user!
         current_user
@@ -921,7 +921,7 @@ describe Grape::Endpoint do
   end
 
   context 'request' do
-    it 'should be set to the url requested' do
+    it 'is set to the url requested' do
       subject.get('/url') do
         request.url
       end
