@@ -105,7 +105,10 @@ module Grape
           end
 
           options = args.extract_options!
-          handler ||= proc { options[:with] } if options.key?(:with)
+          if block_given? && options.key?(:with)
+            fail ArgumentError, 'both :with option and block cannot be passed'
+          end
+          handler ||= extract_with(options)
 
           if args.include?(:all)
             namespace_inheritable(:rescue_all, true)
@@ -148,6 +151,16 @@ module Grape
         def represent(model_class, options)
           fail Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
           namespace_stackable(:representations, model_class => options[:with])
+        end
+
+        private
+
+        def extract_with(options)
+          return unless options.key?(:with)
+          with_option = options[:with]
+          return with_option if with_option.instance_of?(Proc)
+          return if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
+          fail ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
         end
       end
     end
