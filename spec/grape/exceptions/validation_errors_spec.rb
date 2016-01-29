@@ -20,8 +20,8 @@ describe Grape::Exceptions::ValidationErrors do
       expect(subject.headers).to eq(headers)
     end
 
-    it 'fails when errors are missing' do
-      expect { described_class.new(headers: headers) }.to raise_error(RuntimeError, 'Errors are missing:')
+    it 'fails when params are missing' do
+      expect { described_class.new(headers: headers) }.to raise_error(RuntimeError, 'Params are missing:')
     end
   end
 
