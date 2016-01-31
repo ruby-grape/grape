@@ -1,6 +1,5 @@
 require 'logger'
 require 'rack'
-require 'rack/mount'
 require 'rack/builder'
 require 'rack/accept'
 require 'rack/auth/basic'
@@ -33,8 +32,8 @@ module Grape
   eager_autoload do
     autoload :API
     autoload :Endpoint
+    autoload :Router
 
-    autoload :Route
     autoload :Namespace
 
     autoload :Path

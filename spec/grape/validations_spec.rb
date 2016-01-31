@@ -1074,7 +1074,7 @@ describe Grape::Validations do
         subject.get '/' do
         end
 
-        expect(subject.routes.first.route_params['first_name'][:documentation]).to eq(documentation)
+        expect(subject.routes.first.params['first_name'][:documentation]).to eq(documentation)
       end
     end
 

@@ -4,6 +4,7 @@ module Grape
       # https://github.com/rack/rack/blob/master/lib/rack.rb
       HTTP_VERSION    = 'HTTP_VERSION'.freeze
       PATH_INFO       = 'PATH_INFO'.freeze
+      REQUEST_METHOD  = 'REQUEST_METHOD'.freeze
       QUERY_STRING    = 'QUERY_STRING'.freeze
       CONTENT_TYPE    = 'Content-Type'.freeze
 

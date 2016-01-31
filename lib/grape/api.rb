@@ -1,3 +1,5 @@
+require 'grape/router'
+
 module Grape
   # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
@@ -5,7 +7,7 @@ module Grape
     include Grape::DSL::API
 
     class << self
-      attr_reader :instance
+      attr_reader :instance, :router
 
       # A class-level lock to ensure the API is not compiled by multiple
       # threads simultaneously within the same process.
@@ -87,24 +89,25 @@ module Grape
     # Builds the routes from the defined endpoints, effectively compiling
     # this API into a usable form.
     def initialize
-      @route_set = Rack::Mount::RouteSet.new
+      @router = Router.new
       add_head_not_allowed_methods_and_options_methods
       self.class.endpoints.each do |endpoint|
-        endpoint.mount_in(@route_set)
+        endpoint.mount_in(@router)
       end
 
-      @route_set.freeze
+      @router.compile!
+      @router.freeze
     end
 
     # Handle a request. See Rack documentation for what `env` is.
     def call(env)
-      result = @route_set.call(env)
+      result = @router.call(env)
       result[1].delete(Grape::Http::Headers::X_CASCADE) unless cascade?
       result
     end
 
     # Some requests may return a HTTP 404 error if grape cannot find a matching
-    # route. In this case, Rack::Mount adds a X-Cascade header to the response
+    # route. In this case, Grape::Router adds a X-Cascade header to the response
     # and sets it to 'pass', indicating to grape's parents they should keep
     # looking for a matching route on other resources.
     #
@@ -126,20 +129,23 @@ module Grape
     # will return an HTTP 405 response for any HTTP method that the resource
     # cannot handle.
     def add_head_not_allowed_methods_and_options_methods
-      methods_per_path = {}
+      routes_map = {}
 
       self.class.endpoints.each do |endpoint|
         routes = endpoint.routes
         routes.each do |route|
-          route_path = route.route_path
-                       .gsub(/\(.*\)/, '') # ignore any optional portions
-                       .gsub(%r{\:[^\/.?]+}, ':x') # substitute variable names to avoid conflicts
-
-          methods_per_path[route_path] ||= []
-          methods_per_path[route_path] << route.route_method
+          # using the :any shorthand produces [nil] for route methods, substitute all manually
+          route_key = route.pattern.to_regexp
+          routes_map[route_key] ||= {}
+          route_settings = routes_map[route_key]
+          route_settings[:requirements] = route.requirements
+          route_settings[:path] = route.origin
+          route_settings[:methods] ||= []
+          route_settings[:methods] << route.request_method
+          route_settings[:endpoint] = route.app
 
           # using the :any shorthand produces [nil] for route methods, substitute all manually
-          methods_per_path[route_path] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if methods_per_path[route_path].compact.empty?
+          route_settings[:methods] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if route_settings[:methods].include?('ANY')
         end
       end
 
@@ -149,7 +155,9 @@ module Grape
       # informations again.
       without_root_prefix do
         without_versioning do
-          methods_per_path.each do |path, methods|
+          routes_map.each do |regexp, config|
+            methods = config[:methods]
+            path = config[:path]
             allowed_methods = methods.dup
 
             unless self.class.namespace_inheritable(:do_not_route_head)
@@ -159,18 +167,18 @@ module Grape
             allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
 
             unless self.class.namespace_inheritable(:do_not_route_options)
-              generate_options_method(path, allow_header) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
+              generate_options_method(path, allow_header, config) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
             end
 
-            generate_not_allowed_method(path, allowed_methods, allow_header)
+            generate_not_allowed_method(regexp, allowed_methods, allow_header, config[:endpoint])
           end
         end
       end
     end
 
     # Generate an 'OPTIONS' route for a pre-exisiting user defined route
-    def generate_options_method(path, allow_header)
-      self.class.options(path, {}) do
+    def generate_options_method(path, allow_header, options = {})
+      self.class.options(path, options) do
         header 'Allow', allow_header
         status 204
         ''
@@ -179,15 +187,13 @@ module Grape
 
     # Generate a route that returns an HTTP 405 response for a user defined
     # path on methods not specified
-    def generate_not_allowed_method(path, allowed_methods, allow_header)
+    def generate_not_allowed_method(path, allowed_methods, allow_header, endpoint = nil)
       not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
       not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
 
       return if not_allowed_methods.empty?
 
-      self.class.route(not_allowed_methods, path) do
-        fail Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allow_header)
-      end
+      @router.associate_routes(path, not_allowed_methods, allow_header, endpoint)
     end
 
     # Allows definition of endpoints that ignore the versioning configuration

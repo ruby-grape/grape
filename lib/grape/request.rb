@@ -16,8 +16,8 @@ module Grape
 
     def build_params
       params = Hashie::Mash.new(rack_params)
-      if env[Grape::Env::RACK_ROUTING_ARGS]
-        args = env[Grape::Env::RACK_ROUTING_ARGS].dup
+      if env[Grape::Env::GRAPE_ROUTING_ARGS]
+        args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
         # preserve version from query string parameters
         args.delete(:version)
         args.delete(:route_info)

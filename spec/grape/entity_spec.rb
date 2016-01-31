@@ -170,7 +170,7 @@ describe Grape::Entity do
     end
 
     [:json, :serializable_hash].each do |format|
-      it 'presents with #{format}' do
+      it "presents with #{format}" do
         entity = Class.new(Grape::Entity)
         entity.root 'examples', 'example'
         entity.expose :id
@@ -191,7 +191,7 @@ describe Grape::Entity do
         expect(last_response.body).to eq('{"example":{"id":1}}')
       end
 
-      it 'presents with #{format} collection' do
+      it "presents with #{format} collection" do
         entity = Class.new(Grape::Entity)
         entity.root 'examples', 'example'
         entity.expose :id

@@ -20,7 +20,7 @@ module Grape
       #    env['api.format]   => 'json'
       #
       # If version does not match this route, then a 406 is raised with
-      # X-Cascade header to alert Rack::Mount to attempt the next matched
+      # X-Cascade header to alert Grape::Router to attempt the next matched
       # route.
       class Header < Base
         VENDOR_VERSION_HEADER_REGEX =
@@ -154,7 +154,7 @@ module Grape
 
         # By default those errors contain an `X-Cascade` header set to `pass`,
         # which allows nesting and stacking of routes
-        # (see [Rack::Mount](https://github.com/josh/rack-mount) for more
+        # (see Grape::Router for more
         # information). To prevent # this behavior, and not add the `X-Cascade`
         # header, one can set the `:cascade` option to `false`.
         def cascade?

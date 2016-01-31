@@ -1,7 +1,12 @@
 0.15.1 (Next)
 =============
 
+#### Features
+
+* [#1276](https://github.com/ruby-grape/grape/pull/1276): Replace rack-mount with new router - [@namusyaka](https://github.com/namusyaka).
 * Your contribution here.
+
+#### Fixes
 
 0.15.0 (3/8/2016)
 =================
@@ -32,7 +37,6 @@
 * [#1197](https://github.com/ruby-grape/grape/pull/1290): Fix using JSON and Array[JSON] as groups when parameter is optional - [@lukeivers](https://github.com/lukeivers).
 
 0.14.0 (12/07/2015)
-===================
 
 #### Features
 

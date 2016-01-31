@@ -2568,10 +2568,14 @@ Examine the routes at runtime.
 ```ruby
 TwitterAPI::versions # yields [ 'v1', 'v2' ]
 TwitterAPI::routes # yields an array of Grape::Route objects
-TwitterAPI::routes[0].route_version # => 'v1'
-TwitterAPI::routes[0].route_description # => 'Includes custom settings.'
-TwitterAPI::routes[0].route_settings[:custom] # => { key: 'value' }
+TwitterAPI::routes[0].version # => 'v1'
+TwitterAPI::routes[0].description # => 'Includes custom settings.'
+TwitterAPI::routes[0].settings[:custom] # => { key: 'value' }
 ```
+
+Note that `Route#route_xyz` methods have been deprecated since 0.15.0.
+
+Please use `Route#xyz` instead.
 
 ## Current Route and Endpoint
 

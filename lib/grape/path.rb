@@ -2,7 +2,7 @@ module Grape
   # Represents a path to an endpoint.
   class Path
     def self.prepare(raw_path, namespace, settings)
-      Path.new(raw_path, namespace, settings).path_with_suffix
+      Path.new(raw_path, namespace, settings)
     end
 
     attr_reader :raw_path, :namespace, :settings
@@ -22,7 +22,7 @@ module Grape
     end
 
     def uses_specific_format?
-      !!(settings[:format] && settings[:content_types].size == 1)
+      !!(settings[:format] && Array(settings[:content_types]).size == 1)
     end
 
     def uses_path_versioning?
@@ -48,7 +48,7 @@ module Grape
     end
 
     def path
-      Rack::Mount::Utils.normalize_path(parts.join('/'))
+      Grape::Router.normalize_path(parts.join('/'))
     end
 
     def path_with_suffix

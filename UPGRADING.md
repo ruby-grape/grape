@@ -1,6 +1,28 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.16.0
+
+#### Replace rack-mount with new router
+
+The `Route#route_xyz` methods have been deprecated since 0.15.1.
+
+Please use `Route#xyz` instead.
+
+Note that the `Route#route_method` was replaced by `Route#request_method`.
+
+The following code would work correctly.
+
+```ruby
+TwitterAPI::versions # yields [ 'v1', 'v2' ]
+TwitterAPI::routes # yields an array of Grape::Route objects
+TwitterAPI::routes[0].version # => 'v1'
+TwitterAPI::routes[0].description # => 'Includes custom settings.'
+TwitterAPI::routes[0].settings[:custom] # => { key: 'value' }
+
+TwitterAPI::routes[0].request_method # => 'GET'
+```
+
 ### Upgrading to >= 0.15.0
 
 #### Changes to availability of `:with` option of `rescue_from` method

@@ -28,7 +28,7 @@ module Grape
 
           if prefix && path.index(prefix) == 0
             path.sub!(prefix, '')
-            path = Rack::Mount::Utils.normalize_path(path)
+            path = Grape::Router.normalize_path(path)
           end
 
           pieces = path.split('/')
@@ -41,7 +41,7 @@ module Grape
         private
 
         def prefix
-          Rack::Mount::Utils.normalize_path(options[:prefix].to_s) if options[:prefix]
+          Grape::Router.normalize_path(options[:prefix].to_s) if options[:prefix]
         end
       end
     end
