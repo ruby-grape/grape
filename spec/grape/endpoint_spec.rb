@@ -893,7 +893,7 @@ describe Grape::Endpoint do
     verbs = %w(post get head delete put options patch)
 
     verbs.each do |verb|
-      it 'allows for the anchoring option with a #{verb.upcase} method' do
+      it "allows for the anchoring option with a #{verb.upcase} method" do
         subject.send(verb, '/example', anchor: true) do
           verb
         end
@@ -901,7 +901,7 @@ describe Grape::Endpoint do
         expect(last_response.status).to eql 404
       end
 
-      it 'anchors paths by default for the #{verb.upcase} method' do
+      it "anchors paths by default for the #{verb.upcase} method" do
         subject.send(verb, '/example') do
           verb
         end
@@ -909,7 +909,7 @@ describe Grape::Endpoint do
         expect(last_response.status).to eql 404
       end
 
-      it 'responds to /example/and/some/more for the non-anchored #{verb.upcase} method' do
+      it "responds to /example/and/some/more for the non-anchored #{verb.upcase} method" do
         subject.send(verb, '/example', anchor: false) do
           verb
         end
@@ -929,7 +929,7 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('http://example.org/url')
     end
     ['v1', :v1].each do |version|
-      it 'should include version #{version}' do
+      it "should include version #{version}" do
         subject.version version, using: :path
         subject.get('/url') do
           request.url
