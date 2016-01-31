@@ -23,7 +23,7 @@ module Grape
 
         return if value == false || value.present?
 
-        fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :blank
+        fail Grape::Exceptions::Validation, params: [@scope.full_message(attr_name, param_index(params))], message_key: :blank
       end
     end
   end

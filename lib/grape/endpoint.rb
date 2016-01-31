@@ -243,20 +243,7 @@ module Grape
 
         run_filters before_validations, :before_validation
 
-        # Retrieve validations from this namespace and all parent namespaces.
-        validation_errors = []
-
-        route_setting(:saved_validations).each do |validator|
-          begin
-            validator.validate!(params)
-          rescue Grape::Exceptions::Validation => e
-            validation_errors << e
-          end
-        end
-
-        if validation_errors.any?
-          fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
-        end
+        run_validators route_setting(:saved_validations), @params
 
         run_filters after_validations, :after_validation
 
@@ -343,6 +330,16 @@ module Grape
         end
 
         @lazy_initialized = true
+      end
+    end
+
+    def run_validators(validators, params)
+      validate_service = Validations.validate_service(validators, params)
+
+      if validate_service.validate!
+        @params = validate_service.params
+      else
+        fail Grape::Exceptions::ValidationErrors, errors: validate_service.errors, headers: header
       end
     end
 

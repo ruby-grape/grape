@@ -14,5 +14,9 @@ module Grape
     def self.register_validator(short_name, klass)
       validators[short_name] = klass
     end
+
+    def self.validate_service(validators, params)
+      ValidateService.new(validators, params)
+    end
   end
 end

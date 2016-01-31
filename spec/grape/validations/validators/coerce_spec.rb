@@ -293,7 +293,7 @@ describe Grape::Validations::CoerceValidator do
 
         get '/ints', ints: '{"i":1,"j":"2"}'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('ints[0][i] is missing, ints[0][i] is invalid, ints[0][j] is missing')
+        expect(last_response.body).to eq('ints[i] is missing, ints[i] is invalid, ints[j] is missing')
 
         get '/ints', ints: '[{"i":"1","j":"2"}]'
         expect(last_response.status).to eq(200)
@@ -365,7 +365,7 @@ describe Grape::Validations::CoerceValidator do
 
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('splines[x] does not have a valid value')
+        expect(last_response.body).to eq('splines[1][x] does not have a valid value')
       end
 
       it 'accepts Array[JSON] shorthand' do
@@ -391,11 +391,11 @@ describe Grape::Validations::CoerceValidator do
 
         get '/', splines: '{"x":"4","y":"woof"}'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('splines[x] does not have a valid value')
+        expect(last_response.body).to eq('splines[0][x] does not have a valid value')
 
         get '/', splines: '[{"x":"4","y":"woof"}]'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('splines[x] does not have a valid value')
+        expect(last_response.body).to eq('splines[0][x] does not have a valid value')
       end
 
       it "doesn't make sense using coerce_with" do
