@@ -211,7 +211,7 @@ describe Grape::API do
     end
 
     %w(group resource resources segment).each do |als|
-      it '`.#{als}` is an alias' do
+      it "`.#{als}` is an alias" do
         inner_namespace = nil
         subject.send(als, :awesome) do
           inner_namespace = namespace
@@ -494,7 +494,7 @@ describe Grape::API do
 
     verbs = %w(post get head delete put options patch)
     verbs.each do |verb|
-      it 'allows and properly constrain a #{verb.upcase} method' do
+      it "allows and properly constrain a #{verb.upcase} method" do
         subject.send(verb, '/example') do
           verb
         end
