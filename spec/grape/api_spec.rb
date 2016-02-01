@@ -555,6 +555,9 @@ describe Grape::API do
         subject.get 'example' do
           'example'
         end
+        subject.route :any, '*path' do
+          error! :not_found, 404
+        end
         options '/example'
       end
 
@@ -583,13 +586,53 @@ describe Grape::API do
       end
     end
 
-    it 'allows HEAD on a GET request' do
-      subject.get 'example' do
-        'example'
+    describe 'adds a 405 Not Allowed route that' do
+      before do
+        subject.before { header 'X-Custom-Header', 'foo' }
+        subject.post :example do
+          'example'
+        end
+        subject.route :any, '*path' do
+          error! :not_found, 404
+        end
+        get '/example'
       end
-      head '/example'
-      expect(last_response.status).to eql 200
-      expect(last_response.body).to eql ''
+
+      it 'returns a 405' do
+        expect(last_response.status).to eql 405
+      end
+
+      it 'has an empty body' do
+        expect(last_response.body).to be_blank
+      end
+
+      it 'has an Allow header' do
+        expect(last_response.headers['Allow']).to eql 'OPTIONS, POST'
+      end
+
+      it 'has a X-Custom-Header' do
+        expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+      end
+    end
+
+    context 'allows HEAD on a GET request that' do
+      before do
+        subject.get 'example' do
+          'example'
+        end
+        subject.route :any, '*path' do
+          error! :not_found, 404
+        end
+        head '/example'
+      end
+
+      it 'returns a 200' do
+        expect(last_response.status).to eql 200
+      end
+
+      it 'has an empty body' do
+        expect(last_response.body).to eql ''
+      end
     end
 
     it 'overwrites the default HEAD request' do

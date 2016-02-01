@@ -32,6 +32,10 @@ end
 
 See [#1147](https://github.com/ruby-grape/grape/issues/1147) and [#1240](https://github.com/ruby-grape/grape/issues/1240) for discussion of the issues.
 
+#### Changes to generated OPTIONS and Method Not Allowed routes
+
+Using `route :any, '*path'` no longer blocks generated `OPTIONS` and Method Not Allowed methods from other routes. Use `do_not_route_options!` to prevent `OPTIONS` routes from being created.
+
 ### Upgrading to >= 0.14.0
 
 #### Changes to availability of DSL methods in filters
