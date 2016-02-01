@@ -146,6 +146,9 @@ module Grape
         routes.each do |route|
           methods_per_path[route.route_path] ||= []
           methods_per_path[route.route_path] << route.route_method
+
+          # using the :any shorthand produces [nil] for route methods, substitute all manually
+          methods_per_path[route.route_path] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if methods_per_path[route.route_path].compact.empty?
         end
       end
 
@@ -157,31 +160,51 @@ module Grape
         without_versioning do
           methods_per_path.each do |path, methods|
             allowed_methods = methods.dup
+
             unless self.class.namespace_inheritable(:do_not_route_head)
               allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
             end
 
             allow_header = ([Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
+
             unless self.class.namespace_inheritable(:do_not_route_options)
-              unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
-                self.class.options(path, {}) do
-                  header 'Allow', allow_header
-                  status 204
-                  ''
-                end
-              end
+              generate_options_method(path, allow_header) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
             end
 
-            not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
-            not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
-            self.class.route(not_allowed_methods, path) do
-              header 'Allow', allow_header
-              status 405
-              ''
-            end
+            generate_not_allowed_method(path, allowed_methods, allow_header)
           end
         end
       end
+    end
+
+    # Generate an 'OPTIONS' route for a pre-exisiting user defined route
+    def generate_options_method(path, allow_header)
+      self.class.options(path, {}) do
+        header 'Allow', allow_header
+        status 204
+        ''
+      end
+
+      # move options endpoint to top of defined endpoints
+      self.class.endpoints.unshift self.class.endpoints.pop
+    end
+
+    # Generate a route that returns an HTTP 405 response for a user defined
+    # path on methods not specified
+    def generate_not_allowed_method(path, allowed_methods, allow_header)
+      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+      not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
+
+      return if not_allowed_methods.empty?
+
+      self.class.route(not_allowed_methods, path) do
+        header 'Allow', allow_header
+        status 405
+        ''
+      end
+
+      # move options endpoint to top of defined endpoints
+      self.class.endpoints.unshift self.class.endpoints.pop
     end
 
     # Allows definition of endpoints that ignore the versioning configuration
