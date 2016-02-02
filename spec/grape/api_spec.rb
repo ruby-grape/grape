@@ -673,9 +673,16 @@ describe Grape::API do
         'example'
       end
     end
-    it 'options does not exist' do
+
+    it 'does not create an OPTIONS route' do
       options '/example'
       expect(last_response.status).to eql 405
+    end
+
+    it 'does not include OPTIONS in Allow header' do
+      options '/example'
+      expect(last_response.status).to eql 405
+      expect(last_response.headers['Allow']).to eql 'GET, HEAD'
     end
   end
 

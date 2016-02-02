@@ -165,7 +165,7 @@ module Grape
               allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
             end
 
-            allow_header = ([Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
+            allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
 
             unless self.class.namespace_inheritable(:do_not_route_options)
               generate_options_method(path, allow_header) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
