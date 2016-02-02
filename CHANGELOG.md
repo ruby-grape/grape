@@ -19,6 +19,7 @@
 * [#1225](https://github.com/ruby-grape/grape/pull/1225): Fix `given` with nested params not returning correct declared params - [@JanStevens](https://github.com/JanStevens).
 * [#1249](https://github.com/ruby-grape/grape/pull/1249): Don't fail even if invalid type value is passed to default validator - [@namusyaka](https://github.com/namusyaka).
 * [#1263](https://github.com/ruby-grape/grape/pull/1263): Fix `route :any, '*path'` breaking generated `OPTIONS`, Method Not Allowed routes - [@arempe93](https://github.com/arempe93).
+* [#1266](https://github.com/ruby-grape/grape/pull/1266): Fix `Allow` header including `OPTIONS` when `do_not_route_options!` is active - [@arempe93](https://github.com/arempe93).
 
 0.14.0 (12/07/2015)
 ===================
