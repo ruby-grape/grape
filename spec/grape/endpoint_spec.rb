@@ -887,6 +887,57 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq('body')
       end
     end
+
+    it 'allows adding to response with present' do
+      subject.format :json
+      subject.before { present :before, 'before' }
+      subject.before_validation { present :before_validation, 'before_validation' }
+      subject.after_validation { present :after_validation, 'after_validation' }
+      subject.after { present :after, 'after' }
+      subject.get :all_filters do
+        present :endpoint, 'endpoint'
+      end
+
+      get '/all_filters'
+      json = JSON.parse(last_response.body)
+      expect(json.keys).to match_array %w(before before_validation after_validation endpoint after)
+    end
+
+    context 'when terminating the response with error!' do
+      it 'breaks normal call chain' do
+        called = []
+        subject.before { called << 'before' }
+        subject.before_validation { called << 'before_validation' }
+        subject.after_validation { error! :oops, 500 }
+        subject.after { called << 'after' }
+        subject.get :error_filters do
+          called << 'endpoint'
+          ''
+        end
+
+        get '/error_filters'
+        expect(last_response.status).to eql 500
+        expect(called).to match_array %w(before before_validation)
+      end
+
+      it 'allows prior and parent filters of same type to run' do
+        called = []
+        subject.before { called << 'parent' }
+        subject.namespace :parent do
+          before { called << 'prior' }
+          before { error! :oops, 500 }
+          before { called << 'subsequent' }
+          get :hello do
+            called << :endpoint
+            'Hello!'
+          end
+        end
+
+        get '/parent/hello'
+        expect(last_response.status).to eql 500
+        expect(called).to match_array %w(parent prior)
+      end
+    end
   end
 
   context 'anchoring' do
