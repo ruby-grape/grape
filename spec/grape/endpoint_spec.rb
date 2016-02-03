@@ -255,8 +255,11 @@ describe Grape::Endpoint do
         requires :first
         optional :second
         optional :third, default: 'third-default'
-        optional :nested, type: Hash do
+        optional :hash, type: Hash do
           optional :fourth
+        end
+        optional :array, type: Array do
+          optional :fifth
         end
       end
     end
@@ -279,7 +282,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(inner_params.size).to eq(4)
+      expect(inner_params.size).to eq(5)
     end
 
     it 'has a optional param with default value all the time' do
@@ -300,31 +303,21 @@ describe Grape::Endpoint do
         ''
       end
 
-      get '/declared?first=present&nested[fourth]=1'
+      get '/declared?first=present&hash[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
+      expect(inner_params[:hash].keys.size).to eq 1
     end
 
     it 'builds nested params when given array' do
-      subject.get '/dummy' do
-      end
-      subject.params do
-        requires :first
-        optional :second
-        optional :third, default: 'third-default'
-        optional :nested, type: Array do
-          optional :fourth
-        end
-      end
       inner_params = nil
       subject.get '/declared' do
         inner_params = declared(params)
         ''
       end
 
-      get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
+      get '/declared?first=present&array[][fourth]=1&array[][fourth]=2'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].size).to eq 2
+      expect(inner_params[:array].size).to eq 2
     end
 
     it 'builds nested params' do
@@ -334,9 +327,9 @@ describe Grape::Endpoint do
         ''
       end
 
-      get '/declared?first=present&nested[fourth]=1'
+      get '/declared?first=present&hash[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
+      expect(inner_params[:hash].keys.size).to eq 1
     end
 
     context 'sets nested array when the param is missing' do
@@ -349,7 +342,7 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to be_a(Array)
+        expect(inner_params[:array]).to be_a(Array)
       end
 
       it 'to be nil when include_missing is false' do
@@ -361,7 +354,33 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to be_nil
+        expect(inner_params[:array]).to be_nil
+      end
+    end
+
+    context 'sets nested hash when the param is missing' do
+      it 'to be a hash when include missing is true' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params, include_missing: true)
+          ''
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:hash]).to be_a(Hash)
+      end
+
+      it 'to be nil when include_missing is false' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params, include_missing: false)
+          ''
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:hash]).to be_nil
       end
     end
 
@@ -436,10 +455,10 @@ describe Grape::Endpoint do
         requires :first
         optional :second
         optional :third, default: nil
-        optional :nested, type: Hash do
+        optional :hash, type: Hash do
           optional :fourth, default: nil
           optional :fifth, default: nil
-          requires :nested_nested, type: Hash do
+          requires :nested_hash, type: Hash do
             optional :sixth, default: 'sixth-default'
             optional :seven, default: nil
           end
@@ -452,14 +471,14 @@ describe Grape::Endpoint do
         ''
       end
 
-      get '/declared?first=present&nested[fourth]=&nested[nested_nested][sixth]=sixth'
+      get '/declared?first=present&hash[fourth]=&hash[nested_hash][sixth]=sixth'
 
       expect(last_response.status).to eq(200)
       expect(inner_params[:first]).to eq 'present'
-      expect(inner_params[:nested].keys).to eq %w(fourth fifth nested_nested)
-      expect(inner_params[:nested][:fourth]).to eq ''
-      expect(inner_params[:nested][:nested_nested].keys).to eq %w(sixth seven)
-      expect(inner_params[:nested][:nested_nested][:sixth]).to eq 'sixth'
+      expect(inner_params[:hash].keys).to eq %w(fourth fifth nested_hash)
+      expect(inner_params[:hash][:fourth]).to eq ''
+      expect(inner_params[:hash][:nested_hash].keys).to eq %w(sixth seven)
+      expect(inner_params[:hash][:nested_hash][:sixth]).to eq 'sixth'
     end
   end
 
