@@ -2453,7 +2453,9 @@ Before and after callbacks execute in the following order:
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
-E.g. using `before`:
+#### Examples
+
+Using a simple `before` block to set a header
 
 ```ruby
 before do
@@ -2461,7 +2463,9 @@ before do
 end
 ```
 
-The block applies to every API call within and below the current namespace:
+**Namespaces**
+
+Callbacks apply to each API call within and below the current namespace:
 
 ```ruby
 class MyAPI < Grape::API
@@ -2495,8 +2499,7 @@ GET /foo        # 'root - foo - blah'
 GET /foo/bar    # 'root - foo - bar - blah'
 ```
 
-Params on a `namespace` (or whatever alias you are using) also work when using
-`before_validation` or `after_validation`:
+Params on a `namespace` (or whichever alias you are using) will also be available when using `before_validation` or `after_validation`:
 
 ```ruby
 class MyAPI < Grape::API
@@ -2522,6 +2525,8 @@ The behaviour is then:
 GET /123        # 'Fixnum'
 GET /foo        # 400 error - 'blah is invalid'
 ```
+
+**Versioning**
 
 When a callback is defined within a version block, it's only called for the routes defined in that block.
 
@@ -2555,6 +2560,33 @@ The behaviour is then:
 GET /foo/v1       # 'v1-hello'
 GET /foo/v2       # 'v2-hello'
 ```
+
+**Altering Responses**
+
+Using `present` in any callback allows you to add data to a response:
+
+```ruby
+class MyAPI < Grape::API
+  format :json
+
+  after_validation do
+    present :name, params[:name] if params[:name]
+  end
+
+  get '/greeting' do
+    present :greeting, 'Hello!'
+  end
+end
+```
+
+The behaviour is then:
+
+```bash
+GET /greeting              # {"greeting":"Hello!"}
+GET /greeting?name=Alan    # {"name":"Alan","greeting":"Hello!"}
+```
+
+Instead of altering a response, you can also terminate and rewrite it from any callback using `error!`, including `after`. This will cause all subsequent steps in the process to not be called. **This includes the actual api call and any callbacks**
 
 ## Anchoring
 
