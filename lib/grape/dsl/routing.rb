@@ -87,6 +87,11 @@ module Grape
               change!
             end
 
+            app.endpoints.each do |endpoint|
+              current_error_status = namespace_inheritable(:default_error_status) || 500
+              endpoint.namespace_inheritable(:default_error_status, current_error_status)
+            end if !app.is_a?(Proc) && app.ancestors.include?(Grape::API)
+
             endpoints << Grape::Endpoint.new(
               in_setting,
               method: :any,

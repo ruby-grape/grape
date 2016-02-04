@@ -1612,6 +1612,8 @@ class API < Grape::API
 end
 ```
 
+Of course, `default_error_status` does not depend on the timing of route definition, so mounted application can also use the default error status code.
+
 ### Handling 404
 
 For Grape to handle all the 404s for your API, it can be useful to use a catch-all.

@@ -1,6 +1,39 @@
 Upgrading Grape
 ===============
 
+#### Changes to  behavior of `default_error_status`
+
+The `default_error_status` method had been depending on the timing of route definition.
+
+Currently, the difference of behaviors has been unified. The following code is treated as same meaning.
+
+```ruby
+class A < Grape::API
+  default_error_status 400
+end
+
+class API < Grape::API
+  mount A
+end
+
+A.get '/error' do
+  error!('error')
+end
+```
+
+```ruby
+class B < Grape::API
+  default_error_status 400
+  get '/error' do
+    error!('error')
+  end
+end
+
+class API < Grape::API
+  mount B
+end
+```
+
 ### Upgrading to >= 0.15.0
 
 #### Changes to availability of `:with` option of `rescue_from` method

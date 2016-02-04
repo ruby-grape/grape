@@ -1983,6 +1983,37 @@ describe Grape::API do
       get '/exception'
       expect(last_response.status).to eql 400
     end
+
+    context 'with mounted api' do
+      before do
+        subject.version 'v1', using: :path
+        subject.default_error_status 400
+      end
+
+      it 'inherits default error status' do
+        api = Class.new(Grape::API)
+        subject.mount api
+        api.get('/error') do
+          error!('error!')
+        end
+
+        get '/v1/error'
+        expect(last_response.status).to eql 400
+        expect(last_response.body).to eq('error!')
+      end
+
+      it 'inherits default error status even if target route is registered before mounting self' do
+        api = Class.new(Grape::API)
+        api.get('/error') do
+          error!('error!')
+        end
+        subject.mount api
+
+        get '/v1/error'
+        expect(last_response.status).to eql 400
+        expect(last_response.body).to eq('error!')
+      end
+    end
   end
 
   context 'http_codes' do
