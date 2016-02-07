@@ -8,6 +8,8 @@ module Grape
     module Parameters
       extend ActiveSupport::Concern
 
+      include Grape::Util::HashParameter
+
       # Include reusable params rules among current.
       # You can define reusable params with helpers method.
       #
@@ -188,6 +190,7 @@ module Grape
       # @api private
       def params(params)
         params = @parent.params(params) if @parent
+
         if @element
           if params.is_a?(Array)
             params = params.flat_map { |el| el[@element] || {} }
@@ -197,6 +200,9 @@ module Grape
             params = {}
           end
         end
+
+        params = params.values if params.is_a?(Hash) && deem_hash_array?(params)
+
         params
       end
     end

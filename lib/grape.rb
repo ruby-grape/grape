@@ -129,6 +129,7 @@ module Grape
     autoload :InheritableSetting
     autoload :StrictHashConfiguration
     autoload :FileResponse
+    autoload :HashParameter
   end
 
   module DSL

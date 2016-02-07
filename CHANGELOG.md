@@ -11,6 +11,7 @@
 * [#1252](https://github.com/ruby-grape/grape/pull/1252): Allow default to be a subset or equal to allowed values without raising IncompatibleOptionValues - [@jeradphelps](https://github.com/jeradphelps).
 * [#1255](https://github.com/ruby-grape/grape/pull/1255): Allow param type definition in `route_param` - [@namusyaka](https://github.com/namusyaka).
 * [#1257](https://github.com/ruby-grape/grape/pull/1257): Allow Proc, Symbol or String in `rescue_from with: ...` - [@namusyaka](https://github.com/namusyaka).
+* [#1261](https://github.com/ruby-grape/grape/pull/1261): support array with index - [@itoufo](https://github.com/itoufo).
 * Your contribution here.
 
 #### Fixes
