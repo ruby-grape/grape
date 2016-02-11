@@ -2796,7 +2796,7 @@ end
 ```
 
 In Rails, HTTP request tests would go into the `spec/requests` group. You may want your API code to go into
-`app/api` - you can match that layout under `spec` by adding the following in `spec/spec_helper.rb`.
+`app/api` - you can match that layout under `spec` by adding the following in `spec/rails_helper.rb`.
 
 ```ruby
 RSpec.configure do |config|
