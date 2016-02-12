@@ -10,7 +10,7 @@ describe Grape::Middleware::Formatter do
     it 'looks at the bodies for possibly serializable data' do
       @body = { 'abc' => 'def' }
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      bodies.each { |b| expect(b).to eq(MultiJson.dump(@body)) }
+      bodies.each { |b| expect(b).to eq(JSON.dump(@body)) }
     end
 
     it 'calls #to_json since default format is json' do

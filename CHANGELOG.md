@@ -15,6 +15,7 @@
 
 #### Fixes
 
+* [#1274](https://github.com/ruby-grape/grape/pull/1274): Removed multi_json dependencies - [@u2](https://github.com/u2).
 * [#1216](https://github.com/ruby-grape/grape/pull/1142): Fix JSON error response when calling `error!` with non-Strings - [@jrforrest](https://github.com/jrforrest).
 * [#1225](https://github.com/ruby-grape/grape/pull/1225): Fix `given` with nested params not returning correct declared params - [@JanStevens](https://github.com/JanStevens).
 * [#1249](https://github.com/ruby-grape/grape/pull/1249): Don't fail even if invalid type value is passed to default validator - [@namusyaka](https://github.com/namusyaka).

@@ -428,9 +428,9 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.body']
             end
-            send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', JSON.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql MultiJson.dump(object)
+            expect(last_response.body).to eql JSON.dump(object)
             expect(last_request.params).to eql({})
           end
           it 'stores input in api.request.input' do
@@ -438,9 +438,9 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.input']
             end
-            send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', JSON.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql MultiJson.dump(object).to_json
+            expect(last_response.body).to eql JSON.dump(object).to_json
           end
           context 'chunked transfer encoding' do
             it 'stores input in api.request.input' do
@@ -448,9 +448,9 @@ describe Grape::API do
               subject.send(verb) do
                 env['api.request.input']
               end
-              send verb, '/', MultiJson.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
+              send verb, '/', JSON.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
-              expect(last_response.body).to eql MultiJson.dump(object).to_json
+              expect(last_response.body).to eql JSON.dump(object).to_json
             end
           end
         end
@@ -1736,7 +1736,7 @@ describe Grape::API do
         fail 'rain!'
       end
       get '/exception'
-      json = MultiJson.load(last_response.body)
+      json = JSON.load(last_response.body)
       expect(json['error']).to eql 'rain!'
       expect(json['backtrace'].length).to be > 0
     end
@@ -2753,7 +2753,7 @@ describe Grape::API do
     end
     it 'path' do
       get '/endpoint/options'
-      options = MultiJson.load(last_response.body)
+      options = JSON.load(last_response.body)
       expect(options['path']).to eq(['/endpoint/options'])
       expect(options['source_location'][0]).to include 'api_spec.rb'
       expect(options['source_location'][1].to_i).to be > 0
