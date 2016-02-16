@@ -71,7 +71,7 @@ module Grape
 
       # (see #unset_global_setting)
       def unset_namespace_setting(key)
-        unset :namespace_setting, key
+        unset :namespace, key
       end
 
       # (see #global_setting)
@@ -106,7 +106,7 @@ module Grape
 
       # (see #unset_global_setting)
       def unset_api_class_setting(key)
-        unset :api_class_setting, key
+        unset :api_class, key
       end
 
       # Fork our inheritable settings to a new instance, copied from our

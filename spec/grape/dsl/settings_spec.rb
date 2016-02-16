@@ -42,6 +42,13 @@ module Grape
         end
       end
 
+      describe '#unset_global_setting' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:global, :dummy)
+          subject.unset_global_setting(:dummy)
+        end
+      end
+
       describe '#route_setting' do
         it 'delegates to get_or_set' do
           expect(subject).to receive(:get_or_set).with(:route, :dummy, 1)
@@ -55,6 +62,13 @@ module Grape
           subject.route_end
 
           expect(subject.route_setting(:some_thing)).to be_nil
+        end
+      end
+
+      describe '#unset_route_setting' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:route, :dummy)
+          subject.unset_route_setting(:dummy)
         end
       end
 
@@ -94,6 +108,13 @@ module Grape
         end
       end
 
+      describe '#unset_namespace_setting' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:namespace, :dummy)
+          subject.unset_namespace_setting(:dummy)
+        end
+      end
+
       describe '#namespace_inheritable' do
         it 'delegates to get_or_set' do
           expect(subject).to receive(:get_or_set).with(:namespace_inheritable, :dummy, 1)
@@ -117,6 +138,13 @@ module Grape
           subject.namespace_end
           expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
           subject.namespace_end
+        end
+      end
+
+      describe '#unset_namespace_inheritable' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:namespace_inheritable, :dummy)
+          subject.unset_namespace_inheritable(:dummy)
         end
       end
 
@@ -146,10 +174,24 @@ module Grape
         end
       end
 
+      describe '#unset_namespace_stackable' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:namespace_stackable, :dummy)
+          subject.unset_namespace_stackable(:dummy)
+        end
+      end
+
       describe '#api_class_setting' do
         it 'delegates to get_or_set' do
           expect(subject).to receive(:get_or_set).with(:api_class, :dummy, 1)
           subject.api_class_setting(:dummy, 1)
+        end
+      end
+
+      describe '#unset_api_class_setting' do
+        it 'delegates to unset' do
+          expect(subject).to receive(:unset).with(:api_class, :dummy)
+          subject.unset_api_class_setting(:dummy)
         end
       end
 
