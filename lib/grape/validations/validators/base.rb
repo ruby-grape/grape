@@ -3,6 +3,8 @@ module Grape
     class Base
       attr_reader :attrs
 
+      include Grape::Util::HashParameter
+
       # Creates a new Validator from options specified
       # by a +requires+ or +optional+ directive during
       # parameter definition.

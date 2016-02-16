@@ -912,6 +912,31 @@ params do
 end
 ```
 
+If type is Array, It support following kinds of parameter.
+#### Array
+```sh
+#without index
+curl -X POST http://localhost:9292/api/v1/preference.json -d \
+  &preferences[][key]=foo \
+  &preferences[][value]=100 \
+  &preferences[][key]=bar \
+  &preferences[][value]=200
+
+#with index
+curl -X POST http://localhost:9292/api/v1/preference.json -d \
+  &preferences[0][key]=foo \
+  &preferences[1][key]=bar \
+  &preferences[0][value]=100 \
+  &preferences[1][value]=200
+```
+
+#### Hash
+```sh
+curl -X POST http://localhost:9292/api/v1/preference.json -d \
+  &preferences[key]=foo \
+  &preferences[value]=100 \
+````
+
 ### Dependent Parameters
 
 Suppose some of your parameters are only relevant if another parameter is given;
