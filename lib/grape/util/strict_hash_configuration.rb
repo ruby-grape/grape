@@ -98,7 +98,7 @@ module Grape
           new_config_class = config_class(*args)
 
           class_mod.send(:define_method, :config_class) do
-            @config_context ||= new_config_class
+            @config_class ||= new_config_class
           end
         end
       end
