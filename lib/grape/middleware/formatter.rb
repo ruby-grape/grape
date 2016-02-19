@@ -35,7 +35,7 @@ module Grape
         headers = ensure_content_type(headers)
 
         if bodies.is_a?(Grape::Util::FileResponse)
-          Rack::Response.new([], status, headers) do |resp|
+          Grape::Util::SendfileResponse.new([], status, headers) do |resp|
             resp.body = bodies.file
           end
         else

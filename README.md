@@ -2328,6 +2328,30 @@ class API < Grape::API
 end
 ```
 
+If you want to take advantage of `Rack::Sendfile`, which intercepts responses whose body is
+being served from a file and replaces it with a server specific X-Sendfile header, specify `to_path`
+method in your file streamer class which returns path of served file:
+
+```ruby
+class FileStreamer
+  # ...
+
+  def to_path
+    @file_path
+  end
+
+  # ...
+end
+```
+
+Note: don't forget turn on `Rack::Sendfile` middleware in your API:
+
+```ruby
+class API < Grape::API
+  use Rack::Sendfile
+end
+```
+
 ## Authentication
 
 ### Basic and Digest Auth
