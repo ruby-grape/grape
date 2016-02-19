@@ -29,7 +29,12 @@ module Grape
         begin
           @app_response = @app.call(@env)
         ensure
-          after_response = after
+          begin
+            after_response = after
+          rescue StandardError => e
+            warn "caught error of type #{e.class} in after callback inside #{self.class.name} : #{e.message}"
+            raise e
+          end
         end
 
         response = after_response || @app_response

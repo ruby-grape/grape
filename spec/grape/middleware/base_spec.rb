@@ -48,6 +48,25 @@ describe Grape::Middleware::Base do
     end
   end
 
+  context 'after callback with errors' do
+    it 'does not overwrite the application response' do
+      expect(subject.call({})).to eq([200, {}, 'Hi there.'])
+    end
+
+    context 'with patched warnings' do
+      before do
+        @warnings = warnings = []
+        allow_any_instance_of(Grape::Middleware::Base).to receive(:warn) { |m| warnings << m }
+        allow(subject).to receive(:after).and_raise(StandardError)
+      end
+
+      it 'does show a warning' do
+        expect { subject.call({}) }.to raise_error(StandardError)
+        expect(@warnings).not_to be_empty
+      end
+    end
+  end
+
   it 'is able to access the response' do
     subject.call({})
     expect(subject.response).to be_kind_of(Rack::Response)
