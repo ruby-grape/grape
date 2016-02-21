@@ -185,9 +185,7 @@ module Grape
       return if not_allowed_methods.empty?
 
       self.class.route(not_allowed_methods, path) do
-        header 'Allow', allow_header
-        status 405
-        ''
+        fail Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allow_header)
       end
 
       # move options endpoint to top of defined endpoints
