@@ -7,7 +7,7 @@ module Grape
       include Grape::DSL::Configuration
 
       module ClassMethods
-        attr_reader :endpoints, :routes, :route_set
+        attr_reader :endpoints, :routes
 
         # Specify an API version.
         #

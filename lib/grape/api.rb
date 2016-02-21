@@ -13,7 +13,6 @@ module Grape
 
       # Clears all defined routes, endpoints, etc., on this API.
       def reset!
-        @route_set = Rack::Mount::RouteSet.new
         @endpoints = []
         @routes = nil
         reset_validations!
