@@ -58,6 +58,16 @@ module Grape
           namespace_inheritable(:root_prefix, prefix)
         end
 
+        # Create a scope without affecting the URL.
+        #
+        # @param _name [Symbol] Purely placebo, just allows to name the scope to
+        # make the code more readable.
+        def scope(_name = nil, &block)
+          within_namespace do
+            nest(block)
+          end
+        end
+
         # Do not route HEAD requests to GET requests automatically.
         def do_not_route_head!
           namespace_inheritable(:do_not_route_head, true)
@@ -175,7 +185,12 @@ module Grape
 
         # Remove all defined routes.
         def reset_routes!
+          endpoints.each(&:reset_routes!)
           @routes = nil
+        end
+
+        def reset_endpoints!
+          @endpoints = []
         end
 
         # Thie method allows you to quickly define a parameter route segment

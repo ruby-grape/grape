@@ -13,8 +13,8 @@ module Grape
 
       # Clears all defined routes, endpoints, etc., on this API.
       def reset!
-        @endpoints = []
-        @routes = nil
+        reset_endpoints!
+        reset_routes!
         reset_validations!
       end
 
@@ -43,20 +43,10 @@ module Grape
         instance.call(env)
       end
 
-      # Create a scope without affecting the URL.
-      #
-      # @param _name [Symbol] Purely placebo, just allows to name the scope to
-      # make the code more readable.
-      def scope(_name = nil, &block)
-        within_namespace do
-          nest(block)
-        end
-      end
-
       # (see #cascade?)
       def cascade(value = nil)
         if value.nil?
-          inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !!namespace_inheritable(:cascade) : true
+          inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !namespace_inheritable(:cascade).nil? : true
         else
           namespace_inheritable(:cascade, value)
         end
@@ -90,9 +80,7 @@ module Grape
       def inherit_settings(other_settings)
         top_level_setting.inherit_from other_settings.point_in_time_copy
 
-        endpoints.each(&:reset_routes!)
-
-        @routes = nil
+        reset_routes!
       end
     end
 
