@@ -5,11 +5,10 @@ module Grape
   # from inside a `get`, `post`, etc.
   class Endpoint
     include Grape::DSL::Settings
+    include Grape::DSL::InsideRoute
 
     attr_accessor :block, :source, :options
     attr_reader :env, :request, :headers, :params
-
-    include Grape::DSL::InsideRoute
 
     class << self
       def new(*args, &block)
@@ -115,7 +114,7 @@ module Grape
     end
 
     def reset_routes!
-      endpoints.map(&:reset_routes!) if endpoints
+      endpoints.each(&:reset_routes!) if endpoints
       @namespace = nil
       @routes = nil
     end
@@ -126,7 +125,7 @@ module Grape
           e.mount_in(route_set)
         end
       else
-        @routes = nil
+        reset_routes!
 
         routes.each do |route|
           methods = [route.route_method]
@@ -243,20 +242,7 @@ module Grape
 
         run_filters before_validations, :before_validation
 
-        # Retrieve validations from this namespace and all parent namespaces.
-        validation_errors = []
-
-        route_setting(:saved_validations).each do |validator|
-          begin
-            validator.validate(@request)
-          rescue Grape::Exceptions::Validation => e
-            validation_errors << e
-          end
-        end
-
-        if validation_errors.any?
-          fail Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header
-        end
+        run_validators validations, request
 
         run_filters after_validations, :after_validation
 
@@ -346,6 +332,20 @@ module Grape
       end
     end
 
+    def run_validators(validators, request)
+      validation_errors = []
+
+      validators.each do |validator|
+        begin
+          validator.validate(request)
+        rescue Grape::Exceptions::Validation => e
+          validation_errors << e
+        end
+      end
+
+      validation_errors.any? && fail(Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header)
+    end
+
     def run_filters(filters, type = :other)
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
         (filters || []).each do |filter|
@@ -370,6 +370,10 @@ module Grape
 
     def afters
       namespace_stackable(:afters) || []
+    end
+
+    def validations
+      route_setting(:saved_validations) || []
     end
   end
 end
