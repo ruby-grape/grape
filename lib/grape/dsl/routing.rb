@@ -7,7 +7,7 @@ module Grape
       include Grape::DSL::Configuration
 
       module ClassMethods
-        attr_reader :endpoints, :routes, :route_set
+        attr_reader :endpoints, :routes
 
         # Specify an API version.
         #
@@ -56,6 +56,16 @@ module Grape
         # Define a root URL prefix for your entire API.
         def prefix(prefix = nil)
           namespace_inheritable(:root_prefix, prefix)
+        end
+
+        # Create a scope without affecting the URL.
+        #
+        # @param _name [Symbol] Purely placebo, just allows to name the scope to
+        # make the code more readable.
+        def scope(_name = nil, &block)
+          within_namespace do
+            nest(block)
+          end
         end
 
         # Do not route HEAD requests to GET requests automatically.
@@ -175,7 +185,12 @@ module Grape
 
         # Remove all defined routes.
         def reset_routes!
+          endpoints.each(&:reset_routes!)
           @routes = nil
+        end
+
+        def reset_endpoints!
+          @endpoints = []
         end
 
         # Thie method allows you to quickly define a parameter route segment

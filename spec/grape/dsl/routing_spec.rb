@@ -31,6 +31,13 @@ module Grape
         end
       end
 
+      describe '.scope' do
+        it 'create a scope without affecting the URL' do
+          expect(subject).to receive(:within_namespace)
+          subject.scope {}
+        end
+      end
+
       describe '.do_not_route_head!' do
         it 'sets do not route head option' do
           expect(subject).to receive(:namespace_inheritable).with(:do_not_route_head, true)
