@@ -523,8 +523,26 @@ describe Grape::API do
       end
       put '/example'
       expect(last_response.status).to eql 405
-      expect(last_response.body).to eql ''
+      expect(last_response.body).to eql '405 Not Allowed'
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+    end
+
+    context 'when format is xml' do
+      it 'returns a 405 for an unsupported method' do
+        subject.format :xml
+        subject.get 'example' do
+          'example'
+        end
+
+        put '/example'
+        expect(last_response.status).to eql 405
+        expect(last_response.body).to eq <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<error>
+  <message>405 Not Allowed</message>
+</error>
+XML
+      end
     end
 
     specify '405 responses includes an Allow header specifying supported methods' do
@@ -602,8 +620,8 @@ describe Grape::API do
         expect(last_response.status).to eql 405
       end
 
-      it 'has an empty body' do
-        expect(last_response.body).to be_blank
+      it 'contains error message in body' do
+        expect(last_response.body).to eq '405 Not Allowed'
       end
 
       it 'has an Allow header' do

@@ -72,6 +72,7 @@ module Grape
     autoload :InvalidMessageBody
     autoload :InvalidAcceptHeader
     autoload :InvalidVersionHeader
+    autoload :MethodNotAllowed
   end
 
   module ErrorFormatter
