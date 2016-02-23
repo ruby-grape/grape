@@ -2629,9 +2629,8 @@ For example, you can write a middleware to log application exception.
 ```ruby
 class LoggingError < Grape::Middleware::Base
   def after
-    if @api_response[0] == 500
-      env['rack.logger'].error("Raised error on #{env['PATH_INFO']}")
-    end
+    return unless @app_response && @app_response[0] == 500
+    env['rack.logger'].error("Raised error on #{env['PATH_INFO']}")
   end
 end
 ```
