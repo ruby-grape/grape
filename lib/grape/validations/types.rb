@@ -63,6 +63,13 @@ module Grape
         Rack::Multipart::UploadedFile => File
       }
 
+      GROUPS = [
+        Array,
+        Hash,
+        JSON,
+        Array[JSON]
+      ]
+
       # Is the given class a primitive type as recognized by Grape?
       #
       # @param type [Class] type to check
@@ -124,6 +131,15 @@ module Grape
       # @return [Boolean] +true+ if special routines are available
       def self.special?(type)
         SPECIAL.key? type
+      end
+
+      # Is the declared type a supported group type?
+      # Currently supported group types are Array, Hash, JSON, and Array[JSON]
+      #
+      # @param type [Array<Class>,Class] type to check
+      # @return [Boolean] +true+ if the type is a supported group type
+      def self.group?(type)
+        GROUPS.include? type
       end
 
       # A valid custom type must implement a class-level `parse` method, taking

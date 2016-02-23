@@ -122,7 +122,7 @@ module Grape
         # check type for optional parameter group
         if attrs && block_given?
           fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash].include?(type)
+          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
 
         if opts[:using]

@@ -147,7 +147,7 @@ module Grape
         type = attrs[1] ? attrs[1][:type] : nil
         if attrs.first && !optional
           fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless [Array, Hash, JSON, Array[JSON]].include?(type)
+          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
 
         opts = attrs[1] || { type: Array }
