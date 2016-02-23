@@ -46,8 +46,6 @@ module Grape
               namespace_inheritable(:version, args)
               namespace_inheritable(:version_options, options)
             end
-
-            # reset_validations!
           end
 
           @versions.last unless @versions.nil?
@@ -90,8 +88,6 @@ module Grape
               app.inherit_settings(inheritable_setting)
 
               in_setting = app.top_level_setting
-
-              # app.regenerate_endpoints(in_setting)
 
               app.change!
               change!
