@@ -262,14 +262,14 @@ module Grape
       b.use Rack::Head
       b.use Grape::Middleware::Error,
             format: namespace_inheritable(:format),
-            content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
+            content_types: namespace_stackable_with_hash(:content_types),
             default_status: namespace_inheritable(:default_error_status),
             rescue_all: namespace_inheritable(:rescue_all),
             default_error_formatter: namespace_inheritable(:default_error_formatter),
-            error_formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:error_formatters)),
-            rescue_options: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:rescue_options)) || {},
-            rescue_handlers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:rescue_handlers)) || {},
-            base_only_rescue_handlers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:base_only_rescue_handlers)) || {},
+            error_formatters: namespace_stackable_with_hash(:error_formatters),
+            rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
+            rescue_handlers: namespace_stackable_with_hash(:rescue_handlers) || {},
+            base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
             all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
       (namespace_stackable(:middleware) || []).each do |m|
@@ -293,9 +293,9 @@ module Grape
       b.use Grape::Middleware::Formatter,
             format: namespace_inheritable(:format),
             default_format: namespace_inheritable(:default_format) || :txt,
-            content_types: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types)),
-            formatters: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:formatters)),
-            parsers: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:parsers))
+            content_types: namespace_stackable_with_hash(:content_types),
+            formatters: namespace_stackable_with_hash(:formatters),
+            parsers: namespace_stackable_with_hash(:parsers)
 
       b.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
 

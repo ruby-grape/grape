@@ -136,7 +136,7 @@ describe Grape::API do
     it 'adds the association to the :representations setting' do
       klass = Class.new
       subject.represent Object, with: klass
-      expect(Grape::DSL::Configuration.stacked_hash_to_hash(subject.namespace_stackable(:representations))[Object]).to eq(klass)
+      expect(subject.namespace_stackable_with_hash(:representations)[Object]).to eq(klass)
     end
   end
 

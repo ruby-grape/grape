@@ -94,6 +94,12 @@ module Grape
         get_or_set :namespace_stackable, key, value
       end
 
+      def namespace_stackable_with_hash(key)
+        settings = get_or_set :namespace_stackable, key, nil
+        return if settings.blank?
+        settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
+
       # (see #unset_global_setting)
       def unset_namespace_stackable(key)
         unset :namespace_stackable, key

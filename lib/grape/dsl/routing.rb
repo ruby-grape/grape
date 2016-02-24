@@ -121,7 +121,7 @@ module Grape
             path: paths,
             for: self,
             route_options: ({
-              params: Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:params)) || {}
+              params: namespace_stackable_with_hash(:params) || {}
             }).deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
           }
 
