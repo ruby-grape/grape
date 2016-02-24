@@ -7,3 +7,7 @@ group :development, :test do
   gem 'guard-rspec'
   gem 'guard-rubocop'
 end
+
+group :test do
+  gem 'multi_json'
+end

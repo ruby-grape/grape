@@ -3,10 +3,16 @@ module Grape
     module Json
       class << self
         def call(object, _env)
-          MultiJson.load(object)
-        rescue MultiJson::ParseError
+          Grape::Config.json_processor.load(object)
+        rescue => e
           # handle JSON parsing errors via the rescue handlers or provide error message
-          raise Grape::Exceptions::InvalidMessageBody, 'application/json'
+          if Grape::Config.json_processor == JSON && e.is_a?(JSON::ParserError)
+            raise Grape::Exceptions::InvalidMessageBody, 'application/json'
+          elsif defined?(MultiJson) &&  Grape::Config.json_processor == MultiJson && e.is_a?(MultiJson::ParseError)
+            raise Grape::Exceptions::InvalidMessageBody, 'application/json'
+          else
+            raise e
+          end
         end
       end
     end

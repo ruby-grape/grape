@@ -4,9 +4,9 @@ module Grape
       class << self
         def call(object, _env)
           return object if object.is_a?(String)
-          return MultiJson.dump(serialize(object)) if serializable?(object)
+          return Grape::Config.json_processor.dump(serialize(object)) if serializable?(object)
           return object.to_json if object.respond_to?(:to_json)
-          MultiJson.dump(object)
+          Grape::Config.json_processor.dump(object)
         end
 
         private
