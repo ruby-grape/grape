@@ -45,13 +45,13 @@ module Grape
         let(:named_params) { { params_group: proc {} } }
 
         it 'calls processes associated with named params' do
-          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(named_params)
+          allow(subject.api).to receive(:namespace_stackable_with_hash).and_return(named_params)
           expect(subject).to receive(:instance_exec).with(options).and_yield
           subject.use :params_group, options
         end
 
         it 'raises error when non-existent named param is called' do
-          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return({})
+          allow(subject.api).to receive(:namespace_stackable_with_hash).and_return({})
           expect { subject.use :params_group }.to raise_error('Params :params_group not found!')
         end
       end

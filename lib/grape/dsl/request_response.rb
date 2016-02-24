@@ -68,7 +68,7 @@ module Grape
 
         # All available content types.
         def content_types
-          c_types = Grape::DSL::Configuration.stacked_hash_to_hash(namespace_stackable(:content_types))
+          c_types = namespace_stackable_with_hash(:content_types)
           Grape::ContentTypes.content_types_for c_types
         end
 

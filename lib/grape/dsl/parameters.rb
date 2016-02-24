@@ -30,7 +30,7 @@ module Grape
       #       end
       #     end
       def use(*names)
-        named_params = Grape::DSL::Configuration.stacked_hash_to_hash(@api.namespace_stackable(:named_params)) || {}
+        named_params = @api.namespace_stackable_with_hash(:named_params) || {}
         options = names.extract_options!
         names.each do |name|
           params_block = named_params.fetch(name) do

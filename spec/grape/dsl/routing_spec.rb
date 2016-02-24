@@ -102,7 +102,7 @@ module Grape
 
         it 'generates correct endpoint options' do
           allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
-          allow(Grape::DSL::Configuration).to receive(:stacked_hash_to_hash).and_return(nuz: 'naz')
+          allow(subject).to receive(:namespace_stackable_with_hash).and_return(nuz: 'naz')
 
           expect(Grape::Endpoint).to receive(:new) do |_inheritable_setting, endpoint_options|
             expect(endpoint_options[:method]).to eq :get
