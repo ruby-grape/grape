@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'active_support/core_ext/hash'
 
 describe Grape::Middleware::Error do
   # raises a text exception

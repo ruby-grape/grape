@@ -11,6 +11,7 @@
 * [#1252](https://github.com/ruby-grape/grape/pull/1252): Allow default to be a subset or equal to allowed values without raising IncompatibleOptionValues - [@jeradphelps](https://github.com/jeradphelps).
 * [#1255](https://github.com/ruby-grape/grape/pull/1255): Allow param type definition in `route_param` - [@namusyaka](https://github.com/namusyaka).
 * [#1257](https://github.com/ruby-grape/grape/pull/1257): Allow Proc, Symbol or String in `rescue_from with: ...` - [@namusyaka](https://github.com/namusyaka).
+* [#1285](https://github.com/ruby-grape/grape/pull/1285): Add a warning for errors appearing in `after` callbacks - [@gregormelhorn](https://github.com/gregormelhorn).
 * Your contribution here.
 
 #### Fixes
@@ -21,6 +22,8 @@
 * [#1263](https://github.com/ruby-grape/grape/pull/1263): Fix `route :any, '*path'` breaking generated `OPTIONS`, Method Not Allowed routes - [@arempe93](https://github.com/arempe93).
 * [#1266](https://github.com/ruby-grape/grape/pull/1266): Fix `Allow` header including `OPTIONS` when `do_not_route_options!` is active - [@arempe93](https://github.com/arempe93).
 * [#1270](https://github.com/ruby-grape/grape/pull/1270): Fix `param` versioning with a custom parameter - [@wshatch](https://github.com/wshatch).
+* [#1282](https://github.com/ruby-grape/grape/pull/1282): Fix specs circular dependency - [@304](https://github.com/304).
+* [#1283](https://github.com/ruby-grape/grape/pull/1283): Fix 500 error for xml format when method is not allowed - [@304](https://github.com/304).
 
 0.14.0 (12/07/2015)
 ===================

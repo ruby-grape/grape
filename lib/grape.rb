@@ -15,6 +15,7 @@ require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/except'
+require 'active_support/core_ext/hash/conversions'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'multi_json'
@@ -71,6 +72,7 @@ module Grape
     autoload :InvalidMessageBody
     autoload :InvalidAcceptHeader
     autoload :InvalidVersionHeader
+    autoload :MethodNotAllowed
   end
 
   module ErrorFormatter
