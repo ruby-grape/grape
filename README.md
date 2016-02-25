@@ -41,6 +41,7 @@
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
+  - [Custom Validation Messages](#custom-validation-messages)
 - [Headers](#headers)
 - [Routes](#routes)
 - [Helpers](#helpers)
@@ -1237,6 +1238,119 @@ end
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
+### Custom Validation messages
+
+Grape supports custom validation messages for parameter-related and coerce-related error messages.
+
+#### `presence`, `allow_blank`, `values`, `regexp`
+
+```ruby
+params do
+  requires :name, values: { value: 1..10, message: 'not in range from 1 to 10' }, allow_blank: { value: false, message: 'cannot be blank' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }, message: 'is required'
+end
+```
+#### `all_or_none_of`
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  all_or_none_of :beer, :wine, :juice, message: "all params are required or none is required"
+end
+```
+
+#### `mutually_exclusive`
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  mutually_exclusive :beer, :wine, :juice, message: "are mutually exclusive cannot pass both params"
+end
+```
+#### `exactly_one_of`
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  exactly_one_of :beer, :wine, :juice, message: {exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required"}
+end
+```
+#### `at_least_one_of`
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  at_least_one_of :beer, :wine, :juice, message: "are missing, please specify at least one param"
+end
+```
+#### `Coerce`
+
+```ruby
+params do
+  requires :int, type: {value: Integer, message: "type cast is invalid" }
+end
+```
+#### `With Lambdas`
+
+```ruby
+params do
+  requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }
+end
+```
+#### `Pass symbols for i18n translations`
+
+You can pass a symbol if you want i18n translations for your custom validation messages.
+
+```ruby
+params do
+  requires :name, message: :name_required
+end
+```
+```ruby
+# en.yml
+
+en:
+  grape:
+    errors:
+      format: ! '%{attributes} %{message}'
+      messages:
+        name_required: 'must be present'
+```
+
+#### `Overriding attribute names`
+
+You can also override attribute names.
+
+```ruby
+# en.yml
+
+en:
+  grape:
+    errors:
+      format: ! '%{attributes} %{message}'
+      messages:
+        name_required: 'must be present'
+      attributes:
+        name: 'Oops! Name'
+```
+Will produce 'Oops! Name must be present'
+
+#### `With Default`
+
+You cannot set a custom message option for Default as it requires interpolation `%{option1}: %{value1} is incompatible with %{option2}: %{value2}`. You can change the default error message for Default by changing the `incompatible_option_values` message key inside [en.yml](lib/grape/locale/en.yml)
+
+```ruby
+params do
+  requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
+end
+```
 ## Headers
 
 Request headers are available through the `headers` helper or from `env` in their original form.

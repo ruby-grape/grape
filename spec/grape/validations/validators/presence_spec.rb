@@ -25,6 +25,33 @@ describe Grape::Validations::PresenceValidator do
     end
   end
 
+  context 'with a custom validation message' do
+    before do
+      subject.resource :requires do
+        params do
+          requires :email, type: String, allow_blank: { value: false, message: 'has no value' }, regexp: { value: /^\S+$/, message: 'format is invalid' }, message: 'is required'
+        end
+        get do
+          'Hello'
+        end
+      end
+    end
+    it 'requires when missing' do
+      get '/requires'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"email is required, email has no value"}')
+    end
+    it 'requires when empty' do
+      get '/requires', email: ''
+      expect(last_response.body).to eq('{"error":"email has no value, email format is invalid"}')
+    end
+    it 'valid when set' do
+      get '/requires', email: 'bob@example.com'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello'.to_json)
+    end
+  end
+
   context 'with a required regexp parameter supplied in the POST body' do
     before do
       subject.format :json
