@@ -55,6 +55,16 @@ module Grape
         short_name = convert_to_short_name(klass)
         Validations.register_validator(short_name, klass)
       end
+
+      def message(default_key = nil)
+        options = instance_variable_get(:@option)
+        options_key?(:message) ? options[:message] : default_key
+      end
+
+      def options_key?(key, options = nil)
+        options = instance_variable_get(:@option) if options.nil?
+        options.respond_to?(:key?) && options.key?(key) && !options[key].nil?
+      end
     end
   end
 end

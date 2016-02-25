@@ -12,6 +12,7 @@
 * [#1255](https://github.com/ruby-grape/grape/pull/1255): Allow param type definition in `route_param` - [@namusyaka](https://github.com/namusyaka).
 * [#1257](https://github.com/ruby-grape/grape/pull/1257): Allow Proc, Symbol or String in `rescue_from with: ...` - [@namusyaka](https://github.com/namusyaka).
 * [#1285](https://github.com/ruby-grape/grape/pull/1285): Add a warning for errors appearing in `after` callbacks - [@gregormelhorn](https://github.com/gregormelhorn).
+* [#1295](https://github.com/ruby-grape/grape/pull/1295): Add custom validation messages for parameter exceptions - [@railsmith](https://github.com/railsmith).
 * Your contribution here.
 
 #### Fixes
