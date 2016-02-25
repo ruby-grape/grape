@@ -30,14 +30,10 @@ module Grape
           if block_given? || new_mod
             mod = new_mod || Module.new
             define_boolean_in_mod(mod)
-            if new_mod
-              inject_api_helpers_to_mod(new_mod) if new_mod.is_a?(BaseHelper)
-            end
-            if block_given?
-              inject_api_helpers_to_mod(mod) do
-                mod.class_eval(&block)
-              end
-            end
+            inject_api_helpers_to_mod(mod) if new_mod
+            inject_api_helpers_to_mod(mod) do
+              mod.class_eval(&block)
+            end if block_given?
 
             namespace_stackable(:helpers, mod)
           else
@@ -58,7 +54,7 @@ module Grape
         end
 
         def inject_api_helpers_to_mod(mod, &_block)
-          mod.extend(BaseHelper)
+          mod.extend(BaseHelper) unless mod.is_a?(BaseHelper)
           yield if block_given?
           mod.api_changed(self)
         end
