@@ -950,6 +950,14 @@ XML
       expect(last_response.headers['Content-Type']).to eql 'application/xml'
     end
 
+    it 'does not include extension in id' do
+      subject.format :json
+      subject.get(':id') { params }
+
+      get '/baz.bar'
+      expect(last_response.status).to eq 404
+    end
+
     context 'with a custom content_type' do
       before do
         subject.content_type :custom, 'application/custom'
