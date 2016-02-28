@@ -20,7 +20,7 @@ module Grape
           if new_format
             namespace_inheritable(:format, new_format.to_sym)
             # define the default error formatters
-            namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter::Base.formatter_for(new_format, {}))
+            namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter.formatter_for(new_format, {}))
             # define a single mime type
             mime_type = content_types[new_format.to_sym]
             fail Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
@@ -43,7 +43,7 @@ module Grape
         # Specify a default error formatter.
         def default_error_formatter(new_formatter_name = nil)
           if new_formatter_name
-            new_formatter = Grape::ErrorFormatter::Base.formatter_for(new_formatter_name, {})
+            new_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name, {})
             namespace_inheritable(:default_error_formatter, new_formatter)
           else
             namespace_inheritable(:default_error_formatter)

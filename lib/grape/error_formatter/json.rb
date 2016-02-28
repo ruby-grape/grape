@@ -1,9 +1,11 @@
 module Grape
   module ErrorFormatter
     module Json
+      extend Base
+
       class << self
         def call(message, backtrace, options = {}, env = nil)
-          result = wrap_message(Grape::ErrorFormatter::Base.present(message, env))
+          result = wrap_message(present(message, env))
 
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)

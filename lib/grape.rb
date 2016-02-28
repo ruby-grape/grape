@@ -75,14 +75,6 @@ module Grape
     autoload :MethodNotAllowed
   end
 
-  module ErrorFormatter
-    extend ActiveSupport::Autoload
-    autoload :Base
-    autoload :Json
-    autoload :Txt
-    autoload :Xml
-  end
-
   module Formatter
     extend ActiveSupport::Autoload
     autoload :Base
@@ -163,6 +155,7 @@ module Grape
   end
 end
 
+require 'grape/error_formatter'
 require 'grape/util/content_types'
 
 require 'grape/validations/validators/base'
