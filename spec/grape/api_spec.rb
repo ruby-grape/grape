@@ -950,6 +950,14 @@ XML
       expect(last_response.headers['Content-Type']).to eql 'application/xml'
     end
 
+    it 'includes extension in format' do
+      subject.get(':id') { params[:format] }
+
+      get '/baz.bar'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'bar'
+    end
+
     it 'does not include extension in id' do
       subject.format :json
       subject.get(':id') { params }
