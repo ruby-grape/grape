@@ -24,6 +24,7 @@
 * [#1270](https://github.com/ruby-grape/grape/pull/1270): Fix `param` versioning with a custom parameter - [@wshatch](https://github.com/wshatch).
 * [#1282](https://github.com/ruby-grape/grape/pull/1282): Fix specs circular dependency - [@304](https://github.com/304).
 * [#1283](https://github.com/ruby-grape/grape/pull/1283): Fix 500 error for xml format when method is not allowed - [@304](https://github.com/304).
+* [#1197](https://github.com/ruby-grape/grape/pull/1290): Fix using JSON and Array[JSON] as groups when parameter is optional - [@lukeivers](https://github.com/lukeivers).
 
 0.14.0 (12/07/2015)
 ===================
