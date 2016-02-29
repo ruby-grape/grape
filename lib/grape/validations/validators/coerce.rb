@@ -11,12 +11,12 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
-        fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce unless params.is_a? Hash
+        fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
         new_value = coerce_value(params[attr_name])
         if valid_type?(new_value)
           params[attr_name] = new_value
         else
-          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message_key: :coerce
+          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce)
         end
       end
 
@@ -60,7 +60,7 @@ module Grape
       #
       # @return [Class]
       def type
-        @option[:type]
+        @option[:type].is_a?(Hash) ? @option[:type][:value] : @option[:type]
       end
     end
   end

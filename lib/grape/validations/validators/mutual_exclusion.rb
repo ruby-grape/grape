@@ -7,7 +7,7 @@ module Grape
       def validate!(params)
         super
         if two_or_more_exclusive_params_are_present
-          fail Grape::Exceptions::Validation, params: processing_keys_in_common, message_key: :mutual_exclusion
+          fail Grape::Exceptions::Validation, params: processing_keys_in_common, message: message(:mutual_exclusion)
         end
         params
       end

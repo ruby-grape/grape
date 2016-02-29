@@ -55,6 +55,62 @@ describe Grape::Validations::CoerceValidator do
       end
     end
 
+    context 'with a custom validation message' do
+      it 'errors on malformed input' do
+        subject.params do
+          requires :int, type: { value: Integer, message: 'type cast is invalid' }
+        end
+        subject.get '/single' do
+          'int works'
+        end
+
+        get '/single', int: '43a'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('int type cast is invalid')
+
+        get '/single', int: '43'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('int works')
+      end
+
+      context 'on custom coercion rules' do
+        before do
+          subject.params do
+            requires :a, types: { value: [Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
+              if val == 'yup'
+                true
+              elsif val == 'false'
+                0
+              else
+                val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:a].class.to_s
+          end
+        end
+
+        it 'respects :coerce_with' do
+          get '/', a: 'yup'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('TrueClass')
+        end
+
+        it 'still validates type' do
+          get '/', a: 'false'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('a type cast is invalid')
+        end
+
+        it 'performs no additional coercion' do
+          get '/', a: 'true'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('String')
+        end
+      end
+    end
+
     it 'error on malformed input' do
       subject.params do
         requires :int, type: Integer

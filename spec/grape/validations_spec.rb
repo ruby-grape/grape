@@ -942,14 +942,14 @@ describe Grape::Validations do
           class CustomvalidatorWithOptions < Grape::Validations::Base
             def validate_param!(attr_name, params)
               return if params[attr_name] == @option[:text]
-              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: @option[:error_message]
+              fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message
             end
           end
         end
 
         before do
           subject.params do
-            optional :custom, customvalidator_with_options: { text: 'im custom with options', error_message: 'is not custom with options!' }
+            optional :custom, customvalidator_with_options: { text: 'im custom with options', message: 'is not custom with options!' }
           end
           subject.get '/optional_custom' do
             'optional with custom works!'
@@ -1078,8 +1078,62 @@ describe Grape::Validations do
       end
     end
 
+    context 'all or none' do
+      context 'optional params' do
+        before :each do
+          subject.resource :custom_message do
+            params do
+              optional :beer
+              optional :wine
+              optional :juice
+              all_or_none_of :beer, :wine, :juice, message: 'all params are required or none is required'
+            end
+            get '/all_or_none' do
+              'all_or_none works!'
+            end
+          end
+        end
+        context 'with a custom validation message' do
+          it 'errors when any one is present' do
+            get '/custom_message/all_or_none', beer: 'string'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine, juice all params are required or none is required'
+          end
+          it 'works when all params are present' do
+            get '/custom_message/all_or_none', beer: 'string', wine: 'anotherstring', juice: 'anotheranotherstring'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'all_or_none works!'
+          end
+          it 'works when none are present' do
+            get '/custom_message/all_or_none'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'all_or_none works!'
+          end
+        end
+      end
+    end
+
     context 'mutually exclusive' do
       context 'optional params' do
+        context 'with custom validation message' do
+          it 'errors when two or more are present' do
+            subject.resources :custom_message do
+              params do
+                optional :beer
+                optional :wine
+                optional :juice
+                mutually_exclusive :beer, :wine, :juice, message: 'are mutually exclusive cannot pass both params'
+              end
+              get '/mutually_exclusive' do
+                'mutually_exclusive works!'
+              end
+            end
+            get '/custom_message/mutually_exclusive', beer: 'string', wine: 'anotherstring'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine are mutually exclusive cannot pass both params'
+          end
+        end
+
         it 'errors when two or more are present' do
           subject.params do
             optional :beer
@@ -1098,6 +1152,34 @@ describe Grape::Validations do
       end
 
       context 'more than one set of mutually exclusive params' do
+        context 'with a custom validation message' do
+          it 'errors for all sets' do
+            subject.resources :custom_message do
+              params do
+                optional :beer
+                optional :wine
+                mutually_exclusive :beer, :wine, message: 'are mutually exclusive pass only one'
+                optional :nested, type: Hash do
+                  optional :scotch
+                  optional :aquavit
+                  mutually_exclusive :scotch, :aquavit, message: 'are mutually exclusive pass only one'
+                end
+                optional :nested2, type: Array do
+                  optional :scotch2
+                  optional :aquavit2
+                  mutually_exclusive :scotch2, :aquavit2, message: 'are mutually exclusive pass only one'
+                end
+              end
+              get '/mutually_exclusive' do
+                'mutually_exclusive works!'
+              end
+            end
+            get '/custom_message/mutually_exclusive', beer: 'true', wine: 'true', nested: { scotch: 'true', aquavit: 'true' }, nested2: [{ scotch2: 'true' }, { scotch2: 'true', aquavit2: 'true' }]
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine are mutually exclusive pass only one, scotch, aquavit are mutually exclusive pass only one, scotch2, aquavit2 are mutually exclusive pass only one'
+          end
+        end
+
         it 'errors for all sets' do
           subject.params do
             optional :beer
@@ -1131,7 +1213,6 @@ describe Grape::Validations do
               optional :wine
               optional :beer
               optional :juice
-
               mutually_exclusive :beer, :wine, :juice
             end
           end
@@ -1185,6 +1266,18 @@ describe Grape::Validations do
     context 'exactly one of' do
       context 'params' do
         before :each do
+          subject.resources :custom_message do
+            params do
+              optional :beer
+              optional :wine
+              optional :juice
+              exactly_one_of :beer, :wine, :juice, message: { exactly_one: 'are missing, exactly one parameter is required', mutual_exclusion: 'are mutually exclusive, exactly one parameter is required' }
+            end
+            get '/exactly_one_of' do
+              'exactly_one_of works!'
+            end
+          end
+
           subject.params do
             optional :beer
             optional :wine
@@ -1193,6 +1286,26 @@ describe Grape::Validations do
           end
           subject.get '/exactly_one_of' do
             'exactly_one_of works!'
+          end
+        end
+
+        context 'with a custom validation message' do
+          it 'errors when none are present' do
+            get '/custom_message/exactly_one_of'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine, juice are missing, exactly one parameter is required'
+          end
+
+          it 'succeeds when one is present' do
+            get '/custom_message/exactly_one_of', beer: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'exactly_one_of works!'
+          end
+
+          it 'errors when two or more are present' do
+            get '/custom_message/exactly_one_of', beer: 'string', wine: 'anotherstring'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine are mutually exclusive, exactly one parameter is required'
           end
         end
 
@@ -1259,6 +1372,18 @@ describe Grape::Validations do
     context 'at least one of' do
       context 'params' do
         before :each do
+          subject.resources :custom_message do
+            params do
+              optional :beer
+              optional :wine
+              optional :juice
+              at_least_one_of :beer, :wine, :juice, message: 'are missing, please specify at least one param'
+            end
+            get '/at_least_one_of' do
+              'at_least_one_of works!'
+            end
+          end
+
           subject.params do
             optional :beer
             optional :wine
@@ -1267,6 +1392,26 @@ describe Grape::Validations do
           end
           subject.get '/at_least_one_of' do
             'at_least_one_of works!'
+          end
+        end
+
+        context 'with a custom validation message' do
+          it 'errors when none are present' do
+            get '/custom_message/at_least_one_of'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'beer, wine, juice are missing, please specify at least one param'
+          end
+
+          it 'does not error when one is present' do
+            get '/custom_message/at_least_one_of', beer: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'at_least_one_of works!'
+          end
+
+          it 'does not error when two are present' do
+            get '/custom_message/at_least_one_of', beer: 'string', wine: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'at_least_one_of works!'
           end
         end
 

@@ -204,7 +204,7 @@ module Grape
         default = validations[:default]
         doc_attrs[:default] = default if validations.key?(:default)
 
-        values = validations[:values]
+        values = (options_key?(:values, :value, validations)) ? validations[:values][:value] : validations[:values]
         doc_attrs[:values] = values if values
 
         coerce_type = guess_coerce_type(coerce_type, values)
@@ -224,6 +224,7 @@ module Grape
         if validations.key?(:presence) && validations[:presence]
           validate('presence', validations[:presence], attrs, doc_attrs)
           validations.delete(:presence)
+          validations.delete(:message) if validations.key?(:message)
         end
 
         # Before we run the rest of the validators, let's handle
@@ -254,8 +255,12 @@ module Grape
           fail ArgumentError, ':type may not be supplied with :types'
         end
 
-        validations[:coerce] = validations[:type] if validations.key?(:type)
-        validations[:coerce] = validations.delete(:types) if validations.key?(:types)
+        validations[:coerce] = (options_key?(:type, :value, validations) ? validations[:type][:value] : validations[:type]) if validations.key?(:type)
+        validations[:coerce_message] = (options_key?(:type, :message, validations) ? validations[:type][:message] : nil) if validations.key?(:type)
+        validations[:coerce] = (options_key?(:types, :value, validations) ? validations[:types][:value] : validations[:types]) if validations.key?(:types)
+        validations[:coerce_message] = (options_key?(:types, :message, validations) ? validations[:types][:message] : nil) if validations.key?(:types)
+
+        validations.delete(:types) if validations.key?(:types)
 
         coerce_type = validations[:coerce]
 
@@ -300,11 +305,13 @@ module Grape
 
         coerce_options = {
           type: validations[:coerce],
-          method: validations[:coerce_with]
+          method: validations[:coerce_with],
+          message: validations[:coerce_message]
         }
         validate('coerce', coerce_options, attrs, doc_attrs)
         validations.delete(:coerce_with)
         validations.delete(:coerce)
+        validations.delete(:coerce_message)
       end
 
       def guess_coerce_type(coerce_type, values)
@@ -341,6 +348,16 @@ module Grape
         end
         return unless value_types.any? { |v| !v.is_a?(coerce_type) }
         fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+      end
+
+      def extract_message_option(attrs)
+        return nil unless attrs.is_a?(Array)
+        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+        (opts.key?(:message) && !opts[:message].nil?) ? opts.delete(:message) : nil
+      end
+
+      def options_key?(type, key, validations)
+        validations[type].respond_to?(:key?) && validations[type].key?(key) && !validations[type][key].nil?
       end
     end
   end

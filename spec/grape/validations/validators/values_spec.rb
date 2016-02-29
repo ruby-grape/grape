@@ -21,6 +21,22 @@ describe Grape::Validations::ValuesValidator do
       class API < Grape::API
         default_format :json
 
+        resources :custom_message do
+          params do
+            requires :type, values: { value: ValuesModel.values, message: 'value does not include in values' }
+          end
+          get '/' do
+            { type: params[:type] }
+          end
+
+          params do
+            optional :type, values: { value: -> { ValuesModel.values }, message: 'value does not include in values' }, default: 'valid-type2'
+          end
+          get '/lambda' do
+            { type: params[:type] }
+          end
+        end
+
         params do
           requires :type, values: ValuesModel.values
         end
@@ -89,6 +105,34 @@ describe Grape::Validations::ValuesValidator do
 
   def app
     ValidationsSpec::ValuesValidatorSpec::API
+  end
+
+  context 'with a custom validation message' do
+    it 'allows a valid value for a parameter' do
+      get('/custom_message', type: 'valid-type1')
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'valid-type1' }.to_json)
+    end
+
+    it 'does not allow an invalid value for a parameter' do
+      get('/custom_message', type: 'invalid-type')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type value does not include in values' }.to_json)
+    end
+
+    it 'validates against values in a proc' do
+      ValidationsSpec::ValuesModel.add_value('valid-type4')
+
+      get('/custom_message/lambda', type: 'valid-type4')
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'valid-type4' }.to_json)
+    end
+
+    it 'does not allow an invalid value for a parameter using lambda' do
+      get('/custom_message/lambda', type: 'invalid-type')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type value does not include in values' }.to_json)
+    end
   end
 
   it 'allows a valid value for a parameter' do

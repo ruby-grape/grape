@@ -38,15 +38,15 @@ module Grape
       end
 
       def problem(key, attributes)
-        translate_message("#{key}.problem", attributes)
+        translate_message("#{key}.problem".to_sym, attributes)
       end
 
       def summary(key, attributes)
-        translate_message("#{key}.summary", attributes)
+        translate_message("#{key}.summary".to_sym, attributes)
       end
 
       def resolution(key, attributes)
-        translate_message("#{key}.resolution", attributes)
+        translate_message("#{key}.resolution".to_sym, attributes)
       end
 
       def translate_attributes(keys, options = {})
@@ -60,7 +60,14 @@ module Grape
       end
 
       def translate_message(key, options = {})
-        translate("#{BASE_MESSAGES_KEY}.#{key}", options.reverse_merge(default: ''))
+        case key
+        when Symbol
+          translate("#{BASE_MESSAGES_KEY}.#{key}", options.reverse_merge(default: ''))
+        when Proc
+          key.call
+        else
+          key
+        end
       end
 
       def translate(key, options = {})

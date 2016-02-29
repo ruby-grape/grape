@@ -30,6 +30,12 @@ module Grape
         def validates_reader
           @validates
         end
+
+        def extract_message_option(attrs)
+          return nil unless attrs.is_a?(Array)
+          opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
+          (opts.key?(:message) && !opts[:message].nil?) ? opts.delete(:message) : nil
+        end
       end
     end
 
@@ -72,7 +78,7 @@ module Grape
         it 'adds a required parameter' do
           subject.requires :id, type: Integer, desc: 'Identity.'
 
-          expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: true }])
+          expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
           expect(subject.push_declared_params_reader).to eq([[:id]])
         end
       end
@@ -90,7 +96,7 @@ module Grape
         it 'adds an mutally exclusive parameter validation' do
           subject.mutually_exclusive :media, :audio
 
-          expect(subject.validates_reader).to eq([[:media, :audio], { mutual_exclusion: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { mutual_exclusion: { value: true, message: nil } }])
         end
       end
 
@@ -98,7 +104,7 @@ module Grape
         it 'adds an exactly of one parameter validation' do
           subject.exactly_one_of :media, :audio
 
-          expect(subject.validates_reader).to eq([[:media, :audio], { exactly_one_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { exactly_one_of: { value: true, message: nil } }])
         end
       end
 
@@ -106,7 +112,7 @@ module Grape
         it 'adds an at least one of parameter validation' do
           subject.at_least_one_of :media, :audio
 
-          expect(subject.validates_reader).to eq([[:media, :audio], { at_least_one_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { at_least_one_of: { value: true, message: nil } }])
         end
       end
 
@@ -114,7 +120,7 @@ module Grape
         it 'adds an all or none of parameter validation' do
           subject.all_or_none_of :media, :audio
 
-          expect(subject.validates_reader).to eq([[:media, :audio], { all_or_none_of: true }])
+          expect(subject.validates_reader).to eq([[:media, :audio], { all_or_none_of: { value: true, message: nil } }])
         end
       end
 
