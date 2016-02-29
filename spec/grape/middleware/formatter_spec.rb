@@ -50,7 +50,7 @@ describe Grape::Middleware::Formatter do
   context 'error handling' do
     let(:formatter) { double(:formatter) }
     before do
-      allow(Grape::Formatter::Base).to receive(:formatter_for) { formatter }
+      allow(Grape::Formatter).to receive(:formatter_for) { formatter }
     end
 
     it 'rescues formatter-specific exceptions' do

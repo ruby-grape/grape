@@ -1,9 +1,11 @@
 module Grape
   module ErrorFormatter
     module Xml
+      extend Base
+
       class << self
         def call(message, backtrace, options = {}, env = nil)
-          message = Grape::ErrorFormatter::Base.present(message, env)
+          message = present(message, env)
 
           result = message.is_a?(Hash) ? message : { message: message }
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
