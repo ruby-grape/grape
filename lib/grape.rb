@@ -41,6 +41,9 @@ module Grape
 
     autoload :Cookies
     autoload :Validations
+    autoload :ErrorFormatter
+    autoload :Formatter
+    autoload :Parser
     autoload :Request
     autoload :Env, 'grape/util/env'
   end
@@ -85,7 +88,6 @@ module Grape
 
   module Formatter
     extend ActiveSupport::Autoload
-    autoload :Base
     autoload :Json
     autoload :SerializableHash
     autoload :Txt
@@ -94,7 +96,6 @@ module Grape
 
   module Parser
     extend ActiveSupport::Autoload
-    autoload :Base
     autoload :Json
     autoload :Xml
   end

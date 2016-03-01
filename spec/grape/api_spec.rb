@@ -1465,7 +1465,7 @@ XML
     it 'can rescue exceptions raised in the formatter' do
       formatter = double(:formatter)
       allow(formatter).to receive(:call) { fail StandardError }
-      allow(Grape::Formatter::Base).to receive(:formatter_for) { formatter }
+      allow(Grape::Formatter).to receive(:formatter_for) { formatter }
 
       subject.rescue_from :all do |_e|
         rack_response('Formatter Error', 500)
