@@ -770,6 +770,39 @@ describe Grape::Validations do
       end
     end
 
+    context 'nested optional Array blocks with optional Hash blocks' do
+      before do
+        subject.params do
+          optional :items, type: Array do
+            requires :key, type: String
+            optional(:first_value, type: Hash) { requires :nested, type: String }
+            optional(:second_value, type: Hash) { requires :nested, type: String }
+          end
+        end
+        subject.get('/nested_optional_group') { 'nested optional group works' }
+      end
+
+      it 'handles validation within arrays with different objects' do
+        get '/nested_optional_group', items: [{key: 'foo', second_value: {nested: 'bar'}},
+                                              {key: 'key', first_value: {nested: 'bar'}}]
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('nested optional group works')
+      end
+
+      it 'handles validation within arrays with similar objects' do
+        get '/nested_optional_group', items: [{key: 'foo', first_value: {nested: 'bar'}},
+                                              {key: 'key', first_value: {nested: 'rab'}}]
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('nested optional group works')
+      end
+
+      it 'handles validation within arrays without optional nodes' do
+        get '/nested_optional_group', items: [{key: 'foo'}, {key: 'key'}]
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('nested optional group works')
+      end
+    end
+
     context 'multiple validation errors' do
       before do
         subject.params do
