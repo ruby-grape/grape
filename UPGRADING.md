@@ -147,7 +147,7 @@ error!({ message: 'No such page.', id: 'missing_page' }, 404, { 'Content-Type' =
 `error!` also supports just passing a message. `error!('Server error.')` and `format: :json` returns the following JSON response
 
 ```
-{ 'error': 'Server error. }
+{ 'error': 'Server error.' }
 ```
 
 with a status code of 500 and a Content Type of text/error.
