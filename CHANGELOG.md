@@ -3,6 +3,7 @@
 
 #### Features
 
+* [#1306](https://github.com/ruby-grape/grape/pull/1306): Add admin only custom validation example to doc and spec - [@ashkan18](https://github.com/ashkan18)
 * [#1227](https://github.com/ruby-grape/grape/pull/1227): Store `message_key` on `Grape::Exceptions::Validation` - [@stjhimy](https://github.com/sthimy).
 * [#1232](https://github.com/ruby-grape/grape/pull/1232): Helpers are now available inside `rescue_from` - [@namusyaka](https://github.com/namusyaka).
 * [#1237](https://github.com/ruby-grape/grape/pull/1237): Allow multiple parameters in `given`, which behaves as if the scopes were nested in the inputted order - [@ochagata](https://github.com/ochagata).
