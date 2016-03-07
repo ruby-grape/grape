@@ -1198,6 +1198,35 @@ params do
 end
 ```
 
+You can also create custom validation that use request to validate the attribute. For example if you want to have parameters that are available to only admins, you can do the following.
+
+```ruby
+class Admin < Grape::Validations::Base
+  def validate(request)
+    # return if the param we are checking was not in request
+    # @attrs is a list containing the attribute we are currently validating
+    # in our sample case this method once will get called with 
+    # @attrs being [:admin_field] and once with @attrs being [:admin_false_field]
+    return unless request.params.key? @attrs.first
+    # check if admin flag is set to true
+    return unless @option
+    # check if user is admin or not
+    # as an example get a token from request and check if it's admin or not
+    fail Grape::Exceptions::Validation, params: @attrs, message: 'Can not set admin-only field.' unless request.headers['X-Access-Token'] == 'admin'
+  end
+end
+```
+
+And use it in your endpoint definition as:
+
+```ruby
+params do
+  optional :admin_field, type: String, admin: true
+  optional :non_admin_field, type: String
+  optional :admin_false_field, type: String, admin: false
+end
+```
+
 ### Validation Errors
 
 Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.
