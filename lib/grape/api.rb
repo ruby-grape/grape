@@ -131,11 +131,14 @@ module Grape
       self.class.endpoints.each do |endpoint|
         routes = endpoint.routes
         routes.each do |route|
-          methods_per_path[route.route_path] ||= []
-          methods_per_path[route.route_path] << route.route_method
+          # ignore any optional portions of the path
+          route_path = route.route_path.gsub(/\(.*\)/, '')
+
+          methods_per_path[route_path] ||= []
+          methods_per_path[route_path] << route.route_method
 
           # using the :any shorthand produces [nil] for route methods, substitute all manually
-          methods_per_path[route.route_path] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if methods_per_path[route.route_path].compact.empty?
+          methods_per_path[route_path] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if methods_per_path[route_path].compact.empty?
         end
       end
 
