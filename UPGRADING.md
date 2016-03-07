@@ -42,6 +42,18 @@ See [#1285](https://github.com/ruby-grape/grape/pull/1285) for more information.
 
 Using `route :any, '*path'` no longer blocks generated `OPTIONS` and Method Not Allowed methods from other routes. Use `do_not_route_options!` to prevent `OPTIONS` routes from being created.
 
+See [#1263](https://github.com/ruby-grape/grape/pull/1263) for more information.
+
+Furthermore, a `405 Method Not Allowed` error now causes `Grape::Exceptions::MethodNotAllowed` to be raised, which will be rescued via `rescue_from :all`. Restore old behavior with the following error handler.
+
+```ruby
+rescue_from Grape::Exceptions::Base do |e|
+  error! e.message, e.status, e.headers
+end
+```
+
+See [#1283](https://github.com/ruby-grape/grape/pull/1283) for more information.
+
 ### Upgrading to >= 0.14.0
 
 #### Changes to availability of DSL methods in filters
