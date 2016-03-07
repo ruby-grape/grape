@@ -54,6 +54,24 @@ end
 
 See [#1283](https://github.com/ruby-grape/grape/pull/1283) for more information.
 
+#### Changes to Grape::Exceptions::Validation parameters
+
+When raising `Grape::Exceptions::Validation` explicitly, replace `message_key` with `message`.
+
+For example,
+
+```ruby
+fail Grape::Exceptions::Validation, params: [:oauth_token_secret], message_key: :presence
+```
+
+becomes
+
+```ruby
+fail Grape::Exceptions::Validation, params: [:oauth_token_secret], message: :presence
+```
+
+See [#1295](https://github.com/ruby-grape/grape/pull/1295) for more information.
+
 ### Upgrading to >= 0.14.0
 
 #### Changes to availability of DSL methods in filters

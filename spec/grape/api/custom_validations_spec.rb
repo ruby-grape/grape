@@ -1,24 +1,18 @@
 require 'spec_helper'
 
 describe Grape::Validations do
-  before do
-    module CustomValidationsSpec
-      class DefaultLength < Grape::Validations::Base
-        def validate_param!(attr_name, params)
-          @option = params[:max].to_i if params.key?(:max)
-          return if params[attr_name].length <= @option
-          fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
-        end
-      end
-      class InBody < Grape::Validations::PresenceValidator
-        def validate(request)
-          validate!(request.env['api.request.body'])
+  context 'using a custom length validator' do
+    before do
+      module CustomValidationsSpec
+        class DefaultLength < Grape::Validations::Base
+          def validate_param!(attr_name, params)
+            @option = params[:max].to_i if params.key?(:max)
+            return if params[attr_name].length <= @option
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+          end
         end
       end
     end
-  end
-
-  context 'using a custom length validator' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -52,6 +46,15 @@ describe Grape::Validations do
   end
 
   context 'using a custom body-only validator' do
+    before do
+      module CustomValidationsSpec
+        class InBody < Grape::Validations::PresenceValidator
+          def validate(request)
+            validate!(request.env['api.request.body'])
+          end
+        end
+      end
+    end
     subject do
       Class.new(Grape::API) do
         params do
@@ -74,6 +77,38 @@ describe Grape::Validations do
     end
     it 'ignores field in query' do
       get '/', nil, text: 'abc'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'text is missing'
+    end
+  end
+
+  context 'using a custom validator with message_key' do
+    before do
+      module CustomValidationsSpec
+        class WithMessageKey < Grape::Validations::PresenceValidator
+          def validate_param!(attr_name, _params)
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: :presence
+          end
+        end
+      end
+    end
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, with_message_key: true
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'fails with message' do
+      get '/', text: 'foobar'
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq 'text is missing'
     end
