@@ -131,8 +131,9 @@ module Grape
       self.class.endpoints.each do |endpoint|
         routes = endpoint.routes
         routes.each do |route|
-          # ignore any optional portions of the path
-          route_path = route.route_path.gsub(/\(.*\)/, '')
+          route_path = route.route_path
+                       .gsub(/\(.*\)/, '') # ignore any optional portions
+                       .gsub(%r{\:[^\/.?]+}, ':x') # substitute variable names to avoid conflicts
 
           methods_per_path[route_path] ||= []
           methods_per_path[route_path] << route.route_method
