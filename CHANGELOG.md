@@ -1,5 +1,5 @@
-0.14.1 (Next)
-=============
+0.15.0 (3/8/2016)
+=================
 
 #### Features
 
@@ -14,7 +14,6 @@
 * [#1280](https://github.com/ruby-grape/grape/pull/1280): Support `Rack::Sendfile` middleware - [@lfidnl](https://github.com/lfidnl).
 * [#1285](https://github.com/ruby-grape/grape/pull/1285): Add a warning for errors appearing in `after` callbacks - [@gregormelhorn](https://github.com/gregormelhorn).
 * [#1295](https://github.com/ruby-grape/grape/pull/1295): Add custom validation messages for parameter exceptions - [@railsmith](https://github.com/railsmith).
-* Your contribution here.
 
 #### Fixes
 

@@ -101,9 +101,8 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.14.1.
+You're reading the documentation for the stable release of Grape, 0.15.0.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.14.0](https://github.com/ruby-grape/grape/blob/v0.14.0/README.md).
 
 ## Project Resources
 
@@ -1205,7 +1204,7 @@ class Admin < Grape::Validations::Base
   def validate(request)
     # return if the param we are checking was not in request
     # @attrs is a list containing the attribute we are currently validating
-    # in our sample case this method once will get called with 
+    # in our sample case this method once will get called with
     # @attrs being [:admin_field] and once with @attrs being [:admin_false_field]
     return unless request.params.key? @attrs.first
     # check if admin flag is set to true
