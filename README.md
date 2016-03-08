@@ -422,7 +422,7 @@ end
 
 ```ruby
 class V1::API < Grape::API
-  version 'v1' # required block even version ['v2', 'v1'] included in api.rb
+  version 'v1' # required block although `version ['v2', 'v1']` included in api.rb
 
 
   resource :test do
@@ -437,7 +437,7 @@ end
 
 ```ruby
 class V2::API < Grape::API
-  version 'v2' # required block even version ['v2', 'v1'] included in api.rb
+  version 'v2' # required block although `version ['v2', 'v1']` included in api.rb
 
   resource :test do
     get do
