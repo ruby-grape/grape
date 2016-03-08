@@ -175,9 +175,6 @@ module Grape
         status 204
         ''
       end
-
-      # move options endpoint to top of defined endpoints
-      self.class.endpoints.unshift self.class.endpoints.pop
     end
 
     # Generate a route that returns an HTTP 405 response for a user defined
@@ -191,9 +188,6 @@ module Grape
       self.class.route(not_allowed_methods, path) do
         fail Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allow_header)
       end
-
-      # move options endpoint to top of defined endpoints
-      self.class.endpoints.unshift self.class.endpoints.pop
     end
 
     # Allows definition of endpoints that ignore the versioning configuration
