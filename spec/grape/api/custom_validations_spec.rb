@@ -113,4 +113,71 @@ describe Grape::Validations do
       expect(last_response.body).to eq 'text is missing'
     end
   end
+
+  context 'using a custom request/param validator' do
+    before do
+      module CustomValidationsSpec
+        class Admin < Grape::Validations::Base
+          def validate(request)
+            # return if the param we are checking was not in request
+            # @attrs is a list containing the attribute we are currently validating
+            return unless request.params.key? @attrs.first
+            # check if admin flag is set to true
+            return unless @option
+            # check if user is admin or not
+            # as an example get a token from request and check if it's admin or not
+            fail Grape::Exceptions::Validation, params: @attrs, message: 'Can not set Admin only field.' unless request.headers['X-Access-Token'] == 'admin'
+          end
+        end
+      end
+    end
+    subject do
+      Class.new(Grape::API) do
+        params do
+          optional :admin_field, type: String, admin: true
+          optional :non_admin_field, type: String
+          optional :admin_false_field, type: String, admin: false
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'fail when non-admin user sets an admin field' do
+      get '/', admin_field: 'tester', non_admin_field: 'toaster'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to include 'Can not set Admin only field.'
+    end
+
+    it 'does not fail when we send non-admin fields only' do
+      get '/', non_admin_field: 'toaster'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'bacon'
+    end
+
+    it 'does not fail when we send non-admin and admin=false fields only' do
+      get '/', non_admin_field: 'toaster', admin_false_field: 'test'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'bacon'
+    end
+
+    it 'does not fail when we send admin fields and we are admin' do
+      header 'X-Access-Token', 'admin'
+      get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'bacon'
+    end
+
+    it 'fails when we send admin fields and we are not admin' do
+      header 'X-Access-Token', 'user'
+      get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to include 'Can not set Admin only field.'
+    end
+  end
 end
