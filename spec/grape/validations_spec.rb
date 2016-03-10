@@ -487,12 +487,13 @@ describe Grape::Validations do
       it 'errors when a parameter is not present' do
         get '/within_array', children: [
           { name: 'Jim', parents: [{}] },
-          { name: 'Job', parents: [{ name: 'Joy' }] }
+          { name: 'Job', parents: [{ name: 'Joy' }] },
+          { name: 'Jill', parents: [{}] }
         ]
         # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[2][parents] is missing')
       end
 
       it 'safely handles empty arrays and blank parameters' do
