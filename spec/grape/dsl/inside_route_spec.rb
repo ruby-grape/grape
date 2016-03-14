@@ -230,8 +230,8 @@ module Grape
 
       describe '#route' do
         before do
-          subject.env['rack.routing_args'] = {}
-          subject.env['rack.routing_args'][:route_info] = 'dummy'
+          subject.env['grape.routing_args'] = {}
+          subject.env['grape.routing_args'][:route_info] = 'dummy'
         end
 
         it 'returns route_info' do

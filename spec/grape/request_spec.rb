@@ -34,9 +34,9 @@ module Grape
         expect(request.params).to eq('a' => '123', 'b' => 'xyz')
       end
 
-      describe 'with rack.routing_args' do
+      describe 'with grape.routing_args' do
         let(:options) {
-          default_options.merge('rack.routing_args' => routing_args)
+          default_options.merge('grape.routing_args' => routing_args)
         }
         let(:routing_args) {
           {

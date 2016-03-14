@@ -10,7 +10,7 @@ describe Grape::Validations::ParamsScope do
   end
 
   context 'setting a default' do
-    let(:documentation) { subject.routes.first.route_params }
+    let(:documentation) { subject.routes.first.params }
 
     context 'when the default value is truthy' do
       before do
@@ -67,7 +67,7 @@ describe Grape::Validations::ParamsScope do
     end
 
     it 'does not add documentation for the default value' do
-      documentation = subject.routes.first.route_params
+      documentation = subject.routes.first.params
       expect(documentation).to have_key('object')
       expect(documentation['object']).not_to have_key(:default)
     end

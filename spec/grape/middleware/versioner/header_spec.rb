@@ -50,7 +50,7 @@ describe Grape::Middleware::Versioner::Header do
     end
 
     ['v1', :v1].each do |version|
-      context 'when version is set to #{version{ ' do
+      context "when version is set to #{version}" do
         before do
           @options[:versions] = [version]
         end

@@ -269,10 +269,10 @@ module Grape
       #
       #   desc "Returns the route description."
       #   get '/' do
-      #     route.route_description
+      #     route.description
       #   end
       def route
-        env[Grape::Env::RACK_ROUTING_ARGS][:route_info]
+        env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info]
       end
 
       # Attempt to locate the Entity class for a given object, if not given

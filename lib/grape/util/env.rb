@@ -13,10 +13,10 @@ module Grape
     RACK_REQUEST_QUERY_HASH = 'rack.request.query_hash'.freeze
     RACK_REQUEST_FORM_HASH = 'rack.request.form_hash'.freeze
     RACK_REQUEST_FORM_INPUT = 'rack.request.form_input'.freeze
-    RACK_ROUTING_ARGS = 'rack.routing_args'.freeze
 
     GRAPE_REQUEST = 'grape.request'.freeze
     GRAPE_REQUEST_HEADERS = 'grape.request.headers'.freeze
     GRAPE_REQUEST_PARAMS = 'grape.request.params'.freeze
+    GRAPE_ROUTING_ARGS = 'grape.routing_args'.freeze
   end
 end
