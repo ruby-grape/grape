@@ -37,6 +37,7 @@
 * [#1197](https://github.com/ruby-grape/grape/pull/1290): Fix using JSON and Array[JSON] as groups when parameter is optional - [@lukeivers](https://github.com/lukeivers).
 
 0.14.0 (12/07/2015)
+=================
 
 #### Features
 
