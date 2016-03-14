@@ -34,8 +34,8 @@ module Grape
       def build_formatted_response(status, headers, bodies)
         headers = ensure_content_type(headers)
 
-        if bodies.is_a?(Grape::Util::FileResponse)
-          Grape::Util::SendfileResponse.new([], status, headers) do |resp|
+        if bodies.is_a?(Grape::ServeFile::FileResponse)
+          Grape::ServeFile::SendfileResponse.new([], status, headers) do |resp|
             resp.body = bodies.file
           end
         else

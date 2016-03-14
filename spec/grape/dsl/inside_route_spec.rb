@@ -179,12 +179,37 @@ module Grape
 
       describe '#file' do
         describe 'set' do
-          before do
-            subject.file 'file'
+          context 'as file path' do
+            let(:file_path) { '/some/file/path' }
+
+            let(:file_response) do
+              file_body = Grape::ServeFile::FileBody.new(file_path)
+              Grape::ServeFile::FileResponse.new(file_body)
+            end
+
+            before do
+              subject.file file_path
+            end
+
+            it 'returns value wrapped in FileResponse' do
+              expect(subject.file).to eq file_response
+            end
           end
 
-          it 'returns value wrapped in FileResponse' do
-            expect(subject.file).to eq Grape::Util::FileResponse.new('file')
+          context 'as object (backward compatibility)' do
+            let(:file_object) { Class.new }
+
+            let(:file_response) do
+              Grape::ServeFile::FileResponse.new(file_object)
+            end
+
+            before do
+              subject.file file_object
+            end
+
+            it 'returns value wrapped in FileResponse' do
+              expect(subject.file).to eq file_response
+            end
           end
         end
 
@@ -195,19 +220,21 @@ module Grape
 
       describe '#stream' do
         describe 'set' do
+          let(:file_object) { Class.new }
+
           before do
             subject.header 'Cache-Control', 'cache'
             subject.header 'Content-Length', 123
             subject.header 'Transfer-Encoding', 'base64'
-            subject.stream 'file'
+            subject.stream file_object
           end
 
           it 'returns value wrapped in FileResponse' do
-            expect(subject.stream).to eq Grape::Util::FileResponse.new('file')
+            expect(subject.stream).to eq Grape::ServeFile::FileResponse.new(file_object)
           end
 
           it 'also sets result of file to value wrapped in FileResponse' do
-            expect(subject.file).to eq Grape::Util::FileResponse.new('file')
+            expect(subject.file).to eq Grape::ServeFile::FileResponse.new(file_object)
           end
 
           it 'sets Cache-Control header to no-cache' do

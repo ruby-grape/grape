@@ -1,5 +1,5 @@
 module Grape
-  module Util
+  module ServeFile
     # A simple class used to identify responses which represent files and do not
     # need to be formatted or pre-read by Rack::Response
     class FileResponse
