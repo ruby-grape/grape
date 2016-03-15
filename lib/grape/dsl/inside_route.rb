@@ -191,8 +191,12 @@ module Grape
       #
       #   GET /file # => "contents of file"
       def file(value = nil)
-        if value
-          @file = Grape::Util::FileResponse.new(value)
+        if value.is_a?(String)
+          file_body = Grape::ServeFile::FileBody.new(value)
+          @file = Grape::ServeFile::FileResponse.new(file_body)
+        elsif !value.is_a?(NilClass)
+          warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
+          @file = Grape::ServeFile::FileResponse.new(value)
         else
           @file
         end

@@ -4,6 +4,7 @@
 #### Features
 
 * [#1276](https://github.com/ruby-grape/grape/pull/1276): Replace rack-mount with new router - [@namusyaka](https://github.com/namusyaka).
+* [#1321](https://github.com/ruby-grape/grape/pull/1321): Serve files without using FileStreamer-like object - [@lfidnl](https://github.com/lfidnl).
 * Your contribution here.
 
 #### Fixes

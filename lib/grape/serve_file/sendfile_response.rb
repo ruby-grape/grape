@@ -1,5 +1,5 @@
 module Grape
-  module Util
+  module ServeFile
     # Response should respond to to_path method
     # for using Rack::SendFile middleware
     class SendfileResponse < Rack::Response

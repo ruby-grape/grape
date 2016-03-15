@@ -130,8 +130,6 @@ module Grape
     autoload :StackableValues
     autoload :InheritableSetting
     autoload :StrictHashConfiguration
-    autoload :FileResponse
-    autoload :SendfileResponse
   end
 
   module DSL
@@ -161,6 +159,13 @@ module Grape
   module Presenters
     extend ActiveSupport::Autoload
     autoload :Presenter
+  end
+
+  module ServeFile
+    extend ActiveSupport::Autoload
+    autoload :FileResponse
+    autoload :FileBody
+    autoload :SendfileResponse
   end
 end
 

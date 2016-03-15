@@ -23,6 +23,46 @@ TwitterAPI::routes[0].settings[:custom] # => { key: 'value' }
 TwitterAPI::routes[0].request_method # => 'GET'
 ```
 
+#### `file` method accepts path to file
+
+Now to serve files via Grape just pass the path to the file. Functionality with FileStreamer-like objects is deprecated.
+
+Please, replace your FileStreamer-like objects with paths of served files.
+
+Old style:
+
+```ruby
+class FileStreamer
+  def initialize(file_path)
+    @file_path = file_path
+  end
+
+  def each(&blk)
+    File.open(@file_path, 'rb') do |file|
+      file.each(10, &blk)
+    end
+  end
+end
+
+# ...
+
+class API < Grape::API
+  get '/' do
+    file FileStreamer.new('/path/to/file')
+  end
+end
+```
+
+New style:
+
+```ruby
+class API < Grape::API
+  get '/' do
+    file '/path/to/file'
+  end
+end
+```
+
 ### Upgrading to >= 0.15.0
 
 #### Changes to availability of `:with` option of `rescue_from` method
