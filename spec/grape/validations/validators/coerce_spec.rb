@@ -331,6 +331,57 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'using coerce_with' do
+      it 'parses parameters with Array type' do
+        subject.params do
+          requires :values, type: Array, coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: '1 2 3 4'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([1, 2, 3, 4])
+
+        get '/ints', values: 'a b c d'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
+      end
+
+      it 'parses parameters with Array[String] type' do
+        subject.params do
+          requires :values, type: Array[String], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: '1 2 3 4'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq(%w(1 2 3 4))
+
+        get '/ints', values: 'a b c d'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq(%w(0 0 0 0))
+      end
+
+      it 'parses parameters with Array[Integer] type' do
+        subject.params do
+          requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: '1 2 3 4'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([1, 2, 3, 4])
+
+        get '/ints', values: 'a b c d'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
+      end
+
       it 'uses parse where available' do
         subject.params do
           requires :ints, type: Array, coerce_with: JSON do

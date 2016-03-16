@@ -797,6 +797,15 @@ params do
 end
 ```
 
+Example of use of `coerce_with` with a lambda (a class with a `parse` method could also have been used)
+It will parse a string and return an Array of Integers, matching the `Array[Integer]` `type`.
+
+```ruby
+params do
+  requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+end
+```
+
 ### Multipart File Parameters
 
 Grape makes use of `Rack::Request`'s built-in support for multipart

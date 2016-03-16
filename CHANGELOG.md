@@ -9,6 +9,8 @@
 
 #### Fixes
 
+* [#1325](https://github.com/ruby-grape/grape/pull/1325): Params: Fix coerce_with helper with Array types - [@ngonzalez](https://github.com/ngonzalez).
+
 0.15.0 (3/8/2016)
 =================
 
