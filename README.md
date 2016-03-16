@@ -5,6 +5,7 @@
 [![Dependency Status](https://gemnasium.com/ruby-grape/grape.svg)](https://gemnasium.com/ruby-grape/grape)
 [![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
 [![Inline docs](http://inch-ci.org/github/ruby-grape/grape.svg)](http://inch-ci.org/github/ruby-grape/grape)
+[![Join the chat at https://gitter.im/ruby-grape/grape](https://badges.gitter.im/ruby-grape/grape.svg)](https://gitter.im/ruby-grape/grape?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Table of Contents
 
