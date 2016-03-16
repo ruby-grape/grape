@@ -3047,7 +3047,7 @@ XML
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v2')
         options '/v2/hello'
-        expect(last_response.status).to eq(200)
+        expect(last_response.status).to eq(204)
         expect(last_response.body).to be_blank
         head '/v2/hello'
         expect(last_response.status).to eq(200)
