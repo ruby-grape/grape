@@ -3046,6 +3046,12 @@ XML
         get '/v2/hello'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v2')
+        options '/v2/hello'
+        expect(last_response.status).to eq(204)
+        expect(last_response.body).to be_blank
+        head '/v2/hello'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to be_blank
         get '/foobar'
         expect(last_response.status).to eq(404)
         expect(last_response.body).to eq('Unrecognized request path: foobar - /foobar')
