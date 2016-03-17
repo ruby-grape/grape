@@ -1,8 +1,12 @@
+require 'grape/util/registrable'
+
 module Grape
   module Formatter
+    extend Registrable
+
     class << self
       def builtin_formmaters
-        {
+        @builtin_formatters ||= {
           json: Grape::Formatter::Json,
           jsonapi: Grape::Formatter::Json,
           serializable_hash: Grape::Formatter::SerializableHash,
@@ -12,7 +16,7 @@ module Grape
       end
 
       def formatters(options)
-        builtin_formmaters.merge(options[:formatters] || {})
+        builtin_formmaters.merge(default_elements).merge(options[:formatters] || {})
       end
 
       def formatter_for(api_format, options = {})
