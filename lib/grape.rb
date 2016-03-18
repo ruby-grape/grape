@@ -77,28 +77,6 @@ module Grape
     autoload :MethodNotAllowed
   end
 
-  module ErrorFormatter
-    extend ActiveSupport::Autoload
-    autoload :Base
-    autoload :Json
-    autoload :Txt
-    autoload :Xml
-  end
-
-  module Formatter
-    extend ActiveSupport::Autoload
-    autoload :Json
-    autoload :SerializableHash
-    autoload :Txt
-    autoload :Xml
-  end
-
-  module Parser
-    extend ActiveSupport::Autoload
-    autoload :Json
-    autoload :Xml
-  end
-
   module Middleware
     extend ActiveSupport::Autoload
     autoload :Base
@@ -130,6 +108,29 @@ module Grape
     autoload :StackableValues
     autoload :InheritableSetting
     autoload :StrictHashConfiguration
+    autoload :Registrable
+  end
+
+  module ErrorFormatter
+    extend ActiveSupport::Autoload
+    autoload :Base
+    autoload :Json
+    autoload :Txt
+    autoload :Xml
+  end
+
+  module Formatter
+    extend ActiveSupport::Autoload
+    autoload :Json
+    autoload :SerializableHash
+    autoload :Txt
+    autoload :Xml
+  end
+
+  module Parser
+    extend ActiveSupport::Autoload
+    autoload :Json
+    autoload :Xml
   end
 
   module DSL

@@ -1,8 +1,6 @@
-require 'grape/util/registrable'
-
 module Grape
   module Parser
-    extend Registrable
+    extend Util::Registrable
 
     class << self
       def builtin_parsers

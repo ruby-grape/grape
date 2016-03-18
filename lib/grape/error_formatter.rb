@@ -1,8 +1,7 @@
-require 'grape/util/registrable'
-
 module Grape
   module ErrorFormatter
-    extend Registrable
+    extend Util::Registrable
+
     class << self
       def builtin_formatters
         @builtin_formatters ||= {

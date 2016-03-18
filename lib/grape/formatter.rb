@@ -1,8 +1,6 @@
-require 'grape/util/registrable'
-
 module Grape
   module Formatter
-    extend Registrable
+    extend Util::Registrable
 
     class << self
       def builtin_formmaters
