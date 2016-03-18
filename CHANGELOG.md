@@ -11,7 +11,7 @@
 
 * [#1325](https://github.com/ruby-grape/grape/pull/1325): Params: Fix coerce_with helper with Array types - [@ngonzalez](https://github.com/ngonzalez).
 * [#1326](https://github.com/ruby-grape/grape/pull/1326): Fix wrong behavior for OPTIONS and HEAD requests with catch-all - [@ekampp](https://github.com/ekampp), [@namusyaka](https://github.com/namusyaka).
-* [#1330](https://github.com/ruby-grape/grape/pull/1330): Fix built-in parsers and formatters - [@namusyaka](https://github.com/namusyaka).
+* [#1330](https://github.com/ruby-grape/grape/pull/1330): Add `register` keyword for adding customized parsers and formatters - [@namusyaka](https://github.com/namusyaka).
 
 0.15.0 (3/8/2016)
 =================
