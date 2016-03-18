@@ -1,8 +1,12 @@
+require 'grape/util/registrable'
+
 module Grape
   module Parser
+    extend Registrable
+
     class << self
       def builtin_parsers
-        {
+        @builtin_parsers ||= {
           json: Grape::Parser::Json,
           jsonapi: Grape::Parser::Json,
           xml: Grape::Parser::Xml
@@ -10,7 +14,7 @@ module Grape
       end
 
       def parsers(options)
-        builtin_parsers.merge(options[:parsers] || {})
+        builtin_parsers.merge(default_elements).merge(options[:parsers] || {})
       end
 
       def parser_for(api_format, options = {})

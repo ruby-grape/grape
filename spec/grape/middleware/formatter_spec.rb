@@ -292,4 +292,23 @@ describe Grape::Middleware::Formatter do
       expect(subject.call(env)).to be_a(Grape::ServeFile::SendfileResponse)
     end
   end
+
+  context 'inheritable formatters' do
+    class InvalidFormatter
+      def self.call(_, _)
+        { message: 'invalid' }.to_json
+      end
+    end
+    let(:app) { ->(_env) { [200, {}, ['']] } }
+    before do
+      Grape::Formatter.register :invalid, InvalidFormatter
+      Grape::ContentTypes::CONTENT_TYPES[:invalid] = 'application/x-invalid'
+    end
+
+    it 'returns response by invalid formatter' do
+      env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }
+      _, _, bodies = *subject.call(env)
+      expect(bodies.body.first).to eq({ message: 'invalid' }.to_json)
+    end
+  end
 end
