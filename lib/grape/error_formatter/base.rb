@@ -3,9 +3,13 @@ module Grape
     module Base
       def present(message, env)
         present_options = {}
-        present_options[:with] = message.delete(:with) if message.is_a?(Hash)
+        presented_message = message
+        if presented_message.is_a?(Hash)
+          presented_message = presented_message.dup
+          present_options[:with] = presented_message.delete(:with)
+        end
 
-        presenter = env[Grape::Env::API_ENDPOINT].entity_class_for_obj(message, present_options)
+        presenter = env[Grape::Env::API_ENDPOINT].entity_class_for_obj(presented_message, present_options)
 
         unless presenter || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
           # env['api.endpoint'].route does not work when the error occurs within a middleware
@@ -21,10 +25,10 @@ module Grape
         if presenter
           embeds = { env: env }
           embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
-          message = presenter.represent(message, embeds).serializable_hash
+          presented_message = presenter.represent(presented_message, embeds).serializable_hash
         end
 
-        message
+        presented_message
       end
     end
   end

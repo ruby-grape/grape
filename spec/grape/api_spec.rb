@@ -2046,7 +2046,7 @@ XML
     end
 
     it 'presented with' do
-      error = { code: 408, with: error_presenter }
+      error = { code: 408, with: error_presenter }.freeze
       subject.get '/exception' do
         error! error, 408
       end
