@@ -742,6 +742,16 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('{"dude":"rad"}')
     end
 
+    it 'accepts a frozen object' do
+      subject.get '/hey' do
+        error!({ 'dude' => 'rad' }.freeze, 403)
+      end
+
+      get '/hey.json'
+      expect(last_response.status).to eq(403)
+      expect(last_response.body).to eq('{"dude":"rad"}')
+    end
+
     it 'can specifiy headers' do
       subject.get '/hey' do
         error!({ 'dude' => 'rad' }, 403, 'X-Custom' => 'value')
