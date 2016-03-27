@@ -7,7 +7,7 @@ module Grape
     include Grape::DSL::API
 
     class << self
-      attr_reader :instance, :router
+      attr_reader :instance
 
       # A class-level lock to ensure the API is not compiled by multiple
       # threads simultaneously within the same process.
@@ -54,6 +54,12 @@ module Grape
         end
       end
 
+      # see Grape::Router#recognize_path
+      def recognize_path(path)
+        LOCK.synchronize { compile } unless instance
+        instance.router.recognize_path(path)
+      end
+
       protected
 
       def prepare_routes
@@ -85,6 +91,8 @@ module Grape
         reset_routes!
       end
     end
+
+    attr_reader :router
 
     # Builds the routes from the defined endpoints, effectively compiling
     # this API into a usable form.
@@ -138,6 +146,7 @@ module Grape
           route_key = route.pattern.to_regexp
           routes_map[route_key] ||= {}
           route_settings = routes_map[route_key]
+          route_settings[:pattern] = route.pattern
           route_settings[:requirements] = route.requirements
           route_settings[:path] = route.origin
           route_settings[:methods] ||= []
@@ -155,7 +164,7 @@ module Grape
       # informations again.
       without_root_prefix do
         without_versioning do
-          routes_map.each do |regexp, config|
+          routes_map.each do |_, config|
             methods = config[:methods]
             path = config[:path]
             allowed_methods = methods.dup
@@ -170,7 +179,8 @@ module Grape
               generate_options_method(path, allow_header, config) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
             end
 
-            generate_not_allowed_method(regexp, allowed_methods, allow_header, config[:endpoint])
+            attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
+            generate_not_allowed_method(config[:pattern], attributes)
           end
         end
       end
@@ -187,13 +197,13 @@ module Grape
 
     # Generate a route that returns an HTTP 405 response for a user defined
     # path on methods not specified
-    def generate_not_allowed_method(path, allowed_methods, allow_header, endpoint = nil)
-      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+    def generate_not_allowed_method(pattern, attributes = {})
+      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - attributes[:allowed_methods]
       not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
 
       return if not_allowed_methods.empty?
 
-      @router.associate_routes(path, not_allowed_methods, allow_header, endpoint)
+      @router.associate_routes(pattern, attributes.merge(not_allowed_methods: not_allowed_methods))
     end
 
     # Allows definition of endpoints that ignore the versioning configuration

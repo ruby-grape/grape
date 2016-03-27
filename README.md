@@ -51,6 +51,7 @@
 - [Cookies](#cookies)
 - [HTTP Status Code](#http-status-code)
 - [Redirecting](#redirecting)
+- [Recognizing Path](#recognizing-path)
 - [Allowed Methods](#allowed-methods)
 - [Raising Exceptions](#raising-exceptions)
   - [Default Error HTTP Status Code](#default-error-http-status-code)
@@ -1640,6 +1641,21 @@ redirect '/statuses'
 
 ```ruby
 redirect '/statuses', permanent: true
+```
+
+## Recognizing Path
+
+You can recognize the endpoint matched with given path.
+
+This API returns an instance of `Grape::Endpoint`.
+
+```ruby
+class API < Grape::API
+  get '/statuses' do
+  end
+end
+
+API.recognize_path '/statuses'
 ```
 
 ## Allowed Methods
