@@ -4,17 +4,22 @@ module Grape
   class Router
     attr_reader :map, :compiled
 
-    ReverseRoute = Struct.new(:pattern, :not_allowed_methods, :allowed_methods, :index, :endpoint)
+    class Any < AttributeTranslator
+      def initialize(pattern, attributes = {})
+        @pattern = pattern
+        super(attributes)
+      end
+    end
 
     def initialize
-      @reverse_map = []
+      @neutral_map = []
       @map = Hash.new { |hash, key| hash[key] = [] }
       @optimized_map = Hash.new { |hash, key| hash[key] = // }
     end
 
     def compile!
       return if compiled
-      @union = Regexp.union(@reverse_map.map(&:pattern))
+      @union = Regexp.union(@neutral_map.map(&:regexp))
       map.each do |method, routes|
         @optimized_map[method] = routes.map.with_index do |route, index|
           route.index = index
@@ -29,15 +34,21 @@ module Grape
       map[route.request_method.to_s.upcase] << route
     end
 
-    def associate_routes(pattern, not_allowed_methods, allowed_methods, endpoint)
-      pattern = /(?<_#{@reverse_map.length}>)#{pattern}/
-      @reverse_map << ReverseRoute.new(pattern, not_allowed_methods, allowed_methods, @reverse_map.length, endpoint)
+    def associate_routes(pattern, options = {})
+      regexp = /(?<_#{@neutral_map.length}>)#{pattern.to_regexp}/
+      @neutral_map << Any.new(pattern, options.merge(regexp: regexp, index: @neutral_map.length))
     end
 
     def call(env)
       with_optimization do
         identity(env) || rotation(env) { |route| route.exec(env) }
       end
+    end
+
+    def recognize_path(input)
+      any = with_optimization { greedy_match?(input) }
+      return if any == default_response
+      any.endpoint
     end
 
     private
@@ -73,7 +84,7 @@ module Grape
       neighbor = greedy_match?(input)
       return unless neighbor
 
-      (!cascade && neighbor) ? method_not_allowed(env, neighbor.allowed_methods, neighbor.endpoint) : nil
+      (!cascade && neighbor) ? method_not_allowed(env, neighbor.allow_header, neighbor.endpoint) : nil
     end
 
     def make_routing_args(default_args, route, input)
@@ -107,7 +118,7 @@ module Grape
     def greedy_match?(input)
       return unless @union.match(input)
       last_match = Regexp.last_match
-      @reverse_map.detect { |route| last_match["_#{route.index}"] }
+      @neutral_map.detect { |route| last_match["_#{route.index}"] }
     end
 
     def method_not_allowed(env, methods, endpoint)
