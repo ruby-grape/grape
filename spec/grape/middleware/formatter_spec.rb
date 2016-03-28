@@ -217,7 +217,7 @@ describe Grape::Middleware::Formatter do
     %w(POST PATCH PUT DELETE).each do |method|
       ['application/json', 'application/json; charset=utf-8'].each do |content_type|
         context content_type do
-          it 'parses the body from #{method} and copies values into rack.request.form_hash' do
+          it "parses the body from #{method} and copies values into rack.request.form_hash" do
             io = StringIO.new('{"is_boolean":true,"string":"thing"}')
             subject.call(
               'PATH_INFO' => '/info',
@@ -256,7 +256,7 @@ describe Grape::Middleware::Formatter do
         expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
         expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
-      it 'parses the body from an xml #{method} and copies values into rack.request.from_hash' do
+      it "parses the body from an xml #{method} and copies values into rack.request.from_hash" do
         io = StringIO.new('<thing><name>Test</name></thing>')
         subject.call(
           'PATH_INFO' => '/info.xml',

@@ -28,7 +28,7 @@ describe Grape::Middleware::Versioner::Path do
   end
 
   [%w(v1 v2), [:v1, :v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
-    context 'with specified versions as #{versions}' do
+    context "with specified versions as #{versions}" do
       before { @options = { versions: versions } }
 
       it 'throws an error if a non-allowed version is specified' do
