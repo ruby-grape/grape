@@ -1,12 +1,11 @@
-0.15.1 (Next)
-=============
+0.16.0 (4/3/2016)
+=================
 
 #### Features
 
 * [#1276](https://github.com/ruby-grape/grape/pull/1276): Replace rack-mount with new router - [@namusyaka](https://github.com/namusyaka).
 * [#1321](https://github.com/ruby-grape/grape/pull/1321): Serve files without using FileStreamer-like object - [@lfidnl](https://github.com/lfidnl).
 * [#1339](https://github.com/ruby-grape/grape/pull/1339): Implement Grape::API.recognize_path - [@namusyaka](https://github.com/namusyaka).
-* Your contribution here.
 
 #### Fixes
 
