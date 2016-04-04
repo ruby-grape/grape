@@ -261,12 +261,6 @@ module Grape
             base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
             all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
-      (namespace_stackable(:middleware) || []).each do |m|
-        m = m.dup
-        block = m.pop if m.last.is_a?(Proc)
-        block ? b.use(*m, &block) : b.use(*m)
-      end
-
       if namespace_inheritable(:version)
         b.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
               versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
@@ -281,6 +275,12 @@ module Grape
             content_types: namespace_stackable_with_hash(:content_types),
             formatters: namespace_stackable_with_hash(:formatters),
             parsers: namespace_stackable_with_hash(:parsers)
+
+      (namespace_stackable(:middleware) || []).each do |m|
+        m = m.dup
+        block = m.pop if m.last.is_a?(Proc)
+        block ? b.use(*m, &block) : b.use(*m)
+      end
 
       b.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
 
