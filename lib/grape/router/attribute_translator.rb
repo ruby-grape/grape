@@ -1,39 +1,29 @@
-require 'delegate'
-require 'ostruct'
-
 module Grape
   class Router
-    class AttributeTranslator < DelegateClass(OpenStruct)
-      def self.register(*attributes)
-        AttributeTranslator.supported_attributes.concat(attributes)
-      end
-
-      def self.supported_attributes
-        @supported_attributes ||= []
-      end
-
+    # this could be an OpenStruct, but doesn't work in Ruby 2.3.0, see https://bugs.ruby-lang.org/issues/12251
+    class AttributeTranslator
       def initialize(attributes = {})
-        ostruct = OpenStruct.new(attributes)
-        super ostruct
         @attributes = attributes
-        self.class.supported_attributes.each do |name|
-          ostruct.send(:"#{name}=", nil) unless ostruct.respond_to?(name)
-          self.class.instance_eval do
-            define_method(name) { instance_variable_get(:"@#{name}") }
-          end if name == :format
-        end
       end
 
       def to_h
-        @attributes.each_with_object({}) do |(key, _), attributes|
-          attributes[key.to_sym] = send(:"#{key}")
+        @attributes
+      end
+
+      def method_missing(m, *args)
+        if m[-1] == '='
+          @attributes[m[0..-1]] = *args
+        else
+          @attributes[m]
         end
       end
 
-      private
-
-      def accessor_available?(name)
-        respond_to?(name) && respond_to?(:"#{name}=")
+      def respond_to_missing?(method_name, _include_private = false)
+        if method_name[-1] == '='
+          true
+        else
+          @attributes.key?(method_name)
+        end
       end
     end
   end

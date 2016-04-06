@@ -1,6 +1,7 @@
 0.16.2 (Next)
 ============
 
+* [#1348](https://github.com/ruby-grape/grape/pull/1348): Fix global functions polluting Grape::API scope - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 0.16.1 (4/3/2016)
