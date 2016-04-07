@@ -8,20 +8,6 @@ module Grape
     class Route
       ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/.freeze
       SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/.freeze
-      TRANSLATION_ATTRIBUTES = [
-        :prefix,
-        :version,
-        :namespace,
-        :settings,
-        :format,
-        :description,
-        :http_codes,
-        :headers,
-        :entity,
-        :details,
-        :requirements,
-        :request_method
-      ].freeze
 
       attr_accessor :pattern, :translator, :app, :index, :regexp
 
@@ -29,13 +15,6 @@ module Grape
 
       extend Forwardable
       def_delegators :pattern, :path, :origin
-
-      def self.translate(*attributes)
-        AttributeTranslator.register(*attributes)
-        def_delegators :@translator, *attributes
-      end
-
-      translate(*TRANSLATION_ATTRIBUTES)
 
       def method_missing(method_id, *arguments)
         match = ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
@@ -45,6 +24,25 @@ module Grape
           @options[method_name]
         else
           super
+        end
+      end
+
+      [
+        :prefix,
+        :version,
+        :settings,
+        :format,
+        :description,
+        :http_codes,
+        :headers,
+        :entity,
+        :details,
+        :requirements,
+        :request_method,
+        :namespace
+      ].each do |method_name|
+        define_method method_name do
+          attributes.public_send method_name
         end
       end
 
