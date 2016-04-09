@@ -8,8 +8,9 @@ module Grape
     class Route
       ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/.freeze
       SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/.freeze
+      FIXED_NAMED_CAPTURES = %w(format version).freeze
 
-      attr_accessor :pattern, :translator, :app, :index, :regexp
+      attr_accessor :pattern, :translator, :app, :index, :regexp, :options
 
       alias_method :attributes, :translator
 
@@ -78,10 +79,9 @@ module Grape
 
       def params(input = nil)
         if input.nil?
-          default = pattern.named_captures.keys.each_with_object({}) do |key, defaults|
-            defaults[key] = ''
+          pattern.named_captures.keys.each_with_object(translator.params) do |(key), defaults|
+            defaults[key] ||= '' unless FIXED_NAMED_CAPTURES.include?(key) || defaults.key?(key)
           end
-          default.delete_if { |key, _| key == 'format' }.merge(translator.params)
         else
           parsed = pattern.params(input)
           parsed ? parsed.delete_if { |_, value| value.nil? }.symbolize_keys : {}

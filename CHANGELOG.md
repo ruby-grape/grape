@@ -1,8 +1,15 @@
 0.16.2 (Next)
 ============
 
+#### Features
+
 * [#1348](https://github.com/ruby-grape/grape/pull/1348): Fix global functions polluting Grape::API scope - [@dblock](https://github.com/dblock).
+* [#1357](https://github.com/ruby-grape/grape/pull/1357): Expose Route#options - [@namusyaka](https://github.com/namusyaka).
 * Your contribution here.
+
+#### Fixes
+
+* [#1357](https://github.com/ruby-grape/grape/pull/1357): Don't include fixed named captures as route params - [@namusyaka](https://github.com/namusyaka).
 
 0.16.1 (4/3/2016)
 =================

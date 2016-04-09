@@ -2256,6 +2256,14 @@ XML
       expect(route.description).to eq('first method')
       expect(route.route_foo).to be_nil
       expect(route.params).to eq({})
+      expect(route.options).to be_a_kind_of(Hash)
+    end
+    it 'has params which does not include format and version as named captures' do
+      subject.version :v1, using: :path
+      subject.get :first do; end
+      param_keys = subject.routes.first.params.keys
+      expect(param_keys).not_to include('format')
+      expect(param_keys).not_to include('version')
     end
     it 'describes methods separately' do
       subject.desc 'first method'

@@ -2567,6 +2567,11 @@ Note that `Route#route_xyz` methods have been deprecated since 0.15.0.
 
 Please use `Route#xyz` instead.
 
+Note that difference of `Route#options` and `Route#settings`.
+
+The `options` can be referred from your route, it should be set by specifing key and value on verb methods such as `get`, `post` and `put`.
+The `settings` can also be referred from your route, but it should be set by specifing key and value on `route_setting`.
+
 ## Current Route and Endpoint
 
 It's possible to retrieve the information about the current route from within an API call with `route`.
