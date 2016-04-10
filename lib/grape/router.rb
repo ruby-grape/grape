@@ -41,7 +41,7 @@ module Grape
 
     def call(env)
       with_optimization do
-        identity(env) || rotation(env) { |route| route.exec(env) }
+        rotation(env)
       end
     end
 
@@ -53,27 +53,31 @@ module Grape
 
     private
 
-    def identity(env)
-      transaction(env) do |input, method, routing_args|
-        route = match?(input, method)
-        if route
-          env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
-          route.exec(env)
+    def rotation(env)
+      response = nil
+      exact_route = nil
+
+      response = transaction(env) do |input, method, routing_args|
+        exact_route = match?(input, method)
+        if exact_route
+          env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, exact_route, input)
+          exact_route.exec(env)
         end
       end
-    end
 
-    def rotation(env)
       transaction(env) do |input, method, routing_args|
-        response = nil
         routes_for(method).each do |route|
+          next if route == exact_route
           next unless route.match?(input)
           env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
-          response = yield(route)
+          response = route.exec(env)
           break unless cascade?(response)
         end
+
         response
-      end
+      end unless response
+
+      response
     end
 
     def transaction(env)
