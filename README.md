@@ -110,7 +110,8 @@ The current stable release is [0.16.2](https://github.com/ruby-grape/grape/blob/
 ## Project Resources
 
 * [Grape Website](http://www.ruby-grape.org)
-* Need help? [Grape Google Group](http://groups.google.com/group/ruby-grape)
+* Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
+* [Follow us on Twitter](https://twitter.com/grapeframework)
 
 ## Installation
 
