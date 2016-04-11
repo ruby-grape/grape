@@ -41,7 +41,8 @@ module Grape
 
     def call(env)
       with_optimization do
-        identity(env) || rotation(env) { |route| route.exec(env) }
+        response, route = identity(env)
+        response || rotation(env, route)
       end
     end
 
@@ -54,26 +55,28 @@ module Grape
     private
 
     def identity(env)
-      transaction(env) do |input, method, routing_args|
+      route = nil
+      response = transaction(env) do |input, method, routing_args|
         route = match?(input, method)
         if route
           env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
           route.exec(env)
         end
       end
+      [response, route]
     end
 
-    def rotation(env)
-      transaction(env) do |input, method, routing_args|
-        response = nil
-        routes_for(method).each do |route|
-          next unless route.match?(input)
-          env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
-          response = yield(route)
-          break unless cascade?(response)
-        end
-        response
+    def rotation(env, exact_route = nil)
+      response = nil
+      input, method, routing_args = *extract_required_args(env)
+      routes_for(method).each do |route|
+        next if exact_route == route
+        next unless route.match?(input)
+        env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
+        response = route.exec(env)
+        break unless cascade?(response)
       end
+      response
     end
 
     def transaction(env)
@@ -124,6 +127,8 @@ module Grape
     def method_not_allowed(env, methods, endpoint)
       current = endpoint.dup
       current.instance_eval do
+        namespace_inheritable_to_nil(:version)
+        @lazy_initialized = false
         run_filters befores, :before
         @method_not_allowed = true
         @block = proc do

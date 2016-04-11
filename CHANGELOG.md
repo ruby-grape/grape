@@ -10,6 +10,8 @@
 #### Fixes
 
 * [#1357](https://github.com/ruby-grape/grape/pull/1357): Don't include fixed named captures as route params - [@namusyaka](https://github.com/namusyaka).
+* [#1359](https://github.com/ruby-grape/grape/pull/1359): Return 404 even if version is using as header - [@namusyaka](https://github.com/namusyaka).
+* [#1359](https://github.com/ruby-grape/grape/pull/1359): Avoid evaluating the same route twice - [@namusyaka](https://github.com/namusyaka), [@dblock](https://github.com/dblock).
 
 0.16.1 (4/3/2016)
 =================
