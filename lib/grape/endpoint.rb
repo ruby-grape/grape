@@ -231,7 +231,7 @@ module Grape
 
         run_filters before_validations, :before_validation
 
-        run_validators validations, request unless @method_not_allowed
+        run_validators validations, request unless env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED]
 
         run_filters after_validations, :after_validation
 

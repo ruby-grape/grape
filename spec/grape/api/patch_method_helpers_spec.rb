@@ -41,6 +41,23 @@ describe Grape::API::Helpers do
     PatchHelpersSpec::Main
   end
 
+  context 'patch' do
+    it 'public' do
+      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-public-v1+json'
+      expect(last_response.status).to eq 405
+    end
+
+    it 'private' do
+      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-private-v1+json'
+      expect(last_response.status).to eq 405
+    end
+
+    it 'default' do
+      patch '/'
+      expect(last_response.status).to eq 405
+    end
+  end
+
   context 'default' do
     it 'public' do
       get '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-public-v1+json'
@@ -58,23 +75,6 @@ describe Grape::API::Helpers do
       get '/'
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq({ ok: 'public' }.to_json)
-    end
-  end
-
-  context 'patch' do
-    it 'public' do
-      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-public-v1+json'
-      expect(last_response.status).to eq 405
-    end
-
-    it 'private' do
-      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-private-v1+json'
-      expect(last_response.status).to eq 405
-    end
-
-    it 'default' do
-      patch '/'
-      expect(last_response.status).to eq 405
     end
   end
 end
