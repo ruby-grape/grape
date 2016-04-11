@@ -124,6 +124,8 @@ module Grape
     def method_not_allowed(env, methods, endpoint)
       current = endpoint.dup
       current.instance_eval do
+        namespace_inheritable_to_nil(:version)
+        @lazy_initialized = false
         run_filters befores, :before
         @method_not_allowed = true
         @block = proc do
