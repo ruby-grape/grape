@@ -1,11 +1,10 @@
-0.16.2 (Next)
-============
+0.16.2 (4/12/2016)
+==================
 
 #### Features
 
 * [#1348](https://github.com/ruby-grape/grape/pull/1348): Fix global functions polluting Grape::API scope - [@dblock](https://github.com/dblock).
 * [#1357](https://github.com/ruby-grape/grape/pull/1357): Expose Route#options - [@namusyaka](https://github.com/namusyaka).
-* Your contribution here.
 
 #### Fixes
 
