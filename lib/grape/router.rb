@@ -125,10 +125,12 @@ module Grape
     end
 
     def method_not_allowed(env, methods, endpoint)
+      env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED] = true
       current = endpoint.dup
       current.instance_eval do
+        @lazy_initialized = false
+        lazy_initialize!
         run_filters befores, :before
-        @method_not_allowed = true
         @block = proc do
           fail Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => methods)
         end

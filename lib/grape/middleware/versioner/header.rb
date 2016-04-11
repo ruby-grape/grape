@@ -32,7 +32,7 @@ module Grape
         def before
           strict_header_checks if strict?
 
-          if media_type
+          if media_type || env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED]
             media_type_header_handler
           elsif headers_contain_wrong_vendor?
             fail_with_invalid_accept_header!('API vendor not found.')
