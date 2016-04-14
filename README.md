@@ -95,7 +95,7 @@
 
 ## What is Grape?
 
-Grape is a REST-like API micro-framework for Ruby. It's designed to run on Rack
+Grape is a REST-like API framework for Ruby. It's designed to run on Rack
 or complement existing web application frameworks such as Rails and Sinatra by
 providing a simple DSL to easily develop RESTful APIs. It has built-in support
 for common conventions, including multiple formats, subdomain/prefix restriction,
