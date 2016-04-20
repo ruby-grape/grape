@@ -1593,13 +1593,23 @@ XML
         def rescue_arg_error
           error!('500 ArgumentError', 500)
         end
+
+        def rescue_no_method_error
+          error!('500 NoMethodError', 500)
+        end
       end
       subject.rescue_from ArgumentError, with: :rescue_arg_error
-      subject.get('/rescue_method') { fail ArgumentError }
+      subject.rescue_from NoMethodError, with: :rescue_no_method_error
+      subject.get('/rescue_arg_error') { fail ArgumentError }
+      subject.get('/rescue_no_method_error') { fail NoMethodError }
 
-      get '/rescue_method'
+      get '/rescue_arg_error'
       expect(last_response.status).to eq(500)
       expect(last_response.body).to eq('500 ArgumentError')
+
+      get '/rescue_no_method_error'
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('500 NoMethodError')
     end
 
     it 'aborts if the specified method name does not exist' do
@@ -1607,6 +1617,31 @@ XML
       subject.get('/rescue_method') { fail StandardError }
 
       expect { get '/rescue_method' }.to raise_error(NoMethodError, 'undefined method `not_exist_method\'')
+    end
+
+    it 'correctly chooses exception handler if :all handler is specified' do
+      subject.helpers do
+        def rescue_arg_error
+          error!('500 ArgumentError', 500)
+        end
+
+        def rescue_all_errors
+          error!('500 AnotherError', 500)
+        end
+      end
+
+      subject.rescue_from ArgumentError, with: :rescue_arg_error
+      subject.rescue_from :all, with: :rescue_all_errors
+      subject.get('/argument_error') { fail ArgumentError }
+      subject.get('/another_error') { fail NoMethodError }
+
+      get '/argument_error'
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('500 ArgumentError')
+
+      get '/another_error'
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('500 AnotherError')
     end
   end
 

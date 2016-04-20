@@ -4,7 +4,12 @@
 * Your contribution here.
 
 #### Features
+
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
+
+#### Fixes
+
+* [#1365](https://github.com/ruby-grape/grape/pull/1365): Fix finding exception handler in error middleware - [@ktimothy](https://github.com/ktimothy).
 
 0.16.2 (4/12/2016)
 ==================

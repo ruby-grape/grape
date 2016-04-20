@@ -157,9 +157,9 @@ module Grape
 
         def extract_with(options)
           return unless options.key?(:with)
-          with_option = options[:with]
+          with_option = options.delete(:with)
           return with_option if with_option.instance_of?(Proc)
-          return if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
+          return with_option.to_sym if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
           fail ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
         end
       end
