@@ -173,7 +173,7 @@ module Grape
           it 'sets a rescue handler declared through :with option for each key in hash' do
             with_block = -> { 'hello' }
             expect(subject).to receive(:namespace_stackable).with(:rescue_handlers, StandardError => an_instance_of(Proc))
-            expect(subject).to receive(:namespace_stackable).with(:rescue_options, with: with_block)
+            expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
             subject.rescue_from StandardError, with: with_block
           end
         end
