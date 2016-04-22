@@ -9,8 +9,10 @@ module Grape
       def initialize(args = {})
         fail 'Params are missing:' unless args.key? :params
         @params = args[:params]
-        @message_key = args[:message] if args.key?(:message) && args[:message].is_a?(Symbol)
-        args[:message] = translate_message(args[:message]) if args.key? :message
+        if args.key?(:message)
+          @message_key = args[:message] if args[:message].is_a?(Symbol)
+          args[:message] = translate_message(args[:message])
+        end
         super
       end
 

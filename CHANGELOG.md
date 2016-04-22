@@ -4,7 +4,7 @@
 * Your contribution here.
 
 #### Features
-* [#1366](https://github.com/ruby-grape/grape/pull/1366): Store back `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
+* [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
 
 0.16.2 (4/12/2016)
 ==================
