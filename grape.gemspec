@@ -39,4 +39,5 @@ Gem::Specification.new do |s|
   s.files         = Dir['**/*'].keep_if { |file| File.file?(file) }
   s.test_files    = Dir['spec/**/*']
   s.require_paths = ['lib']
+  s.required_ruby_version = '~> 2'
 end

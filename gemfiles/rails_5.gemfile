@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "rack", "1.5.2"
+gem "rails", "~> 5.x"
 
 group :development, :test do
   gem "guard"
