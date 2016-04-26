@@ -12,7 +12,7 @@ module Grape
       extend Forwardable
       def_delegators :pattern, :named_captures, :params
       def_delegators :@regexp, :===
-      alias_method :match?, :===
+      alias match? ===
 
       def initialize(pattern, options = {})
         @origin  = pattern
@@ -30,7 +30,7 @@ module Grape
 
       def pattern_options
         options = DEFAULT_PATTERN_OPTIONS.dup
-        options.merge!(capture: capture) if capture.present?
+        options[:capture] = capture if capture.present?
         options
       end
 

@@ -25,7 +25,7 @@ task default: [:rubocop, :spec]
 
 begin
   require 'yard'
-  DOC_FILES = ['lib/**/*.rb', 'README.md']
+  DOC_FILES = ['lib/**/*.rb', 'README.md'].freeze
 
   YARD::Rake::YardocTask.new(:doc) do |t|
     t.files = DOC_FILES

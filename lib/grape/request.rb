@@ -2,7 +2,7 @@ module Grape
   class Request < Rack::Request
     HTTP_PREFIX = 'HTTP_'.freeze
 
-    alias_method :rack_params, :params
+    alias rack_params params
 
     def params
       @params ||= build_params

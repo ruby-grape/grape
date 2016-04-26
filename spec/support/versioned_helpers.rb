@@ -13,7 +13,7 @@ def versioned_path(options = {})
   when :accept_version_header
     File.join('/', options[:prefix] || '', options[:path])
   else
-    fail ArgumentError.new("unknown versioning strategy: #{options[:using]}")
+    raise ArgumentError.new("unknown versioning strategy: #{options[:using]}")
   end
 end
 
@@ -32,10 +32,10 @@ def versioned_headers(options)
     }
   when :accept_version_header
     {
-      'HTTP_ACCEPT_VERSION' => "#{options[:version]}"
+      'HTTP_ACCEPT_VERSION' => options[:version].to_s
     }
   else
-    fail ArgumentError.new("unknown versioning strategy: #{options[:using]}")
+    raise ArgumentError.new("unknown versioning strategy: #{options[:using]}")
   end
 end
 

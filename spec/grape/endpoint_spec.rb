@@ -577,7 +577,7 @@ describe Grape::Endpoint do
               params[:person_email]
             end
 
-            namespace :inner, requirements: { number: /[0-9]/, person_email: /someone@(.*).com/ }do
+            namespace :inner, requirements: { number: /[0-9]/, person_email: /someone@(.*).com/ } do
               get '/:person_email/test/:number' do
                 params[:person_email] << params[:number]
               end

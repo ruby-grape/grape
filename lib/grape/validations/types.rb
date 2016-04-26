@@ -45,14 +45,14 @@ module Grape
         String,
         Symbol,
         Rack::Multipart::UploadedFile
-      ]
+      ].freeze
 
       # Types representing data structures.
       STRUCTURES = [
         Hash,
         Array,
         Set
-      ]
+      ].freeze
 
       # Types for which Grape provides special coercion
       # and type-checking logic.
@@ -61,14 +61,14 @@ module Grape
         Array[JSON] => JsonArray,
         ::File => File,
         Rack::Multipart::UploadedFile => File
-      }
+      }.freeze
 
       GROUPS = [
         Array,
         Hash,
         JSON,
         Array[JSON]
-      ]
+      ].freeze
 
       # Is the given class a primitive type as recognized by Grape?
       #

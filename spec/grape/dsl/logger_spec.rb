@@ -18,7 +18,7 @@ module Grape
         end
 
         it 'returns a logger' do
-          expect(subject.logger logger).to eq logger
+          expect(subject.logger(logger)).to eq logger
         end
       end
     end

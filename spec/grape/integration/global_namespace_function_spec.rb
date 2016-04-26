@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 def namespace
-  fail
+  raise
 end
 
 describe Grape::API do

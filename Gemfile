@@ -7,7 +7,7 @@ gemspec
 group :development, :test do
   gem 'bundler'
   gem 'rake'
-  gem 'rubocop', '0.35.1'
+  gem 'rubocop', '0.39.0'
 end
 
 group :development do

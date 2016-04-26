@@ -23,7 +23,7 @@ module Grape
             namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter.formatter_for(new_format, {}))
             # define a single mime type
             mime_type = content_types[new_format.to_sym]
-            fail Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
+            raise Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
             namespace_stackable(:content_types, new_format.to_sym => mime_type)
           else
             namespace_inheritable(:format)
@@ -51,11 +51,11 @@ module Grape
         end
 
         def error_formatter(format, options)
-          if options.is_a?(Hash) && options.key?(:with)
-            formatter = options[:with]
-          else
-            formatter = options
-          end
+          formatter = if options.is_a?(Hash) && options.key?(:with)
+                        options[:with]
+                      else
+                        options
+                      end
 
           namespace_stackable(:error_formatters, format.to_sym => formatter)
         end
@@ -106,7 +106,7 @@ module Grape
 
           options = args.extract_options!
           if block_given? && options.key?(:with)
-            fail ArgumentError, 'both :with option and block cannot be passed'
+            raise ArgumentError, 'both :with option and block cannot be passed'
           end
           handler ||= extract_with(options)
 
@@ -115,12 +115,12 @@ module Grape
             namespace_inheritable :all_rescue_handler, handler
           else
             handler_type =
-                case options[:rescue_subclasses]
-                when nil, true
-                  :rescue_handlers
-                else
-                  :base_only_rescue_handlers
-                end
+              case options[:rescue_subclasses]
+              when nil, true
+                :rescue_handlers
+              else
+                :base_only_rescue_handlers
+              end
 
             namespace_stackable handler_type, Hash[args.map { |arg| [arg, handler] }]
           end
@@ -149,7 +149,7 @@ module Grape
         # @param model_class [Class] The model class that will be represented.
         # @option options [Class] :with The entity class that will represent the model.
         def represent(model_class, options)
-          fail Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
+          raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
           namespace_stackable(:representations, model_class => options[:with])
         end
 
@@ -160,7 +160,7 @@ module Grape
           with_option = options.delete(:with)
           return with_option if with_option.instance_of?(Proc)
           return with_option.to_sym if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
-          fail ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
+          raise ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
         end
       end
     end

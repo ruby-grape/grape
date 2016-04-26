@@ -54,7 +54,7 @@ module Grape
       # @raise [NameError] an instance method with the same name already exists
       def generate_api_method(method_name, &block)
         if instance_methods.include?(method_name.to_sym) || instance_methods.include?(method_name.to_s)
-          fail NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
+          raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
         end
 
         define_method(method_name, &block)
@@ -98,7 +98,7 @@ module Grape
     end
 
     def require_option(options, key)
-      fail Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
+      raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
     end
 
     def method_name
@@ -171,7 +171,7 @@ module Grape
 
     def prepare_version
       version = namespace_inheritable(:version) || []
-      return if version.length == 0
+      return if version.empty?
       version.length == 1 ? version.first.to_s : version
     end
 
@@ -326,7 +326,7 @@ module Grape
         end
       end
 
-      validation_errors.any? && fail(Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header)
+      validation_errors.any? && raise(Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header)
     end
 
     def run_filters(filters, type = :other)

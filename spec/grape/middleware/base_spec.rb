@@ -30,7 +30,7 @@ describe Grape::Middleware::Base do
   end
 
   context 'callbacks on error' do
-    let(:blank_app) { ->(_) { fail StandardError } }
+    let(:blank_app) { ->(_) { raise StandardError } }
 
     it 'calls #after' do
       expect(subject).to receive(:after)

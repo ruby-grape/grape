@@ -87,12 +87,12 @@ module Grape
         end
 
         def fail_with_invalid_accept_header!(message)
-          fail Grape::Exceptions::InvalidAcceptHeader
+          raise Grape::Exceptions::InvalidAcceptHeader
             .new(message, error_headers)
         end
 
         def fail_with_invalid_version_header!(message)
-          fail Grape::Exceptions::InvalidVersionHeader
+          raise Grape::Exceptions::InvalidVersionHeader
             .new(message, error_headers)
         end
 

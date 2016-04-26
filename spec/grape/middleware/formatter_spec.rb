@@ -17,7 +17,7 @@ describe Grape::Middleware::Formatter do
       @body = ['foo']
       @body.instance_eval do
         def to_json
-          "\"bar\""
+          '"bar"'
         end
       end
 
@@ -28,7 +28,7 @@ describe Grape::Middleware::Formatter do
       @body = { 'foos' => [{ 'bar' => 'baz' }] }
       @body.instance_eval do
         def to_json
-          "{\"foos\":[{\"bar\":\"baz\"}] }"
+          '{"foos":[{"bar":"baz"}] }'
         end
       end
 
@@ -54,7 +54,7 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'rescues formatter-specific exceptions' do
-      allow(formatter).to receive(:call) { fail Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
+      allow(formatter).to receive(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
 
       expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
@@ -62,7 +62,7 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'does not rescue other exceptions' do
-      allow(formatter).to receive(:call) { fail StandardError }
+      allow(formatter).to receive(:call) { raise StandardError }
 
       expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }

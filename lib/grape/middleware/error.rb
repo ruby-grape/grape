@@ -47,11 +47,8 @@ module Grape
         handler ||= options[:all_rescue_handler]
 
         if handler.instance_of?(Symbol)
-          if respond_to?(handler)
-            handler = self.class.instance_method(handler).bind(self)
-          else
-            fail NoMethodError, "undefined method `#{handler}'"
-          end
+          raise NoMethodError, "undefined method `#{handler}'" unless respond_to?(handler)
+          handler = self.class.instance_method(handler).bind(self)
         end
 
         handler

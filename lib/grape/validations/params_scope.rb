@@ -111,7 +111,7 @@ module Grape
         end
         required_fields.each do |field|
           field_opts = opts[:using][field]
-          fail ArgumentError, "required field not exist: #{field}" unless field_opts
+          raise ArgumentError, "required field not exist: #{field}" unless field_opts
           requires(field, field_opts)
         end
         optional_fields.each do |field|
@@ -146,8 +146,8 @@ module Grape
         # if required params are grouped and no type or unsupported type is provided, raise an error
         type = attrs[1] ? attrs[1][:type] : nil
         if attrs.first && !optional
-          fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
+          raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
+          raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
 
         opts = attrs[1] || { type: Array }
@@ -204,7 +204,7 @@ module Grape
         default = validations[:default]
         doc_attrs[:default] = default if validations.key?(:default)
 
-        values = (options_key?(:values, :value, validations)) ? validations[:values][:value] : validations[:values]
+        values = options_key?(:values, :value, validations) ? validations[:values][:value] : validations[:values]
         doc_attrs[:values] = values if values
 
         coerce_type = guess_coerce_type(coerce_type, values)
@@ -252,7 +252,7 @@ module Grape
       # @raise [ArgumentError] if the given type options are invalid
       def infer_coercion(validations)
         if validations.key?(:type) && validations.key?(:types)
-          fail ArgumentError, ':type may not be supplied with :types'
+          raise ArgumentError, ':type may not be supplied with :types'
         end
 
         validations[:coerce] = (options_key?(:type, :value, validations) ? validations[:type][:value] : validations[:type]) if validations.key?(:type)
@@ -284,12 +284,12 @@ module Grape
       def check_coerce_with(validations)
         return unless validations.key?(:coerce_with)
         # type must be supplied for coerce_with..
-        fail ArgumentError, 'must supply type for coerce_with' unless validations.key?(:coerce)
+        raise ArgumentError, 'must supply type for coerce_with' unless validations.key?(:coerce)
 
         # but not special JSON types, which
         # already imply coercion method
         return unless [JSON, Array[JSON]].include? validations[:coerce]
-        fail ArgumentError, 'coerce_with disallowed for type: JSON'
+        raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
 
       # Add type coercion validation to this scope,
@@ -324,18 +324,16 @@ module Grape
         return unless values && default
         return if values.is_a?(Proc) || default.is_a?(Proc)
         return if values.include?(default) || (Array(default) - Array(values)).empty?
-        fail Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
       end
 
       def validate(type, options, attrs, doc_attrs)
         validator_class = Validations.validators[type.to_s]
 
-        if validator_class
-          value = validator_class.new(attrs, options, doc_attrs[:required], self)
-          @api.namespace_stackable(:validations, value)
-        else
-          fail Grape::Exceptions::UnknownValidator.new(type)
-        end
+        raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
+
+        value = validator_class.new(attrs, options, doc_attrs[:required], self)
+        @api.namespace_stackable(:validations, value)
       end
 
       def validate_value_coercion(coerce_type, values)
@@ -347,7 +345,7 @@ module Grape
           value_types = value_types.map { |type| Virtus::Attribute.build(type) }
         end
         return unless value_types.any? { |v| !v.is_a?(coerce_type) }
-        fail Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
       end
 
       def extract_message_option(attrs)
