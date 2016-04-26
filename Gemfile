@@ -1,4 +1,4 @@
-# when changing this file, run appraisal install ; rubocop -a gemfiles/*
+# when changing this file, run appraisal install ; rubocop -a gemfiles/*.gemfile
 
 source 'https://rubygems.org'
 
@@ -17,6 +17,7 @@ group :development do
   gem 'yard'
   gem 'appraisal'
   gem 'benchmark-ips'
+  gem 'redcarpet'
 end
 
 group :test do
