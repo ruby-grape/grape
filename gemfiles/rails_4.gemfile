@@ -5,9 +5,28 @@ source 'https://rubygems.org'
 gem 'rails', '4.1.6'
 
 group :development, :test do
+  gem 'bundler'
+  gem 'rake'
+  gem 'rubocop', '0.35.1'
+end
+
+group :development do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
+  gem 'yard'
+  gem 'appraisal'
+  gem 'benchmark-ips'
+end
+
+group :test do
+  gem 'grape-entity', '0.5.0'
+  gem 'maruku'
+  gem 'rack-test'
+  gem 'rspec', '~> 3.0'
+  gem 'cookiejar'
+  gem 'rack-contrib'
+  gem 'mime-types', '< 3.0'
 end
 
 gemspec path: '../'

@@ -22,20 +22,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'virtus', '>= 1.0.0'
   s.add_runtime_dependency 'builder'
 
-  s.add_development_dependency 'grape-entity', '0.5.0'
-  s.add_development_dependency 'rake', '~> 10'
-  s.add_development_dependency 'maruku'
-  s.add_development_dependency 'yard'
-  s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'bundler'
-  s.add_development_dependency 'cookiejar'
-  s.add_development_dependency 'rack-contrib'
-  s.add_development_dependency 'mime-types', '< 3.0'
-  s.add_development_dependency 'appraisal'
-  s.add_development_dependency 'benchmark-ips'
-  s.add_development_dependency 'rubocop', '0.35.1'
-
   s.files         = Dir['**/*'].keep_if { |file| File.file?(file) }
   s.test_files    = Dir['spec/**/*']
   s.require_paths = ['lib']
