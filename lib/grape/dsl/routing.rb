@@ -31,7 +31,7 @@ module Grape
             options = args.extract_options!
             options = options.reverse_merge(using: :path)
 
-            fail Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
+            raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
             @versions = versions | args
 
@@ -121,9 +121,9 @@ module Grape
             method: methods,
             path: paths,
             for: self,
-            route_options: ({
+            route_options: {
               params: namespace_stackable_with_hash(:params) || {}
-            }).deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
+            }.deep_merge(route_setting(:description) || {}).deep_merge(route_options || {})
           }
 
           new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
@@ -170,10 +170,10 @@ module Grape
           end
         end
 
-        alias_method :group, :namespace
-        alias_method :resource, :namespace
-        alias_method :resources, :namespace
-        alias_method :segment, :namespace
+        alias group namespace
+        alias resource namespace
+        alias resources namespace
+        alias segment namespace
 
         # An array of API routes.
         def routes

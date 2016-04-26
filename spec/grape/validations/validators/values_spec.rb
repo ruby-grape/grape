@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Grape::Validations::ValuesValidator do
   module ValidationsSpec
     class ValuesModel
-      DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3']
+      DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3'].freeze
       class << self
         def values
           @values ||= []

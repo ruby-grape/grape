@@ -2316,7 +2316,7 @@ module API
       expose :text, documentation: { type: 'string', desc: 'Status update text.' }
       expose :ip, if: { type: :full }
       expose :user_type, :user_id, if: ->(status, options) { status.user.public? }
-      expose :digest do |status, options| 
+      expose :digest do |status, options|
         Digest::MD5.hexdigest(status.txt)
       end
       expose :replies, using: API::Status, as: :replies

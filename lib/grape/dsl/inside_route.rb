@@ -31,7 +31,7 @@ module Grape
 
           declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
 
-          fail ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
+          raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
 
           if params.is_a? Array
             params.map do |param|
@@ -70,7 +70,7 @@ module Grape
       # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
       # you want only to return params declared against the current/target endpoint.
       def declared(*)
-        fail MethodNotYetAvailable, '#declared is not available prior to parameter validation.'
+        raise MethodNotYetAvailable, '#declared is not available prior to parameter validation.'
       end
 
       # The API version as specified in the URL.
@@ -100,14 +100,12 @@ module Grape
         if permanent
           status 301
           body_message ||= "This resource has been moved permanently to #{url}."
+        elsif env[Grape::Http::Headers::HTTP_VERSION] == 'HTTP/1.1' && request.request_method.to_s.upcase != Grape::Http::Headers::GET
+          status 303
+          body_message ||= "An alternate resource is located at #{url}."
         else
-          if env[Grape::Http::Headers::HTTP_VERSION] == 'HTTP/1.1' && request.request_method.to_s.upcase != Grape::Http::Headers::GET
-            status 303
-            body_message ||= "An alternate resource is located at #{url}."
-          else
-            status 302
-            body_message ||= "This resource has been moved temporarily to #{url}."
-          end
+          status 302
+          body_message ||= "This resource has been moved temporarily to #{url}."
         end
         header 'Location', url
         content_type 'text/plain'
@@ -120,11 +118,8 @@ module Grape
       def status(status = nil)
         case status
         when Symbol
-          if Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
-            @status = Rack::Utils.status_code(status)
-          else
-            fail ArgumentError, "Status code :#{status} is invalid."
-          end
+          raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
+          @status = Rack::Utils.status_code(status)
         when Fixnum
           @status = status
         when nil
@@ -136,7 +131,7 @@ module Grape
             200
           end
         else
-          fail ArgumentError, 'Status code must be Fixnum or Symbol.'
+          raise ArgumentError, 'Status code must be Fixnum or Symbol.'
         end
       end
 
@@ -260,7 +255,7 @@ module Grape
         if key
           representation = (@body || {}).merge(key => representation)
         elsif entity_class.present? && @body
-          fail ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
+          raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
           representation = @body.merge(representation)
         end
 

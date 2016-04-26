@@ -74,7 +74,7 @@ module Grape
         return unless
           (request.post? || request.put? || request.patch? || request.delete?) &&
           (!request.form_data? || !request.media_type) &&
-          (!request.parseable_data?) &&
+          !request.parseable_data? &&
           (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
         return unless (input = env[Grape::Env::RACK_INPUT])
@@ -82,7 +82,7 @@ module Grape
         input.rewind
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
-          read_rack_input(body) if body && body.length > 0
+          read_rack_input(body) if body && !body.empty?
         ensure
           input.rewind
         end
@@ -98,11 +98,11 @@ module Grape
             begin
               body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
               if body.is_a?(Hash)
-                if env[Grape::Env::RACK_REQUEST_FORM_HASH]
-                  env[Grape::Env::RACK_REQUEST_FORM_HASH] = env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
-                else
-                  env[Grape::Env::RACK_REQUEST_FORM_HASH] = body
-                end
+                env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env[Grape::Env::RACK_REQUEST_FORM_HASH]
+                                                            env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
+                                                          else
+                                                            body
+                                                          end
                 env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
               end
             rescue Grape::Exceptions::Base => e
@@ -168,8 +168,8 @@ module Grape
         vendor_prefix_pattern = /vnd\.[^+]+\+/
 
         accept.scan(accept_into_mime_and_quality)
-          .sort_by { |_, quality_preference| -quality_preference.to_f }
-          .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
+              .sort_by { |_, quality_preference| -quality_preference.to_f }
+              .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
       end
     end
   end

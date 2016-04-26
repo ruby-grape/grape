@@ -95,7 +95,7 @@ describe Grape::Validations::ParamsScope do
         attr_reader :value
 
         def self.parse(value)
-          fail if value == 'invalid'
+          raise if value == 'invalid'
           new(value)
         end
 

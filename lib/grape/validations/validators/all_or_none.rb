@@ -5,7 +5,7 @@ module Grape
       def validate!(params)
         super
         if scope_requires_params && only_subset_present
-          fail Grape::Exceptions::Validation, params: all_keys, message: message(:all_or_none)
+          raise Grape::Exceptions::Validation, params: all_keys, message: message(:all_or_none)
         end
         params
       end
@@ -13,7 +13,7 @@ module Grape
       private
 
       def only_subset_present
-        scoped_params.any? { |resource_params| keys_in_common(resource_params).length > 0 && keys_in_common(resource_params).length < attrs.length }
+        scoped_params.any? { |resource_params| !keys_in_common(resource_params).empty? && keys_in_common(resource_params).length < attrs.length }
       end
     end
   end

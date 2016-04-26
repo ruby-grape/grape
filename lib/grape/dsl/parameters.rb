@@ -34,13 +34,13 @@ module Grape
         options = names.extract_options!
         names.each do |name|
           params_block = named_params.fetch(name) do
-            fail "Params :#{name} not found!"
+            raise "Params :#{name} not found!"
           end
           instance_exec(options, &params_block)
         end
       end
-      alias_method :use_scope, :use
-      alias_method :includes, :use
+      alias use_scope use
+      alias includes use
 
       # Require one or more parameters for the current endpoint.
       #
@@ -121,8 +121,8 @@ module Grape
 
         # check type for optional parameter group
         if attrs && block_given?
-          fail Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          fail Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
+          raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
+          raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
 
         if opts[:using]
@@ -167,7 +167,7 @@ module Grape
       # @yield a parameter definition DSL
       def given(*attrs, &block)
         attrs.each do |attr|
-          fail Grape::Exceptions::UnknownParameter.new(attr) unless declared_param?(attr)
+          raise Grape::Exceptions::UnknownParameter.new(attr) unless declared_param?(attr)
         end
         new_lateral_scope(dependent_on: attrs, &block)
       end
@@ -181,7 +181,7 @@ module Grape
         @declared_params.flatten.include?(param)
       end
 
-      alias_method :group, :requires
+      alias group requires
 
       # @param params [Hash] initial hash of parameters
       # @return hash of parameters relevant for the current scope
@@ -189,13 +189,13 @@ module Grape
       def params(params)
         params = @parent.params(params) if @parent
         if @element
-          if params.is_a?(Array)
-            params = params.flat_map { |el| el[@element] || {} }
-          elsif params.is_a?(Hash)
-            params = params[@element] || {}
-          else
-            params = {}
-          end
+          params = if params.is_a?(Array)
+                     params.flat_map { |el| el[@element] || {} }
+                   elsif params.is_a?(Hash)
+                     params[@element] || {}
+                   else
+                     {}
+                   end
         end
         params
       end

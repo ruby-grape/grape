@@ -5,7 +5,7 @@ module Grape
       def validate!(params)
         super
         if scope_requires_params && no_exclusive_params_are_present
-          fail Grape::Exceptions::Validation, params: all_keys, message: message(:at_least_one)
+          raise Grape::Exceptions::Validation, params: all_keys, message: message(:at_least_one)
         end
         params
       end

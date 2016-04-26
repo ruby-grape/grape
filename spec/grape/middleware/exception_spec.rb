@@ -6,7 +6,7 @@ describe Grape::Middleware::Error do
     class ExceptionApp
       class << self
         def call(_env)
-          fail 'rain!'
+          raise 'rain!'
         end
       end
     end
@@ -44,7 +44,7 @@ describe Grape::Middleware::Error do
     class CustomErrorApp
       class << self
         def call(_env)
-          fail CustomError, status: 400, message: 'failed validation'
+          raise CustomError, status: 400, message: 'failed validation'
         end
       end
     end

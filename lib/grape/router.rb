@@ -132,7 +132,7 @@ module Grape
         lazy_initialize!
         run_filters befores, :before
         @block = proc do
-          fail Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => methods)
+          raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => methods)
         end
       end
       current.call(env)

@@ -20,7 +20,7 @@ module Grape
       end
 
       def []=(name, value)
-        fail if @froozen_values.key? name
+        raise if @froozen_values.key? name
         @new_values[name] ||= []
         @new_values[name].push value
       end

@@ -24,7 +24,7 @@ module Grape
         when :accept_version_header
           AcceptVersionHeader
         else
-          fail Grape::Exceptions::InvalidVersionerOption.new(strategy)
+          raise Grape::Exceptions::InvalidVersionerOption.new(strategy)
         end
       end
     end

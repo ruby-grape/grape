@@ -10,7 +10,7 @@ module Grape
           @header ||= {}
         end
       end
-      alias_method :headers, :header
+      alias headers header
     end
   end
 end

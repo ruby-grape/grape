@@ -1,7 +1,7 @@
 module Grape
   module ContentTypes
     # Content types are listed in order of preference.
-    CONTENT_TYPES = {
+    CONTENT_TYPES = { # rubocop:disable Style/MutableConstant
       xml: 'application/xml',
       serializable_hash: 'application/json',
       json: 'application/json',

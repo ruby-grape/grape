@@ -258,7 +258,7 @@ describe Grape::API do
           end
         end
         get '/route_param/1234'
-        expect(last_response.body).to eq("{\"foo\":1234}")
+        expect(last_response.body).to eq('{"foo":1234}')
       end
     end
   end
@@ -1383,7 +1383,7 @@ XML
   describe '.rescue_from' do
     it 'does not rescue errors when rescue_from is not set' do
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       expect { get '/exception' }.to raise_error(RuntimeError, 'rain!')
     end
@@ -1396,7 +1396,7 @@ XML
       end
       subject.rescue_from(ArgumentError) { custom_error! :bob }
       subject.get '/custom_error' do
-        fail ArgumentError
+        raise ArgumentError
       end
       get '/custom_error'
       expect(last_response.body).to eq 'hello bob'
@@ -1405,7 +1405,7 @@ XML
     it 'rescues all errors if rescue_from :all is called' do
       subject.rescue_from :all
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.status).to eql 500
@@ -1417,7 +1417,7 @@ XML
       subject.default_format :json
       subject.rescue_from :all
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.status).to eql 500
@@ -1426,8 +1426,8 @@ XML
 
     it 'rescues only certain errors if rescue_from is called with specific errors' do
       subject.rescue_from ArgumentError
-      subject.get('/rescued') { fail ArgumentError }
-      subject.get('/unrescued') { fail 'beefcake' }
+      subject.get('/rescued') { raise ArgumentError }
+      subject.get('/unrescued') { raise 'beefcake' }
 
       get '/rescued'
       expect(last_response.status).to eql 500
@@ -1443,7 +1443,7 @@ XML
       end
 
       it 'does not re-raise exceptions of type Grape::Exceptions::Base' do
-        subject.get('/custom_exception') { fail ApiSpec::CustomError }
+        subject.get('/custom_exception') { raise ApiSpec::CustomError }
 
         expect { get '/custom_exception' }.not_to raise_error
       end
@@ -1453,7 +1453,7 @@ XML
           rack_response('New Error', e.status)
         end
         subject.get '/custom_error' do
-          fail ApiSpec::CustomError, status: 400, message: 'Custom Error'
+          raise ApiSpec::CustomError, status: 400, message: 'Custom Error'
         end
 
         get '/custom_error'
@@ -1464,7 +1464,7 @@ XML
 
     it 'can rescue exceptions raised in the formatter' do
       formatter = double(:formatter)
-      allow(formatter).to receive(:call) { fail StandardError }
+      allow(formatter).to receive(:call) { raise StandardError }
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
 
       subject.rescue_from :all do |_e|
@@ -1484,7 +1484,7 @@ XML
         rack_response("rescued from #{e.message}", 202)
       end
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.status).to eql 202
@@ -1503,7 +1503,7 @@ XML
           rack_response("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
-          fail ConnectionError
+          raise ConnectionError
         end
         get '/exception'
         expect(last_response.status).to eql 500
@@ -1514,7 +1514,7 @@ XML
           rack_response("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
-          fail ConnectionError
+          raise ConnectionError
         end
         get '/exception'
         expect(last_response.status).to eql 500
@@ -1525,7 +1525,7 @@ XML
           rack_response("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
-          fail ConnectionError
+          raise ConnectionError
         end
         get '/exception'
         expect(last_response.status).to eql 500
@@ -1539,10 +1539,10 @@ XML
           rack_response("rescued from #{e.class.name}", 500)
         end
         subject.get '/connection' do
-          fail ConnectionError
+          raise ConnectionError
         end
         subject.get '/database' do
-          fail DatabaseError
+          raise DatabaseError
         end
         get '/connection'
         expect(last_response.status).to eql 500
@@ -1556,7 +1556,7 @@ XML
           rack_response("rescued from #{e.class.name}", 500)
         end
         subject.get '/uncaught' do
-          fail CommunicationError
+          raise CommunicationError
         end
         expect { get '/uncaught' }.to raise_error(CommunicationError)
       end
@@ -1568,7 +1568,7 @@ XML
       subject.rescue_from ArgumentError, lambda {
         rack_response('rescued with a lambda', 400)
       }
-      subject.get('/rescue_lambda') { fail ArgumentError }
+      subject.get('/rescue_lambda') { raise ArgumentError }
 
       get '/rescue_lambda'
       expect(last_response.status).to eq(400)
@@ -1579,7 +1579,7 @@ XML
       subject.rescue_from ArgumentError, lambda { |e|
         rack_response(e.message, 400)
       }
-      subject.get('/rescue_lambda') { fail ArgumentError, 'lambda takes an argument' }
+      subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
 
       get '/rescue_lambda'
       expect(last_response.status).to eq(400)
@@ -1600,8 +1600,8 @@ XML
       end
       subject.rescue_from ArgumentError, with: :rescue_arg_error
       subject.rescue_from NoMethodError, with: :rescue_no_method_error
-      subject.get('/rescue_arg_error') { fail ArgumentError }
-      subject.get('/rescue_no_method_error') { fail NoMethodError }
+      subject.get('/rescue_arg_error') { raise ArgumentError }
+      subject.get('/rescue_no_method_error') { raise NoMethodError }
 
       get '/rescue_arg_error'
       expect(last_response.status).to eq(500)
@@ -1614,7 +1614,7 @@ XML
 
     it 'aborts if the specified method name does not exist' do
       subject.rescue_from :all, with: :not_exist_method
-      subject.get('/rescue_method') { fail StandardError }
+      subject.get('/rescue_method') { raise StandardError }
 
       expect { get '/rescue_method' }.to raise_error(NoMethodError, 'undefined method `not_exist_method\'')
     end
@@ -1632,8 +1632,8 @@ XML
 
       subject.rescue_from ArgumentError, with: :rescue_arg_error
       subject.rescue_from :all, with: :rescue_all_errors
-      subject.get('/argument_error') { fail ArgumentError }
-      subject.get('/another_error') { fail NoMethodError }
+      subject.get('/argument_error') { raise ArgumentError }
+      subject.get('/another_error') { raise NoMethodError }
 
       get '/argument_error'
       expect(last_response.status).to eq(500)
@@ -1660,13 +1660,13 @@ XML
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        fail ApiSpec::APIErrors::ChildError
+        raise ApiSpec::APIErrors::ChildError
       end
       subject.get '/caught_parent' do
-        fail ApiSpec::APIErrors::ParentError
+        raise ApiSpec::APIErrors::ParentError
       end
       subject.get '/uncaught_parent' do
-        fail StandardError
+        raise StandardError
       end
 
       get '/caught_child'
@@ -1681,7 +1681,7 @@ XML
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
-        fail ApiSpec::APIErrors::ChildError
+        raise ApiSpec::APIErrors::ChildError
       end
 
       get '/caught_child'
@@ -1693,7 +1693,7 @@ XML
         rack_response("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
-        fail ApiSpec::APIErrors::ChildError
+        raise ApiSpec::APIErrors::ChildError
       end
       expect { get '/uncaught' }.to raise_error(ApiSpec::APIErrors::ChildError)
     end
@@ -1704,7 +1704,7 @@ XML
       subject.rescue_from :all
       subject.format :txt
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.body).to eql 'rain!'
@@ -1714,7 +1714,7 @@ XML
       subject.rescue_from :all, backtrace: true
       subject.format :txt
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.body.start_with?("rain!\r\n")).to be true
@@ -1725,7 +1725,7 @@ XML
       subject.content_type :foo, 'text/foo'
       subject.rescue_from :all
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception.foo'
       expect(last_response.body).to start_with 'rain!'
@@ -1737,7 +1737,7 @@ XML
       subject.content_type :json, 'application/json'
       subject.content_type :foo, 'text/foo'
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception.json'
       expect(last_response.body).to eq('{"error":"rain!"}')
@@ -1759,7 +1759,7 @@ XML
         subject.rescue_from :all, backtrace: true
         subject.error_formatter :txt, ApiSpec::CustomErrorFormatter
         subject.get '/exception' do
-          fail 'rain!'
+          raise 'rain!'
         end
         get '/exception'
         expect(last_response.body).to eq('message: rain! @backtrace')
@@ -1781,7 +1781,7 @@ XML
         it 'returns a custom error format' do
           subject.rescue_from :all, backtrace: true
           subject.error_formatter :txt, with: ApiSpec::CustomErrorFormatter
-          subject.get('/exception') { fail 'rain!' }
+          subject.get('/exception') { raise 'rain!' }
 
           get '/exception'
           expect(last_response.body).to eq('message: rain! @backtrace')
@@ -1793,7 +1793,7 @@ XML
       subject.rescue_from :all
       subject.format :json
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.body).to eql '{"error":"rain!"}'
@@ -1802,7 +1802,7 @@ XML
       subject.rescue_from :all, backtrace: true
       subject.format :json
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       json = MultiJson.load(last_response.body)
@@ -2030,7 +2030,7 @@ XML
       subject.rescue_from :all
       subject.default_error_status 200
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.status).to eql 200
@@ -2038,7 +2038,7 @@ XML
     it 'has a default error status' do
       subject.rescue_from :all
       subject.get '/exception' do
-        fail 'rain!'
+        raise 'rain!'
       end
       get '/exception'
       expect(last_response.status).to eql 500
@@ -2604,7 +2604,7 @@ XML
 
         subject.namespace :mounted do
           app.rescue_from ArgumentError
-          app.get('/fail') { fail 'doh!' }
+          app.get('/fail') { raise 'doh!' }
           mount app
         end
 

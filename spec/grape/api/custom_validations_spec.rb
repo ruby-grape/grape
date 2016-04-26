@@ -8,7 +8,7 @@ describe Grape::Validations do
           def validate_param!(attr_name, params)
             @option = params[:max].to_i if params.key?(:max)
             return if params[attr_name].length <= @option
-            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+            raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
           end
         end
       end
@@ -87,7 +87,7 @@ describe Grape::Validations do
       module CustomValidationsSpec
         class WithMessageKey < Grape::Validations::PresenceValidator
           def validate_param!(attr_name, _params)
-            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: :presence
+            raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: :presence
           end
         end
       end
@@ -126,7 +126,7 @@ describe Grape::Validations do
             return unless @option
             # check if user is admin or not
             # as an example get a token from request and check if it's admin or not
-            fail Grape::Exceptions::Validation, params: @attrs, message: 'Can not set Admin only field.' unless request.headers['X-Access-Token'] == 'admin'
+            raise Grape::Exceptions::Validation, params: @attrs, message: 'Can not set Admin only field.' unless request.headers['X-Access-Token'] == 'admin'
           end
         end
       end

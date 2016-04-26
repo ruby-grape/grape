@@ -453,8 +453,8 @@ describe Grape::Validations::CoerceValidator do
         subject.get '/' do
           if params[:splines].is_a? Hash
             params[:splines][:obj][:y]
-          else
-            'arrays work' if params[:splines].any? { |s| s.key? :obj }
+          elsif params[:splines].any? { |s| s.key? :obj }
+            'arrays work'
           end
         end
 
@@ -488,8 +488,8 @@ describe Grape::Validations::CoerceValidator do
         subject.get '/' do
           if params[:splines].is_a? Hash
             params[:splines][:obj][:y]
-          else
-            'arrays work' if params[:splines].any? { |s| s.key? :obj }
+          elsif params[:splines].any? { |s| s.key? :obj }
+            'arrays work'
           end
         end
 
