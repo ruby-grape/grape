@@ -74,12 +74,6 @@ Style/DoubleNegation:
     - 'lib/grape/middleware/versioner/header.rb'
     - 'lib/grape/path.rb'
 
-# Offense count: 1
-# Configuration parameters: MinBodyLength.
-Style/GuardClause:
-  Exclude:
-    - 'lib/grape/endpoint.rb'
-
 # Offense count: 14
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 # SupportedStyles: compact, exploded

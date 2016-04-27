@@ -22,11 +22,8 @@ module Grape
       def before_each(new_setup = false, &block)
         @before_each ||= []
         if new_setup == false
-          if block_given?
-            @before_each << block
-          else
-            return @before_each
-          end
+          return @before_each unless block_given?
+          @before_each << block
         else
           @before_each = [new_setup]
         end
