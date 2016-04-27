@@ -11,6 +11,14 @@ module Grape
       end
     end
 
+    def self.normalize_path(path)
+      path = "/#{path}"
+      path.squeeze!('/')
+      path.sub!(%r{/+\Z}, '')
+      path = '/' if path == ''
+      path
+    end
+
     def initialize
       @neutral_map = []
       @map = Hash.new { |hash, key| hash[key] = [] }
@@ -148,14 +156,6 @@ module Grape
 
     def string_for(input)
       self.class.normalize_path(input)
-    end
-
-    def self.normalize_path(path)
-      path = "/#{path}"
-      path.squeeze!('/')
-      path.sub!(%r{/+\Z}, '')
-      path = '/' if path == ''
-      path
     end
   end
 end
