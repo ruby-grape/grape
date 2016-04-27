@@ -50,7 +50,7 @@ module Grape
         # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
           if options[:version_options] && options[:version_options].key?(:cascade)
-            !!options[:version_options][:cascade]
+            options[:version_options][:cascade]
           else
             true
           end

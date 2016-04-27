@@ -22,11 +22,19 @@ module Grape
     end
 
     def uses_specific_format?
-      !!(settings[:format] && Array(settings[:content_types]).size == 1)
+      if settings.key?(:format) && settings.key?(:content_types)
+        (settings[:format] && Array(settings[:content_types]).size == 1)
+      else
+        false
+      end
     end
 
     def uses_path_versioning?
-      !!(settings[:version] && settings[:version_options][:using] == :path)
+      if settings.key?(:version) && settings[:version_options] && settings[:version_options].key?(:using)
+        (settings[:version] && settings[:version_options][:using] == :path)
+      else
+        false
+      end
     end
 
     def namespace?
