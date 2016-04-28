@@ -263,13 +263,13 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   context 'when there are multiple versions with complex vendor specified with rescue_from :all' do
-    subject {
+    subject do
       Class.new(Grape::API) do
         rescue_from :all
       end
-    }
+    end
 
-    let(:v1_app) {
+    let(:v1_app) do
       Class.new(Grape::API) do
         version 'v1', using: :header, vendor: 'test.a-cool_resource', cascade: false, strict: true
         content_type :v1_test, 'application/vnd.test.a-cool_resource-v1+json'
@@ -282,9 +282,9 @@ describe Grape::Middleware::Versioner::Header do
           end
         end
       end
-    }
+    end
 
-    let(:v2_app) {
+    let(:v2_app) do
       Class.new(Grape::API) do
         version 'v2', using: :header, vendor: 'test.a-cool_resource', strict: true
         content_type :v2_test, 'application/vnd.test.a-cool_resource-v2+json'
@@ -297,7 +297,7 @@ describe Grape::Middleware::Versioner::Header do
           end
         end
       end
-    }
+    end
 
     def app
       subject.mount v2_app

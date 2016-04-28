@@ -43,20 +43,6 @@ Metrics/ModuleLength:
 Metrics/PerceivedComplexity:
   Max: 16
 
-# Offense count: 44
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, ProceduralMethods, FunctionalMethods, IgnoredMethods.
-# SupportedStyles: line_count_based, semantic, braces_for_chaining
-# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
-# FunctionalMethods: let, let!, subject, watch
-# IgnoredMethods: lambda, proc, it
-Style/BlockDelimiters:
-  Exclude:
-    - 'spec/grape/api_spec.rb'
-    - 'spec/grape/exceptions/validation_errors_spec.rb'
-    - 'spec/grape/middleware/versioner/header_spec.rb'
-    - 'spec/grape/request_spec.rb'
-
 # Offense count: 111
 Style/Documentation:
   Enabled: false
