@@ -20,7 +20,7 @@ module Grape
 
         return unless should_validate
 
-        return if value == false || value.present?
+        return if false == value || value.present?
 
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:blank)
       end
