@@ -6,11 +6,11 @@ describe Grape::Exceptions::ValidationErrors do
   let(:validation_error) { OpenStruct.new(params: [validation_message]) }
 
   context 'initialize' do
-    let(:headers) {
+    let(:headers) do
       {
         'A-Header-Key' => 'A-Header-Value'
       }
-    }
+    end
 
     subject do
       described_class.new(errors: [validation_error], headers: headers)

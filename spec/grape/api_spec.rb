@@ -2170,9 +2170,9 @@ XML
         expect(last_response.body).to eq('["a","b,c"]')
       end
       it 'sets params' do
-        expect(subject.routes.map { |route|
+        expect(subject.routes.map do |route|
           { params: route.params }
-        }).to eq [
+        end).to eq [
           {
             params: {
               'string' => '',
@@ -2200,9 +2200,9 @@ XML
         end
       end
       it 'sets params' do
-        expect(subject.routes.map { |route|
+        expect(subject.routes.map do |route|
           { params: route.params }
-        }).to eq [
+        end).to eq [
           {
             params: {
               'one' => { required: true, desc: 'a token' },
@@ -2231,9 +2231,9 @@ XML
         end
       end
       it 'sets params' do
-        expect(subject.routes.map { |route|
+        expect(subject.routes.map do |route|
           { params: route.params }
-        }).to eq [
+        end).to eq [
           {
             params: {
               'one' => { required: true, desc: 'a token' },
@@ -2285,7 +2285,7 @@ XML
     end
     it 'describes a method' do
       subject.desc 'first method'
-      subject.get :first do; end
+      subject.get :first
       expect(subject.routes.length).to eq(1)
       route = subject.routes.first
       expect(route.description).to eq('first method')
@@ -2295,31 +2295,31 @@ XML
     end
     it 'has params which does not include format and version as named captures' do
       subject.version :v1, using: :path
-      subject.get :first do; end
+      subject.get :first
       param_keys = subject.routes.first.params.keys
       expect(param_keys).not_to include('format')
       expect(param_keys).not_to include('version')
     end
     it 'describes methods separately' do
       subject.desc 'first method'
-      subject.get :first do; end
+      subject.get :first
       subject.desc 'second method'
-      subject.get :second do; end
+      subject.get :second
       expect(subject.routes.count).to eq(2)
-      expect(subject.routes.map { |route|
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'first method', params: {} },
         { description: 'second method', params: {} }
       ]
     end
     it 'resets desc' do
       subject.desc 'first method'
-      subject.get :first do; end
-      subject.get :second do; end
-      expect(subject.routes.map { |route|
+      subject.get :first
+      subject.get :second
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'first method', params: {} },
         { description: nil, params: {} }
       ]
@@ -2327,20 +2327,20 @@ XML
     it 'namespaces and describe arbitrary parameters' do
       subject.namespace 'ns' do
         desc 'ns second', foo: 'bar'
-        get 'second' do; end
+        get 'second'
       end
-      expect(subject.routes.map { |route|
+      expect(subject.routes.map do |route|
         { description: route.description, foo: route.route_foo, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'ns second', foo: 'bar', params: {} }
       ]
     end
     it 'includes details' do
       subject.desc 'method', details: 'method details'
-      subject.get 'method' do; end
-      expect(subject.routes.map { |route|
+      subject.get 'method'
+      expect(subject.routes.map do |route|
         { description: route.description, details: route.details, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'method', details: 'method details', params: {} }
       ]
     end
@@ -2349,9 +2349,9 @@ XML
       subject.get 'reverse' do
         params[:s].reverse
       end
-      expect(subject.routes.map { |route|
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } } }
       ]
     end
@@ -2362,17 +2362,17 @@ XML
         optional :param2
       end
       subject.namespace 'ns1' do
-        get do; end
+        get { ; }
       end
       subject.params do
         optional :param2
       end
       subject.namespace 'ns2' do
-        get do; end
+        get { ; }
       end
-      routes_doc = subject.routes.map { |route|
+      routes_doc = subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }
+      end
       expect(routes_doc).to eq [
         { description: 'global description',
           params: {
@@ -2397,12 +2397,12 @@ XML
         params do
           optional :method_param, desc: 'method parameter'
         end
-        get 'method' do; end
+        get 'method'
       end
 
-      routes_doc = subject.routes.map { |route|
+      routes_doc = subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }
+      end
       expect(routes_doc).to eq [
         { description: 'method',
           params: {
@@ -2429,12 +2429,12 @@ XML
           params do
             optional :method_param, desc: 'method param'
           end
-          get 'method' do; end
+          get 'method'
         end
       end
-      expect(subject.routes.map { |route|
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'method',
           params: {
             'ns_param' => { required: true, desc: 'ns param 2' },
@@ -2457,7 +2457,7 @@ XML
           requires :param2, desc: 'group2 param2 desc'
         end
       end
-      subject.get 'method' do; end
+      subject.get 'method'
 
       expect(subject.routes.map(&:params)).to eq [{
         'group1'         => { required: true, type: 'Array' },
@@ -2476,10 +2476,10 @@ XML
           requires :nested_param, desc: 'nested param'
         end
       end
-      subject.get 'method' do; end
-      expect(subject.routes.map { |route|
+      subject.get 'method'
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'nesting',
           params: {
             'root_param' => { required: true, desc: 'root param' },
@@ -2500,10 +2500,10 @@ XML
       subject.params do
         requires :one_param, desc: 'one param'
       end
-      subject.get 'method' do; end
-      expect(subject.routes.map { |route|
+      subject.get 'method'
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: nil, params: { 'one_param' => { required: true, desc: 'one param' } } }
       ]
     end
@@ -2512,9 +2512,9 @@ XML
       subject.get 'reverse/:s' do
         params[:s].reverse
       end
-      expect(subject.routes.map { |route|
+      expect(subject.routes.map do |route|
         { description: route.description, params: route.params }
-      }).to eq [
+      end).to eq [
         { description: 'Reverses a string.', params: { 's' => { desc: 'string to reverse', type: 'string' } } }
       ]
     end
