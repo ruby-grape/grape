@@ -488,6 +488,11 @@ describe Grape::Validations::AllowBlankValidator do
       get '/disallow_boolean_blank', val: false
       expect(last_response.status).to eq(200)
     end
+
+    it 'accepts value when time allow_blank' do
+      get '/disallow_datetime_blank', val: Time.now
+      expect(last_response.status).to eq(200)
+    end
   end
 
   context 'in an optional group' do
