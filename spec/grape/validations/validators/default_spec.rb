@@ -58,20 +58,22 @@ describe Grape::Validations::DefaultValidator do
           end
         end
         get '/optional_array' do
-          { thing1: params[:thing1], more_things: params[:more_things] }
+          { thing1: params[:thing1] }
         end
 
         params do
-          optional :some_things, type: Array do
-            requires :foo
-            optional :options, type: Array do
-              requires :name, type: String
-              requires :value, type: String
+          requires :root, type: Hash do
+            optional :some_things, type: Array do
+              requires :foo
+              optional :options, type: Array do
+                requires :name, type: String
+                requires :value, type: String
+              end
             end
           end
         end
         get '/nested_optional_array' do
-          { some_things: params[:some_things] }
+          { root: params[:root] }
         end
       end
     end
@@ -82,15 +84,21 @@ describe Grape::Validations::DefaultValidator do
   end
 
   it 'lets you leave required values nested inside an optional blank' do
-    get '/optional_array?thing1=stuff'
+    get '/optional_array', thing1: 'stuff'
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ thing1: 'stuff' }.to_json)
   end
 
   it 'allows optional arrays to be omitted' do
-    get '/nested_optional_array?some_things[][foo]=1&some_things[][foo]=2&some_things[][options][name]=wat&some_things[][options][value]=nope'
-    puts last_response.body
-    expect(last_response.body).to eq({ some_things: [{ foo: '1' }, { foo: 2, options: { name: 'wat', value: 'nope' } }] }.to_json)
+    params = { some_things:
+                [{ foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
+                 { foo: 'two' },
+                 { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }
+                ]
+             }
+    get '/nested_optional_array', root: params
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq({ root: params }.to_json)
   end
 
   it 'set default value for optional param' do
