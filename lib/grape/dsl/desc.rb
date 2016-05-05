@@ -51,7 +51,7 @@ module Grape
           end
           options = config_class.settings
         else
-          options = options.merge(description: description)
+          options = options.merge!(description: description)
         end
 
         namespace_setting :description, options

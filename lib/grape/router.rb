@@ -44,7 +44,7 @@ module Grape
 
     def associate_routes(pattern, options = {})
       regexp = /(?<_#{@neutral_map.length}>)#{pattern.to_regexp}/
-      @neutral_map << Any.new(pattern, options.merge(regexp: regexp, index: @neutral_map.length))
+      @neutral_map << Any.new(pattern, options.merge!(regexp: regexp, index: @neutral_map.length))
     end
 
     def call(env)
@@ -100,7 +100,7 @@ module Grape
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input))
+      args.merge!(route.params(input))
     end
 
     def extract_required_args(env)

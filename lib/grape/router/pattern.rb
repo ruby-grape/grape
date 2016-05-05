@@ -40,7 +40,7 @@ module Grape
       end
 
       def extract_capture(options = {})
-        requirements = {}.merge(options[:requirements])
+        requirements = {}.merge!(options[:requirements])
         supported_capture.each_with_object(requirements) do |field, capture|
           option = Array(options[field])
           capture[field] = option.map(&:to_s) if option.present?
