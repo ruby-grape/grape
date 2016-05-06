@@ -34,6 +34,16 @@ module Grape
         expect(request.params).to eq('a' => '123', 'b' => 'xyz')
       end
 
+      context 'when params are an array of hashes' do
+        let(:params) do
+          { a: [{ b: 'foo', c: 'bar' }, { d: 'baz', c: 'bar' }] }
+        end
+
+        it 'returns params' do
+          expect(request.params).to eq('a' => [{ 'b' => 'foo', 'c' => 'bar' }, { 'd' => 'baz', 'c' => 'bar' }])
+        end
+      end
+
       describe 'with grape.routing_args' do
         let(:options) do
           default_options.merge('grape.routing_args' => routing_args)
