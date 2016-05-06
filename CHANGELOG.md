@@ -11,6 +11,7 @@
 
 * [#1365](https://github.com/ruby-grape/grape/pull/1365): Fix finding exception handler in error middleware - [@ktimothy](https://github.com/ktimothy).
 * [#1380](https://github.com/ruby-grape/grape/pull/1380): Fix `allow_blank: false` for `Time` attributes with valid values causes `NoMethodError` - [@ipkes](https://github.com/ipkes).
+* [#1384](https://github.com/ruby-grape/grape/pull/1384): Fix parameter validation with an empty optional nested `Array` - [@ipkes](https://github.com/ipkes).
 
 0.16.2 (4/12/2016)
 ==================
