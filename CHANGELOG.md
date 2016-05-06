@@ -5,6 +5,7 @@
 
 #### Features
 
+* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
 
 #### Fixes

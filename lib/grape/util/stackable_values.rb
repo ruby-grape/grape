@@ -3,16 +3,16 @@ module Grape
     class StackableValues
       attr_accessor :inherited_values
       attr_reader :new_values
-      attr_reader :froozen_values
+      attr_reader :frozen_values
 
       def initialize(inherited_values = {})
         @inherited_values = inherited_values
         @new_values = {}
-        @froozen_values = {}
+        @frozen_values = {}
       end
 
       def [](name)
-        return @froozen_values[name] if @froozen_values.key? name
+        return @frozen_values[name] if @frozen_values.key? name
 
         value = []
         value.concat(@inherited_values[name]) if @inherited_values[name]
@@ -21,7 +21,7 @@ module Grape
       end
 
       def []=(name, value)
-        raise if @froozen_values.key? name
+        raise if @frozen_values.key? name
         @new_values[name] ||= []
         @new_values[name].push value
       end
@@ -43,7 +43,7 @@ module Grape
       end
 
       def freeze_value(key)
-        @froozen_values[key] = self[key].freeze
+        @frozen_values[key] = self[key].freeze
       end
 
       def initialize_copy(other)

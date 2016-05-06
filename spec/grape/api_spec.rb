@@ -1044,7 +1044,7 @@ XML
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
         subject.use ApiSpec::PhonyMiddleware, 'abc', 123
-        expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, 'abc', 123]]
+        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 'abc', 123]]
       end
 
       it 'includes all middleware from stacked settings' do
@@ -1053,9 +1053,9 @@ XML
         subject.use ApiSpec::PhonyMiddleware, 'foo'
 
         expect(subject.middleware).to eql [
-          [ApiSpec::PhonyMiddleware, 123],
-          [ApiSpec::PhonyMiddleware, 'abc'],
-          [ApiSpec::PhonyMiddleware, 'foo']
+          [:use, ApiSpec::PhonyMiddleware, 123],
+          [:use, ApiSpec::PhonyMiddleware, 'abc'],
+          [:use, ApiSpec::PhonyMiddleware, 'foo']
         ]
       end
     end
@@ -1063,7 +1063,7 @@ XML
     describe '.use' do
       it 'adds middleware' do
         subject.use ApiSpec::PhonyMiddleware, 123
-        expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, 123]]
+        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123]]
       end
 
       it 'does not show up outside the namespace' do
@@ -1074,8 +1074,8 @@ XML
           inner_middleware = middleware
         end
 
-        expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, 123]]
-        expect(inner_middleware).to eql [[ApiSpec::PhonyMiddleware, 123], [ApiSpec::PhonyMiddleware, 'abc']]
+        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123]]
+        expect(inner_middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123], [:use, ApiSpec::PhonyMiddleware, 'abc']]
       end
 
       it 'calls the middleware' do
@@ -1091,7 +1091,7 @@ XML
       it 'adds a block if one is given' do
         block = -> {}
         subject.use ApiSpec::PhonyMiddleware, &block
-        expect(subject.middleware).to eql [[ApiSpec::PhonyMiddleware, block]]
+        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, block]]
       end
 
       it 'uses a block if one is given' do
@@ -1132,7 +1132,50 @@ XML
         expect(last_response.body).to eq('Caught in the Net')
       end
     end
+
+    describe '.insert_before' do
+      it 'runs before a given middleware' do
+        m = Class.new(Grape::Middleware::Base) do
+          def call(env)
+            env['phony.args'] ||= []
+            env['phony.args'] << @options[:message]
+            @app.call(env)
+          end
+        end
+
+        subject.use ApiSpec::PhonyMiddleware, 'hello'
+        subject.insert_before ApiSpec::PhonyMiddleware, m, message: 'bye'
+        subject.get '/' do
+          env['phony.args'].join(' ')
+        end
+
+        get '/'
+        expect(last_response.body).to eql 'bye hello'
+      end
+    end
+
+    describe '.insert_after' do
+      it 'runs after a given middleware' do
+        m = Class.new(Grape::Middleware::Base) do
+          def call(env)
+            env['phony.args'] ||= []
+            env['phony.args'] << @options[:message]
+            @app.call(env)
+          end
+        end
+
+        subject.use ApiSpec::PhonyMiddleware, 'hello'
+        subject.insert_after ApiSpec::PhonyMiddleware, m, message: 'bye'
+        subject.get '/' do
+          env['phony.args'].join(' ')
+        end
+
+        get '/'
+        expect(last_response.body).to eql 'hello bye'
+      end
+    end
   end
+
   describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, _p|
