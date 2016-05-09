@@ -2807,7 +2807,27 @@ Your middleware can overwrite application response as follows, except error case
 ```ruby
 class Overwriter < Grape::Middleware::Base
   def after
-    [200, { 'Content-Type' => 'text/plain' }, ['Overwrited.']]
+    [200, { 'Content-Type' => 'text/plain' }, ['Overwritten.']]
+  end
+end
+```
+
+You can add your custom middleware with `use`, that push the middleware onto the stack, and you can also control where the middleware is inserted using `insert`, `insert_before` and `insert_after`.
+
+```ruby
+class CustomOverwriter < Grape::Middleware::Base
+  def after
+    [200, { 'Content-Type' => 'text/plain' }, [@options[:message]]]
+  end
+end
+
+
+class API < Grape::API
+  use Overwriter
+  insert_before Overwriter, CustomOverwriter, message: 'Overwritten again.'
+  insert 0, CustomOverwriter, message: 'Overwrites all other middleware.'
+
+  get '/' do
   end
 end
 ```

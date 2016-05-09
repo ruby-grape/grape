@@ -15,7 +15,21 @@ module Grape
         # @param middleware_class [Class] The class of the middleware you'd like
         #   to inject.
         def use(middleware_class, *args, &block)
-          arr = [middleware_class, *args]
+          arr = [:use, middleware_class, *args]
+          arr << block if block_given?
+
+          namespace_stackable(:middleware, arr)
+        end
+
+        def insert_before(*args, &block)
+          arr = [:insert_before, *args]
+          arr << block if block_given?
+
+          namespace_stackable(:middleware, arr)
+        end
+
+        def insert_after(*args, &block)
+          arr = [:insert_after, *args]
           arr << block if block_given?
 
           namespace_stackable(:middleware, arr)

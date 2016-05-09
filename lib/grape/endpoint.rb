@@ -1,3 +1,5 @@
+require 'grape/middleware/stack'
+
 module Grape
   # An Endpoint is the proxy scope in which all routing
   # blocks are executed. In other words, any methods
@@ -243,45 +245,43 @@ module Grape
     end
 
     def build_stack
-      b = Rack::Builder.new
+      ms = Grape::Middleware::Stack.new
 
-      b.use Rack::Head
-      b.use Grape::Middleware::Error,
-            format: namespace_inheritable(:format),
-            content_types: namespace_stackable_with_hash(:content_types),
-            default_status: namespace_inheritable(:default_error_status),
-            rescue_all: namespace_inheritable(:rescue_all),
-            default_error_formatter: namespace_inheritable(:default_error_formatter),
-            error_formatters: namespace_stackable_with_hash(:error_formatters),
-            rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
-            rescue_handlers: namespace_stackable_with_hash(:rescue_handlers) || {},
-            base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
-            all_rescue_handler: namespace_inheritable(:all_rescue_handler)
+      ms.use Rack::Head
+      ms.use Grape::Middleware::Error,
+             format: namespace_inheritable(:format),
+             content_types: namespace_stackable_with_hash(:content_types),
+             default_status: namespace_inheritable(:default_error_status),
+             rescue_all: namespace_inheritable(:rescue_all),
+             default_error_formatter: namespace_inheritable(:default_error_formatter),
+             error_formatters: namespace_stackable_with_hash(:error_formatters),
+             rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
+             rescue_handlers: namespace_stackable_with_hash(:rescue_handlers) || {},
+             base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
+             all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
-      (namespace_stackable(:middleware) || []).each do |m|
-        m = m.dup
-        block = m.pop if m.last.is_a?(Proc)
-        block ? b.use(*m, &block) : b.use(*m)
-      end
+      ms.merge_with(namespace_stackable(:middleware) || [])
 
       if namespace_inheritable(:version)
-        b.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-              versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
-              version_options: namespace_inheritable(:version_options),
-              prefix: namespace_inheritable(:root_prefix)
-
+        ms.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
+               versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
+               version_options: namespace_inheritable(:version_options),
+               prefix: namespace_inheritable(:root_prefix)
       end
 
-      b.use Grape::Middleware::Formatter,
-            format: namespace_inheritable(:format),
-            default_format: namespace_inheritable(:default_format) || :txt,
-            content_types: namespace_stackable_with_hash(:content_types),
-            formatters: namespace_stackable_with_hash(:formatters),
-            parsers: namespace_stackable_with_hash(:parsers)
+      ms.use Grape::Middleware::Formatter,
+             format: namespace_inheritable(:format),
+             default_format: namespace_inheritable(:default_format) || :txt,
+             content_types: namespace_stackable_with_hash(:content_types),
+             formatters: namespace_stackable_with_hash(:formatters),
+             parsers: namespace_stackable_with_hash(:parsers)
 
-      b.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
+      builder = Rack::Builder.new
+      ms.build(builder)
 
-      b.to_app
+      builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
+
+      builder.to_app
     end
 
     def build_helpers
