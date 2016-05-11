@@ -12,6 +12,9 @@ describe Grape::Middleware::Stack do
     end
   end
 
+  let(:proc) { ->() {} }
+  let(:others) { [[:use, StackSpec::BarMiddleware], [:insert_before, StackSpec::BarMiddleware, StackSpec::BlockMiddleware, proc]] }
+
   subject { Grape::Middleware::Stack.new }
 
   before do
@@ -33,7 +36,6 @@ describe Grape::Middleware::Stack do
     end
 
     it 'pushes a middleware class with block arguments onto the stack' do
-      proc = ->() {}
       expect { subject.use StackSpec::BlockMiddleware, &proc }
         .to change { subject.size }.by(1)
       expect(subject.last).to eq(StackSpec::BlockMiddleware)
@@ -80,15 +82,42 @@ describe Grape::Middleware::Stack do
   end
 
   describe '#merge_with' do
-    let(:proc) { ->() {} }
-    let(:other) { [[:use, StackSpec::BarMiddleware], [:insert_before, StackSpec::BarMiddleware, StackSpec::BlockMiddleware, proc]] }
-
     it 'applies a collection of operations and middlewares' do
-      expect { subject.merge_with(other) }
+      expect { subject.merge_with(others) }
         .to change { subject.size }.by(2)
       expect(subject[0]).to eq(StackSpec::FooMiddleware)
       expect(subject[1]).to eq(StackSpec::BlockMiddleware)
       expect(subject[2]).to eq(StackSpec::BarMiddleware)
+    end
+  end
+
+  describe '#build' do
+    it 'returns a rack builder instance' do
+      expect(subject.build).to be_instance_of(Rack::Builder)
+    end
+
+    context 'when @others are present' do
+      let(:others) { [[:insert_after, Grape::Middleware::Formatter, StackSpec::BarMiddleware]] }
+
+      it 'applies the middleware specs stored in @others' do
+        subject.concat others
+        subject.use Grape::Middleware::Formatter
+        subject.build
+        expect(subject[0]).to eq StackSpec::FooMiddleware
+        expect(subject[1]).to eq Grape::Middleware::Formatter
+        expect(subject[2]).to eq StackSpec::BarMiddleware
+      end
+    end
+  end
+
+  describe '#concat' do
+    it 'adds non :use specs to @others' do
+      expect { subject.concat others }.to change(subject, :others).from([]).to([[others.last]])
+    end
+
+    it 'calls +merge_with+ with the :use specs' do
+      expect(subject).to receive(:merge_with).with [[:use, StackSpec::BarMiddleware]]
+      subject.concat others
     end
   end
 end
