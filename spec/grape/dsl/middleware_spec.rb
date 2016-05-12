@@ -20,6 +20,21 @@ module Grape
 
           subject.use foo_middleware, :arg1, &proc
         end
+
+        context 'when the given class responds to +middleware_spec+' do
+          let(:foo_middleware) do
+            Class.new do
+              def self.middleware_spec
+                [:insert_after, Object, self]
+              end
+            end
+          end
+
+          it 'stores the return value of +middleware_spec+ with the given args and proc' do
+            expect(subject).to receive(:namespace_stackable).with(:middleware, [:insert_after, Object, foo_middleware, :arg1, proc])
+            subject.use foo_middleware, :arg1, &proc
+          end
+        end
       end
 
       describe '.insert_before' do

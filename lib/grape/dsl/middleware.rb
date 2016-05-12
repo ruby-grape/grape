@@ -12,10 +12,13 @@ module Grape
         # to the current namespace and any children, but
         # not parents.
         #
-        # @param middleware_class [Class] The class of the middleware you'd like
-        #   to inject.
-        def use(middleware_class, *args, &block)
-          arr = [:use, middleware_class, *args]
+        # @param [Class] klass The class of the middleware you'd like to inject.
+        def use(klass, *args, &block)
+          arr = if klass.respond_to?(:middleware_spec)
+                  klass.middleware_spec.push(*args)
+                else
+                  [:use, klass, *args]
+                end
           arr << block if block_given?
 
           namespace_stackable(:middleware, arr)
