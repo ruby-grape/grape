@@ -245,42 +245,39 @@ module Grape
     end
 
     def build_stack
-      ms = Grape::Middleware::Stack.new
+      stack = Grape::Middleware::Stack.new
 
-      ms.use Rack::Head
-      ms.use Grape::Middleware::Error,
-             format: namespace_inheritable(:format),
-             content_types: namespace_stackable_with_hash(:content_types),
-             default_status: namespace_inheritable(:default_error_status),
-             rescue_all: namespace_inheritable(:rescue_all),
-             default_error_formatter: namespace_inheritable(:default_error_formatter),
-             error_formatters: namespace_stackable_with_hash(:error_formatters),
-             rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
-             rescue_handlers: namespace_stackable_with_hash(:rescue_handlers) || {},
-             base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
-             all_rescue_handler: namespace_inheritable(:all_rescue_handler)
+      stack.use Rack::Head
+      stack.use Grape::Middleware::Error,
+                format: namespace_inheritable(:format),
+                content_types: namespace_stackable_with_hash(:content_types),
+                default_status: namespace_inheritable(:default_error_status),
+                rescue_all: namespace_inheritable(:rescue_all),
+                default_error_formatter: namespace_inheritable(:default_error_formatter),
+                error_formatters: namespace_stackable_with_hash(:error_formatters),
+                rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
+                rescue_handlers: namespace_stackable_with_hash(:rescue_handlers) || {},
+                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
+                all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
-      ms.merge_with(namespace_stackable(:middleware) || [])
+      stack.concat namespace_stackable(:middleware)
 
       if namespace_inheritable(:version)
-        ms.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-               versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
-               version_options: namespace_inheritable(:version_options),
-               prefix: namespace_inheritable(:root_prefix)
+        stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
+                  versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
+                  version_options: namespace_inheritable(:version_options),
+                  prefix: namespace_inheritable(:root_prefix)
       end
 
-      ms.use Grape::Middleware::Formatter,
-             format: namespace_inheritable(:format),
-             default_format: namespace_inheritable(:default_format) || :txt,
-             content_types: namespace_stackable_with_hash(:content_types),
-             formatters: namespace_stackable_with_hash(:formatters),
-             parsers: namespace_stackable_with_hash(:parsers)
+      stack.use Grape::Middleware::Formatter,
+                format: namespace_inheritable(:format),
+                default_format: namespace_inheritable(:default_format) || :txt,
+                content_types: namespace_stackable_with_hash(:content_types),
+                formatters: namespace_stackable_with_hash(:formatters),
+                parsers: namespace_stackable_with_hash(:parsers)
 
-      builder = Rack::Builder.new
-      ms.build(builder)
-
+      builder = stack.build
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
-
       builder.to_app
     end
 

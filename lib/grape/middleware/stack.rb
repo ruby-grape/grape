@@ -32,10 +32,11 @@ module Grape
 
       include Enumerable
 
-      attr_accessor :middlewares
+      attr_accessor :middlewares, :others
 
       def initialize
         @middlewares = []
+        @others = []
       end
 
       def each
@@ -72,25 +73,37 @@ module Grape
         middlewares.push(middleware)
       end
 
-      def merge_with(other)
-        other.each do |operation, *args|
-          block = args.pop if args.last.is_a?(Proc)
-          block ? send(operation, *args, &block) : send(operation, *args)
+      def merge_with(middleware_specs)
+        middleware_specs.each do |operation, *args|
+          if args.last.is_a?(Proc)
+            public_send(operation, *args, &args.pop)
+          else
+            public_send(operation, *args)
+          end
         end
       end
 
-      def build(builder)
+      # @return [Rack::Builder] the builder object with our middlewares applied
+      def build(builder = Rack::Builder.new)
+        others.shift(others.size).each(&method(:merge_with))
         middlewares.each do |m|
           m.block ? builder.use(m.klass, *m.args, &m.block) : builder.use(m.klass, *m.args)
         end
+        builder
+      end
+
+      # @description Add middlewares with :use operation to the stack. Store others with :insert_* operation for later
+      # @param [Array] other_specs An array of middleware specifications (e.g. [[:use, klass], [:insert_before, *args]])
+      def concat(other_specs)
+        @others << Array(other_specs).reject { |o| o.first == :use }
+        merge_with Array(other_specs).select { |o| o.first == :use }
       end
 
       protected
 
       def assert_index(index, where)
         i = index.is_a?(Integer) ? index : middlewares.index(index)
-        raise "No such middleware to insert #{where}: #{index.inspect}" unless i
-        i
+        i || raise("No such middleware to insert #{where}: #{index.inspect}")
       end
     end
   end
