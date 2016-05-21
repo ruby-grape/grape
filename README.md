@@ -1816,6 +1816,18 @@ end
 
 In this case ```UserDefinedError``` must be inherited from ```StandardError```.
 
+Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from Grape::Exceptions::ValidationErrors do |e|
+    error!(e, 400)
+  end
+
+  rescue_from :all
+end
+```
+
 The error format will match the request format. See "Content-Types" below.
 
 Custom error formatters for existing and additional types can be defined with a proc.
@@ -1863,7 +1875,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-You can also rescue specific exceptions with a code block and handle the Rack response at the lowest level.
+You can also rescue all exceptions with a code block and handle the Rack response at the lowest level.
 
 ```ruby
 class Twitter::API < Grape::API
