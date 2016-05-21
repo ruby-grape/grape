@@ -106,6 +106,7 @@ module Grape
     extend ActiveSupport::Autoload
     autoload :InheritableValues
     autoload :StackableValues
+    autoload :ReverseStackableValues
     autoload :InheritableSetting
     autoload :StrictHashConfiguration
     autoload :Registrable

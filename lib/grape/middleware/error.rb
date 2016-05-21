@@ -56,7 +56,7 @@ module Grape
 
       def rescuable?(klass)
         return false if klass == Grape::Exceptions::InvalidVersionHeader
-        options[:rescue_all] || (options[:rescue_handlers] || []).any? { |error, _handler| klass <= error } || (options[:base_only_rescue_handlers] || []).include?(klass)
+        rescue_all? || rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
       end
 
       def exec_handler(e, &handler)
@@ -108,6 +108,20 @@ module Grape
         formatter = Grape::ErrorFormatter.formatter_for(format, options)
         throw :error, status: 406, message: "The requested format '#{format}' is not supported." unless formatter
         formatter.call(message, backtrace, options, env)
+      end
+
+      private
+
+      def rescue_all?
+        options[:rescue_all]
+      end
+
+      def rescue_class_or_its_ancestor?(klass)
+        (options[:rescue_handlers] || []).any? { |error, _handler| klass <= error }
+      end
+
+      def rescue_with_base_only_handler?(klass)
+        (options[:base_only_rescue_handlers] || []).include?(klass)
       end
     end
   end

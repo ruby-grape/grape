@@ -94,10 +94,26 @@ module Grape
         get_or_set :namespace_stackable, key, value
       end
 
+      def namespace_reverse_stackable(key, value = nil)
+        get_or_set :namespace_reverse_stackable, key, value
+      end
+
       def namespace_stackable_with_hash(key)
         settings = get_or_set :namespace_stackable, key, nil
         return if settings.blank?
         settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
+
+      def namespace_reverse_stackable_with_hash(key)
+        settings = get_or_set :namespace_reverse_stackable, key, nil
+        return if settings.blank?
+        result = {}
+        settings.each do |setting|
+          setting.each do |field, value|
+            result[field] ||= value
+          end
+        end
+        result
       end
 
       # (see #unset_global_setting)
