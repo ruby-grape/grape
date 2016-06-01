@@ -70,7 +70,7 @@ module Grape
       # By the following code, you can add a common header 'Token' for the first two requests.
       # But the third one is not added the header 'Token'.
       #
-      #     set_common_block do
+      #     init_common_block do
       #       headers Token: { description: 'Token', required: true }
       #     end
       #
@@ -89,7 +89,7 @@ module Grape
       #     put '/user/:id' do
       #       # ...
       #     end
-      def set_common_block(&block)
+      def init_common_block(&block)
         @_common_block = block if block_given?
       end
 
