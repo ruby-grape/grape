@@ -38,7 +38,9 @@ module Grape
       #     end
       #
       def desc(description, options = {}, &config_block)
-        if block_given?
+        config_block = @_common_block if !block_given? && @_common_block
+
+        if block_given? || config_block
           config_class = desc_container
 
           config_class.configure do
@@ -56,6 +58,39 @@ module Grape
 
         namespace_setting :description, options
         route_setting :description, options
+      end
+
+      # You can set a common block for a specified class.
+      # It works only when you do not pass a block for the `desc` method.
+      #
+      # This can reduce many repeated code when you need to add a same header for many requests.
+      # You can just put them in the same class which inherits from class Grape::API.
+      #
+      # @example
+      # By the following code, you can add a common header 'Token' for the first two requests.
+      # But the third one is not added the header 'Token'.
+      #
+      #     set_common_block do
+      #       headers Token: { description: 'Token', required: true }
+      #     end
+      #
+      #     desc 'create a user'
+      #     post '/users' do
+      #       # ...
+      #     end
+      #
+      #     desc 'find a user'
+      #     get '/user/:id' do
+      #       # ...
+      #     end
+      #
+      #     desc 'update a user' do
+      #     end
+      #     put '/user/:id' do
+      #       # ...
+      #     end
+      def set_common_block(&block)
+        @_common_block = block if block_given?
       end
 
       def description_field(field, value = nil)
