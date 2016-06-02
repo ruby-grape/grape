@@ -1969,6 +1969,30 @@ class Twitter::API < Grape::API
 end
 ```
 
+#### Rescuing exceptions inside namespaces
+
+You could put `rescue_from` clauses inside a namespace and they will take precedence over ones
+defined in the root scope:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from ArgumentError do |e|
+    error!("outer")
+  end
+
+  namespace :statuses do
+    rescue_from ArgumentError do |e|
+      error!("inner")
+    end
+    get do
+      raise ArgumentError.new
+    end
+  end
+end
+```
+
+Here `'inner'` will be result of handling occured `ArgumentError`.
+
 #### Unrescuable Exceptions
 
 `Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.

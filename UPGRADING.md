@@ -3,6 +3,11 @@ Upgrading Grape
 
 ### Upgrading to >= 0.16.0
 
+#### Changed priority of `rescue_from` clauses applying
+
+Since 0.16.3 `rescue_from` clauses declared inside namespace would take a priority over ones declared in the root scope.
+This could possibly affect those users who use different `rescue_from` clauses in root scope and in namespaces.
+
 #### Replace rack-mount with new router
 
 The `Route#route_xyz` methods have been deprecated since 0.15.1.

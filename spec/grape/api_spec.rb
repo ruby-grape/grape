@@ -2638,22 +2638,78 @@ XML
         expect(last_response.body).to eq('yo')
       end
 
-      it 'inherits rescues even when some defined by mounted' do
-        subject.rescue_from :all do |e|
-          rack_response("rescued from #{e.message}", 202)
+      context 'when some rescues are defined by mounted' do
+        it 'inherits parent rescues' do
+          subject.rescue_from :all do |e|
+            rack_response("rescued from #{e.message}", 202)
+          end
+
+          app = Class.new(Grape::API)
+
+          subject.namespace :mounted do
+            app.rescue_from ArgumentError
+            app.get('/fail') { raise 'doh!' }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.status).to eql 202
+          expect(last_response.body).to eq('rescued from doh!')
         end
+        it 'prefers rescues defined by mounted if they rescue similar error class' do
+          subject.rescue_from StandardError do
+            rack_response('outer rescue')
+          end
 
-        app = Class.new(Grape::API)
+          app = Class.new(Grape::API)
 
-        subject.namespace :mounted do
-          app.rescue_from ArgumentError
-          app.get('/fail') { raise 'doh!' }
-          mount app
+          subject.namespace :mounted do
+            rescue_from StandardError do
+              rack_response('inner rescue')
+            end
+            app.get('/fail') { raise 'doh!' }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('inner rescue')
         end
+        it 'prefers rescues defined by mounted even if outer is more specific' do
+          subject.rescue_from ArgumentError do
+            rack_response('outer rescue')
+          end
 
-        get '/mounted/fail'
-        expect(last_response.status).to eql 202
-        expect(last_response.body).to eq('rescued from doh!')
+          app = Class.new(Grape::API)
+
+          subject.namespace :mounted do
+            rescue_from StandardError do
+              rack_response('inner rescue')
+            end
+            app.get('/fail') { raise ArgumentError.new }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('inner rescue')
+        end
+        it 'prefers more specific rescues defined by mounted' do
+          subject.rescue_from StandardError do
+            rack_response('outer rescue')
+          end
+
+          app = Class.new(Grape::API)
+
+          subject.namespace :mounted do
+            rescue_from ArgumentError do
+              rack_response('inner rescue')
+            end
+            app.get('/fail') { raise ArgumentError.new }
+            mount app
+          end
+
+          get '/mounted/fail'
+          expect(last_response.body).to eq('inner rescue')
+        end
       end
 
       it 'collects the routes of the mounted api' do
