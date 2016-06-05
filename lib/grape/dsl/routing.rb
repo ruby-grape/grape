@@ -28,6 +28,7 @@ module Grape
         #
         def version(*args, &block)
           if args.any?
+            args.flatten!
             options = args.extract_options!
             options = options.reverse_merge(using: :path)
 

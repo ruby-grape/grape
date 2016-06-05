@@ -301,8 +301,10 @@ describe Grape::API do
       end
 
       describe 'path versioned APIs' do
+        let(:version) { 'v1' }
+
         before do
-          subject.version 'v1', using: :path
+          subject.version version, using: :path
           subject.enable_root_route!
         end
 
@@ -312,6 +314,13 @@ describe Grape::API do
 
         it 'with a format' do
           get '/v1/.json'
+        end
+
+        context 'when array of versions provided' do
+          let(:version) { %w(v1 v2) }
+
+          it { versioned_get '/', 'v1', using: :path }
+          it { versioned_get '/', 'v2', using: :path }
         end
       end
 
