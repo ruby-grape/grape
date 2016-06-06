@@ -464,65 +464,70 @@ describe Grape::Endpoint do
   end
 
   describe '#declared; call from child namespace' do
-    context 'include_parent_namespaces: true' do
-      before do
-        subject.format :json
-        subject.namespace :something do
+    before do
+      subject.format :json
+      subject.namespace :parent do
+        params do
+          requires :parent_name, type: String
+        end
+
+        namespace ':parent_name' do
           params do
-            requires :id, type: Integer
+            requires :child_name, type: String
+            requires :child_age, type: Integer
           end
-          resource ':id' do
+
+          namespace ':child_name' do
             params do
-              requires :foo
-              optional :bar
+              requires :grandchild_name, type: String
             end
-            get do
+
+            get ':grandchild_name' do
               {
-                params: params,
-                declared_params: declared(params)
+                'params' => params,
+                'without_parent_namespaces' => declared(params, include_parent_namespaces: false),
+                'with_parent_namespaces' => declared(params, include_parent_namespaces: true)
               }
             end
           end
         end
       end
 
-      it 'should include params defined in the parent namespace' do
-        get '/something/123', foo: 'test', extra: 'hello'
-        expect(last_response.status).to eq 200
-        json = JSON.parse(last_response.body, symbolize_names: true)
-        expect(json[:params][:id]).to eq 123
-        expect(json[:declared_params].keys).to match_array [:foo, :bar, :id]
+      get '/parent/foo/bar/baz', child_age: 5, extra: 'hello'
+    end
+
+    let(:parsed_response) { JSON.parse(last_response.body, symbolize_names: true) }
+
+    it { expect(last_response.status).to eq 200 }
+
+    context 'with include_parent_namespaces: false' do
+      it 'returns declared parameters only from current namespace' do
+        expect(parsed_response[:without_parent_namespaces]).to eq(
+          grandchild_name: 'baz'
+        )
       end
     end
 
-    context 'include_parent_namespaces: false' do
-      before do
-        subject.format :json
-        subject.namespace :something do
-          params do
-            requires :id, type: Integer
-          end
-          resource ':id' do
-            params do
-              requires :happy
-              optional :days
-            end
-            get '/test' do
-              {
-                params: params,
-                declared_params: declared(params, include_parent_namespaces: false)
-              }
-            end
-          end
-        end
+    context 'with include_parent_namespaces: true' do
+      it 'returns declared parameters from every parent namespace' do
+        expect(parsed_response[:with_parent_namespaces]).to eq(
+          parent_name: 'foo',
+          child_name: 'bar',
+          grandchild_name: 'baz',
+          child_age: 5
+        )
       end
+    end
 
-      it 'does not include params defined in the parent namespace' do
-        get '/something/123/test', happy: 'test', extra: 'hello'
-        expect(last_response.status).to eq 200
-        json = JSON.parse(last_response.body, symbolize_names: true)
-        expect(json[:params][:id]).to eq 123
-        expect(json[:declared_params].keys).to match_array [:happy, :days]
+    context 'without declaration' do
+      it 'returns all requested parameters' do
+        expect(parsed_response[:params]).to eq(
+          parent_name: 'foo',
+          child_name: 'bar',
+          grandchild_name: 'baz',
+          child_age: 5,
+          extra: 'hello'
+        )
       end
     end
   end

@@ -29,7 +29,10 @@ module Grape
         def declared(params, options = {}, declared_params = nil)
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
 
-          declared_params ||= (!options[:include_parent_namespaces] ? route_setting(:declared_params) : (route_setting(:saved_declared_params) || [])).flatten(1) || []
+          all_declared_params = route_setting(:declared_params)
+          current_namespace_declared_params = route_setting(:saved_declared_params).last
+
+          declared_params ||= options[:include_parent_namespaces] ? all_declared_params : current_namespace_declared_params
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
 
