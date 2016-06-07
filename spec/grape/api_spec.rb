@@ -301,19 +301,21 @@ describe Grape::API do
       end
 
       describe 'path versioned APIs' do
-        let(:version) { 'v1' }
-
         before do
           subject.version version, using: :path
           subject.enable_root_route!
         end
 
-        it 'without a format' do
-          versioned_get '/', 'v1', using: :path
-        end
+        context 'when a single version provided' do
+          let(:version) { 'v1' }
 
-        it 'with a format' do
-          get '/v1/.json'
+          it 'without a format' do
+            versioned_get '/', 'v1', using: :path
+          end
+
+          it 'with a format' do
+            get '/v1/.json'
+          end
         end
 
         context 'when array of versions provided' do
