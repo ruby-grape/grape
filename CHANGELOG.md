@@ -16,6 +16,7 @@
 * [#1380](https://github.com/ruby-grape/grape/pull/1380): Fix `allow_blank: false` for `Time` attributes with valid values causes `NoMethodError` - [@ipkes](https://github.com/ipkes).
 * [#1384](https://github.com/ruby-grape/grape/pull/1384): Fix parameter validation with an empty optional nested `Array` - [@ipkes](https://github.com/ipkes).
 * [#1414](https://github.com/ruby-grape/grape/pull/1414): Fix multiple version definitions for path versioning - [@304](https://github.com/304).
+* [#1415](https://github.com/ruby-grape/grape/pull/1415): Fix `declared(params, include_parent_namespaces: false)` - [@304](https://github.com/304).
 
 0.16.2 (4/12/2016)
 ==================
