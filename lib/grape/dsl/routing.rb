@@ -28,23 +28,23 @@ module Grape
         #
         def version(*args, &block)
           if args.any?
-            args.flatten!
             options = args.extract_options!
             options = options.reverse_merge(using: :path)
+            requested_versions = args.flatten
 
             raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
-            @versions = versions | args
+            @versions = versions | requested_versions
 
             if block_given?
               within_namespace do
-                namespace_inheritable(:version, args)
+                namespace_inheritable(:version, requested_versions)
                 namespace_inheritable(:version_options, options)
 
                 instance_eval(&block)
               end
             else
-              namespace_inheritable(:version, args)
+              namespace_inheritable(:version, requested_versions)
               namespace_inheritable(:version_options, options)
             end
           end
