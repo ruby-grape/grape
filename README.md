@@ -372,7 +372,8 @@ Using this versioning strategy, clients should pass the desired version in the H
 By default, the first matching version is used when no `Accept-Version` header is
 supplied. This behavior is similar to routing in Rails. To circumvent this default behavior,
 one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error
-is returned when no correct `Accept` header is supplied.
+is returned when no correct `Accept` header is supplied and the `:cascade` option is set to `false`.
+Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
 
 ### Param
 
