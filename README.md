@@ -554,6 +554,52 @@ The returned hash is a `Hashie::Mash` instance, allowing you to access parameter
 The `#declared` method is not available to `before` filters, as those are evaluated prior
 to parameter coercion.
 
+### Include parent namespaces
+
+By default `declared(params)` includes parameters that were defined in all parent namespaces. If you want to return only parameters from your current namespace, you can set `include_parent_namespaces` option to `false`.
+
+````ruby
+format :json
+
+namespace :parent do
+  params do
+    requires :parent_name, type: String
+  end
+
+  namespace ':parent_name' do
+    params do
+      requires :child_name, type: String
+    end
+    get ':child_name' do
+      {
+        'without_parent_namespaces' => declared(params, include_parent_namespaces: false),
+        'with_parent_namespaces' => declared(params, include_parent_namespaces: true),
+      }
+    end
+  end
+end
+````
+
+**Request**
+
+````bash
+curl -X GET -H "Content-Type: application/json" localhost:9292/parent/foo/bar
+````
+
+**Response**
+
+````json
+{
+  "without_parent_namespaces": {
+    "child_name": "bar"
+  },
+  "with_parent_namespaces": {
+    "parent_name": "foo",
+    "child_name": "bar"
+  },
+}
+````
+
 ### Include missing
 
 By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:
