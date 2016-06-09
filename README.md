@@ -2086,6 +2086,14 @@ class API < Grape::API
 end
 ```
 
+To change the logger level.
+
+```ruby
+class API < Grape::API
+  self.logger.level = Logger::INFO
+end
+```
+
 You can also set your own logger.
 
 ```ruby
