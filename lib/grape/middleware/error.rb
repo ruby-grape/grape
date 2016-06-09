@@ -8,6 +8,7 @@ module Grape
           default_status: 500, # default status returned on error
           default_message: '',
           format: :txt,
+          helpers: nil,
           formatters: {},
           error_formatters: {},
           rescue_all: false, # true to rescue all exceptions
@@ -19,10 +20,13 @@ module Grape
         }
       end
 
+      def initialize(app, options = {})
+        super
+        self.class.send(:include, @options[:helpers]) if @options[:helpers]
+      end
+
       def call!(env)
         @env = env
-
-        inject_helpers!
 
         begin
           error_response(catch(:error) do
@@ -65,19 +69,6 @@ module Grape
         else
           instance_exec(e, &handler)
         end
-      end
-
-      def inject_helpers!
-        return if helpers_available?
-        endpoint = @env['api.endpoint']
-        self.class.instance_eval do
-          include endpoint.send(:helpers)
-        end if endpoint.is_a?(Grape::Endpoint)
-        @helpers = true
-      end
-
-      def helpers_available?
-        @helpers
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [])

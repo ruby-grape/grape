@@ -1456,6 +1456,36 @@ XML
       expect(last_response.body).to eq 'hello bob'
     end
 
+    context 'with multiple apis' do
+      let(:a) { Class.new(Grape::API) }
+      let(:b) { Class.new(Grape::API) }
+
+      before do
+        a.helpers do
+          def foo
+            error!('foo', 401)
+          end
+        end
+        a.rescue_from(:all) { foo }
+        a.get { raise 'boo' }
+        b.helpers do
+          def foo
+            error!('bar', 401)
+          end
+        end
+        b.rescue_from(:all) { foo }
+        b.get { raise 'boo' }
+      end
+
+      it 'avoids polluting global namespace' do
+        env = Rack::MockRequest.env_for('/')
+
+        expect(a.call(env)[2].body).to eq(['foo'])
+        expect(b.call(env)[2].body).to eq(['bar'])
+        expect(a.call(env)[2].body).to eq(['foo'])
+      end
+    end
+
     it 'rescues all errors if rescue_from :all is called' do
       subject.rescue_from :all
       subject.get '/exception' do
