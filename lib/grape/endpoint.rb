@@ -244,11 +244,12 @@ module Grape
       end
     end
 
-    def build_stack
+    def build_stack(helpers)
       stack = Grape::Middleware::Stack.new
 
       stack.use Rack::Head
-      stack.use Grape::Middleware::Error,
+      stack.use Class.new(Grape::Middleware::Error),
+                helpers: helpers,
                 format: namespace_inheritable(:format),
                 content_types: namespace_stackable_with_hash(:content_types),
                 default_status: namespace_inheritable(:default_error_status),
@@ -300,10 +301,10 @@ module Grape
       @lazy_initialize_lock.synchronize do
         return true if @lazy_initialized
 
-        @app = options[:app] || build_stack
         @helpers = build_helpers.tap do |mod|
           self.class.send(:include, mod)
         end
+        @app = options[:app] || build_stack(@helpers)
 
         @lazy_initialized = true
       end
