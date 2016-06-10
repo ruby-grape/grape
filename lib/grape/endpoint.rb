@@ -254,6 +254,7 @@ module Grape
                 content_types: namespace_stackable_with_hash(:content_types),
                 default_status: namespace_inheritable(:default_error_status),
                 rescue_all: namespace_inheritable(:rescue_all),
+                rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
                 default_error_formatter: namespace_inheritable(:default_error_formatter),
                 error_formatters: namespace_stackable_with_hash(:error_formatters),
                 rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
