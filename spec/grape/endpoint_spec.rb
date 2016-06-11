@@ -532,6 +532,56 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared; from a nested mounted endpoint' do
+    before do
+      doubly_mounted = Class.new(Grape::API)
+      doubly_mounted.namespace :more do
+        params do
+          requires :y, type: Integer
+        end
+        route_param :y do
+          get do
+            {
+              params: params,
+              declared_params: declared(params)
+            }
+          end
+        end
+      end
+
+      mounted = Class.new(Grape::API)
+      mounted.namespace :another do
+        params do
+          requires :mount_space, type: Integer
+        end
+        route_param :mount_space do
+          mount doubly_mounted
+        end
+      end
+
+      subject.format :json
+      subject.namespace :something do
+        params do
+          requires :id, type: Integer
+        end
+        resource ':id' do
+          mount mounted
+        end
+      end
+    end
+
+    it 'can access parent attributes' do
+      get '/something/123/another/456/more/789'
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      # test all three levels of params
+      expect(json[:declared_params][:y]).to eq 789
+      expect(json[:declared_params][:mount_space]).to eq 456
+      expect(json[:declared_params][:id]).to eq 123
+    end
+  end
+
   describe '#params' do
     it 'is available to the caller' do
       subject.get('/hey') do

@@ -88,6 +88,13 @@ module Grape
       def inherit_settings(other_settings)
         top_level_setting.inherit_from other_settings.point_in_time_copy
 
+        # Propagate any inherited params down to our endpoints, and reset any
+        # compiled routes.
+        endpoints.each do |e|
+          e.inherit_settings(top_level_setting.namespace_stackable)
+          e.reset_routes!
+        end
+
         reset_routes!
       end
     end
