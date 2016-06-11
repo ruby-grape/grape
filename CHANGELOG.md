@@ -18,6 +18,7 @@
 * [#1414](https://github.com/ruby-grape/grape/pull/1414): Fix multiple version definitions for path versioning - [@304](https://github.com/304).
 * [#1415](https://github.com/ruby-grape/grape/pull/1415): Fix `declared(params, include_parent_namespaces: false)` - [@304](https://github.com/304).
 * [#1421](https://github.com/ruby-grape/grape/pull/1421): Avoid polluting `Grape::Middleware::Error` - [@namusyaka](https://github.com/namusyaka).
+* [#1422](https://github.com/ruby-grape/grape/pull/1422): Concat parent declared params with current one - [@plukevdh](https://github.com/plukevdh), [@rnubel](https://github.com/rnubel), [@namusyaka](https://github.com/namusyaka).
 
 0.16.2 (4/12/2016)
 ==================

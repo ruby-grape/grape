@@ -14,11 +14,7 @@ module Grape
 
     class << self
       def new(*args, &block)
-        if self == Endpoint
-          Class.new(Endpoint).new(*args, &block)
-        else
-          super
-        end
+        self == Endpoint ? Class.new(Endpoint).new(*args, &block) : super
       end
 
       def before_each(new_setup = false, &block)
@@ -33,9 +29,7 @@ module Grape
 
       def run_before_each(endpoint)
         superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each do |blk|
-          blk.call(endpoint) if blk.respond_to? :call
-        end
+        before_each.each { |blk| blk.call(endpoint) if blk.respond_to?(:call) }
       end
 
       # @api private
@@ -112,8 +106,9 @@ module Grape
     # the endpoint's API is mounted under another one.
     def inherit_settings(namespace_stackable)
       inheritable_setting.route[:saved_validations] += namespace_stackable[:validations]
+      parent_declared_params = namespace_stackable[:declared_params]
 
-      if parent_declared_params = namespace_stackable[:declared_params]
+      if parent_declared_params
         inheritable_setting.route[:declared_params] ||= []
         inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten)
       end
@@ -309,9 +304,7 @@ module Grape
 
     def build_helpers
       helpers = namespace_stackable(:helpers) || []
-      Module.new do
-        helpers.each { |mod_to_include| include mod_to_include }
-      end
+      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
     private :build_stack, :build_helpers
@@ -326,9 +319,7 @@ module Grape
       @lazy_initialize_lock.synchronize do
         return true if @lazy_initialized
 
-        @helpers = build_helpers.tap do |mod|
-          self.class.send(:include, mod)
-        end
+        @helpers = build_helpers.tap { |mod| self.class.send(:include, mod) }
         @app = options[:app] || build_stack(@helpers)
 
         @lazy_initialized = true
