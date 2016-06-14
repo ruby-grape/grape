@@ -538,6 +538,36 @@ describe Grape::API do
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
     end
 
+    it 'runs only the before filter on 405 bad method' do
+      subject.namespace :example do
+        before            { header 'X-Custom-Header', 'foo' }
+        before_validation { raise 'before_validation filter should not run' }
+        after_validation  { raise 'after_validation filter should not run' }
+        after             { raise 'after filter should not run' }
+        get
+      end
+
+      post '/example'
+      expect(last_response.status).to eql 405
+      expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+    end
+
+    it 'runs before filter exactly once on 405 bad method' do
+      already_run = false
+      subject.namespace :example do
+        before do
+          raise 'before filter ran twice' if already_run
+          already_run = true
+          header 'X-Custom-Header', 'foo'
+        end
+        get
+      end
+
+      post '/example'
+      expect(last_response.status).to eql 405
+      expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+    end
+
     context 'when format is xml' do
       it 'returns a 405 for an unsupported method' do
         subject.format :xml
