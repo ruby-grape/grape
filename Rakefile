@@ -7,6 +7,8 @@ Bundler::GemHelper.install_tasks
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
+  spec.ruby_opts = '' if spec.ruby_opts.nil?
+  spec.ruby_opts << ' -w' unless ENV['NO_WARN'] == 'true'
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |spec|
