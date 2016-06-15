@@ -665,6 +665,47 @@ XML
       end
     end
 
+    describe 'adds an OPTIONS route for namespaced endpoints that' do
+      before do
+        subject.before { header 'X-Custom-Header', 'foo' }
+        subject.namespace :example do
+          before { header 'X-Custom-Header-2', 'foo' }
+          get :inner do
+            'example/inner'
+          end
+        end
+        options '/example/inner'
+      end
+
+      it 'returns a 204' do
+        expect(last_response.status).to eql 204
+      end
+
+      it 'has an empty body' do
+        expect(last_response.body).to be_blank
+      end
+
+      it 'has an Allow header' do
+        expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, HEAD'
+      end
+
+      it 'calls the outer before filter' do
+        expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+      end
+
+      it 'calls the inner before filter' do
+        expect(last_response.headers['X-Custom-Header-2']).to eql 'foo'
+      end
+
+      it 'has no Content-Type' do
+        expect(last_response.content_type).to be_nil
+      end
+
+      it 'has no Content-Length' do
+        expect(last_response.content_length).to be_nil
+      end
+    end
+
     describe 'adds a 405 Not Allowed route that' do
       before do
         subject.before { header 'X-Custom-Header', 'foo' }
