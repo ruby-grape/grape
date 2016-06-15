@@ -117,6 +117,24 @@ describe Grape::Middleware::Formatter do
       expect(subject.env['api.format']).to eq(:json)
     end
 
+    it 'uses the requested format with invalid parameter type if provided in headers' do
+      _, headers, = subject.call(
+        'PATH_INFO' => '/info',
+        'QUERY_STRING' => 'id=12&id[]=12',
+        'HTTP_ACCEPT' => 'application/json'
+      )
+      expect(headers['Content-type']).to eq('application/json')
+    end
+
+    it 'uses the requested format with invalid byte sequence in UTF-8 if provided in headers' do
+      _, headers, = subject.call(
+        'PATH_INFO' => '/info',
+        'QUERY_STRING' => 'foo%81E=1',
+        'HTTP_ACCEPT' => 'application/json'
+      )
+      expect(headers['Content-type']).to eq('application/json')
+    end
+
     it 'handles quality rankings mixed with nothing' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0')
       expect(subject.env['api.format']).to eq(:xml)
