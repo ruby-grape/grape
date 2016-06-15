@@ -139,7 +139,11 @@ module Grape
       end
 
       def format_from_params
-        fmt = Rack::Utils.parse_nested_query(env[Grape::Http::Headers::QUERY_STRING])[Grape::Http::Headers::FORMAT]
+        fmt = begin
+          Rack::Utils.parse_nested_query(env[Grape::Http::Headers::QUERY_STRING])[Grape::Http::Headers::FORMAT]
+        rescue Rack::Utils::ParameterTypeError, Rack::Utils::InvalidParameterError
+          nil
+        end
         # avoid symbol memory leak on an unknown format
         return fmt.to_sym if content_type_for(fmt)
         fmt
