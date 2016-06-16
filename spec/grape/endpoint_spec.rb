@@ -582,6 +582,79 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared; with multiple route_param' do
+    before do
+      mounted = Class.new(Grape::API)
+      mounted.namespace :albums do
+        get do
+          declared(params)
+        end
+      end
+
+      subject.format :json
+      subject.namespace :artists do
+        route_param :id, type: Integer do
+          get do
+            declared(params)
+          end
+
+          params do
+            requires :filter, type: String
+          end
+          get :some_route do
+            declared(params)
+          end
+        end
+
+        route_param :artist_id, type: Integer do
+          namespace :compositions do
+            get do
+              declared(params)
+            end
+          end
+        end
+
+        route_param :compositor_id, type: Integer do
+          mount mounted
+        end
+      end
+    end
+
+    it 'return only :id without :artist_id' do
+      get '/artists/1'
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      expect(json.key?(:id)).to be_truthy
+      expect(json.key?(:artist_id)).not_to be_truthy
+    end
+
+    it 'return only :artist_id without :id' do
+      get '/artists/1/compositions'
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      expect(json.key?(:artist_id)).to be_truthy
+      expect(json.key?(:id)).not_to be_truthy
+    end
+
+    it 'return :filter and :id parameters in declared for second enpoint inside route_param' do
+      get '/artists/1/some_route', filter: 'some_filter'
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      expect(json.key?(:filter)).to be_truthy
+      expect(json.key?(:id)).to be_truthy
+      expect(json.key?(:artist_id)).not_to be_truthy
+    end
+
+    it 'return :compositor_id for mounter in route_param' do
+      get '/artists/1/albums'
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      expect(json.key?(:compositor_id)).to be_truthy
+      expect(json.key?(:id)).not_to be_truthy
+      expect(json.key?(:artist_id)).not_to be_truthy
+    end
+  end
+
   describe '#params' do
     it 'is available to the caller' do
       subject.get('/hey') do
