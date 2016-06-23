@@ -17,10 +17,9 @@ module Grape
 
         def value_coerced?(value)
           # Rack::Request creates a Hash with filename,
-          # content type and an IO object. Grape wraps that
-          # using hashie for convenience. Do a bit of basic
+          # content type and an IO object. Do a bit of basic
           # duck-typing.
-          value.is_a?(Hashie::Mash) && value.key?(:tempfile)
+          value.respond_to?(:key?) && value.key?(:tempfile)
         end
       end
     end

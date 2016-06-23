@@ -261,6 +261,7 @@ describe Grape::Validations::ParamsScope do
           requires :b
         end
       end
+      subject.before_validation { p params }
       subject.get('/group') { 'group works' }
       get '/group', a: [{ b: true }]
       expect(last_response.status).to eq(200)

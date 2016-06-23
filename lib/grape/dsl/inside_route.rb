@@ -41,7 +41,7 @@ module Grape
               declared(param || {}, options, declared_params)
             end
           else
-            declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
+            declared_params.each_with_object({}) do |key, hash|
               key = { key => nil } unless key.is_a? Hash
 
               key.each_pair do |parent, children|

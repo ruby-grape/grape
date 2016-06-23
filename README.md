@@ -492,7 +492,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If we do not specify any params, `declared` will return an empty `Hash` instance.
 
 **Request**
 
@@ -544,13 +544,6 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
   }
 }
 ````
-
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
-
-```ruby
-  declared(params).user == declared(params)['user']
-```
-
 
 The `#declared` method is not available to `before` filters, as those are evaluated prior
 to parameter coercion.
@@ -866,10 +859,10 @@ params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  # Parameter will be a plain Hash:
+  params[:avatar][:filename] # => 'avatar.png'
+  params[:avatar][:type]     # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
 ```
 
