@@ -110,9 +110,13 @@ module Grape
           end
           handler ||= extract_with(options)
 
-          if args.include?(:all)
+          case
+          when args.include?(:all)
             namespace_inheritable(:rescue_all, true)
             namespace_inheritable :all_rescue_handler, handler
+          when args.include?(:grape_exceptions)
+            namespace_inheritable(:rescue_all, true)
+            namespace_inheritable(:rescue_grape_exceptions, true)
           else
             handler_type =
               case options[:rescue_subclasses]

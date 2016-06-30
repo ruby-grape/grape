@@ -143,6 +143,20 @@ module Grape
           end
         end
 
+        describe ':grape_exceptions' do
+          it 'sets rescue all to true' do
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
+            subject.rescue_from :grape_exceptions
+          end
+
+          it 'sets rescue_grape_exceptions to true' do
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
+            subject.rescue_from :grape_exceptions
+          end
+        end
+
         describe 'list of exceptions is passed' do
           it 'sets hash of exceptions as rescue handlers' do
             expect(subject).to receive(:namespace_reverse_stackable).with(:rescue_handlers, StandardError => nil)

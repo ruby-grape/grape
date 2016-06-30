@@ -12,8 +12,9 @@ module Grape
           formatters: {},
           error_formatters: {},
           rescue_all: false, # true to rescue all exceptions
+          rescue_grape_exceptions: false,
           rescue_subclasses: true, # rescue subclasses of exceptions listed
-          rescue_options: { backtrace: false }, # true to display backtrace
+          rescue_options: { backtrace: false }, # true to display backtrace, true to let Grape handle Grape::Exceptions
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
           all_rescue_handler: nil # rescue handler block to rescue from all exceptions
@@ -34,7 +35,7 @@ module Grape
           end)
         rescue StandardError => e
           is_rescuable = rescuable?(e.class)
-          if e.is_a?(Grape::Exceptions::Base) && !is_rescuable
+          if e.is_a?(Grape::Exceptions::Base) && (!is_rescuable || rescuable_by_grape?(e.class))
             handler = ->(arg) { error_response(arg) }
           else
             raise unless is_rescuable
@@ -61,6 +62,11 @@ module Grape
       def rescuable?(klass)
         return false if klass == Grape::Exceptions::InvalidVersionHeader
         rescue_all? || rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
+      end
+
+      def rescuable_by_grape?(klass)
+        return false if klass == Grape::Exceptions::InvalidVersionHeader
+        options[:rescue_grape_exceptions]
       end
 
       def exec_handler(e, &handler)

@@ -3,6 +3,8 @@
 
 * Your contribution here.
 
+* [#1398](https://github.com/ruby-grape/grape/pull/1398): Added rescue_from :grape_exceptions option to allow Grape to use the built in Grape::Exception handing and use rescue :all behavior for everything else - [@mmclead](https://github.com/mmclead).
+
 #### Features
 
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).

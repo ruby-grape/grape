@@ -1853,6 +1853,17 @@ class Twitter::API < Grape::API
 end
 ```
 
+Grape can also rescue from all exceptions and still use the built-in exception handing.
+This will give the same behavior as `rescue_from :all` with the addition that Grape will use the exception handling defined by all Exception classes that inherit Grape::Exceptions::Base.
+
+The intent of this setting is to provide a simple way to cover the most common exceptions and return any unexpected exceptions in the API format.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :grape_exceptions
+end
+```
+
 You can also rescue specific exceptions.
 
 ```ruby
