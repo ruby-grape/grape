@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 0.16.0
 
+#### Removed official support for Ruby < 2.2.2
+
+Since 0.16.3 Grape is no longer automatically tested against versions of Ruby prior to 2.2.2.
+This is because of its dependency on activesupport which, with version 5.0.0, now requires
+at least Ruby 2.2.2.
+
 #### Changed priority of `rescue_from` clauses applying
 
 Since 0.16.3 `rescue_from` clauses declared inside namespace would take a priority over ones declared in the root scope.
