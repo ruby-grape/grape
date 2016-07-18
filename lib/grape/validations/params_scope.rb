@@ -39,7 +39,13 @@ module Grape
                                        any_element_blank?(parameters))
 
         @dependent_on.each do |dependency|
-          return false if params(parameters).try(:[], dependency).blank?
+          if dependency.is_a?(Hash)
+            dependency_key = dependency.keys[0]
+            proc = dependency.values[0]
+            return false unless proc.call(params(parameters).try(:[], dependency_key))
+          else
+            return false if params(parameters).try(:[], dependency).blank?
+          end
         end if @dependent_on
 
         return true if parent.nil?
