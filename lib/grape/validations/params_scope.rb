@@ -43,8 +43,8 @@ module Grape
             dependency_key = dependency.keys[0]
             proc = dependency.values[0]
             return false unless proc.call(params(parameters).try(:[], dependency_key))
-          else
-            return false if params(parameters).try(:[], dependency).blank?
+          elsif params(parameters).try(:[], dependency).blank?
+            return false
           end
         end if @dependent_on
 
