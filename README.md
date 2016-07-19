@@ -987,9 +987,9 @@ params do
 end
 ```
 
-In the example above Grape will use `blank?` to check if the `shelf_id` param is present.
+In the example above Grape will use `blank?` to check whether the `shelf_id` param is present.
 
-But you can use a `Proc` with custom code as well. If it returns true, the block will be evaluated.
+Given also takes a `Proc` with custom code. Below, the param `description` is required only if the value of `category` is equal `foo`:
 
 ```ruby
 params do
@@ -999,8 +999,6 @@ params do
   end
 end
 ```
-
-The param `description` is required only if the value of `category` is equal `foo`.
 
 ### Built-in Validators
 
