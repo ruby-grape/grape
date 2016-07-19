@@ -655,6 +655,38 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared; from a nested mounted endpoint - case 2' do
+    before do
+      mounted = Class.new(Grape::API) do
+        params { requires :inner_val, type: Integer }
+        get { declared(params) }
+      end
+
+      subject.format :json
+      subject.namespace :outer do
+        params { requires :outer_val, type: Integer }
+        get { declared(params) }
+        namespace :inner do
+          mount mounted
+        end
+      end
+    end
+
+    it 'outer get sees only outer param' do
+      get '/outer', outer_val: 123
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json).to eq outer_val: 123
+    end
+
+    it 'inner get sees both inner and outer params' do
+      get '/outer/inner', outer_val: 123, inner_val: 456
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json).to eq outer_val: 123, inner_val: 456
+    end
+  end
+
   describe '#params' do
     it 'is available to the caller' do
       subject.get('/hey') do
