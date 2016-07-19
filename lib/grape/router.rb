@@ -136,6 +136,13 @@ module Grape
       env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED] = true
       current = endpoint.dup
       current.instance_eval do
+        @env = env
+        @header = {}
+
+        @request = Grape::Request.new(env)
+        @params = @request.params
+        @headers = @request.headers
+
         @lazy_initialized = false
         lazy_initialize!
         run_filters befores, :before
