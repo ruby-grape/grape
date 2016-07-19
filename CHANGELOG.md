@@ -8,8 +8,9 @@
 * [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
 * [#1398](https://github.com/ruby-grape/grape/pull/1398): Added `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
+* [#1442](https://github.com/ruby-grape/grape/pull/1442): Extended `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
 * Your contribution here.
- 
+
 #### Fixes
 
 * [#1430](https://github.com/ruby-grape/grape/pull/1430): Fix for `declared(params)` inside `route_param` - [@Arkanain](https://github.com/Arkanain).

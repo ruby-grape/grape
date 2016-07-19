@@ -405,4 +405,91 @@ describe Grape::Validations::ParamsScope do
       expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'true', 'c' => { 'b' => 'yes' } })
     end
   end
+
+  context 'when validations are dependent on a parameter with specific value' do
+    before do
+      subject.params do
+        optional :a
+        given a: ->(val) { val == 'x' } do
+          requires :b
+        end
+      end
+      subject.get('/test') { declared(params).to_json }
+    end
+
+    it 'applies the validations only if the parameter has the specific value' do
+      get '/test'
+      expect(last_response.status).to eq(200)
+
+      get '/test', a: 'x'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('b is missing')
+
+      get '/test', a: 'x', b: true
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'raises an error if the dependent parameter was never specified' do
+      expect do
+        subject.params do
+          given :c do
+          end
+        end
+      end.to raise_error(Grape::Exceptions::UnknownParameter)
+    end
+
+    it 'includes the parameter within #declared(params)' do
+      get '/test', a: true, b: true
+
+      expect(JSON.parse(last_response.body)).to eq('a' => 'true', 'b' => 'true')
+    end
+
+    it 'returns a sensible error message within a nested context' do
+      subject.params do
+        requires :bar, type: Hash do
+          optional :a
+          given a: ->(val) { val == 'x' } do
+            requires :b
+          end
+        end
+      end
+      subject.get('/nested') { 'worked' }
+
+      get '/nested', bar: { a: 'x' }
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('bar[b] is missing')
+    end
+
+    it 'includes the nested parameter within #declared(params)' do
+      subject.params do
+        requires :bar, type: Hash do
+          optional :a
+          given a: ->(val) { val == 'x' } do
+            requires :b
+          end
+        end
+      end
+      subject.get('/nested') { declared(params).to_json }
+
+      get '/nested', bar: { a: 'x', b: 'yes' }
+      expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'x', 'b' => 'yes' })
+    end
+
+    it 'includes level 2 nested parameters outside the given within #declared(params)' do
+      subject.params do
+        requires :bar, type: Hash do
+          optional :a
+          given a: ->(val) { val == 'x' } do
+            requires :c, type: Hash do
+              requires :b
+            end
+          end
+        end
+      end
+      subject.get('/nested') { declared(params).to_json }
+
+      get '/nested', bar: { a: 'x', c: { b: 'yes' } }
+      expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'x', 'c' => { 'b' => 'yes' } })
+    end
+  end
 end
