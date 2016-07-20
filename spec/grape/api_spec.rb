@@ -556,6 +556,21 @@ XML
       end
     end
 
+    context 'when accessing env' do
+      it 'returns a 405 for an unsupported method' do
+        subject.before do
+          _custom_header_1 = headers['X-Custom-Header']
+          _custom_header_2 = env['HTTP_X_CUSTOM_HEADER']
+        end
+        subject.get 'example' do
+          'example'
+        end
+        put '/example'
+        expect(last_response.status).to eql 405
+        expect(last_response.body).to eql '405 Not Allowed'
+      end
+    end
+
     specify '405 responses includes an Allow header specifying supported methods' do
       subject.get 'example' do
         'example'

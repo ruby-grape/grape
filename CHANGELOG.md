@@ -13,6 +13,7 @@
 
 #### Fixes
 
+* [#1446](https://github.com/ruby-grape/grape/pull/1446): Fix for `env` inside `before` when using not allowed method - [@leifg](https://github.com/leifg).
 * [#1430](https://github.com/ruby-grape/grape/pull/1430): Fix for `declared(params)` inside `route_param` - [@Arkanain](https://github.com/Arkanain).
 * [#1405](https://github.com/ruby-grape/grape/pull/1405): Fix priority of `rescue_from` clauses applying - [@hedgesky](https://github.com/hedgesky).
 * [#1365](https://github.com/ruby-grape/grape/pull/1365): Fix finding exception handler in error middleware - [@ktimothy](https://github.com/ktimothy).
