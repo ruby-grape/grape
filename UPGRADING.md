@@ -3,6 +3,9 @@ Upgrading Grape
 
 ### Upgrading to >= 0.16.0
 
+#### Removed MultiJSON in favor of JSON from stdlib
+If you need to use another library `#to_json` could be an option for you.
+
 #### Removed official support for Ruby < 2.2.2
 
 Since 0.16.3 Grape is no longer automatically tested against versions of Ruby prior to 2.2.2.
