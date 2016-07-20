@@ -3,6 +3,7 @@
 
 #### Features
 
+* [#1448](https://github.com/ruby-grape/grape/pull/1448): Remove Hashie dependency - [@etehtsea](https://github.com/etehtsea).
 * [#1440](https://github.com/ruby-grape/grape/pull/1441): Supports only Ruby 2.2.2 and later - [@jlfaber](https://github.com/jlfaber).
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
 * [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).

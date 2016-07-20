@@ -15,7 +15,7 @@ module Grape
     private
 
     def build_params
-      params = Hashie::Mash.new(rack_params)
+      params = rack_params.with_indifferent_access
       if env[Grape::Env::GRAPE_ROUTING_ARGS]
         args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
         # preserve version from query string parameters

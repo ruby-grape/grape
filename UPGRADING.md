@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 0.16.0
 
+#### Removed dependency from hashie gem
+
+It means that `Grape::Request#params` became instance of `ActiveSupport::HashWithIndifferentAccess`
+instead of `Hashie::Mash`. After this change `params` fields should be accessed
+using usual `Hash` methods. Both `String` and `Symbol` keys are supported.
+
 #### Removed official support for Ruby < 2.2.2
 
 Since 0.16.3 Grape is no longer automatically tested against versions of Ruby prior to 2.2.2.

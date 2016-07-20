@@ -63,10 +63,7 @@ module Grape
         # @param method [#parse,#call]
         #   optional coercion method. See class docs.
         def initialize(type, method = nil)
-          coercion_method = infer_coercion_method type, method
-
-          @method = enforce_symbolized_keys type, coercion_method
-
+          @method = infer_coercion_method type, method
           @type_check = infer_type_check(type)
         end
 
@@ -141,42 +138,6 @@ module Grape
           else
             # By default, do a simple type check
             ->(value) { value.is_a? type }
-          end
-        end
-
-        # Enforce symbolized keys for complex types
-        # by wrapping the coercion method such that
-        # any Hash objects in the immediate heirarchy
-        # are passed through +Hashie.symbolize_keys!+.
-        # This helps common libs such as JSON to work easily.
-        #
-        # @param type see #new
-        # @param method see #infer_coercion_method
-        # @return [#call] +method+ wrapped in an additional
-        #   key-conversion step, or just returns +method+
-        #   itself if no conversion is deemed to be
-        #   necessary.
-        def enforce_symbolized_keys(type, method)
-          # Collections have all values processed individually
-          if type == Array || type == Set
-            lambda do |val|
-              method.call(val).tap do |new_value|
-                new_value.each do |item|
-                  Hashie.symbolize_keys!(item) if item.is_a? Hash
-                end
-              end
-            end
-
-          # Hash objects are processed directly
-          elsif type == Hash
-            lambda do |val|
-              Hashie.symbolize_keys! method.call(val)
-            end
-
-          # Simple types are not processed.
-          # This includes Array<primitive> types.
-          else
-            method
           end
         end
       end
