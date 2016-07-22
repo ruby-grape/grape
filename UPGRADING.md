@@ -1,18 +1,28 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.16.0
+### Upgrading to >= 0.17.0
 
 #### Removed official support for Ruby < 2.2.2
 
-Since 0.16.3 Grape is no longer automatically tested against versions of Ruby prior to 2.2.2.
-This is because of its dependency on activesupport which, with version 5.0.0, now requires
-at least Ruby 2.2.2.
+Grape is no longer automatically tested against versions of Ruby prior to 2.2.2. This is because of its dependency on activesupport which, with version 5.0.0, now requires at least Ruby 2.2.2.
+
+See [#1441](https://github.com/ruby-grape/grape/pull/1441) for nmore information.
 
 #### Changed priority of `rescue_from` clauses applying
 
-Since 0.16.3 `rescue_from` clauses declared inside namespace would take a priority over ones declared in the root scope.
+The `rescue_from` clauses declared inside a namespace would take a priority over ones declared in the root scope.
 This could possibly affect those users who use different `rescue_from` clauses in root scope and in namespaces.
+
+See [#1405](https://github.com/ruby-grape/grape/pull/1405) for more inforomation.
+
+#### Helper methods injected inside `rescue_from` in middleware
+
+Helper methods are injected inside `rescue_from` may cause undesirable effects. For example, definining a helper method called `error!` will take precendence over the built-in `error!` method and should be renamed.
+
+See [#1451](https://github.com/ruby-grape/grape/issues/1451) for an example.
+
+### Upgrading to >= 0.16.0
 
 #### Replace rack-mount with new router
 
