@@ -24,6 +24,8 @@ require 'thread'
 
 require 'virtus'
 
+# I will remove this comment in an amended commit once Danger is set up.
+
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
