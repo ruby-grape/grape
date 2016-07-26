@@ -9,6 +9,8 @@
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
 * [#1398](https://github.com/ruby-grape/grape/pull/1398): Added `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
 * [#1443](https://github.com/ruby-grape/grape/pull/1443): Extended `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
+* [#1455](https://github.com/ruby-grape/grape/pull/1455): Adds some automated PR rules around CHANGELOGs and ensuring the `fit` and `fdescribe` don't end up in the test suite. - [@orta](https://github.com/orta).
+
 * Your contribution here.
 
 #### Fixes

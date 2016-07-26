@@ -11,7 +11,7 @@ if git.modified_files.include?("CHANGELOG.md") == false && !declared_trivial
 Here's an example of your CHANGELOG entry:
 
 ```markdown
-* [##{pr_number}](https://github.com/ruby-grape/grape/pull/#{pr_number}): #{github.pr_title} [@#{github.pr_author}](https://github.com/#{github.pr_author}).
+* [##{pr_number}](https://github.com/ruby-grape/grape/pull/#{pr_number}): #{github.pr_title} - [@#{github.pr_author}](https://github.com/#{github.pr_author}).
 ```
 MARKDOWN
 end
