@@ -1,7 +1,7 @@
 # Has any changes happened inside the lib dir?
 has_app_changes = !git.modified_files.grep(/lib/).empty?
 
-if git.modified_files.include?('CHANGELOG.md') == false && !declared_trivial && has_app_changes
+if git.modified_files.include?('CHANGELOG.md') == false && has_app_changes
   pr_number = github.pr_json['number']
   markdown <<-MARKDOWN
 Here's an example of your CHANGELOG entry:
