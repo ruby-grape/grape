@@ -2,27 +2,26 @@ language: ruby
 
 sudo: false
 
-rvm:
-  - 2.3.1
-  - 2.3.0
-  - 2.2.5
-  - rbx-2
-  - ruby-head
-  - jruby-head
-
 matrix:
+  include:
+    - rvm: 2.3.1
+      gemfile: Gemfile
+      before_script:
+        - bundle exec danger
+    - rvm: 2.3.1
+      gemfile: gemfiles/rails_3.gemfile
+    - rvm: 2.3.1
+      gemfile: gemfiles/rails_4.gemfile
+    - rvm: 2.3.1
+      gemfile: gemfiles/rack_1.5.2.gemfile
+    - rvm: 2.3.0
+    - rvm: 2.2.5
+    - rvm: rbx-2
+    - rvm: ruby-head
+    - rvm: jruby-head
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-2
 
-gemfile:
-  - Gemfile
-  - gemfiles/rails_3.gemfile
-  - gemfiles/rails_4.gemfile
-  - gemfiles/rack_1.5.2.gemfile
-
 bundler_args: --without development
-
-before_script:
-  - bundle exec danger
