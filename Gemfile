@@ -28,4 +28,5 @@ group :test do
   gem 'cookiejar'
   gem 'rack-contrib'
   gem 'mime-types', '< 3.0'
+  gem 'danger', '~> 2.0'
 end

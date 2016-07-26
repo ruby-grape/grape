@@ -2,8 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "rails", "3.2.19"
-gem "rack-cache", "<= 1.2"
+gem "rails", "5.0.0"
 
 group :development, :test do
   gem "bundler"
