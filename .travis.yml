@@ -9,13 +9,13 @@ matrix:
       before_script:
         - bundle exec danger
     - rvm: 2.3.1
-      gemfile: gemfiles/rails_3.gemfile
-    - rvm: 2.3.1
-      gemfile: gemfiles/rails_4.gemfile
-    - rvm: 2.3.1
       gemfile: gemfiles/rack_1.5.2.gemfile
     - rvm: 2.3.0
     - rvm: 2.2.5
+    - rvm: 2.1.10
+      gemfile: gemfiles/rails_4.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails_3.gemfile
     - rvm: rbx-2
     - rvm: ruby-head
     - rvm: jruby-head
