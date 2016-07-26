@@ -288,13 +288,6 @@ Modify `config/routes`:
 mount Twitter::API => '/'
 ```
 
-Additionally, if the version of your Rails is 4.0+ and the application uses the default model layer of ActiveRecord, you will want to use the [hashie-forbidden_attributes gem](https://github.com/Maxim-Filimonov/hashie-forbidden_attributes). This gem disables the security feature of `strong_params` at the model layer, allowing you the use of Grape's own params validation instead.
-
-```ruby
-# Gemfile
-gem 'hashie-forbidden_attributes'
-```
-
 See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
@@ -492,7 +485,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If we do not specify any params, `declared` will return an empty `ActiveSupport::HashWithIndifferentAccess` instance.
 
 **Request**
 
@@ -545,10 +538,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
+The returned hash is a `ActiveSupport::HashWithIndifferentAccess` instance, allowing you to access parameters via both `Symbol` and `String` keys:
 
 ```ruby
-  declared(params).user == declared(params)['user']
+  declared(params)[:user] == declared(params)['user']
 ```
 
 
@@ -866,10 +859,10 @@ params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  # Parameter will be wrapped using `ActiveSupport::HashWithIndifferentAccess`:
+  params[:avatar][:filename] # => 'avatar.png'
+  params[:avatar][:type]     # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
 ```
 
