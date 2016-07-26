@@ -127,6 +127,10 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('Hello'.to_json)
     end
+    it 'rejects nil values' do
+      get '/', name: 'Bob', company: nil
+      expect(last_response.body).to eq({ error: 'company is missing' }.to_json)
+    end
   end
 
   context 'with nested parameters' do
