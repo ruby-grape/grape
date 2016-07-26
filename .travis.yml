@@ -23,3 +23,6 @@ gemfile:
   - gemfiles/rack_1.5.2.gemfile
 
 bundler_args: --without development
+
+before_script:
+  - bundle exec danger
