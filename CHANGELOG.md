@@ -5,11 +5,11 @@
 
 * [#1440](https://github.com/ruby-grape/grape/pull/1441): Supports only Ruby 2.2.2 and later - [@jlfaber](https://github.com/jlfaber).
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
-* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
-* [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
-* [#1398](https://github.com/ruby-grape/grape/pull/1398): Added `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
-* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extended `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
-* [#1455](https://github.com/ruby-grape/grape/pull/1455): Adds an automated PR linter [@orta](https://github.com/orta).
+* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allows inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
+* [#1366](https://github.com/ruby-grape/grape/pull/1366): Stores `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
+* [#1398](https://github.com/ruby-grape/grape/pull/1398): Adds `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
+* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extends `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
+* [#1455](https://github.com/ruby-grape/grape/pull/1455): Adds an automated PR linter - [@orta](https://github.com/orta).
 
 * Your contribution here.
 

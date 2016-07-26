@@ -1,4 +1,7 @@
 AllCops:
+  Include:
+    - Dangerfile
+
   Exclude:
     - vendor/**/*
     - bin/**/*
