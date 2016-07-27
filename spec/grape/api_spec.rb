@@ -1317,7 +1317,9 @@ XML
     it 'defaults to a standard logger log format' do
       t = Time.at(100)
       allow(Time).to receive(:now).and_return(t)
-      expect(subject.io).to receive(:write).with("I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : this will be logged\n")
+      message = "this will be logged\n"
+      message = "I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : #{message}" if !defined?(Rails) || Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
+      expect(subject.io).to receive(:write).with(message)
       subject.logger.info 'this will be logged'
     end
   end
