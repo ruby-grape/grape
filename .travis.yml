@@ -27,6 +27,3 @@ matrix:
     - rvm: rbx-2
 
 bundler_args: --without development
-
-before_script:
-  - bundle exec danger
