@@ -58,6 +58,7 @@ module Grape
     extend ActiveSupport::Autoload
     autoload :Base
     autoload :Validation
+    autoload :ValidationArrayErrors
     autoload :ValidationErrors
     autoload :MissingVendorOption
     autoload :MissingMimeType

@@ -191,7 +191,8 @@ module Grape
         params = @parent.params(params) if @parent
         if @element
           params = if params.is_a?(Array)
-                     params.flat_map { |el| el[@element] || {} }
+                     # used for calculating parent array indices for error messages
+                     params.map { |el| el[@element] || {} }
                    elsif params.is_a?(Hash)
                      params[@element] || {}
                    else

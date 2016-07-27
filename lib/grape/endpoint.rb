@@ -335,6 +335,8 @@ module Grape
           validator.validate(request)
         rescue Grape::Exceptions::Validation => e
           validation_errors << e
+        rescue Grape::Exceptions::ValidationArrayErrors => e
+          validation_errors += e.errors
         end
       end
 
