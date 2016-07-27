@@ -374,12 +374,17 @@ describe Grape::API do
     end
 
     context 'format' do
+      module ApiSpec
+        class DummyFormatClass
+        end
+      end
+
       before(:each) do
-        allow_any_instance_of(Object).to receive(:to_json).and_return('abc')
-        allow_any_instance_of(Object).to receive(:to_txt).and_return('def')
+        allow_any_instance_of(ApiSpec::DummyFormatClass).to receive(:to_json).and_return('abc')
+        allow_any_instance_of(ApiSpec::DummyFormatClass).to receive(:to_txt).and_return('def')
 
         subject.get('/abc') do
-          Object.new
+          ApiSpec::DummyFormatClass.new
         end
       end
 

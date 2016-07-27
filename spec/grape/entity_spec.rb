@@ -266,8 +266,6 @@ XML
     end
 
     it 'presents with jsonp utilising Rack::JSONP' do
-      require 'rack/contrib'
-
       # Include JSONP middleware
       subject.use Rack::JSONP
 

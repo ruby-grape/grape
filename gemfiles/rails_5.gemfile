@@ -26,7 +26,7 @@ group :test do
   gem 'rack-test'
   gem 'rspec', '~> 3.0'
   gem 'cookiejar'
-  gem 'rack-contrib'
+  gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'mime-types', '< 3.0'
   gem 'danger', '~> 2.0'
 end
