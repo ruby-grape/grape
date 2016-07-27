@@ -7,6 +7,10 @@ appraise 'rails-4' do
   gem 'rails', '4.1.6'
 end
 
+appraise 'rails-5' do
+  gem 'rails', '5.0.0'
+end
+
 appraise 'rack-1.5.2' do
   gem 'rack', '1.5.2'
 end

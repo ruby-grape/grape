@@ -6,14 +6,7 @@ require 'grape'
 
 require 'rubygems'
 require 'bundler'
-Bundler.setup :default, :test
-
-require 'json'
-require 'rack/test'
-require 'base64'
-require 'cookiejar'
-require 'mime/types'
-require 'cgi'
+Bundler.require :default, :test
 
 Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
   require file
