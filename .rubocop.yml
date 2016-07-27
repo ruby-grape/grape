@@ -1,6 +1,7 @@
 AllCops:
   Include:
     - Dangerfile
+    - gemfiles/*.gemfile
 
   Exclude:
     - vendor/**/*
