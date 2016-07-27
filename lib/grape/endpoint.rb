@@ -248,9 +248,12 @@ module Grape
 
         run_filters befores, :before
 
+        allowed_methods = env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED]
+        raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) if allowed_methods
+
         run_filters before_validations, :before_validation
 
-        run_validators validations, request unless env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED]
+        run_validators validations, request
 
         run_filters after_validations, :after_validation
 

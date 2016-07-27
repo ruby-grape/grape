@@ -14,6 +14,7 @@
 
 #### Fixes
 
+* [#1465](https://github.com/ruby-grape/grape/pull/1465): Fix 'before' being called twice when using not allowed method - [@jsteinberg](https://github.com/jsteinberg).
 * [#1446](https://github.com/ruby-grape/grape/pull/1446): Fix for `env` inside `before` when using not allowed method - [@leifg](https://github.com/leifg).
 * [#1438](https://github.com/ruby-grape/grape/pull/1439): Try to dup non-frozen default params with each use - [@jlfaber](https://github.com/jlfaber).
 * [#1430](https://github.com/ruby-grape/grape/pull/1430): Fix for `declared(params)` inside `route_param` - [@Arkanain](https://github.com/Arkanain).
