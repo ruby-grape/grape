@@ -8,16 +8,41 @@ module Grape
       def initialize(validator, scope, params)
         @scope = scope
         @attrs = validator.attrs
-        @params = Array.wrap(scope.params(params))
+        @original_params = scope.params(params)
+        @params = Array.wrap(@original_params)
       end
 
-      def each
-        @params.each do |resource_params|
-          @attrs.each_with_index do |attr_name, index|
-            if resource_params.is_a?(Hash) && resource_params[attr_name].is_a?(Array)
-              scope.index = index
+      def each(&block)
+        do_each(@params, &block) # because we need recursion for nested arrays
+      end
+
+      private
+
+      def do_each(params_to_process, parent_indicies = [], &block)
+        params_to_process.each_with_index do |resource_params, index|
+          # when we get arrays of arrays it means that target element located inside array
+          # we need this because we want to know parent arrays indicies
+          if resource_params.is_a?(Array)
+            do_each(resource_params, [index] + parent_indicies, &block)
+            next
+          end
+
+          if @scope.type == Array
+            next unless @original_params.is_a?(Array) # do not validate content of array if it isn't array
+            inside_array = true
+          end
+          if inside_array
+            # fill current and parent scopes with correct array indicies
+            parent_scope = @scope.parent
+            parent_indicies.each do |parent_index|
+              parent_scope.index = parent_index
+              parent_scope = parent_scope.parent
             end
-            yield resource_params, attr_name
+            @scope.index = index
+          end
+
+          @attrs.each do |attr_name|
+            yield resource_params, attr_name, inside_array
           end
         end
       end

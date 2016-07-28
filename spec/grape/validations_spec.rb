@@ -245,7 +245,7 @@ describe Grape::Validations do
       it 'errors when param is not an Array' do
         get '/required', items: 'hello'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items is invalid, items[key] is missing')
+        expect(last_response.body).to eq('items is invalid')
 
         get '/required', items: { key: 'foo' }
         expect(last_response.status).to eq(400)
@@ -337,7 +337,7 @@ describe Grape::Validations do
 
         get '/required', items: [{ key: 'hash in array' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items is invalid, items[0][key] does not have a valid value')
+        expect(last_response.body).to eq('items is invalid, items[key] does not have a valid value')
       end
 
       it 'works when all params match' do
@@ -466,7 +466,7 @@ describe Grape::Validations do
           group :children, type: Array do
             requires :name
             group :parents, type: Array do
-              requires :name
+              requires :name, allow_blank: false
             end
           end
         end
@@ -486,13 +486,33 @@ describe Grape::Validations do
 
       it 'errors when a parameter is not present' do
         get '/within_array', children: [
-          { name: 'Jim', parents: [{}] },
-          { name: 'Job', parents: [{ name: 'Joy' }] }
+          { name: 'Jim', parents: [{ name: 'Joy' }] },
+          { name: 'Job', parents: [{}] }
         ]
         # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[1][parents] is missing')
+      end
+
+      it 'errors when a parameter is not present in array within array' do
+        get '/within_array', children: [
+          { name: 'Jim', parents: [{ name: 'Joy' }] },
+          { name: 'Job', parents: [{ name: 'Bill' }, { name: '' }] }
+        ]
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('children[1][parents][1][name] is empty')
+      end
+
+      it 'handle errors for all array elements' do
+        get '/within_array', children: [
+          { name: 'Jim', parents: [] },
+          { name: 'Job', parents: [] }
+        ]
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('children[0][parents] is missing, children[1][parents] is missing')
       end
 
       it 'safely handles empty arrays and blank parameters' do
@@ -507,14 +527,13 @@ describe Grape::Validations do
       end
 
       it 'errors when param is not an Array' do
-        # NOTE: would be nicer if these just returned 'children is invalid'
         get '/within_array', children: 'hello'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children is invalid, children[name] is missing, children[parents] is missing, children[parents] is invalid, children[parents][name] is missing')
+        expect(last_response.body).to eq('children is invalid')
 
         get '/within_array', children: { name: 'foo' }
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children is invalid, children[parents] is missing')
+        expect(last_response.body).to eq('children is invalid')
 
         get '/within_array', children: [name: 'Jay', parents: { name: 'Fred' }]
         expect(last_response.status).to eq(400)
@@ -565,7 +584,7 @@ describe Grape::Validations do
       it 'requires defaults to Array type' do
         get '/req', planets: 'Jupiter, Saturn'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('planets is invalid, planets[name] is missing')
+        expect(last_response.body).to eq('planets is invalid')
 
         get '/req', planets: { name: 'Jupiter' }
         expect(last_response.status).to eq(400)
@@ -581,7 +600,7 @@ describe Grape::Validations do
       it 'optional defaults to Array type' do
         get '/opt', name: 'Jupiter', moons: 'Europa, Ganymede'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('moons is invalid, moons[name] is missing')
+        expect(last_response.body).to eq('moons is invalid')
 
         get '/opt', name: 'Jupiter', moons: { name: 'Ganymede' }
         expect(last_response.status).to eq(400)
@@ -600,7 +619,7 @@ describe Grape::Validations do
       it 'group defaults to Array type' do
         get '/grp', stars: 'Sun'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('stars is invalid, stars[name] is missing')
+        expect(last_response.body).to eq('stars is invalid')
 
         get '/grp', stars: { name: 'Sun' }
         expect(last_response.status).to eq(400)
@@ -689,7 +708,7 @@ describe Grape::Validations do
       it "errors when param is present but isn't an Array" do
         get '/optional_group', items: 'hello'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items is invalid, items[key] is missing')
+        expect(last_response.body).to eq('items is invalid')
 
         get '/optional_group', items: { key: 'foo' }
         expect(last_response.status).to eq(400)

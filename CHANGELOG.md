@@ -3,6 +3,7 @@
 
 #### Features
 
+* [#1463](https://github.com/ruby-grape/grape/pull/1463): Fix array indicies in error messages - [@ffloyd](https://github.com/ffloyd).
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
 * [#1390](https://github.com/ruby-grape/grape/pull/1390): Allows inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Stores `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).

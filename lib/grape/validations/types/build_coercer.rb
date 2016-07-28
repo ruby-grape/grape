@@ -26,7 +26,15 @@ module Grape
         converter_options = {
           nullify_blank: true
         }
-        conversion_type = type
+        conversion_type = if method == JSON
+                            Object
+                            # because we want just parsed JSON content:
+                            # if type is Array and data is `"{}"`
+                            # result will be [] because Virtus converts hashes
+                            # to arrays
+                          else
+                            type
+                          end
 
         # Use a special coercer for multiply-typed parameters.
         if Types.multiple?(type)
