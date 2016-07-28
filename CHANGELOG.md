@@ -9,7 +9,6 @@
 * [#1398](https://github.com/ruby-grape/grape/pull/1398): Adds `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
 * [#1443](https://github.com/ruby-grape/grape/pull/1443): Extends `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
 * [#1455](https://github.com/ruby-grape/grape/pull/1455): Adds an automated PR linter - [@orta](https://github.com/orta).
-
 * Your contribution here.
 
 #### Fixes
@@ -121,7 +120,7 @@
 * [#1039](https://github.com/ruby-grape/grape/pull/1039): Added support for custom parameter types - [@rnubel](https://github.com/rnubel).
 * [#1047](https://github.com/ruby-grape/grape/pull/1047): Adds `given` to DSL::Parameters, allowing for dependent params - [@rnubel](https://github.com/rnubel).
 * [#1064](https://github.com/ruby-grape/grape/pull/1064): Add public `Grape::Exception::ValidationErrors#full_messages` - [@romanlehnert](https://github.com/romanlehnert).
-* [#1079](https://github.com/ruby-grape/grape/pull/1079): Added `stream` method to take advantage of `Rack::Chunked` [@zbelzer](https://github.com/zbelzer).
+* [#1079](https://github.com/ruby-grape/grape/pull/1079): Added `stream` method to take advantage of `Rack::Chunked` - [@zbelzer](https://github.com/zbelzer).
 * [#1086](https://github.com/ruby-grape/grape/pull/1086): Added `ActiveSupport::Notifications` instrumentation - [@wagenet](https://github.com/wagenet).
 
 #### Fixes
@@ -130,7 +129,7 @@
 * [#1038](https://github.com/ruby-grape/grape/pull/1038): Avoid dup-ing the `String` class when used in inherited params - [@rnubel](https://github.com/rnubel).
 * [#1042](https://github.com/ruby-grape/grape/issues/1042): Fix coercion of complex arrays - [@dim](https://github.com/dim).
 * [#1045](https://github.com/ruby-grape/grape/pull/1045): Do not convert `Rack::Response` to `Rack::Response` in middleware - [@dmitry](https://github.com/dmitry).
-* [#1048](https://github.com/ruby-grape/grape/pull/1048): Only dup `InheritableValues`, remove support for `deep_dup` - [@toddmazierski](https://github.com/toddmazierski/).
+* [#1048](https://github.com/ruby-grape/grape/pull/1048): Only dup `InheritableValues`, remove support for `deep_dup` - [@toddmazierski](https://github.com/toddmazierski).
 * [#1052](https://github.com/ruby-grape/grape/pull/1052): Reset `description[:params]` when resetting validations - [@marshall-lee](https://github.com/marshall-lee).
 * [#1088](https://github.com/ruby-grape/grape/pull/1088): Support ActiveSupport 3.x by explicitly requiring `Hash#except` - [@wagenet](https://github.com/wagenet).
 * [#1096](https://github.com/ruby-grape/grape/pull/1096): Fix coercion on booleans - [@towanda](https://github.com/towanda).
@@ -146,7 +145,7 @@
 * [#974](https://github.com/ruby-grape/grape/pull/974): Added `error!` to `rescue_from` blocks - [@whatasunnyday](https://github.com/whatasunnyday).
 * [#950](https://github.com/ruby-grape/grape/pull/950): Status method can now accept one of Rack::Utils status code symbols (:ok, :found, :bad_request, etc.) - [@dabrorius](https://github.com/dabrorius).
 * [#952](https://github.com/ruby-grape/grape/pull/952): Status method now raises error when called with invalid status code - [@dabrorius](https://github.com/dabrorius).
-* [#957](https://github.com/ruby-grape/grape/pull/957): Regexp validator now supports `allow_blank`, `nil` value behavior changed - [@calfzhou](https://giihub.com/calfzhou).
+* [#957](https://github.com/ruby-grape/grape/pull/957): Regexp validator now supports `allow_blank`, `nil` value behavior changed - [@calfzhou](https://github.com/calfzhou).
 * [#962](https://github.com/ruby-grape/grape/pull/962): The `default` attribute with `false` value is documented now - [@ajvondrak](https://github.com/ajvondrak).
 * [#1026](https://github.com/ruby-grape/grape/pull/1026): Added `file` method, explicitly setting a file-like response object - [@dblock](https://github.com/dblock).
 
@@ -207,8 +206,8 @@
 * [#826](https://github.com/ruby-grape/grape/pull/826): Find `coerce_type` for `Array` when not specified - [@manovotn](https://github.com/manovotn).
 * [#645](https://github.com/ruby-grape/grape/issues/645): Invoking `body false` will return `204 No Content` - [@dblock](https://github.com/dblock).
 * [#801](https://github.com/ruby-grape/grape/issues/801): Only evaluate permitted parameter `values` and `default` lazily on each request when declared as a proc - [@dblock](https://github.com/dblock).
-* [#679](https://github.com/ruby-grape/grape/issues/679): Fixed `OPTIONS` method returning 404 when combined with `prefix`- [@dblock](https://github.com/dblock).
-* [#679](https://github.com/ruby-grape/grape/issues/679): Fixed unsupported methods returning 404 instead of 405 when combined with `prefix`- [@dblock](https://github.com/dblock).
+* [#679](https://github.com/ruby-grape/grape/issues/679): Fixed `OPTIONS` method returning 404 when combined with `prefix` - [@dblock](https://github.com/dblock).
+* [#679](https://github.com/ruby-grape/grape/issues/679): Fixed unsupported methods returning 404 instead of 405 when combined with `prefix` - [@dblock](https://github.com/dblock).
 
 0.9.0 (8/27/2014)
 =================
@@ -288,7 +287,7 @@
 * [#557](https://github.com/ruby-grape/grape/pull/557): Pass `content_types` option to `Grape::Middleware::Error` to fix the content-type header for custom formats. - [@bernd](https://github.com/bernd).
 * [#585](https://github.com/ruby-grape/grape/pull/585): Fix after boot thread-safety issue - [@etehtsea](https://github.com/etehtsea).
 * [#587](https://github.com/ruby-grape/grape/pull/587): Fix oauth2 middleware compatibility with [draft-ietf-oauth-v2-31](http://tools.ietf.org/html/draft-ietf-oauth-v2-31) spec - [@etehtsea](https://github.com/etehtsea).
-* [#610](https://github.com/ruby-grape/grape/pull/610): Fixed group keyword was not working with type parameter - [@klausmeyer](https://github.com/klausmeyer/).
+* [#610](https://github.com/ruby-grape/grape/pull/610): Fixed group keyword was not working with type parameter - [@klausmeyer](https://github.com/klausmeyer).
 
 0.6.1 (10/19/2013)
 ==================
@@ -319,7 +318,7 @@
 * [#448](https://github.com/ruby-grape/grape/pull/448): Adding POST style parameters for DELETE requests - [@dquimper](https://github.com/dquimper).
 * [#450](https://github.com/ruby-grape/grape/pull/450): Added option to pass an exception handler lambda as an argument to `rescue_from` - [@robertopedroso](https://github.com/robertopedroso).
 * [#443](https://github.com/ruby-grape/grape/pull/443): Let `requires` and `optional` take blocks that initialize new scopes - [@asross](https://github.com/asross).
-* [#452](https://github.com/ruby-grape/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` [@robertopedroso](https://github.com/robertopedroso).
+* [#452](https://github.com/ruby-grape/grape/pull/452): Added `with` as a hash option to specify handlers for `rescue_from` and `error_formatter` - [@robertopedroso](https://github.com/robertopedroso).
 * [#433](https://github.com/ruby-grape/grape/issues/433), [#462](https://github.com/ruby-grape/grape/issues/462): Validation errors are now collected and `Grape::Exceptions::ValidationErrors` is raised - [@stevschmid](https://github.com/stevschmid).
 
 #### Fixes
@@ -351,7 +350,7 @@
 * [#408](https://github.com/ruby-grape/grape/pull/408): Fix: Goliath passes request header keys as symbols not strings - [@bobek](https://github.com/bobek).
 * [#417](https://github.com/ruby-grape/grape/issues/417): Fix: Rails 4 does not rewind input, causes POSTed data to be empty - [@dblock](https://github.com/dblock).
 * [#423](https://github.com/ruby-grape/grape/pull/423): Fix: `Grape::Endpoint#declared` now correctly handles nested params (ie. declared with `group`) - [@jbarreneche](https://github.com/jbarreneche).
-* [#427](https://github.com/ruby-grape/grape/issues/427): Fix: `declared(params)` breaks when `params` contains array - [@timhabermaas](https://github.com/timhabermaas)
+* [#427](https://github.com/ruby-grape/grape/issues/427): Fix: `declared(params)` breaks when `params` contains array - [@timhabermaas](https://github.com/timhabermaas).
 
 0.4.1 (4/1/2013)
 ================
@@ -390,32 +389,32 @@
 * [#340](https://github.com/ruby-grape/grape/pull/339), [#342](https://github.com/ruby-grape/grape/pull/342): Added `:cascade` option to `version` to allow disabling of rack/mount cascade behavior - [@dieb](https://github.com/dieb).
 * [#333](https://github.com/ruby-grape/grape/pull/333): Added support for validation of arrays in `params` - [@flyerhzm](https://github.com/flyerhzm).
 * [#306](https://github.com/ruby-grape/grape/issues/306): Added I18n support for all Grape exceptions - [@niedhui](https://github.com/niedhui).
-* [#309](https://github.com/ruby-grape/grape/pull/309): Added XML support to the entity presenter - [@johnnyiller](https://github.com/johnnyiller), [@dblock](http://github.com/dblock).
-* [#131](https://github.com/ruby-grape/grape/issues/131): Added instructions for Grape API reloading in Rails - [@jyn](http://github.com/jyn), [@dblock](http://github.com/dblock).
-* [#317](https://github.com/ruby-grape/grape/issues/317): Added `headers` that returns a hash of parsed HTTP request headers - [@dblock](http://github.com/dblock).
+* [#309](https://github.com/ruby-grape/grape/pull/309): Added XML support to the entity presenter - [@johnnyiller](https://github.com/johnnyiller), [@dblock](https://github.com/dblock).
+* [#131](https://github.com/ruby-grape/grape/issues/131): Added instructions for Grape API reloading in Rails - [@jyn](https://github.com/jyn), [@dblock](https://github.com/dblock).
+* [#317](https://github.com/ruby-grape/grape/issues/317): Added `headers` that returns a hash of parsed HTTP request headers - [@dblock](https://github.com/dblock).
 * [#332](https://github.com/ruby-grape/grape/pull/332): `Grape::Exceptions::Validation` now contains full nested parameter names - [@alovak](https://github.com/alovak).
-* [#328](https://github.com/ruby-grape/grape/issues/328): API version can now be specified as both String and Symbol - [@dblock](http://github.com/dblock).
-* [#190](https://github.com/ruby-grape/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](http://github.com/dblock).
-* Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](http://github.com/dblock).
-* [#309](https://github.com/ruby-grape/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](http://github.com/dblock).
-* A formatter that raises an exception will cause the API to return a 500 error - [@dblock](http://github.com/dblock).
-* [#322](https://github.com/ruby-grape/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](http://github.com/dblock).
-* [#60](https://github.com/ruby-grape/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](http://github.com/dblock).
-* [#335](https://github.com/ruby-grape/grape/pull/335): Fix: request body parameters from a `PATCH` request not available in `params` - [@FreakenK](http://github.com/FreakenK).
+* [#328](https://github.com/ruby-grape/grape/issues/328): API version can now be specified as both String and Symbol - [@dblock](https://github.com/dblock).
+* [#190](https://github.com/ruby-grape/grape/issues/190): When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!` - [@dblock](https://github.com/dblock).
+* Added `do_not_route_options!`, which disables the automatic creation of the `OPTIONS` route - [@dblock](https://github.com/dblock).
+* [#309](https://github.com/ruby-grape/grape/pull/309): An XML format API will return an error instead of returning a string representation of the response if the latter cannot be converted to XML - [@dblock](https://github.com/dblock).
+* A formatter that raises an exception will cause the API to return a 500 error - [@dblock](https://github.com/dblock).
+* [#322](https://github.com/ruby-grape/grape/issues/322): When returning a 406 status, Grape will include the requested format or content-type in the response body - [@dblock](https://github.com/dblock).
+* [#60](https://github.com/ruby-grape/grape/issues/60): Fix: mounting of a Grape API onto a path - [@dblock](https://github.com/dblock).
+* [#335](https://github.com/ruby-grape/grape/pull/335): Fix: request body parameters from a `PATCH` request not available in `params` - [@FreakenK](https://github.com/FreakenK).
 
 0.2.6 (01/11/2013)
 ==================
 
-* Fix: support content-type with character set when parsing POST and PUT input - [@dblock](http://github.com/dblock).
-* Fix: CVE-2013-0175, multi_xml parse vulnerability, require multi_xml 0.5.2 - [@dblock](http://github.com/dblock).
+* Fix: support content-type with character set when parsing POST and PUT input - [@dblock](https://github.com/dblock).
+* Fix: CVE-2013-0175, multi_xml parse vulnerability, require multi_xml 0.5.2 - [@dblock](https://github.com/dblock).
 
 0.2.5 (01/10/2013)
 ==================
 
-* Added support for custom parsers via `parser`, in addition to built-in multipart, JSON and XML parsers - [@dblock](http://github.com/dblock).
-* Removed `body_params`, data sent via a POST or PUT with a supported content-type is merged into `params` - [@dblock](http://github.com/dblock).
-* Setting `format` will automatically remove other content-types by calling `content_type` - [@dblock](http://github.com/dblock).
-* Setting `content_type` will prevent any input data other than the matching content-type or any Rack-supported form and parseable media types (`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`) from being parsed - [@dblock](http://github.com/dblock).
+* Added support for custom parsers via `parser`, in addition to built-in multipart, JSON and XML parsers - [@dblock](https://github.com/dblock).
+* Removed `body_params`, data sent via a POST or PUT with a supported content-type is merged into `params` - [@dblock](https://github.com/dblock).
+* Setting `format` will automatically remove other content-types by calling `content_type` - [@dblock](https://github.com/dblock).
+* Setting `content_type` will prevent any input data other than the matching content-type or any Rack-supported form and parseable media types (`application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`) from being parsed - [@dblock](https://github.com/dblock).
 * [#305](https://github.com/ruby-grape/grape/issues/305): Fix: presenting arrays of objects via `represent` or when auto-detecting an `Entity` constant in the objects being presented - [@brandonweiss](https://github.com/brandonweiss).
 * [#306](https://github.com/ruby-grape/grape/issues/306): Added i18n support for validation error messages - [@niedhui](https://github.com/niedhui).
 
@@ -473,7 +472,7 @@
 * [#181](https://github.com/ruby-grape/grape/pull/181): Fix: Corrected JSON serialization of nested hashes containing `Grape::Entity` instances - [@benrosenblum](https://github.com/benrosenblum).
 * [#203](https://github.com/ruby-grape/grape/pull/203): Added a check to `Entity#serializable_hash` that verifies an entity exists on an object - [@adamgotterer](https://github.com/adamgotterer).
 * [#208](https://github.com/ruby-grape/grape/pull/208): `Entity#serializable_hash` must also check if attribute is generated by a user supplied block - [@ppadron](https://github.com/ppadron).
-* [#252](https://github.com/ruby-grape/grape/pull/252): Resources that don't respond to a requested HTTP method return 405 (Method Not Allowed) instead of 404 (Not Found) - [@simulacre](https://github.com/simulacre)
+* [#252](https://github.com/ruby-grape/grape/pull/252): Resources that don't respond to a requested HTTP method return 405 (Method Not Allowed) instead of 404 (Not Found) - [@simulacre](https://github.com/simulacre).
 
 0.2.1 (7/11/2012)
 =================
@@ -511,7 +510,6 @@
 * Added support for a configurable logger - [@mbleigh](https://github.com/mbleigh).
 * Added support for before and after filters - [@mbleigh](https://github.com/mbleigh).
 * Extended `rescue_from`, which can now take a block - [@dblock](https://github.com/dblock).
-
 
 0.1.5 (6/14/2011)
 ==================
