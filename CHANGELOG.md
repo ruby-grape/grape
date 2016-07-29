@@ -1,19 +1,18 @@
-0.17.0 (Next)
-=============
+0.17.0 (7/29/2016)
+==================
 
 #### Features
 
-* [#1463](https://github.com/ruby-grape/grape/pull/1463): Fix array indicies in error messages - [@ffloyd](https://github.com/ffloyd).
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
-* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allows inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
-* [#1366](https://github.com/ruby-grape/grape/pull/1366): Stores `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
-* [#1398](https://github.com/ruby-grape/grape/pull/1398): Adds `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
-* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extends `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
-* [#1455](https://github.com/ruby-grape/grape/pull/1455): Adds an automated PR linter - [@orta](https://github.com/orta).
-* Your contribution here.
+* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
+* [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
+* [#1398](https://github.com/ruby-grape/grape/pull/1398): Add `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
+* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extend `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
+* [#1455](https://github.com/ruby-grape/grape/pull/1455): Add an automated PR linter - [@orta](https://github.com/orta).
 
 #### Fixes
 
+* [#1463](https://github.com/ruby-grape/grape/pull/1463): Fix array indicies in error messages - [@ffloyd](https://github.com/ffloyd).
 * [#1465](https://github.com/ruby-grape/grape/pull/1465): Fix 'before' being called twice when using not allowed method - [@jsteinberg](https://github.com/jsteinberg).
 * [#1446](https://github.com/ruby-grape/grape/pull/1446): Fix for `env` inside `before` when using not allowed method - [@leifg](https://github.com/leifg).
 * [#1438](https://github.com/ruby-grape/grape/pull/1439): Try to dup non-frozen default params with each use - [@jlfaber](https://github.com/jlfaber).
