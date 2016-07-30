@@ -316,7 +316,7 @@
 
 #### Features
 
-* Grape is no longer tested against Ruby 1.8.7.
+* Grape is no longer tested against Ruby 1.8.7 - [@dblock](https://github.com/dblock).
 * [#442](https://github.com/ruby-grape/grape/issues/442): Enable incrementally building on top of a previous API version - [@dblock](https://github.com/dblock).
 * [#442](https://github.com/ruby-grape/grape/issues/442): API `version` can now take an array of multiple versions - [@dblock](https://github.com/dblock).
 * [#444](https://github.com/ruby-grape/grape/issues/444): Added `:en` as fallback locale for I18n - [@aew](https://github.com/aew).
@@ -465,7 +465,7 @@
 * [#204](https://github.com/ruby-grape/grape/pull/204): Added ability to declare shared `params` at `namespace` level - [@tim-vandecasteele](https://github.com/tim-vandecasteele).
 * [#234](https://github.com/ruby-grape/grape/pull/234): Added a DSL for creating entities via mixin - [@mbleigh](https://github.com/mbleigh).
 * [#240](https://github.com/ruby-grape/grape/pull/240): Define API response format from a query string `format` parameter, if specified - [@neetiraj](https://github.com/neetiraj).
-* Adds Endpoint#declared to easily filter out unexpected params. - [@mbleigh](https://github.com/mbleigh)
+* Adds Endpoint#declared to easily filter out unexpected params - [@mbleigh](https://github.com/mbleigh).
 
 #### Fixes
 
