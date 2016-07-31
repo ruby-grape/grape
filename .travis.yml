@@ -5,9 +5,10 @@ sudo: false
 matrix:
   include:
     - rvm: 2.3.1
-      gemfile: Gemfile
-      before_script:
+      script:
         - bundle exec danger
+    - rvm: 2.3.1
+      gemfile: Gemfile
     - rvm: 2.3.1
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.3.1
