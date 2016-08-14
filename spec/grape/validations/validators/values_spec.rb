@@ -87,6 +87,13 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :type, type: Integer, desc: 'An integer', values: 10..11, default: 10
+        end
+        get '/range' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, type: Array[Integer], desc: 'An integer', values: [10, 11], default: 10
         end
         get '/values/array_coercion' do
@@ -232,6 +239,12 @@ describe Grape::Validations::ValuesValidator do
   end
   it 'allows values to be a kind of the coerced type not just an instance of it' do
     get('/values/coercion', type: 10)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 10 }.to_json)
+  end
+
+  it 'allows values to be a kind of the coerced type not just an instance of it' do
+    get('/range', type: 10)
     expect(last_response.status).to eq 200
     expect(last_response.body).to eq({ type: 10 }.to_json)
   end
