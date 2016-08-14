@@ -72,7 +72,7 @@ module Grape
 
       def translate(key, options = {})
         message = ::I18n.translate(key, options)
-        message.present? ? message : ::I18n.translate(key, options.merge(locale: FALLBACK_LOCALE))
+        message.present? ? message : ::I18n.translate(key, options.merge!(locale: FALLBACK_LOCALE))
       end
     end
   end

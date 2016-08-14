@@ -32,7 +32,7 @@ module Grape
     end
 
     def delete(name, opts = {})
-      options = opts.merge(value: 'deleted', expires: Time.at(0))
+      options = opts.merge!(value: 'deleted', expires: Time.at(0))
       self.[]=(name, options)
     end
   end

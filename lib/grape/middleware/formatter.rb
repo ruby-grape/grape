@@ -61,7 +61,7 @@ module Grape
         if headers[Grape::Http::Headers::CONTENT_TYPE]
           headers
         else
-          headers.merge(Grape::Http::Headers::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
+          headers.merge!(Grape::Http::Headers::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
         end
       end
 

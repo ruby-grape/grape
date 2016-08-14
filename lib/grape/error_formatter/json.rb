@@ -8,7 +8,7 @@ module Grape
           result = wrap_message(present(message, env))
 
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
-            result = result.merge(backtrace: backtrace)
+            result[:backtrace] = backtrace
           end
           MultiJson.dump(result)
         end
