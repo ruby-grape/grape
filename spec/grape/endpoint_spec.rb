@@ -305,26 +305,55 @@ describe Grape::Endpoint do
       expect(inner_params[:nested].keys.size).to eq 1
     end
 
-    it 'builds nested params when given array' do
-      subject.get '/dummy' do
-      end
-      subject.params do
-        requires :first
-        optional :second
-        optional :third, default: 'third-default'
-        optional :nested, type: Array do
-          optional :fourth
-        end
-      end
+    it 'sets nested hashes to be nil when the param is missing' do
       inner_params = nil
       subject.get '/declared' do
         inner_params = declared(params)
         ''
       end
 
-      get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
+      get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].size).to eq 2
+      expect(inner_params[:nested]).to be_a(Hash)
+    end
+
+    context 'with a nested given array' do
+      before do
+        subject.get '/dummy' do
+        end
+        subject.params do
+          requires :first
+          optional :second
+          optional :third, default: 'third-default'
+          optional :nested, type: Array do
+            optional :fourth
+          end
+        end
+      end
+
+      it 'builds nested params when given array' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params)
+          ''
+        end
+
+        get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:nested].size).to eq 2
+      end
+
+      it 'sets nested arrays to be nil when the param is missing' do
+        inner_params = nil
+        subject.get '/declared' do
+          inner_params = declared(params)
+          ''
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(inner_params[:nested]).to be_an(Array)
+      end
     end
 
     it 'builds nested params' do
