@@ -274,6 +274,28 @@ describe Grape::Validations do
       end
     end
 
+    # Ensure there is no leakage between declared Array types and
+    # subsequent Hash types
+    context 'required with an Array and a Hash block' do
+      before do
+        subject.params do
+          requires :cats, type: Array[String], default: []
+          requires :items, type: Hash do
+            requires :key
+          end
+        end
+        subject.get '/required' do
+          'required works'
+        end
+      end
+
+      it 'does not output index [0] for Hash types' do
+        get '/required', cats: ['Garfield'], items: { foo: 'bar' }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[key] is missing')
+      end
+    end
+
     context 'required with a Hash block' do
       before do
         subject.params do
@@ -290,6 +312,12 @@ describe Grape::Validations do
         get '/required'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('items is missing, items[key] is missing')
+      end
+
+      it 'errors when nested param not present' do
+        get '/required', items: { foo: 'bar' }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[key] is missing')
       end
 
       it 'errors when param is not a Hash' do
