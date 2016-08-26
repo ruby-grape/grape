@@ -526,7 +526,7 @@ Permitted and default parameter values are now only evaluated lazily for each re
 
 ```ruby
 params do
-  optional :v, values: -> { [:x, :y] }, default: -> { :z } }
+  optional :v, values: -> { [:x, :y] }, default: -> { :z }
 end
 ```
 
@@ -534,7 +534,7 @@ Remove the proc to get the previous behavior.
 
 ```ruby
 params do
-  optional :v, values: [:x, :y], default: :z }
+  optional :v, values: [:x, :y], default: :z
 end
 ```
 
