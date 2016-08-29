@@ -21,7 +21,7 @@ module Grape
           when Middleware
             klass == other.klass
           when Class
-            klass == other
+            klass == other || (name.nil? && klass.superclass == other)
           end
         end
 

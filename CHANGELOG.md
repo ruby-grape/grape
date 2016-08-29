@@ -3,13 +3,17 @@
 
 * Your contribution here.
 
+#### Fixes
+
+* [#1479](https://github.com/ruby-grape/grape/pull/1479): Support inserting middleware before/after anonymous classes in the middleware stack - [@rosa](https://github.com/rosa).
+
 0.17.0 (7/29/2016)
 ==================
 
 #### Features
 
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
-* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@Rosa](https://github.com/Rosa).
+* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@rosa](https://github.com/rosa).
 * [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
 * [#1398](https://github.com/ruby-grape/grape/pull/1398): Add `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
 * [#1443](https://github.com/ruby-grape/grape/pull/1443): Extend `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).

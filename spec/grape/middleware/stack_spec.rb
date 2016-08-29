@@ -61,6 +61,16 @@ describe Grape::Middleware::Stack do
       expect(subject[1]).to eq(StackSpec::FooMiddleware)
     end
 
+    it 'inserts a middleware before an anonymous class given by its superclass' do
+      subject.use Class.new(StackSpec::BlockMiddleware)
+
+      expect { subject.insert_before StackSpec::BlockMiddleware, StackSpec::BarMiddleware }
+        .to change { subject.size }.by(1)
+
+      expect(subject[1]).to eq(StackSpec::BarMiddleware)
+      expect(subject[2]).to eq(StackSpec::BlockMiddleware)
+    end
+
     it 'raises an error on an invalid index' do
       expect { subject.insert_before StackSpec::BlockMiddleware, StackSpec::BarMiddleware }
         .to raise_error(RuntimeError, 'No such middleware to insert before: StackSpec::BlockMiddleware')
@@ -73,6 +83,16 @@ describe Grape::Middleware::Stack do
         .to change { subject.size }.by(1)
       expect(subject[1]).to eq(StackSpec::BarMiddleware)
       expect(subject[0]).to eq(StackSpec::FooMiddleware)
+    end
+
+    it 'inserts a middleware after an anonymous class given by its superclass' do
+      subject.use Class.new(StackSpec::BlockMiddleware)
+
+      expect { subject.insert_after StackSpec::BlockMiddleware, StackSpec::BarMiddleware }
+        .to change { subject.size }.by(1)
+
+      expect(subject[1]).to eq(StackSpec::BlockMiddleware)
+      expect(subject[2]).to eq(StackSpec::BarMiddleware)
     end
 
     it 'raises an error on an invalid index' do
