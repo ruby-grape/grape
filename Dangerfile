@@ -1,1 +1,1 @@
-# inherits from https://github.com/ruby-grape/danger
+danger.import_dangerfile(gem: 'ruby-grape-danger')
