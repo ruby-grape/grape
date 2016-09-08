@@ -1065,6 +1065,26 @@ params do
 end
 ```
 
+The values validator can also validate that the value is explicitly not within a specific
+set of values by passing ```except```. ```except``` accepts the same types of parameters as
+values (Procs, ranges, etc.).
+
+```ruby
+params do
+  requires :browsers, values: { except: [ 'ie6', 'ie7', 'ie8' ] }
+end
+```
+
+Values and except can be combined to define a range of accepted values while not allowing
+certain values within the set. Custom error messages can be defined for both when the parameter 
+passed falls within the ```except``` list or when it falls entirely outside the ```value``` list. 
+
+```ruby
+params do
+  requires :number, type: Integer, values: { value: 1..20 except: [4,13], except_message: 'includes unsafe numbers', message: 'is outside the range of numbers allowed' }
+end
+```
+
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value

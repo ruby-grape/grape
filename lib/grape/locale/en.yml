@@ -8,6 +8,7 @@ en:
         regexp: 'is invalid'
         blank: 'is empty'
         values: 'does not have a valid value'
+        except: 'has a value not allowed'
         missing_vendor_option:
           problem: 'missing :vendor option.'
           summary: 'when version using header, you must specify :vendor option. '

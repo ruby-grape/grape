@@ -4,6 +4,7 @@ describe Grape::Validations::ValuesValidator do
   module ValidationsSpec
     class ValuesModel
       DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3'].freeze
+      DEFAULT_EXCEPTS = ['invalid-type1', 'invalid-type2', 'invalid-type3'].freeze
       class << self
         def values
           @values ||= []
@@ -13,6 +14,16 @@ describe Grape::Validations::ValuesValidator do
         def add_value(value)
           @values ||= []
           @values << value
+        end
+
+        def excepts
+          @excepts ||= []
+          [DEFAULT_EXCEPTS + @excepts].flatten.uniq
+        end
+
+        def add_except(except)
+          @excepts ||= []
+          @excepts << except
         end
       end
     end
@@ -33,6 +44,20 @@ describe Grape::Validations::ValuesValidator do
             optional :type, values: { value: -> { ValuesModel.values }, message: 'value does not include in values' }, default: 'valid-type2'
           end
           get '/lambda' do
+            { type: params[:type] }
+          end
+
+          params do
+            requires :type, values: { except: ValuesModel.excepts, except_message: 'value is on exclusions list', message: 'default exclude message' }
+          end
+          get '/exclude/exclude_message' do
+            { type: params[:type] }
+          end
+
+          params do
+            requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
+          end
+          get '/exclude/fallback_message' do
             { type: params[:type] }
           end
         end
@@ -99,6 +124,20 @@ describe Grape::Validations::ValuesValidator do
           end
         end
         get '/optional_with_required_values'
+
+        params do
+          requires :type, values: { except: ValuesModel.excepts }
+        end
+        get '/except/exclusive' do
+          { type: params[:type] }
+        end
+
+        params do
+          requires :type, type: Integer, values: { value: 1..5, except: [3] }
+        end
+        get '/mixed/value/except' do
+          { type: params[:type] }
+        end
       end
     end
   end
@@ -132,6 +171,22 @@ describe Grape::Validations::ValuesValidator do
       get('/custom_message/lambda', type: 'invalid-type')
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type value does not include in values' }.to_json)
+    end
+  end
+
+  context 'with a custom exclude validation message' do
+    it 'does not allow an invalid value for a parameter' do
+      get('/custom_message/exclude/exclude_message', type: 'invalid-type1')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type value is on exclusions list' }.to_json)
+    end
+  end
+
+  context 'exclude with a standard custom validation message' do
+    it 'does not allow an invalid value for a parameter' do
+      get('/custom_message/exclude/fallback_message', type: 'invalid-type1')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type default exclude message' }.to_json)
     end
   end
 
@@ -319,6 +374,40 @@ describe Grape::Validations::ValuesValidator do
       get('/values', values: [8.6, 75, 3, 0.9])
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq('values does not have a valid value')
+    end
+  end
+
+  context 'exclusive excepts' do
+    it 'allows any other value outside excepts' do
+      get '/except/exclusive', type: 'value'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'value' }.to_json)
+    end
+
+    it 'rejects values that matches except' do
+      get '/except/exclusive', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+  end
+
+  context 'with mixed values and excepts' do
+    it 'allows value, but not in except' do
+      get '/mixed/value/except', type: 2
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 2 }.to_json)
+    end
+
+    it 'rejects except' do
+      get '/mixed/value/except', type: 3
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+
+    it 'rejects outside except and outside value' do
+      get '/mixed/value/except', type: 10
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
     end
   end
 end
