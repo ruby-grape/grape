@@ -28,5 +28,5 @@ group :test do
   gem 'cookiejar'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'mime-types', '< 3.0'
-  gem 'danger', '~> 2.0', require: false unless RUBY_PLATFORM == 'java'
+  gem 'ruby-grape-danger', '~> 0.1.0', require: false
 end

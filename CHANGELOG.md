@@ -1,6 +1,7 @@
 0.17.1 (Next)
 ==================
 
+* [#1480](https://github.com/ruby-grape/grape/pull/1480): Use the ruby-grape-danger gem for PR linting - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
