@@ -17,7 +17,7 @@ matrix:
     - rvm: 2.2.5
     - rvm: 2.1.10
       gemfile: gemfiles/rails_4.gemfile
-    - rvm: 2.0.0
+    - rvm: 2.1.10
       gemfile: gemfiles/rails_3.gemfile
     - rvm: rbx-2
     - rvm: ruby-head
