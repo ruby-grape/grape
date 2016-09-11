@@ -248,16 +248,21 @@ module Grape
 
         run_filters befores, :before
 
-        allowed_methods = env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED]
-        raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) if allowed_methods
+        allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS]
+        raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) if !options? && allowed_methods
 
         run_filters before_validations, :before_validation
-
         run_validators validations, request
-
         run_filters after_validations, :after_validation
 
-        response_object = @block ? @block.call(self) : nil
+        response_object =
+          if options?
+            header 'Allow', allowed_methods
+            status 204
+            ''
+          else
+            @block ? @block.call(self) : nil
+          end
         run_filters afters, :after
         cookies.write(header)
 
@@ -372,6 +377,11 @@ module Grape
 
     def validations
       route_setting(:saved_validations) || []
+    end
+
+    def options?
+      options[:options_route_enabled] &&
+        env[Grape::Http::Headers::REQUEST_METHOD] == Grape::Http::Headers::OPTIONS
     end
   end
 end

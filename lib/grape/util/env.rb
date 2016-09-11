@@ -18,6 +18,6 @@ module Grape
     GRAPE_REQUEST_HEADERS = 'grape.request.headers'.freeze
     GRAPE_REQUEST_PARAMS = 'grape.request.params'.freeze
     GRAPE_ROUTING_ARGS = 'grape.routing_args'.freeze
-    GRAPE_METHOD_NOT_ALLOWED = 'grape.method_not_allowed'.freeze
+    GRAPE_ALLOWED_METHODS = 'grape.allowed_methods'.freeze
   end
 end
