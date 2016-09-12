@@ -95,7 +95,7 @@ module Grape
       neighbor = greedy_match?(input)
       return unless neighbor
 
-      (!cascade && neighbor) ? method_not_allowed(env, neighbor.allow_header, neighbor.endpoint) : nil
+      (!cascade && neighbor) ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
     end
 
     def make_routing_args(default_args, route, input)
@@ -132,8 +132,8 @@ module Grape
       @neutral_map.detect { |route| last_match["_#{route.index}"] }
     end
 
-    def method_not_allowed(env, methods, endpoint)
-      env[Grape::Env::GRAPE_METHOD_NOT_ALLOWED] = methods
+    def call_with_allow_headers(env, methods, endpoint)
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods
       endpoint.call(env)
     end
 

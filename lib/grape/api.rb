@@ -173,7 +173,6 @@ module Grape
         without_versioning do
           routes_map.each do |_, config|
             methods = config[:methods]
-            path = config[:path]
             allowed_methods = methods.dup
 
             unless self.class.namespace_inheritable(:do_not_route_head)
@@ -182,23 +181,14 @@ module Grape
 
             allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
 
-            unless self.class.namespace_inheritable(:do_not_route_options)
-              generate_options_method(path, allow_header, config) unless allowed_methods.include?(Grape::Http::Headers::OPTIONS)
+            unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
+              config[:endpoint].options[:options_route_enabled] = true
             end
 
             attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
             generate_not_allowed_method(config[:pattern], attributes)
           end
         end
-      end
-    end
-
-    # Generate an 'OPTIONS' route for a pre-exisiting user defined route
-    def generate_options_method(path, allow_header, options = {})
-      self.class.options(path, options) do
-        header 'Allow', allow_header
-        status 204
-        ''
       end
     end
 
