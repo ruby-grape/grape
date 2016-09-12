@@ -19,6 +19,10 @@ describe Grape::Exceptions::ValidationErrors do
     it 'should assign headers through base class' do
       expect(subject.headers).to eq(headers)
     end
+
+    it 'fails when params are missing' do
+      expect { described_class.new(headers: headers) }.to raise_error(RuntimeError, 'Params are missing:')
+    end
   end
 
   context 'message' do

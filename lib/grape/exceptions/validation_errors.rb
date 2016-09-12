@@ -8,6 +8,7 @@ module Grape
       attr_reader :errors
 
       def initialize(args = {})
+        fail 'Params are missing:' unless args.key? :errors
         @errors = {}
         args[:errors].each do |validation_error|
           @errors[validation_error.params] ||= []
