@@ -7,7 +7,7 @@ module Grape
 
       attr_reader :errors
 
-      def initialize(errors: [], headers: {}, **args)
+      def initialize(errors: [], headers: {}, **_options)
         @errors = {}
         errors.each do |validation_error|
           @errors[validation_error.params] ||= []

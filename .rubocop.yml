@@ -1,4 +1,5 @@
 AllCops:
+  TargetRubyVersion: 2.1
   Include:
     - Dangerfile
     - gemfiles/*.gemfile

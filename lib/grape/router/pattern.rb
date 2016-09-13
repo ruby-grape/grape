@@ -34,7 +34,7 @@ module Grape
         options
       end
 
-      def build_path(pattern, anchor: false, suffix: nil, **options)
+      def build_path(pattern, anchor: false, suffix: nil, **_options)
         pattern << '*path' unless anchor || pattern.end_with?('*path')
         pattern + suffix.to_s
       end

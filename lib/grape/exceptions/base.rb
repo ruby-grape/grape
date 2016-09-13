@@ -7,7 +7,7 @@ module Grape
 
       attr_reader :status, :message, :headers
 
-      def initialize(status: nil, message: nil, headers: nil, **options)
+      def initialize(status: nil, message: nil, headers: nil, **_options)
         @status  = status
         @message = message
         @headers = headers
