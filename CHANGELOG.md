@@ -4,6 +4,7 @@
 * [#1480](https://github.com/ruby-grape/grape/pull/1480): Use the ruby-grape-danger gem for PR linting - [@dblock](https://github.com/dblock).
 * [#1486](https://github.com/ruby-grape/grape/pull/1486): Implemented except in values validator - [@jonmchan](https://github.com/jonmchan).
 * [#1470](https://github.com/ruby-grape/grape/pull/1470): Drop support for ruby-2.0 - [@namusyaka](https://github.com/namusyaka).
+* [#1490](https://github.com/ruby-grape/grape/pull/1490): Switch to Ruby-2.x+ syntax - [@namusyaka](https://github.com/namusyaka).
 * Your contribution here.
 
 #### Fixes
