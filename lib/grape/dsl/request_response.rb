@@ -88,7 +88,7 @@ module Grape
         #       rescue_from CustomError
         #     end
         #
-        # @overload rescue_from(*exception_classes, options = {})
+        # @overload rescue_from(*exception_classes, **options)
         #   @param [Array] exception_classes A list of classes that you want to rescue, or
         #     the symbol :all to rescue from all exceptions.
         #   @param [Block] block Execution block to handle the given exception.

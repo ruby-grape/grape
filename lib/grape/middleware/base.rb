@@ -10,9 +10,9 @@ module Grape
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
-      def initialize(app, options = {})
+      def initialize(app, **options)
         @app = app
-        @options = default_options.merge(options)
+        @options = default_options.merge(**options)
       end
 
       def default_options

@@ -6,9 +6,9 @@ module Grape
       class Base
         attr_accessor :options, :app, :env
 
-        def initialize(app, options = {})
+        def initialize(app, **options)
           @app = app
-          @options = options || {}
+          @options = options
         end
 
         def context

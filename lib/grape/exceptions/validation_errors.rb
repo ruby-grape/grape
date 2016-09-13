@@ -7,14 +7,14 @@ module Grape
 
       attr_reader :errors
 
-      def initialize(args = {})
+      def initialize(errors: [], headers: {}, **args)
         @errors = {}
-        args[:errors].each do |validation_error|
+        errors.each do |validation_error|
           @errors[validation_error.params] ||= []
           @errors[validation_error.params] << validation_error
         end
 
-        super message: full_messages.join(', '), status: 400, headers: args[:headers]
+        super message: full_messages.join(', '), status: 400, headers: headers
       end
 
       def each
@@ -25,7 +25,7 @@ module Grape
         end
       end
 
-      def as_json(_opts = {})
+      def as_json(**_opts)
         errors.map do |k, v|
           {
             params: k,
@@ -34,7 +34,7 @@ module Grape
         end
       end
 
-      def to_json(_opts = {})
+      def to_json(**_opts)
         as_json.to_json
       end
 

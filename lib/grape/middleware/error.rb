@@ -21,7 +21,7 @@ module Grape
         }
       end
 
-      def initialize(app, options = {})
+      def initialize(app, **options)
         super
         self.class.send(:include, @options[:helpers]) if @options[:helpers]
       end

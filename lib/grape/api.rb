@@ -194,13 +194,13 @@ module Grape
 
     # Generate a route that returns an HTTP 405 response for a user defined
     # path on methods not specified
-    def generate_not_allowed_method(pattern, attributes = {})
-      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - attributes[:allowed_methods]
+    def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
+      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
       not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
 
       return if not_allowed_methods.empty?
 
-      @router.associate_routes(pattern, attributes.merge(not_allowed_methods: not_allowed_methods))
+      @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
     end
 
     # Allows definition of endpoints that ignore the versioning configuration
