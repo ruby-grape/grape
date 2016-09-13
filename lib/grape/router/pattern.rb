@@ -14,9 +14,9 @@ module Grape
       def_delegators :@regexp, :===
       alias match? ===
 
-      def initialize(pattern, options = {})
+      def initialize(pattern, **options)
         @origin  = pattern
-        @path    = build_path(pattern, options)
+        @path    = build_path(pattern, **options)
         @capture = extract_capture(options)
         @pattern = Mustermann.new(@path, pattern_options)
         @regexp  = to_regexp
@@ -34,13 +34,13 @@ module Grape
         options
       end
 
-      def build_path(pattern, options = {})
-        pattern << '*path' unless options[:anchor] || pattern.end_with?('*path')
-        pattern + options[:suffix].to_s
+      def build_path(pattern, anchor: false, suffix: nil, **_options)
+        pattern << '*path' unless anchor || pattern.end_with?('*path')
+        pattern + suffix.to_s
       end
 
-      def extract_capture(options = {})
-        requirements = {}.merge(options[:requirements])
+      def extract_capture(requirements: {}, **options)
+        requirements = {}.merge(requirements)
         supported_capture.each_with_object(requirements) do |field, capture|
           option = Array(options[field])
           capture[field] = option.map(&:to_s) if option.present?

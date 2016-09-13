@@ -15,8 +15,8 @@ module Grape
         builtin_parsers.merge(default_elements).merge(options[:parsers] || {})
       end
 
-      def parser_for(api_format, options = {})
-        spec = parsers(options)[api_format]
+      def parser_for(api_format, **options)
+        spec = parsers(**options)[api_format]
         case spec
         when nil
           nil

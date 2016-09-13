@@ -194,8 +194,8 @@ module Grape
       version.length == 1 ? version.first.to_s : version
     end
 
-    def merge_route_options(default = {})
-      options[:route_options].clone.reverse_merge(default)
+    def merge_route_options(**default)
+      options[:route_options].clone.reverse_merge(**default)
     end
 
     def map_routes

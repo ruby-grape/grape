@@ -97,9 +97,8 @@ module Grape
       # @param options [Hash] The options used when redirect.
       #                       :permanent, default false.
       #                       :body, default a short message including the URL.
-      def redirect(url, options = {})
-        permanent = options.fetch(:permanent, false)
-        body_message = options.fetch(:body, nil)
+      def redirect(url, permanent: false, body: nil, **_options)
+        body_message = body
         if permanent
           status 301
           body_message ||= "This resource has been moved permanently to #{url}."

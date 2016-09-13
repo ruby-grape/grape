@@ -5,7 +5,7 @@ module Grape
     attr_reader :map, :compiled
 
     class Any < AttributeTranslator
-      def initialize(pattern, attributes = {})
+      def initialize(pattern, **attributes)
         @pattern = pattern
         super(attributes)
       end
@@ -42,9 +42,9 @@ module Grape
       map[route.request_method.to_s.upcase] << route
     end
 
-    def associate_routes(pattern, options = {})
+    def associate_routes(pattern, **options)
       regexp = /(?<_#{@neutral_map.length}>)#{pattern.to_regexp}/
-      @neutral_map << Any.new(pattern, options.merge(regexp: regexp, index: @neutral_map.length))
+      @neutral_map << Any.new(pattern, regexp: regexp, index: @neutral_map.length, **options)
     end
 
     def call(env)

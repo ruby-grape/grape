@@ -6,14 +6,13 @@ module Grape
       attr_accessor :params
       attr_accessor :message_key
 
-      def initialize(args = {})
-        raise 'Params are missing:' unless args.key? :params
-        @params = args[:params]
-        if args.key?(:message)
-          @message_key = args[:message] if args[:message].is_a?(Symbol)
-          args[:message] = translate_message(args[:message])
+      def initialize(params:, message: nil, **args)
+        @params = params
+        if message
+          @message_key = message if message.is_a?(Symbol)
+          args[:message] = translate_message(message)
         end
-        super
+        super(args)
       end
 
       # remove all the unnecessary stuff from Grape::Exceptions::Base like status

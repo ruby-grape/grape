@@ -31,7 +31,7 @@ module Grape
       @cookies.each(&block)
     end
 
-    def delete(name, opts = {})
+    def delete(name, **opts)
       options = opts.merge(value: 'deleted', expires: Time.at(0))
       self.[]=(name, options)
     end
