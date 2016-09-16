@@ -625,7 +625,7 @@ describe Grape::Validations::CoerceValidator do
 
           get '/', a: %w(the other)
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('["the", "other"]')
+          expect(last_response.body).to eq('#<Hashie::Array ["the", "other"]>')
 
           get '/', a: { a: 1, b: 2 }
           expect(last_response.status).to eq(400)
@@ -633,27 +633,27 @@ describe Grape::Validations::CoerceValidator do
 
           get '/', a: [1, 2, 3]
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('["1", "2", "3"]')
+          expect(last_response.body).to eq('#<Hashie::Array ["1", "2", "3"]>')
         end
 
         it 'allows multiple collection types' do
           get '/', b: [1, 2, 3]
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('[1, 2, 3]')
+          expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
           get '/', b: %w(1 2 3)
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('[1, 2, 3]')
+          expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
           get '/', b: [1, true, 'three']
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('["1", "true", "three"]')
+          expect(last_response.body).to eq('#<Hashie::Array ["1", "true", "three"]>')
         end
 
         it 'allows collections with multiple types' do
           get '/', c: [1, '2', true, 'three']
           expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('[1, 2, "true", "three"]')
+          expect(last_response.body).to eq('#<Hashie::Array [1, 2, "true", "three"]>')
 
           get '/', d: '1'
           expect(last_response.status).to eq(200)
