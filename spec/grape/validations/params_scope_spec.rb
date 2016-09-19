@@ -159,7 +159,7 @@ describe Grape::Validations::ParamsScope do
 
   context 'coercing values validation with proc' do
     it 'allows the proc to pass validation without checking' do
-      subject.params { requires :numbers, type: Integer, values: -> { [0,1,2] } }
+      subject.params { requires :numbers, type: Integer, values: -> { [0, 1, 2] } }
 
       subject.post('/required') { 'coercion with proc works' }
       post '/required', numbers: '1'
@@ -168,7 +168,7 @@ describe Grape::Validations::ParamsScope do
     end
 
     it 'allows the proc to pass validation without checking in value' do
-      subject.params { requires :numbers, type: Integer, values: { value: -> { [0,1,2] } } }
+      subject.params { requires :numbers, type: Integer, values: { value: -> { [0, 1, 2] } } }
 
       subject.post('/required') { 'coercion with proc works' }
       post '/required', numbers: '1'
@@ -177,7 +177,7 @@ describe Grape::Validations::ParamsScope do
     end
 
     it 'allows the proc to pass validation without checking in except' do
-      subject.params { requires :numbers, type: Integer, values: { except: -> { [0,1,2] } } }
+      subject.params { requires :numbers, type: Integer, values: { except: -> { [0, 1, 2] } } }
 
       subject.post('/required') { 'coercion with proc works' }
       post '/required', numbers: '10'

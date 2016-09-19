@@ -350,7 +350,7 @@ module Grape
         return unless coerce_type && values
         return if values.is_a?(Proc)
         if values.is_a?(Hash)
-          return values[:value] && values[:value].is_a?(Proc)
+          return if values[:value] && values[:value].is_a?(Proc)
           return if values[:except] && values[:except].is_a?(Proc)
         end
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)

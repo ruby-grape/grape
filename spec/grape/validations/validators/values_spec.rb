@@ -438,7 +438,7 @@ describe Grape::Validations::ValuesValidator do
     it 'allows any other value outside excepts' do
       get '/except/exclusive/lambda/coercion', type: '10010000'
       expect(last_response.status).to eq 200
-      expect(last_response.body).to eq({ type: 10010000 }.to_json)
+      expect(last_response.body).to eq({ type: 10_010_000 }.to_json)
     end
 
     it 'rejects values that matches except' do
