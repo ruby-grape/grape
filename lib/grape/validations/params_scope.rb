@@ -349,6 +349,10 @@ module Grape
       def validate_value_coercion(coerce_type, values)
         return unless coerce_type && values
         return if values.is_a?(Proc)
+        if values.is_a?(Hash)
+          return values[:value] && values[:value].is_a?(Proc)
+          return if values[:except] && values[:except].is_a?(Proc)
+        end
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)
         value_types = values.is_a?(Range) ? [values.begin, values.end] : values
         if coerce_type == Virtus::Attribute::Boolean
