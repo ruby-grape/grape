@@ -157,6 +157,36 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'coercing values validation with proc' do
+    it 'allows the proc to pass validation without checking' do
+      subject.params { requires :numbers, type: Integer, values: -> { [0, 1, 2] } }
+
+      subject.post('/required') { 'coercion with proc works' }
+      post '/required', numbers: '1'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('coercion with proc works')
+    end
+
+    it 'allows the proc to pass validation without checking in value' do
+      subject.params { requires :numbers, type: Integer, values: { value: -> { [0, 1, 2] } } }
+
+      subject.post('/required') { 'coercion with proc works' }
+      post '/required', numbers: '1'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('coercion with proc works')
+    end
+
+    it 'allows the proc to pass validation without checking in except' do
+      subject.params { requires :numbers, type: Integer, values: { except: -> { [0, 1, 2] } } }
+
+      subject.post('/required') { 'coercion with proc works' }
+      post '/required', numbers: '10'
+      p last_response.body
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('coercion with proc works')
+    end
+  end
+
   context 'with range values' do
     context "when left range endpoint isn't #kind_of? the type" do
       it 'raises exception' do

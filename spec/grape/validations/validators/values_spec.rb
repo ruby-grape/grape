@@ -55,6 +55,13 @@ describe Grape::Validations::ValuesValidator do
           end
 
           params do
+            requires :type, values: { except: -> { ValuesModel.excepts }, except_message: 'value is on exclusions list' }
+          end
+          get '/exclude/lambda/exclude_message' do
+            { type: params[:type] }
+          end
+
+          params do
             requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
           end
           get '/exclude/fallback_message' do
@@ -133,6 +140,20 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :type, values: { except: -> { ValuesModel.excepts } }
+        end
+        get '/except/exclusive/lambda' do
+          { type: params[:type] }
+        end
+
+        params do
+          requires :type, type: Integer, values: { except: -> { [3, 4, 5] } }
+        end
+        get '/except/exclusive/lambda/coercion' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, type: Integer, values: { value: 1..5, except: [3] }
         end
         get '/mixed/value/except' do
@@ -177,6 +198,14 @@ describe Grape::Validations::ValuesValidator do
   context 'with a custom exclude validation message' do
     it 'does not allow an invalid value for a parameter' do
       get('/custom_message/exclude/exclude_message', type: 'invalid-type1')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type value is on exclusions list' }.to_json)
+    end
+  end
+
+  context 'with a custom exclude validation message' do
+    it 'does not allow an invalid value for a parameter' do
+      get('/custom_message/exclude/lambda/exclude_message', type: 'invalid-type1')
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type value is on exclusions list' }.to_json)
     end
@@ -386,6 +415,34 @@ describe Grape::Validations::ValuesValidator do
 
     it 'rejects values that matches except' do
       get '/except/exclusive', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+  end
+
+  context 'exclusive excepts with lambda' do
+    it 'allows any other value outside excepts' do
+      get '/except/exclusive/lambda', type: 'value'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'value' }.to_json)
+    end
+
+    it 'rejects values that matches except' do
+      get '/except/exclusive/lambda', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+  end
+
+  context 'exclusive excepts with lambda and coercion' do
+    it 'allows any other value outside excepts' do
+      get '/except/exclusive/lambda/coercion', type: '10010000'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 10_010_000 }.to_json)
+    end
+
+    it 'rejects values that matches except' do
+      get '/except/exclusive/lambda/coercion', type: '3'
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
     end
