@@ -9,7 +9,12 @@ describe Grape::Validations::AllowBlankValidator do
         params do
           requires :name, allow_blank: false
         end
-        get
+        get '/disallow_blank'
+
+        params do
+          optional :name, type: String, allow_blank: false
+        end
+        get '/opt_disallow_string_blank'
 
         params do
           optional :name, allow_blank: false
@@ -247,7 +252,7 @@ describe Grape::Validations::AllowBlankValidator do
 
   context 'invalid input' do
     it 'refuses empty string' do
-      get '/', name: ''
+      get '/disallow_blank', name: ''
       expect(last_response.status).to eq(400)
 
       get '/disallow_datetime_blank', val: ''
@@ -255,18 +260,23 @@ describe Grape::Validations::AllowBlankValidator do
     end
 
     it 'refuses only whitespaces' do
-      get '/', name: '   '
+      get '/disallow_blank', name: '   '
       expect(last_response.status).to eq(400)
 
-      get '/', name: "  \n "
+      get '/disallow_blank', name: "  \n "
       expect(last_response.status).to eq(400)
 
-      get '/', name: "\n"
+      get '/disallow_blank', name: "\n"
       expect(last_response.status).to eq(400)
     end
 
     it 'refuses nil' do
-      get '/', name: nil
+      get '/disallow_blank', name: nil
+      expect(last_response.status).to eq(400)
+    end
+
+    it 'refuses missing' do
+      get '/disallow_blank'
       expect(last_response.status).to eq(400)
     end
   end
@@ -432,8 +442,13 @@ describe Grape::Validations::AllowBlankValidator do
   end
 
   context 'valid input' do
+    it 'allows missing optional strings' do
+      get 'opt_disallow_string_blank'
+      expect(last_response.status).to eq(200)
+    end
+
     it 'accepts valid input' do
-      get '/', name: 'bob'
+      get '/disallow_blank', name: 'bob'
       expect(last_response.status).to eq(200)
     end
 
