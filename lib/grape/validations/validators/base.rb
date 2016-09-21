@@ -24,6 +24,7 @@ module Grape
       # @raise [Grape::Exceptions::Validation] if validation failed
       # @return [void]
       def validate(request)
+        return unless @scope.should_validate?(request.params)
         validate!(request.params)
       end
 

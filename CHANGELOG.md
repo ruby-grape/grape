@@ -9,6 +9,7 @@
 
 #### Fixes
 
+* [#1498](https://github.com/ruby-grape/grape/pull/1498): Skip validations in inactive given blocks - [@jlfaber](https://github.com/jlfaber).
 * [#1479](https://github.com/ruby-grape/grape/pull/1479): Support inserting middleware before/after anonymous classes in the middleware stack - [@rosa](https://github.com/rosa).
 * [#1488](https://github.com/ruby-grape/grape/pull/1488): Ensure calling before filters when receiving OPTIONS request - [@namusyaka](https://github.com/namusyaka), [@jlfaber](https://github.com/jlfaber).
 * [#1493](https://github.com/ruby-grape/grape/pull/1493): Coercion and lambda fails params validation - [@jonmchan](https://github.com/jonmchan).
