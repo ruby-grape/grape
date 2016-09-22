@@ -18,8 +18,6 @@ module Grape
       end
 
       def validate!(params)
-        return unless @scope.should_validate?(params)
-
         attrs = AttributesIterator.new(self, @scope, params)
         attrs.each do |resource_params, attr_name|
           if resource_params.is_a?(Hash) && resource_params[attr_name].nil?
