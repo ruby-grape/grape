@@ -338,7 +338,7 @@ module Grape
       end
 
       def validate(type, options, attrs, doc_attrs)
-        validator_class = Validations.validators[type.to_s]
+        validator_class = Validations.validators[type.to_s] || custom_validator_autoload.try_load(type)
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
@@ -374,6 +374,10 @@ module Grape
 
       def any_element_blank?(parameters)
         params(parameters).respond_to?(:any?) && params(parameters).any?(&:blank?)
+      end
+
+      def custom_validator_autoload
+        @custom_validator_autoload ||= Autoload.new(@api)
       end
     end
   end
