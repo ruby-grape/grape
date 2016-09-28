@@ -343,8 +343,10 @@ module Grape
           validator.validate(request)
         rescue Grape::Exceptions::Validation => e
           validation_errors << e
+          break if validator.fail_fast?
         rescue Grape::Exceptions::ValidationArrayErrors => e
           validation_errors += e.errors
+          break if validator.fail_fast?
         end
       end
 
