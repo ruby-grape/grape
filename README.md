@@ -1355,6 +1355,23 @@ subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
 end
 ```
 
+Grape returns all validation and coercion errors found by default. To skip all subsequent validation checks when a specific param is found invalid, use `fail_fast: true`.
+For example:
+```ruby
+params do
+  required :beer, fail_fast: true
+  required :wine
+end
+```
+will not check if `:wine` is present unless it finds `:beer`. The result of empty params would be a single `Grape::Exceptions::ValidationErrors` error.
+Similarly
+```ruby
+params do
+  required :blah, allow_blank: false, regexp: /blah/, fail_fast: true
+end
+```
+will not check if the `:blah` matches the regular expression if it is blank.
+
 ### I18n
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if

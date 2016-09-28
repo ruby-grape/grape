@@ -5,6 +5,7 @@
 * [#1486](https://github.com/ruby-grape/grape/pull/1486): Implemented except in values validator - [@jonmchan](https://github.com/jonmchan).
 * [#1470](https://github.com/ruby-grape/grape/pull/1470): Drop support for ruby-2.0 - [@namusyaka](https://github.com/namusyaka).
 * [#1490](https://github.com/ruby-grape/grape/pull/1490): Switch to Ruby-2.x+ syntax - [@namusyaka](https://github.com/namusyaka).
+* [#1499](https://github.com/ruby-grape/grape/pull/1499): Support fail_fast param validation option - [@dgasper](https://github.com/dgasper).
 * Your contribution here.
 
 #### Fixes
