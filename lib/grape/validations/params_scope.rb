@@ -140,13 +140,14 @@ module Grape
       end
 
       def validate_attributes(attrs, opts, &block)
-        # check fail_fast flag
-        fail_fast = opts.delete(:fail_fast) || false
+        # additional options
+        option_keys = [:fail_fast]
+        options = opts.select { |key, _val| option_keys.include?(key) }
 
-        validations = opts.clone
+        validations = opts.reject { |key, _val| option_keys.include?(key) }
         validations[:type] ||= Array if block
 
-        validates(attrs, validations, fail_fast)
+        validates(attrs, validations, options)
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
@@ -205,7 +206,7 @@ module Grape
         end
       end
 
-      def validates(attrs, validations, fail_fast = false)
+      def validates(attrs, validations, opts = {})
         doc_attrs = { required: validations.keys.include?(:presence) }
 
         coerce_type = infer_coercion(validations)
@@ -236,7 +237,7 @@ module Grape
 
         # Validate for presence before any other validators
         if validations.key?(:presence) && validations[:presence]
-          validate('presence', validations[:presence], attrs, doc_attrs, fail_fast)
+          validate('presence', validations[:presence], attrs, doc_attrs, opts)
           validations.delete(:presence)
           validations.delete(:message) if validations.key?(:message)
         end
@@ -244,10 +245,10 @@ module Grape
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, doc_attrs, fail_fast
+        coerce_type validations, attrs, doc_attrs, opts
 
         validations.each do |type, options|
-          validate(type, options, attrs, doc_attrs, fail_fast)
+          validate(type, options, attrs, doc_attrs, opts)
         end
       end
 
@@ -312,7 +313,7 @@ module Grape
       # composited from more than one +requires+/+optional+
       # parameter, and needs to be run before most other
       # validations.
-      def coerce_type(validations, attrs, doc_attrs, fail_fast)
+      def coerce_type(validations, attrs, doc_attrs, opts)
         check_coerce_with(validations)
 
         return unless validations.key?(:coerce)
@@ -322,7 +323,7 @@ module Grape
           method: validations[:coerce_with],
           message: validations[:coerce_message]
         }
-        validate('coerce', coerce_options, attrs, doc_attrs, fail_fast)
+        validate('coerce', coerce_options, attrs, doc_attrs, opts)
         validations.delete(:coerce_with)
         validations.delete(:coerce)
         validations.delete(:coerce_message)
@@ -341,12 +342,12 @@ module Grape
         raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
       end
 
-      def validate(type, options, attrs, doc_attrs, fail_fast)
+      def validate(type, options, attrs, doc_attrs, opts)
         validator_class = Validations.validators[type.to_s]
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
-        value = validator_class.new(attrs, options, doc_attrs[:required], fail_fast, self)
+        value = validator_class.new(attrs, options, doc_attrs[:required], self, opts)
         @api.namespace_stackable(:validations, value)
       end
 
