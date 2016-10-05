@@ -140,14 +140,9 @@ module Grape
       end
 
       def validate_attributes(attrs, opts, &block)
-        # additional options
-        option_keys = [:fail_fast]
-        options = opts.select { |key, _val| option_keys.include?(key) }
-
-        validations = opts.reject { |key, _val| option_keys.include?(key) }
+        validations = opts.clone
         validations[:type] ||= Array if block
-
-        validates(attrs, validations, options)
+        validates(attrs, validations)
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
@@ -206,7 +201,7 @@ module Grape
         end
       end
 
-      def validates(attrs, validations, opts = {})
+      def validates(attrs, validations)
         doc_attrs = { required: validations.keys.include?(:presence) }
 
         coerce_type = infer_coercion(validations)
@@ -234,6 +229,10 @@ module Grape
 
         full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
         @api.document_attribute(full_attrs, doc_attrs)
+
+        # slice out fail_fast attribute
+        opts = {}
+        opts[:fail_fast] = validations.delete(:fail_fast) || false
 
         # Validate for presence before any other validators
         if validations.key?(:presence) && validations[:presence]
