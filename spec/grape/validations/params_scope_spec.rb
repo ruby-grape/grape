@@ -584,4 +584,44 @@ describe Grape::Validations::ParamsScope do
     get '/nested', bar: { a: 'x', c: { b: 'yes' } }
     expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'x', 'c' => { 'b' => 'yes' } })
   end
+
+  context 'failing fast' do
+    context 'when fail_fast is not defined' do
+      it 'does not stop validation' do
+        subject.params do
+          requires :one
+          requires :two
+          requires :three
+        end
+        subject.get('/fail-fast') { declared(params).to_json }
+
+        get '/fail-fast'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('one is missing, two is missing, three is missing')
+      end
+    end
+    context 'when fail_fast is defined it stops the validation' do
+      it 'of other params' do
+        subject.params do
+          requires :one, fail_fast: true
+          requires :two
+        end
+        subject.get('/fail-fast') { declared(params).to_json }
+
+        get '/fail-fast'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('one is missing')
+      end
+      it 'for a single param' do
+        subject.params do
+          requires :one, allow_blank: false, regexp: /[0-9]+/, fail_fast: true
+        end
+        subject.get('/fail-fast') { declared(params).to_json }
+
+        get '/fail-fast', one: ''
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('one is empty')
+      end
+    end
+  end
 end

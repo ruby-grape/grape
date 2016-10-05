@@ -230,9 +230,13 @@ module Grape
         full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
         @api.document_attribute(full_attrs, doc_attrs)
 
+        # slice out fail_fast attribute
+        opts = {}
+        opts[:fail_fast] = validations.delete(:fail_fast) || false
+
         # Validate for presence before any other validators
         if validations.key?(:presence) && validations[:presence]
-          validate('presence', validations[:presence], attrs, doc_attrs)
+          validate('presence', validations[:presence], attrs, doc_attrs, opts)
           validations.delete(:presence)
           validations.delete(:message) if validations.key?(:message)
         end
@@ -240,10 +244,10 @@ module Grape
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, doc_attrs
+        coerce_type validations, attrs, doc_attrs, opts
 
         validations.each do |type, options|
-          validate(type, options, attrs, doc_attrs)
+          validate(type, options, attrs, doc_attrs, opts)
         end
       end
 
@@ -308,7 +312,7 @@ module Grape
       # composited from more than one +requires+/+optional+
       # parameter, and needs to be run before most other
       # validations.
-      def coerce_type(validations, attrs, doc_attrs)
+      def coerce_type(validations, attrs, doc_attrs, opts)
         check_coerce_with(validations)
 
         return unless validations.key?(:coerce)
@@ -318,7 +322,7 @@ module Grape
           method: validations[:coerce_with],
           message: validations[:coerce_message]
         }
-        validate('coerce', coerce_options, attrs, doc_attrs)
+        validate('coerce', coerce_options, attrs, doc_attrs, opts)
         validations.delete(:coerce_with)
         validations.delete(:coerce)
         validations.delete(:coerce_message)
@@ -337,12 +341,12 @@ module Grape
         raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
       end
 
-      def validate(type, options, attrs, doc_attrs)
+      def validate(type, options, attrs, doc_attrs, opts)
         validator_class = Validations.validators[type.to_s]
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
-        value = validator_class.new(attrs, options, doc_attrs[:required], self)
+        value = validator_class.new(attrs, options, doc_attrs[:required], self, opts)
         @api.namespace_stackable(:validations, value)
       end
 
