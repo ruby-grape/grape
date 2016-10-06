@@ -2,6 +2,7 @@ Next Release
 ============
 
 * Your contribution here.
+* [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
 
 0.18.0 (10/7/2016)
 ==================
