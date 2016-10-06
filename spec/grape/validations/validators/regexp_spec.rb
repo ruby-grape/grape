@@ -31,6 +31,14 @@ describe Grape::Validations::RegexpValidator do
         end
         get 'regexp_with_array' do
         end
+
+        params do
+          requires :people, type: Hash do
+            requires :names, type: Array[String], regexp: /^[a-z]+$/
+          end
+        end
+        get 'nested_regexp_with_array' do
+        end
       end
     end
   end
@@ -146,6 +154,14 @@ describe Grape::Validations::RegexpValidator do
     it 'accepts nil instead of array' do
       get '/regexp_with_array', names: nil
       expect(last_response.status).to eq(200)
+    end
+  end
+
+  context 'nested regexp with array' do
+    it 'refuses inapppopriate' do
+      get '/nested_regexp_with_array', people: 'invalid name'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"people is invalid, people[names] is missing, people[names] is invalid"}')
     end
   end
 end
