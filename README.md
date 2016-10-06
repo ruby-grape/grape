@@ -104,8 +104,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the stable release of Grape.
+You're reading the documentation for the next release of Grape, which should be 0.18.1.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
+The current stable release is [0.18.0](https://github.com/ruby-grape/grape/blob/v0.18.0/README.md).
 
 ## Project Resources
 

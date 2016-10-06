@@ -1,3 +1,8 @@
+Next Release
+============
+
+* Your contribution here.
+
 0.18.0 (10/7/2016)
 ==================
 
