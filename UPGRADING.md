@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.18.1
+
+#### Removed param processing from built-in OPTIONS handler
+
+When a request is made to the built-in `OPTIONS` handler, only the `before` and `after`
+callbacks associated with the resource will be run.  The `before_validation` and
+`after_validation` callbacks and parameter validations will be skipped.
+
 ### Upgrading to >= 0.17.0
 
 #### Removed official support for Ruby < 2.2.2

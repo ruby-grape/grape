@@ -124,8 +124,8 @@ module Grape
       [options[:method],
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
-       options[:path].join('/')
-      ].join(' ')
+       options[:path].join('/')]
+        .join(' ')
     end
 
     def routes
@@ -248,21 +248,18 @@ module Grape
 
         run_filters befores, :before
 
-        allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS]
-        raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) if !options? && allowed_methods
+        if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
+          raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
+          header 'Allow', allowed_methods
+          response_object = ''
+          status 204
+        else
+          run_filters before_validations, :before_validation
+          run_validators validations, request
+          run_filters after_validations, :after_validation
+          response_object = @block ? @block.call(self) : nil
+        end
 
-        run_filters before_validations, :before_validation
-        run_validators validations, request
-        run_filters after_validations, :after_validation
-
-        response_object =
-          if options?
-            header 'Allow', allowed_methods
-            status 204
-            ''
-          else
-            @block ? @block.call(self) : nil
-          end
         run_filters afters, :after
         cookies.write(header)
 
