@@ -12,12 +12,32 @@ describe Grape::Validations::RegexpValidator do
           end
           get do
           end
+
+          params do
+            requires :names, type: { value: Array[String], message: 'can\'t be nil' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
+          end
+          get 'regexp_with_array' do
+          end
         end
 
         params do
           requires :name, regexp: /^[a-z]+$/
         end
         get do
+        end
+
+        params do
+          requires :names, type: Array[String], regexp: /^[a-z]+$/
+        end
+        get 'regexp_with_array' do
+        end
+
+        params do
+          requires :people, type: Hash do
+            requires :names, type: Array[String], regexp: /^[a-z]+$/
+          end
+        end
+        get 'nested_regexp_with_array' do
         end
       end
     end
@@ -51,6 +71,36 @@ describe Grape::Validations::RegexpValidator do
       get '/custom_message', name: 'bob'
       expect(last_response.status).to eq(200)
     end
+
+    context 'regexp with array' do
+      it 'refuses inapppopriate items' do
+        get '/custom_message/regexp_with_array', names: ['invalid name', 'abc']
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('{"error":"names format is invalid"}')
+      end
+
+      it 'refuses empty items' do
+        get '/custom_message/regexp_with_array', names: ['', 'abc']
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('{"error":"names format is invalid"}')
+      end
+
+      it 'refuses nil items' do
+        get '/custom_message/regexp_with_array', names: [nil, 'abc']
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('{"error":"names can\'t be nil"}')
+      end
+
+      it 'accepts valid items' do
+        get '/custom_message/regexp_with_array', names: ['bob']
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'accepts nil instead of array' do
+        get '/custom_message/regexp_with_array', names: nil
+        expect(last_response.status).to eq(200)
+      end
+    end
   end
 
   context 'invalid input' do
@@ -75,5 +125,43 @@ describe Grape::Validations::RegexpValidator do
   it 'accepts valid input' do
     get '/', name: 'bob'
     expect(last_response.status).to eq(200)
+  end
+
+  context 'regexp with array' do
+    it 'refuses inapppopriate items' do
+      get '/regexp_with_array', names: ['invalid name', 'abc']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"names is invalid"}')
+    end
+
+    it 'refuses empty items' do
+      get '/regexp_with_array', names: ['', 'abc']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"names is invalid"}')
+    end
+
+    it 'refuses nil items' do
+      get '/regexp_with_array', names: [nil, 'abc']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"names is invalid"}')
+    end
+
+    it 'accepts valid items' do
+      get '/regexp_with_array', names: ['bob']
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'accepts nil instead of array' do
+      get '/regexp_with_array', names: nil
+      expect(last_response.status).to eq(200)
+    end
+  end
+
+  context 'nested regexp with array' do
+    it 'refuses inapppopriate' do
+      get '/nested_regexp_with_array', people: 'invalid name'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"people is invalid, people[names] is missing, people[names] is invalid"}')
+    end
   end
 end
