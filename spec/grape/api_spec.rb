@@ -631,6 +631,9 @@ XML
     describe 'adds an OPTIONS route that' do
       before do
         subject.before { header 'X-Custom-Header', 'foo' }
+        subject.before_validation { header 'X-Custom-Header-2', 'bar' }
+        subject.after_validation { header 'X-Custom-Header-3', 'baz' }
+        subject.params { requires :only_for_get }
         subject.get 'example' do
           'example'
         end
@@ -654,6 +657,14 @@ XML
 
       it 'has a X-Custom-Header' do
         expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+      end
+
+      it 'does not call before_validation hook' do
+        expect(last_response.headers.key?('X-Custom-Header-2')).to be false
+      end
+
+      it 'does not call after_validation hook' do
+        expect(last_response.headers.key?('X-Custom-Header-3')).to be false
       end
 
       it 'has no Content-Type' do
