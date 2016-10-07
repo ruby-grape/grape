@@ -1081,7 +1081,7 @@ passed falls within the ```except``` list or when it falls entirely outside the 
 
 ```ruby
 params do
-  requires :number, type: Integer, values: { value: 1..20 except: [4,13], except_message: 'includes unsafe numbers', message: 'is outside the range of numbers allowed' }
+  requires :number, type: Integer, values: { value: 1..20, except: [4, 13], except_message: 'includes unsafe numbers', message: 'is outside the range of numbers allowed' }
 end
 ```
 
