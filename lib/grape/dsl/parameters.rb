@@ -99,6 +99,7 @@ module Grape
 
         opts = attrs.extract_options!.clone
         opts[:presence] = { value: true, message: opts[:message] }
+        opts = @group.merge(opts) if @group
 
         if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)
@@ -118,6 +119,7 @@ module Grape
 
         opts = attrs.extract_options!.clone
         type = opts[:type]
+        opts = @group.merge(opts) if @group
 
         # check type for optional parameter group
         if attrs && block_given?
@@ -132,6 +134,13 @@ module Grape
 
           block_given? ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs)
         end
+      end
+
+      # Define common settings for one or more parameters
+      # @param (see #requires)
+      # @option (see #requires)
+      def with(*attrs, &block)
+        new_group_scope(attrs.clone, &block)
       end
 
       # Disallow the given parameters to be present in the same request.

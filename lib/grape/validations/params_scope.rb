@@ -16,6 +16,7 @@ module Grape
       # @option opts :optional [Boolean] whether or not this scope needs to have
       #   any parameters set or not
       # @option opts :type [Class] a type meant to govern this scope (deprecated)
+      # @option opts :type [Hash] group options for this scope
       # @option opts :dependent_on [Symbol] if present, this scope should only
       #   validate if this param is present in the parent scope
       # @yield the instance context, open for parameter definitions
@@ -25,6 +26,7 @@ module Grape
         @api          = opts[:api]
         @optional     = opts[:optional] || false
         @type         = opts[:type]
+        @group        = opts[:group] || {}
         @dependent_on = opts[:dependent_on]
         @declared_params = []
 
@@ -186,6 +188,19 @@ module Grape
           options:      @optional,
           type:         Hash,
           dependent_on: options[:dependent_on],
+          &block)
+      end
+
+      # Returns a new parameter scope, subordinate to the current one and nested
+      # under the parameter corresponding to `attrs.first`.
+      # @param attrs [Array] the attributes passed to the `requires` or
+      #   `optional` invocation that opened this scope.
+      # @yield parameter scope
+      def new_group_scope(attrs, &block)
+        self.class.new(
+          api:          @api,
+          parent:       self,
+          group:        attrs.first,
           &block)
       end
 

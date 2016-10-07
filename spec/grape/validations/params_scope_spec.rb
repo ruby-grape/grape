@@ -624,4 +624,167 @@ describe Grape::Validations::ParamsScope do
       end
     end
   end
+
+  context 'when params have group attributes' do
+    context 'with validations' do
+      before do
+        subject.params do
+          with(allow_blank: false) do
+            requires :id
+            optional :name
+            optional :address, allow_blank: true
+          end
+        end
+        subject.get('test')
+      end
+
+      context 'when data is invalid' do
+        before do
+          get 'test', id: '', name: ''
+        end
+
+        it 'returns a validation error' do
+          expect(last_response.status).to eq(400)
+        end
+
+        it 'applies group validations for every parameter' do
+          expect(last_response.body).to eq('id is empty, name is empty')
+        end
+      end
+
+      context 'when parameter has the same validator as a group' do
+        before do
+          get 'test', id: 'id', address: ''
+        end
+
+        it 'returns a successful response' do
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'prioritizes parameter validation over group validation' do
+          expect(last_response.body).to_not include('address is empty')
+        end
+      end
+    end
+
+    context 'with types' do
+      before do
+        subject.params do
+          with(type: Date) do
+            requires :created_at
+          end
+        end
+        subject.get('test') { params[:created_at] }
+      end
+
+      context 'when invalid date provided' do
+        before do
+          get 'test', created_at: 'not_a_date'
+        end
+
+        it 'responds with HTTP error' do
+          expect(last_response.status).to eq(400)
+        end
+
+        it 'returns a validation error' do
+          expect(last_response.body).to eq('created_at is invalid')
+        end
+      end
+
+      context 'when created_at receives a valid date' do
+        before do
+          get 'test', created_at: '2016-01-01'
+        end
+
+        it 'returns a successful response' do
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'returns a date' do
+          expect(last_response.body).to eq('2016-01-01')
+        end
+      end
+    end
+
+    context 'with several group attributes' do
+      before do
+        subject.params do
+          with(values: [1]) do
+            requires :id, type: Integer
+          end
+
+          with(allow_blank: false) do
+            optional :address, type: String
+          end
+
+          requires :name
+        end
+        subject.get('test')
+      end
+
+      context 'when data is invalid' do
+        before do
+          get 'test', id: 2, address: ''
+        end
+
+        it 'responds with HTTP error' do
+          expect(last_response.status).to eq(400)
+        end
+
+        it 'returns a validation error' do
+          expect(last_response.body).to eq('id does not have a valid value, address is empty, name is missing')
+        end
+      end
+
+      context 'when correct data is provided' do
+        before do
+          get 'test', id: 1, address: 'Some street', name: 'John'
+        end
+
+        it 'returns a successful response' do
+          expect(last_response.status).to eq(200)
+        end
+      end
+    end
+
+    context 'with nested groups' do
+      before do
+        subject.params do
+          with(type: Integer) do
+            requires :id
+
+            with(type: Date) do
+              requires :created_at
+              optional :updated_at
+            end
+          end
+        end
+        subject.get('test')
+      end
+
+      context 'when data is invalid' do
+        before do
+          get 'test', id: 'wrong', created_at: 'not_a_date', updated_at: '2016-01-01'
+        end
+
+        it 'responds with HTTP error' do
+          expect(last_response.status).to eq(400)
+        end
+
+        it 'returns a validation error' do
+          expect(last_response.body).to eq('id is invalid, created_at is invalid')
+        end
+      end
+
+      context 'when correct data is provided' do
+        before do
+          get 'test', id: 1, created_at: '2016-01-01'
+        end
+
+        it 'returns a successful response' do
+          expect(last_response.status).to eq(200)
+        end
+      end
+    end
+  end
 end

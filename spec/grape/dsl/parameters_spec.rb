@@ -31,6 +31,11 @@ module Grape
           @validates
         end
 
+        def new_group_scope(args)
+          @group = args.clone.first
+          yield
+        end
+
         def extract_message_option(attrs)
           return nil unless attrs.is_a?(Array)
           opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
@@ -86,6 +91,15 @@ module Grape
       describe '#optional' do
         it 'adds an optional parameter' do
           subject.optional :id, type: Integer, desc: 'Identity.'
+
+          expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+          expect(subject.push_declared_params_reader).to eq([[:id]])
+        end
+      end
+
+      describe '#with' do
+        it 'creates a scope with group attributes' do
+          subject.with(type: Integer) { subject.optional :id, desc: 'Identity.' }
 
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
           expect(subject.push_declared_params_reader).to eq([[:id]])
