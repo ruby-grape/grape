@@ -9,6 +9,23 @@ When a request is made to the built-in `OPTIONS` handler, only the `before` and 
 callbacks associated with the resource will be run.  The `before_validation` and
 `after_validation` callbacks and parameter validations will be skipped.
 
+See [#1505](https://github.com/ruby-grape/grape/pull/1505) for more information.
+
+#### Changed endpoint params validation
+
+Grape now correctly returns validation errors for all params when multiple params are passed to a requires.
+The following code will return `one is missing, two is missing` when calling the endpoint without parameters.
+
+```ruby
+params do
+  requires :one, :two
+end
+```
+
+Prior to this version the response would be `one is missing`.
+
+See [#1510](https://github.com/ruby-grape/grape/pull/1510) for more information.
+
 ### Upgrading to >= 0.17.0
 
 #### Removed official support for Ruby < 2.2.2
@@ -22,7 +39,7 @@ See [#1441](https://github.com/ruby-grape/grape/pull/1441) for nmore information
 The `rescue_from` clauses declared inside a namespace would take a priority over ones declared in the root scope.
 This could possibly affect those users who use different `rescue_from` clauses in root scope and in namespaces.
 
-See [#1405](https://github.com/ruby-grape/grape/pull/1405) for more inforomation.
+See [#1405](https://github.com/ruby-grape/grape/pull/1405) for more information.
 
 #### Helper methods injected inside `rescue_from` in middleware
 

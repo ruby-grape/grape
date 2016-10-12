@@ -39,13 +39,12 @@ module Grape
       def validate!(params)
         attributes = AttributesIterator.new(self, @scope, params)
         array_errors = []
-        attributes.each do |resource_params, attr_name, inside_array|
+        attributes.each do |resource_params, attr_name|
           next unless @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
 
           begin
             validate_param!(attr_name, resource_params)
           rescue Grape::Exceptions::Validation => e
-            raise e unless inside_array
             # we collect errors inside array because
             # there may be more than one error per field
             array_errors << e

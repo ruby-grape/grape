@@ -105,6 +105,34 @@ describe Grape::Validations::PresenceValidator do
     end
   end
 
+  context 'with multiple parameters per requires' do
+    before do
+      subject.params do
+        requires :one, :two
+      end
+      subject.get '/single-requires' do
+        'Hello'
+      end
+
+      subject.params do
+        requires :one
+        requires :two
+      end
+      subject.get '/multiple-requires' do
+        'Hello'
+      end
+    end
+    it 'validates for all defined params' do
+      get '/single-requires'
+      expect(last_response.status).to eq(400)
+      single_requires_error = last_response.body
+
+      get '/multiple-requires'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq(single_requires_error)
+    end
+  end
+
   context 'with required parameters and no type' do
     before do
       subject.params do
@@ -117,7 +145,7 @@ describe Grape::Validations::PresenceValidator do
     it 'validates name, company' do
       get '/'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('{"error":"name is missing"}')
+      expect(last_response.body).to eq('{"error":"name is missing, company is missing"}')
 
       get '/', name: 'Bob'
       expect(last_response.status).to eq(400)
