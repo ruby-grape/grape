@@ -38,6 +38,7 @@
   - [Multiple Allowed Types](#multiple-allowed-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
+  - [Group Options](#group-options)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
@@ -1001,6 +1002,35 @@ params do
 end
 ```
 
+
+### Group Options
+
+Parameters options can be grouped. It can be useful if you want to extract
+common validation or types for several parameters. The example below presents a
+typical case when parameters share common options.
+
+```ruby
+params do
+  requires :first_name, type: String, regexp: /w+/, desc: 'First name'
+  requires :middle_name, type: String, regexp: /w+/, desc: 'Middle name'
+  requires :last_name, type: String, regexp: /w+/, desc: 'Last name'
+end
+```
+
+Grape allows you to present the same logic through the `with` method in your
+parameters block, like so:
+
+```ruby
+params do
+  with(type: String, regexp: /w+/) do
+    requires :first_name, desc: 'First name'
+    requires :middle_name, desc: 'Middle name'
+    requires :last_name, desc: 'Last name'
+  end
+end
+```
+
+
 ### Built-in Validators
 
 #### `allow_blank`
@@ -1076,8 +1106,8 @@ end
 ```
 
 Values and except can be combined to define a range of accepted values while not allowing
-certain values within the set. Custom error messages can be defined for both when the parameter 
-passed falls within the ```except``` list or when it falls entirely outside the ```value``` list. 
+certain values within the set. Custom error messages can be defined for both when the parameter
+passed falls within the ```except``` list or when it falls entirely outside the ```value``` list.
 
 ```ruby
 params do
