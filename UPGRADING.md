@@ -1,6 +1,21 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.18.1
+
+#### Changed endpoint params validation
+
+Grape now returns validation errors for all params when multiple params are passed to a requires.
+The following code will return `one is missing, two is missing` when calling the endpoint without parameters.
+
+```ruby
+params do
+  requires :one, :two
+end
+```
+
+Prior to this version the response would be `one is missing`.
+
 ### Upgrading to >= 0.17.0
 
 #### Removed official support for Ruby < 2.2.2
