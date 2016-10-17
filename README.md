@@ -1807,7 +1807,9 @@ end
 
 When you add a route for a resource, a route for the `OPTIONS`
 method will also be added. The response to an OPTIONS request will
-include an "Allow" header listing the supported methods.
+include an "Allow" header listing the supported methods. If the resource
+has `before` callbacks they will be executed, but no other callbacks will
+run.
 
 ```ruby
 class API < Grape::API
@@ -1837,7 +1839,9 @@ curl -v -X OPTIONS http://localhost:3000/rt_count
 You can disable this behavior with `do_not_route_options!`.
 
 If a request for a resource is made with an unsupported HTTP method, an
-HTTP 405 (Method Not Allowed) response will be returned.
+HTTP 405 (Method Not Allowed) response will be returned. If the resource
+has `before` callbacks they will be executed, but no other callbacks will
+run.
 
 ``` shell
 curl -X DELETE -v http://localhost:3000/rt_count/
@@ -2796,6 +2800,11 @@ Before and after callbacks execute in the following order:
 6. `after`
 
 Steps 4, 5 and 6 only happen if validation succeeds.
+
+If a request for a resource is made with an unsupported HTTP method (returning
+HTTP 405) or with the `OPTIONS` method when the built-in handler is in use,
+only `before` callbacks will be executed.  The remaining callbacks will
+be bypassed.
 
 #### Examples
 

@@ -9,7 +9,7 @@ Next Release
 
 #### Fixes
 
-* [#1505](https://github.com/ruby-grape/grape/pull/1505): Run only before hook for automatic OPTIONS - [@jlfaber](https://github.com/jlfaber).
+* [#1505](https://github.com/ruby-grape/grape/pull/1505): Run `before` callback, but skip the rest when handling OPTIONS - [@jlfaber](https://github.com/jlfaber).
 
 0.18.0 (10/7/2016)
 ==================
