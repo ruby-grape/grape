@@ -124,8 +124,8 @@ module Grape
       [options[:method],
        Namespace.joined_space(namespace_stackable(:namespace)),
        (namespace_stackable(:mount_path) || []).join('/'),
-       options[:path].join('/')
-      ].join(' ')
+       options[:path].join('/')]
+        .join(' ')
     end
 
     def routes

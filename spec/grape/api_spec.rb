@@ -594,8 +594,8 @@ XML
     context 'when accessing env' do
       it 'returns a 405 for an unsupported method' do
         subject.before do
-          _custom_header_1 = headers['X-Custom-Header']
-          _custom_header_2 = env['HTTP_X_CUSTOM_HEADER']
+          _customheader1 = headers['X-Custom-Header']
+          _customheader2 = env['HTTP_X_CUSTOM_HEADER']
         end
         subject.get 'example' do
           'example'
@@ -2566,13 +2566,11 @@ XML
           params: {
             'param1' => { required: true },
             'param2' => { required: false }
-          }
-        },
+          } },
         { description: 'global description',
           params: {
             'param2' => { required: false }
-          }
-        }
+          } }
       ]
     end
     it 'merges the parameters of the namespace with the parameters of the method' do
@@ -2596,8 +2594,7 @@ XML
           params: {
             'ns_param' => { required: true, desc: 'namespace parameter' },
             'method_param' => { required: false, desc: 'method parameter' }
-          }
-        }
+          } }
       ]
     end
     it 'merges the parameters of nested namespaces' do
@@ -2629,8 +2626,7 @@ XML
             'ns1_param' => { required: true, desc: 'ns1 param' },
             'ns2_param' => { required: true, desc: 'ns2 param' },
             'method_param' => { required: false, desc: 'method param' }
-          }
-        }
+          } }
       ]
     end
     it 'groups nested params and prevents overwriting of params with same name in different groups' do
@@ -2673,8 +2669,7 @@ XML
             'root_param' => { required: true, desc: 'root param' },
             'nested' => { required: true, type: 'Array' },
             'nested[nested_param]' => { required: true, desc: 'nested param' }
-          }
-        }
+          } }
       ]
     end
     it 'allows to set the type attribute on :group element' do
