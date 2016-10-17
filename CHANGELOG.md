@@ -1,9 +1,15 @@
 Next Release
 ============
 
+#### Features
+
 * [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
 * [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
 * Your contribution here.
+
+#### Fixes
+
+* [#1505](https://github.com/ruby-grape/grape/pull/1505): Run only before hook for automatic OPTIONS - [@jlfaber](https://github.com/jlfaber).
 
 0.18.0 (10/7/2016)
 ==================

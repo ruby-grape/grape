@@ -516,9 +516,15 @@ describe Grape::API do
         end
         send(verb, '/example')
         expect(last_response.body).to eql verb == 'head' ? '' : verb
-        # Call it with a method other than the properly constrained one.
-        send(used_verb = verbs[(verbs.index(verb) + 2) % verbs.size], '/example')
-        expect(last_response.status).to eql used_verb == 'options' ? 204 : 405
+        # Call it with all methods other than the properly constrained one.
+        (verbs - [verb]).each do |other_verb|
+          send(other_verb, '/example')
+          expected_rc = if other_verb == 'options' then 204
+                        elsif other_verb == 'head' && verb == 'get' then 200
+                        else 405
+                        end
+          expect(last_response.status).to eql expected_rc
+        end
       end
     end
 
@@ -549,6 +555,7 @@ describe Grape::API do
         before_validation { raise 'before_validation filter should not run' }
         after_validation  { raise 'after_validation filter should not run' }
         after             { raise 'after filter should not run' }
+        params { requires :only_for_get }
         get
       end
 
@@ -571,6 +578,27 @@ describe Grape::API do
       post '/example'
       expect(last_response.status).to eql 405
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
+    end
+
+    it 'runs all filters and body with a custom OPTIONS method' do
+      subject.namespace :example do
+        before            { header 'X-Custom-Header-1', 'foo' }
+        before_validation { header 'X-Custom-Header-2', 'foo' }
+        after_validation  { header 'X-Custom-Header-3', 'foo' }
+        after             { header 'X-Custom-Header-4', 'foo' }
+        options { 'yup' }
+        get
+      end
+
+      options '/example'
+      expect(last_response.status).to eql 200
+      expect(last_response.body).to eql 'yup'
+      expect(last_response.headers['Allow']).to be_nil
+      expect(last_response.headers['X-Custom-Header-1']).to eql 'foo'
+      expect(last_response.headers['X-Custom-Header-2']).to eql 'foo'
+      expect(last_response.headers['X-Custom-Header-3']).to eql 'foo'
+      expect(last_response.headers['X-Custom-Header-4']).to eql 'foo'
+      expect(last_response.headers['X-Custom-Header-4']).to eql 'foo'
     end
 
     context 'when format is xml' do
