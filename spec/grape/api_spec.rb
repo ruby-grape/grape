@@ -598,7 +598,6 @@ describe Grape::API do
       expect(last_response.headers['X-Custom-Header-2']).to eql 'foo'
       expect(last_response.headers['X-Custom-Header-3']).to eql 'foo'
       expect(last_response.headers['X-Custom-Header-4']).to eql 'foo'
-      expect(last_response.headers['X-Custom-Header-4']).to eql 'foo'
     end
 
     context 'when format is xml' do
@@ -658,9 +657,10 @@ XML
 
     describe 'adds an OPTIONS route that' do
       before do
-        subject.before { header 'X-Custom-Header', 'foo' }
+        subject.before            { header 'X-Custom-Header', 'foo' }
         subject.before_validation { header 'X-Custom-Header-2', 'bar' }
-        subject.after_validation { header 'X-Custom-Header-3', 'baz' }
+        subject.after_validation  { header 'X-Custom-Header-3', 'baz' }
+        subject.after             { header 'X-Custom-Header-4', 'bing' }
         subject.params { requires :only_for_get }
         subject.get 'example' do
           'example'
@@ -693,6 +693,10 @@ XML
 
       it 'does not call after_validation hook' do
         expect(last_response.headers.key?('X-Custom-Header-3')).to be false
+      end
+
+      it 'does not call after hook' do
+        expect(last_response.headers.key?('X-Custom-Header-4')).to be false
       end
 
       it 'has no Content-Type' do
