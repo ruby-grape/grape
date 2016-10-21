@@ -193,21 +193,24 @@ module Grape
 
       alias group requires
 
+      def map_params(params, element)
+        if params.is_a?(Array)
+          params.map do |el|
+            map_params(el, element)
+          end
+        elsif params.is_a?(Hash)
+          params[element] || {}
+        else
+          {}
+        end
+      end
+
       # @param params [Hash] initial hash of parameters
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
         params = @parent.params(params) if @parent
-        if @element
-          params = if params.is_a?(Array)
-                     # used for calculating parent array indices for error messages
-                     params.map { |el| el[@element] || {} }
-                   elsif params.is_a?(Hash)
-                     params[@element] || {}
-                   else
-                     {}
-                   end
-        end
+        params = map_params(params, @element) if @element
         params
       end
     end

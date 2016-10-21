@@ -585,6 +585,25 @@ describe Grape::Validations::ParamsScope do
     expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'x', 'c' => { 'b' => 'yes' } })
   end
 
+  it 'includes deeply nested parameters within #declared(params)' do
+    subject.params do
+      requires :arr1, type: Array do
+        requires :hash1, type: Hash do
+          requires :arr2, type: Array do
+            requires :hash2, type: Hash do
+              requires :something, type: String
+            end
+          end
+        end
+      end
+    end
+    subject.get('/nested_deep') { declared(params).to_json }
+
+    get '/nested_deep', arr1: [{ hash1: { arr2: [{ hash2: { something: 'value' } }] } }]
+    expect(last_response.status).to eq(200)
+    expect(JSON.parse(last_response.body)).to eq('arr1' => [{ 'hash1' => { 'arr2' => [{ 'hash2' => { 'something' => 'value' } }] } }])
+  end
+
   context 'failing fast' do
     context 'when fail_fast is not defined' do
       it 'does not stop validation' do

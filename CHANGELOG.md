@@ -3,6 +3,7 @@ Next Release
 
 * [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
 * [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
+* [#1512](https://github.com/ruby-grape/grape/pull/1512): Fix for deeply nested params TypeError situation - [@krbs](https://github.com/krbs).
 * Your contribution here.
 
 0.18.0 (10/7/2016)
