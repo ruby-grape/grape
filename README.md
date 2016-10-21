@@ -1808,7 +1808,7 @@ end
 When you add a route for a resource, a route for the `OPTIONS`
 method will also be added. The response to an OPTIONS request will
 include an "Allow" header listing the supported methods. If the resource
-has `before` callbacks they will be executed, but no other callbacks will
+has `before` and `after` callbacks they will be executed, but no other callbacks will
 run.
 
 ```ruby
@@ -2802,8 +2802,11 @@ Before and after callbacks execute in the following order:
 Steps 4, 5 and 6 only happen if validation succeeds.
 
 If a request for a resource is made with an unsupported HTTP method (returning
-HTTP 405) or with the `OPTIONS` method when the built-in handler is in use,
-only `before` callbacks will be executed.  The remaining callbacks will
+HTTP 405) only `before` callbacks will be executed.  The remaining callbacks will
+be bypassed.
+
+If a request for a resource is made that triggers the built-in `OPTIONS` handler,
+only `before` and `after` callbacks will be executed.  The remaining callbacks will
 be bypassed.
 
 #### Examples

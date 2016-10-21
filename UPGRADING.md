@@ -3,12 +3,11 @@ Upgrading Grape
 
 ### Upgrading to >= 0.18.1
 
-#### Aligned and clarified callback behavior of 405 handler and built-in OPTIONS handler
+#### Removed param processing from built-in OPTIONS handler
 
-When a request is made to a resource using an undefined method (HTTP 405) or a request is
-made to the built-in `OPTIONS` handler, only the `before` callbacks associated with the
-resource will be run.  Other callbacks (`before_validation`, `after_validation`, `after`)
-and parameter validations will be skipped.
+When a request is made to the built-in `OPTIONS` handler, only the `before` and `after`
+callbacks associated with the resource will be run.  The `before_validation` and
+`after_validation` callbacks and parameter validations will be skipped.
 
 ### Upgrading to >= 0.17.0
 

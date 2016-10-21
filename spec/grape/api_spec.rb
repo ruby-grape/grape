@@ -683,7 +683,7 @@ XML
         expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, HEAD'
       end
 
-      it 'has a X-Custom-Header' do
+      it 'calls before hook' do
         expect(last_response.headers['X-Custom-Header']).to eql 'foo'
       end
 
@@ -695,8 +695,8 @@ XML
         expect(last_response.headers.key?('X-Custom-Header-3')).to be false
       end
 
-      it 'does not call after hook' do
-        expect(last_response.headers.key?('X-Custom-Header-4')).to be false
+      it 'calls after hook' do
+        expect(last_response.headers['X-Custom-Header-4']).to eq 'bing'
       end
 
       it 'has no Content-Type' do

@@ -251,16 +251,14 @@ module Grape
         if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
           raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
           header 'Allow', allowed_methods
-          cookies.write(header)
+          response_object = ''
           status 204
-          return [status, header, '']
+        else
+          run_filters before_validations, :before_validation
+          run_validators validations, request
+          run_filters after_validations, :after_validation
+          response_object = @block ? @block.call(self) : nil
         end
-
-        run_filters before_validations, :before_validation
-        run_validators validations, request
-        run_filters after_validations, :after_validation
-
-        response_object = @block ? @block.call(self) : nil
 
         run_filters afters, :after
         cookies.write(header)
