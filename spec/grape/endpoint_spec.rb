@@ -291,7 +291,6 @@ describe Grape::Endpoint do
     end
   end
 
-
   describe '#declared' do
     before do
       subject.params do
