@@ -249,6 +249,51 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#params' do
+    context 'access params with HashWithIndifferentAccess' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          [params[:a], params['a'], params["a"]]
+        end
+
+        get '/foo', a: 'bar'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", "bar", "bar"]')
+      end
+    end
+
+    context 'to_h should a Hash' do
+      it 'to_h' do
+        subject.get '/foo' do
+          params.to_h.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Hash')
+      end
+    end
+    
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] =  'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq("bar")
+      end
+    end
+  end
+
+
   describe '#declared' do
     before do
       subject.params do
