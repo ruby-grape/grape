@@ -5,19 +5,19 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'bundler'
-  gem 'rake'
-  gem 'rubocop', '0.39.0'
+  # gem 'bundler'
+  # gem 'rake'
+  # gem 'rubocop', '0.39.0'
 end
 
 group :development do
-  gem 'guard'
-  gem 'guard-rspec'
-  gem 'guard-rubocop'
-  gem 'yard'
-  gem 'appraisal'
-  gem 'benchmark-ips'
-  gem 'redcarpet'
+  # gem 'guard'
+  # gem 'guard-rspec'
+  # gem 'guard-rubocop'
+  # gem 'yard'
+  # gem 'appraisal'
+  # gem 'benchmark-ips'
+  # gem 'redcarpet'
 end
 
 group :test do

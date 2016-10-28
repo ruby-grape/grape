@@ -261,7 +261,7 @@ describe Grape::Endpoint do
 
         get '/foo', a: 'bar'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('["bar", "bar", "bar"]')
+        expect(last_response.body).to eq('["bar", "bar"]')
       end
     end
     context 'to_h should a Hash' do
