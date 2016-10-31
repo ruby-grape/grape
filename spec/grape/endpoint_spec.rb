@@ -251,6 +251,34 @@ describe Grape::Endpoint do
 
   describe '#params' do
     context 'access params with HashWithIndifferentAccess' do
+      it 'should be ActiveSupport::HashWithIndifferentAccess' do
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+      it 'parse sub hash params' do
+        subject.params do
+          optional :a, type: Hash do
+            optional :b, type: Hash do
+              optional :c, type: String
+            end
+            optional :d, type: Array
+          end
+        end
+        subject.get '/foo' do
+          [params[:a]['b'][:c], params['a'][:d]]
+        end
+
+        get '/foo', a: { b: { c: 'bar' }, d: ['foo'] }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", ["foo"]]')
+      end
+    end
+    context 'access params with HashWithIndifferentAccess' do
       it 'params' do
         subject.params do
           requires :a, type: String
