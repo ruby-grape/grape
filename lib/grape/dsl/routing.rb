@@ -99,6 +99,7 @@ module Grape
               method: :any,
               path: path,
               app: app,
+              route_options: { anchor: false },
               forward_match: !app.respond_to?(:inheritable_setting),
               for: self
             )
@@ -118,6 +119,7 @@ module Grape
         #     end
         #   end
         def route(methods, paths = ['/'], route_options = {}, &block)
+          methods = '*' if methods == :any
           endpoint_options = {
             method: methods,
             path: paths,

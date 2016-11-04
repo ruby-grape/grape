@@ -19,6 +19,10 @@ module Grape
       path
     end
 
+    def self.supported_methods
+      @supported_methods ||= Grape::Http::Headers::SUPPORTED_METHODS + ['*']
+    end
+
     def initialize
       @neutral_map = []
       @map = Hash.new { |hash, key| hash[key] = [] }
@@ -28,7 +32,8 @@ module Grape
     def compile!
       return if compiled
       @union = Regexp.union(@neutral_map.map(&:regexp))
-      map.each do |method, routes|
+      self.class.supported_methods.each do |method|
+        routes = map[method]
         @optimized_map[method] = routes.map.with_index do |route, index|
           route.index = index
           route.regexp = /(?<_#{index}>#{route.pattern.to_regexp})/
@@ -77,7 +82,7 @@ module Grape
     def rotation(env, exact_route = nil)
       response = nil
       input, method, routing_args = *extract_required_args(env)
-      routes_for(method).each do |route|
+      map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
         env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
@@ -92,8 +97,18 @@ module Grape
       response = yield(input, method, routing_args)
 
       return response if response && !(cascade = cascade?(response))
+
       neighbor = greedy_match?(input)
-      return unless neighbor
+
+      if neighbor && method == 'OPTIONS'
+        return (!cascade && neighbor) ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
+      end
+
+      if route = match?(input, '*')
+        env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
+        response = route.exec(env)
+        return response if response && !(cascade = cascade?(response))
+      end
 
       (!cascade && neighbor) ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
     end
@@ -139,10 +154,6 @@ module Grape
 
     def cascade?(response)
       response && response[1][Grape::Http::Headers::X_CASCADE] == 'pass'
-    end
-
-    def routes_for(method)
-      map[method] + map['ANY']
     end
 
     def string_for(input)
