@@ -786,9 +786,6 @@ XML
         subject.post :example do
           'example'
         end
-        subject.route :any, '*path' do
-          error! :not_found, 404
-        end
         get '/example'
       end
 
