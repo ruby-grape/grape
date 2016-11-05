@@ -36,12 +36,12 @@ module Grape
 
       def build_path(pattern, anchor: false, suffix: nil, **_options)
         unless anchor || pattern.end_with?('*path')
-          pattern << ?/ unless pattern.end_with?(?/)
+          pattern << '/' unless pattern.end_with?('/')
           pattern << '*path'
         end
-        pattern = pattern.split(?/).tap { |parts|
-          parts[parts.length - 1] = ?? + parts.last
-        }.join(?/) if pattern.end_with?('*path')
+        pattern = pattern.split('/').tap do |parts|
+          parts[parts.length - 1] = '?' + parts.last
+        end.join('/') if pattern.end_with?('*path')
         pattern + suffix.to_s
       end
 

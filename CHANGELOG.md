@@ -12,7 +12,7 @@ Next Release
 #### Fixes
 
 * [#1505](https://github.com/ruby-grape/grape/pull/1505): Run `before` and `after` callbacks, but skip the rest when handling OPTIONS - [@jlfaber](https://github.com/jlfaber).
-* [#1517](https://github.com/ruby-grape/grape/pull/1517): Modify the priority of ANY routes, fixes #1089 - [@namusyaka](https://github.com/namusyaka), [@wagenet](https://github.com/wagenet).
+* [#1517](https://github.com/ruby-grape/grape/pull/1517), [#1089](https://github.com/ruby-grape/grape/pull/1089): Fix: priority of ANY routes - [@namusyaka](https://github.com/namusyaka), [@wagenet](https://github.com/wagenet).
 
 0.18.0 (10/7/2016)
 ==================
