@@ -523,19 +523,19 @@ describe Grape::API do
         end
       end
 
-      send('get', 'nested')
+      get 'nested'
       expect(last_response.body).to eql 'root'
 
-      send('get', 'nested/something')
+      get 'nested/something'
       expect(last_response.body).to eql 'something'
 
-      send('get', 'nested/missing')
+      get 'nested/missing'
       expect(last_response.body).to eql 'catch-all'
 
-      send('post', 'nested')
+      post 'nested'
       expect(last_response.body).to eql 'catch-all'
 
-      send('post', 'nested/something')
+      post 'nested/something'
       expect(last_response.body).to eql 'catch-all'
     end
 
