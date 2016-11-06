@@ -16,6 +16,8 @@ module Grape
       HEAD    = 'HEAD'.freeze
       OPTIONS = 'OPTIONS'.freeze
 
+      SUPPORTED_METHODS = [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS].freeze
+
       HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'.freeze
       X_CASCADE              = 'X-Cascade'.freeze
       HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'.freeze

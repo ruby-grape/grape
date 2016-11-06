@@ -3,6 +3,22 @@ Upgrading Grape
 
 ### Upgrading to >= 0.18.1
 
+#### Modify the priority of :any routes
+
+Conventional, the :any routes had been searched after matching first route and 405 routes.
+This version adds the :any routes processing before 405 processing, so the behavior of following code will be changed. 
+
+```ruby
+post :example do
+  'example'
+end
+route :any, '*path' do
+  error! :not_found, 404
+end
+
+get '/example' #=> before: 405, currently: 404
+```
+
 #### Removed param processing from built-in OPTIONS handler
 
 When a request is made to the built-in `OPTIONS` handler, only the `before` and `after`
