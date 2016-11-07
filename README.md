@@ -494,7 +494,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If we do not specify any params, `declared` will return an empty `ActiveSupport::HashWithIndifferentAccess` hash.
 
 **Request**
 
@@ -547,10 +547,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
+The returned hash is a `ActiveSupport::HashWithIndifferentAccess` hash.
 
 ```ruby
-  declared(params).user == declared(params)['user']
+  declared(params)[:user] == declared(params)['user']
 ```
 
 
@@ -868,11 +868,14 @@ params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  # Parameter will be wrapped using HashWithIndifferentAccess:
+  params[:avatar][:filename] # => 'avatar.png'
+  params['avatar']['avatar']     # => 'image/png'
+   params[:avatar][:tempfile] # => #<File>
 end
+
+`params` hash keys  can accesed with `""` or `:`  
+`:avatar` and `"avatar"` are considered to be the same.
 ```
 
 ### First-Class `JSON` Types

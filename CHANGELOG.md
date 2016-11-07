@@ -7,6 +7,8 @@ Next Release
 * [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
 * [#1512](https://github.com/ruby-grape/grape/pull/1512): Fix: deeply nested parameters are included within `#declared(params)` - [@krbs](https://github.com/krbs).
 * [#1510](https://github.com/ruby-grape/grape/pull/1510): Fix: inconsistent validation for multiple parameters - [@dgasper](https://github.com/dgasper).
+* [#1514](https://github.com/ruby-grape/grape/pull/1514): Replace Hashie::Mash with ActiveSupport::HashWithIndifferentAccess - [@msroot](https://github.com/msroot).
+
 * Your contribution here.
 
 #### Fixes
