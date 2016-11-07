@@ -12,13 +12,13 @@ module Grape
         private
 
         def serializable?(object)
-          object.respond_to?(:serializable_hash) || object.is_a?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false) || object.is_a?(Hash)
+          object.respond_to?(:serializable_hash) || object.is_a?(Array) && object.all? { |o| o.respond_to? :serializable_hash } || object.is_a?(Hash)
         end
 
         def serialize(object)
           if object.respond_to? :serializable_hash
             object.serializable_hash
-          elsif object.is_a?(Array) && !object.map { |o| o.respond_to? :serializable_hash }.include?(false)
+          elsif object.is_a?(Array) && object.all? { |o| o.respond_to? :serializable_hash }
             object.map(&:serializable_hash)
           elsif object.is_a?(Hash)
             h = {}
