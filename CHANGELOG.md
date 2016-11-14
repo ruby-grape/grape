@@ -1,7 +1,8 @@
-### 1.3.4 (Next)
+### 1.4.0 (Next)
 
 #### Features
 
+* [#1520](https://github.com/ruby-grape/grape/pull/1520): Un-deprecate stream-like objects - [@urkle](https://github.com/urkle).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Drop support for Ruby 2.4 - [@dblock](https://github.com/dblock).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
 * Your contribution here.

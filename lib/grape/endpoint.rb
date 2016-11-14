@@ -99,7 +99,7 @@ module Grape
       @block = nil
 
       @status = nil
-      @file = nil
+      @stream = nil
       @body = nil
       @proc = nil
 
@@ -271,8 +271,8 @@ module Grape
           # status verifies body presence when DELETE
           @body ||= response_object
 
-          # The body commonly is an Array of Strings, the application instance itself, or a File-like object
-          response_object = file || [body]
+          # The body commonly is an Array of Strings, the application instance itself, or a Stream-like object
+          response_object = stream || [body]
 
           [status, header, response_object]
         ensure

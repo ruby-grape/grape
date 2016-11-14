@@ -279,23 +279,36 @@ module Grape
         body false
       end
 
-      # Allows you to define the response as a file-like object.
+      # Deprecated method to send files to the client. Use `sendfile` or `stream`
+      def file(value = nil)
+        if value.is_a?(String)
+          warn '[DEPRECATION] Use sendfile or stream to send files.'
+          sendfile(value)
+        elsif !value.is_a?(NilClass)
+          warn '[DEPRECATION] Use stream to use a Stream object.'
+          stream(value)
+        else
+          warn '[DEPRECATION] Use sendfile or stream to send files.'
+          sendfile
+        end
+      end
+
+      # Allows you to send a file to the client via sendfile.
       #
       # @example
       #   get '/file' do
-      #     file FileStreamer.new(...)
+      #     sendfile FileStreamer.new(...)
       #   end
       #
       #   GET /file # => "contents of file"
-      def file(value = nil)
+      def sendfile(value = nil)
         if value.is_a?(String)
-          file_body = Grape::ServeFile::FileBody.new(value)
-          @file = Grape::ServeFile::FileResponse.new(file_body)
+          file_body = Grape::ServeStream::FileBody.new(value)
+          @stream = Grape::ServeStream::StreamResponse.new(file_body)
         elsif !value.is_a?(NilClass)
-          warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
-          @file = Grape::ServeFile::FileResponse.new(value)
+          raise ArgumentError, 'Argument must be a file path'
         else
-          instance_variable_defined?(:@file) ? @file : nil
+          stream
         end
       end
 
@@ -318,7 +331,16 @@ module Grape
         header 'Content-Length', nil
         header 'Transfer-Encoding', nil
         header 'Cache-Control', 'no-cache' # Skips ETag generation (reading the response up front)
-        file(value)
+        if value.is_a?(String)
+          file_body = Grape::ServeStream::FileBody.new(value)
+          @stream = Grape::ServeStream::StreamResponse.new(file_body)
+        elsif value.respond_to?(:each)
+          @stream = Grape::ServeStream::StreamResponse.new(value)
+        elsif !value.is_a?(NilClass)
+          raise ArgumentError, 'Stream object must respond to :each.'
+        else
+          instance_variable_defined?(:@stream) ? @stream : nil
+        end
       end
 
       # Allows you to make use of Grape Entities by setting
