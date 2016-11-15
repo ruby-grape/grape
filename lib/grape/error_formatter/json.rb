@@ -10,7 +10,7 @@ module Grape
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)
           end
-          MultiJson.dump(result)
+          Grape::Config.json_processor.dump(result)
         end
 
         private

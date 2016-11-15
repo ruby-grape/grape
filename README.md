@@ -2374,11 +2374,25 @@ end
 
 Built-in formatters are the following.
 
-* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
+* `:json`: use object's `to_json` when available, otherwise call `JSON.dump`
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
+
+Grape now not longer use MultiJson as JSON processor.If you want to continue to use MultiJson, you can use it by below
+
+```
+gem 'multi_json'
+```
+
+```
+require 'multi_json'
+
+Grape::Config do |config|
+  config.json_processor = MultiJson
+end
+```
 
 Response statuses that indicate no content as defined by [Rack](https://github.com/rack)
 [here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)

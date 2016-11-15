@@ -17,7 +17,6 @@ require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/conversions'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
-require 'multi_json'
 require 'multi_xml'
 require 'i18n'
 require 'thread'
@@ -45,6 +44,7 @@ module Grape
     autoload :Parser
     autoload :Request
     autoload :Env, 'grape/util/env'
+    autoload :Config
   end
 
   module Http
