@@ -5,14 +5,14 @@ Next Release
 
 * [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
 * [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
-* [#1512](https://github.com/ruby-grape/grape/pull/1512): Fix: deeply nested parameters are included within `#declared(params)` - [@krbs](https://github.com/krbs).
-* [#1510](https://github.com/ruby-grape/grape/pull/1510): Fix: inconsistent validation for multiple parameters - [@dgasper](https://github.com/dgasper).
 * Your contribution here.
 
 #### Fixes
 
 * [#1505](https://github.com/ruby-grape/grape/pull/1505): Run `before` and `after` callbacks, but skip the rest when handling OPTIONS - [@jlfaber](https://github.com/jlfaber).
 * [#1517](https://github.com/ruby-grape/grape/pull/1517), [#1089](https://github.com/ruby-grape/grape/pull/1089): Fix: priority of ANY routes - [@namusyaka](https://github.com/namusyaka), [@wagenet](https://github.com/wagenet).
+* [#1512](https://github.com/ruby-grape/grape/pull/1512): Fix: deeply nested parameters are included within `#declared(params)` - [@krbs](https://github.com/krbs).
+* [#1510](https://github.com/ruby-grape/grape/pull/1510): Fix: inconsistent validation for multiple parameters - [@dgasper](https://github.com/dgasper).
 
 0.18.0 (10/7/2016)
 ==================
