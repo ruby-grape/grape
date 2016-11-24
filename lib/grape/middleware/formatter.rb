@@ -1,4 +1,5 @@
 require 'grape/middleware/base'
+require 'grape/formatter/base'
 
 module Grape
   module Middleware
