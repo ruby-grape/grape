@@ -95,6 +95,8 @@ module Grape
       @options[:route_options] ||= {}
 
       @lazy_initialize_lock = Mutex.new
+      @lazy_initialized = nil
+      @block = nil
 
       return unless block_given?
 

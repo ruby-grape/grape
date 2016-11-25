@@ -13,6 +13,7 @@ module Grape
       def initialize(app, **options)
         @app = app
         @options = default_options.merge(**options)
+        @app_response = nil
       end
 
       def default_options

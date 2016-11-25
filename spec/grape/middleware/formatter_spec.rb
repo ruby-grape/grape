@@ -4,46 +4,53 @@ describe Grape::Middleware::Formatter do
   subject { Grape::Middleware::Formatter.new(app) }
   before { allow(subject).to receive(:dup).and_return(subject) }
 
-  let(:app) { ->(_env) { [200, {}, [@body || { 'foo' => 'bar' }]] } }
+  let(:body) { { 'foo' => 'bar' } }
+  let(:app) { ->(_env) { [200, {}, [body]] } }
 
   context 'serialization' do
+    let(:body) { { 'abc' => 'def' } }
     it 'looks at the bodies for possibly serializable data' do
-      @body = { 'abc' => 'def' }
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      bodies.each { |b| expect(b).to eq(MultiJson.dump(@body)) }
+      bodies.each { |b| expect(b).to eq(MultiJson.dump(body)) }
     end
 
-    it 'calls #to_json since default format is json' do
-      @body = ['foo']
-      @body.instance_eval do
-        def to_json
-          '"bar"'
+    context 'default format' do
+      let(:body) { ['foo'] }
+      it 'calls #to_json since default format is json' do
+        body.instance_eval do
+          def to_json
+            '"bar"'
+          end
         end
-      end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') }
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') }
+      end
     end
 
-    it 'calls #to_json if the content type is jsonapi' do
-      @body = { 'foos' => [{ 'bar' => 'baz' }] }
-      @body.instance_eval do
-        def to_json
-          '{"foos":[{"bar":"baz"}] }'
+    context 'jsonapi' do
+      let(:body) { { 'foos' => [{ 'bar' => 'baz' }] } }
+      it 'calls #to_json if the content type is jsonapi' do
+        body.instance_eval do
+          def to_json
+            '{"foos":[{"bar":"baz"}] }'
+          end
         end
-      end
 
-      subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
+      end
     end
 
-    it 'calls #to_xml if the content type is xml' do
-      @body = 'string'
-      @body.instance_eval do
-        def to_xml
-          '<bar/>'
+    context 'xml' do
+      let(:body) { 'string' }
+      it 'calls #to_xml if the content type is xml' do
+        body.instance_eval do
+          def to_xml
+            '<bar/>'
+          end
         end
-      end
 
-      subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') }
+        subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') }
+      end
     end
   end
 
@@ -189,10 +196,12 @@ describe Grape::Middleware::Formatter do
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
       expect(body.body).to eq(['CUSTOM FORMAT'])
     end
-    it 'uses default json formatter' do
-      @body = ['blah']
-      _, _, body = subject.call('PATH_INFO' => '/info.json')
-      expect(body.body).to eq(['["blah"]'])
+    context 'default' do
+      let(:body) { ['blah'] }
+      it 'uses default json formatter' do
+        _, _, body = subject.call('PATH_INFO' => '/info.json')
+        expect(body.body).to eq(['["blah"]'])
+      end
     end
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
@@ -284,10 +293,10 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'send file' do
-    let(:app) { ->(_env) { [200, {}, @body] } }
+    let(:body) { Grape::ServeFile::FileResponse.new('file') }
+    let(:app) { ->(_env) { [200, {}, body] } }
 
     it 'returns Grape::Uril::SendFileReponse' do
-      @body = Grape::ServeFile::FileResponse.new('file')
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
       expect(subject.call(env)).to be_a(Grape::ServeFile::SendfileResponse)
     end
