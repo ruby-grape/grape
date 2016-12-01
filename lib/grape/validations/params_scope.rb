@@ -29,6 +29,7 @@ module Grape
         @group        = opts[:group] || {}
         @dependent_on = opts[:dependent_on]
         @declared_params = []
+        @index = nil
 
         instance_eval(&block) if block_given?
 

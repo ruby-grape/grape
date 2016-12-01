@@ -1202,7 +1202,7 @@ XML
         def initialize(app, *args)
           @args = args
           @app = app
-          @block = true if block_given?
+          @block = block_given? ? true : nil
         end
 
         def call(env)
