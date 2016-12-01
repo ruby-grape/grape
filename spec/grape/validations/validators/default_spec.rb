@@ -93,9 +93,7 @@ describe Grape::Validations::DefaultValidator do
     params = { some_things:
                 [{ foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
                  { foo: 'two' },
-                 { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }
-                ]
-             }
+                 { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }] }
     get '/nested_optional_array', root: params
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ root: params }.to_json)

@@ -28,6 +28,10 @@ module Grape
         end
       end
 
+      def respond_to_missing?(method_id, _)
+        ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
+      end
+
       [
         :prefix,
         :version,

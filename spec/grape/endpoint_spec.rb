@@ -268,7 +268,8 @@ describe Grape::Endpoint do
       subject.get('/declared') { declared(params) }
 
       expect { get('/declared') }.to raise_error(
-        Grape::DSL::InsideRoute::MethodNotYetAvailable)
+        Grape::DSL::InsideRoute::MethodNotYetAvailable
+      )
     end
 
     it 'has as many keys as there are declared params' do

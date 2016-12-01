@@ -7,7 +7,7 @@ gemspec
 group :development, :test do
   gem 'bundler'
   gem 'rake'
-  gem 'rubocop', '0.39.0'
+  gem 'rubocop', '~> 0.40'
 end
 
 group :development do
@@ -21,7 +21,7 @@ group :development do
 end
 
 group :test do
-  gem 'grape-entity', '0.5.0'
+  gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'rack-test'
   gem 'rspec', '~> 3.0'

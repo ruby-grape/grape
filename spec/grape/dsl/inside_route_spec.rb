@@ -302,22 +302,22 @@ describe Grape::Endpoint do
     end
 
     describe 'multiple entities' do
-      let(:entity_mock1) do
-        entity_mock1 = Object.new
-        allow(entity_mock1).to receive(:represent).and_return(dummy1: 'dummy1')
-        entity_mock1
+      let(:entity_mock_one) do
+        entity_mock_one = Object.new
+        allow(entity_mock_one).to receive(:represent).and_return(dummy1: 'dummy1')
+        entity_mock_one
       end
 
-      let(:entity_mock2) do
-        entity_mock2 = Object.new
-        allow(entity_mock2).to receive(:represent).and_return(dummy2: 'dummy2')
-        entity_mock2
+      let(:entity_mock_two) do
+        entity_mock_two = Object.new
+        allow(entity_mock_two).to receive(:represent).and_return(dummy2: 'dummy2')
+        entity_mock_two
       end
 
       describe 'instance' do
         before do
-          subject.present 'dummy1', with: entity_mock1
-          subject.present 'dummy2', with: entity_mock2
+          subject.present 'dummy1', with: entity_mock_one
+          subject.present 'dummy2', with: entity_mock_two
         end
 
         it 'presents both dummy objects' do
@@ -328,23 +328,23 @@ describe Grape::Endpoint do
     end
 
     describe 'non mergeable entity' do
-      let(:entity_mock1) do
-        entity_mock1 = Object.new
-        allow(entity_mock1).to receive(:represent).and_return(dummy1: 'dummy1')
-        entity_mock1
+      let(:entity_mock_one) do
+        entity_mock_one = Object.new
+        allow(entity_mock_one).to receive(:represent).and_return(dummy1: 'dummy1')
+        entity_mock_one
       end
 
-      let(:entity_mock2) do
-        entity_mock2 = Object.new
-        allow(entity_mock2).to receive(:represent).and_return('not a hash')
-        entity_mock2
+      let(:entity_mock_two) do
+        entity_mock_two = Object.new
+        allow(entity_mock_two).to receive(:represent).and_return('not a hash')
+        entity_mock_two
       end
 
       describe 'instance' do
         it 'fails' do
-          subject.present 'dummy1', with: entity_mock1
+          subject.present 'dummy1', with: entity_mock_one
           expect do
-            subject.present 'dummy2', with: entity_mock2
+            subject.present 'dummy2', with: entity_mock_two
           end.to raise_error ArgumentError, 'Representation of type String cannot be merged.'
         end
       end
@@ -356,7 +356,8 @@ describe Grape::Endpoint do
 
     it 'is not available by default' do
       expect { subject.declared({}) }.to raise_error(
-        Grape::DSL::InsideRoute::MethodNotYetAvailable)
+        Grape::DSL::InsideRoute::MethodNotYetAvailable
+      )
     end
   end
 end

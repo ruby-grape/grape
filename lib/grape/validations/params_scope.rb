@@ -42,15 +42,17 @@ module Grape
         return false if @optional && (params(parameters).blank? ||
                                        any_element_blank?(parameters))
 
-        @dependent_on.each do |dependency|
-          if dependency.is_a?(Hash)
-            dependency_key = dependency.keys[0]
-            proc = dependency.values[0]
-            return false unless proc.call(params(parameters).try(:[], dependency_key))
-          elsif params(parameters).try(:[], dependency).blank?
-            return false
+        if @dependent_on
+          @dependent_on.each do |dependency|
+            if dependency.is_a?(Hash)
+              dependency_key = dependency.keys[0]
+              proc = dependency.values[0]
+              return false unless proc.call(params(parameters).try(:[], dependency_key))
+            elsif params(parameters).try(:[], dependency).blank?
+              return false
+            end
           end
-        end if @dependent_on
+        end
 
         return true if parent.nil?
         parent.should_validate?(parameters)
@@ -58,11 +60,10 @@ module Grape
 
       # @return [String] the proper attribute name, with nesting considered.
       def full_name(name)
-        case
-        when nested?
+        if nested?
           # Find our containing element's name, and append ours.
           "#{@parent.full_name(@element)}#{array_index}[#{name}]"
-        when lateral?
+        elsif lateral?
           # Find the name of the element as if it was at the
           # same nesting level as our parent.
           @parent.full_name(name)
@@ -171,7 +172,8 @@ module Grape
           parent:   self,
           optional: optional,
           type:     opts[:type],
-          &block)
+          &block
+        )
       end
 
       # Returns a new parameter scope, not nested under any current-level param
@@ -189,7 +191,8 @@ module Grape
           options:      @optional,
           type:         Hash,
           dependent_on: options[:dependent_on],
-          &block)
+          &block
+        )
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
@@ -202,7 +205,8 @@ module Grape
           api:          @api,
           parent:       self,
           group:        attrs.first,
-          &block)
+          &block
+        )
       end
 
       # Pushes declared params to parent or settings
@@ -385,7 +389,7 @@ module Grape
       def extract_message_option(attrs)
         return nil unless attrs.is_a?(Array)
         opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
-        (opts.key?(:message) && !opts[:message].nil?) ? opts.delete(:message) : nil
+        opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
       end
 
       def options_key?(type, key, validations)

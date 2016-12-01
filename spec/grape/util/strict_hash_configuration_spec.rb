@@ -30,8 +30,7 @@ module Grape
         expect(subject.settings).to eq(config1: 'alpha',
                                        config2: 'beta',
                                        config3: { config4: 'gamma' },
-                                       config5: { config6: { config7: 7, config8: 8 } }
-                                      )
+                                       config5: { config6: { config7: 7, config8: 8 } })
       end
     end
   end

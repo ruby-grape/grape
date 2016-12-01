@@ -176,8 +176,8 @@ module Grape
       # @yield a parameter definition DSL
       def given(*attrs, &block)
         attrs.each do |attr|
-          attr_ = attr.is_a?(Hash) ? attr.keys[0] : attr
-          raise Grape::Exceptions::UnknownParameter.new(attr_) unless declared_param?(attr_)
+          proxy_attr = attr.is_a?(Hash) ? attr.keys[0] : attr
+          raise Grape::Exceptions::UnknownParameter.new(proxy_attr) unless declared_param?(proxy_attr)
         end
         new_lateral_scope(dependent_on: attrs, &block)
       end
