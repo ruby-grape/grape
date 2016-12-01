@@ -129,6 +129,8 @@ module Grape
           case request.request_method.to_s.upcase
           when Grape::Http::Headers::POST
             201
+          when Grape::Http::Headers::DELETE
+            204
           else
             200
           end

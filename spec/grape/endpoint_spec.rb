@@ -1095,32 +1095,65 @@ describe Grape::Endpoint do
   end
 
   context 'anchoring' do
-    verbs = %w(post get head delete put options patch)
-
-    verbs.each do |verb|
-      it "allows for the anchoring option with a #{verb.upcase} method" do
-        subject.send(verb, '/example', anchor: true) do
-          verb
-        end
-        send(verb, '/example/and/some/more')
+    describe 'delete 204' do
+      it 'allows for the anchoring option with a delete method' do
+        subject.send(:delete, '/example', anchor: true) {}
+        send(:delete, '/example/and/some/more')
         expect(last_response.status).to eql 404
       end
 
-      it "anchors paths by default for the #{verb.upcase} method" do
-        subject.send(verb, '/example') do
-          verb
-        end
-        send(verb, '/example/and/some/more')
+      it 'anchors paths by default for the delete method' do
+        subject.send(:delete, '/example') {}
+        send(:delete, '/example/and/some/more')
         expect(last_response.status).to eql 404
       end
 
-      it "responds to /example/and/some/more for the non-anchored #{verb.upcase} method" do
-        subject.send(verb, '/example', anchor: false) do
-          verb
+      it 'responds to /example/and/some/more for the non-anchored delete method' do
+        subject.send(:delete, '/example', anchor: false) {}
+        send(:delete, '/example/and/some/more')
+        expect(last_response.status).to eql 204
+        expect(last_response.body).to be_empty
+      end
+    end
+
+    describe 'delete 200, with response body' do
+      it 'responds to /example/and/some/more for the non-anchored delete method' do
+        subject.send(:delete, '/example', anchor: false) do
+          status 200
+          body 'deleted'
         end
-        send(verb, '/example/and/some/more')
-        expect(last_response.status).to eql verb == 'post' ? 201 : 200
-        expect(last_response.body).to eql verb == 'head' ? '' : verb
+        send(:delete, '/example/and/some/more')
+        expect(last_response.status).to eql 200
+        expect(last_response.body).not_to be_empty
+      end
+    end
+
+    describe 'all other' do
+      %w(post get head put options patch).each do |verb|
+        it "allows for the anchoring option with a #{verb.upcase} method" do
+          subject.send(verb, '/example', anchor: true) do
+            verb
+          end
+          send(verb, '/example/and/some/more')
+          expect(last_response.status).to eql 404
+        end
+
+        it "anchors paths by default for the #{verb.upcase} method" do
+          subject.send(verb, '/example') do
+            verb
+          end
+          send(verb, '/example/and/some/more')
+          expect(last_response.status).to eql 404
+        end
+
+        it "responds to /example/and/some/more for the non-anchored #{verb.upcase} method" do
+          subject.send(verb, '/example', anchor: false) do
+            verb
+          end
+          send(verb, '/example/and/some/more')
+          expect(last_response.status).to eql verb == 'post' ? 201 : 200
+          expect(last_response.body).to eql verb == 'head' ? '' : verb
+        end
       end
     end
   end
