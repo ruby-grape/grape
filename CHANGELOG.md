@@ -91,6 +91,7 @@ Next Release
 * [#1326](https://github.com/ruby-grape/grape/pull/1326): Fix wrong behavior for OPTIONS and HEAD requests with catch-all - [@ekampp](https://github.com/ekampp), [@namusyaka](https://github.com/namusyaka).
 * [#1330](https://github.com/ruby-grape/grape/pull/1330): Add `register` keyword for adding customized parsers and formatters - [@namusyaka](https://github.com/namusyaka).
 * [#1336](https://github.com/ruby-grape/grape/pull/1336): Do not modify Hash argument to `error!` - [@tjwp](https://github.com/tjwp).
+* [#1338](https://github.com/ruby-grape/grape/pull/1338): Fix helpers method modified given helper module - [@vsorlov](https://github.com/vsorlov).
 
 0.15.0 (3/8/2016)
 =================

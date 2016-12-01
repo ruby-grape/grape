@@ -46,7 +46,8 @@ module Grape
           expect(subject).to receive(:namespace_stackable).with(:helpers).and_call_original
           subject.helpers(mod, &proc)
 
-          expect(subject.mod).to eq mod
+          expect(mod.instance_methods).not_to include :test
+          expect(subject.mod.instance_methods).to include :test
         end
 
         context 'with an external file' do
