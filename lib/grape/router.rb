@@ -97,13 +97,11 @@ module Grape
 
       # If neighbor exists and request method is OPTIONS,
       # return response by using #call_with_allow_headers.
-      if neighbor && method == 'OPTIONS' && !cascade
-        return call_with_allow_headers(
-          env,
-          neighbor.allow_header,
-          neighbor.endpoint
-        )
-      end
+      return call_with_allow_headers(
+        env,
+        neighbor.allow_header,
+        neighbor.endpoint
+      ) if neighbor && method == 'OPTIONS' && !cascade
 
       route = match?(input, '*')
       if route

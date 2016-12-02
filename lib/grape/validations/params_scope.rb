@@ -42,17 +42,15 @@ module Grape
         return false if @optional && (params(parameters).blank? ||
                                        any_element_blank?(parameters))
 
-        if @dependent_on
-          @dependent_on.each do |dependency|
-            if dependency.is_a?(Hash)
-              dependency_key = dependency.keys[0]
-              proc = dependency.values[0]
-              return false unless proc.call(params(parameters).try(:[], dependency_key))
-            elsif params(parameters).try(:[], dependency).blank?
-              return false
-            end
+        @dependent_on.each do |dependency|
+          if dependency.is_a?(Hash)
+            dependency_key = dependency.keys[0]
+            proc = dependency.values[0]
+            return false unless proc.call(params(parameters).try(:[], dependency_key))
+          elsif params(parameters).try(:[], dependency).blank?
+            return false
           end
-        end
+        end if @dependent_on
 
         return true if parent.nil?
         parent.should_validate?(parameters)

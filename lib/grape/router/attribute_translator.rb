@@ -15,8 +15,6 @@ module Grape
           @attributes[m[0..-1]] = *args
         elsif m[-1] != '='
           @attributes[m]
-        else
-          super
         end
       end
 

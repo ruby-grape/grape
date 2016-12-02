@@ -10,6 +10,8 @@ matrix:
     - rvm: 2.3.3
       gemfile: Gemfile
     - rvm: 2.3.3
+      gemfile: gemfiles/rack_edge.gemfile
+    - rvm: 2.3.3
       gemfile: gemfiles/rack_1.5.2.gemfile
     - rvm: 2.3.3
       gemfile: gemfiles/rails_edge.gemfile

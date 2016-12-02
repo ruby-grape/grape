@@ -31,11 +31,10 @@ module Grape
             mod = new_mod || Module.new
             define_boolean_in_mod(mod)
             inject_api_helpers_to_mod(mod) if new_mod
-            if block_given?
-              inject_api_helpers_to_mod(mod) do
-                mod.class_eval(&block)
-              end
-            end
+
+            inject_api_helpers_to_mod(mod) do
+              mod.class_eval(&block)
+            end if block_given?
 
             namespace_stackable(:helpers, mod)
           else
