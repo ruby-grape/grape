@@ -9,3 +9,12 @@ AllCops:
     - bin/**/*
 
 inherit_from: .rubocop_todo.yml
+
+Style/Documentation:
+  Enabled: false
+
+Style/MultilineIfModifier:
+  Enabled: false
+
+Style/RaiseArgs:
+  Enabled: false

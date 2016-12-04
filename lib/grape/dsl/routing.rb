@@ -200,6 +200,7 @@ module Grape
         # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
         def route_param(param, options = {}, &block)
           options = options.dup
+
           options[:requirements] = {
             param.to_sym => options[:requirements]
           } if options[:requirements].is_a?(Regexp)
@@ -207,6 +208,7 @@ module Grape
           Grape::Validations::ParamsScope.new(api: self) do
             requires param, type: options[:type]
           end if options.key?(:type)
+
           namespace(":#{param}", options, &block)
         end
 

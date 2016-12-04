@@ -109,7 +109,7 @@ module Grape
         return response if response && !(cascade = cascade?(response))
       end
 
-      (!cascade && neighbor) ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
+      !cascade && neighbor ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
     end
 
     def process_route(route, env)

@@ -34,8 +34,7 @@ module Grape
                       XOptionalHeader: {
                         description: 'Not really needed',
                         required: false
-                      }
-                     ]
+                      }]
           }
 
           subject.desc 'The description' do
@@ -51,8 +50,7 @@ module Grape
                      XOptionalHeader: {
                        description: 'Not really needed',
                        required: false
-                     }
-                    ]
+                     }]
           end
 
           expect(subject.namespace_setting(:description)).to eq(expected_options)

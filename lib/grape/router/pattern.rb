@@ -39,9 +39,11 @@ module Grape
           pattern << '/' unless pattern.end_with?('/')
           pattern << '*path'
         end
+
         pattern = pattern.split('/').tap do |parts|
           parts[parts.length - 1] = '?' + parts.last
         end.join('/') if pattern.end_with?('*path')
+
         pattern + suffix.to_s
       end
 

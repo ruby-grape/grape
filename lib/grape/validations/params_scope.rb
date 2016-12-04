@@ -58,11 +58,10 @@ module Grape
 
       # @return [String] the proper attribute name, with nesting considered.
       def full_name(name)
-        case
-        when nested?
+        if nested?
           # Find our containing element's name, and append ours.
           "#{@parent.full_name(@element)}#{array_index}[#{name}]"
-        when lateral?
+        elsif lateral?
           # Find the name of the element as if it was at the
           # same nesting level as our parent.
           @parent.full_name(name)
@@ -171,7 +170,8 @@ module Grape
           parent:   self,
           optional: optional,
           type:     opts[:type],
-          &block)
+          &block
+        )
       end
 
       # Returns a new parameter scope, not nested under any current-level param
@@ -189,7 +189,8 @@ module Grape
           options:      @optional,
           type:         Hash,
           dependent_on: options[:dependent_on],
-          &block)
+          &block
+        )
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
@@ -202,7 +203,8 @@ module Grape
           api:          @api,
           parent:       self,
           group:        attrs.first,
-          &block)
+          &block
+        )
       end
 
       # Pushes declared params to parent or settings
@@ -385,7 +387,7 @@ module Grape
       def extract_message_option(attrs)
         return nil unless attrs.is_a?(Array)
         opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
-        (opts.key?(:message) && !opts[:message].nil?) ? opts.delete(:message) : nil
+        opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
       end
 
       def options_key?(type, key, validations)

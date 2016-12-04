@@ -12,8 +12,7 @@ describe Grape::API::Helpers do
     end
 
     module AuthMethods
-      def authenticate!
-      end
+      def authenticate!; end
     end
 
     class PatchPrivate < Grape::API

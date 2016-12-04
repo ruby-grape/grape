@@ -13,7 +13,7 @@ module Grape
       def method_missing(m, *args)
         if m[-1] == '='
           @attributes[m[0..-1]] = *args
-        else
+        elsif m[-1] != '='
           @attributes[m]
         end
       end

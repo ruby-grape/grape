@@ -70,7 +70,7 @@ module Grape
       end
 
       def exec_handler(e, &handler)
-        if handler.lambda? && handler.arity == 0
+        if handler.lambda? && handler.arity.zero?
           instance_exec(&handler)
         else
           instance_exec(e, &handler)
