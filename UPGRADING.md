@@ -41,6 +41,21 @@ Prior to this version the response would be `one is missing`.
 
 See [#1510](https://github.com/ruby-grape/grape/pull/1510) for more information.
 
+#### The default status code for DELETE is now 204 instead of 200.
+
+Breaking change: Sets the default response status code for a delete request to 204.
+A status of 204 makes the response more distinguishable and therefore easier to handle on the client side, particularly because a DELETE request typically returns an empty body as the resource was deleted or voided.
+
+To achieve the old behavior, one has to set it explicitly:
+```ruby
+delete :id do
+  status 200
+  'foo successfully deleted'
+end
+```
+
+For more information see: [#1532](https://github.com/ruby-grape/grape/pull/1532).
+
 ### Upgrading to >= 0.17.0
 
 #### Removed official support for Ruby < 2.2.2

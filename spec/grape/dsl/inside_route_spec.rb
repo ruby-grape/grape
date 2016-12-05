@@ -91,7 +91,7 @@ describe Grape::Endpoint do
   end
 
   describe '#status' do
-    %w(GET PUT DELETE OPTIONS).each do |method|
+    %w(GET PUT OPTIONS).each do |method|
       it 'defaults to 200 on GET' do
         request = Grape::Request.new(Rack::MockRequest.env_for('/', method: method))
         expect(subject).to receive(:request).and_return(request)
@@ -103,6 +103,12 @@ describe Grape::Endpoint do
       request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'POST'))
       expect(subject).to receive(:request).and_return(request)
       expect(subject.status).to eq 201
+    end
+
+    it 'defaults to 204 on DELETE' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+      expect(subject).to receive(:request).and_return(request)
+      expect(subject.status).to eq 204
     end
 
     it 'returns status set' do
