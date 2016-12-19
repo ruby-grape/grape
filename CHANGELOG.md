@@ -1,3 +1,8 @@
+Next Release
+============
+
+* Your contribution here.
+
 ### 0.19.0 (12/18/2016)
 
 #### Features
