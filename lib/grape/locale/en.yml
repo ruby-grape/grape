@@ -26,7 +26,7 @@ en:
         invalid_formatter: 'cannot convert %{klass} to %{to_format}'
         invalid_versioner_option:
           problem: 'Unknown :using for versioner: %{strategy}'
-          resolution: 'available strategy for :using is :path, :header, :param'
+          resolution: 'available strategy for :using is :path, :header, :accept_version_header, :param'
         unknown_validator: 'unknown validator: %{validator_type}'
         unknown_options: 'unknown options: %{options}'
         unknown_parameter: 'unknown parameter: %{param}'
