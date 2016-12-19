@@ -1,5 +1,6 @@
 #### 0.19.1 (Next)
 
+* [#1536](https://github.com/ruby-grape/grape/pull/1536): Updates `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
 * Your contribution here.
 
 ### 0.19.0 (12/18/2016)
