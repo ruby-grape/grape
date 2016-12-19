@@ -1,11 +1,10 @@
-### Next Release
+### 0.19.0 (12/18/2016)
 
 #### Features
 
 * [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
 * [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
 * [#1532](https://github.com/ruby-grape/grape/pull/1532): Sets 204 as default status for delete - [@LeFnord](https://github.com/LeFnord).
-* Your contribution here.
 
 #### Fixes
 
@@ -15,7 +14,6 @@
 * [#1510](https://github.com/ruby-grape/grape/pull/1510): Fix: inconsistent validation for multiple parameters - [@dgasper](https://github.com/dgasper).
 * [#1526](https://github.com/ruby-grape/grape/pull/1526): Reduce warnings caused by instance variables not initialized - [@cpetschnig](https://github.com/cpetschnig).
 * [#1531](https://github.com/ruby-grape/grape/pull/1531): Updates gem dependencies - [@LeFnord](https://github.com/LeFnord).
-* Your contribution here.
 
 ### 0.18.0 (10/7/2016)
 
