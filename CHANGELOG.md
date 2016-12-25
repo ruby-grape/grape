@@ -1,6 +1,7 @@
 #### 0.19.1 (Next)
 
 * [#1536](https://github.com/ruby-grape/grape/pull/1536): Updates `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
+* [#1540](https://github.com/ruby-grape/grape/pull/1540): Api.logger is confusing statement - [@greenfieldtech-davidb](https://github.com/greenfieldtech-davidb).
 * Your contribution here.
 
 ### 0.19.0 (12/18/2016)

@@ -2171,10 +2171,10 @@ To log messages from within an endpoint, you need to define a helper to make the
 available in the endpoint context.
 
 ```ruby
-class API < Grape::API
+class MyAPI < Grape::API
   helpers do
     def logger
-      API.logger
+      MyAPI.logger
     end
   end
   post '/statuses' do
