@@ -925,7 +925,11 @@ XML
       end
 
       get '/', id: '32'
-      expect(last_response.body).to eql 'first 32:Fixnum second'
+      if RUBY_VERSION < '2.4.0'
+        expect(last_response.body).to eql 'first 32:Fixnum second'
+      else
+        expect(last_response.body).to eql 'first 32:Integer second'
+      end
     end
 
     it 'adds a after filter' do

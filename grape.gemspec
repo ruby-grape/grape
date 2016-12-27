@@ -12,6 +12,8 @@ Gem::Specification.new do |s|
   s.description = 'A Ruby framework for rapid API development with great conventions.'
   s.license     = 'MIT'
 
+  s.required_ruby_version = '>= 2.2.6'
+
   s.add_runtime_dependency 'rack', '>= 1.3.0'
   s.add_runtime_dependency 'mustermann-grape', '~> 0.4.0'
   s.add_runtime_dependency 'rack-accept'
