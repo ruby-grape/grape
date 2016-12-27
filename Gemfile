@@ -28,5 +28,5 @@ group :test do
   gem 'cookiejar'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'mime-types', '~> 3.0'
-  gem 'ruby-grape-danger', '~> 0.1.0', require: false
+  gem 'ruby-grape-danger', '~> 0.1.1', require: false
 end

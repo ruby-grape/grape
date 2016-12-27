@@ -122,7 +122,7 @@ module Grape
         when Symbol
           raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
           @status = Rack::Utils.status_code(status)
-        when Fixnum
+        when integer_type
           @status = status
         when nil
           return @status if @status
@@ -136,6 +136,15 @@ module Grape
           end
         else
           raise ArgumentError, 'Status code must be Fixnum or Symbol.'
+        end
+      end
+
+      # TODO: maybe it should be moved out for better separation
+      def integer_type
+        if RUBY_VERSION < '2.4.0'
+          Fixnum
+        else
+          Integer
         end
       end
 
