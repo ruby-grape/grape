@@ -32,6 +32,7 @@
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
+  - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
   - [Custom Types and Coercions](#custom-types-and-coercions)
   - [Multipart File Parameters](#multipart-file-parameters)
   - [First-Class `JSON` Types](#first-class-json-types)
@@ -798,6 +799,28 @@ The following are all valid types, supported out of the box by Grape:
 * Symbol
 * Rack::Multipart::UploadedFile (alias `File`)
 * JSON
+
+### Integer/Fixnum and Coercions
+
+Please be aware that the behavior differs between Ruby 2.4 and earlier versions.
+In Ruby 2.4, values consisting of numbers are converted to Integer, but in earlier versions it will be treated as Fixnum.
+
+```ruby
+params do
+  requires :integers, type: Hash do
+    requires :int, coerce: Integer
+  end
+end
+get '/int' do
+  params[:integers][:int].class
+end
+
+...
+
+get '/int' integers: { int: '45' }
+  #=> Integer in ruby 2.4
+  #=> Fixnum in earlier ruby versions
+```
 
 ### Custom Types and Coercions
 
@@ -2878,7 +2901,7 @@ end
 The behaviour is then:
 
 ```bash
-GET /123        # 'Fixnum'
+GET /123        # 'Integer'
 GET /foo        # 400 error - 'blah is invalid'
 ```
 

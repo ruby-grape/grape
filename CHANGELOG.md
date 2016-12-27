@@ -1,6 +1,13 @@
-#### 0.19.1 (Next)
+### 0.19.1 (Next)
+
+#### Features
 
 * [#1536](https://github.com/ruby-grape/grape/pull/1536): Updates `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
+* [#1543](https://github.com/ruby-grape/grape/pull/1543): Support ruby 2.4 - [@LeFnord](https://github.com/LeFnord), [@namusyaka](https://github.com/namusyaka).
+* Your contribution here.
+
+#### Fixes
+
 * Your contribution here.
 
 ### 0.19.0 (12/18/2016)
