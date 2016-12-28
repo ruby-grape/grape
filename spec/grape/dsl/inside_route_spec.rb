@@ -126,13 +126,13 @@ describe Grape::Endpoint do
         .to raise_error(ArgumentError, 'Status code :foo_bar is invalid.')
     end
 
-    it 'accepts unknown Fixnum status codes' do
+    it 'accepts unknown Integer status codes' do
       expect { subject.status 210 }.to_not raise_error
     end
 
-    it 'raises error if status is not a fixnum or symbol' do
+    it 'raises error if status is not a integer or symbol' do
       expect { subject.status Object.new }
-        .to raise_error(ArgumentError, 'Status code must be Fixnum or Symbol.')
+        .to raise_error(ArgumentError, 'Status code must be Integer or Symbol.')
     end
   end
 

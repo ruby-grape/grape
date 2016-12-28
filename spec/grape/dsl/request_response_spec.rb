@@ -131,7 +131,7 @@ module Grape
           end
 
           it 'abort if :with option value is not Symbol, String or Proc' do
-            expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, 'with: Fixnum, expected Symbol, String or Proc')
+            expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, "with: #{integer_class_name}, expected Symbol, String or Proc")
           end
 
           it 'abort if both :with option and block are passed' do

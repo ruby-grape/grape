@@ -925,7 +925,7 @@ XML
       end
 
       get '/', id: '32'
-      expect(last_response.body).to eql 'first 32:Fixnum second'
+      expect(last_response.body).to eql "first 32:#{integer_class_name} second"
     end
 
     it 'adds a after filter' do
@@ -2506,7 +2506,7 @@ XML
       end
     end
     describe 'status' do
-      it 'can be set to arbitrary Fixnum value' do
+      it 'can be set to arbitrary Integer value' do
         subject.get '/foo' do
           status 210
         end

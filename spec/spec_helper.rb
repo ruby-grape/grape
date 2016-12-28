@@ -16,6 +16,7 @@ I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
+  config.include Spec::Support::Helpers
   config.raise_errors_for_deprecations!
 
   config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
