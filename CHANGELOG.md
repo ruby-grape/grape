@@ -54,7 +54,6 @@
 * [#1398](https://github.com/ruby-grape/grape/pull/1398): Add `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
 * [#1443](https://github.com/ruby-grape/grape/pull/1443): Extend `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
 * [#1455](https://github.com/ruby-grape/grape/pull/1455): Add an automated PR linter - [@orta](https://github.com/orta).
-* Your contribution here.
 
 #### Fixes
 
