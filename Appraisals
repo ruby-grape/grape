@@ -14,3 +14,7 @@ end
 appraise 'rack-1.5.2' do
   gem 'rack', '1.5.2'
 end
+
+appraise 'rails-edge' do
+  gem 'arel', github: 'rails/arel'
+end

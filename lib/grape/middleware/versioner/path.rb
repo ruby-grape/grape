@@ -26,7 +26,7 @@ module Grape
         def before
           path = env[Grape::Http::Headers::PATH_INFO].dup
 
-          if prefix && path.index(prefix) == 0
+          if prefix && path.index(prefix) == 0 # rubocop:disable all
             path.sub!(prefix, '')
             path = Grape::Router.normalize_path(path)
           end
