@@ -41,4 +41,11 @@ describe Grape::Middleware::Versioner::Path do
       end
     end
   end
+
+  context 'with prefix, but requested version is not matched' do
+    let(:options) { { prefix: '/v1', pattern: /v./i } }
+    it 'recognizes potential version' do
+      expect(subject.call('PATH_INFO' => '/v3/foo').last).to eq('v3')
+    end
+  end
 end

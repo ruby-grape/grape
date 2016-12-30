@@ -8,6 +8,7 @@
 
 #### Fixes
 
+* [#1548](https://github.com/ruby-grape/grape/pull/1548): Avoid failing even if given path does not match with prefix - [@thomas-peyric](https://github.com/thomas-peyric), [@namusyaka](https://github.com/namusyaka).
 * Your contribution here.
 
 ### 0.19.0 (12/18/2016)
