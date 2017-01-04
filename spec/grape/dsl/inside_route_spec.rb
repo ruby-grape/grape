@@ -143,6 +143,14 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#return_no_content' do
+    it 'sets the status code and body' do
+      subject.return_no_content
+      expect(subject.status).to eq 204
+      expect(subject.body).to eq ''
+    end
+  end
+
   describe '#content_type' do
     describe 'set' do
       before do

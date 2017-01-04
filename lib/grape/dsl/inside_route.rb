@@ -185,6 +185,20 @@ module Grape
         end
       end
 
+      # Allows you to explicitly return no content.
+      #
+      # @example
+      #   delete :id do
+      #     return_no_content
+      #     "not returned"
+      #   end
+      #
+      #   DELETE /12 # => 204 No Content, ""
+      def return_no_content
+        status 204
+        body false
+      end
+
       # Allows you to define the response as a file-like object.
       #
       # @example
