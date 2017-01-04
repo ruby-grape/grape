@@ -130,7 +130,11 @@ module Grape
           when Grape::Http::Headers::POST
             201
           when Grape::Http::Headers::DELETE
-            204
+            if @body.present?
+              200
+            else
+              204
+            end
           else
             200
           end

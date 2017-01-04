@@ -111,6 +111,13 @@ describe Grape::Endpoint do
       expect(subject.status).to eq 204
     end
 
+    it 'defaults to 200 on DELETE with a body present' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+      subject.body 'content here'
+      expect(subject).to receive(:request).and_return(request)
+      expect(subject.status).to eq 200
+    end
+
     it 'returns status set' do
       subject.status 501
       expect(subject.status).to eq 501
