@@ -87,7 +87,7 @@ module Grape
 end
 ```
 
-Comit your changes.
+Commit your changes.
 
 ```
 git add CHANGELOG.md README.md lib/grape/version.rb
