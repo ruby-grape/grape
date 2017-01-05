@@ -121,7 +121,7 @@ describe Grape::Endpoint do
       expect(subject.status).to eq 303
     end
 
-    it 'raises error if unknow symbol is passed' do
+    it 'raises error if unknown symbol is passed' do
       expect { subject.status :foo_bar }
         .to raise_error(ArgumentError, 'Status code :foo_bar is invalid.')
     end
