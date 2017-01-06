@@ -1764,7 +1764,7 @@ cookies.delete :status_count, path: '/'
 
 ## HTTP Status Code
 
-By default Grape returns a 201 for `POST`-Requests, 204 for `DELETE`-Requests and 200 status code for all other Requests.
+By default Grape returns a 201 for `POST`-Requests, 204 for `DELETE`-Requests that don't return any content, and 200 status code for all other Requests.
 You can use `status` to query and set the actual HTTP Status Code
 
 ```ruby

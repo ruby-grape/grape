@@ -1,6 +1,38 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 0.19.1 (next)
+
+#### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise
+
+Prior to this version, DELETE requests defaulted to a status code of 204 No Content, even when the response included content. This behavior confused some clients and prevented the formatter middleware from running properly. As of this version, DELETE requests will only default to a 204 No Content status code if no response body is provided, and will default to 200 OK otherwise.
+
+Specifically, DELETE behaviour has changed as follows:
+
+- In versions < 0.19.0, all DELETE requests defaulted to a 200 OK status code.
+- In version 0.19.0, all DELETE requests defaulted to a 204 No Content status code, even when content was included in the response.
+- As of version 0.19.1, DELETE requests default to a 204 No Content status code, unless content is supplied, in which case they default to a 200 OK status code.
+
+To achieve the old behavior, one can specify the status code explicitly:
+
+```ruby
+delete :id do
+  status 204 # or 200, for < 0.19.0 behavior
+  'foo successfully deleted'
+end
+```
+
+One can also use the new `return_no_content` helper to explicitly return a 204 status code and an empty body for any request type:
+
+```ruby
+delete :id do
+  return_no_content
+  'this will not be returned'
+end
+```
+
+See [#1550](https://github.com/ruby-grape/grape/pull/1550) for more information.
+
 ### Upgrading to >= 0.18.1
 
 #### Changes in priority of :any routes

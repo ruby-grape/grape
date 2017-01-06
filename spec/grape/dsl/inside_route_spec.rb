@@ -111,6 +111,13 @@ describe Grape::Endpoint do
       expect(subject.status).to eq 204
     end
 
+    it 'defaults to 200 on DELETE with a body present' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+      subject.body 'content here'
+      expect(subject).to receive(:request).and_return(request)
+      expect(subject.status).to eq 200
+    end
+
     it 'returns status set' do
       subject.status 501
       expect(subject.status).to eq 501
@@ -133,6 +140,14 @@ describe Grape::Endpoint do
     it 'raises error if status is not a integer or symbol' do
       expect { subject.status Object.new }
         .to raise_error(ArgumentError, 'Status code must be Integer or Symbol.')
+    end
+  end
+
+  describe '#return_no_content' do
+    it 'sets the status code and body' do
+      subject.return_no_content
+      expect(subject.status).to eq 204
+      expect(subject.body).to eq ''
     end
   end
 
