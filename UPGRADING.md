@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 0.19.1 (next)
+### Upgrading to >= 0.19.1
 
 #### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise
 

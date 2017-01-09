@@ -1,3 +1,13 @@
+### 0.19.2 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 0.19.1 (1/9/2017)
 
 #### Features
