@@ -1,16 +1,14 @@
-### 0.19.1 (Next)
+### 0.19.1 (1/9/2017)
 
 #### Features
 
 * [#1536](https://github.com/ruby-grape/grape/pull/1536): Updates `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
 * [#1543](https://github.com/ruby-grape/grape/pull/1543): Support ruby 2.4 - [@LeFnord](https://github.com/LeFnord), [@namusyaka](https://github.com/namusyaka).
-* Your contribution here.
 
 #### Fixes
 
 * [#1548](https://github.com/ruby-grape/grape/pull/1548): Avoid failing even if given path does not match with prefix - [@thomas-peyric](https://github.com/thomas-peyric), [@namusyaka](https://github.com/namusyaka).
 * [#1550](https://github.com/ruby-grape/grape/pull/1550): Use 200 as default status for deletes that reply with content - [@jthornec](https://github.com/jthornec).
-* Your contribution here.
 
 ### 0.19.0 (12/18/2016)
 
