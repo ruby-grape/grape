@@ -7,7 +7,7 @@ gem 'rack', github: 'rack/rack'
 group :development, :test do
   gem 'bundler'
   gem 'rake'
-  gem 'rubocop', '~> 0.45.0'
+  gem 'rubocop', '~> 0.45'
 end
 
 group :development do
@@ -27,8 +27,9 @@ group :test do
   gem 'rspec', '~> 3.0'
   gem 'cookiejar'
   gem 'rack-jsonp', require: 'rack/jsonp'
-  gem 'mime-types', '~> 3.0'
+  gem 'mime-types'
   gem 'ruby-grape-danger', '~> 0.1.0', require: false
+  gem 'coveralls', '~> 0.8.17', require: false
 end
 
 gemspec path: '../'

@@ -21,3 +21,6 @@ RSpec.configure do |config|
 
   config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
 end
+
+require 'coveralls'
+Coveralls.wear!
