@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
