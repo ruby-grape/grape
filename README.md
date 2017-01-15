@@ -321,6 +321,19 @@ class Twitter::API < Grape::API
 end
 ```
 
+Keep in mind such declarations as `before/after/rescue_from` must be placed before `mount` in a case where they should be inherited.
+
+```ruby
+class Twitter::API < Grape::API
+  before do
+    header 'X-Base-Header', 'will be defined for all APIs that are mounted below'
+  end
+
+  mount Twitter::Users
+  mount Twitter::Search
+end
+```
+
 ## Versioning
 
 There are four strategies in which clients can reach your API's endpoints: `:path`,
