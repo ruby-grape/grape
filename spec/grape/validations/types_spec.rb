@@ -3,13 +3,11 @@ require 'spec_helper'
 describe Grape::Validations::Types do
   module TypesSpec
     class FooType
-      def self.parse(_)
-      end
+      def self.parse(_); end
     end
 
     class BarType
-      def self.parse
-      end
+      def self.parse; end
     end
   end
 
