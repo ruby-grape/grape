@@ -299,6 +299,19 @@ end
 
 See [#1029](https://github.com/ruby-grape/grape/pull/1029) for more information.
 
+There is a known issue because of this change. When Grape is used with an older
+than 1.2.4 version of [warden](https://github.com/hassox/warden) there may be raised
+the following exception having the [rack-mount](https://github.com/jm/rack-mount) gem's
+lines as last ones in the backtrace:
+
+```
+NoMethodError: undefined method `[]' for nil:NilClass
+```
+
+The issue can be solved by upgrading warden to 1.2.4 version.
+
+See [#1151](https://github.com/ruby-grape/grape/issues/1151) for more information.
+
 #### Changes in present
 
 Using `present` with objects that responded to `merge` would cause early evaluation of the represented object, with unexpected side-effects, such as missing parameters or environment within rendering code. Grape now only merges represented objects with a previously rendered body, usually when multiple `present` calls are made in the same route.
