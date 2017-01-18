@@ -17,7 +17,7 @@ module Grape
         excepts = @excepts.is_a?(Proc) ? @excepts.call : @excepts
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
 
-        if param_array.all? { |param| excepts.include?(param) }
+        if !param_array.empty? && param_array.all? { |param| excepts.include?(param) }
           raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: except_message
         end
 

@@ -159,6 +159,11 @@ describe Grape::Validations::ValuesValidator do
         get '/mixed/value/except' do
           { type: params[:type] }
         end
+
+        params do
+          optional :optional, type: Array[String], values: %w(a b c)
+        end
+        put '/optional_with_array_of_string_values'
       end
     end
   end
@@ -240,6 +245,11 @@ describe Grape::Validations::ValuesValidator do
 
     it 'allows for a required param in child scope' do
       get('/optional_with_required_values')
+      expect(last_response.status).to eq 200
+    end
+
+    it 'allows for an optional param with a list of values' do
+      put('/optional_with_array_of_string_values', optional: nil)
       expect(last_response.status).to eq 200
     end
   end
