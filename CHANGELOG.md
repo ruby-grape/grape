@@ -7,6 +7,7 @@
 
 #### Fixes
 
+* [#1559](https://github.com/ruby-grape/grape/pull/1559): You can once again pass `nil` to optional attributes with `values` validation set - [@ghiculescu](https://github.com/ghiculescu).
 * Your contribution here.
 
 ### 0.19.1 (1/9/2017)
