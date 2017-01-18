@@ -8,7 +8,7 @@ describe Grape::Validations::RegexpValidator do
 
         resources :custom_message do
           params do
-            requires :name, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
+            optional :name, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
           end
           get do
           end
@@ -21,7 +21,7 @@ describe Grape::Validations::RegexpValidator do
         end
 
         params do
-          requires :name, regexp: /^[a-z]+$/
+          optional :name, regexp: /^[a-z]+$/
         end
         get do
         end

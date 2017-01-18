@@ -70,7 +70,7 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
-          requires :type, values: ValuesModel.values
+          optional :type, values: ValuesModel.values
         end
         get '/' do
           { type: params[:type] }
@@ -236,13 +236,7 @@ describe Grape::Validations::ValuesValidator do
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
 
-  context 'nil value for a parameter' do
-    it 'does not allow for root params scope' do
-      get('/', type: nil)
-      expect(last_response.status).to eq 400
-      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
-    end
-
+  context 'nil value for a parameter', focus: true do
     it 'allows for a required param in child scope' do
       get('/optional_with_required_values')
       expect(last_response.status).to eq 200

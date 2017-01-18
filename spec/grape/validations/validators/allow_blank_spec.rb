@@ -128,7 +128,7 @@ describe Grape::Validations::AllowBlankValidator do
 
         resources :custom_message do
           params do
-            requires :name, allow_blank: { value: false, message: 'has no value' }
+            optional :name, allow_blank: { value: false, message: 'has no value' }
           end
           get
 
