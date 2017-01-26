@@ -15,8 +15,8 @@ module Grape
         return @frozen_values[name] if @frozen_values.key? name
 
         value = []
-        value.concat(@inherited_values[name]) if @inherited_values[name]
-        value.concat(@new_values[name]) if @new_values[name]
+        value.concat(@inherited_values[name] || [])
+        value.concat(@new_values[name] || [])
         value
       end
 
