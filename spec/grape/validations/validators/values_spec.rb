@@ -77,6 +77,11 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :type, values: []
+        end
+        get '/empty'
+
+        params do
           optional :type, values: ValuesModel.values, default: 'valid-type2'
         end
         get '/default/valid' do
@@ -89,6 +94,11 @@ describe Grape::Validations::ValuesValidator do
         get '/lambda' do
           { type: params[:type] }
         end
+
+        params do
+          requires :type, values: -> { [] }
+        end
+        get '/empty_lambda'
 
         params do
           optional :type, values: ValuesModel.values, default: -> { ValuesModel.values.sample }
@@ -236,6 +246,12 @@ describe Grape::Validations::ValuesValidator do
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
 
+  it 'rejects all values if values is an empty array' do
+    get('/empty', type: 'invalid-type')
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+  end
+
   context 'nil value for a parameter' do
     it 'does not allow for root params scope' do
       get('/', type: nil)
@@ -284,6 +300,12 @@ describe Grape::Validations::ValuesValidator do
 
   it 'does not allow an invalid value for a parameter using lambda' do
     get('/lambda', type: 'invalid-type')
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+  end
+
+  it 'validates against an empty array in a proc' do
+    get('/empty_lambda', type: 'any')
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
@@ -425,6 +447,12 @@ describe Grape::Validations::ValuesValidator do
 
     it 'rejects values that matches except' do
       get '/except/exclusive', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+
+    it 'rejects an array of values if any of them matches except' do
+      get '/except/exclusive', type: %w(valid1 valid2 invalid-type1 valid4)
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
     end

@@ -2,10 +2,12 @@ module Grape
   module Validations
     class ValuesValidator < Base
       def initialize(attrs, options, required, scope, opts = {})
-        @excepts = (options_key?(:except, options) ? options[:except] : [])
-        @values = (options_key?(:value, options) ? options[:value] : [])
-
-        @values = options if @excepts == [] && @values == []
+        if options.is_a?(Hash)
+          @excepts = options[:except]
+          @values = options[:value]
+        else
+          @values = options
+        end
         super
       end
 
@@ -17,12 +19,11 @@ module Grape
         excepts = @excepts.is_a?(Proc) ? @excepts.call : @excepts
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
 
-        if !param_array.empty? && param_array.all? { |param| excepts.include?(param) }
-          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: except_message
-        end
+        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: except_message \
+          if !excepts.nil? && param_array.any? { |param| excepts.include?(param) }
 
-        return if (values.is_a?(Array) && values.empty?) || param_array.all? { |param| values.include?(param) }
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values)
+        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
+          if !values.nil? && !param_array.all? { |param| values.include?(param) }
       end
 
       private
