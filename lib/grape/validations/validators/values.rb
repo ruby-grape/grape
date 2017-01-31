@@ -3,9 +3,9 @@ module Grape
     class ValuesValidator < Base
       def initialize(attrs, options, required, scope, opts = {})
         @excepts = (options_key?(:except, options) ? options[:except] : [])
-        @values = (options_key?(:value, options) ? options[:value] : [])
+        @values = options_key?(:value, options) && options[:value]
 
-        @values = options if @excepts == [] && @values == []
+        @values = options if @excepts == [] && !@values
         super
       end
 
@@ -21,7 +21,7 @@ module Grape
           raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: except_message
         end
 
-        return if (values.is_a?(Array) && values.empty?) || param_array.all? { |param| values.include?(param) }
+        return if !values || param_array.all? { |param| values.include?(param) }
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values)
       end
 
