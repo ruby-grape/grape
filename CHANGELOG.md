@@ -7,6 +7,7 @@
 
 #### Fixes
 
+* [#1566](https://github.com/ruby-grape/grape/pull/1566): Fix ValuesValidator: do not allow none if none allowed - [@faucct](https://github.com/faucct).
 * [#1559](https://github.com/ruby-grape/grape/pull/1559): You can once again pass `nil` to optional attributes with `values` validation set - [@ghiculescu](https://github.com/ghiculescu).
 * [#1562](https://github.com/ruby-grape/grape/pull/1562): Fix rainbow gem installation failure above ruby 2.3.3 on travis-ci - [@brucehsu](https://github.com/brucehsu).
 * [#1561](https://github.com/ruby-grape/grape/pull/1561): Fix performance issue introduced by duplicated calls in StackableValue#[] - [@brucehsu](https://github.com/brucehsu).
