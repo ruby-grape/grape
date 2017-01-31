@@ -29,8 +29,11 @@ module Grape
         def declared(params, options = {}, declared_params = nil)
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
 
-          all_declared_params = route_setting(:declared_params)
-          current_namespace_declared_params = route_setting(:saved_declared_params).last
+          # Declared params including parent namespaces
+          all_declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+
+          # Declared params at current namespace
+          current_namespace_declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
 
           declared_params ||= options[:include_parent_namespaces] ? all_declared_params : current_namespace_declared_params
 

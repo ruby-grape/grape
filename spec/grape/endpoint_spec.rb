@@ -583,6 +583,39 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#declared; mixed nesting' do
+    before do
+      subject.format :json
+      subject.resource :users do
+        route_param :id, type: Integer, desc: 'ID desc' do
+          # Adding this causes route_setting(:declared_params) to be nil for the
+          # get block in namespace 'foo' below
+          get do
+          end
+
+          namespace 'foo' do
+            get do
+              {
+                params: params,
+                declared_params: declared(params),
+                declared_params_no_parent: declared(params, include_parent_namespaces: false)
+              }
+            end
+          end
+        end
+      end
+    end
+
+    it 'can access parent route_param' do
+      get '/users/123/foo', bar: 'bar'
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+
+      expect(json[:declared_params][:id]).to eq 123
+      expect(json[:declared_params_no_parent][:id]).to eq nil
+    end
+  end
+
   describe '#declared; with multiple route_param' do
     before do
       mounted = Class.new(Grape::API)
