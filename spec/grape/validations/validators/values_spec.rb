@@ -50,23 +50,17 @@ describe Grape::Validations::ValuesValidator do
           params do
             requires :type, values: { except: ValuesModel.excepts, except_message: 'value is on exclusions list', message: 'default exclude message' }
           end
-          get '/exclude/exclude_message' do
-            { type: params[:type] }
-          end
+          get '/exclude/exclude_message'
 
           params do
             requires :type, values: { except: -> { ValuesModel.excepts }, except_message: 'value is on exclusions list' }
           end
-          get '/exclude/lambda/exclude_message' do
-            { type: params[:type] }
-          end
+          get '/exclude/lambda/exclude_message'
 
           params do
             requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
           end
-          get '/exclude/fallback_message' do
-            { type: params[:type] }
-          end
+          get '/exclude/fallback_message'
         end
 
         params do
@@ -174,6 +168,18 @@ describe Grape::Validations::ValuesValidator do
           optional :optional, type: Array[String], values: %w(a b c)
         end
         put '/optional_with_array_of_string_values'
+
+        params do
+          requires :type, values: { proc: ->(v) { ValuesModel.values.include? v } }
+        end
+        get '/proc' do
+          { type: params[:type] }
+        end
+
+        params do
+          requires :type, values: { proc: ->(v) { ValuesModel.values.include? v }, message: 'failed check' }
+        end
+        get '/proc/message'
       end
     end
   end
@@ -503,6 +509,38 @@ describe Grape::Validations::ValuesValidator do
       get '/mixed/value/except', type: 10
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+    end
+  end
+
+  context 'custom validation using proc' do
+    it 'accepts a single valid value' do
+      get '/proc', type: 'valid-type1'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'valid-type1' }.to_json)
+    end
+
+    it 'accepts multiple valid values' do
+      get '/proc', type: ['valid-type1', 'valid-type3']
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: ['valid-type1', 'valid-type3'] }.to_json)
+    end
+
+    it 'rejects a single invalid value' do
+      get '/proc', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+    end
+
+    it 'rejects an invalid value among valid ones' do
+      get '/proc', type: ['valid-type1', 'invalid-type1', 'valid-type3']
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+    end
+
+    it 'uses supplied message' do
+      get '/proc/message', type: 'invalid-type1'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type failed check' }.to_json)
     end
   end
 end
