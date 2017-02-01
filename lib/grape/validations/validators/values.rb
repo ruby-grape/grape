@@ -5,6 +5,8 @@ module Grape
         if options.is_a?(Hash)
           @excepts = options[:except]
           @values = options[:value]
+          @proc = options[:proc]
+          raise ArgumentError, 'proc must be a Proc' if @proc && !@proc.is_a?(Proc)
         else
           @values = options
         end
@@ -24,6 +26,9 @@ module Grape
 
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
           if !values.nil? && !param_array.all? { |param| values.include?(param) }
+
+        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
+          if @proc && !param_array.all? { |param| @proc.call(param) }
       end
 
       private

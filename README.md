@@ -1152,6 +1152,20 @@ params do
 end
 ```
 
+Finally, for even greater control, an explicit validation Proc may be supplied using ```proc```.
+It will be called with a single argument (the input value), and should return
+a truthy value if the value passes validation. If the input is an array, the Proc will be called
+multiple times, once for each element in the array.
+
+```ruby
+params do
+  requires :number, type: Integer, values: { proc: ->(v) { v.even? && v < 25 }, message: 'is odd or greater than 25' }
+end
+```
+
+While ```proc``` is convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
+
+
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value

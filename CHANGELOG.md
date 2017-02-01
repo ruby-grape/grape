@@ -3,6 +3,7 @@
 #### Features
 
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
+* [#1568](https://github.com/ruby-grape/grape/pull/1568): Add `proc` option to `values` validator to allow custom checks - [@jlfaber](https://github.com/jlfaber).
 * Your contribution here.
 
 #### Fixes
