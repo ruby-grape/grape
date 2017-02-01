@@ -295,7 +295,8 @@ module Grape
         stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
                   versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
                   version_options: namespace_inheritable(:version_options),
-                  prefix: namespace_inheritable(:root_prefix)
+                  prefix: namespace_inheritable(:root_prefix),
+                  mount_path: namespace_stackable(:mount_path).first
       end
 
       stack.use Grape::Middleware::Formatter,

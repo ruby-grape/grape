@@ -1,5 +1,10 @@
 ### 0.19.2 (Next)
 
+#### Fixes
+
+* [#1570](https://github.com/ruby-grape/grape/pull/1570): Make versioner consider the mount destination path - [@namusyaka](https://github.com/namusyaka).
+* Your contribution here.
+
 #### Features
 
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
