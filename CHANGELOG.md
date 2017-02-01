@@ -1,5 +1,10 @@
 ### 0.19.2 (Next)
 
+#### Fixes
+
+* [#1569](https://github.com/ruby-grape/grape/pull/1569), [#1511](https://github.com/ruby-grape/grape/issues/1511): Upgrade mustermann-grape to 1.0.0 - [@namusyaka](https://github.com/namusyaka).
+* Your contribution here.
+
 #### Features
 
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
