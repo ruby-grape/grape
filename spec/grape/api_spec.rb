@@ -3090,6 +3090,33 @@ XML
         versioned_get '/users/hello', 'two', using: :header, vendor: 'test'
         expect(last_response.body).to eq('two')
       end
+
+      it 'recognizes potential versions with mounted path' do
+        a = Class.new(Grape::API) do
+          version :v1, using: :path
+
+          get '/hello' do
+            'hello'
+          end
+        end
+
+        b = Class.new(Grape::API) do
+          version :v1, using: :path
+
+          get '/world' do
+            'world'
+          end
+        end
+
+        subject.mount a => '/one'
+        subject.mount b => '/two'
+
+        get '/one/v1/hello'
+        expect(last_response.status).to eq 200
+
+        get '/two/v1/world'
+        expect(last_response.status).to eq 200
+      end
     end
   end
 

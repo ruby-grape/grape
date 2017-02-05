@@ -48,4 +48,11 @@ describe Grape::Middleware::Versioner::Path do
       expect(subject.call('PATH_INFO' => '/v3/foo').last).to eq('v3')
     end
   end
+
+  context 'with mount path' do
+    let(:options) { { mount_path: '/mounted', versions: [:v1] } }
+    it 'recognizes potential version' do
+      expect(subject.call('PATH_INFO' => '/mounted/v1/foo').last).to eq('v1')
+    end
+  end
 end

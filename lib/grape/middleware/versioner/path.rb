@@ -25,6 +25,7 @@ module Grape
 
         def before
           path = env[Grape::Http::Headers::PATH_INFO].dup
+          path.sub!(mount_path, '') if mounted_path?(path)
 
           if prefix && path.index(prefix) == 0 # rubocop:disable all
             path.sub!(prefix, '')
@@ -39,6 +40,16 @@ module Grape
         end
 
         private
+
+        def mounted_path?(path)
+          return false unless mount_path && path.start_with?(mount_path)
+          rest = path.slice(mount_path.length..-1)
+          rest.start_with?('/') || rest.empty?
+        end
+
+        def mount_path
+          @mount_path ||= options[:mount_path] && options[:mount_path] != '/' ? options[:mount_path] : ''
+        end
 
         def prefix
           Grape::Router.normalize_path(options[:prefix].to_s) if options[:prefix]
