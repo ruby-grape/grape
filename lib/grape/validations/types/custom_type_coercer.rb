@@ -147,7 +147,7 @@ module Grape
         # Enforce symbolized keys for complex types
         # by wrapping the coercion method such that
         # any Hash objects in the immediate heirarchy
-        # are passed through +Hashie.symbolize_keys!+.
+        # have their keys recursively symbolized
         # This helps common libs such as JSON to work easily.
         #
         # @param type see #new
@@ -162,7 +162,7 @@ module Grape
             lambda do |val|
               method.call(val).tap do |new_value|
                 new_value.each do |item|
-                  Hashie.symbolize_keys!(item) if item.is_a? Hash
+                  item.deep_symbolize_keys! if item.is_a? Hash
                 end
               end
             end
@@ -170,7 +170,7 @@ module Grape
           # Hash objects are processed directly
           elsif type == Hash
             lambda do |val|
-              Hashie.symbolize_keys! method.call(val)
+              method.call(val).deep_symbolize_keys!
             end
 
           # Simple types are not processed.

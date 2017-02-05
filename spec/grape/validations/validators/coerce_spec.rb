@@ -285,7 +285,7 @@ describe Grape::Validations::CoerceValidator do
           requires :file, type: Rack::Multipart::UploadedFile
         end
         subject.post '/upload' do
-          params[:file].filename
+          params[:file][:filename]
         end
 
         post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
@@ -302,7 +302,7 @@ describe Grape::Validations::CoerceValidator do
           requires :file, coerce: File
         end
         subject.post '/upload' do
-          params[:file].filename
+          params[:file][:filename]
         end
 
         post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
