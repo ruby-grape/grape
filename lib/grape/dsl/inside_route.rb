@@ -27,24 +27,18 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(params, options = {}, declared_params = nil)
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
+          options = options.reverse_merge(include_missing: true, include_missing_nested: false, include_parent_namespaces: true)
 
-          # Declared params including parent namespaces
-          all_declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+          declared_params ||= get_correct_declared_params(options)
 
-          # Declared params at current namespace
-          current_namespace_declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
-
-          declared_params ||= options[:include_parent_namespaces] ? all_declared_params : current_namespace_declared_params
-
-          raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
-
-          if params.is_a? Array
+          if !options[:include_missing_nested] && params.is_a?(Array)
             params.map do |param|
               declared(param || {}, options, declared_params)
             end
           else
+            
             declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
+
               key = { key => nil } unless key.is_a? Hash
 
               key.each_pair do |parent, children|
@@ -56,11 +50,26 @@ module Grape
                                      children_params = params[parent] || (children.is_a?(Array) ? [] : {})
                                      declared(children_params, options, Array(children))
                                    else
-                                     params[parent]
+                                     params.empty? ? nil : params[parent]
                                    end
               end
             end
+
           end
+        end
+
+        def get_correct_declared_params(options)
+          if options[:include_parent_namespaces]
+            # Declared params including parent namespaces
+            declared_params = all_declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+          else
+            # Declared params at current namespace
+            declared_params = current_namespace_declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
+          end
+
+          raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
+
+          declared_params
         end
       end
 

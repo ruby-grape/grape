@@ -257,8 +257,21 @@ describe Grape::Endpoint do
         optional :third, default: 'third-default'
         optional :nested, type: Hash do
           optional :fourth
+          optional :fifth
         end
       end
+    end 
+
+    it 'should show nil for nested params if include_missing and include_missing_nested are true' do
+      inner_params = nil
+      subject.get '/declared' do
+        inner_params = declared(params, include_missing: true, include_missing_nested: true)
+        ''
+      end
+
+      get '/declared?first=present'
+      expect(last_response.status).to eq(200)
+      expect(inner_params[:nested][:fourth]).to be_nil
     end
 
     it 'does not work in a before filter' do
@@ -303,7 +316,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
+      expect(inner_params[:nested].keys.size).to eq 2
     end
 
     it 'builds nested params when given array' do
@@ -326,18 +339,6 @@ describe Grape::Endpoint do
       get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
       expect(last_response.status).to eq(200)
       expect(inner_params[:nested].size).to eq 2
-    end
-
-    it 'builds nested params' do
-      inner_params = nil
-      subject.get '/declared' do
-        inner_params = declared(params)
-        ''
-      end
-
-      get '/declared?first=present&nested[fourth]=1'
-      expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
     end
 
     context 'sets nested array when the param is missing' do
