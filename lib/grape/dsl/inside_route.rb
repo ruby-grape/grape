@@ -61,10 +61,10 @@ module Grape
         def get_correct_declared_params(options)
           if options[:include_parent_namespaces]
             # Declared params including parent namespaces
-            declared_params = all_declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+            declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
           else
             # Declared params at current namespace
-            declared_params = current_namespace_declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
+            declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
           end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
