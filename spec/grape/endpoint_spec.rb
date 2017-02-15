@@ -258,6 +258,12 @@ describe Grape::Endpoint do
         optional :nested, type: Hash do
           optional :fourth
           optional :fifth
+          optional :nested_two, type: Hash do
+            optional :sixth
+            optional :nested_three, type: Hash do
+              optional :seventh
+            end
+          end
         end
       end
     end 
@@ -316,7 +322,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 2
+      expect(inner_params[:nested].keys.size).to eq 3
     end
 
     it 'builds nested params when given array' do

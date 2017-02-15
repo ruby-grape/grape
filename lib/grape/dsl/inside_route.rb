@@ -29,7 +29,7 @@ module Grape
         def declared(params, options = {}, declared_params = nil)
           options = options.reverse_merge(include_missing: true, include_missing_nested: false, include_parent_namespaces: true)
 
-          declared_params ||= get_correct_declared_params(options)
+          declared_params ||= correct_declared_params(options)
 
           if !options[:include_missing_nested] && params.is_a?(Array)
             params.map do |param|
@@ -46,19 +46,22 @@ module Grape
 
                 next unless options[:include_missing] || params.key?(parent)
 
-                hash[output_key] = if children
-                                     children_params = params[parent] || (children.is_a?(Array) ? [] : {})
-                                     declared(children_params, options, Array(children))
-                                   else
-                                     params.empty? ? nil : params[parent]
-                                   end
+                if children
+                  params_or_nil = params.empty? ? nil : params[parent]
+                  children_params = params_or_nil || (children.is_a?(Array) ? [] : {})
+                  output_value = declared(children_params, options, Array(children))
+                else
+                  output_value = params.empty? ? nil : params[parent]
+                end
+
+                hash[output_key] = output_value
               end
             end
 
           end
         end
 
-        def get_correct_declared_params(options)
+        def correct_declared_params(options)
           if options[:include_parent_namespaces]
             # Declared params including parent namespaces
             declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
