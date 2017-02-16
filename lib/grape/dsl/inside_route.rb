@@ -26,52 +26,56 @@ module Grape
       # Methods which should not be available in filters until the before filter
       # has completed
       module PostBeforeFilter
-        def declared(params, options = {}, declared_params = nil)
-          options = options.reverse_merge(include_missing: true, include_missing_nested: false, include_parent_namespaces: true)
+        def declared(passed_params, options = {}, declared_params = nil)
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
+          declared_params ||= optioned_declared_params(options)
 
-          declared_params ||= correct_declared_params(options)
-
-          if !options[:include_missing_nested] && params.is_a?(Array)
-            params.map do |param|
-              declared(param || {}, options, declared_params)
-            end
+          if passed_params.is_a?(Array)
+            declared_array(passed_params, options, declared_params)
           else
-            
-            declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
-
-              key = { key => nil } unless key.is_a? Hash
-
-              key.each_pair do |parent, children|
-                output_key = options[:stringify] ? parent.to_s : parent.to_sym
-
-                next unless options[:include_missing] || params.key?(parent)
-
-                if children
-                  params_or_nil = params.empty? ? nil : params[parent]
-                  children_params = params_or_nil || (children.is_a?(Array) ? [] : {})
-                  output_value = declared(children_params, options, Array(children))
-                else
-                  output_value = params.empty? ? nil : params[parent]
-                end
-
-                hash[output_key] = output_value
-              end
-            end
-
+            declared_hash(passed_params, options, declared_params)
           end
         end
 
-        def correct_declared_params(options)
-          if options[:include_parent_namespaces]
-            # Declared params including parent namespaces
-            declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
-          else
-            # Declared params at current namespace
-            declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
+        private
+
+        def declared_array(passed_params, options, declared_params)
+          passed_params.map do |passed_param|
+            declared(passed_param || {}, options, declared_params)
           end
+        end
+
+        def declared_hash(passed_params, options, declared_params)
+          declared_params.each_with_object(Hashie::Mash.new) do |declared_param, memo|
+            # if it is not a Hash then it does not have children.
+            # find its value or set it to nil
+            if !declared_param.is_a?(Hash)
+              memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
+            else
+              declared_param.each_pair do |declared_parent_param, declared_children_params|
+                next unless options[:include_missing] || passed_params.key?(declared_parent_param)
+
+                passed_children_params = passed_params[declared_parent_param] || Hashie::Mash.new
+                memo[optioned_param_key(declared_parent_param, options)] = declared(passed_children_params, @options, declared_children_params)
+              end
+            end
+          end
+        end
+
+        def optioned_param_key(declared_param, options)
+          options[:stringify] ? declared_param.to_s : declared_param.to_sym
+        end
+
+        def optioned_declared_params(options)
+          declared_params = if options[:include_parent_namespaces]
+                              # Declared params including parent namespaces
+                              route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+                            else
+                              # Declared params at current namespace
+                              route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
+                            end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
-
           declared_params
         end
       end

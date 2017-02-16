@@ -266,12 +266,12 @@ describe Grape::Endpoint do
           end
         end
       end
-    end 
+    end
 
     it 'should show nil for nested params if include_missing and include_missing_nested are true' do
       inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params, include_missing: true, include_missing_nested: true)
+        inner_params = declared(params, include_missing: true)
         ''
       end
 
@@ -347,7 +347,7 @@ describe Grape::Endpoint do
       expect(inner_params[:nested].size).to eq 2
     end
 
-    context 'sets nested array when the param is missing' do
+    context 'sets nested hash when the param is missing' do
       it 'to be array when include_missing is true' do
         inner_params = nil
         subject.get '/declared' do
@@ -357,7 +357,7 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to be_a(Array)
+        expect(inner_params[:nested]).to be_a(Hash)
       end
 
       it 'to be nil when include_missing is false' do
