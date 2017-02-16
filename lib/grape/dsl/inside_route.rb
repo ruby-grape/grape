@@ -37,8 +37,6 @@ module Grape
           end
         end
 
-        private
-
         def declared_array(passed_params, options, declared_params)
           passed_params.map do |passed_param|
             declared(passed_param || {}, options, declared_params)
