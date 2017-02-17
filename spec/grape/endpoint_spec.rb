@@ -268,7 +268,7 @@ describe Grape::Endpoint do
       end
     end
 
-    it 'should show nil for nested params if include_missing and include_missing_nested are true' do
+    it 'should show nil for nested params if include_missing is true' do
       inner_params = nil
       subject.get '/declared' do
         inner_params = declared(params, include_missing: true)
