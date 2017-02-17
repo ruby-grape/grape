@@ -251,14 +251,32 @@ describe Grape::Endpoint do
 
   describe '#declared' do
     before do
+      subject.format :json
       subject.params do
         requires :first
         optional :second
         optional :third, default: 'third-default'
         optional :nested, type: Hash do
           optional :fourth
+          optional :fifth
+          optional :nested_two, type: Hash do
+            optional :sixth
+            optional :nested_three, type: Hash do
+              optional :seventh
+            end
+          end
         end
       end
+    end
+
+    it 'should show nil for nested params if include_missing is true' do
+      subject.get '/declared' do
+        declared(params, include_missing: true)
+      end
+
+      get '/declared?first=present'
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)['nested']['fourth']).to be_nil
     end
 
     it 'does not work in a before filter' do
@@ -273,37 +291,31 @@ describe Grape::Endpoint do
     end
 
     it 'has as many keys as there are declared params' do
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params).keys
-        ''
+        declared(params)
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(inner_params.size).to eq(4)
+      expect(JSON.parse(last_response.body).keys.size).to eq(4)
     end
 
     it 'has a optional param with default value all the time' do
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params)
-        ''
+        declared(params)
       end
       get '/declared?first=one'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:third]).to eql('third-default')
+      expect(JSON.parse(last_response.body)['third']).to eql('third-default')
     end
 
     it 'builds nested params' do
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params)
-        ''
+        declared(params)
       end
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
+      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 3
     end
 
     it 'builds nested params when given array' do
@@ -317,76 +329,54 @@ describe Grape::Endpoint do
           optional :fourth
         end
       end
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params)
-        ''
+        declared(params)
       end
 
       get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
       expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].size).to eq 2
+      expect(JSON.parse(last_response.body)['nested'].size).to eq 2
     end
 
-    it 'builds nested params' do
-      inner_params = nil
-      subject.get '/declared' do
-        inner_params = declared(params)
-        ''
-      end
-
-      get '/declared?first=present&nested[fourth]=1'
-      expect(last_response.status).to eq(200)
-      expect(inner_params[:nested].keys.size).to eq 1
-    end
-
-    context 'sets nested array when the param is missing' do
+    context 'sets nested hash when the param is missing' do
       it 'to be array when include_missing is true' do
-        inner_params = nil
         subject.get '/declared' do
-          inner_params = declared(params, include_missing: true)
-          ''
+          declared(params, include_missing: true)
         end
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to be_a(Array)
+        expect(JSON.parse(last_response.body)['nested']).to be_a(Hash)
       end
 
       it 'to be nil when include_missing is false' do
-        inner_params = nil
         subject.get '/declared' do
-          inner_params = declared(params, include_missing: false)
-          ''
+          declared(params, include_missing: false)
         end
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(inner_params[:nested]).to be_nil
+        expect(JSON.parse(last_response.body)['nested']).to be_nil
       end
     end
 
     it 'filters out any additional params that are given' do
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params)
-        ''
+        declared(params)
       end
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
-      expect(inner_params.key?(:other)).to eq false
+      expect(JSON.parse(last_response.body).key?(:other)).to eq false
     end
 
     it 'stringifies if that option is passed' do
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params, stringify: true)
-        ''
+        declared(params, stringify: true)
       end
 
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
-      expect(inner_params['first']).to eq 'one'
+      expect(JSON.parse(last_response.body)['first']).to eq 'one'
     end
 
     it 'does not include missing attributes if that option is passed' do
@@ -447,20 +437,18 @@ describe Grape::Endpoint do
         end
       end
 
-      inner_params = nil
       subject.get '/declared' do
-        inner_params = declared(params, include_missing: false)
-        ''
+        declared(params, include_missing: false)
       end
 
       get '/declared?first=present&nested[fourth]=&nested[nested_nested][sixth]=sixth'
-
+      json = JSON.parse(last_response.body)
       expect(last_response.status).to eq(200)
-      expect(inner_params[:first]).to eq 'present'
-      expect(inner_params[:nested].keys).to eq %w(fourth fifth nested_nested)
-      expect(inner_params[:nested][:fourth]).to eq ''
-      expect(inner_params[:nested][:nested_nested].keys).to eq %w(sixth seven)
-      expect(inner_params[:nested][:nested_nested][:sixth]).to eq 'sixth'
+      expect(json['first']).to eq 'present'
+      expect(json['nested'].keys).to eq %w(fourth fifth nested_nested)
+      expect(json['nested']['fourth']).to eq ''
+      expect(json['nested']['nested_nested'].keys).to eq %w(sixth seven)
+      expect(json['nested']['nested_nested']['sixth']).to eq 'sixth'
     end
   end
 

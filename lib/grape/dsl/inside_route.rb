@@ -26,41 +26,57 @@ module Grape
       # Methods which should not be available in filters until the before filter
       # has completed
       module PostBeforeFilter
-        def declared(params, options = {}, declared_params = nil)
+        def declared(passed_params, options = {}, declared_params = nil)
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
+          declared_params ||= optioned_declared_params(options)
 
-          # Declared params including parent namespaces
-          all_declared_params = route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
-
-          # Declared params at current namespace
-          current_namespace_declared_params = route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
-
-          declared_params ||= options[:include_parent_namespaces] ? all_declared_params : current_namespace_declared_params
-
-          raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
-
-          if params.is_a? Array
-            params.map do |param|
-              declared(param || {}, options, declared_params)
-            end
+          if passed_params.is_a?(Array)
+            declared_array(passed_params, options, declared_params)
           else
-            declared_params.each_with_object(Hashie::Mash.new) do |key, hash|
-              key = { key => nil } unless key.is_a? Hash
+            declared_hash(passed_params, options, declared_params)
+          end
+        end
 
-              key.each_pair do |parent, children|
-                output_key = options[:stringify] ? parent.to_s : parent.to_sym
+        private
 
-                next unless options[:include_missing] || params.key?(parent)
+        def declared_array(passed_params, options, declared_params)
+          passed_params.map do |passed_param|
+            declared(passed_param || {}, options, declared_params)
+          end
+        end
 
-                hash[output_key] = if children
-                                     children_params = params[parent] || (children.is_a?(Array) ? [] : {})
-                                     declared(children_params, options, Array(children))
-                                   else
-                                     params[parent]
-                                   end
+        def declared_hash(passed_params, options, declared_params)
+          declared_params.each_with_object(Hashie::Mash.new) do |declared_param, memo|
+            # If it is not a Hash then it does not have children.
+            # Find its value or set it to nil.
+            if !declared_param.is_a?(Hash)
+              memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
+            else
+              declared_param.each_pair do |declared_parent_param, declared_children_params|
+                next unless options[:include_missing] || passed_params.key?(declared_parent_param)
+
+                passed_children_params = passed_params[declared_parent_param] || Hashie::Mash.new
+                memo[optioned_param_key(declared_parent_param, options)] = declared(passed_children_params, @options, declared_children_params)
               end
             end
           end
+        end
+
+        def optioned_param_key(declared_param, options)
+          options[:stringify] ? declared_param.to_s : declared_param.to_sym
+        end
+
+        def optioned_declared_params(options)
+          declared_params = if options[:include_parent_namespaces]
+                              # Declared params including parent namespaces
+                              route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
+                            else
+                              # Declared params at current namespace
+                              route_setting(:saved_declared_params).last & Array(route_setting(:declared_params))
+                            end
+
+          raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
+          declared_params
         end
       end
 
