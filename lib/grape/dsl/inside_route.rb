@@ -47,8 +47,8 @@ module Grape
 
         def declared_hash(passed_params, options, declared_params)
           declared_params.each_with_object(Hashie::Mash.new) do |declared_param, memo|
-            # if it is not a Hash then it does not have children.
-            # find its value or set it to nil
+            # If it is not a Hash then it does not have children.
+            # Find its value or set it to nil.
             if !declared_param.is_a?(Hash)
               memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
             else
