@@ -1,11 +1,5 @@
 ### 0.19.2 (Next)
 
-#### Fixes
-
-* [#1570](https://github.com/ruby-grape/grape/pull/1570): Make versioner consider the mount destination path - [@namusyaka](https://github.com/namusyaka).
-* [#1579](https://github.com/ruby-grape/grape/pull/1579): Fix delete status with a return value - [@eproulx-petalmd](https://github.com/eproulx-petalmd).
-* Your contribution here.
-
 #### Features
 
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
@@ -15,6 +9,8 @@
 
 #### Fixes
 
+* [#1570](https://github.com/ruby-grape/grape/pull/1570): Make versioner consider the mount destination path - [@namusyaka](https://github.com/namusyaka).
+* [#1579](https://github.com/ruby-grape/grape/pull/1579): Fix delete status with a return value - [@eproulx-petalmd](https://github.com/eproulx-petalmd).
 * [#1559](https://github.com/ruby-grape/grape/pull/1559): You can once again pass `nil` to optional attributes with `values` validation set - [@ghiculescu](https://github.com/ghiculescu).
 * [#1562](https://github.com/ruby-grape/grape/pull/1562): Fix rainbow gem installation failure above ruby 2.3.3 on travis-ci - [@brucehsu](https://github.com/brucehsu).
 * [#1561](https://github.com/ruby-grape/grape/pull/1561): Fix performance issue introduced by duplicated calls in StackableValue#[] - [@brucehsu](https://github.com/brucehsu).
