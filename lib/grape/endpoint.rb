@@ -269,7 +269,7 @@ module Grape
         @body ||= response_object
 
         # The Body commonly is an Array of Strings, the application instance itself, or a File-like object
-        response_object = file || [body || response_object]
+        response_object = file || [body]
         [status, header, response_object]
       end
     end
