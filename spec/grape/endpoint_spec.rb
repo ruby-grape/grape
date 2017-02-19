@@ -1149,6 +1149,33 @@ describe Grape::Endpoint do
       end
     end
 
+    describe 'delete 200, with a return value (no explicit body)' do
+      it 'responds to /example delete method' do
+        subject.delete(:example) { 'deleted' }
+        delete '/example'
+        expect(last_response.status).to eql 200
+        expect(last_response.body).not_to be_empty
+      end
+    end
+
+    describe 'delete 204, with nil has return value (no explicit body)' do
+      it 'responds to /example delete method' do
+        subject.delete(:example) { nil }
+        delete '/example'
+        expect(last_response.status).to eql 204
+        expect(last_response.body).to be_empty
+      end
+    end
+
+    describe 'delete 204, with empty array has return value (no explicit body)' do
+      it 'responds to /example delete method' do
+        subject.delete(:example) { '' }
+        delete '/example'
+        expect(last_response.status).to eql 204
+        expect(last_response.body).to be_empty
+      end
+    end
+
     describe 'all other' do
       %w(post get head put options patch).each do |verb|
         it "allows for the anchoring option with a #{verb.upcase} method" do

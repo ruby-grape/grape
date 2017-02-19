@@ -265,8 +265,11 @@ module Grape
         run_filters afters, :after
         cookies.write(header)
 
-        # The Body commonly is an Array of Strings, the application instance itself, or a File-like object.
-        response_object = file || [body || response_object]
+        # status verifies body presence when DELETE
+        @body ||= response_object
+
+        # The Body commonly is an Array of Strings, the application instance itself, or a File-like object
+        response_object = file || [body]
         [status, header, response_object]
       end
     end
