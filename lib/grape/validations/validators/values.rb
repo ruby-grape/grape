@@ -9,7 +9,7 @@ module Grape
           raise ArgumentError, 'proc must be a Proc' if @proc && !@proc.is_a?(Proc)
         else
           @values = options
-          @excepts = nil
+          @excepts = @proc = nil
         end
         super
       end
