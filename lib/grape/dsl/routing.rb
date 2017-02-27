@@ -49,7 +49,7 @@ module Grape
             end
           end
 
-          @versions.last unless @versions.nil?
+          @versions.last if defined?(@versions) && @versions
         end
 
         # Define a root URL prefix for your entire API.
