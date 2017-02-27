@@ -210,7 +210,7 @@ module Grape
       # @api private
       def params(params)
         params = @parent.params(params) if defined?(@parent) && @parent
-        params = map_params(params, @element) if @element
+        params = map_params(params, @element) if defined?(@element) && @element
         params
       end
     end
