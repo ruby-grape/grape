@@ -209,7 +209,7 @@ module Grape
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
-        params = @parent.params(params) if @parent
+        params = @parent.params(params) if defined?(@parent) && @parent
         params = map_params(params, @element) if @element
         params
       end
