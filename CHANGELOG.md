@@ -5,6 +5,7 @@
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
 * [#1568](https://github.com/ruby-grape/grape/pull/1568): Add `proc` option to `values` validator to allow custom checks - [@jlfaber](https://github.com/jlfaber).
 * [#1575](https://github.com/ruby-grape/grape/pull/1575): Include nil values for missing nested params in declared - [@thogg4](https://github.com/thogg4).
+* [#1585](https://github.com/ruby-grape/grape/pull/1585): Bugs in declared method - make sure correct options var is used and respect include missing for non children params - [@thogg4](https://github.com/thogg4).
 * Your contribution here.
 
 #### Fixes
