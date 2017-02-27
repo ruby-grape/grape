@@ -234,7 +234,7 @@ module Grape
           warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
           @file = Grape::ServeFile::FileResponse.new(value)
         else
-          @file
+          @file if defined?(@file)
         end
       end
 
