@@ -144,7 +144,7 @@ module Grape
         when Integer
           @status = status
         when nil
-          return @status if @status
+          return @status if defined?(@status) && @status
           case request.request_method.to_s.upcase
           when Grape::Http::Headers::POST
             201
