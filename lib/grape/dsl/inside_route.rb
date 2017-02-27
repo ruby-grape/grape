@@ -199,8 +199,8 @@ module Grape
         elsif value == false
           @body = ''
           status 204
-        else
-          @body if defined?(@body)
+        elsif defined?(@body)
+          @body
         end
       end
 
@@ -233,8 +233,8 @@ module Grape
         elsif !value.is_a?(NilClass)
           warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
           @file = Grape::ServeFile::FileResponse.new(value)
-        else
-          @file if defined?(@file)
+        elsif defined?(@file)
+          @file
         end
       end
 
