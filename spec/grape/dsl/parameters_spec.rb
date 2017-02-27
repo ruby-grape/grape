@@ -53,7 +53,7 @@ module Grape
           subject.api = api
           allow(api).to receive(:namespace_stackable).with(:named_params)
         end
-        let(:api) { double("api") }
+        let(:api) { double('api') }
         let(:options) { { option: 'value' } }
         let(:named_params) { { params_group: proc {} } }
 
