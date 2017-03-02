@@ -78,7 +78,7 @@ module Grape
         protected
 
         def process_named_params
-          return unless @named_params && @named_params.any?
+          return unless defined?(@named_params) && @named_params && @named_params.any?
           api.namespace_stackable(:named_params, @named_params)
         end
       end

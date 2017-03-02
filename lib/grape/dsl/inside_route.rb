@@ -145,12 +145,12 @@ module Grape
         when Integer
           @status = status
         when nil
-          return @status if @status
+          return @status if defined?(@status) && @status
           case request.request_method.to_s.upcase
           when Grape::Http::Headers::POST
             201
           when Grape::Http::Headers::DELETE
-            if @body.present?
+            if defined?(@body) && @body.present?
               200
             else
               204
@@ -200,7 +200,7 @@ module Grape
         elsif value == false
           @body = ''
           status 204
-        else
+        elsif defined?(@body)
           @body
         end
       end
@@ -234,7 +234,7 @@ module Grape
         elsif !value.is_a?(NilClass)
           warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
           @file = Grape::ServeFile::FileResponse.new(value)
-        else
+        elsif defined?(@file)
           @file
         end
       end
@@ -295,8 +295,8 @@ module Grape
 
         representation = { root => representation } if root
         if key
-          representation = (@body || {}).merge(key => representation)
-        elsif entity_class.present? && @body
+          representation = ((defined?(@body) && @body) || {}).merge(key => representation)
+        elsif entity_class.present? && defined?(@body) && @body
           raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
           representation = @body.merge(representation)
         end

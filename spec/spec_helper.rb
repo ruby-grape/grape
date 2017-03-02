@@ -20,6 +20,8 @@ RSpec.configure do |config|
   config.raise_errors_for_deprecations!
 
   config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
+
+  config.warnings = true
 end
 
 require 'coveralls'

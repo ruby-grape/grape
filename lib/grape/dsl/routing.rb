@@ -49,7 +49,7 @@ module Grape
             end
           end
 
-          @versions.last unless @versions.nil?
+          @versions.last if defined?(@versions) && @versions
         end
 
         # Define a root URL prefix for your entire API.
@@ -159,8 +159,8 @@ module Grape
         def namespace(space = nil, options = {}, &block)
           if space || block_given?
             within_namespace do
-              previous_namespace_description = @namespace_description
-              @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
+              previous_namespace_description = defined?(@namespace_description) && @namespace_description
+              @namespace_description = ((defined?(@namespace_description) && @namespace_description) || {}).deep_merge(namespace_setting(:description) || {})
               nest(block) do
                 if space
                   namespace_stackable(:namespace, Namespace.new(space, options))
