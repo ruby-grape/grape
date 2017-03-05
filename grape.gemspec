@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.add_runtime_dependency 'rack', '>= 1.3.0'
-  s.add_runtime_dependency 'mustermann-grape', '~> 0.4.0'
+  s.add_runtime_dependency 'mustermann-grape', '~> 1.0.0'
   s.add_runtime_dependency 'rack-accept'
   s.add_runtime_dependency 'activesupport'
   s.add_runtime_dependency 'multi_json', '>= 1.3.2'
