@@ -26,6 +26,10 @@ module Grape
         def to_hash
           @settings.to_hash
         end
+
+        def method_missing(setting_name, value)
+          @settings[setting_name] = value
+        end
       end
 
       def self.config_class(*args)
