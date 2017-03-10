@@ -843,6 +843,18 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
 
+    it 'does not accept text/plain in JSON format if application/json is specified as content type' do
+      subject.format :json
+      subject.default_format :json
+      subject.put '/request_body' do
+        params[:user]
+      end
+      put '/request_body', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
+
+      expect(last_response.status).to eq(406)
+      expect(last_response.body).to eq('{"error":"The requested content-type \'text/plain\' is not supported."}')
+    end
+
     context 'content type with params' do
       before do
         subject.format :json
