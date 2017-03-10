@@ -18,6 +18,7 @@
 * [#1564](https://github.com/ruby-grape/grape/pull/1564): Fix declared params bug with nested namespaces - [@bmarini](https://github.com/bmarini).
 * [#1567](https://github.com/ruby-grape/grape/pull/1567): Fix values validator when value is empty array and apply except to input array - [@jlfaber](https://github.com/jlfaber).
 * [#1569](https://github.com/ruby-grape/grape/pull/1569), [#1511](https://github.com/ruby-grape/grape/issues/1511): Upgrade mustermann-grape to 1.0.0 - [@namusyaka](https://github.com/namusyaka).
+* [#1589](https://github.com/ruby-grape/grape/pull/1589): [#726](https://github.com/ruby-grape/grape/issues/726): Use default_format when Content-type is missing and respond with 406 when Content-type is invalid - [@inclooder](https://github.com/inclooder).
 * Your contribution here.
 
 ### 0.19.1 (1/9/2017)
