@@ -33,7 +33,6 @@ module Grape
 
         # Allow nil, to ignore when a parameter is absent
         return true if val.nil?
-
         converter.value_coerced? val
       end
 
