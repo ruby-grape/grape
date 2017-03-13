@@ -2,11 +2,11 @@ AllCops:
   TargetRubyVersion: 2.1
   Include:
     - Dangerfile
-    - gemfiles/*.gemfile
 
   Exclude:
     - vendor/**/*
     - bin/**/*
+    - gemfiles/*.gemfile
 
 inherit_from: .rubocop_todo.yml
 
