@@ -6,7 +6,7 @@ module Grape
     alias rack_params params
 
     def initialize(env, build_params_with: nil)
-      extend build_params_with || Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+      extend build_params_with || Grape::Extensions::Hash::ParamBuilder
       super(env)
     end
 
