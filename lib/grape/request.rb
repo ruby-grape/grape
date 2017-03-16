@@ -1,8 +1,14 @@
+require 'grape/extensions/hash'
 module Grape
   class Request < Rack::Request
     HTTP_PREFIX = 'HTTP_'.freeze
 
     alias rack_params params
+
+    def initialize(env, build_params_with: nil)
+      extend build_params_with || Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+      super(env)
+    end
 
     def params
       @params ||= build_params
@@ -14,16 +20,12 @@ module Grape
 
     private
 
-    def build_params
-      params = ActiveSupport::HashWithIndifferentAccess.new(rack_params)
-      if env[Grape::Env::GRAPE_ROUTING_ARGS]
-        args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
-        # preserve version from query string parameters
-        args.delete(:version)
-        args.delete(:route_info)
-        params.deep_merge!(args)
-      end
-      params
+    def grape_routing_args
+      args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
+      # preserve version from query string parameters
+      args.delete(:version)
+      args.delete(:route_info)
+      args
     end
 
     def build_headers
