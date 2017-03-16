@@ -5,7 +5,7 @@ module Grape
   # blocks are executed. In other words, any methods
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc.
-  class Endpoint
+  class Endpoint # rubocop:disable ClassLength
     include Grape::DSL::Settings
     include Grape::DSL::InsideRoute
 
@@ -239,15 +239,12 @@ module Grape
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
         @header = {}
-
-        @request = Grape::Request.new(env)
+        @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_with))
         @params = @request.params
         @headers = @request.headers
 
         cookies.read(@request)
-
         self.class.run_before_each(self)
-
         run_filters befores, :before
 
         if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
