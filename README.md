@@ -509,7 +509,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `ActiveSupport::HashWithIndifferentAccess` hash.
+If we do not specify any params, `declared` will return an empty `Hash`.
 
 **Request**
 
@@ -562,7 +562,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `ActiveSupport::HashWithIndifferentAccess` hash.
+The returned hash is a `Hash`.
 
 ```ruby
   declared(params)[:user] == declared(params)['user']
@@ -905,14 +905,13 @@ params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using HashWithIndifferentAccess:
+  # Parameter will be a plain Ruby `Hash`:
   params[:avatar][:filename] # => 'avatar.png'
-  params['avatar']['avatar']     # => 'image/png'
-   params[:avatar][:tempfile] # => #<File>
+  params[:avatar]['avatar']     # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
 
-`params` hash keys  can accesed with `""` or `:`  
-`:avatar` and `"avatar"` are considered to be the same.
+`params` hash keys will all be converted to symbols.
 ```
 
 ### First-Class `JSON` Types
