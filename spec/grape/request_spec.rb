@@ -30,8 +30,8 @@ module Grape
         }
       end
 
-      it 'returns params' do
-        expect(request.params).to eq('a' => '123', 'b' => 'xyz')
+      it 'returns symbolized params' do
+        expect(request.params).to eq(a: '123', b: 'xyz')
       end
 
       describe 'with grape.routing_args' do
@@ -47,7 +47,7 @@ module Grape
         end
 
         it 'cuts version and route_info' do
-          expect(request.params).to eq('a' => '123', 'b' => 'xyz', 'c' => 'ccc')
+          expect(request.params).to eq(a: '123', b: 'xyz', c: 'ccc')
         end
       end
     end
