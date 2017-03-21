@@ -754,10 +754,10 @@ You can define validations and coercion options for your parameters using a `par
 params do
   requires :id, type: Integer
   optional :text, type: String, regexp: /\A[a-z]+\z/
-  group :media do
+  group :media, type: Hash do
     requires :url
   end
-  optional :audio do
+  optional :audio, type: Hash do
     requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg], default: :mp3
   end
   mutually_exclusive :media, :audio
@@ -1257,24 +1257,24 @@ All of these methods can be used at any nested level.
 
 ```ruby
 params do
-  requires :food do
+  requires :food, type: Hash do
     optional :meat
     optional :fish
     optional :rice
     at_least_one_of :meat, :fish, :rice
   end
-  group :drink do
+  group :drink, type: Hash do
     optional :beer
     optional :wine
     optional :juice
     exactly_one_of :beer, :wine, :juice
   end
-  optional :dessert do
+  optional :dessert, type: Hash do
     optional :cake
     optional :icecream
     mutually_exclusive :cake, :icecream
   end
-  optional :recipe do
+  optional :recipe, type: Hash do
     optional :oil
     optional :meat
     all_or_none_of :oil, :meat
