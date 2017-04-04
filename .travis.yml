@@ -4,38 +4,38 @@ sudo: false
 
 matrix:
   include:
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       script:
         - bundle exec danger
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: Gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.4.0
+    - rvm: 2.4.1
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.3.3
+    - rvm: 2.3.4
       gemfile: Gemfile
-    - rvm: 2.3.3
+    - rvm: 2.3.4
       gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.3.3
+    - rvm: 2.3.4
       gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.3.3
+    - rvm: 2.3.4
       gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.3.3
+    - rvm: 2.3.4
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.6
+    - rvm: 2.2.7
       gemfile: Gemfile
-    - rvm: 2.2.6
+    - rvm: 2.2.7
       gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.2.6
+    - rvm: 2.2.7
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.6
+    - rvm: 2.2.7
       gemfile: gemfiles/rails_4.gemfile
-    - rvm: 2.2.6
+    - rvm: 2.2.7
       gemfile: gemfiles/rails_3.gemfile
     - rvm: ruby-head
     - rvm: jruby-head
