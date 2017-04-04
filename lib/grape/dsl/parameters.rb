@@ -192,6 +192,12 @@ module Grape
         validates(attrs, all_or_none_of: { value: true, message: extract_message_option(attrs) })
       end
 
+      # Require that only declared params are present.
+      # @param (see #mutually_exclusive)
+      def declared_only(*attrs)
+        validates(attrs, declared_only: { value: true, message: extract_message_option(attrs) })
+      end
+
       # Define a block of validations which should be applied if and only if
       # the given parameter is present. The parameters are not nested.
       # @param attr [Symbol] the parameter which, if present, triggers the

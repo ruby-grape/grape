@@ -67,6 +67,8 @@
 * [#1568](https://github.com/ruby-grape/grape/pull/1568): Add `proc` option to `values` validator to allow custom checks - [@jlfaber](https://github.com/jlfaber).
 * [#1575](https://github.com/ruby-grape/grape/pull/1575): Include nil values for missing nested params in declared - [@thogg4](https://github.com/thogg4).
 * [#1585](https://github.com/ruby-grape/grape/pull/1585): Bugs in declared method - make sure correct options var is used and respect include missing for non children params - [@thogg4](https://github.com/thogg4).
+* [#1605](https://github.com/ruby-grape/grape/pull/1605): Add `declared_only` validator to reject undeclared keys within block- [@jlfaber](https://github.com/jlfaber).
+* Your contribution here.
 
 #### Fixes
 
