@@ -63,7 +63,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_optional_using
-        expect(subject.route_setting(:declared_params)).to eq([:field_a, :field_b])
+        expect(subject.route_setting(:declared_params)).to eq(%i(field_a field_b))
       end
 
       it 'works when field_a and field_b are not present' do
@@ -139,7 +139,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq(%i(required_field optional_field))
       end
 
       it 'errors when required_field is not present' do
@@ -174,7 +174,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_none
-        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq(%i(required_field optional_field))
       end
 
       it 'errors when required_field is not present' do
@@ -204,7 +204,7 @@ describe Grape::Validations do
 
         it 'adds only the entity documentation to declared params, nothing more' do
           define_requires_all
-          expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+          expect(subject.route_setting(:declared_params)).to eq(%i(required_field optional_field))
         end
       end
 
@@ -1058,14 +1058,14 @@ describe Grape::Validations do
           subject.params do
             use :pagination
           end
-          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page]
+          expect(subject.route_setting(:declared_params)).to eq %i(page per_page)
         end
 
         it 'by #use with multiple params' do
           subject.params do
             use :pagination, :period
           end
-          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page, :start_date, :end_date]
+          expect(subject.route_setting(:declared_params)).to eq %i(page per_page start_date end_date)
         end
       end
 
@@ -1073,13 +1073,13 @@ describe Grape::Validations do
         before do
           subject.helpers do
             params :order do |options|
-              optional :order, type: Symbol, values: [:asc, :desc], default: options[:default_order]
+              optional :order, type: Symbol, values: %i(asc desc), default: options[:default_order]
               optional :order_by, type: Symbol, values: options[:order_by], default: options[:default_order_by]
             end
           end
           subject.format :json
           subject.params do
-            use :order, default_order: :asc, order_by: [:name, :created_at], default_order_by: :created_at
+            use :order, default_order: :asc, order_by: %i(name created_at), default_order_by: :created_at
           end
           subject.get '/order' do
             {
@@ -1193,6 +1193,47 @@ describe Grape::Validations do
           end
 
           get '/mutually_exclusive', beer: 'string', wine: 'anotherstring'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'beer, wine are mutually exclusive'
+        end
+
+        it 'does not error across array elements' do
+          subject.params do
+            optional :nested, type: Array do
+              optional :beer
+              optional :wine
+              optional :juice
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.post '/mutually_exclusive' do
+            'mutually_exclusive works!'
+          end
+
+          send :post,
+               '/mutually_exclusive',
+               JSON.generate(nested: [{ beer: 'string' }, { wine: 'anotherstring' }]),
+               'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'errors within array element' do
+          subject.params do
+            optional :nested, type: Array do
+              optional :beer
+              optional :wine
+              optional :juice
+              mutually_exclusive :beer, :wine, :juice
+            end
+          end
+          subject.post '/mutually_exclusive' do
+            'mutually_exclusive works!'
+          end
+
+          send :post,
+               '/mutually_exclusive',
+               JSON.generate(nested: [{ beer: 'string' }, { beer: 'string', wine: 'anotherstring' }]),
+               'CONTENT_TYPE' => 'application/json'
           expect(last_response.status).to eq(400)
           expect(last_response.body).to eq 'beer, wine are mutually exclusive'
         end
@@ -1593,6 +1634,258 @@ describe Grape::Validations do
 
         get '/exactly_one_of_group', drink: { foo: 'bar' }, beer: 'true'
         expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'declared only' do
+      context 'params' do
+        before :each do
+          subject.resources :custom_message do
+            params do
+              optional :beer
+              optional :wine
+              optional :juice
+              declared_only message: 'is not a beverage we serve'
+            end
+            get '/declared_only' do
+              'declared_only works!'
+            end
+          end
+
+          subject.params do
+            optional :beer
+            optional :wine
+            optional :juice
+            declared_only
+          end
+          subject.get '/declared_only' do
+            'declared_only works!'
+          end
+        end
+
+        context 'with a custom validation message' do
+          it 'errors when only extra param is present' do
+            get '/custom_message/declared_only', milk: 'string'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'milk is not a beverage we serve'
+          end
+
+          it 'errors when extra param is present with declared param' do
+            get '/custom_message/declared_only', beer: 'string', milk: 'string'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'milk is not a beverage we serve'
+          end
+
+          it 'does not error when no parameter is present' do
+            get '/custom_message/declared_only'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+
+          it 'does not error when one is present' do
+            get '/custom_message/declared_only', beer: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+
+          it 'does not error when two are present' do
+            get '/custom_message/declared_only', beer: 'string', wine: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+        end
+
+        context 'with default validation message' do
+          it 'errors when only extra param is present' do
+            get '/declared_only', milk: 'string'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'milk is not a declared parameter'
+          end
+
+          it 'errors when extra param is present with declared param' do
+            get '/declared_only', beer: 'string', milk: 'string'
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq 'milk is not a declared parameter'
+          end
+
+          it 'does not error when no parameter is present' do
+            get '/declared_only'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+
+          it 'does not error when one is present' do
+            get '/declared_only', beer: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+
+          it 'does not error when two are present' do
+            get '/declared_only', beer: 'string', wine: 'string'
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq 'declared_only works!'
+          end
+        end
+      end
+
+      context 'nested Hash params' do
+        before :each do
+          subject.params do
+            optional :nested, type: Hash do
+              optional :beer_nested
+              optional :wine_nested
+              optional :juice_nested
+            end
+            optional :nested2, type: Hash do
+              optional :beer_nested2
+              optional :wine_nested2
+              optional :juice_nested2
+              declared_only
+            end
+            declared_only
+          end
+          subject.post '/declared_only' do
+            'declared_only works!'
+          end
+        end
+
+        it 'does not error when none are present' do
+          post '/declared_only'
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'does not error with extra params in different scope' do
+          post '/declared_only', nested: { milk_nested: 'string' }
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'errors when extra top level param is present' do
+          post '/declared_only', extra: 'string'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'extra is not a declared parameter'
+        end
+
+        it 'errors with extra param in declared_only scope' do
+          post '/declared_only', nested2: { milk_nested2: 'string' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'milk_nested2 is not a declared parameter'
+        end
+
+        it 'does not error when all params are present' do
+          send :post, '/declared_only',
+               JSON.generate(
+                 nested: {
+                   beer_nested: 'string',
+                   wine_nested: 'string',
+                   juice_nested: 'string',
+                   milk_nested: 'string'
+                 },
+                 nested2: {
+                   beer_nested2: 'string',
+                   wine_nested2: 'string',
+                   juice_nested2: 'string'
+                 }
+               ),
+               'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(201)
+        end
+      end
+
+      context 'nested Array params' do
+        before :each do
+          subject.params do
+            optional :nested, type: Array do
+              optional :beer_nested
+              optional :wine_nested
+              optional :juice_nested
+            end
+            optional :nested2, type: Array do
+              optional :beer_nested2
+              optional :wine_nested2
+              optional :juice_nested2
+              declared_only
+            end
+            declared_only
+          end
+          subject.post '/declared_only' do
+            'declared_only works!'
+          end
+        end
+
+        it 'does not error when none are present' do
+          post '/declared_only'
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'does not error with extra params in different scope' do
+          post '/declared_only', nested: [{ milk_nested: 'string' }]
+          expect(last_response.status).to eq(201)
+        end
+
+        it 'errors when extra top level param is present' do
+          post '/declared_only', extra: 'string'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'extra is not a declared parameter'
+        end
+
+        it 'errors with extra param in declared_only scope' do
+          post '/declared_only', nested2: [{ milk_nested2: 'string' }]
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'milk_nested2 is not a declared parameter'
+        end
+
+        it 'errors with extra param in any instance of declared_only scope' do
+          param = { nested2: [{ beer_nested2: 'string' }, { beer_nested2: 'string2', milk_nested2: 'string' }] }
+          send :post, '/declared_only', JSON.generate(param), 'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'milk_nested2 is not a declared parameter'
+        end
+
+        it 'does not error when all params are present' do
+          send :post, '/declared_only',
+               JSON.generate(
+                 nested: [{
+                   beer_nested: 'string',
+                   wine_nested: 'string',
+                   juice_nested: 'string',
+                   milk_nested: 'string'
+                 }],
+                 nested2: [{
+                   beer_nested2: 'string',
+                   wine_nested2: 'string',
+                   juice_nested2: 'string'
+                 }]
+               ),
+               'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(201)
+        end
+      end
+
+      context 'using with' do
+        before :each do
+          subject.params do
+            with(type: String) do
+              optional :beer
+              optional :wine
+            end
+            optional :juice
+            declared_only
+          end
+          subject.get '/declared_only' do
+            'declared_only works!'
+          end
+        end
+
+        it 'does not error with all allowed params' do
+          get '/declared_only', beer: 'string', wine: 'string', juice: 'string'
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'errors with extra params' do
+          get '/declared_only', beer: 'string', wine: 'string', juice: 'string', milk: 'string'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq 'milk is not a declared parameter'
+        end
       end
     end
   end
