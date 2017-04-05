@@ -2,7 +2,6 @@ module Grape
   module Validations
     class AllowBlankValidator < Base
       def validate_param!(attr_name, params)
-
         return if (options_key?(:value) ? @option[:value] : @option) || !params.is_a?(Hash)
 
         value = params[attr_name]

@@ -238,10 +238,9 @@ module Grape
 
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
-        @header = {}
-
+        @header  = {}
         @request = Grape::Request.new(env)
-        @params = @request.params
+        @params  = @request.params
         @headers = @request.headers
 
         cookies.read(@request)
@@ -339,9 +338,7 @@ module Grape
     end
 
     def run_validators(validators, request)
-      validation_errors = []
-
-      validators.each do |validator|
+      validators.each_with_object(validation_errors = []) do |validator|
         begin
           validator.validators = validators
           validator.validate(request)

@@ -16,7 +16,7 @@ module Grape
       def validate_param!(attr_name, params)
         return unless params.is_a?(Hash)
         return unless params[attr_name] || required_for_root_scope?
-        return if params[attr_name].blank? && value_allowed_blank?
+        return if value_allowed_blank?(params[attr_name])
 
         values = @values.is_a?(Proc) ? @values.call : @values
         excepts = @excepts.is_a?(Proc) ? @excepts.call : @excepts
@@ -43,9 +43,9 @@ module Grape
         @required && @scope.root?
       end
 
-      def value_allowed_blank?
+      def value_allowed_blank?(value)
         blank_validator = validators.detect { |v| v.is_a?(Grape::Validations::AllowBlankValidator) }
-        blank_validator && blank_validator.instance_variable_get(:@option)
+        value.blank? && blank_validator && blank_validator.instance_variable_get(:@option)
       end
     end
   end
