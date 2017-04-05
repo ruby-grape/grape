@@ -343,7 +343,7 @@ module Grape
 
       validators.each do |validator|
         begin
-          validate.validators = validators
+          validator.validators = validators
           validator.validate(request)
         rescue Grape::Exceptions::Validation => e
           validation_errors << e
