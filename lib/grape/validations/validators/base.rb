@@ -2,6 +2,7 @@ module Grape
   module Validations
     class Base
       attr_reader :attrs
+      attr_accessor :validators
 
       # Creates a new Validator from options specified
       # by a +requires+ or +optional+ directive during
