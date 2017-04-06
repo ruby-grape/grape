@@ -328,7 +328,7 @@ describe Grape::Endpoint do
 
         get '/foo'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hash')
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
       end
     end
 
@@ -1021,7 +1021,9 @@ describe Grape::Endpoint do
       end
 
       it 'symbolizes the params' do
+        require 'grape/extensions/hash'
         subject.params do
+          build_with Grape::Extensions::Hash::ParamBuilder
           requires :a, type: String
         end
 

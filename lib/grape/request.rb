@@ -1,4 +1,4 @@
-require 'grape/extensions/hash'
+require 'grape/extensions/hash_with_indifferent_access'
 module Grape
   class Request < Rack::Request
     HTTP_PREFIX = 'HTTP_'.freeze
@@ -6,7 +6,7 @@ module Grape
     alias rack_params params
 
     def initialize(env, build_params_with: nil)
-      extend build_params_with || Grape::Extensions::Hash::ParamBuilder
+      extend build_params_with || Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
       super(env)
     end
 
