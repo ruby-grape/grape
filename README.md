@@ -798,7 +798,7 @@ end
 ```
 
 By default Grape 1.x presents the parameters to the endpoint as an
-ActiveSupport::HashWithIndifferentAccess. This is a change from 0.x where a
+`ActiveSupport::HashWithIndifferentAccess`. This is a change from 0.x where a
 Hashie::Mash was previously presented.
 
 To restore the previous behaviour check out [UPGRADING](UPGRADING.md).
@@ -927,7 +927,7 @@ post '/' do
   params[:avatar][:tempfile] # => #<File>
 end
 
-`params` hash keys  can accesed with `""` or `:`
+By default `params` hash keys can accesed with a string or a symbol
 `:avatar` and `"avatar"` are considered to be the same.
 ```
 
