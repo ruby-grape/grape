@@ -463,8 +463,8 @@ describe Grape::Validations::AllowBlankValidator do
     end
 
     it 'allows blank value when values option present and allow blank is true' do
-      # get 'allow_blank_with_values_option', name: nil
-      # expect(last_response.status).to eq(200)
+      get 'allow_blank_with_values_option', name: nil
+      expect(last_response.status).to eq(200)
 
       get 'allow_blank_with_values_option', name: ''
       expect(last_response.status).to eq(200)
