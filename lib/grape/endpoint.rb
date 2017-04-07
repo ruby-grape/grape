@@ -340,7 +340,6 @@ module Grape
     def run_validators(validators, request)
       validators.each_with_object(validation_errors = []) do |validator|
         begin
-          validator.validators = validators
           validator.validate(request)
         rescue Grape::Exceptions::Validation => e
           validation_errors << e
@@ -379,7 +378,7 @@ module Grape
     end
 
     def validations
-      route_setting(:saved_validations) || []
+      Grape::Validations::Base.validators = route_setting(:saved_validations) || []
     end
 
     def options?

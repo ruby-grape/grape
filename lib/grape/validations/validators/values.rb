@@ -44,7 +44,7 @@ module Grape
       end
 
       def value_allowed_blank?(value)
-        blank_validator = validators.detect { |v| v.is_a?(Grape::Validations::AllowBlankValidator) }
+        blank_validator = Grape::Validations::Base.validators.detect { |v| v.is_a?(Grape::Validations::AllowBlankValidator) }
         value.blank? && blank_validator && blank_validator.instance_variable_get(:@option)
       end
     end
