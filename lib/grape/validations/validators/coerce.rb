@@ -11,7 +11,6 @@ module Grape
       end
 
       def validate(request)
-        @request = request
         super
       end
 
@@ -19,7 +18,7 @@ module Grape
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
         new_value = coerce_value(params[attr_name])
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless valid_type?(new_value)
-        params[attr_name] = @request.respond_to?(:post_process_params) ? @request.post_process_params(new_value) : new_value
+        params[attr_name] = new_value
       end
 
       private
@@ -38,6 +37,7 @@ module Grape
 
         # Allow nil, to ignore when a parameter is absent
         return true if val.nil?
+
         converter.value_coerced? val
       end
 

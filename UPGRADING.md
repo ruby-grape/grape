@@ -5,9 +5,33 @@ Upgrading Grape
 
 #### Changes in Parameter Class
 
-The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. To restore the behavior of prior versions, add `hashie` to your `Gemfile` and use `TODO`.
+The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. This means that by default you can no longer access parameters by method name.
 
-[TODO]
+```
+class API < Grape::API
+  params do
+    optional :color, type: String
+  end
+  get do
+    params[:color] # use params[:color] instead of params.color
+  end
+end
+```
+
+To restore the behavior of prior versions, add `hashie` to your `Gemfile` and `include Grape::Extensions::Hashie::Mash::ParamBuilder` in your API.
+
+```
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  params do
+    optional :color, type: String
+  end
+  get do
+    # params.color works
+  end
+end
+```
 
 This behavior can also be overridden on individual parameter blocks using `build_with`.
 
@@ -26,7 +50,7 @@ def request
 end
 ```
 
-See [#1594](https://github.com/ruby-grape/grape/pull/1594) for more information.
+See [#1610](https://github.com/ruby-grape/grape/pull/1610) for more information.
 
 ### Upgrading to >= 0.19.1
 

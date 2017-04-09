@@ -11,8 +11,9 @@ module Grape
       # Set the module used to build the request.params.
       #
       # @param build_with the ParamBuilder module to use when building request.params
-      #   Available builders are;
-      #     * Grape::Extensions::HashWithIndifferentAccess::ParamBuilder (default)
+      #   Available builders are:
+      #
+      #     * Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder (default)
       #     * Grape::Extensions::Hash::ParamBuilder
       #     * Grape::Extensions::Hashie::Mash::ParamBuilder
       #
@@ -30,7 +31,7 @@ module Grape
       #       end
       #     end
       def build_with(build_with = nil)
-        @api.namespace_inheritable(:build_with, build_with)
+        @api.namespace_inheritable(:build_params_with, build_with)
       end
 
       # Include reusable params rules among current.

@@ -29,6 +29,7 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Params Class](#params-class)
   - [Declared](#declared)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
@@ -501,9 +502,19 @@ Route string parameters will have precedence.
 
 By default parameters are available as `ActiveSupport::HashWithIndifferentAccess`. This can be changed to, for example, Ruby `Hash` or `Hashie::Mash` for the entire API.
 
-[TODO]
+```ruby
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
 
-The class can be overridden on individual parameter blocks using `build_with` as follows.
+  params do
+    optional :color, type: String
+  end
+  get do
+    params.color # instead of params[:color]
+  end
+```
+
+The class can also be overridden on individual parameter blocks using `build_with` as follows.
 
 ```ruby
 params do
@@ -513,6 +524,8 @@ end
 ```
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
+
+Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder` and `Grape::Extensions::Hashie::Mash::ParamBuilder`.
 
 ### Declared
 
@@ -526,7 +539,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `ActiveSupport::HashWithIndifferentAccess` hash.
+If you do not specify any parameters, `declared` will return an empty hash.
 
 **Request**
 
@@ -543,8 +556,8 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 
 ````
 
-Once we add parameters requirements, grape will start returning only the declared params[:
-]
+Once we add parameters requirements, grape will start returning only the declared parameters.
+
 ````ruby
 format :json
 
@@ -579,7 +592,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `ActiveSupport::HashWithIndifferentAccess` hash.
+The returned hash is an `ActiveSupport::HashWithIndifferentAccess`.
 
 The `#declared` method is not available to `before` filters, as those are evaluated prior to parameter coercion.
 

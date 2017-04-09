@@ -147,7 +147,7 @@ module Grape
         # Enforce symbolized keys for complex types
         # by wrapping the coercion method such that
         # any Hash objects in the immediate heirarchy
-        # have their keys recursively symbolized
+        # have their keys recursively symbolized.
         # This helps common libs such as JSON to work easily.
         #
         # @param type see #new
