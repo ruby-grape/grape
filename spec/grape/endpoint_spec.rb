@@ -249,6 +249,117 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#params' do
+    context 'build params with Hash' do
+      it 'should be Hash' do
+        subject.params do
+          build_with Grape::Extensions::Hash::ParamBuilder
+        end
+
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Hash')
+      end
+    end
+
+    context 'build params with HashWithIndifferentAccess' do
+      it 'should be ActiveSupport::HashWithIndifferentAccess' do
+        subject.params do
+          build_with Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+        end
+
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+
+      it 'parse sub hash params' do
+        subject.params do
+          build_with Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+
+          optional :a, type: Hash do
+            optional :b, type: Hash do
+              optional :c, type: String
+            end
+            optional :d, type: Array
+          end
+        end
+        subject.get '/foo' do
+          [params[:a]['b'][:c], params['a'][:d]]
+        end
+
+        get '/foo', a: { b: { c: 'bar' }, d: ['foo'] }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", ["foo"]]')
+      end
+    end
+
+    context 'build params with Hashie::Mash' do
+      it 'should be Hashie::Mash' do
+        subject.params do
+          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+        end
+
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Hashie::Mash')
+      end
+
+      it 'is indifferent to key or symbol access' do
+        subject.params do
+          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          [params[:a], params['a']]
+        end
+
+        get '/foo', a: 'bar'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", "bar"]')
+      end
+    end
+
+    context 'default class' do
+      it 'should be a ActiveSupport::HashWithIndifferentAccess' do
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
+      end
+    end
+  end
+
   describe '#declared' do
     before do
       subject.format :json
@@ -775,6 +886,7 @@ describe Grape::Endpoint do
             end
           end
         end
+
         it 'parse email param with provided requirements for params' do
           get '/outer/abc@example.com'
           expect(last_response.body).to eq('abc@example.com')
@@ -909,6 +1021,94 @@ describe Grape::Endpoint do
         expect(JSON.parse(last_response.body)['params']).to eq '123'
         post '/123?id=456'
         expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+    end
+
+    context 'params presented as a plain Ruby Hash' do
+      it 'symbolizes params keys' do
+        subject.params do
+          optional :a, type: Hash do
+            optional :b, type: Hash do
+              optional :c, type: String
+            end
+            optional :d, type: Array
+          end
+        end
+
+        subject.get '/foo' do
+          [params[:a][:b][:c], params[:a][:d]]
+        end
+
+        get '/foo', 'a' => { b: { c: 'bar' }, 'd' => ['foo'] }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", ["foo"]]')
+      end
+
+      it 'symbolizes the params' do
+        subject.params do
+          build_with Grape::Extensions::Hash::ParamBuilder
+          requires :a, type: String
+        end
+
+        subject.get '/foo' do
+          [params[:a], params['a']]
+        end
+
+        get '/foo', a: 'bar'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", nil]')
+      end
+    end
+
+    context 'params presented as a HashWithIndifferentAccess' do
+      it 'params are indifferent to symbol or string keys' do
+        subject.params do
+          build_with Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+          optional :a, type: Hash do
+            optional :b, type: Hash do
+              optional :c, type: String
+            end
+            optional :d, type: Array
+          end
+        end
+
+        subject.get '/foo' do
+          [params[:a]['b'][:c], params['a'][:d]]
+        end
+
+        get '/foo', 'a' => { b: { c: 'bar' }, 'd' => ['foo'] }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", ["foo"]]')
+      end
+
+      it 'responds to string keys' do
+        subject.params do
+          build_with Grape::Extensions::HashWithIndifferentAccess::ParamBuilder
+          requires :a, type: String
+        end
+
+        subject.get '/foo' do
+          [params[:a], params['a']]
+        end
+
+        get '/foo', a: 'bar'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('["bar", "bar"]')
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
       end
     end
   end

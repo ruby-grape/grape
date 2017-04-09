@@ -8,6 +8,7 @@ group :development, :test do
   gem 'bundler'
   gem 'rake'
   gem 'rubocop', '0.47.0'
+  gem 'hashie'
 end
 
 group :development do

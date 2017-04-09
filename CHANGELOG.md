@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#1594](https://github.com/ruby-grape/grape/pull/1594): Replace `Hashie::Mash` parameters with `ActiveSupport::HashWithIndifferentAccess` - [@james2m](https://github.com/james2m), [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes

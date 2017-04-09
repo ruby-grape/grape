@@ -1,6 +1,33 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.0.0
+
+#### Changes in Parameter Class
+
+The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. To restore the behavior of prior versions, add `hashie` to your `Gemfile` and use `TODO`.
+
+[TODO]
+
+This behavior can also be overridden on individual parameter blocks using `build_with`.
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String
+end
+```
+
+If you're constructing your own `Grape::Request` in a middleware, you can pass different parameter handlers to create the desired `params` class with `build_params_with`.
+
+```ruby
+def request
+  Grape::Request.new(env, build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder)
+end
+```
+
+See [#1594](https://github.com/ruby-grape/grape/pull/1594) for more information.
+
 ### Upgrading to >= 0.19.1
 
 #### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise

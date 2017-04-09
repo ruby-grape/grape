@@ -4,7 +4,6 @@ require 'rack/builder'
 require 'rack/accept'
 require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
-require 'hashie'
 require 'set'
 require 'active_support/version'
 require 'active_support/core_ext/hash/indifferent_access'
@@ -78,6 +77,21 @@ module Grape
     autoload :MethodNotAllowed
   end
 
+  module Extensions
+    extend ActiveSupport::Autoload
+
+    autoload :DeepMergeableHash
+    autoload :DeepSymbolizeHash
+    autoload :Hash
+    autoload :HashWithIndifferentAccess
+
+    module Hashie
+      extend ActiveSupport::Autoload
+
+      autoload :Mash
+    end
+  end
+
   module Middleware
     extend ActiveSupport::Autoload
     autoload :Base
@@ -85,6 +99,7 @@ module Grape
     autoload :Formatter
     autoload :Error
     autoload :Globals
+    autoload :Stack
 
     module Auth
       extend ActiveSupport::Autoload
