@@ -82,6 +82,7 @@ module Grape
 
     autoload :DeepMergeableHash
     autoload :DeepSymbolizeHash
+    autoload :DeepHashWithIndifferentAccess
     autoload :Hash
 
     module ActiveSupport

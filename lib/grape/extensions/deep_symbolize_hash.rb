@@ -15,7 +15,15 @@ module Grape
       end
 
       def self.symbolize_key(key)
-        key.respond_to?(:to_sym) ? key.to_sym : key
+        if key.is_a?(Symbol)
+          key
+        elsif key.is_a?(String)
+          key.to_sym
+        elsif key.respond_to?(:to_sym)
+          key.to_sym
+        else
+          key
+        end
       end
     end
   end
