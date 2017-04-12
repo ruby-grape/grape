@@ -1,4 +1,4 @@
-### 0.19.2 (Next)
+### 0.19.2 (4/12/2017)
 
 #### Features
 
@@ -6,7 +6,6 @@
 * [#1568](https://github.com/ruby-grape/grape/pull/1568): Add `proc` option to `values` validator to allow custom checks - [@jlfaber](https://github.com/jlfaber).
 * [#1575](https://github.com/ruby-grape/grape/pull/1575): Include nil values for missing nested params in declared - [@thogg4](https://github.com/thogg4).
 * [#1585](https://github.com/ruby-grape/grape/pull/1585): Bugs in declared method - make sure correct options var is used and respect include missing for non children params - [@thogg4](https://github.com/thogg4).
-* Your contribution here.
 
 #### Fixes
 
@@ -19,7 +18,6 @@
 * [#1567](https://github.com/ruby-grape/grape/pull/1567): Fix values validator when value is empty array and apply except to input array - [@jlfaber](https://github.com/jlfaber).
 * [#1569](https://github.com/ruby-grape/grape/pull/1569), [#1511](https://github.com/ruby-grape/grape/issues/1511): Upgrade mustermann-grape to 1.0.0 - [@namusyaka](https://github.com/namusyaka).
 * [#1589](https://github.com/ruby-grape/grape/pull/1589): [#726](https://github.com/ruby-grape/grape/issues/726): Use default_format when Content-type is missing and respond with 406 when Content-type is invalid - [@inclooder](https://github.com/inclooder).
-* Your contribution here.
 
 ### 0.19.1 (1/9/2017)
 
