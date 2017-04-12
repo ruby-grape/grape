@@ -1,5 +1,19 @@
 Upgrading Grape
 ===============
+### Upgrading to >= 1.0.0
+Prior to this version the endpoint was presented with params in the form of a Hashie::Mash. From 1.0.0 upwards Grape presents the parameters to the endpoint as an
+ActiveSupport::HashWithIndifferentAccess.
+
+To restore the previous behaviour you can specify Hashie::Mash using build_with in the params block;
+
+```ruby
+params do
+  build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+  optional :color, type: String, default: 'blue', values: ['blue', 'red', 'green']
+end
+```
+
+The various options are documented in [Grape::DSL::Parameters](lib/grape/dsl/parameters.rb)
 
 ### Upgrading to >= 0.19.1
 

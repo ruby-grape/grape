@@ -509,7 +509,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If we do not specify any params, `declared` will return an empty `ActiveSupport::HashWithIndifferentAccess` hash.
 
 **Request**
 
@@ -562,10 +562,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
+The returned hash is a `ActiveSupport::HashWithIndifferentAccess` hash.
 
 ```ruby
-  declared(params).user == declared(params)['user']
+  declared(params)[:user] == declared(params)['user']
 ```
 
 
@@ -797,6 +797,22 @@ params do
 end
 ```
 
+By default Grape 1.x presents the parameters to the endpoint as an
+`ActiveSupport::HashWithIndifferentAccess`. This is a change from 0.x where a
+Hashie::Mash was previously presented.
+
+To restore the previous behaviour check out [UPGRADING](UPGRADING.md).
+
+If you would rather have the parameters presented as a plain old Ruby Hash you
+can specify this using build_with in the params block;
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String, default: 'blue', values: ['blue', 'red', 'green']
+end
+```
+
 ### Supported Parameter Types
 
 The following are all valid types, supported out of the box by Grape:
@@ -905,11 +921,14 @@ params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  # Parameter will be wrapped using HashWithIndifferentAccess:
+  params[:avatar][:filename] # => 'avatar.png'
+  params['avatar']['avatar'] # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
+
+By default `params` hash keys can accesed with a string or a symbol
+`:avatar` and `"avatar"` are considered to be the same.
 ```
 
 ### First-Class `JSON` Types

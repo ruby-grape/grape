@@ -8,6 +8,31 @@ module Grape
     module Parameters
       extend ActiveSupport::Concern
 
+      # Set the module used to build the request.params.
+      #
+      # @param build_with the ParamBuilder module to use when building request.params
+      #   Available builders are;
+      #     * Grape::Extensions::HashWithIndifferentAccess::ParamBuilder (default)
+      #     * Grape::Extensions::Hash::ParamBuilder
+      #     * Grape::Extensions::Hashie::Mash::ParamBuilder
+      #
+      # @example
+      #
+      #     require 'grape/extenstions/hashie_mash'
+      #     class API < Grape::API
+      #       desc "Get collection"
+      #       params do
+      #         build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+      #         requires :user_id, type: Integer
+      #       end
+      #       get do
+      #         params['user_id']
+      #       end
+      #     end
+      def build_with(build_with = nil)
+        @api.namespace_inheritable(:build_with, build_with)
+      end
+
       # Include reusable params rules among current.
       # You can define reusable params with helpers method.
       #
