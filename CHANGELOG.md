@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#1590](https://github.com/ruby-grape/grape/pull/1590): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
 * Your contribution here.
 
 ### 0.19.2 (4/12/2017)
