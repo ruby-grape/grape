@@ -232,17 +232,20 @@ module Grape
         default = validations[:default]
         doc_attrs[:default] = default if validations.key?(:default)
 
-        values = validations[:values]
-        if values.is_a? Hash
-          excepts = values[:except]
-          values = values[:value]
-          values = nil if values.is_a? Proc
+        if (values_hash = validations[:values]).is_a? Hash
+          values = values_hash[:value]
+          excepts = values_hash[:except]
+        else
+          values = validations[:values]
         end
-
         doc_attrs[:values] = values if values
 
+        # NB. values and excepts should be nil, Proc, Array, or Range.
+        # Specifically, values should NOT be a Hash
+
         # use values or excepts to guess coerce type when stated type is Array
-        coerce_type = guess_coerce_type(coerce_type, values || excepts)
+        coerce_type = guess_coerce_type(coerce_type, values)
+        coerce_type = guess_coerce_type(coerce_type, excepts)
 
         # default value should be present in values array, if both exist and are not procs
         check_incompatible_option_values(values, default)
@@ -380,10 +383,6 @@ module Grape
       def validate_value_coercion(coerce_type, values)
         return unless coerce_type && values
         return if values.is_a?(Proc)
-        if values.is_a?(Hash)
-          return if values[:value] && values[:value].is_a?(Proc)
-          return if values[:except] && values[:except].is_a?(Proc)
-        end
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)
         value_types = values.is_a?(Range) ? [values.begin, values.end] : values
         if coerce_type == Virtus::Attribute::Boolean
