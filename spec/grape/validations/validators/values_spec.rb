@@ -76,9 +76,23 @@ describe Grape::Validations::ValuesValidator do
         get '/empty'
 
         params do
+          optional :type, values: { value: ValuesModel.values }, default: 'valid-type2'
+        end
+        get '/default/hash/valid' do
+          { type: params[:type] }
+        end
+
+        params do
           optional :type, values: ValuesModel.values, default: 'valid-type2'
         end
         get '/default/valid' do
+          { type: params[:type] }
+        end
+
+        params do
+          optional :type, values: { except: ValuesModel.excepts }, default: 'valid-type2'
+        end
+        get '/default/except' do
           { type: params[:type] }
         end
 
@@ -144,9 +158,23 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :type, type: String, values: { except: ValuesModel.excepts }
+        end
+        get '/except/exclusive/type' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, values: { except: -> { ValuesModel.excepts } }
         end
         get '/except/exclusive/lambda' do
+          { type: params[:type] }
+        end
+
+        params do
+          requires :type, type: String, values: { except: -> { ValuesModel.excepts } }
+        end
+        get '/except/exclusive/lambda/type' do
           { type: params[:type] }
         end
 
@@ -282,6 +310,18 @@ describe Grape::Validations::ValuesValidator do
     expect(last_response.body).to eq({ type: 'valid-type2' }.to_json)
   end
 
+  it 'allows a default value with except' do
+    get('/default/except')
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 'valid-type2' }.to_json)
+  end
+
+  it 'allows a valid default value' do
+    get('/default/hash/valid')
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 'valid-type2' }.to_json)
+  end
+
   it 'allows a proc for values' do
     get('/lambda', type: 'valid-type1')
     expect(last_response.status).to eq 200
@@ -371,6 +411,13 @@ describe Grape::Validations::ValuesValidator do
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
+  it 'raises IncompatibleOptionValues when except contains a value that is not a kind of the type' do
+    subject = Class.new(Grape::API)
+    expect do
+      subject.params { requires :type, values: { except: [10.5, 11] }, type: Integer }
+    end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
   context 'with a lambda values' do
     subject do
       Class.new(Grape::API) do
@@ -451,6 +498,12 @@ describe Grape::Validations::ValuesValidator do
       expect(last_response.body).to eq({ type: 'value' }.to_json)
     end
 
+    it 'allows any other value outside excepts when type is included' do
+      get '/except/exclusive/type', type: 'value'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'value' }.to_json)
+    end
+
     it 'rejects values that matches except' do
       get '/except/exclusive', type: 'invalid-type1'
       expect(last_response.status).to eq 400
@@ -465,6 +518,12 @@ describe Grape::Validations::ValuesValidator do
   end
 
   context 'exclusive excepts with lambda' do
+    it 'allows any other value outside excepts when type is included' do
+      get '/except/exclusive/lambda/type', type: 'value'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'value' }.to_json)
+    end
+
     it 'allows any other value outside excepts' do
       get '/except/exclusive/lambda', type: 'value'
       expect(last_response.status).to eq 200
