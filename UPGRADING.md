@@ -7,7 +7,7 @@ Upgrading Grape
 
 The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. This means that by default you can no longer access parameters by method name.
 
-```
+```ruby
 class API < Grape::API
   params do
     optional :color, type: String
@@ -20,7 +20,7 @@ end
 
 To restore the behavior of prior versions, add `hashie` to your `Gemfile` and `include Grape::Extensions::Hashie::Mash::ParamBuilder` in your API.
 
-```
+```ruby
 class API < Grape::API
   include Grape::Extensions::Hashie::Mash::ParamBuilder
 
