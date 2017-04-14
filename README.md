@@ -29,6 +29,7 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Params Class](#params-class)
   - [Declared](#declared)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
@@ -495,7 +496,36 @@ In the case of conflict between either of:
 * `GET`, `POST` and `PUT` parameters
 * the contents of the request body on `POST` and `PUT`
 
-route string parameters will have precedence.
+Route string parameters will have precedence.
+
+### Params Class
+
+By default parameters are available as `ActiveSupport::HashWithIndifferentAccess`. This can be changed to, for example, Ruby `Hash` or `Hashie::Mash` for the entire API.
+
+```ruby
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  params do
+    optional :color, type: String
+  end
+  get do
+    params.color # instead of params[:color]
+  end
+```
+
+The class can also be overridden on individual parameter blocks using `build_with` as follows.
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String
+end
+```
+
+In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
+
+Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder` and `Grape::Extensions::Hashie::Mash::ParamBuilder`.
 
 ### Declared
 
@@ -509,7 +539,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If you do not specify any parameters, `declared` will return an empty hash.
 
 **Request**
 
@@ -526,7 +556,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 
 ````
 
-Once we add parameters requirements, grape will start returning only the declared params.
+Once we add parameters requirements, grape will start returning only the declared parameters.
 
 ````ruby
 format :json
@@ -562,17 +592,11 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
+The returned hash is an `ActiveSupport::HashWithIndifferentAccess`.
 
-```ruby
-  declared(params).user == declared(params)['user']
-```
+The `#declared` method is not available to `before` filters, as those are evaluated prior to parameter coercion.
 
-
-The `#declared` method is not available to `before` filters, as those are evaluated prior
-to parameter coercion.
-
-### Include parent namespaces
+### Include Parent Namespaces
 
 By default `declared(params)` includes parameters that were defined in all parent namespaces. If you want to return only parameters from your current namespace, you can set `include_parent_namespaces` option to `false`.
 
@@ -897,18 +921,16 @@ end
 
 ### Multipart File Parameters
 
-Grape makes use of `Rack::Request`'s built-in support for multipart
-file parameters. Such parameters can be declared with `type: File`:
+Grape makes use of `Rack::Request`'s built-in support for multipart file parameters. Such parameters can be declared with `type: File`:
 
 ```ruby
 params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  params[:avatar][:filename] # => 'avatar.png'
+  params[:avatar][:avatar] # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
 ```
 
@@ -1381,7 +1403,7 @@ class Admin < Grape::Validations::Base
     # @attrs is a list containing the attribute we are currently validating
     # in our sample case this method once will get called with
     # @attrs being [:admin_field] and once with @attrs being [:admin_false_field]
-    return unless request.params.key? @attrs.first
+    return unless request.params.key?(@attrs.first)
     # check if admin flag is set to true
     return unless @option
     # check if user is admin or not

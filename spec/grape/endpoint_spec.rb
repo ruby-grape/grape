@@ -249,6 +249,35 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#params' do
+    context 'default class' do
+      it 'should be a ActiveSupport::HashWithIndifferentAccess' do
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
+      end
+    end
+  end
+
   describe '#declared' do
     before do
       subject.format :json
@@ -775,6 +804,7 @@ describe Grape::Endpoint do
             end
           end
         end
+
         it 'parse email param with provided requirements for params' do
           get '/outer/abc@example.com'
           expect(last_response.body).to eq('abc@example.com')
@@ -909,6 +939,21 @@ describe Grape::Endpoint do
         expect(JSON.parse(last_response.body)['params']).to eq '123'
         post '/123?id=456'
         expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
       end
     end
   end

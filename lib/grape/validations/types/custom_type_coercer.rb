@@ -147,7 +147,7 @@ module Grape
         # Enforce symbolized keys for complex types
         # by wrapping the coercion method such that
         # any Hash objects in the immediate heirarchy
-        # are passed through +Hashie.symbolize_keys!+.
+        # have their keys recursively symbolized.
         # This helps common libs such as JSON to work easily.
         #
         # @param type see #new
@@ -161,8 +161,8 @@ module Grape
           if type == Array || type == Set
             lambda do |val|
               method.call(val).tap do |new_value|
-                new_value.each do |item|
-                  Hashie.symbolize_keys!(item) if item.is_a? Hash
+                new_value.map do |item|
+                  item.is_a?(Hash) ? symbolize_keys(item) : item
                 end
               end
             end
@@ -170,13 +170,27 @@ module Grape
           # Hash objects are processed directly
           elsif type == Hash
             lambda do |val|
-              Hashie.symbolize_keys! method.call(val)
+              symbolize_keys method.call(val)
             end
 
           # Simple types are not processed.
           # This includes Array<primitive> types.
           else
             method
+          end
+        end
+
+        def symbolize_keys!(hash)
+          hash.each_key do |key|
+            hash[key.to_sym] = hash.delete(key) if key.respond_to?(:to_sym)
+          end
+          hash
+        end
+
+        def symbolize_keys(hash)
+          hash.inject({}) do |new_hash, (key, value)|
+            new_key = key.respond_to?(:to_sym) ? key.to_sym : key
+            new_hash.merge!(new_key => value)
           end
         end
       end

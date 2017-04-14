@@ -1,5 +1,3 @@
-require 'grape/middleware/stack'
-
 module Grape
   # An Endpoint is the proxy scope in which all routing
   # blocks are executed. In other words, any methods
@@ -239,15 +237,12 @@ module Grape
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
         @header = {}
-
-        @request = Grape::Request.new(env)
+        @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
         @params = @request.params
         @headers = @request.headers
 
         cookies.read(@request)
-
         self.class.run_before_each(self)
-
         run_filters befores, :before
 
         if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
