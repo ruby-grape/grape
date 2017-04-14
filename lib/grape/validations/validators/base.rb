@@ -3,6 +3,13 @@ module Grape
     class Base
       attr_reader :attrs
 
+      class << self
+        # Registry to store all current validators for current request.
+        attr_accessor :validators
+      end
+
+      self.validators = []
+
       # Creates a new Validator from options specified
       # by a +requires+ or +optional+ directive during
       # parameter definition.

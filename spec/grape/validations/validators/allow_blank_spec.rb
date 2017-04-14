@@ -27,6 +27,16 @@ describe Grape::Validations::AllowBlankValidator do
         get '/allow_blank'
 
         params do
+          optional :name, type: String, values: %w(A B), allow_blank: true
+        end
+        get '/allow_blank_with_values_option'
+
+        params do
+          optional :name, type: String, values: %w(A B), allow_blank: false
+        end
+        get '/disallow_blank_with_values_option'
+
+        params do
           requires :val, type: DateTime, allow_blank: true
         end
         get '/allow_datetime_blank'
@@ -259,6 +269,11 @@ describe Grape::Validations::AllowBlankValidator do
       expect(last_response.status).to eq(400)
     end
 
+    it 'refuses blank value when values option present and allow blank is false' do
+      get '/disallow_blank_with_values_option', name: ''
+      expect(last_response.status).to eq(400)
+    end
+
     it 'refuses only whitespaces' do
       get '/disallow_blank', name: '   '
       expect(last_response.status).to eq(400)
@@ -444,6 +459,14 @@ describe Grape::Validations::AllowBlankValidator do
   context 'valid input' do
     it 'allows missing optional strings' do
       get 'opt_disallow_string_blank'
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'allows blank value when values option present and allow blank is true' do
+      get 'allow_blank_with_values_option', name: nil
+      expect(last_response.status).to eq(200)
+
+      get 'allow_blank_with_values_option', name: ''
       expect(last_response.status).to eq(200)
     end
 
