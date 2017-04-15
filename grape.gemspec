@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'multi_json', '>= 1.3.2'
   s.add_runtime_dependency 'multi_xml', '>= 0.5.2'
   s.add_runtime_dependency 'virtus', '>= 1.0.0'
-  s.add_runtime_dependency 'builder'
+  s.add_runtime_dependency 'builder', '~> 3.1'
 
   s.files         = Dir['**/*'].keep_if { |file| File.file?(file) }
   s.test_files    = Dir['spec/**/*']
