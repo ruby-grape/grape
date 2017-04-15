@@ -836,6 +836,7 @@ describe Grape::Validations do
       end
     end
 
+
     context 'custom validation' do
       module CustomValidations
         class Customvalidator < Grape::Validations::Base
@@ -843,6 +844,28 @@ describe Grape::Validations do
             return if params[attr_name] == 'im custom'
             raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'is not custom!'
           end
+        end
+      end
+
+      context 'before block ordering' do
+        it 'should not evaluate a before block before validating surrounding namespace params' do
+          val = nil
+          subject.params do
+            requires :custom, customvalidator: true
+          end
+          subject.resource ':custom' do
+            before do
+              val = params[:custom]
+            end
+            get do
+              'anything here'
+            end
+          end
+          
+          get '/blahblah'
+          last_response.status.should == 400
+          last_response.body.should == 'custom is not custom!'
+          val.should == nil
         end
       end
 
