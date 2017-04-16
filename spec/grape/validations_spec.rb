@@ -569,6 +569,76 @@ describe Grape::Validations do
       end
     end
 
+    context 'validation within arrays with hashes' do
+      let('array') { [
+            {
+              'order_number' => 1,
+              'product' => 'widget',
+              'customer' => 'John',
+              'quantity' => 1
+            },
+            {
+              'order_number' => 2,
+              'product' => 'widget',
+              'customer' => 'Mary'
+            }
+          ]
+      }
+      context 'with defaults' do
+        before do
+          subject.params do
+            requires :transactions_w_default, type: Array, desc: "An array of transactions"
+            group :transactions_w_default do
+              requires :order_number, type: Integer, desc: "blah"
+              requires :product, type: String, desc: "blah"
+              optional :customer, type: String, desc: "blah"
+              optional :quantity, type: Integer, desc: "blah", default: 1
+            end
+          end
+          subject.put '/within_array' do
+            a = []
+            params[:transactions_w_default].each do |trans|
+              a << trans
+            end
+            return a
+          end
+        end
+
+        it 'correctly handles arrays with defaults' do
+          put '/within_array', MultiJson.dump('transactions_w_default' => array), "CONTENT_TYPE" => "application/json"
+          last_response.status.should == 200
+          last_response.body.should == "[#<Hashie::Mash customer=\"John\" order_number=1 product=\"widget\" quantity=1>, #<Hashie::Mash customer=\"Mary\" order_number=2 product=\"widget\">]"
+        end
+      end
+
+      context 'without defaults' do
+        before do
+          subject.params do
+            requires :transactions_wo_default, type: Array, desc: "An array of transactions"
+            group :transactions_wo_default do
+              requires :order_number, type: Integer, desc: "blah"
+              requires :product, type: String, desc: "blah"
+              optional :customer, type: String, desc: "blah"
+              optional :quantity, type: Integer, desc: "blah"
+            end
+          end
+          subject.put '/within_array' do
+            a = []
+            params[:transactions_wo_default].each do |trans|
+              a << trans
+            end
+            return a
+          end
+        end
+
+        it 'correctly handles arrays with defaults' do
+          put '/within_array', MultiJson.dump('transactions_wo_default' => array), "CONTENT_TYPE" => "application/json"
+          last_response.status.should == 200
+          last_response.body.should == "[#<Hashie::Mash customer=\"John\" order_number=1 product=\"widget\" quantity=1>, #<Hashie::Mash customer=\"Mary\" order_number=2 product=\"widget\">]"
+        end
+      end
+    end
+
     context 'with block param' do
       before do
         subject.params do
