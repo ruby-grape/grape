@@ -283,8 +283,8 @@ Place API files into `app/api`. Rails expects a subdirectory that matches the na
 Modify `application.rb`:
 
 ```ruby
-config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
+config.paths.add 'app/api', glob: '**/*.rb'
+config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
 ```
 
 Modify `config/routes`:
