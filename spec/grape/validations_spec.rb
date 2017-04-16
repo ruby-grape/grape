@@ -45,6 +45,86 @@ describe Grape::Validations do
         end
         expect(subject.route_setting(:declared_params)).to eq([:some_param])
       end
+
+      context 'optional group (Hash), required params' do
+        before :each do
+          subject.params do
+            optional :opt_group, type: Hash do
+              requires :a_number, regexp: /^[0-9]+$/
+            end
+          end
+          subject.get '/optional' do
+            'optional works!'
+          end
+        end
+
+        it 'validates when the optional group is not present' do
+          get '/optional'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
+        it 'validates when the optional group is present with required parameters' do
+          get '/optional', opt_group: { a_number: 45 }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
+        it 'does not validate when optional group is present and a required parameter is invalid' do
+          get '/optional', opt_group: { a_number: 'string' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('opt_group[a_number] is invalid')
+        end
+
+        it 'does not validate when optional group is present but missing required parameters' do
+          get '/optional', opt_group: {}
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('opt_group[a_number] is missing')
+        end
+      end
+
+      context 'optional group (Array), required params' do
+        before :each do
+          subject.params do
+            optional :opt_group, type: Array do
+              requires :a_number, regexp: /^[0-9]+$/
+            end
+          end
+          subject.get '/optional' do
+            'optional works!'
+          end
+        end
+
+        it 'validates when the optional group is not present' do
+          get '/optional'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
+        it 'validates when the optional group is an empty array' do
+          get '/optional', opt_group: []
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
+        it 'validates when the optional group is present with required parameters' do
+          get '/optional', opt_group: [{ a_number: 45 }]
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('optional works!')
+        end
+
+        it 'does not validate when optional group is present and any required parameters are invalid' do
+          get '/optional', opt_group: [{ a_number: 1 }, { a_number: 'string' }]
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('opt_group[a_number] is invalid')
+        end
+
+        it 'does not validate when optional group is present but missing required parameters' do
+          get '/optional', opt_group: [{}]
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('opt_group[a_number] is missing')
+        end
+      end
     end
 
     context 'optional using Grape::Entity documentation' do
