@@ -3204,6 +3204,8 @@ end
 
 #### MiniTest
 
+__Note:__ As of MiniTest 5.6.0, you must use the `assert` syntax instead of the stub syntax. Rack::Test overrides the MiniTest#expect() and MiniTest#value() functions.
+
 ```ruby
 require 'test_helper'
 
