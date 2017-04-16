@@ -9,6 +9,8 @@
 [![git.legal](https://git.legal/projects/1364/badge.svg "Number of libraries approved")](https://git.legal/projects/1364)
 [![Join the chat at https://gitter.im/ruby-grape/grape](https://badges.gitter.im/ruby-grape/grape.svg)](https://gitter.im/ruby-grape/grape?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[![Build Status](https://travis-ci.org/intridea/grape.png?branch=master)](http://travis-ci.org/intridea/grape) [![Code Climate](https://codeclimate.com/github/intridea/grape.png)](https://codeclimate.com/github/intridea/grape) [![Inline docs](http://inch-pages.github.io/github/intridea/grape.png)](http://inch-pages.github.io/github/intridea/grape) [![Dependency Status](https://www.versioneye.com/ruby/grape/0.6.1/badge.png)](https://www.versioneye.com/ruby/grape/0.6.1)
+
 ## Table of Contents
 
 - [What is Grape?](#what-is-grape)
