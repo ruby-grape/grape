@@ -11,6 +11,8 @@
 
 ## Table of Contents
 
+[![Join the chat at https://gitter.im/ruby-grape/grape](https://badges.gitter.im/ruby-grape/grape.svg)](https://gitter.im/ruby-grape/grape?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 - [What is Grape?](#what-is-grape)
 - [Stable Release](#stable-release)
 - [Project Resources](#project-resources)
