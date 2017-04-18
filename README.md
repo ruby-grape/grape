@@ -27,6 +27,7 @@
   - [Header](#header)
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
+  - [Mounting multiple versions](#mounting-multiple-versions)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
   - [Params Class](#params-class)
@@ -412,6 +413,68 @@ version 'v1', using: :param, parameter: 'v'
 
     curl http://localhost:9292/statuses/public_timeline?v=v1
 
+## Mounting multiple versions
+
+Example directory structure.
+
+
+    |- api/
+    |-- api.rb
+    |-- v1/
+    |--- api.rb
+    |-- v2/
+    |--- api.rb
+
+
+`api/api.rb`
+
+```ruby
+class API < Grape::API
+  prefix          'api'
+  version         ['v2', 'v1']
+  format          :json
+  default_format  :json
+
+  mount V2::API
+  mount V1::API
+end
+```
+
+`api/v1/api.rb`
+
+```ruby
+class V1::API < Grape::API
+  version 'v1' # required block although `version ['v2', 'v1']` included in api.rb
+
+
+  resource :test do
+    get do
+      'v1 API'
+    end
+  end
+end
+```
+
+`api/v2/api`
+
+```ruby
+class V2::API < Grape::API
+  version 'v2' # required block although `version ['v2', 'v1']` included in api.rb
+
+  resource :test do
+    get do
+      'v2 API'
+    end
+  end
+end
+```
+
+    curl http://localhost:3000/api/v1/test
+    # => "v1 API"
+    curl http://localhost:3000/api/v2/test
+    # => "v2 API"
+
+> NOTE: In above example, if you do not include `version 'v1'` in `api/v1/api.rb` and `version 'v2'` in `api/v2/api.rb`, then `curl http://localhost:3000/api/v1/test` and `curl http://localhost:3000/api/v2/test` both will return same response from `v2` api, regardless of whatever version you supply in API endpoint.
 
 ## Describing Methods
 
