@@ -52,7 +52,7 @@ module Grape
       #         use :pagination
       #       end
       #       get do
-      #         Collection.page(params[:page]).per(params[:per_page])
+      #         Collection.page(params[:page]).per_page(params[:per_page])
       #       end
       #     end
       def use(*names)
