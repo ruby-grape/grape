@@ -425,7 +425,7 @@ desc 'Returns your public timeline.' do
   failure [[401, 'Unauthorized', 'Entities::Error']]
   named 'My named route'
   headers XAuthToken: {
-            description: 'Valdates your identity',
+            description: 'Validates your identity',
             required: true
           },
           XOptionalHeader: {
