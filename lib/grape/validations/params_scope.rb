@@ -234,26 +234,26 @@ module Grape
 
         if (values_hash = validations[:values]).is_a? Hash
           values = values_hash[:value]
+          # NB: excepts is deprecated
           excepts = values_hash[:except]
         else
           values = validations[:values]
         end
         doc_attrs[:values] = values if values
 
+        except_values = options_key?(:except_values, :value, validations) ? validations[:except_values][:value] : validations[:except_values]
+
         # NB. values and excepts should be nil, Proc, Array, or Range.
         # Specifically, values should NOT be a Hash
 
         # use values or excepts to guess coerce type when stated type is Array
-        coerce_type = guess_coerce_type(coerce_type, values)
-        coerce_type = guess_coerce_type(coerce_type, excepts)
+        coerce_type = guess_coerce_type(coerce_type, values, except_values, excepts)
 
         # default value should be present in values array, if both exist and are not procs
-        check_incompatible_option_values(values, default)
+        check_incompatible_option_values(default, values, except_values, excepts)
 
         # type should be compatible with values array, if both exist
-        validate_value_coercion(coerce_type, values)
-        # type should be compatible with excepts array, if both exist
-        validate_value_coercion(coerce_type, excepts)
+        validate_value_coercion(coerce_type, values, except_values, excepts)
 
         doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
 
@@ -358,17 +358,31 @@ module Grape
         validations.delete(:coerce_message)
       end
 
-      def guess_coerce_type(coerce_type, values)
-        return coerce_type if !values || values.is_a?(Proc)
-        return values.first.class if coerce_type == Array && (values.is_a?(Range) || !values.empty?)
+      def guess_coerce_type(coerce_type, *values_list)
+        return coerce_type unless coerce_type == Array
+        values_list.each do |values|
+          next if !values || values.is_a?(Proc)
+          return values.first.class if values.is_a?(Range) || !values.empty?
+        end
         coerce_type
       end
 
-      def check_incompatible_option_values(values, default)
-        return unless values && default
-        return if values.is_a?(Proc) || default.is_a?(Proc)
-        return if values.include?(default) || (Array(default) - Array(values)).empty?
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values)
+      def check_incompatible_option_values(default, values, except_values, excepts)
+        return unless default && !default.is_a?(Proc)
+
+        if values && !values.is_a?(Proc)
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) \
+            unless Array(default).all? { |def_val| values.include?(def_val) }
+        end
+
+        if except_values && !except_values.is_a?(Proc)
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values) \
+            unless Array(default).none? { |def_val| except_values.include?(def_val) }
+        end
+
+        return unless excepts && !excepts.is_a?(Proc)
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, excepts) \
+          unless Array(default).none? { |def_val| excepts.include?(def_val) }
       end
 
       def validate(type, options, attrs, doc_attrs, opts)
@@ -380,16 +394,19 @@ module Grape
         @api.namespace_stackable(:validations, value)
       end
 
-      def validate_value_coercion(coerce_type, values)
-        return unless coerce_type && values
-        return if values.is_a?(Proc)
+      def validate_value_coercion(coerce_type, *values_list)
+        return unless coerce_type
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)
-        value_types = values.is_a?(Range) ? [values.begin, values.end] : values
-        if coerce_type == Virtus::Attribute::Boolean
-          value_types = value_types.map { |type| Virtus::Attribute.build(type) }
+        values_list.each do |values|
+          next if !values || values.is_a?(Proc)
+          value_types = values.is_a?(Range) ? [values.begin, values.end] : values
+          if coerce_type == Virtus::Attribute::Boolean
+            value_types = value_types.map { |type| Virtus::Attribute.build(type) }
+          end
+          unless value_types.all? { |v| v.is_a? coerce_type }
+            raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
+          end
         end
-        return unless value_types.any? { |v| !v.is_a?(coerce_type) }
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
       end
 
       def extract_message_option(attrs)

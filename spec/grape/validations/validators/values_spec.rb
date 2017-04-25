@@ -104,6 +104,13 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :type, values: ->(v) { ValuesModel.values.include? v }
+        end
+        get '/lambda_val' do
+          { type: params[:type] }
+        end
+
+        params do
           requires :type, values: -> { [] }
         end
         get '/empty_lambda'
@@ -346,6 +353,18 @@ describe Grape::Validations::ValuesValidator do
 
   it 'does not allow an invalid value for a parameter using lambda' do
     get('/lambda', type: 'invalid-type')
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+  end
+
+  it 'allows value using lambda' do
+    get('/lambda_val', type: 'valid-type1')
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 'valid-type1' }.to_json)
+  end
+
+  it 'does not allow invalid value using lambda' do
+    get('/lambda_val', type: 'invalid-type')
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end

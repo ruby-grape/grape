@@ -3,6 +3,7 @@
 #### Features
 
 * [#1594](https://github.com/ruby-grape/grape/pull/1594): Replace `Hashie::Mash` parameters with `ActiveSupport::HashWithIndifferentAccess` - [@james2m](https://github.com/james2m), [@dblock](https://github.com/dblock).
+* [#1622](https://github.com/ruby-grape/grape/pull/1622): Add `except_values` validator to replace `except` option of `values` validator - [@jlfaber](https://github.com/jlfaber).
 * Your contribution here.
 
 #### Fixes

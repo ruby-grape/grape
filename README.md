@@ -807,6 +807,10 @@ end
 Note that default values will be passed through to any validation options specified.
 The following example will always fail if `:color` is not explicitly provided.
 
+Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
+number for each call to the endpoint of this `params` block. To have the default evaluate
+lazily with each request use a lambda, like `:random_number` above.
+
 ```ruby
 params do
   optional :color, type: String, default: 'blue', values: ['red', 'green']
@@ -1114,9 +1118,6 @@ end
 
 Parameters can be restricted to a specific set of values with the `:values` option.
 
-Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
-number for each call to the endpoint of this `params` block. To have the default evaluate
-lazily with each request use a lambda, like `:random_number` above.
 
 ```ruby
 params do
@@ -1135,7 +1136,7 @@ params do
 end
 ```
 
-Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supplied the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
+Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supply the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
 
 ```ruby
 params do
@@ -1145,6 +1146,9 @@ end
 ```
 
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
+If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list 
+or a range which will then be used to validate the parameter.
+
 For example, given a status model you may want to restrict by hashtags that you have
 previously defined in the `HashTag` model.
 
@@ -1154,39 +1158,33 @@ params do
 end
 ```
 
-The values validator can also validate that the value is explicitly not within a specific
-set of values by passing ```except```. ```except``` accepts the same types of parameters as
-values (Procs, ranges, etc.).
+Alternatively, a Proc with arity one (i.e. taking one argument) can be used to explicitly validate
+each parameter value.  In that case, the Proc is expected to return a truthy value if the parameter
+value is valid.
 
 ```ruby
 params do
-  requires :browsers, values: { except: [ 'ie6', 'ie7', 'ie8' ] }
+  requires :number, type: Integer, values: ->(v) { v.even? && v < 25 }
 end
 ```
 
-Values and except can be combined to define a range of accepted values while not allowing
-certain values within the set. Custom error messages can be defined for both when the parameter
-passed falls within the ```except``` list or when it falls entirely outside the ```value``` list.
+While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
+
+#### `except_values`
+
+Parameters can be restricted from having a specific set of values with the `:except_values` option.
+
+The `except_values` validator behaves similarly to the `values` validator in that it accepts either
+an Array, a Range, or a Proc.  Unlike the `values` validator, however, `except_values` only accepts
+Procs with arity zero.
 
 ```ruby
 params do
-  requires :number, type: Integer, values: { value: 1..20, except: [4, 13], except_message: 'includes unsafe numbers', message: 'is outside the range of numbers allowed' }
+  requires :browser, except_values: [ 'ie6', 'ie7', 'ie8' ]
+  requires :port, except_values: { value: 0..1024, message: 'is not allowed' }
+  requires :hashtag, except_values: -> { Hashtag.FORBIDDEN_LIST }
 end
 ```
-
-Finally, for even greater control, an explicit validation Proc may be supplied using ```proc```.
-It will be called with a single argument (the input value), and should return
-a truthy value if the value passes validation. If the input is an array, the Proc will be called
-multiple times, once for each element in the array.
-
-```ruby
-params do
-  requires :number, type: Integer, values: { proc: ->(v) { v.even? && v < 25 }, message: 'is odd or greater than 25' }
-end
-```
-
-While ```proc``` is convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
-
 
 #### `regexp`
 
