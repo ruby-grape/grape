@@ -52,6 +52,34 @@ end
 
 See [#1610](https://github.com/ruby-grape/grape/pull/1610) for more information.
 
+#### The `except`, `except_message`, and `proc` options of the `values` validator are deprecated.
+
+The new `except_values` validator should be used in place of the `except` and `except_message` options of
+the `values` validator.
+
+Arity one Procs may now be used directly as the `values` option to explicitly test param values.
+
+**Deprecated**
+```ruby
+params do
+  requires :a, values: { value: 0..99, except: [3] }
+  requires :b, values: { value: 0..99, except: [3], except_message: 'not allowed' }
+  requires :c, values: { except: ['admin'] }
+  requires :d, values: { proc: -> (v) { v.even? } }
+end
+```
+**New**
+```ruby
+params do
+  requires :a, values: 0..99, except_values: [3]
+  requires :b, values: 0..99, except_values: { value: [3], message: 'not allowed' }
+  requires :c, except_values: ['admin']
+  requires :d, values: -> (v) { v.even? }
+end
+```
+
+See [#1616](https://github.com/ruby-grape/grape/pull/1616) for more information.
+
 ### Upgrading to >= 0.19.1
 
 #### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise
