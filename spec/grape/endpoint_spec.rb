@@ -470,7 +470,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', MultiJson.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 
@@ -485,7 +485,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', MultiJson.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 
@@ -873,7 +873,7 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', MultiJson.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
+        post '/request_body', ::Grape::Json.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.body).to eq('Bobby T.')
       end
 
@@ -897,7 +897,7 @@ describe Grape::Endpoint do
           error! 400, 'expected nil' if params[:version]
           params[:user]
         end
-        post '/omitted_params', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
+        post '/omitted_params', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('Bob')
       end
@@ -920,7 +920,7 @@ describe Grape::Endpoint do
       subject.put '/request_body' do
         params[:user]
       end
-      put '/request_body', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
+      put '/request_body', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
 
       expect(last_response.status).to eq(406)
       expect(last_response.body).to eq('{"error":"The requested content-type \'text/plain\' is not supported."}')
@@ -934,7 +934,7 @@ describe Grape::Endpoint do
         subject.post do
           params[:data]
         end
-        post '/', MultiJson.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
+        post '/', ::Grape::Json.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
       end
 
       it 'should not response with 406 for same type without params' do
