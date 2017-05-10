@@ -1643,12 +1643,18 @@ end
 ## Helpers
 
 You can define helper methods that your endpoints can use with the `helpers`
-macro by either giving a block or a module.
+macro by either giving a block or an array of modules.
 
 ```ruby
 module StatusHelpers
   def user_info(user)
     "#{user} has statused #{user.statuses} status(s)"
+  end
+end
+
+module HttpCodesHelpers
+  def unauthorized
+    401
   end
 end
 
@@ -1660,8 +1666,12 @@ class API < Grape::API
     end
   end
 
-  # or mix in a module
-  helpers StatusHelpers
+  # or mix in an array of modules
+  helpers StatusHelpers, HttpCodesHelpers
+
+  before do
+    error!('Access Denied', unauthorized) unless current_user
+  end
 
   get 'info' do
     # helpers available in your endpoint and filters
@@ -3366,6 +3376,14 @@ The execution of the main content block of the endpoint.
 * *endpoint* - The endpoint instance
 * *filters* - The filters being executed
 * *type* - The type of filters (before, before_validation, after_validation, after)
+
+#### endpoint_run_validators.grape
+
+The execution of validators.
+
+* *endpoint* - The endpoint instance
+* *validators* - The validators being executed
+* *request* - The request being validated
 
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 

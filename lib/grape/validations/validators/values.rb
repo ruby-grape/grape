@@ -14,6 +14,9 @@ module Grape
           warn '[DEPRECATION] The values validator proc option is deprecated. ' \
                'The lambda expression can now be assigned directly to values.' if @proc
         else
+          @excepts = nil
+          @values = nil
+          @proc = nil
           @values = options
         end
         super

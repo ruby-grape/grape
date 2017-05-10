@@ -4,7 +4,6 @@ module Grape
       module Mash
         module ParamBuilder
           extend ::ActiveSupport::Concern
-
           included do
             namespace_inheritable(:build_params_with, Grape::Extensions::Hashie::Mash::ParamBuilder)
           end
