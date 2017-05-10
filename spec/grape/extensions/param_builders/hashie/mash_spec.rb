@@ -19,10 +19,10 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
         end
       end
 
-      it 'should be of type Hashie::Mash' do
+      it 'should be of type Grape::Extensions::Hashie::Mash::ParamBuilder::Mash' do
         get '/'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hashie::Mash')
+        expect(last_response.body).to eq('Grape::Extensions::Hashie::Mash::ParamBuilder::Mash')
       end
     end
   end
@@ -39,10 +39,10 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
         end
       end
 
-      it 'should be Hashie::Mash' do
+      it 'should be Grape::Extensions::Hashie::Mash::ParamBuilder::Mash' do
         get '/'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hashie::Mash')
+        expect(last_response.body).to eq('Grape::Extensions::Hashie::Mash::ParamBuilder::Mash')
       end
     end
 
@@ -55,10 +55,10 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
         end
       end
 
-      it 'should be Hashie::Mash' do
+      it 'should be Grape::Extensions::Hashie::Mash::ParamBuilder::Mash' do
         get '/foo'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hashie::Mash')
+        expect(last_response.body).to eq('Grape::Extensions::Hashie::Mash::ParamBuilder::Mash')
       end
     end
 
