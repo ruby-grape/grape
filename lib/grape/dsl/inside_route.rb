@@ -27,10 +27,6 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil)
-          puts 'declared'
-          puts passed_params
-          puts passed_params.class
-
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
           declared_params ||= optioned_declared_params(options)
 
