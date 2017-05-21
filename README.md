@@ -29,6 +29,7 @@
   - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
+  - [Params Class](#params-class)
   - [Declared](#declared)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
@@ -107,9 +108,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 0.19.2.
+You're reading the documentation for the next release of Grape, which should be **1.0.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.19.1](https://github.com/ruby-grape/grape/blob/v0.19.1/README.md).
+The current stable release is [0.19.2](https://github.com/ruby-grape/grape/blob/v0.19.2/README.md).
 
 ## Project Resources
 
@@ -424,7 +425,7 @@ desc 'Returns your public timeline.' do
   failure [[401, 'Unauthorized', 'Entities::Error']]
   named 'My named route'
   headers XAuthToken: {
-            description: 'Valdates your identity',
+            description: 'Validates your identity',
             required: true
           },
           XOptionalHeader: {
@@ -495,7 +496,36 @@ In the case of conflict between either of:
 * `GET`, `POST` and `PUT` parameters
 * the contents of the request body on `POST` and `PUT`
 
-route string parameters will have precedence.
+Route string parameters will have precedence.
+
+### Params Class
+
+By default parameters are available as `ActiveSupport::HashWithIndifferentAccess`. This can be changed to, for example, Ruby `Hash` or `Hashie::Mash` for the entire API.
+
+```ruby
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  params do
+    optional :color, type: String
+  end
+  get do
+    params.color # instead of params[:color]
+  end
+```
+
+The class can also be overridden on individual parameter blocks using `build_with` as follows.
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String
+end
+```
+
+In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
+
+Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder` and `Grape::Extensions::Hashie::Mash::ParamBuilder`.
 
 ### Declared
 
@@ -509,7 +539,7 @@ post 'users/signup' do
 end
 ````
 
-If we do not specify any params, `declared` will return an empty `Hashie::Mash` instance.
+If you do not specify any parameters, `declared` will return an empty hash.
 
 **Request**
 
@@ -526,7 +556,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 
 ````
 
-Once we add parameters requirements, grape will start returning only the declared params.
+Once we add parameters requirements, grape will start returning only the declared parameters.
 
 ````ruby
 format :json
@@ -562,17 +592,11 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 }
 ````
 
-The returned hash is a `Hashie::Mash` instance, allowing you to access parameters via dot notation:
+The returned hash is an `ActiveSupport::HashWithIndifferentAccess`.
 
-```ruby
-  declared(params).user == declared(params)['user']
-```
+The `#declared` method is not available to `before` filters, as those are evaluated prior to parameter coercion.
 
-
-The `#declared` method is not available to `before` filters, as those are evaluated prior
-to parameter coercion.
-
-### Include parent namespaces
+### Include Parent Namespaces
 
 By default `declared(params)` includes parameters that were defined in all parent namespaces. If you want to return only parameters from your current namespace, you can set `include_parent_namespaces` option to `false`.
 
@@ -754,10 +778,10 @@ You can define validations and coercion options for your parameters using a `par
 params do
   requires :id, type: Integer
   optional :text, type: String, regexp: /\A[a-z]+\z/
-  group :media do
+  group :media, type: Hash do
     requires :url
   end
-  optional :audio do
+  optional :audio, type: Hash do
     requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg], default: :mp3
   end
   mutually_exclusive :media, :audio
@@ -782,6 +806,10 @@ end
 
 Note that default values will be passed through to any validation options specified.
 The following example will always fail if `:color` is not explicitly provided.
+
+Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
+number for each call to the endpoint of this `params` block. To have the default evaluate
+lazily with each request use a lambda, like `:random_number` above.
 
 ```ruby
 params do
@@ -897,18 +925,16 @@ end
 
 ### Multipart File Parameters
 
-Grape makes use of `Rack::Request`'s built-in support for multipart
-file parameters. Such parameters can be declared with `type: File`:
+Grape makes use of `Rack::Request`'s built-in support for multipart file parameters. Such parameters can be declared with `type: File`:
 
 ```ruby
 params do
   requires :avatar, type: File
 end
 post '/' do
-  # Parameter will be wrapped using Hashie:
-  params.avatar.filename # => 'avatar.png'
-  params.avatar.type     # => 'image/png'
-  params.avatar.tempfile # => #<File>
+  params[:avatar][:filename] # => 'avatar.png'
+  params[:avatar][:avatar] # => 'image/png'
+  params[:avatar][:tempfile] # => #<File>
 end
 ```
 
@@ -1092,9 +1118,6 @@ end
 
 Parameters can be restricted to a specific set of values with the `:values` option.
 
-Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
-number for each call to the endpoint of this `params` block. To have the default evaluate
-lazily with each request use a lambda, like `:random_number` above.
 
 ```ruby
 params do
@@ -1113,7 +1136,7 @@ params do
 end
 ```
 
-Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supplied the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
+Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supply the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
 
 ```ruby
 params do
@@ -1123,6 +1146,9 @@ end
 ```
 
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
+If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list 
+or a range which will then be used to validate the parameter.
+
 For example, given a status model you may want to restrict by hashtags that you have
 previously defined in the `HashTag` model.
 
@@ -1132,39 +1158,33 @@ params do
 end
 ```
 
-The values validator can also validate that the value is explicitly not within a specific
-set of values by passing ```except```. ```except``` accepts the same types of parameters as
-values (Procs, ranges, etc.).
+Alternatively, a Proc with arity one (i.e. taking one argument) can be used to explicitly validate
+each parameter value.  In that case, the Proc is expected to return a truthy value if the parameter
+value is valid.
 
 ```ruby
 params do
-  requires :browsers, values: { except: [ 'ie6', 'ie7', 'ie8' ] }
+  requires :number, type: Integer, values: ->(v) { v.even? && v < 25 }
 end
 ```
 
-Values and except can be combined to define a range of accepted values while not allowing
-certain values within the set. Custom error messages can be defined for both when the parameter
-passed falls within the ```except``` list or when it falls entirely outside the ```value``` list.
+While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
+
+#### `except_values`
+
+Parameters can be restricted from having a specific set of values with the `:except_values` option.
+
+The `except_values` validator behaves similarly to the `values` validator in that it accepts either
+an Array, a Range, or a Proc.  Unlike the `values` validator, however, `except_values` only accepts
+Procs with arity zero.
 
 ```ruby
 params do
-  requires :number, type: Integer, values: { value: 1..20, except: [4, 13], except_message: 'includes unsafe numbers', message: 'is outside the range of numbers allowed' }
+  requires :browser, except_values: [ 'ie6', 'ie7', 'ie8' ]
+  requires :port, except_values: { value: 0..1024, message: 'is not allowed' }
+  requires :hashtag, except_values: -> { Hashtag.FORBIDDEN_LIST }
 end
 ```
-
-Finally, for even greater control, an explicit validation Proc may be supplied using ```proc```.
-It will be called with a single argument (the input value), and should return
-a truthy value if the value passes validation. If the input is an array, the Proc will be called
-multiple times, once for each element in the array.
-
-```ruby
-params do
-  requires :number, type: Integer, values: { proc: ->(v) { v.even? && v < 25 }, message: 'is odd or greater than 25' }
-end
-```
-
-While ```proc``` is convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
-
 
 #### `regexp`
 
@@ -1257,24 +1277,24 @@ All of these methods can be used at any nested level.
 
 ```ruby
 params do
-  requires :food do
+  requires :food, type: Hash do
     optional :meat
     optional :fish
     optional :rice
     at_least_one_of :meat, :fish, :rice
   end
-  group :drink do
+  group :drink, type: Hash do
     optional :beer
     optional :wine
     optional :juice
     exactly_one_of :beer, :wine, :juice
   end
-  optional :dessert do
+  optional :dessert, type: Hash do
     optional :cake
     optional :icecream
     mutually_exclusive :cake, :icecream
   end
-  optional :recipe do
+  optional :recipe, type: Hash do
     optional :oil
     optional :meat
     all_or_none_of :oil, :meat
@@ -1381,7 +1401,7 @@ class Admin < Grape::Validations::Base
     # @attrs is a list containing the attribute we are currently validating
     # in our sample case this method once will get called with
     # @attrs being [:admin_field] and once with @attrs being [:admin_false_field]
-    return unless request.params.key? @attrs.first
+    return unless request.params.key?(@attrs.first)
     # check if admin flag is set to true
     return unless @option
     # check if user is admin or not
@@ -3347,6 +3367,14 @@ The execution of the main content block of the endpoint.
 * *filters* - The filters being executed
 * *type* - The type of filters (before, before_validation, after_validation, after)
 
+#### endpoint_run_validators.grape
+
+The execution of validators.
+
+* *endpoint* - The endpoint instance
+* *validators* - The validators being executed
+* *request* - The request being validated
+
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
 ### Monitoring Products
@@ -3371,4 +3399,4 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2015 Michael Bleigh, and Intridea, Inc.
+Copyright (c) 2010-2017 Michael Bleigh, and Intridea, Inc.

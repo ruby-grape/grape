@@ -1,46 +1,57 @@
-### 0.19.2 (Next)
+### 1.0.0 (Next)
+
+#### Features
+
+* [#1594](https://github.com/ruby-grape/grape/pull/1594): Replace `Hashie::Mash` parameters with `ActiveSupport::HashWithIndifferentAccess` - [@james2m](https://github.com/james2m), [@dblock](https://github.com/dblock).
+* [#1622](https://github.com/ruby-grape/grape/pull/1622): Add `except_values` validator to replace `except` option of `values` validator - [@jlfaber](https://github.com/jlfaber).
+* [#1635](https://github.com/ruby-grape/grape/pull/1635): Instrument validators with ActiveSupport::Notifications - [@ktimothy](https://github.com/ktimothy).
+* Your contribution here.
 
 #### Fixes
 
-* [#1570](https://github.com/ruby-grape/grape/pull/1570): Make versioner consider the mount destination path - [@namusyaka](https://github.com/namusyaka).
-* [#1579](https://github.com/ruby-grape/grape/pull/1579): Fix delete status with a return value - [@eproulx-petalmd](https://github.com/eproulx-petalmd).
+* [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
 * Your contribution here.
+
+### 0.19.2 (4/12/2017)
 
 #### Features
 
 * [#1555](https://github.com/ruby-grape/grape/pull/1555): Added code coverage w/Coveralls - [@dblock](https://github.com/dblock).
 * [#1568](https://github.com/ruby-grape/grape/pull/1568): Add `proc` option to `values` validator to allow custom checks - [@jlfaber](https://github.com/jlfaber).
 * [#1575](https://github.com/ruby-grape/grape/pull/1575): Include nil values for missing nested params in declared - [@thogg4](https://github.com/thogg4).
-* Your contribution here.
+* [#1585](https://github.com/ruby-grape/grape/pull/1585): Bugs in declared method - make sure correct options var is used and respect include missing for non children params - [@thogg4](https://github.com/thogg4).
 
 #### Fixes
 
+* [#1570](https://github.com/ruby-grape/grape/pull/1570): Make versioner consider the mount destination path - [@namusyaka](https://github.com/namusyaka).
+* [#1579](https://github.com/ruby-grape/grape/pull/1579): Fix delete status with a return value - [@eproulx-petalmd](https://github.com/eproulx-petalmd).
 * [#1559](https://github.com/ruby-grape/grape/pull/1559): You can once again pass `nil` to optional attributes with `values` validation set - [@ghiculescu](https://github.com/ghiculescu).
 * [#1562](https://github.com/ruby-grape/grape/pull/1562): Fix rainbow gem installation failure above ruby 2.3.3 on travis-ci - [@brucehsu](https://github.com/brucehsu).
 * [#1561](https://github.com/ruby-grape/grape/pull/1561): Fix performance issue introduced by duplicated calls in StackableValue#[] - [@brucehsu](https://github.com/brucehsu).
 * [#1564](https://github.com/ruby-grape/grape/pull/1564): Fix declared params bug with nested namespaces - [@bmarini](https://github.com/bmarini).
 * [#1567](https://github.com/ruby-grape/grape/pull/1567): Fix values validator when value is empty array and apply except to input array - [@jlfaber](https://github.com/jlfaber).
-* Your contribution here.
+* [#1569](https://github.com/ruby-grape/grape/pull/1569), [#1511](https://github.com/ruby-grape/grape/issues/1511): Upgrade mustermann-grape to 1.0.0 - [@namusyaka](https://github.com/namusyaka).
+* [#1589](https://github.com/ruby-grape/grape/pull/1589): [#726](https://github.com/ruby-grape/grape/issues/726): Use default_format when Content-type is missing and respond with 406 when Content-type is invalid - [@inclooder](https://github.com/inclooder).
 
 ### 0.19.1 (1/9/2017)
 
 #### Features
 
-* [#1536](https://github.com/ruby-grape/grape/pull/1536): Updates `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
-* [#1543](https://github.com/ruby-grape/grape/pull/1543): Support ruby 2.4 - [@LeFnord](https://github.com/LeFnord), [@namusyaka](https://github.com/namusyaka).
+* [#1536](https://github.com/ruby-grape/grape/pull/1536): Updated `invalid_versioner_option` translation - [@Lavode](https://github.com/Lavode).
+* [#1543](https://github.com/ruby-grape/grape/pull/1543): Added support for ruby 2.4 - [@LeFnord](https://github.com/LeFnord), [@namusyaka](https://github.com/namusyaka).
 
 #### Fixes
 
-* [#1548](https://github.com/ruby-grape/grape/pull/1548): Avoid failing even if given path does not match with prefix - [@thomas-peyric](https://github.com/thomas-peyric), [@namusyaka](https://github.com/namusyaka).
-* [#1550](https://github.com/ruby-grape/grape/pull/1550): Use 200 as default status for deletes that reply with content - [@jthornec](https://github.com/jthornec).
+* [#1548](https://github.com/ruby-grape/grape/pull/1548): Fix: avoid failing even if given path does not match with prefix - [@thomas-peyric](https://github.com/thomas-peyric), [@namusyaka](https://github.com/namusyaka).
+* [#1550](https://github.com/ruby-grape/grape/pull/1550): Fix: return 200 as default status for DELETE - [@jthornec](https://github.com/jthornec).
 
 ### 0.19.0 (12/18/2016)
 
 #### Features
 
-* [#1503](https://github.com/ruby-grape/grape/pull/1503): Allow to use regexp validator with arrays - [@akoltun](https://github.com/akoltun).
-* [#1507](https://github.com/ruby-grape/grape/pull/1507): Add group attributes for parameter definitions - [@304](https://github.com/304).
-* [#1532](https://github.com/ruby-grape/grape/pull/1532): Sets 204 as default status for delete - [@LeFnord](https://github.com/LeFnord).
+* [#1503](https://github.com/ruby-grape/grape/pull/1503): Allowed use of regexp validator with arrays - [@akoltun](https://github.com/akoltun).
+* [#1507](https://github.com/ruby-grape/grape/pull/1507): Added group attributes for parameter definitions - [@304](https://github.com/304).
+* [#1532](https://github.com/ruby-grape/grape/pull/1532): Set 204 as default status for DELETE - [@LeFnord](https://github.com/LeFnord).
 
 #### Fixes
 
@@ -48,36 +59,35 @@
 * [#1517](https://github.com/ruby-grape/grape/pull/1517), [#1089](https://github.com/ruby-grape/grape/pull/1089): Fix: priority of ANY routes - [@namusyaka](https://github.com/namusyaka), [@wagenet](https://github.com/wagenet).
 * [#1512](https://github.com/ruby-grape/grape/pull/1512): Fix: deeply nested parameters are included within `#declared(params)` - [@krbs](https://github.com/krbs).
 * [#1510](https://github.com/ruby-grape/grape/pull/1510): Fix: inconsistent validation for multiple parameters - [@dgasper](https://github.com/dgasper).
-* [#1526](https://github.com/ruby-grape/grape/pull/1526): Reduce warnings caused by instance variables not initialized - [@cpetschnig](https://github.com/cpetschnig).
-* [#1531](https://github.com/ruby-grape/grape/pull/1531): Updates gem dependencies - [@LeFnord](https://github.com/LeFnord).
+* [#1526](https://github.com/ruby-grape/grape/pull/1526): Reduced warnings caused by instance variables not initialized - [@cpetschnig](https://github.com/cpetschnig).
 
 ### 0.18.0 (10/7/2016)
 
 #### Features
 
-* [#1480](https://github.com/ruby-grape/grape/pull/1480): Use the ruby-grape-danger gem for PR linting - [@dblock](https://github.com/dblock).
+* [#1480](https://github.com/ruby-grape/grape/pull/1480): Used the ruby-grape-danger gem for PR linting - [@dblock](https://github.com/dblock).
 * [#1486](https://github.com/ruby-grape/grape/pull/1486): Implemented except in values validator - [@jonmchan](https://github.com/jonmchan).
-* [#1470](https://github.com/ruby-grape/grape/pull/1470): Drop support for ruby-2.0 - [@namusyaka](https://github.com/namusyaka).
-* [#1490](https://github.com/ruby-grape/grape/pull/1490): Switch to Ruby-2.x+ syntax - [@namusyaka](https://github.com/namusyaka).
-* [#1499](https://github.com/ruby-grape/grape/pull/1499): Support fail_fast param validation option - [@dgasper](https://github.com/dgasper).
+* [#1470](https://github.com/ruby-grape/grape/pull/1470): Dropped support for Ruby 2.0 - [@namusyaka](https://github.com/namusyaka).
+* [#1490](https://github.com/ruby-grape/grape/pull/1490): Switched to Ruby-2.x+ syntax - [@namusyaka](https://github.com/namusyaka).
+* [#1499](https://github.com/ruby-grape/grape/pull/1499): Support `fail_fast` param validation option - [@dgasper](https://github.com/dgasper).
 
 #### Fixes
 
-* [#1498](https://github.com/ruby-grape/grape/pull/1498): Skip validations in inactive given blocks - [@jlfaber](https://github.com/jlfaber).
-* [#1479](https://github.com/ruby-grape/grape/pull/1479): Support inserting middleware before/after anonymous classes in the middleware stack - [@rosa](https://github.com/rosa).
-* [#1488](https://github.com/ruby-grape/grape/pull/1488): Ensure calling before filters when receiving OPTIONS request - [@namusyaka](https://github.com/namusyaka), [@jlfaber](https://github.com/jlfaber).
-* [#1493](https://github.com/ruby-grape/grape/pull/1493): Coercion and lambda fails params validation - [@jonmchan](https://github.com/jonmchan).
+* [#1498](https://github.com/ruby-grape/grape/pull/1498): Fix: skip validations in inactive given blocks - [@jlfaber](https://github.com/jlfaber).
+* [#1479](https://github.com/ruby-grape/grape/pull/1479): Fix: support inserting middleware before/after anonymous classes in the middleware stack - [@rosa](https://github.com/rosa).
+* [#1488](https://github.com/ruby-grape/grape/pull/1488): Fix: ensure calling before filters when receiving OPTIONS request - [@namusyaka](https://github.com/namusyaka), [@jlfaber](https://github.com/jlfaber).
+* [#1493](https://github.com/ruby-grape/grape/pull/1493): Fix: coercion and lambda fails params validation - [@jonmchan](https://github.com/jonmchan).
 
 ### 0.17.0 (7/29/2016)
 
 #### Features
 
 * [#1393](https://github.com/ruby-grape/grape/pull/1393): Middleware can be inserted before or after default Grape middleware - [@ridiculous](https://github.com/ridiculous).
-* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allow inserting middleware at arbitrary points in the middleware stack - [@rosa](https://github.com/rosa).
-* [#1366](https://github.com/ruby-grape/grape/pull/1366): Store `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
-* [#1398](https://github.com/ruby-grape/grape/pull/1398): Add `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
-* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extend `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
-* [#1455](https://github.com/ruby-grape/grape/pull/1455): Add an automated PR linter - [@orta](https://github.com/orta).
+* [#1390](https://github.com/ruby-grape/grape/pull/1390): Allowed inserting middleware at arbitrary points in the middleware stack - [@rosa](https://github.com/rosa).
+* [#1366](https://github.com/ruby-grape/grape/pull/1366): Stored `message_key` on `Grape::Exceptions::Validation` - [@mkou](https://github.com/mkou).
+* [#1398](https://github.com/ruby-grape/grape/pull/1398): Added `rescue_from :grape_exceptions` - allow Grape to use the built-in `Grape::Exception` handing and use `rescue :all` behavior for everything else - [@mmclead](https://github.com/mmclead).
+* [#1443](https://github.com/ruby-grape/grape/pull/1443): Extended `given` to receive a `Proc` - [@glaucocustodio](https://github.com/glaucocustodio).
+* [#1455](https://github.com/ruby-grape/grape/pull/1455): Added an automated PR linter - [@orta](https://github.com/orta).
 
 #### Fixes
 

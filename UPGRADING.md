@@ -1,6 +1,85 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.0.0
+
+#### Changes in Parameter Class
+
+The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. This means that by default you can no longer access parameters by method name.
+
+```ruby
+class API < Grape::API
+  params do
+    optional :color, type: String
+  end
+  get do
+    params[:color] # use params[:color] instead of params.color
+  end
+end
+```
+
+To restore the behavior of prior versions, add `hashie` to your `Gemfile` and `include Grape::Extensions::Hashie::Mash::ParamBuilder` in your API.
+
+```ruby
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  params do
+    optional :color, type: String
+  end
+  get do
+    # params.color works
+  end
+end
+```
+
+This behavior can also be overridden on individual parameter blocks using `build_with`.
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String
+end
+```
+
+If you're constructing your own `Grape::Request` in a middleware, you can pass different parameter handlers to create the desired `params` class with `build_params_with`.
+
+```ruby
+def request
+  Grape::Request.new(env, build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder)
+end
+```
+
+See [#1610](https://github.com/ruby-grape/grape/pull/1610) for more information.
+
+#### The `except`, `except_message`, and `proc` options of the `values` validator are deprecated.
+
+The new `except_values` validator should be used in place of the `except` and `except_message` options of
+the `values` validator.
+
+Arity one Procs may now be used directly as the `values` option to explicitly test param values.
+
+**Deprecated**
+```ruby
+params do
+  requires :a, values: { value: 0..99, except: [3] }
+  requires :b, values: { value: 0..99, except: [3], except_message: 'not allowed' }
+  requires :c, values: { except: ['admin'] }
+  requires :d, values: { proc: -> (v) { v.even? } }
+end
+```
+**New**
+```ruby
+params do
+  requires :a, values: 0..99, except_values: [3]
+  requires :b, values: 0..99, except_values: { value: [3], message: 'not allowed' }
+  requires :c, except_values: ['admin']
+  requires :d, values: -> (v) { v.even? }
+end
+```
+
+See [#1616](https://github.com/ruby-grape/grape/pull/1616) for more information.
+
 ### Upgrading to >= 0.19.1
 
 #### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise

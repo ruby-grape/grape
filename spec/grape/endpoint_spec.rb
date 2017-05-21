@@ -249,6 +249,35 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#params' do
+    context 'default class' do
+      it 'should be a ActiveSupport::HashWithIndifferentAccess' do
+        subject.get '/foo' do
+          params.class
+        end
+
+        get '/foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
+      end
+    end
+  end
+
   describe '#declared' do
     before do
       subject.format :json
@@ -419,7 +448,7 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(201)
     end
 
-    it 'does not include missing attributes when there are nested hashes' do
+    it 'includes missing attributes with defaults when there are nested hashes' do
       subject.get '/dummy' do
       end
 
@@ -449,6 +478,32 @@ describe Grape::Endpoint do
       expect(json['nested']['fourth']).to eq ''
       expect(json['nested']['nested_nested'].keys).to eq %w(sixth seven)
       expect(json['nested']['nested_nested']['sixth']).to eq 'sixth'
+    end
+
+    it 'does not include missing attributes when there are nested hashes' do
+      subject.get '/dummy' do
+      end
+
+      subject.params do
+        requires :first
+        optional :second
+        optional :third
+        optional :nested, type: Hash do
+          optional :fourth
+          optional :fifth
+        end
+      end
+
+      subject.get '/declared' do
+        declared(params, include_missing: false)
+      end
+
+      get '/declared?first=present&nested[fourth]=4'
+      json = JSON.parse(last_response.body)
+      expect(last_response.status).to eq(200)
+      expect(json['first']).to eq 'present'
+      expect(json['nested'].keys).to eq %w(fourth)
+      expect(json['nested']['fourth']).to eq '4'
     end
   end
 
@@ -749,6 +804,7 @@ describe Grape::Endpoint do
             end
           end
         end
+
         it 'parse email param with provided requirements for params' do
           get '/outer/abc@example.com'
           expect(last_response.body).to eq('abc@example.com')
@@ -817,6 +873,18 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
     end
 
+    it 'does not accept text/plain in JSON format if application/json is specified as content type' do
+      subject.format :json
+      subject.default_format :json
+      subject.put '/request_body' do
+        params[:user]
+      end
+      put '/request_body', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
+
+      expect(last_response.status).to eq(406)
+      expect(last_response.body).to eq('{"error":"The requested content-type \'text/plain\' is not supported."}')
+    end
+
     context 'content type with params' do
       before do
         subject.format :json
@@ -871,6 +939,21 @@ describe Grape::Endpoint do
         expect(JSON.parse(last_response.body)['params']).to eq '123'
         post '/123?id=456'
         expect(JSON.parse(last_response.body)['params']).to eq '123'
+      end
+    end
+
+    context 'sets a value to params' do
+      it 'params' do
+        subject.params do
+          requires :a, type: String
+        end
+        subject.get '/foo' do
+          params[:a] = 'bar'
+        end
+
+        get '/foo', a: 'foo'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('bar')
       end
     end
   end
@@ -1320,6 +1403,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :before_validation }),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+                                                                          validators: [],
+                                                                          request: a_kind_of(Grape::Request) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after_validation }),
@@ -1341,6 +1427,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :before_validation }),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+                                                                          validators: [],
+                                                                          request: a_kind_of(Grape::Request) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after_validation }),

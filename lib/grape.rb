@@ -4,7 +4,6 @@ require 'rack/builder'
 require 'rack/accept'
 require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
-require 'hashie'
 require 'set'
 require 'active_support/version'
 require 'active_support/core_ext/hash/indifferent_access'
@@ -27,7 +26,7 @@ require 'virtus'
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape
-  extend ActiveSupport::Autoload
+  extend ::ActiveSupport::Autoload
 
   eager_autoload do
     autoload :API
@@ -48,14 +47,14 @@ module Grape
   end
 
   module Http
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     eager_autoload do
       autoload :Headers
     end
   end
 
   module Exceptions
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Base
     autoload :Validation
     autoload :ValidationArrayErrors
@@ -78,16 +77,38 @@ module Grape
     autoload :MethodNotAllowed
   end
 
+  module Extensions
+    extend ::ActiveSupport::Autoload
+
+    autoload :DeepMergeableHash
+    autoload :DeepSymbolizeHash
+    autoload :DeepHashWithIndifferentAccess
+    autoload :Hash
+
+    module ActiveSupport
+      extend ::ActiveSupport::Autoload
+
+      autoload :HashWithIndifferentAccess
+    end
+
+    module Hashie
+      extend ::ActiveSupport::Autoload
+
+      autoload :Mash
+    end
+  end
+
   module Middleware
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Base
     autoload :Versioner
     autoload :Formatter
     autoload :Error
     autoload :Globals
+    autoload :Stack
 
     module Auth
-      extend ActiveSupport::Autoload
+      extend ::ActiveSupport::Autoload
       autoload :Base
       autoload :DSL
       autoload :StrategyInfo
@@ -95,7 +116,7 @@ module Grape
     end
 
     module Versioner
-      extend ActiveSupport::Autoload
+      extend ::ActiveSupport::Autoload
       autoload :Path
       autoload :Header
       autoload :Param
@@ -104,7 +125,7 @@ module Grape
   end
 
   module Util
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :InheritableValues
     autoload :StackableValues
     autoload :ReverseStackableValues
@@ -114,7 +135,7 @@ module Grape
   end
 
   module ErrorFormatter
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Base
     autoload :Json
     autoload :Txt
@@ -122,7 +143,7 @@ module Grape
   end
 
   module Formatter
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Json
     autoload :SerializableHash
     autoload :Txt
@@ -130,13 +151,13 @@ module Grape
   end
 
   module Parser
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Json
     autoload :Xml
   end
 
   module DSL
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     eager_autoload do
       autoload :API
       autoload :Callbacks
@@ -155,17 +176,17 @@ module Grape
   end
 
   class API
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Helpers
   end
 
   module Presenters
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :Presenter
   end
 
   module ServeFile
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
     autoload :FileResponse
     autoload :FileBody
     autoload :SendfileResponse
@@ -185,6 +206,7 @@ require 'grape/validations/validators/mutual_exclusion'
 require 'grape/validations/validators/presence'
 require 'grape/validations/validators/regexp'
 require 'grape/validations/validators/values'
+require 'grape/validations/validators/except_values'
 require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
 require 'grape/validations/types'

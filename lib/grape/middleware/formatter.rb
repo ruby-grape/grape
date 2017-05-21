@@ -90,31 +90,30 @@ module Grape
 
       # store parsed input in env['api.request.body']
       def read_rack_input(body)
-        fmt = mime_types[request.media_type] if request.media_type
-        fmt ||= options[:default_format]
-        if content_type_for(fmt)
-          parser = Grape::Parser.parser_for fmt, options
-          if parser
-            begin
-              body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
-              if body.is_a?(Hash)
-                env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env[Grape::Env::RACK_REQUEST_FORM_HASH]
-                                                            env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
-                                                          else
-                                                            body
-                                                          end
-                env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
-              end
-            rescue Grape::Exceptions::Base => e
-              raise e
-            rescue StandardError => e
-              throw :error, status: 400, message: e.message
+        fmt = request.media_type ? mime_types[request.media_type] : options[:default_format]
+
+        unless content_type_for(fmt)
+          throw :error, status: 406, message: "The requested content-type '#{request.media_type}' is not supported."
+        end
+        parser = Grape::Parser.parser_for fmt, options
+        if parser
+          begin
+            body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
+            if body.is_a?(Hash)
+              env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env[Grape::Env::RACK_REQUEST_FORM_HASH]
+                                                          env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
+                                                        else
+                                                          body
+                                                        end
+              env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
             end
-          else
-            env[Grape::Env::API_REQUEST_BODY] = body
+          rescue Grape::Exceptions::Base => e
+            raise e
+          rescue StandardError => e
+            throw :error, status: 400, message: e.message
           end
         else
-          throw :error, status: 406, message: "The requested content-type '#{request.media_type}' is not supported."
+          env[Grape::Env::API_REQUEST_BODY] = body
         end
       end
 

@@ -30,8 +30,18 @@ module Grape
         }
       end
 
-      it 'returns params' do
-        expect(request.params).to eq('a' => '123', 'b' => 'xyz')
+      it 'by default returns stringified parameter keys' do
+        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new('a' => '123', 'b' => 'xyz'))
+      end
+
+      context 'when build_params_with: Grape::Extensions::Hash::ParamBuilder is specified' do
+        let(:request) do
+          Grape::Request.new(env, build_params_with: Grape::Extensions::Hash::ParamBuilder)
+        end
+
+        it 'returns symbolized params' do
+          expect(request.params).to eq(a: '123', b: 'xyz')
+        end
       end
 
       describe 'with grape.routing_args' do
@@ -47,7 +57,7 @@ module Grape
         end
 
         it 'cuts version and route_info' do
-          expect(request.params).to eq('a' => '123', 'b' => 'xyz', 'c' => 'ccc')
+          expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc'))
         end
       end
     end

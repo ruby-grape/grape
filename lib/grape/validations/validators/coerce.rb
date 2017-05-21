@@ -10,6 +10,10 @@ module Grape
         @converter = Types.build_coercer(type, @option[:method])
       end
 
+      def validate(request)
+        super
+      end
+
       def validate_param!(attr_name, params)
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
         new_value = coerce_value(params[attr_name])
