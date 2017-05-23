@@ -191,6 +191,11 @@ module Grape
     autoload :FileBody
     autoload :SendfileResponse
   end
+
+  module Meta
+    autoload :Description, 'grape/meta/description'
+    autoload :Response,    'grape/meta/response'
+  end
 end
 
 require 'grape/util/content_types'
