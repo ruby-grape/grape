@@ -1440,4 +1440,50 @@ describe Grape::Endpoint do
       )
     end
   end
+
+  context 'bug' do
+    context 'endpoint is first in a namespace with params' do
+      it do
+        subject.instance_exec do
+          params do
+            optional :parent
+          end
+          namespace :namespace do
+            # get
+
+            resource :resource do
+              get do
+                declared(params).keys.join(',')
+              end
+            end
+          end
+        end
+
+        get 'namespace/resource', parent: 'parent'
+        expect(last_response.body).to eq('parent')
+      end
+    end
+
+    context 'endpoint is second in a namespace with params' do
+      it do
+        subject.instance_exec do
+          params do
+            optional :parent
+          end
+          namespace :namespace do
+            get
+
+            resource :resource do
+              get do
+                declared(params).keys.join(',')
+              end
+            end
+          end
+        end
+
+        get 'namespace/resource', parent: 'parent'
+        expect(last_response.body).to eq('parent')
+      end
+    end
+  end
 end
