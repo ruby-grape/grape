@@ -27,6 +27,7 @@
   - [Header](#header)
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
+  - [Mounting Multiple Versions](#mounting-multiple-versions)
 - [Describing Methods](#describing-methods)
 - [Parameters](#parameters)
   - [Params Class](#params-class)
@@ -412,6 +413,73 @@ version 'v1', using: :param, parameter: 'v'
 
     curl http://localhost:9292/statuses/public_timeline?v=v1
 
+## Mounting Multiple Versions
+
+Building a new API version incrementally on top of a previous one. There’re no hacks involved. Consider the following trivial API.
+
+```ruby
+class V1::API < Grape::API
+  format :json
+  version 'v1' # required
+
+  resource :test do
+    desc "Returns the current API version, v1."
+    get do
+      {version: 'v1'}
+    end
+
+    desc "Returns pong."
+    get 'ping' do
+      {ping: 'pong'}
+    end
+  end
+end
+```
+
+Define the next API version.
+
+```ruby
+class V2::API < Grape::API
+  format :json
+  version 'v2' # required
+
+  resource :test do
+    get do
+      {version: 'v2'}
+    end
+  end
+end
+```
+
+
+At this point we want v1 to be identical to v2, except for the root method. We’ll start by allowing v1 to respond to both v1 and v2 requests.
+
+```ruby
+version ['v2', 'v1']
+```
+
+Mount v2 before v1. The default versioning behavior is to cascade the request to the next Rack middleware.
+
+```ruby
+class API < Grape::API
+  mount V2::API
+  mount V1::API
+end
+```
+
+Request and Response
+--------------------
+
+    curl http://localhost:3000/api/v1/test
+    {version: 'v1'}
+
+    curl http://localhost:3000/api/v1/test/ping
+    {ping: 'pong'}
+
+    curl http://localhost:3000/api/v2/test
+    {version: 'v2'}
+
+> The only fix needed in Grape for this was to enable multiple versions specified with `version`, committed in [2be499c51](https://github.com/ruby-grape/grape/commit/2be499c51542e536e9e0bf7fd4e7587dd069e289)
 
 ## Describing Methods
 
