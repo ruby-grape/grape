@@ -28,6 +28,19 @@ describe Grape::Middleware::Versioner::Path do
     end
   end
 
+  context 'do not throw exception' do
+    let(:path) { 'api/v1/campaigns' }
+    let(:prefix) { '/api' }
+
+    it 'if prefix not in path using " == 0"' do
+      expect(path.index(prefix) == 0).to equal(false)
+    end
+
+    it 'if prefix not in path using ".zero?"' do
+      expect(path.index(prefix).zero?).to equal(false)
+    end
+  end
+
   [%w(v1 v2), [:v1, :v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
     context "with specified versions as #{versions}" do
       let(:options) { { versions: versions } }
