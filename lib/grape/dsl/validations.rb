@@ -10,6 +10,7 @@ module Grape
       module ClassMethods
         # Clears all defined parameters and validations.
         def reset_validations!
+          unset_namespace_stackable :params
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
