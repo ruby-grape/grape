@@ -473,6 +473,29 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'when validations are dependent on a parameter within an array param' do
+    before do
+      subject.params do
+        requires :foos, type: Array do
+          optional :foo_type, :baz_type
+          given :foo_type do
+            requires :bar
+          end
+        end
+      end
+      subject.post('/test') { declared(params).to_json }
+    end
+
+    it 'applies the constraint within each value' do
+      post '/test',
+           { foos: [{ foo_type: 'a' }, { baz_type: 'c' }] }.to_json,
+           'CONTENT_TYPE' => 'application/json'
+
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('foos[0][bar] is missing')
+    end
+  end
+
   context 'when validations are dependent on a parameter with specific value' do
     # build test cases from all combinations of declarations and options
     a_decls = %i(optional requires)
