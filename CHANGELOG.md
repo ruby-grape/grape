@@ -10,6 +10,8 @@
 #### Fixes
 
 * [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
+* [#1645](https://github.com/ruby-grape/grape/pull/1645): Handle
+nested 'given' inside Array type param - [@avellable](https://github.com/avellable)
 * Your contribution here.
 
 ### 0.19.2 (4/12/2017)
