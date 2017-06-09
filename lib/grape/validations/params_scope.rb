@@ -47,17 +47,17 @@ module Grape
       end
 
       def meets_dependency?(params)
-        if @dependent_on
-          params = params.with_indifferent_access
+        return true unless @dependent_on
 
-          @dependent_on.each do |dependency|
-            if dependency.is_a?(Hash)
-              dependency_key = dependency.keys[0]
-              proc = dependency.values[0]
-              return false unless proc.call(params.try(:[], dependency_key))
-            elsif params.respond_to?(:key?) && params.try(:[], dependency).blank?
-              return false
-            end
+        params = params.with_indifferent_access
+
+        @dependent_on.each do |dependency|
+          if dependency.is_a?(Hash)
+            dependency_key = dependency.keys[0]
+            proc = dependency.values[0]
+            return false unless proc.call(params.try(:[], dependency_key))
+          elsif params.respond_to?(:key?) && params.try(:[], dependency).blank?
+            return false
           end
         end
 
