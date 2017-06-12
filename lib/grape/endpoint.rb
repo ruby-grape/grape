@@ -96,6 +96,11 @@ module Grape
       @lazy_initialized = nil
       @block = nil
 
+      @status = nil
+      @file = nil
+      @body = nil
+      @proc = nil
+
       return unless block_given?
 
       @source = block
