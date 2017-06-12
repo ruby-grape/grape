@@ -13,10 +13,15 @@ module Grape
           end
 
           def build_params
-            params = ::Hashie::Mash.new(rack_params)
+            params = Mash.new(rack_params)
             params.deep_merge!(grape_routing_args) if env[Grape::Env::GRAPE_ROUTING_ARGS]
             params
           end
+
+          class Mash < ::Hashie::Mash
+            disable_warnings
+          end
+
         end
       end
     end
