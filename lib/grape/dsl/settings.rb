@@ -9,7 +9,7 @@ module Grape
     module Settings
       extend ActiveSupport::Concern
 
-      attr_accessor :inheritable_setting, :top_level_setting
+      attr_writer :inheritable_setting, :top_level_setting
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting

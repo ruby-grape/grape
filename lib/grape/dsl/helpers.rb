@@ -13,7 +13,7 @@ module Grape
         # When called without a block, all known helpers within this scope
         # are included.
         #
-        # @param [Module] new_mod optional module of methods to include
+        # @param [Array] new_modules optional array of modules to include
         # @param [Block] block optional block of methods to include
         #
         # @example Define some helpers.
@@ -26,28 +26,42 @@ module Grape
         #       end
         #     end
         #
-        def helpers(new_mod = nil, &block)
-          if block_given? || new_mod
-            mod = new_mod || Module.new
-            define_boolean_in_mod(mod)
-            inject_api_helpers_to_mod(mod) if new_mod
-
-            inject_api_helpers_to_mod(mod) do
-              mod.class_eval(&block)
-            end if block_given?
-
-            namespace_stackable(:helpers, mod)
-          else
-            mod = Module.new
-            namespace_stackable(:helpers).each do |mod_to_include|
-              mod.send :include, mod_to_include
-            end
-            change!
-            mod
-          end
+        # @example Include many modules
+        #
+        #     class ExampleAPI < Grape::API
+        #       helpers Authentication, Mailer, OtherModule
+        #     end
+        #
+        def helpers(*new_modules, &block)
+          include_new_modules(new_modules) if new_modules.any?
+          include_block(block) if block_given?
+          include_all_in_scope if !block_given? && new_modules.empty?
         end
 
         protected
+
+        def include_new_modules(modules)
+          modules.each { |mod| make_inclusion(mod) }
+        end
+
+        def include_block(block)
+          Module.new.tap do |mod|
+            make_inclusion(mod) { mod.class_eval(&block) }
+          end
+        end
+
+        def make_inclusion(mod, &block)
+          define_boolean_in_mod(mod)
+          inject_api_helpers_to_mod(mod, &block)
+          namespace_stackable(:helpers, mod)
+        end
+
+        def include_all_in_scope
+          Module.new.tap do |mod|
+            namespace_stackable(:helpers).each { |mod_to_include| mod.send :include, mod_to_include }
+            change!
+          end
+        end
 
         def define_boolean_in_mod(mod)
           return if defined? mod::Boolean

@@ -4,12 +4,15 @@
 
 * [#1594](https://github.com/ruby-grape/grape/pull/1594): Replace `Hashie::Mash` parameters with `ActiveSupport::HashWithIndifferentAccess` - [@james2m](https://github.com/james2m), [@dblock](https://github.com/dblock).
 * [#1622](https://github.com/ruby-grape/grape/pull/1622): Add `except_values` validator to replace `except` option of `values` validator - [@jlfaber](https://github.com/jlfaber).
+* [#1635](https://github.com/ruby-grape/grape/pull/1635): Instrument validators with ActiveSupport::Notifications - [@ktimothy](https://github.com/ktimothy).
+* [#1646](https://github.com/ruby-grape/grape/pull/1646): Add ability to include an array of modules as helpers - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * Your contribution here.
 
 #### Fixes
 
 * [#1632](https://github.com/ruby-grape/grape/pull/1632): Silence warnings - [@thogg4](https://github.com/thogg4).
 * [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
+* [#1625](https://github.com/ruby-grape/grape/pull/1625): Handle `given` correctly when nested in Array params - [@rnubel](https://github.com/rnubel), [@avellable](https://github.com/avellable).
 * Your contribution here.
 
 ### 0.19.2 (4/12/2017)

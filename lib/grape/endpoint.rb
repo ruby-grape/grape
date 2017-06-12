@@ -341,15 +341,17 @@ module Grape
     def run_validators(validators, request)
       validation_errors = []
 
-      validators.each do |validator|
-        begin
-          validator.validate(request)
-        rescue Grape::Exceptions::Validation => e
-          validation_errors << e
-          break if validator.fail_fast?
-        rescue Grape::Exceptions::ValidationArrayErrors => e
-          validation_errors += e.errors
-          break if validator.fail_fast?
+      ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
+        validators.each do |validator|
+          begin
+            validator.validate(request)
+          rescue Grape::Exceptions::Validation => e
+            validation_errors << e
+            break if validator.fail_fast?
+          rescue Grape::Exceptions::ValidationArrayErrors => e
+            validation_errors += e.errors
+            break if validator.fail_fast?
+          end
         end
       end
 
