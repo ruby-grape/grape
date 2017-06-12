@@ -2,8 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.19'
-gem 'rack-cache', '<= 1.2'
+gem 'multi_xml'
 
 group :development, :test do
   gem 'bundler'

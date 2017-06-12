@@ -274,7 +274,11 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'CONTENT_LENGTH' => io.length
         )
-        expect(subject.env['rack.request.form_hash']['thing']['name']).to eq('Test')
+        if Object.const_defined? :MultiXml
+          expect(subject.env['rack.request.form_hash']['thing']['name']).to eq('Test')
+        else
+          expect(subject.env['rack.request.form_hash']['thing']['name']['__content__']).to eq('Test')
+        end
       end
       [Rack::Request::FORM_DATA_MEDIA_TYPES, Rack::Request::PARSEABLE_DATA_MEDIA_TYPES].flatten.each do |content_type|
         it "ignores #{content_type}" do

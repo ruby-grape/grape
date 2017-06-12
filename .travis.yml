@@ -17,6 +17,10 @@ matrix:
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.4.1
       gemfile: gemfiles/rails_5.gemfile
+    - rvm: 2.4.1
+      gemfile: gemfiles/multi_json.gemfile
+    - rvm: 2.4.1
+      gemfile: gemfiles/multi_xml.gemfile
     - rvm: 2.3.4
       gemfile: Gemfile
     - rvm: 2.3.4

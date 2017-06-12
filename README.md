@@ -69,6 +69,7 @@
   - [CORS](#cors)
 - [Content-type](#content-type)
 - [API Data Formats](#api-data-formats)
+- [JSON and XML Processors](#json-and-xml-processors)
 - [RESTful Model Representations](#restful-model-representations)
   - [Grape Entities](#grape-entities)
   - [Hypermedia and Roar](#hypermedia-and-roar)
@@ -1146,7 +1147,7 @@ end
 ```
 
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
-If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list 
+If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list
 or a range which will then be used to validate the parameter.
 
 For example, given a status model you may want to restrict by hashtags that you have
@@ -2563,6 +2564,10 @@ curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom 
 ```
 
 You can disable parsing for a content-type with `nil`. For example, `parser :json, nil` will disable JSON parsing altogether. The request data is then available as-is in `env['api.request.body']`.
+
+## JSON and XML Processors
+
+Grape uses `JSON` and `ActiveSupport::XmlMini` for JSON and XML parsing by default. It also detects and supports [multi_json](https://github.com/intridea/multi_json) and [multi_xml](https://github.com/sferik/multi_xml). Adding those gems to your Gemfile will automatically enable them and allow you to swap the JSON and XML back-ends.
 
 ## RESTful Model Representations
 

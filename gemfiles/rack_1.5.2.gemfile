@@ -22,8 +22,6 @@ group :development do
 end
 
 group :test do
-  gem 'multi_json'
-  gem 'multi_xml'
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'rack-test'

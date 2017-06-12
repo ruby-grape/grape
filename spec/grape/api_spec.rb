@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'shared/versioning_examples'
-# require 'grape-entity'
 
 describe Grape::API do
   subject { Class.new(Grape::API) }
@@ -2225,14 +2224,27 @@ XML
         expect(last_response.body).to eql 'elpmis'
       end
     end
-    context 'multi_xml' do
-      it "doesn't parse yaml" do
-        subject.put :yaml do
-          params[:tag]
+    if Object.const_defined? :MultiXml
+      context 'multi_xml' do
+        it "doesn't parse yaml" do
+          subject.put :yaml do
+            params[:tag]
+          end
+          put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eql 'Disallowed type attribute: "symbol"'
         end
-        put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eql 'Disallowed type attribute: "symbol"'
+      end
+    else
+      context 'default xml parser' do
+        it 'parses symbols' do
+          subject.put :yaml do
+            params[:tag]
+          end
+          put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eql '{"type"=>"symbol", "__content__"=>"a123"}'
+        end
       end
     end
     context 'none parser class' do
