@@ -17,7 +17,6 @@ module Grape
             params.deep_merge!(grape_routing_args) if env[Grape::Env::GRAPE_ROUTING_ARGS]
             params
           end
-
         end
       end
     end
