@@ -1643,12 +1643,18 @@ end
 ## Helpers
 
 You can define helper methods that your endpoints can use with the `helpers`
-macro by either giving a block or a module.
+macro by either giving a block or an array of modules.
 
 ```ruby
 module StatusHelpers
   def user_info(user)
     "#{user} has statused #{user.statuses} status(s)"
+  end
+end
+
+module HttpCodesHelpers
+  def unauthorized
+    401
   end
 end
 
@@ -1660,8 +1666,12 @@ class API < Grape::API
     end
   end
 
-  # or mix in a module
-  helpers StatusHelpers
+  # or mix in an array of modules
+  helpers StatusHelpers, HttpCodesHelpers
+
+  before do
+    error!('Access Denied', unauthorized) unless current_user
+  end
 
   get 'info' do
     # helpers available in your endpoint and filters
