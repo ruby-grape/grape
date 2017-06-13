@@ -298,6 +298,47 @@ describe Grape::Endpoint do
       end
     end
 
+    context 'when params are not built with default class' do
+      it 'returns an object that corresponds with the params class - hash with indifferent access' do
+        subject.params do
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+
+      it 'returns an object that corresponds with the params class - hashie mash' do
+        subject.params do
+          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hashie::Mash')
+      end
+
+      it 'returns an object that corresponds with the params class - hash' do
+        subject.params do
+          build_with Grape::Extensions::Hash::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hash')
+      end
+    end
+
     it 'should show nil for nested params if include_missing is true' do
       subject.get '/declared' do
         declared(params, include_missing: true)
