@@ -7,7 +7,9 @@ Upgrading Grape
 
 Grape no longer uses `multi_json` or `multi_xml` by default and uses `JSON` and `ActiveSupport::XmlMini` instead. This has no visible impact on JSON processing, but the default behavior of the XML parser has changed. For example, an XML POST containing `<user>Bobby T.</user>` was parsed as `Bobby T.` with `multi_xml`, and as now parsed as `{"__content__"=>"Bobby T."}` with `XmlMini`.
 
-To restore previous behavior, add `multi_json` or `multi_xml` to your `Gemfile`, Grape will auto-detect it.
+If you were using `MultiJson.load`, `MultiJson.dump` or `MultiXml.parse`, you can substitute those with `Grape::Json.load`, `Grape::Json.dump`, `::Grape::Xml.parse`, or directly with `JSON.load`, `JSON.dump`, `XmlMini.parse`, etc.
+
+To restore previous behavior, add `multi_json` or `multi_xml` to your `Gemfile` and `require` it.
 
 See [#1623](https://github.com/ruby-grape/grape/pull/1623) for more information.
 

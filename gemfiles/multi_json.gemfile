@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'multi_json'
+gem 'multi_json', require: 'multi_json'
 
 group :development, :test do
   gem 'bundler'

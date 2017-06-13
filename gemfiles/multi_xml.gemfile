@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'multi_xml'
+gem 'multi_xml', require: 'multi_xml'
 
 group :development, :test do
   gem 'bundler'
