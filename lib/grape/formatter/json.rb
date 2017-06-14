@@ -4,7 +4,7 @@ module Grape
       class << self
         def call(object, _env)
           return object.to_json if object.respond_to?(:to_json)
-          MultiJson.dump(object)
+          ::Grape::Json.dump(object)
         end
       end
     end
