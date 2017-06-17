@@ -398,8 +398,13 @@ module Grape
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
-        value = validator_class.new(attrs, options, doc_attrs[:required], self, opts)
-        @api.namespace_stackable(:validations, value)
+        factory = Grape::Validations::ValidatorFactory.new(attributes:      attrs,
+                                                           options:         options,
+                                                           required:        doc_attrs[:required],
+                                                           params_scope:    self,
+                                                           opts:            opts,
+                                                           validator_class: validator_class)
+        @api.namespace_stackable(:validations, factory)
       end
 
       def validate_value_coercion(coerce_type, *values_list)

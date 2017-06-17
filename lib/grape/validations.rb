@@ -14,5 +14,9 @@ module Grape
     def self.register_validator(short_name, klass)
       validators[short_name] = klass
     end
+
+    def self.deregister_validator(short_name)
+      validators.delete(short_name)
+    end
   end
 end
