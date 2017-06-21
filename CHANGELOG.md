@@ -15,6 +15,7 @@
 * [#1632](https://github.com/ruby-grape/grape/pull/1632): Silence warnings - [@thogg4](https://github.com/thogg4).
 * [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
 * [#1625](https://github.com/ruby-grape/grape/pull/1625): Handle `given` correctly when nested in Array params - [@rnubel](https://github.com/rnubel), [@avellable](https://github.com/avellable).
+* [#1649](https://github.com/ruby-grape/grape/pull/1649): Don't share validator instances between requests - [@anakinj](https://github.com/anakinj).
 * Your contribution here.
 
 ### 0.19.2 (4/12/2017)

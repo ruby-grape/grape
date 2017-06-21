@@ -1422,6 +1422,8 @@ params do
 end
 ```
 
+Every validation will have it's own instance of the validator, which means that the validator can have a state.
+
 ### Validation Errors
 
 Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.

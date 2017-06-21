@@ -338,8 +338,10 @@ module Grape
       end
     end
 
-    def run_validators(validators, request)
+    def run_validators(validator_factories, request)
       validation_errors = []
+
+      validators = validator_factories.map(&:create_validator)
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
