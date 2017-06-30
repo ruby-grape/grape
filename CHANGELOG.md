@@ -7,6 +7,7 @@
 * [#1635](https://github.com/ruby-grape/grape/pull/1635): Instrument validators with ActiveSupport::Notifications - [@ktimothy](https://github.com/ktimothy).
 * [#1646](https://github.com/ruby-grape/grape/pull/1646): Add ability to include an array of modules as helpers - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1623](https://github.com/ruby-grape/grape/pull/1623): Removed `multi_json` and `multi_xml` dependencies - [@dblock](https://github.com/dblock).
+* [#1650](https://github.com/ruby-grape/grape/pull/1650): Add extra specs for Boolean type field - [@tiarly](https://github.com/tiarly).
 * Your contribution here.
 
 #### Fixes
