@@ -280,6 +280,43 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('TrueClass')
       end
 
+      it 'Boolean' do
+        subject.params do
+          optional :boolean, type: Boolean, default: true
+        end
+        subject.get '/boolean' do
+          params[:boolean].class
+        end
+
+        get '/boolean'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
+
+        get '/boolean', boolean: true
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
+
+        get '/boolean', boolean: false
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('FalseClass')
+
+        get '/boolean', boolean: 'true'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('TrueClass')
+
+        get '/boolean', boolean: 'false'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('FalseClass')
+
+        get '/boolean', boolean: 123
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('boolean is invalid')
+
+        get '/boolean', boolean: '123'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('boolean is invalid')
+      end
+
       it 'Rack::Multipart::UploadedFile' do
         subject.params do
           requires :file, type: Rack::Multipart::UploadedFile
