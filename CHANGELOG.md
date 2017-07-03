@@ -1,4 +1,4 @@
-### 1.0.0 (Next)
+### 1.0.0 (7/3/2017)
 
 #### Features
 
@@ -8,7 +8,6 @@
 * [#1646](https://github.com/ruby-grape/grape/pull/1646): Add ability to include an array of modules as helpers - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1623](https://github.com/ruby-grape/grape/pull/1623): Removed `multi_json` and `multi_xml` dependencies - [@dblock](https://github.com/dblock).
 * [#1650](https://github.com/ruby-grape/grape/pull/1650): Add extra specs for Boolean type field - [@tiarly](https://github.com/tiarly).
-* Your contribution here.
 
 #### Fixes
 
@@ -17,7 +16,6 @@
 * [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
 * [#1625](https://github.com/ruby-grape/grape/pull/1625): Handle `given` correctly when nested in Array params - [@rnubel](https://github.com/rnubel), [@avellable](https://github.com/avellable).
 * [#1649](https://github.com/ruby-grape/grape/pull/1649): Don't share validator instances between requests - [@anakinj](https://github.com/anakinj).
-* Your contribution here.
 
 ### 0.19.2 (4/12/2017)
 
