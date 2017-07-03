@@ -110,7 +110,7 @@ module Grape
           rescue Grape::Exceptions::Base => e
             raise e
           rescue StandardError => e
-            throw :error, status: 400, message: e.message
+            throw :error, status: 400, message: e.message, backtrace: e
           end
         else
           env[Grape::Env::API_REQUEST_BODY] = body
