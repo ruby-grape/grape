@@ -6,7 +6,7 @@
 
 #### Fixes
 
-* Your contribution here.
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Bubble up to the error_formatter the root exception - [@dcsg](https://github.com/dcsg).
 
 ### 1.0.0 (7/3/2017)
 
