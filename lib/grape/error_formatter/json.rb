@@ -4,12 +4,13 @@ module Grape
       extend Base
 
       class << self
-        def call(message, backtrace, options = {}, env = nil)
+        def call(message, backtrace, options = {}, env = nil, exception = '')
           result = wrap_message(present(message, env))
 
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)
           end
+          result = result.merge(exception: exception) if (options[:rescue_options] || {})[:exception] && !exception.empty?
           ::Grape::Json.dump(result)
         end
 

@@ -4,13 +4,14 @@ module Grape
       extend Base
 
       class << self
-        def call(message, backtrace, options = {}, env = nil)
+        def call(message, backtrace, options = {}, env = nil, exception = '')
           message = present(message, env)
 
           result = message.is_a?(Hash) ? message : { message: message }
           if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)
           end
+          result = result.merge(exception: exception) if (options[:rescue_options] || {})[:exception] && !exception.empty?
           result.respond_to?(:to_xml) ? result.to_xml(root: :error) : result.to_s
         end
       end

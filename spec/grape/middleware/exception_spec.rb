@@ -158,13 +158,14 @@ describe Grape::Middleware::Error do
     it 'is possible to specify a custom formatter' do
       @app ||= Rack::Builder.app do
         use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true,
-                                      format: :custom,
-                                      error_formatters: {
-                                        custom: lambda do |message, _backtrace, _options, _env|
-                                          { custom_formatter: message }.inspect
-                                        end
-                                      }
+        use Grape::Middleware::Error,
+            rescue_all: true,
+            format: :custom,
+            error_formatters: {
+              custom: lambda do |message, _backtrace, _options, _env, _exception|
+                { custom_formatter: message }.inspect
+              end
+            }
         run ExceptionSpec::ExceptionApp
       end
       get '/'
@@ -191,6 +192,18 @@ describe Grape::Middleware::Error do
       get '/'
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('failed validation')
+    end
+
+    context 'with rescue_options :backtrace and :exception set to true' do
+      it 'is possible to return the backtrace and exception in json format' do
+        @app ||= Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_all: true, format: :json, rescue_options: { backtrace: true, exception: true }
+          run ExceptionSpec::ExceptionApp
+        end
+        get '/'
+        expect(last_response.body).to include('error', 'rain!', 'backtrace', 'exception', 'RuntimeError')
+      end
     end
   end
 end
