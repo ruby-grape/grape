@@ -16,7 +16,7 @@ module Grape
           rescue_subclasses: true, # rescue subclasses of exceptions listed
           rescue_options: {
             backtrace: false, # true to display backtrace, true to let Grape handle Grape::Exceptions
-            exception: false, # true to display exception
+            original_exception: false, # true to display exception
           },
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
@@ -80,13 +80,13 @@ module Grape
         end
       end
 
-      def error!(message, status = options[:default_status], headers = {}, backtrace = [], exception = '')
+      def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = '')
         headers = headers.reverse_merge(Grape::Http::Headers::CONTENT_TYPE => content_type)
-        rack_response(format_message(message, backtrace, exception), status, headers)
+        rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
       def handle_error(e)
-        error_response(message: e.message, backtrace: e.backtrace, exception: e.class.name)
+        error_response(message: e.message, backtrace: e.backtrace, original_exception: e)
       end
 
       # TODO: This method is deprecated. Refactor out.
@@ -95,24 +95,24 @@ module Grape
         message = error[:message] || options[:default_message]
         headers = { Grape::Http::Headers::CONTENT_TYPE => content_type }
         headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
-        backtrace = error[:backtrace] || []
-        exception = error.is_a?(Exception) ? error.class.name : error[:exception] || ''
-        rack_response(format_message(message, backtrace, exception), status, headers)
+        backtrace = error[:backtrace] || error[:original_exception] && error[:original_exception].backtrace || []
+        original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
+        rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
       def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
         Rack::Response.new([message], status, headers).finish
       end
 
-      def format_message(message, backtrace, exception)
+      def format_message(message, backtrace, original_exception = nil)
         format = env[Grape::Env::API_FORMAT] || options[:format]
         formatter = Grape::ErrorFormatter.formatter_for(format, options)
         throw :error,
               status: 406,
               message: "The requested format '#{format}' is not supported.",
               backtrace: backtrace,
-              exception: exception unless formatter
-        formatter.call(message, backtrace, options, env, exception)
+              original_exception: original_exception unless formatter
+        formatter.call(message, backtrace, options, env, original_exception)
       end
 
       private

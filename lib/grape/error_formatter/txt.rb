@@ -4,7 +4,7 @@ module Grape
       extend Base
 
       class << self
-        def call(message, backtrace, options = {}, env = nil, exception = '')
+        def call(message, backtrace, options = {}, env = nil, original_exception = nil)
           message = present(message, env)
 
           result = message.is_a?(Hash) ? ::Grape::Json.dump(message) : message
@@ -12,7 +12,9 @@ module Grape
             result += "\r\n "
             result += backtrace.join("\r\n ")
           end
-          result += "\r\n #{exception}" if (options[:rescue_options] || {})[:exception] && !exception.empty?
+          if (options[:rescue_options] || {})[:original_exception] && original_exception
+            result += "\r\n #{original_exception.inspect}"
+          end
           result
         end
       end

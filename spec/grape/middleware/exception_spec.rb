@@ -162,7 +162,7 @@ describe Grape::Middleware::Error do
             rescue_all: true,
             format: :custom,
             error_formatters: {
-              custom: lambda do |message, _backtrace, _options, _env, _exception|
+              custom: lambda do |message, _backtrace, _options, _env, _original_exception|
                 { custom_formatter: message }.inspect
               end
             }
@@ -198,11 +198,14 @@ describe Grape::Middleware::Error do
       it 'is possible to return the backtrace and exception in json format' do
         @app ||= Rack::Builder.app do
           use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_all: true, format: :json, rescue_options: { backtrace: true, exception: true }
+          use Grape::Middleware::Error,
+              rescue_all: true,
+              format: :json,
+              rescue_options: { backtrace: true, original_exception: true }
           run ExceptionSpec::ExceptionApp
         end
         get '/'
-        expect(last_response.body).to include('error', 'rain!', 'backtrace', 'exception', 'RuntimeError')
+        expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original_exception', 'RuntimeError')
       end
     end
   end
