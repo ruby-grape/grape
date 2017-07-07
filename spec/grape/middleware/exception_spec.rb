@@ -195,7 +195,7 @@ describe Grape::Middleware::Error do
     end
 
     context 'with rescue_options :backtrace and :exception set to true' do
-      it 'is possible to return the backtrace and exception in json format' do
+      it 'is possible to return the backtrace and the original exception in json format' do
         @app ||= Rack::Builder.app do
           use Spec::Support::EndpointFaker
           use Grape::Middleware::Error,
@@ -206,6 +206,32 @@ describe Grape::Middleware::Error do
         end
         get '/'
         expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original_exception', 'RuntimeError')
+      end
+
+      it 'is possible to return the backtrace and the original exception in xml format' do
+        @app ||= Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error,
+              rescue_all: true,
+              format: :xml,
+              rescue_options: { backtrace: true, original_exception: true }
+          run ExceptionSpec::ExceptionApp
+        end
+        get '/'
+        expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original-exception', 'RuntimeError')
+      end
+
+      it 'is possible to return the backtrace and the original exception in txt format' do
+        @app ||= Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error,
+              rescue_all: true,
+              format: :txt,
+              rescue_options: { backtrace: true, original_exception: true }
+          run ExceptionSpec::ExceptionApp
+        end
+        get '/'
+        expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original exception', 'RuntimeError')
       end
     end
   end

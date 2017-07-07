@@ -45,7 +45,7 @@ module Grape
           Rack::Response.new(bodymap, status, headers)
         end
       rescue Grape::Exceptions::InvalidFormatter => e
-        throw :error, status: 500, message: e.message, backtrace: e.backtrace, exception: e
+        throw :error, status: 500, message: e.message, backtrace: e.backtrace, original_exception: e
       end
 
       def fetch_formatter(headers, options)
@@ -110,7 +110,7 @@ module Grape
           rescue Grape::Exceptions::Base => e
             raise e
           rescue StandardError => e
-            throw :error, status: 400, message: e.message, backtrace: e.backtrace, exception: e
+            throw :error, status: 400, message: e.message, backtrace: e.backtrace, original_exception: e
           end
         else
           env[Grape::Env::API_REQUEST_BODY] = body

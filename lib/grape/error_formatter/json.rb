@@ -7,10 +7,11 @@ module Grape
         def call(message, backtrace, options = {}, env = nil, original_exception = nil)
           result = wrap_message(present(message, env))
 
-          if (options[:rescue_options] || {})[:backtrace] && backtrace && !backtrace.empty?
+          rescue_options = options[:rescue_options] || {}
+          if rescue_options[:backtrace] && backtrace && !backtrace.empty?
             result = result.merge(backtrace: backtrace)
           end
-          if (options[:rescue_options] || {})[:original_exception] && original_exception
+          if rescue_options[:original_exception] && original_exception
             result = result.merge(original_exception: original_exception.inspect)
           end
           ::Grape::Json.dump(result)
