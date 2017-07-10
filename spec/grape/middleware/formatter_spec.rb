@@ -1,11 +1,12 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
-  subject { Grape::Middleware::Formatter.new(app) }
+  subject { Grape::Middleware::Formatter.new(app, options) }
   before { allow(subject).to receive(:dup).and_return(subject) }
 
   let(:body) { { 'foo' => 'bar' } }
   let(:app) { ->(_env) { [200, {}, [body]] } }
+  let(:options) { {} }
 
   context 'serialization' do
     let(:body) { { 'abc' => 'def' } }
@@ -322,6 +323,32 @@ describe Grape::Middleware::Formatter do
       env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }
       _, _, bodies = *subject.call(env)
       expect(bodies.body.first).to eq({ message: 'invalid' }.to_json)
+    end
+  end
+
+  context 'custom parser raises exception and rescue options are enabled for backtrace and original_exception' do
+    let(:options) {
+      {
+        rescue_options: { backtrace: true, original_exception: true },
+        parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }
+      }
+    }
+
+    it 'adds the backtrace and original_exception to the error output' do
+      io = StringIO.new('{invalid}')
+      error = catch(:error) {
+        subject.call(
+          'PATH_INFO' => '/info',
+          'REQUEST_METHOD' => 'POST',
+          'CONTENT_TYPE' => 'application/json',
+          'rack.input' => io,
+          'CONTENT_LENGTH' => io.length
+        )
+      }
+
+      expect(error[:message]).to eq 'fail'
+      expect(error[:backtrace].size).to be >= 1
+      expect(error[:original_exception].class).to eq StandardError
     end
   end
 end
