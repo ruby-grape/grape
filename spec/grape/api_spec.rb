@@ -1996,7 +1996,7 @@ XML
       before :each do
         module ApiSpec
           class CustomErrorFormatter
-            def self.call(message, _backtrace, _options, _env)
+            def self.call(message, _backtrace, _options, _env, _original_exception)
               "message: #{message} @backtrace"
             end
           end
@@ -2018,7 +2018,7 @@ XML
         before :each do
           module ApiSpec
             class CustomErrorFormatter
-              def self.call(message, _backtrace, _option, _env)
+              def self.call(message, _backtrace, _option, _env, _original_exception)
                 "message: #{message} @backtrace"
               end
             end

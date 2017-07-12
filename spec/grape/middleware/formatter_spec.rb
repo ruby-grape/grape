@@ -324,4 +324,28 @@ describe Grape::Middleware::Formatter do
       expect(bodies.body.first).to eq({ message: 'invalid' }.to_json)
     end
   end
+
+  context 'custom parser raises exception and rescue options are enabled for backtrace and original_exception' do
+    it 'adds the backtrace and original_exception to the error output' do
+      subject = Grape::Middleware::Formatter.new(
+        app,
+        rescue_options: { backtrace: true, original_exception: true },
+        parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }
+      )
+      io = StringIO.new('{invalid}')
+      error = catch(:error) {
+        subject.call(
+          'PATH_INFO' => '/info',
+          'REQUEST_METHOD' => 'POST',
+          'CONTENT_TYPE' => 'application/json',
+          'rack.input' => io,
+          'CONTENT_LENGTH' => io.length
+        )
+      }
+
+      expect(error[:message]).to eq 'fail'
+      expect(error[:backtrace].size).to be >= 1
+      expect(error[:original_exception].class).to eq StandardError
+    end
+  end
 end

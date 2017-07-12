@@ -3,10 +3,11 @@
 #### Features
 
 * Your contribution here.
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
 
 #### Fixes
 
-* Your contribution here.
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubble up to the error_formatter - [@dcsg](https://github.com/dcsg).
 
 ### 1.0.0 (7/3/2017)
 
