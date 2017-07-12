@@ -7,7 +7,7 @@
 
 #### Fixes
 
-* [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubble up to the error_formatter - [@dcsg](https://github.com/dcsg).
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubbled up to the `error_formatter` - [@dcsg](https://github.com/dcsg).
 
 ### 1.0.0 (7/3/2017)
 
