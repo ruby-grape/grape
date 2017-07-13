@@ -418,6 +418,32 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error(Grape::Exceptions::UnknownParameter)
     end
 
+    it 'does not validate nested requires when given is false' do
+      subject.params do
+        requires :a, type: String, allow_blank: false, values: %w(x y)
+        given a: ->(val) { val == 'x' } do
+          requires :inner1, type: Hash, allow_blank: false do
+            requires :foo, type: Integer, allow_blank: false
+          end
+        end
+        given a: ->(val) { val == 'y' } do
+          requires :inner2, type: Hash, allow_blank: false do
+            requires :bar, type: Integer, allow_blank: false
+          end
+        end
+      end
+      subject.get('/varying') { declared(params).to_json }
+
+      # this fails with inner2[bar] is missing, inner2[bar] is empty
+      # but shouldn't because criteria not met
+      get '/varying', a: 'x', inner1: { foo: 1 }
+      expect(last_response.status).to eq(200)
+
+      # this will fail similarly if tested first, but with inner1
+      get '/varying', a: 'y', inner2: { bar: 2 }
+      expect(last_response.status).to eq(200)
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 
