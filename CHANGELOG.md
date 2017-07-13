@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1658](https://github.com/ruby-grape/grape/pull/1658): Update `rack-test` to `0.7.0` and fix failing specs - [@ashkan18](https://github.com/ashkan18).
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
 
 #### Fixes
