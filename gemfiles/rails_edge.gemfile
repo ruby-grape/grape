@@ -24,7 +24,7 @@ end
 group :test do
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
-  gem 'rack-test', '~> 0.6.3'
+  gem 'rack-test', '~> 0.7.0'
   gem 'rspec', '~> 3.0'
   gem 'cookiejar'
   gem 'rack-jsonp', require: 'rack/jsonp'
