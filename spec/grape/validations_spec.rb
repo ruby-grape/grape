@@ -535,12 +535,12 @@ describe Grape::Validations do
 
       it 'handle errors for all array elements' do
         get '/within_array', children: [
-          { name: 'Jim', parents: [] },
+          { name: 'Jim'  },
           { name: 'Job', parents: [] }
         ]
 
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing, children[1][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[1][parents][0][name] is missing')
       end
 
       it 'safely handles empty arrays and blank parameters' do
@@ -548,7 +548,8 @@ describe Grape::Validations do
         # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children is missing')
+        expect(last_response.body).to eq('children[0][name] is missing, children[0][parents] is missing, '\
+          'children[0][parents] is invalid, children[0][parents][0][name] is missing, children[0][parents][0][name] is empty')
         get '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children[0][parents] is missing')
