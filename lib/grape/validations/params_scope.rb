@@ -46,7 +46,11 @@ module Grape
         parent.should_validate?(parameters)
       end
 
-      def meets_dependency?(params)
+      def meets_dependency?(params, request_params)
+        if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
+          return false
+        end
+
         return true unless @dependent_on
 
         params = params.with_indifferent_access
