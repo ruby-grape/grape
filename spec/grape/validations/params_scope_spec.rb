@@ -418,6 +418,46 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error(Grape::Exceptions::UnknownParameter)
     end
 
+    it 'does not validate nested requires when given is false' do
+      subject.params do
+        requires :a, type: String, allow_blank: false, values: %w(x y z)
+        given a: ->(val) { val == 'x' } do
+          requires :inner1, type: Hash, allow_blank: false do
+            requires :foo, type: Integer, allow_blank: false
+          end
+        end
+        given a: ->(val) { val == 'y' } do
+          requires :inner2, type: Hash, allow_blank: false do
+            requires :bar, type: Integer, allow_blank: false
+            requires :baz, type: Array, allow_blank: false do
+              requires :baz_category, type: String, allow_blank: false
+            end
+          end
+        end
+        given a: ->(val) { val == 'z' } do
+          requires :inner3, type: Array, allow_blank: false do
+            requires :bar, type: Integer, allow_blank: false
+            requires :baz, type: Array, allow_blank: false do
+              requires :baz_category, type: String, allow_blank: false
+            end
+          end
+        end
+      end
+      subject.get('/varying') { declared(params).to_json }
+
+      get '/varying', a: 'x', inner1: { foo: 1 }
+      expect(last_response.status).to eq(200)
+
+      get '/varying', a: 'y', inner2: { bar: 2, baz: [{ baz_category: 'barstools' }] }
+      expect(last_response.status).to eq(200)
+
+      get '/varying', a: 'y', inner2: { bar: 2, baz: [{ unrelated: 'yep' }] }
+      expect(last_response.status).to eq(400)
+
+      get '/varying', a: 'z', inner3: [{ bar: 3, baz: [{ baz_category: 'barstools' }] }]
+      expect(last_response.status).to eq(200)
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 

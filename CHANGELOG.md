@@ -8,6 +8,7 @@
 #### Fixes
 
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubbled up to the `error_formatter` - [@dcsg](https://github.com/dcsg).
+* [#1661](https://github.com/ruby-grape/grape/pull/1661): Handle deeply-nested dependencies correctly - [@rnubel](https://github.com/rnubel), [@jnardone](https://github.com/jnardone).
 
 ### 1.0.0 (7/3/2017)
 
