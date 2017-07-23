@@ -2,7 +2,7 @@ require 'active_support/concern'
 
 module Grape
   module DSL
-    # Keeps track of settings (impemented as key-value pairs, grouped by
+    # Keeps track of settings (implemented as key-value pairs, grouped by
     # types), in two contexts: top-level settings which apply globally no
     # matter where they're defined, and inheritable settings which apply only
     # in the current scope and scopes nested under it.
@@ -13,7 +13,7 @@ module Grape
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting
-        @top_level_setting ||= Grape::Util::InheritableSetting.new
+        @top_level_setting ||= obtain_top_level_setting
       end
 
       # Fetch our current inheritable settings, which are inherited by
@@ -161,6 +161,18 @@ module Grape
         reset_validations!
 
         result
+      end
+
+      private
+
+      # Obtains the current class :inheritable_setting. If available, it returns the superclass's :inheritable_setting.
+      # Otherwise, a clean :inheritable_setting is returned.
+      def obtain_top_level_setting
+        if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API
+          superclass.inheritable_setting
+        else
+          Grape::Util::InheritableSetting.new
+        end
       end
     end
   end

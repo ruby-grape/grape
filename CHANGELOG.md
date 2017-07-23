@@ -4,6 +4,7 @@
 
 * Your contribution here.
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
+* [#1662](https://github.com/ruby-grape/grape/pull/1662): Make helpers available in subclasses - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 
 #### Fixes
 
