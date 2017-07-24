@@ -24,6 +24,12 @@ module Grape
       end
     end
 
+    class Base < Grape::API
+      helpers BooleanParam
+    end
+
+    class Child < Base; end
+
     describe Helpers do
       subject { Class.new(HelpersSpec::Dummy) }
       let(:proc) do
@@ -72,6 +78,19 @@ module Grape
           it 'sets Boolean as a Virtus::Attribute::Boolean' do
             subject.helpers BooleanParam
             expect(subject.first_mod::Boolean).to eq Virtus::Attribute::Boolean
+          end
+        end
+
+        context 'in child classes' do
+          it 'is available' do
+            klass = Child
+            expect {
+              klass.instance_eval do
+                params do
+                  use :requires_toggle_prm
+                end
+              end
+            }.to_not raise_exception
           end
         end
       end
