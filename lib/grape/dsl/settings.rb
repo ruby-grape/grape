@@ -13,7 +13,7 @@ module Grape
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting
-        @top_level_setting ||= obtain_top_level_setting
+        @top_level_setting ||= build_top_level_setting
       end
 
       # Fetch our current inheritable settings, which are inherited by
@@ -165,9 +165,9 @@ module Grape
 
       private
 
-      # Obtains the current class :inheritable_setting. If available, it returns the superclass's :inheritable_setting.
+      # Builds the current class :inheritable_setting. If available, it returns the superclass's :inheritable_setting.
       # Otherwise, a clean :inheritable_setting is returned.
-      def obtain_top_level_setting
+      def build_top_level_setting
         if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API
           superclass.inheritable_setting
         else
