@@ -90,4 +90,23 @@ describe Grape::Validations::Types do
       expect(described_class.custom?(TypesSpec::BarType)).to be_falsy
     end
   end
+
+  describe '::build_coercer' do
+    it 'has internal cache variables' do
+      expect(described_class.instance_variable_get(:@__cache)).to be_a(Hash)
+      expect(described_class.instance_variable_get(:@__cache_write_lock)).to be_a(Mutex)
+    end
+
+    it 'caches the result of the Virtus::Attribute.build method' do
+      original_cache = described_class.instance_variable_get(:@__cache)
+      described_class.instance_variable_set(:@__cache, {})
+
+      coercer = 'TestCoercer'
+      expect(Virtus::Attribute).to receive(:build).once.and_return(coercer)
+      expect(described_class.build_coercer(Array[String])).to eq(coercer)
+      expect(described_class.build_coercer(Array[String])).to eq(coercer)
+
+      described_class.instance_variable_set(:@__cache, original_cache)
+    end
+  end
 end

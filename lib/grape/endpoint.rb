@@ -96,6 +96,11 @@ module Grape
       @lazy_initialized = nil
       @block = nil
 
+      @status = nil
+      @file = nil
+      @body = nil
+      @proc = nil
+
       return unless block_given?
 
       @source = block
@@ -333,8 +338,10 @@ module Grape
       end
     end
 
-    def run_validators(validators, request)
+    def run_validators(validator_factories, request)
       validation_errors = []
+
+      validators = validator_factories.map(&:create_validator)
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|

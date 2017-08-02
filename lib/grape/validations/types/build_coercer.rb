@@ -20,6 +20,12 @@ module Grape
       # @return [Virtus::Attribute] object to be used
       #   for coercion and type validation
       def self.build_coercer(type, method = nil)
+        cache_instance(type, method) do
+          create_coercer_instance(type, method)
+        end
+      end
+
+      def self.create_coercer_instance(type, method = nil)
         # Accept pre-rolled virtus attributes without interference
         return type if type.is_a? Virtus::Attribute
 
@@ -56,6 +62,27 @@ module Grape
         # for many common ruby types.
         Virtus::Attribute.build(conversion_type, converter_options)
       end
+
+      def self.cache_instance(type, method, &_block)
+        key = cache_key(type, method)
+
+        return @__cache[key] if @__cache.key?(key)
+
+        instance = yield
+
+        @__cache_write_lock.synchronize do
+          @__cache[key] = instance
+        end
+
+        instance
+      end
+
+      def self.cache_key(type, method)
+        [type, method].compact.map(&:to_s).join('_')
+      end
+
+      instance_variable_set(:@__cache,            {})
+      instance_variable_set(:@__cache_write_lock, Mutex.new)
     end
   end
 end

@@ -46,7 +46,7 @@ module Grape
         end
 
         def declared_hash(passed_params, options, declared_params)
-          declared_params.each_with_object({}) do |declared_param, memo|
+          declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             # If it is not a Hash then it does not have children.
             # Find its value or set it to nil.
             if !declared_param.is_a?(Hash)
@@ -56,7 +56,7 @@ module Grape
               declared_param.each_pair do |declared_parent_param, declared_children_params|
                 next unless options[:include_missing] || passed_params.key?(declared_parent_param)
 
-                passed_children_params = passed_params[declared_parent_param] || {}
+                passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
                 memo[optioned_param_key(declared_parent_param, options)] = declared(passed_children_params, options, declared_children_params)
               end
             end

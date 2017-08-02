@@ -16,8 +16,6 @@ require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/conversions'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
-require 'multi_json'
-require 'multi_xml'
 require 'i18n'
 require 'thread'
 
@@ -44,6 +42,8 @@ module Grape
     autoload :Parser
     autoload :Request
     autoload :Env, 'grape/util/env'
+    autoload :Json, 'grape/util/json'
+    autoload :Xml, 'grape/util/xml'
   end
 
   module Http
@@ -210,5 +210,6 @@ require 'grape/validations/validators/except_values'
 require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
 require 'grape/validations/types'
+require 'grape/validations/validator_factory'
 
 require 'grape/version'

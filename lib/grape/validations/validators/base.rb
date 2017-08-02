@@ -20,7 +20,6 @@ module Grape
       end
 
       # Validates a given request.
-      # @note This method must be thread-safe.
       # @note Override #validate! unless you need to access the entire request.
       # @param request [Grape::Request] the request currently being handled
       # @raise [Grape::Exceptions::Validation] if validation failed
@@ -31,8 +30,7 @@ module Grape
       end
 
       # Validates a given parameter hash.
-      # @note This method must be thread-safe.
-      # @note Override #validate iff you need to access the entire request.
+      # @note Override #validate if you need to access the entire request.
       # @param params [Hash] parameters to validate
       # @raise [Grape::Exceptions::Validation] if validation failed
       # @return [void]
@@ -41,6 +39,7 @@ module Grape
         array_errors = []
         attributes.each do |resource_params, attr_name|
           next unless @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
+          next unless @scope.meets_dependency?(resource_params, params)
 
           begin
             validate_param!(attr_name, resource_params)
@@ -64,8 +63,8 @@ module Grape
       end
 
       def self.inherited(klass)
-        short_name = convert_to_short_name(klass)
-        Validations.register_validator(short_name, klass)
+        return unless klass.name.present?
+        Validations.register_validator(convert_to_short_name(klass), klass)
       end
 
       def message(default_key = nil)

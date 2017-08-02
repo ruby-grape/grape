@@ -42,37 +42,49 @@ module Grape
         return false if @optional && (params(parameters).blank? ||
                                        any_element_blank?(parameters))
 
-        @dependent_on.each do |dependency|
-          if dependency.is_a?(Hash)
-            dependency_key = dependency.keys[0]
-            proc = dependency.values[0]
-            return false unless proc.call(params(parameters).try(:[], dependency_key))
-          elsif params(parameters).try(:[], dependency).blank?
-            return false
-          end
-        end if @dependent_on
-
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
 
+      def meets_dependency?(params, request_params)
+        if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
+          return false
+        end
+
+        return true unless @dependent_on
+
+        params = params.with_indifferent_access
+
+        @dependent_on.each do |dependency|
+          if dependency.is_a?(Hash)
+            dependency_key = dependency.keys[0]
+            proc = dependency.values[0]
+            return false unless proc.call(params.try(:[], dependency_key))
+          elsif params.respond_to?(:key?) && params.try(:[], dependency).blank?
+            return false
+          end
+        end
+
+        true
+      end
+
       # @return [String] the proper attribute name, with nesting considered.
-      def full_name(name)
+      def full_name(name, index: nil)
         if nested?
           # Find our containing element's name, and append ours.
-          "#{@parent.full_name(@element)}#{array_index}[#{name}]"
+          [@parent.full_name(@element), [@index || index, name].map(&method(:brackets))].compact.join
         elsif lateral?
-          # Find the name of the element as if it was at the
-          # same nesting level as our parent.
-          @parent.full_name(name)
+          # Find the name of the element as if it was at the same nesting level
+          # as our parent. We need to forward our index upward to achieve this.
+          @parent.full_name(name, index: @index)
         else
           # We must be the root scope, so no prefix needed.
           name.to_s
         end
       end
 
-      def array_index
-        "[#{@index}]" if @index.present?
+      def brackets(val)
+        "[#{val}]" if val
       end
 
       # @return [Boolean] whether or not this scope is the root-level scope
@@ -187,7 +199,7 @@ module Grape
           element:      nil,
           parent:       self,
           options:      @optional,
-          type:         Hash,
+          type:         type == Array ? Array : Hash,
           dependent_on: options[:dependent_on],
           &block
         )
@@ -390,8 +402,13 @@ module Grape
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
-        value = validator_class.new(attrs, options, doc_attrs[:required], self, opts)
-        @api.namespace_stackable(:validations, value)
+        factory = Grape::Validations::ValidatorFactory.new(attributes:      attrs,
+                                                           options:         options,
+                                                           required:        doc_attrs[:required],
+                                                           params_scope:    self,
+                                                           opts:            opts,
+                                                           validator_class: validator_class)
+        @api.namespace_stackable(:validations, factory)
       end
 
       def validate_value_coercion(coerce_type, *values_list)

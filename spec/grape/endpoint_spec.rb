@@ -298,6 +298,47 @@ describe Grape::Endpoint do
       end
     end
 
+    context 'when params are not built with default class' do
+      it 'returns an object that corresponds with the params class - hash with indifferent access' do
+        subject.params do
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('ActiveSupport::HashWithIndifferentAccess')
+      end
+
+      it 'returns an object that corresponds with the params class - hashie mash' do
+        subject.params do
+          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hashie::Mash')
+      end
+
+      it 'returns an object that corresponds with the params class - hash' do
+        subject.params do
+          build_with Grape::Extensions::Hash::ParamBuilder
+        end
+        subject.get '/declared' do
+          d = declared(params, include_missing: true)
+          { declared_class: d.class.to_s }
+        end
+
+        get '/declared?first=present'
+        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hash')
+      end
+    end
+
     it 'should show nil for nested params if include_missing is true' do
       subject.get '/declared' do
         declared(params, include_missing: true)
@@ -429,7 +470,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', MultiJson.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 
@@ -444,7 +485,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', MultiJson.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 
@@ -832,7 +873,7 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', MultiJson.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
+        post '/request_body', ::Grape::Json.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.body).to eq('Bobby T.')
       end
 
@@ -841,14 +882,26 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq('')
       end
 
-      it 'converts XML bodies to params' do
-        post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-        expect(last_response.body).to eq('Bobby T.')
-      end
+      if Object.const_defined? :MultiXml
+        it 'converts XML bodies to params' do
+          post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq('Bobby T.')
+        end
 
-      it 'converts XML bodies to params' do
-        put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-        expect(last_response.body).to eq('Bobby T.')
+        it 'converts XML bodies to params' do
+          put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq('Bobby T.')
+        end
+      else
+        it 'converts XML bodies to params' do
+          post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq('{"__content__"=>"Bobby T."}')
+        end
+
+        it 'converts XML bodies to params' do
+          put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq('{"__content__"=>"Bobby T."}')
+        end
       end
 
       it 'does not include parameters not defined by the body' do
@@ -856,7 +909,7 @@ describe Grape::Endpoint do
           error! 400, 'expected nil' if params[:version]
           params[:user]
         end
-        post '/omitted_params', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
+        post '/omitted_params', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('Bob')
       end
@@ -879,7 +932,7 @@ describe Grape::Endpoint do
       subject.put '/request_body' do
         params[:user]
       end
-      put '/request_body', MultiJson.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
+      put '/request_body', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
 
       expect(last_response.status).to eq(406)
       expect(last_response.body).to eq('{"error":"The requested content-type \'text/plain\' is not supported."}')
@@ -893,7 +946,7 @@ describe Grape::Endpoint do
         subject.post do
           params[:data]
         end
-        post '/', MultiJson.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
+        post '/', ::Grape::Json.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
       end
 
       it 'should not response with 406 for same type without params' do

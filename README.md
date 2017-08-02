@@ -69,6 +69,7 @@
   - [CORS](#cors)
 - [Content-type](#content-type)
 - [API Data Formats](#api-data-formats)
+- [JSON and XML Processors](#json-and-xml-processors)
 - [RESTful Model Representations](#restful-model-representations)
   - [Grape Entities](#grape-entities)
   - [Hypermedia and Roar](#hypermedia-and-roar)
@@ -108,9 +109,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.0.0**.
+You're reading the documentation for the next release of Grape, which should be **1.0.1**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [0.19.2](https://github.com/ruby-grape/grape/blob/v0.19.2/README.md).
+The current stable release is [1.0.0](https://github.com/ruby-grape/grape/blob/v1.0.0/README.md).
 
 ## Project Resources
 
@@ -1146,7 +1147,7 @@ end
 ```
 
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
-If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list 
+If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list
 or a range which will then be used to validate the parameter.
 
 For example, given a status model you may want to restrict by hashtags that you have
@@ -1421,6 +1422,8 @@ params do
 end
 ```
 
+Every validation will have it's own instance of the validator, which means that the validator can have a state.
+
 ### Validation Errors
 
 Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.
@@ -1643,12 +1646,18 @@ end
 ## Helpers
 
 You can define helper methods that your endpoints can use with the `helpers`
-macro by either giving a block or a module.
+macro by either giving a block or an array of modules.
 
 ```ruby
 module StatusHelpers
   def user_info(user)
     "#{user} has statused #{user.statuses} status(s)"
+  end
+end
+
+module HttpCodesHelpers
+  def unauthorized
+    401
   end
 end
 
@@ -1660,8 +1669,12 @@ class API < Grape::API
     end
   end
 
-  # or mix in a module
-  helpers StatusHelpers
+  # or mix in an array of modules
+  helpers StatusHelpers, HttpCodesHelpers
+
+  before do
+    error!('Access Denied', unauthorized) unless current_user
+  end
 
   get 'info' do
     # helpers available in your endpoint and filters
@@ -2553,6 +2566,10 @@ curl -X PUT -d 'data' 'http://localhost:9292/value' -H Content-Type:text/custom 
 ```
 
 You can disable parsing for a content-type with `nil`. For example, `parser :json, nil` will disable JSON parsing altogether. The request data is then available as-is in `env['api.request.body']`.
+
+## JSON and XML Processors
+
+Grape uses `JSON` and `ActiveSupport::XmlMini` for JSON and XML parsing by default. It also detects and supports [multi_json](https://github.com/intridea/multi_json) and [multi_xml](https://github.com/sferik/multi_xml). Adding those gems to your Gemfile and requiring them will enable them and allow you to swap the JSON and XML back-ends.
 
 ## RESTful Model Representations
 

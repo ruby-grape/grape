@@ -1,16 +1,34 @@
-### 1.0.0 (Next)
+### 1.0.1 (Next)
+
+#### Features
+
+* Your contribution here.
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
+* [#1665](https://github.com/ruby-grape/grape/pull/1665): Make helpers available in subclasses - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
+
+#### Fixes
+
+* [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubbled up to the `error_formatter` - [@dcsg](https://github.com/dcsg).
+* [#1661](https://github.com/ruby-grape/grape/pull/1661): Handle deeply-nested dependencies correctly - [@rnubel](https://github.com/rnubel), [@jnardone](https://github.com/jnardone).
+
+### 1.0.0 (7/3/2017)
 
 #### Features
 
 * [#1594](https://github.com/ruby-grape/grape/pull/1594): Replace `Hashie::Mash` parameters with `ActiveSupport::HashWithIndifferentAccess` - [@james2m](https://github.com/james2m), [@dblock](https://github.com/dblock).
 * [#1622](https://github.com/ruby-grape/grape/pull/1622): Add `except_values` validator to replace `except` option of `values` validator - [@jlfaber](https://github.com/jlfaber).
 * [#1635](https://github.com/ruby-grape/grape/pull/1635): Instrument validators with ActiveSupport::Notifications - [@ktimothy](https://github.com/ktimothy).
-* Your contribution here.
+* [#1646](https://github.com/ruby-grape/grape/pull/1646): Add ability to include an array of modules as helpers - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
+* [#1623](https://github.com/ruby-grape/grape/pull/1623): Removed `multi_json` and `multi_xml` dependencies - [@dblock](https://github.com/dblock).
+* [#1650](https://github.com/ruby-grape/grape/pull/1650): Add extra specs for Boolean type field - [@tiarly](https://github.com/tiarly).
 
 #### Fixes
 
+* [#1648](https://github.com/ruby-grape/grape/pull/1631): Declared now returns declared options using the class that params is set to use - [@thogg4](https://github.com/thogg4).
+* [#1632](https://github.com/ruby-grape/grape/pull/1632): Silence warnings - [@thogg4](https://github.com/thogg4).
 * [#1615](https://github.com/ruby-grape/grape/pull/1615): Fix default and type validator when values is a Hash with no value attribute - [@jlfaber](https://github.com/jlfaber).
-* Your contribution here.
+* [#1625](https://github.com/ruby-grape/grape/pull/1625): Handle `given` correctly when nested in Array params - [@rnubel](https://github.com/rnubel), [@avellable](https://github.com/avellable).
+* [#1649](https://github.com/ruby-grape/grape/pull/1649): Don't share validator instances between requests - [@anakinj](https://github.com/anakinj).
 
 ### 0.19.2 (4/12/2017)
 
