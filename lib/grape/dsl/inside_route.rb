@@ -50,8 +50,16 @@ module Grape
             # If it is not a Hash then it does not have children.
             # Find its value or set it to nil.
             if !declared_param.is_a?(Hash)
-              next unless options[:include_missing] || passed_params.key?(declared_param)
-              memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
+              has_alias = route_setting(:aliased_params) && route_setting(:aliased_params).find { |current| current[declared_param] }
+              param_alias = has_alias[declared_param] if has_alias
+
+              next unless options[:include_missing] || passed_params.key?(declared_param) || param_alias
+
+              if param_alias
+                memo[optioned_param_key(param_alias, options)] = passed_params[param_alias]
+              else
+                memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
+              end
             else
               declared_param.each_pair do |declared_parent_param, declared_children_params|
                 next unless options[:include_missing] || passed_params.key?(declared_parent_param)

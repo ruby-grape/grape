@@ -42,6 +42,7 @@
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
+  - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
@@ -1094,6 +1095,23 @@ params do
 end
 ```
 
+### Alias
+
+You can set an alias for parameters using `as`, which can be useful when refactoring existing APIs:
+
+```ruby
+resource :users do
+  params do
+    requires :email_address, as: :email
+    requires :password
+  end
+  post do
+    User.create!(declared(params)) # User takes email and password
+  end
+end
+```
+
+The value passed to `as` will be the key when calling `params` or `declared(params)`.
 
 ### Built-in Validators
 

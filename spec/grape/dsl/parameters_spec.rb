@@ -15,7 +15,7 @@ module Grape
           @validate_attributes
         end
 
-        def push_declared_params(*args)
+        def push_declared_params(args, **_opts)
           @push_declared_params = args
         end
 
@@ -84,7 +84,7 @@ module Grape
           subject.requires :id, type: Integer, desc: 'Identity.'
 
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
-          expect(subject.push_declared_params_reader).to eq([[:id]])
+          expect(subject.push_declared_params_reader).to eq([:id])
         end
       end
 
@@ -93,7 +93,7 @@ module Grape
           subject.optional :id, type: Integer, desc: 'Identity.'
 
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-          expect(subject.push_declared_params_reader).to eq([[:id]])
+          expect(subject.push_declared_params_reader).to eq([:id])
         end
       end
 
@@ -102,7 +102,7 @@ module Grape
           subject.with(type: Integer) { subject.optional :id, desc: 'Identity.' }
 
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-          expect(subject.push_declared_params_reader).to eq([[:id]])
+          expect(subject.push_declared_params_reader).to eq([:id])
         end
       end
 
