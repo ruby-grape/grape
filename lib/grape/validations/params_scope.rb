@@ -115,10 +115,15 @@ module Grape
 
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
-      def push_declared_params(attrs)
+      def push_declared_params(attrs, **opts)
         if lateral?
           @parent.push_declared_params(attrs)
         else
+          if opts && opts[:as]
+            @api.route_setting(:aliased_params, @api.route_setting(:aliased_params) || [])
+            @api.route_setting(:aliased_params) << { attrs.first => opts[:as] }
+          end
+
           @declared_params.concat attrs
         end
       end

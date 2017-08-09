@@ -121,6 +121,42 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'param alias' do
+    it do
+      subject.params do
+        requires :foo, as: :bar
+        optional :super, as: :hiper
+      end
+      subject.get('/alias') { "#{declared(params)['bar']}-#{declared(params)['hiper']}" }
+      get '/alias', foo: 'any', super: 'any2'
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('any-any2')
+    end
+
+    it do
+      subject.params do
+        requires :foo, as: :bar, type: String, coerce_with: ->(c) { c.strip }
+      end
+      subject.get('/alias-coerced') { "#{params['bar']}-#{params['foo']}" }
+      get '/alias-coerced', foo: ' there we go '
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('there we go-')
+    end
+
+    it do
+      subject.params do
+        requires :foo, as: :bar, allow_blank: false
+      end
+      subject.get('/alias-not-blank') {}
+      get '/alias-not-blank', foo: ''
+
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('foo is empty')
+    end
+  end
+
   context 'array without coerce type explicitly given' do
     it 'sets the type based on first element' do
       subject.params do
