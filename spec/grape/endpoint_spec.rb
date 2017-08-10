@@ -1493,4 +1493,56 @@ describe Grape::Endpoint do
       )
     end
   end
+
+  context 'array params with XML content type' do
+    let(:single_element_request) do
+      '<?xml version="1.0" encoding="UTF-8" ?>
+       <admin>
+         <products>
+           <price>100</price>
+         </products>
+       </admin>'
+    end
+
+    let(:multiple_element_request) do
+      '<?xml version="1.0" encoding="UTF-8" ?>
+       <admin>
+         <products>
+           <price>100</price>
+         </products>
+         <products>
+           <price>200</price>
+         </products>
+       </admin>'
+    end
+    before do
+      subject.format :xml
+      subject.content_type :xml, 'application/xml; charset=utf-8'
+      subject.params do
+        requires :admin, type: Hash do
+          requires :products, type: Array do
+            requires :price, type: String
+          end
+        end
+      end
+      subject.post do
+        params[:data]
+      end
+    end
+    context 'with one element' do
+      it 'returns a successful response' do
+        post '/', single_element_request, 'CONTENT_TYPE' => 'application/xml'
+        expect(last_request.params['admin']['products'][0]['price']['__content__']).to eq('100')
+        # expect(last_response.status).to eq(201)
+      end
+    end
+
+    context 'with multiple elements' do
+      it 'returns a successful response' do
+        post '/', multiple_element_request, 'CONTENT_TYPE' => 'application/xml'
+        expect(last_request.params['admin']['products'][0]['price']['__content__']).to eq('100')
+        expect(last_request.params['admin']['products'][1]['price']['__content__']).to eq('200')
+      end
+    end
+  end
 end
