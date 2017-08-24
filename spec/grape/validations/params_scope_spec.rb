@@ -339,6 +339,18 @@ describe Grape::Validations::ParamsScope do
       get '/optional_type_array'
     end
 
+    it 'handles missing optional Array type' do
+      subject.params do
+        optional :a, type: Array do
+          requires :b
+        end
+      end
+      subject.get('/test') { declared(params).to_json }
+      get '/test'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{"a":[]}')
+    end
+
     it 'errors with an unsupported type' do
       expect do
         subject.params do
