@@ -43,7 +43,11 @@ module Grape
       def check_values(param_array)
         values = @values.is_a?(Proc) && @values.arity.zero? ? @values.call : @values
         return true if values.nil?
-        return param_array.all? { |param| values.call(param) } if values.is_a? Proc
+        begin
+          return param_array.all? { |param| values.call(param) } if values.is_a? Proc
+        rescue => _e
+          return false
+        end
         param_array.all? { |param| values.include?(param) }
       end
 

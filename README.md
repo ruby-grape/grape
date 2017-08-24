@@ -1179,7 +1179,8 @@ end
 
 Alternatively, a Proc with arity one (i.e. taking one argument) can be used to explicitly validate
 each parameter value.  In that case, the Proc is expected to return a truthy value if the parameter
-value is valid.
+value is valid. The parameter will be considered invalid if the Proc returns a falsy value or if it
+raises a StandardError.
 
 ```ruby
 params do
