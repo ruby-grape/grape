@@ -45,7 +45,7 @@ module Grape
         return true if values.nil?
         begin
           return param_array.all? { |param| values.call(param) } if values.is_a? Proc
-        rescue => _e
+        rescue StandardError => _e
           return false
         end
         param_array.all? { |param| values.include?(param) }
