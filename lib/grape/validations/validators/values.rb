@@ -32,7 +32,7 @@ module Grape
           unless check_excepts(param_array)
 
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
-          unless check_values(param_array)
+          unless check_values(param_array, attr_name)
 
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
           if @proc && !param_array.all? { |param| @proc.call(param) }
@@ -40,12 +40,13 @@ module Grape
 
       private
 
-      def check_values(param_array)
+      def check_values(param_array, attr_name)
         values = @values.is_a?(Proc) && @values.arity.zero? ? @values.call : @values
         return true if values.nil?
         begin
           return param_array.all? { |param| values.call(param) } if values.is_a? Proc
-        rescue StandardError => _e
+        rescue StandardError => e
+          warn "Error '#{e}' raised while validating attribute '#{attr_name}'"
           return false
         end
         param_array.all? { |param| values.include?(param) }
