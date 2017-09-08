@@ -1,8 +1,7 @@
-### 1.0.1 (Next)
+### 1.0.1 (9/8/2017)
 
 #### Features
 
-* Your contribution here.
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
 * [#1665](https://github.com/ruby-grape/grape/pull/1665): Make helpers available in subclasses - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1674](https://github.com/ruby-grape/grape/pull/1674): Add parameter alias (`as`) - [@glaucocustodio](https://github.com/glaucocustodio).
