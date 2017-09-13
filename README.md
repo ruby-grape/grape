@@ -1056,7 +1056,7 @@ end
 
 In the example above Grape will use `blank?` to check whether the `shelf_id` param is present.
 
-Given also takes a `Proc` with custom code. Below, the param `description` is required only if the value of `category` is equal `foo`:
+`given` also takes a `Proc` with custom code. Below, the param `description` is required only if the value of `category` is equal `foo`:
 
 ```ruby
 params do
