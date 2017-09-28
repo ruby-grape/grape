@@ -2,7 +2,7 @@
 
 #### Features
 
-* Your contribution here.
+* [#1686](https://github.com/ruby-grape/grape/pull/1686): Avoid coercion of a value if it is valid - [@timothysu](https://github.com/timothysu).
 
 #### Fixes
 
