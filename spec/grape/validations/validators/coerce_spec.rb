@@ -477,7 +477,7 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'first-class JSON' do
-      it 'parses objects and arrays' do
+      it 'parses objects, hashes, and arrays' do
         subject.params do
           requires :splines, type: JSON do
             requires :x, type: Integer, values: [1, 2, 3]
@@ -499,7 +499,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('woof')
 
+        get '/', splines: { x: 1, ints: [1, 2, 3], obj: { y: 'woof' } }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('woof')
+
         get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('arrays work')
+
+        get '/', splines: [{ x: 2, ints: [] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
@@ -507,7 +515,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
+        get '/', splines: { x: 4, ints: [2] }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
+        get '/', splines: [{ x: 1, ints: [] }, { x: 4, ints: [] }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
