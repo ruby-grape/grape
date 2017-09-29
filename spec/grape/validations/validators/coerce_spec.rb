@@ -419,6 +419,23 @@ describe Grape::Validations::CoerceValidator do
         expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
       end
 
+      it 'parses parameters even if type is valid' do
+        subject.params do
+          requires :values, type: Array, coerce_with: ->(array) { array.map { |val| val.to_i + 1 } }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: [1, 2, 3, 4]
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([2, 3, 4, 5])
+
+        get '/ints', values: %w(a b c d)
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
+      end
+
       it 'uses parse where available' do
         subject.params do
           requires :ints, type: Array, coerce_with: JSON do
@@ -477,7 +494,7 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'first-class JSON' do
-      it 'parses objects and arrays' do
+      it 'parses objects, hashes, and arrays' do
         subject.params do
           requires :splines, type: JSON do
             requires :x, type: Integer, values: [1, 2, 3]
@@ -499,7 +516,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('woof')
 
+        get '/', splines: { x: 1, ints: [1, 2, 3], obj: { y: 'woof' } }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('woof')
+
         get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('arrays work')
+
+        get '/', splines: [{ x: 2, ints: [] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
@@ -507,7 +532,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
+        get '/', splines: { x: 4, ints: [2] }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
+        get '/', splines: [{ x: 1, ints: [] }, { x: 4, ints: [] }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
