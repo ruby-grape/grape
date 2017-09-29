@@ -419,6 +419,23 @@ describe Grape::Validations::CoerceValidator do
         expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
       end
 
+      it 'parses parameters even if type is valid' do
+        subject.params do
+          requires :values, type: Array, coerce_with: ->(array) { array.map { |val| val.to_i + 1 } }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: [1, 2, 3, 4]
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([2, 3, 4, 5])
+
+        get '/ints', values: %w(a b c d)
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
+      end
+
       it 'uses parse where available' do
         subject.params do
           requires :ints, type: Array, coerce_with: JSON do
