@@ -42,6 +42,7 @@
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
+  - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
@@ -109,9 +110,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.0.1**.
+You're reading the documentation for the next release of Grape, which should be **1.0.2**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.0.0](https://github.com/ruby-grape/grape/blob/v1.0.0/README.md).
+The current stable release is [1.0.1](https://github.com/ruby-grape/grape/blob/v1.0.1/README.md).
 
 ## Project Resources
 
@@ -1055,7 +1056,7 @@ end
 
 In the example above Grape will use `blank?` to check whether the `shelf_id` param is present.
 
-Given also takes a `Proc` with custom code. Below, the param `description` is required only if the value of `category` is equal `foo`:
+`given` also takes a `Proc` with custom code. Below, the param `description` is required only if the value of `category` is equal `foo`:
 
 ```ruby
 params do
@@ -1094,6 +1095,23 @@ params do
 end
 ```
 
+### Alias
+
+You can set an alias for parameters using `as`, which can be useful when refactoring existing APIs:
+
+```ruby
+resource :users do
+  params do
+    requires :email_address, as: :email
+    requires :password
+  end
+  post do
+    User.create!(declared(params)) # User takes email and password
+  end
+end
+```
+
+The value passed to `as` will be the key when calling `params` or `declared(params)`.
 
 ### Built-in Validators
 
@@ -1161,7 +1179,8 @@ end
 
 Alternatively, a Proc with arity one (i.e. taking one argument) can be used to explicitly validate
 each parameter value.  In that case, the Proc is expected to return a truthy value if the parameter
-value is valid.
+value is valid. The parameter will be considered invalid if the Proc returns a falsy value or if it
+raises a StandardError.
 
 ```ruby
 params do

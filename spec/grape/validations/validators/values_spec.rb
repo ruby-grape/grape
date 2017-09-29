@@ -111,6 +111,13 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
+          requires :number, type: Integer, values: ->(v) { v > 0 }
+        end
+        get '/lambda_int_val' do
+          { number: params[:number] }
+        end
+
+        params do
           requires :type, values: -> { [] }
         end
         get '/empty_lambda'
@@ -355,6 +362,24 @@ describe Grape::Validations::ValuesValidator do
     get('/lambda', type: 'invalid-type')
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+  end
+
+  it 'does not allow non-numeric string value for int value using lambda' do
+    get('/lambda_int_val', number: 'foo')
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'number is invalid, number does not have a valid value' }.to_json)
+  end
+
+  it 'does not allow nil for int value using lambda' do
+    get('/lambda_int_val', number: nil)
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'number does not have a valid value' }.to_json)
+  end
+
+  it 'allows numeric string for int value using lambda' do
+    get('/lambda_int_val', number: '3')
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ number: 3 }.to_json)
   end
 
   it 'allows value using lambda' do

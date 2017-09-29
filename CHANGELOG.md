@@ -1,15 +1,26 @@
-### 1.0.1 (Next)
+### 1.0.2 (Next)
 
 #### Features
 
 * Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
+### 1.0.1 (9/8/2017)
+
+#### Features
+
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Add the original exception to the error_formatter the original exception - [@dcsg](https://github.com/dcsg).
 * [#1665](https://github.com/ruby-grape/grape/pull/1665): Make helpers available in subclasses - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
+* [#1674](https://github.com/ruby-grape/grape/pull/1674): Add parameter alias (`as`) - [@glaucocustodio](https://github.com/glaucocustodio).
 
 #### Fixes
 
 * [#1652](https://github.com/ruby-grape/grape/pull/1652): Fix missing backtrace that was not being bubbled up to the `error_formatter` - [@dcsg](https://github.com/dcsg).
 * [#1661](https://github.com/ruby-grape/grape/pull/1661): Handle deeply-nested dependencies correctly - [@rnubel](https://github.com/rnubel), [@jnardone](https://github.com/jnardone).
+* [#1679](https://github.com/ruby-grape/grape/pull/1679): Treat StandardError from explicit values validator proc as false - [@jlfaber](https://github.com/jlfaber).
 
 ### 1.0.0 (7/3/2017)
 
