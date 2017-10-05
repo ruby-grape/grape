@@ -3,6 +3,7 @@
 #### Features
 
 * [#1686](https://github.com/ruby-grape/grape/pull/1686): Avoid coercion of a value if it is valid - [@timothysu](https://github.com/timothysu).
+* [#1688](https://github.com/ruby-grape/grape/pull/1688): Removes yard docs - [@ramkumar-kr](https://github.com/ramkumar-kr).
 
 #### Fixes
 
