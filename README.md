@@ -3375,6 +3375,22 @@ if Rails.env.development?
 end
 ```
 
+For Rails >= 5.1.4, change this:
+
+```ruby
+ActionDispatch::Callbacks.to_prepare do
+  api_reloader.execute_if_updated
+end
+```
+
+to this:
+
+```ruby
+ActiveSupport::Reloader.to_prepare do
+  api_reloader.execute_if_updated
+end
+```
+
 See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-rails-3-reload-lib-directory-for-each-request/4368838#4368838) for more information.
 
 ## Performance Monitoring
