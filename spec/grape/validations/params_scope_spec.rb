@@ -407,6 +407,60 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq(200)
     end
 
+    it 'sets default values only if the dependency is met' do
+      subject.params do
+        optional :a
+        given :a do
+          optional :b, default: 'default value'
+        end
+      end
+      subject.get('/defaults') { params.to_json }
+
+      get '/defaults'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{}')
+
+      get '/defaults', a: true
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq('a' => 'true', 'b' => 'default value')
+    end
+
+    it 'conditionally applies all multi-param validators' do
+      subject.params do
+        optional :a
+        given :a do
+          optional :b, :c, :d, :e, :f, :g
+
+          exactly_one_of :b, :c
+          all_or_none_of :d, :e
+          at_least_one_of :f, :g
+        end
+      end
+      subject.get('/exactly_one') { params.to_json }
+
+      get '/exactly_one'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{}')
+
+      get '/exactly_one', a: true, b: true, f: true
+      expect(last_response.status).to eq(200)
+
+      get '/exactly_one', a: true, c: true, f: true
+      expect(last_response.status).to eq(200)
+
+      get '/exactly_one', a: true, b: true, c: true, f: true
+      expect(last_response.status).to eq(400)
+
+      get '/exactly_one', d: true
+      expect(last_response.status).to eq(200)
+
+      get '/exactly_one', a: true, b: true, d: true, e: true, f: true
+      expect(last_response.status).to eq(200)
+
+      get '/exactly_one', a: true, b: true, f: true, g: true
+      expect(last_response.status).to eq(200)
+    end
+
     it 'applies only the appropriate validation' do
       subject.params do
         optional :a

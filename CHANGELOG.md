@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#1691](https://github.com/ruby-grape/grape/pull/1691): Fix validations nested under `given` - [@rnubel](https://github.com/rnubel).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)

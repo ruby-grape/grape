@@ -10,6 +10,10 @@ module Grape
 
       private
 
+      def scope_should_validate?(scoped_params, params)
+        @scope.meets_dependency?(scoped_params, params)
+      end
+
       def scope_requires_params
         @scope.required? || scoped_params.any?(&:any?)
       end

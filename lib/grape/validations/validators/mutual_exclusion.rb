@@ -6,7 +6,7 @@ module Grape
 
       def validate!(params)
         super
-        if two_or_more_exclusive_params_are_present
+        if two_or_more_exclusive_params_are_present(params)
           raise Grape::Exceptions::Validation, params: processing_keys_in_common, message: message(:mutual_exclusion)
         end
         params
@@ -14,8 +14,10 @@ module Grape
 
       private
 
-      def two_or_more_exclusive_params_are_present
+      def two_or_more_exclusive_params_are_present(params)
         scoped_params.any? do |resource_params|
+          next unless scope_should_validate?(resource_params, params)
+
           @processing_keys_in_common = keys_in_common(resource_params)
           @processing_keys_in_common.length > 1
         end
