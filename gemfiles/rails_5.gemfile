@@ -15,10 +15,8 @@ group :development do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
-  gem 'yard'
   gem 'appraisal'
   gem 'benchmark-ips'
-  gem 'redcarpet'
 end
 
 group :test do

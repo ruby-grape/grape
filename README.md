@@ -117,6 +117,7 @@ The current stable release is [1.0.1](https://github.com/ruby-grape/grape/blob/v
 ## Project Resources
 
 * [Grape Website](http://www.ruby-grape.org)
+* [Documentation](http://www.rubydoc.info/gems/grape)
 * Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
 * [Follow us on Twitter](https://twitter.com/grapeframework)
 
