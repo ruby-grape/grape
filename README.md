@@ -2083,7 +2083,7 @@ Custom error formatters for existing and additional types can be defined with a 
 
 ```ruby
 class Twitter::API < Grape::API
-  error_formatter :txt, ->(message, backtrace, options, env) {
+  error_formatter :txt, ->(message, backtrace, options, env, original_exception) {
     "error: #{message} from #{backtrace}"
   }
 end
@@ -2093,7 +2093,7 @@ You can also use a module or class.
 
 ```ruby
 module CustomFormatter
-  def self.call(message, backtrace, options, env)
+  def self.call(message, backtrace, options, env, original_exception)
     { message: message, backtrace: backtrace }
   end
 end
