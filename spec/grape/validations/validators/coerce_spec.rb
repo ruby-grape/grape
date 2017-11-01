@@ -225,6 +225,55 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('1')
         end
+
+        it 'Array of type implementing parse' do
+          subject.params do
+            requires :uri, type: Array[URI]
+          end
+          subject.get '/uri_array' do
+            params[:uri][0].class
+          end
+          get 'uri_array', uri: ['http://www.google.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTP')
+        end
+
+        it 'Set of type implementing parse' do
+          subject.params do
+            requires :uri, type: Set[URI]
+          end
+          subject.get '/uri_array' do
+            "#{params[:uri].class},#{params[:uri].first.class},#{params[:uri].size}"
+          end
+          get 'uri_array', uri: Array.new(2) { 'http://www.example.com' }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Set,URI::HTTP,1')
+        end
+
+        it 'Array of class implementing parse and parsed?' do
+          class SecureURIOnly
+            def self.parse(value)
+              URI.parse(value)
+            end
+
+            def self.parsed?(value)
+              value.is_a? URI::HTTPS
+            end
+          end
+
+          subject.params do
+            requires :uri, type: Array[SecureURIOnly]
+          end
+          subject.get '/secure_uris' do
+            params[:uri].first.class
+          end
+          get 'secure_uris', uri: ['https://www.example.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTPS')
+          get 'secure_uris', uri: ['https://www.example.com', 'http://www.example.com']
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('uri is invalid')
+        end
       end
 
       context 'Set' do

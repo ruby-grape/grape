@@ -909,6 +909,8 @@ end
 
 params do
   requires :color, type: Color, default: Color.new('blue')
+  requires :more_colors, type: Array[Color] # Collections work
+  optional :unique_colors, type: Set[Color] # Duplicates discarded
 end
 
 get '/stuff' do
@@ -940,6 +942,26 @@ It will parse a string and return an Array of Integers, matching the `Array[Inte
 ```ruby
 params do
   requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+end
+```
+
+Grape will assert that coerced values match the given `type`, and will reject the request
+if they do not. To override this behaviour, custom types may implement a `parsed?` method
+that should accept a single argument and return `true` if the value passes type validation.
+
+```ruby
+class SecureUri
+  def self.parse(value)
+    URI.parse value
+  end
+
+  def self.parsed?(value)
+    value.is_a? URI::HTTPS
+  end
+end
+
+params do
+  requires :secure_uri, type: SecureUri
 end
 ```
 
