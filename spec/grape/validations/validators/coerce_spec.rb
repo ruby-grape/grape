@@ -225,6 +225,44 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('1')
         end
+
+        it 'Array of URI::HTTP' do
+          module URI
+            class HTTP
+              def self.parse(value)
+                URI.parse(value)
+              end
+            end
+          end
+          subject.params do
+            requires :uri, coerce: Array[URI::HTTP]
+          end
+          subject.get '/uri_array' do
+            params[:uri][0].class
+          end
+          get 'uri_array', uri: ['http://www.google.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTP')
+        end
+
+        it 'Array of URI::HTTP (via Virtus::Attribute)' do
+          class URIAttribute < Virtus::Attribute
+            primitive URI::HTTP
+            def coerce(input)
+              URI.parse(input.to_s)
+            end
+          end
+
+          subject.params do
+            requires :uri, coerce: Array[URIAttribute]
+          end
+          subject.get '/uri_array' do
+            params[:uri][0].class
+          end
+          get 'uri_array', uri: ['http://www.google.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTP')
+        end
       end
 
       context 'Set' do
