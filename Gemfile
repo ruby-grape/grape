@@ -29,4 +29,5 @@ group :test do
   gem 'mime-types'
   gem 'ruby-grape-danger', '~> 0.1.0', require: false
   gem 'coveralls', '~> 0.8.17', require: false
+  gem 'danger-toc', '~> 0.1.0'
 end
