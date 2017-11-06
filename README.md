@@ -31,6 +31,7 @@
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
+  - [Include Parent Namespaces](#include-parent-namespaces)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
@@ -44,12 +45,24 @@
   - [Group Options](#group-options)
   - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
+    - [`allow_blank`](#allowblank)
+    - [`values`](#values)
+    - [`except_values`](#exceptvalues)
+    - [`regexp`](#regexp)
+    - [`mutually_exclusive`](#mutuallyexclusive)
+    - [`exactly_one_of`](#exactlyoneof)
+    - [`at_least_one_of`](#atleastoneof)
+    - [`all_or_none_of`](#allornoneof)
+    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutuallyexclusive-exactlyoneof-atleastoneof-allornoneof)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
-  - [Custom Validation Messages](#custom-validation-messages)
-- [Headers](#headers)
+  - [Custom Validation messages](#custom-validation-messages)
+    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allowblank-values-regexp)
+    - [`mutually_exclusive`](#mutuallyexclusive-1)
+    - [Overriding Attribute Names](#overriding-attribute-names)
+    - [With Default](#with-default)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -63,6 +76,8 @@
   - [Default Error HTTP Status Code](#default-error-http-status-code)
   - [Handling 404](#handling-404)
 - [Exception Handling](#exception-handling)
+    - [Rescuing exceptions inside namespaces](#rescuing-exceptions-inside-namespaces)
+    - [Unrescuable Exceptions](#unrescuable-exceptions)
   - [Rails 3.x](#rails-3x)
 - [Logging](#logging)
 - [API Formats](#api-formats)
@@ -78,6 +93,8 @@
   - [Active Model Serializers](#active-model-serializers)
 - [Sending Raw or No Data](#sending-raw-or-no-data)
 - [Authentication](#authentication)
+  - [Basic and Digest Auth](#basic-and-digest-auth)
+  - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
@@ -88,13 +105,22 @@
   - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
+    - [RSpec](#rspec)
+    - [Airborne](#airborne)
+    - [MiniTest](#minitest)
   - [Writing Tests with Rails](#writing-tests-with-rails)
+    - [RSpec](#rspec-1)
+    - [MiniTest](#minitest-1)
   - [Stubbing Helpers](#stubbing-helpers)
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
   - [Reloading in Rack Applications](#reloading-in-rack-applications)
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
+    - [endpoint_run.grape](#endpointrungrape)
+    - [endpoint_render.grape](#endpointrendergrape)
+    - [endpoint_run_filters.grape](#endpointrunfiltersgrape)
+    - [endpoint_run_validators.grape](#endpointrunvalidatorsgrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [License](#license)
@@ -645,7 +671,7 @@ curl -X GET -H "Content-Type: application/json" localhost:9292/parent/foo/bar
 }
 ````
 
-### Include missing
+### Include Missing
 
 By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:
 
@@ -888,8 +914,6 @@ class Color
   end
 end
 
-# ...
-
 params do
   requires :color, type: Color, default: Color.new('blue')
 end
@@ -957,8 +981,6 @@ get '/' do
   params[:json].inspect
 end
 
-# ...
-
 client.get('/', json: '{"int":1}') # => "{:int=>1}"
 client.get('/', json: '[{"int":"1"}]') # => "[{:int=>1}]"
 
@@ -994,8 +1016,6 @@ get '/' do
   params[:status_code].inspect
 end
 
-# ...
-
 client.get('/', status_code: 'OK_GOOD') # => "OK_GOOD"
 client.get('/', status_code: 300) # => 300
 client.get('/', status_code: %w(404 NOT FOUND)) # => [404, "NOT", "FOUND"]
@@ -1011,8 +1031,6 @@ end
 get '/' do
   params[:status_codes].inspect
 end
-
-# ...
 
 client.get('/', status_codes: %w(1 two)) # => [1, "two"]
 ```
@@ -1589,7 +1607,7 @@ en:
         name_required: 'must be present'
 ```
 
-#### `Overriding attribute names`
+#### Overriding Attribute Names
 
 You can also override attribute names.
 
@@ -1607,7 +1625,7 @@ en:
 ```
 Will produce 'Oops! Name must be present'
 
-#### `With Default`
+#### With Default
 
 You cannot set a custom message option for Default as it requires interpolation `%{option1}: %{value1} is incompatible with %{option2}: %{value2}`. You can change the default error message for Default by changing the `incompatible_option_values` message key inside [en.yml](lib/grape/locale/en.yml)
 
@@ -2282,7 +2300,6 @@ class API < Grape::API
     end
   end
   post '/statuses' do
-    # ...
     logger.info "#{current_user} has statused"
   end
 end
@@ -2925,9 +2942,7 @@ If a request for a resource is made that triggers the built-in `OPTIONS` handler
 only `before` and `after` callbacks will be executed.  The remaining callbacks will
 be bypassed.
 
-#### Examples
-
-Using a simple `before` block to set a header
+For example, using a simple `before` block to set a header.
 
 ```ruby
 before do
@@ -2963,7 +2978,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /           # 'root - '
@@ -2991,7 +3006,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /123        # 'Integer'
@@ -3026,7 +3041,7 @@ class Test < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /foo/v1       # 'v1-hello'
@@ -3051,7 +3066,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /greeting              # {"greeting":"Hello!"}
@@ -3339,7 +3354,7 @@ describe 'an endpoint that needs helpers stubbed' do
   end
 
   it 'stubs the helper' do
-    # ...
+
   end
 end
 ```
