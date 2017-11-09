@@ -960,7 +960,7 @@ params do
 end
 post '/' do
   params[:avatar][:filename] # => 'avatar.png'
-  params[:avatar][:avatar] # => 'image/png'
+  params[:avatar][:type] # => 'image/png'
   params[:avatar][:tempfile] # => #<File>
 end
 ```
