@@ -1038,7 +1038,7 @@ client.get('/', status_codes: %w(1 two)) # => [1, "two"]
 ### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
-In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
+In the [above example](#parameter-validation-and-coercion), this means `params[:media][:url]` is required along with `params[:id]`,
 and `params[:audio][:format]` is required only if `params[:audio]` is present.
 With a block, `group`, `requires` and `optional` accept an additional option `type` which can
 be either `Array` or `Hash`, and defaults to `Array`. Depending on the value, the nested
