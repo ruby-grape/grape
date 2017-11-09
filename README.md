@@ -896,7 +896,7 @@ get '/int' integers: { int: '45' }
 ### Custom Types and Coercions
 
 Aside from the default set of supported types listed above, any class can be
-used as a type so long as an explicit coercion method is supplied. If the type
+used as a type as long as an explicit coercion method is supplied. If the type
 implements a class-level `parse` method, Grape will use it automatically.
 This method must take one string argument and return an instance of the correct
 type, or raise an exception to indicate the value was invalid. E.g.,
