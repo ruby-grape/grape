@@ -8,6 +8,7 @@
 
 #### Fixes
 
+* [#1710](https://github.com/ruby-grape/grape/pull/1710): Fix wrong transformation of empty Array in declared params - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)
