@@ -1,5 +1,6 @@
 require_relative 'types/build_coercer'
 require_relative 'types/custom_type_coercer'
+require_relative 'types/custom_type_collection_coercer'
 require_relative 'types/multiple_type_coercer'
 require_relative 'types/variant_collection_coercer'
 require_relative 'types/json'
@@ -143,7 +144,8 @@ module Grape
       end
 
       # A valid custom type must implement a class-level `parse` method, taking
-      #   one String argument and returning the parsed value in its correct type.
+      # one String argument and returning the parsed value in its correct type.
+      #
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type can be used as a custom type
       def self.custom?(type)
@@ -154,6 +156,17 @@ module Grape
           !special?(type) &&
           type.respond_to?(:parse) &&
           type.method(:parse).arity == 1
+      end
+
+      # Is the declared type an +Array+ or +Set+ of a {#custom?} type?
+      #
+      # @param type [Array<Class>,Class] type to check
+      # @return [Boolean] true if +type+ is a collection of a type that implements
+      #   its own +#parse+ method.
+      def self.collection_of_custom?(type)
+        (type.is_a?(Array) || type.is_a?(Set)) &&
+          type.length == 1 &&
+          custom?(type.first)
       end
     end
   end

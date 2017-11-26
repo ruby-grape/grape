@@ -51,6 +51,14 @@ module Grape
         elsif method || Types.custom?(type)
           converter_options[:coercer] = Types::CustomTypeCoercer.new(type, method)
 
+        # Special coercer for collections of types that implement a parse method.
+        # CustomTypeCoercer (above) already handles such types when an explicit coercion
+        # method is supplied.
+        elsif Types.collection_of_custom?(type)
+          converter_options[:coercer] = Types::CustomTypeCollectionCoercer.new(
+            type.first, type.is_a?(Set)
+          )
+
         # Grape swaps in its own Virtus::Attribute implementations
         # for certain special types that merit first-class support
         # (but not if a custom coercion method has been supplied).
