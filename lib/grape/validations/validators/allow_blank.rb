@@ -7,7 +7,7 @@ module Grape
         value = params[attr_name]
         value = value.strip if value.respond_to?(:strip)
 
-        return if false == value || value.present?
+        return if value == false || value.present?
 
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:blank)
       end

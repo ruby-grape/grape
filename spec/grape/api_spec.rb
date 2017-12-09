@@ -209,7 +209,7 @@ describe Grape::API do
       expect(last_response.body).to eq('outer')
     end
 
-    %w(group resource resources segment).each do |als|
+    %w[group resource resources segment].each do |als|
       it "`.#{als}` is an alias" do
         inner_namespace = nil
         subject.send(als, :awesome) do
@@ -318,7 +318,7 @@ describe Grape::API do
         end
 
         context 'when array of versions provided' do
-          let(:version) { %w(v1 v2) }
+          let(:version) { %w[v1 v2] }
 
           it { versioned_get '/', 'v1', using: :path }
           it { versioned_get '/', 'v2', using: :path }
@@ -333,7 +333,7 @@ describe Grape::API do
       end
 
       it 'header versioned APIs with multiple headers' do
-        subject.version %w(v1 v2), using: :header, vendor: 'test'
+        subject.version %w[v1 v2], using: :header, vendor: 'test'
         subject.enable_root_route!
 
         versioned_get '/', 'v1', using: :header, vendor: 'test'
@@ -421,7 +421,7 @@ describe Grape::API do
     end
 
     it 'allows for multiple verbs' do
-      subject.route([:get, :post], '/abc') do
+      subject.route(%i[get post], '/abc') do
         'hiya'
       end
 
@@ -435,7 +435,7 @@ describe Grape::API do
       expect(last_response.body).to eql 'hiya'
     end
 
-    [:put, :post].each do |verb|
+    %i[put post].each do |verb|
       context verb do
         ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
           it "allows a(n) #{object.class} json object in params" do
@@ -473,14 +473,14 @@ describe Grape::API do
     end
 
     it 'allows for multipart paths' do
-      subject.route([:get, :post], '/:id/first') do
+      subject.route(%i[get post], '/:id/first') do
         'first'
       end
 
-      subject.route([:get, :post], '/:id') do
+      subject.route(%i[get post], '/:id') do
         'ola'
       end
-      subject.route([:get, :post], '/:id/first/second') do
+      subject.route(%i[get post], '/:id/first/second') do
         'second'
       end
 
@@ -501,7 +501,7 @@ describe Grape::API do
         'lol'
       end
 
-      %w(get post put delete options patch).each do |m|
+      %w[get post put delete options patch].each do |m|
         send(m, '/abc')
         expect(last_response.body).to eql 'lol'
       end
@@ -538,7 +538,7 @@ describe Grape::API do
       expect(last_response.body).to eql 'catch-all'
     end
 
-    verbs = %w(post get head delete put options patch)
+    verbs = %w[post get head delete put options patch]
     verbs.each do |verb|
       it "allows and properly constrain a #{verb.upcase} method" do
         subject.send(verb, '/example') do
@@ -2393,7 +2393,7 @@ XML
         expect(subject.version).to eq('v2')
       end
       it 'returns versions' do
-        expect(subject.versions).to eq(%w(v1 v2))
+        expect(subject.versions).to eq(%w[v1 v2])
       end
       it 'sets route paths' do
         expect(subject.routes.size).to be >= 2
@@ -3368,7 +3368,7 @@ XML
       end
       it 'array' do
         subject.get '/example' do
-          %w(example1 example2)
+          %w[example1 example2]
         end
         get '/example'
         expect(last_response.status).to eq(200)

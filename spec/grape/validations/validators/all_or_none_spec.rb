@@ -11,7 +11,7 @@ describe Grape::Validations::AllOrNoneOfValidator do
         def required?; end
       end
     end
-    let(:all_or_none_params) { [:beer, :wine, :grapefruit] }
+    let(:all_or_none_params) { %i[beer wine grapefruit] }
     let(:validator) { described_class.new(all_or_none_params, {}, false, scope.new) }
 
     context 'when all restricted params are present' do

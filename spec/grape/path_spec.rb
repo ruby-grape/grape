@@ -31,8 +31,8 @@ module Grape
       end
 
       it 'splits the mount path' do
-        path = Path.new(anything, anything, mount_path: %w(foo bar))
-        expect(path.mount_path).to eql(%w(foo bar))
+        path = Path.new(anything, anything, mount_path: %w[foo bar])
+        expect(path.mount_path).to eql(%w[foo bar])
       end
     end
 
@@ -49,7 +49,7 @@ module Grape
 
       it 'splits the mount path' do
         path = Path.new(anything, anything, root_prefix: 'hello/world')
-        expect(path.root_prefix).to eql(%w(hello world))
+        expect(path.root_prefix).to eql(%w[hello world])
       end
     end
 

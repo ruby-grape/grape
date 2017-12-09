@@ -161,7 +161,7 @@ module Grape
           route_settings[:endpoint] = route.app
 
           # using the :any shorthand produces [nil] for route methods, substitute all manually
-          route_settings[:methods] = %w(GET PUT POST DELETE PATCH HEAD OPTIONS) if route_settings[:methods].include?('*')
+          route_settings[:methods] = %w[GET PUT POST DELETE PATCH HEAD OPTIONS] if route_settings[:methods].include?('*')
         end
       end
 
@@ -195,7 +195,7 @@ module Grape
     # Generate a route that returns an HTTP 405 response for a user defined
     # path on methods not specified
     def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
-      not_allowed_methods = %w(GET PUT POST DELETE PATCH HEAD) - allowed_methods
+      not_allowed_methods = %w[GET PUT POST DELETE PATCH HEAD] - allowed_methods
       not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
 
       return if not_allowed_methods.empty?
