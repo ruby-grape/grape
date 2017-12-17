@@ -192,7 +192,7 @@ module Grape
           expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
 
           subject.namespace_stackable[:namespace_stackable_thing] = :other_thing
-          expect(subject.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar, :other_thing]
+          expect(subject.namespace_stackable[:namespace_stackable_thing]).to eq %i[namespace_stackable_foo_bar other_thing]
           expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
         end
 
@@ -200,7 +200,7 @@ module Grape
           expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
 
           subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :other_thing
-          expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:other_thing, :namespace_reverse_stackable_foo_bar]
+          expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq %i[other_thing namespace_reverse_stackable_foo_bar]
           expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
         end
 

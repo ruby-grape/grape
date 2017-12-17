@@ -8,7 +8,7 @@ module Grape
     class Route
       ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/
       SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/
-      FIXED_NAMED_CAPTURES = %w(format version).freeze
+      FIXED_NAMED_CAPTURES = %w[format version].freeze
 
       attr_accessor :pattern, :translator, :app, :index, :regexp, :options
 
@@ -32,19 +32,19 @@ module Grape
         ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
       end
 
-      [
-        :prefix,
-        :version,
-        :settings,
-        :format,
-        :description,
-        :http_codes,
-        :headers,
-        :entity,
-        :details,
-        :requirements,
-        :request_method,
-        :namespace
+      %i[
+        prefix
+        version
+        settings
+        format
+        description
+        http_codes
+        headers
+        entity
+        details
+        requirements
+        request_method
+        namespace
       ].each do |method_name|
         define_method method_name do
           attributes.public_send method_name

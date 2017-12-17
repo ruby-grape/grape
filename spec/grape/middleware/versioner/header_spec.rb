@@ -241,7 +241,7 @@ describe Grape::Middleware::Versioner::Header do
 
   context 'when multiple versions are specified' do
     before do
-      @options[:versions] = %w(v1 v2)
+      @options[:versions] = %w[v1 v2]
     end
 
     it 'succeeds with v1' do

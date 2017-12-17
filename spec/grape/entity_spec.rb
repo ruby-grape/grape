@@ -169,7 +169,7 @@ describe Grape::Entity do
       expect(inner_body).to eql(root: { abc: 'def' })
     end
 
-    [:json, :serializable_hash].each do |format|
+    %i[json serializable_hash].each do |format|
       it "presents with #{format}" do
         entity = Class.new(Grape::Entity)
         entity.root 'examples', 'example'

@@ -63,7 +63,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_optional_using
-        expect(subject.route_setting(:declared_params)).to eq([:field_a, :field_b])
+        expect(subject.route_setting(:declared_params)).to eq(%i[field_a field_b])
       end
 
       it 'works when field_a and field_b are not present' do
@@ -139,7 +139,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -174,7 +174,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_none
-        expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+        expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -204,7 +204,7 @@ describe Grape::Validations do
 
         it 'adds only the entity documentation to declared params, nothing more' do
           define_requires_all
-          expect(subject.route_setting(:declared_params)).to eq([:required_field, :optional_field])
+          expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
         end
       end
 
@@ -350,7 +350,7 @@ describe Grape::Validations do
       before do
         subject.params do
           requires :items, type: Hash do
-            requires :key, type: String, values: %w(a b)
+            requires :key, type: String, values: %w[a b]
           end
         end
         subject.get '/required' do
@@ -1058,14 +1058,14 @@ describe Grape::Validations do
           subject.params do
             use :pagination
           end
-          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page]
+          expect(subject.route_setting(:declared_params)).to eq %i[page per_page]
         end
 
         it 'by #use with multiple params' do
           subject.params do
             use :pagination, :period
           end
-          expect(subject.route_setting(:declared_params)).to eq [:page, :per_page, :start_date, :end_date]
+          expect(subject.route_setting(:declared_params)).to eq %i[page per_page start_date end_date]
         end
       end
 
@@ -1073,13 +1073,13 @@ describe Grape::Validations do
         before do
           subject.helpers do
             params :order do |options|
-              optional :order, type: Symbol, values: [:asc, :desc], default: options[:default_order]
+              optional :order, type: Symbol, values: %i[asc desc], default: options[:default_order]
               optional :order_by, type: Symbol, values: options[:order_by], default: options[:default_order_by]
             end
           end
           subject.format :json
           subject.params do
-            use :order, default_order: :asc, order_by: [:name, :created_at], default_order_by: :created_at
+            use :order, default_order: :asc, order_by: %i[name created_at], default_order_by: :created_at
           end
           subject.get '/order' do
             {

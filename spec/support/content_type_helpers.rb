@@ -1,7 +1,7 @@
 module Spec
   module Support
     module Helpers
-      %w(put patch post delete).each do |method|
+      %w[put patch post delete].each do |method|
         define_method :"#{method}_with_json" do |uri, params = {}, env = {}, &block|
           params = params.to_json
           env['CONTENT_TYPE'] ||= 'application/json'

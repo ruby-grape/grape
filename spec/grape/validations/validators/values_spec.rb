@@ -159,7 +159,7 @@ describe Grape::Validations::ValuesValidator do
 
         params do
           optional :optional, type: Array do
-            requires :type, values: %w(a b)
+            requires :type, values: %w[a b]
           end
         end
         get '/optional_with_required_values'
@@ -207,7 +207,7 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
-          optional :optional, type: Array[String], values: %w(a b c)
+          optional :optional, type: Array[String], values: %w[a b c]
         end
         put '/optional_with_array_of_string_values'
 
@@ -555,7 +555,7 @@ describe Grape::Validations::ValuesValidator do
     end
 
     it 'rejects an array of values if any of them matches except' do
-      get '/except/exclusive', type: %w(valid1 valid2 invalid-type1 valid4)
+      get '/except/exclusive', type: %w[valid1 valid2 invalid-type1 valid4]
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
     end

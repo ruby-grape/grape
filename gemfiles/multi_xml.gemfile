@@ -6,29 +6,30 @@ gem 'multi_xml', require: 'multi_xml'
 
 group :development, :test do
   gem 'bundler'
-  gem 'rake'
-  gem 'rubocop', '0.47.0'
   gem 'hashie'
+  gem 'rake'
+  gem 'rubocop', '0.51.0'
 end
 
 group :development do
+  gem 'appraisal'
+  gem 'benchmark-ips'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
-  gem 'appraisal'
-  gem 'benchmark-ips'
 end
 
 group :test do
+  gem 'cookiejar'
+  gem 'coveralls', '~> 0.8.17', require: false
+  gem 'danger-toc', '~> 0.1.0'
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
+  gem 'mime-types'
+  gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '~> 0.6.3'
   gem 'rspec', '~> 3.0'
-  gem 'cookiejar'
-  gem 'rack-jsonp', require: 'rack/jsonp'
-  gem 'mime-types'
   gem 'ruby-grape-danger', '~> 0.1.0', require: false
-  gem 'coveralls', '~> 0.8.17', require: false
 end
 
 gemspec path: '../'

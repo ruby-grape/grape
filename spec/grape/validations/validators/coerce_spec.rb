@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'spec_helper'
 
 describe Grape::Validations::CoerceValidator do
@@ -136,11 +135,11 @@ describe Grape::Validations::CoerceValidator do
         'array int works'
       end
 
-      get 'array', ids: %w(1 2 az)
+      get 'array', ids: %w[1 2 az]
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('ids is invalid')
 
-      get 'array', ids: %w(1 2 890)
+      get 'array', ids: %w[1 2 890]
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('array int works')
     end
@@ -187,7 +186,7 @@ describe Grape::Validations::CoerceValidator do
             params[:arry][0].class
           end
 
-          get '/array', arry: %w(1 2 3)
+          get '/array', arry: %w[1 2 3]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq(integer_class_name)
         end
@@ -444,11 +443,11 @@ describe Grape::Validations::CoerceValidator do
 
         get '/ints', values: '1 2 3 4'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq(%w(1 2 3 4))
+        expect(JSON.parse(last_response.body)).to eq(%w[1 2 3 4])
 
         get '/ints', values: 'a b c d'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq(%w(0 0 0 0))
+        expect(JSON.parse(last_response.body)).to eq(%w[0 0 0 0])
       end
 
       it 'parses parameters with Array[Integer] type' do
@@ -480,7 +479,7 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq([2, 3, 4, 5])
 
-        get '/ints', values: %w(a b c d)
+        get '/ints', values: %w[a b c d]
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
       end
@@ -742,7 +741,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('"one way"')
 
-          get '/', a: %w(the other)
+          get '/', a: %w[the other]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('["the", "other"]')
 
@@ -760,7 +759,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('[1, 2, 3]')
 
-          get '/', b: %w(1 2 3)
+          get '/', b: %w[1 2 3]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('[1, 2, 3]')
 
@@ -782,7 +781,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('"one"')
 
-          get '/', d: %w(1 two)
+          get '/', d: %w[1 two]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('#<Set: {1, "two"}>')
         end
@@ -813,7 +812,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('"one way"')
 
-            get '/', a: %w(the other)
+            get '/', a: %w[the other]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array ["the", "other"]>')
 
@@ -831,7 +830,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
-            get '/', b: %w(1 2 3)
+            get '/', b: %w[1 2 3]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
@@ -853,7 +852,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('"one"')
 
-            get '/', d: %w(1 two)
+            get '/', d: %w[1 two]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Set: {1, "two"}>')
           end

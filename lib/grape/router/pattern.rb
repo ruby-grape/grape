@@ -5,7 +5,7 @@ module Grape
   class Router
     class Pattern
       DEFAULT_PATTERN_OPTIONS   = { uri_decode: true, type: :grape }.freeze
-      DEFAULT_SUPPORTED_CAPTURE = [:format, :version].freeze
+      DEFAULT_SUPPORTED_CAPTURE = %i[format version].freeze
 
       attr_reader :origin, :path, :capture, :pattern
 

@@ -136,7 +136,7 @@ module Grape
           reset_validations!
         end
 
-        %w(get post put head delete options patch).each do |meth|
+        %w[get post put head delete options patch].each do |meth|
           define_method meth do |*args, &block|
             options = args.extract_options!
             paths = args.first || ['/']
