@@ -1299,6 +1299,8 @@ params do
 end
 ```
 
+Note that using `:default` with `mutually_exclusive` will cause multiple parameters to always have a default value and raise a `Grape::Exceptions::Validation` mutually exclusive exception.
+
 #### `at_least_one_of`
 
 Parameters can be defined as 'at_least_one_of', ensuring that at least one parameter gets selected.
