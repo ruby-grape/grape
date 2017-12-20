@@ -149,4 +149,62 @@ shared_examples_for 'versioning' do
     versioned_get '/api_version_with_version_param?version=1', 'v1', macro_options
     expect(last_response.body).to eql '1'
   end
+
+  context 'with catch-all' do
+    let(:options) { macro_options }
+    let(:v1) do
+      klass = Class.new(Grape::API)
+      klass.version 'v1', options
+      klass.get 'version' do
+        'v1'
+      end
+      klass
+    end
+    let(:v2) do
+      klass = Class.new(Grape::API)
+      klass.version 'v2', options
+      klass.get 'version' do
+        'v2'
+      end
+      klass
+    end
+    before do
+      subject.format :txt
+
+      subject.mount v1
+      subject.mount v2
+
+      subject.route :any, '*path' do
+        params[:path]
+      end
+    end
+
+    context 'v1' do
+      it 'finds endpoint' do
+        versioned_get '/version', 'v1', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('v1')
+      end
+
+      it 'finds catch all' do
+        versioned_get '/whatever', 'v1', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to end_with 'whatever'
+      end
+    end
+
+    context 'v2' do
+      it 'finds endpoint' do
+        versioned_get '/version', 'v2', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('v2')
+      end
+
+      it 'finds catch all' do
+        versioned_get '/whatever', 'v2', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to end_with 'whatever'
+      end
+    end
+  end
 end
