@@ -56,6 +56,3 @@ matrix:
     - rvm: rbx-3
 
 bundler_args: --without development
-
-before_install: gem update --system
-
