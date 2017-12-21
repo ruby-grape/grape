@@ -103,9 +103,9 @@ module Grape
         neighbor.endpoint
       ) if neighbor && method == 'OPTIONS' && !cascade
 
-      return neighbor.endpoint.call(env) if neighbor && cascade && match?(input, '*')
-
       route = match?(input, '*')
+      return neighbor.endpoint.call(env) if neighbor && cascade && route
+
       if route
         response = process_route(route, env)
         return response if response && !(cascade = cascade?(response))
