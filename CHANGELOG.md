@@ -10,6 +10,7 @@
 #### Fixes
 
 * [#1710](https://github.com/ruby-grape/grape/pull/1710): Fix wrong transformation of empty Array in declared params - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
+* [#1722](https://github.com/ruby-grape/grape/pull/1722): Fix catch-all hiding multiple versions of an endpoint after the first definition - [@zherr](https://github.com/zherr).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)
