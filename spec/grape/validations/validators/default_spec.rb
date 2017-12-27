@@ -75,6 +75,21 @@ describe Grape::Validations::DefaultValidator do
         get '/nested_optional_array' do
           { root: params[:root] }
         end
+
+        params do
+          requires :root, type: Hash do
+            optional :some_things, type: Array do
+              requires :foo
+              optional :options, type: Array do
+                optional :name, type: String
+                optional :value, type: String
+              end
+            end
+          end
+        end
+        get '/another_nested_optional_array' do
+          { root: params[:root] }
+        end
       end
     end
   end
@@ -108,6 +123,17 @@ describe Grape::Validations::DefaultValidator do
                  ] }
     get '/nested_optional_array', root: params
     expect(last_response.status).to eq(400)
+  end
+
+  it 'allows optional arrays with optional params' do
+    params = { some_things:
+                 [
+                   { foo: 'one', options: [{ value: 'nope' }] },
+                   { foo: 'two', options: [{ name: 'wat' }] },
+                   { foo: 'three' }
+                 ] }
+    get '/another_nested_optional_array', root: params
+    expect(last_response).to eq(200)
   end
 
   it 'set default value for optional param' do
