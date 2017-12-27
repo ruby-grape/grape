@@ -99,6 +99,17 @@ describe Grape::Validations::DefaultValidator do
     expect(last_response.body).to eq({ root: params }.to_json)
   end
 
+  it 'does not allows faulty optional arrays' do
+    params = { some_things:
+                 [
+                   { foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
+                   { foo: 'two', options: [{ name: 'wat' }] },
+                   { foo: 'three' }
+                 ] }
+    get '/nested_optional_array', root: params
+    expect(last_response.status).to eq(400)
+  end
+
   it 'set default value for optional param' do
     get('/')
     expect(last_response.status).to eq(200)

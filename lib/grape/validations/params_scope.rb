@@ -39,8 +39,7 @@ module Grape
       # @return [Boolean] whether or not this entire scope needs to be
       #   validated
       def should_validate?(parameters)
-        return false if @optional && (params(parameters).blank? ||
-                                       any_element_blank?(parameters))
+        return false if @optional && (params(parameters).blank? || all_element_blank?(parameters))
 
         return true if parent.nil?
         parent.should_validate?(parameters)
@@ -441,8 +440,8 @@ module Grape
         validations[type].respond_to?(:key?) && validations[type].key?(key) && !validations[type][key].nil?
       end
 
-      def any_element_blank?(parameters)
-        params(parameters).respond_to?(:any?) && params(parameters).any?(&:blank?)
+      def all_element_blank?(parameters)
+        params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
       end
     end
   end
