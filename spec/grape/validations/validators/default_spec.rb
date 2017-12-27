@@ -133,7 +133,7 @@ describe Grape::Validations::DefaultValidator do
                    { foo: 'three' }
                  ] }
     get '/another_nested_optional_array', root: params
-    expect(last_response).to eq(200)
+    expect(last_response.status).to eq(200)
   end
 
   it 'set default value for optional param' do
