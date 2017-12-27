@@ -9,7 +9,7 @@ describe Grape::Validations::MutualExclusionValidator do
         end
       end
     end
-    let(:mutually_exclusive_params) { [:beer, :wine, :grapefruit] }
+    let(:mutually_exclusive_params) { %i[beer wine grapefruit] }
     let(:validator) { described_class.new(mutually_exclusive_params, {}, false, scope.new) }
 
     context 'when all mutually exclusive params are present' do

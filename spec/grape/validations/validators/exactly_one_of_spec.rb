@@ -11,7 +11,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
         def required?; end
       end
     end
-    let(:exactly_one_of_params) { [:beer, :wine, :grapefruit] }
+    let(:exactly_one_of_params) { %i[beer wine grapefruit] }
     let(:validator) { described_class.new(exactly_one_of_params, {}, false, scope.new) }
 
     context 'when all restricted params are present' do

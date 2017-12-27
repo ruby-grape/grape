@@ -47,9 +47,20 @@ module Grape
 
         def declared_hash(passed_params, options, declared_params)
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
-            # If it is not a Hash then it does not have children.
-            # Find its value or set it to nil.
-            if !declared_param.is_a?(Hash)
+            if declared_param.is_a?(Hash)
+              declared_param.each_pair do |declared_parent_param, declared_children_params|
+                next unless options[:include_missing] || passed_params.key?(declared_parent_param)
+
+                passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
+                memo_key = optioned_param_key(declared_parent_param, options)
+
+                memo[memo_key] = handle_passed_param(declared_parent_param, passed_children_params) do
+                  declared(passed_children_params, options, declared_children_params)
+                end
+              end
+            else
+              # If it is not a Hash then it does not have children.
+              # Find its value or set it to nil.
               has_alias = route_setting(:aliased_params) && route_setting(:aliased_params).find { |current| current[declared_param] }
               param_alias = has_alias[declared_param] if has_alias
 
@@ -60,15 +71,24 @@ module Grape
               else
                 memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
               end
-            else
-              declared_param.each_pair do |declared_parent_param, declared_children_params|
-                next unless options[:include_missing] || passed_params.key?(declared_parent_param)
-
-                passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
-                memo[optioned_param_key(declared_parent_param, options)] = declared(passed_children_params, options, declared_children_params)
-              end
             end
           end
+        end
+
+        def handle_passed_param(declared_param, passed_children_params, &_block)
+          should_be_empty_array?(declared_param, passed_children_params) ? [] : yield
+        end
+
+        def should_be_empty_array?(declared_param, passed_children_params)
+          declared_param_is_array?(declared_param) && passed_children_params.empty?
+        end
+
+        def declared_param_is_array?(declared_param)
+          route_options_params[declared_param.to_s] && route_options_params[declared_param.to_s][:type] == 'Array'
+        end
+
+        def route_options_params
+          options[:route_options][:params] || {}
         end
 
         def optioned_param_key(declared_param, options)

@@ -166,7 +166,7 @@ module Grape
 
           subject.namespace_stackable(:some_thing, :foo_bar_2)
 
-          expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar, :foo_bar_2]
+          expect(subject.namespace_stackable(:some_thing)).to eq %i[foo_bar foo_bar_2]
 
           subject.namespace_end
           expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
@@ -253,7 +253,7 @@ module Grape
           obj1.top_level_setting.inherit_from obj2_copy.point_in_time_copy
           obj2.top_level_setting.inherit_from obj3_copy.point_in_time_copy
 
-          expect(obj1_copy.namespace_stackable[:some_thing]).to eq [:obj3, :obj2, :obj1]
+          expect(obj1_copy.namespace_stackable[:some_thing]).to eq %i[obj3 obj2 obj1]
         end
       end
     end

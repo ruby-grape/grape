@@ -137,7 +137,7 @@ module Grape
             # passed, or if the type also implements a parse() method.
             type
           elsif type.is_a?(Enumerable)
-            ->(value) { value.all? { |item| item.is_a? type[0] } }
+            ->(value) { value.respond_to?(:all?) && value.all? { |item| item.is_a? type[0] } }
           else
             # By default, do a simple type check
             ->(value) { value.is_a? type }

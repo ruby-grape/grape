@@ -91,7 +91,7 @@ describe Grape::Endpoint do
   end
 
   describe '#status' do
-    %w(GET PUT OPTIONS).each do |method|
+    %w[GET PUT OPTIONS].each do |method|
       it 'defaults to 200 on GET' do
         request = Grape::Request.new(Rack::MockRequest.env_for('/', method: method))
         expect(subject).to receive(:request).and_return(request)

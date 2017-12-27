@@ -16,6 +16,7 @@ module Grape
 
       def validate_param!(attr_name, params)
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
+        return unless requires_coercion?(params[attr_name])
         new_value = coerce_value(params[attr_name])
         raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless valid_type?(new_value)
         params[attr_name] = new_value
@@ -62,6 +63,11 @@ module Grape
       # @return [Class]
       def type
         @option[:type].is_a?(Hash) ? @option[:type][:value] : @option[:type]
+      end
+
+      def requires_coercion?(value)
+        # JSON types do not require coercion if value is valid
+        !valid_type?(value) || converter.coercer.respond_to?(:method) && !converter.is_a?(Grape::Validations::Types::Json)
       end
     end
   end

@@ -31,6 +31,7 @@
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
+  - [Include Parent Namespaces](#include-parent-namespaces)
   - [Include Missing](#include-missing)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
@@ -44,12 +45,24 @@
   - [Group Options](#group-options)
   - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
+    - [`allow_blank`](#allowblank)
+    - [`values`](#values)
+    - [`except_values`](#exceptvalues)
+    - [`regexp`](#regexp)
+    - [`mutually_exclusive`](#mutuallyexclusive)
+    - [`exactly_one_of`](#exactlyoneof)
+    - [`at_least_one_of`](#atleastoneof)
+    - [`all_or_none_of`](#allornoneof)
+    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutuallyexclusive-exactlyoneof-atleastoneof-allornoneof)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
-  - [Custom Validation Messages](#custom-validation-messages)
-- [Headers](#headers)
+  - [Custom Validation messages](#custom-validation-messages)
+    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allowblank-values-regexp)
+    - [`mutually_exclusive`](#mutuallyexclusive-1)
+    - [Overriding Attribute Names](#overriding-attribute-names)
+    - [With Default](#with-default)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -63,6 +76,8 @@
   - [Default Error HTTP Status Code](#default-error-http-status-code)
   - [Handling 404](#handling-404)
 - [Exception Handling](#exception-handling)
+    - [Rescuing exceptions inside namespaces](#rescuing-exceptions-inside-namespaces)
+    - [Unrescuable Exceptions](#unrescuable-exceptions)
   - [Rails 3.x](#rails-3x)
 - [Logging](#logging)
 - [API Formats](#api-formats)
@@ -78,6 +93,8 @@
   - [Active Model Serializers](#active-model-serializers)
 - [Sending Raw or No Data](#sending-raw-or-no-data)
 - [Authentication](#authentication)
+  - [Basic and Digest Auth](#basic-and-digest-auth)
+  - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before and After](#before-and-after)
@@ -88,13 +105,22 @@
   - [Remote IP](#remote-ip)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
+    - [RSpec](#rspec)
+    - [Airborne](#airborne)
+    - [MiniTest](#minitest)
   - [Writing Tests with Rails](#writing-tests-with-rails)
+    - [RSpec](#rspec-1)
+    - [MiniTest](#minitest-1)
   - [Stubbing Helpers](#stubbing-helpers)
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
   - [Reloading in Rack Applications](#reloading-in-rack-applications)
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
+    - [endpoint_run.grape](#endpointrungrape)
+    - [endpoint_render.grape](#endpointrendergrape)
+    - [endpoint_run_filters.grape](#endpointrunfiltersgrape)
+    - [endpoint_run_validators.grape](#endpointrunvalidatorsgrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [License](#license)
@@ -117,6 +143,7 @@ The current stable release is [1.0.1](https://github.com/ruby-grape/grape/blob/v
 ## Project Resources
 
 * [Grape Website](http://www.ruby-grape.org)
+* [Documentation](http://www.rubydoc.info/gems/grape)
 * Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
 * [Follow us on Twitter](https://twitter.com/grapeframework)
 
@@ -293,13 +320,6 @@ Modify `config/routes`:
 
 ```ruby
 mount Twitter::API => '/'
-```
-
-Additionally, if the version of your Rails is 4.0+ and the application uses the default model layer of ActiveRecord, you will want to use the [hashie-forbidden_attributes gem](https://github.com/Maxim-Filimonov/hashie-forbidden_attributes). This gem disables the security feature of `strong_params` at the model layer, allowing you the use of Grape's own params validation instead.
-
-```ruby
-# Gemfile
-gem 'hashie-forbidden_attributes'
 ```
 
 See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
@@ -644,7 +664,7 @@ curl -X GET -H "Content-Type: application/json" localhost:9292/parent/foo/bar
 }
 ````
 
-### Include missing
+### Include Missing
 
 By default `declared(params)` includes parameters that have `nil` values. If you want to return only the parameters that are not `nil`, you can use the `include_missing` option. By default, `include_missing` is set to `true`. Consider the following API:
 
@@ -869,7 +889,7 @@ get '/int' integers: { int: '45' }
 ### Custom Types and Coercions
 
 Aside from the default set of supported types listed above, any class can be
-used as a type so long as an explicit coercion method is supplied. If the type
+used as a type as long as an explicit coercion method is supplied. If the type
 implements a class-level `parse` method, Grape will use it automatically.
 This method must take one string argument and return an instance of the correct
 type, or raise an exception to indicate the value was invalid. E.g.,
@@ -887,10 +907,10 @@ class Color
   end
 end
 
-# ...
-
 params do
   requires :color, type: Color, default: Color.new('blue')
+  requires :more_colors, type: Array[Color] # Collections work
+  optional :unique_colors, type: Set[Color] # Duplicates discarded
 end
 
 get '/stuff' do
@@ -925,6 +945,26 @@ params do
 end
 ```
 
+Grape will assert that coerced values match the given `type`, and will reject the request
+if they do not. To override this behaviour, custom types may implement a `parsed?` method
+that should accept a single argument and return `true` if the value passes type validation.
+
+```ruby
+class SecureUri
+  def self.parse(value)
+    URI.parse value
+  end
+
+  def self.parsed?(value)
+    value.is_a? URI::HTTPS
+  end
+end
+
+params do
+  requires :secure_uri, type: SecureUri
+end
+```
+
 ### Multipart File Parameters
 
 Grape makes use of `Rack::Request`'s built-in support for multipart file parameters. Such parameters can be declared with `type: File`:
@@ -935,7 +975,7 @@ params do
 end
 post '/' do
   params[:avatar][:filename] # => 'avatar.png'
-  params[:avatar][:avatar] # => 'image/png'
+  params[:avatar][:type] # => 'image/png'
   params[:avatar][:tempfile] # => #<File>
 end
 ```
@@ -955,8 +995,6 @@ end
 get '/' do
   params[:json].inspect
 end
-
-# ...
 
 client.get('/', json: '{"int":1}') # => "{:int=>1}"
 client.get('/', json: '[{"int":"1"}]') # => "[{:int=>1}]"
@@ -993,8 +1031,6 @@ get '/' do
   params[:status_code].inspect
 end
 
-# ...
-
 client.get('/', status_code: 'OK_GOOD') # => "OK_GOOD"
 client.get('/', status_code: 300) # => 300
 client.get('/', status_code: %w(404 NOT FOUND)) # => [404, "NOT", "FOUND"]
@@ -1011,15 +1047,13 @@ get '/' do
   params[:status_codes].inspect
 end
 
-# ...
-
 client.get('/', status_codes: %w(1 two)) # => [1, "two"]
 ```
 
 ### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
-In the above example, this means `params[:media][:url]` is required along with `params[:id]`,
+In the [above example](#parameter-validation-and-coercion), this means `params[:media][:url]` is required along with `params[:id]`,
 and `params[:audio][:format]` is required only if `params[:audio]` is present.
 With a block, `group`, `requires` and `optional` accept an additional option `type` which can
 be either `Array` or `Hash`, and defaults to `Array`. Depending on the value, the nested
@@ -1264,6 +1298,8 @@ params do
   exactly_one_of :beer, :wine
 end
 ```
+
+Note that using `:default` with `mutually_exclusive` will cause multiple parameters to always have a default value and raise a `Grape::Exceptions::Validation` mutually exclusive exception.
 
 #### `at_least_one_of`
 
@@ -1588,7 +1624,7 @@ en:
         name_required: 'must be present'
 ```
 
-#### `Overriding attribute names`
+#### Overriding Attribute Names
 
 You can also override attribute names.
 
@@ -1606,7 +1642,7 @@ en:
 ```
 Will produce 'Oops! Name must be present'
 
-#### `With Default`
+#### With Default
 
 You cannot set a custom message option for Default as it requires interpolation `%{option1}: %{value1} is incompatible with %{option2}: %{value2}`. You can change the default error message for Default by changing the `incompatible_option_values` message key inside [en.yml](lib/grape/locale/en.yml)
 
@@ -2082,7 +2118,7 @@ Custom error formatters for existing and additional types can be defined with a 
 
 ```ruby
 class Twitter::API < Grape::API
-  error_formatter :txt, ->(message, backtrace, options, env) {
+  error_formatter :txt, ->(message, backtrace, options, env, original_exception) {
     "error: #{message} from #{backtrace}"
   }
 end
@@ -2092,7 +2128,7 @@ You can also use a module or class.
 
 ```ruby
 module CustomFormatter
-  def self.call(message, backtrace, options, env)
+  def self.call(message, backtrace, options, env, original_exception)
     { message: message, backtrace: backtrace }
   end
 end
@@ -2281,7 +2317,6 @@ class API < Grape::API
     end
   end
   post '/statuses' do
-    # ...
     logger.info "#{current_user} has statused"
   end
 end
@@ -2924,9 +2959,7 @@ If a request for a resource is made that triggers the built-in `OPTIONS` handler
 only `before` and `after` callbacks will be executed.  The remaining callbacks will
 be bypassed.
 
-#### Examples
-
-Using a simple `before` block to set a header
+For example, using a simple `before` block to set a header.
 
 ```ruby
 before do
@@ -2962,7 +2995,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /           # 'root - '
@@ -2990,7 +3023,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /123        # 'Integer'
@@ -3025,7 +3058,7 @@ class Test < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /foo/v1       # 'v1-hello'
@@ -3050,7 +3083,7 @@ class MyAPI < Grape::API
 end
 ```
 
-The behaviour is then:
+The behavior is then:
 
 ```bash
 GET /greeting              # {"greeting":"Hello!"}
@@ -3338,7 +3371,7 @@ describe 'an endpoint that needs helpers stubbed' do
   end
 
   it 'stubs the helper' do
-    # ...
+
   end
 end
 ```
@@ -3372,6 +3405,22 @@ if Rails.env.development?
   ActionDispatch::Callbacks.to_prepare do
     api_reloader.execute_if_updated
   end
+end
+```
+
+For Rails >= 5.1.4, change this:
+
+```ruby
+ActionDispatch::Callbacks.to_prepare do
+  api_reloader.execute_if_updated
+end
+```
+
+to this:
+
+```ruby
+ActiveSupport::Reloader.to_prepare do
+  api_reloader.execute_if_updated
 end
 ```
 

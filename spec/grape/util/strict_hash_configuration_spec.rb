@@ -4,7 +4,7 @@ module Grape
     describe 'StrictHashConfiguration' do
       subject do
         Class.new do
-          include Grape::Util::StrictHashConfiguration.module(:config1, :config2, config3: [:config4], config5: [config6: [:config7, :config8]])
+          include Grape::Util::StrictHashConfiguration.module(:config1, :config2, config3: [:config4], config5: [config6: %i[config7 config8]])
         end
       end
 

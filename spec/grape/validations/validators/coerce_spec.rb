@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'spec_helper'
 
 describe Grape::Validations::CoerceValidator do
@@ -136,11 +135,11 @@ describe Grape::Validations::CoerceValidator do
         'array int works'
       end
 
-      get 'array', ids: %w(1 2 az)
+      get 'array', ids: %w[1 2 az]
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('ids is invalid')
 
-      get 'array', ids: %w(1 2 890)
+      get 'array', ids: %w[1 2 890]
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('array int works')
     end
@@ -187,7 +186,7 @@ describe Grape::Validations::CoerceValidator do
             params[:arry][0].class
           end
 
-          get '/array', arry: %w(1 2 3)
+          get '/array', arry: %w[1 2 3]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq(integer_class_name)
         end
@@ -224,6 +223,55 @@ describe Grape::Validations::CoerceValidator do
           get 'array', arry: [{ id: 31, name: 'Alice' }]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('1')
+        end
+
+        it 'Array of type implementing parse' do
+          subject.params do
+            requires :uri, type: Array[URI]
+          end
+          subject.get '/uri_array' do
+            params[:uri][0].class
+          end
+          get 'uri_array', uri: ['http://www.google.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTP')
+        end
+
+        it 'Set of type implementing parse' do
+          subject.params do
+            requires :uri, type: Set[URI]
+          end
+          subject.get '/uri_array' do
+            "#{params[:uri].class},#{params[:uri].first.class},#{params[:uri].size}"
+          end
+          get 'uri_array', uri: Array.new(2) { 'http://www.example.com' }
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Set,URI::HTTP,1')
+        end
+
+        it 'Array of class implementing parse and parsed?' do
+          class SecureURIOnly
+            def self.parse(value)
+              URI.parse(value)
+            end
+
+            def self.parsed?(value)
+              value.is_a? URI::HTTPS
+            end
+          end
+
+          subject.params do
+            requires :uri, type: Array[SecureURIOnly]
+          end
+          subject.get '/secure_uris' do
+            params[:uri].first.class
+          end
+          get 'secure_uris', uri: ['https://www.example.com']
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTPS')
+          get 'secure_uris', uri: ['https://www.example.com', 'http://www.example.com']
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('uri is invalid')
         end
       end
 
@@ -395,11 +443,11 @@ describe Grape::Validations::CoerceValidator do
 
         get '/ints', values: '1 2 3 4'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq(%w(1 2 3 4))
+        expect(JSON.parse(last_response.body)).to eq(%w[1 2 3 4])
 
         get '/ints', values: 'a b c d'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq(%w(0 0 0 0))
+        expect(JSON.parse(last_response.body)).to eq(%w[0 0 0 0])
       end
 
       it 'parses parameters with Array[Integer] type' do
@@ -417,6 +465,23 @@ describe Grape::Validations::CoerceValidator do
         get '/ints', values: 'a b c d'
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
+      end
+
+      it 'parses parameters even if type is valid' do
+        subject.params do
+          requires :values, type: Array, coerce_with: ->(array) { array.map { |val| val.to_i + 1 } }
+        end
+        subject.get '/ints' do
+          params[:values]
+        end
+
+        get '/ints', values: [1, 2, 3, 4]
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([2, 3, 4, 5])
+
+        get '/ints', values: %w[a b c d]
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
       end
 
       it 'uses parse where available' do
@@ -477,7 +542,7 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'first-class JSON' do
-      it 'parses objects and arrays' do
+      it 'parses objects, hashes, and arrays' do
         subject.params do
           requires :splines, type: JSON do
             requires :x, type: Integer, values: [1, 2, 3]
@@ -499,7 +564,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('woof')
 
+        get '/', splines: { x: 1, ints: [1, 2, 3], obj: { y: 'woof' } }
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('woof')
+
         get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('arrays work')
+
+        get '/', splines: [{ x: 2, ints: [] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
@@ -507,7 +580,15 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
+        get '/', splines: { x: 4, ints: [2] }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('splines[x] does not have a valid value')
+
+        get '/', splines: [{ x: 1, ints: [] }, { x: 4, ints: [] }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
@@ -660,7 +741,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('"one way"')
 
-          get '/', a: %w(the other)
+          get '/', a: %w[the other]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('["the", "other"]')
 
@@ -678,7 +759,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('[1, 2, 3]')
 
-          get '/', b: %w(1 2 3)
+          get '/', b: %w[1 2 3]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('[1, 2, 3]')
 
@@ -700,7 +781,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('"one"')
 
-          get '/', d: %w(1 two)
+          get '/', d: %w[1 two]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('#<Set: {1, "two"}>')
         end
@@ -731,7 +812,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('"one way"')
 
-            get '/', a: %w(the other)
+            get '/', a: %w[the other]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array ["the", "other"]>')
 
@@ -749,7 +830,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
-            get '/', b: %w(1 2 3)
+            get '/', b: %w[1 2 3]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
 
@@ -771,7 +852,7 @@ describe Grape::Validations::CoerceValidator do
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('"one"')
 
-            get '/', d: %w(1 two)
+            get '/', d: %w[1 two]
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq('#<Set: {1, "two"}>')
           end

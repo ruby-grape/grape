@@ -215,7 +215,7 @@ describe Grape::Endpoint do
         [cookie.name, cookie]
       end]
       expect(cookies.size).to eq(2)
-      %w(and_this delete_this_cookie).each do |cookie_name|
+      %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
         expect(cookie).not_to be_nil
         expect(cookie.value).to eq('deleted')
@@ -239,7 +239,7 @@ describe Grape::Endpoint do
         [cookie.name, cookie]
       end]
       expect(cookies.size).to eq(2)
-      %w(and_this delete_this_cookie).each do |cookie_name|
+      %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
         expect(cookie).not_to be_nil
         expect(cookie.value).to eq('deleted')
@@ -294,6 +294,9 @@ describe Grape::Endpoint do
               optional :seventh
             end
           end
+        end
+        optional :nested_arr, type: Array do
+          optional :eighth
         end
       end
     end
@@ -366,7 +369,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(4)
+      expect(JSON.parse(last_response.body).keys.size).to eq(5)
     end
 
     it 'has a optional param with default value all the time' do
@@ -408,8 +411,8 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)['nested'].size).to eq 2
     end
 
-    context 'sets nested hash when the param is missing' do
-      it 'to be array when include_missing is true' do
+    context 'sets nested objects when the param is missing' do
+      it 'to be a hash when include_missing is true' do
         subject.get '/declared' do
           declared(params, include_missing: true)
         end
@@ -417,6 +420,16 @@ describe Grape::Endpoint do
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)['nested']).to be_a(Hash)
+      end
+
+      it 'to be an array when include_missing is true' do
+        subject.get '/declared' do
+          declared(params, include_missing: true)
+        end
+
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)['nested_arr']).to be_a(Array)
       end
 
       it 'to be nil when include_missing is false' do
@@ -515,9 +528,9 @@ describe Grape::Endpoint do
       json = JSON.parse(last_response.body)
       expect(last_response.status).to eq(200)
       expect(json['first']).to eq 'present'
-      expect(json['nested'].keys).to eq %w(fourth fifth nested_nested)
+      expect(json['nested'].keys).to eq %w[fourth fifth nested_nested]
       expect(json['nested']['fourth']).to eq ''
-      expect(json['nested']['nested_nested'].keys).to eq %w(sixth seven)
+      expect(json['nested']['nested_nested'].keys).to eq %w[sixth seven]
       expect(json['nested']['nested_nested']['sixth']).to eq 'sixth'
     end
 
@@ -543,7 +556,7 @@ describe Grape::Endpoint do
       json = JSON.parse(last_response.body)
       expect(last_response.status).to eq(200)
       expect(json['first']).to eq 'present'
-      expect(json['nested'].keys).to eq %w(fourth)
+      expect(json['nested'].keys).to eq %w[fourth]
       expect(json['nested']['fourth']).to eq '4'
     end
   end
@@ -1211,7 +1224,7 @@ describe Grape::Endpoint do
 
       get '/all_filters'
       json = JSON.parse(last_response.body)
-      expect(json.keys).to match_array %w(before before_validation after_validation endpoint after)
+      expect(json.keys).to match_array %w[before before_validation after_validation endpoint after]
     end
 
     context 'when terminating the response with error!' do
@@ -1228,7 +1241,7 @@ describe Grape::Endpoint do
 
         get '/error_filters'
         expect(last_response.status).to eql 500
-        expect(called).to match_array %w(before before_validation)
+        expect(called).to match_array %w[before before_validation]
       end
 
       it 'allows prior and parent filters of same type to run' do
@@ -1246,7 +1259,7 @@ describe Grape::Endpoint do
 
         get '/parent/hello'
         expect(last_response.status).to eql 500
-        expect(called).to match_array %w(parent prior)
+        expect(called).to match_array %w[parent prior]
       end
     end
   end
@@ -1313,7 +1326,7 @@ describe Grape::Endpoint do
     end
 
     describe 'all other' do
-      %w(post get head put options patch).each do |verb|
+      %w[post get head put options patch].each do |verb|
         it "allows for the anchoring option with a #{verb.upcase} method" do
           subject.send(verb, '/example', anchor: true) do
             verb

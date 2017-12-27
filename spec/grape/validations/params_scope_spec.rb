@@ -74,7 +74,7 @@ describe Grape::Validations::ParamsScope do
   end
 
   context 'setting description' do
-    [:desc, :description].each do |description_type|
+    %i[desc description].each do |description_type|
       it "allows setting #{description_type}" do
         subject.params do
           requires :int, type: Integer, description_type => 'My very nice integer'
@@ -160,18 +160,18 @@ describe Grape::Validations::ParamsScope do
   context 'array without coerce type explicitly given' do
     it 'sets the type based on first element' do
       subject.params do
-        requires :periods, type: Array, values: -> { %w(day month) }
+        requires :periods, type: Array, values: -> { %w[day month] }
       end
       subject.get('/required') { 'required works' }
 
-      get '/required', periods: %w(day month)
+      get '/required', periods: %w[day month]
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('required works')
     end
 
     it 'fails to call API without Array type' do
       subject.params do
-        requires :periods, type: Array, values: -> { %w(day month) }
+        requires :periods, type: Array, values: -> { %w[day month] }
       end
       subject.get('/required') { 'required works' }
 
@@ -339,6 +339,18 @@ describe Grape::Validations::ParamsScope do
       get '/optional_type_array'
     end
 
+    it 'handles missing optional Array type' do
+      subject.params do
+        optional :a, type: Array do
+          requires :b
+        end
+      end
+      subject.get('/test') { declared(params).to_json }
+      get '/test'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{"a":[]}')
+    end
+
     it 'errors with an unsupported type' do
       expect do
         subject.params do
@@ -456,7 +468,7 @@ describe Grape::Validations::ParamsScope do
 
     it 'does not validate nested requires when given is false' do
       subject.params do
-        requires :a, type: String, allow_blank: false, values: %w(x y z)
+        requires :a, type: String, allow_blank: false, values: %w[x y z]
         given a: ->(val) { val == 'x' } do
           requires :inner1, type: Hash, allow_blank: false do
             requires :foo, type: Integer, allow_blank: false
@@ -574,8 +586,8 @@ describe Grape::Validations::ParamsScope do
 
   context 'when validations are dependent on a parameter with specific value' do
     # build test cases from all combinations of declarations and options
-    a_decls = %i(optional requires)
-    a_options = [{}, { values: %w(x y z) }]
+    a_decls = %i[optional requires]
+    a_options = [{}, { values: %w[x y z] }]
     b_options = [{}, { type: String }, { allow_blank: false }, { type: String, allow_blank: false }]
     combinations = a_decls.product(a_options, b_options)
     combinations.each_with_index do |combination, i|
