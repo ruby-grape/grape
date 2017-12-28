@@ -6,12 +6,12 @@
 * [#1688](https://github.com/ruby-grape/grape/pull/1688): Removes yard docs - [@ramkumar-kr](https://github.com/ramkumar-kr).
 * [#1702](https://github.com/ruby-grape/grape/pull/1702): Added danger-toc, verify correct TOC in README - [@dblock](https://github.com/dblock).
 * [#1711](https://github.com/ruby-grape/grape/pull/1711): Automatically coerce arrays and sets of types that implement a `parse` method - [@dslh](https://github.com/dslh).
-* [#1724](https://github.com/ruby-grape/grape/pull/1724): Optional nested array validation - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
 * [#1710](https://github.com/ruby-grape/grape/pull/1710): Fix wrong transformation of empty Array in declared params - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1722](https://github.com/ruby-grape/grape/pull/1722): Fix catch-all hiding multiple versions of an endpoint after the first definition - [@zherr](https://github.com/zherr).
+* [#1724](https://github.com/ruby-grape/grape/pull/1724): Optional nested array validation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)
