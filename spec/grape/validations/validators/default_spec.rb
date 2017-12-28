@@ -121,8 +121,10 @@ describe Grape::Validations::DefaultValidator do
                    { foo: 'two', options: [{ name: 'wat' }] },
                    { foo: 'three' }
                  ] }
+    error = { error: 'root[some_things][1][options][0][value] is missing' }
     get '/nested_optional_array', root: params
     expect(last_response.status).to eq(400)
+    expect(last_response.body).to eq(error.to_json)
   end
 
   it 'allows optional arrays with optional params' do
@@ -134,6 +136,7 @@ describe Grape::Validations::DefaultValidator do
                  ] }
     get '/another_nested_optional_array', root: params
     expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq({ root: params }.to_json)
   end
 
   it 'set default value for optional param' do
