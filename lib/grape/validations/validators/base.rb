@@ -38,6 +38,7 @@ module Grape
         attributes = AttributesIterator.new(self, @scope, params)
         array_errors = []
         attributes.each do |resource_params, attr_name|
+          next if !@scope.required? && resource_params.empty?
           next unless @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
           next unless @scope.meets_dependency?(resource_params, params)
 

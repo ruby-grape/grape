@@ -75,6 +75,21 @@ describe Grape::Validations::DefaultValidator do
         get '/nested_optional_array' do
           { root: params[:root] }
         end
+
+        params do
+          requires :root, type: Hash do
+            optional :some_things, type: Array do
+              requires :foo
+              optional :options, type: Array do
+                optional :name, type: String
+                optional :value, type: String
+              end
+            end
+          end
+        end
+        get '/another_nested_optional_array' do
+          { root: params[:root] }
+        end
       end
     end
   end
@@ -95,6 +110,31 @@ describe Grape::Validations::DefaultValidator do
                  { foo: 'two' },
                  { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }] }
     get '/nested_optional_array', root: params
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq({ root: params }.to_json)
+  end
+
+  it 'does not allows faulty optional arrays' do
+    params = { some_things:
+                 [
+                   { foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
+                   { foo: 'two', options: [{ name: 'wat' }] },
+                   { foo: 'three' }
+                 ] }
+    error = { error: 'root[some_things][1][options][0][value] is missing' }
+    get '/nested_optional_array', root: params
+    expect(last_response.status).to eq(400)
+    expect(last_response.body).to eq(error.to_json)
+  end
+
+  it 'allows optional arrays with optional params' do
+    params = { some_things:
+                 [
+                   { foo: 'one', options: [{ value: 'nope' }] },
+                   { foo: 'two', options: [{ name: 'wat' }] },
+                   { foo: 'three' }
+                 ] }
+    get '/another_nested_optional_array', root: params
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq({ root: params }.to_json)
   end
