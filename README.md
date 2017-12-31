@@ -2071,7 +2071,7 @@ literally accepts every request.
 
 ## Exception Handling
 
-Grape can be told to rescue all exceptions and return them in the API format.
+Grape can be told to rescue all `StandardError` exceptions and return them in the API format.
 
 ```ruby
 class Twitter::API < Grape::API
