@@ -2177,8 +2177,8 @@ class Twitter::API < Grape::API
     error!("ArgumentError: #{e.message}")
   end
 
-  rescue_from NotImplementedError do |e|
-    error!("NotImplementedError: #{e.message}")
+  rescue_from NoMethodError do |e|
+    error!("NoMethodError: #{e.message}")
   end
 end
 ```
