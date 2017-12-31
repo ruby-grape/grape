@@ -11,6 +11,15 @@ describe Grape::Middleware::Error do
       end
     end
 
+    # raises a non-StandardError (ScriptError) exception
+    class OtherExceptionApp
+      class << self
+        def call(_env)
+          raise NotImplementedError, 'snow!'
+        end
+      end
+    end
+
     # raises a hash error
     class ErrorHashApp
       class << self
@@ -68,20 +77,35 @@ describe Grape::Middleware::Error do
   end
 
   context 'with rescue_all' do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true
-        run ExceptionSpec::ExceptionApp
+    context 'StandardError exception' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_all: true
+          run ExceptionSpec::ExceptionApp
+        end
+      end
+      it 'sets the message appropriately' do
+        get '/'
+        expect(last_response.body).to eq('rain!')
+      end
+      it 'defaults to a 500 status' do
+        get '/'
+        expect(last_response.status).to eq(500)
       end
     end
-    it 'sets the message appropriately' do
-      get '/'
-      expect(last_response.body).to eq('rain!')
-    end
-    it 'defaults to a 500 status' do
-      get '/'
-      expect(last_response.status).to eq(500)
+
+    context 'Non-StandardError exception' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_all: true
+          run ExceptionSpec::OtherExceptionApp
+        end
+      end
+      it 'does not trap errors other than StandardError' do
+        expect { get '/' }.to raise_error(NotImplementedError, 'snow!')
+      end
     end
   end
 
