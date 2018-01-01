@@ -12,6 +12,7 @@
 * [#1710](https://github.com/ruby-grape/grape/pull/1710): Fix wrong transformation of empty Array in declared params - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1722](https://github.com/ruby-grape/grape/pull/1722): Fix catch-all hiding multiple versions of an endpoint after the first definition - [@zherr](https://github.com/zherr).
 * [#1724](https://github.com/ruby-grape/grape/pull/1724): Optional nested array validation - [@ericproulx](https://github.com/ericproulx).
+* [#1725](https://github.com/ruby-grape/grape/pull/1725): Fix `rescue_from :all` documentation - [@Jelkster](https://github.com/Jelkster).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)
