@@ -44,7 +44,7 @@ module Grape
       # @return [Proc]
       # @raise [NameError] an instance method with the same name already exists
       def generate_api_method(method_name, &block)
-        if instance_methods.include?(method_name.to_sym) || instance_methods.include?(method_name.to_s)
+        if method_defined?(method_name)
           raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
         end
 
