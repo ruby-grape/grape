@@ -165,13 +165,13 @@ module Grape
 
       private
 
-      # Builds the current class :inheritable_setting. If available, it returns the superclass's :inheritable_setting.
-      # Otherwise, a clean :inheritable_setting is returned.
+      # Builds the current class :inheritable_setting. If available, it inherits from
+      # the superclass's :inheritable_setting.
       def build_top_level_setting
-        if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API
-          superclass.inheritable_setting
-        else
-          Grape::Util::InheritableSetting.new
+        Grape::Util::InheritableSetting.new.tap do |setting|
+          if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API
+            setting.inherit_from superclass.inheritable_setting
+          end
         end
       end
     end

@@ -3129,6 +3129,16 @@ XML
         get '/two/v1/world'
         expect(last_response.status).to eq 200
       end
+
+      context 'when mounting class extends a subclass of Grape::API' do
+        it 'mounts APIs with the same superclass' do
+          base_api = Class.new(Grape::API)
+          a = Class.new(base_api)
+          b = Class.new(base_api)
+
+          expect { a.mount b }.to_not raise_error
+        end
+      end
     end
   end
 

@@ -14,6 +14,7 @@
 * [#1724](https://github.com/ruby-grape/grape/pull/1724): Optional nested array validation - [@ericproulx](https://github.com/ericproulx).
 * [#1725](https://github.com/ruby-grape/grape/pull/1725): Fix `rescue_from :all` documentation - [@Jelkster](https://github.com/Jelkster).
 * [#1726](https://github.com/ruby-grape/grape/pull/1726): Improved startup performance during API method generation - [@jkowens](https://github.com/jkowens).
+* [#1727](https://github.com/ruby-grape/grape/pull/1727): Fix infinite loop when mounting endpoint with same superclass - [@jkowens](https://github.com/jkowens).
 * Your contribution here.
 
 ### 1.0.1 (9/8/2017)
