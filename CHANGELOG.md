@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1737](https://github.com/ruby-grape/grape/pull/1737): Fix translating error when passing symbols as params in custom validations - [@mlzhuyi](https://github.com/mlzhuyi).
 
 ### 1.0.2 (1/10/2018)
 

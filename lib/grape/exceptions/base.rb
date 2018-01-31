@@ -71,6 +71,8 @@ module Grape
       end
 
       def translate(key, **options)
+        options = options.dup
+        options[:default] &&= options[:default].to_s
         message = ::I18n.translate(key, **options)
         message.present? ? message : ::I18n.translate(key, locale: FALLBACK_LOCALE, **options)
       end
