@@ -201,7 +201,7 @@ module Grape
       # @yield a parameter definition DSL
       def given(*attrs, &block)
         attrs.each do |attr|
-          proxy_attr = attr.is_a?(Hash) ? attr.keys[0] : attr
+          proxy_attr = first_hash_key_or_param(attr)
           raise Grape::Exceptions::UnknownParameter.new(proxy_attr) unless declared_param?(proxy_attr)
         end
         new_lateral_scope(dependent_on: attrs, &block)
@@ -213,7 +213,9 @@ module Grape
       def declared_param?(param)
         # @declared_params also includes hashes of options and such, but those
         # won't be flattened out.
-        @declared_params.flatten.include?(param)
+        @declared_params.flatten.any? do |declared_param|
+          first_hash_key_or_param(declared_param) == param
+        end
       end
 
       alias group requires
@@ -237,6 +239,12 @@ module Grape
         params = @parent.params(params) if @parent
         params = map_params(params, @element) if @element
         params
+      end
+
+      private
+
+      def first_hash_key_or_param(parameter)
+        parameter.is_a?(Hash) ? parameter.keys.first : parameter
       end
     end
   end
