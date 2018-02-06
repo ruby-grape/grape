@@ -6,6 +6,8 @@
 
 #### Fixes
 
+* [#1740](https://github.com/ruby-grape/grape/pull/1740): Fix dependent parameter validation using `given` when parameter is a `Hash` - [@jvortmann](https://github.com/jvortmann).
+
 * Your contribution here.
 
 ### 1.0.2 (1/10/2018)
