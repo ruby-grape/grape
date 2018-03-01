@@ -103,8 +103,13 @@ describe Grape::Middleware::Error do
           run ExceptionSpec::OtherExceptionApp
         end
       end
-      it 'does not trap errors other than StandardError' do
-        expect { get '/' }.to raise_error(NotImplementedError, 'snow!')
+      it 'sets the message appropriately' do
+        get '/'
+        expect(last_response.body).to eq('snow!')
+      end
+      it 'defaults to a 500 status' do
+        get '/'
+        expect(last_response.status).to eq(500)
       end
     end
   end
