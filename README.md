@@ -269,7 +269,7 @@ Grape will also automatically respond to HEAD and OPTIONS for all GET, and just 
 If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool
 is handled correctly.
 
-In the old days we could use ActiveRecord's `ConnectionManagement` middleware in your
+In the old days you could use ActiveRecord's `ConnectionManagement` middleware in your
 `config.ru` before mounting Grape.
 
 But this class was removed on ActiveRecord 5. So, if you want to use ActiveRecord you will need to handle
