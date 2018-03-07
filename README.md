@@ -269,11 +269,36 @@ Grape will also automatically respond to HEAD and OPTIONS for all GET, and just 
 If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool
 is handled correctly.
 
-The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement` middleware in your
-`config.ru` before mounting Grape, e.g.:
+In the old days we could use ActiveRecord's `ConnectionManagement` middleware in your
+`config.ru` before mounting Grape.
+
+But this class was removed on ActiveRecord 5. So, if you want to use ActiveRecord you will need to handle
+connections by your self.
+
+The easyest way to achieve this is by creating the class yourself as a rack midleware and call it in your
+config.ru file, e.g.:
 
 ```ruby
-use ActiveRecord::ConnectionAdapters::ConnectionManagement
+class ConnectionManagement
+  def initialize(app)
+    @app = app
+  end
+
+  def call(env)
+    testing = env['rack.test']
+
+    status, headers, body = @app.call(env)
+    proxy = ::Rack::BodyProxy.new(body) do
+      ActiveRecord::Base.clear_active_connections! unless testing
+    end
+    [status, headers, proxy]
+  rescue Exception
+    ActiveRecord::Base.clear_active_connections! unless testing
+    raise
+  end
+end
+
+use ConnectionManagement
 
 run Twitter::API
 ```
