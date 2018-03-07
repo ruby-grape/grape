@@ -273,7 +273,7 @@ In the old days you could use ActiveRecord's `ConnectionManagement` middleware i
 `config.ru` before mounting Grape.
 
 But this class was removed on ActiveRecord 5. So, if you want to use ActiveRecord you will need to handle
-connections by your self.
+connections by yourself.
 
 The easyest way to achieve this is by creating the class yourself as a rack midleware and call it in your
 config.ru file, e.g.:
