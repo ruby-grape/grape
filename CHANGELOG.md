@@ -2,7 +2,7 @@
 
 #### Fixes
 
-* Changed ActiveRecord Without Rails section of the README.md to use another approach to ConnectionManagement. [@thiagoramos23](https://github.com/thiagoramos23)
+*[#1747] Updating activerecord without rails section on README.md [@thiagoramos23](https://github.com/thiagoramos23)
 
 #### Fixes
 
