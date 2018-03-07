@@ -2,6 +2,7 @@
 
 #### Fixes
 
+* Your contribution here.
 * [#1747](https://github.com/ruby-grape/grape/pull/1747): Updating activerecord without rails section on README.md - [@thiagoramos23](https://github.com/thiagoramos23).
 
 #### Fixes
