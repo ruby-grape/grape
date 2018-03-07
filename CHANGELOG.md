@@ -1,8 +1,8 @@
 ### 1.0.3 (Next)
 
-#### Features
+#### Fixes
 
-* Your contribution here.
+* Changed ActiveRecord Without Rails section of the README.md to use another approach to ConnectionManagement. [@thiagoramos23](https://github.com/thiagoramos23)
 
 #### Fixes
 
