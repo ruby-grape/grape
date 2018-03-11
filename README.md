@@ -78,6 +78,7 @@
 - [Exception Handling](#exception-handling)
     - [Rescuing exceptions inside namespaces](#rescuing-exceptions-inside-namespaces)
     - [Unrescuable Exceptions](#unrescuable-exceptions)
+    - [Exceptions that should be rescued explicitly](#exceptions-that-should-be-rescued-explicitly)
   - [Rails 3.x](#rails-3x)
 - [Logging](#logging)
 - [API Formats](#api-formats)
@@ -2079,6 +2080,9 @@ class Twitter::API < Grape::API
 end
 ```
 
+This mimics [default `rescue` behaviour](https://ruby-doc.org/core/StandardError.html) when an exception type is not provided.
+Any other exception should be rescued explicitly, see [below](#exceptions-that-should-be-rescued-explicitly).
+
 Grape can also rescue from all exceptions and still use the built-in exception handing.
 This will give the same behavior as `rescue_from :all` with the addition that Grape will use the exception handling defined by all Exception classes that inherit `Grape::Exceptions::Base`.
 
@@ -2280,6 +2284,12 @@ Here `'inner'` will be result of handling occured `ArgumentError`.
 #### Unrescuable Exceptions
 
 `Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.
+
+#### Exceptions that should be rescued explicitly
+
+Any exception that is not subclass of `StandardError` should be rescued explicitly.
+Usually it is not a case for an application logic as such errors point to problems in Ruby runtime.
+This is following [standard recomendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
 
 ### Rails 3.x
 

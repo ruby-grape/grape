@@ -109,6 +109,19 @@ describe Grape::Middleware::Error do
     end
   end
 
+  context 'Non-StandardError exception with a provided rescue handler' do
+    subject do
+      Rack::Builder.app do
+        use Spec::Support::EndpointFaker
+        use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => -> { [200, {}, 'rescued'] } }
+        run ExceptionSpec::OtherExceptionApp
+      end
+    end
+    it 'rescues the exception using the provided handler' do
+      get '/'
+      expect(last_response.body).to eq('rescued')
+    end
+  end
   context do
     subject do
       Rack::Builder.app do
