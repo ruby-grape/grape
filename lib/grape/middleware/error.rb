@@ -46,6 +46,14 @@ module Grape
           end
 
           handler.nil? ? handle_error(e) : exec_handler(e, &handler)
+        rescue Exception => e # rubocop:disable Lint/RescueException
+          handler = options[:rescue_handlers].find do |error_class, error_handler|
+            break error_handler if e.class <= error_class
+          end
+
+          raise unless handler
+
+          exec_handler(e, &handler)
         end
       end
 

@@ -7,9 +7,9 @@
 #### Fixes
 
 * [#1740](https://github.com/ruby-grape/grape/pull/1740): Fix dependent parameter validation using `given` when parameter is a `Hash` - [@jvortmann](https://github.com/jvortmann).
-
-* Your contribution here.
 * [#1737](https://github.com/ruby-grape/grape/pull/1737): Fix translating error when passing symbols as params in custom validations - [@mlzhuyi](https://github.com/mlzhuyi).
+* [#1749](https://github.com/ruby-grape/grape/pull/1749): Allow rescue from non-`StandardError` exceptions - [@dm1try](https://github.com/dm1try).
+* Your contribution here.
 
 ### 1.0.2 (1/10/2018)
 
