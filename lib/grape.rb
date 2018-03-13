@@ -30,7 +30,6 @@ module Grape
   eager_autoload do
     autoload :API
     autoload :Endpoint
-    autoload :Router
 
     autoload :Namespace
 
