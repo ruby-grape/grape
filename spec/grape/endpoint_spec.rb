@@ -464,7 +464,20 @@ describe Grape::Endpoint do
 
     it 'does not include missing attributes if that option is passed' do
       subject.get '/declared' do
-        error! 400, 'expected nil' if declared(params, include_missing: false)[:second]
+        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:second)
+        ''
+      end
+
+      get '/declared?first=one&other=two'
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'does not include aliased missing attributes if that option is passed' do
+      subject.params do
+        optional :aliased_original, as: :aliased
+      end
+      subject.get '/declared' do
+        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:aliased)
         ''
       end
 
