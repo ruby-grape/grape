@@ -2289,7 +2289,7 @@ Here `'inner'` will be result of handling occured `ArgumentError`.
 
 Any exception that is not subclass of `StandardError` should be rescued explicitly.
 Usually it is not a case for an application logic as such errors point to problems in Ruby runtime.
-This is following [standard recomendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
+This is following [standard recommendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
 
 ### Rails 3.x
 

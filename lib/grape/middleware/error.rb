@@ -36,7 +36,7 @@ module Grape
           error_response(catch(:error) do
             return @app.call(@env)
           end)
-        rescue StandardError => e
+        rescue Exception => e # rubocop:disable Lint/RescueException
           is_rescuable = rescuable?(e.class)
           if e.is_a?(Grape::Exceptions::Base) && (!is_rescuable || rescuable_by_grape?(e.class))
             handler = ->(arg) { error_response(arg) }
@@ -46,14 +46,6 @@ module Grape
           end
 
           handler.nil? ? handle_error(e) : exec_handler(e, &handler)
-        rescue Exception => e # rubocop:disable Lint/RescueException
-          handler = options[:rescue_handlers].find do |error_class, error_handler|
-            break error_handler if e.class <= error_class
-          end
-
-          raise unless handler
-
-          exec_handler(e, &handler)
         end
       end
 
@@ -72,7 +64,12 @@ module Grape
 
       def rescuable?(klass)
         return false if klass == Grape::Exceptions::InvalidVersionHeader
-        rescue_all? || rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
+
+        if klass <= StandardError
+          rescue_all? || rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
+        else
+          rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
+        end
       end
 
       def rescuable_by_grape?(klass)
