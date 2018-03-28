@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#1755](https://github.com/ruby-grape/grape/pull/1755): Fix shared params with exactly_one_of - [@milgner](https://github.com/milgner).
 * [#1740](https://github.com/ruby-grape/grape/pull/1740): Fix dependent parameter validation using `given` when parameter is a `Hash` - [@jvortmann](https://github.com/jvortmann).
 * [#1737](https://github.com/ruby-grape/grape/pull/1737): Fix translating error when passing symbols as params in custom validations - [@mlzhuyi](https://github.com/mlzhuyi).
 * [#1749](https://github.com/ruby-grape/grape/pull/1749): Allow rescue from non-`StandardError` exceptions - [@dm1try](https://github.com/dm1try).
