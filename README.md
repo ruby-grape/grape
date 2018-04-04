@@ -45,24 +45,31 @@
   - [Group Options](#group-options)
   - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
-    - [`allow_blank`](#allowblank)
+    - [`allow_blank`](#allow_blank)
     - [`values`](#values)
-    - [`except_values`](#exceptvalues)
+    - [`except_values`](#except_values)
     - [`regexp`](#regexp)
-    - [`mutually_exclusive`](#mutuallyexclusive)
-    - [`exactly_one_of`](#exactlyoneof)
-    - [`at_least_one_of`](#atleastoneof)
-    - [`all_or_none_of`](#allornoneof)
-    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutuallyexclusive-exactlyoneof-atleastoneof-allornoneof)
+    - [`mutually_exclusive`](#mutually_exclusive)
+    - [`exactly_one_of`](#exactly_one_of)
+    - [`at_least_one_of`](#at_least_one_of)
+    - [`all_or_none_of`](#all_or_none_of)
+    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
-    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allowblank-values-regexp)
-    - [`mutually_exclusive`](#mutuallyexclusive-1)
+    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allow_blank-values-regexp)
+    - [`all_or_none_of`](#all_or_none_of-1)
+    - [`mutually_exclusive`](#mutually_exclusive-1)
+    - [`exactly_one_of`](#exactly_one_of-1)
+    - [`at_least_one_of`](#at_least_one_of-1)
+    - [`Coerce`](#coerce)
+    - [`With Lambdas`](#with-lambdas)
+    - [`Pass symbols for i18n translations`](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
+- [Headers](#headers)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -118,10 +125,10 @@
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
-    - [endpoint_run.grape](#endpointrungrape)
-    - [endpoint_render.grape](#endpointrendergrape)
-    - [endpoint_run_filters.grape](#endpointrunfiltersgrape)
-    - [endpoint_run_validators.grape](#endpointrunvalidatorsgrape)
+    - [endpoint_run.grape](#endpoint_rungrape)
+    - [endpoint_render.grape](#endpoint_rendergrape)
+    - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
+    - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [License](#license)
@@ -1550,6 +1557,7 @@ params do
   requires :name, values: { value: 1..10, message: 'not in range from 1 to 10' }, allow_blank: { value: false, message: 'cannot be blank' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }, message: 'is required'
 end
 ```
+
 #### `all_or_none_of`
 
 ```ruby
@@ -1571,6 +1579,7 @@ params do
   mutually_exclusive :beer, :wine, :juice, message: "are mutually exclusive cannot pass both params"
 end
 ```
+
 #### `exactly_one_of`
 
 ```ruby
@@ -1581,6 +1590,7 @@ params do
   exactly_one_of :beer, :wine, :juice, message: {exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required"}
 end
 ```
+
 #### `at_least_one_of`
 
 ```ruby
@@ -1591,6 +1601,7 @@ params do
   at_least_one_of :beer, :wine, :juice, message: "are missing, please specify at least one param"
 end
 ```
+
 #### `Coerce`
 
 ```ruby
@@ -1598,6 +1609,7 @@ params do
   requires :int, type: {value: Integer, message: "type cast is invalid" }
 end
 ```
+
 #### `With Lambdas`
 
 ```ruby
@@ -1605,6 +1617,7 @@ params do
   requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }
 end
 ```
+
 #### `Pass symbols for i18n translations`
 
 You can pass a symbol if you want i18n translations for your custom validation messages.
@@ -1652,6 +1665,7 @@ params do
   requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
 end
 ```
+
 ## Headers
 
 Request headers are available through the `headers` helper or from `env` in their original form.
