@@ -13,6 +13,7 @@
 * [#1750](https://github.com/ruby-grape/grape/pull/1750): Fix a circular dependency warning due to router being loaded by API - [@salasrod](https://github.com/salasrod).
 * [#1752](https://github.com/ruby-grape/grape/pull/1752): Fix `include_missing` behavior for aliased parameters - [@jonasoberschweiber](https://github.com/jonasoberschweiber).
 * [#1754](https://github.com/ruby-grape/grape/pull/1754): Allow rescue from non-`StandardError` exceptions to use default error handling - [@jelkster](https://github.com/jelkster).
+* [#1756](https://github.com/ruby-grape/grape/pull/1756): Allow custom Grape exception handlers when the built-in exception handling is enabled - [@soylent](https://github.com/soylent).
 * Your contribution here.
 
 ### 1.0.2 (1/10/2018)

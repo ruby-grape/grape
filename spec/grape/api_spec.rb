@@ -1946,6 +1946,40 @@ XML
     end
   end
 
+  describe '.rescue_from :grape_exceptions' do
+    before do
+      subject.rescue_from :grape_exceptions
+    end
+
+    let(:grape_exception) do
+      Grape::Exceptions::Base.new(status: 400, message: 'Grape Error')
+    end
+
+    it 'rescues grape exceptions' do
+      exception = grape_exception
+      subject.get('/grape_exception') { raise exception }
+
+      get '/grape_exception'
+
+      expect(last_response.status).to eq(exception.status)
+      expect(last_response.body).to eq(exception.message)
+    end
+
+    it 'rescues grape exceptions with a user-defined handler' do
+      subject.rescue_from grape_exception.class do |_error|
+        rack_response('Redefined Error', 403)
+      end
+
+      exception = grape_exception
+      subject.get('/grape_exception') { raise exception }
+
+      get '/grape_exception'
+
+      expect(last_response.status).to eq(403)
+      expect(last_response.body).to eq('Redefined Error')
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
