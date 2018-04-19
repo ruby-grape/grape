@@ -110,7 +110,7 @@ module Grape
       end
 
       def rescue_handler_for_any_class(klass)
-        return unless klass <= StandardError
+        return unless klass <= Exception
         return unless options[:rescue_all] || options[:rescue_grape_exceptions]
 
         options[:all_rescue_handler] || :default_rescue_handler

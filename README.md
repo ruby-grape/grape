@@ -2086,7 +2086,7 @@ literally accepts every request.
 
 ## Exception Handling
 
-Grape can be told to rescue all `StandardError` exceptions and return them in the API format.
+Grape can be told to rescue all exceptions and return them in the API format.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -2116,7 +2116,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-In this case ```UserDefinedError``` must be inherited from ```StandardError```.
+```UserDefinedError``` can be inherited from any exception class.
 
 Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
 
