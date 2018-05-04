@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
 * Your contribution here.
 
 ### 1.0.3 (4/23/2018)
