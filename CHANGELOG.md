@@ -2,7 +2,7 @@
 
 #### Features
 
-* Your contribution here.
+* [#1759](https://github.com/ruby-grape/grape/pull/1759): Instrument serialization as `'format_response.grape'` - [@zvkemp](https://github.com/zvkemp).
 
 #### Fixes
 

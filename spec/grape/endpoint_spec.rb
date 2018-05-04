@@ -1493,7 +1493,9 @@ describe Grape::Endpoint do
                                                                        filters: [],
                                                                        type: :after }),
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
-                                                               env: an_instance_of(Hash) })
+                                                               env: an_instance_of(Hash) }),
+        have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
+                                                                  formatter: a_kind_of(Module) })
       )
 
       # In order that events were initialized
@@ -1515,7 +1517,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
-                                                                       type: :after })
+                                                                       type: :after }),
+        have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
+                                                                  formatter: a_kind_of(Module) })
       )
     end
   end
