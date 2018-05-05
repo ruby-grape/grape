@@ -41,7 +41,9 @@ module Grape
         else
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers, options)
-          bodymap = bodies.collect { |body| formatter.call(body, env) }
+          bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter: formatter, env: env) do
+            bodies.collect { |body| formatter.call(body, env) }
+          end
           Rack::Response.new(bodymap, status, headers)
         end
       rescue Grape::Exceptions::InvalidFormatter => e

@@ -129,6 +129,7 @@
     - [endpoint_render.grape](#endpoint_rendergrape)
     - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
     - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
+    - [format_response.grape](#format_responsegrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [License](#license)
@@ -3483,6 +3484,13 @@ The execution of validators.
 * *endpoint* - The endpoint instance
 * *validators* - The validators being executed
 * *request* - The request being validated
+
+#### format_response.grape
+
+Serialization or template rendering.
+
+* *env* - The request environment
+* *formatter* - The formatter object (e.g., `Grape::Formatter::Json`)
 
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
