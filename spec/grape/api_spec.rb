@@ -2142,7 +2142,7 @@ XML
       end
       get '/excel.json'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq("The requested format 'txt' is not supported.")
+      expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
     end
   end
 
@@ -3524,7 +3524,19 @@ XML
       end
       get '/something'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq("{\"error\":\"The requested format 'txt' is not supported.\"}")
+      expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
+    end
+  end
+
+  context 'with unsafe HTML format specified' do
+    it 'escapes the HTML' do
+      subject.content_type :json, 'application/json'
+      subject.get '/something' do
+        'foo'
+      end
+      get '/something?format=<script>blah</script>'
+      expect(last_response.status).to eq(406)
+      expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
     end
   end
 
