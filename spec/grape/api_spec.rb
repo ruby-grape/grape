@@ -2142,7 +2142,11 @@ XML
       end
       get '/excel.json'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('The requested format &#x27;txt&#x27; is not supported.')
+      else
+        expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
+      end
     end
   end
 
@@ -3524,7 +3528,11 @@ XML
       end
       get '/something'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#x27;txt&#x27; is not supported.&quot;}')
+      else
+        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
+      end
     end
   end
 
@@ -3536,7 +3544,11 @@ XML
       end
       get '/something?format=<script>blah</script>'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('The requested format &#x27;&lt;script&gt;blah&lt;/script&gt;&#x27; is not supported.')
+      else
+        expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
+      end
     end
   end
 
