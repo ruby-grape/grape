@@ -1,4 +1,5 @@
 require 'grape/middleware/base'
+require 'active_support/core_ext/string/output_safety'
 
 module Grape
   module Middleware
@@ -69,6 +70,9 @@ module Grape
       end
 
       def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
+        if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
+          message = ERB::Util.html_escape(message)
+        end
         Rack::Response.new([message], status, headers).finish
       end
 

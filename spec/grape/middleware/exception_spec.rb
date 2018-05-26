@@ -192,7 +192,7 @@ describe Grape::Middleware::Error do
     end
     it 'is possible to return errors in jsonapi format' do
       get '/'
-      expect(last_response.body).to eq('{"error":"rain!"}')
+      expect(last_response.body).to eq('{&quot;error&quot;:&quot;rain!&quot;}')
     end
   end
 
@@ -207,8 +207,8 @@ describe Grape::Middleware::Error do
 
     it 'is possible to return hash errors in jsonapi format' do
       get '/'
-      expect(['{"error":"rain!","detail":"missing widget"}',
-              '{"detail":"missing widget","error":"rain!"}']).to include(last_response.body)
+      expect(['{&quot;error&quot;:&quot;rain!&quot;,&quot;detail&quot;:&quot;missing widget&quot;}',
+              '{&quot;detail&quot;:&quot;missing widget&quot;,&quot;error&quot;:&quot;rain!&quot;}']).to include(last_response.body)
     end
   end
 
@@ -258,7 +258,7 @@ describe Grape::Middleware::Error do
     end
     it 'is possible to specify a custom formatter' do
       get '/'
-      expect(last_response.body).to eq('{:custom_formatter=>"rain!"}')
+      expect(last_response.body).to eq('{:custom_formatter=&gt;&quot;rain!&quot;}')
     end
   end
 
