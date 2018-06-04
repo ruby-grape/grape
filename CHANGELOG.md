@@ -1,4 +1,4 @@
-### 1.0.4 (Next)
+### 1.1.0 (Next)
 
 #### Features
 
@@ -10,6 +10,7 @@
 * [#1762](https://github.com/ruby-grape/grape/pull/1763): Fix unsafe HTML rendering on errors - [@ctennis](https://github.com/ctennis).
 * [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
 * [#1758](https://github.com/ruby-grape/grape/pull/1758): Fix expanding load_path in gemspec - [@2maz](https://github.com/2maz).
+* [#1765](https://github.com/ruby-grape/grape/pull/1765): Use 415 when request body is of an unsupported media type - [@jdmurphy](https://github.com/jdmurphy).
 * Your contribution here.
 
 ### 1.0.3 (4/23/2018)

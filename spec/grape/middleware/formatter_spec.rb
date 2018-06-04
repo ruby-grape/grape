@@ -224,6 +224,80 @@ describe Grape::Middleware::Formatter do
 
   context 'input' do
     %w[POST PATCH PUT DELETE].each do |method|
+      context 'when body is not nil or empty' do
+        context 'when Content-Type is supported' do
+          let(:io) { StringIO.new('{"is_boolean":true,"string":"thing"}') }
+          let(:content_type) { 'application/json' }
+
+          it "parses the body from #{method} and copies values into rack.request.form_hash" do
+            subject.call(
+              'PATH_INFO' => '/info',
+              'REQUEST_METHOD' => method,
+              'CONTENT_TYPE' => content_type,
+              'rack.input' => io,
+              'CONTENT_LENGTH' => io.length
+            )
+            expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
+            expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
+          end
+        end
+
+        context 'when Content-Type is not supported' do
+          let(:io) { StringIO.new('{"is_boolean":true,"string":"thing"}') }
+          let(:content_type) { 'application/atom+xml' }
+
+          it 'returns a 415 HTTP error status' do
+            error = catch(:error) {
+              subject.call(
+                'PATH_INFO' => '/info',
+                'REQUEST_METHOD' => method,
+                'CONTENT_TYPE' => content_type,
+                'rack.input' => io,
+                'CONTENT_LENGTH' => io.length
+              )
+            }
+            expect(error[:status]).to eq(415)
+            expect(error[:message]).to eq("The provided content-type 'application/atom+xml' is not supported.")
+          end
+        end
+      end
+
+      context 'when body is nil' do
+        let(:io) { double }
+        before do
+          allow(io).to receive_message_chain(:rewind, :read).and_return(nil)
+        end
+
+        it 'does not read and parse the body' do
+          expect(subject).not_to receive(:read_rack_input)
+          subject.call(
+            'PATH_INFO' => '/info',
+            'REQUEST_METHOD' => method,
+            'CONTENT_TYPE' => 'application/json',
+            'rack.input' => io,
+            'CONTENT_LENGTH' => 0
+          )
+        end
+      end
+
+      context 'when body is empty' do
+        let(:io) { double }
+        before do
+          allow(io).to receive_message_chain(:rewind, :read).and_return('')
+        end
+
+        it 'does not read and parse the body' do
+          expect(subject).not_to receive(:read_rack_input)
+          subject.call(
+            'PATH_INFO' => '/info',
+            'REQUEST_METHOD' => method,
+            'CONTENT_TYPE' => 'application/json',
+            'rack.input' => io,
+            'CONTENT_LENGTH' => 0
+          )
+        end
+      end
+
       ['application/json', 'application/json; charset=utf-8'].each do |content_type|
         context content_type do
           it "parses the body from #{method} and copies values into rack.request.form_hash" do

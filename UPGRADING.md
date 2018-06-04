@@ -1,6 +1,12 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.1.0
+
+#### Changes in HTTP Response Code for Unsupported Content Type
+
+For PUT, POST, PATCH, and DELETE requests where a non-empty body and a "Content-Type" header is supplied that is not supported by the Grape API, Grape will no longer return a 406 "Not Acceptable" HTTP status code and will instead return a 415 "Unsupported Media Type" so that the usage of HTTP status code falls more in line with the specification of [RFC 2616](https://www.ietf.org/rfc/rfc2616.txt).
+
 ### Upgrading to >= 1.0.0
 
 #### Changes in XML and JSON Parsers
