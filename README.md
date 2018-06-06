@@ -1336,7 +1336,20 @@ params do
 end
 ```
 
-#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`
+#### `declared_only`
+
+The method 'declared_only' may be used within any block to ensure that no undeclared parameters are allowed.
+
+```ruby
+params do
+  optional :beer
+  optional :wine
+  optional :juice
+  declared_only
+end
+```
+
+#### Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`, `declared_only`
 
 All of these methods can be used at any nested level.
 
@@ -1359,11 +1372,13 @@ params do
     optional :icecream
     mutually_exclusive :cake, :icecream
   end
-  optional :recipe, type: Hash do
+  optional :recipes, type: Array do
     optional :oil
     optional :meat
     all_or_none_of :oil, :meat
+    declared_only
   end
+  declared_only
 end
 ```
 
