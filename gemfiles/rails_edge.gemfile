@@ -22,7 +22,7 @@ end
 group :test do
   gem 'cookiejar'
   gem 'coveralls', '~> 0.8.17', require: false
-  gem 'danger-toc', '~> 0.1.0'
+  gem 'danger-toc', '~> 0.1.2'
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'mime-types'

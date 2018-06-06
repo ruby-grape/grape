@@ -145,7 +145,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.0.4**.
+You're reading the documentation for the next release of Grape, which should be **1.1.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
 The current stable release is [1.0.3](https://github.com/ruby-grape/grape/blob/v1.0.3/README.md).
 
@@ -2550,6 +2550,9 @@ Built-in formatters are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
+
+If a body is present in a request to an API, with a Content-Type header value that is of an unsupported type a
+"415 Unsupported Media Type" error code will be returned by Grape.
 
 Response statuses that indicate no content as defined by [Rack](https://github.com/rack)
 [here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
