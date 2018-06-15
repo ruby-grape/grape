@@ -316,14 +316,7 @@ run Rack::Cascade.new [API, Web]
 
 ### Rails
 
-Place API files into `app/api`. Rails expects a subdirectory that matches the name of the Ruby module and a file name that matches the name of the class. In our example, the file name location and directory for `Twitter::API` should be `app/api/twitter/api.rb`.
-
-Modify `application.rb`:
-
-```ruby
-config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
-```
+Place API files into `app/api`. Rails expects a subdirectory that matches the name of the Ruby module and a file name that matches the name of the class. In our example, the file name location and directory for `Twitter::API` should be `app/api/twitter/api.rb`. API changes in development will be picked up automatically.
 
 Modify `config/routes`:
 
@@ -331,7 +324,7 @@ Modify `config/routes`:
 mount Twitter::API => '/'
 ```
 
-See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
+For Rails < 5.2, See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
 
@@ -3412,7 +3405,9 @@ Use [grape-reload](https://github.com/AlexYankee/grape-reload).
 
 ### Reloading in Rails Applications
 
-Add API paths to `config/application.rb`.
+In Rails >= 5.2, reloading should work without any modification.
+
+For Rails <5.2, add API paths to `config/application.rb`.
 
 ```ruby
 # Auto-load API and its subdirectories
