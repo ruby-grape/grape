@@ -11,6 +11,7 @@
 * [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
 * [#1758](https://github.com/ruby-grape/grape/pull/1758): Fix expanding load_path in gemspec - [@2maz](https://github.com/2maz).
 * [#1765](https://github.com/ruby-grape/grape/pull/1765): Use 415 when request body is of an unsupported media type - [@jdmurphy](https://github.com/jdmurphy).
+* [#1771](https://github.com/ruby-grape/grape/pull/1771): Add spec for param aliases with 'given' blocks - [@jereynolds](https://github.com/jereynolds).
 * Your contribution here.
 
 ### 1.0.3 (4/23/2018)
