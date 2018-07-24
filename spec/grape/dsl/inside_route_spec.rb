@@ -111,8 +111,8 @@ describe Grape::Endpoint do
       expect(subject.status).to eq 204
     end
 
-    describe 'defaulting to 200 on DELETE' do
-      it 'defaults to 200 on DELETE with a body present' do
+    describe 'what is regarded as content on DELETE' do
+      it 'regards a string as content' do
         request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
         subject.body 'content here'
         expect(subject).to receive(:request).and_return(request)
