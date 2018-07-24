@@ -3553,10 +3553,10 @@ XML
   end
 
   context 'body' do
-    context 'false' do
+    context 'nil' do
       before do
         subject.get '/blank' do
-          body false
+          body nil
         end
       end
       it 'returns blank body' do

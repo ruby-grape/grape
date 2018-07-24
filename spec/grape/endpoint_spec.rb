@@ -1320,18 +1320,18 @@ describe Grape::Endpoint do
       end
     end
 
-    describe 'delete 204, with nil has return value (no explicit body)' do
+    describe 'delete 200, with empty string as return value' do
       it 'responds to /example delete method' do
-        subject.delete(:example) { nil }
+        subject.delete(:example) { '' }
         delete '/example'
-        expect(last_response.status).to eql 204
+        expect(last_response.status).to eql 200
         expect(last_response.body).to be_empty
       end
     end
 
-    describe 'delete 204, with empty array has return value (no explicit body)' do
+    describe 'delete 204, with nil as return value (no explicit body)' do
       it 'responds to /example delete method' do
-        subject.delete(:example) { '' }
+        subject.delete(:example) { nil }
         delete '/example'
         expect(last_response.status).to eql 204
         expect(last_response.body).to be_empty
