@@ -1,3 +1,13 @@
+### 1.1.1 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 1.1.0 (8/4/2018)
 
 #### Features
@@ -5,7 +15,6 @@
 * [#1759](https://github.com/ruby-grape/grape/pull/1759): Instrument serialization as `'format_response.grape'` - [@zvkemp](https://github.com/zvkemp).
 
 #### Fixes
-
 
 * [#1762](https://github.com/ruby-grape/grape/pull/1763): Fix unsafe HTML rendering on errors - [@ctennis](https://github.com/ctennis).
 * [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
