@@ -127,7 +127,13 @@ module Grape
           handler = public_method(handler)
         end
 
-        handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+        response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+        valid_response?(response) ? response : error!('Internal Server Error(Invalid Response)')
+      end
+
+      def valid_response?(response)
+        # Rack::Response.new(...).finish generates an array with size 3
+        response.is_a?(Array) && response.size == 3
       end
     end
   end

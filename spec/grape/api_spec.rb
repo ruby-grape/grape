@@ -1723,6 +1723,26 @@ XML
       expect(last_response.status).to eql 500
       expect(last_response.body).to eq('Formatter Error')
     end
+
+    it 'validates response processed by exception handler' do
+      subject.rescue_from ArgumentError do
+        error!('rain!')
+        nil # invalid response caused by return nil
+      end
+      subject.rescue_from :all do
+        error!('rain!')
+      end
+      subject.get('/invalid_response') { raise ArgumentError }
+      subject.get('/valid_response') { raise 'rain!' }
+
+      get '/invalid_response'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eq('Internal Server Error(Invalid Response)')
+
+      get '/valid_response'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eq('rain!')
+    end
   end
 
   describe '.rescue_from klass, block' do
