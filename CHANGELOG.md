@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1776](https://github.com/ruby-grape/grape/pull/1776): Validates response processed by exception handler - [@darren987469](https://github.com/darren987469).
 
 ### 1.1.0 (8/4/2018)
 
@@ -21,7 +22,6 @@
 * [#1758](https://github.com/ruby-grape/grape/pull/1758): Fix expanding load_path in gemspec - [@2maz](https://github.com/2maz).
 * [#1765](https://github.com/ruby-grape/grape/pull/1765): Use 415 when request body is of an unsupported media type - [@jdmurphy](https://github.com/jdmurphy).
 * [#1771](https://github.com/ruby-grape/grape/pull/1771): Fix param aliases with 'given' blocks - [@jereynolds](https://github.com/jereynolds).
-* [#1776](https://github.com/ruby-grape/grape/pull/1776): Validates response processed by exception handler - [@darren987469](https://github.com/darren987469).
 
 ### 1.0.3 (4/23/2018)
 

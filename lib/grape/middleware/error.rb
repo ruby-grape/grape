@@ -128,7 +128,7 @@ module Grape
         end
 
         response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
-        valid_response?(response) ? response : error!('Internal Server Error(Invalid Response)')
+        valid_response?(response) ? response : run_rescue_handler(:default_rescue_handler, error)
       end
 
       def valid_response?(response)
