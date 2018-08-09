@@ -127,13 +127,7 @@ module Grape
           handler = public_method(handler)
         end
 
-        response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
-        valid_response?(response) ? response : run_rescue_handler(:default_rescue_handler, error)
-      end
-
-      def valid_response?(response)
-        # Rack::Response.new(...).finish generates an array with size 3
-        response.is_a?(Array) && response.size == 3
+        handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
       end
     end
   end

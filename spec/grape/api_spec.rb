@@ -1724,30 +1724,16 @@ XML
       expect(last_response.body).to eq('Formatter Error')
     end
 
-    context 'validates response processed by exception handler' do
-      it 'calls default_rescue_handler when response is invalid' do
-        subject.rescue_from :all do
-          error!('Internal Server Error')
-          nil # invalid response caused by return nil
-        end
-        subject.get('/invalid_response') { raise 'rain!' }
-
-        expect_any_instance_of(Grape::Middleware::Error).to receive(:default_rescue_handler).and_call_original
-        get '/invalid_response'
-        expect(last_response.status).to eql 500
-        expect(last_response.body).to eq('rain!')
+    it 'can rescue exception no mater what returned by rescue_from' do
+      subject.rescue_from :all do
+        error!('Internal Server Error')
+        Grape::API.logger.error('Internal Server Error')
       end
+      subject.get('/') { raise 'rain!' }
 
-      it 'calls custom handler when response is valid' do
-        subject.rescue_from :all do
-          error!('Internal Server Error')
-        end
-        subject.get('/valid_response') { raise 'rain!' }
-
-        get '/valid_response'
-        expect(last_response.status).to eql 500
-        expect(last_response.body).to eq('Internal Server Error')
-      end
+      get '/'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eq 'Internal Server Error'
     end
   end
 
