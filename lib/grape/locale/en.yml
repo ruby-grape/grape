@@ -49,4 +49,5 @@ en:
         invalid_version_header:
           problem: 'Invalid version header'
           resolution: '%{message}'
+        invalid_response: 'Invalid response'
 
