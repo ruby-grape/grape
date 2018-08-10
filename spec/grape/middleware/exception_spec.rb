@@ -128,7 +128,7 @@ describe Grape::Middleware::Error do
       subject do
         Rack::Builder.app do
           use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => -> { [200, {}, 'rescued'] } }
+          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => -> { ['rescued', 200, {}] } }
           run ExceptionSpec::OtherExceptionApp
         end
       end

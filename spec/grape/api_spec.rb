@@ -1724,16 +1724,52 @@ XML
       expect(last_response.body).to eq('Formatter Error')
     end
 
-    it 'can rescue exception no mater what returned by rescue_from' do
-      subject.rescue_from :all do
-        error!('Internal Server Error')
-        Grape::API.logger.error('Internal Server Error')
-      end
-      subject.get('/') { raise 'rain!' }
+    context 'takes object returned by rescue_from as error message' do
+      it 'accepts nil and returns default message and status' do
+        subject.rescue_from(:all) { nil }
+        subject.get('/') { raise }
 
-      get '/'
-      expect(last_response.status).to eql 500
-      expect(last_response.body).to eq 'Internal Server Error'
+        get '/'
+        expect(last_response.status).to eql 500
+        expect(last_response.body).to eql ''
+      end
+
+      it 'accepts string' do
+        subject.rescue_from(:all) { 'whatever' }
+        subject.get('/') { raise }
+
+        get '/'
+        expect(last_response.status).to eql 500
+        expect(last_response.body).to eql 'whatever'
+      end
+
+      it 'accepts hash' do
+        hash = { message: 'error' }
+        subject.rescue_from(:all) { hash }
+        subject.get('/') { raise }
+
+        get '/'
+        expect(last_response.status).to eql 500
+        expect(last_response.body).to eql hash.to_json
+      end
+
+      it 'accepts Array' do
+        subject.rescue_from(:all) { ['error', 400] }
+        subject.get('/') { raise }
+
+        get '/'
+        expect(last_response.status).to eql 400
+        expect(last_response.body).to eql 'error'
+      end
+
+      it 'accepts Rack::Response' do
+        subject.rescue_from(:all) { Rack::Response.new('error', 400) }
+        subject.get('/') { raise }
+
+        get '/'
+        expect(last_response.status).to eql 400
+        expect(last_response.body).to eql 'error'
+      end
     end
   end
 
