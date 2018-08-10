@@ -128,18 +128,11 @@ module Grape
         end
 
         response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
-        return response if response.is_a?(Rack::Response)
 
-        # take object returned from handler as [message, status, headers]
-        # assign default value if they are nil
-        message, status, headers = response
-        message ||= default_options[:default_message]
-        status ||= default_options[:default_status]
-
-        if headers.present? && headers.is_a?(Hash)
-          error!(message, status, headers)
+        if response.is_a?(Rack::Response)
+          response
         else
-          error!(message, status)
+          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new)
         end
       end
     end

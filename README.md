@@ -2254,16 +2254,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-By default, object returned by `rescue_from` would be taken as response message. It is suggested to call `error!` in the last line of `rescue_from` block. But you could return `String`, `Hash`, `Array`, `Rack::Response` or even `nil` as well.
-
-```ruby
-rescue_from(:all) { error!('error') }
-rescue_from(:all) { 'error' }
-rescue_from(:all) { { message: 'error' } }
-rescue_from(:all) { [500, 'error', { 'Content-Type' => 'text/error' }] }
-rescue_from(:all) { Rack::Response.new('error', 500) }
-rescue_from(:all) { nil } # response default_message and default_status
-```
+The `rescue_from` block must return a `Rack::Response` object, or call `error!`.
 
 The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
 
