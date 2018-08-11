@@ -2254,7 +2254,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-The `rescue_from` block must return a `Rack::Response` object, or call `error!`.
+The `rescue_from` block must return a `Rack::Response` object, or call `error!` or raise an exception, either original exception or another custom exception. The exception raised in `rescue_from` would be handled outside grape. For example, if you mount grape in Rails, the exception would be handle by [Rails](https://guides.rubyonrails.org/action_controller_overview.html#rescue).
 
 The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
 
