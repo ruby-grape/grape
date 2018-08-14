@@ -1,6 +1,25 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.1.1
+
+#### Changes in rescue_from returned object
+
+Grape add a validation to check object returned from `rescue_from` block is a Rack::Response. That makes sure response is valid and prevent exposing service information. If you return `Rack::Response.new(...).finish` in `rescue_from` block, change it to `Rack::Response.new(...)` to comply with the validation.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    # version prior to 1.1.1
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    # 1.1.1 version
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
+  end
+end
+```
+
+See [#1757](https://github.com/ruby-grape/grape/pull/1757), [#1776](https://github.com/ruby-grape/grape/pull/1776) for more details.
+
 ### Upgrading to >= 1.1.0
 
 #### Changes in HTTP Response Code for Unsupported Content Type

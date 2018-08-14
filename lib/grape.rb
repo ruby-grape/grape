@@ -75,6 +75,7 @@ module Grape
     autoload :InvalidAcceptHeader
     autoload :InvalidVersionHeader
     autoload :MethodNotAllowed
+    autoload :InvalidResponse
   end
 
   module Extensions

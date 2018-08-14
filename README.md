@@ -2183,7 +2183,7 @@ You can also rescue all exceptions with a code block and handle the Rack respons
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end
 ```
@@ -2254,7 +2254,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
+The `rescue_from` block must return a `Rack::Response` object, or call `error!` or raise an exception, either original exception or another custom exception. The exception raised in `rescue_from` would be handled outside grape. For example, if you mount grape in Rails, the exception would be handle by [Rails](https://guides.rubyonrails.org/action_controller_overview.html#rescue).
 
 The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
 
