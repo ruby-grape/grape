@@ -935,7 +935,7 @@ parameter, and the return value must match the given `type`.
 
 ```ruby
 params do
-  requires :passwd, type: String, coerce_with: Base64.method(:decode)
+  requires :passwd, type: String, coerce_with: Base64.method(:decode64)
   requires :loud_color, type: Color, coerce_with: ->(c) { Color.parse(c.downcase) }
 
   requires :obj, type: Hash, coerce_with: JSON do
