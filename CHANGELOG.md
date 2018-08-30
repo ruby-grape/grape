@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1776](https://github.com/ruby-grape/grape/pull/1776): Validate response returned by the exception handler - [@darren987469](https://github.com/darren987469).
 
 ### 1.1.0 (8/4/2018)
 
