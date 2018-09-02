@@ -2894,7 +2894,7 @@ end
 
 ```
 
-Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
+Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
 ## Describing and Inspecting an API
 
