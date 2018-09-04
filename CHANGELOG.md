@@ -8,6 +8,7 @@
 
 * Your contribution here.
 * [#1776](https://github.com/ruby-grape/grape/pull/1776): Validate response returned by the exception handler - [@darren987469](https://github.com/darren987469).
+* [#1787](https://github.com/ruby-grape/grape/pull/1787): Add documented but not implemented ability to `.insert` a middleware in the stack - [@michaellennox](https://github.com/michaellennox).
 
 ### 1.1.0 (8/4/2018)
 
