@@ -1348,6 +1348,28 @@ XML
     end
   end
 
+  describe '.insert' do
+    it 'inserts middleware in a specific location in the stack' do
+      m = Class.new(Grape::Middleware::Base) do
+        def call(env)
+          env['phony.args'] ||= []
+          env['phony.args'] << @options[:message]
+          @app.call(env)
+        end
+      end
+
+      subject.use ApiSpec::PhonyMiddleware, 'bye'
+      subject.insert 0, m, message: 'good'
+      subject.insert 0, m, message: 'hello'
+      subject.get '/' do
+        env['phony.args'].join(' ')
+      end
+
+      get '/'
+      expect(last_response.body).to eql 'hello good bye'
+    end
+  end
+
   describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, _p|

@@ -22,6 +22,14 @@ module Grape
         end
       end
 
+      describe '.insert' do
+        it 'adds a middleware with the right operation' do
+          expect(subject).to receive(:namespace_stackable).with(:middleware, [:insert, 0, :arg1, proc])
+
+          subject.insert 0, :arg1, &proc
+        end
+      end
+
       describe '.insert_before' do
         it 'adds a middleware with the right operation' do
           expect(subject).to receive(:namespace_stackable).with(:middleware, [:insert_before, foo_middleware, :arg1, proc])

@@ -21,6 +21,13 @@ module Grape
           namespace_stackable(:middleware, arr)
         end
 
+        def insert(*args, &block)
+          arr = [:insert, *args]
+          arr << block if block_given?
+
+          namespace_stackable(:middleware, arr)
+        end
+
         def insert_before(*args, &block)
           arr = [:insert_before, *args]
           arr << block if block_given?
