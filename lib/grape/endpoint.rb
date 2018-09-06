@@ -200,7 +200,7 @@ module Grape
     end
 
     def merge_route_options(**default)
-      options[:route_options].clone.reverse_merge(**default)
+      options[:route_options].clone.merge(**default)
     end
 
     def map_routes

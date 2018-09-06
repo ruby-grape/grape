@@ -22,7 +22,7 @@ describe Grape::Endpoint do
 
     it 'routes to a path with multiple params with dots' do
       subject.get ':id_with_dots/:another_id_with_dots', requirements: { id_with_dots: %r{[^\/]+},
-                                                                         another_id_with_dots: %r{[^\/]+} }  do
+                                                                         another_id_with_dots: %r{[^\/]+} } do
         "#{params[:id_with_dots]}/#{params[:another_id_with_dots]}"
       end
 
