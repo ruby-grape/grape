@@ -64,7 +64,7 @@ module Grape
               has_alias = route_setting(:aliased_params) && route_setting(:aliased_params).find { |current| current[declared_param] }
               param_alias = has_alias[declared_param] if has_alias
 
-              next unless options[:include_missing] || passed_params.key?(declared_param) || param_alias
+              next unless options[:include_missing] || passed_params.key?(declared_param) || (param_alias && passed_params.key?(param_alias))
 
               if param_alias
                 memo[optioned_param_key(param_alias, options)] = passed_params[param_alias]

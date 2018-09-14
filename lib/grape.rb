@@ -30,7 +30,6 @@ module Grape
   eager_autoload do
     autoload :API
     autoload :Endpoint
-    autoload :Router
 
     autoload :Namespace
 
@@ -76,6 +75,7 @@ module Grape
     autoload :InvalidAcceptHeader
     autoload :InvalidVersionHeader
     autoload :MethodNotAllowed
+    autoload :InvalidResponse
   end
 
   module Extensions

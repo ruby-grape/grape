@@ -1,6 +1,31 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.1.1
+
+#### Changes in rescue_from returned object
+
+Grape will now check the object returned from `rescue_from` and ensure that it is a `Rack::Response`. That makes sure response is valid and avoids exposing service information. Change any code that invoked `Rack::Response.new(...).finish` in a custom `rescue_from` block to `Rack::Response.new(...)` to comply with the validation.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    # version prior to 1.1.1
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    # 1.1.1 version
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
+  end
+end
+```
+
+See [#1757](https://github.com/ruby-grape/grape/pull/1757) and [#1776](https://github.com/ruby-grape/grape/pull/1776) for more information.
+
+### Upgrading to >= 1.1.0
+
+#### Changes in HTTP Response Code for Unsupported Content Type
+
+For PUT, POST, PATCH, and DELETE requests where a non-empty body and a "Content-Type" header is supplied that is not supported by the Grape API, Grape will no longer return a 406 "Not Acceptable" HTTP status code and will instead return a 415 "Unsupported Media Type" so that the usage of HTTP status code falls more in line with the specification of [RFC 2616](https://www.ietf.org/rfc/rfc2616.txt).
+
 ### Upgrading to >= 1.0.0
 
 #### Changes in XML and JSON Parsers

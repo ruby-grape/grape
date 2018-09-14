@@ -1348,6 +1348,28 @@ XML
     end
   end
 
+  describe '.insert' do
+    it 'inserts middleware in a specific location in the stack' do
+      m = Class.new(Grape::Middleware::Base) do
+        def call(env)
+          env['phony.args'] ||= []
+          env['phony.args'] << @options[:message]
+          @app.call(env)
+        end
+      end
+
+      subject.use ApiSpec::PhonyMiddleware, 'bye'
+      subject.insert 0, m, message: 'good'
+      subject.insert 0, m, message: 'hello'
+      subject.get '/' do
+        env['phony.args'].join(' ')
+      end
+
+      get '/'
+      expect(last_response.body).to eql 'hello good bye'
+    end
+  end
+
   describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, _p|
@@ -1723,6 +1745,16 @@ XML
       expect(last_response.status).to eql 500
       expect(last_response.body).to eq('Formatter Error')
     end
+
+    it 'uses default_rescue_handler to handle invalid response from rescue_from' do
+      subject.rescue_from(:all) { 'error' }
+      subject.get('/') { raise }
+
+      expect_any_instance_of(Grape::Middleware::Error).to receive(:default_rescue_handler).and_call_original
+      get '/'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eql 'Invalid response'
+    end
   end
 
   describe '.rescue_from klass, block' do
@@ -1946,6 +1978,40 @@ XML
     end
   end
 
+  describe '.rescue_from :grape_exceptions' do
+    before do
+      subject.rescue_from :grape_exceptions
+    end
+
+    let(:grape_exception) do
+      Grape::Exceptions::Base.new(status: 400, message: 'Grape Error')
+    end
+
+    it 'rescues grape exceptions' do
+      exception = grape_exception
+      subject.get('/grape_exception') { raise exception }
+
+      get '/grape_exception'
+
+      expect(last_response.status).to eq(exception.status)
+      expect(last_response.body).to eq(exception.message)
+    end
+
+    it 'rescues grape exceptions with a user-defined handler' do
+      subject.rescue_from grape_exception.class do |_error|
+        rack_response('Redefined Error', 403)
+      end
+
+      exception = grape_exception
+      subject.get('/grape_exception') { raise exception }
+
+      get '/grape_exception'
+
+      expect(last_response.status).to eq(403)
+      expect(last_response.body).to eq('Redefined Error')
+    end
+  end
+
   describe '.error_format' do
     it 'rescues all errors and return :txt' do
       subject.rescue_from :all
@@ -2108,7 +2174,11 @@ XML
       end
       get '/excel.json'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq("The requested format 'txt' is not supported.")
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('The requested format &#x27;txt&#x27; is not supported.')
+      else
+        expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
+      end
     end
   end
 
@@ -3129,6 +3199,16 @@ XML
         get '/two/v1/world'
         expect(last_response.status).to eq 200
       end
+
+      context 'when mounting class extends a subclass of Grape::API' do
+        it 'mounts APIs with the same superclass' do
+          base_api = Class.new(Grape::API)
+          a = Class.new(base_api)
+          b = Class.new(base_api)
+
+          expect { a.mount b }.to_not raise_error
+        end
+      end
     end
   end
 
@@ -3480,7 +3560,27 @@ XML
       end
       get '/something'
       expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq("{\"error\":\"The requested format 'txt' is not supported.\"}")
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#x27;txt&#x27; is not supported.&quot;}')
+      else
+        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
+      end
+    end
+  end
+
+  context 'with unsafe HTML format specified' do
+    it 'escapes the HTML' do
+      subject.content_type :json, 'application/json'
+      subject.get '/something' do
+        'foo'
+      end
+      get '/something?format=<script>blah</script>'
+      expect(last_response.status).to eq(406)
+      if ActiveSupport::VERSION::MAJOR == 3
+        expect(last_response.body).to eq('The requested format &#x27;&lt;script&gt;blah&lt;/script&gt;&#x27; is not supported.')
+      else
+        expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
+      end
     end
   end
 

@@ -34,8 +34,6 @@ matrix:
     - rvm: 2.3.5
       gemfile: gemfiles/rack_1.5.2.gemfile
     - rvm: 2.3.5
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.3.5
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.2.8
       gemfile: Gemfile

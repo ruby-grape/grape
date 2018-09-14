@@ -38,31 +38,38 @@
   - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
   - [Custom Types and Coercions](#custom-types-and-coercions)
   - [Multipart File Parameters](#multipart-file-parameters)
-  - [First-Class `JSON` Types](#first-class-json-types)
+  - [First-Class JSON Types](#first-class-json-types)
   - [Multiple Allowed Types](#multiple-allowed-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
   - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
-    - [`allow_blank`](#allowblank)
-    - [`values`](#values)
-    - [`except_values`](#exceptvalues)
-    - [`regexp`](#regexp)
-    - [`mutually_exclusive`](#mutuallyexclusive)
-    - [`exactly_one_of`](#exactlyoneof)
-    - [`at_least_one_of`](#atleastoneof)
-    - [`all_or_none_of`](#allornoneof)
-    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutuallyexclusive-exactlyoneof-atleastoneof-allornoneof)
+    - [allow_blank](#allow_blank)
+    - [values](#values)
+    - [except_values](#except_values)
+    - [regexp](#regexp)
+    - [mutually_exclusive](#mutually_exclusive)
+    - [exactly_one_of](#exactly_one_of)
+    - [at_least_one_of](#at_least_one_of)
+    - [all_or_none_of](#all_or_none_of)
+    - [Nested mutually_exclusive, exactly_one_of, at_least_one_of, all_or_none_of](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
-    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allowblank-values-regexp)
-    - [`mutually_exclusive`](#mutuallyexclusive-1)
+    - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
+    - [all_or_none_of](#all_or_none_of-1)
+    - [mutually_exclusive](#mutually_exclusive-1)
+    - [exactly_one_of](#exactly_one_of-1)
+    - [at_least_one_of](#at_least_one_of-1)
+    - [Coerce](#coerce)
+    - [With Lambdas](#with-lambdas)
+    - [Pass symbols for i18n translations](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
+- [Headers](#headers)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -78,6 +85,7 @@
 - [Exception Handling](#exception-handling)
     - [Rescuing exceptions inside namespaces](#rescuing-exceptions-inside-namespaces)
     - [Unrescuable Exceptions](#unrescuable-exceptions)
+    - [Exceptions that should be rescued explicitly](#exceptions-that-should-be-rescued-explicitly)
   - [Rails 3.x](#rails-3x)
 - [Logging](#logging)
 - [API Formats](#api-formats)
@@ -117,10 +125,11 @@
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
-    - [endpoint_run.grape](#endpointrungrape)
-    - [endpoint_render.grape](#endpointrendergrape)
-    - [endpoint_run_filters.grape](#endpointrunfiltersgrape)
-    - [endpoint_run_validators.grape](#endpointrunvalidatorsgrape)
+    - [endpoint_run.grape](#endpoint_rungrape)
+    - [endpoint_render.grape](#endpoint_rendergrape)
+    - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
+    - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
+    - [format_response.grape](#format_responsegrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [License](#license)
@@ -136,9 +145,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.0.2**.
+You're reading the documentation for the next release of Grape, which should be **1.1.1**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.0.1](https://github.com/ruby-grape/grape/blob/v1.0.1/README.md).
+The current stable release is [1.1.0](https://github.com/ruby-grape/grape/blob/v1.1.0/README.md).
 
 ## Project Resources
 
@@ -926,7 +935,7 @@ parameter, and the return value must match the given `type`.
 
 ```ruby
 params do
-  requires :passwd, type: String, coerce_with: Base64.method(:decode)
+  requires :passwd, type: String, coerce_with: Base64.method(:decode64)
   requires :loud_color, type: Color, coerce_with: ->(c) { Color.parse(c.downcase) }
 
   requires :obj, type: Hash, coerce_with: JSON do
@@ -1549,6 +1558,7 @@ params do
   requires :name, values: { value: 1..10, message: 'not in range from 1 to 10' }, allow_blank: { value: false, message: 'cannot be blank' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }, message: 'is required'
 end
 ```
+
 #### `all_or_none_of`
 
 ```ruby
@@ -1570,6 +1580,7 @@ params do
   mutually_exclusive :beer, :wine, :juice, message: "are mutually exclusive cannot pass both params"
 end
 ```
+
 #### `exactly_one_of`
 
 ```ruby
@@ -1580,6 +1591,7 @@ params do
   exactly_one_of :beer, :wine, :juice, message: {exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required"}
 end
 ```
+
 #### `at_least_one_of`
 
 ```ruby
@@ -1590,6 +1602,7 @@ params do
   at_least_one_of :beer, :wine, :juice, message: "are missing, please specify at least one param"
 end
 ```
+
 #### `Coerce`
 
 ```ruby
@@ -1597,6 +1610,7 @@ params do
   requires :int, type: {value: Integer, message: "type cast is invalid" }
 end
 ```
+
 #### `With Lambdas`
 
 ```ruby
@@ -1604,6 +1618,7 @@ params do
   requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }
 end
 ```
+
 #### `Pass symbols for i18n translations`
 
 You can pass a symbol if you want i18n translations for your custom validation messages.
@@ -1651,6 +1666,7 @@ params do
   requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
 end
 ```
+
 ## Headers
 
 Request headers are available through the `headers` helper or from `env` in their original form.
@@ -1801,8 +1817,8 @@ module SharedParams
   extend Grape::API::Helpers
 
   params :order do |options|
-    optional :order_by, type:Symbol, values:options[:order_by], default:options[:default_order_by]
-    optional :order, type:Symbol, values:%i(asc desc), default:options[:default_order]
+    optional :order_by, type: Symbol, values: options[:order_by], default: options[:default_order_by]
+    optional :order, type: Symbol, values: %i(asc desc), default: options[:default_order]
   end
 end
 
@@ -1811,7 +1827,7 @@ class API < Grape::API
 
   desc 'Get a sorted collection.'
   params do
-    use :order, order_by:%i(id created_at), default_order_by: :created_at, default_order: :asc
+    use :order, order_by: %i(id created_at), default_order_by: :created_at, default_order: :asc
   end
 
   get do
@@ -2071,13 +2087,16 @@ literally accepts every request.
 
 ## Exception Handling
 
-Grape can be told to rescue all exceptions and return them in the API format.
+Grape can be told to rescue all `StandardError` exceptions and return them in the API format.
 
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all
 end
 ```
+
+This mimics [default `rescue` behaviour](https://ruby-doc.org/core/StandardError.html) when an exception type is not provided.
+Any other exception should be rescued explicitly, see [below](#exceptions-that-should-be-rescued-explicitly).
 
 Grape can also rescue from all exceptions and still use the built-in exception handing.
 This will give the same behavior as `rescue_from :all` with the addition that Grape will use the exception handling defined by all Exception classes that inherit `Grape::Exceptions::Base`.
@@ -2164,7 +2183,7 @@ You can also rescue all exceptions with a code block and handle the Rack respons
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end
 ```
@@ -2177,8 +2196,8 @@ class Twitter::API < Grape::API
     error!("ArgumentError: #{e.message}")
   end
 
-  rescue_from NotImplementedError do |e|
-    error!("NotImplementedError: #{e.message}")
+  rescue_from NoMethodError do |e|
+    error!("NoMethodError: #{e.message}")
   end
 end
 ```
@@ -2235,9 +2254,9 @@ class Twitter::API < Grape::API
 end
 ```
 
-The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
+The `rescue_from` handler must return a `Rack::Response` object, call `error!`, or raise an exception (either the original exception or another custom one). The exception raised in `rescue_from` will be handled outside Grape. For example, if you mount Grape in Rails, the exception will be handle by [Rails Action Controller](https://guides.rubyonrails.org/action_controller_overview.html#rescue).
 
-The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
+Alternately, use the `with` option in `rescue_from` to specify a method or a `proc`.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -2280,6 +2299,12 @@ Here `'inner'` will be result of handling occured `ArgumentError`.
 #### Unrescuable Exceptions
 
 `Grape::Exceptions::InvalidVersionHeader`, which is raised when the version in the request header doesn't match the currently evaluated version for the endpoint, will _never_ be rescued from a `rescue_from` block (even a `rescue_from :all`) This is because Grape relies on Rack to catch that error and try the next versioned-route for cases where there exist identical Grape endpoints with different versions.
+
+#### Exceptions that should be rescued explicitly
+
+Any exception that is not subclass of `StandardError` should be rescued explicitly.
+Usually it is not a case for an application logic as such errors point to problems in Ruby runtime.
+This is following [standard recommendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
 
 ### Rails 3.x
 
@@ -2525,6 +2550,9 @@ Built-in formatters are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
+
+If a body is present in a request to an API, with a Content-Type header value that is of an unsupported type a
+"415 Unsupported Media Type" error code will be returned by Grape.
 
 Response statuses that indicate no content as defined by [Rack](https://github.com/rack)
 [here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
@@ -2866,7 +2894,7 @@ end
 
 ```
 
-Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
+Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
 ## Describing and Inspecting an API
 
@@ -3460,6 +3488,13 @@ The execution of validators.
 * *validators* - The validators being executed
 * *request* - The request being validated
 
+#### format_response.grape
+
+Serialization or template rendering.
+
+* *env* - The request environment
+* *formatter* - The formatter object (e.g., `Grape::Formatter::Json`)
+
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
 ### Monitoring Products
@@ -3484,4 +3519,4 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2017 Michael Bleigh, and Intridea, Inc.
+Copyright (c) 2010-2018 Michael Bleigh, Intridea Inc. and Contributors.

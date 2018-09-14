@@ -21,3 +21,7 @@ Style/RaiseArgs:
 
 Lint/UnneededDisable:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*_spec.rb

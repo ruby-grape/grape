@@ -1,4 +1,5 @@
 require 'grape/middleware/base'
+require 'active_support/core_ext/string/output_safety'
 
 module Grape
   module Middleware
@@ -36,47 +37,15 @@ module Grape
           error_response(catch(:error) do
             return @app.call(@env)
           end)
-        rescue StandardError => e
-          is_rescuable = rescuable?(e.class)
-          if e.is_a?(Grape::Exceptions::Base) && (!is_rescuable || rescuable_by_grape?(e.class))
-            handler = ->(arg) { error_response(arg) }
-          else
-            raise unless is_rescuable
-            handler = find_handler(e.class)
-          end
+        rescue Exception => error # rubocop:disable Lint/RescueException
+          handler =
+            rescue_handler_for_base_only_class(error.class) ||
+            rescue_handler_for_class_or_its_ancestor(error.class) ||
+            rescue_handler_for_grape_exception(error.class) ||
+            rescue_handler_for_any_class(error.class) ||
+            raise
 
-          handler.nil? ? handle_error(e) : exec_handler(e, &handler)
-        end
-      end
-
-      def find_handler(klass)
-        handler = options[:rescue_handlers].find(-> { [] }) { |error, _| klass <= error }[1]
-        handler ||= options[:base_only_rescue_handlers][klass]
-        handler ||= options[:all_rescue_handler]
-
-        if handler.instance_of?(Symbol)
-          raise NoMethodError, "undefined method `#{handler}'" unless respond_to?(handler)
-          handler = self.class.instance_method(handler).bind(self)
-        end
-
-        handler
-      end
-
-      def rescuable?(klass)
-        return false if klass == Grape::Exceptions::InvalidVersionHeader
-        rescue_all? || rescue_class_or_its_ancestor?(klass) || rescue_with_base_only_handler?(klass)
-      end
-
-      def rescuable_by_grape?(klass)
-        return false if klass == Grape::Exceptions::InvalidVersionHeader
-        options[:rescue_grape_exceptions]
-      end
-
-      def exec_handler(e, &handler)
-        if handler.lambda? && handler.arity.zero?
-          instance_exec(&handler)
-        else
-          instance_exec(e, &handler)
+          run_rescue_handler(handler, error)
         end
       end
 
@@ -85,7 +54,7 @@ module Grape
         rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
-      def handle_error(e)
+      def default_rescue_handler(e)
         error_response(message: e.message, backtrace: e.backtrace, original_exception: e)
       end
 
@@ -101,7 +70,10 @@ module Grape
       end
 
       def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
-        Rack::Response.new([message], status, headers).finish
+        if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
+          message = ERB::Util.html_escape(message)
+        end
+        Rack::Response.new([message], status, headers)
       end
 
       def format_message(message, backtrace, original_exception = nil)
@@ -117,16 +89,51 @@ module Grape
 
       private
 
-      def rescue_all?
-        options[:rescue_all]
+      def rescue_handler_for_base_only_class(klass)
+        error, handler = options[:base_only_rescue_handlers].find { |err, _handler| klass == err }
+
+        return unless error
+
+        handler || :default_rescue_handler
       end
 
-      def rescue_class_or_its_ancestor?(klass)
-        (options[:rescue_handlers] || []).any? { |error, _handler| klass <= error }
+      def rescue_handler_for_class_or_its_ancestor(klass)
+        error, handler = options[:rescue_handlers].find { |err, _handler| klass <= err }
+
+        return unless error
+
+        handler || :default_rescue_handler
       end
 
-      def rescue_with_base_only_handler?(klass)
-        (options[:base_only_rescue_handlers] || []).include?(klass)
+      def rescue_handler_for_grape_exception(klass)
+        return unless klass <= Grape::Exceptions::Base
+        return :error_response if klass == Grape::Exceptions::InvalidVersionHeader
+        return unless options[:rescue_grape_exceptions] || !options[:rescue_all]
+
+        :error_response
+      end
+
+      def rescue_handler_for_any_class(klass)
+        return unless klass <= StandardError
+        return unless options[:rescue_all] || options[:rescue_grape_exceptions]
+
+        options[:all_rescue_handler] || :default_rescue_handler
+      end
+
+      def run_rescue_handler(handler, error)
+        if handler.instance_of?(Symbol)
+          raise NoMethodError, "undefined method `#{handler}'" unless respond_to?(handler)
+
+          handler = public_method(handler)
+        end
+
+        response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+
+        if response.is_a?(Rack::Response)
+          response
+        else
+          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new)
+        end
       end
     end
   end

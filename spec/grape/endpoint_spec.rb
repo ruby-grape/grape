@@ -464,7 +464,20 @@ describe Grape::Endpoint do
 
     it 'does not include missing attributes if that option is passed' do
       subject.get '/declared' do
-        error! 400, 'expected nil' if declared(params, include_missing: false)[:second]
+        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:second)
+        ''
+      end
+
+      get '/declared?first=one&other=two'
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'does not include aliased missing attributes if that option is passed' do
+      subject.params do
+        optional :aliased_original, as: :aliased
+      end
+      subject.get '/declared' do
+        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:aliased)
         ''
       end
 
@@ -928,15 +941,15 @@ describe Grape::Endpoint do
       end
     end
 
-    it 'responds with a 406 for an unsupported content-type' do
+    it 'responds with a 415 for an unsupported content-type' do
       subject.format :json
       # subject.content_type :json, "application/json"
       subject.put '/request_body' do
         params[:user]
       end
       put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-      expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq('{"error":"The requested content-type \'application/xml\' is not supported."}')
+      expect(last_response.status).to eq(415)
+      expect(last_response.body).to eq('{"error":"The provided content-type \'application/xml\' is not supported."}')
     end
 
     it 'does not accept text/plain in JSON format if application/json is specified as content type' do
@@ -947,8 +960,8 @@ describe Grape::Endpoint do
       end
       put '/request_body', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
 
-      expect(last_response.status).to eq(406)
-      expect(last_response.body).to eq('{"error":"The requested content-type \'text/plain\' is not supported."}')
+      expect(last_response.status).to eq(415)
+      expect(last_response.body).to eq('{"error":"The provided content-type \'text/plain\' is not supported."}')
     end
 
     context 'content type with params' do
@@ -1480,7 +1493,9 @@ describe Grape::Endpoint do
                                                                        filters: [],
                                                                        type: :after }),
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
-                                                               env: an_instance_of(Hash) })
+                                                               env: an_instance_of(Hash) }),
+        have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
+                                                                  formatter: a_kind_of(Module) })
       )
 
       # In order that events were initialized
@@ -1502,7 +1517,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
-                                                                       type: :after })
+                                                                       type: :after }),
+        have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
+                                                                  formatter: a_kind_of(Module) })
       )
     end
   end

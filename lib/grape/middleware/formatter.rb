@@ -41,7 +41,9 @@ module Grape
         else
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers, options)
-          bodymap = bodies.collect { |body| formatter.call(body, env) }
+          bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter: formatter, env: env) do
+            bodies.collect { |body| formatter.call(body, env) }
+          end
           Rack::Response.new(bodymap, status, headers)
         end
       rescue Grape::Exceptions::InvalidFormatter => e
@@ -93,7 +95,7 @@ module Grape
         fmt = request.media_type ? mime_types[request.media_type] : options[:default_format]
 
         unless content_type_for(fmt)
-          throw :error, status: 406, message: "The requested content-type '#{request.media_type}' is not supported."
+          throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported."
         end
         parser = Grape::Parser.parser_for fmt, options
         if parser

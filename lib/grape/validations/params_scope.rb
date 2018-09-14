@@ -40,7 +40,7 @@ module Grape
       #   validated
       def should_validate?(parameters)
         return false if @optional && (params(parameters).blank? || all_element_blank?(parameters))
-
+        return false unless meets_dependency?(params(parameters), parameters)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
@@ -51,7 +51,7 @@ module Grape
         end
 
         return true unless @dependent_on
-
+        return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
         params = params.with_indifferent_access
 
         @dependent_on.each do |dependency|
@@ -116,7 +116,7 @@ module Grape
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs, **opts)
         if lateral?
-          @parent.push_declared_params(attrs)
+          @parent.push_declared_params(attrs, opts)
         else
           if opts && opts[:as]
             @api.route_setting(:aliased_params, @api.route_setting(:aliased_params) || [])

@@ -11,6 +11,15 @@ describe Grape::Middleware::Error do
       end
     end
 
+    # raises a non-StandardError (ScriptError) exception
+    class OtherExceptionApp
+      class << self
+        def call(_env)
+          raise NotImplementedError, 'snow!'
+        end
+      end
+    end
+
     # raises a hash error
     class ErrorHashApp
       class << self
@@ -68,20 +77,65 @@ describe Grape::Middleware::Error do
   end
 
   context 'with rescue_all' do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true
-        run ExceptionSpec::ExceptionApp
+    context 'StandardError exception' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_all: true
+          run ExceptionSpec::ExceptionApp
+        end
+      end
+      it 'sets the message appropriately' do
+        get '/'
+        expect(last_response.body).to eq('rain!')
+      end
+      it 'defaults to a 500 status' do
+        get '/'
+        expect(last_response.status).to eq(500)
       end
     end
-    it 'sets the message appropriately' do
-      get '/'
-      expect(last_response.body).to eq('rain!')
+
+    context 'Non-StandardError exception' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_all: true
+          run ExceptionSpec::OtherExceptionApp
+        end
+      end
+      it 'does not trap errors other than StandardError' do
+        expect { get '/' }.to raise_error(NotImplementedError, 'snow!')
+      end
     end
-    it 'defaults to a 500 status' do
-      get '/'
-      expect(last_response.status).to eq(500)
+  end
+
+  context 'Non-StandardError exception with a provided rescue handler' do
+    context 'default error response' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => nil }
+          run ExceptionSpec::OtherExceptionApp
+        end
+      end
+      it 'rescues the exception using the default handler' do
+        get '/'
+        expect(last_response.body).to eq('snow!')
+      end
+    end
+
+    context 'custom error response' do
+      subject do
+        Rack::Builder.app do
+          use Spec::Support::EndpointFaker
+          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => -> { Rack::Response.new('rescued', 200, {}) } }
+          run ExceptionSpec::OtherExceptionApp
+        end
+      end
+      it 'rescues the exception using the provided handler' do
+        get '/'
+        expect(last_response.body).to eq('rescued')
+      end
     end
   end
 
@@ -138,7 +192,7 @@ describe Grape::Middleware::Error do
     end
     it 'is possible to return errors in jsonapi format' do
       get '/'
-      expect(last_response.body).to eq('{"error":"rain!"}')
+      expect(last_response.body).to eq('{&quot;error&quot;:&quot;rain!&quot;}')
     end
   end
 
@@ -153,8 +207,8 @@ describe Grape::Middleware::Error do
 
     it 'is possible to return hash errors in jsonapi format' do
       get '/'
-      expect(['{"error":"rain!","detail":"missing widget"}',
-              '{"detail":"missing widget","error":"rain!"}']).to include(last_response.body)
+      expect(['{&quot;error&quot;:&quot;rain!&quot;,&quot;detail&quot;:&quot;missing widget&quot;}',
+              '{&quot;detail&quot;:&quot;missing widget&quot;,&quot;error&quot;:&quot;rain!&quot;}']).to include(last_response.body)
     end
   end
 
@@ -204,7 +258,7 @@ describe Grape::Middleware::Error do
     end
     it 'is possible to specify a custom formatter' do
       get '/'
-      expect(last_response.body).to eq('{:custom_formatter=>"rain!"}')
+      expect(last_response.body).to eq('{:custom_formatter=&gt;&quot;rain!&quot;}')
     end
   end
 

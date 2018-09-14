@@ -43,6 +43,15 @@ describe Grape::Exceptions::ValidationErrors do
         expect(subject).to contain_exactly('id is missing', 'name is missing')
       end
     end
+
+    context 'when attributes is an array of symbols' do
+      let(:validation_error) { Grape::Exceptions::Validation.new(params: [:admin_field], message: 'Can not set admin-only field') }
+      subject { described_class.new(errors: [validation_error]).full_messages }
+
+      it 'returns an array with an error full message' do
+        expect(subject.first).to eq('admin_field Can not set admin-only field')
+      end
+    end
   end
 
   context 'api' do

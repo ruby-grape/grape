@@ -466,6 +466,37 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error(Grape::Exceptions::UnknownParameter)
     end
 
+    it 'does not raise an error if the dependent parameter is a Hash' do
+      expect do
+        subject.params do
+          optional :a, type: Hash do
+            requires :b
+          end
+          given :a do
+            requires :c
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it 'allows aliasing of dependent parameters' do
+      subject.params do
+        optional :a
+        given :a do
+          requires :b, as: :c
+        end
+      end
+
+      subject.get('/multiple') { declared(params).to_json }
+
+      get '/multiple', a: 'a', b: 'b'
+
+      body = JSON.parse(last_response.body)
+
+      expect(body.keys).to include('c')
+      expect(body.keys).to_not include('b')
+    end
+
     it 'does not validate nested requires when given is false' do
       subject.params do
         requires :a, type: String, allow_blank: false, values: %w[x y z]

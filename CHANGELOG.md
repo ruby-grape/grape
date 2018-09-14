@@ -1,4 +1,44 @@
-### 1.0.2 (Next)
+### 1.1.1 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+* [#1776](https://github.com/ruby-grape/grape/pull/1776): Validate response returned by the exception handler - [@darren987469](https://github.com/darren987469).
+* [#1787](https://github.com/ruby-grape/grape/pull/1787): Add documented but not implemented ability to `.insert` a middleware in the stack - [@michaellennox](https://github.com/michaellennox).
+* [#1788](https://github.com/ruby-grape/grape/pull/1788): Fix route requirements bug - [@darren987469](https://github.com/darren987469), [@darrellnash](https://github.com/darrellnash).
+
+### 1.1.0 (8/4/2018)
+
+#### Features
+
+* [#1759](https://github.com/ruby-grape/grape/pull/1759): Instrument serialization as `'format_response.grape'` - [@zvkemp](https://github.com/zvkemp).
+
+#### Fixes
+
+* [#1762](https://github.com/ruby-grape/grape/pull/1763): Fix unsafe HTML rendering on errors - [@ctennis](https://github.com/ctennis).
+* [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
+* [#1758](https://github.com/ruby-grape/grape/pull/1758): Fix expanding load_path in gemspec - [@2maz](https://github.com/2maz).
+* [#1765](https://github.com/ruby-grape/grape/pull/1765): Use 415 when request body is of an unsupported media type - [@jdmurphy](https://github.com/jdmurphy).
+* [#1771](https://github.com/ruby-grape/grape/pull/1771): Fix param aliases with 'given' blocks - [@jereynolds](https://github.com/jereynolds).
+
+### 1.0.3 (4/23/2018)
+
+#### Fixes
+
+* [#1755](https://github.com/ruby-grape/grape/pull/1755): Fix shared params with exactly_one_of - [@milgner](https://github.com/milgner).
+* [#1740](https://github.com/ruby-grape/grape/pull/1740): Fix dependent parameter validation using `given` when parameter is a `Hash` - [@jvortmann](https://github.com/jvortmann).
+* [#1737](https://github.com/ruby-grape/grape/pull/1737): Fix translating error when passing symbols as params in custom validations - [@mlzhuyi](https://github.com/mlzhuyi).
+* [#1749](https://github.com/ruby-grape/grape/pull/1749): Allow rescue from non-`StandardError` exceptions - [@dm1try](https://github.com/dm1try).
+* [#1750](https://github.com/ruby-grape/grape/pull/1750): Fix a circular dependency warning due to router being loaded by API - [@salasrod](https://github.com/salasrod).
+* [#1752](https://github.com/ruby-grape/grape/pull/1752): Fix `include_missing` behavior for aliased parameters - [@jonasoberschweiber](https://github.com/jonasoberschweiber).
+* [#1754](https://github.com/ruby-grape/grape/pull/1754): Allow rescue from non-`StandardError` exceptions to use default error handling - [@jelkster](https://github.com/jelkster).
+* [#1756](https://github.com/ruby-grape/grape/pull/1756): Allow custom Grape exception handlers when the built-in exception handling is enabled - [@soylent](https://github.com/soylent).
+
+### 1.0.2 (1/10/2018)
 
 #### Features
 
@@ -12,7 +52,9 @@
 * [#1710](https://github.com/ruby-grape/grape/pull/1710): Fix wrong transformation of empty Array in declared params - [@pablonahuelgomez](https://github.com/pablonahuelgomez).
 * [#1722](https://github.com/ruby-grape/grape/pull/1722): Fix catch-all hiding multiple versions of an endpoint after the first definition - [@zherr](https://github.com/zherr).
 * [#1724](https://github.com/ruby-grape/grape/pull/1724): Optional nested array validation - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
+* [#1725](https://github.com/ruby-grape/grape/pull/1725): Fix `rescue_from :all` documentation - [@Jelkster](https://github.com/Jelkster).
+* [#1726](https://github.com/ruby-grape/grape/pull/1726): Improved startup performance during API method generation - [@jkowens](https://github.com/jkowens).
+* [#1727](https://github.com/ruby-grape/grape/pull/1727): Fix infinite loop when mounting endpoint with same superclass - [@jkowens](https://github.com/jkowens).
 
 ### 1.0.1 (9/8/2017)
 
