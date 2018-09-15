@@ -78,13 +78,21 @@ module Grape
       def desc_container
         Module.new do
           include Grape::Util::StrictHashConfiguration.module(
+            :summary,
             :description,
             :detail,
             :params,
             :entity,
             :http_codes,
             :named,
-            :headers
+            :headers,
+            :hidden,
+            :deprecated,
+            :is_array,
+            :nickname,
+            :produces,
+            :consumes,
+            :tags
           )
 
           def config_context.success(*args)

@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1791](https://github.com/ruby-grape/grape/pull/1791): Support more options in desc block - [@darren987469](https://github.com/darren987469).
 
 #### Fixes
 

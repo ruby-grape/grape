@@ -446,10 +446,13 @@ version 'v1', using: :param, parameter: 'v'
 
 ## Describing Methods
 
-You can add a description to API methods and namespaces.
+You can add a description to API methods and namespaces. The description would be used by [grape-swagger][grape-swagger] to generate swagger compliant documentation.
+
+Note: Description block is only for documentation and won't affects API behavior.
 
 ```ruby
 desc 'Returns your public timeline.' do
+  summary 'summary'
   detail 'more details'
   params  API::Entities::Status.documentation
   success API::Entities::Entity
@@ -463,7 +466,13 @@ desc 'Returns your public timeline.' do
             description: 'Not really needed',
             required: false
           }
-
+  hidden false
+  deprecated false
+  is_array true
+  nickname 'nickname'
+  produces ['array', 'of', 'mime_types']
+  consumes ['array', 'of', 'mime_types']
+  tags ['tag1', 'tag2']
 end
 get :public_timeline do
   Status.limit(20)
@@ -476,6 +485,9 @@ end
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
 * `headers`: A definition of the used Headers
+* Other options can be found in [grape-swagger][grape-swagger]
+
+[grape-swagger]: https://github.com/ruby-grape/grape-swagger
 
 ## Parameters
 
