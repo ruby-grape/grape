@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1790](https://github.com/ruby-grape/grape/pull/1790): Frozen string literal - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
