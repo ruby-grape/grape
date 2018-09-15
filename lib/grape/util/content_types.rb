@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module ContentTypes
     # Content types are listed in order of preference.

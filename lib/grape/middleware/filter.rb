@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Middleware
     # This is a simple middleware for adding before and after filters

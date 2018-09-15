@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   class API
     Boolean = Virtus::Attribute::Boolean

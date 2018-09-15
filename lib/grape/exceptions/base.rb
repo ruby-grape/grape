@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Exceptions
     class Base < StandardError
@@ -28,7 +30,7 @@ module Grape
           @problem = problem(key, **attributes)
           @summary = summary(key, **attributes)
           @resolution = resolution(key, **attributes)
-          [['Problem', @problem], ['Summary', @summary], ['Resolution', @resolution]].reduce('') do |message, detail_array|
+          [[String.new('Problem'), @problem], [String.new('Summary'), @summary], [String.new('Resolution'), @resolution]].each_with_object(String.new('')) do |message, detail_array|
             message << "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
             message
           end

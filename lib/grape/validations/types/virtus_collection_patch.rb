@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'virtus/attribute/collection'
 
 # See https://github.com/solnic/virtus/pull/343

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   # Registry to store and locate known Validators.
   module Validations

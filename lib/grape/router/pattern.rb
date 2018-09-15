@@ -35,16 +35,17 @@ module Grape
       end
 
       def build_path(pattern, anchor: false, suffix: nil, **_options)
-        unless anchor || pattern.end_with?('*path')
-          pattern << '/' unless pattern.end_with?('/')
-          pattern << '*path'
+        new_pattern = String.new(pattern)
+        unless anchor || new_pattern.end_with?('*path')
+          new_pattern << '/' unless new_pattern.end_with?('/')
+          new_pattern << '*path'
         end
 
-        pattern = pattern.split('/').tap do |parts|
+        new_pattern = new_pattern.split('/').tap do |parts|
           parts[parts.length - 1] = '?' + parts.last
-        end.join('/') if pattern.end_with?('*path')
+        end.join('/') if new_pattern.end_with?('*path')
 
-        pattern + suffix.to_s
+        new_pattern + suffix.to_s
       end
 
       def extract_capture(requirements: {}, **options)

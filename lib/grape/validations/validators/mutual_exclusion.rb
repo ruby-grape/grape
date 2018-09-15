@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Validations
     require 'grape/validations/validators/multiple_params_base'

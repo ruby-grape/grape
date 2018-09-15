@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'types/build_coercer'
 require_relative 'types/custom_type_coercer'
 require_relative 'types/custom_type_collection_coercer'
