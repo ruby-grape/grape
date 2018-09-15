@@ -30,9 +30,8 @@ module Grape
           @problem = problem(key, **attributes)
           @summary = summary(key, **attributes)
           @resolution = resolution(key, **attributes)
-          [[String.new('Problem'), @problem], [String.new('Summary'), @summary], [String.new('Resolution'), @resolution]].each_with_object(String.new('')) do |message, detail_array|
-            message << "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
-            message
+          [['Problem', @problem], ['Summary', @summary], ['Resolution', @resolution]].each_with_object(String.new('')) do |detail_array, final_message|
+            final_message << "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
           end
         else
           short_message
