@@ -40,9 +40,9 @@ module Grape
             deprecated: false,
             is_array: true,
             nickname: 'nickname',
-            produces: ['array', 'of', 'mime_types'],
-            consumes: ['array', 'of', 'mime_types'],
-            tags: ['tag1', 'tag2']
+            produces: %w[array of mime_types],
+            consumes: %w[array of mime_types],
+            tags: %w[tag1 tag2]
           }
 
           subject.desc 'The description' do
@@ -64,9 +64,9 @@ module Grape
             deprecated false
             is_array true
             nickname 'nickname'
-            produces ['array', 'of', 'mime_types']
-            consumes ['array', 'of', 'mime_types']
-            tags ['tag1', 'tag2']
+            produces %w[array of mime_types]
+            consumes %w[array of mime_types]
+            tags %w[tag1 tag2]
           end
 
           expect(subject.namespace_setting(:description)).to eq(expected_options)
