@@ -470,8 +470,8 @@ desc 'Returns your public timeline.' do
   deprecated false
   is_array true
   nickname 'nickname'
-  produces ['array', 'of', 'mime_types']
-  consumes ['array', 'of', 'mime_types']
+  produces ['application/json']
+  consumes ['application/json']
   tags ['tag1', 'tag2']
 end
 get :public_timeline do
