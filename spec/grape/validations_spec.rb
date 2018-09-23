@@ -120,6 +120,62 @@ describe Grape::Validations do
       end
     end
 
+    context 'requires with nested params' do
+      before do
+        subject.params do
+          requires :first_level, type: Hash do
+            optional :second_level, type: Array do
+              requires :value, type: Integer
+              optional :name, type: String
+              optional :third_level, type: Array do
+                requires :value, type: Integer
+                optional :name, type: String
+                optional :fourth_level, type: Array do
+                  requires :value, type: Integer
+                  optional :name, type: String
+                end
+              end
+            end
+          end
+        end
+        subject.put('/required') { 'required works' }
+      end
+
+      let(:request_params) do
+        {
+          first_level: {
+            second_level: [
+              { value: 1, name: 'Lisa' },
+              {
+                value: 2,
+                name: 'James',
+                third_level: [
+                  { value: 'three', name: 'Sophie' },
+                  {
+                    value: 4,
+                    name: 'Jenny',
+                    fourth_level: [
+                      { name: 'Samuel' }, { value: 6, name: 'Jane' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      end
+
+      it 'validates correctly in deep nested params' do
+        put '/required', request_params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq(
+          'first_level[second_level][1][third_level][0][value] is invalid, ' \
+          'first_level[second_level][1][third_level][1][fourth_level][0][value] is missing'
+        )
+      end
+    end
+
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
