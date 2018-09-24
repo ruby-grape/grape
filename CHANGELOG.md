@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1794](https://github.com/ruby-grape/grape/pull/1794): Add more jruby version in the travis matrix - [@guizmaii](https://github.com/guizmaii).
 * [#1791](https://github.com/ruby-grape/grape/pull/1791): Support `summary`, `hidden`, `deprecated`, `is_array`, `nickname`, `produces`, `consumes`, `tags` options in `desc` block - [@darren987469](https://github.com/darren987469).
 
 #### Fixes
