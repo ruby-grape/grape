@@ -45,9 +45,54 @@ matrix:
       gemfile: gemfiles/rails_4.gemfile
     - rvm: 2.2.10
       gemfile: gemfiles/rails_3.gemfile
-    - rvm: ruby-head
+
     - rvm: jruby-9.1.17.0
+      gemfile: Gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/rack_edge.gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/rack_1.5.2.gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/rails_5.gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/rails_4.gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/rails_3.gemfile
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/multi_json.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_json
+    - rvm: jruby-9.1.17.0
+      gemfile: gemfiles/multi_xml.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_xml
+
     - rvm: jruby-9.2.0.0
+      gemfile: Gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/rack_edge.gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/rack_1.5.2.gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/rails_5.gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/rails_4.gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/rails_3.gemfile
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/multi_json.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_json
+    - rvm: jruby-9.2.0.0
+      gemfile: gemfiles/multi_xml.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_xml
+
+    - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
   allow_failures:
