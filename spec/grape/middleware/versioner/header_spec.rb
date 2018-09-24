@@ -160,6 +160,12 @@ describe Grape::Middleware::Versioner::Header do
     expect(subject.call({}).first).to eq(200)
   end
 
+  it 'succeeds if :strict is set to false and given an invalid header' do
+    @options[:version_options][:strict] = false
+    expect(subject.call('HTTP_ACCEPT' => 'yaml').first).to eq(200)
+    expect(subject.call({}).first).to eq(200)
+  end
+
   context 'when :strict is set' do
     before do
       @options[:versions] = ['v1']
