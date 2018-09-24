@@ -46,6 +46,8 @@ matrix:
     - rvm: 2.2.8
       gemfile: gemfiles/rails_3.gemfile
     - rvm: ruby-head
+    - rvm: jruby-9.1.17.0
+    - rvm: jruby-9.2.0.0
     - rvm: jruby-head
     - rvm: rbx-3
   allow_failures:
