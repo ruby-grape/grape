@@ -111,4 +111,4 @@ matrix:
     - rvm: jruby-head
     - rvm: rbx-3
 
-bundler_args: --without development
+bundler_args: --without development --jobs=3
