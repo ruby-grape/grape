@@ -3,7 +3,30 @@ language: ruby
 sudo: false
 
 matrix:
-  include:
+  include
+    - rvm: 2.5.1
+      script:
+      - bundle exec danger
+    - rvm: 2.5.1
+      gemfile: Gemfile
+    - rvm: 2.5.1
+      gemfile: gemfiles/rack_edge.gemfile
+    - rvm: 2.5.1
+      gemfile: gemfiles/rack_1.5.2.gemfile
+    - rvm: 2.5.1
+      gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.5.1
+      gemfile: gemfiles/rails_5.gemfile
+    - rvm: 2.5.1
+      gemfile: gemfiles/multi_json.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_json
+    - rvm: 2.5.1
+      gemfile: gemfiles/multi_xml.gemfile
+      script:
+      - bundle exec rake
+      - bundle exec rspec spec/integration/multi_xml
     - rvm: 2.4.4
       script:
         - bundle exec danger
@@ -17,6 +40,8 @@ matrix:
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.4.4
       gemfile: gemfiles/rails_5.gemfile
+    - rvm: 2.4.4
+      gemfile: gemfiles/rails_4.gemfile
     - rvm: 2.4.4
       gemfile: gemfiles/multi_json.gemfile
       script:
@@ -34,16 +59,6 @@ matrix:
     - rvm: 2.3.7
       gemfile: gemfiles/rack_1.5.2.gemfile
     - rvm: 2.3.7
-      gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.10
-      gemfile: Gemfile
-    - rvm: 2.2.10
-      gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.2.10
-      gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.10
-      gemfile: gemfiles/rails_4.gemfile
-    - rvm: 2.2.10
       gemfile: gemfiles/rails_3.gemfile
 
     - rvm: jruby-9.1.17.0
@@ -79,8 +94,6 @@ matrix:
       gemfile: gemfiles/rails_5.gemfile
     - rvm: jruby-9.2.0.0
       gemfile: gemfiles/rails_4.gemfile
-    - rvm: jruby-9.2.0.0
-      gemfile: gemfiles/rails_3.gemfile
     - rvm: jruby-9.2.0.0
       gemfile: gemfiles/multi_json.gemfile
       script:
