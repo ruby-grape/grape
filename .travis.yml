@@ -12,8 +12,6 @@ matrix:
     - rvm: 2.5.1
       gemfile: gemfiles/rack_edge.gemfile
     - rvm: 2.5.1
-      gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.5.1
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.5.1
       gemfile: gemfiles/rails_5.gemfile
