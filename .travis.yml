@@ -3,7 +3,7 @@ language: ruby
 sudo: false
 
 matrix:
-  include
+  include:
     - rvm: 2.5.1
       script:
       - bundle exec danger
