@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1795](https://github.com/ruby-grape/grape/pull/1795): Fix Accept header parsing bug - [@bschmeck](https://github.com/bschmeck)
 * [#1791](https://github.com/ruby-grape/grape/pull/1791): Support `summary`, `hidden`, `deprecated`, `is_array`, `nickname`, `produces`, `consumes`, `tags` options in `desc` block - [@darren987469](https://github.com/darren987469).
 
 #### Fixes
