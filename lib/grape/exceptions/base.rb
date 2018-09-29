@@ -74,7 +74,15 @@ module Grape
         options = options.dup
         options[:default] &&= options[:default].to_s
         message = ::I18n.translate(key, **options)
-        message.present? ? message : ::I18n.translate(key, locale: FALLBACK_LOCALE, **options)
+        message.present? ? message : fallback_message(key, **options)
+      end
+
+      def fallback_message(key, **options)
+        if ::I18n.enforce_available_locales && !::I18n.available_locales.include?(FALLBACK_LOCALE)
+          key
+        else
+          ::I18n.translate(key, locale: FALLBACK_LOCALE, **options)
+        end
       end
     end
   end
