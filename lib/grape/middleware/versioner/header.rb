@@ -173,7 +173,7 @@ module Grape
         # @return [Boolean] whether the content type sets a vendor
         def vendor?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[HAS_VENDOR_REGEX]
+          subtype.present? && subtype[HAS_VENDOR_REGEX]
         end
 
         def request_vendor(media_type)
@@ -190,7 +190,7 @@ module Grape
         # @return [Boolean] whether the content type sets an API version
         def version?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[HAS_VERSION_REGEX]
+          subtype.present? && subtype[HAS_VERSION_REGEX]
         end
       end
     end
