@@ -1559,6 +1559,8 @@ end
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
+In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
+
 ### Custom Validation messages
 
 Grape supports custom validation messages for parameter-related and coerce-related error messages.
