@@ -366,6 +366,59 @@ class Twitter::API < Grape::API
 end
 ```
 
+## Remounting
+
+You can mount the same endpoints in two different locations using `RemountableAPI`
+
+```ruby
+class Voting::API < Grape::RemountableAPI
+  namespace 'votes' do
+    get do
+      # Your logic
+    end
+
+    post do
+      # Your logic
+    end
+  end
+end
+
+class Post::API < Grape::API
+  mount Voting::API
+end
+
+class Comment::API < Grape::API
+  mount Voting::API
+end
+```
+
+Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`,
+you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`
+
+### Configuration
+
+You can configure remountable endpoints for small details changing according to where
+they are mounted
+
+```ruby
+class Voting::API < Grape::RemountableAPI
+  namespace 'votes' do
+    desc "Vote for your #{configuration[:votable]}"
+    get do
+      # Your logic
+    end
+  end
+end
+
+class Post::API < Grape::API
+  mount Voting::API, with: {votable: 'posts'}
+end
+
+class Comment::API < Grape::API
+  mount Voting::API, with: {votable: 'comments'}
+end
+```
+
 ## Versioning
 
 There are four strategies in which clients can reach your API's endpoints: `:path`,
