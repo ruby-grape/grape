@@ -22,6 +22,8 @@
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
   - [Modules](#modules)
+- [Remounting](#remounting)
+  - [Configuration](#configuration)
 - [Versioning](#versioning)
   - [Path](#path)
   - [Header](#header)
