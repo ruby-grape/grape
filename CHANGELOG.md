@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1802](https://github.com/ruby-grape/grape/pull/1802): Adds the ability to re-mount endpoints that inherit from RemountableAPI - [@myxoh](https://github.com/myxoh).
 * [#1795](https://github.com/ruby-grape/grape/pull/1795): Fix vendor/subtype parsing of an invalid Accept header - [@bschmeck](https://github.com/bschmeck).
 * [#1791](https://github.com/ruby-grape/grape/pull/1791): Support `summary`, `hidden`, `deprecated`, `is_array`, `nickname`, `produces`, `consumes`, `tags` options in `desc` block - [@darren987469](https://github.com/darren987469).
 
