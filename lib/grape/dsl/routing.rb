@@ -77,9 +77,12 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
-        def mount(mounts)
+        def mount(mounts, with: {})
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
+            if app.is_a?(Class) && app.ancestors.include?(Grape::RemountableAPI)
+              return mount(app.new_instance(configuration: with) => path)
+            end
             in_setting = inheritable_setting
 
             if app.respond_to?(:inheritable_setting, true)

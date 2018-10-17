@@ -29,6 +29,7 @@ module Grape
 
   eager_autoload do
     autoload :API
+    autoload :RemountableAPI
     autoload :Endpoint
 
     autoload :Namespace
