@@ -21,6 +21,7 @@ module Grape
 
         it 'can be set with a block' do
           expected_options = {
+            summary: 'summary',
             description: 'The description',
             detail: 'more details',
             params: { first: :param },
@@ -34,10 +35,18 @@ module Grape
                       XOptionalHeader: {
                         description: 'Not really needed',
                         required: false
-                      }]
+                      }],
+            hidden: false,
+            deprecated: false,
+            is_array: true,
+            nickname: 'nickname',
+            produces: %w[array of mime_types],
+            consumes: %w[array of mime_types],
+            tags: %w[tag1 tag2]
           }
 
           subject.desc 'The description' do
+            summary 'summary'
             detail 'more details'
             params(first: :param)
             success Object
@@ -51,6 +60,13 @@ module Grape
                        description: 'Not really needed',
                        required: false
                      }]
+            hidden false
+            deprecated false
+            is_array true
+            nickname 'nickname'
+            produces %w[array of mime_types]
+            consumes %w[array of mime_types]
+            tags %w[tag1 tag2]
           end
 
           expect(subject.namespace_setting(:description)).to eq(expected_options)

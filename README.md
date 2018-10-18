@@ -38,35 +38,35 @@
   - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
   - [Custom Types and Coercions](#custom-types-and-coercions)
   - [Multipart File Parameters](#multipart-file-parameters)
-  - [First-Class `JSON` Types](#first-class-json-types)
+  - [First-Class JSON Types](#first-class-json-types)
   - [Multiple Allowed Types](#multiple-allowed-types)
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
   - [Alias](#alias)
   - [Built-in Validators](#built-in-validators)
-    - [`allow_blank`](#allow_blank)
-    - [`values`](#values)
-    - [`except_values`](#except_values)
-    - [`regexp`](#regexp)
-    - [`mutually_exclusive`](#mutually_exclusive)
-    - [`exactly_one_of`](#exactly_one_of)
-    - [`at_least_one_of`](#at_least_one_of)
-    - [`all_or_none_of`](#all_or_none_of)
-    - [Nested `mutually_exclusive`, `exactly_one_of`, `at_least_one_of`, `all_or_none_of`](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
+    - [allow_blank](#allow_blank)
+    - [values](#values)
+    - [except_values](#except_values)
+    - [regexp](#regexp)
+    - [mutually_exclusive](#mutually_exclusive)
+    - [exactly_one_of](#exactly_one_of)
+    - [at_least_one_of](#at_least_one_of)
+    - [all_or_none_of](#all_or_none_of)
+    - [Nested mutually_exclusive, exactly_one_of, at_least_one_of, all_or_none_of](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
   - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
-    - [`presence`, `allow_blank`, `values`, `regexp`](#presence-allow_blank-values-regexp)
-    - [`all_or_none_of`](#all_or_none_of-1)
-    - [`mutually_exclusive`](#mutually_exclusive-1)
-    - [`exactly_one_of`](#exactly_one_of-1)
-    - [`at_least_one_of`](#at_least_one_of-1)
-    - [`Coerce`](#coerce)
-    - [`With Lambdas`](#with-lambdas)
-    - [`Pass symbols for i18n translations`](#pass-symbols-for-i18n-translations)
+    - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
+    - [all_or_none_of](#all_or_none_of-1)
+    - [mutually_exclusive](#mutually_exclusive-1)
+    - [exactly_one_of](#exactly_one_of-1)
+    - [at_least_one_of](#at_least_one_of-1)
+    - [Coerce](#coerce)
+    - [With Lambdas](#with-lambdas)
+    - [Pass symbols for i18n translations](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
 - [Headers](#headers)
@@ -145,9 +145,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.1.0**.
+You're reading the documentation for the next release of Grape, which should be **1.1.1**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.0.3](https://github.com/ruby-grape/grape/blob/v1.0.3/README.md).
+The current stable release is [1.1.0](https://github.com/ruby-grape/grape/blob/v1.1.0/README.md).
 
 ## Project Resources
 
@@ -446,10 +446,13 @@ version 'v1', using: :param, parameter: 'v'
 
 ## Describing Methods
 
-You can add a description to API methods and namespaces.
+You can add a description to API methods and namespaces. The description would be used by [grape-swagger][grape-swagger] to generate swagger compliant documentation.
+
+Note: Description block is only for documentation and won't affects API behavior.
 
 ```ruby
 desc 'Returns your public timeline.' do
+  summary 'summary'
   detail 'more details'
   params  API::Entities::Status.documentation
   success API::Entities::Entity
@@ -463,7 +466,13 @@ desc 'Returns your public timeline.' do
             description: 'Not really needed',
             required: false
           }
-
+  hidden false
+  deprecated false
+  is_array true
+  nickname 'nickname'
+  produces ['application/json']
+  consumes ['application/json']
+  tags ['tag1', 'tag2']
 end
 get :public_timeline do
   Status.limit(20)
@@ -476,6 +485,9 @@ end
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
 * `headers`: A definition of the used Headers
+* Other options can be found in [grape-swagger][grape-swagger]
+
+[grape-swagger]: https://github.com/ruby-grape/grape-swagger
 
 ## Parameters
 
@@ -935,7 +947,7 @@ parameter, and the return value must match the given `type`.
 
 ```ruby
 params do
-  requires :passwd, type: String, coerce_with: Base64.method(:decode)
+  requires :passwd, type: String, coerce_with: Base64.method(:decode64)
   requires :loud_color, type: Color, coerce_with: ->(c) { Color.parse(c.downcase) }
 
   requires :obj, type: Hash, coerce_with: JSON do
@@ -1546,6 +1558,8 @@ end
 
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
+
+In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
 
 ### Custom Validation messages
 
@@ -2183,7 +2197,7 @@ You can also rescue all exceptions with a code block and handle the Rack respons
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end
 ```
@@ -2254,9 +2268,9 @@ class Twitter::API < Grape::API
 end
 ```
 
-The `rescue_from` block must return a `Rack::Response` object, call `error!` or re-raise an exception.
+The `rescue_from` handler must return a `Rack::Response` object, call `error!`, or raise an exception (either the original exception or another custom one). The exception raised in `rescue_from` will be handled outside Grape. For example, if you mount Grape in Rails, the exception will be handle by [Rails Action Controller](https://guides.rubyonrails.org/action_controller_overview.html#rescue).
 
-The `with` keyword is available as `rescue_from` options, it can be passed method name or Proc object.
+Alternately, use the `with` option in `rescue_from` to specify a method or a `proc`.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -2894,7 +2908,7 @@ end
 
 ```
 
-Use [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
+Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
 ## Describing and Inspecting an API
 

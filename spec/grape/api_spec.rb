@@ -1348,6 +1348,28 @@ XML
     end
   end
 
+  describe '.insert' do
+    it 'inserts middleware in a specific location in the stack' do
+      m = Class.new(Grape::Middleware::Base) do
+        def call(env)
+          env['phony.args'] ||= []
+          env['phony.args'] << @options[:message]
+          @app.call(env)
+        end
+      end
+
+      subject.use ApiSpec::PhonyMiddleware, 'bye'
+      subject.insert 0, m, message: 'good'
+      subject.insert 0, m, message: 'hello'
+      subject.get '/' do
+        env['phony.args'].join(' ')
+      end
+
+      get '/'
+      expect(last_response.body).to eql 'hello good bye'
+    end
+  end
+
   describe '.http_basic' do
     it 'protects any resources on the same scope' do
       subject.http_basic do |u, _p|
@@ -1722,6 +1744,16 @@ XML
       get '/formatter_exception'
       expect(last_response.status).to eql 500
       expect(last_response.body).to eq('Formatter Error')
+    end
+
+    it 'uses default_rescue_handler to handle invalid response from rescue_from' do
+      subject.rescue_from(:all) { 'error' }
+      subject.get('/') { raise }
+
+      expect_any_instance_of(Grape::Middleware::Error).to receive(:default_rescue_handler).and_call_original
+      get '/'
+      expect(last_response.status).to eql 500
+      expect(last_response.body).to eql 'Invalid response'
     end
   end
 

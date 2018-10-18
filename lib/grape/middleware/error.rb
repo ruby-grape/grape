@@ -73,7 +73,7 @@ module Grape
         if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
           message = ERB::Util.html_escape(message)
         end
-        Rack::Response.new([message], status, headers).finish
+        Rack::Response.new([message], status, headers)
       end
 
       def format_message(message, backtrace, original_exception = nil)
@@ -127,7 +127,13 @@ module Grape
           handler = public_method(handler)
         end
 
-        handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+        response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+
+        if response.is_a?(Rack::Response)
+          response
+        else
+          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new)
+        end
       end
     end
   end
