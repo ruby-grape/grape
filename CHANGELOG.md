@@ -1,4 +1,11 @@
-### 1.1.0 (Next)
+### ? (Next)
+
+#### Fixes
+
+* [#1774](https://github.com/ruby-grape/grape/pull/1774): Change HTTP delete status code and response body logic - [@basjanssen](https://github.com/basjanssen).
+* Your contribution here.
+
+### 1.1.0 (8/4/2018)
 
 #### Features
 
@@ -6,13 +13,11 @@
 
 #### Fixes
 
-
 * [#1762](https://github.com/ruby-grape/grape/pull/1763): Fix unsafe HTML rendering on errors - [@ctennis](https://github.com/ctennis).
 * [#1759](https://github.com/ruby-grape/grape/pull/1759): Update appraisal for rails_edge - [@zvkemp](https://github.com/zvkemp).
 * [#1758](https://github.com/ruby-grape/grape/pull/1758): Fix expanding load_path in gemspec - [@2maz](https://github.com/2maz).
 * [#1765](https://github.com/ruby-grape/grape/pull/1765): Use 415 when request body is of an unsupported media type - [@jdmurphy](https://github.com/jdmurphy).
 * [#1771](https://github.com/ruby-grape/grape/pull/1771): Fix param aliases with 'given' blocks - [@jereynolds](https://github.com/jereynolds).
-* Your contribution here.
 
 ### 1.0.3 (4/23/2018)
 

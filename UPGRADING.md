@@ -1,5 +1,9 @@
 Upgrading Grape
 ===============
+### Upgrading to >= ?
+#### Changes in HTTP Delete Response Body and HTTP status code
+Previously, using `body false` or returning an empty Hash/Array would result in a empty response body and HTTP 204 (No content). 
+Currently, returning an empty Hash or Array will return the corresponding json/xml string and HTTP 200. Calling `body nil` or setting the response body to `nil` or using `return_no_content` will return an empty response body and HTTP 204.
 
 ### Upgrading to >= 1.1.0
 
