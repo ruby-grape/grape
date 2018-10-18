@@ -140,11 +140,9 @@ describe Grape::Endpoint do
         expect(subject.status).to eq 200
       end
 
-      # Still failing for some weird kind of reason.
       it 'regards a nil as no content' do
-        request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
         subject.body nil
-        expect(subject).to receive(:request).and_return(request)
         expect(subject.status).to eq 204
       end
     end
