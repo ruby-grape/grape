@@ -1,20 +1,44 @@
+require 'grape/router'
+
 module Grape
-  # The RemountableAPI class can replace most API classes, except for the base one that is to be mounted in rack.
+  # The RemountableAPI class can replace all API classes
   # should subclass this class in order to build an API.
   class RemountableAPI
+    # Class methods that we want to call on the RemountableAPI rather than on the API object
+    NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of? respond_to?].freeze
+
     class << self
+      attr_accessor :base_instance
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(remountable_class)
-        remountable_class.instance_variable_set(:@instances, [])
-        remountable_class.instance_variable_set(:@setup, [])
+      def inherited(remountable_class, base_instance_parent = Grape::API)
+        remountable_class.initial_setup(base_instance_parent)
+        remountable_class.override_all_methods
+        remountable_class.make_inheritable
+      end
 
-        base_instance = Class.new(Grape::API)
-        base_instance.define_singleton_method(:configuration) { {} }
+      # Initialize the instance variables on the remountable class, and the base_instance
+      # an instance that will be used to create the set up but will not be mounted
+      def initial_setup(base_instance_parent)
+        @instances = []
+        @setup = []
+        @base_parent = base_instance_parent
+        @base_instance = mount_instance
+      end
 
-        remountable_class.instance_variable_set(:@base_instance, base_instance)
-        base_instance.constants.each do |constant_name|
-          remountable_class.const_set(constant_name, base_instance.const_get(constant_name))
+      # Redefines all methods so that are forwarded to add_setup and recorded
+      def override_all_methods
+        (base_instance.methods - NON_OVERRIDABLE).each do |method_override|
+          define_singleton_method(method_override) do |*args, &block|
+            add_setup(method_override, *args, &block)
+          end
+        end
+      end
+
+      # When classes inheriting from this RemountableAPI child, we also want the instances to inherit from our instance
+      def make_inheritable
+        define_singleton_method(:inherited) do |sub_remountable|
+          Grape::RemountableAPI.inherited(sub_remountable, base_instance)
         end
       end
 
@@ -22,8 +46,8 @@ module Grape
       # For instance, a descripcion could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def new_instance(configuration: {})
-        instance = Class.new(Grape::API)
+      def mount_instance(configuration: {})
+        instance = Class.new(@base_parent)
         instance.instance_variable_set(:@configuration, configuration)
         instance.define_singleton_method(:configuration) { @configuration }
         replay_setup_on(instance)
@@ -39,25 +63,21 @@ module Grape
         end
       end
 
+      def respond_to?(method, include_private = false)
+        super(method, include_private) || base_instance.respond_to?(method, include_private)
+      end
+
       private
 
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
         setup_stage = { method: method, args: args, block: block }
         @setup << setup_stage
-        @base_instance.send(setup_stage[:method], *setup_stage[:args], &setup_stage[:block])
-      end
-
-      def method_missing(method, *args, &block)
-        if respond_to_missing?(method, true)
-          add_setup(method, *args, &block)
-        else
-          super
+        last_response = nil
+        @instances.each do |instance|
+          last_response = instance.send(setup_stage[:method], *setup_stage[:args], &setup_stage[:block])
         end
-      end
-
-      def respond_to_missing?(name, include_private = false)
-        @base_instance.respond_to?(name, include_private)
+        last_response
       end
     end
   end

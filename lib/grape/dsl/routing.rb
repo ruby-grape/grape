@@ -80,8 +80,8 @@ module Grape
         def mount(mounts, with: {})
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
-            if app.is_a?(Class) && app.ancestors.include?(Grape::RemountableAPI)
-              return mount(app.new_instance(configuration: with) => path)
+            if app.respond_to?(:mount_instance)
+              return mount(app.mount_instance(configuration: with) => path)
             end
             in_setting = inheritable_setting
 
