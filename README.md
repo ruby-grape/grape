@@ -370,10 +370,10 @@ end
 
 ## Remounting
 
-You can mount the same endpoints in two different locations using `RemountableAPI`
+You can mount the same endpoints in two different locations
 
 ```ruby
-class Voting::API < Grape::RemountableAPI
+class Voting::API < Grape::GrapeAPI
   namespace 'votes' do
     get do
       # Your logic
@@ -403,7 +403,7 @@ You can configure remountable endpoints for small details changing according to 
 they are mounted
 
 ```ruby
-class Voting::API < Grape::RemountableAPI
+class Voting::API < Grape::API
   namespace 'votes' do
     desc "Vote for your #{configuration[:votable]}"
     get do

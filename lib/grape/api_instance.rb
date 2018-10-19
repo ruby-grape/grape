@@ -1,8 +1,8 @@
 require 'grape/router'
 
 module Grape
-  # The API class is the primary entry point for creating Grape APIs. Users
-  # should subclass this class in order to build an API.
+  # The API Instance class, is the engine behind Grape::API. Each class that inherits
+  # from this will represent a different API
   class APIInstance
     include Grape::DSL::API
 

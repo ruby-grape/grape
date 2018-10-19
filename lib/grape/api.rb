@@ -1,10 +1,10 @@
 require 'grape/router'
 
 module Grape
-  # The RemountableAPI class can replace most API classes, except for the base one that is to be mounted in rack.
+  # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
   class API
-    # Class methods that we want to call on the RemountableAPI rather than on the API object
+    # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of? respond_to? byebug].freeze
 
     class << self
@@ -35,7 +35,7 @@ module Grape
         end
       end
 
-      # When classes inheriting from this RemountableAPI child, we also want the instances to inherit from our instance
+      # When classes inheriting from this API child, we also want the instances to inherit from our instance
       def make_inheritable
         define_singleton_method(:inherited) do |sub_remountable|
           Grape::API.inherited(sub_remountable, base_instance)
