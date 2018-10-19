@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'shared/versioning_examples'
 
-describe Grape::RemountableAPI do
-  subject(:a_remountable_api) { Class.new(Grape::RemountableAPI) }
+describe Grape::API do
+  subject(:a_remountable_api) { Class.new(Grape::API) }
   let(:root_api) { Class.new(Grape::API) }
 
   def app

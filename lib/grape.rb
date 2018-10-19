@@ -28,8 +28,8 @@ module Grape
   extend ::ActiveSupport::Autoload
 
   eager_autoload do
+    autoload :APIInstance
     autoload :API
-    autoload :RemountableAPI
     autoload :Endpoint
 
     autoload :Namespace
