@@ -373,7 +373,7 @@ end
 You can mount the same endpoints in two different locations
 
 ```ruby
-class Voting::API < Grape::GrapeAPI
+class Voting::API < Grape::API
   namespace 'votes' do
     get do
       # Your logic
@@ -413,11 +413,11 @@ class Voting::API < Grape::API
 end
 
 class Post::API < Grape::API
-  mount Voting::API, with: {votable: 'posts'}
+  mount Voting::API, with: { votable: 'posts' }
 end
 
 class Comment::API < Grape::API
-  mount Voting::API, with: {votable: 'comments'}
+  mount Voting::API, with: { votable: 'comments' }
 end
 ```
 
