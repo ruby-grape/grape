@@ -47,9 +47,9 @@ module Grape
       # For instance, a descripcion could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def mount_instance(configuration: {})
+      def mount_instance(opts = {})
         instance = Class.new(@base_parent)
-        instance.instance_variable_set(:@configuration, configuration)
+        instance.instance_variable_set(:@configuration, opts[:configuration] || {})
         instance.define_singleton_method(:configuration) { @configuration }
         replay_setup_on(instance)
         @instances << instance
