@@ -9,13 +9,13 @@ module Grape
     NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of? respond_to?].freeze
 
     class << self
-      attr_accessor :base_instance
+      attr_accessor :base_instance, :instances
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(remountable_class, base_instance_parent = Grape::API::Instance)
-        remountable_class.initial_setup(base_instance_parent)
-        remountable_class.override_all_methods
-        remountable_class.make_inheritable
+      def inherited(api, base_instance_parent = Grape::API::Instance)
+        api.initial_setup(base_instance_parent)
+        api.override_all_methods!
+        make_inheritable(api)
       end
 
       # Initialize the instance variables on the remountable class, and the base_instance
@@ -27,8 +27,8 @@ module Grape
         @base_instance = mount_instance
       end
 
-      # Redefines all methods so that are forwarded to add_setup and recorded
-      def override_all_methods
+      # Redefines all methods so that are forwarded to add_setup and be recorded
+      def override_all_methods!
         (base_instance.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, &block|
             add_setup(method_override, *args, &block)
@@ -36,10 +36,12 @@ module Grape
         end
       end
 
-      # When classes inheriting from this API child, we also want the instances to inherit from our instance
-      def make_inheritable
-        define_singleton_method(:inherited) do |sub_remountable|
-          Grape::API.inherited(sub_remountable, base_instance)
+      # Allows an API to itself be inheritable:
+      def make_inheritable(api)
+        # When a child API inherits from a parent API.
+        def api.inherited(child_api)
+          # The instances of the child API inherit from the instances of the parent API
+          Grape::API.inherited(child_api, base_instance)
         end
       end
 
@@ -49,10 +51,9 @@ module Grape
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(opts = {})
         instance = Class.new(@base_parent)
-        instance.instance_variable_set(:@configuration, opts[:configuration] || {})
-        instance.define_singleton_method(:configuration) { @configuration }
+        instance.configuration = opts[:configuration] || {}
+        instance.base = self
         replay_setup_on(instance)
-        @instances << instance
         instance
       end
 

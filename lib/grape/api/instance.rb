@@ -9,6 +9,13 @@ module Grape
 
       class << self
         attr_reader :instance
+        attr_reader :base
+        attr_accessor :configuration
+
+        def base=(grape_api)
+          @base = grape_api
+          grape_api.instances << self
+        end
 
         # A class-level lock to ensure the API is not compiled by multiple
         # threads simultaneously within the same process.
