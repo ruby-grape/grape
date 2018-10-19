@@ -87,7 +87,7 @@ Naming/HeredocDelimiterNaming:
 # Configuration parameters: AutoCorrect.
 Performance/HashEachMethods:
   Exclude:
-    - 'lib/grape/api_instance.rb'
+    - 'lib/grape/api/instance.rb'
     - 'lib/grape/middleware/versioner/header.rb'
 
 # Offense count: 1

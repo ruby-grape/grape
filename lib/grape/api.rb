@@ -1,17 +1,18 @@
 require 'grape/router'
+require 'grape/api/instance'
 
 module Grape
   # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of? respond_to? byebug].freeze
+    NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of? respond_to?].freeze
 
     class << self
       attr_accessor :base_instance
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(remountable_class, base_instance_parent = Grape::APIInstance)
+      def inherited(remountable_class, base_instance_parent = Grape::API::Instance)
         remountable_class.initial_setup(base_instance_parent)
         remountable_class.override_all_methods
         remountable_class.make_inheritable
