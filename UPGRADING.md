@@ -3,6 +3,15 @@ Upgrading Grape
 
 ### Upgrading to >= 1.1.1
 
+### Changes in the Grape::API class
+
+In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
+rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
+with a class that can contain several instances of `Grape::API`.
+
+This changes were done in such a way that no code-changes should be required.
+However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
+
 #### Changes in rescue_from returned object
 
 Grape will now check the object returned from `rescue_from` and ensure that it is a `Rack::Response`. That makes sure response is valid and avoids exposing service information. Change any code that invoked `Rack::Response.new(...).finish` in a custom `rescue_from` block to `Rack::Response.new(...)` to comply with the validation.
