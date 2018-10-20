@@ -50,7 +50,6 @@ Metrics/CyclomaticComplexity:
 # URISchemes: http, https
 Metrics/LineLength:
   Max: 215
-
 # Offense count: 57
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
@@ -60,6 +59,8 @@ Metrics/MethodLength:
 # Configuration parameters: CountComments.
 Metrics/ModuleLength:
   Max: 212
+  Exclude:
+    - 'spec/grape/dsl/routing_spec.rb'
 
 # Offense count: 21
 Metrics/PerceivedComplexity:
