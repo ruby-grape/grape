@@ -3,7 +3,7 @@ Upgrading Grape
 
 ### Upgrading to >= 1.2.0
 
-### Changes in the Grape::API class
+#### Changes in the Grape::API class
 
 In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
 rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
@@ -21,7 +21,7 @@ class Twitter::API < Grape::API
   rescue_from :all do |e|
     # version prior to 1.2.0
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
-    # 1.2.0 version
+    # 1.2.0  version
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end
