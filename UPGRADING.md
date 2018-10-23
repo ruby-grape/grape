@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.1.1
+### Upgrading to >= 1.2.0
 
 ### Changes in the Grape::API class
 
@@ -19,9 +19,9 @@ Grape will now check the object returned from `rescue_from` and ensure that it i
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    # version prior to 1.1.1
+    # version prior to 1.2.0
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
-    # 1.1.1 version
+    # 1.2.0 version
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end

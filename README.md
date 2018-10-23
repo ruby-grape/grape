@@ -370,7 +370,7 @@ end
 
 ## Remounting
 
-You can mount the same endpoints in two different locations
+You can mount the same endpoints in two different locations.
 
 ```ruby
 class Voting::API < Grape::API
@@ -394,13 +394,11 @@ class Comment::API < Grape::API
 end
 ```
 
-Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`,
-you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`
+Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`.
 
 ### Configuration
 
-You can configure remountable endpoints for small details changing according to where
-they are mounted
+You can configure remountable endpoints for small details changing according to where they are mounted.
 
 ```ruby
 class Voting::API < Grape::API
