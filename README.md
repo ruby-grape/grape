@@ -1655,7 +1655,7 @@ params do
   optional :beer
   optional :wine
   optional :juice
-  exactly_one_of :beer, :wine, :juice, message: {exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required"}
+  exactly_one_of :beer, :wine, :juice, message: { exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required" }
 end
 ```
 
@@ -1674,7 +1674,7 @@ end
 
 ```ruby
 params do
-  requires :int, type: {value: Integer, message: "type cast is invalid" }
+  requires :int, type: { value: Integer, message: "type cast is invalid" }
 end
 ```
 
