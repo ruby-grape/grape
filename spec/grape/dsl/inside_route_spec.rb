@@ -111,11 +111,40 @@ describe Grape::Endpoint do
       expect(subject.status).to eq 204
     end
 
-    it 'defaults to 200 on DELETE with a body present' do
-      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
-      subject.body 'content here'
-      expect(subject).to receive(:request).and_return(request)
-      expect(subject.status).to eq 200
+    describe 'what is regarded as content on DELETE' do
+      it 'regards a string as content' do
+        request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        subject.body 'content here'
+        expect(subject).to receive(:request).and_return(request)
+        expect(subject.status).to eq 200
+      end
+
+      it 'regards an empty string as content' do
+        request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        subject.body ''
+        expect(subject).to receive(:request).and_return(request)
+        expect(subject.status).to eq 200
+      end
+
+      it 'regards an empty hash as content' do
+        request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        subject.body({}) # Use brackets, because it's a block otherwise
+        expect(subject).to receive(:request).and_return(request)
+        expect(subject.status).to eq 200
+      end
+
+      it 'regards an empty array as content' do
+        request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        subject.body []
+        expect(subject).to receive(:request).and_return(request)
+        expect(subject.status).to eq 200
+      end
+
+      it 'regards a nil as no content' do
+        Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+        subject.body nil
+        expect(subject.status).to eq 204
+      end
     end
 
     it 'returns status set' do
@@ -184,9 +213,9 @@ describe Grape::Endpoint do
       end
     end
 
-    describe 'false' do
+    describe 'nil' do
       before do
-        subject.body false
+        subject.body nil
       end
 
       it 'sets status to 204' do

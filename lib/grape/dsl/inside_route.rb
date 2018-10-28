@@ -178,10 +178,10 @@ module Grape
           when Grape::Http::Headers::POST
             201
           when Grape::Http::Headers::DELETE
-            if @body.present?
-              200
-            else
+            if @body.nil?
               204
+            else
+              200
             end
           else
             200
@@ -222,12 +222,17 @@ module Grape
       #   end
       #
       #   GET /body # => "Body"
-      def body(value = nil)
-        if value
-          @body = value
-        elsif value == false
-          @body = ''
-          status 204
+      def body(*value)
+        raise ArgumentError 'you can only set a body with one argument' if value.length > 1
+
+        if value.length == 1
+          value = value.first
+          if value.nil?
+            @body = ''
+            status 204
+          else
+            @body = value
+          end
         else
           @body
         end
@@ -244,7 +249,7 @@ module Grape
       #   DELETE /12 # => 204 No Content, ""
       def return_no_content
         status 204
-        body false
+        body nil
       end
 
       # Allows you to define the response as a file-like object.
