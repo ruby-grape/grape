@@ -1175,6 +1175,18 @@ params do
 end
 ```
 
+You can set alias for parameter:
+
+```ruby
+params do
+  optional :category, as: :type
+  given type: ->(val) { val == 'foo' } do
+    requires :description
+  end
+end
+```
+
+Note: param in `given` should be the aliased one. In the example, it should be `type`, not `category`.
 
 ### Group Options
 
