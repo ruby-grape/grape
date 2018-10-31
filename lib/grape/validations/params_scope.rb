@@ -121,6 +121,7 @@ module Grape
           if opts && opts[:as]
             @api.route_setting(:aliased_params, @api.route_setting(:aliased_params) || [])
             @api.route_setting(:aliased_params) << { attrs.first => opts[:as] }
+            attrs = [opts[:as]]
           end
 
           @declared_params.concat attrs
