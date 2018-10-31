@@ -514,6 +514,17 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq 200
     end
 
+    it 'raises an error if the dependent parameter is not the aliased one' do
+      expect do
+        subject.params do
+          optional :a, as: :b
+          given :a do
+            requires :c
+          end
+        end
+      end.to raise_error(Grape::Exceptions::UnknownParameter)
+    end
+
     it 'does not validate nested requires when given is false' do
       subject.params do
         requires :a, type: String, allow_blank: false, values: %w[x y z]
