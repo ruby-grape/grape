@@ -479,6 +479,22 @@ describe Grape::Validations::ParamsScope do
       end.to_not raise_error
     end
 
+    it 'does not raise an error if when using nested given' do
+      expect do
+        subject.params do
+          optional :a, type: Hash do
+            requires :b
+          end
+          given :a do
+            requires :c
+            given :c do
+              requires :d
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
     it 'allows aliasing of dependent parameters' do
       subject.params do
         optional :a
