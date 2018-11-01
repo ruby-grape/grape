@@ -495,6 +495,33 @@ describe Grape::Validations::ParamsScope do
       end.to_not raise_error
     end
 
+    it 'allows nested dependent parameters' do
+      subject.params do
+        optional :a
+        given a: ->(val) { val == 'a' } do
+          optional :b
+          given b: ->(val) { val == 'b' } do
+            optional :c
+            given c: ->(val) { val == 'c' } do
+              requires :d
+            end
+          end
+        end
+      end
+      subject.get('/') { declared(params).to_json }
+
+      get '/'
+      expect(last_response.status).to eq 200
+
+      get '/', a: 'a', b: 'b', c: 'c'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'd is missing'
+
+      get '/', a: 'a', b: 'b', c: 'c', d: 'd'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ a: 'a', b: 'b', c: 'c', d: 'd' }.to_json)
+    end
+
     it 'allows aliasing of dependent parameters' do
       subject.params do
         optional :a
