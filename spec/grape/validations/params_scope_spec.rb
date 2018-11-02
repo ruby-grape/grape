@@ -663,6 +663,32 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'default value in given block' do
+    before do
+      subject.params do
+        optional :a, values: %w[a b]
+        given a: ->(val) { val == 'a' } do
+          optional :b, default: 'default'
+        end
+      end
+      subject.get('/') { params.to_json }
+    end
+
+    context 'when dependency meets' do
+      it 'sets default value for dependent parameter' do
+        get '/', a: 'a'
+        expect(last_response.body).to eq({ a: 'a', b: 'default' }.to_json)
+      end
+    end
+
+    context 'when dependency does not meet' do
+      it 'does not set default value for dependent parameter' do
+        get '/', a: 'b'
+        expect(last_response.body).to eq({ a: 'b' }.to_json)
+      end
+    end
+  end
+
   context 'when validations are dependent on a parameter within an array param' do
     before do
       subject.params do
