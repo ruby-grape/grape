@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rack', '1.5.2'
+gem 'rack', '1.5.5'
 
 group :development, :test do
   gem 'bundler'
