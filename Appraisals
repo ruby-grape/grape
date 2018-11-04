@@ -11,10 +11,6 @@ appraise 'rails-5' do
   gem 'rails', '5.2.1'
 end
 
-appraise 'rack-1.5.5' do
-  gem 'rack', '1.5.5'
-end
-
 appraise 'rails-edge' do
   gem 'rails', github: 'rails/rails'
 end
