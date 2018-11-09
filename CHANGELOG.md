@@ -4,13 +4,13 @@
 
 * Your contribution here.
 * [#1813](https://github.com/ruby-grape/grape/pull/1813): Add ruby 2.5 support, drop 2.2. Update rails version in travis - [@darren987469](https://github.com/darren987469).
-* [#1803](https://github.com/ruby-grape/grape/pull/1803): Adds the ability to re-mount all endpoints in any location - [@myxoh](https://github.com/bschmeck).
+* [#1803](https://github.com/ruby-grape/grape/pull/1803): Adds the ability to re-mount all endpoints in any location - [@myxoh](https://github.com/myxoh).
 * [#1795](https://github.com/ruby-grape/grape/pull/1795): Fix vendor/subtype parsing of an invalid Accept header - [@bschmeck](https://github.com/bschmeck).
 * [#1791](https://github.com/ruby-grape/grape/pull/1791): Support `summary`, `hidden`, `deprecated`, `is_array`, `nickname`, `produces`, `consumes`, `tags` options in `desc` block - [@darren987469](https://github.com/darren987469).
 
 #### Fixes
 
-* Your contribution here.
+* [#1818](https://github.com/ruby-grape/grape/pull/1818): Fixes methods defined on included modules after remountable apis - [@myxoh](https://github.com/myxoh).
 * [#1796](https://github.com/ruby-grape/grape/pull/1796): Fix crash when available locales are enforced but fallback locale unavailable - [@Morred](https://github.com/Morred).
 * [#1776](https://github.com/ruby-grape/grape/pull/1776): Validate response returned by the exception handler - [@darren987469](https://github.com/darren987469).
 * [#1787](https://github.com/ruby-grape/grape/pull/1787): Add documented but not implemented ability to `.insert` a middleware in the stack - [@michaellennox](https://github.com/michaellennox).
