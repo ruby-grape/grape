@@ -3211,10 +3211,9 @@ XML
       end
 
       it 'should correctly include module in nested mount' do
-
         module Test
           def self.included(base)
-             base.extend(ClassMethods)
+            base.extend(ClassMethods)
           end
           module ClassMethods
             def my_method
@@ -3232,19 +3231,18 @@ XML
           my_method
         end
         v2 = Class.new(Grape::API) do
-          version :v1, using: :path
+          version :v2, using: :path
         end
         segment_base = Class.new(Grape::API) do
           mount v1
           mount v2
         end
 
-        base = Class.new(Grape::API) do
-           mount segment_base
+        Class.new(Grape::API) do
+          mount segment_base
         end
 
         expect(v1.my_method).to be_truthy
-
       end
     end
   end
