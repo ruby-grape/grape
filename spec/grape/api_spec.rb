@@ -3209,6 +3209,43 @@ XML
           expect { a.mount b }.to_not raise_error
         end
       end
+
+      context 'when including a module' do
+        let(:included_module) do
+          Module.new do
+            def self.included(base)
+              base.extend(ClassMethods)
+            end
+            module ClassMethods
+              def my_method
+                @test = true
+              end
+            end
+          end
+        end
+
+        it 'should correctly include module in nested mount' do
+          module_to_include = included_module
+          v1 = Class.new(Grape::API) do
+            version :v1, using: :path
+            include module_to_include
+            my_method
+          end
+          v2 = Class.new(Grape::API) do
+            version :v2, using: :path
+          end
+          segment_base = Class.new(Grape::API) do
+            mount v1
+            mount v2
+          end
+
+          Class.new(Grape::API) do
+            mount segment_base
+          end
+
+          expect(v1.my_method).to be_truthy
+        end
+      end
     end
   end
 

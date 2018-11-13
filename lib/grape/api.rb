@@ -7,7 +7,8 @@ module Grape
   class API
     # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of?
-                         respond_to? const_defined? const_missing parent parent_name name equal? to_s parents].freeze
+                         respond_to? respond_to_missing? const_defined? const_missing parent
+                         parent_name name equal? to_s parents].freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -79,6 +80,19 @@ module Grape
 
       def respond_to?(method, include_private = false)
         super(method, include_private) || base_instance.respond_to?(method, include_private)
+      end
+
+      def respond_to_missing?(method, include_private = false)
+        base_instance.respond_to?(method, include_private)
+      end
+
+      def method_missing(method, *args, &block)
+        # If there's a missing method, it may be defined on the base_instance instead.
+        if respond_to_missing?(method)
+          base_instance.send(method, *args, &block)
+        else
+          super
+        end
       end
 
       private
