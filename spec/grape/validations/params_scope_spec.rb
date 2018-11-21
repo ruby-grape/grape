@@ -1050,7 +1050,7 @@ describe Grape::Validations::ParamsScope do
     before do
       subject.params do
         optional :memo, type: Hash do
-          optional :text,   type: String
+          optional :text, type: String
           optional :custom_body, type: Hash, coerce_with: JSON
           exactly_one_of :text, :custom_body
         end
@@ -1060,23 +1060,23 @@ describe Grape::Validations::ParamsScope do
 
     context 'when correct data is provided' do
       it 'returns a successful response' do
-        get 'test', memo: { }
+        get 'test', memo: {}
         expect(last_response.status).to eq(200)
 
-        get 'test', memo: { text: "HOGEHOGE" }
+        get 'test', memo: { text: 'HOGEHOGE' }
         expect(last_response.status).to eq(200)
 
-        get 'test', memo: { custom_body: "{ \"xxx\": \"yyy\" }" }
+        get 'test', memo: { custom_body: '{ "xxx": "yyy" }' }
         expect(last_response.status).to eq(200)
       end
     end
 
     context 'when invalid data is provided' do
       it 'returns a failure response' do
-        get 'test', memo: { text: "HOGEHOGE", custom_body: "{ \"xxx\": \"yyy\" }" }
+        get 'test', memo: { text: 'HOGEHOGE', custom_body: '{ "xxx": "yyy" }' }
         expect(last_response.status).to eq(400)
 
-        get 'test', memo: "{ \"custom_body\": \"HOGE\" }"
+        get 'test', memo: '{ "custom_body": "HOGE" }'
         expect(last_response.status).to eq(400)
       end
     end
