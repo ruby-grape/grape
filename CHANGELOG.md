@@ -17,6 +17,7 @@
 * [#1788](https://github.com/ruby-grape/grape/pull/1788): Fix route requirements bug - [@darren987469](https://github.com/darren987469), [@darrellnash](https://github.com/darrellnash).
 * [#1810](https://github.com/ruby-grape/grape/pull/1810): Fix support in `given` for aliased params - [@darren987469](https://github.com/darren987469).
 * [#1811](https://github.com/ruby-grape/grape/pull/1811): Support nested dependent parameters - [@darren987469](https://github.com/darren987469), [@andreacfm](https://github.com/andreacfm).
+* [#1822](https://github.com/ruby-grape/grape/pull/1822): Raise validation error when optional hash type parameter is received string type value and exactly_one_of be used - [@woshidan](https://github.com/woshidan).
 
 ### 1.1.0 (8/4/2018)
 

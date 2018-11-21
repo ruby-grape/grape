@@ -11,7 +11,7 @@ module Grape
       private
 
       def scope_requires_params
-        @scope.required? || scoped_params.any?(&:any?)
+        @scope.required? || scoped_params.any? { |param| param.respond_to?(:any?) && param.any? }
       end
 
       def keys_in_common(resource_params)
