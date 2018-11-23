@@ -8,7 +8,7 @@ module Grape
     # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of?
                          respond_to? respond_to_missing? const_defined? const_missing parent
-                         parent_name name equal? to_s parents].freeze
+                         parent_name name equal? to_s parents anonymous?].freeze
 
     class << self
       attr_accessor :base_instance, :instances
