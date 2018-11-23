@@ -12,7 +12,7 @@ with a class that can contain several instances of `Grape::API`.
 This changes were done in such a way that no code-changes should be required.
 However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
 
-Note, this is particularly relevant if you are opening the class `Grape::API` for modification. This code:
+Note, this is particularly relevant if you are opening the class `Grape::API` for modification.
 
 **Deprecated**
 ```ruby
