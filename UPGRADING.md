@@ -12,6 +12,24 @@ with a class that can contain several instances of `Grape::API`.
 This changes were done in such a way that no code-changes should be required.
 However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
 
+Note, this is particularly relevant if you are opening the class `Grape::API` for modification. This code:
+
+```ruby
+class Grape::API
+  #your patched logic
+  ...
+end
+```
+
+Needs to be modified into:
+
+```ruby
+class Grape::API::Instance
+  #your patched logic
+  ...
+end
+```
+
 #### Changes in rescue_from returned object
 
 Grape will now check the object returned from `rescue_from` and ensure that it is a `Rack::Response`. That makes sure response is valid and avoids exposing service information. Change any code that invoked `Rack::Response.new(...).finish` in a custom `rescue_from` block to `Rack::Response.new(...)` to comply with the validation.
