@@ -14,18 +14,17 @@ However, if experiencing problems, or relying on private methods and internal be
 
 Note, this is particularly relevant if you are opening the class `Grape::API` for modification. This code:
 
+**Deprecated**
 ```ruby
 class Grape::API
-  #your patched logic
+  # your patched logic
   ...
 end
 ```
-
-Needs to be modified into:
-
+**New**
 ```ruby
 class Grape::API::Instance
-  #your patched logic
+  # your patched logic
   ...
 end
 ```
