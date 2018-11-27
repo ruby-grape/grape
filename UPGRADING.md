@@ -1,6 +1,21 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.2.1
+
+#### Obtaining the name of a mounted class
+
+In order to make obtaining the name of a mounted class simpler, we've delegated `.to_s` to `base.name`
+
+**Deprecated in 1.2.0**
+```ruby
+  payload[:endpoint].options[:for].name
+```
+**New**
+```ruby
+  payload[:endpoint].options[:for].to_s
+```
+
 ### Upgrading to >= 1.2.0
 
 #### Changes in the Grape::API class
@@ -37,7 +52,7 @@ After the patch, the mounted API is no longer a Named class inheriting from `Gra
 which inherit from `Grape::API::Instance`.
 What this means in practice, is:
 - Generally: you can access the named class from the instance calling the getter `base`.
-- In particular: If you need the `name`, you can use `.to_s`, which will fallback on: `base`.`name`
+- In particular: If you need the `name`, you can use `base`.`name`
 
 **Deprecated**
 ```ruby
@@ -45,7 +60,7 @@ What this means in practice, is:
 ```
 **New**
 ```ruby
-  payload[:endpoint].options[:for].to_s # or `.base.name`
+  payload[:endpoint].options[:for].base.name
 ```
 
 #### Changes in rescue_from returned object
