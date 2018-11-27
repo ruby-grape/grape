@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1825](https://github.com/ruby-grape/grape/pull/1825): `to_s` on a mounted class now responses with the API name - [@myxoh](https://github.com/myxoh).
 
 ### 1.2.0 (29/11/2018)
 
