@@ -5,6 +5,8 @@ Upgrading Grape
 
 #### Changes in the Grape::API class
 
+##### Patching the class
+
 In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
 rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
 with a class that can contain several instances of `Grape::API`.
@@ -27,6 +29,23 @@ class Grape::API::Instance
   # your patched logic
   ...
 end
+```
+
+##### `name` (and other caveats) of the mounted API
+
+After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class
+which inherit from `Grape::API::Instance`.
+What this means in practice, is:
+- Generally: you can access the named class from the instance calling the getter `base`.
+- In particular: If you need the `name`, you can use `.to_s`, which will fallback on: `base`.`name`
+
+**Deprecated**
+```ruby
+  payload[:endpoint].options[:for].name
+```
+**New**
+```ruby
+  payload[:endpoint].options[:for].to_s # or `.base.name`
 ```
 
 #### Changes in rescue_from returned object
