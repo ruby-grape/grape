@@ -18,7 +18,7 @@ module Grape
         end
 
         def to_s
-          base&.to_s || super
+          (base && base.to_s) || super
         end
 
         # A class-level lock to ensure the API is not compiled by multiple
