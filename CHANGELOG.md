@@ -1,4 +1,4 @@
-### 1.2.1 (Next)
+### 1.2.2 (Next)
 
 #### Features
 
@@ -7,9 +7,17 @@
 #### Fixes
 
 * Your contribution here.
+
+### 1.2.1 (11/28/2018)
+
+#### Features
+
+
+#### Fixes
+
 * [#1825](https://github.com/ruby-grape/grape/pull/1825): `to_s` on a mounted class now responses with the API name - [@myxoh](https://github.com/myxoh).
 
-### 1.2.0 (11/29/2018)
+### 1.2.0 (11/26/2018)
 
 #### Features
 
