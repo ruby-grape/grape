@@ -6,12 +6,16 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %I[define_singleton_method instance_variable_set inspect class is_a? ! kind_of?
-                         respond_to? respond_to_missing? const_defined? const_missing parent
-                         parent_name name equal? to_s parents anonymous?].freeze
+    NON_OVERRIDABLE = Class.new.methods.freeze
 
     class << self
       attr_accessor :base_instance, :instances
+
+      # Rather than initializing an object of type Grape::API, create an object of type Instance
+      def new(*args, &block)
+        base_instance.new(*args, &block)
+      end
+
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
       def inherited(api, base_instance_parent = Grape::API::Instance)
