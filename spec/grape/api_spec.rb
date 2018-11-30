@@ -3649,4 +3649,22 @@ XML
       end
     end
   end
+
+  describe 'normal class methods' do
+    subject(:grape_api) { Class.new(Grape::API) }
+
+    before do
+      stub_const('MyAPI', grape_api)
+    end
+
+    it 'can find the appropiate name' do
+      expect(grape_api.name).to eq 'MyAPI'
+    end
+
+    it 'is equal to itself' do
+      expect(grape_api.itself).to eq grape_api
+      expect(grape_api).to eq MyAPI
+      expect(grape_api.eql?(MyAPI))
+    end
+  end
 end
