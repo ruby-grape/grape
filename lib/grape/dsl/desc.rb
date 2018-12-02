@@ -24,6 +24,7 @@ module Grape
       # @option options :nickname [String] nickname of the endpoint
       # @option options :produces [Array[String]] a list of MIME types the endpoint produce
       # @option options :consumes [Array[String]] a list of MIME types the endpoint consume
+      # @option options :security [Array[Hash]] a list of security schemes
       # @option options :tags [Array[String]] a list of tags
       # @yield a block yielding an instance context with methods mapping to
       #   each of the above, except that :entity is also aliased as #success
@@ -100,6 +101,7 @@ module Grape
             :nickname,
             :produces,
             :consumes,
+            :security,
             :tags
           )
 

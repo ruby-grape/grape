@@ -44,7 +44,8 @@ module Grape
             nickname: 'nickname',
             produces: %w[array of mime_types],
             consumes: %w[array of mime_types],
-            tags: %w[tag1 tag2]
+            tags: %w[tag1 tag2],
+            security: %w[array of security schemes]
           }
 
           subject.desc 'The description' do
@@ -71,6 +72,7 @@ module Grape
             produces %w[array of mime_types]
             consumes %w[array of mime_types]
             tags %w[tag1 tag2]
+            security %w[array of security schemes]
           end
 
           expect(subject.namespace_setting(:description)).to eq(expected_options)
