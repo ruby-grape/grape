@@ -28,14 +28,16 @@ module Grape
             entity: Object,
             http_codes: [[401, 'Unauthorized', 'Entities::Error']],
             named: 'My named route',
-            headers: [XAuthToken: {
-              description: 'Valdates your identity',
-              required: true
-            },
-                      XOptionalHeader: {
-                        description: 'Not really needed',
-                        required: false
-                      }],
+            headers: [
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            ],
             hidden: false,
             deprecated: false,
             is_array: true,
@@ -52,14 +54,16 @@ module Grape
             success Object
             failure [[401, 'Unauthorized', 'Entities::Error']]
             named 'My named route'
-            headers [XAuthToken: {
-              description: 'Valdates your identity',
-              required: true
-            },
-                     XOptionalHeader: {
-                       description: 'Not really needed',
-                       required: false
-                     }]
+            headers [
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            ]
             hidden false
             deprecated false
             is_array true
