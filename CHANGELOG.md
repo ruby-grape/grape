@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1831](https://github.com/ruby-grape/grape/pull/1831): Support security in desc block - [@fotos](https://github.com/fotos).
 * [#1830](https://github.com/ruby-grape/grape/pull/1830): Restores self_sanity addresses #1829 - [@myxoh](https://github.com/myxoh).
 
 ### 1.2.1 (2018/11/28)
