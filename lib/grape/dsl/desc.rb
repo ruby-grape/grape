@@ -4,12 +4,12 @@ module Grape
       include Grape::DSL::Settings
 
       # Add a description to the next namespace or function.
-      # @option options :summary [String] summary for this endpoint
       # @param description [String] descriptive string for this endpoint
       #   or namespace
       # @param options [Hash] other properties you can set to describe the
       #   endpoint or namespace. Optional.
       # @option options :detail [String] additional detail about this endpoint
+      # @option options :summary [String] summary for this endpoint
       # @option options :params [Hash] param types and info. normally, you set
       #   these via the `params` dsl method.
       # @option options :entity [Grape::Entity] the entity returned upon a
@@ -24,6 +24,7 @@ module Grape
       # @option options :nickname [String] nickname of the endpoint
       # @option options :produces [Array[String]] a list of MIME types the endpoint produce
       # @option options :consumes [Array[String]] a list of MIME types the endpoint consume
+      # @option options :security [Array[Hash]] a list of security schemes
       # @option options :tags [Array[String]] a list of tags
       # @yield a block yielding an instance context with methods mapping to
       #   each of the above, except that :entity is also aliased as #success
@@ -100,6 +101,7 @@ module Grape
             :nickname,
             :produces,
             :consumes,
+            :security,
             :tags
           )
 
