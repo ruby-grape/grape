@@ -22,7 +22,7 @@
   - [Rails](#rails)
   - [Modules](#modules)
 - [Remounting](#remounting)
-  - [Configuration](#configuration)
+  - [Mount Configuration](#mount-configuration)
 - [Versioning](#versioning)
   - [Path](#path)
   - [Header](#header)
@@ -396,7 +396,7 @@ end
 
 Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`.
 
-### Configuration
+### Mount Configuration
 
 You can configure remountable endpoints for small details changing according to where they are mounted.
 
