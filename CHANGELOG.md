@@ -2,8 +2,9 @@
 
 #### Features
 
-* [#1831](https://github.com/ruby-grape/grape/pull/1831): Support `security` in `desc` block - [@fotos](https://github.com/fotos).
 * Your contribution here.
+* [#1832](https://github.com/ruby-grape/grape/pull/1832): Support `body_name` in `desc` block - [@fotos](https://github.com/fotos).
+* [#1831](https://github.com/ruby-grape/grape/pull/1831): Support `security` in `desc` block - [@fotos](https://github.com/fotos).
 
 #### Fixes
 
