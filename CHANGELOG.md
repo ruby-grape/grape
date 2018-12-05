@@ -3,9 +3,9 @@
 #### Features
 
 * Your contribution here.
+* [#1833](https://github.com/ruby-grape/grape/pull/1833): Allows to set the `ParamBuilder` globally - [@myxoh](https://github.com/myxoh).
 * [#1832](https://github.com/ruby-grape/grape/pull/1832): Support `body_name` in `desc` block - [@fotos](https://github.com/fotos).
 * [#1831](https://github.com/ruby-grape/grape/pull/1831): Support `security` in `desc` block - [@fotos](https://github.com/fotos).
-* [#1833](https://github.com/ruby-grape/grape/pull/1833), Allows to set the ParamBuilder globally - [@myxoh](https://github.com/myxoh).
 
 #### Fixes
 
