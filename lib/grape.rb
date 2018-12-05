@@ -34,6 +34,7 @@ module Grape
     autoload :Namespace
 
     autoload :Path
+    autoload :Config
 
     autoload :Cookies
     autoload :Validations

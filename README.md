@@ -29,6 +29,7 @@
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
 - [Describing Methods](#describing-methods)
+- [Configuration][#configuration]
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
@@ -541,6 +542,25 @@ end
 
 [grape-swagger]: https://github.com/ruby-grape/grape-swagger
 
+## Configuration
+
+Grape counts with a module `Grape::Config` for some basic configuration at load time.
+Currently the configurable settings are:
+
+* `param_builder`: Sets the default [Parameter Builder](#parameters), by default: `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`
+
+To change a setting value make sure that at some point on load time the code the following code runs
+
+```ruby
+Grape::Config[setting] = value
+```
+
+For example, for the `param_builder`, the following code could run in an initializers:
+
+```ruby
+Grape::Config[:param_builder] = Grape::Extensions::Hashie::Mash::ParamBuilder
+```
+
 ## Parameters
 
 Request parameters are available through the `params` hash object. This includes `GET`, `POST`
@@ -617,6 +637,8 @@ params do
   optional :color, type: String
 end
 ```
+
+Or globally with the [Configuration](#configuration) `Grape::Config[:param_builder]`
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
