@@ -29,7 +29,7 @@
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
 - [Describing Methods](#describing-methods)
-- [Configuration][#configuration]
+- [Configuration](#configuration)
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
