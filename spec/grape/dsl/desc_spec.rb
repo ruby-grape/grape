@@ -28,6 +28,7 @@ module Grape
             entity: Object,
             http_codes: [[401, 'Unauthorized', 'Entities::Error']],
             named: 'My named route',
+            body_name: 'My body name',
             headers: [
               XAuthToken: {
                 description: 'Valdates your identity',
@@ -55,6 +56,7 @@ module Grape
             success Object
             failure [[401, 'Unauthorized', 'Entities::Error']]
             named 'My named route'
+            body_name 'My body name'
             headers [
               XAuthToken: {
                 description: 'Valdates your identity',
