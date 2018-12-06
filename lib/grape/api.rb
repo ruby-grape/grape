@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = Class.new.methods.freeze
+    NON_OVERRIDABLE = Class.new.methods.freeze + %i[call call!]
 
     class << self
       attr_accessor :base_instance, :instances
@@ -40,6 +40,15 @@ module Grape
             add_setup(method_override, *args, &block)
           end
         end
+      end
+
+      # This is the interface point between Rack and Grape; it accepts a request
+      # from Rack and ultimately returns an array of three values: the status,
+      # the headers, and the body. See [the rack specification]
+      # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
+      # NOTE: This will only be called on an API directly mounted on RACK
+      def call(*args, &block)
+        base_instance.call(*args, &block)
       end
 
       # Allows an API to itself be inheritable:
