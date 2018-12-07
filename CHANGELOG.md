@@ -1,3 +1,13 @@
+### 1.2.3 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 1.2.2 (2018/12/07)
 
 #### Features
