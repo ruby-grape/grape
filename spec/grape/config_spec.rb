@@ -5,7 +5,8 @@ describe '.configure' do
 
   context 'when not configured' do
     it 'does not change when resetted' do
-      expect { grape_double.config.reset }.not_to change { grape_double.config.param_builder }
+      expect { grape_double.config.reset }
+        .not_to(change { grape_double.config.param_builder })
     end
   end
 
@@ -23,8 +24,8 @@ describe '.configure' do
     it 'can be restored by resetting' do
       configure
       expect { grape_double.config.reset }
-             .to change { grape_double.config.param_builder }
-             .from(42)
+        .to change { grape_double.config.param_builder }
+        .from(42)
     end
   end
 end
