@@ -1013,7 +1013,7 @@ describe Grape::Validations do
           expect(last_response.body).to eq('custom is not custom with options!')
         end
       end
-    end # end custom validation
+    end
 
     context 'named' do
       context 'can be defined' do
