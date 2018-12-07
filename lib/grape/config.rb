@@ -1,27 +1,32 @@
 module Grape
   module Config
-    module SettingStore
+    class Configuration
       ATTRIBUTES = %i[
         param_builder
       ].freeze
 
-      attr_accessor(*SettingStore::ATTRIBUTES)
+      attr_accessor(*ATTRIBUTES)
+
+      def initialize
+        reset
+      end
 
       def reset
         self.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
       end
-
-      def configure
-        block_given? ? yield(self) : self
-      end
-
-      def config
-        self
-      end
     end
 
-    Grape::Config.extend SettingStore
+    def self.extended(base)
+      def base.configure
+        block_given? ? yield(config) : config
+      end
+
+      def base.config
+        @configuration ||= Grape::Config::Configuration.new
+      end
+    end
   end
 end
 
-Grape::Config.reset
+Grape.extend Grape::Config
+Grape.config.reset
