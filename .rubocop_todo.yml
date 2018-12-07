@@ -79,8 +79,3 @@ Naming/FileName:
 # SupportedStyles: annotated, template
 Style/FormatStringToken:
   EnforcedStyle: template
-
-# Offense count: 1
-Style/MethodMissing:
-  Exclude:
-    - 'lib/grape/router/attribute_translator.rb'
