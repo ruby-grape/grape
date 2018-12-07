@@ -80,11 +80,6 @@ Naming/FileName:
 Style/FormatStringToken:
   EnforcedStyle: template
 
-# Offense count: 2
-Style/IdenticalConditionalBranches:
-  Exclude:
-    - 'lib/grape/dsl/desc.rb'
-
 # Offense count: 1
 Style/MethodMissing:
   Exclude:
