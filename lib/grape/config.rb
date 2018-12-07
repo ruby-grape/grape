@@ -1,24 +1,27 @@
 module Grape
   module Config
     module SettingStore
-      def setting(setting_name, opts = {})
-        @setting_caller ||= {}.with_indifferent_access
-        default_caller = opts[:default] || -> { nil }
-        @setting_caller[setting_name] = { default: default_caller }
+      ATTRIBUTES = %i[
+        param_builder
+      ].freeze
+
+      attr_accessor(*SettingStore::ATTRIBUTES)
+
+      def reset
+        self.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
       end
 
-      def [](setting_name)
-        callers = @setting_caller[setting_name]
-        (callers[:configured] || callers[:default]).call
+      def configure
+        block_given? ? yield(self) : self
       end
 
-      def []=(setting_name, value)
-        @setting_caller[setting_name][:configured] = -> { value }
+      def config
+        self
       end
     end
-    # A singleton setup module
-    extend SettingStore
 
-    setting :param_builder, default: -> { Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder }
+    Grape::Config.extend SettingStore
   end
 end
+
+Grape::Config.reset

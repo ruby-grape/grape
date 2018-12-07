@@ -552,13 +552,17 @@ Currently the configurable settings are:
 To change a setting value make sure that at some point on load time the code the following code runs
 
 ```ruby
-Grape::Config[setting] = value
+Grape::Config.configure do |config|
+  config.setting = value
+end
 ```
 
 For example, for the `param_builder`, the following code could run in an initializers:
 
 ```ruby
-Grape::Config[:param_builder] = Grape::Extensions::Hashie::Mash::ParamBuilder
+Grape::Config.configure do |config|
+  config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+end
 ```
 
 ## Parameters
@@ -638,7 +642,7 @@ params do
 end
 ```
 
-Or globally with the [Configuration](#configuration) `Grape::Config[:param_builder]`
+Or globally with the [Configuration](#configuration) `Grape::Config.param_builder`
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
