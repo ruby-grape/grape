@@ -1,21 +1,16 @@
-### 1.2.2 (Next)
+### 1.2.2 (2018/12/07)
 
 #### Features
 
-* Your contribution here.
 * [#1832](https://github.com/ruby-grape/grape/pull/1832): Support `body_name` in `desc` block - [@fotos](https://github.com/fotos).
 * [#1831](https://github.com/ruby-grape/grape/pull/1831): Support `security` in `desc` block - [@fotos](https://github.com/fotos).
 
 #### Fixes
 
-* Your contribution here.
 * [#1836](https://github.com/ruby-grape/grape/pull/1836): Fix: memory leak not releasing `call` method calls from setup - [@myxoh](https://github.com/myxoh).
 * [#1830](https://github.com/ruby-grape/grape/pull/1830), [#1829](https://github.com/ruby-grape/grape/issues/1829): Restores `self` sanity - [@myxoh](https://github.com/myxoh).
 
 ### 1.2.1 (2018/11/28)
-
-#### Features
-
 
 #### Fixes
 
