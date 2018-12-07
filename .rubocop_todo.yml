@@ -74,13 +74,6 @@ Naming/FileName:
     - 'Guardfile'
     - 'Rakefile'
 
-# Offense count: 1
-# Configuration parameters: Blacklist.
-# Blacklist: END, (?-mix:EO[A-Z]{1})
-Naming/HeredocDelimiterNaming:
-  Exclude:
-    - 'lib/grape/router/route.rb'
-
 # Offense count: 3
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
