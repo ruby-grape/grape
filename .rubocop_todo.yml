@@ -74,14 +74,6 @@ Naming/FileName:
     - 'Guardfile'
     - 'Rakefile'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/HashEachMethods:
-  Exclude:
-    - 'lib/grape/api/instance.rb'
-    - 'lib/grape/middleware/versioner/header.rb'
-
 # Offense count: 2
 # Configuration parameters: SupportedStyles.
 # SupportedStyles: annotated, template
