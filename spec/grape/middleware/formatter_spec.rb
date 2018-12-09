@@ -247,7 +247,7 @@ describe Grape::Middleware::Formatter do
           let(:content_type) { 'application/atom+xml' }
 
           it 'returns a 415 HTTP error status' do
-            error = catch(:error) {
+            error = catch(:error) do
               subject.call(
                 'PATH_INFO' => '/info',
                 'REQUEST_METHOD' => method,
@@ -255,7 +255,7 @@ describe Grape::Middleware::Formatter do
                 'rack.input' => io,
                 'CONTENT_LENGTH' => io.length
               )
-            }
+            end
             expect(error[:status]).to eq(415)
             expect(error[:message]).to eq("The provided content-type 'application/atom+xml' is not supported.")
           end
@@ -407,7 +407,7 @@ describe Grape::Middleware::Formatter do
         parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }
       )
       io = StringIO.new('{invalid}')
-      error = catch(:error) {
+      error = catch(:error) do
         subject.call(
           'PATH_INFO' => '/info',
           'REQUEST_METHOD' => 'POST',
@@ -415,7 +415,7 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'CONTENT_LENGTH' => io.length
         )
-      }
+      end
 
       expect(error[:message]).to eq 'fail'
       expect(error[:backtrace].size).to be >= 1

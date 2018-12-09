@@ -96,7 +96,7 @@ module Grape
       # @param [Array] other_specs An array of middleware specifications (e.g. [[:use, klass], [:insert_before, *args]])
       def concat(other_specs)
         @others << Array(other_specs).reject { |o| o.first == :use }
-        merge_with Array(other_specs).select { |o| o.first == :use }
+        merge_with(Array(other_specs).select { |o| o.first == :use })
       end
 
       protected

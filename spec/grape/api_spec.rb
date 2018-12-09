@@ -220,6 +220,15 @@ describe Grape::API do
     end
   end
 
+  describe '.call' do
+    context 'it does not add to the app setup' do
+      it 'calls the app' do
+        expect(subject).not_to receive(:add_setup)
+        subject.call({})
+      end
+    end
+  end
+
   describe '.route_param' do
     it 'adds a parameterized route segment namespace' do
       subject.namespace :users do

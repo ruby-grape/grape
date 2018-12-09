@@ -69,13 +69,12 @@ module Grape
       end
 
       def description_field(field, value = nil)
+        description = route_setting(:description)
         if value
-          description = route_setting(:description)
           description ||= route_setting(:description, {})
           description[field] = value
-        else
-          description = route_setting(:description)
-          description[field] if description
+        elsif description
+          description[field]
         end
       end
 

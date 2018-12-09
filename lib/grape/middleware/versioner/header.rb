@@ -99,7 +99,7 @@ module Grape
         def available_media_types
           available_media_types = []
 
-          content_types.each do |extension, _media_type|
+          content_types.each_key do |extension|
             versions.reverse_each do |version|
               available_media_types += [
                 "application/vnd.#{vendor}-#{version}+#{extension}",
@@ -111,7 +111,7 @@ module Grape
 
           available_media_types << "application/vnd.#{vendor}"
 
-          content_types.each do |_, media_type|
+          content_types.each_value do |media_type|
             available_media_types << media_type
           end
 
