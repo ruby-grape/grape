@@ -64,7 +64,13 @@ module Grape
 
     describe 'when the param_builder is set to Hashie' do
       before do
-        allow(Grape.configure).to receive(:param_builder) { Grape::Extensions::Hashie::Mash::ParamBuilder }
+        Grape.configure do |config|
+          config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+        end
+      end
+
+      after do
+        Grape.config.reset
       end
 
       subject(:request_params) { Grape::Request.new(env, opts).params }
