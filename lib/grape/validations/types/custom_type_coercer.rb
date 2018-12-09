@@ -158,7 +158,7 @@ module Grape
         #   necessary.
         def enforce_symbolized_keys(type, method)
           # Collections have all values processed individually
-          if type == Array || type == Set
+          if [Array, Set].include?(type)
             lambda do |val|
               method.call(val).tap do |new_value|
                 new_value.map do |item|

@@ -183,7 +183,7 @@ module Grape
         # informations again.
         without_root_prefix do
           without_versioning do
-            routes_map.each do |_, config|
+            routes_map.each_value do |config|
               methods = config[:methods]
               allowed_methods = methods.dup
 
