@@ -544,10 +544,10 @@ end
 
 ## Configuration
 
-Grape counts with a module `Grape.configure` for some basic configuration at load time.
+Use `Grape.configure` to set up global settings at load time.
 Currently the configurable settings are:
 
-* `param_builder`: Sets the default [Parameter Builder](#parameters), by default: `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`
+* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
 
 To change a setting value make sure that at some point on load time the code the following code runs
 
@@ -642,7 +642,7 @@ params do
 end
 ```
 
-Or globally with the [Configuration](#configuration) `Grape.configure.param_builder`
+Or globally with the [Configuration](#configuration) `Grape.configure.param_builder`.
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
