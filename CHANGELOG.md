@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1833](https://github.com/ruby-grape/grape/pull/1833): Allows to set the `ParamBuilder` globally - [@myxoh](https://github.com/myxoh).
 
 #### Fixes
 

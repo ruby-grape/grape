@@ -34,7 +34,6 @@ module Grape
     autoload :Namespace
 
     autoload :Path
-
     autoload :Cookies
     autoload :Validations
     autoload :ErrorFormatter
@@ -194,6 +193,7 @@ module Grape
   end
 end
 
+require 'grape/config'
 require 'grape/util/content_types'
 
 require 'grape/validations/validators/base'

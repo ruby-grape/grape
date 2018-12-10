@@ -22,13 +22,14 @@
   - [Rails](#rails)
   - [Modules](#modules)
 - [Remounting](#remounting)
-  - [Configuration](#configuration)
+  - [Mount Configuration](#mount-configuration)
 - [Versioning](#versioning)
   - [Path](#path)
   - [Header](#header)
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
 - [Describing Methods](#describing-methods)
+- [Configuration](#configuration)
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
@@ -395,7 +396,7 @@ end
 
 Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`.
 
-### Configuration
+### Mount Configuration
 
 You can configure remountable endpoints for small details changing according to where they are mounted.
 
@@ -541,6 +542,29 @@ end
 
 [grape-swagger]: https://github.com/ruby-grape/grape-swagger
 
+## Configuration
+
+Use `Grape.configure` to set up global settings at load time.
+Currently the configurable settings are:
+
+* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
+
+To change a setting value make sure that at some point on load time the code the following code runs
+
+```ruby
+Grape.configure do |config|
+  config.setting = value
+end
+```
+
+For example, for the `param_builder`, the following code could run in an initializers:
+
+```ruby
+Grape.configure do |config|
+  config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+end
+```
+
 ## Parameters
 
 Request parameters are available through the `params` hash object. This includes `GET`, `POST`
@@ -617,6 +641,8 @@ params do
   optional :color, type: String
 end
 ```
+
+Or globally with the [Configuration](#configuration) `Grape.configure.param_builder`.
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
