@@ -369,7 +369,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(5)
+      expect(JSON.parse(last_response.body).keys.size).to eq(4)
     end
 
     it 'has a optional param with default value all the time' do
@@ -388,7 +388,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 3
+      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq(4)
     end
 
     it 'builds nested params when given array' do
