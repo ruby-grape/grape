@@ -397,6 +397,10 @@ describe Grape::Validations::CoerceValidator do
         post '/upload', file: 'not a file'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('file is invalid')
+
+        post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('file is invalid')
       end
 
       it 'Nests integers' do
