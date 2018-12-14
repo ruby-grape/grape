@@ -294,9 +294,9 @@ describe Grape::Endpoint do
               optional :seventh
             end
           end
-        end
-        optional :nested_arr, type: Array do
-          optional :eighth
+          optional :nested_arr, type: Array do
+            optional :eighth
+          end
         end
       end
     end
@@ -429,7 +429,7 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested_arr']).to be_a(Array)
+        expect(JSON.parse(last_response.body)['nested']['nested_arr']).to be_a(Array)
       end
 
       it 'to be nil when include_missing is false' do
