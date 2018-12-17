@@ -50,6 +50,7 @@
     - [allow_blank](#allow_blank)
     - [values](#values)
     - [except_values](#except_values)
+    - [same_as](#same_as)
     - [regexp](#regexp)
     - [mutually_exclusive](#mutually_exclusive)
     - [exactly_one_of](#exactly_one_of)
@@ -62,6 +63,7 @@
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
     - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
+    - [same_as](#same_as-1)
     - [all_or_none_of](#all_or_none_of-1)
     - [mutually_exclusive](#mutually_exclusive-1)
     - [exactly_one_of](#exactly_one_of-1)
@@ -1351,6 +1353,17 @@ params do
 end
 ```
 
+#### `same_as`
+
+A `same_as` option can be given to ensure that values of parameters match.
+
+```ruby
+params do
+  requires :password
+  requires :password_confirmation, same_as: :password
+end
+```
+
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value
@@ -1660,6 +1673,15 @@ Grape supports custom validation messages for parameter-related and coerce-relat
 ```ruby
 params do
   requires :name, values: { value: 1..10, message: 'not in range from 1 to 10' }, allow_blank: { value: false, message: 'cannot be blank' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }, message: 'is required'
+end
+```
+
+#### `same_as`
+
+```ruby
+params do
+  requires :password
+  requires :password_confirmation, same_as: { value: :password, message: 'not match' }
 end
 ```
 

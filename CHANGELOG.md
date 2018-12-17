@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1850](https://github.com/ruby-grape/grape/pull/1850): Adds `same_as` validator - [@glaucocustodio](https://github.com/glaucocustodio).
 * [#1833](https://github.com/ruby-grape/grape/pull/1833): Allows to set the `ParamBuilder` globally - [@myxoh](https://github.com/myxoh).
 * [#1844](https://github.com/ruby-grape/grape/pull/1844): Fix: enforce `:tempfile` to be a `Tempfile` object in `File` validator - [@Nyangawa](https://github.com/Nyangawa).
 
