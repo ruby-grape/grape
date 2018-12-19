@@ -8,7 +8,6 @@ module Grape
 
       def validate_param!(attr_name, params)
         params[@alias] = params[attr_name]
-        params.delete(attr_name)
       end
     end
   end

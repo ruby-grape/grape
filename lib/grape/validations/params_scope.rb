@@ -293,8 +293,6 @@ module Grape
         # type casted values
         coerce_type validations, attrs, doc_attrs, opts
 
-        move_alias_to_end(validations)
-
         validations.each do |type, options|
           validate(type, options, attrs, doc_attrs, opts)
         end
@@ -431,11 +429,6 @@ module Grape
             raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
           end
         end
-      end
-
-      def move_alias_to_end(validations)
-        alias_validation = validations.delete(:as)
-        validations[:as] = alias_validation if alias_validation
       end
 
       def extract_message_option(attrs)

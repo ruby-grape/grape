@@ -8,7 +8,7 @@
 
 #### Fixes
 
-* [#1852](https://github.com/ruby-grape/grape/pull/1852): Validators checking aliased param instead of original one - [@glaucocustodio](https://github.com/glaucocustodio).
+* [#1852](https://github.com/ruby-grape/grape/pull/1852): `allow_blank` called after `as` when the original param is not blank - [@glaucocustodio](https://github.com/glaucocustodio).
 * [#1844](https://github.com/ruby-grape/grape/pull/1844): Enforce `:tempfile` to be a `Tempfile` object in `File` validator - [@Nyangawa](https://github.com/Nyangawa).
 
 ### 1.2.2 (2018/12/07)
