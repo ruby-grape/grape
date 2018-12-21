@@ -258,6 +258,7 @@ module Grape
         else
           run_filters before_validations, :before_validation
           run_validators validations, request
+          remove_aliased_params
           run_filters after_validations, :after_validation
           response_object = @block ? @block.call(self) : nil
         end
@@ -319,7 +320,14 @@ module Grape
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
-    private :build_stack, :build_helpers
+    def remove_aliased_params
+      return unless route_setting(:aliased_params)
+      route_setting(:aliased_params).flat_map(&:keys).each do |aliased_param|
+        @params.delete(aliased_param)
+      end
+    end
+
+    private :build_stack, :build_helpers, :remove_aliased_params
 
     def helpers
       lazy_initialize! && @helpers
