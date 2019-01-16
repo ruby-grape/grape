@@ -1,8 +1,17 @@
-### 1.2.3 (Next)
+### 1.2.4 (Next)
 
 #### Features
 
 * Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
+### 1.2.3 (2019/01/16)
+
+#### Features
+
 * [#1850](https://github.com/ruby-grape/grape/pull/1850): Adds `same_as` validator - [@glaucocustodio](https://github.com/glaucocustodio).
 * [#1833](https://github.com/ruby-grape/grape/pull/1833): Allows to set the `ParamBuilder` globally - [@myxoh](https://github.com/myxoh).
 
