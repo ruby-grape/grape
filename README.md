@@ -400,7 +400,7 @@ Assuming that the post and comment endpoints are mounted in `/posts` and `/comme
 
 ### Mount Configuration
 
-You can configure remountable endpoints for small details changing according to where they are mounted.
+You can configure remountable endpoints to change small details according to where they are mounted.
 
 ```ruby
 class Voting::API < Grape::API
@@ -551,7 +551,7 @@ Currently the configurable settings are:
 
 * `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
 
-To change a setting value make sure that at some point on load time the code the following code runs
+To change a setting value make sure that at some point during load time the following code runs
 
 ```ruby
 Grape.configure do |config|
@@ -559,7 +559,7 @@ Grape.configure do |config|
 end
 ```
 
-For example, for the `param_builder`, the following code could run in an initializers:
+For example, for the `param_builder`, the following code could run in an initializer:
 
 ```ruby
 Grape.configure do |config|
