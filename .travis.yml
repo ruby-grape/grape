@@ -2,6 +2,10 @@ language: ruby
 
 sudo: false
 
+# "gemfile" is required for "allow_failures" option,
+# see https://docs.travis-ci.com/user/customizing-the-build/#matching-jobs-with-allow_failures
+gemfile:
+
 matrix:
   include:
     - rvm: 2.5.3
@@ -28,13 +32,9 @@ matrix:
     - rvm: 2.4.5
       gemfile: Gemfile
     - rvm: 2.4.5
-      gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.4.5
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.3.8
       gemfile: Gemfile
-    - rvm: 2.3.8
-      gemfile: gemfiles/rack_edge.gemfile
     - rvm: 2.3.8
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.2.10
@@ -46,5 +46,7 @@ matrix:
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
+    - rvm: 2.5.3
+      gemfile: gemfiles/rack_edge.gemfile
 
 bundler_args: --without development
