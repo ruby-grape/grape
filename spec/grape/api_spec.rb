@@ -2795,10 +2795,10 @@ XML
       subject.get 'method'
 
       expect(subject.routes.map(&:params)).to eq [{
-        'group1'         => { required: true, type: 'Array' },
+        'group1'         => { required: true, type: Array },
         'group1[param1]' => { required: false, desc: 'group1 param1 desc' },
         'group1[param2]' => { required: true, desc: 'group1 param2 desc' },
-        'group2'         => { required: true, type: 'Array' },
+        'group2'         => { required: true, type: Array },
         'group2[param1]' => { required: false, desc: 'group2 param1 desc' },
         'group2[param2]' => { required: true, desc: 'group2 param2 desc' }
       }]
@@ -2818,7 +2818,7 @@ XML
         { description: 'nesting',
           params: {
             'root_param' => { required: true, desc: 'root param' },
-            'nested' => { required: true, type: 'Array' },
+            'nested' => { required: true, type: Array },
             'nested[nested_param]' => { required: true, desc: 'nested param' }
           } }
       ]

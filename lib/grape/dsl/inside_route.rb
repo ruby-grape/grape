@@ -84,7 +84,7 @@ module Grape
         end
 
         def declared_param_is_array?(declared_param)
-          route_options_params[declared_param.to_s] && route_options_params[declared_param.to_s][:type] == 'Array'
+          route_options_params[declared_param.to_s] && route_options_params[declared_param.to_s][:type] <= Array
         end
 
         def route_options_params
