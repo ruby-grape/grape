@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1863](https://github.com/ruby-grape/grape/pull/1863): Fix entity data type identification - [@fotos](https://github.com/fotos).
 
 ### 1.2.3 (2019/01/16)
 
