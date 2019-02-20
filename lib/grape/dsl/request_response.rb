@@ -131,7 +131,7 @@ module Grape
           namespace_stackable(:rescue_options, options)
         end
 
-        def ensure(&ensured_block)
+        def ensure_block(&ensured_block)
           namespace_inheritable(:ensured, true)
           namespace_inheritable(:ensured_block, ensured_block)
         end

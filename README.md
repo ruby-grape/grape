@@ -1603,7 +1603,7 @@ end
 
 Every validation will have it's own instance of the validator, which means that the validator can have a state.
 
-### Validation Errors
+### Validation Errors and Rescuing
 
 Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.
 
@@ -1654,6 +1654,13 @@ Similarly, no regular expression test will be performed if `:blah` is blank in t
 ```ruby
 params do
   required :blah, allow_blank: false, regexp: /blah/, fail_fast: true
+end
+```
+
+You can ensure a block of code runs after every request (including failures) with `ensure`:
+```ruby
+ensure_block do
+  This.block(of: code) # Will definetely run after every request
 end
 ```
 

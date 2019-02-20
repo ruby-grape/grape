@@ -1628,13 +1628,13 @@ XML
     end
   end
 
-  describe '.ensure' do
+  describe '.ensure_block' do
     let!(:code) { { has_executed: false } }
 
     context 'when the ensure block has no exceptions' do
       before do
         code_to_execute = code
-        subject.ensure do
+        subject.ensure_block do
           code_to_execute[:has_executed] = true
         end
       end
