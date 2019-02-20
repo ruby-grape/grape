@@ -131,6 +131,11 @@ module Grape
           namespace_stackable(:rescue_options, options)
         end
 
+        def ensure(&ensured_block)
+          namespace_inheritable(:ensured, true)
+          namespace_inheritable(:ensured_block, ensured_block)
+        end
+
         # Allows you to specify a default representation entity for a
         # class. This allows you to map your models to their respective
         # entities once and then simply call `present` with the model.

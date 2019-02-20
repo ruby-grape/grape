@@ -1628,6 +1628,67 @@ XML
     end
   end
 
+  describe '.ensure' do
+    let!(:code) { { has_executed: false } }
+
+    context 'when the ensure block has no exceptions' do
+      before do
+        code_to_execute = code
+        subject.ensure do
+          code_to_execute[:has_executed] = true
+        end
+      end
+
+      context 'when no API call is made' do
+        it 'has not executed the ensure code' do
+          expect(code[:has_executed]).to be false
+        end
+      end
+
+      context 'when no errors occurs' do
+        before do
+          subject.get '/no_exceptions' do
+            'success'
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/no_exceptions'
+          expect(last_response.body).to eq 'success'
+          expect(code[:has_executed]).to be true
+        end
+      end
+
+      context 'when an unhandled occurs inside the API call' do
+        before do
+          subject.get '/unhandled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          expect { get '/unhandled_exception' }.to raise_error StandardError
+          expect(code[:has_executed]).to be true
+        end
+      end
+
+      context 'when a handled error occurs inside the API call' do
+        before do
+          subject.rescue_from(StandardError) { error! 'handled' }
+          subject.get '/handled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/handled_exception'
+          expect(code[:has_executed]).to be true
+          expect(last_response.body).to eq 'handled'
+        end
+      end
+    end
+  end
+
   describe '.rescue_from' do
     it 'does not rescue errors when rescue_from is not set' do
       subject.get '/exception' do
