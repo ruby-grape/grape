@@ -59,7 +59,7 @@
     - [Nested mutually_exclusive, exactly_one_of, at_least_one_of, all_or_none_of](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
-  - [Validation Errors](#validation-errors)
+  - [Validation Errors and Rescuing](#validation-errors-and-rescuing)
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
     - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
