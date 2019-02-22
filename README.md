@@ -59,7 +59,7 @@
     - [Nested mutually_exclusive, exactly_one_of, at_least_one_of, all_or_none_of](#nested-mutually_exclusive-exactly_one_of-at_least_one_of-all_or_none_of)
   - [Namespace Validation and Coercion](#namespace-validation-and-coercion)
   - [Custom Validators](#custom-validators)
-  - [Validation Errors and Rescuing](#validation-errors-and-rescuing)
+  - [Validation Errors](#validation-errors)
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
     - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
@@ -109,7 +109,7 @@
   - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
-- [Before and After](#before-and-after)
+- [Before, After and Ensure](#before-after-and-ensure)
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Grape Middleware](#grape-middleware)
@@ -1603,7 +1603,7 @@ end
 
 Every validation will have it's own instance of the validator, which means that the validator can have a state.
 
-### Validation Errors and Rescuing
+### Validation Errors
 
 Validation and coercion errors are collected and an exception of type `Grape::Exceptions::ValidationErrors` is raised. If the exception goes uncaught it will respond with a status of 400 and an error message. The validation errors are grouped by parameter name and can be accessed via `Grape::Exceptions::ValidationErrors#errors`.
 
@@ -1654,13 +1654,6 @@ Similarly, no regular expression test will be performed if `:blah` is blank in t
 ```ruby
 params do
   required :blah, allow_blank: false, regexp: /blah/, fail_fast: true
-end
-```
-
-You can ensure a block of code runs after every request (including failures) with `ensure`:
-```ruby
-ensure_block do
-  This.block(of: code) # Will definetely run after every request
 end
 ```
 
@@ -3096,19 +3089,22 @@ class ApiLogger < Grape::Middleware::Base
 end
 ```
 
-## Before and After
+## Before, After and Ensure
 
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
+If the API fails the `after` call will not be trigered, if you need code to execute for sure
+use the `ensure_block`
 
 Before and after callbacks execute in the following order:
 
 1. `before`
 2. `before_validation`
 3. _validations_
-4. `after_validation`
-5. _the API call_
-6. `after`
+4. `after_validation` (if Validation Successful)
+5. _the API call_ (if Validation Successful)
+6. `after` (if Validation & API Successful)
+7. `ensure_block` (ALWAYS)
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
@@ -3125,6 +3121,13 @@ For example, using a simple `before` block to set a header.
 ```ruby
 before do
   header 'X-Robots-Tag', 'noindex'
+end
+```
+
+You can ensure a block of code runs after every request (including failures) with `ensure`:
+```ruby
+ensure_block do
+  This.block(of: code) # Will definetely run after every request
 end
 ```
 

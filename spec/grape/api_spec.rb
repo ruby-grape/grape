@@ -1628,6 +1628,111 @@ XML
     end
   end
 
+  describe 'lifecycle' do
+    let!(:lifecycle) { [] }
+    let!(:standard_cycle) do
+      %i[before before_validation after_validation api_call after ensure_block]
+    end
+
+    let!(:validation_error) do
+      %i[before before_validation ensure_block]
+    end
+
+    let!(:errored_cycle) do
+      %i[before before_validation after_validation api_call ensure_block]
+    end
+
+    before do
+      current_cycle = lifecycle
+
+      subject.before do
+        current_cycle << :before
+      end
+
+      subject.before_validation do
+        current_cycle << :before_validation
+      end
+
+      subject.after_validation do
+        current_cycle << :after_validation
+      end
+
+      subject.after do
+        current_cycle << :after
+      end
+
+      subject.ensure_block do
+        current_cycle << :ensure_block
+      end
+    end
+
+    context 'when the api_call succeeds' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the standard life_cycle' do
+        get '/api_call'
+        expect(lifecycle).to eq standard_cycle
+      end
+    end
+
+    context 'when the api_call has a controlled error' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          error!(:some_error)
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        get '/api_call'
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call has an exception' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          raise StandardError
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        expect { get '/api_call' }.to raise_error(StandardError)
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call fails validation' do
+      before do
+        current_cycle = lifecycle
+
+        subject.params do
+          requires :some_param, type: String
+        end
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the failed_validation cycle (skips after_validation, api_call & after)' do
+        get '/api_call'
+        expect(lifecycle).to eq validation_error
+      end
+    end
+  end
+
   describe '.ensure_block' do
     let!(:code) { { has_executed: false } }
 
