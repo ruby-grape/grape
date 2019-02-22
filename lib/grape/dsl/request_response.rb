@@ -131,6 +131,22 @@ module Grape
           namespace_stackable(:rescue_options, options)
         end
 
+        # Allows you to specify a block of code to be executed after every
+        # API call. Unlike the `after` block, this code will run even on
+        # unsuccesful requests
+        # @example
+        #   class ExampleAPI < Grape::API
+        #     before do
+        #       ApiLogger.start
+        #     end
+        #     ensure_block do
+        #       ApiLogger.close
+        #     end
+        #   end
+        #
+        # This will make sure that the ApiLogger is opened and close around every
+        # request
+        # @param  ensured_block [Proc] The block to be executed after every api_call
         def ensure_block(&ensured_block)
           namespace_inheritable(:ensured, true)
           namespace_inheritable(:ensured_block, ensured_block)
