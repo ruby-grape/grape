@@ -245,33 +245,39 @@ module Grape
         @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
         @params = @request.params
         @headers = @request.headers
+        begin
+          cookies.read(@request)
+          self.class.run_before_each(self)
+          run_filters befores, :before
 
-        cookies.read(@request)
-        self.class.run_before_each(self)
-        run_filters befores, :before
+          if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
+            raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
+            header 'Allow', allowed_methods
+            response_object = ''
+            status 204
+          else
+            run_filters before_validations, :before_validation
+            run_validators validations, request
+            remove_aliased_params
+            run_filters after_validations, :after_validation
+            response_object = @block ? @block.call(self) : nil
+          end
 
-        if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
-          raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
-          header 'Allow', allowed_methods
-          response_object = ''
-          status 204
-        else
-          run_filters before_validations, :before_validation
-          run_validators validations, request
-          remove_aliased_params
-          run_filters after_validations, :after_validation
-          response_object = @block ? @block.call(self) : nil
+          run_filters afters, :after
+          cookies.write(header)
+
+          # status verifies body presence when DELETE
+          @body ||= response_object
+
+          # The Body commonly is an Array of Strings, the application instance itself, or a File-like object
+          response_object = file || [body]
+
+
+          [status, header, response_object]
+        ensure
+          # An error on the finallies should not prevent a succesful request from executing
+          begin run_filters finallies, :finally end
         end
-
-        run_filters afters, :after
-        cookies.write(header)
-
-        # status verifies body presence when DELETE
-        @body ||= response_object
-
-        # The Body commonly is an Array of Strings, the application instance itself, or a File-like object
-        response_object = file || [body]
-        [status, header, response_object]
       end
     end
 
@@ -291,9 +297,7 @@ module Grape
                 rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
                 rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers) || {},
                 base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
-                all_rescue_handler: namespace_inheritable(:all_rescue_handler),
-                ensured: namespace_inheritable(:ensured),
-                ensured_block: namespace_inheritable(:ensured_block)
+                all_rescue_handler: namespace_inheritable(:all_rescue_handler)
 
       stack.concat namespace_stackable(:middleware)
 
@@ -392,6 +396,10 @@ module Grape
 
     def afters
       namespace_stackable(:afters) || []
+    end
+
+    def finallies
+      namespace_stackable(:finallies) || []
     end
 
     def validations

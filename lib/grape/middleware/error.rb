@@ -22,8 +22,6 @@ module Grape
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
           all_rescue_handler: nil, # rescue handler block to rescue from all exceptions
-          ensured: false,
-          ensured_block: nil # This should always be present if ensured is present
         }
       end
 
@@ -47,19 +45,9 @@ module Grape
             raise
 
           run_rescue_handler(handler, error)
-        ensure
-          execute_ensured_block! if should_ensure?
         end
       end
-
-      def should_ensure?
-        options[:ensured]
-      end
-
-      def execute_ensured_block!
-        options[:ensured_block].call
-      end
-
+      
       def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
         headers = headers.reverse_merge(Grape::Http::Headers::CONTENT_TYPE => content_type)
         rack_response(format_message(message, backtrace, original_exception), status, headers)

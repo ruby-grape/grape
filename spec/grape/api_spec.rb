@@ -1735,14 +1735,15 @@ XML
 
   describe '.ensure_block' do
     let!(:code) { { has_executed: false } }
+    let(:block_to_run) do
+      code_to_execute = code
+      proc do
+        code_to_execute[:has_executed] = true
+      end
+    end
 
     context 'when the ensure block has no exceptions' do
-      before do
-        code_to_execute = code
-        subject.ensure_block do
-          code_to_execute[:has_executed] = true
-        end
-      end
+      before { subject.ensure_block(&block_to_run) }
 
       context 'when no API call is made' do
         it 'has not executed the ensure code' do
@@ -1761,6 +1762,32 @@ XML
           get '/no_exceptions'
           expect(last_response.body).to eq 'success'
           expect(code[:has_executed]).to be true
+        end
+
+        context 'with a helper' do
+          let(:block_to_run) do
+            code_to_execute = code
+            proc do
+              code_to_execute[:value] = some_helper
+            end
+          end
+
+          before do
+            subject.helpers do
+              def some_helper
+                'some_value'
+              end
+            end
+            
+            subject.get '/with_helpers' do
+              'success'
+            end
+          end
+
+          it 'has access to the helper' do
+            get '/with_helpers'
+            expect(code[:value]).to eq 'some_value'
+          end
         end
       end
 
