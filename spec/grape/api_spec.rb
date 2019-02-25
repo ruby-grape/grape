@@ -1631,15 +1631,15 @@ XML
   describe 'lifecycle' do
     let!(:lifecycle) { [] }
     let!(:standard_cycle) do
-      %i[before before_validation after_validation api_call after ensure_block]
+      %i[before before_validation after_validation api_call after finally]
     end
 
     let!(:validation_error) do
-      %i[before before_validation ensure_block]
+      %i[before before_validation finally]
     end
 
     let!(:errored_cycle) do
-      %i[before before_validation after_validation api_call ensure_block]
+      %i[before before_validation after_validation api_call finally]
     end
 
     before do
@@ -1661,8 +1661,8 @@ XML
         current_cycle << :after
       end
 
-      subject.ensure_block do
-        current_cycle << :ensure_block
+      subject.finally do
+        current_cycle << :finally
       end
     end
 
@@ -1733,7 +1733,7 @@ XML
     end
   end
 
-  describe '.ensure_block' do
+  describe '.finally' do
     let!(:code) { { has_executed: false } }
     let(:block_to_run) do
       code_to_execute = code
@@ -1743,7 +1743,7 @@ XML
     end
 
     context 'when the ensure block has no exceptions' do
-      before { subject.ensure_block(&block_to_run) }
+      before { subject.finally(&block_to_run) }
 
       context 'when no API call is made' do
         it 'has not executed the ensure code' do
@@ -1778,7 +1778,7 @@ XML
                 'some_value'
               end
             end
-            
+
             subject.get '/with_helpers' do
               'success'
             end

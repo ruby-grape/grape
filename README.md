@@ -109,7 +109,7 @@
   - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
-- [Before, After and Ensure](#before-after-and-ensure)
+- [Before, After and Finally](#before-after-and-finally)
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Grape Middleware](#grape-middleware)
@@ -3089,12 +3089,12 @@ class ApiLogger < Grape::Middleware::Base
 end
 ```
 
-## Before, After and Ensure
+## Before, After and Finally
 
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
 If the API fails the `after` call will not be trigered, if you need code to execute for sure
-use the `ensure_block`
+use the `finally`
 
 Before and after callbacks execute in the following order:
 
@@ -3104,7 +3104,7 @@ Before and after callbacks execute in the following order:
 4. `after_validation` (if Validation Successful)
 5. _the API call_ (if Validation Successful)
 6. `after` (if Validation & API Successful)
-7. `ensure_block` (ALWAYS)
+7. `finally` (ALWAYS)
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
@@ -3124,9 +3124,9 @@ before do
 end
 ```
 
-You can ensure a block of code runs after every request (including failures) with `ensure`:
+You can ensure a block of code runs after every request (including failures) with `finally`:
 ```ruby
-ensure_block do
+finally do
   This.block(of: code) # Will definetely run after every request
 end
 ```
