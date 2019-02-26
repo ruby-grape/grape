@@ -274,8 +274,7 @@ module Grape
 
           [status, header, response_object]
         ensure
-          # An error on the finallies should not prevent a succesful request from executing
-          begin run_filters finallies, :finally end
+          run_filters finallies, :finally
         end
       end
     end
