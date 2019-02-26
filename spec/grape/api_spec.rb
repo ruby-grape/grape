@@ -1628,6 +1628,199 @@ XML
     end
   end
 
+  describe 'lifecycle' do
+    let!(:lifecycle) { [] }
+    let!(:standard_cycle) do
+      %i[before before_validation after_validation api_call after finally]
+    end
+
+    let!(:validation_error) do
+      %i[before before_validation finally]
+    end
+
+    let!(:errored_cycle) do
+      %i[before before_validation after_validation api_call finally]
+    end
+
+    before do
+      current_cycle = lifecycle
+
+      subject.before do
+        current_cycle << :before
+      end
+
+      subject.before_validation do
+        current_cycle << :before_validation
+      end
+
+      subject.after_validation do
+        current_cycle << :after_validation
+      end
+
+      subject.after do
+        current_cycle << :after
+      end
+
+      subject.finally do
+        current_cycle << :finally
+      end
+    end
+
+    context 'when the api_call succeeds' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the standard life_cycle' do
+        get '/api_call'
+        expect(lifecycle).to eq standard_cycle
+      end
+    end
+
+    context 'when the api_call has a controlled error' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          error!(:some_error)
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        get '/api_call'
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call has an exception' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          raise StandardError
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        expect { get '/api_call' }.to raise_error(StandardError)
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call fails validation' do
+      before do
+        current_cycle = lifecycle
+
+        subject.params do
+          requires :some_param, type: String
+        end
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the failed_validation cycle (skips after_validation, api_call & after)' do
+        get '/api_call'
+        expect(lifecycle).to eq validation_error
+      end
+    end
+  end
+
+  describe '.finally' do
+    let!(:code) { { has_executed: false } }
+    let(:block_to_run) do
+      code_to_execute = code
+      proc do
+        code_to_execute[:has_executed] = true
+      end
+    end
+
+    context 'when the ensure block has no exceptions' do
+      before { subject.finally(&block_to_run) }
+
+      context 'when no API call is made' do
+        it 'has not executed the ensure code' do
+          expect(code[:has_executed]).to be false
+        end
+      end
+
+      context 'when no errors occurs' do
+        before do
+          subject.get '/no_exceptions' do
+            'success'
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/no_exceptions'
+          expect(last_response.body).to eq 'success'
+          expect(code[:has_executed]).to be true
+        end
+
+        context 'with a helper' do
+          let(:block_to_run) do
+            code_to_execute = code
+            proc do
+              code_to_execute[:value] = some_helper
+            end
+          end
+
+          before do
+            subject.helpers do
+              def some_helper
+                'some_value'
+              end
+            end
+
+            subject.get '/with_helpers' do
+              'success'
+            end
+          end
+
+          it 'has access to the helper' do
+            get '/with_helpers'
+            expect(code[:value]).to eq 'some_value'
+          end
+        end
+      end
+
+      context 'when an unhandled occurs inside the API call' do
+        before do
+          subject.get '/unhandled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          expect { get '/unhandled_exception' }.to raise_error StandardError
+          expect(code[:has_executed]).to be true
+        end
+      end
+
+      context 'when a handled error occurs inside the API call' do
+        before do
+          subject.rescue_from(StandardError) { error! 'handled' }
+          subject.get '/handled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/handled_exception'
+          expect(code[:has_executed]).to be true
+          expect(last_response.body).to eq 'handled'
+        end
+      end
+    end
+  end
+
   describe '.rescue_from' do
     it 'does not rescue errors when rescue_from is not set' do
       subject.get '/exception' do

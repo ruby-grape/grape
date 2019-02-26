@@ -21,7 +21,7 @@ module Grape
           },
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
-          all_rescue_handler: nil # rescue handler block to rescue from all exceptions
+          all_rescue_handler: nil, # rescue handler block to rescue from all exceptions
         }
       end
 
@@ -32,7 +32,6 @@ module Grape
 
       def call!(env)
         @env = env
-
         begin
           error_response(catch(:error) do
             return @app.call(@env)

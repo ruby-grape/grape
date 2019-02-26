@@ -1492,6 +1492,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :finally }),
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
@@ -1518,6 +1521,9 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                        filters: [],
                                                                        type: :after }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+                                                                       filters: [],
+                                                                       type: :finally }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
                                                                   formatter: a_kind_of(Module) })
       )

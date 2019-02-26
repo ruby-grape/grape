@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 
 #### Fixes
 

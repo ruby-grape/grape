@@ -109,7 +109,7 @@
   - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
-- [Before and After](#before-and-after)
+- [Before, After and Finally](#before-after-and-finally)
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Grape Middleware](#grape-middleware)
@@ -3089,19 +3089,22 @@ class ApiLogger < Grape::Middleware::Base
 end
 ```
 
-## Before and After
+## Before, After and Finally
 
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
+If the API fails the `after` call will not be trigered, if you need code to execute for sure
+use the `finally`.
 
 Before and after callbacks execute in the following order:
 
 1. `before`
 2. `before_validation`
 3. _validations_
-4. `after_validation`
-5. _the API call_
-6. `after`
+4. `after_validation` (upon successful validation)
+5. _the API call_ (upon successful validation)
+6. `after` (upon successful validation and API call)
+7. `finally` (always)
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
@@ -3118,6 +3121,14 @@ For example, using a simple `before` block to set a header.
 ```ruby
 before do
   header 'X-Robots-Tag', 'noindex'
+end
+```
+
+You can ensure a block of code runs after every request (including failures) with `finally`:
+
+```ruby
+finally do
+  # this code will run after every request (successful or failed)
 end
 ```
 
