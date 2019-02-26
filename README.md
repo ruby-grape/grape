@@ -3094,17 +3094,17 @@ end
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
 If the API fails the `after` call will not be trigered, if you need code to execute for sure
-use the `finally`
+use the `finally`.
 
 Before and after callbacks execute in the following order:
 
 1. `before`
 2. `before_validation`
 3. _validations_
-4. `after_validation` (if Validation Successful)
-5. _the API call_ (if Validation Successful)
-6. `after` (if Validation & API Successful)
-7. `finally` (ALWAYS)
+4. `after_validation` (upon successful validation)
+5. _the API call_ (upon successful validation)
+6. `after` (upon successful validation and API call)
+7. `finally` (always)
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
@@ -3125,9 +3125,10 @@ end
 ```
 
 You can ensure a block of code runs after every request (including failures) with `finally`:
+
 ```ruby
 finally do
-  This.block(of: code) # Will definetely run after every request
+  # this code will run after every request (successful or failed)
 end
 ```
 

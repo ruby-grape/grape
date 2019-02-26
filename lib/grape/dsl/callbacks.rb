@@ -46,7 +46,7 @@ module Grape
 
         # Allows you to specify a something that will always be executed after a call
         # API call. Unlike the `after` block, this code will run even on
-        # unsuccesful requests
+        # unsuccesful requests.
         # @example
         #   class ExampleAPI < Grape::API
         #     before do
