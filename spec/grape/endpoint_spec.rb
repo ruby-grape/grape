@@ -1089,6 +1089,17 @@ describe Grape::Endpoint do
       expect(last_response.headers['X-Custom']).to eq('value')
     end
 
+    it 'returns headers set before error!' do
+      subject.get '/hey' do
+        header 'X-Test', 'sample'
+        error!({ 'dude' => 'rad' }, 403)
+      end
+
+      get '/hey.json'
+      expect(last_response.status).to eq(403)
+      expect(last_response.headers['X-Test']).to eq('sample')
+    end
+
     it 'sets the status code for the endpoint' do
       memoized_endpoint = nil
 
