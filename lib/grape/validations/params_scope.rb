@@ -52,6 +52,7 @@ module Grape
 
         return true unless @dependent_on
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
+        return false unless params.respond_to?(:with_indifferent_access)
         params = params.with_indifferent_access
 
         @dependent_on.each do |dependency|

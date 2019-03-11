@@ -703,6 +703,26 @@ describe Grape::Validations::ParamsScope do
     before do
       subject.params do
         requires :foos, type: Array do
+          optional :foo
+          given :foo do
+            requires :bar
+          end
+        end
+      end
+      subject.get('/test') { 'ok' }
+    end
+
+    it 'should pass none Hash params' do
+      get '/test', foos: ['']
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('ok')
+    end
+  end
+
+  context 'when validations are dependent on a parameter within an array param within #declared(params).to_json' do
+    before do
+      subject.params do
+        requires :foos, type: Array do
           optional :foo_type, :baz_type
           given :foo_type do
             requires :bar
