@@ -7,7 +7,7 @@
 
 #### Fixes
 
-* Your contribution here.
+* [#1868](https://github.com/ruby-grape/grape/pull/1868): Fix NoMethodError with none hash params - [@ksss](https://github.com/ksss).
 
 ### 1.2.3 (2019/01/16)
 
