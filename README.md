@@ -1815,7 +1815,7 @@ You can set a response header with `header` inside an API.
 header 'X-Robots-Tag', 'noindex'
 ```
 
-When raising `error!`, pass additional headers as arguments.
+When raising `error!`, pass additional headers as arguments. Additional headers will be merged with headers set before `error!` call.
 
 ```ruby
 error! 'Unauthorized', 401, 'X-Error-Detail' => 'Invalid token.'
@@ -2153,6 +2153,12 @@ instead of a message.
 
 ```ruby
 error!({ error: 'unexpected error', detail: 'missing widget' }, 500)
+```
+
+You can set additional headers for the response. They will be merged with headers set before `error!` call.
+
+```ruby
+error!('Something went wrong', 500, 'X-Error-Detail' => 'Invalid token.')
 ```
 
 You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
