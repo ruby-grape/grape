@@ -1089,6 +1089,36 @@ describe Grape::Endpoint do
       expect(last_response.headers['X-Custom']).to eq('value')
     end
 
+    it 'merges additional headers with headers set before call' do
+      subject.before do
+        header 'X-Before-Test', 'before-sample'
+      end
+
+      subject.get '/hey' do
+        header 'X-Test', 'test-sample'
+        error!({ 'dude' => 'rad' }, 403, 'X-Error' => 'error')
+      end
+
+      get '/hey.json'
+      expect(last_response.headers['X-Before-Test']).to eq('before-sample')
+      expect(last_response.headers['X-Test']).to eq('test-sample')
+      expect(last_response.headers['X-Error']).to eq('error')
+    end
+
+    it 'does not merges additional headers with headers set after call' do
+      subject.after do
+        header 'X-After-Test', 'after-sample'
+      end
+
+      subject.get '/hey' do
+        error!({ 'dude' => 'rad' }, 403, 'X-Error' => 'error')
+      end
+
+      get '/hey.json'
+      expect(last_response.headers['X-Error']).to eq('error')
+      expect(last_response.headers['X-After-Test']).to be_nil
+    end
+
     it 'sets the status code for the endpoint' do
       memoized_endpoint = nil
 

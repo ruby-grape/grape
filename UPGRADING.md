@@ -1,6 +1,38 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.2.4
+
+#### Headers in `error!` call
+
+Headers in `error!` will be merged with `headers` hash. If any header need to be cleared on `error!` call, make sure to move it to the `after` block.
+
+```ruby
+class SampleApi < Grape::API
+  before do
+    header 'X-Before-Header', 'before_call'
+  end
+
+  get 'ping' do
+    header 'X-App-Header', 'on_call'
+    error! :pong, 400, 'X-Error-Details' => 'Invalid token'
+  end
+end
+```
+**Former behaviour**
+```ruby
+  response.headers['X-Before-Header'] # => nil
+  response.headers['X-App-Header'] # => nil
+  response.headers['X-Error-Details'] # => Invalid token
+```
+
+**Current behaviour**
+```ruby
+  response.headers['X-Before-Header'] # => 'before_call'
+  response.headers['X-App-Header'] # => 'on_call'
+  response.headers['X-Error-Details'] # => Invalid token
+```
+
 ### Upgrading to >= 1.2.1
 
 #### Obtaining the name of a mounted class
