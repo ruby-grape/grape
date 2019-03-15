@@ -396,7 +396,7 @@ class Comment::API < Grape::API
 end
 ```
 
-Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes`.
+Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes` and `post /comments/votes`.
 
 ### Mount Configuration
 
