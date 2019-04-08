@@ -3869,4 +3869,18 @@ XML
       expect(grape_api.eql?(MyAPI))
     end
   end
+
+  describe 'const_missing' do
+    class Mounted < Grape::API
+      get '/missing' do
+        SomeRandomConst
+      end
+    end
+
+    before { subject.mount Mounted => '/const' }
+
+    it 'raises an error' do
+      expect { get '/const/missing' }.to raise_error(NameError).with_message('uninitialized constant Mounted::SomeRandomConst')
+    end
+  end
 end
