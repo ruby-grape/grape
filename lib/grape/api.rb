@@ -64,8 +64,8 @@ module Grape
       def const_missing(*args)
         if base_instance.const_defined?(*args)
           base_instance.const_get(*args)
-        elsif defined?(parent) && parent.const_defined?(*args)
-          parent.const_get(*args)
+        elsif @base_parent && @base_parent.const_defined?(*args)
+          @base_parent.const_get(*args)
         else
           super
         end
