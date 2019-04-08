@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1876](https://github.com/ruby-grape/grape/pull/1876): Fix const errors being hidden by bug in `const_missing` - [@dandehavilland](https://github.com/dandehavilland).
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
 
