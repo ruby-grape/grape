@@ -9,6 +9,7 @@
 #### Fixes
 
 * [#1868](https://github.com/ruby-grape/grape/pull/1868): Fix NoMethodError with none hash params - [@ksss](https://github.com/ksss).
+* [#1876](https://github.com/ruby-grape/grape/pull/1876): Fix const errors being hidden by bug in `const_missing` - [@dandehavilland](https://github.com/dandehavilland).
 
 ### 1.2.3 (2019/01/16)
 

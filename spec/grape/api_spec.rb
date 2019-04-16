@@ -3869,4 +3869,21 @@ XML
       expect(grape_api.eql?(MyAPI))
     end
   end
+
+  describe 'const_missing' do
+    subject(:grape_api) { Class.new(Grape::API) }
+    let(:mounted) do
+      Class.new(Grape::API) do
+        get '/missing' do
+          SomeRandomConstant
+        end
+      end
+    end
+
+    before { subject.mount mounted => '/const' }
+
+    it 'raises an error' do
+      expect { get '/const/missing' }.to raise_error(NameError).with_message(/SomeRandomConstant/)
+    end
+  end
 end
