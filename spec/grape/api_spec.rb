@@ -3883,7 +3883,7 @@ XML
     before { subject.mount mounted => '/const' }
 
     it 'raises an error' do
-      expect { get '/const/missing' }.to raise_error(NameError).with_message(/SomeRandomConst/)
+      expect { get '/const/missing' }.to raise_error(NameError).with_message(/SomeRandomConstant/)
     end
   end
 end
