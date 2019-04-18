@@ -19,6 +19,8 @@
   - [ActiveRecord without Rails](#activerecord-without-rails)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
+    - [Rails < 5.2](#rails--52)
+    - [Rails 6.0](#rails-60)
   - [Modules](#modules)
 - [Remounting](#remounting)
   - [Mount Configuration](#mount-configuration)
@@ -321,6 +323,14 @@ run Rack::Cascade.new [API, Web]
 
 Place API files into `app/api`. Rails expects a subdirectory that matches the name of the Ruby module and a file name that matches the name of the class. In our example, the file name location and directory for `Twitter::API` should be `app/api/twitter/api.rb`.
 
+Modify `config/routes`:
+
+```ruby
+mount Twitter::API => '/'
+```
+
+#### Rails < 5.2
+
 Modify `application.rb`:
 
 ```ruby
@@ -328,13 +338,17 @@ config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
 config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
 ```
 
-Modify `config/routes`:
+See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
+
+#### Rails 6.0
+
+For Rails versions greater than 6.0.0.beta2, `Zeitwerk` autoloader is the default for CRuby. By default `Zeitwerk` inflects `api` as `Api` instead of `API`. To make our example work, you need to uncomment the lines at the bottom of `config/initializers/inflections.rb`, and add `API` as an acronym:
 
 ```ruby
-mount Twitter::API => '/'
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym 'API'
+end
 ```
-
-See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
 
