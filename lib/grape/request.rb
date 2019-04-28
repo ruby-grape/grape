@@ -32,7 +32,7 @@ module Grape
       env.each_pair do |k, v|
         next unless k.to_s.start_with? HTTP_PREFIX
 
-        k = k[5..-1].split('_').each(&:capitalize!).join('-')
+        k = k[5..-1].split('_').each(&:capitalize).join('-')
         headers[k] = v
       end
       headers
