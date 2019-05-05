@@ -120,8 +120,8 @@ module Grape
           @parent.push_declared_params(attrs, opts)
         else
           if opts && opts[:as]
-            @api.route_setting(:aliased_params, @api.route_setting(:aliased_params) || [])
-            @api.route_setting(:aliased_params) << { attrs.first => opts[:as] }
+            @api.route_setting(:renamed_params, @api.route_setting(:renamed_params) || [])
+            @api.route_setting(:renamed_params) << { attrs.first => opts[:as] }
             attrs = [opts[:as]]
           end
 

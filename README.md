@@ -46,7 +46,7 @@
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
-  - [Alias](#alias)
+  - [Renaming](#renaming)
   - [Built-in Validators](#built-in-validators)
     - [allow_blank](#allow_blank)
     - [values](#values)
@@ -1215,7 +1215,7 @@ params do
 end
 ```
 
-You can set alias for parameter:
+You can rename parameters:
 
 ```ruby
 params do
@@ -1226,7 +1226,7 @@ params do
 end
 ```
 
-Note: param in `given` should be the aliased one. In the example, it should be `type`, not `category`.
+Note: param in `given` should be the renamed one. In the example, it should be `type`, not `category`.
 
 ### Group Options
 
@@ -1255,9 +1255,9 @@ params do
 end
 ```
 
-### Alias
+### Renaming
 
-You can set an alias for parameters using `as`, which can be useful when refactoring existing APIs:
+You can rename parameters using `as`, which can be useful when refactoring existing APIs:
 
 ```ruby
 resource :users do

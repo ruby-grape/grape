@@ -121,14 +121,14 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
-  context 'param alias' do
+  context 'param renaming' do
     it do
       subject.params do
         requires :foo, as: :bar
         optional :super, as: :hiper
       end
-      subject.get('/alias') { "#{declared(params)['bar']}-#{declared(params)['hiper']}" }
-      get '/alias', foo: 'any', super: 'any2'
+      subject.get('/renaming') { "#{declared(params)['bar']}-#{declared(params)['hiper']}" }
+      get '/renaming', foo: 'any', super: 'any2'
 
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('any-any2')
@@ -138,8 +138,8 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         requires :foo, as: :bar, type: String, coerce_with: ->(c) { c.strip }
       end
-      subject.get('/alias-coerced') { "#{params['bar']}-#{params['foo']}" }
-      get '/alias-coerced', foo: ' there we go '
+      subject.get('/renaming-coerced') { "#{params['bar']}-#{params['foo']}" }
+      get '/renaming-coerced', foo: ' there we go '
 
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('there we go-')
@@ -149,8 +149,8 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         requires :foo, as: :bar, allow_blank: false
       end
-      subject.get('/alias-not-blank') {}
-      get '/alias-not-blank', foo: ''
+      subject.get('/renaming-not-blank') {}
+      get '/renaming-not-blank', foo: ''
 
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('foo is empty')
@@ -160,8 +160,8 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         requires :foo, as: :bar, allow_blank: false
       end
-      subject.get('/alias-not-blank-with-value') {}
-      get '/alias-not-blank-with-value', foo: 'any'
+      subject.get('/renaming-not-blank-with-value') {}
+      get '/renaming-not-blank-with-value', foo: 'any'
 
       expect(last_response.status).to eq(200)
     end
@@ -532,7 +532,7 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq({ a: 'a', b: 'b', c: 'c', d: 'd' }.to_json)
     end
 
-    it 'allows aliasing of dependent parameters' do
+    it 'allows renaming of dependent parameters' do
       subject.params do
         optional :a
         given :a do
@@ -550,7 +550,7 @@ describe Grape::Validations::ParamsScope do
       expect(body.keys).to_not include('b')
     end
 
-    it 'allows aliasing of dependent on parameter' do
+    it 'allows renaming of dependent on parameter' do
       subject.params do
         optional :a, as: :b
         given b: ->(val) { val == 'x' } do
@@ -567,7 +567,7 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq 200
     end
 
-    it 'raises an error if the dependent parameter is not the aliased one' do
+    it 'raises an error if the dependent parameter is not the renamed one' do
       expect do
         subject.params do
           optional :a, as: :b
