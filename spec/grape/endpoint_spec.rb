@@ -472,12 +472,12 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(200)
     end
 
-    it 'does not include aliased missing attributes if that option is passed' do
+    it 'does not include renamed missing attributes if that option is passed' do
       subject.params do
-        optional :aliased_original, as: :aliased
+        optional :renamed_original, as: :renamed
       end
       subject.get '/declared' do
-        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:aliased)
+        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:renamed)
         ''
       end
 
