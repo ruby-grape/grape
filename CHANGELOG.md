@@ -5,6 +5,7 @@
 * Your contribution here.
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
+* [#1887](https://github.com/ruby-grape/grape/pull/1887): Documentation to explain request header casing - [@carlism](https://github.com/carlism).
 
 #### Fixes
 
