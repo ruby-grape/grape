@@ -1808,6 +1808,7 @@ end
 
 ## Headers
 
+### Request
 Request headers are available through the `headers` helper or from `env` in their original form.
 
 ```ruby
@@ -1822,6 +1823,8 @@ get do
 end
 ```
 
+#### Header Case Handling
+
 The above example may have been requested as follows:
 
 ``` shell
@@ -1833,10 +1836,9 @@ The header name will have been normalized for you.
 - In the `header` helper names will be coerced into a capitalized kebab case.
 - In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_'.
 
-With this normalization you will be able to handle headers in a case-insensitive way as per
-the HTTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2).
-You will not have to force your clients into conforming to a particular casing choice.  
-You can also avoid having to guess which case approach clients may have selected.
+The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
+
+### Response
 
 You can set a response header with `header` inside an API.
 
