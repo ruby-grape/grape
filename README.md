@@ -75,6 +75,9 @@
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
 - [Headers](#headers)
+  - [Request](#request)
+    - [Header Case Handling](#header-case-handling)
+  - [Response](#response)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -1808,6 +1811,7 @@ end
 
 ## Headers
 
+### Request
 Request headers are available through the `headers` helper or from `env` in their original form.
 
 ```ruby
@@ -1821,6 +1825,23 @@ get do
   error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
 end
 ```
+
+#### Header Case Handling
+
+The above example may have been requested as follows:
+
+``` shell
+curl -H "secret_PassWord: swordfish" ...
+```
+
+The header name will have been normalized for you.
+
+- In the `header` helper names will be coerced into a capitalized kebab case.
+- In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_'.
+
+The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
+
+### Response
 
 You can set a response header with `header` inside an API.
 
