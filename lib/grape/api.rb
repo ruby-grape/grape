@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call!]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -75,7 +75,7 @@ module Grape
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(opts = {})
         instance = Class.new(@base_parent)
-        instance.configuration = opts[:configuration] || {}
+        instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
         instance.base = self
         replay_setup_on(instance)
         instance
@@ -84,8 +84,8 @@ module Grape
       # Replays the set up to produce an API as defined in this class, can be called
       # on classes that inherit from Grape::API
       def replay_setup_on(instance)
-        @setup.each do |setup_stage|
-          instance.send(setup_stage[:method], *setup_stage[:args], &setup_stage[:block])
+        @setup.each do |setup_step|
+          replay_step_on(instance, setup_step)
         end
       end
 
@@ -110,13 +110,34 @@ module Grape
 
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
-        setup_stage = { method: method, args: args, block: block }
-        @setup << setup_stage
+        setup_step = { method: method, args: args, block: block }
+        @setup << setup_step
         last_response = nil
         @instances.each do |instance|
-          last_response = instance.send(setup_stage[:method], *setup_stage[:args], &setup_stage[:block])
+          last_response = replay_step_on(instance, setup_step)
         end
         last_response
+      end
+
+      def replay_step_on(instance, setup_step)
+        return if skip_immediate_run?(instance, setup_step[:args])
+        instance.send(setup_step[:method], *evaluate_arguments(setup_step[:args], instance.configuration), &setup_step[:block])
+      end
+
+      # Skips steps that contain arguments to be lazily executed (on re-mount time)
+      def skip_immediate_run?(instance, args)
+        instance.base_instance? &&
+          args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
+      end
+
+      def evaluate_arguments(args, configuration)
+        args.map do |argument|
+          if argument.respond_to?(:lazy?) && argument.lazy?
+            configuration.fetch(argument.access_keys).evaluate
+          else
+            argument
+          end
+        end
       end
     end
   end

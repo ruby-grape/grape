@@ -21,6 +21,10 @@ module Grape
           (base && base.to_s) || super
         end
 
+        def base_instance?
+          self == base.base_instance
+        end
+
         # A class-level lock to ensure the API is not compiled by multiple
         # threads simultaneously within the same process.
         LOCK = Mutex.new
