@@ -416,12 +416,12 @@ Assuming that the post and comment endpoints are mounted in `/posts` and `/comme
 
 ### Mount Configuration
 
-You can configure remountable endpoints to change small details according to where they are mounted.
+You can configure remountable endpoints to change how they behave according to where they are mounted.
 
 ```ruby
 class Voting::API < Grape::API
   namespace 'votes' do
-    desc "Vote for your #{configuration[:votable]}"
+    desc "Vote for your #{api_configuration[:votable]}"
     get do
       # Your logic
     end
@@ -434,6 +434,35 @@ end
 
 class Comment::API < Grape::API
   mount Voting::API, with: { votable: 'comments' }
+end
+```
+
+You can access `api_configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
+
+If you want logic happening conditional on an `api_configuration`, you can use the helper `conditional`.
+
+```ruby
+class ConditionalEndpoint::API < Grape::API
+  conditional on: api_configuration[:some_setting] do
+    get 'mount_this_endpoint_conditionally' do
+      api_configuration[:configurable_response]
+    end
+  end
+end
+```
+
+If you want a block of logic running every time an endpoint is mounted (within which you can access the `api_configuration` Hash)
+
+
+```ruby
+class ConditionalEndpoint::API < Grape::API
+  on_mounted do
+    YourLogger.info "This API was mounted at: #{Time.now}"
+
+    get api_configuration[:endpoint_name] do
+      api_configuration[:configurable_response]
+    end
+  end
 end
 ```
 
