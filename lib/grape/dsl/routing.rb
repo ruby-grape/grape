@@ -81,7 +81,7 @@ module Grape
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
             if app.respond_to?(:mount_instance)
-              mount(app.mount_instance(configuration: opts[:with] || {}) => path)
+              mount(app.mount_instance(api_configuration: opts[:with] || {}) => path)
               next
             end
             in_setting = inheritable_setting

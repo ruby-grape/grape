@@ -63,11 +63,11 @@ describe Grape::API do
       end
     end
 
-    describe 'with dynamic configuration' do
-      context 'when the configuration is part of the arguments of a method' do
+    describe 'with dynamic api_configuration' do
+      context 'when the api_configuration is part of the arguments of a method' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
-            get configuration[:endpoint_name] do
+            get api_configuration[:endpoint_name] do
               'success'
             end
           end
@@ -86,22 +86,22 @@ describe Grape::API do
           expect(last_response.body).to eq 'success'
         end
 
-        context 'when the configuration is the value in a key-arg pair' do
+        context 'when the api_configuration is the value in a key-arg pair' do
           subject(:a_remounted_api) do
             Class.new(Grape::API) do
-              version 'v1', using: :param, parameter: configuration[:version_param]
+              version 'v1', using: :param, parameter: api_configuration[:version_param]
               get 'endpoint' do
                 'version 1'
               end
 
-              version 'v2', using: :param, parameter: configuration[:version_param]
+              version 'v2', using: :param, parameter: api_configuration[:version_param]
               get 'endpoint' do
                 'version 2'
               end
             end
           end
 
-          it 'takes the param from the configuration' do
+          it 'takes the param from the api_configuration' do
             root_api.mount a_remounted_api, with: { version_param: 'param_name' }
 
             get '/endpoint?param_name=v1'
@@ -120,7 +120,7 @@ describe Grape::API do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
             desc 'The description of this' do
-              tags ['not_configurable_tag', configuration[:a_configurable_tag]]
+              tags ['not_configurable_tag', api_configuration[:a_configurable_tag]]
             end
             get 'location' do
               'success'
@@ -137,7 +137,7 @@ describe Grape::API do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
             params do
-              requires configuration[:required_param], type: configuration[:required_type]
+              requires api_configuration[:required_param], type: api_configuration[:required_type]
             end
 
             get 'location' do
@@ -167,7 +167,7 @@ describe Grape::API do
           subject(:a_remounted_api) do
             Class.new(Grape::API) do
               params do
-                optional :restricted_values, values: -> { [configuration[:allowed_value], 'always'] }
+                optional :restricted_values, values: -> { [api_configuration[:allowed_value], 'always'] }
               end
 
               get 'location' do
@@ -176,7 +176,7 @@ describe Grape::API do
             end
           end
 
-          it 'can read the configuration on lambdas' do
+          it 'can read the api_configuration on lambdas' do
             root_api.mount a_remounted_api, with: { allowed_value: 'sometimes' }
             get '/location', restricted_values: 'always'
             expect(last_response.body).to eq 'success'
@@ -188,10 +188,10 @@ describe Grape::API do
         end
       end
 
-      context 'when the configuration is read within a namespace' do
+      context 'when the api_configuration is read within a namespace' do
         before do
           a_remounted_api.namespace 'api' do
-            get "/#{configuration[:path]}" do
+            get "/#{api_configuration[:path]}" do
               '10 votes'
             end
           end
@@ -199,7 +199,7 @@ describe Grape::API do
           root_api.mount a_remounted_api, with: { path: 'scores' }
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'will use the dynamic api_configuration on all routes' do
           get 'api/votes'
           expect(last_response.body).to eql '10 votes'
           get 'api/scores'
@@ -207,12 +207,12 @@ describe Grape::API do
         end
       end
 
-      context 'when the configuration is read in a helper' do
+      context 'when the api_configuration is read in a helper' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
             helpers do
               def printed_response
-                configuration[:some_value]
+                api_configuration[:some_value]
               end
             end
 
@@ -222,7 +222,7 @@ describe Grape::API do
           end
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'will use the dynamic api_configuration on all routes' do
           root_api.mount(a_remounted_api, with: { some_value: 'response value' })
 
           get '/location'
@@ -230,16 +230,16 @@ describe Grape::API do
         end
       end
 
-      context 'when the configuration is read within the response block' do
+      context 'when the api_configuration is read within the response block' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
             get 'location' do
-              configuration[:some_value]
+              api_configuration[:some_value]
             end
           end
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'will use the dynamic api_configuration on all routes' do
           root_api.mount(a_remounted_api, with: { some_value: 'response value' })
 
           get '/location'

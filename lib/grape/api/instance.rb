@@ -10,7 +10,18 @@ module Grape
       class << self
         attr_reader :instance
         attr_reader :base
-        attr_accessor :configuration
+        attr_accessor :api_configuration
+
+        # DEPRECATED
+        def configuration
+          warn 'Accessing the configuration with configuration is deprecated, use api_configuration instead'
+          api_configuration
+        end
+
+        def configuration=(value)
+          warn 'Accessing the configuration with configuration= is deprecated, use api_configuration= instead'
+          self.api_configuration = value
+        end
 
         def base=(grape_api)
           @base = grape_api
@@ -219,7 +230,7 @@ module Grape
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 
-      # Allows definition of endpoints that ignore the versioning configuration
+      # Allows definition of endpoints that ignore the versioning api_configuration
       # used by the rest of your API.
       def without_versioning(&_block)
         old_version = self.class.namespace_inheritable(:version)

@@ -75,7 +75,7 @@ module Grape
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(opts = {})
         instance = Class.new(@base_parent)
-        instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
+        instance.api_configuration = Grape::Util::EndpointConfiguration.new(opts[:api_configuration] || {})
         instance.base = self
         replay_setup_on(instance)
         instance
@@ -121,7 +121,7 @@ module Grape
 
       def replay_step_on(instance, setup_step)
         return if skip_immediate_run?(instance, setup_step[:args])
-        instance.send(setup_step[:method], *evaluate_arguments(instance.configuration, *setup_step[:args]), &setup_step[:block])
+        instance.send(setup_step[:method], *evaluate_arguments(instance.api_configuration, *setup_step[:args]), &setup_step[:block])
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)

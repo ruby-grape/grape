@@ -36,8 +36,8 @@ module Grape
         configure_declared_params
       end
 
-      def configuration
-        @api.configuration.evaluate
+      def api_configuration
+        @api.api_configuration.evaluate
       end
 
       # @return [Boolean] whether or not this entire scope needs to be
