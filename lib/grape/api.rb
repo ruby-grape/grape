@@ -121,7 +121,7 @@ module Grape
 
       def replay_step_on(instance, setup_step)
         return if skip_immediate_run?(instance, setup_step[:args])
-        instance.send(setup_step[:method], *evaluate_arguments(setup_step[:args], instance.configuration), &setup_step[:block])
+        instance.send(setup_step[:method], *evaluate_arguments(instance.configuration, *setup_step[:args]), &setup_step[:block])
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
@@ -130,10 +130,14 @@ module Grape
           args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
       end
 
-      def evaluate_arguments(args, configuration)
+      def evaluate_arguments(configuration, *args)
         args.map do |argument|
           if argument.respond_to?(:lazy?) && argument.lazy?
             configuration.fetch(argument.access_keys).evaluate
+          elsif argument.is_a?(Hash)
+            argument.map { |key, value| [key, evaluate_arguments(configuration, value).first] }.to_h
+          elsif argument.is_a?(Array)
+            evaluate_arguments(configuration, *argument)
           else
             argument
           end

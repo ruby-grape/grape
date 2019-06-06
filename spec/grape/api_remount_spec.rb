@@ -85,6 +85,52 @@ describe Grape::API do
           get '/new_location'
           expect(last_response.body).to eq 'success'
         end
+
+        context 'when the configuration is the value in a key-arg pair' do
+          subject(:a_remounted_api) do
+            Class.new(Grape::API) do
+              version 'v1', using: :param, parameter: configuration[:version_param]
+              get 'endpoint' do
+                'version 1'
+              end
+
+              version 'v2', using: :param, parameter: configuration[:version_param]
+              get 'endpoint' do
+                'version 2'
+              end
+            end
+          end
+
+          it 'takes the param from the configuration' do
+            root_api.mount a_remounted_api, with: { version_param: 'param_name' }
+
+            get '/endpoint?param_name=v1'
+            expect(last_response.body).to eq 'version 1'
+
+            get '/endpoint?param_name=v2'
+            expect(last_response.body).to eq 'version 2'
+
+            get '/endpoint?wrong_param_name=v2'
+            expect(last_response.body).to eq 'version 1'
+          end
+        end
+      end
+
+      context 'on the DescSCope' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            desc 'The description of this' do
+              tags ['not_configurable_tag', configuration[:a_configurable_tag]]
+            end
+            get 'location' do
+              'success'
+            end
+          end
+        end
+
+        it 'mounts the endpoint with the appropiate tags' do
+          root_api.mount({ a_remounted_api => 'integer' }, with: { a_configurable_tag: 'a configured tag' })
+        end
       end
 
       context 'on the ParamScope' do
