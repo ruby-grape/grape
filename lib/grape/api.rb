@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! api_configuration]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -127,7 +127,11 @@ module Grape
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
       def skip_immediate_run?(instance, args)
         instance.base_instance? &&
-          args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
+          (any_lazy?(args) || args.any? { |arg| arg.is_a?(Hash) && any_lazy?(arg.values) })
+      end
+
+      def any_lazy?(args)
+        args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
       end
 
       def evaluate_arguments(configuration, *args)

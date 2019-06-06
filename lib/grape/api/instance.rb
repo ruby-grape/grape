@@ -11,7 +11,6 @@ module Grape
         attr_reader :instance
         attr_reader :base
         attr_accessor :api_configuration
-
         # DEPRECATED
         def configuration
           warn 'Accessing the configuration with configuration is deprecated, use api_configuration instead'
@@ -21,6 +20,15 @@ module Grape
         def configuration=(value)
           warn 'Accessing the configuration with configuration= is deprecated, use api_configuration= instead'
           self.api_configuration = value
+        end
+
+        def conditional(on:, &block)
+          evaluate_as_instance_with_api_configuration(block) if on && block_given?
+        end
+
+        def on_mounted(&block)
+          return if base_instance?
+          evaluate_as_instance_with_api_configuration(block)
         end
 
         def base=(grape_api)
@@ -99,12 +107,22 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            instance_eval(&block) if block_given?
-            blocks.each { |b| instance_eval(&b) }
+            evaluate_as_instance_with_api_configuration(block) if block_given?
+            blocks.each { |b| evaluate_as_instance_with_api_configuration(b) }
             reset_validations!
           else
             instance_eval(&block)
           end
+        end
+
+        def evaluate_as_instance_with_api_configuration(block)
+          value_for_api_configuration = api_configuration
+          if value_for_api_configuration.respond_to?(:lazy?) && value_for_api_configuration.lazy?
+            self.api_configuration = value_for_api_configuration.evaluate
+          end
+          response = instance_eval(&block)
+          self.api_configuration = value_for_api_configuration
+          response
         end
 
         def inherited(subclass)

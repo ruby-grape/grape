@@ -64,6 +64,63 @@ describe Grape::API do
     end
 
     describe 'with dynamic api_configuration' do
+      context 'when mounting an endpoint conditional on a configuration' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            get 'always' do
+              'success'
+            end
+
+            conditional on: api_configuration[:mount_sometimes] do
+              get 'sometimes' do
+                'sometimes'
+              end
+            end
+          end
+        end
+
+        it 'mounts the endpoints only when configured to do so' do
+          root_api.mount({ a_remounted_api => 'with_conditional' }, with: { mount_sometimes: true })
+          root_api.mount({ a_remounted_api => 'without_conditional' }, with: { mount_sometimes: false })
+
+          get '/with_conditional/always'
+          expect(last_response.body).to eq 'success'
+
+          get '/with_conditional/sometimes'
+          expect(last_response.body).to eq 'sometimes'
+
+          get '/without_conditional/always'
+          expect(last_response.body).to eq 'success'
+
+          get '/without_conditional/sometimes'
+          expect(last_response.status).to eq 404
+        end
+      end
+
+      context 'when executing a custom block on mount' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            get 'always' do
+              'success'
+            end
+
+            on_mounted do
+              api_configuration[:endpoints].each do |endpoint_name, endpoint_response|
+                get endpoint_name do
+                  endpoint_response
+                end
+              end
+            end
+          end
+        end
+
+        it 'mounts the endpoints only when configured to do so' do
+          root_api.mount a_remounted_api, with: { endpoints: { 'api_name' => 'api_response' } }
+          get 'api_name'
+          expect(last_response.body).to eq 'api_response'
+        end
+      end
+
       context 'when the api_configuration is part of the arguments of a method' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
