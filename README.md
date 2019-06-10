@@ -439,11 +439,11 @@ end
 
 You can access `configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
 
-If you want logic happening conditional on an `configuration`, you can use the helper `conditional`.
+If you want logic happening given on an `configuration`, you can use the helper `given`.
 
 ```ruby
 class ConditionalEndpoint::API < Grape::API
-  conditional on: configuration[:some_setting] do
+  given configuration[:some_setting] do
     get 'mount_this_endpoint_conditionally' do
       configuration[:configurable_response]
     end

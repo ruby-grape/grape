@@ -12,8 +12,8 @@ module Grape
         attr_reader :base
         attr_accessor :configuration
 
-        def conditional(on:, &block)
-          evaluate_as_instance_with_configuration(block) if on && block_given?
+        def given(conditional_option, &block)
+          evaluate_as_instance_with_configuration(block) if conditional_option && block_given?
         end
 
         def mounted(&block)

@@ -71,7 +71,7 @@ describe Grape::API do
               'success'
             end
 
-            conditional on: configuration[:mount_sometimes] do
+            given configuration[:mount_sometimes] do
               get 'sometimes' do
                 'sometimes'
               end
