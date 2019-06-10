@@ -456,7 +456,7 @@ If you want a block of logic running every time an endpoint is mounted (within w
 
 ```ruby
 class ConditionalEndpoint::API < Grape::API
-  on_mounted do
+  mounted do
     YourLogger.info "This API was mounted at: #{Time.now}"
 
     get configuration[:endpoint_name] do

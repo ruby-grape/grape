@@ -104,7 +104,7 @@ describe Grape::API do
               'success'
             end
 
-            on_mounted do
+            mounted do
               configuration[:endpoints].each do |endpoint_name, endpoint_response|
                 get endpoint_name do
                   endpoint_response

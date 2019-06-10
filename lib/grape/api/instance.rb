@@ -16,7 +16,7 @@ module Grape
           evaluate_as_instance_with_configuration(block) if on && block_given?
         end
 
-        def on_mounted(&block)
+        def mounted(&block)
           return if base_instance?
           evaluate_as_instance_with_configuration(block)
         end
