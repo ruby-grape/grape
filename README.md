@@ -421,7 +421,7 @@ You can configure remountable endpoints to change how they behave according to w
 ```ruby
 class Voting::API < Grape::API
   namespace 'votes' do
-    desc "Vote for your #{api_configuration[:votable]}"
+    desc "Vote for your #{configuration[:votable]}"
     get do
       # Your logic
     end
@@ -437,21 +437,21 @@ class Comment::API < Grape::API
 end
 ```
 
-You can access `api_configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
+You can access `configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
 
-If you want logic happening conditional on an `api_configuration`, you can use the helper `conditional`.
+If you want logic happening conditional on an `configuration`, you can use the helper `conditional`.
 
 ```ruby
 class ConditionalEndpoint::API < Grape::API
-  conditional on: api_configuration[:some_setting] do
+  conditional on: configuration[:some_setting] do
     get 'mount_this_endpoint_conditionally' do
-      api_configuration[:configurable_response]
+      configuration[:configurable_response]
     end
   end
 end
 ```
 
-If you want a block of logic running every time an endpoint is mounted (within which you can access the `api_configuration` Hash)
+If you want a block of logic running every time an endpoint is mounted (within which you can access the `configuration` Hash)
 
 
 ```ruby
@@ -459,8 +459,8 @@ class ConditionalEndpoint::API < Grape::API
   on_mounted do
     YourLogger.info "This API was mounted at: #{Time.now}"
 
-    get api_configuration[:endpoint_name] do
-      api_configuration[:configurable_response]
+    get configuration[:endpoint_name] do
+      configuration[:configurable_response]
     end
   end
 end

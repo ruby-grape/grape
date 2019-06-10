@@ -3,31 +3,6 @@ Upgrading Grape
 
 ### Upgrading to >= 1.2.4
 
-#### Configuration Block
-
-The configuration block has been greatly enhanced (it can now be accessed in pretty much every block), to avoid name conflicts it has been renamed to
-`api_configuration` in most places, however, in those places where it was accessible previously, `configuration` will still work (but raise deprecation message)
-
-For example:
-
-**Deprecated in 1.2.4**
-```ruby
-  class YourAPI < Grape::API
-    desc configuration[:configurable_description] do
-      # your config block here...
-    end
-  end
-```
-**New**
-```ruby
-  class YourAPI < Grape::API
-    desc api_configuration[:configurable_description] do
-      # your config block here...
-    end
-  end
-```
-
-
 #### Headers in `error!` call
 
 Headers in `error!` will be merged with `headers` hash. If any header need to be cleared on `error!` call, make sure to move it to the `after` block.

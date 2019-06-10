@@ -3,7 +3,7 @@
 #### Features
 
 * Your contribution here.
-* [#1888](https://github.com/ruby-grape/grape/pull/1888): Renames the `configuration` block and makes it widly available as `api_configuration` - [@myxoh](https://github.com/myxoh).
+* [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widly available - [@myxoh](https://github.com/myxoh).
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
 

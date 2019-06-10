@@ -10,25 +10,15 @@ module Grape
       class << self
         attr_reader :instance
         attr_reader :base
-        attr_accessor :api_configuration
-        # DEPRECATED
-        def configuration
-          warn 'Accessing the configuration with configuration is deprecated, use api_configuration instead'
-          api_configuration
-        end
-
-        def configuration=(value)
-          warn 'Accessing the configuration with configuration= is deprecated, use api_configuration= instead'
-          self.api_configuration = value
-        end
+        attr_accessor :configuration
 
         def conditional(on:, &block)
-          evaluate_as_instance_with_api_configuration(block) if on && block_given?
+          evaluate_as_instance_with_configuration(block) if on && block_given?
         end
 
         def on_mounted(&block)
           return if base_instance?
-          evaluate_as_instance_with_api_configuration(block)
+          evaluate_as_instance_with_configuration(block)
         end
 
         def base=(grape_api)
@@ -107,21 +97,21 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            evaluate_as_instance_with_api_configuration(block) if block_given?
-            blocks.each { |b| evaluate_as_instance_with_api_configuration(b) }
+            evaluate_as_instance_with_configuration(block) if block_given?
+            blocks.each { |b| evaluate_as_instance_with_configuration(b) }
             reset_validations!
           else
             instance_eval(&block)
           end
         end
 
-        def evaluate_as_instance_with_api_configuration(block)
-          value_for_api_configuration = api_configuration
-          if value_for_api_configuration.respond_to?(:lazy?) && value_for_api_configuration.lazy?
-            self.api_configuration = value_for_api_configuration.evaluate
+        def evaluate_as_instance_with_configuration(block)
+          value_for_configuration = configuration
+          if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
+            self.configuration = value_for_configuration.evaluate
           end
           response = instance_eval(&block)
-          self.api_configuration = value_for_api_configuration
+          self.configuration = value_for_configuration
           response
         end
 
@@ -248,7 +238,7 @@ module Grape
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 
-      # Allows definition of endpoints that ignore the versioning api_configuration
+      # Allows definition of endpoints that ignore the versioning configuration
       # used by the rest of your API.
       def without_versioning(&_block)
         old_version = self.class.namespace_inheritable(:version)

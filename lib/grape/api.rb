@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! api_configuration]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -75,7 +75,7 @@ module Grape
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(opts = {})
         instance = Class.new(@base_parent)
-        instance.api_configuration = Grape::Util::EndpointConfiguration.new(opts[:api_configuration] || {})
+        instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
         instance.base = self
         replay_setup_on(instance)
         instance
@@ -121,7 +121,7 @@ module Grape
 
       def replay_step_on(instance, setup_step)
         return if skip_immediate_run?(instance, setup_step[:args])
-        instance.send(setup_step[:method], *evaluate_arguments(instance.api_configuration, *setup_step[:args]), &setup_step[:block])
+        instance.send(setup_step[:method], *evaluate_arguments(instance.configuration, *setup_step[:args]), &setup_step[:block])
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)

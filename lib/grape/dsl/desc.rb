@@ -49,7 +49,7 @@ module Grape
       #
       def desc(description, options = {}, &config_block)
         if block_given?
-          configuration = defined?(api_configuration) ? api_configuration.evaluate : {}
+          configuration = defined?(configuration) && configuration.respond_to?(:evaluate) ? configuration.evaluate : {}
           config_class = desc_container(configuration)
 
           config_class.configure do
@@ -106,7 +106,7 @@ module Grape
             :security,
             :tags
           )
-          config_context.define_singleton_method(:api_configuration) do
+          config_context.define_singleton_method(:configuration) do
             endpoint_configuration
           end
 
