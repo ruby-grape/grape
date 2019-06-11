@@ -12,6 +12,15 @@ module Grape
         attr_reader :base
         attr_accessor :configuration
 
+        def given(conditional_option, &block)
+          evaluate_as_instance_with_configuration(block) if conditional_option && block_given?
+        end
+
+        def mounted(&block)
+          return if base_instance?
+          evaluate_as_instance_with_configuration(block)
+        end
+
         def base=(grape_api)
           @base = grape_api
           grape_api.instances << self
@@ -19,6 +28,10 @@ module Grape
 
         def to_s
           (base && base.to_s) || super
+        end
+
+        def base_instance?
+          self == base.base_instance
         end
 
         # A class-level lock to ensure the API is not compiled by multiple
@@ -84,12 +97,22 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            instance_eval(&block) if block_given?
-            blocks.each { |b| instance_eval(&b) }
+            evaluate_as_instance_with_configuration(block) if block_given?
+            blocks.each { |b| evaluate_as_instance_with_configuration(b) }
             reset_validations!
           else
             instance_eval(&block)
           end
+        end
+
+        def evaluate_as_instance_with_configuration(block)
+          value_for_configuration = configuration
+          if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
+            self.configuration = value_for_configuration.evaluate
+          end
+          response = instance_eval(&block)
+          self.configuration = value_for_configuration
+          response
         end
 
         def inherited(subclass)

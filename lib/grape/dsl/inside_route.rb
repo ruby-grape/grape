@@ -129,6 +129,10 @@ module Grape
         env[Grape::Env::API_VERSION]
       end
 
+      def configuration
+        options[:for].configuration.evaluate
+      end
+
       # End the request and display an error to the
       # end user with the specified message.
       #

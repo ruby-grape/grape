@@ -49,7 +49,8 @@ module Grape
       #
       def desc(description, options = {}, &config_block)
         if block_given?
-          config_class = desc_container
+          configuration = defined?(configuration) && configuration.respond_to?(:evaluate) ? configuration.evaluate : {}
+          config_class = desc_container(configuration)
 
           config_class.configure do
             description description
@@ -84,7 +85,7 @@ module Grape
       end
 
       # Returns an object which configures itself via an instance-context DSL.
-      def desc_container
+      def desc_container(endpoint_configuration)
         Module.new do
           include Grape::Util::StrictHashConfiguration.module(
             :summary,
@@ -105,6 +106,9 @@ module Grape
             :security,
             :tags
           )
+          config_context.define_singleton_method(:configuration) do
+            endpoint_configuration
+          end
 
           def config_context.success(*args)
             entity(*args)
