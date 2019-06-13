@@ -1,8 +1,17 @@
-### 1.2.4 (Next)
+### 1.2.5 (Next)
 
 #### Features
 
 * Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
+### 1.2.4 (2019/06/13)
+
+#### Features
+
 * [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widly available - [@myxoh](https://github.com/myxoh).
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
