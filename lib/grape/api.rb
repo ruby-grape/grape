@@ -49,12 +49,13 @@ module Grape
       # NOTE: This will only be called on an API directly mounted on RACK
       def call(*args, &block)
         instance_for_rack = if never_mounted?
-          base_instance
-        else
-          mounted_instances.first
-        end
+                              base_instance
+                            else
+                              mounted_instances.first
+                            end
         instance_for_rack.call(*args, &block)
       end
+
       # Allows an API to itself be inheritable:
       def make_inheritable(api)
         # When a child API inherits from a parent API.
