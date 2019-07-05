@@ -31,4 +31,26 @@ describe Rack do
       input.unlink
     end
   end
+
+  context 'when the app is mounted' do
+    def app
+      @main_app ||= Class.new(Grape::API) do
+        get 'ping'
+      end
+    end
+
+    let!(:base) do
+      app_to_mount = app
+      Class.new(Grape::API) do
+        namespace 'namespace' do
+          mount app_to_mount
+        end
+      end
+    end
+
+    it 'finds the app on the namespace' do
+      get '/namespace/ping'
+      expect(last_response.status).to eq 200
+    end
+  end
 end
