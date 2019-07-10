@@ -2489,7 +2489,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-Here `'inner'` will be result of handling occured `ArgumentError`.
+Here `'inner'` will be result of handling occurred `ArgumentError`.
 
 #### Unrescuable Exceptions
 
