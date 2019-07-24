@@ -27,10 +27,11 @@ module Grape
           setting = description_field(:params)
           setting ||= description_field(:params, {})
           Array(names).each do |name|
-            setting[name[:full_name].to_s] ||= {}
-            setting[name[:full_name].to_s].merge!(opts)
+            full_name_string = name[:full_name].to_s
+            setting[full_name_string] ||= {}
+            setting[full_name_string].merge!(opts)
 
-            namespace_stackable(:params, name[:full_name].to_s => opts)
+            namespace_stackable(:params, full_name_string => opts)
           end
         end
       end

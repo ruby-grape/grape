@@ -8,6 +8,7 @@
 
 * Your contribution here.
 * [#1893](https://github.com/ruby-grape/grape/pull/1893): Allows `Grape::API` to behave like a Rack::app in some instances where it was misbehaving - [@myxoh](https://github.com/myxoh).
+* [#1898](https://github.com/ruby-grape/grape/pull/1898): Refactor ValidatorFactory to improve memory allocation - [@Bhacaz](https://github.com/Bhacaz).
 
 ### 1.2.4 (2019/06/13)
 
