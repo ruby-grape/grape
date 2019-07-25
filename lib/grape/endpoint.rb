@@ -353,7 +353,7 @@ module Grape
     def run_validators(validator_factories, request)
       validation_errors = []
 
-      validators = validator_factories.map(&:create_validator)
+      validators = validator_factories.map { |options| Grape::Validations::ValidatorFactory.create_validator(options) }
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
@@ -363,7 +363,7 @@ module Grape
             validation_errors << e
             break if validator.fail_fast?
           rescue Grape::Exceptions::ValidationArrayErrors => e
-            validation_errors += e.errors
+            validation_errors.concat e.errors
             break if validator.fail_fast?
           end
         end
