@@ -5,6 +5,7 @@ module Grape
     # The API Instance class, is the engine behind Grape::API. Each class that inherits
     # from this will represent a different API instance
     class Instance
+      Boolean = Virtus::Attribute::Boolean
       include Grape::DSL::API
 
       class << self
