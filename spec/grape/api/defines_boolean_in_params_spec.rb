@@ -1,0 +1,31 @@
+require 'spec_helper'
+
+describe Grape::API::Instance do
+  describe 'boolean constant' do
+    module DefinesBooleanInstanceSpec
+      class API < Grape::API
+        params do
+          requires :message, type: Boolean
+        end
+        post :echo do
+          { class: params[:message].class.name, value: params[:message] }
+        end
+      end
+    end
+
+    def app
+      DefinesBooleanInstanceSpec::API
+    end
+
+    let(:expected_body) do
+      { class: 'TrueClass', value: true }.to_s
+    end
+
+    it 'sets Boolean as a Virtus::Attribute::Boolean' do
+      post '/echo?message=true'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq expected_body
+      expect(DefinesBooleanInstanceSpec::API.new.router.map['POST'].first.options[:params]['message'][:type]).to eq 'Virtus::Attribute::Boolean'
+    end
+  end
+end
