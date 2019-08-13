@@ -25,7 +25,13 @@ describe Grape::API::Instance do
       post '/echo?message=true'
       expect(last_response.status).to eq(201)
       expect(last_response.body).to eq expected_body
-      expect(DefinesBooleanInstanceSpec::API.new.router.map['POST'].first.options[:params]['message'][:type]).to eq 'Virtus::Attribute::Boolean'
+    end
+
+    context 'Params endpoint type' do
+      subject { DefinesBooleanInstanceSpec::API.new.router.map['POST'].first.options[:params]['message'][:type] }
+      it 'params type is a Virtus::Attribute::Boolean' do
+        is_expected.to eq 'Virtus::Attribute::Boolean'
+      end
     end
   end
 end
