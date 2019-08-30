@@ -186,7 +186,7 @@ module Grape
 
         self.class.new(
           api:      @api,
-          element:  attrs.first,
+          element:  attrs[1][:as] || attrs.first,
           parent:   self,
           optional: optional,
           type:     type || Array,
