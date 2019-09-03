@@ -61,7 +61,7 @@ module Grape
         # the headers, and the body. See [the rack specification]
         # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
         def call(env)
-          LOCK.synchronize { compile } unless instance
+          compile!
           call!(env)
         end
 
@@ -79,9 +79,13 @@ module Grape
           end
         end
 
+        def compile!
+          LOCK.synchronize { compile } unless instance
+        end
+
         # see Grape::Router#recognize_path
         def recognize_path(path)
-          LOCK.synchronize { compile } unless instance
+          compile!
           instance.router.recognize_path(path)
         end
 
