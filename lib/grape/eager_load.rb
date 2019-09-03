@@ -15,4 +15,4 @@ Grape::DSL.eager_load!
 Grape::API.eager_load!
 Grape::Presenters.eager_load!
 Grape::ServeFile.eager_load!
-Rack::Head # AutoLoads the Rack::Head 
+Rack::Head # AutoLoads the Rack::Head

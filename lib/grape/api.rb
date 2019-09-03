@@ -112,6 +112,7 @@ module Grape
       end
 
       private
+
       def instance_for_rack
         if never_mounted?
           base_instance
@@ -119,6 +120,7 @@ module Grape
           mounted_instances.first
         end
       end
+
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
         setup_step = { method: method, args: args, block: block }

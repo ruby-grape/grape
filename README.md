@@ -261,12 +261,30 @@ end
 
 ## Mounting
 
+### All
+
+
+By default Grape will compile the routes on the first route, it is possible to pre-load routes using the `compile!` method
+
+```ruby
+Twitter::API.compile!
+```
+
+This can be added to your `config.ru` (if using rackup), `application.rb` (if using rails), or any file that loads your server.
+
 ### Rack
 
 The above sample creates a Rack application that can be run from a rackup `config.ru` file
 with `rackup`:
 
 ```ruby
+run Twitter::API
+```
+
+(With pre-loading you can use)
+
+```ruby
+Twitter::API.compile!
 run Twitter::API
 ```
 
