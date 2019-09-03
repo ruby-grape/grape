@@ -15,6 +15,7 @@
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
+  - [All](#all)
   - [Rack](#rack)
   - [ActiveRecord without Rails](#activerecord-without-rails)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
