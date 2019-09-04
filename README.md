@@ -265,7 +265,7 @@ end
 ### All
 
 
-By default Grape will compile the routes on the first route, it is possible to pre-load routes using the `compile!` method
+By default Grape will compile the routes on the first route, it is possible to pre-load routes using the `compile!` method.
 
 ```ruby
 Twitter::API.compile!
