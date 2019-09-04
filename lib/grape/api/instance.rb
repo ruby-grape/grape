@@ -80,7 +80,7 @@ module Grape
         end
 
         def compile!
-          LOCK.synchronize { compile } unless instance
+          LOCK.synchronize { compile unless instance }
         end
 
         # see Grape::Router#recognize_path
