@@ -80,6 +80,7 @@ module Grape
         end
 
         def compile!
+          return if instance
           LOCK.synchronize { compile unless instance }
         end
 
