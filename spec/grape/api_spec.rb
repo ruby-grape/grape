@@ -885,6 +885,40 @@ XML
     end
   end
 
+  describe '.compile!' do
+    it 'requires the grape/eager_load file' do
+      expect(app).to receive(:require).with('grape/eager_load') { nil }
+      app.compile!
+    end
+
+    it 'compiles the instance for rack!' do
+      stubbed_object = double(:instance_for_rack)
+      allow(app).to receive(:instance_for_rack) { stubbed_object }
+    end
+  end
+
+  # NOTE: this method is required to preserve the ability of pre-mounting
+  # the root API into a namespace, it may be deprecated in the future.
+  describe 'instance_for_rack' do
+    context 'when the app was not mounted' do
+      it 'returns the base_instance' do
+        expect(app.send(:instance_for_rack)).to eq app.base_instance
+      end
+    end
+
+    context 'when the app was mounted' do
+      it 'returns the first mounted instance' do
+        mounted_app = app
+        Class.new(Grape::API) do
+          namespace 'new_namespace' do
+            mount mounted_app
+          end
+        end
+        expect(app.send(:instance_for_rack)).to eq app.send(:mounted_instances).first
+      end
+    end
+  end
+
   describe 'filters' do
     it 'adds a before filter' do
       subject.before { @foo = 'first'  }
