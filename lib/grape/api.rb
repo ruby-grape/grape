@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile!]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -48,11 +48,6 @@ module Grape
       # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
       def call(*args, &block)
-        instance_for_rack = if never_mounted?
-                              base_instance
-                            else
-                              mounted_instances.first
-                            end
         instance_for_rack.call(*args, &block)
       end
 
@@ -111,7 +106,20 @@ module Grape
         end
       end
 
+      def compile!
+        require 'grape/eager_load'
+        instance_for_rack.compile! # See API::Instance.compile!
+      end
+
       private
+
+      def instance_for_rack
+        if never_mounted?
+          base_instance
+        else
+          mounted_instances.first
+        end
+      end
 
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
