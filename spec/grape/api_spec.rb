@@ -3754,6 +3754,42 @@ XML
     end
   end
 
+  describe '.with_configuration' do
+    it 'passes configuration from outside' do
+      subject.with_configuration(hello: 'hello', bread: 'bread')
+      subject.get '/hello-bread' do
+        "#{configuration[:hello]} #{configuration[:bread]}"
+      end
+
+      get '/hello-bread'
+      expect(last_response.body).to eq 'hello bread'
+    end
+
+    it 'inherits configuration on mounted APIs' do
+      a = Class.new(Grape::API) do
+          get '/hello' do
+            configuration[:hello]
+          end
+        end
+
+        b = Class.new(Grape::API) do
+          get '/bread' do
+            configuration[:bread]
+          end
+        end
+
+        subject.mount a
+        a.mount b
+        subject.with_configuration(hello: 'hello', bread: 'bread')
+
+        get '/hello'
+        expect(last_response.body).to eq 'hello'
+
+        get '/bread'
+        expect(last_response.body).to eq 'bread'
+    end
+  end
+
   context 'catch-all' do
     before do
       api1 = Class.new(Grape::API)

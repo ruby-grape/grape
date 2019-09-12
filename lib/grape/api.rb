@@ -42,6 +42,12 @@ module Grape
         end
       end
 
+      def with_configuration(config)
+        config.each do |key, value|
+          base_instance.configuration[key] = value
+        end
+      end
+
       # This is the interface point between Rack and Grape; it accepts a request
       # from Rack and ultimately returns an array of three values: the status,
       # the headers, and the body. See [the rack specification]
