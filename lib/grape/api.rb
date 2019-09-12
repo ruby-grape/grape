@@ -46,6 +46,7 @@ module Grape
         config.each do |key, value|
           base_instance.configuration[key] = value
         end
+        self
       end
 
       # This is the interface point between Rack and Grape; it accepts a request

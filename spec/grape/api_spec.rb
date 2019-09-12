@@ -3755,6 +3755,10 @@ XML
   end
 
   describe '.with_configuration' do
+    it 'returns self' do
+      expect(subject.with_configuration({})).to be subject
+    end
+
     it 'passes configuration from outside' do
       subject.with_configuration(hello: 'hello', bread: 'bread')
       subject.get '/hello-bread' do
