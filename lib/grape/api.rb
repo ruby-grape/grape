@@ -42,11 +42,14 @@ module Grape
         end
       end
 
-      def with_configuration(config)
-        config.each do |key, value|
-          base_instance.configuration[key] = value
+      def configure
+        config = @base_instance.configuration
+        if block_given?
+          yield config
+          self
+        else
+          config
         end
-        self
       end
 
       # This is the interface point between Rack and Grape; it accepts a request
