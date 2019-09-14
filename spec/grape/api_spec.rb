@@ -3754,7 +3754,7 @@ XML
     end
   end
 
-  fdescribe '.configure' do
+  describe '.configure' do
     context 'when given a block' do
       it 'returns self' do
         expect(subject.configure {}).to be subject
