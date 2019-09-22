@@ -631,6 +631,17 @@ Grape.configure do |config|
 end
 ```
 
+You can also configure a single API:
+
+```ruby
+API.configure do |config|
+  config[key] = value
+end
+```
+
+This will be available inside the API with `configuration`, as if it were
+[mount configuration](#mount-configuration).
+
 ## Parameters
 
 Request parameters are available through the `params` hash object. This includes `GET`, `POST`

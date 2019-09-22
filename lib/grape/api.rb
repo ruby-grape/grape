@@ -42,6 +42,11 @@ module Grape
         end
       end
 
+      # Configure an API from the outside. If a block is given, it'll pass a
+      # configuration hash to the block which you can use to configure your
+      # API. If no block is given, returns the configuration hash.
+      # The configuration set here is accessible from inside an API with
+      # `configuration` as normal.
       def configure
         config = @base_instance.configuration
         if block_given?
