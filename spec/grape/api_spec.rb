@@ -3790,33 +3790,6 @@ XML
       get '/hello-bread'
       expect(last_response.body).to eq 'hello bread'
     end
-
-    it 'inherits configuration on mounted APIs' do
-      a = Class.new(Grape::API) do
-          get '/hello' do
-            configuration[:hello]
-          end
-        end
-
-        b = Class.new(Grape::API) do
-          get '/bread' do
-            configuration[:bread]
-          end
-        end
-
-        subject.mount a
-        a.mount b
-        subject.configure do |config|
-          config[:hello] = 'hello'
-          config[:bread] = 'bread'
-        end
-
-        get '/hello'
-        expect(last_response.body).to eq 'hello'
-
-        get '/bread'
-        expect(last_response.body).to eq 'bread'
-    end
   end
 
   context 'catch-all' do
