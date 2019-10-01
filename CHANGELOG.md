@@ -8,6 +8,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1911](https://github.com/ruby-grape/grape/pull/1911): Make sure `Grape::Valiations::AtLeastOneOfValidator` properly treats nested params in errors - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1893](https://github.com/ruby-grape/grape/pull/1893): Allows `Grape::API` to behave like a Rack::app in some instances where it was misbehaving - [@myxoh](https://github.com/myxoh).
 * [#1898](https://github.com/ruby-grape/grape/pull/1898): Refactor `ValidatorFactory` to improve memory allocation - [@Bhacaz](https://github.com/Bhacaz).
 * [#1900](https://github.com/ruby-grape/grape/pull/1900): Define boolean for `Grape::Api::Instance` - [@Bhacaz](https://github.com/Bhacaz).
@@ -17,7 +18,7 @@
 
 #### Features
 
-* [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widly available - [@myxoh](https://github.com/myxoh).
+* [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widely available - [@myxoh](https://github.com/myxoh).
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
 

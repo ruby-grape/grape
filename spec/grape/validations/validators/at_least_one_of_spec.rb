@@ -9,8 +9,15 @@ describe Grape::Validations::AtLeastOneOfValidator do
         end
 
         def required?; end
+
+        # mimics a method from Grape::Validations::ParamsScope which decides how a parameter must
+        # be named in errors
+        def full_name(name)
+          "food[#{name}]"
+        end
       end
     end
+
     let(:at_least_one_of_params) { %i[beer wine grapefruit] }
     let(:validator) { described_class.new(at_least_one_of_params, {}, false, scope.new) }
 
@@ -48,11 +55,14 @@ describe Grape::Validations::AtLeastOneOfValidator do
 
     context 'when none of the restricted params is selected' do
       let(:params) { { somethingelse: true } }
-
       it 'raises a validation exception' do
-        expect do
-          validator.validate! params
-        end.to raise_error(Grape::Exceptions::Validation)
+        expected_params = at_least_one_of_params.map { |p| "food[#{p}]" }
+
+        expect { validator.validate! params }.to raise_error do |error|
+          expect(error).to be_a(Grape::Exceptions::Validation)
+          expect(error.params).to eq(expected_params)
+          expect(error.message).to eq(I18n.t('grape.errors.messages.at_least_one'))
+        end
       end
     end
 
