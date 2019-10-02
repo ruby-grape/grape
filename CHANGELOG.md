@@ -4,6 +4,7 @@
 
 * Your contribution here.
 * [#1904](https://github.com/ruby-grape/grape/pull/1904): Allows Grape to load files on startup rather than on the first call - [@myxoh](https://github.com/myxoh).
+* [#1907](https://github.com/ruby-grape/grape/pull/1907): Adds outside configuration to Grape with `configure` - [@unleashy](https://github.com/unleashy).
 
 #### Fixes
 

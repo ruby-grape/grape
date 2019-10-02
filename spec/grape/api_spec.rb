@@ -3754,6 +3754,44 @@ XML
     end
   end
 
+  describe '.configure' do
+    context 'when given a block' do
+      it 'returns self' do
+        expect(subject.configure {}).to be subject
+      end
+
+      it 'calls the block passing the config' do
+        call = [false, nil]
+        subject.configure do |config|
+          call = [true, config]
+        end
+
+        expect(call[0]).to be true
+        expect(call[1]).not_to be_nil
+      end
+    end
+
+    context 'when not given a block' do
+      it 'returns a configuration object' do
+        expect(subject.configure).to respond_to(:[], :[]=)
+      end
+    end
+
+    it 'allows configuring the api' do
+      subject.configure do |config|
+        config[:hello] = 'hello'
+        config[:bread] = 'bread'
+      end
+
+      subject.get '/hello-bread' do
+        "#{configuration[:hello]} #{configuration[:bread]}"
+      end
+
+      get '/hello-bread'
+      expect(last_response.body).to eq 'hello bread'
+    end
+  end
+
   context 'catch-all' do
     before do
       api1 = Class.new(Grape::API)
