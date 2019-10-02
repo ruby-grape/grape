@@ -576,7 +576,7 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
-        get '/', splines: [{ x: 2, ints: [] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
+        get '/', splines: [{ x: 2, ints: [5] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
@@ -592,7 +592,7 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
-        get '/', splines: [{ x: 1, ints: [] }, { x: 4, ints: [] }]
+        get '/', splines: [{ x: 1, ints: [5] }, { x: 4, ints: [6] }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
