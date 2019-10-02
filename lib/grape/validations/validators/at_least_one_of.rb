@@ -1,11 +1,14 @@
+require 'grape/validations/validators/multiple_params_base'
+
 module Grape
   module Validations
-    require 'grape/validations/validators/multiple_params_base'
     class AtLeastOneOfValidator < MultipleParamsBase
       def validate!(params)
         super
         if scope_requires_params && no_exclusive_params_are_present
-          raise Grape::Exceptions::Validation, params: all_keys, message: message(:at_least_one)
+          scoped_params = all_keys.map { |key| @scope.full_name(key) }
+          raise Grape::Exceptions::Validation, params: scoped_params,
+                                               message: message(:at_least_one)
         end
         params
       end
