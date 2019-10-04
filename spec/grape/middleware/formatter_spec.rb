@@ -391,6 +391,10 @@ describe Grape::Middleware::Formatter do
       Grape::Formatter.register :invalid, InvalidFormatter
       Grape::ContentTypes::CONTENT_TYPES[:invalid] = 'application/x-invalid'
     end
+    after do
+      Grape::ContentTypes::CONTENT_TYPES.delete(:invalid)
+      Grape::Formatter.default_elements.delete(:invalid)
+    end
 
     it 'returns response by invalid formatter' do
       env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }

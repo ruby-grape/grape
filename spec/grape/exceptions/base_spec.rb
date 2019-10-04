@@ -8,8 +8,11 @@ describe Grape::Exceptions::Base do
     let(:attributes) { { klass: String, to_format: 'xml' } }
 
     after do
+      I18n.enforce_available_locales = true
       I18n.available_locales = %i[en]
+      I18n.locale = :en
       I18n.default_locale = :en
+      I18n.reload!
     end
 
     context 'when I18n enforces available locales' do
@@ -29,6 +32,7 @@ describe Grape::Exceptions::Base do
       context 'when the fallback locale is not available' do
         before do
           I18n.available_locales = %i[de jp]
+          I18n.locale = :de
           I18n.default_locale = :de
         end
 

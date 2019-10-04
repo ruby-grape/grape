@@ -8,7 +8,7 @@ describe Grape::Endpoint do
   end
 
   describe '.before_each' do
-    after { Grape::Endpoint.before_each(nil) }
+    after { Grape::Endpoint.before_each.clear }
 
     it 'is settable via block' do
       block = ->(_endpoint) { 'noop' }
