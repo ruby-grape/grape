@@ -3,19 +3,20 @@ require 'json'
 module Grape
   module Validations
     module Types
-      # +Virtus::Attribute+ implementation that handles coercion
-      # and type checking for parameters that are complex types
-      # given as JSON-encoded strings. It accepts both JSON objects
+      # Handles coercion and type checking for parameters that are complex
+      # types given as JSON-encoded strings. It accepts both JSON objects
       # and arrays of objects, and will coerce the input to a +Hash+
       # or +Array+ object respectively. In either case the Grape
       # validation system will apply nested validation rules to
       # all returned objects.
-      class Json < Virtus::Attribute
+      class Json
         # Coerce the input into a JSON-like data structure.
         #
         # @param input [String] a JSON-encoded parameter value
         # @return [Hash,Array<Hash>,nil]
-        def coerce(input)
+        def call(input)
+          return input if coerced?(input)
+
           # Allow nulls and blank strings
           return if input.nil? || input =~ /^\s*$/
           JSON.parse(input, symbolize_names: true)
@@ -26,7 +27,7 @@ module Grape
         #
         # @param value [Object] result of {#coerce}
         # @return [true,false]
-        def value_coerced?(value)
+        def coerced?(value)
           value.is_a?(::Hash) || coerced_collection?(value)
         end
 
@@ -50,13 +51,13 @@ module Grape
         #
         # @param input [String] JSON-encoded parameter value
         # @return [Array<Hash>]
-        def coerce(input)
+        def call(input)
           json = super
           Array.wrap(json) unless json.nil?
         end
 
         # See {Json#coerced_collection?}
-        def value_coerced?(value)
+        def coerced?(value)
           coerced_collection? value
         end
       end

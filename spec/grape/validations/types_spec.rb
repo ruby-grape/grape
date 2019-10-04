@@ -11,29 +11,10 @@ describe Grape::Validations::Types do
     end
   end
 
-  VirtusA = Virtus::Attribute.build(String)
-
-  module VirtusModule
-    include Virtus.module
-  end
-
-  class VirtusB
-    include VirtusModule
-  end
-
-  class VirtusC
-    include Virtus.model
-  end
-
-  MyAxiom = Axiom::Types::String.new do
-    minimum_length 1
-    maximum_length 30
-  end
-
   describe '::primitive?' do
     [
       Integer, Float, Numeric, BigDecimal,
-      Virtus::Attribute::Boolean, String, Symbol,
+      Grape::API::Boolean, String, Symbol,
       Date, DateTime, Time, Rack::Multipart::UploadedFile
     ].each do |type|
       it "recognizes #{type} as a primitive" do
@@ -53,16 +34,6 @@ describe Grape::Validations::Types do
     ].each do |type|
       it "recognizes #{type} as a structure" do
         expect(described_class.structure?(type)).to be_truthy
-      end
-    end
-  end
-
-  describe '::recognized?' do
-    [
-      VirtusA, VirtusB, VirtusC, MyAxiom
-    ].each do |type|
-      it "recognizes #{type}" do
-        expect(described_class.recognized?(type)).to be_truthy
       end
     end
   end
@@ -97,14 +68,14 @@ describe Grape::Validations::Types do
       expect(described_class.instance_variable_get(:@__cache_write_lock)).to be_a(Mutex)
     end
 
-    it 'caches the result of the Virtus::Attribute.build method' do
+    it 'caches the result of the build_coercer method' do
       original_cache = described_class.instance_variable_get(:@__cache)
       described_class.instance_variable_set(:@__cache, {})
 
-      coercer = 'TestCoercer'
-      expect(Virtus::Attribute).to receive(:build).once.and_return(coercer)
-      expect(described_class.build_coercer(Array[String])).to eq(coercer)
-      expect(described_class.build_coercer(Array[String])).to eq(coercer)
+      a_coercer = described_class.build_coercer(Array[String])
+      b_coercer = described_class.build_coercer(Array[String])
+
+      expect(a_coercer.object_id).to eq(b_coercer.object_id)
 
       described_class.instance_variable_set(:@__cache, original_cache)
     end

@@ -427,8 +427,8 @@ module Grape
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
           value_types = values.is_a?(Range) ? [values.begin, values.end] : values
-          if coerce_type == Virtus::Attribute::Boolean
-            value_types = value_types.map { |type| Virtus::Attribute.build(type) }
+          if coerce_type == Grape::API::Boolean
+            value_types = value_types.map { |type| Grape::API::Boolean.build(type) }
           end
           unless value_types.all? { |v| v.is_a? coerce_type }
             raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)

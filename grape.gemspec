@@ -20,14 +20,15 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'activesupport'
   s.add_runtime_dependency 'builder'
+  s.add_runtime_dependency 'dry-types', '~> 1.1.1'
   s.add_runtime_dependency 'mustermann-grape', '~> 1.0.0'
   s.add_runtime_dependency 'rack', '>= 1.3.0'
   s.add_runtime_dependency 'rack-accept'
-  s.add_runtime_dependency 'virtus', '>= 1.0.0'
 
   s.files         = %w[CHANGELOG.md CONTRIBUTING.md README.md grape.png UPGRADING.md LICENSE]
   s.files        += %w[grape.gemspec]
   s.files        += Dir['lib/**/*']
   s.test_files    = Dir['spec/**/*']
   s.require_paths = ['lib']
+  s.required_ruby_version = '>= 2.4.0'
 end

@@ -1,21 +1,6 @@
 module Grape
   module Validations
     module Types
-      # Instances of this class may be passed to
-      # +Virtus::Attribute.build+ as the +:coercer+
-      # option for custom types that do not otherwise
-      # satisfy the requirements for +Virtus::Attribute::coerce+
-      # and +Virtus::Attribute::value_coerced?+ to work
-      # as expected.
-      #
-      # Subclasses of +Virtus::Attribute+ or +Axiom::Types::Type+
-      # (or for which an axiom type can be inferred, i.e. the
-      # primitives, +Date+, +Time+, etc.) do not need any such
-      # coercer to be passed with them.
-      #
-      # Coercion
-      # --------
-      #
       # This class will detect type classes that implement
       # a class-level +parse+ method. The method should accept one
       # +String+ argument and should return the value coerced to
@@ -30,14 +15,14 @@ module Grape
       # Type Checking
       # -------------
       #
-      # Calls to +value_coerced?+ will consult this class to check
+      # Calls to +coerced?+ will consult this class to check
       # that the coerced value produced above is in fact of the
       # expected type. By default this class performs a basic check
       # against the type supplied, but this behaviour will be
       # overridden if the class implements a class-level
       # +coerced?+ or +parsed?+ method. This method
       # will receive a single parameter that is the coerced value
-      # and should return +true+ iff the value meets type expectations.
+      # and should return +true+ if the value meets type expectations.
       # Arbitrary assertions may be made here but the grape validation
       # system should be preferred.
       #
@@ -46,15 +31,6 @@ module Grape
       # contract as +coerced?+, and must be supplied with a coercion
       # +method+.
       class CustomTypeCoercer
-        # Uses +Virtus::Attribute.build+ to build a new
-        # attribute that makes use of this class for
-        # coercion and type validation logic.
-        #
-        # @return [Virtus::Attribute]
-        def self.build(type, method = nil)
-          Virtus::Attribute.build(type, coercer: new(type, method))
-        end
-
         # A new coercer for the given type specification
         # and coercion method.
         #
@@ -64,37 +40,25 @@ module Grape
         #   optional coercion method. See class docs.
         def initialize(type, method = nil)
           coercion_method = infer_coercion_method type, method
-
           @method = enforce_symbolized_keys type, coercion_method
-
           @type_check = infer_type_check(type)
         end
 
-        # This method is called from somewhere within
-        # +Virtus::Attribute::coerce+ in order to coerce
-        # the given value.
+        # Coerces the given value.
         #
         # @param value [String] value to be coerced, in grape
         #   this should always be a string.
         # @return [Object] the coerced result
-        def call(value)
-          @method.call value
+        def call(val)
+          return if val.nil?
+
+          coerced_val = @method.call(val)
+          return InvalidValue.new unless coerced?(coerced_val)
+          coerced_val
         end
 
-        # This method is called from somewhere within
-        # +Virtus::Attribute::value_coerced?+ in order to
-        # assert that the value has been coerced successfully.
-        #
-        # @param _primitive [Axiom::Types::Type] primitive type
-        #   for the coercion as detected by axiom-types' inference
-        #   system. For custom types this is typically not much use
-        #   (i.e. it is +Axiom::Types::Object+) unless special
-        #   inference rules have been declared for the type.
-        # @param value [Object] a coerced result returned from {#call}
-        # @return [true,false] whether or not the coerced value
-        #   satisfies type requirements.
-        def success?(_primitive, value)
-          @type_check.call value
+        def coerced?(val)
+          @type_check.call val
         end
 
         private
@@ -160,8 +124,8 @@ module Grape
           # Collections have all values processed individually
           if [Array, Set].include?(type)
             lambda do |val|
-              method.call(val).tap do |new_value|
-                new_value.map do |item|
+              method.call(val).tap do |new_val|
+                new_val.map do |item|
                   item.is_a?(Hash) ? symbolize_keys(item) : item
                 end
               end

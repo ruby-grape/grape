@@ -1,6 +1,49 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.3.0
+
+#### Ruby
+
+After adding dry-types, Ruby 2.4 or newer is required.
+
+#### Coercion
+
+[Virtus](https://github.com/solnic/virtus) has been replaced by [dry-types](https://dry-rb.org/gems/dry-types/1.2/) for parameter coercion. If your project depends on Virtus, explicitly add it to your `Gemfile`. Also, if Virtus is used for defining custom types
+
+```ruby
+class User
+  include Virtus.model
+
+  attribute :id, Integer
+  attribute :name, String
+end
+
+# somewhere in your API
+params do
+  requires :user, type: User
+end
+```
+
+Add a class-level `parse` method to the model:
+
+```ruby
+class User
+  include Virtus.model
+
+  attribute :id, Integer
+  attribute :name, String
+
+  def self.parse(attrs)
+    new(attrs)
+  end
+end
+```
+
+Custom types which don't depend on Virtus don't require any changes.
+
+For more information see [#1920](https://github.com/ruby-grape/grape/pull/1920).
+
 ### Upgrading to >= 1.2.4
 
 #### Headers in `error!` call

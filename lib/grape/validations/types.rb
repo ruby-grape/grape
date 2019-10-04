@@ -6,10 +6,6 @@ require_relative 'types/variant_collection_coercer'
 require_relative 'types/json'
 require_relative 'types/file'
 
-# Patch for Virtus::Attribute::Collection
-# See the file for more details
-require_relative 'types/virtus_collection_patch'
-
 module Grape
   module Validations
     # Module for code related to grape's system for
@@ -27,8 +23,7 @@ module Grape
       # a parameter value could not be coerced.
       class InvalidValue; end
 
-      # Types representing a single value, which are coerced through Virtus
-      # or special logic in Grape.
+      # Types representing a single value, which are coerced.
       PRIMITIVES = [
         # Numerical
         Integer,
@@ -42,10 +37,12 @@ module Grape
         Time,
 
         # Misc
-        Virtus::Attribute::Boolean,
+        Grape::API::Boolean,
         String,
         Symbol,
-        Rack::Multipart::UploadedFile
+        Rack::Multipart::UploadedFile,
+        TrueClass,
+        FalseClass
       ].freeze
 
       # Types representing data structures.
@@ -86,8 +83,6 @@ module Grape
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type is known by Grape as a valid
       #   data structure type
-      # @note This method does not yet consider 'complex types', which inherit
-      #   Virtus.model.
       def self.structure?(type)
         STRUCTURES.include?(type)
       end
@@ -102,25 +97,6 @@ module Grape
       #   a list of types.
       def self.multiple?(type)
         (type.is_a?(Array) || type.is_a?(Set)) && type.size > 1
-      end
-
-      # Does the given class implement a type system that Grape
-      # (i.e. the underlying virtus attribute system) supports
-      # out-of-the-box? Currently supported are +axiom-types+
-      # and +virtus+.
-      #
-      # The type will be passed to +Virtus::Attribute.build+,
-      # and the resulting attribute object will be expected to
-      # respond correctly to +coerce+ and +value_coerced?+.
-      #
-      # @param type [Class] type to check
-      # @return [Boolean] +true+ where the type is recognized
-      def self.recognized?(type)
-        return false if type.is_a?(Array) || type.is_a?(Set)
-
-        type.is_a?(Virtus::Attribute) ||
-          type.ancestors.include?(Axiom::Types::Type) ||
-          type.include?(Virtus::Model::Core)
       end
 
       # Does Grape provide special coercion and validation
@@ -152,7 +128,6 @@ module Grape
         !primitive?(type) &&
           !structure?(type) &&
           !multiple?(type) &&
-          !recognized?(type) &&
           !special?(type) &&
           type.respond_to?(:parse) &&
           type.method(:parse).arity == 1

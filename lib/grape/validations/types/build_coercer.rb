@@ -1,78 +1,73 @@
+require_relative 'array_coercer'
+require_relative 'set_coercer'
+require_relative 'primitive_coercer'
+
 module Grape
   module Validations
     module Types
-      # Work out the +Virtus::Attribute+ object to
-      # use for coercing strings to the given +type+.
-      # Coercion +method+ will be inferred if none is
-      # supplied.
+      # Chooses the best coercer for the given type. For example, if the type
+      # is Integer, it will return a coercer which will be able to coerce a value
+      # to the integer.
       #
-      # If a +Virtus::Attribute+ object already built
-      # with +Virtus::Attribute.build+ is supplied as
-      # the +type+ it will be returned and +method+
-      # will be ignored.
+      # There are a few very special coercers which might be returned.
       #
-      # See {CustomTypeCoercer} for further details
-      # about coercion and type-checking inference.
+      # +Grape::Types::MultipleTypeCoercer+ is a coercer which is returned when
+      # the given type implies values in an array with different types.
+      # For example, +[Integer, String]+ allows integer and string values in
+      # an array.
+      #
+      # +Grape::Types::CustomTypeCoercer+ is a coercer which is returned when
+      # a method is specified by a user with +coerce_with+ option or the user
+      # specifies a custom type which implements requirments of
+      # +Grape::Types::CustomTypeCoercer+.
+      #
+      # +Grape::Types::CustomTypeCollectionCoercer+ is a very similar to the
+      # previous one, but it expects an array or set of values having a custom
+      # type implemented by the user.
+      #
+      # There is also a group of custom types implemented by Grape, check
+      # +Grape::Validations::Types::SPECIAL+ to get the full list.
       #
       # @param type [Class] the type to which input strings
       #   should be coerced
       # @param method [Class,#call] the coercion method to use
-      # @return [Virtus::Attribute] object to be used
+      # @return [Object] object to be used
       #   for coercion and type validation
-      def self.build_coercer(type, method = nil)
-        cache_instance(type, method) do
-          create_coercer_instance(type, method)
+      def self.build_coercer(type, method: nil, strict: false)
+        cache_instance(type, method, strict) do
+          create_coercer_instance(type, method, strict)
         end
       end
 
-      def self.create_coercer_instance(type, method = nil)
-        # Accept pre-rolled virtus attributes without interference
-        return type if type.is_a? Virtus::Attribute
-
-        converter_options = {
-          nullify_blank: true
-        }
-        conversion_type = if method == JSON
-                            Object
-                            # because we want just parsed JSON content:
-                            # if type is Array and data is `"{}"`
-                            # result will be [] because Virtus converts hashes
-                            # to arrays
-                          else
-                            type
-                          end
-
+      def self.create_coercer_instance(type, method, strict)
         # Use a special coercer for multiply-typed parameters.
         if Types.multiple?(type)
-          converter_options[:coercer] = Types::MultipleTypeCoercer.new(type, method)
-          conversion_type = Object
+          MultipleTypeCoercer.new(type, method)
 
         # Use a special coercer for custom types and coercion methods.
         elsif method || Types.custom?(type)
-          converter_options[:coercer] = Types::CustomTypeCoercer.new(type, method)
+          CustomTypeCoercer.new(type, method)
 
         # Special coercer for collections of types that implement a parse method.
         # CustomTypeCoercer (above) already handles such types when an explicit coercion
         # method is supplied.
         elsif Types.collection_of_custom?(type)
-          converter_options[:coercer] = Types::CustomTypeCollectionCoercer.new(
+          Types::CustomTypeCollectionCoercer.new(
             type.first, type.is_a?(Set)
           )
-
-        # Grape swaps in its own Virtus::Attribute implementations
-        # for certain special types that merit first-class support
-        # (but not if a custom coercion method has been supplied).
         elsif Types.special?(type)
-          conversion_type = Types::SPECIAL[type]
+          Types::SPECIAL[type].new
+        elsif type.is_a?(Array)
+          ArrayCoercer.new type, strict
+        elsif type.is_a?(Set)
+          SetCoercer.new type, strict
+        else
+          PrimitiveCoercer.new type, strict
         end
-
-        # Virtus will infer coercion and validation rules
-        # for many common ruby types.
-        Virtus::Attribute.build(conversion_type, converter_options)
       end
 
-      def self.cache_instance(type, method, &_block)
-        key = cache_key(type, method)
+      def self.cache_instance(type, method, strict, &_block)
+        key = cache_key(type, method, strict)
 
         return @__cache[key] if @__cache.key?(key)
 
@@ -85,8 +80,8 @@ module Grape
         instance
       end
 
-      def self.cache_key(type, method)
-        [type, method].compact.map(&:to_s).join('_')
+      def self.cache_key(type, method, strict)
+        [type, method, strict].compact.map(&:to_s).join('_')
       end
 
       instance_variable_set(:@__cache,            {})

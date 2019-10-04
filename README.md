@@ -154,7 +154,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.2.6**.
+You're reading the documentation for the next release of Grape, which should be **1.3.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
 The current stable release is [1.2.5](https://github.com/ruby-grape/grape/blob/v1.2.5/README.md).
 
@@ -166,6 +166,8 @@ The current stable release is [1.2.5](https://github.com/ruby-grape/grape/blob/v
 * [Follow us on Twitter](https://twitter.com/grapeframework)
 
 ## Installation
+
+Ruby 2.4 or newer is required.
 
 Grape is available as a gem, to install it just install the gem:
 

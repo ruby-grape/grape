@@ -1133,7 +1133,7 @@ XML
 
       subject.use Rack::Chunked
       subject.get('/stream') { stream test_stream }
-      get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1'
+      get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
 
       expect(last_response.headers['Content-Type']).to eq('text/plain')
       expect(last_response.headers['Content-Length']).to eq(nil)

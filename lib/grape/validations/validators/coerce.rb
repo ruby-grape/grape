@@ -1,9 +1,15 @@
 module Grape
   class API
-    Boolean = Virtus::Attribute::Boolean
+    class Boolean
+      def self.build(val)
+        return nil if val != true && val != false
+
+        new
+      end
+    end
 
     class Instance
-      Boolean = Virtus::Attribute::Boolean
+      Boolean = Grape::API::Boolean
     end
   end
 
@@ -11,7 +17,12 @@ module Grape
     class CoerceValidator < Base
       def initialize(*_args)
         super
-        @converter = Types.build_coercer(type, @option[:method])
+
+        @converter = if type.is_a?(Grape::Validations::Types::VariantCollectionCoercer)
+                       type
+                     else
+                       Types.build_coercer(type, method: @option[:method])
+                     end
       end
 
       def validate(request)
@@ -19,11 +30,22 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless params.is_a? Hash
-        return unless requires_coercion?(params[attr_name])
+        raise validation_exception(attr_name) unless params.is_a? Hash
+
         new_value = coerce_value(params[attr_name])
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:coerce) unless valid_type?(new_value)
-        params[attr_name] = new_value
+
+        raise validation_exception(attr_name) unless valid_type?(new_value)
+
+        # Don't assign a value if it is identical. It fixes a problem with Hashie::Mash
+        # which looses wrappers for hashes and arrays after reassigning values
+        #
+        #     h = Hashie::Mash.new(list: [1, 2, 3, 4])
+        #     => #<Hashie::Mash list=#<Hashie::Array [1, 2, 3, 4]>>
+        #     list = h.list
+        #     h[:list] = list
+        #     h
+        #     => #<Hashie::Mash list=[1, 2, 3, 4]>
+        params[attr_name] = new_value unless params[attr_name] == new_value
       end
 
       private
@@ -33,31 +55,25 @@ module Grape
       #
       # See {Types.build_coercer}
       #
-      # @return [Virtus::Attribute]
+      # @return [Object]
       attr_reader :converter
 
       def valid_type?(val)
-        # Special value to denote coercion failure
-        return false if val.instance_of?(Types::InvalidValue)
-
-        # Allow nil, to ignore when a parameter is absent
-        return true if val.nil?
-
-        converter.value_coerced? val
+        !val.is_a?(Types::InvalidValue)
       end
 
       def coerce_value(val)
-        # Don't coerce things other than nil to Arrays or Hashes
-        unless (@option[:method] && !val.nil?) || type.is_a?(Virtus::Attribute)
-          return val || []      if type == Array
-          return val || Set.new if type == Set
-          return val || {}      if type == Hash
+        # define default values for structures, the dry-types lib which is used
+        # for coercion doesn't accept nil as a value, so it would fail
+        if val.nil?
+          return []      if type == Array || type.is_a?(Array)
+          return Set.new if type == Set
+          return {}      if type == Hash
         end
 
-        converter.coerce(val)
+        converter.call(val)
 
-      # not the prettiest but some invalid coercion can currently trigger
-      # errors in Virtus (see coerce_spec.rb:75)
+      # Some custom types might fail, so it should be treated as an invalid value
       rescue
         Types::InvalidValue.new
       end
@@ -69,9 +85,8 @@ module Grape
         @option[:type].is_a?(Hash) ? @option[:type][:value] : @option[:type]
       end
 
-      def requires_coercion?(value)
-        # JSON types do not require coercion if value is valid
-        !valid_type?(value) || converter.coercer.respond_to?(:method) && !converter.is_a?(Grape::Validations::Types::Json)
+      def validation_exception(attr_name)
+        Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:coerce))
       end
     end
   end

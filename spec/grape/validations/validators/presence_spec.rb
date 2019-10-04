@@ -269,4 +269,32 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.body).to eq('Hello optional'.to_json)
     end
   end
+
+  context 'with a custom type' do
+    it 'does not validate their type when it is missing' do
+      class CustomType
+        def self.parse(value)
+          return if value.blank?
+
+          new
+        end
+      end
+
+      subject.params do
+        requires :custom, type: CustomType
+      end
+      subject.get '/custom' do
+        'custom'
+      end
+
+      get 'custom'
+
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('{"error":"custom is missing"}')
+
+      get 'custom', custom: 'filled'
+
+      expect(last_response.status).to eq(200)
+    end
+  end
 end

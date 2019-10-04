@@ -20,8 +20,6 @@ require 'active_support/notifications'
 require 'i18n'
 require 'thread'
 
-require 'virtus'
-
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
 module Grape

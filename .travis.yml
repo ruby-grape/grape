@@ -8,45 +8,41 @@ gemfile:
 
 matrix:
   include:
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       script:
         - bundle exec danger
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: Gemfile
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: gemfiles/multi_json.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_json
-    - rvm: 2.5.3
+    - rvm: 2.6.5
       gemfile: gemfiles/multi_xml.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_xml
-    - rvm: 2.4.5
+    - rvm: 2.5.7
       gemfile: Gemfile
-    - rvm: 2.4.5
+    - rvm: 2.5.7
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.3.8
+    - rvm: 2.4.9
       gemfile: Gemfile
-    - rvm: 2.3.8
+    - rvm: 2.4.9
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.10
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
   allow_failures:
-    - rvm: 2.2.10
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
-    - rvm: 2.5.3
-      gemfile: gemfiles/rack_edge.gemfile
 
 bundler_args: --without development
