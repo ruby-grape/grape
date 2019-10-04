@@ -77,10 +77,12 @@ describe Grape::Exceptions::ValidationErrors do
       end
       get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)).to eq([
-                                                     'params' => %w[beer wine],
-                                                     'messages' => ['are mutually exclusive']
-                                                   ])
+      expect(JSON.parse(last_response.body)).to eq(
+        [
+          'params' => %w[beer wine juice],
+          'messages' => ['are missing, exactly one parameter must be provided']
+        ]
+      )
     end
   end
 end
