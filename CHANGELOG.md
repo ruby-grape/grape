@@ -19,6 +19,7 @@
 * [#1898](https://github.com/ruby-grape/grape/pull/1898): Refactor `ValidatorFactory` to improve memory allocation - [@Bhacaz](https://github.com/Bhacaz).
 * [#1900](https://github.com/ruby-grape/grape/pull/1900): Define boolean for `Grape::Api::Instance` - [@Bhacaz](https://github.com/Bhacaz).
 * [#1903](https://github.com/ruby-grape/grape/pull/1903): Allow nested params renaming (Hash/Array) - [@bikolya](https://github.com/bikolya).
+* [#1913](https://github.com/ruby-grape/grape/pull/1913): Fix multiple params validators to return correct messages for nested params - [@bikolya](https://github.com/bikolya).
 
 ### 1.2.4 (2019/06/13)
 

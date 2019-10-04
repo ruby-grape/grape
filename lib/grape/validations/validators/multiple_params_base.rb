@@ -1,26 +1,32 @@
 module Grape
   module Validations
     class MultipleParamsBase < Base
-      attr_reader :scoped_params
-
+      # rubocop:disable HashEachMethods
       def validate!(params)
-        @scoped_params = [@scope.params(params)].flatten
-        params
+        attributes = AttributesIterator.new(self, @scope, params, multiple_params: true)
+        array_errors = []
+
+        attributes.each do |resource_params, _|
+          begin
+            validate_params!(resource_params)
+          rescue Grape::Exceptions::Validation => e
+            array_errors << e
+          end
+        end
+
+        raise Grape::Exceptions::ValidationArrayErrors, array_errors if array_errors.any?
       end
+      # rubocop:enable HashEachMethods
 
       private
 
-      def scope_requires_params
-        @scope.required? || scoped_params.any? { |param| param.respond_to?(:any?) && param.any? }
-      end
-
       def keys_in_common(resource_params)
         return [] unless resource_params.is_a?(Hash)
-        (all_keys & resource_params.stringify_keys.keys).map(&:to_s)
+        all_keys & resource_params.keys.map! { |attr| @scope.full_name(attr) }
       end
 
       def all_keys
-        attrs.map(&:to_s)
+        attrs.map { |attr| @scope.full_name(attr) }
       end
     end
   end
