@@ -14,7 +14,7 @@ module Grape
       end
 
       def formatters(options)
-        builtin_formmaters.merge(default_elements).merge(options[:formatters] || {})
+        builtin_formmaters.merge(default_elements).merge!(options[:formatters] || {})
       end
 
       def formatter_for(api_format, **options)

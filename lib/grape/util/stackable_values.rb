@@ -1,37 +1,31 @@
+require_relative 'base_inheritable'
+
 module Grape
   module Util
-    class StackableValues
-      attr_accessor :inherited_values
-      attr_accessor :new_values
+    class StackableValues < BaseInheritable
       attr_reader :frozen_values
 
-      def initialize(inherited_values = {})
-        @inherited_values = inherited_values
-        @new_values = {}
+      def initialize(*_args)
+        super
+
         @frozen_values = {}
       end
 
       def [](name)
         return @frozen_values[name] if @frozen_values.key? name
 
-        value = []
-        value.concat(@inherited_values[name] || [])
-        value.concat(@new_values[name] || [])
-        value
+        inherited_value = @inherited_values[name]
+        new_value = @new_values[name] || []
+
+        return new_value unless inherited_value
+
+        concat_values(inherited_value, new_value)
       end
 
       def []=(name, value)
         raise if @frozen_values.key? name
         @new_values[name] ||= []
         @new_values[name].push value
-      end
-
-      def delete(key)
-        new_values.delete key
-      end
-
-      def keys
-        (@new_values.keys + @inherited_values.keys).sort.uniq
       end
 
       def to_hash
@@ -44,10 +38,13 @@ module Grape
         @frozen_values[key] = self[key].freeze
       end
 
-      def initialize_copy(other)
-        super
-        self.inherited_values = other.inherited_values
-        self.new_values = other.new_values.dup
+      protected
+
+      def concat_values(inherited_value, new_value)
+        [].tap do |value|
+          value.concat(inherited_value)
+          value.concat(new_value)
+        end
       end
     end
   end
