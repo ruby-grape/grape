@@ -20,10 +20,13 @@ describe Grape::Validations::CoerceValidator do
 
     context 'i18n' do
       after :each do
+        I18n.available_locales = %i[en]
         I18n.locale = :en
+        I18n.default_locale = :en
       end
 
       it 'i18n error on malformed input' do
+        I18n.available_locales = %i[en zh-CN]
         I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
         I18n.reload!
         I18n.locale = 'zh-CN'.to_sym
@@ -40,6 +43,7 @@ describe Grape::Validations::CoerceValidator do
       end
 
       it 'gives an english fallback error when default locale message is blank' do
+        I18n.available_locales = %i[en pt-BR]
         I18n.locale = 'pt-BR'.to_sym
         subject.params do
           requires :age, type: Integer
