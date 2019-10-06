@@ -56,10 +56,10 @@ module Grape
 
       def self.convert_to_short_name(klass)
         ret = klass.name.gsub(/::/, '/')
-                   .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
-                   .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-                   .tr('-', '_')
-                   .downcase
+        ret.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+        ret.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+        ret.tr!('-', '_')
+        ret.downcase!
         File.basename(ret, '_validator')
       end
 
