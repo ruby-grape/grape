@@ -11,6 +11,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1916](https://github.com/ruby-grape/grape/pull/1916): Drop old appraisals - [@NikolayRys](https://github.com/NikolayRys).
 * [#1911](https://github.com/ruby-grape/grape/pull/1911): Make sure `Grape::Valiations::AtLeastOneOfValidator` properly treats nested params in errors - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1893](https://github.com/ruby-grape/grape/pull/1893): Allows `Grape::API` to behave like a Rack::app in some instances where it was misbehaving - [@myxoh](https://github.com/myxoh).
 * [#1898](https://github.com/ruby-grape/grape/pull/1898): Refactor `ValidatorFactory` to improve memory allocation - [@Bhacaz](https://github.com/Bhacaz).
