@@ -3,6 +3,8 @@ require 'grape/dsl/headers'
 module Grape
   module Middleware
     class Base
+      include Helpers
+
       attr_reader :app, :env, :options
       TEXT_HTML = 'text/html'.freeze
 
