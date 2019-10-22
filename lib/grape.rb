@@ -111,6 +111,7 @@ module Grape
       autoload :Error
       autoload :Globals
       autoload :Stack
+      autoload :Helpers
     end
 
     module Auth

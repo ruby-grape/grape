@@ -2497,6 +2497,17 @@ class Twitter::API < Grape::API
 end
 ```
 
+Inside the `rescue_from` block, the environment of the original controller method(`.self` receiver) is accessible through the `#context` method.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    user_id = context.params[:user_id]
+    error!("error for #{user_id}")
+  end
+end
+```
+
 #### Rescuing exceptions inside namespaces
 
 You could put `rescue_from` clauses inside a namespace and they will take precedence over ones
@@ -3121,6 +3132,8 @@ end
 
 Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middlware::Auth::Base`.
+
 ## Describing and Inspecting an API
 
 Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
@@ -3432,6 +3445,8 @@ class API < Grape::API
   end
 end
 ```
+
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middlware::Base`.
 
 ### Rails Middleware
 
