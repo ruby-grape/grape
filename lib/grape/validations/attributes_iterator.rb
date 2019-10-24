@@ -5,12 +5,11 @@ module Grape
 
       attr_reader :scope
 
-      def initialize(validator, scope, params, multiple_params: false)
+      def initialize(validator, scope, params)
         @scope = scope
         @attrs = validator.attrs
         @original_params = scope.params(params)
         @params = Array.wrap(@original_params)
-        @multiple_params = multiple_params
       end
 
       def each(&block)
@@ -42,14 +41,12 @@ module Grape
             @scope.index = index
           end
 
-          if @multiple_params
-            yield resource_params, @attrs
-          else
-            @attrs.each do |attr_name|
-              yield resource_params, attr_name
-            end
-          end
+          yield_attributes(resource_params, @attrs, &block)
         end
+      end
+
+      def yield_attributes(_resource_params, _attrs)
+        raise NotImplementedError
       end
     end
   end

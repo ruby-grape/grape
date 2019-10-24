@@ -1,12 +1,11 @@
 module Grape
   module Validations
     class MultipleParamsBase < Base
-      # rubocop:disable HashEachMethods
       def validate!(params)
-        attributes = AttributesIterator.new(self, @scope, params, multiple_params: true)
+        attributes = MultipleAttributesIterator.new(self, @scope, params)
         array_errors = []
 
-        attributes.each do |resource_params, _|
+        attributes.each do |resource_params|
           begin
             validate_params!(resource_params)
           rescue Grape::Exceptions::Validation => e
@@ -16,7 +15,6 @@ module Grape
 
         raise Grape::Exceptions::ValidationArrayErrors, array_errors if array_errors.any?
       end
-      # rubocop:enable HashEachMethods
 
       private
 

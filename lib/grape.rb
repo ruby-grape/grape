@@ -225,6 +225,8 @@ require 'grape/util/endpoint_configuration'
 
 require 'grape/validations/validators/base'
 require 'grape/validations/attributes_iterator'
+require 'grape/validations/single_attribute_iterator'
+require 'grape/validations/multiple_attributes_iterator'
 require 'grape/validations/validators/allow_blank'
 require 'grape/validations/validators/as'
 require 'grape/validations/validators/at_least_one_of'

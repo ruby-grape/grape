@@ -35,7 +35,7 @@ module Grape
       # @raise [Grape::Exceptions::Validation] if validation failed
       # @return [void]
       def validate!(params)
-        attributes = AttributesIterator.new(self, @scope, params)
+        attributes = SingleAttributeIterator.new(self, @scope, params)
         # we collect errors inside array because
         # there may be more than one error per field
         array_errors = []
