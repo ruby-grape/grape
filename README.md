@@ -2,11 +2,9 @@
 
 [![Gem Version](https://badge.fury.io/rb/grape.svg)](http://badge.fury.io/rb/grape)
 [![Build Status](https://travis-ci.org/ruby-grape/grape.svg?branch=master)](https://travis-ci.org/ruby-grape/grape)
-[![Dependency Status](https://gemnasium.com/ruby-grape/grape.svg)](https://gemnasium.com/ruby-grape/grape)
 [![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
 [![Coverage Status](https://coveralls.io/repos/github/ruby-grape/grape/badge.svg?branch=master)](https://coveralls.io/github/ruby-grape/grape?branch=master)
-[![Inline docs](http://inch-ci.org/github/ruby-grape/grape.svg)](http://inch-ci.org/github/ruby-grape/grape)
-[![git.legal](https://git.legal/projects/1364/badge.svg "Number of libraries approved")](https://git.legal/projects/1364)
+[![Inline docs](https://inch-ci.org/github/ruby-grape/grape.svg)](https://inch-ci.org/github/ruby-grape/grape)
 [![Join the chat at https://gitter.im/ruby-grape/grape](https://badges.gitter.im/ruby-grape/grape.svg)](https://gitter.im/ruby-grape/grape?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Table of Contents
@@ -17,17 +15,23 @@
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
+  - [All](#all)
   - [Rack](#rack)
   - [ActiveRecord without Rails](#activerecord-without-rails)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
+    - [Rails < 5.2](#rails--52)
+    - [Rails 6.0](#rails-60)
   - [Modules](#modules)
+- [Remounting](#remounting)
+  - [Mount Configuration](#mount-configuration)
 - [Versioning](#versioning)
   - [Path](#path)
   - [Header](#header)
   - [Accept-Version Header](#accept-version-header)
   - [Param](#param)
 - [Describing Methods](#describing-methods)
+- [Configuration](#configuration)
 - [Parameters](#parameters)
   - [Params Class](#params-class)
   - [Declared](#declared)
@@ -43,11 +47,12 @@
   - [Validation of Nested Parameters](#validation-of-nested-parameters)
   - [Dependent Parameters](#dependent-parameters)
   - [Group Options](#group-options)
-  - [Alias](#alias)
+  - [Renaming](#renaming)
   - [Built-in Validators](#built-in-validators)
     - [allow_blank](#allow_blank)
     - [values](#values)
     - [except_values](#except_values)
+    - [same_as](#same_as)
     - [regexp](#regexp)
     - [mutually_exclusive](#mutually_exclusive)
     - [exactly_one_of](#exactly_one_of)
@@ -60,6 +65,7 @@
   - [I18n](#i18n)
   - [Custom Validation messages](#custom-validation-messages)
     - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
+    - [same_as](#same_as-1)
     - [all_or_none_of](#all_or_none_of-1)
     - [mutually_exclusive](#mutually_exclusive-1)
     - [exactly_one_of](#exactly_one_of-1)
@@ -70,6 +76,9 @@
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
 - [Headers](#headers)
+  - [Request](#request)
+    - [Header Case Handling](#header-case-handling)
+  - [Response](#response)
 - [Routes](#routes)
 - [Helpers](#helpers)
 - [Path Helpers](#path-helpers)
@@ -105,7 +114,7 @@
   - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
-- [Before and After](#before-and-after)
+- [Before, After and Finally](#before-after-and-finally)
 - [Anchoring](#anchoring)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Grape Middleware](#grape-middleware)
@@ -145,9 +154,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.1.1**.
+You're reading the documentation for the next release of Grape, which should be **1.2.5**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.1.0](https://github.com/ruby-grape/grape/blob/v1.1.0/README.md).
+The current stable release is [1.2.4](https://github.com/ruby-grape/grape/blob/v1.2.4/README.md).
 
 ## Project Resources
 
@@ -253,12 +262,30 @@ end
 
 ## Mounting
 
+### All
+
+
+By default Grape will compile the routes on the first route, it is possible to pre-load routes using the `compile!` method.
+
+```ruby
+Twitter::API.compile!
+```
+
+This can be added to your `config.ru` (if using rackup), `application.rb` (if using rails), or any file that loads your server.
+
 ### Rack
 
 The above sample creates a Rack application that can be run from a rackup `config.ru` file
 with `rackup`:
 
 ```ruby
+run Twitter::API
+```
+
+(With pre-loading you can use)
+
+```ruby
+Twitter::API.compile!
 run Twitter::API
 ```
 
@@ -318,6 +345,14 @@ run Rack::Cascade.new [API, Web]
 
 Place API files into `app/api`. Rails expects a subdirectory that matches the name of the Ruby module and a file name that matches the name of the class. In our example, the file name location and directory for `Twitter::API` should be `app/api/twitter/api.rb`.
 
+Modify `config/routes`:
+
+```ruby
+mount Twitter::API => '/'
+```
+
+#### Rails < 5.2
+
 Modify `application.rb`:
 
 ```ruby
@@ -325,13 +360,17 @@ config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
 config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
 ```
 
-Modify `config/routes`:
+See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
+
+#### Rails 6.0
+
+For Rails versions greater than 6.0.0.beta2, `Zeitwerk` autoloader is the default for CRuby. By default `Zeitwerk` inflects `api` as `Api` instead of `API`. To make our example work, you need to uncomment the lines at the bottom of `config/initializers/inflections.rb`, and add `API` as an acronym:
 
 ```ruby
-mount Twitter::API => '/'
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym 'API'
+end
 ```
-
-See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
 
 ### Modules
 
@@ -363,6 +402,86 @@ class Twitter::API < Grape::API
 
   mount Twitter::Users
   mount Twitter::Search
+end
+```
+
+## Remounting
+
+You can mount the same endpoints in two different locations.
+
+```ruby
+class Voting::API < Grape::API
+  namespace 'votes' do
+    get do
+      # Your logic
+    end
+
+    post do
+      # Your logic
+    end
+  end
+end
+
+class Post::API < Grape::API
+  mount Voting::API
+end
+
+class Comment::API < Grape::API
+  mount Voting::API
+end
+```
+
+Assuming that the post and comment endpoints are mounted in `/posts` and `/comments`, you should now be able to do `get /posts/votes`, `post /posts/votes`, `get /comments/votes` and `post /comments/votes`.
+
+### Mount Configuration
+
+You can configure remountable endpoints to change how they behave according to where they are mounted.
+
+```ruby
+class Voting::API < Grape::API
+  namespace 'votes' do
+    desc "Vote for your #{configuration[:votable]}"
+    get do
+      # Your logic
+    end
+  end
+end
+
+class Post::API < Grape::API
+  mount Voting::API, with: { votable: 'posts' }
+end
+
+class Comment::API < Grape::API
+  mount Voting::API, with: { votable: 'comments' }
+end
+```
+
+You can access `configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
+
+If you want logic happening given on an `configuration`, you can use the helper `given`.
+
+```ruby
+class ConditionalEndpoint::API < Grape::API
+  given configuration[:some_setting] do
+    get 'mount_this_endpoint_conditionally' do
+      configuration[:configurable_response]
+    end
+  end
+end
+```
+
+If you want a block of logic running every time an endpoint is mounted (within which you can access the `configuration` Hash)
+
+
+```ruby
+class ConditionalEndpoint::API < Grape::API
+  mounted do
+    YourLogger.info "This API was mounted at: #{Time.now}"
+
+    get configuration[:endpoint_name] do
+      configuration[:configurable_response]
+    end
+  end
 end
 ```
 
@@ -446,10 +565,13 @@ version 'v1', using: :param, parameter: 'v'
 
 ## Describing Methods
 
-You can add a description to API methods and namespaces.
+You can add a description to API methods and namespaces. The description would be used by [grape-swagger][grape-swagger] to generate swagger compliant documentation.
+
+Note: Description block is only for documentation and won't affects API behavior.
 
 ```ruby
 desc 'Returns your public timeline.' do
+  summary 'summary'
   detail 'more details'
   params  API::Entities::Status.documentation
   success API::Entities::Entity
@@ -463,7 +585,13 @@ desc 'Returns your public timeline.' do
             description: 'Not really needed',
             required: false
           }
-
+  hidden false
+  deprecated false
+  is_array true
+  nickname 'nickname'
+  produces ['application/json']
+  consumes ['application/json']
+  tags ['tag1', 'tag2']
 end
 get :public_timeline do
   Status.limit(20)
@@ -476,6 +604,43 @@ end
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
 * `headers`: A definition of the used Headers
+* Other options can be found in [grape-swagger][grape-swagger]
+
+[grape-swagger]: https://github.com/ruby-grape/grape-swagger
+
+## Configuration
+
+Use `Grape.configure` to set up global settings at load time.
+Currently the configurable settings are:
+
+* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
+
+To change a setting value make sure that at some point during load time the following code runs
+
+```ruby
+Grape.configure do |config|
+  config.setting = value
+end
+```
+
+For example, for the `param_builder`, the following code could run in an initializer:
+
+```ruby
+Grape.configure do |config|
+  config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+end
+```
+
+You can also configure a single API:
+
+```ruby
+API.configure do |config|
+  config[key] = value
+end
+```
+
+This will be available inside the API with `configuration`, as if it were
+[mount configuration](#mount-configuration).
 
 ## Parameters
 
@@ -553,6 +718,8 @@ params do
   optional :color, type: String
 end
 ```
+
+Or globally with the [Configuration](#configuration) `Grape.configure.param_builder`.
 
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
@@ -1110,6 +1277,18 @@ params do
 end
 ```
 
+You can rename parameters:
+
+```ruby
+params do
+  optional :category, as: :type
+  given type: ->(val) { val == 'foo' } do
+    requires :description
+  end
+end
+```
+
+Note: param in `given` should be the renamed one. In the example, it should be `type`, not `category`.
 
 ### Group Options
 
@@ -1138,9 +1317,9 @@ params do
 end
 ```
 
-### Alias
+### Renaming
 
-You can set an alias for parameters using `as`, which can be useful when refactoring existing APIs:
+You can rename parameters using `as`, which can be useful when refactoring existing APIs:
 
 ```ruby
 resource :users do
@@ -1246,6 +1425,17 @@ params do
   requires :browser, except_values: [ 'ie6', 'ie7', 'ie8' ]
   requires :port, except_values: { value: 0..1024, message: 'is not allowed' }
   requires :hashtag, except_values: -> { Hashtag.FORBIDDEN_LIST }
+end
+```
+
+#### `same_as`
+
+A `same_as` option can be given to ensure that values of parameters match.
+
+```ruby
+params do
+  requires :password
+  requires :password_confirmation, same_as: :password
 end
 ```
 
@@ -1547,6 +1737,8 @@ end
 Grape supports I18n for parameter-related error messages, but will fallback to English if
 translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
+In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
+
 ### Custom Validation messages
 
 Grape supports custom validation messages for parameter-related and coerce-related error messages.
@@ -1556,6 +1748,15 @@ Grape supports custom validation messages for parameter-related and coerce-relat
 ```ruby
 params do
   requires :name, values: { value: 1..10, message: 'not in range from 1 to 10' }, allow_blank: { value: false, message: 'cannot be blank' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }, message: 'is required'
+end
+```
+
+#### `same_as`
+
+```ruby
+params do
+  requires :password
+  requires :password_confirmation, same_as: { value: :password, message: 'not match' }
 end
 ```
 
@@ -1588,7 +1789,7 @@ params do
   optional :beer
   optional :wine
   optional :juice
-  exactly_one_of :beer, :wine, :juice, message: {exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required"}
+  exactly_one_of :beer, :wine, :juice, message: { exactly_one: "are missing, exactly one parameter is required", mutual_exclusion: "are mutually exclusive, exactly one parameter is required" }
 end
 ```
 
@@ -1607,7 +1808,7 @@ end
 
 ```ruby
 params do
-  requires :int, type: {value: Integer, message: "type cast is invalid" }
+  requires :int, type: { value: Integer, message: "type cast is invalid" }
 end
 ```
 
@@ -1669,6 +1870,7 @@ end
 
 ## Headers
 
+### Request
 Request headers are available through the `headers` helper or from `env` in their original form.
 
 ```ruby
@@ -1683,13 +1885,30 @@ get do
 end
 ```
 
+#### Header Case Handling
+
+The above example may have been requested as follows:
+
+``` shell
+curl -H "secret_PassWord: swordfish" ...
+```
+
+The header name will have been normalized for you.
+
+- In the `header` helper names will be coerced into a capitalized kebab case.
+- In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_'.
+
+The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
+
+### Response
+
 You can set a response header with `header` inside an API.
 
 ```ruby
 header 'X-Robots-Tag', 'noindex'
 ```
 
-When raising `error!`, pass additional headers as arguments.
+When raising `error!`, pass additional headers as arguments. Additional headers will be merged with headers set before `error!` call.
 
 ```ruby
 error! 'Unauthorized', 401, 'X-Error-Detail' => 'Invalid token.'
@@ -2029,6 +2248,12 @@ instead of a message.
 error!({ error: 'unexpected error', detail: 'missing widget' }, 500)
 ```
 
+You can set additional headers for the response. They will be merged with headers set before `error!` call.
+
+```ruby
+error!('Something went wrong', 500, 'X-Error-Detail' => 'Invalid token.')
+```
+
 You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
 
 ```ruby
@@ -2272,6 +2497,17 @@ class Twitter::API < Grape::API
 end
 ```
 
+Inside the `rescue_from` block, the environment of the original controller method(`.self` receiver) is accessible through the `#context` method.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    user_id = context.params[:user_id]
+    error!("error for #{user_id}")
+  end
+end
+```
+
 #### Rescuing exceptions inside namespaces
 
 You could put `rescue_from` clauses inside a namespace and they will take precedence over ones
@@ -2294,7 +2530,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-Here `'inner'` will be result of handling occured `ArgumentError`.
+Here `'inner'` will be result of handling occurred `ArgumentError`.
 
 #### Unrescuable Exceptions
 
@@ -2896,6 +3132,8 @@ end
 
 Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middlware::Auth::Base`.
+
 ## Describing and Inspecting an API
 
 Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
@@ -2963,19 +3201,22 @@ class ApiLogger < Grape::Middleware::Base
 end
 ```
 
-## Before and After
+## Before, After and Finally
 
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
+If the API fails the `after` call will not be trigered, if you need code to execute for sure
+use the `finally`.
 
 Before and after callbacks execute in the following order:
 
 1. `before`
 2. `before_validation`
 3. _validations_
-4. `after_validation`
-5. _the API call_
-6. `after`
+4. `after_validation` (upon successful validation)
+5. _the API call_ (upon successful validation)
+6. `after` (upon successful validation and API call)
+7. `finally` (always)
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
@@ -2992,6 +3233,14 @@ For example, using a simple `before` block to set a header.
 ```ruby
 before do
   header 'X-Robots-Tag', 'noindex'
+end
+```
+
+You can ensure a block of code runs after every request (including failures) with `finally`:
+
+```ruby
+finally do
+  # this code will run after every request (successful or failed)
 end
 ```
 
@@ -3196,6 +3445,8 @@ class API < Grape::API
   end
 end
 ```
+
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middlware::Base`.
 
 ### Rails Middleware
 
@@ -3519,4 +3770,4 @@ MIT License. See LICENSE for details.
 
 ## Copyright
 
-Copyright (c) 2010-2018 Michael Bleigh, Intridea Inc. and Contributors.
+Copyright (c) 2010-2019 Michael Bleigh, Intridea Inc. and Contributors.

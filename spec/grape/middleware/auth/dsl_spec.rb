@@ -15,15 +15,15 @@ describe Grape::Middleware::Auth::DSL do
 
   describe '.auth' do
     it 'stets auth parameters' do
-      expect(subject).to receive(:use).with(Grape::Middleware::Auth::Base, settings)
+      expect(subject.base_instance).to receive(:use).with(Grape::Middleware::Auth::Base, settings)
 
       subject.auth :http_digest, realm: settings[:realm], opaque: settings[:opaque], &settings[:proc]
       expect(subject.auth).to eq(settings)
     end
 
     it 'can be called multiple times' do
-      expect(subject).to receive(:use).with(Grape::Middleware::Auth::Base, settings)
-      expect(subject).to receive(:use).with(Grape::Middleware::Auth::Base, settings.merge(realm: 'super_secret'))
+      expect(subject.base_instance).to receive(:use).with(Grape::Middleware::Auth::Base, settings)
+      expect(subject.base_instance).to receive(:use).with(Grape::Middleware::Auth::Base, settings.merge(realm: 'super_secret'))
 
       subject.auth :http_digest, realm: settings[:realm], opaque: settings[:opaque], &settings[:proc]
       first_settings = subject.auth

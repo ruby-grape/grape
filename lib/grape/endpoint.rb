@@ -202,7 +202,7 @@ module Grape
     end
 
     def merge_route_options(**default)
-      options[:route_options].clone.merge(**default)
+      options[:route_options].clone.merge!(**default)
     end
 
     def map_routes
@@ -247,32 +247,37 @@ module Grape
         @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
         @params = @request.params
         @headers = @request.headers
+        begin
+          cookies.read(@request)
+          self.class.run_before_each(self)
+          run_filters befores, :before
 
-        cookies.read(@request)
-        self.class.run_before_each(self)
-        run_filters befores, :before
+          if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
+            raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
+            header 'Allow', allowed_methods
+            response_object = ''
+            status 204
+          else
+            run_filters before_validations, :before_validation
+            run_validators validations, request
+            remove_renamed_params
+            run_filters after_validations, :after_validation
+            response_object = @block ? @block.call(self) : nil
+          end
 
-        if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
-          raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
-          header 'Allow', allowed_methods
-          response_object = ''
-          status 204
-        else
-          run_filters before_validations, :before_validation
-          run_validators validations, request
-          run_filters after_validations, :after_validation
-          response_object = @block ? @block.call(self) : nil
+          run_filters afters, :after
+          cookies.write(header)
+
+          # status verifies body presence when DELETE
+          @body ||= response_object
+
+          # The body commonly is an Array of Strings, the application instance itself, or a File-like object
+          response_object = file || [body]
+
+          [status, header, response_object]
+        ensure
+          run_filters finallies, :finally
         end
-
-        run_filters afters, :after
-        cookies.write(header)
-
-        # status verifies body presence when DELETE
-        @body ||= response_object
-
-        # The Body commonly is an Array of Strings, the application instance itself, or a File-like object
-        response_object = file || [body]
-        [status, header, response_object]
       end
     end
 
@@ -321,7 +326,14 @@ module Grape
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
-    private :build_stack, :build_helpers
+    def remove_renamed_params
+      return unless route_setting(:renamed_params)
+      route_setting(:renamed_params).flat_map(&:keys).each do |renamed_param|
+        @params.delete(renamed_param)
+      end
+    end
+
+    private :build_stack, :build_helpers, :remove_renamed_params
 
     def helpers
       lazy_initialize! && @helpers
@@ -343,7 +355,7 @@ module Grape
     def run_validators(validator_factories, request)
       validation_errors = []
 
-      validators = validator_factories.map(&:create_validator)
+      validators = validator_factories.map { |options| Grape::Validations::ValidatorFactory.create_validator(options) }
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
@@ -353,7 +365,7 @@ module Grape
             validation_errors << e
             break if validator.fail_fast?
           rescue Grape::Exceptions::ValidationArrayErrors => e
-            validation_errors += e.errors
+            validation_errors.concat e.errors
             break if validator.fail_fast?
           end
         end
@@ -384,6 +396,10 @@ module Grape
 
     def afters
       namespace_stackable(:afters) || []
+    end
+
+    def finallies
+      namespace_stackable(:finallies) || []
     end
 
     def validations

@@ -121,14 +121,14 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
-  context 'param alias' do
+  context 'param renaming' do
     it do
       subject.params do
         requires :foo, as: :bar
         optional :super, as: :hiper
       end
-      subject.get('/alias') { "#{declared(params)['bar']}-#{declared(params)['hiper']}" }
-      get '/alias', foo: 'any', super: 'any2'
+      subject.get('/renaming') { "#{declared(params)['bar']}-#{declared(params)['hiper']}" }
+      get '/renaming', foo: 'any', super: 'any2'
 
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('any-any2')
@@ -138,8 +138,8 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         requires :foo, as: :bar, type: String, coerce_with: ->(c) { c.strip }
       end
-      subject.get('/alias-coerced') { "#{params['bar']}-#{params['foo']}" }
-      get '/alias-coerced', foo: ' there we go '
+      subject.get('/renaming-coerced') { "#{params['bar']}-#{params['foo']}" }
+      get '/renaming-coerced', foo: ' there we go '
 
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('there we go-')
@@ -149,11 +149,34 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         requires :foo, as: :bar, allow_blank: false
       end
-      subject.get('/alias-not-blank') {}
-      get '/alias-not-blank', foo: ''
+      subject.get('/renaming-not-blank') {}
+      get '/renaming-not-blank', foo: ''
 
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('foo is empty')
+    end
+
+    it do
+      subject.params do
+        requires :foo, as: :bar, allow_blank: false
+      end
+      subject.get('/renaming-not-blank-with-value') {}
+      get '/renaming-not-blank-with-value', foo: 'any'
+
+      expect(last_response.status).to eq(200)
+    end
+
+    it do
+      subject.params do
+        requires :foo, as: :baz, type: Hash do
+          requires :bar, as: :qux
+        end
+      end
+      subject.get('/nested-renaming') { declared(params).to_json }
+      get '/nested-renaming', foo: { bar: 'any' }
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{"baz":{"qux":"any"}}')
     end
   end
 
@@ -479,7 +502,50 @@ describe Grape::Validations::ParamsScope do
       end.to_not raise_error
     end
 
-    it 'allows aliasing of dependent parameters' do
+    it 'does not raise an error if when using nested given' do
+      expect do
+        subject.params do
+          optional :a, type: Hash do
+            requires :b
+          end
+          given :a do
+            requires :c
+            given :c do
+              requires :d
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it 'allows nested dependent parameters' do
+      subject.params do
+        optional :a
+        given a: ->(val) { val == 'a' } do
+          optional :b
+          given b: ->(val) { val == 'b' } do
+            optional :c
+            given c: ->(val) { val == 'c' } do
+              requires :d
+            end
+          end
+        end
+      end
+      subject.get('/') { declared(params).to_json }
+
+      get '/'
+      expect(last_response.status).to eq 200
+
+      get '/', a: 'a', b: 'b', c: 'c'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'd is missing'
+
+      get '/', a: 'a', b: 'b', c: 'c', d: 'd'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ a: 'a', b: 'b', c: 'c', d: 'd' }.to_json)
+    end
+
+    it 'allows renaming of dependent parameters' do
       subject.params do
         optional :a
         given :a do
@@ -495,6 +561,34 @@ describe Grape::Validations::ParamsScope do
 
       expect(body.keys).to include('c')
       expect(body.keys).to_not include('b')
+    end
+
+    it 'allows renaming of dependent on parameter' do
+      subject.params do
+        optional :a, as: :b
+        given b: ->(val) { val == 'x' } do
+          requires :c
+        end
+      end
+      subject.get('/') { declared(params) }
+
+      get '/', a: 'x'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'c is missing'
+
+      get '/', a: 'y'
+      expect(last_response.status).to eq 200
+    end
+
+    it 'raises an error if the dependent parameter is not the renamed one' do
+      expect do
+        subject.params do
+          optional :a, as: :b
+          given :a do
+            requires :c
+          end
+        end
+      end.to raise_error(Grape::Exceptions::UnknownParameter)
     end
 
     it 'does not validate nested requires when given is false' do
@@ -592,7 +686,53 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'default value in given block' do
+    before do
+      subject.params do
+        optional :a, values: %w[a b]
+        given a: ->(val) { val == 'a' } do
+          optional :b, default: 'default'
+        end
+      end
+      subject.get('/') { params.to_json }
+    end
+
+    context 'when dependency meets' do
+      it 'sets default value for dependent parameter' do
+        get '/', a: 'a'
+        expect(last_response.body).to eq({ a: 'a', b: 'default' }.to_json)
+      end
+    end
+
+    context 'when dependency does not meet' do
+      it 'does not set default value for dependent parameter' do
+        get '/', a: 'b'
+        expect(last_response.body).to eq({ a: 'b' }.to_json)
+      end
+    end
+  end
+
   context 'when validations are dependent on a parameter within an array param' do
+    before do
+      subject.params do
+        requires :foos, type: Array do
+          optional :foo
+          given :foo do
+            requires :bar
+          end
+        end
+      end
+      subject.get('/test') { 'ok' }
+    end
+
+    it 'should pass none Hash params' do
+      get '/test', foos: ['']
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('ok')
+    end
+  end
+
+  context 'when validations are dependent on a parameter within an array param within #declared(params).to_json' do
     before do
       subject.params do
         requires :foos, type: Array do
@@ -945,6 +1085,42 @@ describe Grape::Validations::ParamsScope do
         it 'returns a successful response' do
           expect(last_response.status).to eq(200)
         end
+      end
+    end
+  end
+
+  context 'with exactly_one_of validation for optional parameters within an Hash param' do
+    before do
+      subject.params do
+        optional :memo, type: Hash do
+          optional :text, type: String
+          optional :custom_body, type: Hash, coerce_with: JSON
+          exactly_one_of :text, :custom_body
+        end
+      end
+      subject.get('test')
+    end
+
+    context 'when correct data is provided' do
+      it 'returns a successful response' do
+        get 'test', memo: {}
+        expect(last_response.status).to eq(200)
+
+        get 'test', memo: { text: 'HOGEHOGE' }
+        expect(last_response.status).to eq(200)
+
+        get 'test', memo: { custom_body: '{ "xxx": "yyy" }' }
+        expect(last_response.status).to eq(200)
+      end
+    end
+
+    context 'when invalid data is provided' do
+      it 'returns a failure response' do
+        get 'test', memo: { text: 'HOGEHOGE', custom_body: '{ "xxx": "yyy" }' }
+        expect(last_response.status).to eq(400)
+
+        get 'test', memo: '{ "custom_body": "HOGE" }'
+        expect(last_response.status).to eq(400)
       end
     end
   end

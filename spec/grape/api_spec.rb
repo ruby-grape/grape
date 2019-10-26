@@ -220,6 +220,15 @@ describe Grape::API do
     end
   end
 
+  describe '.call' do
+    context 'it does not add to the app setup' do
+      it 'calls the app' do
+        expect(subject).not_to receive(:add_setup)
+        subject.call({})
+      end
+    end
+  end
+
   describe '.route_param' do
     it 'adds a parameterized route segment namespace' do
       subject.namespace :users do
@@ -873,6 +882,40 @@ XML
       options '/example'
       expect(last_response.status).to eql 405
       expect(last_response.headers['Allow']).to eql 'GET, HEAD'
+    end
+  end
+
+  describe '.compile!' do
+    it 'requires the grape/eager_load file' do
+      expect(app).to receive(:require).with('grape/eager_load') { nil }
+      app.compile!
+    end
+
+    it 'compiles the instance for rack!' do
+      stubbed_object = double(:instance_for_rack)
+      allow(app).to receive(:instance_for_rack) { stubbed_object }
+    end
+  end
+
+  # NOTE: this method is required to preserve the ability of pre-mounting
+  # the root API into a namespace, it may be deprecated in the future.
+  describe 'instance_for_rack' do
+    context 'when the app was not mounted' do
+      it 'returns the base_instance' do
+        expect(app.send(:instance_for_rack)).to eq app.base_instance
+      end
+    end
+
+    context 'when the app was mounted' do
+      it 'returns the first mounted instance' do
+        mounted_app = app
+        Class.new(Grape::API) do
+          namespace 'new_namespace' do
+            mount mounted_app
+          end
+        end
+        expect(app.send(:instance_for_rack)).to eq app.send(:mounted_instances).first
+      end
     end
   end
 
@@ -1616,6 +1659,199 @@ XML
       expect(last_response.status).to eql 404
       get '/new/def'
       expect(last_response.status).to eql 200
+    end
+  end
+
+  describe 'lifecycle' do
+    let!(:lifecycle) { [] }
+    let!(:standard_cycle) do
+      %i[before before_validation after_validation api_call after finally]
+    end
+
+    let!(:validation_error) do
+      %i[before before_validation finally]
+    end
+
+    let!(:errored_cycle) do
+      %i[before before_validation after_validation api_call finally]
+    end
+
+    before do
+      current_cycle = lifecycle
+
+      subject.before do
+        current_cycle << :before
+      end
+
+      subject.before_validation do
+        current_cycle << :before_validation
+      end
+
+      subject.after_validation do
+        current_cycle << :after_validation
+      end
+
+      subject.after do
+        current_cycle << :after
+      end
+
+      subject.finally do
+        current_cycle << :finally
+      end
+    end
+
+    context 'when the api_call succeeds' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the standard life_cycle' do
+        get '/api_call'
+        expect(lifecycle).to eq standard_cycle
+      end
+    end
+
+    context 'when the api_call has a controlled error' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          error!(:some_error)
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        get '/api_call'
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call has an exception' do
+      before do
+        current_cycle = lifecycle
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+          raise StandardError
+        end
+      end
+
+      it 'follows the errored life_cycle (skips after)' do
+        expect { get '/api_call' }.to raise_error(StandardError)
+        expect(lifecycle).to eq errored_cycle
+      end
+    end
+
+    context 'when the api_call fails validation' do
+      before do
+        current_cycle = lifecycle
+
+        subject.params do
+          requires :some_param, type: String
+        end
+
+        subject.get 'api_call' do
+          current_cycle << :api_call
+        end
+      end
+
+      it 'follows the failed_validation cycle (skips after_validation, api_call & after)' do
+        get '/api_call'
+        expect(lifecycle).to eq validation_error
+      end
+    end
+  end
+
+  describe '.finally' do
+    let!(:code) { { has_executed: false } }
+    let(:block_to_run) do
+      code_to_execute = code
+      proc do
+        code_to_execute[:has_executed] = true
+      end
+    end
+
+    context 'when the ensure block has no exceptions' do
+      before { subject.finally(&block_to_run) }
+
+      context 'when no API call is made' do
+        it 'has not executed the ensure code' do
+          expect(code[:has_executed]).to be false
+        end
+      end
+
+      context 'when no errors occurs' do
+        before do
+          subject.get '/no_exceptions' do
+            'success'
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/no_exceptions'
+          expect(last_response.body).to eq 'success'
+          expect(code[:has_executed]).to be true
+        end
+
+        context 'with a helper' do
+          let(:block_to_run) do
+            code_to_execute = code
+            proc do
+              code_to_execute[:value] = some_helper
+            end
+          end
+
+          before do
+            subject.helpers do
+              def some_helper
+                'some_value'
+              end
+            end
+
+            subject.get '/with_helpers' do
+              'success'
+            end
+          end
+
+          it 'has access to the helper' do
+            get '/with_helpers'
+            expect(code[:value]).to eq 'some_value'
+          end
+        end
+      end
+
+      context 'when an unhandled occurs inside the API call' do
+        before do
+          subject.get '/unhandled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          expect { get '/unhandled_exception' }.to raise_error StandardError
+          expect(code[:has_executed]).to be true
+        end
+      end
+
+      context 'when a handled error occurs inside the API call' do
+        before do
+          subject.rescue_from(StandardError) { error! 'handled' }
+          subject.get '/handled_exception' do
+            raise StandardError
+          end
+        end
+
+        it 'executes the ensure code' do
+          get '/handled_exception'
+          expect(code[:has_executed]).to be true
+          expect(last_response.body).to eq 'handled'
+        end
+      end
     end
   end
 
@@ -3209,6 +3445,43 @@ XML
           expect { a.mount b }.to_not raise_error
         end
       end
+
+      context 'when including a module' do
+        let(:included_module) do
+          Module.new do
+            def self.included(base)
+              base.extend(ClassMethods)
+            end
+            module ClassMethods
+              def my_method
+                @test = true
+              end
+            end
+          end
+        end
+
+        it 'should correctly include module in nested mount' do
+          module_to_include = included_module
+          v1 = Class.new(Grape::API) do
+            version :v1, using: :path
+            include module_to_include
+            my_method
+          end
+          v2 = Class.new(Grape::API) do
+            version :v2, using: :path
+          end
+          segment_base = Class.new(Grape::API) do
+            mount v1
+            mount v2
+          end
+
+          Class.new(Grape::API) do
+            mount segment_base
+          end
+
+          expect(v1.my_method).to be_truthy
+        end
+      end
     end
   end
 
@@ -3224,7 +3497,7 @@ XML
     it 'sets the instance' do
       expect(subject.instance).to be_nil
       subject.compile
-      expect(subject.instance).to be_kind_of(subject)
+      expect(subject.instance).to be_kind_of(subject.base_instance)
     end
   end
 
@@ -3481,6 +3754,44 @@ XML
     end
   end
 
+  describe '.configure' do
+    context 'when given a block' do
+      it 'returns self' do
+        expect(subject.configure {}).to be subject
+      end
+
+      it 'calls the block passing the config' do
+        call = [false, nil]
+        subject.configure do |config|
+          call = [true, config]
+        end
+
+        expect(call[0]).to be true
+        expect(call[1]).not_to be_nil
+      end
+    end
+
+    context 'when not given a block' do
+      it 'returns a configuration object' do
+        expect(subject.configure).to respond_to(:[], :[]=)
+      end
+    end
+
+    it 'allows configuring the api' do
+      subject.configure do |config|
+        config[:hello] = 'hello'
+        config[:bread] = 'bread'
+      end
+
+      subject.get '/hello-bread' do
+        "#{configuration[:hello]} #{configuration[:bread]}"
+      end
+
+      get '/hello-bread'
+      expect(last_response.body).to eq 'hello bread'
+    end
+  end
+
   context 'catch-all' do
     before do
       api1 = Class.new(Grape::API)
@@ -3610,6 +3921,41 @@ XML
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq 'Hello World'
       end
+    end
+  end
+
+  describe 'normal class methods' do
+    subject(:grape_api) { Class.new(Grape::API) }
+
+    before do
+      stub_const('MyAPI', grape_api)
+    end
+
+    it 'can find the appropiate name' do
+      expect(grape_api.name).to eq 'MyAPI'
+    end
+
+    it 'is equal to itself' do
+      expect(grape_api.itself).to eq grape_api
+      expect(grape_api).to eq MyAPI
+      expect(grape_api.eql?(MyAPI))
+    end
+  end
+
+  describe 'const_missing' do
+    subject(:grape_api) { Class.new(Grape::API) }
+    let(:mounted) do
+      Class.new(Grape::API) do
+        get '/missing' do
+          SomeRandomConstant
+        end
+      end
+    end
+
+    before { subject.mount mounted => '/const' }
+
+    it 'raises an error' do
+      expect { get '/const/missing' }.to raise_error(NameError).with_message(/SomeRandomConstant/)
     end
   end
 end

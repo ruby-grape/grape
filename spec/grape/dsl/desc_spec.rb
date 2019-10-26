@@ -21,36 +21,60 @@ module Grape
 
         it 'can be set with a block' do
           expected_options = {
+            summary: 'summary',
             description: 'The description',
             detail: 'more details',
             params: { first: :param },
             entity: Object,
             http_codes: [[401, 'Unauthorized', 'Entities::Error']],
             named: 'My named route',
-            headers: [XAuthToken: {
-              description: 'Valdates your identity',
-              required: true
-            },
-                      XOptionalHeader: {
-                        description: 'Not really needed',
-                        required: false
-                      }]
+            body_name: 'My body name',
+            headers: [
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            ],
+            hidden: false,
+            deprecated: false,
+            is_array: true,
+            nickname: 'nickname',
+            produces: %w[array of mime_types],
+            consumes: %w[array of mime_types],
+            tags: %w[tag1 tag2],
+            security: %w[array of security schemes]
           }
 
           subject.desc 'The description' do
+            summary 'summary'
             detail 'more details'
             params(first: :param)
             success Object
             failure [[401, 'Unauthorized', 'Entities::Error']]
             named 'My named route'
-            headers [XAuthToken: {
-              description: 'Valdates your identity',
-              required: true
-            },
-                     XOptionalHeader: {
-                       description: 'Not really needed',
-                       required: false
-                     }]
+            body_name 'My body name'
+            headers [
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            ]
+            hidden false
+            deprecated false
+            is_array true
+            nickname 'nickname'
+            produces %w[array of mime_types]
+            consumes %w[array of mime_types]
+            tags %w[tag1 tag2]
+            security %w[array of security schemes]
           end
 
           expect(subject.namespace_setting(:description)).to eq(expected_options)

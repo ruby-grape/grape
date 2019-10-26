@@ -36,7 +36,7 @@ You're reading the documentation for the stable release of Grape, 0.6.0.
 Change "Next Release" in [CHANGELOG.md](CHANGELOG.md) to the new version.
 
 ```
-#### 0.6.0 (9/16/2013)
+#### 0.6.0 (2013/9/16)
 ```
 
 Remove the line with "Your contribution here.", since there will be no more contributions to this release.

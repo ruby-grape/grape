@@ -21,13 +21,13 @@ end
 
 group :test do
   gem 'cookiejar'
-  gem 'coveralls', '~> 0.8.17', require: false
+  gem 'coveralls_reborn'
   gem 'danger-toc', '~> 0.1.2'
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
-  gem 'rack-test', '~> 0.6.3'
+  gem 'rack-test', '~> 1.1.0'
   gem 'rspec', '~> 3.0'
   gem 'ruby-grape-danger', '~> 0.1.0', require: false
 end

@@ -3,6 +3,10 @@
 module Grape
   class API
     Boolean = Virtus::Attribute::Boolean
+
+    class Instance
+      Boolean = Virtus::Attribute::Boolean
+    end
   end
 
   module Validations

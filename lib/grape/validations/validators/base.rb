@@ -37,18 +37,19 @@ module Grape
       # @raise [Grape::Exceptions::Validation] if validation failed
       # @return [void]
       def validate!(params)
-        attributes = AttributesIterator.new(self, @scope, params)
+        attributes = SingleAttributeIterator.new(self, @scope, params)
+        # we collect errors inside array because
+        # there may be more than one error per field
         array_errors = []
+
         attributes.each do |resource_params, attr_name|
           next if !@scope.required? && resource_params.empty?
-          next unless @required || (resource_params.respond_to?(:key?) && resource_params.key?(attr_name))
           next unless @scope.meets_dependency?(resource_params, params)
-
           begin
-            validate_param!(attr_name, resource_params)
+            if @required || resource_params.respond_to?(:key?) && resource_params.key?(attr_name)
+              validate_param!(attr_name, resource_params)
+            end
           rescue Grape::Exceptions::Validation => e
-            # we collect errors inside array because
-            # there may be more than one error per field
             array_errors << e
           end
         end
@@ -58,10 +59,10 @@ module Grape
 
       def self.convert_to_short_name(klass)
         ret = klass.name.gsub(/::/, '/')
-                   .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
-                   .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-                   .tr('-', '_')
-                   .downcase
+        ret.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+        ret.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+        ret.tr!('-', '_')
+        ret.downcase!
         File.basename(ret, '_validator')
       end
 
