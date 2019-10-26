@@ -19,7 +19,7 @@ module Grape
           # Rack::Request creates a Hash with filename,
           # content type and an IO object. Do a bit of basic
           # duck-typing.
-          value.is_a?(::Hash) && value.key?(:tempfile)
+          value.is_a?(::Hash) && value.key?(:tempfile) && value[:tempfile].is_a?(Tempfile)
         end
       end
     end

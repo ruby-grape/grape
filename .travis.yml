@@ -2,55 +2,51 @@ language: ruby
 
 sudo: false
 
+# "gemfile" is required for "allow_failures" option,
+# see https://docs.travis-ci.com/user/customizing-the-build/#matching-jobs-with-allow_failures
+gemfile:
+
 matrix:
   include:
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       script:
         - bundle exec danger
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: Gemfile
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.4.2
-      gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: gemfiles/multi_json.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_json
-    - rvm: 2.4.2
+    - rvm: 2.5.3
       gemfile: gemfiles/multi_xml.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_xml
-    - rvm: 2.3.5
+    - rvm: 2.4.5
       gemfile: Gemfile
-    - rvm: 2.3.5
-      gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.3.5
-      gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.3.5
+    - rvm: 2.4.5
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.8
+    - rvm: 2.3.8
       gemfile: Gemfile
-    - rvm: 2.2.8
-      gemfile: gemfiles/rack_1.5.2.gemfile
-    - rvm: 2.2.8
+    - rvm: 2.3.8
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.2.8
-      gemfile: gemfiles/rails_4.gemfile
-    - rvm: 2.2.8
-      gemfile: gemfiles/rails_3.gemfile
+    - rvm: 2.2.10
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
   allow_failures:
+    - rvm: 2.2.10
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
+    - rvm: 2.5.3
+      gemfile: gemfiles/rack_edge.gemfile
 
 bundler_args: --without development

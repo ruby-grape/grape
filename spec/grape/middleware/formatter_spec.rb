@@ -213,7 +213,13 @@ describe Grape::Middleware::Formatter do
   context 'no content responses' do
     let(:no_content_response) { ->(status) { [status, {}, ['']] } }
 
-    Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.each do |status|
+    STATUSES_WITHOUT_BODY = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
+                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.keys
+                            else
+                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY
+                            end
+
+    STATUSES_WITHOUT_BODY.each do |status|
       it "does not modify a #{status} response" do
         expected_response = no_content_response[status]
         allow(app).to receive(:call).and_return(expected_response)
@@ -247,7 +253,7 @@ describe Grape::Middleware::Formatter do
           let(:content_type) { 'application/atom+xml' }
 
           it 'returns a 415 HTTP error status' do
-            error = catch(:error) {
+            error = catch(:error) do
               subject.call(
                 'PATH_INFO' => '/info',
                 'REQUEST_METHOD' => method,
@@ -255,7 +261,7 @@ describe Grape::Middleware::Formatter do
                 'rack.input' => io,
                 'CONTENT_LENGTH' => io.length
               )
-            }
+            end
             expect(error[:status]).to eq(415)
             expect(error[:message]).to eq("The provided content-type 'application/atom+xml' is not supported.")
           end
@@ -391,6 +397,10 @@ describe Grape::Middleware::Formatter do
       Grape::Formatter.register :invalid, InvalidFormatter
       Grape::ContentTypes::CONTENT_TYPES[:invalid] = 'application/x-invalid'
     end
+    after do
+      Grape::ContentTypes::CONTENT_TYPES.delete(:invalid)
+      Grape::Formatter.default_elements.delete(:invalid)
+    end
 
     it 'returns response by invalid formatter' do
       env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }
@@ -407,7 +417,7 @@ describe Grape::Middleware::Formatter do
         parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }
       )
       io = StringIO.new('{invalid}')
-      error = catch(:error) {
+      error = catch(:error) do
         subject.call(
           'PATH_INFO' => '/info',
           'REQUEST_METHOD' => 'POST',
@@ -415,7 +425,7 @@ describe Grape::Middleware::Formatter do
           'rack.input' => io,
           'CONTENT_LENGTH' => io.length
         )
-      }
+      end
 
       expect(error[:message]).to eq 'fail'
       expect(error[:backtrace].size).to be >= 1

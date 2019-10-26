@@ -62,6 +62,30 @@ module Grape
       end
     end
 
+    describe 'when the param_builder is set to Hashie' do
+      before do
+        Grape.configure do |config|
+          config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+        end
+      end
+
+      after do
+        Grape.config.reset
+      end
+
+      subject(:request_params) { Grape::Request.new(env, opts).params }
+
+      context 'when the API does not include a specific param builder' do
+        let(:opts) { {} }
+        it { is_expected.to be_a(Hashie::Mash) }
+      end
+
+      context 'when the API includes a specific param builder' do
+        let(:opts) { { build_params_with: Grape::Extensions::Hash::ParamBuilder } }
+        it { is_expected.to be_a(Hash) }
+      end
+    end
+
     describe '#headers' do
       let(:options) do
         default_options.merge(request_headers)

@@ -4,15 +4,13 @@ module Grape
   module Middleware
     module Auth
       class Base
+        include Helpers
+
         attr_accessor :options, :app, :env
 
         def initialize(app, **options)
           @app = app
           @options = options
-        end
-
-        def context
-          env[Grape::Env::API_ENDPOINT]
         end
 
         def call(env)

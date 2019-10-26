@@ -12,7 +12,7 @@ module Grape
       end
 
       def parsers(options)
-        builtin_parsers.merge(default_elements).merge(options[:parsers] || {})
+        builtin_parsers.merge(default_elements).merge!(options[:parsers] || {})
       end
 
       def parser_for(api_format, **options)

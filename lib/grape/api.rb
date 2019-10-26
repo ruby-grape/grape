@@ -1,233 +1,188 @@
 require 'grape/router'
+require 'grape/api/instance'
 
 module Grape
   # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
   class API
-    include Grape::DSL::API
+    # Class methods that we want to call on the API rather than on the API object
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile!]).freeze
 
     class << self
-      attr_reader :instance
+      attr_accessor :base_instance, :instances
 
-      # A class-level lock to ensure the API is not compiled by multiple
-      # threads simultaneously within the same process.
-      LOCK = Mutex.new
-
-      # Clears all defined routes, endpoints, etc., on this API.
-      def reset!
-        reset_endpoints!
-        reset_routes!
-        reset_validations!
+      # Rather than initializing an object of type Grape::API, create an object of type Instance
+      def new(*args, &block)
+        base_instance.new(*args, &block)
       end
 
-      # Parses the API's definition and compiles it into an instance of
-      # Grape::API.
-      def compile
-        @instance ||= new
+      # When inherited, will create a list of all instances (times the API was mounted)
+      # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
+      def inherited(api, base_instance_parent = Grape::API::Instance)
+        api.initial_setup(base_instance_parent)
+        api.override_all_methods!
+        make_inheritable(api)
       end
 
-      # Wipe the compiled API so we can recompile after changes were made.
-      def change!
-        @instance = nil
+      # Initialize the instance variables on the remountable class, and the base_instance
+      # an instance that will be used to create the set up but will not be mounted
+      def initial_setup(base_instance_parent)
+        @instances = []
+        @setup = []
+        @base_parent = base_instance_parent
+        @base_instance = mount_instance
+      end
+
+      # Redefines all methods so that are forwarded to add_setup and be recorded
+      def override_all_methods!
+        (base_instance.methods - NON_OVERRIDABLE).each do |method_override|
+          define_singleton_method(method_override) do |*args, &block|
+            add_setup(method_override, *args, &block)
+          end
+        end
+      end
+
+      # Configure an API from the outside. If a block is given, it'll pass a
+      # configuration hash to the block which you can use to configure your
+      # API. If no block is given, returns the configuration hash.
+      # The configuration set here is accessible from inside an API with
+      # `configuration` as normal.
+      def configure
+        config = @base_instance.configuration
+        if block_given?
+          yield config
+          self
+        else
+          config
+        end
       end
 
       # This is the interface point between Rack and Grape; it accepts a request
       # from Rack and ultimately returns an array of three values: the status,
       # the headers, and the body. See [the rack specification]
       # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
-      def call(env)
-        LOCK.synchronize { compile } unless instance
-        call!(env)
+      # NOTE: This will only be called on an API directly mounted on RACK
+      def call(*args, &block)
+        instance_for_rack.call(*args, &block)
       end
 
-      # A non-synchronized version of ::call.
-      def call!(env)
-        instance.call(env)
+      # Allows an API to itself be inheritable:
+      def make_inheritable(api)
+        # When a child API inherits from a parent API.
+        def api.inherited(child_api)
+          # The instances of the child API inherit from the instances of the parent API
+          Grape::API.inherited(child_api, base_instance)
+        end
       end
 
-      # (see #cascade?)
-      def cascade(value = nil)
-        if value.nil?
-          inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !namespace_inheritable(:cascade).nil? : true
+      # Alleviates problems with autoloading by tring to search for the constant
+      def const_missing(*args)
+        if base_instance.const_defined?(*args)
+          base_instance.const_get(*args)
         else
-          namespace_inheritable(:cascade, value)
+          super
         end
       end
 
-      # see Grape::Router#recognize_path
-      def recognize_path(path)
-        LOCK.synchronize { compile } unless instance
-        instance.router.recognize_path(path)
+      # The remountable class can have a configuration hash to provide some dynamic class-level variables.
+      # For instance, a descripcion could be done using: `desc configuration[:description]` if it may vary
+      # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
+      # too much, you may actually want to provide a new API rather than remount it.
+      def mount_instance(opts = {})
+        instance = Class.new(@base_parent)
+        instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
+        instance.base = self
+        replay_setup_on(instance)
+        instance
       end
 
-      protected
-
-      def prepare_routes
-        endpoints.map(&:routes).flatten
+      # Replays the set up to produce an API as defined in this class, can be called
+      # on classes that inherit from Grape::API
+      def replay_setup_on(instance)
+        @setup.each do |setup_step|
+          replay_step_on(instance, setup_step)
+        end
       end
 
-      # Execute first the provided block, then each of the
-      # block passed in. Allows for simple 'before' setups
-      # of settings stack pushes.
-      def nest(*blocks, &block)
-        blocks.reject!(&:nil?)
-        if blocks.any?
-          instance_eval(&block) if block_given?
-          blocks.each { |b| instance_eval(&b) }
-          reset_validations!
+      def respond_to?(method, include_private = false)
+        super(method, include_private) || base_instance.respond_to?(method, include_private)
+      end
+
+      def respond_to_missing?(method, include_private = false)
+        base_instance.respond_to?(method, include_private)
+      end
+
+      def method_missing(method, *args, &block)
+        # If there's a missing method, it may be defined on the base_instance instead.
+        if respond_to_missing?(method)
+          base_instance.send(method, *args, &block)
         else
-          instance_eval(&block)
+          super
         end
       end
 
-      def inherited(subclass)
-        subclass.reset!
-        subclass.logger = logger.clone
+      def compile!
+        require 'grape/eager_load'
+        instance_for_rack.compile! # See API::Instance.compile!
       end
 
-      def inherit_settings(other_settings)
-        top_level_setting.inherit_from other_settings.point_in_time_copy
+      private
 
-        # Propagate any inherited params down to our endpoints, and reset any
-        # compiled routes.
-        endpoints.each do |e|
-          e.inherit_settings(top_level_setting.namespace_stackable)
-          e.reset_routes!
-        end
-
-        reset_routes!
-      end
-    end
-
-    attr_reader :router
-
-    # Builds the routes from the defined endpoints, effectively compiling
-    # this API into a usable form.
-    def initialize
-      @router = Router.new
-      add_head_not_allowed_methods_and_options_methods
-      self.class.endpoints.each do |endpoint|
-        endpoint.mount_in(@router)
-      end
-
-      @router.compile!
-      @router.freeze
-    end
-
-    # Handle a request. See Rack documentation for what `env` is.
-    def call(env)
-      result = @router.call(env)
-      result[1].delete(Grape::Http::Headers::X_CASCADE) unless cascade?
-      result
-    end
-
-    # Some requests may return a HTTP 404 error if grape cannot find a matching
-    # route. In this case, Grape::Router adds a X-Cascade header to the response
-    # and sets it to 'pass', indicating to grape's parents they should keep
-    # looking for a matching route on other resources.
-    #
-    # In some applications (e.g. mounting grape on rails), one might need to trap
-    # errors from reaching upstream. This is effectivelly done by unsetting
-    # X-Cascade. Default :cascade is true.
-    def cascade?
-      return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.keys.include?(:cascade)
-      return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options) && self.class.namespace_inheritable(:version_options).key?(:cascade)
-      true
-    end
-
-    reset!
-
-    private
-
-    # For every resource add a 'OPTIONS' route that returns an HTTP 204 response
-    # with a list of HTTP methods that can be called. Also add a route that
-    # will return an HTTP 405 response for any HTTP method that the resource
-    # cannot handle.
-    def add_head_not_allowed_methods_and_options_methods
-      routes_map = {}
-
-      self.class.endpoints.each do |endpoint|
-        routes = endpoint.routes
-        routes.each do |route|
-          # using the :any shorthand produces [nil] for route methods, substitute all manually
-          route_key = route.pattern.to_regexp
-          routes_map[route_key] ||= {}
-          route_settings = routes_map[route_key]
-          route_settings[:pattern] = route.pattern
-          route_settings[:requirements] = route.requirements
-          route_settings[:path] = route.origin
-          route_settings[:methods] ||= []
-          route_settings[:methods] << route.request_method
-          route_settings[:endpoint] = route.app
-
-          # using the :any shorthand produces [nil] for route methods, substitute all manually
-          route_settings[:methods] = %w[GET PUT POST DELETE PATCH HEAD OPTIONS] if route_settings[:methods].include?('*')
+      def instance_for_rack
+        if never_mounted?
+          base_instance
+        else
+          mounted_instances.first
         end
       end
 
-      # The paths we collected are prepared (cf. Path#prepare), so they
-      # contain already versioning information when using path versioning.
-      # Disable versioning so adding a route won't prepend versioning
-      # informations again.
-      without_root_prefix do
-        without_versioning do
-          routes_map.each do |_, config|
-            methods = config[:methods]
-            allowed_methods = methods.dup
+      # Adds a new stage to the set up require to get a Grape::API up and running
+      def add_setup(method, *args, &block)
+        setup_step = { method: method, args: args, block: block }
+        @setup << setup_step
+        last_response = nil
+        @instances.each do |instance|
+          last_response = replay_step_on(instance, setup_step)
+        end
+        last_response
+      end
 
-            unless self.class.namespace_inheritable(:do_not_route_head)
-              allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
-            end
+      def replay_step_on(instance, setup_step)
+        return if skip_immediate_run?(instance, setup_step[:args])
+        instance.send(setup_step[:method], *evaluate_arguments(instance.configuration, *setup_step[:args]), &setup_step[:block])
+      end
 
-            allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods).join(', ')
+      # Skips steps that contain arguments to be lazily executed (on re-mount time)
+      def skip_immediate_run?(instance, args)
+        instance.base_instance? &&
+          (any_lazy?(args) || args.any? { |arg| arg.is_a?(Hash) && any_lazy?(arg.values) })
+      end
 
-            unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
-              config[:endpoint].options[:options_route_enabled] = true
-            end
+      def any_lazy?(args)
+        args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
+      end
 
-            attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
-            generate_not_allowed_method(config[:pattern], attributes)
+      def evaluate_arguments(configuration, *args)
+        args.map do |argument|
+          if argument.respond_to?(:lazy?) && argument.lazy?
+            configuration.fetch(argument.access_keys).evaluate
+          elsif argument.is_a?(Hash)
+            argument.map { |key, value| [key, evaluate_arguments(configuration, value).first] }.to_h
+          elsif argument.is_a?(Array)
+            evaluate_arguments(configuration, *argument)
+          else
+            argument
           end
         end
       end
-    end
 
-    # Generate a route that returns an HTTP 405 response for a user defined
-    # path on methods not specified
-    def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
-      not_allowed_methods = %w[GET PUT POST DELETE PATCH HEAD] - allowed_methods
-      not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
+      def never_mounted?
+        mounted_instances.empty?
+      end
 
-      return if not_allowed_methods.empty?
-
-      @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
-    end
-
-    # Allows definition of endpoints that ignore the versioning configuration
-    # used by the rest of your API.
-    def without_versioning(&_block)
-      old_version = self.class.namespace_inheritable(:version)
-      old_version_options = self.class.namespace_inheritable(:version_options)
-
-      self.class.namespace_inheritable_to_nil(:version)
-      self.class.namespace_inheritable_to_nil(:version_options)
-
-      yield
-
-      self.class.namespace_inheritable(:version, old_version)
-      self.class.namespace_inheritable(:version_options, old_version_options)
-    end
-
-    # Allows definition of endpoints that ignore the root prefix used by the
-    # rest of your API.
-    def without_root_prefix(&_block)
-      old_prefix = self.class.namespace_inheritable(:root_prefix)
-
-      self.class.namespace_inheritable_to_nil(:root_prefix)
-
-      yield
-
-      self.class.namespace_inheritable(:root_prefix, old_prefix)
+      def mounted_instances
+        instances - [base_instance]
+      end
     end
   end
 end

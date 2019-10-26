@@ -39,14 +39,16 @@ module Grape
       end
 
       def full_messages
-        map { |attributes, error| full_message(attributes, error) }.uniq
+        messages = map { |attributes, error| full_message(attributes, error) }
+        messages.uniq!
+        messages
       end
 
       private
 
       def full_message(attributes, error)
         I18n.t(
-          'grape.errors.format'.to_sym,
+          'grape.errors.format',
           default: '%{attributes} %{message}',
           attributes: attributes.count == 1 ? translate_attribute(attributes.first) : translate_attributes(attributes),
           message: error.message

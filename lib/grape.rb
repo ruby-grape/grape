@@ -34,7 +34,6 @@ module Grape
     autoload :Namespace
 
     autoload :Path
-
     autoload :Cookies
     autoload :Validations
     autoload :ErrorFormatter
@@ -55,106 +54,125 @@ module Grape
 
   module Exceptions
     extend ::ActiveSupport::Autoload
-    autoload :Base
-    autoload :Validation
-    autoload :ValidationArrayErrors
-    autoload :ValidationErrors
-    autoload :MissingVendorOption
-    autoload :MissingMimeType
-    autoload :MissingOption
-    autoload :InvalidFormatter
-    autoload :InvalidVersionerOption
-    autoload :UnknownValidator
-    autoload :UnknownOptions
-    autoload :UnknownParameter
-    autoload :InvalidWithOptionForRepresent
-    autoload :IncompatibleOptionValues
-    autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
-    autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
-    autoload :InvalidMessageBody
-    autoload :InvalidAcceptHeader
-    autoload :InvalidVersionHeader
-    autoload :MethodNotAllowed
-    autoload :InvalidResponse
+    eager_autoload do
+      autoload :Base
+      autoload :Validation
+      autoload :ValidationArrayErrors
+      autoload :ValidationErrors
+      autoload :MissingVendorOption
+      autoload :MissingMimeType
+      autoload :MissingOption
+      autoload :InvalidFormatter
+      autoload :InvalidVersionerOption
+      autoload :UnknownValidator
+      autoload :UnknownOptions
+      autoload :UnknownParameter
+      autoload :InvalidWithOptionForRepresent
+      autoload :IncompatibleOptionValues
+      autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
+      autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
+      autoload :InvalidMessageBody
+      autoload :InvalidAcceptHeader
+      autoload :InvalidVersionHeader
+      autoload :MethodNotAllowed
+      autoload :InvalidResponse
+    end
   end
 
   module Extensions
     extend ::ActiveSupport::Autoload
-
-    autoload :DeepMergeableHash
-    autoload :DeepSymbolizeHash
-    autoload :DeepHashWithIndifferentAccess
-    autoload :Hash
-
+    eager_autoload do
+      autoload :DeepMergeableHash
+      autoload :DeepSymbolizeHash
+      autoload :DeepHashWithIndifferentAccess
+      autoload :Hash
+    end
     module ActiveSupport
       extend ::ActiveSupport::Autoload
-
-      autoload :HashWithIndifferentAccess
+      eager_autoload do
+        autoload :HashWithIndifferentAccess
+      end
     end
 
     module Hashie
       extend ::ActiveSupport::Autoload
-
-      autoload :Mash
+      eager_autoload do
+        autoload :Mash
+      end
     end
   end
 
   module Middleware
     extend ::ActiveSupport::Autoload
-    autoload :Base
-    autoload :Versioner
-    autoload :Formatter
-    autoload :Error
-    autoload :Globals
-    autoload :Stack
+    eager_autoload do
+      autoload :Base
+      autoload :Versioner
+      autoload :Formatter
+      autoload :Error
+      autoload :Globals
+      autoload :Stack
+      autoload :Helpers
+    end
 
     module Auth
       extend ::ActiveSupport::Autoload
-      autoload :Base
-      autoload :DSL
-      autoload :StrategyInfo
-      autoload :Strategies
+      eager_autoload do
+        autoload :Base
+        autoload :DSL
+        autoload :StrategyInfo
+        autoload :Strategies
+      end
     end
 
     module Versioner
       extend ::ActiveSupport::Autoload
-      autoload :Path
-      autoload :Header
-      autoload :Param
-      autoload :AcceptVersionHeader
+      eager_autoload do
+        autoload :Path
+        autoload :Header
+        autoload :Param
+        autoload :AcceptVersionHeader
+      end
     end
   end
 
   module Util
     extend ::ActiveSupport::Autoload
-    autoload :InheritableValues
-    autoload :StackableValues
-    autoload :ReverseStackableValues
-    autoload :InheritableSetting
-    autoload :StrictHashConfiguration
-    autoload :Registrable
+    eager_autoload do
+      autoload :InheritableValues
+      autoload :StackableValues
+      autoload :ReverseStackableValues
+      autoload :InheritableSetting
+      autoload :StrictHashConfiguration
+      autoload :Registrable
+    end
   end
 
   module ErrorFormatter
     extend ::ActiveSupport::Autoload
-    autoload :Base
-    autoload :Json
-    autoload :Txt
-    autoload :Xml
+    eager_autoload do
+      autoload :Base
+      autoload :Json
+      autoload :Txt
+      autoload :Xml
+    end
   end
 
   module Formatter
     extend ::ActiveSupport::Autoload
-    autoload :Json
-    autoload :SerializableHash
-    autoload :Txt
-    autoload :Xml
+    eager_autoload do
+      autoload :Json
+      autoload :SerializableHash
+      autoload :Txt
+      autoload :Xml
+    end
   end
 
   module Parser
     extend ::ActiveSupport::Autoload
-    autoload :Json
-    autoload :Xml
+    eager_autoload do
+      autoload :Json
+      autoload :Xml
+    end
   end
 
   module DSL
@@ -178,26 +196,37 @@ module Grape
 
   class API
     extend ::ActiveSupport::Autoload
-    autoload :Helpers
+    eager_autoload do
+      autoload :Helpers
+    end
   end
 
   module Presenters
     extend ::ActiveSupport::Autoload
-    autoload :Presenter
+    eager_autoload do
+      autoload :Presenter
+    end
   end
 
   module ServeFile
     extend ::ActiveSupport::Autoload
-    autoload :FileResponse
-    autoload :FileBody
-    autoload :SendfileResponse
+    eager_autoload do
+      autoload :FileResponse
+      autoload :FileBody
+      autoload :SendfileResponse
+    end
   end
 end
 
+require 'grape/config'
 require 'grape/util/content_types'
+require 'grape/util/lazy_value'
+require 'grape/util/endpoint_configuration'
 
 require 'grape/validations/validators/base'
 require 'grape/validations/attributes_iterator'
+require 'grape/validations/single_attribute_iterator'
+require 'grape/validations/multiple_attributes_iterator'
 require 'grape/validations/validators/allow_blank'
 require 'grape/validations/validators/as'
 require 'grape/validations/validators/at_least_one_of'
@@ -207,6 +236,7 @@ require 'grape/validations/validators/exactly_one_of'
 require 'grape/validations/validators/mutual_exclusion'
 require 'grape/validations/validators/presence'
 require 'grape/validations/validators/regexp'
+require 'grape/validations/validators/same_as'
 require 'grape/validations/validators/values'
 require 'grape/validations/validators/except_values'
 require 'grape/validations/params_scope'

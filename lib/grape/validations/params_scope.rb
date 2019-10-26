@@ -36,6 +36,10 @@ module Grape
         configure_declared_params
       end
 
+      def configuration
+        @api.configuration.evaluate
+      end
+
       # @return [Boolean] whether or not this entire scope needs to be
       #   validated
       def should_validate?(parameters)
@@ -52,6 +56,7 @@ module Grape
 
         return true unless @dependent_on
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
+        return false unless params.respond_to?(:with_indifferent_access)
         params = params.with_indifferent_access
 
         @dependent_on.each do |dependency|
@@ -71,7 +76,7 @@ module Grape
       def full_name(name, index: nil)
         if nested?
           # Find our containing element's name, and append ours.
-          [@parent.full_name(@element), [@index || index, name].map(&method(:brackets))].compact.join
+          "#{@parent.full_name(@element)}#{brackets(@index || index)}#{brackets(name)}"
         elsif lateral?
           # Find the name of the element as if it was at the same nesting level
           # as our parent. We need to forward our index upward to achieve this.
@@ -119,8 +124,9 @@ module Grape
           @parent.push_declared_params(attrs, opts)
         else
           if opts && opts[:as]
-            @api.route_setting(:aliased_params, @api.route_setting(:aliased_params) || [])
-            @api.route_setting(:aliased_params) << { attrs.first => opts[:as] }
+            @api.route_setting(:renamed_params, @api.route_setting(:renamed_params) || [])
+            @api.route_setting(:renamed_params) << { attrs.first => opts[:as] }
+            attrs = [opts[:as]]
           end
 
           @declared_params.concat attrs
@@ -178,14 +184,12 @@ module Grape
           raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
 
-        opts = attrs[1] || { type: Array }
-
         self.class.new(
           api:      @api,
-          element:  attrs.first,
+          element:  attrs[1][:as] || attrs.first,
           parent:   self,
           optional: optional,
-          type:     opts[:type],
+          type:     type || Array,
           &block
         )
       end
@@ -406,13 +410,15 @@ module Grape
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
-        factory = Grape::Validations::ValidatorFactory.new(attributes:      attrs,
-                                                           options:         options,
-                                                           required:        doc_attrs[:required],
-                                                           params_scope:    self,
-                                                           opts:            opts,
-                                                           validator_class: validator_class)
-        @api.namespace_stackable(:validations, factory)
+        validator_options = {
+          attributes:      attrs,
+          options:         options,
+          required:        doc_attrs[:required],
+          params_scope:    self,
+          opts:            opts,
+          validator_class: validator_class
+        }
+        @api.namespace_stackable(:validations, validator_options)
       end
 
       def validate_value_coercion(coerce_type, *values_list)

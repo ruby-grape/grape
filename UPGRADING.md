@@ -1,7 +1,99 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.1.1
+### Upgrading to >= 1.2.4
+
+#### Headers in `error!` call
+
+Headers in `error!` will be merged with `headers` hash. If any header need to be cleared on `error!` call, make sure to move it to the `after` block.
+
+```ruby
+class SampleApi < Grape::API
+  before do
+    header 'X-Before-Header', 'before_call'
+  end
+
+  get 'ping' do
+    header 'X-App-Header', 'on_call'
+    error! :pong, 400, 'X-Error-Details' => 'Invalid token'
+  end
+end
+```
+**Former behaviour**
+```ruby
+  response.headers['X-Before-Header'] # => nil
+  response.headers['X-App-Header'] # => nil
+  response.headers['X-Error-Details'] # => Invalid token
+```
+
+**Current behaviour**
+```ruby
+  response.headers['X-Before-Header'] # => 'before_call'
+  response.headers['X-App-Header'] # => 'on_call'
+  response.headers['X-Error-Details'] # => Invalid token
+```
+
+### Upgrading to >= 1.2.1
+
+#### Obtaining the name of a mounted class
+
+In order to make obtaining the name of a mounted class simpler, we've delegated `.to_s` to `base.name`
+
+**Deprecated in 1.2.0**
+```ruby
+  payload[:endpoint].options[:for].name
+```
+**New**
+```ruby
+  payload[:endpoint].options[:for].to_s
+```
+
+### Upgrading to >= 1.2.0
+
+#### Changes in the Grape::API class
+
+##### Patching the class
+
+In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
+rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
+with a class that can contain several instances of `Grape::API`.
+
+This changes were done in such a way that no code-changes should be required.
+However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
+
+Note, this is particularly relevant if you are opening the class `Grape::API` for modification.
+
+**Deprecated**
+```ruby
+class Grape::API
+  # your patched logic
+  ...
+end
+```
+**New**
+```ruby
+class Grape::API::Instance
+  # your patched logic
+  ...
+end
+```
+
+##### `name` (and other caveats) of the mounted API
+
+After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class
+which inherit from `Grape::API::Instance`.
+What this means in practice, is:
+- Generally: you can access the named class from the instance calling the getter `base`.
+- In particular: If you need the `name`, you can use `base`.`name`
+
+**Deprecated**
+```ruby
+  payload[:endpoint].options[:for].name
+```
+**New**
+```ruby
+  payload[:endpoint].options[:for].base.name
+```
 
 #### Changes in rescue_from returned object
 
@@ -10,9 +102,9 @@ Grape will now check the object returned from `rescue_from` and ensure that it i
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :all do |e|
-    # version prior to 1.1.1
+    # version prior to 1.2.0
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
-    # 1.1.1 version
+    # 1.2.0  version
     Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
   end
 end

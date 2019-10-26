@@ -9,6 +9,7 @@ en:
         blank: 'is empty'
         values: 'does not have a valid value'
         except_values: 'has a value not allowed'
+        same_as: 'is not the same as %{parameter}'
         missing_vendor_option:
           problem: 'missing :vendor option.'
           summary: 'when version using header, you must specify :vendor option. '

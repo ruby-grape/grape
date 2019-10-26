@@ -70,6 +70,16 @@ module Grape
 
           expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(mount_path: ['/app1', '/app2'])
         end
+
+        it 'mounts multiple routes at once' do
+          base_app = Class.new(Grape::API)
+          app1     = Class.new(Grape::API)
+          app2     = Class.new(Grape::API)
+          base_app.mount(app1 => '/app1', app2 => '/app2')
+
+          expect(app1.inheritable_setting.to_hash[:namespace_stackable]).to eq(mount_path: ['/app1'])
+          expect(app2.inheritable_setting.to_hash[:namespace_stackable]).to eq(mount_path: ['/app2'])
+        end
       end
 
       describe '.route' do

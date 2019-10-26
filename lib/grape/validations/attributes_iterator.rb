@@ -41,10 +41,12 @@ module Grape
             @scope.index = index
           end
 
-          @attrs.each do |attr_name|
-            yield resource_params, attr_name, inside_array
-          end
+          yield_attributes(resource_params, @attrs, &block)
         end
+      end
+
+      def yield_attributes(_resource_params, _attrs)
+        raise NotImplementedError
       end
     end
   end

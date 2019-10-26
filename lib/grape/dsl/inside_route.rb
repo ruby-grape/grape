@@ -61,13 +61,13 @@ module Grape
             else
               # If it is not a Hash then it does not have children.
               # Find its value or set it to nil.
-              has_alias = route_setting(:aliased_params) && route_setting(:aliased_params).find { |current| current[declared_param] }
-              param_alias = has_alias[declared_param] if has_alias
+              has_renaming = route_setting(:renamed_params) && route_setting(:renamed_params).find { |current| current[declared_param] }
+              param_renaming = has_renaming[declared_param] if has_renaming
 
-              next unless options[:include_missing] || passed_params.key?(declared_param) || (param_alias && passed_params.key?(param_alias))
+              next unless options[:include_missing] || passed_params.key?(declared_param) || (param_renaming && passed_params.key?(param_renaming))
 
-              if param_alias
-                memo[optioned_param_key(param_alias, options)] = passed_params[param_alias]
+              if param_renaming
+                memo[optioned_param_key(param_renaming, options)] = passed_params[param_renaming]
               else
                 memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
               end
@@ -129,13 +129,19 @@ module Grape
         env[Grape::Env::API_VERSION]
       end
 
+      def configuration
+        options[:for].configuration.evaluate
+      end
+
       # End the request and display an error to the
       # end user with the specified message.
       #
       # @param message [String] The message to display.
       # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
-      def error!(message, status = nil, headers = nil)
+      # @param additional_headers [Hash] Addtional headers for the response.
+      def error!(message, status = nil, additional_headers = nil)
         self.status(status || namespace_inheritable(:default_error_status))
+        headers = additional_headers.present? ? header.merge(additional_headers) : header
         throw :error, message: message, status: self.status, headers: headers
       end
 

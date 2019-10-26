@@ -99,7 +99,7 @@ module Grape
         def available_media_types
           available_media_types = []
 
-          content_types.each do |extension, _media_type|
+          content_types.each_key do |extension|
             versions.reverse_each do |version|
               available_media_types += [
                 "application/vnd.#{vendor}-#{version}+#{extension}",
@@ -111,7 +111,7 @@ module Grape
 
           available_media_types << "application/vnd.#{vendor}"
 
-          content_types.each do |_, media_type|
+          content_types.each_value do |media_type|
             available_media_types << media_type
           end
 
@@ -173,7 +173,7 @@ module Grape
         # @return [Boolean] whether the content type sets a vendor
         def vendor?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[HAS_VENDOR_REGEX]
+          subtype.present? && subtype[HAS_VENDOR_REGEX]
         end
 
         def request_vendor(media_type)
@@ -190,7 +190,7 @@ module Grape
         # @return [Boolean] whether the content type sets an API version
         def version?(media_type)
           _, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          subtype[HAS_VERSION_REGEX]
+          subtype.present? && subtype[HAS_VERSION_REGEX]
         end
       end
     end

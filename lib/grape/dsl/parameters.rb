@@ -211,10 +211,15 @@ module Grape
       # block yet.
       # @return [Boolean] whether the parameter has been defined
       def declared_param?(param)
-        # @declared_params also includes hashes of options and such, but those
-        # won't be flattened out.
-        @declared_params.flatten.any? do |declared_param|
-          first_hash_key_or_param(declared_param) == param
+        if lateral?
+          # Elements of @declared_params of lateral scope are pushed in @parent. So check them in @parent.
+          @parent.declared_param?(param)
+        else
+          # @declared_params also includes hashes of options and such, but those
+          # won't be flattened out.
+          @declared_params.flatten.any? do |declared_param|
+            first_hash_key_or_param(declared_param) == param
+          end
         end
       end
 
