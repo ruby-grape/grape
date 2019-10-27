@@ -14,7 +14,7 @@ module Grape
     end
 
     def self.normalize_path(path)
-      path = String.new("/#{path}")
+      path = +"/#{path}"
       path.squeeze!('/')
       path.sub!(%r{/+\Z}, '')
       path = '/' if path == ''
