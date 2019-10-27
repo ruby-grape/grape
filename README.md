@@ -214,7 +214,7 @@ module Twitter
 
       desc 'Return a status.'
       params do
-        requires :id, type: Integer, desc: 'Status id.'
+        requires :id, type: Integer, desc: 'Status ID.'
       end
       route_param :id do
         get do
