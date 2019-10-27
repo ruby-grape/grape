@@ -8,7 +8,7 @@ module Grape
       include Helpers
 
       attr_reader :app, :env, :options
-      TEXT_HTML = 'text/html'.freeze
+      TEXT_HTML = 'text/html'
 
       include Grape::DSL::Headers
 

@@ -3,8 +3,8 @@
 module Grape
   module Exceptions
     class Base < StandardError
-      BASE_MESSAGES_KEY = 'grape.errors.messages'.freeze
-      BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'.freeze
+      BASE_MESSAGES_KEY = 'grape.errors.messages'
+      BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'
       FALLBACK_LOCALE = :en
 
       attr_reader :status, :message, :headers
