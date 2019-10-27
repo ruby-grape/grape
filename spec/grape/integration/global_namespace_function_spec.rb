@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see https://github.com/ruby-grape/grape/issues/1348
 
 require 'spec_helper'
