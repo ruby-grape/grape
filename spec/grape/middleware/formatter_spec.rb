@@ -43,7 +43,7 @@ describe Grape::Middleware::Formatter do
     end
 
     context 'xml' do
-      let(:body) { 'string' }
+      let(:body) { +'string' }
       it 'calls #to_xml if the content type is xml' do
         body.instance_eval do
           def to_xml

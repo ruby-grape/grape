@@ -15,8 +15,7 @@ describe Grape::Endpoint do
         optional :foo, default: '-abcdef'
       end
       get do
-        params[:foo].slice!(0)
-        params[:foo]
+        params[:foo][1..-1]
       end
     end
   end
