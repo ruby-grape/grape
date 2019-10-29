@@ -37,7 +37,7 @@ module Grape
       end
 
       def build_path(pattern, anchor: false, suffix: nil, **_options)
-        new_pattern = String.new(pattern)
+        new_pattern = +pattern
         unless anchor || new_pattern.end_with?('*path')
           new_pattern << '/' unless new_pattern.end_with?('/')
           new_pattern << '*path'
