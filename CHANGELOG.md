@@ -8,6 +8,7 @@
 * [#1904](https://github.com/ruby-grape/grape/pull/1904): Allows Grape to load files on startup rather than on the first call - [@myxoh](https://github.com/myxoh).
 * [#1907](https://github.com/ruby-grape/grape/pull/1907): Adds outside configuration to Grape with `configure` - [@unleashy](https://github.com/unleashy).
 * [#1914](https://github.com/ruby-grape/grape/pull/1914): Run specs in random order - [@splattael](https://github.com/splattael).
+* [#1790](https://github.com/ruby-grape/grape/pull/1790): Added frozen_string_literal - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
