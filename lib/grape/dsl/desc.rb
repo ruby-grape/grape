@@ -49,8 +49,17 @@ module Grape
       #
       def desc(description, options = {}, &config_block)
         if block_given?
-          configuration = defined?(configuration) && configuration.respond_to?(:evaluate) ? configuration.evaluate : {}
-          config_class = desc_container(configuration)
+          endpoint_configuration = if defined?(configuration)
+                                     # When the instance is mounted - the configuration is executed on mount time
+                                     if configuration.respond_to?(:evaluate)
+                                       configuration.evaluate
+                                     # Within `given` or `mounted blocks` the configuration is already evaluated
+                                     elsif configuration.is_a?(Hash)
+                                       configuration
+                                     end
+                                   end
+          endpoint_configuration ||= {}
+          config_class = desc_container(endpoint_configuration)
 
           config_class.configure do
             description description
