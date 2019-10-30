@@ -20,10 +20,13 @@ describe Grape::Validations::CoerceValidator do
 
     context 'i18n' do
       after :each do
+        I18n.available_locales = %i[en]
         I18n.locale = :en
+        I18n.default_locale = :en
       end
 
       it 'i18n error on malformed input' do
+        I18n.available_locales = %i[en zh-CN]
         I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
         I18n.reload!
         I18n.locale = 'zh-CN'.to_sym
@@ -40,6 +43,7 @@ describe Grape::Validations::CoerceValidator do
       end
 
       it 'gives an english fallback error when default locale message is blank' do
+        I18n.available_locales = %i[en pt-BR]
         I18n.locale = 'pt-BR'.to_sym
         subject.params do
           requires :age, type: Integer
@@ -576,7 +580,7 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
-        get '/', splines: [{ x: 2, ints: [] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
+        get '/', splines: [{ x: 2, ints: [5] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('arrays work')
 
@@ -592,7 +596,7 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
-        get '/', splines: [{ x: 1, ints: [] }, { x: 4, ints: [] }]
+        get '/', splines: [{ x: 1, ints: [5] }, { x: 4, ints: [6] }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end

@@ -213,7 +213,13 @@ describe Grape::Middleware::Formatter do
   context 'no content responses' do
     let(:no_content_response) { ->(status) { [status, {}, ['']] } }
 
-    Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.each do |status|
+    STATUSES_WITHOUT_BODY = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
+                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.keys
+                            else
+                              Rack::Utils::STATUS_WITH_NO_ENTITY_BODY
+                            end
+
+    STATUSES_WITHOUT_BODY.each do |status|
       it "does not modify a #{status} response" do
         expected_response = no_content_response[status]
         allow(app).to receive(:call).and_return(expected_response)
@@ -390,6 +396,10 @@ describe Grape::Middleware::Formatter do
     before do
       Grape::Formatter.register :invalid, InvalidFormatter
       Grape::ContentTypes::CONTENT_TYPES[:invalid] = 'application/x-invalid'
+    end
+    after do
+      Grape::ContentTypes::CONTENT_TYPES.delete(:invalid)
+      Grape::Formatter.default_elements.delete(:invalid)
     end
 
     it 'returns response by invalid formatter' do

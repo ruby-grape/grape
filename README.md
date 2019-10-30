@@ -15,6 +15,7 @@
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
+  - [All](#all)
   - [Rack](#rack)
   - [ActiveRecord without Rails](#activerecord-without-rails)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
@@ -213,7 +214,7 @@ module Twitter
 
       desc 'Return a status.'
       params do
-        requires :id, type: Integer, desc: 'Status id.'
+        requires :id, type: Integer, desc: 'Status ID.'
       end
       route_param :id do
         get do
@@ -261,12 +262,30 @@ end
 
 ## Mounting
 
+### All
+
+
+By default Grape will compile the routes on the first route, it is possible to pre-load routes using the `compile!` method.
+
+```ruby
+Twitter::API.compile!
+```
+
+This can be added to your `config.ru` (if using rackup), `application.rb` (if using rails), or any file that loads your server.
+
 ### Rack
 
 The above sample creates a Rack application that can be run from a rackup `config.ru` file
 with `rackup`:
 
 ```ruby
+run Twitter::API
+```
+
+(With pre-loading you can use)
+
+```ruby
+Twitter::API.compile!
 run Twitter::API
 ```
 
@@ -611,6 +630,17 @@ Grape.configure do |config|
   config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
 end
 ```
+
+You can also configure a single API:
+
+```ruby
+API.configure do |config|
+  config[key] = value
+end
+```
+
+This will be available inside the API with `configuration`, as if it were
+[mount configuration](#mount-configuration).
 
 ## Parameters
 
@@ -2467,6 +2497,17 @@ class Twitter::API < Grape::API
 end
 ```
 
+Inside the `rescue_from` block, the environment of the original controller method(`.self` receiver) is accessible through the `#context` method.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    user_id = context.params[:user_id]
+    error!("error for #{user_id}")
+  end
+end
+```
+
 #### Rescuing exceptions inside namespaces
 
 You could put `rescue_from` clauses inside a namespace and they will take precedence over ones
@@ -3091,6 +3132,8 @@ end
 
 Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middlware::Auth::Base`.
+
 ## Describing and Inspecting an API
 
 Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
@@ -3402,6 +3445,8 @@ class API < Grape::API
   end
 end
 ```
+
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middlware::Base`.
 
 ### Rails Middleware
 

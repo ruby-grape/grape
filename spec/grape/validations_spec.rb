@@ -540,7 +540,10 @@ describe Grape::Validations do
         ]
 
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing, children[1][parents] is missing')
+        expect(last_response.body).to eq(
+          'children[0][parents][0][name] is missing, ' \
+          'children[1][parents][0][name] is missing'
+        )
       end
 
       it 'safely handles empty arrays and blank parameters' do
@@ -548,7 +551,14 @@ describe Grape::Validations do
         # should actually return 200, since an empty array is valid.
         get '/within_array', children: []
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children is missing')
+        expect(last_response.body).to eq(
+          'children[0][name] is missing, ' \
+          'children[0][parents] is missing, ' \
+          'children[0][parents] is invalid, ' \
+          'children[0][parents][0][name] is missing, ' \
+          'children[0][parents][0][name] is empty'
+        )
+
         get '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children[0][parents] is missing')
@@ -1223,7 +1233,9 @@ describe Grape::Validations do
             end
             get '/custom_message/mutually_exclusive', beer: 'true', wine: 'true', nested: { scotch: 'true', aquavit: 'true' }, nested2: [{ scotch2: 'true' }, { scotch2: 'true', aquavit2: 'true' }]
             expect(last_response.status).to eq(400)
-            expect(last_response.body).to eq 'beer, wine are mutually exclusive pass only one, scotch, aquavit are mutually exclusive pass only one, scotch2, aquavit2 are mutually exclusive pass only one'
+            expect(last_response.body).to eq(
+              'beer, wine are mutually exclusive pass only one, nested[scotch], nested[aquavit] are mutually exclusive pass only one, nested2[1][scotch2], nested2[1][aquavit2] are mutually exclusive pass only one'
+            )
           end
         end
 
@@ -1249,7 +1261,7 @@ describe Grape::Validations do
 
           get '/mutually_exclusive', beer: 'true', wine: 'true', nested: { scotch: 'true', aquavit: 'true' }, nested2: [{ scotch2: 'true' }, { scotch2: 'true', aquavit2: 'true' }]
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq 'beer, wine are mutually exclusive, scotch, aquavit are mutually exclusive, scotch2, aquavit2 are mutually exclusive'
+          expect(last_response.body).to eq 'beer, wine are mutually exclusive, nested[scotch], nested[aquavit] are mutually exclusive, nested2[1][scotch2], nested2[1][aquavit2] are mutually exclusive'
         end
       end
 
@@ -1318,7 +1330,7 @@ describe Grape::Validations do
               optional :beer
               optional :wine
               optional :juice
-              exactly_one_of :beer, :wine, :juice, message: { exactly_one: 'are missing, exactly one parameter is required', mutual_exclusion: 'are mutually exclusive, exactly one parameter is required' }
+              exactly_one_of :beer, :wine, :juice, message: 'are missing, exactly one parameter is required'
             end
             get '/exactly_one_of' do
               'exactly_one_of works!'
@@ -1352,7 +1364,7 @@ describe Grape::Validations do
           it 'errors when two or more are present' do
             get '/custom_message/exactly_one_of', beer: 'string', wine: 'anotherstring'
             expect(last_response.status).to eq(400)
-            expect(last_response.body).to eq 'beer, wine are mutually exclusive, exactly one parameter is required'
+            expect(last_response.body).to eq 'beer, wine, juice are missing, exactly one parameter is required'
           end
         end
 
@@ -1371,7 +1383,7 @@ describe Grape::Validations do
         it 'errors when two or more are present' do
           get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq 'beer, wine are mutually exclusive'
+          expect(last_response.body).to eq 'beer, wine, juice are missing, exactly one parameter must be provided'
         end
       end
 
@@ -1399,7 +1411,7 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/exactly_one_of_nested'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq 'nested is missing, beer_nested, wine_nested, juice_nested are missing, exactly one parameter must be provided'
+          expect(last_response.body).to eq 'nested is missing, nested[beer_nested], nested[wine_nested], nested[juice_nested] are missing, exactly one parameter must be provided'
         end
 
         it 'succeeds when one is present' do
@@ -1411,7 +1423,7 @@ describe Grape::Validations do
         it 'errors when two or more are present' do
           get '/exactly_one_of_nested', nested: { beer_nested: 'string' }, nested2: [{ beer_nested2: 'string', wine_nested2: 'anotherstring' }]
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq 'beer_nested2, wine_nested2 are mutually exclusive'
+          expect(last_response.body).to eq 'nested2[0][beer_nested2], nested2[0][wine_nested2], nested2[0][juice_nested2] are missing, exactly one parameter must be provided'
         end
       end
     end
@@ -1485,16 +1497,16 @@ describe Grape::Validations do
         before :each do
           subject.params do
             requires :nested, type: Hash do
-              optional :beer_nested
-              optional :wine_nested
-              optional :juice_nested
-              at_least_one_of :beer_nested, :wine_nested, :juice_nested
+              optional :beer
+              optional :wine
+              optional :juice
+              at_least_one_of :beer, :wine, :juice
             end
             optional :nested2, type: Array do
-              optional :beer_nested2
-              optional :wine_nested2
-              optional :juice_nested2
-              at_least_one_of :beer_nested2, :wine_nested2, :juice_nested2
+              optional :beer
+              optional :wine
+              optional :juice
+              at_least_one_of :beer, :wine, :juice
             end
           end
           subject.get '/at_least_one_of_nested' do
@@ -1505,17 +1517,17 @@ describe Grape::Validations do
         it 'errors when none are present' do
           get '/at_least_one_of_nested'
           expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq 'nested is missing, beer_nested, wine_nested, juice_nested are missing, at least one parameter must be provided'
+          expect(last_response.body).to eq 'nested is missing, nested[beer], nested[wine], nested[juice] are missing, at least one parameter must be provided'
         end
 
         it 'does not error when one is present' do
-          get '/at_least_one_of_nested', nested: { beer_nested: 'string' }, nested2: [{ beer_nested2: 'string' }]
+          get '/at_least_one_of_nested', nested: { beer: 'string' }, nested2: [{ beer: 'string' }]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq 'at_least_one_of works!'
         end
 
         it 'does not error when two are present' do
-          get '/at_least_one_of_nested', nested: { beer_nested: 'string', wine_nested: 'string' }, nested2: [{ beer_nested2: 'string', wine_nested2: 'string' }]
+          get '/at_least_one_of_nested', nested: { beer: 'string', wine: 'string' }, nested2: [{ beer: 'string', wine: 'string' }]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq 'at_least_one_of works!'
         end

@@ -885,6 +885,40 @@ XML
     end
   end
 
+  describe '.compile!' do
+    it 'requires the grape/eager_load file' do
+      expect(app).to receive(:require).with('grape/eager_load') { nil }
+      app.compile!
+    end
+
+    it 'compiles the instance for rack!' do
+      stubbed_object = double(:instance_for_rack)
+      allow(app).to receive(:instance_for_rack) { stubbed_object }
+    end
+  end
+
+  # NOTE: this method is required to preserve the ability of pre-mounting
+  # the root API into a namespace, it may be deprecated in the future.
+  describe 'instance_for_rack' do
+    context 'when the app was not mounted' do
+      it 'returns the base_instance' do
+        expect(app.send(:instance_for_rack)).to eq app.base_instance
+      end
+    end
+
+    context 'when the app was mounted' do
+      it 'returns the first mounted instance' do
+        mounted_app = app
+        Class.new(Grape::API) do
+          namespace 'new_namespace' do
+            mount mounted_app
+          end
+        end
+        expect(app.send(:instance_for_rack)).to eq app.send(:mounted_instances).first
+      end
+    end
+  end
+
   describe 'filters' do
     it 'adds a before filter' do
       subject.before { @foo = 'first'  }
@@ -3717,6 +3751,44 @@ XML
 </error>
 XML
       end
+    end
+  end
+
+  describe '.configure' do
+    context 'when given a block' do
+      it 'returns self' do
+        expect(subject.configure {}).to be subject
+      end
+
+      it 'calls the block passing the config' do
+        call = [false, nil]
+        subject.configure do |config|
+          call = [true, config]
+        end
+
+        expect(call[0]).to be true
+        expect(call[1]).not_to be_nil
+      end
+    end
+
+    context 'when not given a block' do
+      it 'returns a configuration object' do
+        expect(subject.configure).to respond_to(:[], :[]=)
+      end
+    end
+
+    it 'allows configuring the api' do
+      subject.configure do |config|
+        config[:hello] = 'hello'
+        config[:bread] = 'bread'
+      end
+
+      subject.get '/hello-bread' do
+        "#{configuration[:hello]} #{configuration[:bread]}"
+      end
+
+      get '/hello-bread'
+      expect(last_response.body).to eq 'hello bread'
     end
   end
 

@@ -3,21 +3,30 @@
 #### Features
 
 * Your contribution here.
+* [#1918](https://github.com/ruby-grape/grape/pull/1918): Helper methods to access controller context from middleware - [@NikolayRys](https://github.com/NikolayRys).
+* [#1915](https://github.com/ruby-grape/grape/pull/1915): Micro optimizations in allocating hashes and arrays - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#1904](https://github.com/ruby-grape/grape/pull/1904): Allows Grape to load files on startup rather than on the first call - [@myxoh](https://github.com/myxoh).
+* [#1907](https://github.com/ruby-grape/grape/pull/1907): Adds outside configuration to Grape with `configure` - [@unleashy](https://github.com/unleashy).
+* [#1914](https://github.com/ruby-grape/grape/pull/1914): Run specs in random order - [@splattael](https://github.com/splattael).
 
 #### Fixes
 
 * Your contribution here.
+* [#1917](https://github.com/ruby-grape/grape/pull/1917): Update access to rack constant - [@NikolayRys](https://github.com/NikolayRys).
+* [#1916](https://github.com/ruby-grape/grape/pull/1916): Drop old appraisals - [@NikolayRys](https://github.com/NikolayRys).
+* [#1911](https://github.com/ruby-grape/grape/pull/1911): Make sure `Grape::Valiations::AtLeastOneOfValidator` properly treats nested params in errors - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1893](https://github.com/ruby-grape/grape/pull/1893): Allows `Grape::API` to behave like a Rack::app in some instances where it was misbehaving - [@myxoh](https://github.com/myxoh).
 * [#1898](https://github.com/ruby-grape/grape/pull/1898): Refactor `ValidatorFactory` to improve memory allocation - [@Bhacaz](https://github.com/Bhacaz).
 * [#1900](https://github.com/ruby-grape/grape/pull/1900): Define boolean for `Grape::Api::Instance` - [@Bhacaz](https://github.com/Bhacaz).
 * [#1903](https://github.com/ruby-grape/grape/pull/1903): Allow nested params renaming (Hash/Array) - [@bikolya](https://github.com/bikolya).
-* [#1903](https://github.com/ruby-grape/grape/pull/1926): Fixes configuration within given or mounted blocks - [@myxoh](https://github.com/myxoh).
+* [#1913](https://github.com/ruby-grape/grape/pull/1913): Fix multiple params validators to return correct messages for nested params - [@bikolya](https://github.com/bikolya).
+* [#1926](https://github.com/ruby-grape/grape/pull/1926): Fixes configuration within given or mounted blocks - [@myxoh](https://github.com/myxoh).
 
 ### 1.2.4 (2019/06/13)
 
 #### Features
 
-* [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widly available - [@myxoh](https://github.com/myxoh).
+* [#1888](https://github.com/ruby-grape/grape/pull/1888): Makes the `configuration` hash widely available - [@myxoh](https://github.com/myxoh).
 * [#1864](https://github.com/ruby-grape/grape/pull/1864): Adds `finally` on the API - [@myxoh](https://github.com/myxoh).
 * [#1869](https://github.com/ruby-grape/grape/pull/1869): Fix issue with empty headers after `error!` method call - [@anaumov](https://github.com/anaumov).
 

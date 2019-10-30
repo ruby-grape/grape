@@ -6,7 +6,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile!]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -42,17 +42,27 @@ module Grape
         end
       end
 
+      # Configure an API from the outside. If a block is given, it'll pass a
+      # configuration hash to the block which you can use to configure your
+      # API. If no block is given, returns the configuration hash.
+      # The configuration set here is accessible from inside an API with
+      # `configuration` as normal.
+      def configure
+        config = @base_instance.configuration
+        if block_given?
+          yield config
+          self
+        else
+          config
+        end
+      end
+
       # This is the interface point between Rack and Grape; it accepts a request
       # from Rack and ultimately returns an array of three values: the status,
       # the headers, and the body. See [the rack specification]
       # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
       def call(*args, &block)
-        instance_for_rack = if never_mounted?
-                              base_instance
-                            else
-                              mounted_instances.first
-                            end
         instance_for_rack.call(*args, &block)
       end
 
@@ -111,7 +121,20 @@ module Grape
         end
       end
 
+      def compile!
+        require 'grape/eager_load'
+        instance_for_rack.compile! # See API::Instance.compile!
+      end
+
       private
+
+      def instance_for_rack
+        if never_mounted?
+          base_instance
+        else
+          mounted_instances.first
+        end
+      end
 
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
