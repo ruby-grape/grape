@@ -24,11 +24,13 @@ matrix:
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_json
+        - bundle exec rspec spec/integration/real_api
     - rvm: 2.5.3
       gemfile: gemfiles/multi_xml.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_xml
+        - bundle exec rspec spec/integration/real_api
     - rvm: 2.4.5
       gemfile: Gemfile
     - rvm: 2.4.5
