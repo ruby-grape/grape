@@ -97,6 +97,48 @@ describe Grape::API do
         end
       end
 
+      context 'when executing a standard block within a `mounted` block with all dynamic params' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            mounted do
+              desc configuration[:description] do
+                headers configuration[:headers]
+              end
+              get configuration[:endpoint] do
+                configuration[:response]
+              end
+            end
+          end
+        end
+
+        let(:api_endpoint) { 'custom_endpoint' }
+        let(:api_response) { 'custom response' }
+        let(:endpoint_description) { 'this is a custom API' }
+        let(:headers) do
+          {
+            'XAuthToken' => {
+              'description' => 'Validates your identity',
+              'required' => true
+            }
+          }
+        end
+
+        it 'mounts the API and obtains the description and headers definition' do
+          root_api.mount a_remounted_api, with: {
+            description: endpoint_description,
+            headers: headers,
+            endpoint: api_endpoint,
+            response: api_response
+          }
+          get api_endpoint
+          expect(last_response.body).to eq api_response
+          expect(a_remounted_api.instances.last.endpoints.first.options[:route_options][:description])
+            .to eq endpoint_description
+          expect(a_remounted_api.instances.last.endpoints.first.options[:route_options][:headers])
+            .to eq headers
+        end
+      end
+
       context 'when executing a custom block on mount' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
