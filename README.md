@@ -1928,12 +1928,18 @@ end
 get 'status' do
 end
 
-# is the same as (!)
+# is the same as
 
 get :status do
 end
 
-# This will make param[:status_id] and param[:id] available
+# is NOT the same as
+
+get ':status' do # this makes param[:status] available
+end
+
+# This will make both param[:status_id] and param[:id] available
+
 get 'statuses/:status_id/reviews/:id' do
 end
 ```
