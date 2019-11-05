@@ -1916,6 +1916,56 @@ error! 'Unauthorized', 401, 'X-Error-Detail' => 'Invalid token.'
 
 ## Routes
 
+To define routes you can use the `route` method or the shorthands for the HTTP verbs. To define a route that accepts any route set to `:any`.
+Parts of the path that are denoted with a colon will be interpreted as route parameters.
+
+```ruby
+route :get, 'status' do
+end
+
+# is the same as
+
+get 'status' do
+end
+
+# is the same as
+
+get :status do
+end
+
+# is NOT the same as
+
+get ':status' do # this makes param[:status] available
+end
+
+# This will make both param[:status_id] and param[:id] available
+
+get 'statuses/:status_id/reviews/:id' do
+end
+```
+
+To declare a namespace that prefixes all routes within, use the `namespace` method. `group`, `resource`, `resources` and `segment` are aliases to this method. Any endpoints within will share their parent context as well as any configuration done in the namespace context.
+
+The `route_param` method is a convenient method for defining a parameter route segment. If you define a type, it will add a validation for this parameter.
+
+```ruby
+route_param :id, type: Integer do
+  get 'status' do
+  end
+end
+
+# is the same as
+
+namespace ':id' do
+  params do
+    requires :id, type: Integer
+  end
+
+  get 'status' do
+  end
+end
+```
+
 Optionally, you can define requirements for your named route parameters using regular
 expressions on namespace or endpoint. The route will match only if all requirements are met.
 
