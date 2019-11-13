@@ -262,7 +262,7 @@ module Grape
             run_validators validations, request
             remove_renamed_params
             run_filters after_validations, :after_validation
-            response_object = @block ? @block.call(self) : nil
+            response_object = execute
           end
 
           run_filters afters, :after
@@ -334,6 +334,10 @@ module Grape
     end
 
     private :build_stack, :build_helpers, :remove_renamed_params
+
+    def execute
+      @block ? @block.call(self) : nil
+    end
 
     def helpers
       lazy_initialize! && @helpers

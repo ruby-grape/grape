@@ -3,13 +3,14 @@
 #### Features
 
 * Your contribution here.
-* [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduced attribute_translator string allocations - [@ericproulx](https://github.com/ericproulx).
-* [#1943](https://github.com/ruby-grape/grape/pull/1943): Reduce number of regex string allocations - [@ericproulx](https://github.com/ericproulx).
-* [#1942](https://github.com/ruby-grape/grape/pull/1942): Optimized retained memory methods - [@ericproulx](https://github.com/ericproulx).
-* [#1941](https://github.com/ruby-grape/grape/pull/1941): Frozen string literal - [@ericproulx](https://github.com/ericproulx).
-* [#1940](https://github.com/ruby-grape/grape/pull/1940): Get rid of a needless step in HashWithIndifferentAccess - [@dnesteryuk](https://github.com/dnesteryuk).
-* [#1938](https://github.com/ruby-grape/grape/pull/1938): Add project metadata to the gemspec - [@orien](https://github.com/orien).
-* [#1920](https://github.com/ruby-grape/grape/pull/1920): Replace Virtus with dry-types - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduces `attribute_translator` string allocations - [@ericproulx](https://github.com/ericproulx).
+* [#1943](https://github.com/ruby-grape/grape/pull/1943): Reduces number of regex string allocations - [@ericproulx](https://github.com/ericproulx).
+* [#1942](https://github.com/ruby-grape/grape/pull/1942): Optimizes retained memory methods - [@ericproulx](https://github.com/ericproulx).
+* [#1941](https://github.com/ruby-grape/grape/pull/1941): Adds frozen string literal - [@ericproulx](https://github.com/ericproulx).
+* [#1940](https://github.com/ruby-grape/grape/pull/1940): Gets rid of a needless step in `HashWithIndifferentAccess` - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#1938](https://github.com/ruby-grape/grape/pull/1938): Adds project metadata to the gemspec - [@orien](https://github.com/orien).
+* [#1920](https://github.com/ruby-grape/grape/pull/1920): Replaces Virtus with dry-types - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#1930](https://github.com/ruby-grape/grape/pull/1930): Moves block call to separate method so it can be spied on - [@estolfo](https://github.com/estolfo).
 
 #### Fixes
 
