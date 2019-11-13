@@ -38,6 +38,7 @@
 * [#1913](https://github.com/ruby-grape/grape/pull/1913): Fix multiple params validators to return correct messages for nested params - [@bikolya](https://github.com/bikolya).
 * [#1926](https://github.com/ruby-grape/grape/pull/1926): Fixes configuration within given or mounted blocks - [@myxoh](https://github.com/myxoh).
 * [#1937](https://github.com/ruby-grape/grape/pull/1937): Fix bloat in released gem - [@dblock](https://github.com/dblock).
+* [#1930](https://github.com/ruby-grape/grape/pull/1930): Move block call to separate method so it can be spied on - [@estolfo](https://github.com/estolfo).
 
 ### 1.2.4 (2019/06/13)
 
