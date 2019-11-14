@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1931](https://github.com/ruby-grape/grape/pull/1931): Introduces LazyBlock to generate expressions that will executed at mount time - [@myxoh](https://github.com/myxoh).
 * [#1918](https://github.com/ruby-grape/grape/pull/1918): Helper methods to access controller context from middleware - [@NikolayRys](https://github.com/NikolayRys).
 * [#1915](https://github.com/ruby-grape/grape/pull/1915): Micro optimizations in allocating hashes and arrays - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1904](https://github.com/ruby-grape/grape/pull/1904): Allows Grape to load files on startup rather than on the first call - [@myxoh](https://github.com/myxoh).
