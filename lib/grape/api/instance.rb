@@ -17,8 +17,13 @@ module Grape
         end
 
         def mounted(&block)
-          Grape::Util::LazyBlock.new do |configuration|
+          lazy_block = Grape::Util::LazyBlock.new do |configuration|
             evaluate_as_instance_with_configuration(block, configuration)
+          end
+          if base_instance?
+            lazy_block
+          else
+            lazy_block.evaluate_from(configuration)
           end
         end
 
