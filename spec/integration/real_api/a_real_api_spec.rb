@@ -1,8 +1,8 @@
 describe 'Mounting a real API' do
   let!(:server_thread) do
     Thread.new do
-      `fuser -k 9292/tcp`
-      `rackup spec/integration/real_api/example_api/config.ru`
+      `fuser -k 9292/tcp  2>/dev/null`
+      system("rackup spec/integration/real_api/example_api/config.ru 2>/dev/null")
     end
   end
 
@@ -15,7 +15,7 @@ describe 'Mounting a real API' do
     begin
       Timeout.timeout(3) do
         loop do
-          response = `#{request_start}/ping`
+          response = `#{request_start}/ping 2>/dev/null`
           break if response == 'pong'
         end
       end
@@ -28,21 +28,21 @@ describe 'Mounting a real API' do
 
   after do
     server_thread.terminate
-    `fuser -k 9292/tcp`
+    `fuser -k 9292/tcp 2>/dev/null`
   end
 
   it 'responds to an endpoint' do
-    expect(`#{request_start}/endpoint`).to eq 'response'
+    expect(`#{request_start}/endpoint 2>/dev/null`).to eq 'response'
   end
 
   it 'responds with the formatted headers' do
-    headers = `#{request_start}/headers -H 'secret_PassWord: swordfish'`
+    headers = `#{request_start}/headers -H 'secret_PassWord: swordfish' 2>/dev/null`
     require 'json'
     expect(JSON.parse(headers)['Secret-Password']).to eq 'swordfish'
   end
 
   it 'responds with the formatted env' do
-    response = `#{request_start}/env -H 'secret_PassWord: swordfish'`
+    response = `#{request_start}/env -H 'secret_PassWord: swordfish' 2>/dev/null`
     require 'json'
     expect(JSON.parse(response)['HTTP_SECRET_PASSWORD']).to eq 'swordfish'
   end
