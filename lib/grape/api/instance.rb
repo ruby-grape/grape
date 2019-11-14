@@ -13,18 +13,11 @@ module Grape
         attr_accessor :configuration
 
         def given(conditional_option, &block)
-          evaluate_as_instance_with_configuration(block, configuration) if conditional_option && block_given?
+          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block_given?
         end
 
         def mounted(&block)
-          lazy_block = Grape::Util::LazyBlock.new do |configuration|
-            evaluate_as_instance_with_configuration(block, configuration)
-          end
-          if base_instance?
-            lazy_block
-          else
-            lazy_block.evaluate_from(configuration)
-          end
+          evaluate_as_instance_with_configuration(block, lazy: true)
         end
 
         def base=(grape_api)
@@ -108,22 +101,29 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            evaluate_as_instance_with_configuration(block, configuration) if block_given?
-            blocks.each { |b| evaluate_as_instance_with_configuration(b, configuration) }
+            evaluate_as_instance_with_configuration(block) if block_given?
+            blocks.each { |b| evaluate_as_instance_with_configuration(b) }
             reset_validations!
           else
             instance_eval(&block)
           end
         end
 
-        def evaluate_as_instance_with_configuration(block, configuration)
-          value_for_configuration = configuration
-          if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
-            self.configuration = value_for_configuration.evaluate
+        def evaluate_as_instance_with_configuration(block, lazy: false)
+          lazy_block = Grape::Util::LazyBlock.new do |configuration|
+            value_for_configuration = configuration
+            if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
+              self.configuration = value_for_configuration.evaluate
+            end
+            response = instance_eval(&block)
+            self.configuration = value_for_configuration
+            response
           end
-          response = instance_eval(&block)
-          self.configuration = value_for_configuration
-          response
+          if base_instance? && lazy
+            lazy_block
+          else
+            lazy_block.evaluate_from(configuration)
+          end
         end
 
         def inherited(subclass)
