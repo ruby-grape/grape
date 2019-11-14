@@ -485,7 +485,7 @@ class ConditionalEndpoint::API < Grape::API
 end
 ```
 
-More complex results can be achieved by using mounted as an expression within which the `configuration` is already evaluated as a Hash.
+More complex results can be achieved by using `mounted` as an expression within which the `configuration` is already evaluated as a Hash.
 
 ```ruby
 class ExpressionEndpointAPI < Grape::API
