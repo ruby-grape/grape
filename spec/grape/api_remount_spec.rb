@@ -97,6 +97,54 @@ describe Grape::API do
         end
       end
 
+      context 'when using an expression derived from a configuration' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            get(mounted { "api_name_#{configuration[:api_name]}" }) do
+              'success'
+            end
+          end
+        end
+
+        before do
+          root_api.mount a_remounted_api, with: {
+            api_name: 'a_name'
+          }
+        end
+
+        it 'mounts the endpoint with the name' do
+          get 'api_name_a_name'
+          expect(last_response.body).to eq 'success'
+        end
+
+        it 'does not mount the endpoint with a null name' do
+          get 'api_name_'
+          expect(last_response.body).not_to eq 'success'
+        end
+
+        context 'when the expression lives in a namespace' do
+          subject(:a_remounted_api) do
+            Class.new(Grape::API) do
+              namespace :base do
+                get(mounted { "api_name_#{configuration[:api_name]}" }) do
+                  'success'
+                end
+              end
+            end
+          end
+
+          it 'mounts the endpoint with the name' do
+            get 'base/api_name_a_name'
+            expect(last_response.body).to eq 'success'
+          end
+
+          it 'does not mount the endpoint with a null name' do
+            get 'base/api_name_'
+            expect(last_response.body).not_to eq 'success'
+          end
+        end
+      end
+
       context 'when executing a standard block within a `mounted` block with all dynamic params' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
@@ -303,6 +351,74 @@ describe Grape::API do
           expect(last_response.body).to eql '10 votes'
           get 'api/scores'
           expect(last_response.body).to eql '10 votes'
+        end
+      end
+
+      context 'a very complex configuration example' do
+        before do
+          top_level_api = Class.new(Grape::API) do
+            remounted_api = Class.new(Grape::API) do
+              get configuration[:endpoint_name] do
+                configuration[:response]
+              end
+            end
+
+            expression_namespace = mounted { configuration[:namespace].to_s * 2 }
+            given(mounted { configuration[:should_mount_expressed] != false }) do
+              namespace expression_namespace do
+                mount remounted_api, with: { endpoint_name: configuration[:endpoint_name], response: configuration[:endpoint_response] }
+              end
+            end
+          end
+          root_api.mount top_level_api, with: configuration_options
+        end
+
+        context 'when the namespace should be mounted' do
+          let(:configuration_options) do
+            {
+              should_mount_expressed: true,
+              namespace: 'bang',
+              endpoint_name: 'james',
+              endpoint_response: 'bond'
+            }
+          end
+
+          it 'gets a response' do
+            get 'bangbang/james'
+            expect(last_response.body).to eq 'bond'
+          end
+        end
+
+        context 'when should be mounted is nil' do
+          let(:configuration_options) do
+            {
+              should_mount_expressed: nil,
+              namespace: 'bang',
+              endpoint_name: 'james',
+              endpoint_response: 'bond'
+            }
+          end
+
+          it 'gets a response' do
+            get 'bangbang/james'
+            expect(last_response.body).to eq 'bond'
+          end
+        end
+
+        context 'when it should not be mounted' do
+          let(:configuration_options) do
+            {
+              should_mount_expressed: false,
+              namespace: 'bang',
+              endpoint_name: 'james',
+              endpoint_response: 'bond'
+            }
+          end
+
+          it 'gets a response' do
+            get 'bangbang/james'
+            expect(last_response.body).not_to eq 'bond'
+          end
         end
       end
 

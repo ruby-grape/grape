@@ -485,6 +485,42 @@ class ConditionalEndpoint::API < Grape::API
 end
 ```
 
+More complex results can be achieved by using `mounted` as an expression within which the `configuration` is already evaluated as a Hash.
+
+```ruby
+class ExpressionEndpointAPI < Grape::API
+  get(mounted { configuration[:route_name] || 'default_name' }) do
+    # some logic
+  end
+end
+```
+
+```ruby
+class BasicAPI < Grape::API
+  desc 'Statuses index' do
+    params: mounted { configuration[:entity] || API::Entities::Status }.documentation
+  end
+  params do
+    requires :all, using: mounted { configuration[:entity] || API::Entities::Status }.documentation
+  end
+  get '/statuses' do
+    statuses = Status.all
+    type = current_user.admin? ? :full : :default
+    present statuses, with: mounted { configuration[:entity] || API::Entities::Status }, type: type
+  end
+end
+
+class V1 < Grape::API
+  version 'v1'
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::Status } }
+end
+
+class V2 < Grape::API
+  version 'v2'
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::V2::Status } }
+end
+```
+
 ## Versioning
 
 There are four strategies in which clients can reach your API's endpoints: `:path`,
