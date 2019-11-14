@@ -221,6 +221,7 @@ end
 require 'grape/config'
 require 'grape/util/content_types'
 require 'grape/util/lazy_value'
+require 'grape/util/lazy_block'
 require 'grape/util/endpoint_configuration'
 
 require 'grape/validations/validators/base'

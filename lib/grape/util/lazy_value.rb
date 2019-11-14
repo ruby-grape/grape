@@ -7,6 +7,11 @@ module Grape
         @access_keys = access_keys
       end
 
+      def evaluate_from(configuration)
+        matching_lazy_value = configuration.fetch(@access_keys)
+        matching_lazy_value.evaluate
+      end
+
       def evaluate
         @value
       end

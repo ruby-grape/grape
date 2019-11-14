@@ -13,12 +13,13 @@ module Grape
         attr_accessor :configuration
 
         def given(conditional_option, &block)
-          evaluate_as_instance_with_configuration(block) if conditional_option && block_given?
+          evaluate_as_instance_with_configuration(block, configuration) if conditional_option && block_given?
         end
 
         def mounted(&block)
-          return if base_instance?
-          evaluate_as_instance_with_configuration(block)
+          Grape::Util::LazyBlock.new do |configuration|
+            evaluate_as_instance_with_configuration(block, configuration)
+          end
         end
 
         def base=(grape_api)
@@ -102,15 +103,15 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            evaluate_as_instance_with_configuration(block) if block_given?
-            blocks.each { |b| evaluate_as_instance_with_configuration(b) }
+            evaluate_as_instance_with_configuration(block, configuration) if block_given?
+            blocks.each { |b| evaluate_as_instance_with_configuration(b, configuration) }
             reset_validations!
           else
             instance_eval(&block)
           end
         end
 
-        def evaluate_as_instance_with_configuration(block)
+        def evaluate_as_instance_with_configuration(block, configuration)
           value_for_configuration = configuration
           if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
             self.configuration = value_for_configuration.evaluate

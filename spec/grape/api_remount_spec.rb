@@ -97,6 +97,32 @@ describe Grape::API do
         end
       end
 
+      context 'when using an expression derived from a configuration' do
+        subject(:a_remounted_api) do
+          Class.new(Grape::API) do
+            get mounted { "api_name_#{configuration[:api_name]}" } do
+              'success'
+            end
+          end
+        end
+
+        before do
+          root_api.mount a_remounted_api, with: {
+            api_name: 'a_name'
+          }
+        end
+
+        it 'mounts the endpoint with the name' do
+          get 'api_name_a_name'
+          expect(last_response.body).to eq 'success'
+        end
+
+        it 'does not mount the endpoint with a null name' do
+          get 'api_name_'
+          expect(last_response.body).not_to eq 'success'
+        end
+      end
+
       context 'when executing a standard block within a `mounted` block with all dynamic params' do
         subject(:a_remounted_api) do
           Class.new(Grape::API) do
