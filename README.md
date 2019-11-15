@@ -456,6 +456,15 @@ class Comment::API < Grape::API
 end
 ```
 
+Note that if you're passing a hash as the first parameter to `mount`, you will need to explicitly put `()` around parameters:
+```ruby
+# good
+mount({ ::Some::Api => '/some/api' }, with: { condition: true })
+
+# bad
+mount ::Some::Api => '/some/api', with: { condition: true }
+```
+
 You can access `configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
 
 If you want logic happening given on an `configuration`, you can use the helper `given`.
