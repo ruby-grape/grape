@@ -3851,6 +3851,7 @@ Grape integrates with following third-party tools:
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 * **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
+* **[ElasticAPM](https://www.elastic.co/products/apm) - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
 
 ## Contributing to Grape
 
