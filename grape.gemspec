@@ -19,7 +19,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack-accept'
   s.add_runtime_dependency 'virtus', '>= 1.0.0'
 
-  s.files         = Dir['**/*'].keep_if { |file| File.file?(file) }
+  s.files         = %w[CHANGELOG.md CONTRIBUTING.md README.md grape.png UPGRADING.md LICENSE]
+  s.files        += %w[grape.gemspec]
+  s.files        += Dir['lib/**/*']
   s.test_files    = Dir['spec/**/*']
   s.require_paths = ['lib']
 end
