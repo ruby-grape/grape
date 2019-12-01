@@ -1,8 +1,7 @@
-### 1.2.5 (Next)
+### 1.2.5 (2019/12/01)
 
 #### Features
 
-* Your contribution here.
 * [#1931](https://github.com/ruby-grape/grape/pull/1931): Introduces LazyBlock to generate expressions that will executed at mount time - [@myxoh](https://github.com/myxoh).
 * [#1918](https://github.com/ruby-grape/grape/pull/1918): Helper methods to access controller context from middleware - [@NikolayRys](https://github.com/NikolayRys).
 * [#1915](https://github.com/ruby-grape/grape/pull/1915): Micro optimizations in allocating hashes and arrays - [@dnesteryuk](https://github.com/dnesteryuk).
@@ -12,7 +11,6 @@
 
 #### Fixes
 
-* Your contribution here.
 * [#1917](https://github.com/ruby-grape/grape/pull/1917): Update access to rack constant - [@NikolayRys](https://github.com/NikolayRys).
 * [#1916](https://github.com/ruby-grape/grape/pull/1916): Drop old appraisals - [@NikolayRys](https://github.com/NikolayRys).
 * [#1911](https://github.com/ruby-grape/grape/pull/1911): Make sure `Grape::Valiations::AtLeastOneOfValidator` properly treats nested params in errors - [@dnesteryuk](https://github.com/dnesteryuk).
