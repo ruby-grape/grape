@@ -74,7 +74,13 @@ The current stable release is [0.6.0](https://github.com/ruby-grape/grape/blob/v
 Add the next release to [CHANGELOG.md](CHANGELOG.md).
 
 ```
-#### 0.6.1 (Next)
+### 0.6.1 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
 
 * Your contribution here.
 ```
@@ -83,7 +89,7 @@ Bump the minor version in lib/grape/version.rb.
 
 ```ruby
 module Grape
-  VERSION = '0.6.1'
+  VERSION = '0.6.1'.freeze
 end
 ```
 
