@@ -11,6 +11,12 @@ Gem::Specification.new do |s|
   s.summary     = 'A simple Ruby framework for building REST-like APIs.'
   s.description = 'A Ruby framework for rapid API development with great conventions.'
   s.license     = 'MIT'
+  s.metadata    = {
+    'bug_tracker_uri'   => 'https://github.com/ruby-grape/grape/issues',
+    'changelog_uri'     => "https://github.com/ruby-grape/grape/blob/v#{s.version}/CHANGELOG.md",
+    'documentation_uri' => "https://www.rubydoc.info/gems/grape/#{s.version}",
+    'source_code_uri'   => "https://github.com/ruby-grape/grape/tree/v#{s.version}"
+  }
 
   s.add_runtime_dependency 'activesupport'
   s.add_runtime_dependency 'builder'

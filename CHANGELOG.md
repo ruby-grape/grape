@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1938](https://github.com/ruby-grape/grape/pull/1938): Add project metadata to the gemspec - [@orien](https://github.com/orien).
 
 #### Fixes
 
