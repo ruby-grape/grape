@@ -110,7 +110,7 @@ describe Grape::Validations::ExceptValuesValidator do
         optional: { type: Array[Integer], except_values: [10, 11], default: 12 },
         tests: [
           { value: 'invalid-type1', rc: 400, body: { error: 'type is invalid' }.to_json },
-          { value: 10, rc: 400, body: { error: 'type has a value not allowed' }.to_json },
+          { value: 10, rc: 400, body: { error: 'type is invalid' }.to_json },
           { value: [10], rc: 400, body: { error: 'type has a value not allowed' }.to_json },
           { value: ['3'], rc: 200, body: { type: [3] }.to_json },
           { value: [3], rc: 200, body: { type: [3] }.to_json },

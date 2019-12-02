@@ -22,53 +22,32 @@ module Grape
 
           @type_coercers = types.map do |type|
             if Types.multiple? type
-              VariantCollectionCoercer.new type
+              VariantCollectionCoercer.new type, @method
             else
-              Types.build_coercer type
+              Types.build_coercer type, strict: !@method.nil?
             end
           end
         end
 
-        # This method is called from somewhere within
-        # +Virtus::Attribute::coerce+ in order to coerce
-        # the given value.
+        # Coerces the given value.
         #
-        # @param value [String] value to be coerced, in grape
+        # @param val [String] value to be coerced, in grape
         #   this should always be a string.
         # @return [Object,InvalidValue] the coerced result, or an instance
         #   of {InvalidValue} if the value could not be coerced.
-        def call(value)
-          return @method.call(value) if @method
+        def call(val)
+          # once the value is coerced by the custom method, its type should be checked
+          val = @method.call(val) if @method
+
+          coerced_val = InvalidValue.new
 
           @type_coercers.each do |coercer|
-            coerced = coercer.coerce(value)
+            coerced_val = coercer.call(val)
 
-            return coerced if coercer.value_coerced? coerced
+            return coerced_val unless coerced_val.is_a?(InvalidValue)
           end
 
-          # Declare that we couldn't coerce the value in such a way
-          # that Grape won't ask us again if the value is valid
-          InvalidValue.new
-        end
-
-        # This method is called from somewhere within
-        # +Virtus::Attribute::value_coerced?+ in order to
-        # assert that the value has been coerced successfully.
-        # Due to Grape's design this will in fact only be called
-        # if a custom coercion method is being used, since {#call}
-        # returns an {InvalidValue} object if the value could not
-        # be coerced.
-        #
-        # @param _primitive [Axiom::Types::Type] primitive type
-        #   for the coercion as detected by axiom-types' inference
-        #   system. For custom types this is typically not much use
-        #   (i.e. it is +Axiom::Types::Object+) unless special
-        #   inference rules have been declared for the type.
-        # @param value [Object] a coerced result returned from {#call}
-        # @return [true,false] whether or not the coerced value
-        #   satisfies type requirements.
-        def success?(_primitive, value)
-          @type_coercers.any? { |coercer| coercer.value_coerced? value }
+          coerced_val
         end
       end
     end

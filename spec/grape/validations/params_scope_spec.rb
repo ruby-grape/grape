@@ -30,7 +30,7 @@ describe Grape::Validations::ParamsScope do
     context 'when the default value is false' do
       before do
         subject.params do
-          optional :bool, type: Virtus::Attribute::Boolean, default: false
+          optional :bool, type: Grape::API::Boolean, default: false
         end
         subject.get
       end

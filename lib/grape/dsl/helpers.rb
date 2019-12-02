@@ -65,7 +65,7 @@ module Grape
 
         def define_boolean_in_mod(mod)
           return if defined? mod::Boolean
-          mod.const_set('Boolean', Virtus::Attribute::Boolean)
+          mod.const_set('Boolean', Grape::API::Boolean)
         end
 
         def inject_api_helpers_to_mod(mod, &_block)

@@ -3,7 +3,7 @@ module Grape
     module Types
       # This class wraps {MultipleTypeCoercer}, for use with collections
       # that allow members of more than one type.
-      class VariantCollectionCoercer < Virtus::Attribute
+      class VariantCollectionCoercer
         # Construct a new coercer that will attempt to coerce
         # a list of values such that all members are of one of
         # the given types. The container may also optionally be
@@ -30,7 +30,7 @@ module Grape
         # @return [Array<Object>,Set<Object>,InvalidValue]
         #   the coerced result, or an instance
         #   of {InvalidValue} if the value could not be coerced.
-        def coerce(value)
+        def call(value)
           return InvalidValue.new unless value.is_a? Array
 
           value =
@@ -42,16 +42,6 @@ module Grape
           return Set.new value if @types.is_a? Set
 
           value
-        end
-
-        # Assert that the value has been coerced successfully.
-        #
-        # @param value [Object] a coerced result returned from {#coerce}
-        # @return [true,false] whether or not the coerced value
-        #   satisfies type requirements.
-        def value_coerced?(value)
-          value.is_a?(@types.class) &&
-            value.all? { |v| @member_coercer.success?(@types, v) }
         end
       end
     end

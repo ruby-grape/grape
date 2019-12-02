@@ -1,21 +1,20 @@
 module Grape
   module Validations
     module Types
-      # +Virtus::Attribute+ implementation for parameters
-      # that are multipart file objects. Actual handling
-      # of these objects is provided by +Rack::Request+;
-      # this class is here only to assert that rack's
-      # handling has succeeded, and to prevent virtus
-      # from interfering.
-      class File < Virtus::Attribute
-        def coerce(input)
+      # Implementation for parameters that are multipart file objects.
+      # Actual handling of these objects is provided by +Rack::Request+;
+      # this class is here only to assert that rack's handling has succeeded.
+      class File
+        def call(input)
+          return InvalidValue.new unless coerced?(input)
+
           # Processing of multipart file objects
           # is already taken care of by Rack::Request.
           # Nothing to do here.
           input
         end
 
-        def value_coerced?(value)
+        def coerced?(value)
           # Rack::Request creates a Hash with filename,
           # content type and an IO object. Do a bit of basic
           # duck-typing.

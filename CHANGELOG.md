@@ -1,9 +1,10 @@
-### 1.2.6 (Next)
+### 1.3.0 (Next)
 
 #### Features
 
 * Your contribution here.
 * [#1938](https://github.com/ruby-grape/grape/pull/1938): Add project metadata to the gemspec - [@orien](https://github.com/orien).
+* [#1920](https://github.com/ruby-grape/grape/pull/1920): Replace Virtus with dry-types - [@dnesteryuk](https://github.com/dnesteryuk).
 
 #### Fixes
 

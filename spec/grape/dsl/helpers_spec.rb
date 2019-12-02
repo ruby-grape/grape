@@ -75,9 +75,9 @@ module Grape
         end
 
         context 'with an external file' do
-          it 'sets Boolean as a Virtus::Attribute::Boolean' do
+          it 'sets Boolean as a Grape::API::Boolean' do
             subject.helpers BooleanParam
-            expect(subject.first_mod::Boolean).to eq Virtus::Attribute::Boolean
+            expect(subject.first_mod::Boolean).to eq Grape::API::Boolean
           end
         end
 

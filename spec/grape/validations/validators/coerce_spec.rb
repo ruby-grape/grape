@@ -10,11 +10,13 @@ describe Grape::Validations::CoerceValidator do
   end
 
   describe 'coerce' do
-    module CoerceValidatorSpec
-      class User
-        include Virtus.model
-        attribute :id, Integer
-        attribute :name, String
+    class SecureURIOnly
+      def self.parse(value)
+        URI.parse(value)
+      end
+
+      def self.parsed?(value)
+        value.is_a? URI::HTTPS
       end
     end
 
@@ -96,6 +98,7 @@ describe Grape::Validations::CoerceValidator do
 
         it 'respects :coerce_with' do
           get '/', a: 'yup'
+
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('TrueClass')
         end
@@ -148,25 +151,6 @@ describe Grape::Validations::CoerceValidator do
       expect(last_response.body).to eq('array int works')
     end
 
-    context 'complex objects' do
-      it 'error on malformed input for complex objects' do
-        subject.params do
-          requires :user, type: CoerceValidatorSpec::User
-        end
-        subject.get '/user' do
-          'complex works'
-        end
-
-        get '/user', user: '32'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('user is invalid')
-
-        get '/user', user: { id: 32, name: 'Bob' }
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('complex works')
-      end
-    end
-
     context 'coerces' do
       it 'Integer' do
         subject.params do
@@ -179,6 +163,25 @@ describe Grape::Validations::CoerceValidator do
         get '/int', int: '45'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq(integer_class_name)
+      end
+
+      it 'is a custom type' do
+        subject.params do
+          requires :uri, coerce: SecureURIOnly
+        end
+        subject.get '/secure_uri' do
+          params[:uri].class
+        end
+
+        get 'secure_uri', uri: 'https://www.example.com'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('URI::HTTPS')
+
+        get 'secure_uri', uri: 'http://www.example.com'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('uri is invalid')
       end
 
       context 'Array' do
@@ -197,7 +200,7 @@ describe Grape::Validations::CoerceValidator do
 
         it 'Array of Bools' do
           subject.params do
-            requires :arry, coerce: Array[Virtus::Attribute::Boolean]
+            requires :arry, coerce: Array[Grape::API::Boolean]
           end
           subject.get '/array' do
             params[:arry][0].class
@@ -206,27 +209,6 @@ describe Grape::Validations::CoerceValidator do
           get 'array', arry: [1, 0]
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq('TrueClass')
-        end
-
-        it 'Array of Complex' do
-          subject.params do
-            requires :arry, coerce: Array[CoerceValidatorSpec::User]
-          end
-          subject.get '/array' do
-            params[:arry].size
-          end
-
-          get 'array', arry: [31]
-          expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq('arry is invalid')
-
-          get 'array', arry: { id: 31, name: 'Alice' }
-          expect(last_response.status).to eq(400)
-          expect(last_response.body).to eq('arry is invalid')
-
-          get 'array', arry: [{ id: 31, name: 'Alice' }]
-          expect(last_response.status).to eq(200)
-          expect(last_response.body).to eq('1')
         end
 
         it 'Array of type implementing parse' do
@@ -253,17 +235,7 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.body).to eq('Set,URI::HTTP,1')
         end
 
-        it 'Array of class implementing parse and parsed?' do
-          class SecureURIOnly
-            def self.parse(value)
-              URI.parse(value)
-            end
-
-            def self.parsed?(value)
-              value.is_a? URI::HTTPS
-            end
-          end
-
+        it 'Array of a custom type' do
           subject.params do
             requires :uri, type: Array[SecureURIOnly]
           end
@@ -295,7 +267,7 @@ describe Grape::Validations::CoerceValidator do
 
         it 'Set of Bools' do
           subject.params do
-            requires :set, coerce: Set[Virtus::Attribute::Boolean]
+            requires :set, coerce: Set[Grape::API::Boolean]
           end
           subject.get '/set' do
             params[:set].first.class
@@ -309,7 +281,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'Bool' do
         subject.params do
-          requires :bool, coerce: Virtus::Attribute::Boolean
+          requires :bool, coerce: Grape::API::Boolean
         end
         subject.get '/bool' do
           params[:bool].class
@@ -443,19 +415,19 @@ describe Grape::Validations::CoerceValidator do
 
       it 'parses parameters with Array[String] type' do
         subject.params do
-          requires :values, type: Array[String], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
+          requires :values, type: Array[String], coerce_with: ->(val) { val.split(/\s+/) }
         end
-        subject.get '/ints' do
+        subject.get '/strings' do
           params[:values]
         end
 
-        get '/ints', values: '1 2 3 4'
+        get '/strings', values: '1 2 3 4'
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq(%w[1 2 3 4])
 
-        get '/ints', values: 'a b c d'
+        get '/strings', values: 'a b c d'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq(%w[0 0 0 0])
+        expect(JSON.parse(last_response.body)).to eq(%w[a b c d])
       end
 
       it 'parses parameters with Array[Integer] type' do
@@ -914,14 +886,17 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'converter' do
-      it 'does not build Virtus::Attribute multiple times' do
+      it 'does not build a coercer multiple times' do
         subject.params do
           requires :something, type: Array[String]
         end
         subject.get do
         end
 
-        expect(Virtus::Attribute).to receive(:build).at_most(2).times.and_call_original
+        expect(Grape::Validations::Types::ArrayCoercer).to(
+          receive(:new).at_most(:once).and_call_original
+        )
+
         10.times { get '/' }
       end
     end
