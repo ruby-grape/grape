@@ -244,7 +244,7 @@ module Grape
 
         coerce_type = infer_coercion(validations)
 
-        doc_attrs[:type] = coerce_type.to_s if coerce_type
+        doc_attrs[:type] = coerce_type if coerce_type
 
         desc = validations.delete(:desc) || validations.delete(:description)
         doc_attrs[:desc] = desc if desc
