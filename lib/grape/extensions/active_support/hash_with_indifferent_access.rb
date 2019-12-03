@@ -14,10 +14,9 @@ module Grape
           end
 
           def build_params
-            params = ::ActiveSupport::HashWithIndifferentAccess[rack_params]
+            params = ::ActiveSupport::HashWithIndifferentAccess.new(rack_params)
             params.deep_merge!(grape_routing_args) if env[Grape::Env::GRAPE_ROUTING_ARGS]
-            # TODO: remove, in Rails 4 or later ::ActiveSupport::HashWithIndifferentAccess converts nested Hashes into indifferent access ones
-            DeepHashWithIndifferentAccess.deep_hash_with_indifferent_access(params)
+            params
           end
         end
       end
