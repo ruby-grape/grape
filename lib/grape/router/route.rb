@@ -62,10 +62,12 @@ module Grape
       end
 
       def initialize(method, pattern, **options)
+        upcased_method = method.to_s.upcase
+
         @suffix     = options[:suffix]
-        @options    = options.merge(method: method.to_s.upcase)
+        @options    = options.merge(method: upcased_method)
         @pattern    = Pattern.new(pattern, **options)
-        @translator = AttributeTranslator.new(**options, request_method: method.to_s.upcase)
+        @translator = AttributeTranslator.new(**options, request_method: upcased_method)
       end
 
       def exec(env)

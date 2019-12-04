@@ -154,7 +154,7 @@ module Grape
             methods << Grape::Http::Headers::HEAD
           end
           methods.each do |method|
-            unless route.request_method.to_s.upcase == method
+            unless route.request_method == method
               route = Grape::Router::Route.new(method, route.origin, route.attributes.to_h)
             end
             router.append(route.apply(self))
