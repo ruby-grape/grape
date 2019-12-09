@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Spec
   module Support
     class EndpointFaker

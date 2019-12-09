@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/middleware/base'
 
 module Grape
@@ -22,7 +24,7 @@ module Grape
         def default_options
           {
             version_options: {
-              parameter: 'apiver'.freeze
+              parameter: 'apiver'
             }
           }
         end

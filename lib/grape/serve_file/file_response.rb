@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module ServeFile
     # A simple class used to identify responses which represent files and do not

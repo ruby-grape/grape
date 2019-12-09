@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/router/route'
 
 module Grape
@@ -12,7 +14,7 @@ module Grape
     end
 
     def self.normalize_path(path)
-      path = "/#{path}"
+      path = +"/#{path}"
       path.squeeze!('/')
       path.sub!(%r{/+\Z}, '')
       path = '/' if path == ''

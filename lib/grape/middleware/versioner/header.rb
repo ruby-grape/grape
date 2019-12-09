@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/middleware/base'
 require 'grape/middleware/versioner/parse_media_type_patch'
 

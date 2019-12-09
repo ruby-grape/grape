@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'forwardable'
 require 'mustermann/grape'
 
@@ -36,6 +38,7 @@ module Grape
 
       def build_path(pattern, anchor: false, suffix: nil, **_options)
         unless anchor || pattern.end_with?('*path')
+          pattern = +pattern
           pattern << '/' unless pattern.end_with?('/')
           pattern << '*path'
         end
@@ -44,7 +47,7 @@ module Grape
           parts[parts.length - 1] = '?' + parts.last
         end.join('/') if pattern.end_with?('*path')
 
-        pattern + suffix.to_s
+        "#{pattern}#{suffix}"
       end
 
       def extract_capture(requirements: {}, **options)

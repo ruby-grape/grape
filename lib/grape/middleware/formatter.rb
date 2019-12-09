@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'grape/middleware/base'
 
 module Grape
   module Middleware
     class Formatter < Base
-      CHUNKED = 'chunked'.freeze
+      CHUNKED = 'chunked'
 
       def default_options
         {

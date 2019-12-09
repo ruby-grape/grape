@@ -1,29 +1,31 @@
+# frozen_string_literal: true
+
 module Grape
   module Http
     module Headers
       # https://github.com/rack/rack/blob/master/lib/rack.rb
-      HTTP_VERSION    = 'HTTP_VERSION'.freeze
-      PATH_INFO       = 'PATH_INFO'.freeze
-      REQUEST_METHOD  = 'REQUEST_METHOD'.freeze
-      QUERY_STRING    = 'QUERY_STRING'.freeze
-      CONTENT_TYPE    = 'Content-Type'.freeze
+      HTTP_VERSION    = 'HTTP_VERSION'
+      PATH_INFO       = 'PATH_INFO'
+      REQUEST_METHOD  = 'REQUEST_METHOD'
+      QUERY_STRING    = 'QUERY_STRING'
+      CONTENT_TYPE    = 'Content-Type'
 
-      GET     = 'GET'.freeze
-      POST    = 'POST'.freeze
-      PUT     = 'PUT'.freeze
-      PATCH   = 'PATCH'.freeze
-      DELETE  = 'DELETE'.freeze
-      HEAD    = 'HEAD'.freeze
-      OPTIONS = 'OPTIONS'.freeze
+      GET     = 'GET'
+      POST    = 'POST'
+      PUT     = 'PUT'
+      PATCH   = 'PATCH'
+      DELETE  = 'DELETE'
+      HEAD    = 'HEAD'
+      OPTIONS = 'OPTIONS'
 
       SUPPORTED_METHODS = [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS].freeze
 
-      HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'.freeze
-      X_CASCADE              = 'X-Cascade'.freeze
-      HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'.freeze
-      HTTP_ACCEPT            = 'HTTP_ACCEPT'.freeze
+      HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'
+      X_CASCADE              = 'X-Cascade'
+      HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'
+      HTTP_ACCEPT            = 'HTTP_ACCEPT'
 
-      FORMAT                 = 'format'.freeze
+      FORMAT                 = 'format'
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples_for 'versioning' do
   it 'sets the API version' do
     subject.format :txt

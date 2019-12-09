@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   # A container for endpoints or other namespaces, which allows for both
   # logical grouping of endpoints as well as sharing common configuration.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/router'
 require 'grape/api/instance'
 

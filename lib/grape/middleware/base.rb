@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/dsl/headers'
 
 module Grape
@@ -6,7 +8,7 @@ module Grape
       include Helpers
 
       attr_reader :app, :env, :options
-      TEXT_HTML = 'text/html'.freeze
+      TEXT_HTML = 'text/html'
 
       include Grape::DSL::Headers
 

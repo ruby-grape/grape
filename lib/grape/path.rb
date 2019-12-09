@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   # Represents a path to an endpoint.
   class Path
