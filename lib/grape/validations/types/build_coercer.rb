@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'array_coercer'
 require_relative 'set_coercer'
 require_relative 'primitive_coercer'

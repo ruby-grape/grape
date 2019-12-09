@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Grape.eager_load!
 Grape::Http.eager_load!
 Grape::Exceptions.eager_load!

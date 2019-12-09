@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Grape::Endpoint do
@@ -10,7 +12,7 @@ describe Grape::Endpoint do
   before do
     subject.namespace :test do
       params do
-        optional :foo, default: '-abcdef'
+        optional :foo, default: +'-abcdef'
       end
       get do
         params[:foo].slice!(0)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Util
     # A branchable, inheritable settings object which can store both stackable

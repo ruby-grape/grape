@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Middleware
     # Class to handle the stack of middlewares based on ActionDispatch::MiddlewareStack

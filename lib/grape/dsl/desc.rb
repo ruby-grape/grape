@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module DSL
     module Desc

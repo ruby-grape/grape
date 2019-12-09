@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Middleware
     # Common methods for all types of Grape middleware

@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1941](https://github.com/ruby-grape/grape/pull/1941): Frozen string literal - [@ericproulx](https://github.com/ericproulx).
 * [#1940](https://github.com/ruby-grape/grape/pull/1940): Get rid of a needless step in HashWithIndifferentAccess - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1938](https://github.com/ruby-grape/grape/pull/1938): Add project metadata to the gemspec - [@orien](https://github.com/orien).
 * [#1920](https://github.com/ruby-grape/grape/pull/1920): Replace Virtus with dry-types - [@dnesteryuk](https://github.com/dnesteryuk).

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module ServeFile
     # Response should respond to to_path method

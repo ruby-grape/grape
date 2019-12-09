@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Versioners set env['api.version'] when a version is defined on an API and
 # on the requests. The current methods for determining version are:
 #

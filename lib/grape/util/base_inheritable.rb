@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module Util
     # Base for classes which need to operate with own values kept

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grape/router/pattern'
 require 'grape/router/attribute_translator'
 require 'forwardable'

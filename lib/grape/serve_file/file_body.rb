@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Grape
   module ServeFile
     CHUNK_SIZE = 16_384

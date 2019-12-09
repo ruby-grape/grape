@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Grape
   class Request < Rack::Request
-    HTTP_PREFIX = 'HTTP_'.freeze
+    HTTP_PREFIX = 'HTTP_'
 
     alias rack_params params
 
