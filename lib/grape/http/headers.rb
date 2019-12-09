@@ -26,6 +26,10 @@ module Grape
       HTTP_ACCEPT            = 'HTTP_ACCEPT'
 
       FORMAT                 = 'format'
+
+      def self.find_supported_method(route_method)
+        Grape::Http::Headers::SUPPORTED_METHODS.detect { |supported_method| supported_method.casecmp(route_method).zero? }
+      end
     end
   end
 end

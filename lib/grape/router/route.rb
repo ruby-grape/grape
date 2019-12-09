@@ -64,12 +64,13 @@ module Grape
       end
 
       def initialize(method, pattern, **options)
-        upcased_method = method.to_s.upcase
+        method_s = method.to_s
+        method_upcase = Grape::Http::Headers.find_supported_method(method_s) || method_s.upcase
 
         @suffix     = options[:suffix]
-        @options    = options.merge(method: upcased_method)
+        @options    = options.merge(method: method_upcase)
         @pattern    = Pattern.new(pattern, **options)
-        @translator = AttributeTranslator.new(**options, request_method: upcased_method)
+        @translator = AttributeTranslator.new(**options, request_method: method_upcase)
       end
 
       def exec(env)
