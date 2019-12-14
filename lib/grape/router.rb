@@ -46,7 +46,7 @@ module Grape
     end
 
     def append(route)
-      map[route.request_method.to_s.upcase] << route
+      map[route.request_method] << route
     end
 
     def associate_routes(pattern, **options)

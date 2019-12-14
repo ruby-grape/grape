@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1942](https://github.com/ruby-grape/grape/pull/1942): Optimized retained memory methods - [@ericproulx](https://github.com/ericproulx).
 * [#1941](https://github.com/ruby-grape/grape/pull/1941): Frozen string literal - [@ericproulx](https://github.com/ericproulx).
 * [#1940](https://github.com/ruby-grape/grape/pull/1940): Get rid of a needless step in HashWithIndifferentAccess - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1938](https://github.com/ruby-grape/grape/pull/1938): Add project metadata to the gemspec - [@orien](https://github.com/orien).
