@@ -38,7 +38,7 @@ module Grape
         routes = map[method]
         @optimized_map[method] = routes.map.with_index do |route, index|
           route.index = index
-          route.regexp = /(?<_#{index}>#{route.pattern.to_regexp})/
+          route.regexp = Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
         end
         @optimized_map[method] = Regexp.union(@optimized_map[method])
       end
@@ -50,7 +50,7 @@ module Grape
     end
 
     def associate_routes(pattern, **options)
-      regexp = /(?<_#{@neutral_map.length}>)#{pattern.to_regexp}/
+      regexp = Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
       @neutral_map << Any.new(pattern, regexp: regexp, index: @neutral_map.length, **options)
     end
 
