@@ -8,14 +8,12 @@ module Grape
 
       def initialize(attributes = {})
         @attributes = attributes
-        @request_method = attributes.delete(:request_method)
-        @requirements = attributes.delete(:requirements)
+        @request_method = attributes[:request_method]
+        @requirements = attributes[:requirements]
       end
 
       def to_h
-        attributes.merge(request_method: request_method).tap do |attr|
-          attr[:requirements] = requirements if requirements
-        end
+        attributes
       end
 
       def method_missing(method_name, *args) # rubocop:disable Style/MethodMissing
