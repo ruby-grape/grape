@@ -121,7 +121,7 @@ module Grape
             self.configuration = value_for_configuration
             response
           end
-          if base_instance? && lazy
+          if base && base_instance? && lazy
             lazy_block
           else
             lazy_block.evaluate_from(configuration)

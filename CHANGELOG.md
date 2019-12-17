@@ -13,7 +13,7 @@
 
 #### Fixes
 
-* Your contribution here.
+* [#1931](https://github.com/ruby-grape/grape/pull/1946): Fixes issue when using namespaces in `Grape::API::Instance` mounted directly - [@myxoh](https://github.com/myxoh).
 
 ### 1.2.5 (2019/12/01)
 
