@@ -6,7 +6,7 @@ describe Grape::Validations::SingleAttributeIterator do
   describe '#each' do
     subject(:iterator) { described_class.new(validator, scope, params) }
     let(:scope) { Grape::Validations::ParamsScope.new(api: Class.new(Grape::API)) }
-    let(:validator) { double(attrs: %i[first second third]) }
+    let(:validator) { double(attrs: %i[first second]) }
 
     context 'when params is a hash' do
       let(:params) do
@@ -15,7 +15,7 @@ describe Grape::Validations::SingleAttributeIterator do
 
       it 'yields params and every single attribute from the list' do
         expect { |b| iterator.each(&b) }
-          .to yield_successive_args([params, :first], [params, :second], [params, :third])
+          .to yield_successive_args([params, :first, false], [params, :second, false])
       end
     end
 
@@ -26,9 +26,21 @@ describe Grape::Validations::SingleAttributeIterator do
 
       it 'yields every single attribute from the list for each of the array elements' do
         expect { |b| iterator.each(&b) }.to yield_successive_args(
-          [params[0], :first], [params[0], :second], [params[0], :third],
-          [params[1], :first], [params[1], :second], [params[1], :third]
+          [params[0], :first, false], [params[0], :second, false],
+          [params[1], :first, false], [params[1], :second, false]
         )
+      end
+
+      context 'empty values' do
+        let(:params) { [{}, '', 10] }
+
+        it 'marks params with empty values' do
+          expect { |b| iterator.each(&b) }.to yield_successive_args(
+            [params[0], :first, true], [params[0], :second, true],
+            [params[1], :first, true], [params[1], :second, true],
+            [params[2], :first, false], [params[2], :second, false]
+          )
+        end
       end
     end
   end
