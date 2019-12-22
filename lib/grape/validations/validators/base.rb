@@ -42,12 +42,12 @@ module Grape
         # there may be more than one error per field
         array_errors = []
 
-        attributes.each do |resource_params, attr_name|
-          next if !@scope.required? && resource_params.empty?
-          next unless @scope.meets_dependency?(resource_params, params)
+        attributes.each do |val, attr_name, empty_val|
+          next if !@scope.required? && empty_val
+          next unless @scope.meets_dependency?(val, params)
           begin
-            if @required || resource_params.respond_to?(:key?) && resource_params.key?(attr_name)
-              validate_param!(attr_name, resource_params)
+            if @required || val.respond_to?(:key?) && val.key?(attr_name)
+              validate_param!(attr_name, val)
             end
           rescue Grape::Exceptions::Validation => e
             array_errors << e

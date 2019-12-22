@@ -31,9 +31,7 @@ module Grape
 
           if @scope.type == Array
             next unless @original_params.is_a?(Array) # do not validate content of array if it isn't array
-            inside_array = true
-          end
-          if inside_array
+
             # fill current and parent scopes with correct array indicies
             parent_scope = @scope.parent
             parent_indicies.each do |parent_index|
