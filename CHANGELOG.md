@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#1948](https://github.com/ruby-grape/grape/pull/1948): Relax `dry-types` dependency version - [@nbulaj](https://github.com/nbulaj).
 * [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduces `attribute_translator` string allocations - [@ericproulx](https://github.com/ericproulx).
 * [#1943](https://github.com/ruby-grape/grape/pull/1943): Reduces number of regex string allocations - [@ericproulx](https://github.com/ericproulx).
 * [#1942](https://github.com/ruby-grape/grape/pull/1942): Optimizes retained memory methods - [@ericproulx](https://github.com/ericproulx).
