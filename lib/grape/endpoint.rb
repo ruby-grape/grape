@@ -157,7 +157,7 @@ module Grape
           end
           methods.each do |method|
             unless route.request_method == method
-              route = Grape::Router::Route.new(method, route.origin, route.attributes.to_h)
+              route = Grape::Router::Route.new(method, route.origin, **route.attributes.to_h)
             end
             router.append(route.apply(self))
           end
@@ -169,8 +169,8 @@ module Grape
       route_options = prepare_default_route_attributes
       map_routes do |method, path|
         path = prepare_path(path)
-        params = merge_route_options(route_options.merge(suffix: path.suffix))
-        route = Router::Route.new(method, path.path, params)
+        params = merge_route_options(**route_options.merge(suffix: path.suffix))
+        route = Router::Route.new(method, path.path, **params)
         route.apply(self)
       end.flatten
     end
@@ -359,7 +359,7 @@ module Grape
     def run_validators(validator_factories, request)
       validation_errors = []
 
-      validators = validator_factories.map { |options| Grape::Validations::ValidatorFactory.create_validator(options) }
+      validators = validator_factories.map { |options| Grape::Validations::ValidatorFactory.create_validator(**options) }
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
@@ -375,7 +375,7 @@ module Grape
         end
       end
 
-      validation_errors.any? && raise(Grape::Exceptions::ValidationErrors, errors: validation_errors, headers: header)
+      validation_errors.any? && raise(Grape::Exceptions::ValidationErrors.new(errors: validation_errors, headers: header))
     end
 
     def run_filters(filters, type = :other)

@@ -19,8 +19,8 @@ module Grape
       def initialize(pattern, **options)
         @origin  = pattern
         @path    = build_path(pattern, **options)
-        @capture = extract_capture(options)
-        @pattern = Mustermann.new(@path, pattern_options)
+        @capture = extract_capture(**options)
+        @pattern = Mustermann.new(@path, **pattern_options)
         @regexp  = to_regexp
       end
 

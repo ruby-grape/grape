@@ -169,7 +169,7 @@ module Grape
               @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
               nest(block) do
                 if space
-                  namespace_stackable(:namespace, Namespace.new(space, options))
+                  namespace_stackable(:namespace, Namespace.new(space, **options))
                 end
               end
               @namespace_description = previous_namespace_description

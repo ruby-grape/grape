@@ -7,8 +7,8 @@ describe 'Validator with instance variables' do
     Class.new(Grape::Validations::Base) do
       def validate_param!(_attr_name, _params)
         if @instance_variable
-          raise Grape::Exceptions::Validation, params: ['params'],
-                                               message: 'This should never happen'
+          raise Grape::Exceptions::Validation.new(params: ['params'],
+                                                  message: 'This should never happen')
         end
         @instance_variable = true
       end

@@ -11,7 +11,7 @@ module Grape
 
         return if value == false || value.present?
 
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:blank)
+        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:blank))
       end
     end
   end

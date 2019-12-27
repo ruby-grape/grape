@@ -123,7 +123,7 @@ module Grape
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs, **opts)
         if lateral?
-          @parent.push_declared_params(attrs, opts)
+          @parent.push_declared_params(attrs, **opts)
         else
           if opts && opts[:as]
             @api.route_setting(:renamed_params, @api.route_setting(:renamed_params) || [])

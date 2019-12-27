@@ -55,7 +55,7 @@ describe Grape::Middleware::Error do
     class CustomErrorApp
       class << self
         def call(_env)
-          raise CustomError, status: 400, message: 'failed validation'
+          raise CustomError.new(status: 400, message: 'failed validation')
         end
       end
     end

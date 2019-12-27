@@ -39,16 +39,16 @@ module Grape
         end
       end
 
-      def problem(key, attributes)
-        translate_message("#{key}.problem".to_sym, attributes)
+      def problem(key, **attributes)
+        translate_message("#{key}.problem".to_sym, **attributes)
       end
 
-      def summary(key, attributes)
-        translate_message("#{key}.summary".to_sym, attributes)
+      def summary(key, **attributes)
+        translate_message("#{key}.summary".to_sym, **attributes)
       end
 
-      def resolution(key, attributes)
-        translate_message("#{key}.resolution".to_sym, attributes)
+      def resolution(key, **attributes)
+        translate_message("#{key}.resolution".to_sym, **attributes)
       end
 
       def translate_attributes(keys, **options)

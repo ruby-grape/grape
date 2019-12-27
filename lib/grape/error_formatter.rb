@@ -15,7 +15,7 @@ module Grape
         }
       end
 
-      def formatters(options)
+      def formatters(**options)
         builtin_formatters.merge(default_elements).merge!(options[:error_formatters] || {})
       end
 

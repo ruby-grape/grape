@@ -8,7 +8,7 @@ module Grape
       def validate_params!(params)
         keys = keys_in_common(params)
         return if keys.length <= 1
-        raise Grape::Exceptions::Validation, params: keys, message: message(:mutual_exclusion)
+        raise Grape::Exceptions::Validation.new(params: keys, message: message(:mutual_exclusion))
       end
     end
   end
