@@ -79,7 +79,7 @@ module Grape
 
       def format_message(message, backtrace, original_exception = nil)
         format = env[Grape::Env::API_FORMAT] || options[:format]
-        formatter = Grape::ErrorFormatter.formatter_for(format, options)
+        formatter = Grape::ErrorFormatter.formatter_for(format, **options)
         throw :error,
               status: 406,
               message: "The requested format '#{format}' is not supported.",

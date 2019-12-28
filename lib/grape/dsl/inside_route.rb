@@ -30,7 +30,7 @@ module Grape
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil)
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
-          declared_params ||= optioned_declared_params(options)
+          declared_params ||= optioned_declared_params(**options)
 
           if passed_params.is_a?(Array)
             declared_array(passed_params, options, declared_params)
@@ -98,7 +98,7 @@ module Grape
           options[:stringify] ? declared_param.to_s : declared_param.to_sym
         end
 
-        def optioned_declared_params(options)
+        def optioned_declared_params(**options)
           declared_params = if options[:include_parent_namespaces]
                               # Declared params including parent namespaces
                               route_setting(:saved_declared_params).flatten | Array(route_setting(:declared_params))
@@ -387,7 +387,7 @@ module Grape
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
         embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
-        entity_class.represent(object, embeds.merge(options))
+        entity_class.represent(object, **embeds.merge(options))
       end
     end
   end

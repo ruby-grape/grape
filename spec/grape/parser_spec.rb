@@ -17,11 +17,11 @@ describe Grape::Parser do
 
   describe '.parsers' do
     it 'returns an instance of Hash' do
-      expect(subject.parsers({})).to be_an_instance_of(Hash)
+      expect(subject.parsers(**{})).to be_an_instance_of(Hash)
     end
 
     it 'includes built-in parsers' do
-      expect(subject.parsers({})).to include(subject.builtin_parsers)
+      expect(subject.parsers(**{})).to include(subject.builtin_parsers)
     end
 
     context 'with :parsers option' do
@@ -35,7 +35,7 @@ describe Grape::Parser do
       let(:added_parser) { Class.new }
       before { subject.register :added, added_parser }
       it 'includes added parser' do
-        expect(subject.parsers({})).to include(added: added_parser)
+        expect(subject.parsers(**{})).to include(added: added_parser)
       end
     end
   end
@@ -44,8 +44,8 @@ describe Grape::Parser do
     let(:options) { {} }
 
     it 'calls .parsers' do
-      expect(subject).to receive(:parsers).with(options).and_return(subject.builtin_parsers)
-      subject.parser_for(:json, options)
+      expect(subject).to receive(:parsers).with(any_args).and_return(subject.builtin_parsers)
+      subject.parser_for(:json, **options)
     end
 
     it 'returns parser correctly' do

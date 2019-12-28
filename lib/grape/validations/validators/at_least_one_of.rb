@@ -7,7 +7,7 @@ module Grape
     class AtLeastOneOfValidator < MultipleParamsBase
       def validate_params!(params)
         return unless keys_in_common(params).empty?
-        raise Grape::Exceptions::Validation, params: all_keys, message: message(:at_least_one)
+        raise Grape::Exceptions::Validation.new(params: all_keys, message: message(:at_least_one))
       end
     end
   end

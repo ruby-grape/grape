@@ -30,13 +30,13 @@ module Grape
 
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
 
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: except_message \
+        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: except_message) \
           unless check_excepts(param_array)
 
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
+        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:values)) \
           unless check_values(param_array, attr_name)
 
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:values) \
+        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:values)) \
           if @proc && !param_array.all? { |param| @proc.call(param) }
       end
 

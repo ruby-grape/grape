@@ -234,7 +234,7 @@ module Grape
               end
 
               attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
-              generate_not_allowed_method(config[:pattern], attributes)
+              generate_not_allowed_method(config[:pattern], **attributes)
             end
           end
         end

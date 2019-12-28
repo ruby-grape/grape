@@ -21,7 +21,7 @@ module Spec
         end
       end
 
-      def versioned_headers(options)
+      def versioned_headers(**options)
         case options[:using]
         when :path
           {}  # no-op
@@ -45,7 +45,7 @@ module Spec
 
       def versioned_get(path, version_name, version_options = {})
         path    = versioned_path(version_options.merge(version: version_name, path: path))
-        headers = versioned_headers(version_options.merge(version: version_name))
+        headers = versioned_headers(**version_options.merge(version: version_name))
         params = {}
         if version_options[:using] == :param
           params = { version_options[:parameter] => version_name }

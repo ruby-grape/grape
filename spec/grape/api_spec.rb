@@ -1960,7 +1960,7 @@ XML
           rack_response('New Error', e.status)
         end
         subject.get '/custom_error' do
-          raise ApiSpec::CustomError, status: 400, message: 'Custom Error'
+          raise ApiSpec::CustomError.new(status: 400, message: 'Custom Error')
         end
 
         get '/custom_error'

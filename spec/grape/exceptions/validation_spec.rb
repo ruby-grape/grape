@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Grape::Exceptions::Validation do
   it 'fails when params are missing' do
-    expect { Grape::Exceptions::Validation.new(message: 'presence') }.to raise_error(ArgumentError, 'missing keyword: params')
+    expect { Grape::Exceptions::Validation.new(message: 'presence') }.to raise_error(ArgumentError, /missing keyword:.+?params/)
   end
   context 'when message is a symbol' do
     it 'stores message_key' do

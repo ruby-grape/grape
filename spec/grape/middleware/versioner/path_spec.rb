@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Grape::Middleware::Versioner::Path do
   let(:app) { ->(env) { [200, env, env['api.version']] } }
   let(:options) { {} }
-  subject { Grape::Middleware::Versioner::Path.new(app, options) }
+  subject { Grape::Middleware::Versioner::Path.new(app, **options) }
 
   it 'sets the API version based on the first path' do
     expect(subject.call('PATH_INFO' => '/v1/awesome').last).to eq('v1')

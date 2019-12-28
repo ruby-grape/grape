@@ -54,7 +54,7 @@ module Grape
 
       def fetch_formatter(headers, options)
         api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
-        Grape::Formatter.formatter_for(api_format, options)
+        Grape::Formatter.formatter_for(api_format, **options)
       end
 
       # Set the content type header for the API format if it is not already present.
@@ -99,7 +99,7 @@ module Grape
         unless content_type_for(fmt)
           throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported."
         end
-        parser = Grape::Parser.parser_for fmt, options
+        parser = Grape::Parser.parser_for fmt, **options
         if parser
           begin
             body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))

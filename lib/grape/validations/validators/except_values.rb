@@ -15,7 +15,7 @@ module Grape
         return if excepts.nil?
 
         param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
-        raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: message(:except_values) if param_array.any? { |param| excepts.include?(param) }
+        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:except_values)) if param_array.any? { |param| excepts.include?(param) }
       end
     end
   end
