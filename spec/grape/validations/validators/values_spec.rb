@@ -224,6 +224,11 @@ describe Grape::Validations::ValuesValidator do
           requires :type, values: { proc: ->(v) { ValuesModel.values.include? v }, message: 'failed check' }
         end
         get '/proc/message'
+
+        params do
+          optional :name, type: String, values: %w[a b], allow_blank: true
+        end
+        get '/allow_blank'
       end
     end
   end
@@ -462,6 +467,14 @@ describe Grape::Validations::ValuesValidator do
     expect do
       subject.params { requires :type, values: { except: [10.5, 11] }, type: Integer }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+  end
+
+  it 'allows a blank value when the allow_blank option is true' do
+    get 'allow_blank', name: nil
+    expect(last_response.status).to eq(200)
+
+    get 'allow_blank', name: ''
+    expect(last_response.status).to eq(200)
   end
 
   context 'with a lambda values' do

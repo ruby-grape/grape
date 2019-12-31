@@ -26,9 +26,15 @@ module Grape
 
       def validate_param!(attr_name, params)
         return unless params.is_a?(Hash)
-        return unless params[attr_name] || required_for_root_scope?
 
-        param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
+        val = params[attr_name]
+
+        return unless val || required_for_root_scope?
+
+        # don't forget that +false.blank?+ is true
+        return if val != false && val.blank? && @allow_blank
+
+        param_array = val.nil? ? [nil] : Array.wrap(val)
 
         raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: except_message) \
           unless check_excepts(param_array)
