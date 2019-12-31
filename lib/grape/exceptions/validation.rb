@@ -14,7 +14,7 @@ module Grape
           @message_key = message if message.is_a?(Symbol)
           args[:message] = translate_message(message)
         end
-        super(args)
+        super(**args)
       end
 
       # remove all the unnecessary stuff from Grape::Exceptions::Base like status
