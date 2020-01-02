@@ -19,6 +19,7 @@ module Grape
         @required = required
         @scope = scope
         @fail_fast = opts[:fail_fast] || false
+        @allow_blank = opts[:allow_blank] || false
       end
 
       # Validates a given request.

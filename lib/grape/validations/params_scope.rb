@@ -282,9 +282,7 @@ module Grape
         full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
         @api.document_attribute(full_attrs, doc_attrs)
 
-        # slice out fail_fast attribute
-        opts = {}
-        opts[:fail_fast] = validations.delete(:fail_fast) || false
+        opts = derive_validator_options(validations)
 
         # Validate for presence before any other validators
         if validations.key?(:presence) && validations[:presence]
@@ -450,6 +448,17 @@ module Grape
 
       def all_element_blank?(parameters)
         params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
+      end
+
+      # Validators don't have access to each other and they don't need, however,
+      # some validators might influence others, so their options should be shared
+      def derive_validator_options(validations)
+        allow_blank = validations[:allow_blank]
+
+        {
+          allow_blank: allow_blank.is_a?(Hash) ? allow_blank[:value] : allow_blank,
+          fail_fast:   validations.delete(:fail_fast) || false
+        }
       end
     end
   end
