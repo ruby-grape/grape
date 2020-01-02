@@ -386,24 +386,8 @@ module Grape
       extend post_extension if post_extension
     end
 
-    def befores
-      namespace_stackable(:befores) || []
-    end
-
-    def before_validations
-      namespace_stackable(:before_validations) || []
-    end
-
-    def after_validations
-      namespace_stackable(:after_validations) || []
-    end
-
-    def afters
-      namespace_stackable(:afters) || []
-    end
-
-    def finallies
-      namespace_stackable(:finallies) || []
+    %i[befores before_validations after_validations afters finallies].each do |meth_id|
+      define_method(meth_id) { namespace_stackable(meth_id) }
     end
 
     def validations

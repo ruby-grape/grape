@@ -6,7 +6,7 @@ module Grape
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
       attr_accessor :route, :api_class, :namespace
-      attr_accessor :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable
+      attr_accessor :namespace_inheritable, :namespace_stackable
       attr_accessor :parent, :point_in_time_copies
 
       # Retrieve global settings.
@@ -31,7 +31,6 @@ module Grape
         # used with a mount, or should every API::Class be a separate namespace by default?
         self.namespace_inheritable = InheritableValues.new
         self.namespace_stackable = StackableValues.new
-        self.namespace_reverse_stackable = ReverseStackableValues.new
 
         self.point_in_time_copies = []
 
@@ -54,7 +53,6 @@ module Grape
 
         namespace_inheritable.inherited_values = parent.namespace_inheritable
         namespace_stackable.inherited_values = parent.namespace_stackable
-        namespace_reverse_stackable.inherited_values = parent.namespace_reverse_stackable
         self.route = parent.route.merge(route)
 
         point_in_time_copies.map { |cloned_one| cloned_one.inherit_from parent }
@@ -72,7 +70,6 @@ module Grape
           new_setting.namespace = namespace.clone
           new_setting.namespace_inheritable = namespace_inheritable.clone
           new_setting.namespace_stackable = namespace_stackable.clone
-          new_setting.namespace_reverse_stackable = namespace_reverse_stackable.clone
           new_setting.route = route.clone
           new_setting.api_class = api_class
 
@@ -93,8 +90,7 @@ module Grape
           route: route.clone,
           namespace: namespace.to_hash,
           namespace_inheritable: namespace_inheritable.to_hash,
-          namespace_stackable: namespace_stackable.to_hash,
-          namespace_reverse_stackable: namespace_reverse_stackable.to_hash
+          namespace_stackable: namespace_stackable.to_hash
         }
       end
     end
