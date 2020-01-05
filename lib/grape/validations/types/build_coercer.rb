@@ -86,7 +86,7 @@ module Grape
         [type, method, strict].each_with_object(+'') do |val, memo|
           next if val.nil?
 
-          memo << val.to_s
+          memo << '_' << val.to_s
         end
       end
 
