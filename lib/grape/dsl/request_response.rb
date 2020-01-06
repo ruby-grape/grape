@@ -127,7 +127,7 @@ module Grape
                 :base_only_rescue_handlers
               end
 
-            namespace_reverse_stackable handler_type, Hash[args.map { |arg| [arg, handler] }]
+            namespace_stackable handler_type, Hash[args.map { |arg| [arg, handler] }]
           end
 
           namespace_stackable(:rescue_options, options)

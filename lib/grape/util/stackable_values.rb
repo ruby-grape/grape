@@ -13,6 +13,7 @@ module Grape
         @frozen_values = {}
       end
 
+      # Even if there is no value, an empty array will be returned.
       def [](name)
         return @frozen_values[name] if @frozen_values.key? name
 
