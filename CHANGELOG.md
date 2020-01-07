@@ -16,6 +16,7 @@
 
 #### Fixes
 
+* [#1963](https://github.com/ruby-grape/grape/pull/1963): The values validator must properly work with booleans - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1950](https://github.com/ruby-grape/grape/pull/1950): Consider the allow_blank option in the values validator - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1947](https://github.com/ruby-grape/grape/pull/1947): Careful check for empty params - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1931](https://github.com/ruby-grape/grape/pull/1946): Fixes issue when using namespaces in `Grape::API::Instance` mounted directly - [@myxoh](https://github.com/myxoh).

@@ -29,20 +29,20 @@ module Grape
 
         val = params[attr_name]
 
-        return unless val || required_for_root_scope?
+        return if val.nil? && !required_for_root_scope?
 
         # don't forget that +false.blank?+ is true
         return if val != false && val.blank? && @allow_blank
 
         param_array = val.nil? ? [nil] : Array.wrap(val)
 
-        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: except_message) \
+        raise validation_exception(attr_name, except_message) \
           unless check_excepts(param_array)
 
-        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:values)) \
+        raise validation_exception(attr_name, message(:values)) \
           unless check_values(param_array, attr_name)
 
-        raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:values)) \
+        raise validation_exception(attr_name, message(:values)) \
           if @proc && !param_array.all? { |param| @proc.call(param) }
       end
 
@@ -73,6 +73,10 @@ module Grape
 
       def required_for_root_scope?
         @required && @scope.root?
+      end
+
+      def validation_exception(attr_name, message)
+        Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message)
       end
     end
   end
