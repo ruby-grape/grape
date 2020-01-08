@@ -379,7 +379,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'send file' do
-    let(:file) {double(File)}
+    let(:file) { double(File) }
     let(:file_body) { Grape::ServeFile::FileResponse.new(file) }
     let(:app) { ->(_env) { [200, {}, file_body] } }
 
@@ -387,7 +387,7 @@ describe Grape::Middleware::Formatter do
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
       status, headers, body = subject.call(env)
       expect(status).to be == 200
-      expect(headers).to be == {"Content-Type"=>"application/json"}
+      expect(headers).to be == { 'Content-Type' => 'application/json' }
       expect(body).to be file
     end
   end
