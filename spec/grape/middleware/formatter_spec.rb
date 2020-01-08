@@ -196,19 +196,19 @@ describe Grape::Middleware::Formatter do
       subject.options[:content_types][:custom] = "don't care"
       subject.options[:formatters][:custom] = ->(_obj, _env) { 'CUSTOM FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
-      expect(body.body).to eq(['CUSTOM FORMAT'])
+      expect(body).to eq(['CUSTOM FORMAT'])
     end
     context 'default' do
       let(:body) { ['blah'] }
       it 'uses default json formatter' do
         _, _, body = subject.call('PATH_INFO' => '/info.json')
-        expect(body.body).to eq(['["blah"]'])
+        expect(body).to eq(['["blah"]'])
       end
     end
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.json')
-      expect(body.body).to eq(['CUSTOM JSON FORMAT'])
+      expect(body).to eq(['CUSTOM JSON FORMAT'])
     end
   end
 
@@ -384,7 +384,7 @@ describe Grape::Middleware::Formatter do
 
     it 'returns Grape::Uril::SendFileReponse' do
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
-      expect(subject.call(env)).to be_a(Grape::ServeFile::SendfileResponse)
+      expect(subject.call(env)).to be_a(Array)
     end
   end
 
@@ -407,7 +407,7 @@ describe Grape::Middleware::Formatter do
     it 'returns response by invalid formatter' do
       env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }
       _, _, bodies = *subject.call(env)
-      expect(bodies.body.first).to eq({ message: 'invalid' }.to_json)
+      expect(bodies.first).to eq({ message: 'invalid' }.to_json)
     end
   end
 

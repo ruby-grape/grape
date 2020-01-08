@@ -21,7 +21,7 @@ describe Rack do
       }
       env = Rack::MockRequest.env_for('/', options)
 
-      expect(JSON.parse(app.call(env)[2].body.first)['params_keys']).to match_array('test')
+      expect(JSON.parse(app.call(env)[2].first)['params_keys']).to match_array('test')
     ensure
       input.close
       input.unlink
