@@ -1903,9 +1903,9 @@ XML
       it 'avoids polluting global namespace' do
         env = Rack::MockRequest.env_for('/')
 
-        expect(a.call(env)[2]).to eq(['foo'])
-        expect(b.call(env)[2]).to eq(['bar'])
-        expect(a.call(env)[2]).to eq(['foo'])
+        expect(read_chunks(a.call(env)[2])).to eq(['foo'])
+        expect(read_chunks(b.call(env)[2])).to eq(['bar'])
+        expect(read_chunks(a.call(env)[2])).to eq(['foo'])
       end
     end
 

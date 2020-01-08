@@ -151,7 +151,7 @@ describe Grape::Endpoint do
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for('/headers')
       env['HTTP_SYMBOL_HEADER'.to_sym] = 'Goliath passes symbols'
-      body = subject.call(env)[2].first
+      body = read_chunks(subject.call(env)[2]).join
       expect(JSON.parse(body)['Symbol-Header']).to eq('Goliath passes symbols')
     end
   end
