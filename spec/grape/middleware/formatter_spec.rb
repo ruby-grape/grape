@@ -379,12 +379,16 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'send file' do
-    let(:body) { Grape::ServeFile::FileResponse.new('file') }
-    let(:app) { ->(_env) { [200, {}, body] } }
+    let(:file) {double(File)}
+    let(:file_body) { Grape::ServeFile::FileResponse.new(file) }
+    let(:app) { ->(_env) { [200, {}, file_body] } }
 
-    it 'returns Grape::Uril::SendFileReponse' do
+    it 'returns a file response' do
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
-      expect(subject.call(env)).to be_a(Array)
+      status, headers, body = subject.call(env)
+      expect(status).to be == 200
+      expect(headers).to be == {"Content-Type"=>"application/json"}
+      expect(body).to be file
     end
   end
 
