@@ -196,19 +196,19 @@ describe Grape::Middleware::Formatter do
       subject.options[:content_types][:custom] = "don't care"
       subject.options[:formatters][:custom] = ->(_obj, _env) { 'CUSTOM FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
-      expect(body.body).to eq(['CUSTOM FORMAT'])
+      expect(read_chunks(body)).to eq(['CUSTOM FORMAT'])
     end
     context 'default' do
       let(:body) { ['blah'] }
       it 'uses default json formatter' do
         _, _, body = subject.call('PATH_INFO' => '/info.json')
-        expect(body.body).to eq(['["blah"]'])
+        expect(read_chunks(body)).to eq(['["blah"]'])
       end
     end
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.json')
-      expect(body.body).to eq(['CUSTOM JSON FORMAT'])
+      expect(read_chunks(body)).to eq(['CUSTOM JSON FORMAT'])
     end
   end
 
@@ -379,12 +379,17 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'send file' do
-    let(:body) { Grape::ServeFile::FileResponse.new('file') }
-    let(:app) { ->(_env) { [200, {}, body] } }
+    let(:file) { double(File) }
+    let(:file_body) { Grape::ServeFile::FileResponse.new(file) }
+    let(:app) { ->(_env) { [200, {}, file_body] } }
 
-    it 'returns Grape::Uril::SendFileReponse' do
+    it 'returns a file response' do
+      expect(file).to receive(:each).and_yield('data')
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
-      expect(subject.call(env)).to be_a(Grape::ServeFile::SendfileResponse)
+      status, headers, body = subject.call(env)
+      expect(status).to be == 200
+      expect(headers).to be == { 'Content-Type' => 'application/json' }
+      expect(read_chunks(body)).to be == ['data']
     end
   end
 
@@ -406,8 +411,8 @@ describe Grape::Middleware::Formatter do
 
     it 'returns response by invalid formatter' do
       env = { 'PATH_INFO' => '/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid' }
-      _, _, bodies = *subject.call(env)
-      expect(bodies.body.first).to eq({ message: 'invalid' }.to_json)
+      _, _, body = *subject.call(env)
+      expect(read_chunks(body).join).to eq({ message: 'invalid' }.to_json)
     end
   end
 
