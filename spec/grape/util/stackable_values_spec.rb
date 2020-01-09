@@ -8,7 +8,7 @@ module Grape
       subject { StackableValues.new(parent) }
 
       describe '#keys' do
-        it 'returns all key' do
+        it 'returns all keys' do
           subject[:some_thing] = :foo_bar
           subject[:some_thing_else] = :foo_bar
           expect(subject.keys).to eq %i[some_thing some_thing_else].sort
