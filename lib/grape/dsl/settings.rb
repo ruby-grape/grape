@@ -171,7 +171,11 @@ module Grape
       # the superclass's :inheritable_setting.
       def build_top_level_setting
         Grape::Util::InheritableSetting.new.tap do |setting|
-          if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API
+          # Doesn't try to inherit settings from +Grape::API::Instance+ which also responds to
+          # +inheritable_setting+, however, it doesn't contain any user-defined settings.
+          # Otherwise, it would lead to an extra instance of +Grape::Util::InheritableSetting+
+          # in the chain for every endpoint.
+          if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API::Instance
             setting.inherit_from superclass.inheritable_setting
           end
         end
