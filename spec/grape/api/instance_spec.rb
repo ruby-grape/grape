@@ -45,10 +45,4 @@ describe Grape::API::Instance do
       expect(last_response.body).to eq 'success'
     end
   end
-
-  context 'top level setting' do
-    it 'does not inherit settings from the superclass (Grape::API::Instance)' do
-      expect(an_instance.top_level_setting.parent).to be_nil
-    end
-  end
 end

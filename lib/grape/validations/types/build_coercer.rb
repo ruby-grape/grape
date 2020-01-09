@@ -83,11 +83,7 @@ module Grape
       end
 
       def self.cache_key(type, method, strict)
-        [type, method, strict].each_with_object(+'') do |val, memo|
-          next if val.nil?
-
-          memo << '_' << val.to_s
-        end
+        [type, method, strict].compact.map(&:to_s).join('_')
       end
 
       instance_variable_set(:@__cache,            {})

@@ -14,6 +14,7 @@ module Grape
           settings.namespace[:namespace_thing] = :namespace_foo_bar
           settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
           settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar
+          settings.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :namespace_reverse_stackable_foo_bar
           settings.route[:route_thing] = :route_foo_bar
         end
       end
@@ -23,6 +24,7 @@ module Grape
           settings.namespace[:namespace_thing] = :namespace_foo_bar_other
           settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar_other
           settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar_other
+          settings.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :namespace_reverse_stackable_foo_bar_other
           settings.route[:route_thing] = :route_foo_bar_other
         end
       end
@@ -120,6 +122,16 @@ module Grape
         end
       end
 
+      describe '#namespace_reverse_stackable' do
+        it 'works with reverse stackable values' do
+          expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
+
+          subject.inherit_from other_parent
+
+          expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar_other]
+        end
+      end
+
       describe '#route' do
         it 'sets a value until the next route' do
           subject.route[:some_thing] = :foo_bar
@@ -186,6 +198,14 @@ module Grape
           expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
         end
 
+        it 'decouples namespace reverse stackable values' do
+          expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
+
+          subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :other_thing
+          expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq %i[other_thing namespace_reverse_stackable_foo_bar]
+          expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
+        end
+
         it 'decouples route values' do
           expect(cloned_obj.route[:route_thing]).to eq :route_foo_bar
 
@@ -204,6 +224,7 @@ module Grape
           subject.namespace[:namespace_thing] = :namespace_foo_bar
           subject.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
           subject.namespace_stackable[:namespace_stackable_thing] = [:namespace_stackable_foo_bar]
+          subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = [:namespace_reverse_stackable_foo_bar]
           subject.route[:route_thing] = :route_foo_bar
 
           expect(subject.to_hash).to include(global: { global_thing: :global_foo_bar })
@@ -212,6 +233,8 @@ module Grape
                                                namespace_inheritable_thing: :namespace_inheritable_foo_bar
                                              })
           expect(subject.to_hash).to include(namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] })
+          expect(subject.to_hash).to include(namespace_reverse_stackable:
+            { namespace_reverse_stackable_thing: [[:namespace_reverse_stackable_foo_bar], :namespace_reverse_stackable_foo_bar] })
           expect(subject.to_hash).to include(route: { route_thing: :route_foo_bar })
         end
       end

@@ -3,12 +3,12 @@
 require 'spec_helper'
 module Grape
   module Util
-    describe StackableValues do
-      let(:parent) { StackableValues.new }
-      subject { StackableValues.new(parent) }
+    describe ReverseStackableValues do
+      let(:parent) { described_class.new }
+      subject { described_class.new(parent) }
 
       describe '#keys' do
-        it 'returns all key' do
+        it 'returns all keys' do
           subject[:some_thing] = :foo_bar
           subject[:some_thing_else] = :foo_bar
           expect(subject.keys).to eq %i[some_thing some_thing_else].sort
@@ -51,10 +51,10 @@ module Grape
           expect(subject[:some_thing]).to eq [:foo]
         end
 
-        it 'combines parent and actual values' do
+        it 'combines parent and actual values (actual first)' do
           parent[:some_thing] = :foo
           subject[:some_thing] = :foo_bar
-          expect(subject[:some_thing]).to eq %i[foo foo_bar]
+          expect(subject[:some_thing]).to eq %i[foo_bar foo]
         end
 
         it 'parent values are not changed' do
@@ -84,7 +84,7 @@ module Grape
           parent[:some_thing_else] = %i[foo bar]
           subject[:some_thing_else] = %i[some bar foo]
 
-          expect(subject[:some_thing_else]).to eq [%i[foo bar], %i[some bar foo]]
+          expect(subject[:some_thing_else]).to eq [%i[some bar foo], %i[foo bar]]
         end
       end
 
@@ -93,23 +93,29 @@ module Grape
           parent[:some_thing] = :foo
           subject[:some_thing] = %i[bar more]
           subject[:some_thing_more] = :foo_bar
-          expect(subject.to_hash).to eq(some_thing: [:foo, %i[bar more]], some_thing_more: [:foo_bar])
+          expect(subject.to_hash).to eq(
+            some_thing: [%i[bar more], :foo],
+            some_thing_more: [:foo_bar]
+          )
         end
       end
 
       describe '#clone' do
         let(:obj_cloned) { subject.clone }
         it 'copies all values' do
-          parent = StackableValues.new
-          child = StackableValues.new parent
-          grandchild = StackableValues.new child
+          parent = described_class.new
+          child = described_class.new parent
+          grandchild = described_class.new child
 
           parent[:some_thing] = :foo
           child[:some_thing] = %i[bar more]
           grandchild[:some_thing] = :grand_foo_bar
           grandchild[:some_thing_more] = :foo_bar
 
-          expect(grandchild.clone.to_hash).to eq(some_thing: [:foo, %i[bar more], :grand_foo_bar], some_thing_more: [:foo_bar])
+          expect(grandchild.clone.to_hash).to eq(
+            some_thing: [:grand_foo_bar, %i[bar more], :foo],
+            some_thing_more: [:foo_bar]
+          )
         end
 
         context 'complex (i.e. not primitive) data types (ex. middleware, please see bug #930)' do
