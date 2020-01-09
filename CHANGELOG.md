@@ -3,7 +3,6 @@
 #### Features
 
 * Your contribution here.
-* [#1953](https://github.com/ruby-grape/grape/pull/1953): Delete a reversible stackable values class - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1949](https://github.com/ruby-grape/grape/pull/1949): Add support for Ruby 2.7 - [@nbulaj](https://github.com/nbulaj).
 * [#1948](https://github.com/ruby-grape/grape/pull/1948): Relax `dry-types` dependency version - [@nbulaj](https://github.com/nbulaj).
 * [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduces `attribute_translator` string allocations - [@ericproulx](https://github.com/ericproulx).

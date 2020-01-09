@@ -45,10 +45,8 @@ module Grape
       # @return [Boolean] whether or not this entire scope needs to be
       #   validated
       def should_validate?(parameters)
-        scoped_params = params(parameters)
-
-        return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
-        return false unless meets_dependency?(scoped_params, parameters)
+        return false if @optional && (params(parameters).blank? || all_element_blank?(parameters))
+        return false unless meets_dependency?(params(parameters), parameters)
         return true if parent.nil?
         parent.should_validate?(parameters)
       end
@@ -448,8 +446,8 @@ module Grape
         validations[type].respond_to?(:key?) && validations[type].key?(key) && !validations[type][key].nil?
       end
 
-      def all_element_blank?(scoped_params)
-        scoped_params.respond_to?(:all?) && scoped_params.all?(&:blank?)
+      def all_element_blank?(parameters)
+        params(parameters).respond_to?(:all?) && params(parameters).all?(&:blank?)
       end
 
       # Validators don't have access to each other and they don't need, however,

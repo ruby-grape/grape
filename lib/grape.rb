@@ -140,6 +140,7 @@ module Grape
     eager_autoload do
       autoload :InheritableValues
       autoload :StackableValues
+      autoload :ReverseStackableValues
       autoload :InheritableSetting
       autoload :StrictHashConfiguration
       autoload :Registrable

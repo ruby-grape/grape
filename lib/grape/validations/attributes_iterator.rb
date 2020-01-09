@@ -11,7 +11,6 @@ module Grape
         @scope = scope
         @attrs = validator.attrs
         @original_params = scope.params(params)
-        @array_given = @original_params.is_a?(Array)
         @params = Array.wrap(@original_params)
       end
 
@@ -31,7 +30,7 @@ module Grape
           end
 
           if @scope.type == Array
-            next unless @array_given # do not validate content of array if it isn't array
+            next unless @original_params.is_a?(Array) # do not validate content of array if it isn't array
 
             # fill current and parent scopes with correct array indicies
             parent_scope = @scope.parent

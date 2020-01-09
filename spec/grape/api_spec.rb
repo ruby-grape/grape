@@ -1942,6 +1942,26 @@ XML
       expect { get '/unrescued' }.to raise_error(RuntimeError, 'beefcake')
     end
 
+    it 'mimics default ruby "rescue" handler' do
+      # The exception is matched to the rescue starting at the top, and matches only once
+
+      subject.rescue_from ArgumentError do |e|
+        error!(e, 402)
+      end
+      subject.rescue_from StandardError do |e|
+        error!(e, 401)
+      end
+
+      subject.get('/child_of_standard_error') { raise ArgumentError }
+      subject.get('/standard_error') { raise StandardError }
+
+      get '/child_of_standard_error'
+      expect(last_response.status).to eql 402
+
+      get '/standard_error'
+      expect(last_response.status).to eql 401
+    end
+
     context 'CustomError subclass of Grape::Exceptions::Base' do
       before do
         module ApiSpec
