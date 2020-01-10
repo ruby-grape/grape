@@ -16,6 +16,7 @@
 
 #### Fixes
 
+* [#1965](https://github.com/ruby-grape/grape/pull/1965): Fix typos in README - [@davidalee](https://github.com/davidalee).
 * [#1963](https://github.com/ruby-grape/grape/pull/1963): The values validator must properly work with booleans - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1950](https://github.com/ruby-grape/grape/pull/1950): Consider the allow_blank option in the values validator - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1947](https://github.com/ruby-grape/grape/pull/1947): Careful check for empty params - [@dnesteryuk](https://github.com/dnesteryuk).
