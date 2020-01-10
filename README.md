@@ -3229,7 +3229,7 @@ end
 
 Use [Doorkeeper](https://github.com/doorkeeper-gem/doorkeeper), [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2) for OAuth2 support.
 
-You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middlware::Auth::Base`.
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any auth middleware inherited from `Grape::Middleware::Auth::Base`.
 
 ## Describing and Inspecting an API
 
@@ -3543,7 +3543,7 @@ class API < Grape::API
 end
 ```
 
-You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middlware::Base`.
+You can access the controller params, headers, and helpers through the context with the `#context` method inside any middleware inherited from `Grape::Middleware::Base`.
 
 ### Rails Middleware
 
