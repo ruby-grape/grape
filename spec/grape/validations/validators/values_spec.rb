@@ -438,11 +438,21 @@ describe Grape::Validations::ValuesValidator do
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
-  it 'allows values to be true or false when setting the type to boolean' do
-    get('/values/optional_boolean', type: true)
-    expect(last_response.status).to eq 200
-    expect(last_response.body).to eq({ type: true }.to_json)
+  context 'boolean values' do
+    it 'allows a value from the list' do
+      get('/values/optional_boolean', type: true)
+
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: true }.to_json)
+    end
+
+    it 'rejects a value which is not in the list' do
+      get('/values/optional_boolean', type: false)
+
+      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+    end
   end
+
   it 'allows values to be a kind of the coerced type not just an instance of it' do
     get('/values/coercion', type: 10)
     expect(last_response.status).to eq 200
