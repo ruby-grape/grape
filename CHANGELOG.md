@@ -3,7 +3,6 @@
 #### Features
 
 * Your contribution here.
-* [#1965](https://github.com/ruby-grape/grape/pull/1965): Fix typos in README - [@davidalee](https://github.com/davidalee).
 * [#1949](https://github.com/ruby-grape/grape/pull/1949): Add support for Ruby 2.7 - [@nbulaj](https://github.com/nbulaj).
 * [#1948](https://github.com/ruby-grape/grape/pull/1948): Relax `dry-types` dependency version - [@nbulaj](https://github.com/nbulaj).
 * [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduces `attribute_translator` string allocations - [@ericproulx](https://github.com/ericproulx).
@@ -17,6 +16,7 @@
 
 #### Fixes
 
+* [#1965](https://github.com/ruby-grape/grape/pull/1965): Fix typos in README - [@davidalee](https://github.com/davidalee).
 * [#1963](https://github.com/ruby-grape/grape/pull/1963): The values validator must properly work with booleans - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1950](https://github.com/ruby-grape/grape/pull/1950): Consider the allow_blank option in the values validator - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1947](https://github.com/ruby-grape/grape/pull/1947): Careful check for empty params - [@dnesteryuk](https://github.com/dnesteryuk).
