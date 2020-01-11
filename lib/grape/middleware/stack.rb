@@ -78,7 +78,8 @@ module Grape
       def merge_with(middleware_specs)
         middleware_specs.each do |operation, *args|
           if args.last.is_a?(Proc)
-            public_send(operation, *args, &args.pop)
+            last_proc = args.pop
+            public_send(operation, *args, &last_proc)
           else
             public_send(operation, *args)
           end
