@@ -1,8 +1,7 @@
-### 1.3.0 (Next)
+### 1.3.0 (2020/01/11)
 
 #### Features
 
-* Your contribution here.
 * [#1949](https://github.com/ruby-grape/grape/pull/1949): Add support for Ruby 2.7 - [@nbulaj](https://github.com/nbulaj).
 * [#1948](https://github.com/ruby-grape/grape/pull/1948): Relax `dry-types` dependency version - [@nbulaj](https://github.com/nbulaj).
 * [#1944](https://github.com/ruby-grape/grape/pull/1944): Reduces `attribute_translator` string allocations - [@ericproulx](https://github.com/ericproulx).
