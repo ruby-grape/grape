@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#1968](https://github.com/ruby-grape/grape/pull/1968): Fix args forwarding in Grape::Middleware::Stack#merge_with for ruby 2.7.0 - [@dm1try](https://github.com/dm1try).
 
 ### 1.3.0 (2020/01/11)
 
