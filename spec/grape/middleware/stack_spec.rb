@@ -111,6 +111,15 @@ describe Grape::Middleware::Stack do
       expect(subject[1]).to eq(StackSpec::BlockMiddleware)
       expect(subject[2]).to eq(StackSpec::BarMiddleware)
     end
+
+    context 'middleware spec with proc declaration exists' do
+      let(:middleware_spec_with_proc) { [:use, StackSpec::FooMiddleware, proc] }
+
+      it 'properly forwards spec arguments' do
+        expect(subject).to receive(:use).with(StackSpec::FooMiddleware)
+        subject.merge_with([middleware_spec_with_proc])
+      end
+    end
   end
 
   describe '#build' do
