@@ -154,6 +154,19 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'coerces' do
+      it 'BigDecimal' do
+        subject.params do
+          requires :bigdecimal, coerce: BigDecimal
+        end
+        subject.get '/bigdecimal' do
+          params[:bigdecimal].class
+        end
+
+        get '/bigdecimal', bigdecimal: '45'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('BigDecimal')
+      end
+
       it 'Integer' do
         subject.params do
           requires :int, coerce: Integer
