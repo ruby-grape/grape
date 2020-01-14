@@ -6,12 +6,13 @@ module Grape
   module Validations
     module Types
       # Coerces the given value to a type defined via a +type+ argument during
-      # initialization.
+      # initialization. When +strict+ is true, it doesn't coerce a value but check
+      # that it has the proper type.
       class PrimitiveCoercer < DryTypeCoercer
         MAPPING = {
           Grape::API::Boolean => DryTypes::Params::Bool,
 
-          # unfortunatelly, a +Params+ scope doesn't contain String
+          # unfortunately, a +Params+ scope doesn't contain String
           String              => DryTypes::Coercible::String,
           BigDecimal          => DryTypes::Coercible::Decimal
         }.freeze
