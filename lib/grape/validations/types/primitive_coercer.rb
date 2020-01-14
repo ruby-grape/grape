@@ -17,7 +17,8 @@ module Grape
         }.freeze
 
         STRICT_MAPPING = {
-          Grape::API::Boolean => DryTypes::Strict::Bool
+          Grape::API::Boolean => DryTypes::Strict::Bool,
+          BigDecimal          => DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)
