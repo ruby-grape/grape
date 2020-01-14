@@ -12,11 +12,13 @@ module Grape
           Grape::API::Boolean => DryTypes::Params::Bool,
 
           # unfortunatelly, a +Params+ scope doesn't contain String
-          String              => DryTypes::Coercible::String
+          String              => DryTypes::Coercible::String,
+          BigDecimal          => DryTypes::Coercible::Decimal
         }.freeze
 
         STRICT_MAPPING = {
-          Grape::API::Boolean => DryTypes::Strict::Bool
+          Grape::API::Boolean => DryTypes::Strict::Bool,
+          BigDecimal          => DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)
