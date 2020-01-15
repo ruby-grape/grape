@@ -84,7 +84,6 @@ module Grape
     eager_autoload do
       autoload :DeepMergeableHash
       autoload :DeepSymbolizeHash
-      autoload :DeepHashWithIndifferentAccess
       autoload :Hash
     end
     module ActiveSupport
