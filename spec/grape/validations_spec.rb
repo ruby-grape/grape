@@ -11,14 +11,17 @@ describe Grape::Validations do
 
   describe 'params' do
     context 'optional' do
-      it 'validates when params is present' do
+      before do
         subject.params do
           optional :a_number, regexp: /^[0-9]+$/
+          optional :attachment, type: File
         end
         subject.get '/optional' do
           'optional works!'
         end
+      end
 
+      it 'validates when params is present' do
         get '/optional', a_number: 'string'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('a_number is invalid')
@@ -29,14 +32,7 @@ describe Grape::Validations do
       end
 
       it "doesn't validate when param not present" do
-        subject.params do
-          optional :a_number, regexp: /^[0-9]+$/
-        end
-        subject.get '/optional' do
-          'optional works!'
-        end
-
-        get '/optional'
+        get '/optional', a_number: nil, attachment: nil
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('optional works!')
       end

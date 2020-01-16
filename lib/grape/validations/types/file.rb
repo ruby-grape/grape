@@ -8,6 +8,7 @@ module Grape
       # this class is here only to assert that rack's handling has succeeded.
       class File
         def call(input)
+          return if input.nil?
           return InvalidValue.new unless coerced?(input)
 
           # Processing of multipart file objects
