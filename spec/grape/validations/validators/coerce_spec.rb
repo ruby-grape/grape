@@ -294,66 +294,17 @@ describe Grape::Validations::CoerceValidator do
         end
       end
 
-      it 'Bool' do
-        subject.params do
-          requires :bool, coerce: Grape::API::Boolean
-        end
-        subject.get '/bool' do
-          params[:bool].class
-        end
-
-        get '/bool', bool: 1
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('TrueClass')
-
-        get '/bool', bool: 0
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('FalseClass')
-
-        get '/bool', bool: 'false'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('FalseClass')
-
-        get '/bool', bool: 'true'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('TrueClass')
-      end
-
       it 'Boolean' do
         subject.params do
-          optional :boolean, type: Boolean, default: true
+          requires :boolean, type: Boolean
         end
         subject.get '/boolean' do
           params[:boolean].class
         end
 
-        get '/boolean'
+        get '/boolean', boolean: 1
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('TrueClass')
-
-        get '/boolean', boolean: true
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('TrueClass')
-
-        get '/boolean', boolean: false
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('FalseClass')
-
-        get '/boolean', boolean: 'true'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('TrueClass')
-
-        get '/boolean', boolean: 'false'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('FalseClass')
-
-        get '/boolean', boolean: 123
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('boolean is invalid')
-
-        get '/boolean', boolean: '123'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('boolean is invalid')
       end
 
       it 'Rack::Multipart::UploadedFile' do
