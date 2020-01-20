@@ -46,7 +46,7 @@ module Grape
           bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter: formatter, env: env) do
             bodies.collect { |body| formatter.call(body, env) }
           end
-          Rack::Response.new(bodymap, status, headers)
+          Rack::Response.new(bodymap, status, headers).finish
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, status: 500, message: e.message, backtrace: e.backtrace, original_exception: e

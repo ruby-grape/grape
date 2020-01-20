@@ -2,7 +2,9 @@
 
 #### Features
 
-* Your contribution here.
+-* Your contribution here.
+
+* [#1981](https://github.com/ruby-grape/grape/pull/1981): Fix incompatibility of formatter middleware with Rack 2.1.0 and higher - [@ignatbagaev](https://github.com/ignatbagaev).
 
 #### Fixes
 
