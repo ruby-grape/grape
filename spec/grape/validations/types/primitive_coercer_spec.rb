@@ -11,8 +11,20 @@ describe Grape::Validations::Types::PrimitiveCoercer do
     context 'Boolean' do
       let(:type) { Grape::API::Boolean }
 
-      it 'coerces to Boolean' do
-        expect(subject.call(0)).to eq(false)
+      [true, 'true', 1].each do |val|
+        it "coerces '#{val}' to true" do
+          expect(subject.call(val)).to eq(true)
+        end
+      end
+
+      [false, 'false', 0].each do |val|
+        it "coerces '#{val}' to false" do
+          expect(subject.call(val)).to eq(false)
+        end
+      end
+
+      it 'returns an error when the given value cannot be coerced' do
+        expect(subject.call(123)).to be_instance_of(Grape::Validations::Types::InvalidValue)
       end
     end
 
