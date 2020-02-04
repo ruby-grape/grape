@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#1987](https://github.com/ruby-grape/grape/pull/1987): Re-add exactly_one_of mutually exclusive error message - [@ZeroInputCtrl](https://github.com/ZeroInputCtrl).
 * [#1977](https://github.com/ruby-grape/grape/pull/1977): Skip validation for a file if it is optional and nil - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1976](https://github.com/ruby-grape/grape/pull/1976): Ensure classes/modules listed for autoload really exist - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1971](https://github.com/ruby-grape/grape/pull/1971): Fix BigDecimal coercion - [@FlickStuart](https://github.com/FlickStuart).

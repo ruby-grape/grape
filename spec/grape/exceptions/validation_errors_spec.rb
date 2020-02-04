@@ -81,8 +81,8 @@ describe Grape::Exceptions::ValidationErrors do
       expect(last_response.status).to eq(400)
       expect(JSON.parse(last_response.body)).to eq(
         [
-          'params' => %w[beer wine juice],
-          'messages' => ['are missing, exactly one parameter must be provided']
+          'params' => %w[beer wine],
+          'messages' => ['are mutually exclusive']
         ]
       )
     end
