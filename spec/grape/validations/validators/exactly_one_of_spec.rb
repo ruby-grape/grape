@@ -100,7 +100,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'beer,wine,grapefruit' => ['are missing, exactly one parameter must be provided']
+          'beer,wine,grapefruit' => ['are mutually exclusive']
         )
       end
 
@@ -112,7 +112,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
           validate
           expect(last_response.status).to eq 400
           expect(JSON.parse(last_response.body)).to eq(
-            'beer,wine,grapefruit' => ['are missing, exactly one parameter must be provided']
+            'beer,wine,grapefruit' => ['are mutually exclusive']
           )
         end
       end
@@ -126,7 +126,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'beer,wine,grapefruit' => ['are missing, exactly one parameter must be provided']
+          'beer,grapefruit' => ['are mutually exclusive']
         )
       end
     end
@@ -139,7 +139,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'beer,wine,grapefruit' => ['you should choose one']
+          'beer,wine' => ['you should choose one']
         )
       end
     end
@@ -175,7 +175,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'item[beer],item[wine],item[grapefruit]' => ['are missing, exactly one parameter must be provided']
+          'item[beer],item[wine]' => ['are mutually exclusive']
         )
       end
     end
@@ -190,7 +190,7 @@ describe Grape::Validations::ExactlyOneOfValidator do
           validate
           expect(last_response.status).to eq 400
           expect(JSON.parse(last_response.body)).to eq(
-            'item[beer],item[wine],item[grapefruit]' => ['are missing, exactly one parameter must be provided']
+            'item[beer],item[wine]' => ['are mutually exclusive']
           )
         end
       end
@@ -213,11 +213,11 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'items[0][beer],items[0][wine],items[0][grapefruit]' => [
-            'are missing, exactly one parameter must be provided'
+          'items[0][beer],items[0][wine]' => [
+            'are mutually exclusive'
           ],
-          'items[1][beer],items[1][wine],items[1][grapefruit]' => [
-            'are missing, exactly one parameter must be provided'
+          'items[1][wine],items[1][grapefruit]' => [
+            'are mutually exclusive'
           ]
         )
       end
@@ -231,8 +231,8 @@ describe Grape::Validations::ExactlyOneOfValidator do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'items[0][nested_items][0][beer],items[0][nested_items][0][wine],items[0][nested_items][0][grapefruit]' => [
-            'are missing, exactly one parameter must be provided'
+          'items[0][nested_items][0][beer],items[0][nested_items][0][wine]' => [
+            'are mutually exclusive'
           ]
         )
       end
