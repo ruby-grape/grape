@@ -57,10 +57,6 @@ module Grape
         end.join(', ')
       end
 
-      def translate_attribute(key, **options)
-        translate("#{BASE_ATTRIBUTES_KEY}.#{key}", default: key, **options)
-      end
-
       def translate_message(key, **options)
         case key
         when Symbol
