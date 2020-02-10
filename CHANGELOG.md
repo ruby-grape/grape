@@ -11,7 +11,7 @@
 * [#1976](https://github.com/ruby-grape/grape/pull/1976): Ensure classes/modules listed for autoload really exist - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1971](https://github.com/ruby-grape/grape/pull/1971): Fix BigDecimal coercion - [@FlickStuart](https://github.com/FlickStuart).
 * [#1968](https://github.com/ruby-grape/grape/pull/1968): Fix args forwarding in Grape::Middleware::Stack#merge_with for ruby 2.7.0 - [@dm1try](https://github.com/dm1try).
-
+* [#1988](https://github.com/ruby-grape/grape/pull/1988): Refactored the full_messages method and stop overriding full_message - [@hosseintoussi](https://github.com/hosseintoussi).
 ### 1.3.0 (2020/01/11)
 
 #### Features

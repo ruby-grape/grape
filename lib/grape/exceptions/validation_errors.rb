@@ -5,6 +5,9 @@ require 'grape/exceptions/base'
 module Grape
   module Exceptions
     class ValidationErrors < Grape::Exceptions::Base
+      ERRORS_FORMAT_KEY = 'grape.errors.format'
+      DEFAULT_ERRORS_FORMAT = '%{attributes} %{message}'
+
       include Enumerable
 
       attr_reader :errors
@@ -41,20 +44,16 @@ module Grape
       end
 
       def full_messages
-        messages = map { |attributes, error| full_message(attributes, error) }
+        messages = map do |attributes, error|
+          I18n.t(
+            ERRORS_FORMAT_KEY,
+            default: DEFAULT_ERRORS_FORMAT,
+            attributes: translate_attributes(attributes),
+            message: error.message
+          )
+        end
         messages.uniq!
         messages
-      end
-
-      private
-
-      def full_message(attributes, error)
-        I18n.t(
-          'grape.errors.format',
-          default: '%{attributes} %{message}',
-          attributes: attributes.count == 1 ? translate_attribute(attributes.first) : translate_attributes(attributes),
-          message: error.message
-        )
       end
     end
   end
