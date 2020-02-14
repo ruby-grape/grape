@@ -106,7 +106,7 @@ module Grape
         env,
         neighbor.allow_header,
         neighbor.endpoint
-      ) if neighbor && method == 'OPTIONS' && !cascade
+      ) if neighbor && method == Grape::Http::Headers::OPTIONS && !cascade
 
       route = match?(input, '*')
       return neighbor.endpoint.call(env) if neighbor && cascade && route
@@ -160,7 +160,7 @@ module Grape
     end
 
     def call_with_allow_headers(env, methods, endpoint)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ')
       endpoint.call(env)
     end
 
