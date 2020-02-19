@@ -8,7 +8,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile!]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile! inherited]).freeze
 
     class << self
       attr_accessor :base_instance, :instances

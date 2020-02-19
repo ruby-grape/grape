@@ -127,7 +127,7 @@ module Grape
 
         opts = attrs.extract_options!.clone
         opts[:presence] = { value: true, message: opts[:message] }
-        opts = @group.merge(opts) if @group
+        opts = @group.merge(opts) if instance_variable_defined?(:@group) && @group
 
         if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)
@@ -146,7 +146,7 @@ module Grape
 
         opts = attrs.extract_options!.clone
         type = opts[:type]
-        opts = @group.merge(opts) if @group
+        opts = @group.merge(opts) if instance_variable_defined?(:@group) && @group
 
         # check type for optional parameter group
         if attrs && block_given?
@@ -243,8 +243,8 @@ module Grape
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
-        params = @parent.params(params) if @parent
-        params = map_params(params, @element) if @element
+        params = @parent.params(params) if instance_variable_defined?(:@parent) && @parent
+        params = map_params(params, @element) if instance_variable_defined?(:@element) && @element
         params
       end
 

@@ -51,7 +51,7 @@ module Grape
             end
           end
 
-          @versions.last unless @versions.nil?
+          @versions.last if instance_variable_defined?(:@versions) && @versions
         end
 
         # Define a root URL prefix for your entire API.
@@ -163,6 +163,8 @@ module Grape
         #       end
         #     end
         def namespace(space = nil, options = {}, &block)
+          @namespace_description = nil unless instance_variable_defined?(:@namespace_description) && @namespace_description
+
           if space || block_given?
             within_namespace do
               previous_namespace_description = @namespace_description

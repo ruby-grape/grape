@@ -935,7 +935,7 @@ XML
 
     it 'adds a before filter to current and child namespaces only' do
       subject.get '/' do
-        "root - #{@foo}"
+        "root - #{instance_variable_defined?(:@foo) ? @foo : nil}"
       end
       subject.namespace :blah do
         before { @foo = 'foo' }
@@ -3677,12 +3677,13 @@ XML
       end
     end
     context ':serializable_hash' do
-      before(:each) do
-        class SerializableHashExample
-          def serializable_hash
-            { abc: 'def' }
-          end
+      class SerializableHashExample
+        def serializable_hash
+          { abc: 'def' }
         end
+      end
+
+      before(:each) do
         subject.format :serializable_hash
       end
       it 'instance' do
