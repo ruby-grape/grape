@@ -1723,7 +1723,7 @@ params do
 end
 ```
 
-Every validation will have it's own instance of the validator, which means that the validator can have a state.
+Every validation will have its own instance of the validator, which means that the validator can have a state.
 
 ### Validation Errors
 
@@ -3302,7 +3302,7 @@ end
 
 Blocks can be executed before or after every API call, using `before`, `after`,
 `before_validation` and `after_validation`.
-If the API fails the `after` call will not be trigered, if you need code to execute for sure
+If the API fails the `after` call will not be triggered, if you need code to execute for sure
 use the `finally`.
 
 Before and after callbacks execute in the following order:
