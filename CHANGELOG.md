@@ -6,7 +6,7 @@
 
 #### Fixes
 
-* [#1995](https://github.com/ruby-grape/grape/pull/1995): Address some Ruby warnings - [@nbeyer](https://github.com/nbeyer).
+* [#1995](https://github.com/ruby-grape/grape/pull/1995): Address some Ruby warnings (undefined instance variables, method redefined) - [@nbeyer](https://github.com/nbeyer).
 * [#1994](https://github.com/ruby-grape/grape/pull/1993): Fix typos in README - [@bellmyer](https://github.com/bellmyer).
 * [#1993](https://github.com/ruby-grape/grape/pull/1993): Lazy join allow header - [@ericproulx](https://github.com/ericproulx).
 * [#1987](https://github.com/ruby-grape/grape/pull/1987): Re-add exactly_one_of mutually exclusive error message - [@ZeroInputCtrl](https://github.com/ZeroInputCtrl).
