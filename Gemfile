@@ -28,7 +28,6 @@ group :test do
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'mime-types'
-  gem 'multi_xml'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '~> 1.1.0'
   gem 'rspec', '~> 3.0'
