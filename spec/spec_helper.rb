@@ -35,6 +35,7 @@ RSpec.configure do |config|
   config.include Spec::Support::Helpers
   config.raise_errors_for_deprecations!
   config.filter_run_when_matching :focus
+  config.warnings = true
 
   config.before(:each) { Grape::Util::InheritableSetting.reset_global! }
 

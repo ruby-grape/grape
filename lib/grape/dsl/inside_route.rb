@@ -182,12 +182,12 @@ module Grape
         when Integer
           @status = status
         when nil
-          return @status if @status
+          return @status if instance_variable_defined?(:@status) && @status
           case request.request_method.to_s.upcase
           when Grape::Http::Headers::POST
             201
           when Grape::Http::Headers::DELETE
-            if @body.present?
+            if instance_variable_defined?(:@body) && @body.present?
               200
             else
               204
@@ -238,7 +238,7 @@ module Grape
           @body = ''
           status 204
         else
-          @body
+          instance_variable_defined?(:@body) ? @body : nil
         end
       end
 
@@ -272,7 +272,7 @@ module Grape
           warn '[DEPRECATION] Argument as FileStreamer-like object is deprecated. Use path to file instead.'
           @file = Grape::ServeFile::FileResponse.new(value)
         else
-          @file
+          instance_variable_defined?(:@file) ? @file : nil
         end
       end
 
@@ -331,11 +331,12 @@ module Grape
                          end
 
         representation = { root => representation } if root
+
         if key
-          representation = (@body || {}).merge(key => representation)
-        elsif entity_class.present? && @body
+          representation = (body || {}).merge(key => representation)
+        elsif entity_class.present? && body
           raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
-          representation = @body.merge(representation)
+          representation = body.merge(representation)
         end
 
         body representation
@@ -387,7 +388,7 @@ module Grape
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
         embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
-        entity_class.represent(object, **embeds.merge(options))
+        entity_class.represent(object, embeds.merge(options))
       end
     end
   end

@@ -5,6 +5,8 @@
 * Your contribution here.
 
 #### Fixes
+
+* [#1995](https://github.com/ruby-grape/grape/pull/1995): Fix: "undefined instance variables" and "method redefined" warnings - [@nbeyer](https://github.com/nbeyer).
 * [#1994](https://github.com/ruby-grape/grape/pull/1993): Fix typos in README - [@bellmyer](https://github.com/bellmyer).
 * [#1993](https://github.com/ruby-grape/grape/pull/1993): Lazy join allow header - [@ericproulx](https://github.com/ericproulx).
 * [#1987](https://github.com/ruby-grape/grape/pull/1987): Re-add exactly_one_of mutually exclusive error message - [@ZeroInputCtrl](https://github.com/ZeroInputCtrl).
@@ -13,6 +15,7 @@
 * [#1971](https://github.com/ruby-grape/grape/pull/1971): Fix BigDecimal coercion - [@FlickStuart](https://github.com/FlickStuart).
 * [#1968](https://github.com/ruby-grape/grape/pull/1968): Fix args forwarding in Grape::Middleware::Stack#merge_with for ruby 2.7.0 - [@dm1try](https://github.com/dm1try).
 * [#1988](https://github.com/ruby-grape/grape/pull/1988): Refactored the full_messages method and stop overriding full_message - [@hosseintoussi](https://github.com/hosseintoussi).
+
 ### 1.3.0 (2020/01/11)
 
 #### Features
