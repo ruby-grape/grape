@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#2002](https://github.com/ruby-grape/grape/pull/2002): Objects allocation optimization (lazy_lookup) - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
