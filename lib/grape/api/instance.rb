@@ -209,7 +209,7 @@ module Grape
             route_settings[:endpoint] = route.app
 
             # using the :any shorthand produces [nil] for route methods, substitute all manually
-            route_settings[:methods] = %w[GET PUT POST DELETE PATCH HEAD OPTIONS] if route_settings[:methods].include?('*')
+            route_settings[:methods] = Grape::Http::Headers::SUPPORTED_METHODS if route_settings[:methods].include?('*')
           end
         end
 
