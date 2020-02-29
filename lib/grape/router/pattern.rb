@@ -2,35 +2,32 @@
 
 require 'forwardable'
 require 'mustermann/grape'
+require 'grape/util/cache'
 
 module Grape
   class Router
     class Pattern
-      DEFAULT_PATTERN_OPTIONS   = { uri_decode: true, type: :grape }.freeze
+      DEFAULT_PATTERN_OPTIONS   = { uri_decode: true }.freeze
       DEFAULT_SUPPORTED_CAPTURE = %i[format version].freeze
 
-      attr_reader :origin, :path, :capture, :pattern
+      attr_reader :origin, :path, :pattern, :to_regexp
 
       extend Forwardable
       def_delegators :pattern, :named_captures, :params
-      def_delegators :@regexp, :===
+      def_delegators :to_regexp, :===
       alias match? ===
 
       def initialize(pattern, **options)
         @origin  = pattern
         @path    = build_path(pattern, **options)
-        @capture = extract_capture(**options)
-        @pattern = Mustermann.new(@path, **pattern_options)
-        @regexp  = to_regexp
-      end
-
-      def to_regexp
-        @to_regexp ||= @pattern.to_regexp
+        @pattern = Mustermann::Grape.new(@path, **pattern_options(options))
+        @to_regexp = @pattern.to_regexp
       end
 
       private
 
-      def pattern_options
+      def pattern_options(options)
+        capture = extract_capture(**options)
         options = DEFAULT_PATTERN_OPTIONS.dup
         options[:capture] = capture if capture.present?
         options
@@ -43,23 +40,27 @@ module Grape
           pattern << '*path'
         end
 
-        pattern = pattern.split('/').tap do |parts|
+        pattern = -pattern.split('/').tap do |parts|
           parts[parts.length - 1] = '?' + parts.last
         end.join('/') if pattern.end_with?('*path')
 
-        "#{pattern}#{suffix}"
+        PatternCache[[pattern, suffix]]
       end
 
       def extract_capture(requirements: {}, **options)
         requirements = {}.merge(requirements)
-        supported_capture.each_with_object(requirements) do |field, capture|
+        DEFAULT_SUPPORTED_CAPTURE.each_with_object(requirements) do |field, capture|
           option = Array(options[field])
           capture[field] = option.map(&:to_s) if option.present?
         end
       end
 
-      def supported_capture
-        DEFAULT_SUPPORTED_CAPTURE
+      class PatternCache < Grape::Util::Cache
+        def initialize
+          @cache ||= Hash.new do |h, (pattern, suffix)|
+            h[[pattern, suffix]] = -"#{pattern}#{suffix}"
+          end
+        end
       end
     end
   end
