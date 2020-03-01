@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'grape/router/route'
+require 'grape/util/cache'
 
 module Grape
   class Router
@@ -16,12 +17,20 @@ module Grape
       end
     end
 
+    class NormalizePathCache < Grape::Util::Cache
+      def initialize
+        @cache ||= Hash.new do |h, path|
+          normalized_path = +"/#{path}"
+          normalized_path.squeeze!('/')
+          normalized_path.sub!(%r{/+\Z}, '')
+          normalized_path = '/' if normalized_path.empty?
+          h[path] = -normalized_path
+        end
+      end
+    end
+
     def self.normalize_path(path)
-      path = +"/#{path}"
-      path.squeeze!('/')
-      path.sub!(%r{/+\Z}, '')
-      path = '/' if path == ''
-      path
+      NormalizePathCache[path]
     end
 
     def self.supported_methods
@@ -160,7 +169,7 @@ module Grape
     end
 
     def call_with_allow_headers(env, methods, endpoint)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ')
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ').freeze
       endpoint.call(env)
     end
 

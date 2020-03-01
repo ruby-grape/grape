@@ -177,7 +177,7 @@ module Grape
       def status(status = nil)
         case status
         when Symbol
-          raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.keys.include?(status)
+          raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(status)
           @status = Rack::Utils.status_code(status)
         when Integer
           @status = status

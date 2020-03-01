@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'grape/util/lazy_object'
+
 module Grape
   class Request < Rack::Request
     HTTP_PREFIX = 'HTTP_'
@@ -30,14 +32,17 @@ module Grape
     end
 
     def build_headers
-      headers = {}
-      env.each_pair do |k, v|
-        next unless k.to_s.start_with? HTTP_PREFIX
-
-        k = k[5..-1].split('_').each(&:capitalize!).join('-')
-        headers[k] = v
+      Grape::Util::LazyObject.new do
+        env.each_pair.with_object({}) do |(k, v), headers|
+          next unless k.to_s.start_with? HTTP_PREFIX
+          transformed_header = Grape::Http::Headers::HTTP_HEADERS[k] || transform_header(k)
+          headers[transformed_header] = v
+        end
       end
-      headers
+    end
+
+    def transform_header(header)
+      -header[5..-1].split('_').each(&:capitalize!).join('-')
     end
   end
 end
