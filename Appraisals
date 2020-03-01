@@ -19,3 +19,11 @@ end
 appraise 'multi_xml' do
   gem 'multi_xml', require: 'multi_xml'
 end
+
+appraise 'rack1' do
+  gem 'rack', '~> 1.0'
+end
+
+appraise 'rack2' do
+  gem 'rack', '~> 2.0'
+end

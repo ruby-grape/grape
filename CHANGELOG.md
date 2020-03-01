@@ -3,7 +3,7 @@
 #### Features
 
 * Your contribution here.
-* [#2003](https://github.com/ruby-grape/grape/pull/2003): Updated rubocop - [@ericproulx](https://github.com/ericproulx).
+* [#2003](https://github.com/ruby-grape/grape/pull/2003): Upgraded Rubocop to 0.80.1 - [@ericproulx](https://github.com/ericproulx).
 * [#2002](https://github.com/ruby-grape/grape/pull/2002): Objects allocation optimization (lazy_lookup) - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes

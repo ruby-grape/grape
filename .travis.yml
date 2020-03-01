@@ -16,7 +16,7 @@ matrix:
     - rvm: 2.7.0
       gemfile: gemfiles/rack1.gemfile
     - rvm: 2.7.0
-      gemfile: gemfiles/rack2-0.gemfile
+      gemfile: gemfiles/rack2.gemfile
     - rvm: 2.7.0
       gemfile: gemfiles/rack_edge.gemfile
     - rvm: 2.7.0
