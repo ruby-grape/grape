@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'grape/util/cache'
+
 module Grape
   # Represents a path to an endpoint.
   class Path
@@ -58,7 +60,7 @@ module Grape
     end
 
     def path
-      Grape::Router.normalize_path(parts.join('/'))
+      Grape::Router.normalize_path(PartsCache[parts])
     end
 
     def path_with_suffix
@@ -70,6 +72,14 @@ module Grape
     end
 
     private
+
+    class PartsCache < Grape::Util::Cache
+      def initialize
+        @cache ||= Hash.new do |h, parts|
+          h[parts] = -parts.join('/')
+        end
+      end
+    end
 
     def parts
       parts = [mount_path, root_prefix].compact

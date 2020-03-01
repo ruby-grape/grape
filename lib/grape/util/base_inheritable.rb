@@ -31,6 +31,10 @@ module Grape
         combined.uniq!
         combined
       end
+
+      def key?(name)
+        inherited_values.key?(name) || new_values.key?(name)
+      end
     end
   end
 end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'grape/util/cache'
+
 module Grape
   # A container for endpoints or other namespaces, which allows for both
   # logical grouping of endpoints as well as sharing common configuration.
@@ -25,13 +27,21 @@ module Grape
 
     # (see ::joined_space_path)
     def self.joined_space(settings)
-      (settings || []).map(&:space).join('/')
+      settings&.map(&:space)
     end
 
     # Join the namespaces from a list of settings to create a path prefix.
     # @param settings [Array] list of Grape::Util::InheritableSettings.
     def self.joined_space_path(settings)
-      Grape::Router.normalize_path(joined_space(settings))
+      Grape::Router.normalize_path(JoinedSpaceCache[joined_space(settings)])
+    end
+
+    class JoinedSpaceCache < Grape::Util::Cache
+      def initialize
+        @cache ||= Hash.new do |h, joined_space|
+          h[joined_space] = -joined_space.join('/')
+        end
+      end
     end
   end
 end

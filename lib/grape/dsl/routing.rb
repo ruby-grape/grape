@@ -142,11 +142,11 @@ module Grape
           reset_validations!
         end
 
-        %w[get post put head delete options patch].each do |meth|
-          define_method meth do |*args, &block|
+        Grape::Http::Headers::SUPPORTED_METHODS.each do |supported_method|
+          define_method supported_method.downcase do |*args, &block|
             options = args.extract_options!
             paths = args.first || ['/']
-            route(meth.upcase, paths, options, &block)
+            route(supported_method, paths, options, &block)
           end
         end
 
