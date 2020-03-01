@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#2003](https://github.com/ruby-grape/grape/pull/2003): Updated rubocop - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
