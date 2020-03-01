@@ -169,7 +169,7 @@ module Grape
     end
 
     def call_with_allow_headers(env, methods, endpoint)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = -methods.join(', ')
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ').freeze
       endpoint.call(env)
     end
 
