@@ -244,7 +244,7 @@ module Grape
       end
 
       def validates(attrs, validations)
-        doc_attrs = { required: validations.keys.include?(:presence) }
+        doc_attrs = { required: validations.key?(:presence) }
 
         coerce_type = infer_coercion(validations)
 

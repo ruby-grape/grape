@@ -74,7 +74,7 @@ module Grape
         # (see #cascade?)
         def cascade(value = nil)
           if value.nil?
-            inheritable_setting.namespace_inheritable.keys.include?(:cascade) ? !namespace_inheritable(:cascade).nil? : true
+            inheritable_setting.namespace_inheritable.key?(:cascade) ? !namespace_inheritable(:cascade).nil? : true
           else
             namespace_inheritable(:cascade, value)
           end
@@ -178,7 +178,7 @@ module Grape
       # errors from reaching upstream. This is effectivelly done by unsetting
       # X-Cascade. Default :cascade is true.
       def cascade?
-        return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.keys.include?(:cascade)
+        return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.key?(:cascade)
         return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options) && self.class.namespace_inheritable(:version_options).key?(:cascade)
         true
       end
