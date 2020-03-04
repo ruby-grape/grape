@@ -7,7 +7,7 @@
 * [#2002](https://github.com/ruby-grape/grape/pull/2002): Objects allocation optimization (lazy_lookup) - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
-
+* [#2004](https://github.com/ruby-grape/grape/pull/2004): Rubocop fixes - [@ericproulx](https://github.com/ericproulx).
 * [#1995](https://github.com/ruby-grape/grape/pull/1995): Fix: "undefined instance variables" and "method redefined" warnings - [@nbeyer](https://github.com/nbeyer).
 * [#1994](https://github.com/ruby-grape/grape/pull/1993): Fix typos in README - [@bellmyer](https://github.com/bellmyer).
 * [#1993](https://github.com/ruby-grape/grape/pull/1993): Lazy join allow header - [@ericproulx](https://github.com/ericproulx).
