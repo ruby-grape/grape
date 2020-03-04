@@ -76,7 +76,7 @@ module Grape
         converter.call(val)
 
       # Some custom types might fail, so it should be treated as an invalid value
-      rescue
+      rescue StandardError
         Types::InvalidValue.new
       end
 
