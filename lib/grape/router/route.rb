@@ -8,8 +8,8 @@ require 'pathname'
 module Grape
   class Router
     class Route
-      ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/
-      SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/
+      ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/.freeze
+      SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/.freeze
       FIXED_NAMED_CAPTURES = %w[format version].freeze
 
       attr_accessor :pattern, :translator, :app, :index, :regexp, :options
