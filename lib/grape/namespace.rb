@@ -38,7 +38,7 @@ module Grape
 
     class JoinedSpaceCache < Grape::Util::Cache
       def initialize
-        @cache ||= Hash.new do |h, joined_space|
+        @cache = Hash.new do |h, joined_space|
           h[joined_space] = -joined_space.join('/')
         end
       end
