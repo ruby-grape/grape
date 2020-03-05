@@ -188,6 +188,14 @@ Style/NumericPredicate:
     - 'spec/**/*'
     - 'lib/grape/middleware/formatter.rb'
 
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: implicit, explicit
+Style/RescueStandardError:
+  Exclude:
+    - 'lib/grape/validations/validators/coerce.rb'
+
 # Offense count: 11
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods.
