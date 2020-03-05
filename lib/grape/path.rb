@@ -75,7 +75,7 @@ module Grape
 
     class PartsCache < Grape::Util::Cache
       def initialize
-        @cache ||= Hash.new do |h, parts|
+        @cache = Hash.new do |h, parts|
           h[parts] = -parts.join('/')
         end
       end

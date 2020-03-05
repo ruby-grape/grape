@@ -19,7 +19,7 @@ module Grape
 
     class NormalizePathCache < Grape::Util::Cache
       def initialize
-        @cache ||= Hash.new do |h, path|
+        @cache = Hash.new do |h, path|
           normalized_path = +"/#{path}"
           normalized_path.squeeze!('/')
           normalized_path.sub!(%r{/+\Z}, '')

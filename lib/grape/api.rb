@@ -175,7 +175,7 @@ module Grape
           if argument.respond_to?(:lazy?) && argument.lazy?
             argument.evaluate_from(configuration)
           elsif argument.is_a?(Hash)
-            argument.map { |key, value| [key, evaluate_arguments(configuration, value).first] }.to_h
+            argument.transform_values { |value| evaluate_arguments(configuration, value).first }
           elsif argument.is_a?(Array)
             evaluate_arguments(configuration, *argument)
           else

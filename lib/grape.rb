@@ -20,7 +20,6 @@ require 'active_support/core_ext/hash/conversions'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'i18n'
-require 'thread'
 
 I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
 
