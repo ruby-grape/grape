@@ -402,10 +402,10 @@ describe Grape::Middleware::Formatter do
     let(:app) { ->(_env) { [200, {}, ['']] } }
     before do
       Grape::Formatter.register :invalid, InvalidFormatter
-      Grape::ContentTypes::CONTENT_TYPES[:invalid] = 'application/x-invalid'
+      Grape::ContentTypes.register :invalid, 'application/x-invalid'
     end
     after do
-      Grape::ContentTypes::CONTENT_TYPES.delete(:invalid)
+      Grape::ContentTypes.default_elements.delete(:invalid)
       Grape::Formatter.default_elements.delete(:invalid)
     end
 
