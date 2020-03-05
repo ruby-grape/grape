@@ -26,10 +26,10 @@ module Grape
       # route.
       class Header < Base
         VENDOR_VERSION_HEADER_REGEX =
-          /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))?(?:\+([a-z0-9*\-.]+))?\z/
+          /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))?(?:\+([a-z0-9*\-.]+))?\z/.freeze
 
-        HAS_VENDOR_REGEX = /\Avnd\.[a-z0-9.\-_!#\$&\^]+/
-        HAS_VERSION_REGEX = /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))+/
+        HAS_VENDOR_REGEX = /\Avnd\.[a-z0-9.\-_!#\$&\^]+/.freeze
+        HAS_VERSION_REGEX = /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))+/.freeze
 
         def before
           strict_header_checks if strict?
