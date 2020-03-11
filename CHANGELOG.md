@@ -1,3 +1,13 @@
+### 1.3.2 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 1.3.1 (2020/03/11)
 
 #### Features
