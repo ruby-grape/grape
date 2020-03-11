@@ -1,13 +1,13 @@
-### 1.3.1 (Next)
+### 1.3.1 (2020/03/11)
 
 #### Features
 
-* Your contribution here.
 * [#2005](https://github.com/ruby-grape/grape/pull/2005): Content types registrable - [@ericproulx](https://github.com/ericproulx).
 * [#2003](https://github.com/ruby-grape/grape/pull/2003): Upgraded Rubocop to 0.80.1 - [@ericproulx](https://github.com/ericproulx).
 * [#2002](https://github.com/ruby-grape/grape/pull/2002): Objects allocation optimization (lazy_lookup) - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
+
 * [#2006](https://github.com/ruby-grape/grape/pull/2006): Fix explicit rescue StandardError - [@ericproulx](https://github.com/ericproulx).
 * [#2004](https://github.com/ruby-grape/grape/pull/2004): Rubocop fixes - [@ericproulx](https://github.com/ericproulx).
 * [#1995](https://github.com/ruby-grape/grape/pull/1995): Fix: "undefined instance variables" and "method redefined" warnings - [@nbeyer](https://github.com/nbeyer).
