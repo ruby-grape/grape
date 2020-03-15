@@ -2,7 +2,7 @@
 
 #### Features
 
-* Your contribution here.
+* [#2011](https://github.com/ruby-grape/grape/pull/2011): Reduce total retained regexes - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
