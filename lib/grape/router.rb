@@ -8,10 +8,9 @@ module Grape
     attr_reader :map, :compiled
 
     class Any < AttributeTranslator
-      attr_reader :pattern, :regexp, :index
-      def initialize(pattern, regexp, index, **attributes)
+      attr_reader :pattern, :index
+      def initialize(pattern, index, **attributes)
         @pattern = pattern
-        @regexp = regexp
         @index = index
         super(attributes)
       end
@@ -39,18 +38,20 @@ module Grape
 
     def initialize
       @neutral_map = []
+      @neutral_regexes = []
       @map = Hash.new { |hash, key| hash[key] = [] }
       @optimized_map = Hash.new { |hash, key| hash[key] = // }
     end
 
     def compile!
       return if compiled
-      @union = Regexp.union(@neutral_map.map(&:regexp))
+      @union = Regexp.union(@neutral_regexes)
+      @neutral_regexes = nil
       self.class.supported_methods.each do |method|
         routes = map[method]
         @optimized_map[method] = routes.map.with_index do |route, index|
           route.index = index
-          route.regexp = Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
+          Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
         end
         @optimized_map[method] = Regexp.union(@optimized_map[method])
       end
@@ -62,8 +63,8 @@ module Grape
     end
 
     def associate_routes(pattern, **options)
-      regexp = Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Any.new(pattern, regexp, @neutral_map.length, **options)
+      @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
+      @neutral_map << Any.new(pattern, @neutral_map.length, **options)
     end
 
     def call(env)

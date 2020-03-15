@@ -12,7 +12,7 @@ module Grape
       SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/.freeze
       FIXED_NAMED_CAPTURES = %w[format version].freeze
 
-      attr_accessor :pattern, :translator, :app, :index, :regexp, :options
+      attr_accessor :pattern, :translator, :app, :index, :options
 
       alias attributes translator
 
