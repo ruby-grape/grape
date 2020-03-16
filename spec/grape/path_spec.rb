@@ -87,12 +87,12 @@ module Grape
     describe '#namespace?' do
       it 'is false when the namespace is nil' do
         path = Path.new(anything, nil, anything)
-        expect(path.namespace?).to be nil
+        expect(path.namespace?).to be_falsey
       end
 
       it 'is false when the namespace starts with whitespace' do
         path = Path.new(anything, ' /foo', anything)
-        expect(path.namespace?).to be nil
+        expect(path.namespace?).to be_falsey
       end
 
       it 'is false when the namespace is the root path' do
@@ -109,12 +109,12 @@ module Grape
     describe '#path?' do
       it 'is false when the path is nil' do
         path = Path.new(nil, anything, anything)
-        expect(path.path?).to be nil
+        expect(path.path?).to be_falsey
       end
 
       it 'is false when the path starts with whitespace' do
         path = Path.new(' /foo', anything, anything)
-        expect(path.path?).to be nil
+        expect(path.path?).to be_falsey
       end
 
       it 'is false when the path is the root path' do

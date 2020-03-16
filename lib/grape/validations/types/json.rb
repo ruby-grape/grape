@@ -20,7 +20,7 @@ module Grape
           return input if coerced?(input)
 
           # Allow nulls and blank strings
-          return if input.nil? || input =~ /^\s*$/
+          return if input.nil? || input.match?(/^\s*$/)
           JSON.parse(input, symbolize_names: true)
         end
 
