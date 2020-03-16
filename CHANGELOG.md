@@ -2,6 +2,8 @@
 
 #### Features
 * Your contribution here.
+* [#2020](https://github.com/ruby-grape/grape/pull/2014): Reduce array allocation - [@ericproulx](https://github.com/ericproulx).
+* [#2015](https://github.com/ruby-grape/grape/pull/2014): Reduce MatchData allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
 * [#2011](https://github.com/ruby-grape/grape/pull/2011): Reduce total retained regexes - [@ericproulx](https://github.com/ericproulx).
 

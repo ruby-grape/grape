@@ -31,7 +31,7 @@ module Grape
       end
 
       def respond_to_missing?(method_id, _)
-        ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
+        ROUTE_ATTRIBUTE_REGEXP.match?(method_id.to_s)
       end
 
       %i[
@@ -67,7 +67,6 @@ module Grape
         method_s = method.to_s
         method_upcase = Grape::Http::Headers.find_supported_method(method_s) || method_s.upcase
 
-        @suffix     = options[:suffix]
         @options    = options.merge(method: method_upcase)
         @pattern    = Pattern.new(pattern, **options)
         @translator = AttributeTranslator.new(**options, request_method: method_upcase)
