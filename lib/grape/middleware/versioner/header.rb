@@ -63,7 +63,7 @@ module Grape
 
         def an_accept_header_with_version_and_vendor_is_present?
           header.qvalues.keys.any? do |h|
-            VENDOR_VERSION_HEADER_REGEX =~ h.sub('application/', '')
+            VENDOR_VERSION_HEADER_REGEX.match?(h.sub('application/', ''))
           end
         end
 

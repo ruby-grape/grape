@@ -42,11 +42,11 @@ module Grape
     end
 
     def namespace?
-      namespace && namespace.to_s =~ /^\S/ && namespace != '/'
+      namespace&.match?(/^\S/) && namespace != '/'
     end
 
     def path?
-      raw_path && raw_path.to_s =~ /^\S/ && raw_path != '/'
+      raw_path&.match?(/^\S/) && raw_path != '/'
     end
 
     def suffix
