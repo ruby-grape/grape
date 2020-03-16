@@ -1,7 +1,8 @@
 ### 1.3.2 (Next)
 
 #### Features
-
+* Your contribution here.
+* [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
 * [#2011](https://github.com/ruby-grape/grape/pull/2011): Reduce total retained regexes - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes

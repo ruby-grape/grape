@@ -29,9 +29,11 @@ module Grape
       protected
 
       def concat_values(inherited_value, new_value)
+        return inherited_value unless new_value
+
         [].tap do |value|
           value.concat(inherited_value)
-          value.concat(new_value) if new_value
+          value.concat(new_value)
         end
       end
     end
