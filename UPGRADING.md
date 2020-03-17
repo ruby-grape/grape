@@ -42,6 +42,32 @@ end
 
 Custom types which don't depend on Virtus don't require any changes.
 
+#### Ensure that Array types have explicit coercions
+
+Unlike Virtus, dry-types does not perform any implict coercions. If you
+have any uses of `Array[String]`, `Array[Integer]`, etc. be sure they
+use a `coerce_with` block. For example:
+
+```ruby
+requires :values, type: Array[String]
+```
+
+It's quite common to pass a comma-separated list, such as `tag1,tag2` as
+`values`. Previously Virtus would implicitly coerce this to
+`Array(values)` so that `["tag1,tag2"]` would pass the type checks, but
+with `dry-types` the values are no longer coerced for you. To fix this,
+you might do:
+
+```ruby
+requires :values, type: Array[String], coerce_with: ->(val) { val.split(',').map(&:strip) }
+```
+
+Likewise, for `Array[Integer]`, you might do:
+
+```ruby
+requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(',').map(&:strip).map(&:to_i) }
+```
+
 For more information see [#1920](https://github.com/ruby-grape/grape/pull/1920).
 
 ### Upgrading to >= 1.2.4

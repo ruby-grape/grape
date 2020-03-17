@@ -3,6 +3,7 @@
 #### Features
 * Your contribution here.
 * [#2021](https://github.com/ruby-grape/grape/pull/2021): Report endpoint_call.grape which includes the whole stack - [@Kukunin](https://github.com/Kukunin).
+* [#2015](https://github.com/ruby-grape/grape/pull/2014): Reduce MatchData allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
 * [#2011](https://github.com/ruby-grape/grape/pull/2011): Reduce total retained regexes - [@ericproulx](https://github.com/ericproulx).
 
