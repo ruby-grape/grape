@@ -42,11 +42,11 @@ end
 
 Custom types which don't depend on Virtus don't require any changes.
 
-#### Ensure that Array[String] types have explicit coercions
+#### Ensure that Array types have explicit coercions
 
 Unlike Virtus, dry-types does not perform any implict coercions. If you
-have any uses of `Array[String]`, be sure they use a `coerce_with`
-block. For example:
+have any uses of `Array[String]`, `Array[Integer]`, etc. be sure they
+use a `coerce_with` block. For example:
 
 ```ruby
 requires :values, type: Array[String]
@@ -60,6 +60,12 @@ you might do:
 
 ```ruby
 requires :values, type: Array[String], coerce_with: ->(val) { val.split(',').map(&:strip) }
+```
+
+Likewise, for `Array[Integer]`, you might do:
+
+```ruby
+requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(',').map(&:strip).map(&:to_i) }
 ```
 
 For more information see [#1920](https://github.com/ruby-grape/grape/pull/1920).
