@@ -180,6 +180,23 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq(integer_class_name)
       end
 
+      it 'String' do
+        subject.params do
+          requires :string, coerce: String
+        end
+        subject.get '/string' do
+          params[:string].class
+        end
+
+        get '/string', string: 45
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('String')
+
+        get '/string', string: nil
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('NilClass')
+      end
+
       it 'is a custom type' do
         subject.params do
           requires :uri, coerce: SecureURIOnly
@@ -645,6 +662,19 @@ describe Grape::Validations::CoerceValidator do
         get '/', a: 'anything else'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('String')
+      end
+
+      it 'respects nil values' do
+        subject.params do
+          optional :a, types: [File, String]
+        end
+        subject.get '/' do
+          params[:a].class.to_s
+        end
+
+        get '/', a: nil
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('NilClass')
       end
 
       it 'fails when no coercion is possible' do
