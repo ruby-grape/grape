@@ -134,6 +134,7 @@
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
+    - [endpoint_call.grape](#endpoint_callgrape)
     - [endpoint_run.grape](#endpoint_rungrape)
     - [endpoint_render.grape](#endpoint_rendergrape)
     - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
