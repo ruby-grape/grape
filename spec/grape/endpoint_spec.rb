@@ -1530,11 +1530,15 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
-                                                                  formatter: a_kind_of(Module) })
+                                                                  formatter: a_kind_of(Module) }),
+        have_attributes(name: 'endpoint_call.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+                                                                env: an_instance_of(Hash),
+                                                                response: match([200, be_a(Hash), be_a(Array)]) })
       )
 
       # In order that events were initialized
       expect(@events.sort_by(&:time)).to contain_exactly(
+        have_attributes(name: 'endpoint_call.grape'),
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
