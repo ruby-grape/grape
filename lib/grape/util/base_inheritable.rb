@@ -5,8 +5,7 @@ module Grape
     # Base for classes which need to operate with own values kept
     # in the hash and inherited values kept in a Hash-like object.
     class BaseInheritable
-      attr_accessor :inherited_values
-      attr_accessor :new_values
+      attr_accessor :inherited_values, :new_values
 
       # @param inherited_values [Object] An object implementing an interface
       #   of the Hash class.
@@ -26,10 +25,14 @@ module Grape
       end
 
       def keys
-        combined = inherited_values.keys
-        combined.concat(new_values.keys)
-        combined.uniq!
-        combined
+        if new_values.any?
+          combined = inherited_values.keys
+          combined.concat(new_values.keys)
+          combined.uniq!
+          combined
+        else
+          inherited_values.keys
+        end
       end
 
       def key?(name)
