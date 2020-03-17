@@ -3810,9 +3810,17 @@ Grape has built-in support for [ActiveSupport::Notifications](http://api.rubyonr
 
 The following are currently supported:
 
+#### endpoint_call.grape
+
+The main execution of an endpoint, includes filters, rendering and all middlewares.
+
+* *endpoint* - The endpoint instance
+* *response* - A typical Rack response, for example `[404, {"Content-Type"=>"application/json; charset=UTF-8"}, ["{\"error\":\"not_found\"}"]]`
+
 #### endpoint_run.grape
 
-The main execution of an endpoint, includes filters and rendering.
+Similar to `endpoint_call.grape` but does not include middlewares, thus might be inaccurate.
+One more difference that it returns original exceptions, before `rescue_from` handlers.
 
 * *endpoint* - The endpoint instance
 
