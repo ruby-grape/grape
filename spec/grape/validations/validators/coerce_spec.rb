@@ -154,6 +154,36 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'coerces' do
+      context 'json' do
+        let(:headers) { { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' } }
+
+        it 'BigDecimal' do
+          subject.params do
+            requires :bigdecimal, type: BigDecimal
+          end
+          subject.post '/bigdecimal' do
+            params[:bigdecimal]
+          end
+
+          post '/bigdecimal', { bigdecimal: 45.1 }.to_json, headers
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq('45.1')
+        end
+
+        it 'Boolean' do
+          subject.params do
+            requires :boolean, type: Boolean
+          end
+          subject.post '/boolean' do
+            params[:boolean]
+          end
+
+          post '/boolean', { boolean: 'true' }.to_json, headers
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq('true')
+        end
+      end
+
       it 'BigDecimal' do
         subject.params do
           requires :bigdecimal, coerce: BigDecimal
