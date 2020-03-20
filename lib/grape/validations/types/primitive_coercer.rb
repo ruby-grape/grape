@@ -14,7 +14,7 @@ module Grape
           BigDecimal          => DryTypes::Params::Decimal,
 
           # unfortunately, a +Params+ scope doesn't contain String
-          String              => DryTypes::Coercible::String,
+          String              => DryTypes::Coercible::String
         }.freeze
 
         STRICT_MAPPING = {
