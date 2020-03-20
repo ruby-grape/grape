@@ -10,6 +10,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2025](https://github.com/ruby-grape/grape/pull/2025): Fix Decimal type category - [@kdoya](https://github.com/kdoya).
 * [#2019](https://github.com/ruby-grape/grape/pull/2019): Avoid coercing parameter with multiple types to an empty Array - [@stanhu](https://github.com/stanhu).
 
 ### 1.3.1 (2020/03/11)
