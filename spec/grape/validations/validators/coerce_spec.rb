@@ -525,6 +525,43 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('3')
       end
 
+      it 'allows coerce_with to return nil' do
+        subject.params do
+          requires :int, type: Integer, coerce_with: (lambda do |val|
+            if val == '0'
+              nil
+            elsif val.match?(/^-?\d+$/)
+              val.to_i
+            else
+              val
+            end
+          end)
+        end
+        subject.get '/' do
+          params[:int].class.to_s
+        end
+
+        get '/', int: '0'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('NilClass')
+
+        get '/', int: '1'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Integer')
+
+        get '/', int: '-1'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('Integer')
+
+        get '/', int: 'lol'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('int is invalid')
+      end
+
       it 'must be supplied with :type or :coerce' do
         expect do
           subject.params do
