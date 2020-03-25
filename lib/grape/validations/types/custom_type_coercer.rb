@@ -60,7 +60,7 @@ module Grape
         end
 
         def coerced?(val)
-          @type_check.call val
+          val.nil? || @type_check.call(val)
         end
 
         private
