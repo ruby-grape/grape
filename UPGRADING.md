@@ -9,38 +9,57 @@ After adding dry-types, Ruby 2.4 or newer is required.
 
 #### Coercion
 
-[Virtus](https://github.com/solnic/virtus) has been replaced by [dry-types](https://dry-rb.org/gems/dry-types/1.2/) for parameter coercion. If your project depends on Virtus, explicitly add it to your `Gemfile`. Also, if Virtus is used for defining custom types
+[Virtus](https://github.com/solnic/virtus) has been replaced by
+[dry-types](https://dry-rb.org/gems/dry-types/1.2/) for parameter
+coercion. If your project depends on Virtus outside of Grape, explicitly
+add it to your `Gemfile`.
+
+Here's an example of how to migrate a custom type from Virtus to dry-types:
 
 ```ruby
-class User
-  include Virtus.model
+# Legacy Grape parser
+class SecureUriType < Virtus::Attribute
+  def coerce(input)
+    URI.parse value
+  end
 
-  attribute :id, Integer
-  attribute :name, String
-end
-
-# somewhere in your API
-params do
-  requires :user, type: User
-end
-```
-
-Add a class-level `parse` method to the model:
-
-```ruby
-class User
-  include Virtus.model
-
-  attribute :id, Integer
-  attribute :name, String
-
-  def self.parse(attrs)
-    new(attrs)
+  def value_coerced?(input)
+    value.is_a? String
   end
 end
+
+params do
+  requires :secure_uri, type: SecureUri
+end
 ```
 
-Custom types which don't depend on Virtus don't require any changes.
+To use dry-types, we need to:
+
+1. Remove the inheritance of `Virtus::Attribute`
+1. Rename `coerce` to `self.parse`
+1. Rename `value_coerced?` to `self.parsed?`
+
+The custom type must have a class-level `parse` method to the model. A
+class-level `parsed?` is needed if the parsed type differs from the
+defined type. In the example below, since `SecureUri` is not the same
+as `URI::HTTPS`, `self.parsed?` is needed:
+
+```ruby
+# New dry-types parser
+class SecureUri
+  def self.parse(value)
+    URI.parse value
+  end
+
+  def self.parsed?(value)
+    value.is_a? URI::HTTPS
+  end
+end
+
+params do
+  requires :secure_uri, type: SecureUri
+end
+```
 
 #### Ensure that Array types have explicit coercions
 
