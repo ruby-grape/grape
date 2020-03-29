@@ -42,6 +42,9 @@ module Grape
       end
 
       def self.create_coercer_instance(type, method, strict)
+        # Maps a custom type provided by Grape, it doesn't map types wrapped by collections!!!
+        type = Types.map_special(type)
+
         # Use a special coercer for multiply-typed parameters.
         if Types.multiple?(type)
           MultipleTypeCoercer.new(type, method)
@@ -55,10 +58,8 @@ module Grape
         # method is supplied.
         elsif Types.collection_of_custom?(type)
           Types::CustomTypeCollectionCoercer.new(
-            type.first, type.is_a?(Set)
+            Types.map_special(type.first), type.is_a?(Set)
           )
-        elsif Types.special?(type)
-          Types::SPECIAL[type].new
         elsif type.is_a?(Array)
           ArrayCoercer.new type, strict
         elsif type.is_a?(Set)

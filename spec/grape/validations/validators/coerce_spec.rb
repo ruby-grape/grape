@@ -354,42 +354,60 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('TrueClass')
       end
 
-      it 'Rack::Multipart::UploadedFile' do
-        subject.params do
-          requires :file, type: Rack::Multipart::UploadedFile
-        end
-        subject.post '/upload' do
-          params[:file][:filename]
-        end
+      context 'File' do
+        let(:file) { Rack::Test::UploadedFile.new(__FILE__) }
+        let(:filename) { File.basename(__FILE__).to_s }
 
-        post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
-        expect(last_response.status).to eq(201)
-        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+        it 'Rack::Multipart::UploadedFile' do
+          subject.params do
+            requires :file, type: Rack::Multipart::UploadedFile
+          end
+          subject.post '/upload' do
+            params[:file][:filename]
+          end
 
-        post '/upload', file: 'not a file'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
-      end
+          post '/upload', file: file
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
 
-      it 'File' do
-        subject.params do
-          requires :file, coerce: File
-        end
-        subject.post '/upload' do
-          params[:file][:filename]
+          post '/upload', file: 'not a file'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
         end
 
-        post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
-        expect(last_response.status).to eq(201)
-        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+        it 'File' do
+          subject.params do
+            requires :file, coerce: File
+          end
+          subject.post '/upload' do
+            params[:file][:filename]
+          end
 
-        post '/upload', file: 'not a file'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
+          post '/upload', file: file
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
 
-        post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
+          post '/upload', file: 'not a file'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
+
+          post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
+        end
+
+        it 'collection' do
+          subject.params do
+            requires :files, type: Array[File]
+          end
+          subject.post '/upload' do
+            params[:files].first[:filename]
+          end
+
+          post '/upload', files: [file]
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
+        end
       end
 
       it 'Nests integers' do
