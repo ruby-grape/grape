@@ -17,7 +17,7 @@ describe Grape::Validations::Types do
     [
       Integer, Float, Numeric, BigDecimal,
       Grape::API::Boolean, String, Symbol,
-      Date, DateTime, Time, Rack::Multipart::UploadedFile
+      Date, DateTime, Time
     ].each do |type|
       it "recognizes #{type} as a primitive" do
         expect(described_class.primitive?(type)).to be_truthy
