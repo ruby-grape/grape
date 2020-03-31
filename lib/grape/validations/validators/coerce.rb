@@ -47,7 +47,9 @@ module Grape
         #     h[:list] = list
         #     h
         #     => #<Hashie::Mash list=[1, 2, 3, 4]>
-        params[attr_name] = new_value unless params[attr_name] == new_value
+        return if params[attr_name].class == new_value.class && params[attr_name] == new_value
+
+        params[attr_name] = new_value
       end
 
       private
