@@ -162,12 +162,12 @@ describe Grape::Validations::CoerceValidator do
             requires :bigdecimal, type: BigDecimal
           end
           subject.post '/bigdecimal' do
-            params[:bigdecimal]
+            "#{params[:bigdecimal].class} #{params[:bigdecimal].to_f}"
           end
 
           post '/bigdecimal', { bigdecimal: 45.1 }.to_json, headers
           expect(last_response.status).to eq(201)
-          expect(last_response.body).to eq('45.1')
+          expect(last_response.body).to eq('BigDecimal 45.1')
         end
 
         it 'Boolean' do

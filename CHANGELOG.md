@@ -10,6 +10,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2033](https://github.com/ruby-grape/grape/pull/2033): Ensure `Float` params are correctly coerced to `BigDecimal` - [@tlconnor](https://github.com/tlconnor).
 * [#2031](https://github.com/ruby-grape/grape/pull/2031): Fix a regression with an array of a custom type - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2026](https://github.com/ruby-grape/grape/pull/2026): Fix a regression in `coerce_with` when coercion returns `nil` - [@misdoro](https://github.com/misdoro).
 * [#2025](https://github.com/ruby-grape/grape/pull/2025): Fix Decimal type category - [@kdoya](https://github.com/kdoya).
