@@ -2,6 +2,10 @@
 
 require 'spec_helper'
 
+class AnEntity < Grape::Entity
+  expose :name, documentation: { required: true, type: 'String', desc: 'a name' }
+end
+
 describe Grape::Validations::CoerceValidator do
   subject do
     Class.new(Grape::API)
@@ -982,6 +986,22 @@ describe Grape::Validations::CoerceValidator do
         )
 
         10.times { get '/' }
+      end
+    end
+
+    context 'grape entity' do
+      it 'handles a subclass of Grape::Entity' do
+        subject.params do
+          requires :grape_entity, type: AnEntity
+        end
+        subject.get '/single' do
+          'grape entity works'
+        end
+
+        get '/single', grape_entity: AnEntity.new(name: 'an entity')
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('grape entity works')
       end
     end
   end
