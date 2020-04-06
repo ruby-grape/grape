@@ -22,9 +22,14 @@ module Grape
 
         def coerced?(val)
           val.each_key do |k|
-            exposure = type.find_exposure(k.to_sym)
-            return false unless exposure
+            return false unless exposure_keys.include?(k.to_sym)
           end
+
+          true
+        end
+
+        def exposure_keys
+          type.root_exposures.map(&:key)
         end
       end
     end

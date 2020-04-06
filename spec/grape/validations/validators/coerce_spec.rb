@@ -988,7 +988,8 @@ describe Grape::Validations::CoerceValidator do
 
     context 'grape entity' do
       class AnEntity < Grape::Entity
-        expose :name, documentation: { required: true, type: 'String', desc: 'a name' }
+        expose :first_name, documentation: { required: true, type: 'String', desc: 'first name' }
+        expose :surname, as: 'lastName', documentation: { required: true, type: 'String', desc: 'last name' }
       end
 
       it 'handles a subclass of Grape::Entity' do
@@ -999,7 +1000,7 @@ describe Grape::Validations::CoerceValidator do
           'grape entity works'
         end
 
-        get '/single', grape_entity: { name: 'an entity' }
+        get '/single', grape_entity: { first_name: 'John', 'lastName' => 'Smith' }
 
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('grape entity works')
