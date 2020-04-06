@@ -13,7 +13,13 @@ module Grape
         def call(val)
           return if val.nil?
 
-          return InvalidValue.new unless coerced?(val)
+          if val.is_a?(Array)
+            val.each do |i|
+              return InvalidValue.new unless coerced?(i)
+            end
+          else
+            return InvalidValue.new unless coerced?(val)
+          end
         end
 
         private

@@ -987,23 +987,61 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'grape entity' do
-      class AnEntity < Grape::Entity
+      class Name < Grape::Entity
         expose :first_name, documentation: { required: true, type: 'String', desc: 'first name' }
         expose :surname, as: 'lastName', documentation: { required: true, type: 'String', desc: 'last name' }
       end
 
+      class Person < Grape::Entity
+        expose :email, documentation: { required: true, type: 'String', desc: 'email address' }
+        expose :name, using: Name, documentation: { required: true, type: 'Name', desc: 'full name' }
+      end
+
+      class Question < Grape::Entity
+        expose :order, documentation: { required: true, type: 'Integer', desc: 'order of question' }
+        expose :text, documentation: { required: true, type: 'String', desc: 'text of question' }
+      end
+
       it 'handles a subclass of Grape::Entity' do
         subject.params do
-          requires :grape_entity, type: AnEntity
+          requires :name, type: Name
         end
-        subject.get '/single' do
-          'grape entity works'
+        subject.get '/' do
+          'simple grape entity works'
         end
 
-        get '/single', grape_entity: { first_name: 'John', 'lastName' => 'Smith' }
+        get '/', name: { first_name: 'John', 'lastName' => 'Smith' }
 
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('grape entity works')
+        expect(last_response.body).to eq('simple grape entity works')
+      end
+
+      it 'handles a subclass of Grape::Entity which exposes another Grape::Entity' do
+        subject.params do
+          requires :person, type: Person
+        end
+        subject.get '/' do
+          'complex grape entity works'
+        end
+
+        get '/', person: { email: 'john@example.com', name: { first_name: 'John', 'lastName' => 'Smith' } }
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('complex grape entity works')
+      end
+
+      it 'handles an array of elements of a subclass of Grape::Entity' do
+        subject.params do
+          requires :question, type: Question
+        end
+        subject.get '/' do
+          'an array of grape entities works'
+        end
+
+        get '/', question: [{ order: 1, text: 'Why?' }, { order: 2, text: 'How?' }]
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('an array of grape entities works')
       end
     end
   end
