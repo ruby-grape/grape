@@ -3,6 +3,7 @@
 require_relative 'array_coercer'
 require_relative 'set_coercer'
 require_relative 'primitive_coercer'
+require_relative 'grape_entity_coercer'
 
 module Grape
   module Validations
@@ -64,6 +65,8 @@ module Grape
           ArrayCoercer.new type, strict
         elsif type.is_a?(Set)
           SetCoercer.new type, strict
+        elsif type.superclass == Grape::Entity
+          GrapeEntityCoercer.new type
         else
           PrimitiveCoercer.new type, strict
         end

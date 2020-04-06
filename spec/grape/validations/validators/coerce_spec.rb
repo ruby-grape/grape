@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-
-class AnEntity < Grape::Entity
-  expose :name, documentation: { required: true, type: 'String', desc: 'a name' }
-end
+require 'grape_entity'
 
 describe Grape::Validations::CoerceValidator do
   subject do
@@ -990,6 +987,10 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'grape entity' do
+      class AnEntity < Grape::Entity
+        expose :name, documentation: { required: true, type: 'String', desc: 'a name' }
+      end
+
       it 'handles a subclass of Grape::Entity' do
         subject.params do
           requires :grape_entity, type: AnEntity
@@ -998,7 +999,7 @@ describe Grape::Validations::CoerceValidator do
           'grape entity works'
         end
 
-        get '/single', grape_entity: AnEntity.new(name: 'an entity')
+        get '/single', grape_entity: { name: 'an entity' }
 
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('grape entity works')
