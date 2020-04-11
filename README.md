@@ -3189,14 +3189,13 @@ applies to the current namespace and any children, but not parents.
 ```ruby
 http_basic do |username, password|
   # verify user's password here
-  { 'test' => 'password1' }[username] == password
+  # IMPORTANT: make sure you use a comparison method which isn't prone to a timing attack
 end
 ```
 
 ```ruby
 http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
   # lookup the user's password here
-  { 'user1' => 'password1' }[username]
 end
 ```
 
