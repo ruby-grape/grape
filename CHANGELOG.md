@@ -1,7 +1,6 @@
-### 1.3.2 (Next)
+### 1.3.2 (2020/04/12)
 
 #### Features
-* Your contribution here.
 * [#2020](https://github.com/ruby-grape/grape/pull/2020): Reduce array allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2015](https://github.com/ruby-grape/grape/pull/2014): Reduce MatchData allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
@@ -9,7 +8,6 @@
 
 #### Fixes
 
-* Your contribution here.
 * [#2033](https://github.com/ruby-grape/grape/pull/2033): Ensure `Float` params are correctly coerced to `BigDecimal` - [@tlconnor](https://github.com/tlconnor).
 * [#2031](https://github.com/ruby-grape/grape/pull/2031): Fix a regression with an array of a custom type - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2026](https://github.com/ruby-grape/grape/pull/2026): Fix a regression in `coerce_with` when coercion returns `nil` - [@misdoro](https://github.com/misdoro).
