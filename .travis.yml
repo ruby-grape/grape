@@ -8,42 +8,48 @@ gemfile:
 
 matrix:
   include:
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       script:
         - bundle exec danger
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: Gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/rack1.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/rack2.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/rack_edge.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.7.0
+    - rvm: 2.7.1
+      gemfile: gemfiles/rails_6.gemfile
+    - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_json
-    - rvm: 2.7.0
+    - rvm: 2.7.1
       gemfile: gemfiles/multi_xml.gemfile
       script:
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_xml
-    - rvm: 2.6.5
+    - rvm: 2.6.6
       gemfile: Gemfile
-    - rvm: 2.6.5
+    - rvm: 2.6.6
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.5.7
+    - rvm: 2.6.6
+      gemfile: gemfiles/rails_6.gemfile
+    - rvm: 2.5.8
       gemfile: Gemfile
-    - rvm: 2.5.7
+    - rvm: 2.5.8
       gemfile: gemfiles/rails_5.gemfile
-    - rvm: 2.4.9
+    - rvm: 2.5.8
+      gemfile: gemfiles/rails_6.gemfile
+    - rvm: 2.4.10
       gemfile: Gemfile
-    - rvm: 2.4.9
+    - rvm: 2.4.10
       gemfile: gemfiles/rails_5.gemfile
     - rvm: ruby-head
     - rvm: jruby-head
