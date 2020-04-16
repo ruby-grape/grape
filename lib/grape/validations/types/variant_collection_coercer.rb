@@ -33,7 +33,7 @@ module Grape
         #   the coerced result, or an instance
         #   of {InvalidValue} if the value could not be coerced.
         def call(value)
-          return InvalidValue.new unless value.is_a? Array
+          return unless value.is_a? Array
 
           value =
             if @method

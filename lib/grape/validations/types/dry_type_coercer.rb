@@ -27,6 +27,8 @@ module Grape
         #
         # @param val [Object]
         def call(val)
+          return if val.nil?
+
           @coercer[val]
         rescue Dry::Types::CoercionError => _e
           InvalidValue.new

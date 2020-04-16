@@ -424,6 +424,79 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq(integer_class_name)
       end
+
+      context 'nil values' do
+        context 'primitive types' do
+          Grape::Validations::Types::PRIMITIVES.each do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'structures types' do
+          Grape::Validations::Types::STRUCTURES.each do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'special types' do
+          Grape::Validations::Types::SPECIAL.each_key do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          context 'variant-member-type collections' do
+            [
+              Array[Integer, String],
+              [Integer, String, Array[Integer, String]]
+            ].each do |type|
+              it 'respects the nil value' do
+                subject.params do
+                  requires :param, type: type
+                end
+                subject.get '/nil_value' do
+                  params[:param].class
+                end
+
+                get '/nil_value', param: nil
+                expect(last_response.status).to eq(200)
+                expect(last_response.body).to eq('NilClass')
+              end
+            end
+          end
+        end
+      end
     end
 
     context 'using coerce_with' do
@@ -750,19 +823,6 @@ describe Grape::Validations::CoerceValidator do
         get '/', a: 'anything else'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('String')
-      end
-
-      it 'respects nil values' do
-        subject.params do
-          optional :a, types: [File, String]
-        end
-        subject.get '/' do
-          params[:a].class.to_s
-        end
-
-        get '/', a: nil
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('NilClass')
       end
 
       it 'fails when no coercion is possible' do

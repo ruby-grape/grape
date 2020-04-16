@@ -9,7 +9,6 @@ module Grape
       end
 
       def validate_param!(attr_name, params)
-        return if params.key? attr_name
         params[attr_name] = if @default.is_a? Proc
                               @default.call
                             elsif @default.frozen? || !duplicatable?(@default)

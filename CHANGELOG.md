@@ -9,6 +9,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2040](https://github.com/ruby-grape/grape/pull/2040): Fix a regression with Array of type nil - [@ericproulx](https://github.com/ericproulx).
 
 ### 1.3.2 (2020/04/12)
 

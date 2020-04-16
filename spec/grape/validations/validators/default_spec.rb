@@ -298,4 +298,125 @@ describe Grape::Validations::DefaultValidator do
       end
     end
   end
+
+  context 'optional with nil as value' do
+    subject do
+      Class.new(Grape::API) do
+        default_format :json
+      end
+    end
+
+    def app
+      subject
+    end
+
+    context 'primitive types' do
+      [
+        [Integer, 0],
+        [Integer, 42],
+        [Float, 0.0],
+        [Float, 4.2],
+        [BigDecimal, 0.0],
+        [BigDecimal, 4.2],
+        [Numeric, 0],
+        [Numeric, 42],
+        [Date, Date.today],
+        [DateTime, DateTime.now],
+        [Time, Time.now],
+        [Time, Time.at(0)],
+        [Grape::API::Boolean, false],
+        [String, ''],
+        [String, 'non-empty-string'],
+        [Symbol, :symbol],
+        [TrueClass, true],
+        [FalseClass, false]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'structures types' do
+      [
+        [Hash, {}],
+        [Hash, { test: 'non-empty' }],
+        [Array, []],
+        [Array, ['non-empty']],
+        [Array[Integer], []],
+        [Set, []],
+        [Set, [1]]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'special types' do
+      [
+        [JSON, ''],
+        [JSON, { test: 'non-empty-string' }.to_json],
+        [Array[JSON], []],
+        [Array[JSON], [{ test: 'non-empty-string' }.to_json]],
+        [::File, ''],
+        [::File, { test: 'non-empty-string' }.to_json],
+        [Rack::Multipart::UploadedFile, ''],
+        [Rack::Multipart::UploadedFile, { test: 'non-empty-string' }.to_json]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'variant-member-type collections' do
+      [
+        [Array[Integer, String], [0, '']],
+        [Array[Integer, String], [42, 'non-empty-string']],
+        [[Integer, String, Array[Integer, String]], [0, '', [0, '']]],
+        [[Integer, String, Array[Integer, String]], [42, 'non-empty-string', [42, 'non-empty-string']]]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+  end
 end

@@ -319,7 +319,7 @@ describe Grape::Validations::ValuesValidator do
       expect(last_response.status).to eq 200
     end
 
-    it 'allows for an optional param with a list of values' do
+    it 'accepts for an optional param with a list of values' do
       put('/optional_with_array_of_string_values', optional: nil)
       expect(last_response.status).to eq 200
     end

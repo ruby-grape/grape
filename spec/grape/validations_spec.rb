@@ -574,7 +574,7 @@ describe Grape::Validations do
         # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[1][parents] is missing')
+        expect(last_response.body).to eq('children[1][parents] is missing, children[0][parents][1][name] is missing, children[0][parents][1][name] is empty')
       end
 
       it 'errors when a parameter is not present in array within array' do
@@ -615,7 +615,7 @@ describe Grape::Validations do
 
         get '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing, children[0][parents][0][name] is empty')
       end
 
       it 'errors when param is not an Array' do
@@ -763,7 +763,7 @@ describe Grape::Validations do
         expect(last_response.status).to eq(200)
         put_with_json '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing')
       end
     end
 
@@ -838,7 +838,7 @@ describe Grape::Validations do
       it 'does internal validations if the outer group is present' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
@@ -858,7 +858,7 @@ describe Grape::Validations do
       it 'handles validation within arrays' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
