@@ -24,6 +24,8 @@ matrix:
     - rvm: 2.7.1
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.7.1
+      gemfile: gemfiles/rails_6.gemfile
+    - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
         - bundle exec rake
@@ -37,10 +39,14 @@ matrix:
       gemfile: Gemfile
     - rvm: 2.6.6
       gemfile: gemfiles/rails_5.gemfile
+    - rvm: 2.6.6
+      gemfile: gemfiles/rails_6.gemfile
     - rvm: 2.5.8
       gemfile: Gemfile
     - rvm: 2.5.8
       gemfile: gemfiles/rails_5.gemfile
+    - rvm: 2.5.8
+      gemfile: gemfiles/rails_6.gemfile
     - rvm: 2.4.10
       gemfile: Gemfile
     - rvm: 2.4.10

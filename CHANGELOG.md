@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#2039](https://github.com/ruby-grape/grape/pull/2039): Travis - update rails versions - [@ericproulx](https://github.com/ericproulx).
 * [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
