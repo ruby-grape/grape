@@ -296,9 +296,12 @@ describe Grape::Endpoint do
               optional :seventh
             end
           end
+          optional :nested_arr, type: Array do
+            optional :eighth
+          end
         end
-        optional :nested_arr, type: Array do
-          optional :eighth
+        optional :arr, type: Array do
+          optional :nineth
         end
       end
     end
@@ -390,7 +393,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 3
+      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 4
     end
 
     it 'builds nested params when given array' do
@@ -421,7 +424,7 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested']).to be_a(Hash)
+        expect(JSON.parse(last_response.body)['nested']).to eq({})
       end
 
       it 'to be an array when include_missing is true' do
@@ -431,7 +434,17 @@ describe Grape::Endpoint do
 
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested_arr']).to be_a(Array)
+        expect(JSON.parse(last_response.body)['arr']).to be_a(Array)
+      end
+
+      it 'to be an array when nested and include_missing is true' do
+        subject.get '/declared' do
+          declared(params, include_missing: true)
+        end
+
+        get '/declared?first=present&nested[fourth]=1'
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)['nested']['nested_arr']).to be_a(Array)
       end
 
       it 'to be nil when include_missing is false' do

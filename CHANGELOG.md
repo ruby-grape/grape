@@ -7,6 +7,7 @@
 * [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
+* [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
 
 * Your contribution here.
 
