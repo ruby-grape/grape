@@ -19,14 +19,35 @@ describe Grape::API::Instance do
       DefinesBooleanInstanceSpec::API
     end
 
-    let(:expected_body) do
-      { class: 'TrueClass', value: true }.to_s
-    end
-
-    it 'sets Boolean as a type' do
+    it 'sets "true" as a Boolean type' do
       post '/echo?message=true'
       expect(last_response.status).to eq(201)
-      expect(last_response.body).to eq expected_body
+      expect(last_response.body).to eq({ class: 'TrueClass', value: true }.to_s)
+    end
+
+    it 'sets "1" as a Boolean true' do
+      post '/echo?message=1'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq({ class: 'TrueClass', value: true }.to_s)
+    end
+
+    it 'sets "false" as a Boolean type' do
+      post '/echo?message=false'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq({ class: 'FalseClass', value: false }.to_s)
+    end
+
+    it 'sets "0" as a Boolean false' do
+      post '/echo?message=0'
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq({ class: 'FalseClass', value: false }.to_s)
+    end
+
+    # Pending
+    xit 'sets "" as a nil' do
+      post '/echo?message='
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq({ class: 'NilClass', value: nil }.to_s)
     end
 
     context 'Params endpoint type' do
