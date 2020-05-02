@@ -12,6 +12,7 @@
 - [What is Grape?](#what-is-grape)
 - [Stable Release](#stable-release)
 - [Project Resources](#project-resources)
+- [Grape for Enterprise](#grape-for-enterprise)
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
@@ -141,6 +142,7 @@
     - [format_response.grape](#format_responsegrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
+- [Security](#security)
 - [License](#license)
 - [Copyright](#copyright)
 
@@ -164,6 +166,14 @@ The current stable release is [1.3.2](https://github.com/ruby-grape/grape/blob/v
 * [Documentation](http://www.rubydoc.info/gems/grape)
 * Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
 * [Follow us on Twitter](https://twitter.com/grapeframework)
+
+## Grape for Enterprise
+
+Available as part of the Tidelift Subscription.
+
+The maintainers of Grape are working with Tidelift to deliver commercial support and maintenance. Save time, reduce risk, and improve code health, while paying the maintainers of Grape. Click [here](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) for more details.
+
+In 2020, we plan to use the money towards gathering Grape contributors for dinner in New York City.
 
 ## Installation
 
@@ -3852,7 +3862,7 @@ Grape integrates with following third-party tools:
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 * **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
-* **[ElasticAPM](https://www.elastic.co/products/apm) - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
+* **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
 
 ## Contributing to Grape
 
@@ -3861,10 +3871,14 @@ features and discuss issues.
 
 See [CONTRIBUTING](CONTRIBUTING.md).
 
+## Security
+
+See [SECURITY](SECURITY.md) for details.
+
 ## License
 
-MIT License. See LICENSE for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ## Copyright
 
-Copyright (c) 2010-2019 Michael Bleigh, Intridea Inc. and Contributors.
+Copyright (c) 2010-2020 Michael Bleigh, Intridea Inc. and Contributors.

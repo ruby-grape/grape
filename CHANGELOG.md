@@ -2,18 +2,20 @@
 
 #### Features
 
-* Your contribution here.
+* [#2048](https://github.com/ruby-grape/grape/issues/2034): Grape Enterprise support is now available [via TideLift](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) - [@dblock](https://github.com/dblock).
 * [#2039](https://github.com/ruby-grape/grape/pull/2039): Travis - update rails versions - [@ericproulx](https://github.com/ericproulx).
 * [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
 
 #### Fixes
-* [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
 
+* [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
 * Your contribution here.
 
 ### 1.3.2 (2020/04/12)
 
 #### Features
+
 * [#2020](https://github.com/ruby-grape/grape/pull/2020): Reduce array allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2015](https://github.com/ruby-grape/grape/pull/2014): Reduce MatchData allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
