@@ -36,7 +36,7 @@ module Grape
 
         def call(val)
           return InvalidValue.new if reject?(val)
-          return nil if val.nil?
+          return nil if val.nil? || treat_as_nil?(val)
           return '' if val == ''
 
           super
@@ -46,7 +46,7 @@ module Grape
 
         attr_reader :type
 
-        # This method maintaine logic which was defined by Virtus. For example,
+        # This method maintains logic which was defined by Virtus. For example,
         # dry-types is ok to convert an array or a hash to a string, it is supported,
         # but Virtus wouldn't accept it. So, this method only exists to not introduce
         # breaking changes.
@@ -54,6 +54,13 @@ module Grape
           (val.is_a?(Array) && type == String) ||
             (val.is_a?(String) && type == Hash) ||
             (val.is_a?(Hash) && type == String)
+        end
+
+        # Dry-Types treats an empty string as invalid. However, Grape considers an empty string as
+        # absence of a value and coerces it into nil. See a discussion there
+        # https://github.com/ruby-grape/grape/pull/2045
+        def treat_as_nil?(val)
+          val == '' && type == Grape::API::Boolean
         end
       end
     end

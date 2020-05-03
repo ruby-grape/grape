@@ -26,6 +26,10 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       it 'returns an error when the given value cannot be coerced' do
         expect(subject.call(123)).to be_instance_of(Grape::Validations::Types::InvalidValue)
       end
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
     end
 
     context 'String' do
