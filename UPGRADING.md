@@ -1,6 +1,65 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.4.0
+
+#### Nil values for structures
+
+Nil values always been a special case when dealing with types especially with the following structures:
+ - Array
+ - Hash
+ - Set
+ 
+The behaviour for these structures has change through out the latest releases. For instance:
+
+```ruby
+class Api < Grape::API
+  params do
+    require :my_param, type: Array[Integer]
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil }
+  # 1.3.1 = []
+  # 1.3.2 = nil
+end
+```
+For now on, `nil` values stay `nil` values for all types, including arrays, sets and hashes.
+
+If you want to have the same behavior as 1.3.1, apply a `default` validator
+
+```ruby
+class Api < Grape::API
+  params do
+    require :my_param, type: Array[Integer], default: []
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil } # => []
+end
+```
+
+#### Default validator
+
+Default validator is now applied for `nil` values.
+
+```ruby
+class Api < Grape::API
+  params do
+    requires :my_param, type: Integer, default: 0
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil } #=> before: nil, after: 0
+end
+```
+
 ### Upgrading to >= 1.3.0
 
 #### Ruby
