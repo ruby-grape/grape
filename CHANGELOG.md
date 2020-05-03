@@ -11,6 +11,7 @@
 
 * [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
 * Your contribution here.
+* [#2040](https://github.com/ruby-grape/grape/pull/2040): Fix a regression with Array of type nil - [@ericproulx](https://github.com/ericproulx).
 
 ### 1.3.2 (2020/04/12)
 

@@ -67,19 +67,10 @@ module Grape
       end
 
       def coerce_value(val)
-        val.nil? ? coerce_nil(val) : converter.call(val)
+        converter.call(val)
       # Some custom types might fail, so it should be treated as an invalid value
       rescue StandardError
         Types::InvalidValue.new
-      end
-
-      def coerce_nil(val)
-        # define default values for structures, the dry-types lib which is used
-        # for coercion doesn't accept nil as a value, so it would fail
-        return []      if type == Array
-        return Set.new if type == Set
-        return {}      if type == Hash
-        val
       end
 
       # Type to which the parameter will be coerced.

@@ -32,6 +32,8 @@ module Grape
         protected
 
         def coerce_elements(collection)
+          return if collection.nil?
+
           collection.each_with_index do |elem, index|
             return InvalidValue.new if reject?(elem)
 
