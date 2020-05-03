@@ -7,15 +7,6 @@ module Grape
   class Router
     attr_reader :map, :compiled
 
-    class Any < AttributeTranslator
-      attr_reader :pattern, :index
-      def initialize(pattern, index, **attributes)
-        @pattern = pattern
-        @index = index
-        super(attributes)
-      end
-    end
-
     class NormalizePathCache < Grape::Util::Cache
       def initialize
         @cache = Hash.new do |h, path|
@@ -64,7 +55,7 @@ module Grape
 
     def associate_routes(pattern, **options)
       @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Any.new(pattern, @neutral_map.length, **options)
+      @neutral_map << Grape::Router::AttributeTranslator.new(options.merge(pattern: pattern, index: @neutral_map.length))
     end
 
     def call(env)

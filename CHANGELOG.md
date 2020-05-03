@@ -5,6 +5,7 @@
 * [#2048](https://github.com/ruby-grape/grape/issues/2034): Grape Enterprise support is now available [via TideLift](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) - [@dblock](https://github.com/dblock).
 * [#2039](https://github.com/ruby-grape/grape/pull/2039): Travis - update rails versions - [@ericproulx](https://github.com/ericproulx).
 * [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
+* [#2050](https://github.com/ruby-grape/grape/pull/2050): Refactor route public_send to AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

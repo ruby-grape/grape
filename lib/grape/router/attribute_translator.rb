@@ -6,10 +6,31 @@ module Grape
     class AttributeTranslator
       attr_reader :attributes, :request_method, :requirements
 
+      ROUTE_ATTRIBUTES = %i[
+        prefix
+        version
+        settings
+        format
+        description
+        http_codes
+        headers
+        entity
+        details
+        requirements
+        request_method
+        namespace
+      ].freeze
+
+      ROUTER_ATTRIBUTES = %i[pattern index].freeze
+
       def initialize(attributes = {})
         @attributes = attributes
-        @request_method = attributes[:request_method]
-        @requirements = attributes[:requirements]
+      end
+
+      (ROUTER_ATTRIBUTES + ROUTE_ATTRIBUTES).each do |attr|
+        define_method attr do
+          attributes[attr]
+        end
       end
 
       def to_h
