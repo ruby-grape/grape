@@ -18,6 +18,7 @@ module Grape
 
       extend Forwardable
       def_delegators :pattern, :path, :origin
+      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES => :attributes
 
       def method_missing(method_id, *arguments)
         match = ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
@@ -32,25 +33,6 @@ module Grape
 
       def respond_to_missing?(method_id, _)
         ROUTE_ATTRIBUTE_REGEXP.match?(method_id.to_s)
-      end
-
-      %i[
-        prefix
-        version
-        settings
-        format
-        description
-        http_codes
-        headers
-        entity
-        details
-        requirements
-        request_method
-        namespace
-      ].each do |method_name|
-        define_method method_name do
-          attributes.public_send method_name
-        end
       end
 
       def route_method
