@@ -205,11 +205,12 @@ module Grape
             route_settings[:requirements] = route.requirements
             route_settings[:path] = route.origin
             route_settings[:methods] ||= []
-            route_settings[:methods] << route.request_method
+            if route.request_method == '*' || route_settings[:methods].include?('*')
+              route_settings[:methods] = Grape::Http::Headers::SUPPORTED_METHODS
+            else
+              route_settings[:methods] << route.request_method
+            end
             route_settings[:endpoint] = route.app
-
-            # using the :any shorthand produces [nil] for route methods, substitute all manually
-            route_settings[:methods] = Grape::Http::Headers::SUPPORTED_METHODS if route_settings[:methods].include?('*')
           end
         end
 
