@@ -7,7 +7,7 @@ describe Grape::Validations::Types::PrimitiveCoercer do
 
   subject { described_class.new(type, strict) }
 
-  describe '.call' do
+  describe '#call' do
     context 'Boolean' do
       let(:type) { Grape::API::Boolean }
 

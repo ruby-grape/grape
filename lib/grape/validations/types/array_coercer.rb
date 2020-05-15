@@ -6,7 +6,7 @@ module Grape
   module Validations
     module Types
       # Coerces elements in an array. It might be an array of strings or integers or
-      # anything else.
+      # an array of arrays of integers.
       #
       # It could've been possible to use an +of+
       # method (https://dry-rb.org/gems/dry-types/1.2/array-with-member/)
@@ -18,12 +18,11 @@ module Grape
           super
 
           @coercer = scope::Array
-          @elem_coercer = PrimitiveCoercer.new(type.first, strict)
+          @nested = type.first.is_a?(Array)
         end
 
         def call(_val)
           collection = super
-
           return collection if collection.is_a?(InvalidValue)
 
           coerce_elements collection
@@ -31,13 +30,15 @@ module Grape
 
         protected
 
+        attr_reader :nested
+
         def coerce_elements(collection)
           return if collection.nil?
 
           collection.each_with_index do |elem, index|
             return InvalidValue.new if reject?(elem)
 
-            coerced_elem = @elem_coercer.call(elem)
+            coerced_elem = elem_coercer.call(elem)
 
             return coerced_elem if coerced_elem.is_a?(InvalidValue)
 
@@ -51,6 +52,13 @@ module Grape
         # Virtus doesn't allow nil in arrays.
         def reject?(val)
           val.nil?
+        end
+
+        def elem_coercer
+          @elem_coercer ||= begin
+            klass = nested ? ArrayCoercer : PrimitiveCoercer
+            klass.new(type.first, strict)
+          end
         end
       end
     end

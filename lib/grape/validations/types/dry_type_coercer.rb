@@ -19,6 +19,7 @@ module Grape
       class DryTypeCoercer
         def initialize(type, strict = false)
           @type = type
+          @strict = strict
           @scope = strict ? DryTypes::Strict : DryTypes::Params
         end
 
@@ -36,7 +37,7 @@ module Grape
 
         protected
 
-        attr_reader :scope, :type
+        attr_reader :scope, :type, :strict
       end
     end
   end
