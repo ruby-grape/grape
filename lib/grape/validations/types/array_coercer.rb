@@ -14,11 +14,13 @@ module Grape
       # behavior of Virtus which was used earlier, a `Grape::Validations::Types::PrimitiveCoercer`
       # maintains Virtus behavior in coercing.
       class ArrayCoercer < DryTypeCoercer
+        register_collection Array
+
         def initialize(type, strict = false)
           super
 
           @coercer = scope::Array
-          @nested = type.first.is_a?(Array)
+          @subtype = type.first.class
         end
 
         def call(_val)
@@ -30,7 +32,7 @@ module Grape
 
         protected
 
-        attr_reader :nested
+        attr_reader :subtype
 
         def coerce_elements(collection)
           return if collection.nil?
@@ -48,7 +50,7 @@ module Grape
           collection
         end
 
-        # This method maintaine logic which was defined by Virtus for arrays.
+        # This method maintains logic which was defined by Virtus for arrays.
         # Virtus doesn't allow nil in arrays.
         def reject?(val)
           val.nil?
@@ -56,7 +58,7 @@ module Grape
 
         def elem_coercer
           @elem_coercer ||= begin
-            klass = nested ? ArrayCoercer : PrimitiveCoercer
+            klass = DryTypeCoercer.collection_coercer_for(subtype) || PrimitiveCoercer
             klass.new(type.first, strict)
           end
         end

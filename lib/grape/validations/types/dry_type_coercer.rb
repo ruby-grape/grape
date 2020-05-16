@@ -17,6 +17,34 @@ module Grape
       # but check its type. More information there
       # https://dry-rb.org/gems/dry-types/1.2/built-in-types/
       class DryTypeCoercer
+        class << self
+          def inherited(klass)
+            # share the hash with classes, so inheritors could will it
+            klass.instance_variable_set(:@collection_coercers, collection_coercers)
+          end
+
+          # Registers a collection coercer which could be found by a type,
+          # see +collection_coercer_for+ method below.
+          def register_collection(type)
+            collection_coercers[type] = self
+          end
+
+          # Returns a collection coercer which corresponds to a given type.
+          # Example:
+          #
+          #    collection_coercer_for(Array)
+          #    #=> Grape::Validations::Types::ArrayCoercer
+          def collection_coercer_for(type)
+            collection_coercers[type]
+          end
+
+          protected
+
+          def collection_coercers
+            @collection_coercers ||= {}
+          end
+        end
+
         def initialize(type, strict = false)
           @type = type
           @strict = strict
