@@ -20,7 +20,7 @@ module Grape
           super
 
           @coercer = scope::Array
-          @subtype = type.first.class
+          @subtype = type.first
         end
 
         def call(_val)
@@ -57,10 +57,7 @@ module Grape
         end
 
         def elem_coercer
-          @elem_coercer ||= begin
-            klass = DryTypeCoercer.collection_coercer_for(subtype) || PrimitiveCoercer
-            klass.new(type.first, strict)
-          end
+          @elem_coercer ||= DryTypeCoercer.coercer_instance_for(subtype, strict)
         end
       end
     end

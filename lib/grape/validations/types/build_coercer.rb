@@ -60,12 +60,8 @@ module Grape
           Types::CustomTypeCollectionCoercer.new(
             Types.map_special(type.first), type.is_a?(Set)
           )
-        elsif type.is_a?(Array)
-          ArrayCoercer.new type, strict
-        elsif type.is_a?(Set)
-          SetCoercer.new type, strict
         else
-          PrimitiveCoercer.new type, strict
+          DryTypeCoercer.coercer_instance_for(type, strict)
         end
       end
 
