@@ -14,6 +14,7 @@
 * [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
 * [#2040](https://github.com/ruby-grape/grape/pull/2040): Fix a regression with Array of type nil - [@ericproulx](https://github.com/ericproulx).
 * [#2054](https://github.com/ruby-grape/grape/pull/2054): Coercing of nested arrays - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2050](https://github.com/ruby-grape/grape/pull/2053): Fix broken multiple mounts - [@Jack12816](https://github.com/Jack12816).
 * Your contribution here.
 
 ### 1.3.2 (2020/04/12)
