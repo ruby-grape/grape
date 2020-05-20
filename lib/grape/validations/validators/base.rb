@@ -48,6 +48,7 @@ module Grape
           next unless @scope.meets_dependency?(val, params)
           begin
             if @required || val.respond_to?(:key?) && val.key?(attr_name)
+              puts "validating #{attr_name}"
               validate_param!(attr_name, val)
             end
           rescue Grape::Exceptions::Validation => e

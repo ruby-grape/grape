@@ -23,6 +23,7 @@ module Grape
       end
 
       def each
+        puts "errors: #{errors}"
         errors.each_pair do |attribute, errors|
           errors.each do |error|
             yield attribute, error
