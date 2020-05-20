@@ -174,6 +174,39 @@ describe Grape::Validations do
       end
     end
 
+    context 'validates correctly with multiple nested params in array' do
+      before do
+        subject.params do
+          optional :included, type: Array do
+            optional :attributes, type: Hash do
+              requires :value, type: String, allow_blank: { value: false, message: "can't be blank" }
+            end
+          end
+        end
+        subject.put('/required') { 'required works' }
+      end
+
+      let(:request_params) do
+        {
+          included: [
+            { attributes: { value: '' } },
+            { attributes: { value: 'test' } },
+            { attributes: { value: '' } }
+          ]
+        }
+      end
+
+      it 'validates correctly in multiple nested params' do
+        put '/required', request_params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq(
+          'included[0][attributes][value] can\'t be blank, ' \
+          'included[2][attributes][value] can\'t be blank'
+        )
+      end
+    end
+
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
