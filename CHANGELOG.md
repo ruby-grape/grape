@@ -1,4 +1,4 @@
-### 1.3.3 (Next)
+### 1.3.3 (2020/05/23)
 
 #### Features
 
@@ -6,7 +6,6 @@
 * [#2039](https://github.com/ruby-grape/grape/pull/2039): Travis - update rails versions - [@ericproulx](https://github.com/ericproulx).
 * [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
 * [#2050](https://github.com/ruby-grape/grape/pull/2050): Refactor route public_send to AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -15,7 +14,6 @@
 * [#2040](https://github.com/ruby-grape/grape/pull/2040): Fix a regression with Array of type nil - [@ericproulx](https://github.com/ericproulx).
 * [#2054](https://github.com/ruby-grape/grape/pull/2054): Coercing of nested arrays - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2050](https://github.com/ruby-grape/grape/pull/2053): Fix broken multiple mounts - [@Jack12816](https://github.com/Jack12816).
-* Your contribution here.
 
 ### 1.3.2 (2020/04/12)
 
