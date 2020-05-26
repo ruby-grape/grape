@@ -116,6 +116,22 @@ params do
 end
 ```
 
+#### Coercing to `FalseClass` or `TrueClass` no longer works
+
+Previous Grape versions allowed this, though it wasn't documented:
+
+```ruby
+requires :valueTrue, type: FalseClass
+requires :valueBool, types: [FalseClass, TrueClass]
+```
+
+These will now crash. Instead you should do:
+
+```ruby
+requires :valueTrue, type: Boolean # in your endpoint you should validate if this actually `false`
+requires :valueBool, type: Boolean
+```
+
 #### Ensure that Array types have explicit coercions
 
 Unlike Virtus, dry-types does not perform any implict coercions. If you have any uses of `Array[String]`, `Array[Integer]`, etc. be sure they use a `coerce_with` block. For example:
