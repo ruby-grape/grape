@@ -121,15 +121,15 @@ end
 Previous Grape versions allowed this, though it wasn't documented:
 
 ```ruby
-requires :valueTrue, type: FalseClass
-requires :valueBool, types: [FalseClass, TrueClass]
+requires :true_value, type: TrueClass
+requires :bool_value, types: [FalseClass, TrueClass]
 ```
 
 These will now crash. Instead you should do:
 
 ```ruby
-requires :valueTrue, type: Boolean # in your endpoint you should validate if this actually `false`
-requires :valueBool, type: Boolean
+requires :true_value, type: Boolean # in your endpoint you should validate if this actually `true`
+requires :bool_value, type: Boolean
 ```
 
 #### Ensure that Array types have explicit coercions
