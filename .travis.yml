@@ -47,10 +47,6 @@ matrix:
       gemfile: gemfiles/rails_5.gemfile
     - rvm: 2.5.8
       gemfile: gemfiles/rails_6.gemfile
-    - rvm: 2.4.10
-      gemfile: Gemfile
-    - rvm: 2.4.10
-      gemfile: gemfiles/rails_5.gemfile
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3

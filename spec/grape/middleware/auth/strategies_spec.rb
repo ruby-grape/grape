@@ -36,7 +36,7 @@ describe Grape::Middleware::Auth::Strategies do
     RSpec::Matchers.define :be_challenge do
       match do |actual_response|
         actual_response.status == 401 &&
-          actual_response['WWW-Authenticate'] =~ /^Digest / &&
+          actual_response['WWW-Authenticate'].start_with?('Digest ') &&
           actual_response.body.empty?
       end
     end
