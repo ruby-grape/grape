@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
