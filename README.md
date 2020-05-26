@@ -906,7 +906,7 @@ format :json
 
 params do
   requires :first_name, type: String
-  optional :last_nae, type: String
+  optional :last_name, type: String
 end
 
 post 'users/signup' do
