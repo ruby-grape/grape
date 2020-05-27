@@ -1059,12 +1059,12 @@ params do
 end
 ```
 
-Note that default values will be passed through to any validation options specified.
-The following example will always fail if `:color` is not explicitly provided.
-
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
 number for each call to the endpoint of this `params` block. To have the default evaluate
 lazily with each request use a lambda, like `:random_number` above.
+
+Note that default values will be passed through to any validation options specified.
+The following example will always fail if `:color` is not explicitly provided.
 
 ```ruby
 params do
