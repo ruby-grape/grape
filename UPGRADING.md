@@ -125,10 +125,10 @@ requires :true_value, type: TrueClass
 requires :bool_value, types: [FalseClass, TrueClass]
 ```
 
-These will now crash. Instead you should do:
+This is no longer supported, if you do this, your values will never be valid. Instead you should do this:
 
 ```ruby
-requires :true_value, type: Boolean # in your endpoint you should validate if this actually `true`
+requires :true_value, type: Boolean # in your endpoint you should validate if this is actually `true`
 requires :bool_value, type: Boolean
 ```
 
