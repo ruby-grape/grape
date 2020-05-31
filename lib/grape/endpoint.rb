@@ -80,7 +80,10 @@ module Grape
 
       self.inheritable_setting = new_settings.point_in_time_copy
 
-      route_setting(:saved_declared_params, namespace_stackable(:declared_params))
+      # now +namespace_stackable(:declared_params)+ contains all params defined for
+      # this endpoint and its parents, but later it will be cleaned up,
+      # see +reset_validations!+ in lib/grape/dsl/validations.rb
+      route_setting(:declared_params, namespace_stackable(:declared_params).flatten)
       route_setting(:saved_validations, namespace_stackable(:validations))
 
       namespace_stackable(:representations, []) unless namespace_stackable(:representations)
@@ -116,7 +119,6 @@ module Grape
       parent_declared_params = namespace_stackable[:declared_params]
 
       if parent_declared_params
-        inheritable_setting.route[:declared_params] ||= []
         inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten)
       end
 
@@ -190,7 +192,7 @@ module Grape
         requirements: prepare_routes_requirements,
         prefix: namespace_inheritable(:root_prefix),
         anchor: options[:route_options].fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations),
+        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
         forward_match: options[:forward_match]
       }
     end

@@ -5,6 +5,7 @@
 * [#1520](https://github.com/ruby-grape/grape/pull/1520): Un-deprecate stream-like objects - [@urkle](https://github.com/urkle).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Drop support for Ruby 2.4 - [@dblock](https://github.com/dblock).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
+* [#2077](https://github.com/ruby-grape/grape/pull/2077): Simplify logic for defining declared params - [@dnesteryuk](https://github.com/dnesteryuk).
 * Your contribution here.
 
 #### Fixes

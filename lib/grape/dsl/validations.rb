@@ -10,7 +10,24 @@ module Grape
       include Grape::DSL::Configuration
 
       module ClassMethods
-        # Clears all defined parameters and validations.
+        # Clears all defined parameters and validations. The main purpose of it is to clean up
+        # settings, so next endpoint won't interfere with previous one.
+        #
+        #    params do
+        #      # params for the endpoint below this block
+        #    end
+        #    post '/current' do
+        #      # whatever
+        #    end
+        #
+        #    # somewhere between them the reset_validations! method gets called
+        #
+        #    params do
+        #      # params for the endpoint below this block
+        #    end
+        #    post '/next' do
+        #      # whatever
+        #    end
         def reset_validations!
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations

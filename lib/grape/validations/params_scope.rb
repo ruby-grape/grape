@@ -237,10 +237,10 @@ module Grape
           @parent.push_declared_params [element => @declared_params]
         else
           @api.namespace_stackable(:declared_params, @declared_params)
-
-          @api.route_setting(:declared_params, []) unless @api.route_setting(:declared_params)
-          @api.route_setting(:declared_params, @api.namespace_stackable(:declared_params).flatten)
         end
+
+        # params were stored in settings, it can be cleaned from the params scope
+        @declared_params = nil
       end
 
       def validates(attrs, validations)
