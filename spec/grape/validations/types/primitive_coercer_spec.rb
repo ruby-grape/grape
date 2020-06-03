@@ -8,6 +8,14 @@ describe Grape::Validations::Types::PrimitiveCoercer do
   subject { described_class.new(type, strict) }
 
   describe '#call' do
+    context 'BigDecimal' do
+      let(:type) { BigDecimal }
+
+      it 'coerces to BigDecimal' do
+        expect(subject.call(5)).to eq(BigDecimal(5))
+      end
+    end
+
     context 'Boolean' do
       let(:type) { Grape::API::Boolean }
 
@@ -37,14 +45,6 @@ describe Grape::Validations::Types::PrimitiveCoercer do
 
       it 'coerces to String' do
         expect(subject.call(10)).to eq('10')
-      end
-    end
-
-    context 'BigDecimal' do
-      let(:type) { BigDecimal }
-
-      it 'coerces to BigDecimal' do
-        expect(subject.call(5)).to eq(BigDecimal(5))
       end
     end
 
