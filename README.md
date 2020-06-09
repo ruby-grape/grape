@@ -3168,22 +3168,44 @@ end
 
 Use `body false` to return `204 No Content` without any data or content-type.
 
-You can also set the response to a file with `file`.
+You can also set the response to a file with `sendfile`. This works with the
+[Rack::Sendfile](https://www.rubydoc.info/gems/rack/Rack/Sendfile) middleware to optimally send
+the file through your web server software.
 
 ```ruby
 class API < Grape::API
   get '/' do
-    file '/path/to/file'
+    sendfile '/path/to/file'
   end
 end
 ```
 
-If you want a file to be streamed using Rack::Chunked, use `stream`.
+To stream a file in chunks use `stream`
 
 ```ruby
 class API < Grape::API
   get '/' do
     stream '/path/to/file'
+  end
+end
+```
+
+If you want to stream non-file data use the `stream` method and a `Stream` object.
+This is an object that responds to `each` and yields for each chunk to send to the client.
+Each chunk will be sent as it is yielded instead of waiting for all of the content to be available.
+
+```ruby
+class MyStream
+  def each
+    yield 'part 1'
+    yield 'part 2'
+    yield 'part 3'
+  end
+end
+
+class API < Grape::API
+  get '/' do
+    stream MyStream.new
   end
 end
 ```

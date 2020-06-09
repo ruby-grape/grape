@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Grape
-  module ServeFile
+  module ServeStream
     CHUNK_SIZE = 16_384
 
     # Class helps send file through API

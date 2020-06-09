@@ -206,12 +206,12 @@ module Grape
     end
   end
 
-  module ServeFile
+  module ServeStream
     extend ::ActiveSupport::Autoload
     eager_autoload do
-      autoload :FileResponse
       autoload :FileBody
       autoload :SendfileResponse
+      autoload :StreamResponse
     end
   end
 end

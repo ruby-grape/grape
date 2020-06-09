@@ -1,6 +1,70 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.4.0
+
+#### Reworking stream and file and un-deprecating stream like-objects
+
+Previously in 0.16 stream-like objects were deprecated. This release restores their functionality for use-cases other than file streaming.
+
+This release deprecated `file` in favor of `sendfile` to better document its purpose.
+
+To deliver a file via the Sendfile support in your web server and have the Rack::Sendfile middleware enabled. See [`Rack::Sendfile`](https://www.rubydoc.info/gems/rack/Rack/Sendfile).
+```ruby
+class API < Grape::API
+  get '/' do
+    sendfile '/path/to/file'
+  end
+end
+```
+
+Use `stream` to stream file content in chunks.
+
+```ruby
+class API < Grape::API
+  get '/' do
+    stream '/path/to/file'
+  end
+end
+```
+
+Or use `stream` to stream other kinds of content. In the following example a streamer class 
+streams paginated data from a database.
+
+```ruby
+class MyObject     
+  attr_accessor :result
+
+  def initialize(query)
+    @result = query
+  end
+  
+  def each
+    yield '['
+    # Do paginated DB fetches and return each page formatted
+    first = false
+    result.find_in_batches do |records|
+      yield process_records(records, first)
+      first = false
+    end
+    yield ']'  
+  end
+
+  def process_records(records, first)
+    buffer = +''
+    buffer << ',' unless first
+    buffer << records.map(&:to_json).join(',')
+    buffer
+  end
+end
+
+class API < Grape::API
+  get '/' do
+    stream MyObject.new(Sprocket.all)
+  end
+end
+```
+
 ### Upgrading to >= 1.3.3
 
 #### Nil values for structures

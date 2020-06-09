@@ -36,9 +36,9 @@ module Grape
       def build_formatted_response(status, headers, bodies)
         headers = ensure_content_type(headers)
 
-        if bodies.is_a?(Grape::ServeFile::FileResponse)
-          Grape::ServeFile::SendfileResponse.new([], status, headers) do |resp|
-            resp.body = bodies.file
+        if bodies.is_a?(Grape::ServeStream::StreamResponse)
+          Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
+            resp.body = bodies.stream
           end
         else
           # Allow content-type to be explicitly overwritten

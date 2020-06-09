@@ -380,7 +380,7 @@ describe Grape::Middleware::Formatter do
 
   context 'send file' do
     let(:file) { double(File) }
-    let(:file_body) { Grape::ServeFile::FileResponse.new(file) }
+    let(:file_body) { Grape::ServeStream::StreamResponse.new(file) }
     let(:app) { ->(_env) { [200, {}, file_body] } }
 
     it 'returns a file response' do
