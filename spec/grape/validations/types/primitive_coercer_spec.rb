@@ -8,6 +8,18 @@ describe Grape::Validations::Types::PrimitiveCoercer do
   subject { described_class.new(type, strict) }
 
   describe '#call' do
+    context 'BigDecimal' do
+      let(:type) { BigDecimal }
+
+      it 'coerces to BigDecimal' do
+        expect(subject.call(5)).to eq(BigDecimal(5))
+      end
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
     context 'Boolean' do
       let(:type) { Grape::API::Boolean }
 
@@ -32,19 +44,63 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       end
     end
 
+    context 'DateTime' do
+      let(:type) { DateTime }
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
+    context 'Float' do
+      let(:type) { Float }
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
+    context 'Integer' do
+      let(:type) { Integer }
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
+    context 'Numeric' do
+      let(:type) { Numeric }
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
+    context 'Time' do
+      let(:type) { Time }
+
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
+      end
+    end
+
     context 'String' do
       let(:type) { String }
 
       it 'coerces to String' do
         expect(subject.call(10)).to eq('10')
       end
+
+      it 'does not coerce an empty string to nil' do
+        expect(subject.call('')).to eq('')
+      end
     end
 
-    context 'BigDecimal' do
-      let(:type) { BigDecimal }
+    context 'Symbol' do
+      let(:type) { Symbol }
 
-      it 'coerces to BigDecimal' do
-        expect(subject.call(5)).to eq(BigDecimal(5))
+      it 'coerces an empty string to nil' do
+        expect(subject.call('')).to be_nil
       end
     end
 

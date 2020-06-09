@@ -9,6 +9,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2067](https://github.com/ruby-grape/grape/pull/2067): Coerce empty string to nil for all primitive types except String - [@petekinnecom](https://github.com/petekinnecom).
 * [#2064](https://github.com/ruby-grape/grape/pull/2064): Fix Ruby 2.7 deprecation warning in `Grape::Middleware::Base#initialize` - [@skarger](https://github.com/skarger).
 
 ### 1.3.3 (2020/05/23)

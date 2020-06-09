@@ -37,7 +37,6 @@ module Grape
         def call(val)
           return InvalidValue.new if reject?(val)
           return nil if val.nil? || treat_as_nil?(val)
-          return '' if val == ''
 
           super
         end
@@ -60,7 +59,7 @@ module Grape
         # absence of a value and coerces it into nil. See a discussion there
         # https://github.com/ruby-grape/grape/pull/2045
         def treat_as_nil?(val)
-          val == '' && type == Grape::API::Boolean
+          val == '' && type != String
         end
       end
     end

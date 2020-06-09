@@ -497,6 +497,92 @@ describe Grape::Validations::CoerceValidator do
           end
         end
       end
+
+      context 'empty string' do
+        context 'primitive types' do
+          (Grape::Validations::Types::PRIMITIVES - [String]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          it 'is not coerced to nil for type String' do
+            subject.params do
+              requires :param, type: String
+            end
+            subject.get '/empty_string' do
+              params[:param].class
+            end
+
+            get '/empty_string', param: ''
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq('String')
+          end
+        end
+
+        context 'structures types' do
+          (Grape::Validations::Types::STRUCTURES - [Hash]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'special types' do
+          (Grape::Validations::Types::SPECIAL.keys - [File, Rack::Multipart::UploadedFile]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          context 'variant-member-type collections' do
+            [
+              Array[Integer, String],
+              [Integer, String, Array[Integer, String]]
+            ].each do |type|
+              it "is coerced to nil for type #{type}" do
+                subject.params do
+                  requires :param, type: type
+                end
+                subject.get '/empty_string' do
+                  params[:param].class
+                end
+
+                get '/empty_string', param: ''
+                expect(last_response.status).to eq(200)
+                expect(last_response.body).to eq('NilClass')
+              end
+            end
+          end
+        end
+      end
     end
 
     context 'using coerce_with' do
