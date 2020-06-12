@@ -26,6 +26,10 @@ matrix:
     - rvm: 2.7.1
       gemfile: gemfiles/rails_6.gemfile
     - rvm: 2.7.1
+      gemfile: Gemfile
+      script:
+        - bundle exec rspec spec/integration/eager_load
+    - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
         - bundle exec rake

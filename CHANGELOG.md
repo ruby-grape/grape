@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2072](https://github.com/ruby-grape/grape/pull/2072): Fix eager loading due to ServeStream rename - [@stanhu](https://github.com/stanhu).
 * [#1520](https://github.com/ruby-grape/grape/pull/1520): Un-deprecate stream-like objects - [@urkle](https://github.com/urkle).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Drop support for Ruby 2.4 - [@dblock](https://github.com/dblock).
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
@@ -10,9 +11,10 @@
 
 #### Fixes
 
-* Your contribution here.
 * [#2067](https://github.com/ruby-grape/grape/pull/2067): Coerce empty string to nil for all primitive types except String - [@petekinnecom](https://github.com/petekinnecom).
 * [#2064](https://github.com/ruby-grape/grape/pull/2064): Fix Ruby 2.7 deprecation warning in `Grape::Middleware::Base#initialize` - [@skarger](https://github.com/skarger).
+* [#2072](https://github.com/ruby-grape/grape/pull/2072): Fix `Grape.eager_load!` and `compile!` - [@stanhu](https://github.com/stanhu).
+* Your contribution here.
 
 ### 1.3.3 (2020/05/23)
 
