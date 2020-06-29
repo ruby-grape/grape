@@ -192,37 +192,15 @@ module Grape
       # will return an HTTP 405 response for any HTTP method that the resource
       # cannot handle.
       def add_head_not_allowed_methods_and_options_methods
-        routes_map = {}
-
-        self.class.endpoints.each do |endpoint|
-          routes = endpoint.routes
-          routes.each do |route|
-            # using the :any shorthand produces [nil] for route methods, substitute all manually
-            route_key = route.pattern.to_regexp
-            routes_map[route_key] ||= {}
-            route_settings = routes_map[route_key]
-            route_settings[:pattern] = route.pattern
-            route_settings[:requirements] = route.requirements
-            route_settings[:path] = route.origin
-            route_settings[:methods] ||= []
-            if route.request_method == '*' || route_settings[:methods].include?('*')
-              route_settings[:methods] = Grape::Http::Headers::SUPPORTED_METHODS
-            else
-              route_settings[:methods] << route.request_method
-            end
-            route_settings[:endpoint] = route.app
-          end
-        end
-
+        versioned_route_configs = collect_route_config_per_pattern
         # The paths we collected are prepared (cf. Path#prepare), so they
         # contain already versioning information when using path versioning.
         # Disable versioning so adding a route won't prepend versioning
         # informations again.
         without_root_prefix do
           without_versioning do
-            routes_map.each_value do |config|
-              methods = config[:methods]
-              allowed_methods = methods.dup
+            versioned_route_configs.each do |config|
+              allowed_methods = config[:methods].dup
 
               unless self.class.namespace_inheritable(:do_not_route_head)
                 allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
@@ -241,6 +219,25 @@ module Grape
         end
       end
 
+      def collect_route_config_per_pattern
+        all_routes       = self.class.endpoints.map(&:routes).flatten
+        routes_by_regexp = all_routes.group_by { |route| route.pattern.to_regexp }
+
+        # Build the configuration based on the first endpoint and the collection of methods supported.
+        routes_by_regexp.values.map do |routes|
+          last_route        = routes.last # Most of the configuration is taken from the last endpoint
+          matching_wildchar = routes.any? { |route| route.request_method == '*' }
+          {
+            options: {},
+            pattern: last_route.pattern,
+            requirements: last_route.requirements,
+            path: last_route.origin,
+            endpoint: last_route.app,
+            methods: matching_wildchar ? Grape::Http::Headers::SUPPORTED_METHODS : routes.map(&:request_method)
+          }
+        end
+      end
+
       # Generate a route that returns an HTTP 405 response for a user defined
       # path on methods not specified
       def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
@@ -252,7 +249,6 @@ module Grape
           end
         not_allowed_methods = supported_methods - allowed_methods
         return if not_allowed_methods.empty?
-
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 

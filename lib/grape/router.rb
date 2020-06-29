@@ -99,37 +99,34 @@ module Grape
       response = yield(input, method)
 
       return response if response && !(cascade = cascade?(response))
-      neighbor = greedy_match?(input)
+      last_neighbor_route = greedy_match?(input)
 
-      # If neighbor exists and request method is OPTIONS,
+      # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #call_with_allow_headers.
-      return call_with_allow_headers(
-        env,
-        neighbor.allow_header,
-        neighbor.endpoint
-      ) if neighbor && method == Grape::Http::Headers::OPTIONS && !cascade
+      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Grape::Http::Headers::OPTIONS && !cascade
 
       route = match?(input, '*')
-      return neighbor.endpoint.call(env) if neighbor && cascade && route
+
+      return last_neighbor_route.endpoint.call(env) if last_neighbor_route && cascade && route
 
       if route
         response = process_route(route, env)
         return response if response && !(cascade = cascade?(response))
       end
 
-      !cascade && neighbor ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
+      return call_with_allow_headers(env, last_neighbor_route) if !cascade && last_neighbor_route
+
+      nil
     end
 
     def process_route(route, env)
-      input, = *extract_input_and_method(env)
-      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]
-      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
+      prepare_env_from_route(env, route)
       route.exec(env)
     end
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input))
+      args.merge(route.params(input) || {})
     end
 
     def extract_input_and_method(env)
@@ -160,9 +157,15 @@ module Grape
       @neutral_map.detect { |route| last_match["_#{route.index}"] }
     end
 
-    def call_with_allow_headers(env, methods, endpoint)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ').freeze
-      endpoint.call(env)
+    def call_with_allow_headers(env, route)
+      prepare_env_from_route(env, route)
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
+      route.endpoint.call(env)
+    end
+
+    def prepare_env_from_route(env, route)
+      input, = *extract_input_and_method(env)
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Env::GRAPE_ROUTING_ARGS], route, input)
     end
 
     def cascade?(response)

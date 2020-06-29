@@ -816,6 +816,71 @@ XML
       end
     end
 
+    describe 'when hook behaviour is controlled by attributes on the route ' do
+      before do
+        subject.before do
+          error!('Access Denied', 401) unless route.options[:secret] == params[:secret]
+        end
+
+        subject.namespace 'example' do
+          before do
+            error!('Access Denied', 401) unless route.options[:namespace_secret] == params[:namespace_secret]
+          end
+
+          desc 'it gets with secret', secret: 'password'
+          get { status(params[:id] == '504' ? 200 : 404) }
+
+          desc 'it post with secret', secret: 'password', namespace_secret: 'namespace_password'
+          post {}
+        end
+      end
+
+      context 'when HTTP method is not defined' do
+        let(:response) { delete('/example') }
+
+        it 'responds with a 405 status' do
+          expect(response.status).to eql 405
+        end
+      end
+
+      context 'when HTTP method is defined with attribute' do
+        let(:response) { post('/example?secret=incorrect_password') }
+        it 'responds with the defined error in the before hook' do
+          expect(response.status).to eql 401
+        end
+      end
+
+      context 'when HTTP method is defined and the underlying before hook expectation is not met' do
+        let(:response) { post('/example?secret=password&namespace_secret=wrong_namespace_password') }
+        it 'ends up in the endpoint' do
+          expect(response.status).to eql 401
+        end
+      end
+
+      context 'when HTTP method is defined and everything is like the before hooks expect' do
+        let(:response) { post('/example?secret=password&namespace_secret=namespace_password') }
+        it 'ends up in the endpoint' do
+          expect(response.status).to eql 201
+        end
+      end
+
+      context 'when HEAD is called for the defined GET' do
+        let(:response) { head('/example?id=504') }
+
+        it 'responds with 401 because before expectations in before hooks are not met' do
+          expect(response.status).to eql 401
+        end
+      end
+
+      context 'when HEAD is called for the defined GET' do
+        let(:response) { head('/example?id=504&secret=password') }
+
+        it 'responds with 200 because before hooks are not called' do
+          expect(response.status).to eql 200
+        end
+      end
+    end
+
     context 'allows HEAD on a GET request that' do
       before do
         subject.get 'example' do

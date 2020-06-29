@@ -13,6 +13,7 @@
 * [#2067](https://github.com/ruby-grape/grape/pull/2067): Coerce empty string to nil for all primitive types except String - [@petekinnecom](https://github.com/petekinnecom).
 * [#2064](https://github.com/ruby-grape/grape/pull/2064): Fix Ruby 2.7 deprecation warning in `Grape::Middleware::Base#initialize` - [@skarger](https://github.com/skarger).
 * [#2072](https://github.com/ruby-grape/grape/pull/2072): Fix `Grape.eager_load!` and `compile!` - [@stanhu](https://github.com/stanhu).
+* [#2076](https://github.com/ruby-grape/grape/pull/2076): Make route information available for hooks when the automatically generated endpoints are invoked - [@anakinj](https://github.com/anakinj).
 * Your contribution here.
 
 ### 1.3.3 (2020/05/23)
