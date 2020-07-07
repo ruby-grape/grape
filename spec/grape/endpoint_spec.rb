@@ -589,6 +589,40 @@ describe Grape::Endpoint do
     end
   end
 
+  describe 'array handling' do
+    let(:json) { JSON.parse(last_response.body) }
+    let(:arr) { json.fetch 'arr' }
+
+    before do
+      subject.format :json
+      subject.params do
+        optional :arr, type: Array
+      end
+      subject.get '/declared' do
+        declared(params, include_missing: false)
+      end
+    end
+
+    # see: https://github.com/lostisland/faraday/pull/801
+    it 'correctly parses an empty array as passed by faraday' do
+      get '/declared?arr[]'
+
+      expect(arr).to eq []
+    end
+
+    it 'correctly parses other empty-ish array notation' do
+      get '/declared?arr[]='
+
+      expect(arr).to eq []
+    end
+
+    it 'correctly parses an array with content' do
+      get '/declared?arr[]=a&arr[]=b'
+
+      expect(arr).to eq %w[a b]
+    end
+  end
+
   describe '#declared; call from child namespace' do
     before do
       subject.format :json
