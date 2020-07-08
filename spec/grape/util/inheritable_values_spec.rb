@@ -8,15 +8,19 @@ module Grape
       subject { InheritableValues.new(parent) }
 
       describe '#delete' do
+        before { subject[:some_thing] = :new_foo_bar }
+
         it 'deletes a key' do
-          subject[:some_thing] = :new_foo_bar
           subject.delete :some_thing
           expect(subject[:some_thing]).to be_nil
         end
 
+        it 'returns a value for the given key' do
+          expect(subject.delete(:some_thing)).to eq(:new_foo_bar)
+        end
+
         it 'does not delete parent values' do
           parent[:some_thing] = :foo
-          subject[:some_thing] = :new_foo_bar
           subject.delete :some_thing
           expect(subject[:some_thing]).to eq :foo
         end

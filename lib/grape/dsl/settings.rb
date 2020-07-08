@@ -24,7 +24,8 @@ module Grape
         @inheritable_setting ||= Grape::Util::InheritableSetting.new.tap { |new_settings| new_settings.inherit_from top_level_setting }
       end
 
-      # @param type [Symbol]
+      # Returns a value for the given type and key then deletes the value from settings.
+      # @param type [Symbol] One of: :namespace,  :inheritable, :stackable, :reverse_stackable.
       # @param key [Symbol]
       def unset(type, key)
         setting = inheritable_setting.send(type)
@@ -71,7 +72,7 @@ module Grape
         get_or_set :namespace, key, value
       end
 
-      # (see #unset_global_setting)
+      # (see #unset)
       def unset_namespace_setting(key)
         unset :namespace, key
       end
@@ -81,7 +82,7 @@ module Grape
         get_or_set :namespace_inheritable, key, value
       end
 
-      # (see #unset_global_setting)
+      # (see #unset)
       def unset_namespace_inheritable(key)
         unset :namespace_inheritable, key
       end

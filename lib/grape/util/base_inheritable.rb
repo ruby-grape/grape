@@ -14,6 +14,7 @@ module Grape
         @new_values = {}
       end
 
+      # Returns a current value for the given key then deletes it.
       def delete(key)
         new_values.delete key
       end

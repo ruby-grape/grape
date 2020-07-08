@@ -91,6 +91,15 @@ module Grape
           instance.router.recognize_path(path)
         end
 
+        # Cleans up settings which are only need during setup
+        def finalize!
+          # named params get evaluated right away after embedding them into the params block,
+          # see Grape::DSL::Parameters#use for more details
+          unset_namespace_stackable(:named_params)
+
+          endpoints.each(&:finalize!)
+        end
+
         protected
 
         def prepare_routes

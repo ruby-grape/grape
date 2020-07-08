@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2082](https://github.com/ruby-grape/grape/pull/2082): Introduce a finalize! method - [@dnesteryuk](https://github.com/dnesteryuk).
 * Your contribution here.
 
 #### Fixes

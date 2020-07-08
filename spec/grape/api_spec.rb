@@ -964,6 +964,42 @@ XML
     end
   end
 
+  describe '.finalize!' do
+    before do
+      subject.get 'example' do
+        'example'
+      end
+    end
+
+    it 'removes objects which were only needed during setup' do
+      prior_objects = {}
+
+      GC.start
+
+      ObjectSpace.count_objects(prior_objects)
+
+      described_class.finalize!
+
+      GC.start
+
+      current_objects = {}
+
+      ObjectSpace.count_objects(current_objects)
+
+      expect(current_objects[:T_ARRAY]).to be < prior_objects[:T_ARRAY]
+      expect(current_objects[:T_HASH]).to be < prior_objects[:T_HASH]
+    end
+
+    it 'calls the finalize! method on instances' do
+      allow(Grape::API::Instance).to receive(:finalize!).and_call_original
+
+      described_class.finalize!
+
+      # other tests produce lots of instances
+      expect(Grape::API::Instance).to have_received(:finalize!).at_least(:once)
+    end
+  end
+
   # NOTE: this method is required to preserve the ability of pre-mounting
   # the root API into a namespace, it may be deprecated in the future.
   describe 'instance_for_rack' do

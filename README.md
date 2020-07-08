@@ -121,6 +121,7 @@
   - [Grape Middleware](#grape-middleware)
   - [Rails Middleware](#rails-middleware)
   - [Remote IP](#remote-ip)
+- [Finalizing API](#finalizing-api)
 - [Writing Tests](#writing-tests)
   - [Writing Tests with Rack](#writing-tests-with-rack)
     - [RSpec](#rspec)
@@ -3605,6 +3606,16 @@ class API < Grape::API
   end
 end
 ```
+
+## Finalizing API
+
+Grape initializes lots of objects during setup, later they aren't needed. So, you might add a following line to a file that loads your server (for example, `config.ru`) to clean up those objects and free RAM:
+
+```ruby
+Grape::API.finalize!
+```
+
+**It must be called exactly this way, calls on inheritors of `Grape::API` won't have the effect.**
 
 ## Writing Tests
 

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Endpoint do
+  let(:settings) { Grape::Util::InheritableSetting.new }
+
   subject { Class.new(Grape::API) }
 
   def app
@@ -66,10 +68,7 @@ describe Grape::Endpoint do
     it 'takes a settings stack, options, and a block' do
       p = proc {}
       expect do
-        Grape::Endpoint.new(Grape::Util::InheritableSetting.new, {
-                              path: '/',
-                              method: :get
-                            }, &p)
+        Grape::Endpoint.new(settings, { path: '/', method: :get }, &p)
       end.not_to raise_error
     end
   end
@@ -1185,6 +1184,25 @@ describe Grape::Endpoint do
       end
       get '/hey'
       expect(last_response.body).to eq 'test body'
+    end
+  end
+
+  describe '#finalize!' do
+    subject { described_class.new(settings, { path: '/', method: :get }) }
+
+    before do
+      settings.namespace_stackable[:named_params] = 'Some named params'
+      settings.namespace_stackable[:validations] = 'Some validations'
+
+      subject.finalize!
+    end
+
+    it 'removes named params' do
+      expect(subject.namespace_stackable(:named_params)).to eq([])
+    end
+
+    it 'removes validations' do
+      expect(subject.namespace_stackable(:validations)).to eq([])
     end
   end
 

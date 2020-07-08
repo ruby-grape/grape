@@ -8,7 +8,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile! inherited]).freeze
+    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile! inherited finalize!]).freeze
 
     class << self
       attr_accessor :base_instance, :instances
@@ -33,6 +33,7 @@ module Grape
         @setup = []
         @base_parent = base_instance_parent
         @base_instance = mount_instance
+        @finalized = false
       end
 
       # Redefines all methods so that are forwarded to add_setup and be recorded
@@ -128,6 +129,20 @@ module Grape
         instance_for_rack.compile! # See API::Instance.compile!
       end
 
+      # Finds all inheritors and cleans up variables which are only needed while setting up API.
+      # This method must be called on the +Grape::API+ class. Otherwise, all heirs won't be
+      # cleaned up.
+      def finalize!
+        @setup = nil
+
+        # find heirs and call +finalize!+ on them
+        ObjectSpace.each_object(Class).each { |klass| klass.finalize! if klass < self }
+
+        (instances || []).each(&:finalize!)
+
+        @finalized = true
+      end
+
       private
 
       def instance_for_rack
@@ -141,7 +156,7 @@ module Grape
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
         setup_step = { method: method, args: args, block: block }
-        @setup << setup_step
+        @setup << setup_step unless @finalized
         last_response = nil
         @instances.each do |instance|
           last_response = replay_step_on(instance, setup_step)

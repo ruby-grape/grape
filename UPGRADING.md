@@ -1,6 +1,13 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.4.1
+
+#### Cleaning up setup-related objects
+
+Grape initializes lots of objects which aren't needed at runtime. To clean them up and free RAM, `Grape::API.finalize!` was introduced.
+See [README.md](#finalizing-api) for more details.
+
 ### Upgrading to >= 1.4.0
 
 #### Reworking stream and file and un-deprecating stream like-objects
@@ -28,17 +35,17 @@ class API < Grape::API
 end
 ```
 
-Or use `stream` to stream other kinds of content. In the following example a streamer class 
+Or use `stream` to stream other kinds of content. In the following example a streamer class
 streams paginated data from a database.
 
 ```ruby
-class MyObject     
+class MyObject
   attr_accessor :result
 
   def initialize(query)
     @result = query
   end
-  
+
   def each
     yield '['
     # Do paginated DB fetches and return each page formatted
@@ -47,7 +54,7 @@ class MyObject
       yield process_records(records, first)
       first = false
     end
-    yield ']'  
+    yield ']'
   end
 
   def process_records(records, first)

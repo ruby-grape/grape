@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'shared/versioning_examples'
 
 describe Grape::API::Instance do
-  subject(:an_instance) do
+  subject(:instance) do
     Class.new(Grape::API::Instance) do
       namespace :some_namespace do
         get 'some_endpoint' do
@@ -15,7 +15,7 @@ describe Grape::API::Instance do
   end
 
   let(:root_api) do
-    to_mount = an_instance
+    to_mount = instance
     Class.new(Grape::API) do
       mount to_mount
     end
@@ -34,7 +34,7 @@ describe Grape::API::Instance do
 
   context 'when an instance is the root' do
     let(:root_api) do
-      to_mount = an_instance
+      to_mount = instance
       Class.new(Grape::API::Instance) do
         mount to_mount
       end
@@ -48,7 +48,7 @@ describe Grape::API::Instance do
 
   context 'top level setting' do
     it 'does not inherit settings from the superclass (Grape::API::Instance)' do
-      expect(an_instance.top_level_setting.parent).to be_nil
+      expect(instance.top_level_setting.parent).to be_nil
     end
   end
 
@@ -99,6 +99,36 @@ describe Grape::API::Instance do
     it 'responds the correct body at the second instance' do
       get '/another_namespace/foobar'
       expect(last_response.body).to eq 'Not found! (2)'
+    end
+  end
+
+  describe '.finalize!' do
+    subject(:instance) do
+      Class.new(Grape::API::Instance) do
+        helpers do
+          params :shared_params do
+            requires :title
+          end
+        end
+
+        get '/', &-> {}
+      end
+    end
+
+    it 'removes named params' do
+      settings = instance.inheritable_setting
+
+      expect(settings.namespace_stackable[:named_params]).to_not be_empty
+
+      instance.finalize!
+
+      expect(settings.namespace_stackable[:named_params]).to be_empty
+    end
+
+    it 'calls the finalize! method on endpoints' do
+      expect_any_instance_of(Grape::Endpoint).to receive(:finalize!).and_call_original
+
+      instance.finalize!
     end
   end
 end

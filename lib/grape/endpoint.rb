@@ -132,7 +132,7 @@ module Grape
     def method_name
       [options[:method],
        Namespace.joined_space(namespace_stackable(:namespace)),
-       (namespace_stackable(:mount_path) || []).join('/'),
+       namespace_stackable(:mount_path).join('/'),
        options[:path].join('/')]
         .join(' ')
     end
@@ -241,6 +241,10 @@ module Grape
       (options == e.options) && (inheritable_setting.to_hash == e.inheritable_setting.to_hash)
     end
 
+    def finalize!
+      %i[named_params validations].each { |key| unset_namespace_stackable(key) }
+    end
+
     protected
 
     def run
@@ -286,10 +290,12 @@ module Grape
     def build_stack(helpers)
       stack = Grape::Middleware::Stack.new
 
+      format = namespace_inheritable(:format)
+
       stack.use Rack::Head
       stack.use Class.new(Grape::Middleware::Error),
                 helpers: helpers,
-                format: namespace_inheritable(:format),
+                format: format,
                 content_types: namespace_stackable_with_hash(:content_types),
                 default_status: namespace_inheritable(:default_error_status),
                 rescue_all: namespace_inheritable(:rescue_all),
@@ -303,16 +309,20 @@ module Grape
 
       stack.concat namespace_stackable(:middleware)
 
-      if namespace_inheritable(:version)
-        stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-                  versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
-                  version_options: namespace_inheritable(:version_options),
+      version = namespace_inheritable(:version)
+
+      if version
+        version_options = namespace_inheritable(:version_options)
+
+        stack.use Grape::Middleware::Versioner.using(version_options[:using]),
+                  versions: version.flatten,
+                  version_options: version_options,
                   prefix: namespace_inheritable(:root_prefix),
                   mount_path: namespace_stackable(:mount_path).first
       end
 
       stack.use Grape::Middleware::Formatter,
-                format: namespace_inheritable(:format),
+                format: format,
                 default_format: namespace_inheritable(:default_format) || :txt,
                 content_types: namespace_stackable_with_hash(:content_types),
                 formatters: namespace_stackable_with_hash(:formatters),
@@ -388,24 +398,10 @@ module Grape
       extend post_extension if post_extension
     end
 
-    def befores
-      namespace_stackable(:befores) || []
-    end
-
-    def before_validations
-      namespace_stackable(:before_validations) || []
-    end
-
-    def after_validations
-      namespace_stackable(:after_validations) || []
-    end
-
-    def afters
-      namespace_stackable(:afters) || []
-    end
-
-    def finallies
-      namespace_stackable(:finallies) || []
+    %i[befores before_validations after_validations afters finallies].each do |meth_id|
+      define_method(meth_id) do
+        namespace_stackable(meth_id)
+      end
     end
 
     def validations
