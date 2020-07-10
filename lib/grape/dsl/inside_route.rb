@@ -328,6 +328,8 @@ module Grape
       # * https://github.com/rack/rack/blob/99293fa13d86cd48021630fcc4bd5acc9de5bdc3/lib/rack/chunked.rb
       # * https://github.com/rack/rack/blob/99293fa13d86cd48021630fcc4bd5acc9de5bdc3/lib/rack/etag.rb
       def stream(value = nil)
+        return if value.nil? && @stream.nil?
+
         header 'Content-Length', nil
         header 'Transfer-Encoding', nil
         header 'Cache-Control', 'no-cache' # Skips ETag generation (reading the response up front)
@@ -339,7 +341,7 @@ module Grape
         elsif !value.is_a?(NilClass)
           raise ArgumentError, 'Stream object must respond to :each.'
         else
-          instance_variable_defined?(:@stream) ? @stream : nil
+          @stream
         end
       end
 

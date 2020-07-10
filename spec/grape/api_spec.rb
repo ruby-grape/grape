@@ -1149,6 +1149,11 @@ XML
       expect(last_response.headers['Content-Type']).to eq('text/plain')
     end
 
+    it 'does not set Cache-Control' do
+      get '/foo'
+      expect(last_response.headers['Cache-Control']).to eq(nil)
+    end
+
     it 'sets content type for xml' do
       get '/foo.xml'
       expect(last_response.headers['Content-Type']).to eq('application/xml')
