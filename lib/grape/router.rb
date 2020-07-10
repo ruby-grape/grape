@@ -7,20 +7,12 @@ module Grape
   class Router
     attr_reader :map, :compiled
 
-    class NormalizePathCache < Grape::Util::Cache
-      def initialize
-        @cache = Hash.new do |h, path|
-          normalized_path = +"/#{path}"
-          normalized_path.squeeze!('/')
-          normalized_path.sub!(%r{/+\Z}, '')
-          normalized_path = '/' if normalized_path.empty?
-          h[path] = -normalized_path
-        end
-      end
-    end
-
     def self.normalize_path(path)
-      NormalizePathCache[path]
+      path = +"/#{path}"
+      path.squeeze!('/')
+      path.sub!(%r{/+\Z}, '')
+      path = '/' if path == ''
+      path
     end
 
     def self.supported_methods
