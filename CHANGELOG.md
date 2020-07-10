@@ -1,4 +1,4 @@
-### 1.4.0 (Next)
+### 1.4.0 (2020/07/10)
 
 #### Features
 
@@ -7,7 +7,6 @@
 * [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
 * [#2077](https://github.com/ruby-grape/grape/pull/2077): Simplify logic for defining declared params - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2084](https://github.com/ruby-grape/grape/pull/2084): Fix memory leak in path normalization - [@fcheung](https://github.com/fcheung).
-* Your contribution here.
 
 #### Fixes
 
@@ -15,7 +14,6 @@
 * [#2064](https://github.com/ruby-grape/grape/pull/2064): Fix Ruby 2.7 deprecation warning in `Grape::Middleware::Base#initialize` - [@skarger](https://github.com/skarger).
 * [#2072](https://github.com/ruby-grape/grape/pull/2072): Fix `Grape.eager_load!` and `compile!` - [@stanhu](https://github.com/stanhu).
 * [#2076](https://github.com/ruby-grape/grape/pull/2076): Make route information available for hooks when the automatically generated endpoints are invoked - [@anakinj](https://github.com/anakinj).
-* Your contribution here.
 
 ### 1.3.3 (2020/05/23)
 
