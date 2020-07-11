@@ -350,8 +350,11 @@ class Web < Sinatra::Base
 end
 
 use Rack::Session::Cookie
-run Rack::Cascade.new [API, Web]
+run Rack::Cascade.new [Web, API]
 ```
+
+Note that order of loading apps using `Rack::Cascade` matters. The grape application must be last if you want to raise custom 404 errors from grape (such as `error!('Not Found',404)`). If the grape application is not last and returns 404 or 405 response, [cascade utilizes that as a signal to try the next app](https://www.rubydoc.info/gems/rack/Rack/Cascade). This may lead to undesirable behavior showing the [wrong 404 page from the wrong app](https://github.com/ruby-grape/grape/issues/1515). 
+
 
 ### Rails
 
