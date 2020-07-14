@@ -351,6 +351,12 @@ describe Grape::Endpoint do
           expect(subject.header['Cache-Control']).to eq 'no-cache'
         end
 
+        it 'does not change Cache-Control header' do
+          subject.stream
+
+          expect(subject.header['Cache-Control']).to eq 'cache'
+        end
+
         it 'sets Content-Length header to nil' do
           subject.stream file_path
 
@@ -419,6 +425,7 @@ describe Grape::Endpoint do
 
     it 'returns default' do
       expect(subject.stream).to be nil
+      expect(subject.header['Cache-Control']).to eq nil
     end
   end
 
