@@ -6,7 +6,7 @@ Upgrading Grape
 #### Cleaning up setup-related objects
 
 Grape initializes lots of objects which aren't needed at runtime. To clean them up and free RAM, `Grape::API.finalize!` was introduced.
-See [README.md](#finalizing-api) for more details.
+See [README.md](https://github.com/ruby-grape/grape/README.md#finalizing-api) for more details.
 
 ### Upgrading to >= 1.4.0
 
