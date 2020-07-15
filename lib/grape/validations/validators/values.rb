@@ -3,7 +3,7 @@
 module Grape
   module Validations
     class ValuesValidator < Base
-      def initialize(attrs, options, required, scope, opts = {})
+      def initialize(attrs, options, required, scope, **opts)
         if options.is_a?(Hash)
           @excepts = options[:except]
           @values = options[:value]

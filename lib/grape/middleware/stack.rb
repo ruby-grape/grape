@@ -90,7 +90,8 @@ module Grape
       def build(builder = Rack::Builder.new)
         others.shift(others.size).each(&method(:merge_with))
         middlewares.each do |m|
-          m.block ? builder.use(m.klass, *m.args, &m.block) : builder.use(m.klass, *m.args)
+          opts = m.args.extract_options!
+          m.block ? builder.use(m.klass, *m.args, **opts, &m.block) : builder.use(m.klass, *m.args, **opts)
         end
         builder
       end

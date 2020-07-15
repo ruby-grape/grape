@@ -3,7 +3,7 @@
 module Grape
   module Validations
     class DefaultValidator < Base
-      def initialize(attrs, options, required, scope, opts = {})
+      def initialize(attrs, options, required, scope, **opts)
         @default = options
         super
       end
@@ -21,9 +21,7 @@ module Grape
       def validate!(params)
         attrs = SingleAttributeIterator.new(self, @scope, params)
         attrs.each do |resource_params, attr_name|
-          if resource_params.is_a?(Hash) && resource_params[attr_name].nil?
-            validate_param!(attr_name, resource_params)
-          end
+          validate_param!(attr_name, resource_params) if resource_params.is_a?(Hash) && resource_params[attr_name].nil?
         end
       end
 

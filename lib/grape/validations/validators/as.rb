@@ -3,7 +3,7 @@
 module Grape
   module Validations
     class AsValidator < Base
-      def initialize(attrs, options, required, scope, opts = {})
+      def initialize(attrs, options, required, scope, **opts)
         @renamed_options = options
         super
       end

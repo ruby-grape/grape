@@ -30,7 +30,7 @@ describe Grape::Middleware::Error do
     opts = options
     Rack::Builder.app do
       use Spec::Support::EndpointFaker
-      use Grape::Middleware::Error, opts
+      use Grape::Middleware::Error, **opts
       run ErrorSpec::ErrApp
     end
   end
