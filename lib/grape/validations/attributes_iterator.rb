@@ -15,6 +15,7 @@ module Grape
       end
 
       def each(&block)
+        puts "@params #{@params}"
         do_each(@params, &block) # because we need recursion for nested arrays
       end
 
@@ -38,6 +39,9 @@ module Grape
               parent_scope.index = parent_index
               parent_scope = parent_scope.parent
             end
+            puts "........\n"
+            puts "@scope.index = #{index}"
+            puts "........\n"
             @scope.index = index
           end
 
