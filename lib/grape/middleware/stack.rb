@@ -10,10 +10,20 @@ module Grape
 
         def initialize(klass, *args, **opts, &block)
           @klass = klass
-          @args = args
-          @opts = opts
+          @args  = args
+          @opts  = opts
           @block = block
         end
+
+        def use_in(builder)
+          block ? builder.use(klass, *args, **opts, &block) : builder.use(klass, *args, **opts)
+        end if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+
+        def use_in(builder)
+          args  = m.args
+          args += [m.opts] unless m.opts.empty?
+          block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
+        end if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.7')
 
         def name
           klass.name
@@ -91,13 +101,7 @@ module Grape
       def build(builder = Rack::Builder.new)
         others.shift(others.size).each(&method(:merge_with))
         middlewares.each do |m|
-          if RUBY_VERSION >= '2.7'
-            m.block ? builder.use(m.klass, *m.args, **m.opts, &m.block) : builder.use(m.klass, *m.args, **m.opts)
-          else
-            args = m.args
-            args += [m.opts] unless m.opts.empty?
-            m.block ? builder.use(m.klass, *args, &m.block) : builder.use(m.klass, *args)
-          end
+          m.use_in(builder)
         end
         builder
       end
