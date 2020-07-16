@@ -10,6 +10,7 @@
 * [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
 * [#2083](https://github.com/ruby-grape/grape/pull/2083): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
 * [#2092](https://github.com/ruby-grape/grape/pull/2092): Correct an example params in Include Missing doc - [@huyvohcmc](https://github.com/huyvohcmc).
+* [#2091](https://github.com/ruby-grape/grape/pull/2091): Fix ruby 2.7 keyword deprecations - [@dim](https://github.com/dim).
 
 ### 1.4.0 (2020/07/10)
 
