@@ -48,7 +48,7 @@ module Spec
         headers = versioned_headers(**version_options.merge(version: version_name))
         params = {}
         if version_options[:using] == :param
-          params = { version_options[:parameter] => version_name }
+          params = { version_options.fetch(:parameter, 'apiver') => version_name }
         end
         get path, params, headers
       end
