@@ -908,8 +908,10 @@ By default `declared(params)` includes parameters that have `nil` values. If you
 format :json
 
 params do
-  requires :first_name, type: String
-  optional :last_name, type: String
+  requires :user, type: Hash do
+    requires :first_name, type: String
+    optional :last_name, type: String
+  end
 end
 
 post 'users/signup' do
