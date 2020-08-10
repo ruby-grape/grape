@@ -22,8 +22,8 @@ module Grape
         end if use_ruby2_keywords
 
         def use_in(builder)
-          args  = m.args
-          args += [m.opts] unless m.opts.empty?
+          args  = self.args
+          args += [opts] unless opts.empty?
           block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
         end unless use_ruby2_keywords
 
