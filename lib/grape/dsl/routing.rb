@@ -79,7 +79,7 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
-        def mount(mounts, opts = {})
+        def mount(mounts, **opts)
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
             if app.respond_to?(:mount_instance)
@@ -170,9 +170,7 @@ module Grape
               previous_namespace_description = @namespace_description
               @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
               nest(block) do
-                if space
-                  namespace_stackable(:namespace, Namespace.new(space, **options))
-                end
+                namespace_stackable(:namespace, Namespace.new(space, **options)) if space
               end
               @namespace_description = previous_namespace_description
             end

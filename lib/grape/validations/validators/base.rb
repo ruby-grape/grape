@@ -13,7 +13,7 @@ module Grape
       # @param required [Boolean] attribute(s) are required or optional
       # @param scope [ParamsScope] parent scope for this Validator
       # @param opts [Hash] additional validation options
-      def initialize(attrs, options, required, scope, opts = {})
+      def initialize(attrs, options, required, scope, **opts)
         @attrs = Array(attrs)
         @option = options
         @required = required
@@ -47,9 +47,7 @@ module Grape
           next if !@scope.required? && empty_val
           next unless @scope.meets_dependency?(val, params)
           begin
-            if @required || val.respond_to?(:key?) && val.key?(attr_name)
-              validate_param!(attr_name, val)
-            end
+            validate_param!(attr_name, val) if @required || val.respond_to?(:key?) && val.key?(attr_name)
           rescue Grape::Exceptions::Validation => e
             array_errors << e
           end

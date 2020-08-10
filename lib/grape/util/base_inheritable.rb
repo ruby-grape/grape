@@ -9,8 +9,8 @@ module Grape
 
       # @param inherited_values [Object] An object implementing an interface
       #   of the Hash class.
-      def initialize(inherited_values = {})
-        @inherited_values = inherited_values
+      def initialize(inherited_values = nil)
+        @inherited_values = inherited_values || {}
         @new_values = {}
       end
 

@@ -19,11 +19,11 @@ module Grape
           rescue_subclasses: true, # rescue subclasses of exceptions listed
           rescue_options: {
             backtrace: false, # true to display backtrace, true to let Grape handle Grape::Exceptions
-            original_exception: false, # true to display exception
+            original_exception: false # true to display exception
           },
           rescue_handlers: {}, # rescue handler blocks
           base_only_rescue_handlers: {}, # rescue handler blocks rescuing only the base class
-          all_rescue_handler: nil, # rescue handler block to rescue from all exceptions
+          all_rescue_handler: nil # rescue handler block to rescue from all exceptions
         }
       end
 
@@ -38,15 +38,15 @@ module Grape
           error_response(catch(:error) do
             return @app.call(@env)
           end)
-        rescue Exception => error # rubocop:disable Lint/RescueException
+        rescue Exception => e # rubocop:disable Lint/RescueException
           handler =
-            rescue_handler_for_base_only_class(error.class) ||
-            rescue_handler_for_class_or_its_ancestor(error.class) ||
-            rescue_handler_for_grape_exception(error.class) ||
-            rescue_handler_for_any_class(error.class) ||
+            rescue_handler_for_base_only_class(e.class) ||
+            rescue_handler_for_class_or_its_ancestor(e.class) ||
+            rescue_handler_for_grape_exception(e.class) ||
+            rescue_handler_for_any_class(e.class) ||
             raise
 
-          run_rescue_handler(handler, error)
+          run_rescue_handler(handler, e)
         end
       end
 
@@ -65,15 +65,13 @@ module Grape
         message = error[:message] || options[:default_message]
         headers = { Grape::Http::Headers::CONTENT_TYPE => content_type }
         headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
-        backtrace = error[:backtrace] || error[:original_exception] && error[:original_exception].backtrace || []
+        backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
         original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
         rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
       def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
-        if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
-          message = ERB::Util.html_escape(message)
-        end
+        message = ERB::Util.html_escape(message) if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
         Rack::Response.new([message], status, headers)
       end
 

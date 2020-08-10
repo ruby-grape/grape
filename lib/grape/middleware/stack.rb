@@ -6,11 +6,12 @@ module Grape
     # It allows to insert and insert after
     class Stack
       class Middleware
-        attr_reader :args, :block, :klass
+        attr_reader :args, :opts, :block, :klass
 
-        def initialize(klass, *args, &block)
+        def initialize(klass, *args, **opts, &block)
           @klass = klass
-          @args = args
+          @args  = args
+          @opts  = opts
           @block = block
         end
 
@@ -29,6 +30,18 @@ module Grape
 
         def inspect
           klass.to_s
+        end
+
+        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+          def use_in(builder)
+            block ? builder.use(klass, *args, **opts, &block) : builder.use(klass, *args, **opts)
+          end
+        else
+          def use_in(builder)
+            args  = self.args
+            args += [opts] unless opts.empty?
+            block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
+          end
         end
       end
 
@@ -90,7 +103,7 @@ module Grape
       def build(builder = Rack::Builder.new)
         others.shift(others.size).each(&method(:merge_with))
         middlewares.each do |m|
-          m.block ? builder.use(m.klass, *m.args, &m.block) : builder.use(m.klass, *m.args)
+          m.use_in(builder)
         end
         builder
       end

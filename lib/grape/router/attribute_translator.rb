@@ -23,7 +23,7 @@ module Grape
 
       ROUTER_ATTRIBUTES = %i[pattern index].freeze
 
-      def initialize(attributes = {})
+      def initialize(**attributes)
         @attributes = attributes
       end
 
@@ -37,7 +37,7 @@ module Grape
         attributes
       end
 
-      def method_missing(method_name, *args) # rubocop:disable Style/MethodMissing
+      def method_missing(method_name, *args)
         if setter?(method_name[-1])
           attributes[method_name[0..-1]] = *args
         else

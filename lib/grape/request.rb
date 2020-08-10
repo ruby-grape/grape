@@ -8,7 +8,7 @@ module Grape
 
     alias rack_params params
 
-    def initialize(env, options = {})
+    def initialize(env, **options)
       extend options[:build_params_with] || Grape.config.param_builder
       super(env)
     end

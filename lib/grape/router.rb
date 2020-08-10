@@ -47,7 +47,7 @@ module Grape
 
     def associate_routes(pattern, **options)
       @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Grape::Router::AttributeTranslator.new(options.merge(pattern: pattern, index: @neutral_map.length))
+      @neutral_map << Grape::Router::AttributeTranslator.new(**options, pattern: pattern, index: @neutral_map.length)
     end
 
     def call(env)
