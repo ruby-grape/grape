@@ -6,8 +6,6 @@ module Grape
     # It allows to insert and insert after
     class Stack
       class Middleware
-        use_ruby2_keywords = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
-
         attr_reader :args, :opts, :block, :klass
 
         def initialize(klass, *args, **opts, &block)
@@ -16,16 +14,6 @@ module Grape
           @opts  = opts
           @block = block
         end
-
-        def use_in(builder)
-          block ? builder.use(klass, *args, **opts, &block) : builder.use(klass, *args, **opts)
-        end if use_ruby2_keywords
-
-        def use_in(builder)
-          args  = self.args
-          args += [opts] unless opts.empty?
-          block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
-        end unless use_ruby2_keywords
 
         def name
           klass.name
@@ -42,6 +30,18 @@ module Grape
 
         def inspect
           klass.to_s
+        end
+
+        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+          def use_in(builder)
+            block ? builder.use(klass, *args, **opts, &block) : builder.use(klass, *args, **opts)
+          end
+        else
+          def use_in(builder)
+            args  = self.args
+            args += [opts] unless opts.empty?
+            block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
+          end
         end
       end
 
