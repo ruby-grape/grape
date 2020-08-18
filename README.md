@@ -387,6 +387,13 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
 end
 ```
 
+It may also be necessary to auto-load the API and it's subdirectories. To do so, add the following to `config/application.rb`:
+
+```ruby
+config.paths.add 'app/api', glob: '**/*.rb'
+config.autoload_paths += Dir["#{Rails.root}/app/api/*"]
+```
+
 ### Modules
 
 You can mount multiple API implementations inside another one. These don't have to be
