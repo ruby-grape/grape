@@ -2,6 +2,7 @@
 
 require 'grape'
 require 'ruby-prof'
+require 'hashie'
 require 'benchmark/ips'
 
 class ScheduleType
@@ -35,6 +36,10 @@ end
 class API < Grape::API
   # include Grape::Extensions::Hash::ParamBuilder
   # include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  rescue_from StandardError do |e|
+    STDERR.puts "\n\n#{e.class} (#{e.message}):\n    " + e.backtrace.join("\n    ") + "\n\n" if ENV['APP_ENV'] != 'test'
+  end
 
   prefix :api
   version 'v1', using: :path
@@ -257,7 +262,7 @@ env = Rack::MockRequest.env_for('/api/v1', options)
 
 result = RubyProf.profile do
   start = Time.now
-    API.call env
+  API.call env
   puts Time.now - start
 end
 printer = RubyProf::FlatPrinter.new(result)
