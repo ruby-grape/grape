@@ -1,53 +1,28 @@
 # frozen_string_literal: true
 
+# gem 'grape', '=1.0.1'
+
 require 'grape'
 require 'ruby-prof'
 require 'hashie'
-require 'benchmark/ips'
-
-class ScheduleType
-  def type_cast(value, mandatory = true, allow_zero = true)
-    return_value = if !value.nil?
-                     if /([0-9]+):([0-9]+):([0-9]+)/ =~ value.to_s
-                       3600 * Regexp.last_match(1).to_i + 60 * Regexp.last_match(2).to_i + Regexp.last_match(3).to_i
-                     elsif /([0-9]+):([0-9]+)/ =~ value.to_s
-                       3600 * Regexp.last_match(1).to_i + 60 * Regexp.last_match(2).to_i
-                     elsif value.to_s.match? "\A[0-9]+\.{0,1}[0-9]*\z"
-                       value.to_i
-                     elsif value.is_a?(Integer) || value.is_a?(Float)
-                       value.to_i
-                     else
-                       log 'error', level: :error
-                       raise ArgumentError, 'Invalid Time value'
-                     end
-                   elsif mandatory
-                     0
-                   end
-
-    if return_value&.negative? || (!allow_zero && return_value&.zero?)
-      log 'error', level: :error
-      raise ArgumentError, 'Invalid Time value'
-    end
-
-    return_value
-  end
-end
 
 class API < Grape::API
   # include Grape::Extensions::Hash::ParamBuilder
   # include Grape::Extensions::Hashie::Mash::ParamBuilder
 
-  rescue_from StandardError do |e|
-    STDERR.puts "\n\n#{e.class} (#{e.message}):\n    " + e.backtrace.join("\n    ") + "\n\n" if ENV['APP_ENV'] != 'test'
+  rescue_from do |e|
+    warn "\n\n#{e.class} (#{e.message}):\n    " + e.backtrace.join("\n    ") + "\n\n"
   end
 
   prefix :api
   version 'v1', using: :path
+  content_type :json, 'application/json; charset=UTF-8'
+  default_format :json
 
   def self.vrp_request_timewindow(this)
     this.optional(:id, types: String)
-    this.optional(:start, types: [String, Float, Integer], coerce_with: ->(value) { ScheduleType.new.type_cast(value, false) })
-    this.optional(:end, types: [String, Float, Integer], coerce_with: ->(value) { ScheduleType.new.type_cast(value, false) })
+    this.optional(:start, types: [String, Float, Integer])
+    this.optional(:end, types: [String, Float, Integer])
     this.optional(:day_index, type: Integer, values: 0..6)
     this.at_least_one_of :start, :end, :day_index
   end
@@ -72,9 +47,9 @@ class API < Grape::API
   end
 
   def self.vrp_request_activity(this)
-    this.optional(:duration, types: [String, Float, Integer], coerce_with: ->(value) { ScheduleType.new.type_cast(value) })
+    this.optional(:duration, types: [String, Float, Integer])
     this.optional(:additional_value, type: Integer)
-    this.optional(:setup_duration, types: [String, Float, Integer], coerce_with: ->(value) { ScheduleType.new.type_cast(value) })
+    this.optional(:setup_duration, types: [String, Float, Integer])
     this.optional(:late_multiplier, type: Float)
     this.optional(:timewindow_start_day_shift_number, documentation: { hidden: true }, type: Integer)
     this.requires(:point_id, type: String, allow_blank: false)
@@ -181,7 +156,7 @@ class API < Grape::API
     this.optional(:partitions, type: Array) do
       API.vrp_request_partition(self)
     end
-    this.optional(:first_solution_strategy, type: Array[String], coerce_with: ->(value) { FirstSolType.new.type_cast(value) })
+    this.optional(:first_solution_strategy, type: Array[String])
   end
 
   def self.vrp_request_resolution(this)
@@ -252,6 +227,7 @@ class API < Grape::API
     'hello'
   end
 end
+puts Grape::VERSION
 
 options = {
   method: 'POST',
@@ -260,10 +236,10 @@ options = {
 
 env = Rack::MockRequest.env_for('/api/v1', options)
 
+start = Time.now
 result = RubyProf.profile do
-  start = Time.now
   API.call env
-  puts Time.now - start
 end
+puts Time.now - start
 printer = RubyProf::FlatPrinter.new(result)
 File.open('test_prof.out', 'w+') { |f| printer.print(f, {}) }
