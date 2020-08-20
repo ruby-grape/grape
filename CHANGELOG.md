@@ -12,6 +12,7 @@
 * [#2092](https://github.com/ruby-grape/grape/pull/2092): Correct an example params in Include Missing doc - [@huyvohcmc](https://github.com/huyvohcmc).
 * [#2091](https://github.com/ruby-grape/grape/pull/2091): Fix ruby 2.7 keyword deprecations - [@dim](https://github.com/dim).
 * [#2097](https://github.com/ruby-grape/grape/pull/2097): Skip to set default value unless `meets_dependency?` - [@wanabe](https://github.com/wanabe).
+* [#2096](https://github.com/ruby-grape/grape/pull/2096): Fix redundant dependency check - [@braktar](https://github.com/braktar).
 
 ### 1.4.0 (2020/07/10)
 
