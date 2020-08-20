@@ -419,4 +419,53 @@ describe Grape::Validations::DefaultValidator do
       end
     end
   end
+
+  context 'array with default values and given conditions' do
+    subject do
+      Class.new(Grape::API) do
+        default_format :json
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'applies the default values only if the conditions are met' do
+      subject.params do
+        requires :ary, type: Array do
+          requires :has_value, type: Grape::API::Boolean
+          given has_value: ->(has_value) { has_value } do
+            optional :type, type: String, values: %w[str int], default: 'str'
+            given type: ->(type) { type == 'str' } do
+              optional :str, type: String, default: 'a'
+            end
+            given type: ->(type) { type == 'int' } do
+              optional :int, type: Integer, default: 1
+            end
+          end
+        end
+      end
+      subject.post('/nested_given_and_default') { declared(self.params) }
+
+      params = {
+        ary: [
+          { has_value: false },
+          { has_value: true, type: 'int', int: 123 },
+          { has_value: true, type: 'str', str: 'b' }
+        ]
+      }
+      expected = {
+        'ary' => [
+          { 'has_value' => false, 'type' => nil,   'int' => nil, 'str' => nil },
+          { 'has_value' => true,  'type' => 'int', 'int' => 123, 'str' => nil },
+          { 'has_value' => true,  'type' => 'str', 'int' => nil, 'str' => 'b' }
+        ]
+      }
+
+      post '/nested_given_and_default', params
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq(expected)
+    end
+  end
 end
