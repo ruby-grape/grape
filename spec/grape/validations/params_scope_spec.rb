@@ -633,6 +633,25 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq(200)
     end
 
+    it 'detect unmet nested dependency' do
+      subject.params do
+        requires :a, type: String, allow_blank: false, values: %w[x y z]
+        given a: ->(val) { val == 'z' } do
+          requires :inner3, type: Array, allow_blank: false do
+            requires :bar, type: Integer, allow_blank: false
+            requires :baz, type: Array do
+              requires :baz_category, type: String
+            end
+          end
+        end
+      end
+      subject.get('/nested-dependency') { declared(params).to_json }
+
+      get '/nested-dependency', a: 'z', inner3: [{ bar: 3, baz: [{ unrelated: 'nope' }] }]
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq 'inner3[0][baz][0][baz_category] is missing'
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 
