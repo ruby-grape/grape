@@ -54,11 +54,12 @@ module Grape
       end
 
       def meets_dependency?(params, request_params)
+        return true unless @dependent_on
+
         if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
           return false
         end
 
-        return true unless @dependent_on
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
         return false unless params.respond_to?(:with_indifferent_access)
         params = params.with_indifferent_access
