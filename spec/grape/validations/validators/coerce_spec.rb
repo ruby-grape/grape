@@ -632,9 +632,16 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq([%w[a b c d]])
 
-        get '/coerce_nested_strings', values: [%w[a], %w[b]]
+        get '/coerce_nested_strings', values: [%w[a c], %w[b]]
         expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)).to eq([%w[a], %w[b]])
+        expect(JSON.parse(last_response.body)).to eq([%w[a c], %w[b]])
+
+        get '/coerce_nested_strings', values: [[]]
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq([[]])
+
+        get '/coerce_nested_strings', values: [['a', { bar: 0 }], ['b']]
+        expect(last_response.status).to eq(400)
       end
 
       it 'parses parameters with Array[Integer] type' do
