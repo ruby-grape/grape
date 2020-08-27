@@ -79,7 +79,7 @@ class API < Grape::API
     this.optional(:cost_time_multiplier, type: Float)
 
     this.optional :router_dimension, type: String, values: %w[time distance]
-    this.optional(:skills, type: Array[Array[String]])
+    this.optional(:skills, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(/,/).map(&:strip)] : val })
 
     this.optional(:unavailable_work_day_indices, type: Array[Integer])
 
@@ -224,7 +224,10 @@ class API < Grape::API
     end
   end
   post '/' do
-    'hello'
+    {
+      skills_v1: params[:vrp][:vehicles].first[:skills],
+      skills_v2: params[:vrp][:vehicles].last[:skills]
+    }
   end
 end
 puts Grape::VERSION
@@ -238,7 +241,8 @@ env = Rack::MockRequest.env_for('/api/v1', options)
 
 start = Time.now
 result = RubyProf.profile do
-  API.call env
+  response = API.call env
+  puts response.last
 end
 puts Time.now - start
 printer = RubyProf::FlatPrinter.new(result)

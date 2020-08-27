@@ -103,10 +103,22 @@ module Grape
             # passed, or if the type also implements a parse() method.
             type
           elsif type.is_a?(Enumerable)
-            ->(value) { value.respond_to?(:all?) && value.all? { |item| item.is_a? type[0] } }
+            lambda do |value|
+              value.is_a?(Enumerable) && value.all? do |val|
+                recursive_type_check(type.first, val)
+              end
+            end
           else
             # By default, do a simple type check
             ->(value) { value.is_a? type }
+          end
+        end
+
+        def recursive_type_check(type, value)
+          if type.is_a?(Enumerable) && value.is_a?(Enumerable)
+            value.all? { |val| recursive_type_check(type.first, val) }
+          else
+            !type.is_a?(Enumerable) && value.is_a?(type)
           end
         end
 

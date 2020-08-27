@@ -620,6 +620,30 @@ describe Grape::Validations::CoerceValidator do
         expect(JSON.parse(last_response.body)).to eq(%w[a b c d])
       end
 
+      it 'parses parameters with Array[Array[String]] type and coerce_with' do
+        subject.params do
+          requires :values, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(/,/).map(&:strip)] : val }
+        end
+        subject.post '/coerce_nested_strings' do
+          params[:values]
+        end
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: 'a,b,c,d'), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([%w[a b c d]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [%w[a c], %w[b]]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([%w[a c], %w[b]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [[]]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([[]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [['a', { bar: 0 }], ['b']]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+      end
+
       it 'parses parameters with Array[Integer] type' do
         subject.params do
           requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
