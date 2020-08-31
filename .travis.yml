@@ -5,6 +5,7 @@ sudo: false
 # "gemfile" is required for "allow_failures" option,
 # see https://docs.travis-ci.com/user/customizing-the-build/#matching-jobs-with-allow_failures
 gemfile:
+script: rubocop
 
 matrix:
   include:
