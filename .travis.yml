@@ -54,6 +54,7 @@ matrix:
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
+    - rvm: truffleruby-head
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
