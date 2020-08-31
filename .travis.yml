@@ -12,6 +12,9 @@ matrix:
       script:
         - bundle exec danger
     - rvm: 2.7.1
+      script:
+        - rubocop
+    - rvm: 2.7.1
       gemfile: Gemfile
     - rvm: 2.7.1
       gemfile: gemfiles/rack1.gemfile
@@ -32,13 +35,11 @@ matrix:
     - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
-        - rubocop
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_json
     - rvm: 2.7.1
       gemfile: gemfiles/multi_xml.gemfile
       script:
-        - rubocop
         - bundle exec rake
         - bundle exec rspec spec/integration/multi_xml
     - rvm: 2.6.6
