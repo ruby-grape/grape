@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2099](https://github.com/ruby-grape/grape/pull/2099): Added truffleruby to Travis-CI - [@gogainda](https://github.com/gogainda).
 * [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
 * [#2083](https://github.com/ruby-grape/grape/pull/2083): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
 * [#2092](https://github.com/ruby-grape/grape/pull/2092): Correct an example params in Include Missing doc - [@huyvohcmc](https://github.com/huyvohcmc).
