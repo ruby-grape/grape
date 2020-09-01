@@ -34,12 +34,10 @@ matrix:
     - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
-        - bundle exec rubocop
         - bundle exec rspec spec/integration/multi_json
     - rvm: 2.7.1
       gemfile: gemfiles/multi_xml.gemfile
       script:
-        - bundle exec rubocop
         - bundle exec rspec spec/integration/multi_xml
     - rvm: 2.6.6
       gemfile: Gemfile
