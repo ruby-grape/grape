@@ -24,4 +24,4 @@ require 'rainbow/ext/string' unless String.respond_to?(:color)
 require 'rubocop/rake_task'
 RuboCop::RakeTask.new
 
-task default: :spec
+task default: %i[rubocop spec]
