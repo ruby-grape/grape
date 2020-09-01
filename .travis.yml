@@ -6,14 +6,13 @@ sudo: false
 # see https://docs.travis-ci.com/user/customizing-the-build/#matching-jobs-with-allow_failures
 gemfile:
 
+script: bundle exec rake spec
+
 matrix:
   include:
     - rvm: 2.7.1
       script:
         - bundle exec danger
-    - rvm: 2.7.1
-      script:
-        - rubocop
     - rvm: 2.7.1
       gemfile: Gemfile
     - rvm: 2.7.1
@@ -35,12 +34,12 @@ matrix:
     - rvm: 2.7.1
       gemfile: gemfiles/multi_json.gemfile
       script:
-        - bundle exec rake
+        - bundle exec rubocop
         - bundle exec rspec spec/integration/multi_json
     - rvm: 2.7.1
       gemfile: gemfiles/multi_xml.gemfile
       script:
-        - bundle exec rake
+        - bundle exec rubocop
         - bundle exec rspec spec/integration/multi_xml
     - rvm: 2.6.6
       gemfile: Gemfile
@@ -62,5 +61,6 @@ matrix:
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
+    - rvm: truffleruby-head
 
 bundler_args: --without development
