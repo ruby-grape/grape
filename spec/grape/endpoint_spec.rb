@@ -708,6 +708,58 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#route_params; from a nested mounted endpoint' do
+    before do
+      mounted = Class.new(Grape::API)
+      mounted.namespace :mounted do
+        get do
+          {
+            param_defs: route.params
+          }
+        end
+      end
+
+      parent = Class.new(Grape::API)
+      parent.namespace :top do
+        params do
+          requires :x, type: String, desc: 'hello world'
+        end
+        route_param :x do
+          get do
+            {
+              param_defs: route.params
+            }
+          end
+
+          mount mounted
+        end
+      end
+
+      subject.format :json
+      subject.mount parent
+    end
+
+    it 'can access param information from parent' do
+      get '/top/abcd'
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json[:param_defs][:x]).not_to be_nil
+      # we get "param_defs":{"x":{"required":true,"type":"String","desc":"hello world"}}}
+      expect(json[:param_defs][:x][:required]).to eq true
+      expect(json[:param_defs][:x][:type]).to eq 'String'
+      expect(json[:param_defs][:x][:desc]).to eq 'hello world'
+
+      get '/top/abcd/mounted'
+      expect(last_response.status).to eq 200
+      json = JSON.parse(last_response.body, symbolize_names: true)
+      expect(json[:param_defs][:x]).not_to be_nil
+      # however we have "param_defs":{"x":""} here but would expect above
+      expect(json[:param_defs][:x][:required]).to eq true
+      expect(json[:param_defs][:x][:type]).to eq 'String'
+      expect(json[:param_defs][:x][:desc]).to eq 'hello world'
+    end
+  end
+
   describe '#declared; mixed nesting' do
     before do
       subject.format :json
