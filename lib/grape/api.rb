@@ -30,7 +30,7 @@ module Grape
       # an instance that will be used to create the set up but will not be mounted
       def initial_setup(base_instance_parent)
         @instances = []
-        @setup = []
+        @setup = Set.new
         @base_parent = base_instance_parent
         @base_instance = mount_instance
       end
