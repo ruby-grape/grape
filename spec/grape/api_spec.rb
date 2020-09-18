@@ -1600,6 +1600,11 @@ XML
       expect(subject.io).to receive(:write).with(message)
       subject.logger.info 'this will be logged'
     end
+
+    it 'does not unnecessarily retain duplicate setup blocks' do
+      subject.logger
+      expect { subject.logger }.to_not change(subject.instance_variable_get(:@setup), :size)
+    end
   end
 
   describe '.helpers' do
