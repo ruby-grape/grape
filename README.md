@@ -156,7 +156,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.4.1**.
+You're reading the documentation for the next release of Grape, which should be **1.5.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
 The current stable release is [1.4.0](https://github.com/ruby-grape/grape/blob/v1.4.0/README.md).
 
@@ -353,7 +353,7 @@ use Rack::Session::Cookie
 run Rack::Cascade.new [Web, API]
 ```
 
-Note that order of loading apps using `Rack::Cascade` matters. The grape application must be last if you want to raise custom 404 errors from grape (such as `error!('Not Found',404)`). If the grape application is not last and returns 404 or 405 response, [cascade utilizes that as a signal to try the next app](https://www.rubydoc.info/gems/rack/Rack/Cascade). This may lead to undesirable behavior showing the [wrong 404 page from the wrong app](https://github.com/ruby-grape/grape/issues/1515). 
+Note that order of loading apps using `Rack::Cascade` matters. The grape application must be last if you want to raise custom 404 errors from grape (such as `error!('Not Found',404)`). If the grape application is not last and returns 404 or 405 response, [cascade utilizes that as a signal to try the next app](https://www.rubydoc.info/gems/rack/Rack/Cascade). This may lead to undesirable behavior showing the [wrong 404 page from the wrong app](https://github.com/ruby-grape/grape/issues/1515).
 
 
 ### Rails
@@ -787,7 +787,12 @@ Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape
 
 ### Declared
 
-Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Consider the following API endpoint:
+Grape allows you to access only the parameters that have been declared by your `params` block. It will:
+
+  * Filter out the params that have been passed, but are not allowed.
+  * Include any optional params that are declared but not passed.
+
+Consider the following API endpoint:
 
 ````ruby
 format :json
@@ -820,9 +825,9 @@ Once we add parameters requirements, grape will start returning only the declare
 format :json
 
 params do
-  requires :user, type: Hash do
-    requires :first_name, type: String
-    requires :last_name, type: String
+  optional :user, type: Hash do
+    optional :first_name, type: String
+    optional :last_name, type: String
   end
 end
 
@@ -846,6 +851,44 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
       "first_name": "first name",
       "last_name": "last name"
     }
+  }
+}
+````
+
+Missing params that are declared as type `Hash` or `Array` will be included.
+
+````ruby
+format :json
+
+params do
+  optional :user, type: Hash do
+    optional :first_name, type: String
+    optional :last_name, type: String
+  end
+  optional :widgets, type: Array
+end
+
+post 'users/signup' do
+  { 'declared_params' => declared(params) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": null,
+      "last_name": null
+    },
+    "widgets": []
   }
 }
 ````

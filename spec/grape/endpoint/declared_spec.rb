@@ -28,10 +28,20 @@ describe Grape::Endpoint do
           optional :nested_arr, type: Array do
             optional :eighth
           end
+          optional :empty_arr, type: Array
+          optional :empty_typed_arr, type: Array[String]
+          optional :empty_hash, type: Hash
+          optional :empty_set, type: Set
+          optional :empty_typed_set, type: Set[String]
         end
         optional :arr, type: Array do
           optional :nineth
         end
+        optional :empty_arr, type: Array
+        optional :empty_typed_arr, type: Array[String]
+        optional :empty_hash, type: Hash
+        optional :empty_set, type: Set
+        optional :empty_typed_set, type: Set[String]
       end
     end
 
@@ -103,7 +113,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(5)
+      expect(JSON.parse(last_response.body).keys.size).to eq(10)
     end
 
     it 'has a optional param with default value all the time' do
@@ -122,7 +132,7 @@ describe Grape::Endpoint do
 
       get '/declared?first=present&nested[fourth]=1'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 4
+      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 9
     end
 
     it 'builds nested params when given array' do
@@ -145,45 +155,66 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)['nested'].size).to eq 2
     end
 
-    context 'sets nested objects when the param is missing' do
-      it 'to be a hash when include_missing is true' do
-        subject.get '/declared' do
-          declared(params, include_missing: true)
-        end
-
-        get '/declared?first=present'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested']).to eq({})
+    context 'when the param is missing and include_missing=false' do
+      before do
+        subject.get('/declared') { declared(params, include_missing: false) }
       end
 
-      it 'to be an array when include_missing is true' do
-        subject.get '/declared' do
-          declared(params, include_missing: true)
-        end
-
-        get '/declared?first=present'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['arr']).to be_a(Array)
-      end
-
-      it 'to be an array when nested and include_missing is true' do
-        subject.get '/declared' do
-          declared(params, include_missing: true)
-        end
-
-        get '/declared?first=present&nested[fourth]=1'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested']['nested_arr']).to be_a(Array)
-      end
-
-      it 'to be nil when include_missing is false' do
-        subject.get '/declared' do
-          declared(params, include_missing: false)
-        end
-
+      it 'sets nested objects to be nil' do
         get '/declared?first=present'
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)['nested']).to be_nil
+      end
+    end
+
+    context 'when the param is missing and include_missing=true' do
+      before do
+        subject.get('/declared') { declared(params, include_missing: true) }
+      end
+
+      it 'sets objects with type=Hash to be a hash' do
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+
+        body = JSON.parse(last_response.body)
+        expect(body['empty_hash']).to eq({})
+        expect(body['nested']).to be_a(Hash)
+        expect(body['nested']['empty_hash']).to eq({})
+        expect(body['nested']['nested_two']).to be_a(Hash)
+      end
+
+      it 'sets objects with type=Set to be a set' do
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+
+        body = JSON.parse(last_response.body)
+        expect(['#<Set: {}>', []]).to include(body['empty_set'])
+        expect(['#<Set: {}>', []]).to include(body['empty_typed_set'])
+        expect(['#<Set: {}>', []]).to include(body['nested']['empty_set'])
+        expect(['#<Set: {}>', []]).to include(body['nested']['empty_typed_set'])
+      end
+
+      it 'sets objects with type=Array to be an array' do
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+
+        body = JSON.parse(last_response.body)
+        expect(body['empty_arr']).to eq([])
+        expect(body['empty_typed_arr']).to eq([])
+        expect(body['arr']).to eq([])
+        expect(body['nested']['empty_arr']).to eq([])
+        expect(body['nested']['empty_typed_arr']).to eq([])
+        expect(body['nested']['nested_arr']).to eq([])
+      end
+
+      it 'includes all declared children when type=Hash' do
+        get '/declared?first=present'
+        expect(last_response.status).to eq(200)
+
+        body = JSON.parse(last_response.body)
+        expect(body['nested'].keys).to eq(%w[fourth fifth nested_two nested_arr empty_arr empty_typed_arr empty_hash empty_set empty_typed_set])
+        expect(body['nested']['nested_two'].keys).to eq(%w[sixth nested_three])
+        expect(body['nested']['nested_two']['nested_three'].keys).to eq(%w[seventh])
       end
     end
 

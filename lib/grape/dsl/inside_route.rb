@@ -58,7 +58,7 @@ module Grape
                 passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
                 memo_key = optioned_param_key(declared_parent_param, options)
 
-                memo[memo_key] = handle_passed_param(passed_children_params, params_nested_path_dup) do
+                memo[memo_key] = handle_passed_param(params_nested_path_dup, passed_children_params.any?) do
                   declared(passed_children_params, options, declared_children_params, params_nested_path_dup)
                 end
               end
@@ -70,55 +70,42 @@ module Grape
 
               next unless options[:include_missing] || passed_params.key?(declared_param) || (param_renaming && passed_params.key?(param_renaming))
 
-              if param_renaming
-                memo[optioned_param_key(param_renaming, options)] = passed_params[param_renaming]
-              else
-                memo[optioned_param_key(declared_param, options)] = passed_params[declared_param]
+              memo_key = optioned_param_key(param_renaming || declared_param, options)
+              passed_param = passed_params[param_renaming || declared_param]
+
+              params_nested_path_dup = params_nested_path.dup
+              params_nested_path_dup << declared_param.to_s
+
+              memo[memo_key] = handle_passed_param(params_nested_path_dup) do
+                passed_param
               end
             end
           end
         end
 
-        def handle_passed_param(passed_children_params, params_nested_path, &_block)
-          if should_be_empty_hash?(passed_children_params, params_nested_path)
+        def handle_passed_param(params_nested_path, has_passed_children = false, &_block)
+          return yield if has_passed_children
+
+          key = params_nested_path[0]
+          key += '[' + params_nested_path[1..-1].join('][') + ']' if params_nested_path.size > 1
+
+          route_options_params = options[:route_options][:params] || {}
+          type = route_options_params.dig(key, :type)
+          has_children = route_options_params.keys.any? { |k| k != key && k.start_with?(key) }
+
+          if type == 'Hash' && !has_children
             {}
-          elsif should_be_empty_array?(passed_children_params, params_nested_path)
+          elsif type == 'Array' || type&.start_with?('[')
             []
+          elsif type == 'Set' || type&.start_with?('#<Set')
+            Set.new
           else
             yield
           end
         end
 
-        def should_be_empty_array?(passed_children_params, params_nested_path)
-          passed_children_params.empty? && declared_param_is_array?(params_nested_path)
-        end
-
-        def declared_param_is_array?(params_nested_path)
-          key = route_options_params_key(params_nested_path)
-          route_options_params[key] && route_options_params[key][:type] == 'Array'
-        end
-
-        def should_be_empty_hash?(passed_children_params, params_nested_path)
-          passed_children_params.empty? && declared_param_is_hash?(params_nested_path)
-        end
-
-        def declared_param_is_hash?(params_nested_path)
-          key = route_options_params_key(params_nested_path)
-          route_options_params[key] && route_options_params[key][:type] == 'Hash'
-        end
-
-        def route_options_params
-          options[:route_options][:params] || {}
-        end
-
         def optioned_param_key(declared_param, options)
           options[:stringify] ? declared_param.to_s : declared_param.to_sym
-        end
-
-        def route_options_params_key(params_nested_path)
-          key = params_nested_path[0]
-          key += '[' + params_nested_path[1..-1].join('][') + ']' if params_nested_path.size > 1
-          key
         end
 
         def optioned_declared_params(**options)

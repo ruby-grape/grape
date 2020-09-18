@@ -1,4 +1,4 @@
-### 1.4.1 (Next)
+### 1.5.0 (Next)
 
 #### Features
 
@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2103](https://github.com/ruby-grape/grape/pull/2103): Ensure complete declared params structure is present - [@tlconnor](https://github.com/tlconnor).
 * [#2099](https://github.com/ruby-grape/grape/pull/2099): Added truffleruby to Travis-CI - [@gogainda](https://github.com/gogainda).
 * [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
 * [#2083](https://github.com/ruby-grape/grape/pull/2083): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
