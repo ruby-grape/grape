@@ -11,6 +11,7 @@ group :development, :test do
   gem 'hashie'
   gem 'rake'
   gem 'rubocop', '0.84.0'
+  gem 'rubocop-ast', '< 0.7'
   gem 'rubocop-performance', require: false
 end
 
