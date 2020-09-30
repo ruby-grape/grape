@@ -1,6 +1,45 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.5.0
+
+Prior to 1.3.3, the `declared` helper would always return the complete params structure if `include_missing=true` was set. In 1.3.3 a regression was introduced such that a missing Hash with or without nested parameters would always resolve to `{}`.
+
+In 1.5.0 this behavior is reverted, so the whole params structure will always be available via `declared`, regardless of whether any params are passed.
+
+The following rules now apply to the `declared` helper when params are missing and `include_missing=true`:
+
+* Hash params with children will resolve to a Hash with keys for each declared child.
+* Hash params with no children will resolve to `{}`.
+* Set params will resolve to `Set.new`.
+* Array params will resolve to `[]`.
+* All other params will resolve to `nil`.
+
+#### Example
+
+```ruby
+class Api < Grape::API
+  params do
+    optional :outer, type: Hash do
+      optional :inner, type: Hash do
+        optional :value, type: String
+      end
+    end
+  end
+  get 'example' do
+    declared(params, include_missing: true)
+  end
+end
+```
+
+```
+get '/example'
+# 1.3.3 = {}
+# 1.5.0 = {outer: {inner: {value:null}}}
+```
+
+For more information see [#2103](https://github.com/ruby-grape/grape/pull/2103).
+
 ### Upgrading to >= 1.4.0
 
 #### Reworking stream and file and un-deprecating stream like-objects
@@ -28,17 +67,17 @@ class API < Grape::API
 end
 ```
 
-Or use `stream` to stream other kinds of content. In the following example a streamer class 
+Or use `stream` to stream other kinds of content. In the following example a streamer class
 streams paginated data from a database.
 
 ```ruby
-class MyObject     
+class MyObject
   attr_accessor :result
 
   def initialize(query)
     @result = query
   end
-  
+
   def each
     yield '['
     # Do paginated DB fetches and return each page formatted
@@ -47,7 +86,7 @@ class MyObject
       yield process_records(records, first)
       first = false
     end
-    yield ']'  
+    yield ']'
   end
 
   def process_records(records, first)
