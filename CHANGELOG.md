@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2104](https://github.com/ruby-grape/grape/pull/2104): Fix Ruby 2.7 keyword deprecation warning - [@stanhu](https://github.com/stanhu).
 * [#2103](https://github.com/ruby-grape/grape/pull/2103): Ensure complete declared params structure is present - [@tlconnor](https://github.com/tlconnor).
 * [#2099](https://github.com/ruby-grape/grape/pull/2099): Added truffleruby to Travis-CI - [@gogainda](https://github.com/gogainda).
 * [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
