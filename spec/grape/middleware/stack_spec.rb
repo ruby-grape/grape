@@ -8,6 +8,7 @@ describe Grape::Middleware::Stack do
     class BarMiddleware; end
     class BlockMiddleware
       attr_reader :block
+
       def initialize(&block)
         @block = block
       end
