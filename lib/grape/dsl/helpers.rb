@@ -81,6 +81,7 @@ module Grape
       # to provide some API-specific functionality.
       module BaseHelper
         attr_accessor :api
+
         def params(name, &block)
           @named_params ||= {}
           @named_params[name] = block

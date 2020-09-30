@@ -181,6 +181,7 @@ describe Grape::Entity do
         subject.get '/example' do
           c = Class.new do
             attr_reader :id
+
             def initialize(id)
               @id = id
             end
@@ -202,6 +203,7 @@ describe Grape::Entity do
         subject.get '/examples' do
           c = Class.new do
             attr_reader :id
+
             def initialize(id)
               @id = id
             end
@@ -226,6 +228,7 @@ describe Grape::Entity do
       subject.get '/example' do
         c = Class.new do
           attr_reader :name
+
           def initialize(args)
             @name = args[:name] || 'no name set'
           end
@@ -255,6 +258,7 @@ XML
       subject.get '/example' do
         c = Class.new do
           attr_reader :name
+
           def initialize(args)
             @name = args[:name] || 'no name set'
           end
@@ -284,6 +288,7 @@ XML
       subject.get '/example' do
         c = Class.new do
           attr_reader :name
+
           def initialize(args)
             @name = args[:name] || 'no name set'
           end
@@ -302,6 +307,7 @@ XML
       it 'present with multiple entities using optional symbol' do
         user = Class.new do
           attr_reader :name
+
           def initialize(args)
             @name = args[:name] || 'no name set'
           end

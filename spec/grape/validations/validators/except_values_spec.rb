@@ -8,6 +8,7 @@ describe Grape::Validations::ExceptValuesValidator do
       DEFAULT_EXCEPTS = ['invalid-type1', 'invalid-type2', 'invalid-type3'].freeze
       class << self
         attr_accessor :excepts
+
         def excepts
           @excepts ||= []
           [DEFAULT_EXCEPTS + @excepts].flatten.uniq

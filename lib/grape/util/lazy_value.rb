@@ -4,6 +4,7 @@ module Grape
   module Util
     class LazyValue
       attr_reader :access_keys
+
       def initialize(value, access_keys = [])
         @value = value
         @access_keys = access_keys
