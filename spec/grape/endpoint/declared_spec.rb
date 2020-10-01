@@ -135,6 +135,20 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 9
     end
 
+    it 'builds arrays correctly' do
+      subject.params do
+        requires :first
+        optional :second, type: Array
+      end
+      subject.post('/declared') { declared(params) }
+
+      post '/declared', first: 'present', second: ['present']
+      expect(last_response.status).to eq(201)
+
+      body = JSON.parse(last_response.body)
+      expect(body['second']).to eq(['present'])
+    end
+
     it 'builds nested params when given array' do
       subject.get '/dummy' do
       end
