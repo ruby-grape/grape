@@ -75,8 +75,7 @@ module Grape
 
               params_nested_path_dup = params_nested_path.dup
               params_nested_path_dup << declared_param.to_s
-
-              memo[memo_key] = handle_passed_param(params_nested_path_dup) do
+              memo[memo_key] = passed_param || handle_passed_param(params_nested_path_dup) do
                 passed_param
               end
             end
