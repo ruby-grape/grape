@@ -91,6 +91,43 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'when using multiple types' do
+    it 'coerces the parameter via the type\'s parse method' do
+      subject.params do
+        requires :bar, type: Array do
+          optional :foo, types: [String, Float, Integer], coerce_with: ->(c) {
+              if c
+                if /([0-9]+):([0-9]+):([0-9]+)/ =~ c.to_s
+                  'HH:MM:SS format'
+                elsif /\A[0-9]+\.{0,1}[0-9]*\z/ =~ c.to_s
+                  'Float or Integer format'
+                else
+                  'Invalid Time value'
+                end
+              end
+            }
+          end
+      end
+      subject.post('/types') { declared(params)[:bar].first[:foo] }
+
+      post '/types', bar: [{ foo: '00:00:01' }]
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('HH:MM:SS format')
+
+      post '/types', bar: [{ foo: 1 }]
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('Float or Integer format')
+
+      post '/types', bar: [{ foo: 1.0 }]
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('Float or Integer format')
+
+      post '/types', bar: [{ foo: nil }]
+      expect(last_response.status).to eq(201)
+      expect(last_response.body).to eq('')
+    end
+  end
+
   context 'when using custom types' do
     module ParamsScopeSpec
       class CustomType
