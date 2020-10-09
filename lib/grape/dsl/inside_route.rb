@@ -94,7 +94,7 @@ module Grape
 
           if type == 'Hash' && !has_children
             {}
-          elsif type == 'Array' || type&.start_with?('[')
+          elsif type == 'Array' || type&.start_with?('[') && !type&.include?(',')
             []
           elsif type == 'Set' || type&.start_with?('#<Set')
             Set.new

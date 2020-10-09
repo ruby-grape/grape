@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2115](https://github.com/ruby-grape/grape/pull/2115): Fix declared_params regression with multiple allowed types - [@stanhu](https://github.com/stanhu).
 
 ### 1.5.0 (2020/10/05)
 

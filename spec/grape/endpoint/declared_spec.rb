@@ -16,6 +16,7 @@ describe Grape::Endpoint do
         requires :first
         optional :second
         optional :third, default: 'third-default'
+        optional :multiple_types, types: [Integer, String]
         optional :nested, type: Hash do
           optional :fourth
           optional :fifth
@@ -96,6 +97,16 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)['nested']['fourth']).to be_nil
     end
 
+    it 'should show nil for multiple allowed types if include_missing is true' do
+      subject.get '/declared' do
+        declared(params, include_missing: true)
+      end
+
+      get '/declared?first=present'
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)['multiple_types']).to be_nil
+    end
+
     it 'does not work in a before filter' do
       subject.before do
         declared(params)
@@ -113,7 +124,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(10)
+      expect(JSON.parse(last_response.body).keys.size).to eq(11)
     end
 
     it 'has a optional param with default value all the time' do
