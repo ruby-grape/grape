@@ -2040,10 +2040,10 @@ end
 
 # is NOT the same as
 
-get ':status' do # this makes param[:status] available
+get ':status' do # this makes params[:status] available
 end
 
-# This will make both param[:status_id] and param[:id] available
+# This will make both params[:status_id] and params[:id] available
 
 get 'statuses/:status_id/reviews/:id' do
 end
