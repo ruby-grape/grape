@@ -70,9 +70,9 @@ module Grape
         middlewares[i]
       end
 
-      def insert(index, *args, &block)
+      def insert(index, *args, **kwargs, &block)
         index = assert_index(index, :before)
-        middleware = self.class::Middleware.new(*args, &block)
+        middleware = self.class::Middleware.new(*args, **kwargs, &block)
         middlewares.insert(index, middleware)
       end
 
@@ -83,8 +83,8 @@ module Grape
         insert(index + 1, *args, &block)
       end
 
-      def use(*args, &block)
-        middleware = self.class::Middleware.new(*args, &block)
+      def use(*args, **kwargs, &block)
+        middleware = self.class::Middleware.new(*args, **kwargs, &block)
         middlewares.push(middleware)
       end
 
