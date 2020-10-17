@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2121](https://github.com/ruby-grape/grape/pull/2121): Fix 2.7 deprecation warning in validator_factory - [@Legogris](https://github.com/Legogris).
 * [#2115](https://github.com/ruby-grape/grape/pull/2115): Fix declared_params regression with multiple allowed types - [@stanhu](https://github.com/stanhu).
 * [#2123](https://github.com/ruby-grape/grape/pull/2123): Fix 2.7 deprecation warning in middleware/stack - [@Legogris](https://github.com/Legogris).
 

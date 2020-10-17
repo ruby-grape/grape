@@ -8,7 +8,7 @@ module Grape
                                       options[:options],
                                       options[:required],
                                       options[:params_scope],
-                                      options[:opts])
+                                      **options[:opts])
       end
     end
   end
