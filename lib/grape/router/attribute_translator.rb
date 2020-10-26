@@ -4,7 +4,7 @@ module Grape
   class Router
     # this could be an OpenStruct, but doesn't work in Ruby 2.3.0, see https://bugs.ruby-lang.org/issues/12251
     class AttributeTranslator
-      attr_reader :attributes, :request_method, :requirements
+      attr_reader :attributes
 
       ROUTE_ATTRIBUTES = %i[
         prefix
