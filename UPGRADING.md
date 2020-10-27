@@ -1,6 +1,28 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.5.1
+
+#### Dependent params
+
+If you use [dependent params](https://github.com/ruby-grape/grape#dependent-parameters) with
+`Grape::Extensions::Hash::ParamBuilder`, make sure a parameter to be dependent on is set as a Symbol.
+If a String is given, a parameter that other parameters depend on won't be found even if it is present.
+
+_Correct_:
+```ruby
+given :matrix do
+  # dependent params
+end
+```
+
+_Wrong_:
+```ruby
+given 'matrix' do
+  # dependent params
+end
+```
+
 ### Upgrading to >= 1.5.0
 
 Prior to 1.3.3, the `declared` helper would always return the complete params structure if `include_missing=true` was set. In 1.3.3 a regression was introduced such that a missing Hash with or without nested parameters would always resolve to `{}`.
