@@ -61,8 +61,9 @@ module Grape
         end
 
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
-        return false unless params.respond_to?(:with_indifferent_access)
-        params = params.with_indifferent_access
+
+        # params might be anything what looks like a hash, so it must implement a `key?` method
+        return false unless params.respond_to?(:key?)
 
         @dependent_on.each do |dependency|
           if dependency.is_a?(Hash)
