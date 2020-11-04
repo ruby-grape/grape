@@ -883,6 +883,34 @@ describe Grape::Validations do
         end
         expect(declared_params).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
       end
+
+      it "does not report errors when required array inside missing optional array" do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Array do
+              requires :batches, type: Array do
+                requires :batch_no, type: String
+              end
+            end
+          end
+        end
+
+        subject.get '/validate_required_arrays_under_optional_arrays' do
+          'validate_required_arrays_under_optional_arrays works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: [{batches: [{batch_no: "A1234567"}]}]},
+            { id: 70 }
+          ]
+        }
+
+        get '/validate_required_arrays_under_optional_arrays', data
+        expect(last_response.body).to eq("validate_required_arrays_under_optional_arrays works!")
+        expect(last_response.status).to eq(200)
+      end
     end
 
     context 'multiple validation errors' do

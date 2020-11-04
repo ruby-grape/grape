@@ -43,7 +43,8 @@ module Grape
         # there may be more than one error per field
         array_errors = []
 
-        attributes.each do |val, attr_name, empty_val|
+        attributes.each do |val, attr_name, empty_val, skip_value|
+          next if skip_value
           next if !@scope.required? && empty_val
           next unless @scope.meets_dependency?(val, params)
           begin
