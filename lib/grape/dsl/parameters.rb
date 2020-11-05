@@ -227,13 +227,17 @@ module Grape
 
       alias group requires
 
-      def map_params(params, element)
+      class EmptyOptionalValue; end
+
+      def map_params(params, element, is_array = false)
         if params.is_a?(Array)
           params.map do |el|
-            map_params(el, element)
+            map_params(el, element, true)
           end
         elsif params.is_a?(Hash)
-          params[element] || {}
+          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
+        elsif params == EmptyOptionalValue
+          EmptyOptionalValue
         else
           {}
         end

@@ -15,7 +15,7 @@ describe Grape::Validations::SingleAttributeIterator do
 
       it 'yields params and every single attribute from the list' do
         expect { |b| iterator.each(&b) }
-          .to yield_successive_args([params, :first, false], [params, :second, false])
+          .to yield_successive_args([params, :first, false, false], [params, :second, false, false])
       end
     end
 
@@ -26,8 +26,8 @@ describe Grape::Validations::SingleAttributeIterator do
 
       it 'yields every single attribute from the list for each of the array elements' do
         expect { |b| iterator.each(&b) }.to yield_successive_args(
-          [params[0], :first, false], [params[0], :second, false],
-          [params[1], :first, false], [params[1], :second, false]
+          [params[0], :first, false, false], [params[0], :second, false, false],
+          [params[1], :first, false, false], [params[1], :second, false, false]
         )
       end
 
@@ -36,9 +36,20 @@ describe Grape::Validations::SingleAttributeIterator do
 
         it 'marks params with empty values' do
           expect { |b| iterator.each(&b) }.to yield_successive_args(
-            [params[0], :first, true], [params[0], :second, true],
-            [params[1], :first, true], [params[1], :second, true],
-            [params[2], :first, false], [params[2], :second, false]
+            [params[0], :first, true, false], [params[0], :second, true, false],
+            [params[1], :first, true, false], [params[1], :second, true, false],
+            [params[2], :first, false, false], [params[2], :second, false, false]
+          )
+        end
+      end
+
+      context 'when missing optional value' do
+        let(:params) { [Grape::DSL::Parameters::EmptyOptionalValue, 10] }
+
+        it 'marks params with skipped values' do
+          expect { |b| iterator.each(&b) }.to yield_successive_args(
+            [params[0], :first, false, true], [params[0], :second, false, true],
+            [params[1], :first, false, false], [params[1], :second, false, false],
           )
         end
       end
