@@ -48,6 +48,14 @@ module Grape
       def yield_attributes(_resource_params, _attrs)
         raise NotImplementedError
       end
+
+      # This is a special case so that we can ignore tree's where option
+      # values are missing lower down. Unfortunately we can remove this
+      # are the parameter parsing stage as they are required to ensure
+      # the correct indexing is maintained
+      def skip?(val)
+        val == Grape::DSL::Parameters::EmptyOptionalValue
+      end
     end
   end
 end

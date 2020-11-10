@@ -13,8 +13,8 @@ describe Grape::Validations::MultipleAttributesIterator do
         { first: 'string', second: 'string' }
       end
 
-      it 'yields the whole params hash without the list of attrs' do
-        expect { |b| iterator.each(&b) }.to yield_with_args(params)
+      it 'yields the whole params hash and the skipped flag without the list of attrs' do
+        expect { |b| iterator.each(&b) }.to yield_with_args(params, false)
       end
     end
 
@@ -24,7 +24,17 @@ describe Grape::Validations::MultipleAttributesIterator do
       end
 
       it 'yields each element of the array without the list of attrs' do
-        expect { |b| iterator.each(&b) }.to yield_successive_args(params[0], params[1])
+        expect { |b| iterator.each(&b) }.to yield_successive_args([params[0], false], [params[1], false])
+      end
+    end
+
+    context 'when params is empty optional placeholder' do
+      let(:params) do
+        [Grape::DSL::Parameters::EmptyOptionalValue, { first: 'string2', second: 'string2' }]
+      end
+
+      it 'yields each element of the array without the list of attrs' do
+        expect { |b| iterator.each(&b) }.to yield_successive_args([Grape::DSL::Parameters::EmptyOptionalValue, true], [params[1], false])
       end
     end
   end
