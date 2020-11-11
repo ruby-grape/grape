@@ -7,7 +7,8 @@ module Grape
         attributes = MultipleAttributesIterator.new(self, @scope, params)
         array_errors = []
 
-        attributes.each do |resource_params|
+        attributes.each do |resource_params, skip_value|
+          next if skip_value
           begin
             validate_params!(resource_params)
           rescue Grape::Exceptions::Validation => e

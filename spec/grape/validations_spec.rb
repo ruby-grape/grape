@@ -1023,7 +1023,7 @@ describe Grape::Validations do
           end
 
           it "with valid data" do
-            data_without_errors = {
+            data = {
               top: [
                 { top_id: 1, middle_1: [
                   {middle_1_id: 11}, {middle_1_id: 12, middle_2: [
@@ -1037,7 +1037,7 @@ describe Grape::Validations do
               ]
             }
 
-            get '/multi_level', data_without_errors
+            get '/multi_level', data
             expect(last_response.body).to eq("multi_level works!")
             expect(last_response.status).to eq(200)
           end
@@ -1066,6 +1066,90 @@ describe Grape::Validations do
             expect(last_response.status).to eq(400)
           end
         end
+      end
+
+      it "exactly_one_of" do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              exactly_one_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/exactly_one_of' do
+          'exactly_one_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: {batch_no: "A1234567"}},
+            { id: 70 }
+          ]
+        }
+
+        get '/exactly_one_of', data
+        expect(last_response.body).to eq("exactly_one_of works!")
+        expect(last_response.status).to eq(200)
+      end
+
+      it "at_least_one_of" do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              at_least_one_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/at_least_one_of' do
+          'at_least_one_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: {batch_no: "A1234567"}},
+            { id: 70 }
+          ]
+        }
+
+        get '/at_least_one_of', data
+        expect(last_response.body).to eq("at_least_one_of works!")
+        expect(last_response.status).to eq(200)
+      end
+
+      it "all_or_none_of" do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              all_or_none_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/all_or_none_of' do
+          'all_or_none_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: {batch_no: "A1234567", batch_id: "12"}},
+            { id: 70 }
+          ]
+        }
+
+        get '/all_or_none_of', data
+        expect(last_response.body).to eq("all_or_none_of works!")
+        expect(last_response.status).to eq(200)
       end
     end
 
