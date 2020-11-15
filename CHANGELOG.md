@@ -12,7 +12,6 @@
 
 #### Fixes
 
-* Your contribution here.
 * [#2129](https://github.com/ruby-grape/grape/pull/2129): Fix validation error when Required Array nested inside an optional array, for Multiparam validators - [@dwhenry](https://github.com/dwhenry).
 * [#2128](https://github.com/ruby-grape/grape/pull/2128): Fix validation error when Required Array nested inside an optional array - [@dwhenry](https://github.com/dwhenry).
 * [#2127](https://github.com/ruby-grape/grape/pull/2127): Fix a performance issue with dependent params - [@dnesteryuk](https://github.com/dnesteryuk).
