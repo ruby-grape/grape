@@ -1,8 +1,4 @@
-### 1.5.1 (Next)
-
-#### Features
-
-* Your contribution here.
+### 1.5.1 (2020/11/15)
 
 #### Fixes
 
