@@ -189,6 +189,8 @@ end
 
 ### Upgrading to >= 1.3.0
 
+#### Added Rack 2.1.0 support
+
 #### Ruby
 
 After adding dry-types, Ruby 2.4 or newer is required.
