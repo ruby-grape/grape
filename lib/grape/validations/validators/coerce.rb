@@ -17,7 +17,7 @@ module Grape
 
   module Validations
     class CoerceValidator < Base
-      def initialize(*_args)
+      def initialize(attrs, options, required, scope, **opts)
         super
 
         @converter = if type.is_a?(Grape::Validations::Types::VariantCollectionCoercer)
