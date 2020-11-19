@@ -29,7 +29,7 @@
 * [#2103](https://github.com/ruby-grape/grape/pull/2103): Ensure complete declared params structure is present - [@tlconnor](https://github.com/tlconnor).
 * [#2099](https://github.com/ruby-grape/grape/pull/2099): Added truffleruby to Travis-CI - [@gogainda](https://github.com/gogainda).
 * [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
-* [#2083](https://github.com/ruby-grape/grape/pull/2083): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
+* [#2088](https://github.com/ruby-grape/grape/pull/2088): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
 * [#2092](https://github.com/ruby-grape/grape/pull/2092): Correct an example params in Include Missing doc - [@huyvohcmc](https://github.com/huyvohcmc).
 * [#2091](https://github.com/ruby-grape/grape/pull/2091): Fix ruby 2.7 keyword deprecations - [@dim](https://github.com/dim).
 * [#2097](https://github.com/ruby-grape/grape/pull/2097): Skip to set default value unless `meets_dependency?` - [@wanabe](https://github.com/wanabe).
