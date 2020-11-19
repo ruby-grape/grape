@@ -6,12 +6,11 @@ module Grape
     # It allows to insert and insert after
     class Stack
       class Middleware
-        attr_reader :args, :opts, :block, :klass
+        attr_reader :args, :block, :klass
 
-        def initialize(klass, *args, **opts, &block)
+        def initialize(klass, *args, &block)
           @klass = klass
-          @args  = args
-          @opts  = opts
+          @args = args
           @block = block
         end
 
@@ -32,16 +31,8 @@ module Grape
           klass.to_s
         end
 
-        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
-          def use_in(builder)
-            block ? builder.use(klass, *args, **opts, &block) : builder.use(klass, *args, **opts)
-          end
-        else
-          def use_in(builder)
-            args  = self.args
-            args += [opts] unless opts.empty?
-            block ? builder.use(klass, *args, &block) : builder.use(klass, *args)
-          end
+        def use_in(builder)
+          builder.use(@klass, *@args, &@block)
         end
       end
 
@@ -70,11 +61,12 @@ module Grape
         middlewares[i]
       end
 
-      def insert(index, *args, **kwargs, &block)
+      def insert(index, *args, &block)
         index = assert_index(index, :before)
-        middleware = self.class::Middleware.new(*args, **kwargs, &block)
+        middleware = self.class::Middleware.new(*args, &block)
         middlewares.insert(index, middleware)
       end
+      ruby2_keywords :insert if respond_to?(:ruby2_keywords, true)
 
       alias insert_before insert
 
@@ -82,11 +74,13 @@ module Grape
         index = assert_index(index, :after)
         insert(index + 1, *args, &block)
       end
+      ruby2_keywords :insert_after if respond_to?(:ruby2_keywords, true)
 
-      def use(*args, **kwargs, &block)
-        middleware = self.class::Middleware.new(*args, **kwargs, &block)
+      def use(*args, &block)
+        middleware = self.class::Middleware.new(*args, &block)
         middlewares.push(middleware)
       end
+      ruby2_keywords :use if respond_to?(:ruby2_keywords, true)
 
       def merge_with(middleware_specs)
         middleware_specs.each do |operation, *args|
