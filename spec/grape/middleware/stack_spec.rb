@@ -35,8 +35,7 @@ describe Grape::Middleware::Stack do
       expect { subject.use StackSpec::BarMiddleware, false, my_arg: 42 }
         .to change { subject.size }.by(1)
       expect(subject.last).to eq(StackSpec::BarMiddleware)
-      expect(subject.last.args).to eq([false])
-      expect(subject.last.opts).to eq(my_arg: 42)
+      expect(subject.last.args).to eq([false, { my_arg: 42 }])
     end
 
     it 'pushes a middleware class with block arguments onto the stack' do

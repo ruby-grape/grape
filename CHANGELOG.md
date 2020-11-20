@@ -8,6 +8,7 @@
 
 * Your contribution here.
 * [#2131](https://github.com/ruby-grape/grape/pull/2131): Fix Ruby 2.7 keyword deprecation warning in validators/coerce - [@K0H205](https://github.com/K0H205).
+* [#2132](https://github.com/ruby-grape/grape/pull/2132): Use #ruby2_keywords for correct delegation on Ruby <= 2.6, 2.7 and 3 - [@eregon](https://github.com/eregon).
 
 ### 1.5.1 (2020/11/15)
 
