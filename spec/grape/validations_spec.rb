@@ -921,7 +921,7 @@ describe Grape::Validations do
           expect(last_response.status).to eq(200)
         end
 
-        it "simplest example using Arry -> Array -> Hash -> String" do
+        it "simplest example using Array -> Array -> Hash -> String" do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
@@ -947,7 +947,7 @@ describe Grape::Validations do
           expect(last_response.status).to eq(200)
         end
 
-        it "simplest example using Arry -> Hash -> String" do
+        it "simplest example using Array -> Hash -> String" do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
