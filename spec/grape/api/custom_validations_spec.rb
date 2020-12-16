@@ -3,6 +3,54 @@
 require 'spec_helper'
 
 describe Grape::Validations do
+
+  context "when a validator uses an instance variable" do
+    before do
+      module CustomValidationsSpec
+        module HelperMethods
+          extend Grape::API::Helpers
+          def max_ref(req_params)
+            return @max unless @max.nil?
+            @max = req_params[:max].to_i
+          end
+        end
+
+        class DefaultLength < Grape::Validations::Base
+          include CustomValidationsSpec::HelperMethods
+          def validate_param!(attr_name, params)
+            return if params[attr_name].length <= max_ref(params)
+            fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{max_ref(params)} characters long"
+          end
+        end
+      end
+    end
+
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, default_length: 140
+          requires :max
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'between 2 calls, helper inside a validator does not keep old reference of instance variable' do
+      get '/', text: 'a' * 130, max: 140
+      expect(last_response.status).to eq 200
+
+      get '/', text: 'a' * 130, max: 120
+      expect(last_response.status).to eq 400
+    end
+  end
+
+
   context 'using a custom length validator' do
     before do
       module CustomValidationsSpec
