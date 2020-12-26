@@ -3,6 +3,8 @@
 #### Features
 
 * Your contribution here.
+* [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
+
 
 #### Fixes
 
