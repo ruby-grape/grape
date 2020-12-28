@@ -39,7 +39,7 @@ module Grape
         end
       end
 
-      def to_json(**_opts)
+      def to_json(*_opts)
         as_json.to_json
       end
 

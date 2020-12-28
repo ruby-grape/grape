@@ -1,6 +1,7 @@
 AllCops:
   NewCops: enable
   TargetRubyVersion: 2.4
+  SuggestExtensions: false
   Exclude:
     - vendor/**/*
     - bin/**/*

@@ -79,11 +79,12 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
-        def mount(mounts, **opts)
+        def mount(mounts, *opts)
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
             if app.respond_to?(:mount_instance)
-              mount(app.mount_instance(configuration: opts[:with] || {}) => path)
+              opts_with = opts.any? ? opts.shift[:with] : {}
+              mount({ app.mount_instance(configuration: opts_with) => path })
               next
             end
             in_setting = inheritable_setting

@@ -3,10 +3,13 @@
 #### Features
 
 * Your contribution here.
+* [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
+* [#2145](https://github.com/ruby-grape/grape/pull/2145): Ruby 3.0 compatibility - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
 * Your contribution here.
+* [#2144](https://github.com/ruby-grape/grape/pull/2144): Fix compatibility issue with activesupport 6.1 and XML serialization of arrays - [@anakinj](https://github.com/anakinj).
 * [#2137](https://github.com/ruby-grape/grape/pull/2137): Fix typos - [@johnny-miyake](https://github.com/johnny-miyake).
 * [#2131](https://github.com/ruby-grape/grape/pull/2131): Fix Ruby 2.7 keyword deprecation warning in validators/coerce - [@K0H205](https://github.com/K0H205).
 * [#2132](https://github.com/ruby-grape/grape/pull/2132): Use #ruby2_keywords for correct delegation on Ruby <= 2.6, 2.7 and 3 - [@eregon](https://github.com/eregon).
