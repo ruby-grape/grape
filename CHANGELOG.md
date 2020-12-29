@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#2146](https://github.com/ruby-grape/grape/pull/2146): Upgrade rubocop to 1.7.0 - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
