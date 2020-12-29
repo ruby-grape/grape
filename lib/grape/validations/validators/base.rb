@@ -18,7 +18,6 @@ module Grape
         @option = options
         @required = required
         @scope = scope
-        @opts = opts
         opts = opts.any? ? opts.shift : {}
         @fail_fast = opts.fetch(:fail_fast, false)
         @allow_blank = opts.fetch(:allow_blank, false)
