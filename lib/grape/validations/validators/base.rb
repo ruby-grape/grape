@@ -12,14 +12,15 @@ module Grape
       # @param options [Object] implementation-dependent Validator options
       # @param required [Boolean] attribute(s) are required or optional
       # @param scope [ParamsScope] parent scope for this Validator
-      # @param opts [Hash] additional validation options
-      def initialize(attrs, options, required, scope, **opts)
+      # @param opts [Array] additional validation options
+      def initialize(attrs, options, required, scope, *opts)
         @attrs = Array(attrs)
         @option = options
         @required = required
         @scope = scope
-        @fail_fast = opts[:fail_fast] || false
-        @allow_blank = opts[:allow_blank] || false
+        opts = opts.any? ? opts.shift : {}
+        @fail_fast = opts.fetch(:fail_fast, false)
+        @allow_blank = opts.fetch(:allow_blank, false)
       end
 
       # Validates a given request.

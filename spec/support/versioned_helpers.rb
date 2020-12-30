@@ -44,7 +44,7 @@ module Spec
       end
 
       def versioned_get(path, version_name, **version_options)
-        path    = versioned_path(version_options.merge(version: version_name, path: path))
+        path = versioned_path(**version_options.merge(version: version_name, path: path))
         headers = versioned_headers(**version_options.merge(version: version_name))
         params = {}
         params = { version_options[:parameter] => version_name } if version_options[:using] == :param

@@ -75,7 +75,7 @@ module Grape
         Grape.config.reset
       end
 
-      subject(:request_params) { Grape::Request.new(env, opts).params }
+      subject(:request_params) { Grape::Request.new(env, **opts).params }
 
       context 'when the API does not include a specific param builder' do
         let(:opts) { {} }

@@ -10,9 +10,9 @@ module Grape
 
         attr_accessor :options, :app, :env
 
-        def initialize(app, **options)
+        def initialize(app, *options)
           @app = app
-          @options = options
+          @options = options.shift
         end
 
         def call(env)
@@ -23,7 +23,7 @@ module Grape
           self.env = env
 
           if options.key?(:type)
-            auth_proc         = options[:proc]
+            auth_proc = options[:proc]
             auth_proc_context = context
 
             strategy_info = Grape::Middleware::Auth::Strategies[options[:type]]

@@ -3,8 +3,8 @@
 #### Features
 
 * Your contribution here.
+* [#2145](https://github.com/ruby-grape/grape/pull/2145): Ruby 3.0 compatibility - [@ericproulx](https://github.com/ericproulx).
 * [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
-
 
 #### Fixes
 
