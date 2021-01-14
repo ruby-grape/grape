@@ -321,9 +321,20 @@ The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement
 `config.ru` before mounting Grape, e.g.:
 
 ```ruby
+# Rails 4 and less
 use ActiveRecord::ConnectionAdapters::ConnectionManagement
 
 run Twitter::API
+
+# Rails 5 and later
+app = run(Twitter::API)
+
+ActiveRecord::QueryCache.install_executor_hooks
+ActiveRecord::Base.class_eval do
+  self.connection_handlers = { writing_role => default_connection_handler }
+end
+
+run lambda { |env| ActiveSupport::Executor.wrap { app.call(env) } }
 ```
 
 ### Alongside Sinatra (or other frameworks)
