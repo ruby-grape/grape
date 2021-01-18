@@ -317,24 +317,20 @@ Grape will also automatically respond to HEAD and OPTIONS for all GET, and just 
 If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool
 is handled correctly.
 
+Rails 4
+
 The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement` middleware in your
 `config.ru` before mounting Grape, e.g.:
+```ruby
+use ActiveRecord::ConnectionAdapters::ConnectionManagement
+```
+
+Rails 5+
+
+Due to ActiveRecord's `ConnectionManagement` was removed in Rails 5, so you can use [otr-activerecord](https://github.com/jhollinger/otr-activerecord), and add like below:
 
 ```ruby
-# Rails 4 and less
-use ActiveRecord::ConnectionAdapters::ConnectionManagement
-
-run Twitter::API
-
-# Rails 5 and later
-app = run(Twitter::API)
-
-ActiveRecord::QueryCache.install_executor_hooks
-ActiveRecord::Base.class_eval do
-  self.connection_handlers = { writing_role => default_connection_handler }
-end
-
-run lambda { |env| ActiveSupport::Executor.wrap { app.call(env) } }
+use OTR::ActiveRecord::ConnectionManagement
 ```
 
 ### Alongside Sinatra (or other frameworks)
