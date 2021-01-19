@@ -39,7 +39,7 @@ module Grape
       end
 
       def configuration
-        @api.configuration.evaluate
+        @api.configuration.respond_to?(:evaluate) ? @api.configuration.evaluate : @api.configuration
       end
 
       # @return [Boolean] whether or not this entire scope needs to be

@@ -340,19 +340,24 @@ describe Grape::API do
       context 'when the configuration is read within a namespace' do
         before do
           a_remounted_api.namespace 'api' do
+            params do
+              requires configuration[:required_param]
+            end
             get "/#{configuration[:path]}" do
               '10 votes'
             end
           end
-          root_api.mount a_remounted_api, with: { path: 'votes' }
-          root_api.mount a_remounted_api, with: { path: 'scores' }
+          root_api.mount a_remounted_api, with: { path: 'votes', required_param: 'param_key' }
+          root_api.mount a_remounted_api, with: { path: 'scores', required_param: 'param_key' }
         end
 
         it 'will use the dynamic configuration on all routes' do
+          get 'api/votes', param_key: 'a'
+          expect(last_response.body).to eql '10 votes'
+          get 'api/scores', param_key: 'a'
+          expect(last_response.body).to eql '10 votes'
           get 'api/votes'
-          expect(last_response.body).to eql '10 votes'
-          get 'api/scores'
-          expect(last_response.body).to eql '10 votes'
+          expect(last_response.status).to eq 400
         end
       end
 
