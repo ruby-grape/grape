@@ -1183,7 +1183,8 @@ Aside from the default set of supported types listed above, any class can be
 used as a type as long as an explicit coercion method is supplied. If the type
 implements a class-level `parse` method, Grape will use it automatically.
 This method must take one string argument and return an instance of the correct
-type, or raise an exception to indicate the value was invalid. E.g.,
+type, or return an instance of `Grape::Types::InvalidValue` which optionally
+accepts a message to be returned in the response.
 
 ```ruby
 class Color
@@ -1193,8 +1194,9 @@ class Color
   end
 
   def self.parse(value)
-    fail 'Invalid color' unless %w(blue red green).include?(value)
-    new(value)
+    return new(value) if %w[blue red green]).include?(value)
+
+    Grape::Types::InvalidValue.new('Unsupported color')
   end
 end
 
