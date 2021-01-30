@@ -227,23 +227,51 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('NilClass')
       end
 
-      it 'is a custom type' do
-        subject.params do
-          requires :uri, coerce: SecureURIOnly
+      context 'a custom type' do
+        it 'coerces the given value' do
+          subject.params do
+            requires :uri, coerce: SecureURIOnly
+          end
+          subject.get '/secure_uri' do
+            params[:uri].class
+          end
+
+          get 'secure_uri', uri: 'https://www.example.com'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTPS')
+
+          get 'secure_uri', uri: 'http://www.example.com'
+
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('uri is invalid')
         end
-        subject.get '/secure_uri' do
-          params[:uri].class
+
+        context 'returning the InvalidValue instance when invalid' do
+          let(:custom_type) do
+            Class.new do
+              def self.parse(_val)
+                Grape::Types::InvalidValue.new('must be unique')
+              end
+            end
+          end
+
+          it 'uses a custom message added to the invalid value' do
+            type = custom_type
+
+            subject.params do
+              requires :name, type: type
+            end
+            subject.get '/whatever' do
+              params[:name].class
+            end
+
+            get 'whatever', name: 'Bob'
+
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq('name must be unique')
+          end
         end
-
-        get 'secure_uri', uri: 'https://www.example.com'
-
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('URI::HTTPS')
-
-        get 'secure_uri', uri: 'http://www.example.com'
-
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('uri is invalid')
       end
 
       context 'Array' do

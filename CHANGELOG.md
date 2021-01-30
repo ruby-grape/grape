@@ -3,6 +3,7 @@
 #### Features
 
 * Your contribution here.
+* [#2157](https://github.com/ruby-grape/grape/pull/2157): Custom types can set a message to be used in the response when invalid - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2145](https://github.com/ruby-grape/grape/pull/2145): Ruby 3.0 compatibility - [@ericproulx](https://github.com/ericproulx).
 * [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
 

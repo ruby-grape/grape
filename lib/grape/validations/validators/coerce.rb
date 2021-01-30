@@ -36,7 +36,7 @@ module Grape
 
         new_value = coerce_value(params[attr_name])
 
-        raise validation_exception(attr_name) unless valid_type?(new_value)
+        raise validation_exception(attr_name, new_value.message) unless valid_type?(new_value)
 
         # Don't assign a value if it is identical. It fixes a problem with Hashie::Mash
         # which looses wrappers for hashes and arrays after reassigning values
@@ -80,8 +80,11 @@ module Grape
         @option[:type].is_a?(Hash) ? @option[:type][:value] : @option[:type]
       end
 
-      def validation_exception(attr_name)
-        Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:coerce))
+      def validation_exception(attr_name, custom_msg = nil)
+        Grape::Exceptions::Validation.new(
+          params: [@scope.full_name(attr_name)],
+          message: custom_msg || message(:coerce)
+        )
       end
     end
   end

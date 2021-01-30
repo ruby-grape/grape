@@ -7,6 +7,7 @@ require_relative 'types/multiple_type_coercer'
 require_relative 'types/variant_collection_coercer'
 require_relative 'types/json'
 require_relative 'types/file'
+require_relative 'types/invalid_value'
 
 module Grape
   module Validations
@@ -21,10 +22,6 @@ module Grape
     # and {Grape::Dsl::Parameters#optional}. The main
     # entry point for this process is {Types.build_coercer}.
     module Types
-      # Instances of this class may be used as tokens to denote that
-      # a parameter value could not be coerced.
-      class InvalidValue; end
-
       # Types representing a single value, which are coerced.
       PRIMITIVES = [
         # Numerical
