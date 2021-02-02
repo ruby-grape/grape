@@ -639,7 +639,7 @@
 * [#492](https://github.com/ruby-grape/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values - [@Antti](https://github.com/Antti).
 * [#495](https://github.com/ruby-grape/grape/pull/495): Fixed `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
 * [#498](https://github.com/ruby-grape/grape/pull/498): Dry'ed up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
-* [#500](https://github.com/ruby-grape/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
+* [#500](https://github.com/ruby-grape/grape/pull/500): Skip entity auto-detection when explicitly passed - [@yaneq](https://github.com/yaneq).
 * [#503](https://github.com/ruby-grape/grape/pull/503): Calling declared(params) from child namespace fails to include parent namespace defined params - [@myitcv](https://github.com/myitcv).
 * [#512](https://github.com/ruby-grape/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
 * [#538](https://github.com/ruby-grape/grape/pull/538): Fixed default values for grouped params - [@dm1try](https://github.com/dm1try).

@@ -152,7 +152,7 @@ module Grape
         end
 
         # Declare a "namespace", which prefixes all subordinate routes with its
-        # name. Any endpoints within a namespace, or group, resource, segment,
+        # name. Any endpoints within a namespace, group, resource or segment,
         # etc., will share their parent context as well as any configuration
         # done in the namespace context.
         #
@@ -200,7 +200,7 @@ module Grape
           @endpoints = []
         end
 
-        # Thie method allows you to quickly define a parameter route segment
+        # This method allows you to quickly define a parameter route segment
         # in your API.
         #
         # @param param [Symbol] The name of the parameter you wish to declare.

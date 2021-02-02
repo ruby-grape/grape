@@ -399,7 +399,7 @@ module Grape
         entity_class = options.delete(:with)
 
         if entity_class.nil?
-          # entity class not explicitely defined, auto-detect from relation#klass or first object in the collection
+          # entity class not explicitly defined, auto-detect from relation#klass or first object in the collection
           object_class = if object.respond_to?(:klass)
                            object.klass
                          else

@@ -59,7 +59,7 @@ module Grape
         #     end
         #   end
         #
-        # This will make sure that the ApiLogger is opened and close around every
+        # This will make sure that the ApiLogger is opened and closed around every
         # request
         # @param  ensured_block [Proc] The block to be executed after every api_call
         def finally(&block)

@@ -116,7 +116,7 @@ describe Grape::Entity do
       expect(last_response.body).to eq('Auto-detect!')
     end
 
-    it 'does not run autodetection for Entity when explicitely provided' do
+    it 'does not run autodetection for Entity when explicitly provided' do
       entity = Class.new(Grape::Entity)
       some_array = []
 
