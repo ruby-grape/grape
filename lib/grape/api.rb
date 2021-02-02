@@ -87,7 +87,7 @@ module Grape
       end
 
       # The remountable class can have a configuration hash to provide some dynamic class-level variables.
-      # For instance, a descripcion could be done using: `desc configuration[:description]` if it may vary
+      # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(**opts)

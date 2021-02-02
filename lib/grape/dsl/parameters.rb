@@ -72,7 +72,7 @@ module Grape
 
       # Require one or more parameters for the current endpoint.
       #
-      # @param attrs list of parameter names, or, if :using is
+      # @param attrs list of parameters names, or, if :using is
       #   passed as an option, which keys to include (:all or :none) from
       #   the :using hash. The last key can be a hash, which specifies
       #   options for the parameters

@@ -17,7 +17,7 @@ module Grape
         super(**args)
       end
 
-      # remove all the unnecessary stuff from Grape::Exceptions::Base like status
+      # Remove all the unnecessary stuff from Grape::Exceptions::Base like status
       # and headers when converting a validation error to json or string
       def as_json(*_args)
         to_s
