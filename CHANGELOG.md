@@ -1,15 +1,13 @@
-### 1.5.2 (Next)
+### 1.5.2 (2021/02/06)
 
 #### Features
 
-* Your contribution here.
 * [#2157](https://github.com/ruby-grape/grape/pull/2157): Custom types can set a message to be used in the response when invalid - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2145](https://github.com/ruby-grape/grape/pull/2145): Ruby 3.0 compatibility - [@ericproulx](https://github.com/ericproulx).
 * [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
 
 #### Fixes
 
-* Your contribution here.
 * [#2144](https://github.com/ruby-grape/grape/pull/2144): Fix compatibility issue with activesupport 6.1 and XML serialization of arrays - [@anakinj](https://github.com/anakinj).
 * [#2137](https://github.com/ruby-grape/grape/pull/2137): Fix typos - [@johnny-miyake](https://github.com/johnny-miyake).
 * [#2131](https://github.com/ruby-grape/grape/pull/2131): Fix Ruby 2.7 keyword deprecation warning in validators/coerce - [@K0H205](https://github.com/K0H205).
