@@ -15,6 +15,8 @@ module Grape
 
     def params
       @params ||= build_params
+    rescue EOFError
+      raise Grape::Exceptions::InvalidMessageBody, 'multipart/form-data'
     end
 
     def headers

@@ -420,6 +420,22 @@ describe Grape::Endpoint do
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('Bob')
       end
+
+      it 'returns a 400 if given an invalid multipart body' do
+        # Rack swallowed this error until v2.2.0
+        major, minor, _patch = Rack.release.split('.').map(&:to_i)
+        next if major < 2 || major == 2 && minor < 2
+
+        subject.params do
+          requires :file, type: Rack::Multipart::UploadedFile
+        end
+        subject.post '/upload' do
+          params[:file][:filename]
+        end
+        post '/upload', { file: '' }, 'CONTENT_TYPE' => 'multipart/form-data; boundary=foobar'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to include('multipart/form-data')
+      end
     end
 
     it 'responds with a 415 for an unsupported content-type' do

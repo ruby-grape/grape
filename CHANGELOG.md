@@ -8,6 +8,8 @@
 
 * Your contribution here.
 
+* [#2161](https://github.com/ruby-grape/grape/pull/2157): Handle EOFError from Rack when given an empty multipart body - [@bschmeck](https://github.com/bschmeck).
+
 ### 1.5.2 (2021/02/06)
 
 #### Features
