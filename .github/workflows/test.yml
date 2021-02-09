@@ -34,7 +34,6 @@ jobs:
           - gemfiles/rack1.gemfile
           - gemfiles/rack2.gemfile
           - gemfiles/rack_edge.gemfile
-          - gemfiles/rails_edge.gemfile
           - gemfiles/rails_5.gemfile
           - gemfiles/rails_6.gemfile
           - gemfiles/rails_6_1.gemfile
@@ -51,6 +50,9 @@ jobs:
             experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/multi_xml.gemfile'
+            experimental: false
+          - ruby: 2.7
+            gemfile: 'gemfiles/rails_edge.gemfile'
             experimental: false
           - ruby: "ruby-head"
             experimental: true
