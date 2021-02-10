@@ -33,6 +33,7 @@ jobs:
           - Gemfile
           - gemfiles/rack1.gemfile
           - gemfiles/rack2.gemfile
+          - gemfiles/rack2_2.gemfile
           - gemfiles/rack_edge.gemfile
           - gemfiles/rails_edge.gemfile
           - gemfiles/rails_5.gemfile
@@ -74,7 +75,7 @@ jobs:
 
     - name: Run tests
       run: bundle exec rake spec
-    
+
     - name: Run tests (spec/integration/eager_load)
       if: ${{ matrix.gemfile == 'Gemfile' }}
       run: bundle exec rspec spec/integration/eager_load
@@ -82,7 +83,7 @@ jobs:
     - name: Run tests (spec/integration/multi_json)
       if: ${{ matrix.gemfile == 'gemfiles/multi_json.gemfile' }}
       run: bundle exec rspec spec/integration/multi_json
-   
+
     - name: Run tests (spec/integration/multi_xml)
       if: ${{ matrix.gemfile == 'gemfiles/multi_xml.gemfile' }}
       run: bundle exec rspec spec/integration/multi_xml
