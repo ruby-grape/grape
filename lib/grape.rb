@@ -76,6 +76,7 @@ module Grape
       autoload :InvalidVersionHeader
       autoload :MethodNotAllowed
       autoload :InvalidResponse
+      autoload :EmptyMessageBody
     end
   end
 

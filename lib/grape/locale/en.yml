@@ -44,6 +44,7 @@ en:
             "when specifying %{body_format} as content-type, you must pass valid
             %{body_format} in the request's 'body'
             "
+        empty_message_body: 'Empty message body supplied with %{body_format} content-type'
         invalid_accept_header:
           problem: 'Invalid accept header'
           resolution: '%{message}'
@@ -51,4 +52,3 @@ en:
           problem: 'Invalid version header'
           resolution: '%{message}'
         invalid_response: 'Invalid response'
-

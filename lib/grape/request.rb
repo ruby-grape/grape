@@ -16,7 +16,7 @@ module Grape
     def params
       @params ||= build_params
     rescue EOFError
-      raise Grape::Exceptions::InvalidMessageBody, content_type
+      raise Grape::Exceptions::EmptyMessageBody, content_type
     end
 
     def headers

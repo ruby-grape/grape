@@ -431,7 +431,7 @@ describe Grape::Endpoint do
         end
         post '/upload', { file: '' }, 'CONTENT_TYPE' => 'multipart/form-data; boundary=foobar'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to include('multipart/form-data')
+        expect(last_response.body).to eq('Empty message body supplied with multipart/form-data; boundary=foobar content-type')
       end
     end
 
