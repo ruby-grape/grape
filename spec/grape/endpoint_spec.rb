@@ -421,11 +421,8 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq('Bob')
       end
 
-      it 'returns a 400 if given an invalid multipart body' do
-        # Rack swallowed this error until v2.2.0
-        major, minor, _patch = Rack.release.split('.').map(&:to_i)
-        next if major < 2 || major == 2 && minor < 2
-
+      # Rack swallowed this error until v2.2.0
+      it 'returns a 400 if given an invalid multipart body', if: Gem::Version.new(Rack.release) >= Gem::Version.new('2.2.0') do
         subject.params do
           requires :file, type: Rack::Multipart::UploadedFile
         end
