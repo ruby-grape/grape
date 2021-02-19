@@ -4056,4 +4056,81 @@ XML
       expect { get '/const/missing' }.to raise_error(NameError).with_message(/SomeRandomConstant/)
     end
   end
+
+  describe 'custom route helpers on nested APIs' do
+    let(:shared_api_module) do
+      Module.new do
+        # rubocop:disable Style/ExplicitBlockArgument because this causes
+        #   the underlying issue in this form
+        def uniqe_id_route
+          params do
+            use :unique_id
+          end
+          route_param(:id) do
+            yield
+          end
+        end
+        # rubocop:enable Style/ExplicitBlockArgument
+      end
+    end
+    let(:shared_api_definitions) do
+      Module.new do
+        extend ActiveSupport::Concern
+
+        included do
+          helpers do
+            params :unique_id do
+              requires :id, type: String,
+                            allow_blank: false,
+                            regexp: /\d+-\d+/
+            end
+          end
+        end
+      end
+    end
+    let(:orders_root) do
+      shared = shared_api_definitions
+      find = orders_find_endpoint
+      Class.new(Grape::API) do
+        include shared
+
+        namespace(:orders) do
+          mount find
+        end
+      end
+    end
+    let(:orders_find_endpoint) do
+      shared = shared_api_definitions
+      Class.new(Grape::API) do
+        include shared
+
+        uniqe_id_route do
+          desc 'Fetch a single order' do
+            detail 'While specifying the order id on the route'
+          end
+          get { params[:id] }
+        end
+      end
+    end
+    subject(:grape_api) do
+      Class.new(Grape::API) do
+        version 'v1', using: :path
+      end
+    end
+
+    before do
+      Grape::API::Instance.extend(shared_api_module)
+      subject.mount orders_root
+    end
+
+    it 'returns an error when the id is bad' do
+      get '/v1/orders/abc'
+      expect(last_response.body).to be_eql('id is invalid')
+    end
+
+    it 'returns the given id when it is valid' do
+      get '/v1/orders/1-2'
+      expect(last_response.body).to be_eql('1-2')
+    end
+  end
 end
