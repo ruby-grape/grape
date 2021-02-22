@@ -141,7 +141,7 @@ module Grape
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
         setup_step = { method: method, args: args, block: block }
-        @setup << setup_step
+        @setup += [setup_step]
         last_response = nil
         @instances.each do |instance|
           last_response = replay_step_on(instance, setup_step)
