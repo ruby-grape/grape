@@ -1,6 +1,33 @@
 Upgrading Grape
 ===============
 
+
+### Upgrading to >= 1.5.3
+
+### Nil value and coercion
+
+Prior to 1.2.5 version passing a `nil` value for a parameter with a custom coercer would invoke the coercer, and not passing a parameter would not invoke it.
+This behavior was not tested or documented. Version 1.3.0 quietly changed this behavior, in such that `nil` values skipped the coercion. Version 1.5.3 fixes and documents this as follows:
+
+```ruby
+class Api < Grape::API
+  params do
+    optional :value, type: Integer, coerce_with: ->(val) { val || 0 }
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { value: nil }
+  # 1.5.2 = nil
+  # 1.5.3 = 0
+  get '/example', params: {}
+  # 1.5.2 = nil
+  # 1.5.3 = nil
+end
+```
+See [#2164](https://github.com/ruby-grape/grape/pull/2164) for more information.
+
 ### Upgrading to >= 1.5.1
 
 #### Dependent params

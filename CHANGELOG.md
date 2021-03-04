@@ -10,6 +10,7 @@
 
 * [#2161](https://github.com/ruby-grape/grape/pull/2157): Handle EOFError from Rack when given an empty multipart body - [@bschmeck](https://github.com/bschmeck).
 * [#2162](https://github.com/ruby-grape/grape/pull/2162): Corrected a hash modification while iterating issue - [@Jack12816](https://github.com/Jack12816).
+* [#2164](https://github.com/ruby-grape/grape/pull/2164): Fix: `coerce_with` is now called for params with `nil` value - [@braktar](https://github.com/braktar).
 
 ### 1.5.2 (2021/02/06)
 
