@@ -706,6 +706,44 @@ describe Grape::Validations::CoerceValidator do
         expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
       end
 
+      context 'Array type and coerce_with should' do
+        before do
+          subject.params do
+            optional :arr, type: Array, coerce_with: (lambda do |val|
+              if val.nil?
+                []
+              else
+                val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:arr].class.to_s
+          end
+        end
+
+        it 'coerce nil value to array' do
+          get '/', arr: nil
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Array')
+        end
+
+        it 'not coerce missing field' do
+          get '/'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('NilClass')
+        end
+
+        it 'coerce array as array' do
+          get '/', arr: []
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Array')
+        end
+      end
+
       it 'uses parse where available' do
         subject.params do
           requires :ints, type: Array, coerce_with: JSON do
@@ -752,6 +790,44 @@ describe Grape::Validations::CoerceValidator do
         get '/ints', ints: '{"int":3}'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('3')
+      end
+
+      context 'Integer type and coerce_with should' do
+        before do
+          subject.params do
+            optional :int, type: Integer, coerce_with: (lambda do |val|
+              if val.nil?
+                0
+              else
+                val.to_i
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:int].class.to_s
+          end
+        end
+
+        it 'coerce nil value to integer' do
+          get '/', int: nil
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Integer')
+        end
+
+        it 'not coerce missing field' do
+          get '/'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('NilClass')
+        end
+
+        it 'coerce integer as integer' do
+          get '/', int: 1
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Integer')
+        end
       end
 
       context 'Integer type and coerce_with potentially returning nil' do

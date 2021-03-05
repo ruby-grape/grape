@@ -52,8 +52,6 @@ module Grape
         #   this should always be a string.
         # @return [Object] the coerced result
         def call(val)
-          return if val.nil?
-
           coerced_val = @method.call(val)
 
           return coerced_val if coerced_val.is_a?(InvalidValue)
