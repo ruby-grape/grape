@@ -55,7 +55,7 @@ module Grape
           end
         end
 
-        raise Grape::Exceptions::ValidationArrayErrors, array_errors if array_errors.any?
+        raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
       end
 
       def self.convert_to_short_name(klass)
