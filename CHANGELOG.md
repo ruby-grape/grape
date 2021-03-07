@@ -1,12 +1,6 @@
-### 1.5.3 (Next)
-
-#### Features
-
-* Your contribution here.
+### 1.5.3 (2021/03/07)
 
 #### Fixes
-
-* Your contribution here.
 
 * [#2161](https://github.com/ruby-grape/grape/pull/2157): Handle EOFError from Rack when given an empty multipart body - [@bschmeck](https://github.com/bschmeck).
 * [#2162](https://github.com/ruby-grape/grape/pull/2162): Corrected a hash modification while iterating issue - [@Jack12816](https://github.com/Jack12816).
