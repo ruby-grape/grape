@@ -22,7 +22,7 @@ module Grape
         private
 
         def wrap_message(message)
-          if message.is_a?(Exceptions::ValidationErrors) || message.is_a?(Hash) || message.is_a?(ActiveModel::DeprecationHandlingMessageHash)
+          if message.is_a?(Exceptions::ValidationErrors) || message.is_a?(Hash) || (defined?(ActiveModel::DeprecationHandlingMessageHash) && message.is_a?(ActiveModel::DeprecationHandlingMessageHash))
             message
           else
             { error: message }
