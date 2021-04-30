@@ -200,6 +200,8 @@ module Grape
         without_root_prefix do
           without_versioning do
             versioned_route_configs.each do |config|
+              next if config[:options][:matching_wildchar]
+
               allowed_methods = config[:methods].dup
 
               unless self.class.namespace_inheritable(:do_not_route_head)
@@ -212,8 +214,7 @@ module Grape
                 config[:endpoint].options[:options_route_enabled] = true
               end
 
-              matching_wildchar = config[:options][:matching_wildchar]
-              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header, matching_wildchar: matching_wildchar)
+              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
               generate_not_allowed_method(config[:pattern], **attributes)
             end
           end
@@ -249,7 +250,6 @@ module Grape
             Grape::Http::Headers::SUPPORTED_METHODS_WITHOUT_OPTIONS
           end
         not_allowed_methods = supported_methods - allowed_methods
-        return if attributes[:matching_wildchar]
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 
