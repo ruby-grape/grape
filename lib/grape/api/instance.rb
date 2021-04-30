@@ -212,7 +212,8 @@ module Grape
                 config[:endpoint].options[:options_route_enabled] = true
               end
 
-              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
+              matching_wildchar = config[:options][:matching_wildchar]
+              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header, matching_wildchar: matching_wildchar)
               generate_not_allowed_method(config[:pattern], **attributes)
             end
           end
@@ -228,7 +229,7 @@ module Grape
           last_route        = routes.last # Most of the configuration is taken from the last endpoint
           matching_wildchar = routes.any? { |route| route.request_method == '*' }
           {
-            options: {},
+            options: { matching_wildchar: matching_wildchar },
             pattern: last_route.pattern,
             requirements: last_route.requirements,
             path: last_route.origin,
@@ -248,7 +249,7 @@ module Grape
             Grape::Http::Headers::SUPPORTED_METHODS_WITHOUT_OPTIONS
           end
         not_allowed_methods = supported_methods - allowed_methods
-        return if not_allowed_methods.empty?
+        return if attributes[:matching_wildchar]
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 
