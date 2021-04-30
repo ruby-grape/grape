@@ -749,6 +749,47 @@ XML
       end
     end
 
+    describe 'when a resource routes by POST, GET, PATCH, PUT, and DELETE' do
+      before do
+        subject.namespace :example do
+          get do
+            'example'
+          end
+
+          patch do
+            'example'
+          end
+
+          post do
+            'example'
+          end
+
+          delete do
+            'example'
+          end
+
+          put do
+            'example'
+          end
+        end
+        options '/example'
+      end
+
+      describe 'it adds an OPTIONS route for namespaced endpoints that' do
+        it 'returns a 204' do
+          expect(last_response.status).to eql 204
+        end
+
+        it 'has an empty body' do
+          expect(last_response.body).to be_blank
+        end
+
+        it 'has an Allow header' do
+          expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, PATCH, POST, DELETE, PUT, HEAD'
+        end
+      end
+    end
+
     describe 'adds an OPTIONS route for namespaced endpoints that' do
       before do
         subject.before { header 'X-Custom-Header', 'foo' }
