@@ -6,7 +6,7 @@
 
 #### Fixes
 
-* Your contribution here.
+* [#2176](https://github.com/ruby-grape/grape/pull/2176): Fixes issue-2175 - options call failing if matching all routes - [@myxoh](https://github.com/myxoh).
 
 ### 1.5.3 (2021/03/07)
 
