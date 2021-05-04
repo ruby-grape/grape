@@ -189,7 +189,7 @@ end
 
 ### Upgrading to >= 1.3.0
 
-#### Added Rack 2.1.0 support
+You will need to upgrade to this version if you depend on `rack >= 2.1.0`
 
 #### Ruby
 
