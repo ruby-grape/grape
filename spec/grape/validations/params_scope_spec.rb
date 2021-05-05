@@ -180,6 +180,28 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('{"baz":{"qux":"any"}}')
     end
+
+    it 'renaming can be defined before default' do
+      subject.params do
+        optional :foo, as: :bar, default: 'before'
+      end
+      subject.get('/rename-before-default') { params[:bar] }
+      get '/rename-before-default'
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('before')
+    end
+
+    it 'renaming can be defined after default' do
+      subject.params do
+        optional :foo, default: 'after', as: :bar
+      end
+      subject.get('/rename-after-default') { params[:bar] }
+      get '/rename-after-default'
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('after')
+    end
   end
 
   context 'array without coerce type explicitly given' do

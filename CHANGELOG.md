@@ -6,7 +6,8 @@
 
 #### Fixes
 
-* [#2176](https://github.com/ruby-grape/grape/pull/2176): Fixes issue-2175 - options call failing if matching all routes - [@myxoh](https://github.com/myxoh).
+* [#2176](https://github.com/ruby-grape/grape/pull/2176): Fix: OPTIONS fails if matching all routes - [@myxoh](https://github.com/myxoh).
+* [#2177](https://github.com/ruby-grape/grape/pull/2177): Fix: `default` validator fails if preceded by `as` validator - [@Catsuko](https://github.com/Catsuko).
 * Your contribution here.
 ### 1.5.3 (2021/03/07)
 

@@ -283,16 +283,15 @@ module Grape
 
         doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
 
-        full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
-        @api.document_attribute(full_attrs, doc_attrs)
+        document_attribute(attrs, doc_attrs)
 
         opts = derive_validator_options(validations)
 
+        order_specific_validations = Set[:as]
+
         # Validate for presence before any other validators
-        if validations.key?(:presence) && validations[:presence]
-          validate('presence', validations[:presence], attrs, doc_attrs, opts)
-          validations.delete(:presence)
-          validations.delete(:message) if validations.key?(:message)
+        validates_presence(validations, attrs, doc_attrs, opts) do |validation_type|
+          order_specific_validations << validation_type
         end
 
         # Before we run the rest of the validators, let's handle
@@ -301,8 +300,13 @@ module Grape
         coerce_type validations, attrs, doc_attrs, opts
 
         validations.each do |type, options|
+          next if order_specific_validations.include?(type)
           validate(type, options, attrs, doc_attrs, opts)
         end
+
+        # Apply as validator last so other validations are applied to
+        # renamed param
+        validate(:as, validations[:as], attrs, doc_attrs, opts) if validations.key?(:as)
       end
 
       # Validate and comprehend the +:type+, +:types+, and +:coerce_with+
@@ -463,6 +467,18 @@ module Grape
           allow_blank: allow_blank.is_a?(Hash) ? allow_blank[:value] : allow_blank,
           fail_fast:   validations.delete(:fail_fast) || false
         }
+      end
+
+      def validates_presence(validations, attrs, doc_attrs, opts)
+        return unless validations.key?(:presence) && validations[:presence]
+        validate(:presence, validations[:presence], attrs, doc_attrs, opts)
+        yield :presence
+        yield :message if validations.key?(:message)
+      end
+
+      def document_attribute(attrs, doc_attrs)
+        full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
+        @api.document_attribute(full_attrs, doc_attrs)
       end
     end
   end
