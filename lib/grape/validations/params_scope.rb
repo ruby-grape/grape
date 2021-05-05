@@ -300,9 +300,15 @@ module Grape
         # type casted values
         coerce_type validations, attrs, doc_attrs, opts
 
+        as = validations.delete(:as)
+
         validations.each do |type, options|
           validate(type, options, attrs, doc_attrs, opts)
         end
+
+        # Validate as last so other validations are applied to
+        # renamed param
+        validate(:as, as, attrs, doc_attrs, opts) if as
       end
 
       # Validate and comprehend the +:type+, +:types+, and +:coerce_with+
