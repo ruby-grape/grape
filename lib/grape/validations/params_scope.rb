@@ -283,28 +283,30 @@ module Grape
 
         doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
 
-        full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
-        @api.document_attribute(full_attrs, doc_attrs)
+        document_attribute(attrs, doc_attrs)
 
         opts = derive_validator_options(validations)
 
+        order_specific_validations = Set[:as]
+
         # Validate for presence before any other validators
-        validates_presence(validations, attrs, doc_attrs, opts)
+        validates_presence(validations, attrs, doc_attrs, opts) do |validation_type|
+          order_specific_validations << validation_type
+        end
 
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
         coerce_type validations, attrs, doc_attrs, opts
 
-        as = validations.delete(:as)
-
         validations.each do |type, options|
+          next if order_specific_validations.include?(type)
           validate(type, options, attrs, doc_attrs, opts)
         end
 
-        # Validate as last so other validations are applied to
+        # Apply as validator last so other validations are applied to
         # renamed param
-        validate(:as, as, attrs, doc_attrs, opts) if as
+        validate(:as, validations[:as], attrs, doc_attrs, opts) if validations.key?(:as)
       end
 
       # Validate and comprehend the +:type+, +:types+, and +:coerce_with+
@@ -470,8 +472,13 @@ module Grape
       def validates_presence(validations, attrs, doc_attrs, opts)
         return unless validations.key?(:presence) && validations[:presence]
         validate(:presence, validations[:presence], attrs, doc_attrs, opts)
-        validations.delete(:presence)
-        validations.delete(:message) if validations.key?(:message)
+        yield :presence
+        yield :message if validations.key?(:message)
+      end
+
+      def document_attribute(attrs, doc_attrs)
+        full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
+        @api.document_attribute(full_attrs, doc_attrs)
       end
     end
   end
