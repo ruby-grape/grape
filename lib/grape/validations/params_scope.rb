@@ -289,11 +289,7 @@ module Grape
         opts = derive_validator_options(validations)
 
         # Validate for presence before any other validators
-        if validations.key?(:presence) && validations[:presence]
-          validate('presence', validations[:presence], attrs, doc_attrs, opts)
-          validations.delete(:presence)
-          validations.delete(:message) if validations.key?(:message)
-        end
+        validates_presence(validations, attrs, doc_attrs, opts)
 
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
@@ -469,6 +465,13 @@ module Grape
           allow_blank: allow_blank.is_a?(Hash) ? allow_blank[:value] : allow_blank,
           fail_fast:   validations.delete(:fail_fast) || false
         }
+      end
+
+      def validates_presence(validations, attrs, doc_attrs, opts)
+        return unless validations.key?(:presence) && validations[:presence]
+        validate(:presence, validations[:presence], attrs, doc_attrs, opts)
+        validations.delete(:presence)
+        validations.delete(:message) if validations.key?(:message)
       end
     end
   end
