@@ -28,7 +28,7 @@ jobs:
           - 2.5
           - 2.6
           - 2.7
-          - 3.0
+          - "3.0"
         gemfile:
           - Gemfile
           - gemfiles/rack1.gemfile
@@ -40,10 +40,10 @@ jobs:
           - gemfiles/rails_6_1.gemfile
         experimental: [false]
         include:
-          - ruby: 3.0
+          - ruby: "3.0"
             gemfile: 'gemfiles/multi_json.gemfile'
             experimental: false
-          - ruby: 3.0
+          - ruby: "3.0"
             gemfile: 'gemfiles/multi_xml.gemfile'
             experimental: false
           - ruby: 2.7
