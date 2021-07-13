@@ -4081,6 +4081,49 @@ XML
     end
   end
 
+  describe '.inherited' do
+    context 'overriding within class' do
+      let(:root_api) do
+        Class.new(Grape::API) do
+          @bar = 'Hello, world'
+
+          def self.inherited(child_api)
+            super
+            child_api.instance_variable_set(:@foo, @bar.dup)
+          end
+        end
+      end
+
+      let(:child_api) { Class.new(root_api) }
+
+      it 'allows overriding the hook' do
+        expect(child_api.instance_variable_get(:@foo)).to eq('Hello, world')
+      end
+    end
+
+    context 'overriding via composition' do
+      module Inherited
+        def inherited(api)
+          super
+          api.instance_variable_set(:@foo, @bar.dup)
+        end
+      end
+
+      let(:root_api) do
+        Class.new(Grape::API) do
+          @bar = 'Hello, world'
+          extend Inherited
+        end
+      end
+
+      let(:child_api) { Class.new(root_api) }
+
+      it 'allows overriding the hook' do
+        expect(child_api.instance_variable_get(:@foo)).to eq('Hello, world')
+      end
+    end
+  end
+
   describe 'const_missing' do
     subject(:grape_api) { Class.new(Grape::API) }
     let(:mounted) do

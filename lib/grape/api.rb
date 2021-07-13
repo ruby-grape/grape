@@ -20,10 +20,11 @@ module Grape
 
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(api, base_instance_parent = Grape::API::Instance)
-        api.initial_setup(base_instance_parent)
+      def inherited(api)
+        super
+
+        api.initial_setup(Grape::API == self ? Grape::API::Instance : @base_instance)
         api.override_all_methods!
-        make_inheritable(api)
       end
 
       # Initialize the instance variables on the remountable class, and the base_instance
@@ -66,15 +67,6 @@ module Grape
       # NOTE: This will only be called on an API directly mounted on RACK
       def call(*args, &block)
         instance_for_rack.call(*args, &block)
-      end
-
-      # Allows an API to itself be inheritable:
-      def make_inheritable(api)
-        # When a child API inherits from a parent API.
-        def api.inherited(child_api)
-          # The instances of the child API inherit from the instances of the parent API
-          Grape::API.inherited(child_api, base_instance)
-        end
       end
 
       # Alleviates problems with autoloading by tring to search for the constant
