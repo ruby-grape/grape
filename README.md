@@ -3642,6 +3642,14 @@ You can access the controller params, headers, and helpers through the context w
 Note that when you're using Grape mounted on Rails you don't have to use Rails middleware because it's already included into your middleware stack.
 You only have to implement the helpers to access the specific `env` variable.
 
+If you are using a custom application that is inherited from `Rails::Application` and need to insert a new middleware among the ones initiated via Rails, you will need to register it manually in your custom application class.
+
+```ruby
+class Company::Application < Rails::Application
+  config.middleware.insert_before(Rack::Attack, Middleware::ApiLogger)
+end
+```
+
 ### Remote IP
 
 By default you can access remote IP with `request.ip`. This is the remote IP address implemented by Rack. Sometimes it is desirable to get the remote IP [Rails-style](http://stackoverflow.com/questions/10997005/whats-the-difference-between-request-remote-ip-and-request-ip-in-rails) with `ActionDispatch::RemoteIp`.
