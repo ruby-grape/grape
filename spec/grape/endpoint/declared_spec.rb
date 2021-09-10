@@ -598,4 +598,172 @@ describe Grape::Endpoint do
       expect(json.key?(:artist_id)).not_to be_truthy
     end
   end
+
+  describe 'parameter renaming' do
+    context 'with a renamed hash with nested parameters' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :email_address, type: String, regexp: /.+@.+/, as: :email
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to match(%w[email_address])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', email_address: 'test@example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('email' => 'test@example.com')
+      end
+
+      it 'maps the renamed parameter correctly (as name)' do
+        post '/test', email: 'test@example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('email' => 'test@example.com')
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', email_address: 'bad[at]example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'email_address is invalid')
+      end
+
+      it 'validates the renamed parameter correctly (as name)' do
+        # NOTE: This is mostly unexpected behaviour, because when we "know" the
+        #       renamed parameter name we can bypass the parameter validation
+        #       here as client.
+        post '/test', email: 'bad[at]example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('email' => 'bad[at]example.com')
+        # Should be: match('error' => 'email_address is invalid')
+      end
+    end
+
+    context 'with a renamed hash with nested parameters' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :address, type: Hash, as: :address_attributes do
+            optional :street, type: String, values: ['Street 1', 'Street 2'],
+                              default: 'Street 1'
+            optional :city, type: String
+          end
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to \
+          match(%w[address address[street] address[city]])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', address: { city: 'Berlin', street: 'Street 2', t: 't' }
+        expect(JSON.parse(last_response.body)).to \
+          match('address_attributes' => { 'city' => 'Berlin',
+                                          'street' => 'Street 2' })
+      end
+
+      it 'maps the renamed parameter correctly (as name)' do
+        post '/test', address_attributes: { city: 'Berlin', unknown: '1' }
+        expect(JSON.parse(last_response.body)).to \
+          match('address_attributes' => { 'city' => 'Berlin',
+                                          'street' => 'Street 1' })
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', address: { street: 'unknown' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'address[street] does not have a valid value')
+      end
+
+      it 'validates the renamed parameter correctly (as name)' do
+        post '/test', address_attributes: { street: 'unknown' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'address[street] does not have a valid value')
+      end
+    end
+
+    context 'with a renamed hash with nested renamed parameter' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :user, type: Hash, as: :user_attributes do
+            optional :email_address, type: String, regexp: /.+@.+/, as: :email
+          end
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to \
+          match(%w[user user[email_address]])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', user: { email_address: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'test@example.com' })
+      end
+
+      it 'maps the renamed parameter correctly (as name, 1)' do
+        post '/test', user: { email: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'test@example.com' })
+      end
+
+      it 'maps the renamed parameter correctly (as name, 2)' do
+        post '/test', user_attributes: { email_address: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'test@example.com' })
+      end
+
+      it 'maps the renamed parameter correctly (as name, 3)' do
+        post '/test', user_attributes: { email: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'test@example.com' })
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', user: { email_address: 'bad[at]example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'user[email_address] is invalid')
+      end
+
+      it 'validates the renamed parameter correctly (as name, 1)' do
+        # NOTE: This is mostly unexpected behaviour, because when we "know" the
+        #       renamed parameter name we can bypass the parameter validation
+        #       here as client.
+        post '/test', user: { email: 'bad[at]example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'bad[at]example.com' })
+        # Should be: match('error' => 'user[email_address] is invalid')
+      end
+
+      it 'validates the renamed parameter correctly (as name, 2)' do
+        post '/test', user_attributes: { email_address: 'bad[at]example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'user[email_address] is invalid')
+      end
+
+      it 'validates the renamed parameter correctly (as name, 3)' do
+        # NOTE: This is mostly unexpected behaviour, because when we "know" the
+        #       renamed parameter name we can bypass the parameter validation
+        #       here as client.
+        post '/test', user_attributes: { email: 'bad[at]example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'bad[at]example.com' })
+        # Should be: match('error' => 'user[email_address] is invalid')
+      end
+    end
+  end
 end

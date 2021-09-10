@@ -995,8 +995,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 ````json
 {
   "declared_params": {
-    "first_name": "first name",
-    "last_name": null
+    "user": {
+      "first_name": "first name",
+      "last_name": null
+    }
   }
 }
 ````

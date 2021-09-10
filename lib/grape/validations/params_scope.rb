@@ -3,7 +3,7 @@
 module Grape
   module Validations
     class ParamsScope
-      attr_accessor :element, :parent, :index
+      attr_accessor :element, :original_element, :parent, :index
       attr_reader :type
 
       include Grape::DSL::Parameters
@@ -13,6 +13,8 @@ module Grape
       # @param opts [Hash] options for this scope
       # @option opts :element [Symbol] the element that contains this scope; for
       #   this to be relevant, @parent must be set
+      # @option opts :original_element [Symbol, nil] the original element name
+      #   before it was renamed through +:as+
       # @option opts :parent [ParamsScope] the scope containing this scope
       # @option opts :api [API] the API endpoint to modify
       # @option opts :optional [Boolean] whether or not this scope needs to have
@@ -23,13 +25,14 @@ module Grape
       #   validate if this param is present in the parent scope
       # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
-        @element      = opts[:element]
-        @parent       = opts[:parent]
-        @api          = opts[:api]
-        @optional     = opts[:optional] || false
-        @type         = opts[:type]
-        @group        = opts[:group] || {}
-        @dependent_on = opts[:dependent_on]
+        @element          = opts[:element]
+        @original_element = opts[:original_element]
+        @parent           = opts[:parent]
+        @api              = opts[:api]
+        @optional         = opts[:optional] || false
+        @type             = opts[:type]
+        @group            = opts[:group] || {}
+        @dependent_on     = opts[:dependent_on]
         @declared_params = []
         @index = nil
 
@@ -82,7 +85,8 @@ module Grape
       def full_name(name, index: nil)
         if nested?
           # Find our containing element's name, and append ours.
-          "#{@parent.full_name(@element)}#{brackets(@index || index)}#{brackets(name)}"
+          element_name = @original_element || @element
+          "#{@parent.full_name(element_name)}#{brackets(@index || index)}#{brackets(name)}"
         elsif lateral?
           # Find the name of the element as if it was at the same nesting level
           # as our parent. We need to forward our index upward to achieve this.
@@ -191,11 +195,12 @@ module Grape
         end
 
         self.class.new(
-          api:      @api,
-          element:  attrs[1][:as] || attrs.first,
-          parent:   self,
-          optional: optional,
-          type:     type || Array,
+          api:              @api,
+          element:          attrs[1][:as] || attrs.first,
+          original_element: attrs[1][:as] ? attrs.first : nil,
+          parent:           self,
+          optional:         optional,
+          type:             type || Array,
           &block
         )
       end
