@@ -599,7 +599,7 @@ describe Grape::Endpoint do
     end
   end
 
-  fdescribe 'parameter renaming' do
+  describe 'parameter renaming' do
     context 'with a deeply nested parameter structure' do
       let(:params) do
         {

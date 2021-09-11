@@ -48,7 +48,7 @@ module Grape
         end
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
-          renamed_params = route_setting(:renamed_params)
+          renamed_params = route_setting(:renamed_params) || {}
 
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             if declared_param.is_a?(Hash)
