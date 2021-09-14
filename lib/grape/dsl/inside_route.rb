@@ -57,7 +57,7 @@ module Grape
                 params_nested_path_dup << declared_parent_param.to_s
                 next unless options[:include_missing] || passed_params.key?(declared_parent_param)
 
-                rename_path = params_nested_path.dup + [declared_parent_param.to_s]
+                rename_path = params_nested_path + [declared_parent_param.to_s]
                 renamed_param_name = renamed_params[rename_path]
 
                 memo_key = optioned_param_key(renamed_param_name || declared_parent_param, options)
@@ -72,7 +72,7 @@ module Grape
               # Find its value or set it to nil.
               next unless options[:include_missing] || passed_params.key?(declared_param)
 
-              rename_path = params_nested_path.dup + [declared_param.to_s]
+              rename_path = params_nested_path + [declared_param.to_s]
               renamed_param_name = renamed_params[rename_path]
 
               memo_key = optioned_param_key(renamed_param_name || declared_param, options)

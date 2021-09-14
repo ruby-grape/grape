@@ -13,8 +13,8 @@ module Grape
       # @param opts [Hash] options for this scope
       # @option opts :element [Symbol] the element that contains this scope; for
       #   this to be relevant, @parent must be set
-      # @option opts :rename [Symbol, nil] whenever this scope should be
-      #   renamed and to what
+      # @option opts :element_renamed [Symbol, nil] whenever this scope should
+      #   be renamed and to what, given +nil+ no renaming is done
       # @option opts :parent [ParamsScope] the scope containing this scope
       # @option opts :api [API] the API endpoint to modify
       # @option opts :optional [Boolean] whether or not this scope needs to have
@@ -26,7 +26,7 @@ module Grape
       # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
         @element          = opts[:element]
-        @rename           = opts[:rename]
+        @element_renamed  = opts[:element_renamed]
         @parent           = opts[:parent]
         @api              = opts[:api]
         @optional         = opts[:optional] || false
@@ -211,12 +211,12 @@ module Grape
         end
 
         self.class.new(
-          api:      @api,
-          element:  attrs.first,
-          rename:   attrs[1][:as],
-          parent:   self,
-          optional: optional,
-          type:     type || Array,
+          api:             @api,
+          element:         attrs.first,
+          element_renamed: attrs[1][:as],
+          parent:          self,
+          optional:        optional,
+          type:            type || Array,
           &block
         )
       end
@@ -256,7 +256,7 @@ module Grape
 
       # Pushes declared params to parent or settings
       def configure_declared_params
-        push_renamed_param(full_path, @rename) if @rename
+        push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
           @parent.push_declared_params [element => @declared_params]

@@ -801,6 +801,7 @@ Grape allows you to access only the parameters that have been declared by your `
 
   * Filter out the params that have been passed, but are not allowed.
   * Include any optional params that are declared but not passed.
+  * Perform any parameter renaming on the resulting hash.
 
 Consider the following API endpoint:
 

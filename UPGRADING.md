@@ -1,10 +1,64 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.5.4
+
+#### Parameter renaming with :as
+
+Prior to 1.5.4 the [parameter
+renaming](https://github.com/ruby-grape/grape#renaming) with `:as` was directly
+touching the request payload
+([`#params`](https://github.com/ruby-grape/grape#parameters)) while duplicating
+the old and the new key to be both available in the hash. This allowed clients
+to bypass any validation in case they knew the internal name of the parameter.
+Unfortunately, in combination with
+[grape-swagger](https://github.com/ruby-grape/grape-swagger) the internal name
+(name set with `:as`) of the parameters were documented.
+
+From now on the parameter renaming is not anymore done automatically in the
+request payload, but only when using the
+[`#declared(params)`](https://github.com/ruby-grape/grape#declared) parameters
+helper. This stops confusing validation/coercion behavior.
+
+Here comes an illustration of the old and new behaviour as code:
+
+```ruby
+# (1) Rename a to b, while client sends +a+
+optional :a, type: Integer, as: :b
+params = { a: 1 }
+declared(params, include_missing: false)
+# expected => { b: 1 }
+# actual   => { b: 1 }
+
+# (2) Rename a to b, while client sends +b+
+optional :a, type: Integer, as: :b, values: [1, 2, 3]
+params = { b: '5' }
+declared(params, include_missing: false)
+# expected => { }        (>= 1.5.4)
+# actual   => { b: '5' } (uncasted, unvalidated, <= 1.5.3)
+```
+
+Another implication of this is the dependent parameter resolution. Prior to
+1.5.4 the following code produced an `Grape::Exceptions::UnknownParameter`
+because `:a` was replace by `:b`:
+
+```ruby
+params do
+  optional :a, as: :b
+  given :a do # (<= 1.5.3 you had to reference +:b+ here to make it work)
+    requires :c
+  end
+end
+```
+
+This code now works without any errors, as the renaming is just an internal
+behaviour of the `#declared(params)` parameter helper.
+
+See [#2189](https://github.com/ruby-grape/grape/pull/2189) for more information.
 
 ### Upgrading to >= 1.5.3
 
-### Nil value and coercion
+#### Nil value and coercion
 
 Prior to 1.2.5 version passing a `nil` value for a parameter with a custom coercer would invoke the coercer, and not passing a parameter would not invoke it.
 This behavior was not tested or documented. Version 1.3.0 quietly changed this behavior, in such that `nil` values skipped the coercion. Version 1.5.3 fixes and documents this as follows:

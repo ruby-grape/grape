@@ -9,7 +9,7 @@
 * [#2176](https://github.com/ruby-grape/grape/pull/2176): Fix: OPTIONS fails if matching all routes - [@myxoh](https://github.com/myxoh).
 * [#2177](https://github.com/ruby-grape/grape/pull/2177): Fix: `default` validator fails if preceded by `as` validator - [@Catsuko](https://github.com/Catsuko).
 * [#2180](https://github.com/ruby-grape/grape/pull/2180): Call `super` in `API.inherited` - [@yogeshjain999](https://github.com/yogeshjain999).
-* [#2189](https://github.com/ruby-grape/grape/pull/2189): Corrected the endpoint parameter name generation - [@Jack12816](https://github.com/Jack12816).
+* [#2189](https://github.com/ruby-grape/grape/pull/2189): Fix: rename parameters when using `:as` (behaviour and grape-swagger documentation) - [@Jack12816](https://github.com/Jack12816).
 * Your contribution here.
 
 ### 1.5.3 (2021/03/07)
