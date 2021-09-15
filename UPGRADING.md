@@ -1,24 +1,13 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.5.4
+### Upgrading to >= 1.6.0
 
 #### Parameter renaming with :as
 
-Prior to 1.5.4 the [parameter
-renaming](https://github.com/ruby-grape/grape#renaming) with `:as` was directly
-touching the request payload
-([`#params`](https://github.com/ruby-grape/grape#parameters)) while duplicating
-the old and the new key to be both available in the hash. This allowed clients
-to bypass any validation in case they knew the internal name of the parameter.
-Unfortunately, in combination with
-[grape-swagger](https://github.com/ruby-grape/grape-swagger) the internal name
-(name set with `:as`) of the parameters were documented.
+Prior to 1.6.0 the [parameter renaming](https://github.com/ruby-grape/grape#renaming) with `:as` was directly touching the request payload ([`#params`](https://github.com/ruby-grape/grape#parameters)) while duplicating the old and the new key to be both available in the hash. This allowed clients to bypass any validation in case they knew the internal name of the parameter.  Unfortunately, in combination with [grape-swagger](https://github.com/ruby-grape/grape-swagger) the internal name (name set with `:as`) of the parameters were documented.
 
-From now on the parameter renaming is not anymore done automatically in the
-request payload, but only when using the
-[`#declared(params)`](https://github.com/ruby-grape/grape#declared) parameters
-helper. This stops confusing validation/coercion behavior.
+This behavior was fixed. Parameter renaming is now done when using the [`#declared(params)`](https://github.com/ruby-grape/grape#declared) parameters helper. This stops confusing validation/coercion behavior.
 
 Here comes an illustration of the old and new behaviour as code:
 
@@ -34,13 +23,11 @@ declared(params, include_missing: false)
 optional :a, type: Integer, as: :b, values: [1, 2, 3]
 params = { b: '5' }
 declared(params, include_missing: false)
-# expected => { }        (>= 1.5.4)
+# expected => { }        (>= 1.6.0)
 # actual   => { b: '5' } (uncasted, unvalidated, <= 1.5.3)
 ```
 
-Another implication of this is the dependent parameter resolution. Prior to
-1.5.4 the following code produced an `Grape::Exceptions::UnknownParameter`
-because `:a` was replace by `:b`:
+Another implication of this change is the dependent parameter resolution. Prior to 1.6.0 the following code produced an `Grape::Exceptions::UnknownParameter` because `:a` was replace by `:b`:
 
 ```ruby
 params do
@@ -51,8 +38,7 @@ params do
 end
 ```
 
-This code now works without any errors, as the renaming is just an internal
-behaviour of the `#declared(params)` parameter helper.
+This code now works without any errors, as the renaming is just an internal behaviour of the `#declared(params)` parameter helper.
 
 See [#2189](https://github.com/ruby-grape/grape/pull/2189) for more information.
 
