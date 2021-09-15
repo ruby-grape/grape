@@ -262,7 +262,6 @@ module Grape
           else
             run_filters before_validations, :before_validation
             run_validators validations, request
-            remove_renamed_params
             run_filters after_validations, :after_validation
             response_object = execute
           end
@@ -328,14 +327,7 @@ module Grape
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
-    def remove_renamed_params
-      return unless route_setting(:renamed_params)
-      route_setting(:renamed_params).flat_map(&:keys).each do |renamed_param|
-        @params.delete(renamed_param)
-      end
-    end
-
-    private :build_stack, :build_helpers, :remove_renamed_params
+    private :build_stack, :build_helpers
 
     def execute
       @block ? @block.call(self) : nil

@@ -801,6 +801,7 @@ Grape allows you to access only the parameters that have been declared by your `
 
   * Filter out the params that have been passed, but are not allowed.
   * Include any optional params that are declared but not passed.
+  * Perform any parameter renaming on the resulting hash.
 
 Consider the following API endpoint:
 
@@ -995,8 +996,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 ````json
 {
   "declared_params": {
-    "first_name": "first name",
-    "last_name": null
+    "user": {
+      "first_name": "first name",
+      "last_name": null
+    }
   }
 }
 ````

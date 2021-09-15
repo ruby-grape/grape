@@ -13,6 +13,8 @@ module Grape
       # @param opts [Hash] options for this scope
       # @option opts :element [Symbol] the element that contains this scope; for
       #   this to be relevant, @parent must be set
+      # @option opts :element_renamed [Symbol, nil] whenever this scope should
+      #   be renamed and to what, given +nil+ no renaming is done
       # @option opts :parent [ParamsScope] the scope containing this scope
       # @option opts :api [API] the API endpoint to modify
       # @option opts :optional [Boolean] whether or not this scope needs to have
@@ -23,13 +25,14 @@ module Grape
       #   validate if this param is present in the parent scope
       # @yield the instance context, open for parameter definitions
       def initialize(opts, &block)
-        @element      = opts[:element]
-        @parent       = opts[:parent]
-        @api          = opts[:api]
-        @optional     = opts[:optional] || false
-        @type         = opts[:type]
-        @group        = opts[:group] || {}
-        @dependent_on = opts[:dependent_on]
+        @element          = opts[:element]
+        @element_renamed  = opts[:element_renamed]
+        @parent           = opts[:parent]
+        @api              = opts[:api]
+        @optional         = opts[:optional] || false
+        @type             = opts[:type]
+        @group            = opts[:group] || {}
+        @dependent_on     = opts[:dependent_on]
         @declared_params = []
         @index = nil
 
@@ -129,17 +132,34 @@ module Grape
         if lateral?
           @parent.push_declared_params(attrs, **opts)
         else
-          if opts && opts[:as]
-            @api.route_setting(:renamed_params, @api.route_setting(:renamed_params) || [])
-            @api.route_setting(:renamed_params) << { attrs.first => opts[:as] }
-            attrs = [opts[:as]]
-          end
+          push_renamed_param(full_path + [attrs.first], opts[:as]) \
+            if opts && opts[:as]
 
           @declared_params.concat attrs
         end
       end
 
+      # Get the full path of the parameter scope in the hierarchy.
+      #
+      # @return [Array<Symbol>] the nesting/path of the current parameter scope
+      def full_path
+        nested? ? @parent.full_path + [@element] : []
+      end
+
       private
+
+      # Add a new parameter which should be renamed when using the +#declared+
+      # method.
+      #
+      # @param path [Array<String, Symbol>] the full path of the parameter
+      #   (including the parameter name as last array element)
+      # @param new_name [String, Symbol] the new name of the parameter (the
+      #   renamed name, with the +as: ...+ semantic)
+      def push_renamed_param(path, new_name)
+        base = @api.route_setting(:renamed_params) || {}
+        base[Array(path).map(&:to_s)] = new_name.to_s
+        @api.route_setting(:renamed_params, base)
+      end
 
       def require_required_and_optional_fields(context, opts)
         if context == :all
@@ -191,11 +211,12 @@ module Grape
         end
 
         self.class.new(
-          api:      @api,
-          element:  attrs[1][:as] || attrs.first,
-          parent:   self,
-          optional: optional,
-          type:     type || Array,
+          api:             @api,
+          element:         attrs.first,
+          element_renamed: attrs[1][:as],
+          parent:          self,
+          optional:        optional,
+          type:            type || Array,
           &block
         )
       end
@@ -235,6 +256,8 @@ module Grape
 
       # Pushes declared params to parent or settings
       def configure_declared_params
+        push_renamed_param(full_path, @element_renamed) if @element_renamed
+
         if nested?
           @parent.push_declared_params [element => @declared_params]
         else
@@ -303,10 +326,6 @@ module Grape
           next if order_specific_validations.include?(type)
           validate(type, options, attrs, doc_attrs, opts)
         end
-
-        # Apply as validator last so other validations are applied to
-        # renamed param
-        validate(:as, validations[:as], attrs, doc_attrs, opts) if validations.key?(:as)
       end
 
       # Validate and comprehend the +:type+, +:types+, and +:coerce_with+

@@ -598,4 +598,251 @@ describe Grape::Endpoint do
       expect(json.key?(:artist_id)).not_to be_truthy
     end
   end
+
+  describe 'parameter renaming' do
+    context 'with a deeply nested parameter structure' do
+      let(:params) do
+        {
+          i_a: 'a',
+          i_b: {
+            i_c: 'c',
+            i_d: {
+              i_e: {
+                i_f: 'f',
+                i_g: 'g',
+                i_h: [
+                  {
+                    i_ha: 'ha1',
+                    i_hb: {
+                      i_hc: 'c'
+                    }
+                  },
+                  {
+                    i_ha: 'ha2',
+                    i_hb: {
+                      i_hc: 'c'
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      end
+      let(:declared) do
+        {
+          o_a: 'a',
+          o_b: {
+            o_c: 'c',
+            o_d: {
+              o_e: {
+                o_f: 'f',
+                o_g: 'g',
+                o_h: [
+                  {
+                    o_ha: 'ha1',
+                    o_hb: {
+                      o_hc: 'c'
+                    }
+                  },
+                  {
+                    o_ha: 'ha2',
+                    o_hb: {
+                      o_hc: 'c'
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      end
+      let(:params_keys) do
+        [
+          'i_a',
+          'i_b',
+          'i_b[i_c]',
+          'i_b[i_d]',
+          'i_b[i_d][i_e]',
+          'i_b[i_d][i_e][i_f]',
+          'i_b[i_d][i_e][i_g]',
+          'i_b[i_d][i_e][i_h]',
+          'i_b[i_d][i_e][i_h][i_ha]',
+          'i_b[i_d][i_e][i_h][i_hb]',
+          'i_b[i_d][i_e][i_h][i_hb][i_hc]'
+        ]
+      end
+
+      before do
+        subject.format :json
+        subject.params do
+          optional :i_a, type: String, as: :o_a
+          optional :i_b, type: Hash, as: :o_b do
+            optional :i_c, type: String, as: :o_c
+            optional :i_d, type: Hash, as: :o_d do
+              optional :i_e, type: Hash, as: :o_e do
+                optional :i_f, type: String, as: :o_f
+                optional :i_g, type: String, as: :o_g
+                optional :i_h, type: Array, as: :o_h do
+                  optional :i_ha, type: String, as: :o_ha
+                  optional :i_hb, type: Hash, as: :o_hb do
+                    optional :i_hc, type: String, as: :o_hc
+                  end
+                end
+              end
+            end
+          end
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+        subject.post '/test/no-mod' do
+          before = params.to_h
+          declared(params, include_missing: false)
+          after = params.to_h
+          { before: before, after: after }
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to match(params_keys)
+      end
+
+      it 'maps the renamed parameter correctly' do
+        post '/test', **params
+        expect(JSON.parse(last_response.body, symbolize_names: true)).to \
+          match(declared)
+      end
+
+      it 'maps no parameters when none are given' do
+        post '/test'
+        expect(JSON.parse(last_response.body)).to match({})
+      end
+
+      it 'does not modify the request params' do
+        post '/test/no-mod', **params
+        result = JSON.parse(last_response.body, symbolize_names: true)
+        expect(result[:before]).to match(result[:after])
+      end
+    end
+
+    context 'with a renamed root parameter' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :email_address, type: String, regexp: /.+@.+/, as: :email
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to match(%w[email_address])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', email_address: 'test@example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('email' => 'test@example.com')
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', email_address: 'bad[at]example.com'
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'email_address is invalid')
+      end
+
+      it 'ignores the renamed parameter (as name)' do
+        post '/test', email: 'test@example.com'
+        expect(JSON.parse(last_response.body)).to match({})
+      end
+    end
+
+    context 'with a renamed hash with nested parameters' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :address, type: Hash, as: :address_attributes do
+            optional :street, type: String, values: ['Street 1', 'Street 2'],
+                              default: 'Street 1'
+            optional :city, type: String
+          end
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to \
+          match(%w[address address[street] address[city]])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', address: { city: 'Berlin', street: 'Street 2', t: 't' }
+        expect(JSON.parse(last_response.body)).to \
+          match('address_attributes' => { 'city' => 'Berlin',
+                                          'street' => 'Street 2' })
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', address: { street: 'unknown' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'address[street] does not have a valid value')
+      end
+
+      it 'ignores the renamed parameter (as name)' do
+        post '/test', address_attributes: { city: 'Berlin', unknown: '1' }
+        expect(JSON.parse(last_response.body)).to match({})
+      end
+    end
+
+    context 'with a renamed hash with nested renamed parameter' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :user, type: Hash, as: :user_attributes do
+            optional :email_address, type: String, regexp: /.+@.+/, as: :email
+          end
+        end
+        subject.post '/test' do
+          declared(params, include_missing: false)
+        end
+      end
+
+      it 'generates the correct parameter names for documentation' do
+        expect(subject.routes.first.params.keys).to \
+          match(%w[user user[email_address]])
+      end
+
+      it 'maps the renamed parameter correctly (original name)' do
+        post '/test', user: { email_address: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('user_attributes' => { 'email' => 'test@example.com' })
+      end
+
+      it 'validates the renamed parameter correctly (original name)' do
+        post '/test', user: { email_address: 'bad[at]example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match('error' => 'user[email_address] is invalid')
+      end
+
+      it 'ignores the renamed parameter (as name, 1)' do
+        post '/test', user: { email: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to \
+          match({ 'user_attributes' => {} })
+      end
+
+      it 'ignores the renamed parameter (as name, 2)' do
+        post '/test', user_attributes: { email_address: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to match({})
+      end
+
+      it 'ignores the renamed parameter (as name, 3)' do
+        post '/test', user_attributes: { email: 'test@example.com' }
+        expect(JSON.parse(last_response.body)).to match({})
+      end
+    end
+  end
 end

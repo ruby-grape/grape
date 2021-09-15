@@ -144,7 +144,7 @@ describe Grape::Validations::ParamsScope do
       get '/renaming-coerced', foo: ' there we go '
 
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('there we go-')
+      expect(last_response.body).to eq('-there we go')
     end
 
     it do
@@ -185,7 +185,7 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         optional :foo, as: :bar, default: 'before'
       end
-      subject.get('/rename-before-default') { params[:bar] }
+      subject.get('/rename-before-default') { declared(params)[:bar] }
       get '/rename-before-default'
 
       expect(last_response.status).to eq(200)
@@ -196,7 +196,7 @@ describe Grape::Validations::ParamsScope do
       subject.params do
         optional :foo, default: 'after', as: :bar
       end
-      subject.get('/rename-after-default') { params[:bar] }
+      subject.get('/rename-after-default') { declared(params)[:bar] }
       get '/rename-after-default'
 
       expect(last_response.status).to eq(200)
@@ -590,7 +590,7 @@ describe Grape::Validations::ParamsScope do
     it 'allows renaming of dependent on parameter' do
       subject.params do
         optional :a, as: :b
-        given b: ->(val) { val == 'x' } do
+        given a: ->(val) { val == 'x' } do
           requires :c
         end
       end
@@ -604,11 +604,22 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq 200
     end
 
-    it 'raises an error if the dependent parameter is not the renamed one' do
+    it 'does not raise if the dependent parameter is not the renamed one' do
       expect do
         subject.params do
           optional :a, as: :b
           given :a do
+            requires :c
+          end
+        end
+      end.not_to raise_error
+    end
+
+    it 'raises an error if the dependent parameter is the renamed one' do
+      expect do
+        subject.params do
+          optional :a, as: :b
+          given :b do
             requires :c
           end
         end
