@@ -610,6 +610,7 @@ describe Grape::API do
       subject.namespace :example do
         before do
           raise 'before filter ran twice' if already_run
+
           already_run = true
           header 'X-Custom-Header', 'foo'
         end
@@ -650,12 +651,12 @@ describe Grape::API do
 
         put '/example'
         expect(last_response.status).to eql 405
-        expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<error>
-  <message>405 Not Allowed</message>
-</error>
-XML
+        expect(last_response.body).to eq <<~XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <error>
+            <message>405 Not Allowed</message>
+          </error>
+        XML
       end
     end
 
@@ -2147,7 +2148,9 @@ XML
     context 'custom errors' do
       before do
         class ConnectionError < RuntimeError; end
+
         class DatabaseError < RuntimeError; end
+
         class CommunicationError < StandardError; end
       end
 
@@ -2303,6 +2306,7 @@ XML
       module ApiSpec
         module APIErrors
           class ParentError < StandardError; end
+
           class ChildError < ParentError; end
         end
       end
@@ -3160,10 +3164,10 @@ XML
       subject.get 'method'
 
       expect(subject.routes.map(&:params)).to eq [{
-        'group1'         => { required: true, type: 'Array' },
+        'group1' => { required: true, type: 'Array' },
         'group1[param1]' => { required: false, desc: 'group1 param1 desc' },
         'group1[param2]' => { required: true, desc: 'group1 param2 desc' },
-        'group2'         => { required: true, type: 'Array' },
+        'group2' => { required: true, type: 'Array' },
         'group2[param1]' => { required: false, desc: 'group2 param1 desc' },
         'group2[param2]' => { required: true, desc: 'group2 param2 desc' }
       }]
@@ -3376,8 +3380,8 @@ XML
           mount app
         end
         expect(subject.routes.size).to eq(2)
-        expect(subject.routes.first.path).to match(%r{\/cool\/awesome})
-        expect(subject.routes.last.path).to match(%r{\/cool\/sauce})
+        expect(subject.routes.first.path).to match(%r{/cool/awesome})
+        expect(subject.routes.last.path).to match(%r{/cool/sauce})
       end
 
       it 'mounts on a path' do
@@ -3399,7 +3403,7 @@ XML
         APP2.get '/nice' do
           'play'
         end
-        # note that the reverse won't work, mount from outside-in
+        # NOTE: that the reverse won't work, mount from outside-in
         APP3 = subject
         APP3.mount APP1 => '/app1'
         APP1.mount APP2 => '/app2'
@@ -3590,6 +3594,7 @@ XML
             def self.included(base)
               base.extend(ClassMethods)
             end
+
             module ClassMethods
               def my_method
                 @test = true
@@ -3834,12 +3839,12 @@ XML
         end
         get '/example'
         expect(last_response.status).to eq(500)
-        expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<error>
-  <message>cannot convert String to xml</message>
-</error>
-XML
+        expect(last_response.body).to eq <<~XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <error>
+            <message>cannot convert String to xml</message>
+          </error>
+        XML
       end
       it 'hash' do
         subject.get '/example' do
@@ -3850,13 +3855,13 @@ XML
         end
         get '/example'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<hash>
-  <example1>example1</example1>
-  <example2>example2</example2>
-</hash>
-XML
+        expect(last_response.body).to eq <<~XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <hash>
+            <example1>example1</example1>
+            <example2>example2</example2>
+          </hash>
+        XML
       end
       it 'array' do
         subject.get '/example' do
@@ -3864,13 +3869,13 @@ XML
         end
         get '/example'
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<strings type="array">
-  <string>example1</string>
-  <string>example2</string>
-</strings>
-XML
+        expect(last_response.body).to eq <<~XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <strings type="array">
+            <string>example1</string>
+            <string>example2</string>
+          </strings>
+        XML
       end
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
@@ -3883,12 +3888,12 @@ XML
         end
         get '/'
         expect(last_response.status).to eq(42)
-        expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<error>
-  <message>Unauthorized</message>
-</error>
-XML
+        expect(last_response.body).to eq <<~XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <error>
+            <message>Unauthorized</message>
+          </error>
+        XML
       end
     end
   end

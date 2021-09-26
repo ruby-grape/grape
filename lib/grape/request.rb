@@ -37,6 +37,7 @@ module Grape
       Grape::Util::LazyObject.new do
         env.each_pair.with_object({}) do |(k, v), headers|
           next unless k.to_s.start_with? HTTP_PREFIX
+
           transformed_header = Grape::Http::Headers::HTTP_HEADERS[k] || transform_header(k)
           headers[transformed_header] = v
         end

@@ -22,11 +22,9 @@ module Grape
         def before
           potential_version = (env[Grape::Http::Headers::HTTP_ACCEPT_VERSION] || '').strip
 
-          if strict?
+          if strict? && potential_version.empty?
             # If no Accept-Version header:
-            if potential_version.empty?
-              throw :error, status: 406, headers: error_headers, message: 'Accept-Version header must be set.'
-            end
+            throw :error, status: 406, headers: error_headers, message: 'Accept-Version header must be set.'
           end
 
           return if potential_version.empty?
@@ -51,7 +49,7 @@ module Grape
         # of routes (see Grape::Router) for more information). To prevent
         # this behavior, and not add the `X-Cascade` header, one can set the `:cascade` option to `false`.
         def cascade?
-          if options[:version_options] && options[:version_options].key?(:cascade)
+          if options[:version_options]&.key?(:cascade)
             options[:version_options][:cascade]
           else
             true

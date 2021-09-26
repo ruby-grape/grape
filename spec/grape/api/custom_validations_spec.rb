@@ -10,6 +10,7 @@ describe Grape::Validations do
           def validate_param!(attr_name, params)
             @option = params[:max].to_i if params.key?(:max)
             return if params[attr_name].length <= @option
+
             raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long")
           end
         end

@@ -30,6 +30,7 @@ module Grape
       # @return [void]
       def validate(request)
         return unless @scope.should_validate?(request.params)
+
         validate!(request.params)
       end
 
@@ -48,8 +49,9 @@ module Grape
           next if skip_value
           next if !@scope.required? && empty_val
           next unless @scope.meets_dependency?(val, params)
+
           begin
-            validate_param!(attr_name, val) if @required || val.respond_to?(:key?) && val.key?(attr_name)
+            validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
             array_errors << e
           end
@@ -69,6 +71,7 @@ module Grape
 
       def self.inherited(klass)
         return unless klass.name.present?
+
         Validations.register_validator(convert_to_short_name(klass), klass)
       end
 

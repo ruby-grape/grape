@@ -59,6 +59,7 @@ module Grape
 
       def response
         return @app_response if @app_response.is_a?(Rack::Response)
+
         Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
       end
 
@@ -84,6 +85,7 @@ module Grape
 
       def merge_headers(response)
         return unless headers.is_a?(Hash)
+
         case response
         when Rack::Response then response.headers.merge!(headers)
         when Array          then response[1].merge!(headers)

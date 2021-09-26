@@ -20,7 +20,7 @@ describe Grape::Middleware::Formatter do
       let(:body) { ['foo'] }
       it 'calls #to_json since default format is json' do
         body.instance_eval do
-          def to_json
+          def to_json(*_args)
             '"bar"'
           end
         end
@@ -33,7 +33,7 @@ describe Grape::Middleware::Formatter do
       let(:body) { { 'foos' => [{ 'bar' => 'baz' }] } }
       it 'calls #to_json if the content type is jsonapi' do
         body.instance_eval do
-          def to_json
+          def to_json(*_args)
             '{"foos":[{"bar":"baz"}] }'
           end
         end

@@ -22,7 +22,7 @@ require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'i18n'
 
-I18n.load_path << File.expand_path('../grape/locale/en.yml', __FILE__)
+I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 
 module Grape
   extend ::ActiveSupport::Autoload

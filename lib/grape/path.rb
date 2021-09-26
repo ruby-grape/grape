@@ -91,6 +91,7 @@ module Grape
 
     def split_setting(key)
       return if settings[key].nil?
+
       settings[key].to_s.split('/')
     end
   end

@@ -5,8 +5,8 @@ require 'spec_helper'
 describe Grape::Validations::ValuesValidator do
   module ValidationsSpec
     class ValuesModel
-      DEFAULT_VALUES = ['valid-type1', 'valid-type2', 'valid-type3'].freeze
-      DEFAULT_EXCEPTS = ['invalid-type1', 'invalid-type2', 'invalid-type3'].freeze
+      DEFAULT_VALUES = %w[valid-type1 valid-type2 valid-type3].freeze
+      DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze
       class << self
         def values
           @values ||= []
@@ -26,6 +26,10 @@ describe Grape::Validations::ValuesValidator do
         def add_except(except)
           @excepts ||= []
           @excepts << except
+        end
+
+        def include?(value)
+          values.include?(value)
         end
       end
     end
@@ -106,7 +110,7 @@ describe Grape::Validations::ValuesValidator do
         end
 
         params do
-          requires :type, values: ->(v) { ValuesModel.values.include? v }
+          requires :type, values: ->(v) { ValuesModel.include? v }
         end
         get '/lambda_val' do
           { type: params[:type] }
@@ -214,14 +218,14 @@ describe Grape::Validations::ValuesValidator do
         put '/optional_with_array_of_string_values'
 
         params do
-          requires :type, values: { proc: ->(v) { ValuesModel.values.include? v } }
+          requires :type, values: { proc: ->(v) { ValuesModel.include? v } }
         end
         get '/proc' do
           { type: params[:type] }
         end
 
         params do
-          requires :type, values: { proc: ->(v) { ValuesModel.values.include? v }, message: 'failed check' }
+          requires :type, values: { proc: ->(v) { ValuesModel.include? v }, message: 'failed check' }
         end
         get '/proc/message'
 
@@ -420,21 +424,21 @@ describe Grape::Validations::ValuesValidator do
   it 'raises IncompatibleOptionValues on an invalid default value from proc' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: ValidationsSpec::ValuesModel.values.sample + '_invalid' }
+      subject.params { optional :type, values: %w[valid-type1 valid-type2 valid-type3], default: "#{ValidationsSpec::ValuesModel.values.sample}_invalid" }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
   it 'raises IncompatibleOptionValues on an invalid default value' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], default: 'invalid-type' }
+      subject.params { optional :type, values: %w[valid-type1 valid-type2 valid-type3], default: 'invalid-type' }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
   it 'raises IncompatibleOptionValues when type is incompatible with values array' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: ['valid-type1', 'valid-type2', 'valid-type3'], type: Symbol }
+      subject.params { optional :type, values: %w[valid-type1 valid-type2 valid-type3], type: Symbol }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 
@@ -648,9 +652,9 @@ describe Grape::Validations::ValuesValidator do
     end
 
     it 'accepts multiple valid values' do
-      get '/proc', type: ['valid-type1', 'valid-type3']
+      get '/proc', type: %w[valid-type1 valid-type3]
       expect(last_response.status).to eq 200
-      expect(last_response.body).to eq({ type: ['valid-type1', 'valid-type3'] }.to_json)
+      expect(last_response.body).to eq({ type: %w[valid-type1 valid-type3] }.to_json)
     end
 
     it 'rejects a single invalid value' do
@@ -660,7 +664,7 @@ describe Grape::Validations::ValuesValidator do
     end
 
     it 'rejects an invalid value among valid ones' do
-      get '/proc', type: ['valid-type1', 'invalid-type1', 'valid-type3']
+      get '/proc', type: %w[valid-type1 invalid-type1 valid-type3]
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
     end

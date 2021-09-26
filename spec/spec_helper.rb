@@ -10,7 +10,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.require :default, :test
 
-Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
+Dir["#{File.dirname(__FILE__)}/support/*.rb"].sort.each do |file|
   require file
 end
 

@@ -70,7 +70,7 @@ shared_examples_for 'versioning' do
 
         subject.version 'v1', macro_options do
           get 'version' do
-            'version ' + request.env['api.version']
+            "version #{request.env['api.version']}"
           end
         end
 
@@ -94,7 +94,7 @@ shared_examples_for 'versioning' do
 
         subject.version 'v1', macro_options do
           get 'version' do
-            'version ' + request.env['api.version']
+            "version #{request.env['api.version']}"
           end
         end
 

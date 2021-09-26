@@ -32,6 +32,7 @@ module Grape
         def before
           potential_version = Rack::Utils.parse_nested_query(env[Grape::Http::Headers::QUERY_STRING])[paramkey]
           return if potential_version.nil?
+
           throw :error, status: 404, message: '404 API Version Not Found', headers: { Grape::Http::Headers::X_CASCADE => 'pass' } if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
           env[Grape::Env::API_VERSION] = potential_version
           env[Grape::Env::RACK_REQUEST_QUERY_HASH].delete(paramkey) if env.key? Grape::Env::RACK_REQUEST_QUERY_HASH

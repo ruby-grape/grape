@@ -38,7 +38,7 @@ module Grape
 
             @versions = versions | requested_versions
 
-            if block_given?
+            if block
               within_namespace do
                 namespace_inheritable(:version, requested_versions)
                 namespace_inheritable(:version_options, options)
@@ -166,7 +166,7 @@ module Grape
         def namespace(space = nil, options = {}, &block)
           @namespace_description = nil unless instance_variable_defined?(:@namespace_description) && @namespace_description
 
-          if space || block_given?
+          if space || block
             within_namespace do
               previous_namespace_description = @namespace_description
               @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})

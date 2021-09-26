@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
+require 'English'
 module Rack
   module Accept
     module Header
-      ALLOWED_CHARACTERS = %r{^([a-z*]+)\/([a-z0-9*\&\^\-_#\$!.+]+)(?:;([a-z0-9=;]+))?$}.freeze
+      ALLOWED_CHARACTERS = %r{^([a-z*]+)/([a-z0-9*&\^\-_#{$ERROR_INFO}.+]+)(?:;([a-z0-9=;]+))?$}.freeze
       class << self
         # Corrected version of https://github.com/mjackson/rack-accept/blob/master/lib/rack/accept/header.rb#L40-L44
         def parse_media_type(media_type)

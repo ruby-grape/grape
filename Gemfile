@@ -10,9 +10,9 @@ group :development, :test do
   gem 'bundler'
   gem 'hashie'
   gem 'rake'
-  gem 'rubocop', '1.7.0'
-  gem 'rubocop-ast', '1.3.0'
-  gem 'rubocop-performance', '1.9.1', require: false
+  gem 'rubocop', '~> 1.21.0'
+  gem 'rubocop-ast', '~> 1.11.0'
+  gem 'rubocop-performance', '~> 1.11.5', require: false
 end
 
 group :development do

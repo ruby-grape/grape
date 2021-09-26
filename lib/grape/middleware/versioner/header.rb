@@ -26,10 +26,10 @@ module Grape
       # route.
       class Header < Base
         VENDOR_VERSION_HEADER_REGEX =
-          /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))?(?:\+([a-z0-9*\-.]+))?\z/.freeze
+          /\Avnd\.([a-z0-9.\-_!#{Regexp.last_match(0)}\^]+?)(?:-([a-z0-9*.]+))?(?:\+([a-z0-9*\-.]+))?\z/.freeze
 
-        HAS_VENDOR_REGEX = /\Avnd\.[a-z0-9.\-_!#\$&\^]+/.freeze
-        HAS_VERSION_REGEX = /\Avnd\.([a-z0-9.\-_!#\$&\^]+?)(?:-([a-z0-9*.]+))+/.freeze
+        HAS_VENDOR_REGEX = /\Avnd\.[a-z0-9.\-_!#{Regexp.last_match(0)}\^]+/.freeze
+        HAS_VERSION_REGEX = /\Avnd\.([a-z0-9.\-_!#{Regexp.last_match(0)}\^]+?)(?:-([a-z0-9*.]+))+/.freeze
 
         def before
           strict_header_checks if strict?
@@ -52,12 +52,14 @@ module Grape
 
         def strict_accept_header_presence_check
           return unless header.qvalues.empty?
+
           fail_with_invalid_accept_header!('Accept header must be set.')
         end
 
         def strict_version_vendor_accept_header_presence_check
           return unless versions.present?
           return if an_accept_header_with_version_and_vendor_is_present?
+
           fail_with_invalid_accept_header!('API vendor or version not found.')
         end
 
@@ -160,7 +162,7 @@ module Grape
         # information). To prevent # this behavior, and not add the `X-Cascade`
         # header, one can set the `:cascade` option to `false`.
         def cascade?
-          if version_options && version_options.key?(:cascade)
+          if version_options&.key?(:cascade)
             version_options[:cascade]
           else
             true

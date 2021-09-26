@@ -11,7 +11,7 @@ class API < Grape::API
   # include Grape::Extensions::Hashie::Mash::ParamBuilder
 
   rescue_from do |e|
-    warn "\n\n#{e.class} (#{e.message}):\n    " + e.backtrace.join("\n    ") + "\n\n"
+    warn "\n\n#{e.class} (#{e.message}):\n    #{e.backtrace.join("\n    ")}\n\n"
   end
 
   prefix :api
@@ -79,7 +79,7 @@ class API < Grape::API
     this.optional(:cost_time_multiplier, type: Float)
 
     this.optional :router_dimension, type: String, values: %w[time distance]
-    this.optional(:skills, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(/,/).map(&:strip)] : val })
+    this.optional(:skills, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(',').map(&:strip)] : val })
 
     this.optional(:unavailable_work_day_indices, type: Array[Integer])
 

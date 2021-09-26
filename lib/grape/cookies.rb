@@ -33,9 +33,11 @@ module Grape
       @cookies.each(&block)
     end
 
+    # rubocop:disable Layout/SpaceBeforeBrackets
     def delete(name, **opts)
       options = opts.merge(value: 'deleted', expires: Time.at(0))
       self.[]=(name, options)
     end
+    # rubocop:enable Layout/SpaceBeforeBrackets
   end
 end

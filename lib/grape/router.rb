@@ -28,6 +28,7 @@ module Grape
 
     def compile!
       return if compiled
+
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
       self.class.supported_methods.each do |method|
@@ -60,6 +61,7 @@ module Grape
     def recognize_path(input)
       any = with_optimization { greedy_match?(input) }
       return if any == default_response
+
       any.endpoint
     end
 
@@ -80,6 +82,7 @@ module Grape
       map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
+
         response = process_route(route, env)
         break unless cascade?(response)
       end
@@ -91,6 +94,7 @@ module Grape
       response = yield(input, method)
 
       return response if response && !(cascade = cascade?(response))
+
       last_neighbor_route = greedy_match?(input)
 
       # If last_neighbor_route exists and request method is OPTIONS,
@@ -139,12 +143,14 @@ module Grape
     def match?(input, method)
       current_regexp = @optimized_map[method]
       return unless current_regexp.match(input)
+
       last_match = Regexp.last_match
       @map[method].detect { |route| last_match["_#{route.index}"] }
     end
 
     def greedy_match?(input)
       return unless @union.match(input)
+
       last_match = Regexp.last_match
       @neutral_map.detect { |route| last_match["_#{route.index}"] }
     end

@@ -12,7 +12,7 @@ module Grape
 
     describe Routing do
       subject { Class.new(RoutingSpec::Dummy) }
-      let(:proc) { ->() {} }
+      let(:proc) { -> {} }
       let(:options) { { a: :b } }
       let(:path) { '/dummy' }
 

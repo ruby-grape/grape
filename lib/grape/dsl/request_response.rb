@@ -26,6 +26,7 @@ module Grape
             # define a single mime type
             mime_type = content_types[new_format.to_sym]
             raise Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
+
             namespace_stackable(:content_types, new_format.to_sym => mime_type)
           else
             namespace_inheritable(:format)
@@ -102,14 +103,13 @@ module Grape
         def rescue_from(*args, &block)
           if args.last.is_a?(Proc)
             handler = args.pop
-          elsif block_given?
+          elsif block
             handler = block
           end
 
           options = args.extract_options!
-          if block_given? && options.key?(:with)
-            raise ArgumentError, 'both :with option and block cannot be passed'
-          end
+          raise ArgumentError, 'both :with option and block cannot be passed' if block && options.key?(:with)
+
           handler ||= extract_with(options)
 
           if args.include?(:all)
@@ -127,7 +127,7 @@ module Grape
                 :base_only_rescue_handlers
               end
 
-            namespace_reverse_stackable handler_type, Hash[args.map { |arg| [arg, handler] }]
+            namespace_reverse_stackable handler_type, args.map { |arg| [arg, handler] }.to_h
           end
 
           namespace_stackable(:rescue_options, options)
@@ -154,7 +154,8 @@ module Grape
         # @param model_class [Class] The model class that will be represented.
         # @option options [Class] :with The entity class that will represent the model.
         def represent(model_class, options)
-          raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with] && options[:with].is_a?(Class)
+          raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with].is_a?(Class)
+
           namespace_stackable(:representations, model_class => options[:with])
         end
 
@@ -162,9 +163,11 @@ module Grape
 
         def extract_with(options)
           return unless options.key?(:with)
+
           with_option = options.delete(:with)
           return with_option if with_option.instance_of?(Proc)
           return with_option.to_sym if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
+
           raise ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
         end
       end

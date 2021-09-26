@@ -22,6 +22,7 @@ module Grape
         attrs = SingleAttributeIterator.new(self, @scope, params)
         attrs.each do |resource_params, attr_name|
           next unless @scope.meets_dependency?(resource_params, params)
+
           validate_param!(attr_name, resource_params) if resource_params.is_a?(Hash) && resource_params[attr_name].nil?
         end
       end

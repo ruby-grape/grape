@@ -10,12 +10,11 @@ module Grape
       include Grape::DSL::API
 
       class << self
-        attr_reader :instance
-        attr_reader :base
+        attr_reader :instance, :base
         attr_accessor :configuration
 
         def given(conditional_option, &block)
-          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block_given?
+          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block
         end
 
         def mounted(&block)
@@ -28,7 +27,7 @@ module Grape
         end
 
         def to_s
-          (base && base.to_s) || super
+          base&.to_s || super
         end
 
         def base_instance?
@@ -82,6 +81,7 @@ module Grape
 
         def compile!
           return if instance
+
           LOCK.synchronize { compile unless instance }
         end
 
@@ -103,7 +103,7 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            evaluate_as_instance_with_configuration(block) if block_given?
+            evaluate_as_instance_with_configuration(block) if block
             blocks.each { |b| evaluate_as_instance_with_configuration(b) }
             reset_validations!
           else
@@ -114,9 +114,7 @@ module Grape
         def evaluate_as_instance_with_configuration(block, lazy: false)
           lazy_block = Grape::Util::LazyBlock.new do |configuration|
             value_for_configuration = configuration
-            if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
-              self.configuration = value_for_configuration.evaluate
-            end
+            self.configuration = value_for_configuration.evaluate if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
             response = instance_eval(&block)
             self.configuration = value_for_configuration
             response
@@ -179,7 +177,8 @@ module Grape
       # X-Cascade. Default :cascade is true.
       def cascade?
         return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.key?(:cascade)
-        return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options) && self.class.namespace_inheritable(:version_options).key?(:cascade)
+        return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options)&.key?(:cascade)
+
         true
       end
 
@@ -204,15 +203,11 @@ module Grape
 
               allowed_methods = config[:methods].dup
 
-              unless self.class.namespace_inheritable(:do_not_route_head)
-                allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
-              end
+              allowed_methods |= [Grape::Http::Headers::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Grape::Http::Headers::GET)
 
               allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods)
 
-              unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
-                config[:endpoint].options[:options_route_enabled] = true
-              end
+              config[:endpoint].options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
 
               attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
               generate_not_allowed_method(config[:pattern], **attributes)

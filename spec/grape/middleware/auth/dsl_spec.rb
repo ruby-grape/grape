@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Grape::Middleware::Auth::DSL do
   subject { Class.new(Grape::API) }
 
-  let(:block) { ->() {} }
+  let(:block) { -> {} }
   let(:settings) do
     {
       opaque: 'secret',

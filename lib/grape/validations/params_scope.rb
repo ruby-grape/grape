@@ -36,7 +36,7 @@ module Grape
         @declared_params = []
         @index = nil
 
-        instance_eval(&block) if block_given?
+        instance_eval(&block) if block
 
         configure_declared_params
       end
@@ -53,15 +53,14 @@ module Grape
         return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
         return false unless meets_dependency?(scoped_params, parameters)
         return true if parent.nil?
+
         parent.should_validate?(parameters)
       end
 
       def meets_dependency?(params, request_params)
         return true unless @dependent_on
 
-        if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
-          return false
-        end
+        return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
 
@@ -172,6 +171,7 @@ module Grape
         required_fields.each do |field|
           field_opts = opts[:using][field]
           raise ArgumentError, "required field not exist: #{field}" unless field_opts
+
           requires(field, field_opts)
         end
         optional_fields.each do |field|
@@ -211,12 +211,12 @@ module Grape
         end
 
         self.class.new(
-          api:             @api,
-          element:         attrs.first,
+          api: @api,
+          element: attrs.first,
           element_renamed: attrs[1][:as],
-          parent:          self,
-          optional:        optional,
-          type:            type || Array,
+          parent: self,
+          optional: optional,
+          type: type || Array,
           &block
         )
       end
@@ -230,11 +230,11 @@ module Grape
       # @yield parameter scope
       def new_lateral_scope(options, &block)
         self.class.new(
-          api:          @api,
-          element:      nil,
-          parent:       self,
-          options:      @optional,
-          type:         type == Array ? Array : Hash,
+          api: @api,
+          element: nil,
+          parent: self,
+          options: @optional,
+          type: type == Array ? Array : Hash,
           dependent_on: options[:dependent_on],
           &block
         )
@@ -247,9 +247,9 @@ module Grape
       # @yield parameter scope
       def new_group_scope(attrs, &block)
         self.class.new(
-          api:          @api,
-          parent:       self,
-          group:        attrs.first,
+          api: @api,
+          parent: self,
+          group: attrs.first,
           &block
         )
       end
@@ -324,6 +324,7 @@ module Grape
 
         validations.each do |type, options|
           next if order_specific_validations.include?(type)
+
           validate(type, options, attrs, doc_attrs, opts)
         end
       end
@@ -342,9 +343,7 @@ module Grape
       # @return [class-like] type to which the parameter will be coerced
       # @raise [ArgumentError] if the given type options are invalid
       def infer_coercion(validations)
-        if validations.key?(:type) && validations.key?(:types)
-          raise ArgumentError, ':type may not be supplied with :types'
-        end
+        raise ArgumentError, ':type may not be supplied with :types' if validations.key?(:type) && validations.key?(:types)
 
         validations[:coerce] = (options_key?(:type, :value, validations) ? validations[:type][:value] : validations[:type]) if validations.key?(:type)
         validations[:coerce_message] = (options_key?(:type, :message, validations) ? validations[:type][:message] : nil) if validations.key?(:type)
@@ -380,6 +379,7 @@ module Grape
         # but not special JSON types, which
         # already imply coercion method
         return unless [JSON, Array[JSON]].include? validations[:coerce]
+
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
 
@@ -407,6 +407,7 @@ module Grape
 
       def guess_coerce_type(coerce_type, *values_list)
         return coerce_type unless coerce_type == Array
+
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
           return values.first.class if values.is_a?(Range) || !values.empty?
@@ -417,14 +418,11 @@ module Grape
       def check_incompatible_option_values(default, values, except_values, excepts)
         return unless default && !default.is_a?(Proc)
 
-        if values && !values.is_a?(Proc)
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) \
-            unless Array(default).all? { |def_val| values.include?(def_val) }
-        end
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && !Array(default).all? { |def_val| values.include?(def_val) }
 
-        if except_values && !except_values.is_a?(Proc)
+        if except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
           raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values) \
-            unless Array(default).none? { |def_val| except_values.include?(def_val) }
+
         end
 
         return unless excepts && !excepts.is_a?(Proc)
@@ -438,11 +436,11 @@ module Grape
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
         validator_options = {
-          attributes:      attrs,
-          options:         options,
-          required:        doc_attrs[:required],
-          params_scope:    self,
-          opts:            opts,
+          attributes: attrs,
+          options: options,
+          required: doc_attrs[:required],
+          params_scope: self,
+          opts: opts,
           validator_class: validator_class
         }
         @api.namespace_stackable(:validations, validator_options)
@@ -450,21 +448,20 @@ module Grape
 
       def validate_value_coercion(coerce_type, *values_list)
         return unless coerce_type
+
         coerce_type = coerce_type.first if coerce_type.is_a?(Array)
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
+
           value_types = values.is_a?(Range) ? [values.begin, values.end] : values
-          if coerce_type == Grape::API::Boolean
-            value_types = value_types.map { |type| Grape::API::Boolean.build(type) }
-          end
-          unless value_types.all? { |v| v.is_a? coerce_type }
-            raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values)
-          end
+          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if coerce_type == Grape::API::Boolean
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values) unless value_types.all?(coerce_type)
         end
       end
 
       def extract_message_option(attrs)
         return nil unless attrs.is_a?(Array)
+
         opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
         opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
       end
@@ -484,12 +481,13 @@ module Grape
 
         {
           allow_blank: allow_blank.is_a?(Hash) ? allow_blank[:value] : allow_blank,
-          fail_fast:   validations.delete(:fail_fast) || false
+          fail_fast: validations.delete(:fail_fast) || false
         }
       end
 
       def validates_presence(validations, attrs, doc_attrs, opts)
         return unless validations.key?(:presence) && validations[:presence]
+
         validate(:presence, validations[:presence], attrs, doc_attrs, opts)
         yield :presence
         yield :message if validations.key?(:message)

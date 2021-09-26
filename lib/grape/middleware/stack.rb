@@ -45,8 +45,8 @@ module Grape
         @others = []
       end
 
-      def each
-        @middlewares.each { |x| yield x }
+      def each(&block)
+        @middlewares.each(&block)
       end
 
       def size

@@ -56,6 +56,7 @@ module Grape
 
           return coerced_val if coerced_val.is_a?(InvalidValue)
           return InvalidValue.new unless coerced?(coerced_val)
+
           coerced_val
         end
 

@@ -5,7 +5,7 @@ require 'grape'
 require 'benchmark/memory'
 
 class VotingApi < Grape::API
-  logger Logger.new(STDOUT)
+  logger Logger.new($stdout)
 
   helpers do
     def logger

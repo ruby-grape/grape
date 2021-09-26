@@ -27,10 +27,6 @@ module Grape
                      end
       end
 
-      def validate(request)
-        super
-      end
-
       def validate_param!(attr_name, params)
         raise validation_exception(attr_name) unless params.is_a? Hash
 
@@ -47,7 +43,7 @@ module Grape
         #     h[:list] = list
         #     h
         #     => #<Hashie::Mash list=[1, 2, 3, 4]>
-        return if params[attr_name].class == new_value.class && params[attr_name] == new_value
+        return if params[attr_name].instance_of?(new_value.class) && params[attr_name] == new_value
 
         params[attr_name] = new_value
       end

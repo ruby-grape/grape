@@ -22,6 +22,7 @@ module Grape
 
       def after
         return unless @app_response
+
         status, headers, bodies = *@app_response
 
         if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
@@ -79,7 +80,7 @@ module Grape
           (request.post? || request.put? || request.patch? || request.delete?) &&
           (!request.form_data? || !request.media_type) &&
           !request.parseable_data? &&
-          (request.content_length.to_i > 0 || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
+          (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
         return unless (input = env[Grape::Env::RACK_INPUT])
 
@@ -96,9 +97,7 @@ module Grape
       def read_rack_input(body)
         fmt = request.media_type ? mime_types[request.media_type] : options[:default_format]
 
-        unless content_type_for(fmt)
-          throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported."
-        end
+        throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported." unless content_type_for(fmt)
         parser = Grape::Parser.parser_for fmt, **options
         if parser
           begin
@@ -145,6 +144,7 @@ module Grape
         fmt = Rack::Utils.parse_nested_query(env[Grape::Http::Headers::QUERY_STRING])[Grape::Http::Headers::FORMAT]
         # avoid symbol memory leak on an unknown format
         return fmt.to_sym if content_type_for(fmt)
+
         fmt
       end
 
