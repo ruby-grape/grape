@@ -6,6 +6,7 @@ module Grape
       def validate_param!(attr_name, params)
         confirmation = options_key?(:value) ? @option[:value] : @option
         return if params[attr_name] == params[confirmation]
+
         raise Grape::Exceptions::Validation.new(
           params: [@scope.full_name(attr_name)],
           message: build_message

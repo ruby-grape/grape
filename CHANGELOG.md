@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2190](https://github.com/ruby-grape/grape/pull/2190): Upgrade dev deps & drop Ruby 2.4.x support - [@dnesteryuk](https://github.com/dnesteryuk).
 * Your contribution here.
 
 #### Fixes

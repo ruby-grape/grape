@@ -98,6 +98,7 @@ describe Grape::Validations::ParamsScope do
 
         def self.parse(value)
           raise if value == 'invalid'
+
           new(value)
         end
 

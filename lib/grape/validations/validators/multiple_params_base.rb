@@ -9,6 +9,7 @@ module Grape
 
         attributes.each do |resource_params, skip_value|
           next if skip_value
+
           begin
             validate_params!(resource_params)
           rescue Grape::Exceptions::Validation => e
@@ -23,6 +24,7 @@ module Grape
 
       def keys_in_common(resource_params)
         return [] unless resource_params.is_a?(Hash)
+
         all_keys & resource_params.keys.map! { |attr| @scope.full_name(attr) }
       end
 

@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Grape::Validations::ExceptValuesValidator do
   module ValidationsSpec
     class ExceptValuesModel
-      DEFAULT_EXCEPTS = ['invalid-type1', 'invalid-type2', 'invalid-type3'].freeze
+      DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze
       class << self
         attr_accessor :excepts
 
@@ -170,7 +170,7 @@ describe Grape::Validations::ExceptValuesValidator do
   it 'raises IncompatibleOptionValues when type is incompatible with values array' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, except_values: ['valid-type1', 'valid-type2', 'valid-type3'], type: Symbol }
+      subject.params { optional :type, except_values: %w[valid-type1 valid-type2 valid-type3], type: Symbol }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 

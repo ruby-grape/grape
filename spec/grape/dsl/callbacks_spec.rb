@@ -12,7 +12,7 @@ module Grape
 
     describe Callbacks do
       subject { Class.new(CallbacksSpec::Dummy) }
-      let(:proc) { ->() {} }
+      let(:proc) { -> {} }
 
       describe '.before' do
         it 'adds a block to "before"' do

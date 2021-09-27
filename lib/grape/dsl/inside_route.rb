@@ -91,7 +91,7 @@ module Grape
           return yield if has_passed_children
 
           key = params_nested_path[0]
-          key += '[' + params_nested_path[1..-1].join('][') + ']' if params_nested_path.size > 1
+          key += "[#{params_nested_path[1..-1].join('][')}]" if params_nested_path.size > 1
 
           route_options_params = options[:route_options][:params] || {}
           type = route_options_params.dig(key, :type)
@@ -99,7 +99,7 @@ module Grape
 
           if type == 'Hash' && !has_children
             {}
-          elsif type == 'Array' || type&.start_with?('[') && !type&.include?(',')
+          elsif type == 'Array' || (type&.start_with?('[') && !type&.include?(','))
             []
           elsif type == 'Set' || type&.start_with?('#<Set')
             Set.new
@@ -122,6 +122,7 @@ module Grape
                             end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
+
           declared_params
         end
       end
@@ -192,11 +193,13 @@ module Grape
         case status
         when Symbol
           raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(status)
+
           @status = Rack::Utils.status_code(status)
         when Integer
           @status = status
         when nil
           return @status if instance_variable_defined?(:@status) && @status
+
           case request.request_method.to_s.upcase
           when Grape::Http::Headers::POST
             201
@@ -374,6 +377,7 @@ module Grape
           representation = (body || {}).merge(key => representation)
         elsif entity_class.present? && body
           raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
+
           representation = body.merge(representation)
         end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift File.expand_path('lib', __dir__)
 require 'grape/version'
 
 Gem::Specification.new do |s|
@@ -14,10 +14,10 @@ Gem::Specification.new do |s|
   s.description = 'A Ruby framework for rapid API development with great conventions.'
   s.license     = 'MIT'
   s.metadata    = {
-    'bug_tracker_uri'   => 'https://github.com/ruby-grape/grape/issues',
-    'changelog_uri'     => "https://github.com/ruby-grape/grape/blob/v#{s.version}/CHANGELOG.md",
+    'bug_tracker_uri' => 'https://github.com/ruby-grape/grape/issues',
+    'changelog_uri' => "https://github.com/ruby-grape/grape/blob/v#{s.version}/CHANGELOG.md",
     'documentation_uri' => "https://www.rubydoc.info/gems/grape/#{s.version}",
-    'source_code_uri'   => "https://github.com/ruby-grape/grape/tree/v#{s.version}"
+    'source_code_uri' => "https://github.com/ruby-grape/grape/tree/v#{s.version}"
   }
 
   s.add_runtime_dependency 'activesupport'
@@ -32,5 +32,5 @@ Gem::Specification.new do |s|
   s.files        += Dir['lib/**/*']
   s.test_files    = Dir['spec/**/*']
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.4.0'
+  s.required_ruby_version = '>= 2.5.0'
 end

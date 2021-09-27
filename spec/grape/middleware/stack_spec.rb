@@ -5,7 +5,9 @@ require 'spec_helper'
 describe Grape::Middleware::Stack do
   module StackSpec
     class FooMiddleware; end
+
     class BarMiddleware; end
+
     class BlockMiddleware
       attr_reader :block
 
@@ -15,7 +17,7 @@ describe Grape::Middleware::Stack do
     end
   end
 
-  let(:proc) { ->() {} }
+  let(:proc) { -> {} }
   let(:others) { [[:use, StackSpec::BarMiddleware], [:insert_before, StackSpec::BarMiddleware, StackSpec::BlockMiddleware, proc]] }
 
   subject { Grape::Middleware::Stack.new }

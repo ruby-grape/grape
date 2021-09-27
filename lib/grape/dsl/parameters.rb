@@ -133,7 +133,7 @@ module Grape
           require_required_and_optional_fields(attrs.first, opts)
         else
           validate_attributes(attrs, opts, &block)
-          block_given? ? new_scope(orig_attrs, &block) : push_declared_params(attrs, **opts.slice(:as))
+          block ? new_scope(orig_attrs, &block) : push_declared_params(attrs, **opts.slice(:as))
         end
       end
 
@@ -149,7 +149,7 @@ module Grape
         opts = @group.merge(opts) if instance_variable_defined?(:@group) && @group
 
         # check type for optional parameter group
-        if attrs && block_given?
+        if attrs && block
           raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
           raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
@@ -159,7 +159,7 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block_given? ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, **opts.slice(:as))
+          block ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, **opts.slice(:as))
         end
       end
 

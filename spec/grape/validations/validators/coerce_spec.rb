@@ -31,9 +31,9 @@ describe Grape::Validations::CoerceValidator do
 
       it 'i18n error on malformed input' do
         I18n.available_locales = %i[en zh-CN]
-        I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
+        I18n.load_path << File.expand_path('zh-CN.yml', __dir__)
         I18n.reload!
-        I18n.locale = 'zh-CN'.to_sym
+        I18n.locale = :'zh-CN'
         subject.params do
           requires :age, type: Integer
         end
@@ -48,7 +48,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'gives an english fallback error when default locale message is blank' do
         I18n.available_locales = %i[en pt-BR]
-        I18n.locale = 'pt-BR'.to_sym
+        I18n.locale = :'pt-BR'
         subject.params do
           requires :age, type: Integer
         end
@@ -84,9 +84,10 @@ describe Grape::Validations::CoerceValidator do
         before do
           subject.params do
             requires :a, types: { value: [Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
-              if val == 'yup'
+              case val
+              when 'yup'
                 true
-              elsif val == 'false'
+              when 'false'
                 0
               else
                 val
@@ -650,7 +651,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'parses parameters with Array[Array[String]] type and coerce_with' do
         subject.params do
-          requires :values, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(/,/).map(&:strip)] : val }
+          requires :values, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(',').map(&:strip)] : val }
         end
         subject.post '/coerce_nested_strings' do
           params[:values]
@@ -834,9 +835,10 @@ describe Grape::Validations::CoerceValidator do
         before do
           subject.params do
             requires :int, type: Integer, coerce_with: (lambda do |val|
-              if val == '0'
+              case val
+              when '0'
                 nil
-              elsif val.match?(/^-?\d+$/)
+              when /^-?\d+$/
                 val.to_i
               else
                 val
@@ -1201,9 +1203,10 @@ describe Grape::Validations::CoerceValidator do
         before do
           subject.params do
             requires :a, types: [Boolean, String], coerce_with: (lambda do |val|
-              if val == 'yup'
+              case val
+              when 'yup'
                 true
-              elsif val == 'false'
+              when 'false'
                 0
               else
                 val

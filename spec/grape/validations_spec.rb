@@ -494,6 +494,7 @@ describe Grape::Validations do
           class DateRangeValidator < Grape::Validations::Base
             def validate_param!(attr_name, params)
               return if params[attr_name][:from] <= params[attr_name][:to]
+
               raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'")
             end
           end
@@ -887,13 +888,13 @@ describe Grape::Validations do
       context <<~DESC do
         Issue occurs whenever:
         * param structure with at least three levels
-        * 1st level item is a required Array that has >1 entry with an optional item present and >1 entry with an optional item missing  
-        * 2nd level is an optional Array or Hash 
+        * 1st level item is a required Array that has >1 entry with an optional item present and >1 entry with an optional item missing#{'  '}
+        * 2nd level is an optional Array or Hash#{' '}
         * 3rd level is a required item (can be any type)
         * additional levels do not effect the issue from occuring
       DESC
 
-        it "example based off actual real world use case" do
+        it 'example based off actual real world use case' do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
@@ -911,17 +912,17 @@ describe Grape::Validations do
 
           data = {
             orders: [
-              { id: 77, drugs: [{batches: [{batch_no: "A1234567"}]}]},
+              { id: 77, drugs: [{ batches: [{ batch_no: 'A1234567' }] }] },
               { id: 70 }
             ]
           }
 
           get '/validate_required_arrays_under_optional_arrays', data
-          expect(last_response.body).to eq("validate_required_arrays_under_optional_arrays works!")
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
           expect(last_response.status).to eq(200)
         end
 
-        it "simplest example using Array -> Array -> Hash -> String" do
+        it 'simplest example using Array -> Array -> Hash -> String' do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
@@ -937,17 +938,17 @@ describe Grape::Validations do
 
           data = {
             orders: [
-              { id: 77, drugs: [{batch_no: "A1234567"}]},
+              { id: 77, drugs: [{ batch_no: 'A1234567' }] },
               { id: 70 }
             ]
           }
 
           get '/validate_required_arrays_under_optional_arrays', data
-          expect(last_response.body).to eq("validate_required_arrays_under_optional_arrays works!")
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
           expect(last_response.status).to eq(200)
         end
 
-        it "simplest example using Array -> Hash -> String" do
+        it 'simplest example using Array -> Hash -> String' do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
@@ -963,17 +964,17 @@ describe Grape::Validations do
 
           data = {
             orders: [
-              { id: 77, drugs: {batch_no: "A1234567"}},
+              { id: 77, drugs: { batch_no: 'A1234567' } },
               { id: 70 }
             ]
           }
 
           get '/validate_required_arrays_under_optional_arrays', data
-          expect(last_response.body).to eq("validate_required_arrays_under_optional_arrays works!")
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
           expect(last_response.status).to eq(200)
         end
 
-        it "correctly indexes invalida data" do
+        it 'correctly indexes invalida data' do
           subject.params do
             requires :orders, type: Array do
               requires :id, type: Integer
@@ -991,16 +992,16 @@ describe Grape::Validations do
           data = {
             orders: [
               { id: 70 },
-              { id: 77, drugs: [{batch_no: "A1234567", quantity: 12}, {batch_no: "B222222"}]}
+              { id: 77, drugs: [{ batch_no: 'A1234567', quantity: 12 }, { batch_no: 'B222222' }] }
             ]
           }
 
           get '/correctly_indexes', data
-          expect(last_response.body).to eq("orders[1][drugs][1][quantity] is missing")
+          expect(last_response.body).to eq('orders[1][drugs][1][quantity] is missing')
           expect(last_response.status).to eq(400)
         end
 
-        context "multiple levels of optional and requires settings" do
+        context 'multiple levels of optional and requires settings' do
           before do
             subject.params do
               requires :top, type: Array do
@@ -1022,53 +1023,62 @@ describe Grape::Validations do
             end
           end
 
-          it "with valid data" do
+          it 'with valid data' do
             data = {
               top: [
                 { top_id: 1, middle_1: [
-                  {middle_1_id: 11}, {middle_1_id: 12, middle_2: [
-                    {middle_2_id: 121}, {middle_2_id: 122, bottom: [{bottom_id: 1221}]}]}]},
+                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
+                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: 1221 }] }
+                  ] }
+                ] },
                 { top_id: 2, middle_1: [
-                  {middle_1_id: 21}, {middle_1_id: 22, middle_2: [
-                  {middle_2_id: 221}]}]},
+                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [
+                    { middle_2_id: 221 }
+                  ] }
+                ] },
                 { top_id: 3, middle_1: [
-                  {middle_1_id: 31}, {middle_1_id: 32}]},
+                  { middle_1_id: 31 }, { middle_1_id: 32 }
+                ] },
                 { top_id: 4 }
               ]
             }
 
             get '/multi_level', data
-            expect(last_response.body).to eq("multi_level works!")
+            expect(last_response.body).to eq('multi_level works!')
             expect(last_response.status).to eq(200)
           end
 
-          it "with invalid data" do
+          it 'with invalid data' do
             data = {
               top: [
                 { top_id: 1, middle_1: [
-                  {middle_1_id: 11}, {middle_1_id: 12, middle_2: [
-                  {middle_2_id: 121}, {middle_2_id: 122, bottom: [{bottom_id: nil}]}]}]},
+                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
+                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: nil }] }
+                  ] }
+                ] },
                 { top_id: 2, middle_1: [
-                  {middle_1_id: 21}, {middle_1_id: 22, middle_2: [{middle_2_id: nil}]}]},
+                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [{ middle_2_id: nil }] }
+                ] },
                 { top_id: 3, middle_1: [
-                  {middle_1_id: nil}, {middle_1_id: 32}]},
+                  { middle_1_id: nil }, { middle_1_id: 32 }
+                ] },
                 { top_id: nil, missing_top_id: 4 }
               ]
             }
             # debugger
             get '/multi_level', data
-            expect(last_response.body.split(", ")).to match_array([
-              "top[3][top_id] is empty",
-              "top[2][middle_1][0][middle_1_id] is empty",
-              "top[1][middle_1][1][middle_2][0][middle_2_id] is empty",
-              "top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty"
-            ])
+            expect(last_response.body.split(', ')).to match_array([
+                                                                    'top[3][top_id] is empty',
+                                                                    'top[2][middle_1][0][middle_1_id] is empty',
+                                                                    'top[1][middle_1][1][middle_2][0][middle_2_id] is empty',
+                                                                    'top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty'
+                                                                  ])
             expect(last_response.status).to eq(400)
           end
         end
       end
 
-      it "exactly_one_of" do
+      it 'exactly_one_of' do
         subject.params do
           requires :orders, type: Array do
             requires :id, type: Integer
@@ -1086,17 +1096,17 @@ describe Grape::Validations do
 
         data = {
           orders: [
-            { id: 77, drugs: {batch_no: "A1234567"}},
+            { id: 77, drugs: { batch_no: 'A1234567' } },
             { id: 70 }
           ]
         }
 
         get '/exactly_one_of', data
-        expect(last_response.body).to eq("exactly_one_of works!")
+        expect(last_response.body).to eq('exactly_one_of works!')
         expect(last_response.status).to eq(200)
       end
 
-      it "at_least_one_of" do
+      it 'at_least_one_of' do
         subject.params do
           requires :orders, type: Array do
             requires :id, type: Integer
@@ -1114,17 +1124,17 @@ describe Grape::Validations do
 
         data = {
           orders: [
-            { id: 77, drugs: {batch_no: "A1234567"}},
+            { id: 77, drugs: { batch_no: 'A1234567' } },
             { id: 70 }
           ]
         }
 
         get '/at_least_one_of', data
-        expect(last_response.body).to eq("at_least_one_of works!")
+        expect(last_response.body).to eq('at_least_one_of works!')
         expect(last_response.status).to eq(200)
       end
 
-      it "all_or_none_of" do
+      it 'all_or_none_of' do
         subject.params do
           requires :orders, type: Array do
             requires :id, type: Integer
@@ -1142,13 +1152,13 @@ describe Grape::Validations do
 
         data = {
           orders: [
-            { id: 77, drugs: {batch_no: "A1234567", batch_id: "12"}},
+            { id: 77, drugs: { batch_no: 'A1234567', batch_id: '12' } },
             { id: 70 }
           ]
         }
 
         get '/all_or_none_of', data
-        expect(last_response.body).to eq("all_or_none_of works!")
+        expect(last_response.body).to eq('all_or_none_of works!')
         expect(last_response.status).to eq(200)
       end
     end
@@ -1177,6 +1187,7 @@ describe Grape::Validations do
         class Customvalidator < Grape::Validations::Base
           def validate_param!(attr_name, params)
             return if params[attr_name] == 'im custom'
+
             raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: 'is not custom!')
           end
         end
@@ -1325,6 +1336,7 @@ describe Grape::Validations do
           class CustomvalidatorWithOptions < Grape::Validations::Base
             def validate_param!(attr_name, params)
               return if params[attr_name] == @option[:text]
+
               raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message)
             end
           end

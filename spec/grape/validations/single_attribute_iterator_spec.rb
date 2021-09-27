@@ -49,7 +49,7 @@ describe Grape::Validations::SingleAttributeIterator do
         it 'marks params with skipped values' do
           expect { |b| iterator.each(&b) }.to yield_successive_args(
             [params[0], :first, false, true], [params[0], :second, false, true],
-            [params[1], :first, false, false], [params[1], :second, false, false],
+            [params[1], :first, false, false], [params[1], :second, false, false]
           )
         end
       end

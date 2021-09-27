@@ -50,7 +50,7 @@ module Grape
       #     end
       #
       def desc(description, options = {}, &config_block)
-        if block_given?
+        if config_block
           endpoint_configuration = if defined?(configuration)
                                      # When the instance is mounted - the configuration is executed on mount time
                                      if configuration.respond_to?(:evaluate)
@@ -68,9 +68,7 @@ module Grape
           end
 
           config_class.configure(&config_block)
-          unless options.empty?
-            warn '[DEPRECATION] Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.'
-          end
+          warn '[DEPRECATION] Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.' unless options.empty?
           options = config_class.settings
         else
           options = options.merge(description: description)
@@ -92,7 +90,7 @@ module Grape
 
       def unset_description_field(field)
         description = route_setting(:description)
-        description.delete(field) if description
+        description&.delete(field)
       end
 
       # Returns an object which configures itself via an instance-context DSL.

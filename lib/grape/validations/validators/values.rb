@@ -13,6 +13,7 @@ module Grape
                'Use the except validator instead.' if @excepts
 
           raise ArgumentError, 'proc must be a Proc' if @proc && !@proc.is_a?(Proc)
+
           warn '[DEPRECATION] The values validator proc option is deprecated. ' \
                'The lambda expression can now be assigned directly to values.' if @proc
         else
@@ -51,6 +52,7 @@ module Grape
       def check_values(param_array, attr_name)
         values = @values.is_a?(Proc) && @values.arity.zero? ? @values.call : @values
         return true if values.nil?
+
         begin
           return param_array.all? { |param| values.call(param) } if values.is_a? Proc
         rescue StandardError => e
@@ -63,6 +65,7 @@ module Grape
       def check_excepts(param_array)
         excepts = @excepts.is_a?(Proc) ? @excepts.call : @excepts
         return true if excepts.nil?
+
         param_array.none? { |param| excepts.include?(param) }
       end
 

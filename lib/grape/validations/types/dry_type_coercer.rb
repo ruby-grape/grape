@@ -35,7 +35,7 @@ module Grape
 
           # Returns an instance of a coercer for a given type
           def coercer_instance_for(type, strict = false)
-            return PrimitiveCoercer.new(type, strict) if type.class == Class
+            return PrimitiveCoercer.new(type, strict) if type.instance_of?(Class)
 
             # in case of a collection (Array[Integer]) the type is an instance of a collection,
             # so we need to figure out the actual type

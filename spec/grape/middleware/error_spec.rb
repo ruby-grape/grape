@@ -16,8 +16,7 @@ describe Grape::Middleware::Error do
 
     class ErrApp
       class << self
-        attr_accessor :error
-        attr_accessor :format
+        attr_accessor :error, :format
 
         def call(_env)
           throw :error, error

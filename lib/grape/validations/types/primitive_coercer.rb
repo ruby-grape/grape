@@ -11,15 +11,15 @@ module Grape
       class PrimitiveCoercer < DryTypeCoercer
         MAPPING = {
           Grape::API::Boolean => DryTypes::Params::Bool,
-          BigDecimal          => DryTypes::Params::Decimal,
+          BigDecimal => DryTypes::Params::Decimal,
 
           # unfortunately, a +Params+ scope doesn't contain String
-          String              => DryTypes::Coercible::String
+          String => DryTypes::Coercible::String
         }.freeze
 
         STRICT_MAPPING = {
           Grape::API::Boolean => DryTypes::Strict::Bool,
-          BigDecimal          => DryTypes::Strict::Decimal
+          BigDecimal => DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)

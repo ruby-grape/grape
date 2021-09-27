@@ -41,7 +41,7 @@ module Grape
         end
 
         pattern = -pattern.split('/').tap do |parts|
-          parts[parts.length - 1] = '?' + parts.last
+          parts[parts.length - 1] = "?#{parts.last}"
         end.join('/') if pattern.end_with?('*path')
 
         PatternCache[[pattern, suffix]]

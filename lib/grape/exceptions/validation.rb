@@ -5,8 +5,7 @@ require 'grape/exceptions/base'
 module Grape
   module Exceptions
     class Validation < Grape::Exceptions::Base
-      attr_accessor :params
-      attr_accessor :message_key
+      attr_accessor :params, :message_key
 
       def initialize(params:, message: nil, **args)
         @params = params

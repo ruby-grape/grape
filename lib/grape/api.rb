@@ -143,6 +143,7 @@ module Grape
 
       def replay_step_on(instance, setup_step)
         return if skip_immediate_run?(instance, setup_step[:args])
+
         args = evaluate_arguments(instance.configuration, *setup_step[:args])
         response = instance.send(setup_step[:method], *args, &setup_step[:block])
         if skip_immediate_run?(instance, [response])

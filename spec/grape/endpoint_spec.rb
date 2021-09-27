@@ -150,7 +150,7 @@ describe Grape::Endpoint do
     end
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for('/headers')
-      env['HTTP_SYMBOL_HEADER'.to_sym] = 'Goliath passes symbols'
+      env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
       body = read_chunks(subject.call(env)[2]).join
       expect(JSON.parse(body)['Symbol-Header']).to eq('Goliath passes symbols')
     end
@@ -212,10 +212,10 @@ describe Grape::Endpoint do
       end
       get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
       expect(last_response.body).to eq('3')
-      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end]
+      end.to_h
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
@@ -236,10 +236,10 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       expect(last_response.body).to eq('3')
-      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end]
+      end.to_h
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]

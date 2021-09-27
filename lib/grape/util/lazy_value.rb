@@ -49,9 +49,10 @@ module Grape
       end
 
       def []=(key, value)
-        @value_hash[key] = if value.is_a?(Hash)
+        @value_hash[key] = case value
+                           when Hash
                              LazyValueHash.new(value)
-                           elsif value.is_a?(Array)
+                           when Array
                              LazyValueArray.new(value)
                            else
                              LazyValue.new(value)

@@ -12,7 +12,7 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       let(:type) { BigDecimal }
 
       it 'coerces to BigDecimal' do
-        expect(subject.call(5)).to eq(BigDecimal(5))
+        expect(subject.call(5)).to eq(BigDecimal('5'))
       end
 
       it 'coerces an empty string to nil' do
@@ -127,7 +127,7 @@ describe Grape::Validations::Types::PrimitiveCoercer do
         end
 
         it 'returns a value as it is when the given value is BigDecimal' do
-          expect(subject.call(BigDecimal(0))).to eq(BigDecimal(0))
+          expect(subject.call(BigDecimal('0'))).to eq(BigDecimal('0'))
         end
       end
     end

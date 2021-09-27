@@ -238,14 +238,14 @@ describe Grape::Entity do
       get '/example'
       expect(last_response.status).to eq(200)
       expect(last_response.headers['Content-type']).to eq('application/xml')
-      expect(last_response.body).to eq <<-XML
-<?xml version="1.0" encoding="UTF-8"?>
-<hash>
-  <example>
-    <name>johnnyiller</name>
-  </example>
-</hash>
-XML
+      expect(last_response.body).to eq <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <hash>
+          <example>
+            <name>johnnyiller</name>
+          </example>
+        </hash>
+      XML
     end
 
     it 'presents with json' do
@@ -326,7 +326,7 @@ XML
         end
         get '/example'
         expect_response_json = {
-          'page'  => 1,
+          'page' => 1,
           'user1' => { 'name' => 'user1' },
           'user2' => { 'name' => 'user2' }
         }
