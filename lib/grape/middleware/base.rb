@@ -60,7 +60,7 @@ module Grape
       def response
         return @app_response if @app_response.is_a?(Rack::Response)
 
-        Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
+        @app_response = Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
       end
 
       def content_type_for(format)
