@@ -77,22 +77,25 @@ describe Grape::Middleware::Base do
   describe '#response' do
     subject { Grape::Middleware::Base.new(response) }
 
+    before { subject.call({}) }
+
     context Array do
       let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
       it 'status' do
-        subject.call({})
         expect(subject.response.status).to eq(204)
       end
 
       it 'body' do
-        subject.call({})
         expect(subject.response.body).to eq(['test'])
       end
 
       it 'header' do
-        subject.call({})
         expect(subject.response.header).to have_key(:abc)
+      end
+
+      it 'returns the memoized Rack::Response instance' do
+        expect(subject.response).to be(subject.response)
       end
     end
 
@@ -100,18 +103,19 @@ describe Grape::Middleware::Base do
       let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
 
       it 'status' do
-        subject.call({})
         expect(subject.response.status).to eq(204)
       end
 
       it 'body' do
-        subject.call({})
         expect(subject.response.body).to eq(['test'])
       end
 
       it 'header' do
-        subject.call({})
         expect(subject.response.header).to have_key(:abc)
+      end
+
+      it 'returns the memoized Rack::Response instance' do
+        expect(subject.response).to be(subject.response)
       end
     end
   end
