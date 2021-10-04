@@ -1,3 +1,13 @@
+### 1.6.1 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 1.6.0 (2021/10/04)
 
 #### Features
