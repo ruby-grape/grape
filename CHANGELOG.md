@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2192](https://github.com/ruby-grape/grape/pull/2192): Memoize the result of Grape::Middleware::Base#response - [@Jack12816](https://github.com/Jack12816).
 * Your contribution here.
 
 ### 1.6.0 (2021/10/04)
