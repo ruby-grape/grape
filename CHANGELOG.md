@@ -1,9 +1,8 @@
-### 1.6.0 (Next)
+### 1.6.0 (2021/10/04)
 
 #### Features
 
 * [#2190](https://github.com/ruby-grape/grape/pull/2190): Upgrade dev deps & drop Ruby 2.4.x support - [@dnesteryuk](https://github.com/dnesteryuk).
-* Your contribution here.
 
 #### Fixes
 
@@ -11,7 +10,6 @@
 * [#2177](https://github.com/ruby-grape/grape/pull/2177): Fix: `default` validator fails if preceded by `as` validator - [@Catsuko](https://github.com/Catsuko).
 * [#2180](https://github.com/ruby-grape/grape/pull/2180): Call `super` in `API.inherited` - [@yogeshjain999](https://github.com/yogeshjain999).
 * [#2189](https://github.com/ruby-grape/grape/pull/2189): Fix: rename parameters when using `:as` (behaviour and grape-swagger documentation) - [@Jack12816](https://github.com/Jack12816).
-* Your contribution here.
 
 ### 1.5.3 (2021/03/07)
 
