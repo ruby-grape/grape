@@ -42,7 +42,17 @@ describe Grape::Middleware::Auth::Strategies do
     end
 
     module StrategiesSpec
-      class Test < Grape::API
+      class PasswordHashed < Grape::API
+        http_digest(realm: { realm: 'Test Api', opaque: 'secret', passwords_hashed: true }) do |username|
+          { 'foo' => Digest::MD5.hexdigest(['foo', 'Test Api', 'bar'].join(':')) }[username]
+        end
+
+        get '/test' do
+          [{ hey: 'you' }, { there: 'bar' }, { foo: 'baz' }]
+        end
+      end
+
+      class PasswordIsNotHashed < Grape::API
         http_digest(realm: 'Test Api', opaque: 'secret') do |username|
           { 'foo' => 'bar' }[username]
         end
@@ -53,30 +63,60 @@ describe Grape::Middleware::Auth::Strategies do
       end
     end
 
-    def app
-      StrategiesSpec::Test
+    context 'when password is hashed' do
+      def app
+        StrategiesSpec::PasswordHashed
+      end
+
+      it 'is a digest authentication challenge' do
+        get '/test'
+        expect(last_response).to be_challenge
+      end
+
+      it 'throws a 401 if no auth is given' do
+        get '/test'
+        expect(last_response.status).to eq(401)
+      end
+
+      it 'authenticates if given valid creds' do
+        digest_authorize 'foo', 'bar'
+        get '/test'
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'throws a 401 if given invalid creds' do
+        digest_authorize 'bar', 'foo'
+        get '/test'
+        expect(last_response.status).to eq(401)
+      end
     end
 
-    it 'is a digest authentication challenge' do
-      get '/test'
-      expect(last_response).to be_challenge
-    end
+    context 'when password is not hashed' do
+      def app
+        StrategiesSpec::PasswordIsNotHashed
+      end
 
-    it 'throws a 401 if no auth is given' do
-      get '/test'
-      expect(last_response.status).to eq(401)
-    end
+      it 'is a digest authentication challenge' do
+        get '/test'
+        expect(last_response).to be_challenge
+      end
 
-    it 'authenticates if given valid creds' do
-      digest_authorize 'foo', 'bar'
-      get '/test'
-      expect(last_response.status).to eq(200)
-    end
+      it 'throws a 401 if no auth is given' do
+        get '/test'
+        expect(last_response.status).to eq(401)
+      end
 
-    it 'throws a 401 if given invalid creds' do
-      digest_authorize 'bar', 'foo'
-      get '/test'
-      expect(last_response.status).to eq(401)
+      it 'authenticates if given valid creds' do
+        digest_authorize 'foo', 'bar'
+        get '/test'
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'throws a 401 if given invalid creds' do
+        digest_authorize 'bar', 'foo'
+        get '/test'
+        expect(last_response.status).to eq(401)
+      end
     end
   end
 end
