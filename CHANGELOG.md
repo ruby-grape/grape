@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2196](https://github.com/ruby-grape/grape/pull/2196): Add support for `passwords_hashed` param for `digest_auth` - [@lHydra](https://github.com/lhydra).
 * Your contribution here.
 
 #### Fixes

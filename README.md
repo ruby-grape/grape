@@ -3297,9 +3297,17 @@ http_basic do |username, password|
 end
 ```
 
+Digest auth supports clear-text passwords and password hashes.
+
 ```ruby
 http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
   # lookup the user's password here
+end
+```
+
+```ruby
+http_digest(realm: { realm: 'Test Api', opaque: 'app secret', passwords_hashed: true }) do |username|
+  # lookup the user's password hash here
 end
 ```
 
