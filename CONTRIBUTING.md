@@ -35,6 +35,7 @@ bundle exec rake
 Run tests against all supported versions of Rails.
 
 ```
+gem install appraisal
 appraisal install
 appraisal rake spec
 ```
