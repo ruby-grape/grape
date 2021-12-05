@@ -3,27 +3,40 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Error do
-  # raises a text exception
-  module ExceptionSpec
-    class ExceptionApp
+  let(:exception_app) do
+    Class.new do
       class << self
         def call(_env)
           raise 'rain!'
         end
       end
     end
+  end
 
-    # raises a non-StandardError (ScriptError) exception
-    class OtherExceptionApp
+  let(:other_exception_app) do
+    Class.new do
       class << self
         def call(_env)
           raise NotImplementedError, 'snow!'
         end
       end
     end
+  end
 
-    # raises a hash error
-    class ErrorHashApp
+  let(:custom_error_app) do
+    Class.new do
+      class << self
+        class CustomError < Grape::Exceptions::Base; end
+
+        def call(_env)
+          raise CustomError.new(status: 400, message: 'failed validation')
+        end
+      end
+    end
+  end
+
+  let(:error_hash_app) do
+    Class.new do
       class << self
         def error!(message, status)
           throw :error, message: { error: message, detail: 'missing widget' }, status: status
@@ -34,9 +47,10 @@ describe Grape::Middleware::Error do
         end
       end
     end
+  end
 
-    # raises an error!
-    class AccessDeniedApp
+  let(:access_denied_app) do
+    Class.new do
       class << self
         def error!(message, status)
           throw :error, message: message, status: status
@@ -47,32 +61,23 @@ describe Grape::Middleware::Error do
         end
       end
     end
-
-    # raises a custom error
-    class CustomError < Grape::Exceptions::Base
-    end
-
-    class CustomErrorApp
-      class << self
-        def call(_env)
-          raise CustomError.new(status: 400, message: 'failed validation')
-        end
-      end
-    end
   end
 
-  def app
-    subject
+  let(:app) do
+    builder = Rack::Builder.new
+    builder.use Spec::Support::EndpointFaker
+    if options.any?
+      builder.use described_class, options
+    else
+      builder.use described_class
+    end
+    builder.run running_app
+    builder.to_app
   end
 
   context 'with defaults' do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error
-        run ExceptionSpec::ExceptionApp
-      end
-    end
+    let(:running_app) { exception_app }
+    let(:options) { {} }
 
     it 'does not trap errors by default' do
       expect { get '/' }.to raise_error(RuntimeError, 'rain!')
@@ -81,13 +86,8 @@ describe Grape::Middleware::Error do
 
   context 'with rescue_all' do
     context 'StandardError exception' do
-      subject do
-        Rack::Builder.app do
-          use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_all: true
-          run ExceptionSpec::ExceptionApp
-        end
-      end
+      let(:running_app) { exception_app }
+      let(:options) { { rescue_all: true } }
 
       it 'sets the message appropriately' do
         get '/'
@@ -101,13 +101,8 @@ describe Grape::Middleware::Error do
     end
 
     context 'Non-StandardError exception' do
-      subject do
-        Rack::Builder.app do
-          use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_all: true
-          run ExceptionSpec::OtherExceptionApp
-        end
-      end
+      let(:running_app) { other_exception_app }
+      let(:options) { { rescue_all: true } }
 
       it 'does not trap errors other than StandardError' do
         expect { get '/' }.to raise_error(NotImplementedError, 'snow!')
@@ -117,13 +112,8 @@ describe Grape::Middleware::Error do
 
   context 'Non-StandardError exception with a provided rescue handler' do
     context 'default error response' do
-      subject do
-        Rack::Builder.app do
-          use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => nil }
-          run ExceptionSpec::OtherExceptionApp
-        end
-      end
+      let(:running_app) { other_exception_app }
+      let(:options) { { rescue_handlers: { NotImplementedError => nil } } }
 
       it 'rescues the exception using the default handler' do
         get '/'
@@ -132,13 +122,8 @@ describe Grape::Middleware::Error do
     end
 
     context 'custom error response' do
-      subject do
-        Rack::Builder.app do
-          use Spec::Support::EndpointFaker
-          use Grape::Middleware::Error, rescue_handlers: { NotImplementedError => -> { Rack::Response.new('rescued', 200, {}) } }
-          run ExceptionSpec::OtherExceptionApp
-        end
-      end
+      let(:running_app) { other_exception_app }
+      let(:options) { { rescue_handlers: { NotImplementedError => -> { Rack::Response.new('rescued', 200, {}) } } } }
 
       it 'rescues the exception using the provided handler' do
         get '/'
@@ -148,13 +133,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, default_status: 500
-        run ExceptionSpec::ExceptionApp
-      end
-    end
+    let(:running_app) { exception_app }
+    let(:options) { { rescue_all: true, default_status: 500 } }
 
     it 'is possible to specify a different default status code' do
       get '/'
@@ -163,13 +143,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :json
-        run ExceptionSpec::ExceptionApp
-      end
-    end
+    let(:running_app) { exception_app }
+    let(:options) { { rescue_all: true, format: :json } }
 
     it 'is possible to return errors in json format' do
       get '/'
@@ -178,13 +153,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :json
-        run ExceptionSpec::ErrorHashApp
-      end
-    end
+    let(:running_app) { error_hash_app }
+    let(:options) { { rescue_all: true, format: :json } }
 
     it 'is possible to return hash errors in json format' do
       get '/'
@@ -194,13 +164,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :jsonapi
-        run ExceptionSpec::ExceptionApp
-      end
-    end
+    let(:running_app) { exception_app }
+    let(:options) { { rescue_all: true, format: :jsonapi } }
 
     it 'is possible to return errors in jsonapi format' do
       get '/'
@@ -209,13 +174,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :jsonapi
-        run ExceptionSpec::ErrorHashApp
-      end
-    end
+    let(:running_app) { error_hash_app }
+    let(:options) { { rescue_all: true, format: :jsonapi } }
 
     it 'is possible to return hash errors in jsonapi format' do
       get '/'
@@ -225,13 +185,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :xml
-        run ExceptionSpec::ExceptionApp
-      end
-    end
+    let(:running_app) { exception_app }
+    let(:options) { { rescue_all: true, format: :xml } }
 
     it 'is possible to return errors in xml format' do
       get '/'
@@ -240,13 +195,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: true, format: :xml
-        run ExceptionSpec::ErrorHashApp
-      end
-    end
+    let(:running_app) { error_hash_app }
+    let(:options) { { rescue_all: true, format: :xml } }
 
     it 'is possible to return hash errors in xml format' do
       get '/'
@@ -256,19 +206,17 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error,
-            rescue_all: true,
-            format: :custom,
-            error_formatters: {
-              custom: lambda do |message, _backtrace, _options, _env, _original_exception|
-                { custom_formatter: message }.inspect
-              end
-            }
-        run ExceptionSpec::ExceptionApp
-      end
+    let(:running_app) { exception_app }
+    let(:options) do
+      {
+        rescue_all: true,
+        format: :custom,
+        error_formatters: {
+          custom: lambda do |message, _backtrace, _options, _env, _original_exception|
+            { custom_formatter: message }.inspect
+          end
+        }
+      }
     end
 
     it 'is possible to specify a custom formatter' do
@@ -278,13 +226,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error
-        run ExceptionSpec::AccessDeniedApp
-      end
-    end
+    let(:running_app) { access_denied_app }
+    let(:options) { {} }
 
     it 'does not trap regular error! codes' do
       get '/'
@@ -293,13 +236,8 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, rescue_all: false
-        run ExceptionSpec::CustomErrorApp
-      end
-    end
+    let(:running_app) { custom_error_app }
+    let(:options) { { rescue_all: false } }
 
     it 'responds to custom Grape exceptions appropriately' do
       get '/'
@@ -309,15 +247,13 @@ describe Grape::Middleware::Error do
   end
 
   context 'with rescue_options :backtrace and :exception set to true' do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error,
-            rescue_all: true,
-            format: :json,
-            rescue_options: { backtrace: true, original_exception: true }
-        run ExceptionSpec::ExceptionApp
-      end
+    let(:running_app) { exception_app }
+    let(:options) do
+      {
+        rescue_all: true,
+        format: :json,
+        rescue_options: { backtrace: true, original_exception: true }
+      }
     end
 
     it 'is possible to return the backtrace and the original exception in json format' do
@@ -327,15 +263,13 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error,
-            rescue_all: true,
-            format: :xml,
-            rescue_options: { backtrace: true, original_exception: true }
-        run ExceptionSpec::ExceptionApp
-      end
+    let(:running_app) { exception_app }
+    let(:options) do
+      {
+        rescue_all: true,
+        format: :xml,
+        rescue_options: { backtrace: true, original_exception: true }
+      }
     end
 
     it 'is possible to return the backtrace and the original exception in xml format' do
@@ -345,15 +279,13 @@ describe Grape::Middleware::Error do
   end
 
   context do
-    subject do
-      Rack::Builder.app do
-        use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error,
-            rescue_all: true,
-            format: :txt,
-            rescue_options: { backtrace: true, original_exception: true }
-        run ExceptionSpec::ExceptionApp
-      end
+    let(:running_app) { exception_app }
+    let(:options) do
+      {
+        rescue_all: true,
+        format: :txt,
+        rescue_options: { backtrace: true, original_exception: true }
+      }
     end
 
     it 'is possible to return the backtrace and the original exception in txt format' do

@@ -13,7 +13,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
     describe '#params' do
       before do
         subject.params do
-          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder # rubocop:disable RSpec/DescribedClass
         end
 
         subject.get do
@@ -31,7 +31,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
 
   describe 'in an api' do
     before do
-      subject.send(:include, Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder)
+      subject.send(:include, Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder) # rubocop:disable RSpec/DescribedClass
     end
 
     describe '#params' do
@@ -49,7 +49,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
 
       it 'parses sub hash params' do
         subject.params do
-          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder # rubocop:disable RSpec/DescribedClass
 
           optional :a, type: Hash do
             optional :b, type: Hash do
@@ -70,7 +70,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
 
       it 'params are indifferent to symbol or string keys' do
         subject.params do
-          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder # rubocop:disable RSpec/DescribedClass
           optional :a, type: Hash do
             optional :b, type: Hash do
               optional :c, type: String
@@ -90,7 +90,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
 
       it 'responds to string keys' do
         subject.params do
-          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder # rubocop:disable RSpec/DescribedClass
           requires :a, type: String
         end
 

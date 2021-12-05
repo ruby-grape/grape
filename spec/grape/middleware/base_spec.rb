@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Base do
-  subject { Grape::Middleware::Base.new(blank_app) }
+  subject { described_class.new(blank_app) }
 
   let(:blank_app) { ->(_) { [200, {}, 'Hi there.'] } }
 
@@ -76,11 +76,14 @@ describe Grape::Middleware::Base do
   end
 
   describe '#response' do
-    subject { Grape::Middleware::Base.new(response) }
+    subject do
+      puts described_class
+      described_class.new(response)
+    end
 
     before { subject.call({}) }
 
-    context Array do
+    context 'when Array' do
       let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
       it 'status' do
@@ -100,7 +103,7 @@ describe Grape::Middleware::Base do
       end
     end
 
-    context Rack::Response do
+    context 'when Rack::Response' do
       let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
 
       it 'status' do

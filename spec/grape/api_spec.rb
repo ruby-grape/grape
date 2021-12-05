@@ -4,7 +4,10 @@ require 'spec_helper'
 require 'shared/versioning_examples'
 
 describe Grape::API do
-  subject { Class.new(Grape::API) }
+  subject do
+    puts described_class
+    Class.new(described_class)
+  end
 
   def app
     subject
@@ -447,7 +450,7 @@ describe Grape::API do
     end
 
     %i[put post].each do |verb|
-      context verb do
+      context verb.to_s do
         ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
@@ -1032,7 +1035,7 @@ describe Grape::API do
     context 'when the app was mounted' do
       it 'returns the first mounted instance' do
         mounted_app = app
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           namespace 'new_namespace' do
             mount mounted_app
           end
@@ -1636,7 +1639,7 @@ describe Grape::API do
 
   describe '.logger' do
     subject do
-      Class.new(Grape::API) do
+      Class.new(described_class) do
         def self.io
           @io ||= StringIO.new
         end
@@ -2018,8 +2021,8 @@ describe Grape::API do
     end
 
     context 'with multiple apis' do
-      let(:a) { Class.new(Grape::API) }
-      let(:b) { Class.new(Grape::API) }
+      let(:a) { Class.new(described_class) }
+      let(:b) { Class.new(described_class) }
 
       before do
         a.helpers do
@@ -3356,7 +3359,7 @@ describe Grape::API do
         subject.version 'v1', using: :path
 
         subject.namespace :cool do
-          app = Class.new(Grape::API)
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           app.get('/awesome') do
             'yo'
           end
@@ -3372,12 +3375,12 @@ describe Grape::API do
         subject.version 'v1', using: :path
 
         subject.namespace :cool do
-          inner_app = Class.new(Grape::API)
+          inner_app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           inner_app.get('/awesome') do
             'yo'
           end
 
-          app = Class.new(Grape::API)
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           app.mount inner_app
           mount app
         end
@@ -3392,7 +3395,7 @@ describe Grape::API do
             rack_response("rescued from #{e.message}", 202)
           end
 
-          app = Class.new(Grape::API)
+          app = Class.new(described_class)
 
           subject.namespace :mounted do
             app.rescue_from ArgumentError
@@ -3410,7 +3413,7 @@ describe Grape::API do
             rack_response('outer rescue')
           end
 
-          app = Class.new(Grape::API)
+          app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
@@ -3429,7 +3432,7 @@ describe Grape::API do
             rack_response('outer rescue')
           end
 
-          app = Class.new(Grape::API)
+          app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
@@ -3448,7 +3451,7 @@ describe Grape::API do
             rack_response('outer rescue')
           end
 
-          app = Class.new(Grape::API)
+          app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from ArgumentError do
@@ -3465,7 +3468,7 @@ describe Grape::API do
 
       it 'collects the routes of the mounted api' do
         subject.namespace :cool do
-          app = Class.new(Grape::API)
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           app.get('/awesome') {}
           app.post('/sauce') {}
           mount app
@@ -3477,7 +3480,7 @@ describe Grape::API do
 
       it 'mounts on a path' do
         subject.namespace :cool do
-          app = Class.new(Grape::API)
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           app.get '/awesome' do
             'sauce'
           end
@@ -3489,8 +3492,8 @@ describe Grape::API do
       end
 
       it 'mounts on a nested path' do
-        APP1 = Class.new(Grape::API)
-        APP2 = Class.new(Grape::API)
+        APP1 = Class.new(described_class)
+        APP2 = Class.new(described_class)
         APP2.get '/nice' do
           'play'
         end
@@ -3506,7 +3509,7 @@ describe Grape::API do
       end
 
       it 'responds to options' do
-        app = Class.new(Grape::API)
+        app = Class.new(described_class)
         app.get '/colour' do
           'red'
         end
@@ -3534,7 +3537,7 @@ describe Grape::API do
       it 'responds to options with path versioning' do
         subject.version 'v1', using: :path
         subject.namespace :apples do
-          app = Class.new(Grape::API)
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
           app.get('/colour') do
             'red'
           end
@@ -3549,7 +3552,7 @@ describe Grape::API do
       end
 
       it 'mounts a versioned API with nested resources' do
-        api = Class.new(Grape::API) do
+        api = Class.new(described_class) do
           version 'v1'
           resources :users do
             get :hello do
@@ -3564,7 +3567,7 @@ describe Grape::API do
       end
 
       it 'mounts a prefixed API with nested resources' do
-        api = Class.new(Grape::API) do
+        api = Class.new(described_class) do
           prefix 'api'
           resources :users do
             get :hello do
@@ -3579,7 +3582,7 @@ describe Grape::API do
       end
 
       it 'applies format to a mounted API with nested resources' do
-        api = Class.new(Grape::API) do
+        api = Class.new(described_class) do
           format :json
           resources :users do
             get do
@@ -3594,7 +3597,7 @@ describe Grape::API do
       end
 
       it 'applies auth to a mounted API with nested resources' do
-        api = Class.new(Grape::API) do
+        api = Class.new(described_class) do
           format :json
           http_basic do |username, password|
             username == 'username' && password == 'password'
@@ -3615,7 +3618,7 @@ describe Grape::API do
       end
 
       it 'mounts multiple versioned APIs with nested resources' do
-        api1 = Class.new(Grape::API) do
+        api1 = Class.new(described_class) do
           version 'one', using: :header, vendor: 'test'
           resources :users do
             get :hello do
@@ -3624,7 +3627,7 @@ describe Grape::API do
           end
         end
 
-        api2 = Class.new(Grape::API) do
+        api2 = Class.new(described_class) do
           version 'two', using: :header, vendor: 'test'
           resources :users do
             get :hello do
@@ -3643,7 +3646,7 @@ describe Grape::API do
       end
 
       it 'recognizes potential versions with mounted path' do
-        a = Class.new(Grape::API) do
+        a = Class.new(described_class) do
           version :v1, using: :path
 
           get '/hello' do
@@ -3651,7 +3654,7 @@ describe Grape::API do
           end
         end
 
-        b = Class.new(Grape::API) do
+        b = Class.new(described_class) do
           version :v1, using: :path
 
           get '/world' do
@@ -3671,7 +3674,7 @@ describe Grape::API do
 
       context 'when mounting class extends a subclass of Grape::API' do
         it 'mounts APIs with the same superclass' do
-          base_api = Class.new(Grape::API)
+          base_api = Class.new(described_class)
           a = Class.new(base_api)
           b = Class.new(base_api)
 
@@ -3696,20 +3699,20 @@ describe Grape::API do
 
         it 'correctlies include module in nested mount' do
           module_to_include = included_module
-          v1 = Class.new(Grape::API) do
+          v1 = Class.new(described_class) do
             version :v1, using: :path
             include module_to_include
             my_method
           end
-          v2 = Class.new(Grape::API) do
+          v2 = Class.new(described_class) do
             version :v2, using: :path
           end
-          segment_base = Class.new(Grape::API) do
+          segment_base = Class.new(described_class) do
             mount v1
             mount v2
           end
 
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             mount segment_base
           end
 
@@ -4058,12 +4061,12 @@ describe Grape::API do
 
   context 'catch-all' do
     before do
-      api1 = Class.new(Grape::API)
+      api1 = Class.new(described_class)
       api1.version 'v1', using: :path
       api1.get 'hello' do
         'v1'
       end
-      api2 = Class.new(Grape::API)
+      api2 = Class.new(described_class)
       api2.version 'v2', using: :path
       api2.get 'hello' do
         'v2'
@@ -4196,7 +4199,7 @@ describe Grape::API do
   end
 
   describe 'normal class methods' do
-    subject(:grape_api) { Class.new(Grape::API) }
+    subject(:grape_api) { Class.new(described_class) }
 
     before do
       stub_const('MyAPI', grape_api)
@@ -4216,7 +4219,7 @@ describe Grape::API do
   describe '.inherited' do
     context 'overriding within class' do
       let(:root_api) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           @bar = 'Hello, world'
 
           def self.inherited(child_api)
@@ -4242,7 +4245,7 @@ describe Grape::API do
       end
 
       let(:root_api) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           @bar = 'Hello, world'
           extend Inherited
         end
@@ -4257,10 +4260,10 @@ describe Grape::API do
   end
 
   describe 'const_missing' do
-    subject(:grape_api) { Class.new(Grape::API) }
+    subject(:grape_api) { Class.new(described_class) }
 
     let(:mounted) do
-      Class.new(Grape::API) do
+      Class.new(described_class) do
         get '/missing' do
           SomeRandomConstant
         end
@@ -4276,7 +4279,7 @@ describe Grape::API do
 
   describe 'custom route helpers on nested APIs' do
     subject(:grape_api) do
-      Class.new(Grape::API) do
+      Class.new(described_class) do
         version 'v1', using: :path
       end
     end
@@ -4314,7 +4317,7 @@ describe Grape::API do
     let(:orders_root) do
       shared = shared_api_definitions
       find = orders_find_endpoint
-      Class.new(Grape::API) do
+      Class.new(described_class) do
         include shared
 
         namespace(:orders) do
@@ -4324,7 +4327,7 @@ describe Grape::API do
     end
     let(:orders_find_endpoint) do
       shared = shared_api_definitions
-      Class.new(Grape::API) do
+      Class.new(described_class) do
         include shared
 
         uniqe_id_route do

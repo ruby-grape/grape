@@ -13,7 +13,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
     describe '#params' do
       before do
         subject.params do
-          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+          build_with Grape::Extensions::Hashie::Mash::ParamBuilder # rubocop:disable RSpec/DescribedClass
         end
 
         subject.get do
@@ -31,7 +31,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
 
   describe 'in an api' do
     before do
-      subject.send(:include, Grape::Extensions::Hashie::Mash::ParamBuilder)
+      subject.send(:include, Grape::Extensions::Hashie::Mash::ParamBuilder) # rubocop:disable RSpec/DescribedClass
     end
 
     describe '#params' do
@@ -66,7 +66,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
 
     it 'is indifferent to key or symbol access' do
       subject.params do
-        build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+        build_with Grape::Extensions::Hashie::Mash::ParamBuilder # rubocop:disable RSpec/DescribedClass
         requires :a, type: String
       end
       subject.get '/foo' do

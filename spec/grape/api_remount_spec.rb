@@ -4,9 +4,9 @@ require 'spec_helper'
 require 'shared/versioning_examples'
 
 describe Grape::API do
-  subject(:a_remounted_api) { Class.new(Grape::API) }
+  subject(:a_remounted_api) { Class.new(described_class) }
 
-  let(:root_api) { Class.new(Grape::API) }
+  let(:root_api) { Class.new(described_class) }
 
   def app
     root_api
@@ -69,7 +69,7 @@ describe Grape::API do
     describe 'with dynamic configuration' do
       context 'when mounting an endpoint conditional on a configuration' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             get 'always' do
               'success'
             end
@@ -102,7 +102,7 @@ describe Grape::API do
 
       context 'when using an expression derived from a configuration' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             get(mounted { "api_name_#{configuration[:api_name]}" }) do
               'success'
             end
@@ -127,7 +127,7 @@ describe Grape::API do
 
         context 'when the expression lives in a namespace' do
           subject(:a_remounted_api) do
-            Class.new(Grape::API) do
+            Class.new(described_class) do
               namespace :base do
                 get(mounted { "api_name_#{configuration[:api_name]}" }) do
                   'success'
@@ -150,7 +150,7 @@ describe Grape::API do
 
       context 'when executing a standard block within a `mounted` block with all dynamic params' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             mounted do
               desc configuration[:description] do
                 headers configuration[:headers]
@@ -192,7 +192,7 @@ describe Grape::API do
 
       context 'when executing a custom block on mount' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             get 'always' do
               'success'
             end
@@ -216,7 +216,7 @@ describe Grape::API do
 
       context 'when the configuration is part of the arguments of a method' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             get configuration[:endpoint_name] do
               'success'
             end
@@ -238,7 +238,7 @@ describe Grape::API do
 
         context 'when the configuration is the value in a key-arg pair' do
           subject(:a_remounted_api) do
-            Class.new(Grape::API) do
+            Class.new(described_class) do
               version 'v1', using: :param, parameter: configuration[:version_param]
               get 'endpoint' do
                 'version 1'
@@ -268,7 +268,7 @@ describe Grape::API do
 
       context 'on the DescSCope' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             desc 'The description of this' do
               tags ['not_configurable_tag', configuration[:a_configurable_tag]]
             end
@@ -285,7 +285,7 @@ describe Grape::API do
 
       context 'on the ParamScope' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             params do
               requires configuration[:required_param], type: configuration[:required_type]
             end
@@ -315,7 +315,7 @@ describe Grape::API do
 
         context 'on dynamic checks' do
           subject(:a_remounted_api) do
-            Class.new(Grape::API) do
+            Class.new(described_class) do
               params do
                 optional :restricted_values, values: -> { [configuration[:allowed_value], 'always'] }
               end
@@ -364,7 +364,7 @@ describe Grape::API do
 
       context 'a very complex configuration example' do
         before do
-          top_level_api = Class.new(Grape::API) do
+          top_level_api = Class.new(described_class) do
             remounted_api = Class.new(Grape::API) do
               get configuration[:endpoint_name] do
                 configuration[:response]
@@ -432,7 +432,7 @@ describe Grape::API do
 
       context 'when the configuration is read in a helper' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             helpers do
               def printed_response
                 configuration[:some_value]
@@ -455,7 +455,7 @@ describe Grape::API do
 
       context 'when the configuration is read within the response block' do
         subject(:a_remounted_api) do
-          Class.new(Grape::API) do
+          Class.new(described_class) do
             get 'location' do
               configuration[:some_value]
             end

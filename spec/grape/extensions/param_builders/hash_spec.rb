@@ -13,7 +13,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
     describe '#params' do
       before do
         subject.params do
-          build_with Grape::Extensions::Hash::ParamBuilder
+          build_with Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
         end
 
         subject.get do
@@ -31,7 +31,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
 
   describe 'in an api' do
     before do
-      subject.send(:include, Grape::Extensions::Hash::ParamBuilder)
+      subject.send(:include, Grape::Extensions::Hash::ParamBuilder) # rubocop:disable RSpec/DescribedClass
     end
 
     describe '#params' do
@@ -69,7 +69,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
 
     it 'symbolizes the params' do
       subject.params do
-        build_with Grape::Extensions::Hash::ParamBuilder
+        build_with Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
         requires :a, type: String
       end
 

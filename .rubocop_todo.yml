@@ -166,20 +166,6 @@ RSpec/DescribeClass:
     - 'spec/grape/named_api_spec.rb'
     - 'spec/grape/validations/instance_behaivour_spec.rb'
 
-# Offense count: 54
-# Cop supports --auto-correct.
-# Configuration parameters: SkipBlocks, EnforcedStyle.
-# SupportedStyles: described_class, explicit
-RSpec/DescribedClass:
-  Exclude:
-    - 'spec/grape/api_remount_spec.rb'
-    - 'spec/grape/api_spec.rb'
-    - 'spec/grape/extensions/param_builders/hash_spec.rb'
-    - 'spec/grape/extensions/param_builders/hash_with_indifferent_access_spec.rb'
-    - 'spec/grape/extensions/param_builders/hashie/mash_spec.rb'
-    - 'spec/grape/middleware/base_spec.rb'
-    - 'spec/grape/middleware/exception_spec.rb'
-
 # Offense count: 3
 RSpec/EmptyExampleGroup:
   Exclude:
