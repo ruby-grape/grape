@@ -2,27 +2,25 @@
 
 require 'spec_helper'
 
-module Grape
-  module DSL
-    module LoggerSpec
-      class Dummy
-        extend Grape::DSL::Logger
-      end
+describe Grape::DSL::Logger do
+  subject { Class.new(dummy_logger) }
+
+  let(:dummy_logger) do
+    Class.new do
+      extend Grape::DSL::Logger
     end
-    describe Logger do
-      subject { Class.new(LoggerSpec::Dummy) }
-      let(:logger) { double(:logger) }
+  end
 
-      describe '.logger' do
-        it 'sets a logger' do
-          subject.logger logger
-          expect(subject.logger).to eq logger
-        end
+  let(:logger) { instance_double(::Logger) }
 
-        it 'returns a logger' do
-          expect(subject.logger(logger)).to eq logger
-        end
-      end
+  describe '.logger' do
+    it 'sets a logger' do
+      subject.logger logger
+      expect(subject.logger).to eq logger
+    end
+
+    it 'returns a logger' do
+      expect(subject.logger(logger)).to eq logger
     end
   end
 end
