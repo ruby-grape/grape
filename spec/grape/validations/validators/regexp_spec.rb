@@ -2,51 +2,45 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::RegexpValidator do
-  module ValidationsSpec
-    module RegexpValidatorSpec
-      class API < Grape::API
-        default_format :json
+describe Grape::Validations::Validators::RegexpValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      default_format :json
 
-        resources :custom_message do
-          params do
-            requires :name, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
-          end
-          get do
-          end
-
-          params do
-            requires :names, type: { value: Array[String], message: 'can\'t be nil' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
-          end
-          get 'regexp_with_array' do
-          end
-        end
-
+      resources :custom_message do
         params do
-          requires :name, regexp: /^[a-z]+$/
+          requires :name, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
         end
         get do
         end
 
         params do
-          requires :names, type: Array[String], regexp: /^[a-z]+$/
+          requires :names, type: { value: Array[String], message: 'can\'t be nil' }, regexp: { value: /^[a-z]+$/, message: 'format is invalid' }
         end
         get 'regexp_with_array' do
         end
+      end
 
-        params do
-          requires :people, type: Hash do
-            requires :names, type: Array[String], regexp: /^[a-z]+$/
-          end
-        end
-        get 'nested_regexp_with_array' do
+      params do
+        requires :name, regexp: /^[a-z]+$/
+      end
+      get do
+      end
+
+      params do
+        requires :names, type: Array[String], regexp: /^[a-z]+$/
+      end
+      get 'regexp_with_array' do
+      end
+
+      params do
+        requires :people, type: Hash do
+          requires :names, type: Array[String], regexp: /^[a-z]+$/
         end
       end
+      get 'nested_regexp_with_array' do
+      end
     end
-  end
-
-  def app
-    ValidationsSpec::RegexpValidatorSpec::API
   end
 
   context 'custom validation message' do

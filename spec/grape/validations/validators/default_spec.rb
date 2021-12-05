@@ -2,102 +2,96 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::DefaultValidator do
-  module ValidationsSpec
-    module DefaultValidatorSpec
-      class API < Grape::API
-        default_format :json
+describe Grape::Validations::Validators::DefaultValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      default_format :json
 
-        params do
-          optional :id
-          optional :type, default: 'default-type'
-        end
-        get '/' do
-          { id: params[:id], type: params[:type] }
-        end
+      params do
+        optional :id
+        optional :type, default: 'default-type'
+      end
+      get '/' do
+        { id: params[:id], type: params[:type] }
+      end
 
-        params do
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
-        end
-        get '/user' do
-          { type1: params[:type1], type2: params[:type2] }
-        end
+      params do
+        optional :type1, default: 'default-type1'
+        optional :type2, default: 'default-type2'
+      end
+      get '/user' do
+        { type1: params[:type1], type2: params[:type2] }
+      end
 
-        params do
-          requires :id
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
-        end
+      params do
+        requires :id
+        optional :type1, default: 'default-type1'
+        optional :type2, default: 'default-type2'
+      end
 
-        get '/message' do
-          { id: params[:id], type1: params[:type1], type2: params[:type2] }
-        end
+      get '/message' do
+        { id: params[:id], type1: params[:type1], type2: params[:type2] }
+      end
 
-        params do
-          optional :random, default: -> { Random.rand }
-          optional :not_random, default: Random.rand
-        end
-        get '/numbers' do
-          { random_number: params[:random], non_random_number: params[:non_random_number] }
-        end
+      params do
+        optional :random, default: -> { Random.rand }
+        optional :not_random, default: Random.rand
+      end
+      get '/numbers' do
+        { random_number: params[:random], non_random_number: params[:non_random_number] }
+      end
 
-        params do
-          optional :array, type: Array do
-            requires :name
-            optional :with_default, default: 'default'
-          end
-        end
-        get '/array' do
-          { array: params[:array] }
-        end
-
-        params do
-          requires :thing1
-          optional :more_things, type: Array do
-            requires :nested_thing
-            requires :other_thing, default: 1
-          end
-        end
-        get '/optional_array' do
-          { thing1: params[:thing1] }
-        end
-
-        params do
-          requires :root, type: Hash do
-            optional :some_things, type: Array do
-              requires :foo
-              optional :options, type: Array do
-                requires :name, type: String
-                requires :value, type: String
-              end
-            end
-          end
-        end
-        get '/nested_optional_array' do
-          { root: params[:root] }
-        end
-
-        params do
-          requires :root, type: Hash do
-            optional :some_things, type: Array do
-              requires :foo
-              optional :options, type: Array do
-                optional :name, type: String
-                optional :value, type: String
-              end
-            end
-          end
-        end
-        get '/another_nested_optional_array' do
-          { root: params[:root] }
+      params do
+        optional :array, type: Array do
+          requires :name
+          optional :with_default, default: 'default'
         end
       end
-    end
-  end
+      get '/array' do
+        { array: params[:array] }
+      end
 
-  def app
-    ValidationsSpec::DefaultValidatorSpec::API
+      params do
+        requires :thing1
+        optional :more_things, type: Array do
+          requires :nested_thing
+          requires :other_thing, default: 1
+        end
+      end
+      get '/optional_array' do
+        { thing1: params[:thing1] }
+      end
+
+      params do
+        requires :root, type: Hash do
+          optional :some_things, type: Array do
+            requires :foo
+            optional :options, type: Array do
+              requires :name, type: String
+              requires :value, type: String
+            end
+          end
+        end
+      end
+      get '/nested_optional_array' do
+        { root: params[:root] }
+      end
+
+      params do
+        requires :root, type: Hash do
+          optional :some_things, type: Array do
+            requires :foo
+            optional :options, type: Array do
+              optional :name, type: String
+              optional :value, type: String
+            end
+          end
+        end
+      end
+      get '/another_nested_optional_array' do
+        { root: params[:root] }
+      end
+    end
   end
 
   it 'lets you leave required values nested inside an optional blank' do

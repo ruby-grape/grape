@@ -2,29 +2,23 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::SameAsValidator do
-  module ValidationsSpec
-    module SameAsValidatorSpec
-      class API < Grape::API
-        params do
-          requires :password
-          requires :password_confirmation, same_as: :password
-        end
-        post do
-        end
+describe Grape::Validations::Validators::SameAsValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      params do
+        requires :password
+        requires :password_confirmation, same_as: :password
+      end
+      post do
+      end
 
-        params do
-          requires :password
-          requires :password_confirmation, same_as: { value: :password, message: 'not match' }
-        end
-        post '/custom-message' do
-        end
+      params do
+        requires :password
+        requires :password_confirmation, same_as: { value: :password, message: 'not match' }
+      end
+      post '/custom-message' do
       end
     end
-  end
-
-  def app
-    ValidationsSpec::SameAsValidatorSpec::API
   end
 
   describe '/' do
