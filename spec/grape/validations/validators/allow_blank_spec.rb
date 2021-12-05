@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Grape::Validations::Validators::AllowBlankValidator do
   let_it_be(:app) do
-    @app = Class.new(Grape::API) do
+    Class.new(Grape::API) do
       default_format :json
 
       params do
