@@ -8,6 +8,7 @@ AllCops:
 
 require:
   - rubocop-performance
+  - rubocop-rspec
 
 inherit_from: .rubocop_todo.yml
 
@@ -32,3 +33,6 @@ Style/HashTransformValues:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*_spec.rb
+
+RSpec/Capybara/FeatureMethods:
+  Enabled: false

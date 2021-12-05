@@ -4,8 +4,9 @@ require 'spec_helper'
 module Grape
   module Util
     describe InheritableValues do
-      let(:parent) { InheritableValues.new }
-      subject { InheritableValues.new(parent) }
+      subject { described_class.new(parent) }
+
+      let(:parent) { described_class.new }
 
       describe '#delete' do
         it 'deletes a key' do

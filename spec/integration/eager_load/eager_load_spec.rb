@@ -6,10 +6,10 @@ require 'grape'
 describe Grape do
   it 'eager_load!' do
     require 'grape/eager_load'
-    expect { Grape.eager_load! }.to_not raise_error
+    expect { described_class.eager_load! }.not_to raise_error
   end
 
   it 'compile!' do
-    expect { Class.new(Grape::API).compile! }.to_not raise_error
+    expect { Class.new(Grape::API).compile! }.not_to raise_error
   end
 end

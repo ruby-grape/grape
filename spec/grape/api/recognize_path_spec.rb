@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Grape::API do
   describe '.recognize_path' do
-    subject { Class.new(Grape::API) }
+    subject { Class.new(described_class) }
 
     it 'fetches endpoint by given path' do
       subject.get('/foo/:id') {}

@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Versioner::Path do
+  subject { described_class.new(app, **options) }
+
   let(:app) { ->(env) { [200, env, env['api.version']] } }
   let(:options) { {} }
-  subject { Grape::Middleware::Versioner::Path.new(app, **options) }
 
   it 'sets the API version based on the first path' do
     expect(subject.call('PATH_INFO' => '/v1/awesome').last).to eq('v1')
@@ -21,6 +22,7 @@ describe Grape::Middleware::Versioner::Path do
 
   context 'with a pattern' do
     let(:options) { { pattern: /v./i } }
+
     it 'sets the version if it matches' do
       expect(subject.call('PATH_INFO' => '/v1/awesome').last).to eq('v1')
     end
@@ -46,6 +48,7 @@ describe Grape::Middleware::Versioner::Path do
 
   context 'with prefix, but requested version is not matched' do
     let(:options) { { prefix: '/v1', pattern: /v./i } }
+
     it 'recognizes potential version' do
       expect(subject.call('PATH_INFO' => '/v3/foo').last).to eq('v3')
     end
@@ -53,6 +56,7 @@ describe Grape::Middleware::Versioner::Path do
 
   context 'with mount path' do
     let(:options) { { mount_path: '/mounted', versions: [:v1] } }
+
     it 'recognizes potential version' do
       expect(subject.call('PATH_INFO' => '/mounted/v1/foo').last).to eq('v1')
     end

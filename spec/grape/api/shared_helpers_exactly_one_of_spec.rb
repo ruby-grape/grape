@@ -3,19 +3,17 @@
 require 'spec_helper'
 
 describe Grape::API::Helpers do
-  subject do
-    shared_params = Module.new do
-      extend Grape::API::Helpers
-
-      params :drink do
-        optional :beer
-        optional :wine
-        exactly_one_of :beer, :wine
-      end
-    end
-
+  let(:app) do
     Class.new(Grape::API) do
-      helpers shared_params
+      helpers Module.new do
+        extend Grape::API::Helpers
+
+        params :drink do
+          optional :beer
+          optional :wine
+          exactly_one_of :beer, :wine
+        end
+      end
       format :json
 
       params do
@@ -33,10 +31,6 @@ describe Grape::API::Helpers do
         declared(params, include_missing: true)
       end
     end
-  end
-
-  def app
-    subject
   end
 
   it 'defines parameters' do

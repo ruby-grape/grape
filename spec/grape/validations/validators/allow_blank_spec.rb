@@ -283,10 +283,12 @@ describe Grape::Validations::Validators::AllowBlankValidator do
         get '/custom_message', name: ''
         expect(last_response.body).to eq('{"error":"name has no value"}')
       end
+
       it 'refuses empty string for an optional param' do
         get '/custom_message/disallow_blank_optional_param', name: ''
         expect(last_response.body).to eq('{"error":"name has no value"}')
       end
+
       it 'refuses only whitespaces' do
         get '/custom_message', name: '   '
         expect(last_response.body).to eq('{"error":"name has no value"}')

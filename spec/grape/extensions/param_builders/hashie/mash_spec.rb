@@ -10,7 +10,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
   end
 
   describe 'in an endpoint' do
-    context '#params' do
+    describe '#params' do
       before do
         subject.params do
           build_with Grape::Extensions::Hashie::Mash::ParamBuilder
@@ -21,7 +21,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
         end
       end
 
-      it 'should be of type Hashie::Mash' do
+      it 'is of type Hashie::Mash' do
         get '/'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Hashie::Mash')
@@ -34,14 +34,14 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
       subject.send(:include, Grape::Extensions::Hashie::Mash::ParamBuilder)
     end
 
-    context '#params' do
+    describe '#params' do
       before do
         subject.get do
           params.class
         end
       end
 
-      it 'should be Hashie::Mash' do
+      it 'is Hashie::Mash' do
         get '/'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Hashie::Mash')
@@ -57,7 +57,7 @@ describe Grape::Extensions::Hashie::Mash::ParamBuilder do
         end
       end
 
-      it 'should be Hashie::Mash' do
+      it 'is Hashie::Mash' do
         get '/foo'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Hashie::Mash')

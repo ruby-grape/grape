@@ -43,6 +43,7 @@ describe Grape::Endpoint do
       before do
         catch(:error) { subject.error! 'Not Found', 404 }
       end
+
       it 'sets status' do
         expect(subject.status).to eq 404
       end
@@ -53,6 +54,7 @@ describe Grape::Endpoint do
         subject.namespace_inheritable(:default_error_status, 500)
         catch(:error) { subject.error! 'Unknown' }
       end
+
       it 'sets status to default_error_status' do
         expect(subject.status).to eq 500
       end
@@ -136,7 +138,7 @@ describe Grape::Endpoint do
     end
 
     it 'accepts unknown Integer status codes' do
-      expect { subject.status 210 }.to_not raise_error
+      expect { subject.status 210 }.not_to raise_error
     end
 
     it 'raises error if status is not a integer or symbol' do
@@ -273,7 +275,7 @@ describe Grape::Endpoint do
         end
 
         it 'sends no deprecation warnings' do
-          expect(subject).to_not receive(:warn)
+          expect(subject).not_to receive(:warn)
 
           subject.sendfile file_path
         end
@@ -334,7 +336,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(subject).to_not receive(:warn)
+          expect(subject).not_to receive(:warn)
 
           subject.stream file_path
         end
@@ -384,7 +386,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(subject).to_not receive(:warn)
+          expect(subject).not_to receive(:warn)
 
           subject.stream stream_object
         end

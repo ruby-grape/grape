@@ -5,6 +5,7 @@ require 'shared/versioning_examples'
 
 describe Grape::API do
   subject(:a_remounted_api) { Class.new(Grape::API) }
+
   let(:root_api) { Class.new(Grape::API) }
 
   def app

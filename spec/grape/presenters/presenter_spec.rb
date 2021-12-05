@@ -19,17 +19,17 @@ module Grape
     end
 
     describe Presenter do
+      subject { PresenterSpec::Dummy.new }
+
       describe 'represent' do
         let(:object_mock) do
           Object.new
         end
 
         it 'represent object' do
-          expect(Presenter.represent(object_mock)).to eq object_mock
+          expect(described_class.represent(object_mock)).to eq object_mock
         end
       end
-
-      subject { PresenterSpec::Dummy.new }
 
       describe 'present' do
         let(:hash_mock) do
@@ -38,8 +38,9 @@ module Grape
 
         describe 'instance' do
           before do
-            subject.present hash_mock, with: Grape::Presenters::Presenter
+            subject.present hash_mock, with: described_class
           end
+
           it 'presents dummy hash' do
             expect(subject.body).to eq hash_mock
           end
@@ -56,8 +57,8 @@ module Grape
 
           describe 'instance' do
             before do
-              subject.present hash_mock1, with: Grape::Presenters::Presenter
-              subject.present hash_mock2, with: Grape::Presenters::Presenter
+              subject.present hash_mock1, with: described_class
+              subject.present hash_mock2, with: described_class
             end
 
             it 'presents both dummy presenter' do

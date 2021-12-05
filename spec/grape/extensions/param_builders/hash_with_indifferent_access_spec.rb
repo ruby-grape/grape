@@ -10,7 +10,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
   end
 
   describe 'in an endpoint' do
-    context '#params' do
+    describe '#params' do
       before do
         subject.params do
           build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
@@ -21,7 +21,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
         end
       end
 
-      it 'should be of type Hash' do
+      it 'is of type Hash' do
         get '/'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('ActiveSupport::HashWithIndifferentAccess')
@@ -34,7 +34,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
       subject.send(:include, Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder)
     end
 
-    context '#params' do
+    describe '#params' do
       before do
         subject.get do
           params.class

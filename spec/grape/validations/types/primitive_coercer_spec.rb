@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 describe Grape::Validations::Types::PrimitiveCoercer do
-  let(:strict) { false }
-
   subject { described_class.new(type, strict) }
+
+  let(:strict) { false }
 
   describe '#call' do
     context 'BigDecimal' do

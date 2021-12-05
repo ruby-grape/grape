@@ -4,6 +4,17 @@ require 'spec_helper'
 
 describe Grape::Validations do
   context 'using a custom length validator' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, default_length: 140
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
     let(:default_length_validator) do
       Class.new(Grape::Validations::Validators::Base) do
         def validate_param!(attr_name, params)
@@ -16,22 +27,11 @@ describe Grape::Validations do
     end
 
     before do
-      Grape::Validations.register_validator('default_length', default_length_validator)
+      described_class.register_validator('default_length', default_length_validator)
     end
 
     after do
-      Grape::Validations.deregister_validator('default_length')
-    end
-
-    subject do
-      Class.new(Grape::API) do
-        params do
-          requires :text, default_length: 140
-        end
-        get do
-          'bacon'
-        end
-      end
+      described_class.deregister_validator('default_length')
     end
 
     def app
@@ -43,11 +43,13 @@ describe Grape::Validations do
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq 'bacon'
     end
+
     it 'over 140 characters' do
       get '/', text: 'a' * 141
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq 'text must be at the most 140 characters long'
     end
+
     it 'specified in the query string' do
       get '/', text: 'a' * 141, max: 141
       expect(last_response.status).to eq 200
@@ -56,22 +58,6 @@ describe Grape::Validations do
   end
 
   context 'using a custom body-only validator' do
-    let(:in_body_validator) do
-      Class.new(Grape::Validations::Validators::PresenceValidator) do
-        def validate(request)
-          validate!(request.env['api.request.body'])
-        end
-      end
-    end
-
-    before do
-      Grape::Validations.register_validator('in_body', in_body_validator)
-    end
-
-    after do
-      Grape::Validations.deregister_validator('in_body')
-    end
-
     subject do
       Class.new(Grape::API) do
         params do
@@ -83,6 +69,22 @@ describe Grape::Validations do
       end
     end
 
+    let(:in_body_validator) do
+      Class.new(Grape::Validations::Validators::PresenceValidator) do
+        def validate(request)
+          validate!(request.env['api.request.body'])
+        end
+      end
+    end
+
+    before do
+      described_class.register_validator('in_body', in_body_validator)
+    end
+
+    after do
+      described_class.deregister_validator('in_body')
+    end
+
     def app
       subject
     end
@@ -92,6 +94,7 @@ describe Grape::Validations do
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq 'bacon'
     end
+
     it 'ignores field in query' do
       get '/', nil, text: 'abc'
       expect(last_response.status).to eq 400
@@ -100,22 +103,6 @@ describe Grape::Validations do
   end
 
   context 'using a custom validator with message_key' do
-    let(:message_key_validator) do
-      Class.new(Grape::Validations::Validators::PresenceValidator) do
-        def validate_param!(attr_name, _params)
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: :presence)
-        end
-      end
-    end
-
-    before do
-      Grape::Validations.register_validator('with_message_key', message_key_validator)
-    end
-
-    after do
-      Grape::Validations.deregister_validator('with_message_key')
-    end
-
     subject do
       Class.new(Grape::API) do
         params do
@@ -125,6 +112,22 @@ describe Grape::Validations do
           'bacon'
         end
       end
+    end
+
+    let(:message_key_validator) do
+      Class.new(Grape::Validations::Validators::PresenceValidator) do
+        def validate_param!(attr_name, _params)
+          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: :presence)
+        end
+      end
+    end
+
+    before do
+      described_class.register_validator('with_message_key', message_key_validator)
+    end
+
+    after do
+      described_class.deregister_validator('with_message_key')
     end
 
     def app
@@ -139,6 +142,19 @@ describe Grape::Validations do
   end
 
   context 'using a custom request/param validator' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          optional :admin_field, type: String, admin: true
+          optional :non_admin_field, type: String
+          optional :admin_false_field, type: String, admin: false
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
     let(:admin_validator) do
       Class.new(Grape::Validations::Validators::Base) do
         def validate(request)
@@ -155,24 +171,11 @@ describe Grape::Validations do
     end
 
     before do
-      Grape::Validations.register_validator('admin', admin_validator)
+      described_class.register_validator('admin', admin_validator)
     end
 
     after do
-      Grape::Validations.deregister_validator('admin')
-    end
-
-    subject do
-      Class.new(Grape::API) do
-        params do
-          optional :admin_field, type: String, admin: true
-          optional :non_admin_field, type: String
-          optional :admin_false_field, type: String, admin: false
-        end
-        get do
-          'bacon'
-        end
-      end
+      described_class.deregister_validator('admin')
     end
 
     def app

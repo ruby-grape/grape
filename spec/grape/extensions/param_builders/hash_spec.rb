@@ -10,7 +10,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
   end
 
   describe 'in an endpoint' do
-    context '#params' do
+    describe '#params' do
       before do
         subject.params do
           build_with Grape::Extensions::Hash::ParamBuilder
@@ -21,7 +21,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
         end
       end
 
-      it 'should be of type Hash' do
+      it 'is of type Hash' do
         get '/'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Hash')
@@ -34,14 +34,14 @@ describe Grape::Extensions::Hash::ParamBuilder do
       subject.send(:include, Grape::Extensions::Hash::ParamBuilder)
     end
 
-    context '#params' do
+    describe '#params' do
       before do
         subject.get do
           params.class
         end
       end
 
-      it 'should be Hash' do
+      it 'is Hash' do
         get '/'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('Hash')

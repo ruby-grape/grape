@@ -12,6 +12,7 @@ module Grape
 
     describe Middleware do
       subject { Class.new(MiddlewareSpec::Dummy) }
+
       let(:proc) { -> {} }
       let(:foo_middleware) { Class.new }
       let(:bar_middleware) { Class.new }

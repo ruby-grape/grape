@@ -23,7 +23,7 @@ describe Grape::Validations::Validators::CoerceValidator do
     end
 
     context 'i18n' do
-      after :each do
+      after do
         I18n.available_locales = %i[en]
         I18n.locale = :en
         I18n.default_locale = :en

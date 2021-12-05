@@ -73,6 +73,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'does not trap errors by default' do
       expect { get '/' }.to raise_error(RuntimeError, 'rain!')
     end
@@ -87,10 +88,12 @@ describe Grape::Middleware::Error do
           run ExceptionSpec::ExceptionApp
         end
       end
+
       it 'sets the message appropriately' do
         get '/'
         expect(last_response.body).to eq('rain!')
       end
+
       it 'defaults to a 500 status' do
         get '/'
         expect(last_response.status).to eq(500)
@@ -105,6 +108,7 @@ describe Grape::Middleware::Error do
           run ExceptionSpec::OtherExceptionApp
         end
       end
+
       it 'does not trap errors other than StandardError' do
         expect { get '/' }.to raise_error(NotImplementedError, 'snow!')
       end
@@ -120,6 +124,7 @@ describe Grape::Middleware::Error do
           run ExceptionSpec::OtherExceptionApp
         end
       end
+
       it 'rescues the exception using the default handler' do
         get '/'
         expect(last_response.body).to eq('snow!')
@@ -134,6 +139,7 @@ describe Grape::Middleware::Error do
           run ExceptionSpec::OtherExceptionApp
         end
       end
+
       it 'rescues the exception using the provided handler' do
         get '/'
         expect(last_response.body).to eq('rescued')
@@ -149,6 +155,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to specify a different default status code' do
       get '/'
       expect(last_response.status).to eq(500)
@@ -163,6 +170,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return errors in json format' do
       get '/'
       expect(last_response.body).to eq('{"error":"rain!"}')
@@ -177,6 +185,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ErrorHashApp
       end
     end
+
     it 'is possible to return hash errors in json format' do
       get '/'
       expect(['{"error":"rain!","detail":"missing widget"}',
@@ -192,6 +201,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return errors in jsonapi format' do
       get '/'
       expect(last_response.body).to eq('{&quot;error&quot;:&quot;rain!&quot;}')
@@ -222,6 +232,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return errors in xml format' do
       get '/'
       expect(last_response.body).to eq("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <message>rain!</message>\n</error>\n")
@@ -236,6 +247,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ErrorHashApp
       end
     end
+
     it 'is possible to return hash errors in xml format' do
       get '/'
       expect(["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>\n  <detail>missing widget</detail>\n  <error>rain!</error>\n</error>\n",
@@ -258,6 +270,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to specify a custom formatter' do
       get '/'
       expect(last_response.body).to eq('{:custom_formatter=&gt;&quot;rain!&quot;}')
@@ -272,6 +285,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::AccessDeniedApp
       end
     end
+
     it 'does not trap regular error! codes' do
       get '/'
       expect(last_response.status).to eq(401)
@@ -286,6 +300,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::CustomErrorApp
       end
     end
+
     it 'responds to custom Grape exceptions appropriately' do
       get '/'
       expect(last_response.status).to eq(400)
@@ -304,6 +319,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return the backtrace and the original exception in json format' do
       get '/'
       expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original_exception', 'RuntimeError')
@@ -321,6 +337,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return the backtrace and the original exception in xml format' do
       get '/'
       expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original-exception', 'RuntimeError')
@@ -338,6 +355,7 @@ describe Grape::Middleware::Error do
         run ExceptionSpec::ExceptionApp
       end
     end
+
     it 'is possible to return the backtrace and the original exception in txt format' do
       get '/'
       expect(last_response.body).to include('error', 'rain!', 'backtrace', 'original exception', 'RuntimeError')

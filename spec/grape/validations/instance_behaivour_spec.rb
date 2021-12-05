@@ -14,15 +14,6 @@ describe 'Validator with instance variables' do
       end
     end
   end
-
-  before do
-    Grape::Validations.register_validator('instance_validator', validator_type)
-  end
-
-  after do
-    Grape::Validations.deregister_validator('instance_validator')
-  end
-
   let(:app) do
     Class.new(Grape::API) do
       params do
@@ -33,6 +24,14 @@ describe 'Validator with instance variables' do
         'noop'
       end
     end
+  end
+
+  before do
+    Grape::Validations.register_validator('instance_validator', validator_type)
+  end
+
+  after do
+    Grape::Validations.deregister_validator('instance_validator')
   end
 
   it 'passes validation every time' do

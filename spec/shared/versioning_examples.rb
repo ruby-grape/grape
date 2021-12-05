@@ -35,14 +35,14 @@ shared_examples_for 'versioning' do
     end
 
     versioned_get '/awesome', 'v1', **macro_options
-    expect(last_response.status).to eql 404
+    expect(last_response.status).to be 404
 
     versioned_get '/awesome', 'v2', **macro_options
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     versioned_get '/legacy', 'v1', **macro_options
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     versioned_get '/legacy', 'v2', **macro_options
-    expect(last_response.status).to eql 404
+    expect(last_response.status).to be 404
   end
 
   it 'is able to specify multiple versions' do
@@ -52,11 +52,11 @@ shared_examples_for 'versioning' do
     end
 
     versioned_get '/awesome', 'v1', **macro_options
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     versioned_get '/awesome', 'v2', **macro_options
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     versioned_get '/awesome', 'v3', **macro_options
-    expect(last_response.status).to eql 404
+    expect(last_response.status).to be 404
   end
 
   context 'with different versions for the same endpoint' do
@@ -117,6 +117,7 @@ shared_examples_for 'versioning' do
         before do
           @output ||= 'v2-'
         end
+
         get 'version' do
           @output += 'version'
         end
@@ -126,6 +127,7 @@ shared_examples_for 'versioning' do
         before do
           @output ||= 'v1-'
         end
+
         get 'version' do
           @output += 'version'
         end
@@ -170,6 +172,7 @@ shared_examples_for 'versioning' do
       end
       klass
     end
+
     before do
       subject.format :txt
 

@@ -500,11 +500,11 @@ describe Grape::Validations do
       end
 
       before do
-        Grape::Validations.register_validator('date_range', date_range_validator)
+        described_class.register_validator('date_range', date_range_validator)
       end
 
       after do
-        Grape::Validations.deregister_validator('date_range')
+        described_class.deregister_validator('date_range')
       end
 
       before do
@@ -1200,11 +1200,11 @@ describe Grape::Validations do
       end
 
       before do
-        Grape::Validations.register_validator('customvalidator', custom_validator)
+        described_class.register_validator('customvalidator', custom_validator)
       end
 
       after do
-        Grape::Validations.deregister_validator('customvalidator')
+        described_class.deregister_validator('customvalidator')
       end
 
       context 'when using optional with a custom validator' do
@@ -1357,11 +1357,11 @@ describe Grape::Validations do
         end
 
         before do
-          Grape::Validations.register_validator('customvalidator_with_options', custom_validator_with_options)
+          described_class.register_validator('customvalidator_with_options', custom_validator_with_options)
         end
 
         after do
-          Grape::Validations.deregister_validator('customvalidator_with_options')
+          described_class.deregister_validator('customvalidator_with_options')
         end
 
         before do
@@ -1458,21 +1458,25 @@ describe Grape::Validations do
             }
           end
         end
+
         it 'returns defaults' do
           get '/order'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :asc, order_by: :created_at }.to_json)
         end
+
         it 'overrides default value for order' do
           get '/order?order=desc'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :desc, order_by: :created_at }.to_json)
         end
+
         it 'overrides default value for order_by' do
           get '/order?order_by=name'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :asc, order_by: :name }.to_json)
         end
+
         it 'fails with invalid value' do
           get '/order?order=invalid'
           expect(last_response.status).to eq(400)
@@ -1497,7 +1501,7 @@ describe Grape::Validations do
 
     context 'all or none' do
       context 'optional params' do
-        before :each do
+        before do
           subject.resource :custom_message do
             params do
               optional :beer
@@ -1510,17 +1514,20 @@ describe Grape::Validations do
             end
           end
         end
+
         context 'with a custom validation message' do
           it 'errors when any one is present' do
             get '/custom_message/all_or_none', beer: 'string'
             expect(last_response.status).to eq(400)
             expect(last_response.body).to eq 'beer, wine, juice all params are required or none is required'
           end
+
           it 'works when all params are present' do
             get '/custom_message/all_or_none', beer: 'string', wine: 'anotherstring', juice: 'anotheranotherstring'
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq 'all_or_none works!'
           end
+
           it 'works when none are present' do
             get '/custom_message/all_or_none'
             expect(last_response.status).to eq(200)
@@ -1684,7 +1691,7 @@ describe Grape::Validations do
 
     context 'exactly one of' do
       context 'params' do
-        before :each do
+        before do
           subject.resources :custom_message do
             params do
               optional :beer
@@ -1748,7 +1755,7 @@ describe Grape::Validations do
       end
 
       context 'nested params' do
-        before :each do
+        before do
           subject.params do
             requires :nested, type: Hash do
               optional :beer_nested
@@ -1790,7 +1797,7 @@ describe Grape::Validations do
 
     context 'at least one of' do
       context 'params' do
-        before :each do
+        before do
           subject.resources :custom_message do
             params do
               optional :beer
@@ -1854,7 +1861,7 @@ describe Grape::Validations do
       end
 
       context 'nested params' do
-        before :each do
+        before do
           subject.params do
             requires :nested, type: Hash do
               optional :beer

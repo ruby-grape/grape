@@ -292,7 +292,7 @@ describe Grape::Validations::ParamsScope do
         it 'does not raise an exception' do
           expect do
             subject.params { optional :numbers, type: Array[Integer], values: 0..2, default: 0..2 }
-          end.to_not raise_error
+          end.not_to raise_error
         end
       end
 
@@ -300,7 +300,7 @@ describe Grape::Validations::ParamsScope do
         it 'does not raise an exception' do
           expect do
             subject.params { optional :numbers, type: Array[Integer], values: [0, 1, 2], default: [1, 0] }
-          end.to_not raise_error
+          end.not_to raise_error
         end
       end
     end
@@ -524,7 +524,7 @@ describe Grape::Validations::ParamsScope do
             requires :c
           end
         end
-      end.to_not raise_error
+      end.not_to raise_error
     end
 
     it 'does not raise an error if when using nested given' do
@@ -540,7 +540,7 @@ describe Grape::Validations::ParamsScope do
             end
           end
         end
-      end.to_not raise_error
+      end.not_to raise_error
     end
 
     it 'allows nested dependent parameters' do
@@ -585,7 +585,7 @@ describe Grape::Validations::ParamsScope do
       body = JSON.parse(last_response.body)
 
       expect(body.keys).to include('c')
-      expect(body.keys).to_not include('b')
+      expect(body.keys).not_to include('b')
     end
 
     it 'allows renaming of dependent on parameter' do
@@ -787,7 +787,7 @@ describe Grape::Validations::ParamsScope do
       subject.get('/test') { 'ok' }
     end
 
-    it 'should pass none Hash params' do
+    it 'passes none Hash params' do
       get '/test', foos: ['']
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('ok')
@@ -963,6 +963,7 @@ describe Grape::Validations::ParamsScope do
         expect(last_response.body).to eq('one is missing, two is missing, three is missing')
       end
     end
+
     context 'when fail_fast is defined it stops the validation' do
       it 'of other params' do
         subject.params do
@@ -975,6 +976,7 @@ describe Grape::Validations::ParamsScope do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('one is missing')
       end
+
       it 'for a single param' do
         subject.params do
           requires :one, allow_blank: false, regexp: /[0-9]+/, fail_fast: true
@@ -1025,7 +1027,7 @@ describe Grape::Validations::ParamsScope do
         end
 
         it 'prioritizes parameter validation over group validation' do
-          expect(last_response.body).to_not include('address is empty')
+          expect(last_response.body).not_to include('address is empty')
         end
       end
     end

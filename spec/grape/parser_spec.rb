@@ -26,6 +26,7 @@ describe Grape::Parser do
 
     context 'with :parsers option' do
       let(:parsers) { { customized: Class.new } }
+
       it 'includes passed :parsers values' do
         expect(subject.parsers(parsers: parsers)).to include(parsers)
       end
@@ -33,7 +34,9 @@ describe Grape::Parser do
 
     context 'with added parser by using `register` keyword' do
       let(:added_parser) { Class.new }
+
       before { subject.register :added, added_parser }
+
       it 'includes added parser' do
         expect(subject.parsers(**{})).to include(added: added_parser)
       end
@@ -54,6 +57,7 @@ describe Grape::Parser do
 
     context 'when parser is available' do
       before { subject.register :customized_json, Grape::Parser::Json }
+
       it 'returns registered parser if available' do
         expect(subject.parser_for(:customized_json)).to eq(Grape::Parser::Json)
       end

@@ -7,6 +7,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     it 'does return with status 200' do
       expect(last_response.status).to eq 200
     end
+
     it 'does return the expected result' do
       expect(last_response.body).to eq('beer received')
     end
@@ -20,6 +21,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     it 'does not include the X-Cascade=pass header' do
       expect(last_response.headers['X-Cascade']).to be_nil
     end
+
     it 'does not accept the request' do
       expect(last_response.status).to eq 406
     end
@@ -28,6 +30,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     it 'does not include the X-Cascade=pass header' do
       expect(last_response.headers['X-Cascade']).to be_nil
     end
+
     it 'does show rescue handler processing' do
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq('message was processed')
@@ -36,6 +39,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
   context 'API with cascade=false and rescue_from :all handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.rescue_from :all do |e|
@@ -52,7 +56,8 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
@@ -61,13 +66,15 @@ describe Grape::Exceptions::InvalidAcceptHeader do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a rescued request'
+
+        it_behaves_like 'a rescued request'
       end
     end
   end
 
   context 'API with cascade=false and without a rescue handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.get '/beer' do
@@ -81,23 +88,28 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
-        it_should_behave_like 'a not-cascaded request'
+
+        it_behaves_like 'a not-cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
-        it_should_behave_like 'a not-cascaded request'
+
+        it_behaves_like 'a not-cascaded request'
       end
     end
   end
 
   context 'API with cascade=false and with rescue_from :all handler and http_codes' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.rescue_from :all do |e|
@@ -119,7 +131,8 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
@@ -128,13 +141,15 @@ describe Grape::Exceptions::InvalidAcceptHeader do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a rescued request'
+
+        it_behaves_like 'a rescued request'
       end
     end
   end
 
   context 'API with cascade=false, http_codes but without a rescue handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.desc 'Get beer' do
@@ -153,23 +168,28 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
-        it_should_behave_like 'a not-cascaded request'
+
+        it_behaves_like 'a not-cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
-        it_should_behave_like 'a not-cascaded request'
+
+        it_behaves_like 'a not-cascaded request'
       end
     end
   end
 
   context 'API with cascade=true and rescue_from :all handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.rescue_from :all do |e|
@@ -186,7 +206,8 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
@@ -195,20 +216,24 @@ describe Grape::Exceptions::InvalidAcceptHeader do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
     end
   end
 
   context 'API with cascade=true and without a rescue handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.get '/beer' do
@@ -222,23 +247,28 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
     end
   end
 
   context 'API with cascade=true and with rescue_from :all handler and http_codes' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.rescue_from :all do |e|
@@ -260,7 +290,8 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
@@ -269,20 +300,24 @@ describe Grape::Exceptions::InvalidAcceptHeader do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before do
           get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
     end
   end
 
   context 'API with cascade=true, http_codes but without a rescue handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.desc 'Get beer' do
@@ -301,17 +336,21 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
     context 'that received a request with correct vendor and version' do
       before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
-      it_should_behave_like 'a valid request'
+
+      it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
+
       context 'an invalid vendor in the request' do
         before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
-        it_should_behave_like 'a cascaded request'
+
+        it_behaves_like 'a cascaded request'
       end
     end
   end
