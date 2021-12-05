@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::ValuesValidator do
-  let_it_be(:values_model) do
-    Class.new do
+  before :all do
+    ValuesModel = Class.new do
       DEFAULT_VALUES = %w[valid-type1 valid-type2 valid-type3].freeze
       DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze
 
@@ -34,15 +34,7 @@ describe Grape::Validations::Validators::ValuesValidator do
         end
       end
     end
-  end
-
-  before do
-    stub_const('ValuesModel', values_model)
-  end
-
-  let_it_be(:app) do
-    ValuesModel = values_model
-    Class.new(Grape::API) do
+    @app = Class.new(Grape::API) do
       default_format :json
 
       resources :custom_message do
@@ -242,6 +234,8 @@ describe Grape::Validations::Validators::ValuesValidator do
       get '/allow_blank'
     end
   end
+
+  let(:app) { @app }
 
   context 'with a custom validation message' do
     it 'allows a valid value for a parameter' do

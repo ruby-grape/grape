@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::AllOrNoneOfValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
+  before :all do
+    @app = Class.new(Grape::API) do
       rescue_from Grape::Exceptions::ValidationErrors do |e|
         error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
       end
@@ -60,6 +60,8 @@ describe Grape::Validations::Validators::AllOrNoneOfValidator do
       end
     end
   end
+
+  let(:app) { @app }
 
   describe '#validate!' do
     subject(:validate) { post path, params }

@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::DefaultValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
+  before :all do
+    @app = Class.new(Grape::API) do
       default_format :json
 
       params do
@@ -93,6 +93,8 @@ describe Grape::Validations::Validators::DefaultValidator do
       end
     end
   end
+
+  let(:app) { @app }
 
   it 'lets you leave required values nested inside an optional blank' do
     get '/optional_array', thing1: 'stuff'

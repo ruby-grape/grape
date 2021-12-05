@@ -274,15 +274,21 @@ describe Grape::Validations::Validators::PresenceValidator do
   end
 
   context 'with a custom type' do
-    it 'does not validate their type when it is missing' do
-      class CustomType
+    let(:custom_type) do
+      Class.new do
         def self.parse(value)
           return if value.blank?
 
           new
         end
       end
+    end
 
+    before do
+      stub_const('CustomType', custom_type)
+    end
+
+    it 'does not validate their type when it is missing' do
       subject.params do
         requires :custom, type: CustomType
       end

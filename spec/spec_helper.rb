@@ -5,15 +5,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
 
 require 'grape'
-require 'test_prof/recipes/rspec/let_it_be'
-
-class NullAdapter
-  def begin_transaction; end
-
-  def rollback_transaction; end
-end
-
-TestProf::BeforeAll.adapter = NullAdapter.new
 
 require 'rubygems'
 require 'bundler'

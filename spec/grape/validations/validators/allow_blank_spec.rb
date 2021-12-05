@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::AllowBlankValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
+  before :all do
+    @app = Class.new(Grape::API) do
       default_format :json
 
       params do
@@ -245,6 +245,8 @@ describe Grape::Validations::Validators::AllowBlankValidator do
       end
     end
   end
+
+  let(:app) { @app }
 
   context 'invalid input' do
     it 'refuses empty string' do

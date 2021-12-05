@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::SameAsValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
+  before :all do
+    @app = Class.new(Grape::API) do
       params do
         requires :password
         requires :password_confirmation, same_as: :password
@@ -20,6 +20,8 @@ describe Grape::Validations::Validators::SameAsValidator do
       end
     end
   end
+
+  let(:app) { @app }
 
   describe '/' do
     context 'is the same' do

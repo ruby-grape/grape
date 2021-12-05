@@ -7,12 +7,8 @@ describe Grape::Validations::Validators::CoerceValidator do
     Class.new(Grape::API)
   end
 
-  def app
-    subject
-  end
-
-  describe 'coerce' do
-    class SecureURIOnly
+  let(:secure_uri_only) do
+    Class.new do
       def self.parse(value)
         URI.parse(value)
       end
@@ -21,7 +17,17 @@ describe Grape::Validations::Validators::CoerceValidator do
         value.is_a? URI::HTTPS
       end
     end
+  end
 
+  def app
+    subject
+  end
+
+  before do
+    stub_const('SecureURIOnly', secure_uri_only)
+  end
+
+  describe 'coerce' do
     context 'i18n' do
       after :each do
         I18n.available_locales = %i[en]

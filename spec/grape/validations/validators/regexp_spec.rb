@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Validations::Validators::RegexpValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
+  before :all do
+    @app = Class.new(Grape::API) do
       default_format :json
 
       resources :custom_message do
@@ -42,6 +42,8 @@ describe Grape::Validations::Validators::RegexpValidator do
       end
     end
   end
+
+  let(:app) { @app }
 
   context 'custom validation message' do
     context 'with invalid input' do
