@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::CoerceValidator do
+describe Grape::Validations::Validators::CoerceValidator do
   subject do
     Class.new(Grape::API)
   end
@@ -83,7 +83,7 @@ describe Grape::Validations::CoerceValidator do
       context 'on custom coercion rules' do
         before do
           subject.params do
-            requires :a, types: { value: [Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
+            requires :a, types: { value: [Grape::API::Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
               case val
               when 'yup'
                 true
@@ -171,9 +171,9 @@ describe Grape::Validations::CoerceValidator do
           expect(last_response.body).to eq('BigDecimal 45.1')
         end
 
-        it 'Boolean' do
+        it 'Grape::API::Boolean' do
           subject.params do
-            requires :boolean, type: Boolean
+            requires :boolean, type: Grape::API::Boolean
           end
           subject.post '/boolean' do
             params[:boolean]
@@ -370,9 +370,9 @@ describe Grape::Validations::CoerceValidator do
         end
       end
 
-      it 'Boolean' do
+      it 'Grape::API::Boolean' do
         subject.params do
-          requires :boolean, type: Boolean
+          requires :boolean, type: Grape::API::Boolean
         end
         subject.get '/boolean' do
           params[:boolean].class
@@ -1018,11 +1018,9 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'multiple types' do
-      Boolean = Grape::API::Boolean
-
       it 'coerces to first possible type' do
         subject.params do
-          requires :a, types: [Boolean, Integer, String]
+          requires :a, types: [Grape::API::Boolean, Integer, String]
         end
         subject.get '/' do
           params[:a].class.to_s
@@ -1043,7 +1041,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'fails when no coercion is possible' do
         subject.params do
-          requires :a, types: [Boolean, Integer]
+          requires :a, types: [Grape::API::Boolean, Integer]
         end
         subject.get '/' do
           params[:a].class.to_s
@@ -1202,7 +1200,7 @@ describe Grape::Validations::CoerceValidator do
       context 'custom coercion rules' do
         before do
           subject.params do
-            requires :a, types: [Boolean, String], coerce_with: (lambda do |val|
+            requires :a, types: [Grape::API::Boolean, String], coerce_with: (lambda do |val|
               case val
               when 'yup'
                 true

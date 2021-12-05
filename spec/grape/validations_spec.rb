@@ -489,16 +489,22 @@ describe Grape::Validations do
     end
 
     context 'custom validator for a Hash' do
-      module ValuesSpec
-        module DateRangeValidations
-          class DateRangeValidator < Grape::Validations::Base
-            def validate_param!(attr_name, params)
-              return if params[attr_name][:from] <= params[attr_name][:to]
+      let(:date_range_validator) do
+        Class.new(Grape::Validations::Validators::Base) do
+          def validate_param!(attr_name, params)
+            return if params[attr_name][:from] <= params[attr_name][:to]
 
-              raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'")
-            end
+            raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'")
           end
         end
+      end
+
+      before do
+        Grape::Validations.register_validator('date_range', date_range_validator)
+      end
+
+      after do
+        Grape::Validations.deregister_validator('date_range')
       end
 
       before do
@@ -1183,14 +1189,22 @@ describe Grape::Validations do
     end
 
     context 'custom validation' do
-      module CustomValidations
-        class Customvalidator < Grape::Validations::Base
+      let(:custom_validator) do
+        Class.new(Grape::Validations::Validators::Base) do
           def validate_param!(attr_name, params)
             return if params[attr_name] == 'im custom'
 
             raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: 'is not custom!')
           end
         end
+      end
+
+      before do
+        Grape::Validations.register_validator('customvalidator', custom_validator)
+      end
+
+      after do
+        Grape::Validations.deregister_validator('customvalidator')
       end
 
       context 'when using optional with a custom validator' do
@@ -1332,14 +1346,22 @@ describe Grape::Validations do
       end
 
       context 'when using options on param' do
-        module CustomValidations
-          class CustomvalidatorWithOptions < Grape::Validations::Base
+        let(:custom_validator_with_options) do
+          Class.new(Grape::Validations::Validators::Base) do
             def validate_param!(attr_name, params)
               return if params[attr_name] == @option[:text]
 
               raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message)
             end
           end
+        end
+
+        before do
+          Grape::Validations.register_validator('customvalidator_with_options', custom_validator_with_options)
+        end
+
+        after do
+          Grape::Validations.deregister_validator('customvalidator_with_options')
         end
 
         before do

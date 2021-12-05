@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::PresenceValidator do
+describe Grape::Validations::Validators::PresenceValidator do
   subject do
     Class.new(Grape::API) do
       format :json
     end
   end
+
   def app
     subject
   end

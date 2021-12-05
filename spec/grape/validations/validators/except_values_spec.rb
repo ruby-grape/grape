@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::ExceptValuesValidator do
+describe Grape::Validations::Validators::ExceptValuesValidator do
   module ValidationsSpec
     class ExceptValuesModel
       DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze

@@ -4,18 +4,25 @@ require 'spec_helper'
 
 describe Grape::Validations do
   context 'using a custom length validator' do
-    before do
-      module CustomValidationsSpec
-        class DefaultLength < Grape::Validations::Base
-          def validate_param!(attr_name, params)
-            @option = params[:max].to_i if params.key?(:max)
-            return if params[attr_name].length <= @option
+    let(:default_length_validator) do
+      Class.new(Grape::Validations::Validators::Base) do
+        def validate_param!(attr_name, params)
+          @option = params[:max].to_i if params.key?(:max)
+          return if params[attr_name].length <= @option
 
-            raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long")
-          end
+          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long")
         end
       end
     end
+
+    before do
+      Grape::Validations.register_validator('default_length', default_length_validator)
+    end
+
+    after do
+      Grape::Validations.deregister_validator('default_length')
+    end
+
     subject do
       Class.new(Grape::API) do
         params do
@@ -49,15 +56,22 @@ describe Grape::Validations do
   end
 
   context 'using a custom body-only validator' do
-    before do
-      module CustomValidationsSpec
-        class InBody < Grape::Validations::PresenceValidator
-          def validate(request)
-            validate!(request.env['api.request.body'])
-          end
+    let(:in_body_validator) do
+      Class.new(Grape::Validations::Validators::PresenceValidator) do
+        def validate(request)
+          validate!(request.env['api.request.body'])
         end
       end
     end
+
+    before do
+      Grape::Validations.register_validator('in_body', in_body_validator)
+    end
+
+    after do
+      Grape::Validations.deregister_validator('in_body')
+    end
+
     subject do
       Class.new(Grape::API) do
         params do
@@ -86,15 +100,22 @@ describe Grape::Validations do
   end
 
   context 'using a custom validator with message_key' do
-    before do
-      module CustomValidationsSpec
-        class WithMessageKey < Grape::Validations::PresenceValidator
-          def validate_param!(attr_name, _params)
-            raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: :presence)
-          end
+    let(:message_key_validator) do
+      Class.new(Grape::Validations::Validators::PresenceValidator) do
+        def validate_param!(attr_name, _params)
+          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: :presence)
         end
       end
     end
+
+    before do
+      Grape::Validations.register_validator('with_message_key', message_key_validator)
+    end
+
+    after do
+      Grape::Validations.deregister_validator('with_message_key')
+    end
+
     subject do
       Class.new(Grape::API) do
         params do
@@ -118,22 +139,29 @@ describe Grape::Validations do
   end
 
   context 'using a custom request/param validator' do
-    before do
-      module CustomValidationsSpec
-        class Admin < Grape::Validations::Base
-          def validate(request)
-            # return if the param we are checking was not in request
-            # @attrs is a list containing the attribute we are currently validating
-            return unless request.params.key? @attrs.first
-            # check if admin flag is set to true
-            return unless @option
-            # check if user is admin or not
-            # as an example get a token from request and check if it's admin or not
-            raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers['X-Access-Token'] == 'admin'
-          end
+    let(:admin_validator) do
+      Class.new(Grape::Validations::Validators::Base) do
+        def validate(request)
+          # return if the param we are checking was not in request
+          # @attrs is a list containing the attribute we are currently validating
+          return unless request.params.key? @attrs.first
+          # check if admin flag is set to true
+          return unless @option
+          # check if user is admin or not
+          # as an example get a token from request and check if it's admin or not
+          raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers['X-Access-Token'] == 'admin'
         end
       end
     end
+
+    before do
+      Grape::Validations.register_validator('admin', admin_validator)
+    end
+
+    after do
+      Grape::Validations.deregister_validator('admin')
+    end
+
     subject do
       Class.new(Grape::API) do
         params do

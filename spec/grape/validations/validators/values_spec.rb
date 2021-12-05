@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::ValuesValidator do
-  module ValidationsSpec
-    class ValuesModel
+describe Grape::Validations::Validators::ValuesValidator do
+  let_it_be(:values_model) do
+    Class.new do
       DEFAULT_VALUES = %w[valid-type1 valid-type2 valid-type3].freeze
       DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze
+
       class << self
         def values
           @values ||= []
@@ -33,212 +34,213 @@ describe Grape::Validations::ValuesValidator do
         end
       end
     end
+  end
 
-    module ValuesValidatorSpec
-      class API < Grape::API
-        default_format :json
+  before do
+    stub_const('ValuesModel', values_model)
+  end
 
-        resources :custom_message do
-          params do
-            requires :type, values: { value: ValuesModel.values, message: 'value does not include in values' }
-          end
-          get '/' do
-            { type: params[:type] }
-          end
+  let_it_be(:app) do
+    ValuesModel = values_model
+    Class.new(Grape::API) do
+      default_format :json
 
-          params do
-            optional :type, values: { value: -> { ValuesModel.values }, message: 'value does not include in values' }, default: 'valid-type2'
-          end
-          get '/lambda' do
-            { type: params[:type] }
-          end
-
-          params do
-            requires :type, values: { except: ValuesModel.excepts, except_message: 'value is on exclusions list', message: 'default exclude message' }
-          end
-          get '/exclude/exclude_message'
-
-          params do
-            requires :type, values: { except: -> { ValuesModel.excepts }, except_message: 'value is on exclusions list' }
-          end
-          get '/exclude/lambda/exclude_message'
-
-          params do
-            requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
-          end
-          get '/exclude/fallback_message'
-        end
-
+      resources :custom_message do
         params do
-          requires :type, values: ValuesModel.values
+          requires :type, values: { value: ValuesModel.values, message: 'value does not include in values' }
         end
         get '/' do
           { type: params[:type] }
         end
 
         params do
-          requires :type, values: []
-        end
-        get '/empty'
-
-        params do
-          optional :type, values: { value: ValuesModel.values }, default: 'valid-type2'
-        end
-        get '/default/hash/valid' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :type, values: ValuesModel.values, default: 'valid-type2'
-        end
-        get '/default/valid' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :type, values: { except: ValuesModel.excepts }, default: 'valid-type2'
-        end
-        get '/default/except' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :type, values: -> { ValuesModel.values }, default: 'valid-type2'
+          optional :type, values: { value: -> { ValuesModel.values }, message: 'value does not include in values' }, default: 'valid-type2'
         end
         get '/lambda' do
           { type: params[:type] }
         end
 
         params do
-          requires :type, values: ->(v) { ValuesModel.include? v }
+          requires :type, values: { except: ValuesModel.excepts, except_message: 'value is on exclusions list', message: 'default exclude message' }
         end
-        get '/lambda_val' do
-          { type: params[:type] }
-        end
+        get '/exclude/exclude_message'
 
         params do
-          requires :number, type: Integer, values: ->(v) { v > 0 }
+          requires :type, values: { except: -> { ValuesModel.excepts }, except_message: 'value is on exclusions list' }
         end
-        get '/lambda_int_val' do
-          { number: params[:number] }
-        end
+        get '/exclude/lambda/exclude_message'
 
         params do
-          requires :type, values: -> { [] }
+          requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
         end
-        get '/empty_lambda'
-
-        params do
-          optional :type, values: ValuesModel.values, default: -> { ValuesModel.values.sample }
-        end
-        get '/default_lambda' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :type, values: -> { ValuesModel.values }, default: -> { ValuesModel.values.sample }
-        end
-        get '/default_and_values_lambda' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :type, type: Boolean, desc: 'A boolean', values: [true]
-        end
-        get '/values/optional_boolean' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: Integer, desc: 'An integer', values: [10, 11], default: 10
-        end
-        get '/values/coercion' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: Array[Integer], desc: 'An integer', values: [10, 11], default: 10
-        end
-        get '/values/array_coercion' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :optional, type: Array do
-            requires :type, values: %w[a b]
-          end
-        end
-        get '/optional_with_required_values'
-
-        params do
-          requires :type, values: { except: ValuesModel.excepts }
-        end
-        get '/except/exclusive' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: String, values: { except: ValuesModel.excepts }
-        end
-        get '/except/exclusive/type' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, values: { except: -> { ValuesModel.excepts } }
-        end
-        get '/except/exclusive/lambda' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: String, values: { except: -> { ValuesModel.excepts } }
-        end
-        get '/except/exclusive/lambda/type' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: Integer, values: { except: -> { [3, 4, 5] } }
-        end
-        get '/except/exclusive/lambda/coercion' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, type: Integer, values: { value: 1..5, except: [3] }
-        end
-        get '/mixed/value/except' do
-          { type: params[:type] }
-        end
-
-        params do
-          optional :optional, type: Array[String], values: %w[a b c]
-        end
-        put '/optional_with_array_of_string_values'
-
-        params do
-          requires :type, values: { proc: ->(v) { ValuesModel.include? v } }
-        end
-        get '/proc' do
-          { type: params[:type] }
-        end
-
-        params do
-          requires :type, values: { proc: ->(v) { ValuesModel.include? v }, message: 'failed check' }
-        end
-        get '/proc/message'
-
-        params do
-          optional :name, type: String, values: %w[a b], allow_blank: true
-        end
-        get '/allow_blank'
+        get '/exclude/fallback_message'
       end
-    end
-  end
 
-  def app
-    ValidationsSpec::ValuesValidatorSpec::API
+      params do
+        requires :type, values: ValuesModel.values
+      end
+      get '/' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, values: []
+      end
+      get '/empty'
+
+      params do
+        optional :type, values: { value: ValuesModel.values }, default: 'valid-type2'
+      end
+      get '/default/hash/valid' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :type, values: ValuesModel.values, default: 'valid-type2'
+      end
+      get '/default/valid' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :type, values: { except: ValuesModel.excepts }, default: 'valid-type2'
+      end
+      get '/default/except' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :type, values: -> { ValuesModel.values }, default: 'valid-type2'
+      end
+      get '/lambda' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, values: ->(v) { ValuesModel.include? v }
+      end
+      get '/lambda_val' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :number, type: Integer, values: ->(v) { v > 0 }
+      end
+      get '/lambda_int_val' do
+        { number: params[:number] }
+      end
+
+      params do
+        requires :type, values: -> { [] }
+      end
+      get '/empty_lambda'
+
+      params do
+        optional :type, values: ValuesModel.values, default: -> { ValuesModel.values.sample }
+      end
+      get '/default_lambda' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :type, values: -> { ValuesModel.values }, default: -> { ValuesModel.values.sample }
+      end
+      get '/default_and_values_lambda' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :type, type: Grape::API::Boolean, desc: 'A boolean', values: [true]
+      end
+      get '/values/optional_boolean' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: Integer, desc: 'An integer', values: [10, 11], default: 10
+      end
+      get '/values/coercion' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: Array[Integer], desc: 'An integer', values: [10, 11], default: 10
+      end
+      get '/values/array_coercion' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :optional, type: Array do
+          requires :type, values: %w[a b]
+        end
+      end
+      get '/optional_with_required_values'
+
+      params do
+        requires :type, values: { except: ValuesModel.excepts }
+      end
+      get '/except/exclusive' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: String, values: { except: ValuesModel.excepts }
+      end
+      get '/except/exclusive/type' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, values: { except: -> { ValuesModel.excepts } }
+      end
+      get '/except/exclusive/lambda' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: String, values: { except: -> { ValuesModel.excepts } }
+      end
+      get '/except/exclusive/lambda/type' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: Integer, values: { except: -> { [3, 4, 5] } }
+      end
+      get '/except/exclusive/lambda/coercion' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, type: Integer, values: { value: 1..5, except: [3] }
+      end
+      get '/mixed/value/except' do
+        { type: params[:type] }
+      end
+
+      params do
+        optional :optional, type: Array[String], values: %w[a b c]
+      end
+      put '/optional_with_array_of_string_values'
+
+      params do
+        requires :type, values: { proc: ->(v) { ValuesModel.include? v } }
+      end
+      get '/proc' do
+        { type: params[:type] }
+      end
+
+      params do
+        requires :type, values: { proc: ->(v) { ValuesModel.include? v }, message: 'failed check' }
+      end
+      get '/proc/message'
+
+      params do
+        optional :name, type: String, values: %w[a b], allow_blank: true
+      end
+      get '/allow_blank'
+    end
   end
 
   context 'with a custom validation message' do
@@ -255,7 +257,7 @@ describe Grape::Validations::ValuesValidator do
     end
 
     it 'validates against values in a proc' do
-      ValidationsSpec::ValuesModel.add_value('valid-type4')
+      ValuesModel.add_value('valid-type4')
 
       get('/custom_message/lambda', type: 'valid-type4')
       expect(last_response.status).to eq 200
@@ -354,15 +356,14 @@ describe Grape::Validations::ValuesValidator do
   end
 
   it 'does not validate updated values without proc' do
-    ValidationsSpec::ValuesModel.add_value('valid-type4')
-
+    ValuesModel.add_value('valid-type4')
     get('/', type: 'valid-type4')
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
 
   it 'validates against values in a proc' do
-    ValidationsSpec::ValuesModel.add_value('valid-type4')
+    ValuesModel.add_value('valid-type4')
 
     get('/lambda', type: 'valid-type4')
     expect(last_response.status).to eq 200
@@ -424,7 +425,7 @@ describe Grape::Validations::ValuesValidator do
   it 'raises IncompatibleOptionValues on an invalid default value from proc' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { optional :type, values: %w[valid-type1 valid-type2 valid-type3], default: "#{ValidationsSpec::ValuesModel.values.sample}_invalid" }
+      subject.params { optional :type, values: %w[valid-type1 valid-type2 valid-type3], default: "#{ValuesModel.values.sample}_invalid" }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 

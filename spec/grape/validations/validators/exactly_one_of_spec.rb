@@ -2,95 +2,89 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::ExactlyOneOfValidator do
-  describe '#validate!' do
-    subject(:validate) { post path, params }
+describe Grape::Validations::Validators::ExactlyOneOfValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      rescue_from Grape::Exceptions::ValidationErrors do |e|
+        error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+      end
 
-    module ValidationsSpec
-      module ExactlyOneOfValidatorSpec
-        class API < Grape::API
-          rescue_from Grape::Exceptions::ValidationErrors do |e|
-            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
-          end
+      params do
+        optional :beer
+        optional :wine
+        optional :grapefruit
+        exactly_one_of :beer, :wine, :grapefruit
+      end
+      post do
+      end
 
-          params do
-            optional :beer
-            optional :wine
-            optional :grapefruit
+      params do
+        optional :beer
+        optional :wine
+        optional :grapefruit
+        optional :other
+        exactly_one_of :beer, :wine, :grapefruit
+      end
+      post 'mixed-params' do
+      end
+
+      params do
+        optional :beer
+        optional :wine
+        optional :grapefruit
+        exactly_one_of :beer, :wine, :grapefruit, message: 'you should choose one'
+      end
+      post '/custom-message' do
+      end
+
+      params do
+        requires :item, type: Hash do
+          optional :beer
+          optional :wine
+          optional :grapefruit
+          exactly_one_of :beer, :wine, :grapefruit
+        end
+      end
+      post '/nested-hash' do
+      end
+
+      params do
+        optional :item, type: Hash do
+          optional :beer
+          optional :wine
+          optional :grapefruit
+          exactly_one_of :beer, :wine, :grapefruit
+        end
+      end
+      post '/nested-optional-hash' do
+      end
+
+      params do
+        requires :items, type: Array do
+          optional :beer
+          optional :wine
+          optional :grapefruit
+          exactly_one_of :beer, :wine, :grapefruit
+        end
+      end
+      post '/nested-array' do
+      end
+
+      params do
+        requires :items, type: Array do
+          requires :nested_items, type: Array do
+            optional :beer, :wine, :grapefruit, type: Grape::API::Boolean
             exactly_one_of :beer, :wine, :grapefruit
-          end
-          post do
-          end
-
-          params do
-            optional :beer
-            optional :wine
-            optional :grapefruit
-            optional :other
-            exactly_one_of :beer, :wine, :grapefruit
-          end
-          post 'mixed-params' do
-          end
-
-          params do
-            optional :beer
-            optional :wine
-            optional :grapefruit
-            exactly_one_of :beer, :wine, :grapefruit, message: 'you should choose one'
-          end
-          post '/custom-message' do
-          end
-
-          params do
-            requires :item, type: Hash do
-              optional :beer
-              optional :wine
-              optional :grapefruit
-              exactly_one_of :beer, :wine, :grapefruit
-            end
-          end
-          post '/nested-hash' do
-          end
-
-          params do
-            optional :item, type: Hash do
-              optional :beer
-              optional :wine
-              optional :grapefruit
-              exactly_one_of :beer, :wine, :grapefruit
-            end
-          end
-          post '/nested-optional-hash' do
-          end
-
-          params do
-            requires :items, type: Array do
-              optional :beer
-              optional :wine
-              optional :grapefruit
-              exactly_one_of :beer, :wine, :grapefruit
-            end
-          end
-          post '/nested-array' do
-          end
-
-          params do
-            requires :items, type: Array do
-              requires :nested_items, type: Array do
-                optional :beer, :wine, :grapefruit, type: Boolean
-                exactly_one_of :beer, :wine, :grapefruit
-              end
-            end
-          end
-          post '/deeply-nested-array' do
           end
         end
       end
+      post '/deeply-nested-array' do
+      end
     end
+  end
 
-    def app
-      ValidationsSpec::ExactlyOneOfValidatorSpec::API
-    end
+  describe '#validate!' do
+    subject(:validate) { post path, params }
 
     context 'when all params are present' do
       let(:path) { '/' }

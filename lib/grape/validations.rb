@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+require 'grape/validations/attributes_iterator'
+require 'grape/validations/single_attribute_iterator'
+require 'grape/validations/multiple_attributes_iterator'
+require 'grape/validations/params_scope'
+require 'grape/validations/types'
+
 module Grape
   # Registry to store and locate known Validators.
   module Validations
