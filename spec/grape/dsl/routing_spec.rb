@@ -12,6 +12,7 @@ module Grape
 
     describe Routing do
       subject { Class.new(RoutingSpec::Dummy) }
+
       let(:proc) { -> {} }
       let(:options) { { a: :b } }
       let(:path) { '/dummy' }
@@ -109,7 +110,7 @@ module Grape
         it 'does not duplicate identical endpoints' do
           subject.route(:any)
           expect { subject.route(:any) }
-            .to_not change(subject.endpoints, :count)
+            .not_to change(subject.endpoints, :count)
         end
 
         it 'generates correct endpoint options' do
@@ -233,21 +234,23 @@ module Grape
             allow(subject).to receive(:prepare_routes).and_return(routes)
             subject.routes
           end
-          it 'it does not call prepare_routes again' do
-            expect(subject).to_not receive(:prepare_routes)
+
+          it 'does not call prepare_routes again' do
+            expect(subject).not_to receive(:prepare_routes)
             expect(subject.routes).to eq routes
           end
         end
       end
 
       describe '.route_param' do
+        let!(:options) { { requirements: regex } }
+        let(:regex) { /(.*)/ }
+
         it 'calls #namespace with given params' do
           expect(subject).to receive(:namespace).with(':foo', {}).and_yield
           subject.route_param('foo', {}, &proc {})
         end
 
-        let(:regex) { /(.*)/ }
-        let!(:options) { { requirements: regex } }
         it 'nests requirements option under param name' do
           expect(subject).to receive(:namespace) do |_param, options|
             expect(options[:requirements][:foo]).to eq regex
@@ -258,7 +261,7 @@ module Grape
         it 'does not modify options parameter' do
           allow(subject).to receive(:namespace)
           expect { subject.route_param('foo', options, &proc {}) }
-            .to_not change { options }
+            .not_to change { options }
         end
       end
 

@@ -87,7 +87,7 @@ describe Grape::Endpoint do
       end
     end
 
-    it 'should show nil for nested params if include_missing is true' do
+    it 'shows nil for nested params if include_missing is true' do
       subject.get '/declared' do
         declared(params, include_missing: true)
       end
@@ -97,7 +97,7 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)['nested']['fourth']).to be_nil
     end
 
-    it 'should show nil for multiple allowed types if include_missing is true' do
+    it 'shows nil for multiple allowed types if include_missing is true' do
       subject.get '/declared' do
         declared(params, include_missing: true)
       end
@@ -568,34 +568,34 @@ describe Grape::Endpoint do
       get '/artists/1'
       json = JSON.parse(last_response.body, symbolize_names: true)
 
-      expect(json.key?(:id)).to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
+      expect(json).to be_key(:id)
+      expect(json).not_to be_key(:artist_id)
     end
 
     it 'return only :artist_id without :id' do
       get '/artists/1/compositions'
       json = JSON.parse(last_response.body, symbolize_names: true)
 
-      expect(json.key?(:artist_id)).to be_truthy
-      expect(json.key?(:id)).not_to be_truthy
+      expect(json).to be_key(:artist_id)
+      expect(json).not_to be_key(:id)
     end
 
     it 'return :filter and :id parameters in declared for second enpoint inside route_param' do
       get '/artists/1/some_route', filter: 'some_filter'
       json = JSON.parse(last_response.body, symbolize_names: true)
 
-      expect(json.key?(:filter)).to be_truthy
-      expect(json.key?(:id)).to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
+      expect(json).to be_key(:filter)
+      expect(json).to be_key(:id)
+      expect(json).not_to be_key(:artist_id)
     end
 
     it 'return :compositor_id for mounter in route_param' do
       get '/artists/1/albums'
       json = JSON.parse(last_response.body, symbolize_names: true)
 
-      expect(json.key?(:compositor_id)).to be_truthy
-      expect(json.key?(:id)).not_to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
+      expect(json).to be_key(:compositor_id)
+      expect(json).not_to be_key(:id)
+      expect(json).not_to be_key(:artist_id)
     end
   end
 

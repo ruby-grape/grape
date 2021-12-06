@@ -20,6 +20,7 @@ module Grape
 
     describe RequestResponse do
       subject { Class.new(RequestResponseSpec::Dummy) }
+
       let(:c_type) { 'application/json' }
       let(:format) { 'txt' }
 

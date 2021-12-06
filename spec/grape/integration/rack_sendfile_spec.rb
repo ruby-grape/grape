@@ -44,7 +44,7 @@ describe Rack::Sendfile do
 
     it 'not contains Sendfile headers' do
       headers = subject[1]
-      expect(headers).to_not include('X-Accel-Redirect')
+      expect(headers).not_to include('X-Accel-Redirect')
     end
   end
 end

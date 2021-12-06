@@ -11,6 +11,7 @@
 * [#2192](https://github.com/ruby-grape/grape/pull/2192): Memoize the result of Grape::Middleware::Base#response - [@Jack12816](https://github.com/Jack12816).
 * [#2200](https://github.com/ruby-grape/grape/pull/2200): Add validators module to all validators - [@ericproulx](https://github.com/ericproulx).
 * [#2202](https://github.com/ruby-grape/grape/pull/2202): Fix random mock spec error - [@ericproulx](https://github.com/ericproulx).
+* [#2203](https://github.com/ruby-grape/grape/pull/2203): Add rubocop-rspec - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.6.0 (2021/10/04)

@@ -5,6 +5,7 @@ require 'spec_helper'
 describe Grape::Validations::SingleAttributeIterator do
   describe '#each' do
     subject(:iterator) { described_class.new(validator, scope, params) }
+
     let(:scope) { Grape::Validations::ParamsScope.new(api: Class.new(Grape::API)) }
     let(:validator) { double(attrs: %i[first second]) }
 

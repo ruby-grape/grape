@@ -4,8 +4,9 @@ require 'spec_helper'
 module Grape
   module Util
     describe ReverseStackableValues do
-      let(:parent) { described_class.new }
       subject { described_class.new(parent) }
+
+      let(:parent) { described_class.new }
 
       describe '#keys' do
         it 'returns all keys' do
@@ -102,6 +103,7 @@ module Grape
 
       describe '#clone' do
         let(:obj_cloned) { subject.clone }
+
         it 'copies all values' do
           parent = described_class.new
           child = described_class.new parent

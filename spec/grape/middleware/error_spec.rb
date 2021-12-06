@@ -62,6 +62,7 @@ describe Grape::Middleware::Error do
 
   context 'with http code' do
     let(:options) {  { default_message: 'Aww, hamburgers.' } }
+
     it 'adds the status code if wanted' do
       ErrorSpec::ErrApp.error = { message: { code: 200 } }
       get '/'

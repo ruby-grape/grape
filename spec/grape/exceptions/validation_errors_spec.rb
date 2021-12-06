@@ -5,30 +5,31 @@ require 'ostruct'
 
 describe Grape::Exceptions::ValidationErrors do
   let(:validation_message) { 'FooBar is invalid' }
-  let(:validation_error) { OpenStruct.new(params: [validation_message]) }
+  let(:validation_error) { instance_double Grape::Exceptions::Validation, params: [validation_message], message: '' }
 
   context 'initialize' do
+    subject do
+      described_class.new(errors: [validation_error], headers: headers)
+    end
+
     let(:headers) do
       {
         'A-Header-Key' => 'A-Header-Value'
       }
     end
 
-    subject do
-      described_class.new(errors: [validation_error], headers: headers)
-    end
-
-    it 'should assign headers through base class' do
+    it 'assigns headers through base class' do
       expect(subject.headers).to eq(headers)
     end
   end
 
   context 'message' do
     context 'is not repeated' do
+      subject(:message) { error.message.split(',').map(&:strip) }
+
       let(:error) do
         described_class.new(errors: [validation_error, validation_error])
       end
-      subject(:message) { error.message.split(',').map(&:strip) }
 
       it { expect(message).to include validation_message }
       it { expect(message.size).to eq 1 }
@@ -37,9 +38,10 @@ describe Grape::Exceptions::ValidationErrors do
 
   describe '#full_messages' do
     context 'with errors' do
+      subject { described_class.new(errors: [validation_error_1, validation_error_2]).full_messages }
+
       let(:validation_error_1) { Grape::Exceptions::Validation.new(params: ['id'], message: :presence) }
       let(:validation_error_2) { Grape::Exceptions::Validation.new(params: ['name'], message: :presence) }
-      subject { described_class.new(errors: [validation_error_1, validation_error_2]).full_messages }
 
       it 'returns an array with each errors full message' do
         expect(subject).to contain_exactly('id is missing', 'name is missing')
@@ -47,8 +49,9 @@ describe Grape::Exceptions::ValidationErrors do
     end
 
     context 'when attributes is an array of symbols' do
-      let(:validation_error) { Grape::Exceptions::Validation.new(params: [:admin_field], message: 'Can not set admin-only field') }
       subject { described_class.new(errors: [validation_error]).full_messages }
+
+      let(:validation_error) { Grape::Exceptions::Validation.new(params: [:admin_field], message: 'Can not set admin-only field') }
 
       it 'returns an array with an error full message' do
         expect(subject.first).to eq('admin_field Can not set admin-only field')
@@ -65,7 +68,7 @@ describe Grape::Exceptions::ValidationErrors do
 
     it 'can return structured json with separate fields' do
       subject.format :json
-      subject.rescue_from Grape::Exceptions::ValidationErrors do |e|
+      subject.rescue_from described_class do |e|
         error!(e, 400)
       end
       subject.params do

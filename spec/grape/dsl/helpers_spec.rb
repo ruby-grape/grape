@@ -34,6 +34,7 @@ module Grape
 
     describe Helpers do
       subject { Class.new(HelpersSpec::Dummy) }
+
       let(:proc) do
         lambda do |*|
           def test
@@ -54,7 +55,7 @@ module Grape
         it 'uses provided modules' do
           mod = Module.new
 
-          expect(subject).to receive(:namespace_stackable).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original.exactly(2).times
+          expect(subject).to receive(:namespace_stackable).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original.twice
           expect(subject).to receive(:namespace_stackable).with(:helpers).and_call_original
           subject.helpers(mod, &proc)
 
@@ -92,7 +93,7 @@ module Grape
                   use :requires_toggle_prm
                 end
               end
-            end.to_not raise_exception
+            end.not_to raise_exception
           end
         end
       end

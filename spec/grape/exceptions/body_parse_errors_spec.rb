@@ -5,6 +5,7 @@ require 'spec_helper'
 describe Grape::Exceptions::ValidationErrors do
   context 'api with rescue_from :all handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.rescue_from :all do |_e|
         rack_response 'message was processed', 400
@@ -56,6 +57,7 @@ describe Grape::Exceptions::ValidationErrors do
 
   context 'api with rescue_from :grape_exceptions handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.rescue_from :all do |_e|
         rack_response 'message was processed', 400
@@ -93,6 +95,7 @@ describe Grape::Exceptions::ValidationErrors do
 
   context 'api without a rescue handler' do
     subject { Class.new(Grape::API) }
+
     before do
       subject.params do
         requires :beer

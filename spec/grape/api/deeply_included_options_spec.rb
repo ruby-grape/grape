@@ -41,18 +41,18 @@ describe Grape::API do
 
   it 'works for unspecified format' do
     get '/users'
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     expect(last_response.content_type).to eql 'application/json'
   end
 
   it 'works for specified format' do
     get '/users.json'
-    expect(last_response.status).to eql 200
+    expect(last_response.status).to be 200
     expect(last_response.content_type).to eql 'application/json'
   end
 
   it "doesn't work for format different than specified" do
     get '/users.txt'
-    expect(last_response.status).to eql 404
+    expect(last_response.status).to be 404
   end
 end
