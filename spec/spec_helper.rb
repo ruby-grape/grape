@@ -36,6 +36,7 @@ RSpec.configure do |config|
   config.filter_run_when_matching :focus
   config.warnings = true
 
+  config.before(:all) { Grape::Util::InheritableSetting.reset_global! }
   config.before { Grape::Util::InheritableSetting.reset_global! }
 
   # Enable flags like --only-failures and --next-failure
