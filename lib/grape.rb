@@ -246,5 +246,5 @@ require 'grape/validations/params_scope'
 require 'grape/validations/validators/all_or_none'
 require 'grape/validations/types'
 require 'grape/validations/validator_factory'
-
+require 'grape/railtie' if defined?(Rails::Railtie)
 require 'grape/version'
