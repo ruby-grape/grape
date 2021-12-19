@@ -1188,4 +1188,14 @@ describe Grape::Validations::ParamsScope do
       end
     end
   end
+
+  context 'with unknown validator' do
+    it 'raises an error' do
+      expect do
+        subject.params do
+          optional :id, unknown: true
+        end
+      end.to raise_error(Grape::Exceptions::UnknownValidator)
+    end
+  end
 end
