@@ -5,6 +5,7 @@ module Grape
     class Configuration
       ATTRIBUTES = %i[
         param_builder
+        on_unknown_validator
       ].freeze
 
       attr_accessor(*ATTRIBUTES)
@@ -15,6 +16,7 @@ module Grape
 
       def reset
         self.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+        self.on_unknown_validator = []
       end
     end
 

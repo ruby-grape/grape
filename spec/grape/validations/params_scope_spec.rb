@@ -1197,5 +1197,32 @@ describe Grape::Validations::ParamsScope do
         end
       end.to raise_error(Grape::Exceptions::UnknownValidator)
     end
+
+    context 'with a set callback' do
+      before do
+        Grape.config.on_unknown_validator << lambda { |_validator_name|
+          Class.new(Grape::Validations::Validators::Base) do
+            def validate_param!(attr_name, params)
+              params[attr_name] = 'custom_validator_implementation'
+            end
+          end
+        }
+      end
+
+      after do
+        Grape.config.on_unknown_validator.clear
+      end
+
+      it 'calls the callback' do
+        subject.params do
+          optional :id, unknown: true
+        end
+        subject.get('test') { params[:id] }
+
+        get 'test', id: 'test_validator'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('custom_validator_implementation')
+      end
+    end
   end
 end

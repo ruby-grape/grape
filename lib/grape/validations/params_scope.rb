@@ -431,7 +431,7 @@ module Grape
       end
 
       def validate(type, options, attrs, doc_attrs, opts)
-        validator_class = Validations.validators[type.to_s]
+        validator_class = find_validator_class(type.to_s)
 
         raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
 
@@ -496,6 +496,14 @@ module Grape
       def document_attribute(attrs, doc_attrs)
         full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
         @api.document_attribute(full_attrs, doc_attrs)
+      end
+
+      def find_validator_class(name)
+        Validations.validators[name] ||
+          ::Grape.config.on_unknown_validator.find do |callback|
+            result = callback.call(name)
+            break result if result
+          end
       end
     end
   end
