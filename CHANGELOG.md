@@ -3,6 +3,7 @@
 #### Features
 
 * [#2196](https://github.com/ruby-grape/grape/pull/2196): Add support for `passwords_hashed` param for `digest_auth` - [@lHydra](https://github.com/lhydra).
+* [#2204](https://github.com/ruby-grape/grape/pull/2204): Support custom validators autoloading in Rails 6 - [@dm1try](https://github.com/dm1try).
 * Your contribution here.
 
 #### Fixes
