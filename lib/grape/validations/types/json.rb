@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 module Grape
   module Validations
     module Types
