@@ -45,7 +45,6 @@ module Grape
     autoload :Env, 'grape/util/env'
     autoload :Json, 'grape/util/json'
     autoload :Xml, 'grape/util/xml'
-    autoload :DryTypes
   end
 
   module Http
@@ -274,6 +273,7 @@ module Grape
   end
 end
 
+require 'grape/dry_types'
 require 'grape/config'
 require 'grape/content_types'
 
