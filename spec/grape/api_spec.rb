@@ -1638,33 +1638,25 @@ describe Grape::API do
   end
 
   describe '.logger' do
-    subject do
-      Class.new(described_class) do
-        def self.io
-          @io ||= StringIO.new
-        end
-        logger ::Logger.new(io)
-      end
-    end
-
     it 'returns an instance of Logger class by default' do
       expect(subject.logger.class).to eql Logger
     end
 
-    it 'allows setting a custom logger' do
-      mylogger = Class.new
-      subject.logger mylogger
-      expect(mylogger).to receive(:info).once
-      subject.logger.info 'this will be logged'
-    end
+    context 'with a custom logger' do
+      subject do
+        Class.new(described_class) do
+          def self.io
+            @io ||= StringIO.new
+          end
+          logger ::Logger.new(io)
+        end
+      end
 
-    it 'defaults to a standard logger log format' do
-      t = Time.at(100)
-      allow(Time).to receive(:now).and_return(t)
-      message = "this will be logged\n"
-      message = "I, [#{Logger::Formatter.new.send(:format_datetime, t)}\##{Process.pid}]  INFO -- : #{message}" if !defined?(Rails) || Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new('4.0')
-      expect(subject.io).to receive(:write).with(message)
-      subject.logger.info 'this will be logged'
+      it 'exposes its interaface' do
+        message = 'this will be logged'
+        subject.logger.info message
+        expect(subject.io.string).to include(message)
+      end
     end
 
     it 'does not unnecessarily retain duplicate setup blocks' do
