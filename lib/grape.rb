@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'logger'
-require 'dry-types'
 require 'rack'
 require 'rack/builder'
 require 'rack/accept'
@@ -46,6 +45,7 @@ module Grape
     autoload :Env, 'grape/util/env'
     autoload :Json, 'grape/util/json'
     autoload :Xml, 'grape/util/xml'
+    autoload :DryTypes
   end
 
   module Http
