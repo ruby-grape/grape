@@ -270,7 +270,6 @@ module Grape
         autoload :ValuesValidator
       end
     end
-
   end
 end
 
