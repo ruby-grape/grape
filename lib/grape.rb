@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'logger'
+require 'dry-types'
 require 'rack'
 require 'rack/builder'
 require 'rack/accept'
