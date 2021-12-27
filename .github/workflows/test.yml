@@ -46,11 +46,17 @@ jobs:
           - ruby: "3.0"
             gemfile: 'gemfiles/multi_xml.gemfile'
             experimental: false
+          - ruby: "3.0"
+            gemfile: 'gemfiles/rails_7.gemfile'
+            experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/multi_json.gemfile'
             experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/multi_xml.gemfile'
+            experimental: false
+          - ruby: 2.7
+            gemfile: 'gemfiles/rails_7.gemfile'
             experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/rails_edge.gemfile'
