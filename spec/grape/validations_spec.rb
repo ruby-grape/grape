@@ -1509,20 +1509,6 @@ describe Grape::Validations do
       end
     end
 
-    context 'documentation' do
-      it 'can be included with a hash' do
-        documentation = { example: 'Joe' }
-
-        subject.params do
-          requires 'first_name', documentation: documentation
-        end
-        subject.get '/' do
-        end
-
-        expect(subject.routes.first.params['first_name'][:documentation]).to eq(documentation)
-      end
-    end
-
     context 'all or none' do
       context 'optional params' do
         before do

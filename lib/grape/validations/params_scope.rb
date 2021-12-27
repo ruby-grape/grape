@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'attributes_doc'
+
 module Grape
   module Validations
     class ParamsScope
@@ -31,7 +33,7 @@ module Grape
         @api              = opts[:api]
         @optional         = opts[:optional] || false
         @type             = opts[:type]
-        @group            = opts[:group] || {}
+        @group            = opts[:group]
         @dependent_on     = opts[:dependent_on]
         @declared_params = []
         @index = nil
@@ -269,17 +271,14 @@ module Grape
       end
 
       def validates(attrs, validations)
-        doc_attrs = { required: validations.key?(:presence) }
+        doc = AttributesDoc.new @api, self
+        doc.extract_details validations
 
         coerce_type = infer_coercion(validations)
 
-        doc_attrs[:type] = coerce_type.to_s if coerce_type
-
-        desc = validations.delete(:desc) || validations.delete(:description)
-        doc_attrs[:desc] = desc if desc
+        doc.type = coerce_type
 
         default = validations[:default]
-        doc_attrs[:default] = default if validations.key?(:default)
 
         if (values_hash = validations[:values]).is_a? Hash
           values = values_hash[:value]
@@ -288,7 +287,8 @@ module Grape
         else
           values = validations[:values]
         end
-        doc_attrs[:values] = values if values
+
+        doc.values = values
 
         except_values = options_key?(:except_values, :value, validations) ? validations[:except_values][:value] : validations[:except_values]
 
@@ -304,28 +304,22 @@ module Grape
         # type should be compatible with values array, if both exist
         validate_value_coercion(coerce_type, values, except_values, excepts)
 
-        doc_attrs[:documentation] = validations.delete(:documentation) if validations.key?(:documentation)
-
-        document_attribute(attrs, doc_attrs)
+        doc.document attrs
 
         opts = derive_validator_options(validations)
 
-        order_specific_validations = Set[:as]
-
         # Validate for presence before any other validators
-        validates_presence(validations, attrs, doc_attrs, opts) do |validation_type|
-          order_specific_validations << validation_type
-        end
+        validates_presence(validations, attrs, doc, opts)
 
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, doc_attrs, opts
+        coerce_type validations, attrs, doc, opts
 
         validations.each do |type, options|
-          next if order_specific_validations.include?(type)
+          next if type == :as
 
-          validate(type, options, attrs, doc_attrs, opts)
+          validate(type, options, attrs, doc, opts)
         end
       end
 
@@ -389,7 +383,7 @@ module Grape
       # composited from more than one +requires+/+optional+
       # parameter, and needs to be run before most other
       # validations.
-      def coerce_type(validations, attrs, doc_attrs, opts)
+      def coerce_type(validations, attrs, doc, opts)
         check_coerce_with(validations)
 
         return unless validations.key?(:coerce)
@@ -399,7 +393,7 @@ module Grape
           method: validations[:coerce_with],
           message: validations[:coerce_message]
         }
-        validate('coerce', coerce_options, attrs, doc_attrs, opts)
+        validate('coerce', coerce_options, attrs, doc, opts)
         validations.delete(:coerce_with)
         validations.delete(:coerce)
         validations.delete(:coerce_message)
@@ -430,11 +424,11 @@ module Grape
           unless Array(default).none? { |def_val| excepts.include?(def_val) }
       end
 
-      def validate(type, options, attrs, doc_attrs, opts)
+      def validate(type, options, attrs, doc, opts)
         validator_options = {
           attributes: attrs,
           options: options,
-          required: doc_attrs[:required],
+          required: doc.required,
           params_scope: self,
           opts: opts,
           validator_class: Validations.require_validator(type)
@@ -481,17 +475,11 @@ module Grape
         }
       end
 
-      def validates_presence(validations, attrs, doc_attrs, opts)
+      def validates_presence(validations, attrs, doc, opts)
         return unless validations.key?(:presence) && validations[:presence]
 
-        validate(:presence, validations[:presence], attrs, doc_attrs, opts)
-        yield :presence
-        yield :message if validations.key?(:message)
-      end
-
-      def document_attribute(attrs, doc_attrs)
-        full_attrs = attrs.collect { |name| { name: name, full_name: full_name(name) } }
-        @api.document_attribute(full_attrs, doc_attrs)
+        validate(:presence, validations.delete(:presence), attrs, doc, opts)
+        validations.delete(:message) if validations.key?(:message)
       end
     end
   end

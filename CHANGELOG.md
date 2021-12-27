@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2233](https://github.com/ruby-grape/grape/pull/2233): A setting for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
 * Your contribution here.
 
 #### Fixes
@@ -12,8 +13,6 @@
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)
-
-#### Features
 
 #### Fixes
 
