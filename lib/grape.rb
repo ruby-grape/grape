@@ -222,6 +222,24 @@ module Grape
   module Validations
     extend ::ActiveSupport::Autoload
 
+    module Types
+      extend ::ActiveSupport::Autoload
+
+      eager_autoload do
+        autoload :InvalidValue
+        autoload :File
+        autoload :Json
+        autoload :DryTypeCoercer
+        autoload :ArrayCoercer
+        autoload :SetCoercer
+        autoload :PrimitiveCoercer
+        autoload :CustomTypeCoercer
+        autoload :CustomTypeCollectionCoercer
+        autoload :MultipleTypeCoercer
+        autoload :VariantCollectionCoercer
+      end
+    end
+
     eager_autoload do
       autoload :AttributesIterator
       autoload :MultipleAttributesIterator
@@ -252,6 +270,7 @@ module Grape
         autoload :ValuesValidator
       end
     end
+
   end
 end
 
