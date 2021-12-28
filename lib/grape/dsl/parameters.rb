@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
-
 module Grape
   module DSL
     # Defines DSL methods, meant to be applied to a ParamsScope, which define
@@ -150,8 +148,8 @@ module Grape
 
         # check type for optional parameter group
         if attrs && block
-          raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
+          raise Grape::Exceptions::MissingGroupType.new if type.nil?
+          raise Grape::Exceptions::UnsupportedGroupType.new unless Grape::Validations::Types.group?(type)
         end
 
         if opts[:using]

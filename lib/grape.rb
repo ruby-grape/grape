@@ -8,6 +8,7 @@ require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
 require 'set'
 require 'active_support'
+require 'active_support/concern'
 require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
 require 'active_support/core_ext/hash/indifferent_access'
@@ -20,6 +21,7 @@ require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/slice'
+require 'active_support/core_ext/string/output_safety'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'i18n'
@@ -32,9 +34,7 @@ module Grape
   eager_autoload do
     autoload :API
     autoload :Endpoint
-
     autoload :Namespace
-
     autoload :Path
     autoload :Cookies
     autoload :Validations
@@ -71,8 +71,8 @@ module Grape
       autoload :UnknownParameter
       autoload :InvalidWithOptionForRepresent
       autoload :IncompatibleOptionValues
-      autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
-      autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
+      autoload :MissingGroupType
+      autoload :UnsupportedGroupType
       autoload :InvalidMessageBody
       autoload :InvalidAcceptHeader
       autoload :InvalidVersionHeader

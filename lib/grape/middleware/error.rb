@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'grape/middleware/base'
-require 'active_support/core_ext/string/output_safety'
 
 module Grape
   module Middleware
@@ -27,7 +26,7 @@ module Grape
         }
       end
 
-      def initialize(app, *options)
+      def initialize(app, **options)
         super
         self.class.send(:include, @options[:helpers]) if @options[:helpers]
       end
