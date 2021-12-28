@@ -15,6 +15,7 @@
 * [#2202](https://github.com/ruby-grape/grape/pull/2202): Fix random mock spec error - [@ericproulx](https://github.com/ericproulx).
 * [#2203](https://github.com/ruby-grape/grape/pull/2203): Add rubocop-rspec - [@ericproulx](https://github.com/ericproulx).
 * [#2207](https://github.com/ruby-grape/grape/pull/2207): Autoload Validations/Validators - [@ericproulx](https://github.com/ericproulx).
+* [#2209](https://github.com/ruby-grape/grape/pull/2209): Autoload Validations/Types - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.6.0 (2021/10/04)
