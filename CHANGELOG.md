@@ -1,10 +1,9 @@
-### 1.6.1 (Next)
+### 1.6.1 (2021/12/28)
 
 #### Features
 
 * [#2196](https://github.com/ruby-grape/grape/pull/2196): Add support for `passwords_hashed` param for `digest_auth` - [@lHydra](https://github.com/lhydra).
 * [#2208](https://github.com/ruby-grape/grape/pull/2208): Added Rails 7 support - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -16,7 +15,6 @@
 * [#2203](https://github.com/ruby-grape/grape/pull/2203): Add rubocop-rspec - [@ericproulx](https://github.com/ericproulx).
 * [#2207](https://github.com/ruby-grape/grape/pull/2207): Autoload Validations/Validators - [@ericproulx](https://github.com/ericproulx).
 * [#2209](https://github.com/ruby-grape/grape/pull/2209): Autoload Validations/Types - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 1.6.0 (2021/10/04)
 
