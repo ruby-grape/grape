@@ -45,6 +45,7 @@ module Grape
     autoload :Env, 'grape/util/env'
     autoload :Json, 'grape/util/json'
     autoload :Xml, 'grape/util/xml'
+    autoload :DryTypes
   end
 
   module Http
@@ -221,6 +222,24 @@ module Grape
 
   module Validations
     extend ::ActiveSupport::Autoload
+
+    module Types
+      extend ::ActiveSupport::Autoload
+
+      eager_autoload do
+        autoload :InvalidValue
+        autoload :File
+        autoload :Json
+        autoload :DryTypeCoercer
+        autoload :ArrayCoercer
+        autoload :SetCoercer
+        autoload :PrimitiveCoercer
+        autoload :CustomTypeCoercer
+        autoload :CustomTypeCollectionCoercer
+        autoload :MultipleTypeCoercer
+        autoload :VariantCollectionCoercer
+      end
+    end
 
     eager_autoload do
       autoload :AttributesIterator
