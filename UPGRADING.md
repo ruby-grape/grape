@@ -47,8 +47,7 @@ See [#2189](https://github.com/ruby-grape/grape/pull/2189) for more information.
 #### Nil value and coercion
 
 Prior to 1.2.5 version passing a `nil` value for a parameter with a custom coercer would invoke the coercer, and not passing a parameter would not invoke it.
-This behavior was not tested or documented. Version 1.3.0 quietly changed this behavior, in
-that `nil` values skipped the coercion. Version 1.5.3 fixes and documents this as follows:
+This behavior was not tested or documented. Version 1.3.0 quietly changed this behavior, in that `nil` values skipped the coercion. Version 1.5.3 fixes and documents this as follows:
 
 ```ruby
 class Api < Grape::API
@@ -198,8 +197,7 @@ end
 
 #### Nil values for structures
 
-Nil values have always been a special case when dealing with types, especially with the
-following structures:
+Nil values have always been a special case when dealing with types, especially with the following structures:
 
 - Array
 - Hash
