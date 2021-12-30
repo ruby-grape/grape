@@ -12,14 +12,14 @@ require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/array/wrap'
-require 'active_support/core_ext/hash/conversions'
+require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/hash/deep_merge'
-require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/reverse_merge'
+require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/slice'
+require 'active_support/core_ext/hash/conversions'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'i18n'
@@ -218,41 +218,6 @@ module Grape
       autoload :StreamResponse
     end
   end
-
-  module Validations
-    extend ::ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :AttributesIterator
-      autoload :MultipleAttributesIterator
-      autoload :SingleAttributeIterator
-      autoload :ParamsScope
-      autoload :Types
-      autoload :ValidatorFactory
-    end
-
-    module Validators
-      extend ::ActiveSupport::Autoload
-
-      eager_autoload do
-        autoload :Base
-        autoload :MultipleParamsBase
-        autoload :AllOrNoneOfValidator
-        autoload :AllowBlankValidator
-        autoload :AsValidator
-        autoload :AtLeastOneOfValidator
-        autoload :CoerceValidator
-        autoload :DefaultValidator
-        autoload :ExactlyOneOfValidator
-        autoload :ExceptValuesValidator
-        autoload :MutualExclusionValidator
-        autoload :PresenceValidator
-        autoload :RegexpValidator
-        autoload :SameAsValidator
-        autoload :ValuesValidator
-      end
-    end
-  end
 end
 
 require 'grape/config'
@@ -261,5 +226,26 @@ require 'grape/content_types'
 require 'grape/util/lazy_value'
 require 'grape/util/lazy_block'
 require 'grape/util/endpoint_configuration'
+
+require 'grape/validations/validators/base'
+require 'grape/validations/attributes_iterator'
+require 'grape/validations/single_attribute_iterator'
+require 'grape/validations/multiple_attributes_iterator'
+require 'grape/validations/validators/allow_blank'
+require 'grape/validations/validators/as'
+require 'grape/validations/validators/at_least_one_of'
+require 'grape/validations/validators/coerce'
+require 'grape/validations/validators/default'
+require 'grape/validations/validators/exactly_one_of'
+require 'grape/validations/validators/mutual_exclusion'
+require 'grape/validations/validators/presence'
+require 'grape/validations/validators/regexp'
+require 'grape/validations/validators/same_as'
+require 'grape/validations/validators/values'
+require 'grape/validations/validators/except_values'
+require 'grape/validations/params_scope'
+require 'grape/validations/validators/all_or_none'
+require 'grape/validations/types'
+require 'grape/validations/validator_factory'
 
 require 'grape/version'
