@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'set'
+require_relative 'array_coercer'
+
 module Grape
   module Validations
     module Types
