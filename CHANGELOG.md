@@ -1,13 +1,10 @@
-### 1.6.2 (Next)
+### 1.6.2 (2021/12/30)
 
 #### Features
-
-* Your contribution here.
 
 #### Fixes
 
 * [#2219](https://github.com/ruby-grape/grape/pull/2219): Revert the changes for autoloading provided in 1.6.1 - [@dm1try](https://github.com/dm1try).
-* Your contribution here.
 
 ### 1.6.1 (2021/12/28)
 
