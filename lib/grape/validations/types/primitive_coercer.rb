@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'dry_type_coercer'
+
 module Grape
   module Validations
     module Types
@@ -8,16 +10,16 @@ module Grape
       # that it has the proper type.
       class PrimitiveCoercer < DryTypeCoercer
         MAPPING = {
-          Grape::API::Boolean => Grape::DryTypes::Params::Bool,
-          BigDecimal => Grape::DryTypes::Params::Decimal,
+          Grape::API::Boolean => DryTypes::Params::Bool,
+          BigDecimal => DryTypes::Params::Decimal,
 
           # unfortunately, a +Params+ scope doesn't contain String
-          String => Grape::DryTypes::Coercible::String
+          String => DryTypes::Coercible::String
         }.freeze
 
         STRICT_MAPPING = {
-          Grape::API::Boolean => Grape::DryTypes::Strict::Bool,
-          BigDecimal => Grape::DryTypes::Strict::Decimal
+          Grape::API::Boolean => DryTypes::Strict::Bool,
+          BigDecimal => DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)
