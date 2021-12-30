@@ -65,7 +65,7 @@ module Grape
             end
           end
 
-          define_method :to_hash do
+          define_method 'to_hash' do
             merge_hash = {}
             setting_name.each_key { |k| merge_hash[k] = send("#{k}_context").to_hash }
 
