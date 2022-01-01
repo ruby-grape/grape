@@ -454,7 +454,7 @@ describe Grape::Validations::Validators::CoerceValidator do
 
       context 'nil values' do
         context 'primitive types' do
-          Grape::Validations::Types::PRIMITIVES.each do |type|
+          Grape::Validations::Types.primitives.each do |type|
             it 'respects the nil value' do
               subject.params do
                 requires :param, type: type
@@ -471,7 +471,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         context 'structures types' do
-          Grape::Validations::Types::STRUCTURES.each do |type|
+          Grape::Validations::Types.structures.each do |type|
             it 'respects the nil value' do
               subject.params do
                 requires :param, type: type
@@ -488,7 +488,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         context 'special types' do
-          Grape::Validations::Types::SPECIAL.each_key do |type|
+          Grape::Validations::Types.specials.each_key do |type|
             it 'respects the nil value' do
               subject.params do
                 requires :param, type: type
@@ -527,7 +527,7 @@ describe Grape::Validations::Validators::CoerceValidator do
 
       context 'empty string' do
         context 'primitive types' do
-          (Grape::Validations::Types::PRIMITIVES - [String]).each do |type|
+          (Grape::Validations::Types.primitives - [String]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
                 requires :param, type: type
@@ -557,7 +557,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         context 'structures types' do
-          (Grape::Validations::Types::STRUCTURES - [Hash]).each do |type|
+          (Grape::Validations::Types.structures - [Hash]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
                 requires :param, type: type
@@ -574,7 +574,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         context 'special types' do
-          (Grape::Validations::Types::SPECIAL.keys - [File, Rack::Multipart::UploadedFile]).each do |type|
+          (Grape::Validations::Types.specials.keys - [File, Rack::Multipart::UploadedFile]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
                 requires :param, type: type

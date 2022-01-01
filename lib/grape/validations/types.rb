@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'types/build_coercer'
-require_relative 'types/custom_type_coercer'
-require_relative 'types/custom_type_collection_coercer'
-require_relative 'types/multiple_type_coercer'
-require_relative 'types/variant_collection_coercer'
-require_relative 'types/json'
-require_relative 'types/file'
-require_relative 'types/invalid_value'
-
 module Grape
   module Validations
     # Module for code related to grape's system for
@@ -22,6 +13,7 @@ module Grape
     # and {Grape::Dsl::Parameters#optional}. The main
     # entry point for this process is {Types.build_coercer}.
     module Types
+      module_function
       # Types representing a single value, which are coerced.
       PRIMITIVES = [
         # Numerical
@@ -80,7 +72,7 @@ module Grape
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type is known by Grape as a valid
       #   data structure type
-      def self.structure?(type)
+      def structure?(type)
         STRUCTURES.include?(type)
       end
 
@@ -92,7 +84,7 @@ module Grape
       # @param type [Array<Class>,Set<Class>] type (or type list!) to check
       # @return [Boolean] +true+ if the given value will be treated as
       #   a list of types.
-      def self.multiple?(type)
+      def multiple?(type)
         (type.is_a?(Array) || type.is_a?(Set)) && type.size > 1
       end
 
@@ -103,7 +95,7 @@ module Grape
       #
       # @param type [Class] type to check
       # @return [Boolean] +true+ if special routines are available
-      def self.special?(type)
+      def special?(type)
         SPECIAL.key? type
       end
 
@@ -112,7 +104,7 @@ module Grape
       #
       # @param type [Array<Class>,Class] type to check
       # @return [Boolean] +true+ if the type is a supported group type
-      def self.group?(type)
+      def group?(type)
         GROUPS.include? type
       end
 
@@ -121,7 +113,7 @@ module Grape
       #
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type can be used as a custom type
-      def self.custom?(type)
+      def custom?(type)
         !primitive?(type) &&
           !structure?(type) &&
           !multiple?(type) &&
@@ -134,15 +126,98 @@ module Grape
       # @param type [Array<Class>,Class] type to check
       # @return [Boolean] true if +type+ is a collection of a type that implements
       #   its own +#parse+ method.
-      def self.collection_of_custom?(type)
+      def collection_of_custom?(type)
         (type.is_a?(Array) || type.is_a?(Set)) &&
           type.length == 1 &&
           (custom?(type.first) || special?(type.first))
       end
 
-      def self.map_special(type)
-        SPECIAL.fetch(type, type)
+      def map_special(type)
+        specials.fetch(type, type)
       end
+
+      # Chooses the best coercer for the given type. For example, if the type
+      # is Integer, it will return a coercer which will be able to coerce a value
+      # to the integer.
+      #
+      # There are a few very special coercers which might be returned.
+      #
+      # +Grape::Types::MultipleTypeCoercer+ is a coercer which is returned when
+      # the given type implies values in an array with different types.
+      # For example, +[Integer, String]+ allows integer and string values in
+      # an array.
+      #
+      # +Grape::Types::CustomTypeCoercer+ is a coercer which is returned when
+      # a method is specified by a user with +coerce_with+ option or the user
+      # specifies a custom type which implements requirments of
+      # +Grape::Types::CustomTypeCoercer+.
+      #
+      # +Grape::Types::CustomTypeCollectionCoercer+ is a very similar to the
+      # previous one, but it expects an array or set of values having a custom
+      # type implemented by the user.
+      #
+      # There is also a group of custom types implemented by Grape, check
+      # +Grape::Validations::Types::SPECIAL+ to get the full list.
+      #
+      # @param type [Class] the type to which input strings
+      #   should be coerced
+      # @param method [Class,#call] the coercion method to use
+      # @return [Object] object to be used
+      #   for coercion and type validation
+      def build_coercer(type, method: nil, strict: false)
+        cache_instance(type, method, strict) do
+          create_coercer_instance(type, method, strict)
+        end
+      end
+
+      def create_coercer_instance(type, method, strict)
+        # Maps a custom type provided by Grape, it doesn't map types wrapped by collections!!!
+        type = Types.map_special(type)
+
+        # Use a special coercer for multiply-typed parameters.
+        if Types.multiple?(type)
+          MultipleTypeCoercer.new(type, method)
+
+          # Use a special coercer for custom types and coercion methods.
+        elsif method || Types.custom?(type)
+          CustomTypeCoercer.new(type, method)
+
+          # Special coercer for collections of types that implement a parse method.
+          # CustomTypeCoercer (above) already handles such types when an explicit coercion
+          # method is supplied.
+        elsif Types.collection_of_custom?(type)
+          Types::CustomTypeCollectionCoercer.new(
+            Types.map_special(type.first), type.is_a?(Set)
+          )
+        else
+          DryTypeCoercer.coercer_instance_for(type, strict)
+        end
+      end
+
+      def cache_instance(type, method, strict, &_block)
+        key = cache_key(type, method, strict)
+
+        return @__cache[key] if @__cache.key?(key)
+
+        instance = yield
+
+        @__cache_write_lock.synchronize do
+          @__cache[key] = instance
+        end
+
+        instance
+      end
+
+      def cache_key(type, method, strict)
+        [type, method, strict].each_with_object(+'_') do |val, memo|
+          next if val.nil?
+
+          memo << '_' << val.to_s
+        end
+      end
+
+      instance_variable_set(:@__cache,            {})
+      instance_variable_set(:@__cache_write_lock, Mutex.new)
     end
   end
 end
