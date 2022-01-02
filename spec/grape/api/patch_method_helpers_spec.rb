@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::API::Helpers do
   module PatchHelpersSpec
     class PatchPublic < Grape::API

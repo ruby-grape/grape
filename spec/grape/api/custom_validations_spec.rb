@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Validations do
   context 'using a custom length validator' do
     subject do

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
 require 'base64'
 
 describe Grape::Middleware::Auth::Base do

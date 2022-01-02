@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Exceptions::InvalidResponse do
   describe '#message' do
     let(:error) { described_class.new }

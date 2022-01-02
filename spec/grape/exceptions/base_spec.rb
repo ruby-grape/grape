@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Exceptions::Base do
   describe '#compose_message' do
     subject { described_class.new.send(:compose_message, key, **attributes) }

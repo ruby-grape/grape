@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Endpoint do
   subject { Class.new(Grape::API) }
 

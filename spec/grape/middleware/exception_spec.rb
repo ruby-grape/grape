@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Middleware::Error do
   let(:exception_app) do
     Class.new do

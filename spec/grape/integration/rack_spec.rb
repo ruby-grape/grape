@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Rack do
   it 'correctly populates params from a Tempfile' do
     input = Tempfile.new 'rubbish'

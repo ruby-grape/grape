@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Validations::Validators::AllOrNoneOfValidator do
   let_it_be(:app) do
     Class.new(Grape::API) do

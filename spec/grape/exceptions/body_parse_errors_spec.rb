@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Exceptions::ValidationErrors do
   context 'api with rescue_from :all handler' do
     subject { Class.new(Grape::API) }

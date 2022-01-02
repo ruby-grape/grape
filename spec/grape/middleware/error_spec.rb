@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
 require 'grape-entity'
 
 describe Grape::Middleware::Error do

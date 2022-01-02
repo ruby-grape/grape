@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe '.configure' do
   before do
     Grape.configure do |config|
