@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 module Grape
   module DSL
     module ValidationsSpec

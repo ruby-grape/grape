@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::API::Helpers do
   let(:user) { 'Miguel Caneo' }
   let(:id)   { '42' }

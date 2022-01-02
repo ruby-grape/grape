@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
 require 'shared/versioning_examples'
 
 describe Grape::API::Instance do

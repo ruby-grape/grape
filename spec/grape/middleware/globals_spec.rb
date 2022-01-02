@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Middleware::Globals do
   subject { described_class.new(blank_app) }
 

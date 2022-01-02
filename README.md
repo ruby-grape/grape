@@ -3702,7 +3702,7 @@ Use `rack-test` and define your API as `app`.
 You can test a Grape API with RSpec by making HTTP requests and examining the response.
 
 ```ruby
-require 'spec_helper'
+
 
 describe Twitter::API do
   include Rack::Test::Methods

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 module Grape
   describe Path do
     describe '#initialize' do

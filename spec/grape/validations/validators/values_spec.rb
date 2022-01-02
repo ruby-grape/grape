@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Validations::Validators::ValuesValidator do
   let_it_be(:values_model) do
     Class.new do

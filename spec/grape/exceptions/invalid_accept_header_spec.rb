@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Exceptions::InvalidAcceptHeader do
   shared_examples_for 'a valid request' do
     it 'does return with status 200' do

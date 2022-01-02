@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Exceptions::MissingMimeType do
   describe '#message' do
     let(:error) do

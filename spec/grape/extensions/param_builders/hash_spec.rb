@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Extensions::Hash::ParamBuilder do
   subject { Class.new(Grape::API) }
 
