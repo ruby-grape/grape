@@ -25,10 +25,10 @@ module Grape
         BigDecimal,
         Numeric,
 
-          # Date/time
-          Date,
-          DateTime,
-          Time,
+        # Date/time
+        Date,
+        DateTime,
+        Time,
 
         # Misc
         Grape::API::Boolean,
