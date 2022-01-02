@@ -6,7 +6,7 @@
 
 #### Fixes
 
-* [#2222](https://github.com/ruby-grape/grape/pull/2222): Fix autoload types and validators - [@ericproulx](https://github.com/ericproulx).
+* [#2222](https://github.com/ruby-grape/grape/pull/2222): autoload types and validators - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)

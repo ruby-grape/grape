@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/validations/attributes_iterator'
-require 'grape/validations/single_attribute_iterator'
-require 'grape/validations/multiple_attributes_iterator'
-require 'grape/validations/params_scope'
-require 'grape/validations/types'
-
 module Grape
   # Registry to store and locate known Validators.
   module Validations
@@ -28,10 +22,10 @@ module Grape
     end
 
     # Find a validator and if not found will try to load it
-    def lazy_find_validator(short_name)
+    def require_validator(short_name)
       str_name = short_name.to_s
       validators.fetch(str_name) do
-        register_validator(str_name, "Grape::Validations::Validators::#{str_name.camelize}Validator".constantize)
+        Grape::Validations::Validators.const_get("#{str_name.camelize}Validator")
       end
     rescue NameError
       raise Grape::Exceptions::UnknownValidator.new(short_name)

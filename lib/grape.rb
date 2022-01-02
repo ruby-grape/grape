@@ -10,16 +10,16 @@ require 'set'
 require 'active_support'
 require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
-require 'active_support/core_ext/hash/indifferent_access'
-require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/array/wrap'
-require 'active_support/core_ext/array/conversions'
-require 'active_support/core_ext/hash/deep_merge'
-require 'active_support/core_ext/hash/reverse_merge'
-require 'active_support/core_ext/hash/except'
-require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/hash/conversions'
+require 'active_support/core_ext/hash/deep_merge'
+require 'active_support/core_ext/hash/except'
+require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/hash/reverse_merge'
+require 'active_support/core_ext/hash/slice'
+require 'active_support/core_ext/object/blank'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
 require 'i18n'
@@ -237,8 +237,6 @@ module Grape
 
       eager_autoload do
         autoload :InvalidValue
-        autoload :File
-        autoload :Json
         autoload :DryTypeCoercer
         autoload :ArrayCoercer
         autoload :SetCoercer

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'grape/validations/types/json'
+require 'grape/validations/types/file'
+
 module Grape
   module Validations
     # Module for code related to grape's system for
@@ -14,7 +17,7 @@ module Grape
     # entry point for this process is {Types.build_coercer}.
     module Types
       module_function
-      # Types representing a single value, which are coerced.
+
       PRIMITIVES = [
         # Numerical
         Integer,
@@ -22,10 +25,10 @@ module Grape
         BigDecimal,
         Numeric,
 
-        # Date/time
-        Date,
-        DateTime,
-        Time,
+          # Date/time
+          Date,
+          DateTime,
+          Time,
 
         # Misc
         Grape::API::Boolean,
@@ -36,33 +39,23 @@ module Grape
       ].freeze
 
       # Types representing data structures.
-      STRUCTURES = [
-        Hash,
-        Array,
-        Set
-      ].freeze
+      STRUCTURES = [Hash, Array, Set].freeze
 
-      # Special custom types provided by Grape.
       SPECIAL = {
-        JSON => Json,
+        ::JSON => Json,
         Array[JSON] => JsonArray,
         ::File => File,
         Rack::Multipart::UploadedFile => File
       }.freeze
 
-      GROUPS = [
-        Array,
-        Hash,
-        JSON,
-        Array[JSON]
-      ].freeze
+      GROUPS = [Array, Hash, JSON, Array[JSON]].freeze
 
       # Is the given class a primitive type as recognized by Grape?
       #
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type is known by Grape as a valid
       #   type for a single value
-      def self.primitive?(type)
+      def primitive?(type)
         PRIMITIVES.include?(type)
       end
 
@@ -133,7 +126,7 @@ module Grape
       end
 
       def map_special(type)
-        specials.fetch(type, type)
+        SPECIAL.fetch(type, type)
       end
 
       # Chooses the best coercer for the given type. For example, if the type

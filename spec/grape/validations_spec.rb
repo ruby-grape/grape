@@ -1974,8 +1974,8 @@ describe Grape::Validations do
     end
   end
 
-  describe 'lazy_find_validator' do
-    subject { described_class.lazy_find_validator(short_name) }
+  describe 'require_validator' do
+    subject { described_class.require_validator(short_name) }
 
     context 'when found' do
       let(:short_name) { :presence }

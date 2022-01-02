@@ -437,7 +437,7 @@ module Grape
           required: doc_attrs[:required],
           params_scope: self,
           opts: opts,
-          validator_class: Validations.lazy_find_validator(type)
+          validator_class: Validations.require_validator(type)
         }
         @api.namespace_stackable(:validations, validator_options)
       end
