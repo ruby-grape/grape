@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::API::Instance do
   describe 'boolean constant' do
     module DefinesBooleanInstanceSpec

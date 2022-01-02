@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Validations::MultipleAttributesIterator do
   describe '#each' do
     subject(:iterator) { described_class.new(validator, scope, params) }

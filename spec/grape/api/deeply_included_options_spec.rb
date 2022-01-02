@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 module DeeplyIncludedOptionsSpec
   module Defaults
     extend ActiveSupport::Concern

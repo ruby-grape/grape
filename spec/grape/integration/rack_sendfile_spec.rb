@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Rack::Sendfile do
   subject do
     content_object = file_object

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe 'A named API' do
   subject(:api_name) { NamedAPI.endpoints.last.options[:for].to_s }
 

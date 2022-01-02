@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe 'Validator with instance variables' do
   let(:validator_type) do
     Class.new(Grape::Validations::Validators::Base) do

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Grape::Validations::Validators::CoerceValidator do
   subject do
     Class.new(Grape::API)
