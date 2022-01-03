@@ -11,16 +11,16 @@ require 'active_support'
 require 'active_support/concern'
 require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
-require 'active_support/core_ext/hash/indifferent_access'
-require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/hash/conversions'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/except'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/slice'
+require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/output_safety'
 require 'active_support/dependencies/autoload'
 require 'active_support/notifications'
@@ -45,6 +45,7 @@ module Grape
     autoload :Env, 'grape/util/env'
     autoload :Json, 'grape/util/json'
     autoload :Xml, 'grape/util/xml'
+    autoload :DryTypes
   end
 
   module Http
@@ -229,6 +230,57 @@ module Grape
       autoload :ParamsScope
       autoload :Types
       autoload :ValidatorFactory
+    end
+
+    module Validators
+      extend ::ActiveSupport::Autoload
+
+      eager_autoload do
+        autoload :Base
+        autoload :MultipleParamsBase
+        autoload :AllOrNoneOfValidator
+        autoload :AllowBlankValidator
+        autoload :AsValidator
+        autoload :AtLeastOneOfValidator
+        autoload :CoerceValidator
+        autoload :DefaultValidator
+        autoload :ExactlyOneOfValidator
+        autoload :ExceptValuesValidator
+        autoload :MutualExclusionValidator
+        autoload :PresenceValidator
+        autoload :RegexpValidator
+        autoload :SameAsValidator
+        autoload :ValuesValidator
+      end
+    end
+  end
+
+  module Validations
+    extend ::ActiveSupport::Autoload
+
+    eager_autoload do
+      autoload :AttributesIterator
+      autoload :MultipleAttributesIterator
+      autoload :SingleAttributeIterator
+      autoload :Types
+      autoload :ParamsScope
+      autoload :ValidatorFactory
+    end
+
+    module Types
+      extend ::ActiveSupport::Autoload
+
+      eager_autoload do
+        autoload :InvalidValue
+        autoload :DryTypeCoercer
+        autoload :ArrayCoercer
+        autoload :SetCoercer
+        autoload :PrimitiveCoercer
+        autoload :CustomTypeCoercer
+        autoload :CustomTypeCollectionCoercer
+        autoload :MultipleTypeCoercer
+        autoload :VariantCollectionCoercer
+      end
     end
 
     module Validators

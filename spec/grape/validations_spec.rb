@@ -1973,4 +1973,22 @@ describe Grape::Validations do
       end
     end
   end
+
+  describe 'require_validator' do
+    subject { described_class.require_validator(short_name) }
+
+    context 'when found' do
+      let(:short_name) { :presence }
+
+      it { is_expected.to be(Grape::Validations::Validators::PresenceValidator) }
+    end
+
+    context 'when not found' do
+      let(:short_name) { :test }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(Grape::Exceptions::UnknownValidator)
+      end
+    end
+  end
 end

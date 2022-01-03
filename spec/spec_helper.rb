@@ -23,8 +23,6 @@ Dir["#{File.dirname(__FILE__)}/support/*.rb"].sort.each do |file|
   require file
 end
 
-eager_load!
-
 # The default value for this setting is true in a standard Rails app,
 # so it should be set to true here as well to reflect that.
 I18n.enforce_available_locales = true

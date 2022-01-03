@@ -9,8 +9,6 @@ module Grape
       # Takes the given array and converts it to a set. Every element of the set
       # is also coerced.
       class SetCoercer < ArrayCoercer
-        register_collection Set
-
         def initialize(type, strict = false)
           super
 
