@@ -5,7 +5,7 @@ appraise 'rails-5' do
 end
 
 appraise 'rails-6' do
-  gem 'rails', '~> 6.0'
+  gem 'rails', '~> 6.0.0'
 end
 
 appraise 'rails-6-1' do
@@ -37,5 +37,5 @@ appraise 'rack1' do
 end
 
 appraise 'rack2' do
-  gem 'rack', '~> 2.0'
+  gem 'rack', '~> 2.0.0'
 end
