@@ -72,8 +72,8 @@ module Grape
       autoload :UnknownParameter
       autoload :InvalidWithOptionForRepresent
       autoload :IncompatibleOptionValues
-      autoload :MissingGroupTypeError,          'grape/exceptions/missing_group_type'
-      autoload :UnsupportedGroupTypeError,      'grape/exceptions/unsupported_group_type'
+      autoload :MissingGroupType
+      autoload :UnsupportedGroupType
       autoload :InvalidMessageBody
       autoload :InvalidAcceptHeader
       autoload :InvalidVersionHeader

@@ -336,7 +336,7 @@ describe Grape::Validations::ParamsScope do
             requires :b
           end
         end
-      end.to raise_error Grape::Exceptions::MissingGroupTypeError
+      end.to raise_error Grape::Exceptions::MissingGroupType
 
       expect do
         subject.params do
@@ -344,7 +344,7 @@ describe Grape::Validations::ParamsScope do
             requires :b
           end
         end
-      end.to raise_error Grape::Exceptions::MissingGroupTypeError
+      end.to raise_error Grape::Exceptions::MissingGroupType
     end
 
     it 'allows Hash as type' do
@@ -404,7 +404,7 @@ describe Grape::Validations::ParamsScope do
             requires :b
           end
         end
-      end.to raise_error Grape::Exceptions::UnsupportedGroupTypeError
+      end.to raise_error Grape::Exceptions::UnsupportedGroupType
 
       expect do
         subject.params do
@@ -412,7 +412,7 @@ describe Grape::Validations::ParamsScope do
             requires :b
           end
         end
-      end.to raise_error Grape::Exceptions::UnsupportedGroupTypeError
+      end.to raise_error Grape::Exceptions::UnsupportedGroupType
     end
   end
 
