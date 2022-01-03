@@ -431,17 +431,13 @@ module Grape
       end
 
       def validate(type, options, attrs, doc_attrs, opts)
-        validator_class = Validations.validators[type.to_s]
-
-        raise Grape::Exceptions::UnknownValidator.new(type) unless validator_class
-
         validator_options = {
           attributes: attrs,
           options: options,
           required: doc_attrs[:required],
           params_scope: self,
           opts: opts,
-          validator_class: validator_class
+          validator_class: Validations.require_validator(type)
         }
         @api.namespace_stackable(:validations, validator_options)
       end

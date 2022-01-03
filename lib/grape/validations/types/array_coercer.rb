@@ -14,8 +14,6 @@ module Grape
       # behavior of Virtus which was used earlier, a `Grape::Validations::Types::PrimitiveCoercer`
       # maintains Virtus behavior in coercing.
       class ArrayCoercer < DryTypeCoercer
-        register_collection Array
-
         def initialize(type, strict = false)
           super
 

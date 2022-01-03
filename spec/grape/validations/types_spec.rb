@@ -48,6 +48,34 @@ describe Grape::Validations::Types do
     end
   end
 
+  describe 'special types' do
+    subject { described_class::SPECIAL[type] }
+
+    context 'when JSON' do
+      let(:type) { JSON }
+
+      it { is_expected.to eq(Grape::Validations::Types::Json) }
+    end
+
+    context 'when Array[JSON]' do
+      let(:type) { Array[JSON] }
+
+      it { is_expected.to eq(Grape::Validations::Types::JsonArray) }
+    end
+
+    context 'when File' do
+      let(:type) { File }
+
+      it { is_expected.to eq(Grape::Validations::Types::File) }
+    end
+
+    context 'when Rack::Multipart::UploadedFile' do
+      let(:type) { Rack::Multipart::UploadedFile }
+
+      it { is_expected.to eq(Grape::Validations::Types::File) }
+    end
+  end
+
   describe '::custom?' do
     it 'returns false if the type does not respond to :parse' do
       expect(described_class).not_to be_custom(Object)
