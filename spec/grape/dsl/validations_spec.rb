@@ -36,10 +36,6 @@ module Grape
           expect(subject.namespace_stackable(:params)).to eq []
         end
 
-        it 'resets documentation params' do
-          expect(subject.route_setting(:description)[:params]).to be_nil
-        end
-
         it 'does not reset documentation description' do
           expect(subject.route_setting(:description)[:description]).to eq 'lol'
         end
@@ -62,7 +58,6 @@ module Grape
 
         it 'creates a param documentation' do
           expect(subject.namespace_stackable(:params)).to eq(['xxx' => { foo: 'bar' }])
-          expect(subject.route_setting(:description)).to eq(params: { 'xxx' => { foo: 'bar' } })
         end
       end
     end
