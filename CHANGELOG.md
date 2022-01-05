@@ -7,6 +7,7 @@
 #### Fixes
 
 * [#2222](https://github.com/ruby-grape/grape/pull/2222): Autoload types and validators - [@ericproulx](https://github.com/ericproulx).
+* [#2232](https://github.com/ruby-grape/grape/pull/2232): Fix kwargs support in shared params definition - [@dm1try](https://github.com/dm1try).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)

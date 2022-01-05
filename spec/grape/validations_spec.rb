@@ -1483,6 +1483,32 @@ describe Grape::Validations do
       end
     end
 
+    context 'with block and keyword argument' do
+      before do
+        subject.helpers do
+          params :shared_params do |type:|
+            optional :param, default: type
+          end
+        end
+        subject.format :json
+        subject.params do
+          use :shared_params, type: 'value'
+        end
+        subject.get '/shared_params' do
+          {
+            param: params[:param]
+          }
+        end
+      end
+
+      it 'works' do
+        get '/shared_params'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq({ param: 'value' }.to_json)
+      end
+    end
+
     context 'documentation' do
       it 'can be included with a hash' do
         documentation = { example: 'Joe' }
