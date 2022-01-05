@@ -30,7 +30,6 @@ module Grape
           unset_namespace_stackable :declared_params
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
-          unset_description_field :params
         end
 
         # Opens a root-level ParamsScope, defining parameter coercions and
@@ -41,14 +40,8 @@ module Grape
         end
 
         def document_attribute(names, opts)
-          setting = description_field(:params)
-          setting ||= description_field(:params, {})
           Array(names).each do |name|
-            full_name = name[:full_name].to_s
-            setting[full_name] ||= {}
-            setting[full_name].merge!(opts)
-
-            namespace_stackable(:params, full_name => opts)
+            namespace_stackable(:params, name[:full_name].to_s => opts)
           end
         end
       end
