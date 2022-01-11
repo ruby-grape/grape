@@ -21,8 +21,14 @@ module Grape
           if message.is_a?(Exceptions::ValidationErrors) || message.is_a?(Hash)
             message
           else
-            { error: message }
+            { error: ensure_utf8(message) }
           end
+        end
+
+        def ensure_utf8(message)
+          return message unless message.respond_to? :encode
+
+          message.encode('UTF-8', invalid: :replace, undef: :replace)
         end
       end
     end

@@ -9,6 +9,7 @@
 * [#2222](https://github.com/ruby-grape/grape/pull/2222): Autoload types and validators - [@ericproulx](https://github.com/ericproulx).
 * [#2232](https://github.com/ruby-grape/grape/pull/2232): Fix kwargs support in shared params definition - [@dm1try](https://github.com/dm1try).
 * [#2229](https://github.com/ruby-grape/grape/pull/2229): Do not collect params in route settings - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2234](https://github.com/ruby-grape/grape/pull/2234): Remove non-utf-8 characters from format before generating JSON error - [@bschmeck](https://github.com/bschmeck).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)

@@ -4157,6 +4157,20 @@ describe Grape::API do
     end
   end
 
+  context 'with non-UTF-8 characters in specified format' do
+    it 'converts the characters' do
+      subject.format :json
+      subject.content_type :json, 'application/json'
+      subject.get '/something' do
+        'foo'
+      end
+      get '/something?format=%0A%0B%BF'
+      expect(last_response.status).to eq(406)
+      message = "The requested format '\n\u000b\357\277\275' is not supported."
+      expect(last_response.body).to eq({ error: message }.to_json)
+    end
+  end
+
   context 'body' do
     context 'false' do
       before do
