@@ -50,16 +50,6 @@ module Grape
           expect { subject.params { raise 'foo' } }.to raise_error RuntimeError, 'foo'
         end
       end
-
-      describe '.document_attribute' do
-        before do
-          subject.document_attribute([full_name: 'xxx'], foo: 'bar')
-        end
-
-        it 'creates a param documentation' do
-          expect(subject.namespace_stackable(:params)).to eq(['xxx' => { foo: 'bar' }])
-        end
-      end
     end
   end
 end

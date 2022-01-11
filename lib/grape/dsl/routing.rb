@@ -77,6 +77,10 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
+        def do_not_document!
+          namespace_inheritable(:do_not_document, true)
+        end
+
         def mount(mounts, *opts)
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|

@@ -38,12 +38,6 @@ module Grape
         def params(&block)
           Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
         end
-
-        def document_attribute(names, opts)
-          Array(names).each do |name|
-            namespace_stackable(:params, name[:full_name].to_s => opts)
-          end
-        end
       end
     end
   end
