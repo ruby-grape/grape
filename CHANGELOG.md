@@ -3,6 +3,7 @@
 #### Features
 
 * [#2233](https://github.com/ruby-grape/grape/pull/2233): A setting for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2235](https://github.com/ruby-grape/grape/pull/2235): Add Ruby 3.1 to CI - [@petergoldstein](https://github.com/petergoldstein).
 * Your contribution here.
 
 #### Fixes
