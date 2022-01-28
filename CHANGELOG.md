@@ -2,17 +2,20 @@
 
 #### Features
 
+* [#2233](https://github.com/ruby-grape/grape/pull/2233): A setting for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2235](https://github.com/ruby-grape/grape/pull/2235): Add Ruby 3.1 to CI - [@petergoldstein](https://github.com/petergoldstein).
 * Your contribution here.
 
 #### Fixes
 
 * [#2222](https://github.com/ruby-grape/grape/pull/2222): Autoload types and validators - [@ericproulx](https://github.com/ericproulx).
+* [#2232](https://github.com/ruby-grape/grape/pull/2232): Fix kwargs support in shared params definition - [@dm1try](https://github.com/dm1try).
+* [#2229](https://github.com/ruby-grape/grape/pull/2229): Do not collect params in route settings - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2234](https://github.com/ruby-grape/grape/pull/2234): Remove non-utf-8 characters from format before generating JSON error - [@bschmeck](https://github.com/bschmeck).
 * [#2227](https://github.com/ruby-grape/grape/pull/2222): Rename "MissingGroupType" and "UnsupportedGroupType" exceptions - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)
-
-#### Features
 
 #### Fixes
 

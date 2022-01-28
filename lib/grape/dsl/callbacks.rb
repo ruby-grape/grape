@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
-
 module Grape
   module DSL
     # Blocks can be executed before or after every API call, using `before`, `after`,

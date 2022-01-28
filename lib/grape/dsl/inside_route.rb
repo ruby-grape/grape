@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
 require 'grape/dsl/headers'
 
 module Grape

@@ -8,6 +8,7 @@ require 'rack/auth/basic'
 require 'rack/auth/digest/md5'
 require 'set'
 require 'active_support'
+require 'active_support/concern'
 require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
 require 'active_support/core_ext/array/conversions'

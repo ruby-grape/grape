@@ -78,21 +78,6 @@ module Grape
         route_setting :description, options
       end
 
-      def description_field(field, value = nil)
-        description = route_setting(:description)
-        if value
-          description ||= route_setting(:description, {})
-          description[field] = value
-        elsif description
-          description[field]
-        end
-      end
-
-      def unset_description_field(field)
-        description = route_setting(:description)
-        description&.delete(field)
-      end
-
       # Returns an object which configures itself via an instance-context DSL.
       def desc_container(endpoint_configuration)
         Module.new do

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
-
 module Grape
   module DSL
     module Routing
@@ -77,6 +75,10 @@ module Grape
         # Do not automatically route OPTIONS.
         def do_not_route_options!
           namespace_inheritable(:do_not_route_options, true)
+        end
+
+        def do_not_document!
+          namespace_inheritable(:do_not_document, true)
         end
 
         def mount(mounts, *opts)

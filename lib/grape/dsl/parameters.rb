@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
-
 module Grape
   module DSL
     # Defines DSL methods, meant to be applied to a ParamsScope, which define
@@ -64,7 +62,7 @@ module Grape
           params_block = named_params.fetch(name) do
             raise "Params :#{name} not found!"
           end
-          instance_exec(options, &params_block)
+          instance_exec(**options, &params_block)
         end
       end
       alias use_scope use

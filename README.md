@@ -2249,6 +2249,18 @@ params do
 end
 ```
 
+If documentation isn't needed (for instance, it is an internal API), documentation can be disabled.
+
+```ruby
+class API < Grape::API
+  do_not_document!
+
+  # endpoints...
+end
+```
+
+In this case, Grape won't create objects related to documentation which are retained in RAM forever.
+
 ## Cookies
 
 You can set, get and delete your cookies very simply using `cookies` method.
