@@ -9,3 +9,5 @@ module Grape
     end
   end
 end
+
+Grape::Exceptions::MissingGroupTypeError = Grape::Exceptions::MissingGroupType

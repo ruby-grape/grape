@@ -9,3 +9,5 @@ module Grape
     end
   end
 end
+
+Grape::Exceptions::UnsupportedGroupTypeError = Grape::Exceptions::UnsupportedGroupType
