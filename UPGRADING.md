@@ -1,6 +1,17 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.6.3
+
+#### Exceptions renaming
+
+The following exceptions has been renamed for consistency through exceptions naming :
+
+* `MissingGroupTypeError` => `MissingGroupType`
+* `UnsupportedGroupTypeError` => `UnsupportedGroupType`
+
+See [#2227](https://github.com/ruby-grape/grape/pull/2227) for more information.
+
 ### Upgrading to >= 1.6.0
 
 #### Parameter renaming with :as

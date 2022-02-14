@@ -208,8 +208,8 @@ module Grape
         # if required params are grouped and no type or unsupported type is provided, raise an error
         type = attrs[1] ? attrs[1][:type] : nil
         if attrs.first && !optional
-          raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
+          raise Grape::Exceptions::MissingGroupType if type.nil?
+          raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
         self.class.new(

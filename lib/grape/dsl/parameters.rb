@@ -148,8 +148,8 @@ module Grape
 
         # check type for optional parameter group
         if attrs && block
-          raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
-          raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
+          raise Grape::Exceptions::MissingGroupType if type.nil?
+          raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
         if opts[:using]
