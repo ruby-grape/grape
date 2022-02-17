@@ -93,3 +93,10 @@ module Grape
     end
   end
 end
+
+Grape::Validations::Base = Class.new(Grape::Validations::Validators::Base) do
+  def initialize(*)
+    super
+    warn '[DEPRECATION] `Grape::Validations::Base` is deprecated. Use `Grape::Validations::Validators::Base` instead.'
+  end
+end

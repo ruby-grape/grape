@@ -1,6 +1,47 @@
 # frozen_string_literal: true
 
 describe Grape::Validations do
+  context 'deprecated Grape::Validations::Base' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :text, validator_with_old_base: true
+        end
+        get do
+        end
+      end
+    end
+
+    let(:validator_with_old_base) do
+      Class.new(Grape::Validations::Base) do
+        def validate_param!(_attr_name, _params)
+          true
+        end
+      end
+    end
+
+    before do
+      described_class.register_validator('validator_with_old_base', validator_with_old_base)
+      allow(Warning).to receive(:warn)
+    end
+
+    after do
+      described_class.deregister_validator('validator_with_old_base')
+    end
+
+    def app
+      subject
+    end
+
+    it 'puts a deprecation warning' do
+      expect(Warning).to receive(:warn) do |message|
+        expect(message).to include('`Grape::Validations::Base` is deprecated')
+      end
+
+      get '/'
+    end
+  end
+
   context 'using a custom length validator' do
     subject do
       Class.new(Grape::API) do
