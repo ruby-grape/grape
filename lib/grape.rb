@@ -231,6 +231,7 @@ module Grape
       autoload :Types
       autoload :ParamsScope
       autoload :ValidatorFactory
+      autoload :Base, 'grape/validations/validators/base'
     end
 
     module Types

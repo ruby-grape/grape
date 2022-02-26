@@ -13,6 +13,7 @@
 * [#2229](https://github.com/ruby-grape/grape/pull/2229): Do not collect params in route settings - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2234](https://github.com/ruby-grape/grape/pull/2234): Remove non-utf-8 characters from format before generating JSON error - [@bschmeck](https://github.com/bschmeck).
 * [#2227](https://github.com/ruby-grape/grape/pull/2222): Rename "MissingGroupType" and "UnsupportedGroupType" exceptions - [@ericproulx](https://github.com/ericproulx).
+* [#2244](https://github.com/ruby-grape/grape/pull/2244): Fix a breaking change in `Grape::Validations` provided in 1.6.1 - [@dm1try](https://github.com/dm1try).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)
