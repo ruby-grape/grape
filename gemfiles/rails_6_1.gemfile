@@ -33,7 +33,7 @@ group :test do
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '~> 1.1.0'
-  gem 'rspec', '~> 3.0'
+  gem 'rspec', '~> 3.9.0'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false
   gem 'test-prof', require: false
 end

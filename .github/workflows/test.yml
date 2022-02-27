@@ -34,7 +34,6 @@ jobs:
           - gemfiles/rack1.gemfile
           - gemfiles/rack2.gemfile
           - gemfiles/rack2_2.gemfile
-          - gemfiles/rack_edge.gemfile
           - gemfiles/rails_5.gemfile
           - gemfiles/rails_6.gemfile
           - gemfiles/rails_6_1.gemfile
@@ -69,7 +68,10 @@ jobs:
             experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/rails_edge.gemfile'
-            experimental: false
+            experimental: true
+          - ruby: 2.7
+            gemfile: 'gemfiles/rack_edge.gemfile'
+            experimental: true
           - ruby: "ruby-head"
             experimental: true
           - ruby: "truffleruby-head"
