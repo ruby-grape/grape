@@ -5,6 +5,7 @@
 * [#2233](https://github.com/ruby-grape/grape/pull/2233): A setting for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#2235](https://github.com/ruby-grape/grape/pull/2235): Add Ruby 3.1 to CI - [@petergoldstein](https://github.com/petergoldstein).
 * [#2248](https://github.com/ruby-grape/grape/pull/2248): Upgraded to rspec 3.11.0 - [@dblock](https://github.com/dblock).
+* [#2249](https://github.com/ruby-grape/grape/pull/2249): Split ci matrix, extract edge - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes

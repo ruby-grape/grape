@@ -37,49 +37,26 @@ jobs:
           - gemfiles/rails_5.gemfile
           - gemfiles/rails_6.gemfile
           - gemfiles/rails_6_1.gemfile
-        experimental: [false]
         include:
           - ruby: 3.1
             gemfile: 'gemfiles/multi_json.gemfile'
-            experimental: false
           - ruby: 3.1
             gemfile: 'gemfiles/multi_xml.gemfile'
-            experimental: false
           - ruby: 3.1
             gemfile: 'gemfiles/rails_7.gemfile'
-            experimental: false
           - ruby: "3.0"
             gemfile: 'gemfiles/multi_json.gemfile'
-            experimental: false
           - ruby: "3.0"
             gemfile: 'gemfiles/multi_xml.gemfile'
-            experimental: false
           - ruby: "3.0"
             gemfile: 'gemfiles/rails_7.gemfile'
-            experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/multi_json.gemfile'
-            experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/multi_xml.gemfile'
-            experimental: false
           - ruby: 2.7
             gemfile: 'gemfiles/rails_7.gemfile'
-            experimental: false
-          - ruby: 2.7
-            gemfile: 'gemfiles/rails_edge.gemfile'
-            experimental: true
-          - ruby: 2.7
-            gemfile: 'gemfiles/rack_edge.gemfile'
-            experimental: true
-          - ruby: "ruby-head"
-            experimental: true
-          - ruby: "truffleruby-head"
-            experimental: true
-          - ruby: "jruby-head"
-            experimental: true
     runs-on: ubuntu-20.04
-    continue-on-error: ${{ matrix.experimental }}
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
 
