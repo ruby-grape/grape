@@ -19,7 +19,7 @@ module Grape
         it 'sets a version for route' do
           version = 'v1'
           expect(subject).to receive(:namespace_inheritable).with(:version, [version])
-          expect(subject).to receive(:namespace_inheritable).with(:version_options, using: :path)
+          expect(subject).to receive(:namespace_inheritable).with(:version_options, { using: :path })
           expect(subject.version(version)).to eq(version)
         end
       end
