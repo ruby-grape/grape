@@ -2,10 +2,11 @@
 
 #### Features
 
-* [#2233](https://github.com/ruby-grape/grape/pull/2233): A setting for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
-* [#2235](https://github.com/ruby-grape/grape/pull/2235): Add Ruby 3.1 to CI - [@petergoldstein](https://github.com/petergoldstein).
+* [#2233](https://github.com/ruby-grape/grape/pull/2233): Added `do_not_document!` for disabling documentation to internal APIs - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2235](https://github.com/ruby-grape/grape/pull/2235): Add support for Ruby 3.1 - [@petergoldstein](https://github.com/petergoldstein).
 * [#2248](https://github.com/ruby-grape/grape/pull/2248): Upgraded to rspec 3.11.0 - [@dblock](https://github.com/dblock).
-* [#2249](https://github.com/ruby-grape/grape/pull/2249): Split ci matrix, extract edge - [@dblock](https://github.com/dblock).
+* [#2249](https://github.com/ruby-grape/grape/pull/2249): Split CI matrix, extract edge - [@dblock](https://github.com/dblock).
+* [#2249](https://github.com/ruby-grape/grape/pull/2251): Upgraded to RuboCop 1.25.1 - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
@@ -13,10 +14,10 @@
 * [#2222](https://github.com/ruby-grape/grape/pull/2222): Autoload types and validators - [@ericproulx](https://github.com/ericproulx).
 * [#2232](https://github.com/ruby-grape/grape/pull/2232): Fix kwargs support in shared params definition - [@dm1try](https://github.com/dm1try).
 * [#2229](https://github.com/ruby-grape/grape/pull/2229): Do not collect params in route settings - [@dnesteryuk](https://github.com/dnesteryuk).
-* [#2234](https://github.com/ruby-grape/grape/pull/2234): Remove non-utf-8 characters from format before generating JSON error - [@bschmeck](https://github.com/bschmeck).
-* [#2227](https://github.com/ruby-grape/grape/pull/2222): Rename "MissingGroupType" and "UnsupportedGroupType" exceptions - [@ericproulx](https://github.com/ericproulx).
+* [#2234](https://github.com/ruby-grape/grape/pull/2234): Remove non-UTF8 characters from format before generating JSON error - [@bschmeck](https://github.com/bschmeck).
+* [#2227](https://github.com/ruby-grape/grape/pull/2222): Rename `MissingGroupType` and `UnsupportedGroupType` exceptions - [@ericproulx](https://github.com/ericproulx).
 * [#2244](https://github.com/ruby-grape/grape/pull/2244): Fix a breaking change in `Grape::Validations` provided in 1.6.1 - [@dm1try](https://github.com/dm1try).
-* [#2250](https://github.com/ruby-grape/grape/pull/2250): Add deprecation warning for unsupportedgrouptypeerror and missinggrouptypeerror - [@ericproulx](https://github.com/ericproulx).
+* [#2250](https://github.com/ruby-grape/grape/pull/2250): Add deprecation warning for `UnsupportedGroupTypeError` and `MissingGroupTypeError` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)

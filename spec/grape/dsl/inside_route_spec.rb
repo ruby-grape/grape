@@ -23,7 +23,7 @@ describe Grape::Endpoint do
 
   describe '#version' do
     it 'defaults to nil' do
-      expect(subject.version).to be nil
+      expect(subject.version).to be_nil
     end
 
     it 'returns env[api.version]' do
@@ -165,7 +165,7 @@ describe Grape::Endpoint do
     end
 
     it 'returns default' do
-      expect(subject.content_type).to be nil
+      expect(subject.content_type).to be_nil
     end
   end
 
@@ -198,7 +198,7 @@ describe Grape::Endpoint do
     end
 
     it 'returns default' do
-      expect(subject.body).to be nil
+      expect(subject.body).to be_nil
     end
   end
 
@@ -313,7 +313,7 @@ describe Grape::Endpoint do
     end
 
     it 'returns default' do
-      expect(subject.sendfile).to be nil
+      expect(subject.sendfile).to be_nil
     end
   end
 
@@ -360,13 +360,13 @@ describe Grape::Endpoint do
         it 'sets Content-Length header to nil' do
           subject.stream file_path
 
-          expect(subject.header['Content-Length']).to eq nil
+          expect(subject.header['Content-Length']).to be_nil
         end
 
         it 'sets Transfer-Encoding header to nil' do
           subject.stream file_path
 
-          expect(subject.header['Transfer-Encoding']).to eq nil
+          expect(subject.header['Transfer-Encoding']).to be_nil
         end
       end
 
@@ -404,13 +404,13 @@ describe Grape::Endpoint do
         it 'sets Content-Length header to nil' do
           subject.stream stream_object
 
-          expect(subject.header['Content-Length']).to eq nil
+          expect(subject.header['Content-Length']).to be_nil
         end
 
         it 'sets Transfer-Encoding header to nil' do
           subject.stream stream_object
 
-          expect(subject.header['Transfer-Encoding']).to eq nil
+          expect(subject.header['Transfer-Encoding']).to be_nil
         end
       end
 
@@ -424,8 +424,8 @@ describe Grape::Endpoint do
     end
 
     it 'returns default' do
-      expect(subject.stream).to be nil
-      expect(subject.header['Cache-Control']).to eq nil
+      expect(subject.stream).to be_nil
+      expect(subject.header['Cache-Control']).to be_nil
     end
   end
 

@@ -23,13 +23,13 @@ describe Grape::Validations::Types::PrimitiveCoercer do
 
       [true, 'true', 1].each do |val|
         it "coerces '#{val}' to true" do
-          expect(subject.call(val)).to eq(true)
+          expect(subject.call(val)).to be(true)
         end
       end
 
       [false, 'false', 0].each do |val|
         it "coerces '#{val}' to false" do
-          expect(subject.call(val)).to eq(false)
+          expect(subject.call(val)).to be(false)
         end
       end
 
@@ -113,7 +113,7 @@ describe Grape::Validations::Types::PrimitiveCoercer do
         end
 
         it 'returns a value as it is when the given value is Boolean' do
-          expect(subject.call(true)).to eq(true)
+          expect(subject.call(true)).to be(true)
         end
       end
 

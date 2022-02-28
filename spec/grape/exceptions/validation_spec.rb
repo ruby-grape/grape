@@ -13,7 +13,7 @@ describe Grape::Exceptions::Validation do
 
   context 'when message is a String' do
     it 'does not store the message_key' do
-      expect(described_class.new(params: ['id'], message: 'presence').message_key).to eq(nil)
+      expect(described_class.new(params: ['id'], message: 'presence').message_key).to be_nil
     end
   end
 end

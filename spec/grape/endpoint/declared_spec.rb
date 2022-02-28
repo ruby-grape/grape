@@ -247,7 +247,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=one&other=two'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).key?(:other)).to eq false
+      expect(JSON.parse(last_response.body).key?(:other)).to be false
     end
 
     it 'stringifies if that option is passed' do
@@ -520,7 +520,7 @@ describe Grape::Endpoint do
       json = JSON.parse(last_response.body, symbolize_names: true)
 
       expect(json[:declared_params][:id]).to eq 123
-      expect(json[:declared_params_no_parent][:id]).to eq nil
+      expect(json[:declared_params_no_parent][:id]).to be_nil
     end
   end
 
