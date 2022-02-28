@@ -81,6 +81,8 @@ module Grape
       autoload :MethodNotAllowed
       autoload :InvalidResponse
       autoload :EmptyMessageBody
+      autoload :MissingGroupTypeError, 'grape/exceptions/missing_group_type'
+      autoload :UnsupportedGroupTypeError, 'grape/exceptions/unsupported_group_type'
     end
   end
 

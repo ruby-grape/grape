@@ -10,4 +10,9 @@ module Grape
   end
 end
 
-Grape::Exceptions::UnsupportedGroupTypeError = Grape::Exceptions::UnsupportedGroupType
+Grape::Exceptions::UnsupportedGroupTypeError = Class.new(Grape::Exceptions::UnsupportedGroupType) do
+  def initialize(*)
+    super
+    warn '[DEPRECATION] `Grape::Exceptions::UnsupportedGroupTypeError` is deprecated. Use `Grape::Exceptions::UnsupportedGroupType` instead.'
+  end
+end

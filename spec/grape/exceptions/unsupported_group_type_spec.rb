@@ -9,9 +9,15 @@ RSpec.describe Grape::Exceptions::UnsupportedGroupType do
     it { is_expected.to include 'group type must be Array, Hash, JSON or Array[JSON]' }
   end
 
-  describe '#alias' do
-    subject { described_class }
+  describe 'deprecated Grape::Exceptions::UnsupportedGroupTypeError' do
+    subject { Grape::Exceptions::UnsupportedGroupTypeError.new }
 
-    it { is_expected.to eq(Grape::Exceptions::UnsupportedGroupTypeError) }
+    it 'puts a deprecation warning' do
+      expect(Warning).to receive(:warn) do |message|
+        expect(message).to include('`Grape::Exceptions::UnsupportedGroupTypeError` is deprecated')
+      end
+
+      subject
+    end
   end
 end
