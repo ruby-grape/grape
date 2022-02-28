@@ -101,7 +101,7 @@ module Grape
         # block passed in. Allows for simple 'before' setups
         # of settings stack pushes.
         def nest(*blocks, &block)
-          blocks.reject!(&:nil?)
+          blocks.compact!
           if blocks.any?
             evaluate_as_instance_with_configuration(block) if block
             blocks.each { |b| evaluate_as_instance_with_configuration(b) }

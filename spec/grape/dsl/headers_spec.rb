@@ -52,8 +52,8 @@ module Grape
       context 'when no headers are set' do
         describe '#header' do
           it 'returns nil' do
-            expect(subject.header['First Key']).to be nil
-            expect(subject.header('First Key')).to be nil
+            expect(subject.header['First Key']).to be_nil
+            expect(subject.header('First Key')).to be_nil
           end
         end
       end

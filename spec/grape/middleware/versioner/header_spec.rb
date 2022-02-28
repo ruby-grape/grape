@@ -46,7 +46,7 @@ describe Grape::Middleware::Versioner::Header do
 
     it 'is nil if not provided' do
       status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor')
-      expect(env['api.format']).to be nil
+      expect(env['api.format']).to be_nil
       expect(status).to eq(200)
     end
 
@@ -64,7 +64,7 @@ describe Grape::Middleware::Versioner::Header do
 
         it 'is nil if not provided' do
           status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1')
-          expect(env['api.format']).to be nil
+          expect(env['api.format']).to be_nil
           expect(status).to eq(200)
         end
       end

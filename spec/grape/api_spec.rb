@@ -1216,7 +1216,7 @@ describe Grape::API do
 
     it 'does not set Cache-Control' do
       get '/foo'
-      expect(last_response.headers['Cache-Control']).to eq(nil)
+      expect(last_response.headers['Cache-Control']).to be_nil
     end
 
     it 'sets content type for xml' do
@@ -1241,7 +1241,7 @@ describe Grape::API do
 
     it 'returns raw data when content type binary' do
       image_filename = 'grape.png'
-      file = File.open(image_filename, 'rb', &:read)
+      file = File.binread(image_filename)
       subject.format :binary
       subject.get('/binary_file') { File.binread(image_filename) }
       get '/binary_file'
@@ -1273,7 +1273,7 @@ describe Grape::API do
       get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
 
       expect(last_response.headers['Content-Type']).to eq('text/plain')
-      expect(last_response.headers['Content-Length']).to eq(nil)
+      expect(last_response.headers['Content-Length']).to be_nil
       expect(last_response.headers['Cache-Control']).to eq('no-cache')
       expect(last_response.headers['Transfer-Encoding']).to eq('chunked')
 

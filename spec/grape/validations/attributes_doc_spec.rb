@@ -114,7 +114,7 @@ describe Grape::Validations::ParamsScope::AttributesDoc do
           doc = subject.first['nested[engine_age]']
 
           expect(doc).to have_key(:default)
-          expect(doc[:default]).to eq(false)
+          expect(doc[:default]).to be(false)
         end
       end
 
