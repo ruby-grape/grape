@@ -181,15 +181,9 @@ In 2020, we plan to use the money towards gathering Grape contributors for dinne
 
 Ruby 2.4 or newer is required.
 
-Grape is available as a gem, to install it just install the gem:
+Grape is available as a gem, to install it run:
 
-    gem install grape
-
-If you're using Bundler, add the gem to Gemfile.
-
-    gem 'grape'
-
-Run `bundle install`.
+    bundle add grape
 
 ## Basic Usage
 
