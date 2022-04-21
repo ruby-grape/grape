@@ -445,7 +445,7 @@ describe Grape::Endpoint do
       subject.post '/upload' do
         params[:file][:filename]
       end
-      post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, "text/plain"), extra: Rack::Test::UploadedFile.new(__FILE__, "text/plain") }
+      post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, 'text/plain'), extra: Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
       expect(last_response.status).to eq(400)
     end
 
