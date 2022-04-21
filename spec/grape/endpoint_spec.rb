@@ -436,6 +436,19 @@ describe Grape::Endpoint do
       end
     end
 
+    it 'returns a 400 if given too many multipart files' do
+      Rack::Utils.multipart_part_limit = 1
+
+      subject.params do
+        requires :file, type: Rack::Multipart::UploadedFile
+      end
+      subject.post '/upload' do
+        params[:file][:filename]
+      end
+      post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, "text/plain"), extra: Rack::Test::UploadedFile.new(__FILE__, "text/plain") }
+      expect(last_response.status).to eq(400)
+    end
+
     it 'responds with a 415 for an unsupported content-type' do
       subject.format :json
       # subject.content_type :json, "application/json"
