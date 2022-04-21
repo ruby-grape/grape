@@ -436,18 +436,25 @@ describe Grape::Endpoint do
       end
     end
 
-    it 'returns a 413 if given too many multipart files' do
-      Rack::Utils.multipart_part_limit = 1
+    context 'when the limit on multipart files is exceeded' do
+      around do |example|
+        limit = Rack::Utils.multipart_part_limit
+        Rack::Utils.multipart_part_limit = 1
+        example.run
+        Rack::Utils.multipart_part_limit = limit
+      end
 
-      subject.params do
-        requires :file, type: Rack::Multipart::UploadedFile
+      it 'returns a 413 if given too many multipart files' do
+        subject.params do
+          requires :file, type: Rack::Multipart::UploadedFile
+        end
+        subject.post '/upload' do
+          params[:file][:filename]
+        end
+        post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, 'text/plain'), extra: Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
+        expect(last_response.status).to eq(413)
+        expect(last_response.body).to eq("The number of uploaded files exceeded the system's configured limit")
       end
-      subject.post '/upload' do
-        params[:file][:filename]
-      end
-      post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, 'text/plain'), extra: Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
-      expect(last_response.status).to eq(413)
-      expect(last_response.body).to eq("The number of uploaded files exceeded the system's configured limit")
     end
 
     it 'responds with a 415 for an unsupported content-type' do
