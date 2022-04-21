@@ -447,6 +447,7 @@ describe Grape::Endpoint do
       end
       post '/upload', { file: Rack::Test::UploadedFile.new(__FILE__, 'text/plain'), extra: Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
       expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq("The number of uploaded files exceeded the system's configured limit")
     end
 
     it 'responds with a 415 for an unsupported content-type' do

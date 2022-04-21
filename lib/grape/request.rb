@@ -17,6 +17,8 @@ module Grape
       @params ||= build_params
     rescue EOFError
       raise Grape::Exceptions::EmptyMessageBody.new(content_type)
+    rescue Rack::Multipart::MultipartPartLimitError
+      raise Grape::Exceptions::TooManyMultipartFiles
     end
 
     def headers
