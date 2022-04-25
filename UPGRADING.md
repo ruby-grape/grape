@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.6.3
+### Upgrading to >= 1.7.0
 
 #### Exceptions renaming
 
