@@ -3,8 +3,8 @@
 module Grape
   module Exceptions
     class TooManyMultipartFiles < Base
-      def initialize
-        super(message: compose_message(:too_many_multipart_files), status: 413)
+      def initialize(limit)
+        super(message: compose_message(:too_many_multipart_files, limit: limit), status: 413)
       end
     end
   end

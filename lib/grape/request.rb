@@ -18,7 +18,7 @@ module Grape
     rescue EOFError
       raise Grape::Exceptions::EmptyMessageBody.new(content_type)
     rescue Rack::Multipart::MultipartPartLimitError
-      raise Grape::Exceptions::TooManyMultipartFiles
+      raise Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit)
     end
 
     def headers
