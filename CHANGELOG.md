@@ -18,7 +18,7 @@
 * [#2227](https://github.com/ruby-grape/grape/pull/2222): Rename `MissingGroupType` and `UnsupportedGroupType` exceptions - [@ericproulx](https://github.com/ericproulx).
 * [#2244](https://github.com/ruby-grape/grape/pull/2244): Fix a breaking change in `Grape::Validations` provided in 1.6.1 - [@dm1try](https://github.com/dm1try).
 * [#2250](https://github.com/ruby-grape/grape/pull/2250): Add deprecation warning for `UnsupportedGroupTypeError` and `MissingGroupTypeError` - [@ericproulx](https://github.com/ericproulx).
-* [#2256](https://github.com/ruby-grape/grape/pull/2256): Raise Grape::Exceptions::MultipartPartLimitError from Rack when too many files are uploaded - [@bschmeck](https://github.com/bschmeck).
+* [#2256](https://github.com/ruby-grape/grape/pull/2256): Raise `Grape::Exceptions::MultipartPartLimitError` from Rack when too many files are uploaded - [@bschmeck](https://github.com/bschmeck).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)
