@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.6.3
+### Upgrading to >= 1.7.0
 
 #### Exceptions renaming
 
@@ -11,6 +11,10 @@ The following exceptions has been renamed for consistency through exceptions nam
 * `UnsupportedGroupTypeError` => `UnsupportedGroupType`
 
 See [#2227](https://github.com/ruby-grape/grape/pull/2227) for more information.
+
+#### Handling Multipart Limit Errors
+
+Rack supports a configurable limit on the number of files created from multipart parameters (`Rack::Utils.multipart_part_limit`) and raises an error if params are received that create too many files.  If you were handling the Rack error directly, Grape now wraps that error in `Grape::Execeptions::TooManyMultipartFiles`.  Additionally, Grape will return a 413 status code if the exception goes unhandled.
 
 ### Upgrading to >= 1.6.0
 

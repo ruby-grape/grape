@@ -45,6 +45,7 @@ en:
             %{body_format} in the request's 'body'
             "
         empty_message_body: 'Empty message body supplied with %{body_format} content-type'
+        too_many_multipart_files: "The number of uploaded files exceeded the system's configured limit (%{limit})"
         invalid_accept_header:
           problem: 'Invalid accept header'
           resolution: '%{message}'
