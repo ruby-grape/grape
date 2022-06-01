@@ -1450,6 +1450,8 @@ end
 
 The value passed to `as` will be the key when calling `params` or `declared(params)`.
 
+Note: If you are on 1.6+, then you'll need to use `declared(params)`. See [inspiration here](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#upgrading-to--160) as to why.
+
 ### Built-in Validators
 
 #### `allow_blank`
