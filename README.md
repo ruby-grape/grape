@@ -1448,7 +1448,7 @@ resource :users do
 end
 ```
 
-The value passed to `as` will be the key when calling `params` or `declared(params)`.
+The value passed to `as` will be the key when calling `declared(params)`.
 
 ### Built-in Validators
 
