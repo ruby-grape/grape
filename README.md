@@ -1740,7 +1740,7 @@ end
 class AlphaNumeric < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /\A[[:alnum:]]+\z/
-      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
+      raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
     end
   end
 end
@@ -1758,7 +1758,7 @@ You can also create custom classes that take parameters.
 class Length < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
-      fail Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
+      raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
     end
   end
 end
@@ -1784,7 +1784,7 @@ class Admin < Grape::Validations::Validators::Base
     return unless @option
     # check if user is admin or not
     # as an example get a token from request and check if it's admin or not
-    fail Grape::Exceptions::Validation, params: @attrs, message: 'Can not set admin-only field.' unless request.headers['X-Access-Token'] == 'admin'
+    raise Grape::Exceptions::Validation.new params: @attrs, message: 'Can not set admin-only field.' unless request.headers['X-Access-Token'] == 'admin'
   end
 end
 ```
