@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
     steps:
     - uses: actions/checkout@v2
