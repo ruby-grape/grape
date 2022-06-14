@@ -60,6 +60,7 @@ jobs:
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      COVERALLS_PARALLEL: true
 
     steps:
     - uses: actions/checkout@v2
