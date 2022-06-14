@@ -21,7 +21,6 @@ jobs:
     continue-on-error: true
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
     steps:
     - uses: actions/checkout@v2
@@ -34,3 +33,20 @@ jobs:
 
     - name: Run tests
       run: bundle exec rake spec
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-${{ matrix.ruby }}-${{ matrix.gemfile }}
+        parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
