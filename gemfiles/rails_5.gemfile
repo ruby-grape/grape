@@ -27,7 +27,6 @@ end
 
 group :test do
   gem 'cookiejar'
-  gem 'coveralls_reborn'
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'mime-types'
@@ -35,6 +34,8 @@ group :test do
   gem 'rack-test', '~> 1.1.0'
   gem 'rspec', '~> 3.11.0'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false
+  gem 'simplecov', '~> 0.21.2'
+  gem 'simplecov-lcov', '~> 0.8.0'
   gem 'test-prof', require: false
 end
 
