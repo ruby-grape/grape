@@ -175,8 +175,6 @@ Available as part of the Tidelift Subscription.
 
 The maintainers of Grape are working with Tidelift to deliver commercial support and maintenance. Save time, reduce risk, and improve code health, while paying the maintainers of Grape. Click [here](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) for more details.
 
-In 2020, we plan to use the money towards gathering Grape contributors for dinner in New York City.
-
 ## Installation
 
 Ruby 2.4 or newer is required.
