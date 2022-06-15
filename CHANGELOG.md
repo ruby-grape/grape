@@ -8,6 +8,7 @@
 * [#2249](https://github.com/ruby-grape/grape/pull/2249): Split CI matrix, extract edge - [@dblock](https://github.com/dblock).
 * [#2249](https://github.com/ruby-grape/grape/pull/2251): Upgraded to RuboCop 1.25.1 - [@dblock](https://github.com/dblock).
 * [#2271](https://github.com/ruby-grape/grape/pull/2271): Fixed validation regression on Numeric type introduced in 1.3 - [@vasfed](https://github.com/Vasfed).
+* [#2267](https://github.com/ruby-grape/grape/pull/2267): Standardized English error messages - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
