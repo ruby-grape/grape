@@ -110,6 +110,15 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       end
     end
 
+    context 'a type unknown in Dry-types' do
+      let(:type) { Complex }
+
+      it 'raises error on init' do
+        expect(DryTypes::Params.constants).not_to include(type.name.to_sym)
+        expect { subject }.to raise_error(/type Complex should support coercion/)
+      end
+    end
+
     context 'the strict mode' do
       let(:strict) { true }
 
