@@ -64,6 +64,10 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       it 'coerces an empty string to nil' do
         expect(subject.call('')).to be_nil
       end
+
+      it 'accepts non-nil value' do
+        expect(subject.call(42)).to be_a(Integer)
+      end
     end
 
     context 'Numeric' do
@@ -71,6 +75,10 @@ describe Grape::Validations::Types::PrimitiveCoercer do
 
       it 'coerces an empty string to nil' do
         expect(subject.call('')).to be_nil
+      end
+
+      it 'accepts a non-nil value' do
+        expect(subject.call(42)).to be_a(Numeric) # in fact Integer
       end
     end
 

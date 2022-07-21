@@ -12,6 +12,7 @@ module Grape
         MAPPING = {
           Grape::API::Boolean => DryTypes::Params::Bool,
           BigDecimal => DryTypes::Params::Decimal,
+          Numeric => DryTypes::Params::Integer | DryTypes::Params::Float | DryTypes::Params::Decimal,
 
           # unfortunately, a +Params+ scope doesn't contain String
           String => DryTypes::Coercible::String
@@ -19,7 +20,8 @@ module Grape
 
         STRICT_MAPPING = {
           Grape::API::Boolean => DryTypes::Strict::Bool,
-          BigDecimal => DryTypes::Strict::Decimal
+          BigDecimal => DryTypes::Strict::Decimal,
+          Numeric => DryTypes::Strict::Integer | DryTypes::Strict::Float | DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)
