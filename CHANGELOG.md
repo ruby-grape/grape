@@ -7,6 +7,7 @@
 * [#2248](https://github.com/ruby-grape/grape/pull/2248): Upgraded to rspec 3.11.0 - [@dblock](https://github.com/dblock).
 * [#2249](https://github.com/ruby-grape/grape/pull/2249): Split CI matrix, extract edge - [@dblock](https://github.com/dblock).
 * [#2249](https://github.com/ruby-grape/grape/pull/2251): Upgraded to RuboCop 1.25.1 - [@dblock](https://github.com/dblock).
+* [#2271](https://github.com/ruby-grape/grape/pull/2271): Fixed validation regression on Numeric type introduced in 1.3 - [@vasfed](https://github.com/Vasfed).
 * Your contribution here.
 
 #### Fixes
