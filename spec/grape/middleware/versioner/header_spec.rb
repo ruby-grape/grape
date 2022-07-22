@@ -326,4 +326,20 @@ describe Grape::Middleware::Versioner::Header do
       end
     end
   end
+
+  context 'with missing vendor option' do
+    subject do
+      Class.new(Grape::API) do
+        version 'v1', using: :header
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'fails' do
+      expect { versioned_get '/', 'v1', using: :header }.to raise_error Grape::Exceptions::MissingVendorOption
+    end
+  end
 end
