@@ -72,7 +72,7 @@ module Grape
 
       def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
         message = ERB::Util.html_escape(message) if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
-        Rack::Response.new([message], status, headers)
+        Rack::Response.new([message], Rack::Utils.status_code(status), headers)
       end
 
       def format_message(message, backtrace, original_exception = nil)
