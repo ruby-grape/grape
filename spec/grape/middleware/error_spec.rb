@@ -41,6 +41,12 @@ describe Grape::Middleware::Error do
     expect(last_response.status).to eq(410)
   end
 
+  it 'sets the status code based on the rack util status code symbol' do
+    ErrorSpec::ErrApp.error = { status: :gone }
+    get '/'
+    expect(last_response.status).to eq(410)
+  end
+
   it 'sets the error message appropriately' do
     ErrorSpec::ErrApp.error = { message: 'Awesome stuff.' }
     get '/'
