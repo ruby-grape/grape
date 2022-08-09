@@ -5,6 +5,7 @@ describe Grape::Exceptions::Base do
     subject { described_class.new(message: message).to_s }
 
     let(:message) { 'a_message' }
+
     it { is_expected.to eq(message) }
   end
 
