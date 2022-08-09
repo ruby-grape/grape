@@ -13,6 +13,7 @@ module Grape
         @status  = status
         @message = message
         @headers = headers
+        super(message)
       end
 
       def [](index)
