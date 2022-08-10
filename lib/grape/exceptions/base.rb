@@ -7,11 +7,10 @@ module Grape
       BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'
       FALLBACK_LOCALE = :en
 
-      attr_reader :status, :message, :headers
+      attr_reader :status, :headers
 
       def initialize(status: nil, message: nil, headers: nil, **_options)
         @status  = status
-        @message = message
         @headers = headers
         super(message)
       end
