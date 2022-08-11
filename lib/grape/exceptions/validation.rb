@@ -21,10 +21,6 @@ module Grape
       def as_json(*_args)
         to_s
       end
-
-      def to_s
-        message
-      end
     end
   end
 end

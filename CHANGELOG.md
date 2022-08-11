@@ -11,6 +11,7 @@
 * [#2267](https://github.com/ruby-grape/grape/pull/2267): Standardized English error messages - [@dblock](https://github.com/dblock).
 * [#2272](https://github.com/ruby-grape/grape/pull/2272): Added error on param init when provided type does not have `[]` coercion method, previously validation silently failed for any value - [@vasfed](https://github.com/Vasfed).
 * [#2274](https://github.com/ruby-grape/grape/pull/2274): Error middleware support using rack util's symbols as status - [@dhruvCW](https://github.com/dhruvCW).
+* [#2276](https://github.com/ruby-grape/grape/pull/2276): Fix exception super - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -1,6 +1,22 @@
 # frozen_string_literal: true
 
 describe Grape::Exceptions::Base do
+  describe '#to_s' do
+    subject { described_class.new(message: message).to_s }
+
+    let(:message) { 'a_message' }
+
+    it { is_expected.to eq(message) }
+  end
+
+  describe '#message' do
+    subject { described_class.new(message: message).message }
+
+    let(:message) { 'a_message' }
+
+    it { is_expected.to eq(message) }
+  end
+
   describe '#compose_message' do
     subject { described_class.new.send(:compose_message, key, **attributes) }
 
