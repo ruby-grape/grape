@@ -6,7 +6,7 @@ module Spec
     module Helpers
       # Returns the path with options[:version] prefixed if options[:using] is :path.
       # Returns normal path otherwise.
-      def versioned_path(options = {})
+      def versioned_path(**options)
         case options[:using]
         when :path
           File.join('/', options[:prefix] || '', options[:version], options[:path])
@@ -43,13 +43,11 @@ module Spec
         end
       end
 
-      def versioned_get(path, version_name, version_options = {})
-        path    = versioned_path(version_options.merge(version: version_name, path: path))
+      def versioned_get(path, version_name, **version_options)
+        path = versioned_path(**version_options.merge(version: version_name, path: path))
         headers = versioned_headers(**version_options.merge(version: version_name))
         params = {}
-        if version_options[:using] == :param
-          params = { version_options[:parameter] => version_name }
-        end
+        params = { version_options[:parameter] => version_name } if version_options[:using] == :param
         get path, params, headers
       end
     end

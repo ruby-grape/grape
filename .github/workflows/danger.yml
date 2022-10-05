@@ -1,0 +1,21 @@
+---
+name: danger
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+jobs:
+  danger:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.6
+        bundler-cache: true
+    - name: Run Danger
+      run: |
+        # the token is public, this is ok
+        TOKEN='b8b19daa0ade737762c'
+        TOKEN+='f35edcb328642d371ce86'
+        DANGER_GITHUB_API_TOKEN=$TOKEN bundle exec danger --verbose

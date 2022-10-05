@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Versioner do
-  let(:klass) { Grape::Middleware::Versioner }
+  let(:klass) { described_class }
 
   it 'recognizes :path' do
     expect(klass.using(:path)).to eq(Grape::Middleware::Versioner::Path)

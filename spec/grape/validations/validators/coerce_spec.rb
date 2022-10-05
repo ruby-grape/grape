@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::CoerceValidator do
+describe Grape::Validations::Validators::CoerceValidator do
   subject do
     Class.new(Grape::API)
   end
@@ -23,7 +23,7 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'i18n' do
-      after :each do
+      after do
         I18n.available_locales = %i[en]
         I18n.locale = :en
         I18n.default_locale = :en
@@ -31,9 +31,9 @@ describe Grape::Validations::CoerceValidator do
 
       it 'i18n error on malformed input' do
         I18n.available_locales = %i[en zh-CN]
-        I18n.load_path << File.expand_path('../zh-CN.yml', __FILE__)
+        I18n.load_path << File.expand_path('zh-CN.yml', __dir__)
         I18n.reload!
-        I18n.locale = 'zh-CN'.to_sym
+        I18n.locale = :'zh-CN'
         subject.params do
           requires :age, type: Integer
         end
@@ -48,7 +48,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'gives an english fallback error when default locale message is blank' do
         I18n.available_locales = %i[en pt-BR]
-        I18n.locale = 'pt-BR'.to_sym
+        I18n.locale = :'pt-BR'
         subject.params do
           requires :age, type: Integer
         end
@@ -83,10 +83,11 @@ describe Grape::Validations::CoerceValidator do
       context 'on custom coercion rules' do
         before do
           subject.params do
-            requires :a, types: { value: [Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
-              if val == 'yup'
+            requires :a, types: { value: [Grape::API::Boolean, String], message: 'type cast is invalid' }, coerce_with: (lambda do |val|
+              case val
+              when 'yup'
                 true
-              elsif val == 'false'
+              when 'false'
                 0
               else
                 val
@@ -154,6 +155,36 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'coerces' do
+      context 'json' do
+        let(:headers) { { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' } }
+
+        it 'BigDecimal' do
+          subject.params do
+            requires :bigdecimal, type: BigDecimal
+          end
+          subject.post '/bigdecimal' do
+            "#{params[:bigdecimal].class} #{params[:bigdecimal].to_f}"
+          end
+
+          post '/bigdecimal', { bigdecimal: 45.1 }.to_json, headers
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq('BigDecimal 45.1')
+        end
+
+        it 'Grape::API::Boolean' do
+          subject.params do
+            requires :boolean, type: Grape::API::Boolean
+          end
+          subject.post '/boolean' do
+            params[:boolean]
+          end
+
+          post '/boolean', { boolean: 'true' }.to_json, headers
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq('true')
+        end
+      end
+
       it 'BigDecimal' do
         subject.params do
           requires :bigdecimal, coerce: BigDecimal
@@ -180,23 +211,68 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq(integer_class_name)
       end
 
-      it 'is a custom type' do
+      it 'String' do
         subject.params do
-          requires :uri, coerce: SecureURIOnly
+          requires :string, coerce: String
         end
-        subject.get '/secure_uri' do
-          params[:uri].class
+        subject.get '/string' do
+          params[:string].class
         end
 
-        get 'secure_uri', uri: 'https://www.example.com'
-
+        get '/string', string: 45
         expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('URI::HTTPS')
+        expect(last_response.body).to eq('String')
 
-        get 'secure_uri', uri: 'http://www.example.com'
+        get '/string', string: nil
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('NilClass')
+      end
 
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('uri is invalid')
+      context 'a custom type' do
+        it 'coerces the given value' do
+          subject.params do
+            requires :uri, coerce: SecureURIOnly
+          end
+          subject.get '/secure_uri' do
+            params[:uri].class
+          end
+
+          get 'secure_uri', uri: 'https://www.example.com'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('URI::HTTPS')
+
+          get 'secure_uri', uri: 'http://www.example.com'
+
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('uri is invalid')
+        end
+
+        context 'returning the InvalidValue instance when invalid' do
+          let(:custom_type) do
+            Class.new do
+              def self.parse(_val)
+                Grape::Types::InvalidValue.new('must be unique')
+              end
+            end
+          end
+
+          it 'uses a custom message added to the invalid value' do
+            type = custom_type
+
+            subject.params do
+              requires :name, type: type
+            end
+            subject.get '/whatever' do
+              params[:name].class
+            end
+
+            get 'whatever', name: 'Bob'
+
+            expect(last_response.status).to eq(400)
+            expect(last_response.body).to eq('name must be unique')
+          end
+        end
       end
 
       context 'Array' do
@@ -294,9 +370,9 @@ describe Grape::Validations::CoerceValidator do
         end
       end
 
-      it 'Boolean' do
+      it 'Grape::API::Boolean' do
         subject.params do
-          requires :boolean, type: Boolean
+          requires :boolean, type: Grape::API::Boolean
         end
         subject.get '/boolean' do
           params[:boolean].class
@@ -307,42 +383,60 @@ describe Grape::Validations::CoerceValidator do
         expect(last_response.body).to eq('TrueClass')
       end
 
-      it 'Rack::Multipart::UploadedFile' do
-        subject.params do
-          requires :file, type: Rack::Multipart::UploadedFile
-        end
-        subject.post '/upload' do
-          params[:file][:filename]
-        end
+      context 'File' do
+        let(:file) { Rack::Test::UploadedFile.new(__FILE__) }
+        let(:filename) { File.basename(__FILE__).to_s }
 
-        post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
-        expect(last_response.status).to eq(201)
-        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+        it 'Rack::Multipart::UploadedFile' do
+          subject.params do
+            requires :file, type: Rack::Multipart::UploadedFile
+          end
+          subject.post '/upload' do
+            params[:file][:filename]
+          end
 
-        post '/upload', file: 'not a file'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
-      end
+          post '/upload', file: file
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
 
-      it 'File' do
-        subject.params do
-          requires :file, coerce: File
-        end
-        subject.post '/upload' do
-          params[:file][:filename]
+          post '/upload', file: 'not a file'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
         end
 
-        post '/upload', file: Rack::Test::UploadedFile.new(__FILE__)
-        expect(last_response.status).to eq(201)
-        expect(last_response.body).to eq(File.basename(__FILE__).to_s)
+        it 'File' do
+          subject.params do
+            requires :file, coerce: File
+          end
+          subject.post '/upload' do
+            params[:file][:filename]
+          end
 
-        post '/upload', file: 'not a file'
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
+          post '/upload', file: file
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
 
-        post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('file is invalid')
+          post '/upload', file: 'not a file'
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
+
+          post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('file is invalid')
+        end
+
+        it 'collection' do
+          subject.params do
+            requires :files, type: Array[File]
+          end
+          subject.post '/upload' do
+            params[:files].first[:filename]
+          end
+
+          post '/upload', files: [file]
+          expect(last_response.status).to eq(201)
+          expect(last_response.body).to eq(filename)
+        end
       end
 
       it 'Nests integers' do
@@ -358,6 +452,165 @@ describe Grape::Validations::CoerceValidator do
         get '/int', integers: { int: '45' }
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq(integer_class_name)
+      end
+
+      context 'nil values' do
+        context 'primitive types' do
+          Grape::Validations::Types::PRIMITIVES.each do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'structures types' do
+          Grape::Validations::Types::STRUCTURES.each do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'special types' do
+          Grape::Validations::Types::SPECIAL.each_key do |type|
+            it 'respects the nil value' do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/nil_value' do
+                params[:param].class
+              end
+
+              get '/nil_value', param: nil
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          context 'variant-member-type collections' do
+            [
+              Array[Integer, String],
+              [Integer, String, Array[Integer, String]]
+            ].each do |type|
+              it 'respects the nil value' do
+                subject.params do
+                  requires :param, type: type
+                end
+                subject.get '/nil_value' do
+                  params[:param].class
+                end
+
+                get '/nil_value', param: nil
+                expect(last_response.status).to eq(200)
+                expect(last_response.body).to eq('NilClass')
+              end
+            end
+          end
+        end
+      end
+
+      context 'empty string' do
+        context 'primitive types' do
+          (Grape::Validations::Types::PRIMITIVES - [String]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          it 'is not coerced to nil for type String' do
+            subject.params do
+              requires :param, type: String
+            end
+            subject.get '/empty_string' do
+              params[:param].class
+            end
+
+            get '/empty_string', param: ''
+            expect(last_response.status).to eq(200)
+            expect(last_response.body).to eq('String')
+          end
+        end
+
+        context 'structures types' do
+          (Grape::Validations::Types::STRUCTURES - [Hash]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+        end
+
+        context 'special types' do
+          (Grape::Validations::Types::SPECIAL.keys - [File, Rack::Multipart::UploadedFile]).each do |type|
+            it "is coerced to nil for type #{type}" do
+              subject.params do
+                requires :param, type: type
+              end
+              subject.get '/empty_string' do
+                params[:param].class
+              end
+
+              get '/empty_string', param: ''
+              expect(last_response.status).to eq(200)
+              expect(last_response.body).to eq('NilClass')
+            end
+          end
+
+          context 'variant-member-type collections' do
+            [
+              Array[Integer, String],
+              [Integer, String, Array[Integer, String]]
+            ].each do |type|
+              it "is coerced to nil for type #{type}" do
+                subject.params do
+                  requires :param, type: type
+                end
+                subject.get '/empty_string' do
+                  params[:param].class
+                end
+
+                get '/empty_string', param: ''
+                expect(last_response.status).to eq(200)
+                expect(last_response.body).to eq('NilClass')
+              end
+            end
+          end
+        end
       end
     end
 
@@ -396,6 +649,30 @@ describe Grape::Validations::CoerceValidator do
         expect(JSON.parse(last_response.body)).to eq(%w[a b c d])
       end
 
+      it 'parses parameters with Array[Array[String]] type and coerce_with' do
+        subject.params do
+          requires :values, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(',').map(&:strip)] : val }
+        end
+        subject.post '/coerce_nested_strings' do
+          params[:values]
+        end
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: 'a,b,c,d'), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([%w[a b c d]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [%w[a c], %w[b]]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([%w[a c], %w[b]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [[]]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+        expect(JSON.parse(last_response.body)).to eq([[]])
+
+        post '/coerce_nested_strings', ::Grape::Json.dump(values: [['a', { bar: 0 }], ['b']]), 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+      end
+
       it 'parses parameters with Array[Integer] type' do
         subject.params do
           requires :values, type: Array[Integer], coerce_with: ->(val) { val.split(/\s+/).map(&:to_i) }
@@ -428,6 +705,44 @@ describe Grape::Validations::CoerceValidator do
         get '/ints', values: %w[a b c d]
         expect(last_response.status).to eq(200)
         expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
+      end
+
+      context 'Array type and coerce_with should' do
+        before do
+          subject.params do
+            optional :arr, type: Array, coerce_with: (lambda do |val|
+              if val.nil?
+                []
+              else
+                val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:arr].class.to_s
+          end
+        end
+
+        it 'coerce nil value to array' do
+          get '/', arr: nil
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Array')
+        end
+
+        it 'not coerce missing field' do
+          get '/'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('NilClass')
+        end
+
+        it 'coerce array as array' do
+          get '/', arr: []
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Array')
+        end
       end
 
       it 'uses parse where available' do
@@ -476,6 +791,85 @@ describe Grape::Validations::CoerceValidator do
         get '/ints', ints: '{"int":3}'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('3')
+      end
+
+      context 'Integer type and coerce_with should' do
+        before do
+          subject.params do
+            optional :int, type: Integer, coerce_with: (lambda do |val|
+              if val.nil?
+                0
+              else
+                val.to_i
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:int].class.to_s
+          end
+        end
+
+        it 'coerce nil value to integer' do
+          get '/', int: nil
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Integer')
+        end
+
+        it 'not coerce missing field' do
+          get '/'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('NilClass')
+        end
+
+        it 'coerce integer as integer' do
+          get '/', int: 1
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Integer')
+        end
+      end
+
+      context 'Integer type and coerce_with potentially returning nil' do
+        before do
+          subject.params do
+            requires :int, type: Integer, coerce_with: (lambda do |val|
+              case val
+              when '0'
+                nil
+              when /^-?\d+$/
+                val.to_i
+              else
+                val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:int].class.to_s
+          end
+        end
+
+        it 'accepts value that coerces to nil' do
+          get '/', int: '0'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('NilClass')
+        end
+
+        it 'coerces to Integer' do
+          get '/', int: '1'
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq('Integer')
+        end
+
+        it 'returns invalid value if coercion returns a wrong type' do
+          get '/', int: 'lol'
+
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to eq('int is invalid')
+        end
       end
 
       it 'must be supplied with :type or :coerce' do
@@ -624,11 +1018,9 @@ describe Grape::Validations::CoerceValidator do
     end
 
     context 'multiple types' do
-      Boolean = Grape::API::Boolean
-
       it 'coerces to first possible type' do
         subject.params do
-          requires :a, types: [Boolean, Integer, String]
+          requires :a, types: [Grape::API::Boolean, Integer, String]
         end
         subject.get '/' do
           params[:a].class.to_s
@@ -649,7 +1041,7 @@ describe Grape::Validations::CoerceValidator do
 
       it 'fails when no coercion is possible' do
         subject.params do
-          requires :a, types: [Boolean, Integer]
+          requires :a, types: [Grape::API::Boolean, Integer]
         end
         subject.get '/' do
           params[:a].class.to_s
@@ -808,10 +1200,11 @@ describe Grape::Validations::CoerceValidator do
       context 'custom coercion rules' do
         before do
           subject.params do
-            requires :a, types: [Boolean, String], coerce_with: (lambda do |val|
-              if val == 'yup'
+            requires :a, types: [Grape::API::Boolean, String], coerce_with: (lambda do |val|
+              case val
+              when 'yup'
                 true
-              elsif val == 'false'
+              when 'false'
                 0
               else
                 val

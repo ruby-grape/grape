@@ -1,15 +1,144 @@
-### 1.3.2 (Next)
+### 1.6.2 (2021/12/30)
 
 #### Features
-* Your contribution here.
-* [#2021](https://github.com/ruby-grape/grape/pull/2021): Report endpoint_call.grape which includes the whole stack - [@Kukunin](https://github.com/Kukunin).
+
+#### Fixes
+
+* [#2219](https://github.com/ruby-grape/grape/pull/2219): Revert the changes for autoloading provided in 1.6.1 - [@dm1try](https://github.com/dm1try).
+
+### 1.6.1 (2021/12/28)
+
+#### Features
+
+* [#2196](https://github.com/ruby-grape/grape/pull/2196): Add support for `passwords_hashed` param for `digest_auth` - [@lHydra](https://github.com/lhydra).
+* [#2208](https://github.com/ruby-grape/grape/pull/2208): Added Rails 7 support - [@ericproulx](https://github.com/ericproulx).
+
+#### Fixes
+
+* [#2206](https://github.com/ruby-grape/grape/pull/2206): Require main active_support lib before any of its extension definitions - [@annih](https://github.com/Annih).
+* [#2193](https://github.com/ruby-grape/grape/pull/2193): Fixed the broken ruby-head NoMethodError spec - [@Jack12816](https://github.com/Jack12816).
+* [#2192](https://github.com/ruby-grape/grape/pull/2192): Memoize the result of Grape::Middleware::Base#response - [@Jack12816](https://github.com/Jack12816).
+* [#2200](https://github.com/ruby-grape/grape/pull/2200): Add validators module to all validators - [@ericproulx](https://github.com/ericproulx).
+* [#2202](https://github.com/ruby-grape/grape/pull/2202): Fix random mock spec error - [@ericproulx](https://github.com/ericproulx).
+* [#2203](https://github.com/ruby-grape/grape/pull/2203): Add rubocop-rspec - [@ericproulx](https://github.com/ericproulx).
+* [#2207](https://github.com/ruby-grape/grape/pull/2207): Autoload Validations/Validators - [@ericproulx](https://github.com/ericproulx).
+* [#2209](https://github.com/ruby-grape/grape/pull/2209): Autoload Validations/Types - [@ericproulx](https://github.com/ericproulx).
+
+### 1.6.0 (2021/10/04)
+
+#### Features
+
+* [#2190](https://github.com/ruby-grape/grape/pull/2190): Upgrade dev deps & drop Ruby 2.4.x support - [@dnesteryuk](https://github.com/dnesteryuk).
+
+#### Fixes
+
+* [#2176](https://github.com/ruby-grape/grape/pull/2176): Fix: OPTIONS fails if matching all routes - [@myxoh](https://github.com/myxoh).
+* [#2177](https://github.com/ruby-grape/grape/pull/2177): Fix: `default` validator fails if preceded by `as` validator - [@Catsuko](https://github.com/Catsuko).
+* [#2180](https://github.com/ruby-grape/grape/pull/2180): Call `super` in `API.inherited` - [@yogeshjain999](https://github.com/yogeshjain999).
+* [#2189](https://github.com/ruby-grape/grape/pull/2189): Fix: rename parameters when using `:as` (behaviour and grape-swagger documentation) - [@Jack12816](https://github.com/Jack12816).
+
+### 1.5.3 (2021/03/07)
+
+#### Fixes
+
+* [#2161](https://github.com/ruby-grape/grape/pull/2157): Handle EOFError from Rack when given an empty multipart body - [@bschmeck](https://github.com/bschmeck).
+* [#2162](https://github.com/ruby-grape/grape/pull/2162): Corrected a hash modification while iterating issue - [@Jack12816](https://github.com/Jack12816).
+* [#2164](https://github.com/ruby-grape/grape/pull/2164): Fix: `coerce_with` is now called for params with `nil` value - [@braktar](https://github.com/braktar).
+
+### 1.5.2 (2021/02/06)
+
+#### Features
+
+* [#2157](https://github.com/ruby-grape/grape/pull/2157): Custom types can set a message to be used in the response when invalid - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2145](https://github.com/ruby-grape/grape/pull/2145): Ruby 3.0 compatibility - [@ericproulx](https://github.com/ericproulx).
+* [#2143](https://github.com/ruby-grape/grape/pull/2143): Enable GitHub Actions with updated RuboCop and Danger - [@anakinj](https://github.com/anakinj).
+
+#### Fixes
+
+* [#2144](https://github.com/ruby-grape/grape/pull/2144): Fix compatibility issue with activesupport 6.1 and XML serialization of arrays - [@anakinj](https://github.com/anakinj).
+* [#2137](https://github.com/ruby-grape/grape/pull/2137): Fix typos - [@johnny-miyake](https://github.com/johnny-miyake).
+* [#2131](https://github.com/ruby-grape/grape/pull/2131): Fix Ruby 2.7 keyword deprecation warning in validators/coerce - [@K0H205](https://github.com/K0H205).
+* [#2132](https://github.com/ruby-grape/grape/pull/2132): Use #ruby2_keywords for correct delegation on Ruby <= 2.6, 2.7 and 3 - [@eregon](https://github.com/eregon).
+* [#2152](https://github.com/ruby-grape/grape/pull/2152): Fix configuration method inside namespaced params - [@fsainz](https://github.com/fsainz).
+
+### 1.5.1 (2020/11/15)
+
+#### Fixes
+
+* [#2129](https://github.com/ruby-grape/grape/pull/2129): Fix validation error when Required Array nested inside an optional array, for Multiparam validators - [@dwhenry](https://github.com/dwhenry).
+* [#2128](https://github.com/ruby-grape/grape/pull/2128): Fix validation error when Required Array nested inside an optional array - [@dwhenry](https://github.com/dwhenry).
+* [#2127](https://github.com/ruby-grape/grape/pull/2127): Fix a performance issue with dependent params - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2126](https://github.com/ruby-grape/grape/pull/2126): Fix warnings about redefined attribute accessors in `AttributeTranslator` - [@samsonjs](https://github.com/samsonjs).
+* [#2121](https://github.com/ruby-grape/grape/pull/2121): Fix 2.7 deprecation warning in validator_factory - [@Legogris](https://github.com/Legogris).
+* [#2115](https://github.com/ruby-grape/grape/pull/2115): Fix declared_params regression with multiple allowed types - [@stanhu](https://github.com/stanhu).
+* [#2123](https://github.com/ruby-grape/grape/pull/2123): Fix 2.7 deprecation warning in middleware/stack - [@Legogris](https://github.com/Legogris).
+
+### 1.5.0 (2020/10/05)
+
+#### Fixes
+
+* [#2104](https://github.com/ruby-grape/grape/pull/2104): Fix Ruby 2.7 keyword deprecation warning - [@stanhu](https://github.com/stanhu).
+* [#2103](https://github.com/ruby-grape/grape/pull/2103): Ensure complete declared params structure is present - [@tlconnor](https://github.com/tlconnor).
+* [#2099](https://github.com/ruby-grape/grape/pull/2099): Added truffleruby to Travis-CI - [@gogainda](https://github.com/gogainda).
+* [#2089](https://github.com/ruby-grape/grape/pull/2089): Specify order of mounting Grape with Rack::Cascade in README - [@jonmchan](https://github.com/jonmchan).
+* [#2088](https://github.com/ruby-grape/grape/pull/2088): Set `Cache-Control` header only for streamed responses - [@stanhu](https://github.com/stanhu).
+* [#2092](https://github.com/ruby-grape/grape/pull/2092): Correct an example params in Include Missing doc - [@huyvohcmc](https://github.com/huyvohcmc).
+* [#2091](https://github.com/ruby-grape/grape/pull/2091): Fix ruby 2.7 keyword deprecations - [@dim](https://github.com/dim).
+* [#2097](https://github.com/ruby-grape/grape/pull/2097): Skip to set default value unless `meets_dependency?` - [@wanabe](https://github.com/wanabe).
+* [#2096](https://github.com/ruby-grape/grape/pull/2096): Fix redundant dependency check - [@braktar](https://github.com/braktar).
+* [#2096](https://github.com/ruby-grape/grape/pull/2098): Fix nested coercion - [@braktar](https://github.com/braktar).
+* [#2102](https://github.com/ruby-grape/grape/pull/2102): Fix retaining setup blocks when remounting APIs - [@jylamont](https://github.com/jylamont).
+
+### 1.4.0 (2020/07/10)
+
+#### Features
+
+* [#1520](https://github.com/ruby-grape/grape/pull/1520): Un-deprecate stream-like objects - [@urkle](https://github.com/urkle).
+* [#2060](https://github.com/ruby-grape/grape/pull/2060): Drop support for Ruby 2.4 - [@dblock](https://github.com/dblock).
+* [#2060](https://github.com/ruby-grape/grape/pull/2060): Upgraded Rubocop to 0.84.0 - [@dblock](https://github.com/dblock).
+* [#2077](https://github.com/ruby-grape/grape/pull/2077): Simplify logic for defining declared params - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2076](https://github.com/ruby-grape/grape/pull/2076): Make route information available for hooks when the automatically generated endpoints are invoked - [@anakinj](https://github.com/anakinj).
+
+#### Fixes
+
+* [#2067](https://github.com/ruby-grape/grape/pull/2067): Coerce empty String to `nil` for all primitive types except `String` - [@petekinnecom](https://github.com/petekinnecom).
+* [#2064](https://github.com/ruby-grape/grape/pull/2064): Fix Ruby 2.7 deprecation warning in `Grape::Middleware::Base#initialize` - [@skarger](https://github.com/skarger).
+* [#2072](https://github.com/ruby-grape/grape/pull/2072): Fix `Grape.eager_load!` and `compile!` - [@stanhu](https://github.com/stanhu).
+* [#2084](https://github.com/ruby-grape/grape/pull/2084): Fix memory leak in path normalization - [@fcheung](https://github.com/fcheung).
+
+### 1.3.3 (2020/05/23)
+
+#### Features
+
+* [#2048](https://github.com/ruby-grape/grape/issues/2034): Grape Enterprise support is now available [via TideLift](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) - [@dblock](https://github.com/dblock).
+* [#2039](https://github.com/ruby-grape/grape/pull/2039): Travis - update rails versions - [@ericproulx](https://github.com/ericproulx).
+* [#2038](https://github.com/ruby-grape/grape/pull/2038): Travis - update ruby versions - [@ericproulx](https://github.com/ericproulx).
+* [#2050](https://github.com/ruby-grape/grape/pull/2050): Refactor route public_send to AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
+
+#### Fixes
+
+* [#2049](https://github.com/ruby-grape/grape/pull/2049): Coerce an empty string to nil in case of the bool type - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2043](https://github.com/ruby-grape/grape/pull/2043): Modify declared for nested array and hash - [@kadotami](https://github.com/kadotami).
+* [#2040](https://github.com/ruby-grape/grape/pull/2040): Fix a regression with Array of type nil - [@ericproulx](https://github.com/ericproulx).
+* [#2054](https://github.com/ruby-grape/grape/pull/2054): Coercing of nested arrays - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2050](https://github.com/ruby-grape/grape/pull/2053): Fix broken multiple mounts - [@Jack12816](https://github.com/Jack12816).
+
+### 1.3.2 (2020/04/12)
+
+#### Features
+
+* [#2020](https://github.com/ruby-grape/grape/pull/2020): Reduce array allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2015](https://github.com/ruby-grape/grape/pull/2014): Reduce MatchData allocation - [@ericproulx](https://github.com/ericproulx).
 * [#2014](https://github.com/ruby-grape/grape/pull/2014): Reduce total allocated arrays - [@ericproulx](https://github.com/ericproulx).
 * [#2011](https://github.com/ruby-grape/grape/pull/2011): Reduce total retained regexes - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
-* Your contribution here.
+* [#2033](https://github.com/ruby-grape/grape/pull/2033): Ensure `Float` params are correctly coerced to `BigDecimal` - [@tlconnor](https://github.com/tlconnor).
+* [#2031](https://github.com/ruby-grape/grape/pull/2031): Fix a regression with an array of a custom type - [@dnesteryuk](https://github.com/dnesteryuk).
+* [#2026](https://github.com/ruby-grape/grape/pull/2026): Fix a regression in `coerce_with` when coercion returns `nil` - [@misdoro](https://github.com/misdoro).
+* [#2025](https://github.com/ruby-grape/grape/pull/2025): Fix Decimal type category - [@kdoya](https://github.com/kdoya).
+* [#2019](https://github.com/ruby-grape/grape/pull/2019): Avoid coercing parameter with multiple types to an empty Array - [@stanhu](https://github.com/stanhu).
 
 ### 1.3.1 (2020/03/11)
 
@@ -31,7 +160,8 @@
 * [#1976](https://github.com/ruby-grape/grape/pull/1976): Ensure classes/modules listed for autoload really exist - [@dnesteryuk](https://github.com/dnesteryuk).
 * [#1971](https://github.com/ruby-grape/grape/pull/1971): Fix BigDecimal coercion - [@FlickStuart](https://github.com/FlickStuart).
 * [#1968](https://github.com/ruby-grape/grape/pull/1968): Fix args forwarding in Grape::Middleware::Stack#merge_with for ruby 2.7.0 - [@dm1try](https://github.com/dm1try).
-* [#1988](https://github.com/ruby-grape/grape/pull/1988): Refactored the full_messages method and stop overriding full_message - [@hosseintoussi](https://github.com/hosseintoussi).
+* [#1988](https://github.com/ruby-grape/grape/pull/1988): Refactor the full_messages method and stop overriding full_message - [@hosseintoussi](https://github.com/hosseintoussi).
+* [#1956](https://github.com/ruby-grape/grape/pull/1956): Comply with Rack spec, fix `undefined method [] for nil:NilClass` error when upgrading Rack - [@ioquatix](https://github.com/ioquatix).
 
 ### 1.3.0 (2020/01/11)
 
@@ -554,7 +684,7 @@
 * [#492](https://github.com/ruby-grape/grape/pull/492): Don't allow to have nil value when a param is required and has a list of allowed values - [@Antti](https://github.com/Antti).
 * [#495](https://github.com/ruby-grape/grape/pull/495): Fixed `ParamsScope#params` for parameters nested inside arrays - [@asross](https://github.com/asross).
 * [#498](https://github.com/ruby-grape/grape/pull/498): Dry'ed up options and headers logic, allow headers to be passed to OPTIONS requests - [@karlfreeman](https://github.com/karlfreeman).
-* [#500](https://github.com/ruby-grape/grape/pull/500): Skip entity auto-detection when explicitely passed - [@yaneq](https://github.com/yaneq).
+* [#500](https://github.com/ruby-grape/grape/pull/500): Skip entity auto-detection when explicitly passed - [@yaneq](https://github.com/yaneq).
 * [#503](https://github.com/ruby-grape/grape/pull/503): Calling declared(params) from child namespace fails to include parent namespace defined params - [@myitcv](https://github.com/myitcv).
 * [#512](https://github.com/ruby-grape/grape/pull/512): Don't create `Grape::Request` multiple times - [@dblock](https://github.com/dblock).
 * [#538](https://github.com/ruby-grape/grape/pull/538): Fixed default values for grouped params - [@dm1try](https://github.com/dm1try).

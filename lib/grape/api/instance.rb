@@ -10,12 +10,11 @@ module Grape
       include Grape::DSL::API
 
       class << self
-        attr_reader :instance
-        attr_reader :base
+        attr_reader :instance, :base
         attr_accessor :configuration
 
         def given(conditional_option, &block)
-          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block_given?
+          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block
         end
 
         def mounted(&block)
@@ -28,7 +27,7 @@ module Grape
         end
 
         def to_s
-          (base && base.to_s) || super
+          base&.to_s || super
         end
 
         def base_instance?
@@ -82,6 +81,7 @@ module Grape
 
         def compile!
           return if instance
+
           LOCK.synchronize { compile unless instance }
         end
 
@@ -103,7 +103,7 @@ module Grape
         def nest(*blocks, &block)
           blocks.reject!(&:nil?)
           if blocks.any?
-            evaluate_as_instance_with_configuration(block) if block_given?
+            evaluate_as_instance_with_configuration(block) if block
             blocks.each { |b| evaluate_as_instance_with_configuration(b) }
             reset_validations!
           else
@@ -114,9 +114,7 @@ module Grape
         def evaluate_as_instance_with_configuration(block, lazy: false)
           lazy_block = Grape::Util::LazyBlock.new do |configuration|
             value_for_configuration = configuration
-            if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
-              self.configuration = value_for_configuration.evaluate
-            end
+            self.configuration = value_for_configuration.evaluate if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
             response = instance_eval(&block)
             self.configuration = value_for_configuration
             response
@@ -179,7 +177,8 @@ module Grape
       # X-Cascade. Default :cascade is true.
       def cascade?
         return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.key?(:cascade)
-        return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options) && self.class.namespace_inheritable(:version_options).key?(:cascade)
+        return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options)&.key?(:cascade)
+
         true
       end
 
@@ -192,46 +191,23 @@ module Grape
       # will return an HTTP 405 response for any HTTP method that the resource
       # cannot handle.
       def add_head_not_allowed_methods_and_options_methods
-        routes_map = {}
-
-        self.class.endpoints.each do |endpoint|
-          routes = endpoint.routes
-          routes.each do |route|
-            # using the :any shorthand produces [nil] for route methods, substitute all manually
-            route_key = route.pattern.to_regexp
-            routes_map[route_key] ||= {}
-            route_settings = routes_map[route_key]
-            route_settings[:pattern] = route.pattern
-            route_settings[:requirements] = route.requirements
-            route_settings[:path] = route.origin
-            route_settings[:methods] ||= []
-            route_settings[:methods] << route.request_method
-            route_settings[:endpoint] = route.app
-
-            # using the :any shorthand produces [nil] for route methods, substitute all manually
-            route_settings[:methods] = Grape::Http::Headers::SUPPORTED_METHODS if route_settings[:methods].include?('*')
-          end
-        end
-
+        versioned_route_configs = collect_route_config_per_pattern
         # The paths we collected are prepared (cf. Path#prepare), so they
         # contain already versioning information when using path versioning.
         # Disable versioning so adding a route won't prepend versioning
         # informations again.
         without_root_prefix do
           without_versioning do
-            routes_map.each_value do |config|
-              methods = config[:methods]
-              allowed_methods = methods.dup
+            versioned_route_configs.each do |config|
+              next if config[:options][:matching_wildchar]
 
-              unless self.class.namespace_inheritable(:do_not_route_head)
-                allowed_methods |= [Grape::Http::Headers::HEAD] if allowed_methods.include?(Grape::Http::Headers::GET)
-              end
+              allowed_methods = config[:methods].dup
+
+              allowed_methods |= [Grape::Http::Headers::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Grape::Http::Headers::GET)
 
               allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Grape::Http::Headers::OPTIONS] | allowed_methods)
 
-              unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
-                config[:endpoint].options[:options_route_enabled] = true
-              end
+              config[:endpoint].options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Grape::Http::Headers::OPTIONS)
 
               attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
               generate_not_allowed_method(config[:pattern], **attributes)
@@ -240,14 +216,35 @@ module Grape
         end
       end
 
+      def collect_route_config_per_pattern
+        all_routes       = self.class.endpoints.map(&:routes).flatten
+        routes_by_regexp = all_routes.group_by { |route| route.pattern.to_regexp }
+
+        # Build the configuration based on the first endpoint and the collection of methods supported.
+        routes_by_regexp.values.map do |routes|
+          last_route        = routes.last # Most of the configuration is taken from the last endpoint
+          matching_wildchar = routes.any? { |route| route.request_method == '*' }
+          {
+            options: { matching_wildchar: matching_wildchar },
+            pattern: last_route.pattern,
+            requirements: last_route.requirements,
+            path: last_route.origin,
+            endpoint: last_route.app,
+            methods: matching_wildchar ? Grape::Http::Headers::SUPPORTED_METHODS : routes.map(&:request_method)
+          }
+        end
+      end
+
       # Generate a route that returns an HTTP 405 response for a user defined
       # path on methods not specified
       def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
-        not_allowed_methods = %w[GET PUT POST DELETE PATCH HEAD] - allowed_methods
-        not_allowed_methods << Grape::Http::Headers::OPTIONS if self.class.namespace_inheritable(:do_not_route_options)
-
-        return if not_allowed_methods.empty?
-
+        supported_methods =
+          if self.class.namespace_inheritable(:do_not_route_options)
+            Grape::Http::Headers::SUPPORTED_METHODS
+          else
+            Grape::Http::Headers::SUPPORTED_METHODS_WITHOUT_OPTIONS
+          end
+        not_allowed_methods = supported_methods - allowed_methods
         @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
       end
 

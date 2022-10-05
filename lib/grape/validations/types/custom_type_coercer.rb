@@ -52,15 +52,16 @@ module Grape
         #   this should always be a string.
         # @return [Object] the coerced result
         def call(val)
-          return if val.nil?
-
           coerced_val = @method.call(val)
+
+          return coerced_val if coerced_val.is_a?(InvalidValue)
           return InvalidValue.new unless coerced?(coerced_val)
+
           coerced_val
         end
 
         def coerced?(val)
-          @type_check.call val
+          val.nil? || @type_check.call(val)
         end
 
         private
@@ -103,10 +104,22 @@ module Grape
             # passed, or if the type also implements a parse() method.
             type
           elsif type.is_a?(Enumerable)
-            ->(value) { value.respond_to?(:all?) && value.all? { |item| item.is_a? type[0] } }
+            lambda do |value|
+              value.is_a?(Enumerable) && value.all? do |val|
+                recursive_type_check(type.first, val)
+              end
+            end
           else
             # By default, do a simple type check
             ->(value) { value.is_a? type }
+          end
+        end
+
+        def recursive_type_check(type, value)
+          if type.is_a?(Enumerable) && value.is_a?(Enumerable)
+            value.all? { |val| recursive_type_check(type.first, val) }
+          else
+            !type.is_a?(Enumerable) && value.is_a?(type)
           end
         end
 

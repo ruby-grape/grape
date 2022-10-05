@@ -4,12 +4,12 @@ require 'spec_helper'
 module Grape
   module Util
     describe InheritableSetting do
-      before :each do
-        InheritableSetting.reset_global!
+      before do
+        described_class.reset_global!
       end
 
       let(:parent) do
-        Grape::Util::InheritableSetting.new.tap do |settings|
+        described_class.new.tap do |settings|
           settings.global[:global_thing] = :global_foo_bar
           settings.namespace[:namespace_thing] = :namespace_foo_bar
           settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
@@ -20,7 +20,7 @@ module Grape
       end
 
       let(:other_parent) do
-        Grape::Util::InheritableSetting.new.tap do |settings|
+        described_class.new.tap do |settings|
           settings.namespace[:namespace_thing] = :namespace_foo_bar_other
           settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar_other
           settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar_other
@@ -29,7 +29,7 @@ module Grape
         end
       end
 
-      before :each do
+      before do
         subject.inherit_from parent
       end
 
@@ -50,7 +50,7 @@ module Grape
           expect(parent.global[:global_thing]).to eq :global_new_foo_bar
         end
 
-        it 'should handle different parents' do
+        it 'handles different parents' do
           subject.global[:global_thing] = :global_new_foo_bar
 
           subject.inherit_from other_parent
@@ -89,7 +89,7 @@ module Grape
           expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
         end
 
-        it 'should handle different parents' do
+        it 'handles different parents' do
           expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
 
           subject.inherit_from other_parent

@@ -6,7 +6,7 @@ module Grape
       private
 
       def yield_attributes(resource_params, _attrs)
-        yield resource_params
+        yield resource_params, skip?(resource_params)
       end
     end
   end

@@ -1,11 +1,14 @@
-require:
-  - rubocop-performance
-
 AllCops:
-  TargetRubyVersion: 2.4
+  NewCops: enable
+  TargetRubyVersion: 2.5
+  SuggestExtensions: false
   Exclude:
     - vendor/**/*
     - bin/**/*
+
+require:
+  - rubocop-performance
+  - rubocop-rspec
 
 inherit_from: .rubocop_todo.yml
 
@@ -30,3 +33,6 @@ Style/HashTransformValues:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*_spec.rb
+
+RSpec/Capybara/FeatureMethods:
+  Enabled: false

@@ -20,7 +20,8 @@ module Grape
       def before_each(new_setup = false, &block)
         @before_each ||= []
         if new_setup == false
-          return @before_each unless block_given?
+          return @before_each unless block
+
           @before_each << block
         else
           @before_each = [new_setup]
@@ -46,9 +47,7 @@ module Grape
       # @return [Proc]
       # @raise [NameError] an instance method with the same name already exists
       def generate_api_method(method_name, &block)
-        if method_defined?(method_name)
-          raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name")
-        end
+        raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name") if method_defined?(method_name)
 
         define_method(method_name, &block)
         method = instance_method(method_name)
@@ -80,7 +79,10 @@ module Grape
 
       self.inheritable_setting = new_settings.point_in_time_copy
 
-      route_setting(:saved_declared_params, namespace_stackable(:declared_params))
+      # now +namespace_stackable(:declared_params)+ contains all params defined for
+      # this endpoint and its parents, but later it will be cleaned up,
+      # see +reset_validations!+ in lib/grape/dsl/validations.rb
+      route_setting(:declared_params, namespace_stackable(:declared_params).flatten)
       route_setting(:saved_validations, namespace_stackable(:validations))
 
       namespace_stackable(:representations, []) unless namespace_stackable(:representations)
@@ -99,11 +101,11 @@ module Grape
       @block = nil
 
       @status = nil
-      @file = nil
+      @stream = nil
       @body = nil
       @proc = nil
 
-      return unless block_given?
+      return unless block
 
       @source = block
       @block = self.class.generate_api_method(method_name, &block)
@@ -115,12 +117,9 @@ module Grape
       inheritable_setting.route[:saved_validations] += namespace_stackable[:validations]
       parent_declared_params = namespace_stackable[:declared_params]
 
-      if parent_declared_params
-        inheritable_setting.route[:declared_params] ||= []
-        inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten)
-      end
+      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params
 
-      endpoints && endpoints.each { |e| e.inherit_settings(namespace_stackable) }
+      endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
     end
 
     def require_option(options, key)
@@ -140,7 +139,7 @@ module Grape
     end
 
     def reset_routes!
-      endpoints.each(&:reset_routes!) if endpoints
+      endpoints&.each(&:reset_routes!)
       @namespace = nil
       @routes = nil
     end
@@ -152,13 +151,9 @@ module Grape
         reset_routes!
         routes.each do |route|
           methods = [route.request_method]
-          if !namespace_inheritable(:do_not_route_head) && route.request_method == Grape::Http::Headers::GET
-            methods << Grape::Http::Headers::HEAD
-          end
+          methods << Grape::Http::Headers::HEAD if !namespace_inheritable(:do_not_route_head) && route.request_method == Grape::Http::Headers::GET
           methods.each do |method|
-            unless route.request_method == method
-              route = Grape::Router::Route.new(method, route.origin, **route.attributes.to_h)
-            end
+            route = Grape::Router::Route.new(method, route.origin, **route.attributes.to_h) unless route.request_method == method
             router.append(route.apply(self))
           end
         end
@@ -190,7 +185,7 @@ module Grape
         requirements: prepare_routes_requirements,
         prefix: namespace_inheritable(:root_prefix),
         anchor: options[:route_options].fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:saved_declared_params, :saved_validations),
+        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
         forward_match: options[:forward_match]
       }
     end
@@ -198,6 +193,7 @@ module Grape
     def prepare_version
       version = namespace_inheritable(:version) || []
       return if version.empty?
+
       version.length == 1 ? version.first.to_s : version
     end
 
@@ -235,7 +231,7 @@ module Grape
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
-      options[:app].endpoints if options[:app] && options[:app].respond_to?(:endpoints)
+      options[:app].endpoints if options[:app].respond_to?(:endpoints)
     end
 
     def equals?(e)
@@ -256,14 +252,14 @@ module Grape
           run_filters befores, :before
 
           if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
-            raise Grape::Exceptions::MethodNotAllowed, header.merge('Allow' => allowed_methods) unless options?
+            raise Grape::Exceptions::MethodNotAllowed.new(header.merge('Allow' => allowed_methods)) unless options?
+
             header 'Allow', allowed_methods
             response_object = ''
             status 204
           else
             run_filters before_validations, :before_validation
             run_validators validations, request
-            remove_renamed_params
             run_filters after_validations, :after_validation
             response_object = execute
           end
@@ -274,8 +270,8 @@ module Grape
           # status verifies body presence when DELETE
           @body ||= response_object
 
-          # The body commonly is an Array of Strings, the application instance itself, or a File-like object
-          response_object = file || [body]
+          # The body commonly is an Array of Strings, the application instance itself, or a Stream-like object
+          response_object = stream || [body]
 
           [status, header, response_object]
         ensure
@@ -329,14 +325,7 @@ module Grape
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
-    def remove_renamed_params
-      return unless route_setting(:renamed_params)
-      route_setting(:renamed_params).flat_map(&:keys).each do |renamed_param|
-        @params.delete(renamed_param)
-      end
-    end
-
-    private :build_stack, :build_helpers, :remove_renamed_params
+    private :build_stack, :build_helpers
 
     def execute
       @block ? @block.call(self) : nil
@@ -366,15 +355,13 @@ module Grape
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
-          begin
-            validator.validate(request)
-          rescue Grape::Exceptions::Validation => e
-            validation_errors << e
-            break if validator.fail_fast?
-          rescue Grape::Exceptions::ValidationArrayErrors => e
-            validation_errors.concat e.errors
-            break if validator.fail_fast?
-          end
+          validator.validate(request)
+        rescue Grape::Exceptions::Validation => e
+          validation_errors << e
+          break if validator.fail_fast?
+        rescue Grape::Exceptions::ValidationArrayErrors => e
+          validation_errors.concat e.errors
+          break if validator.fail_fast?
         end
       end
 

@@ -5,9 +5,7 @@ module Grape
     # A branchable, inheritable settings object which can store both stackable
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
-      attr_accessor :route, :api_class, :namespace
-      attr_accessor :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable
-      attr_accessor :parent, :point_in_time_copies
+      attr_accessor :route, :api_class, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent, :point_in_time_copies
 
       # Retrieve global settings.
       def self.global

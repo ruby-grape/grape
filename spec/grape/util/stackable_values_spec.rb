@@ -4,8 +4,9 @@ require 'spec_helper'
 module Grape
   module Util
     describe StackableValues do
-      let(:parent) { StackableValues.new }
-      subject { StackableValues.new(parent) }
+      subject { described_class.new(parent) }
+
+      let(:parent) { described_class.new }
 
       describe '#keys' do
         it 'returns all keys' do
@@ -99,10 +100,11 @@ module Grape
 
       describe '#clone' do
         let(:obj_cloned) { subject.clone }
+
         it 'copies all values' do
-          parent = StackableValues.new
-          child = StackableValues.new parent
-          grandchild = StackableValues.new child
+          parent = described_class.new
+          child = described_class.new parent
+          grandchild = described_class.new child
 
           parent[:some_thing] = :foo
           child[:some_thing] = %i[bar more]

@@ -10,6 +10,18 @@ module Grape
     # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile! inherited]).freeze
 
+    class Boolean
+      def self.build(val)
+        return nil if val != true && val != false
+
+        new
+      end
+    end
+
+    class Instance
+      Boolean = Grape::API::Boolean
+    end
+
     class << self
       attr_accessor :base_instance, :instances
 
@@ -20,17 +32,18 @@ module Grape
 
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(api, base_instance_parent = Grape::API::Instance)
-        api.initial_setup(base_instance_parent)
+      def inherited(api)
+        super
+
+        api.initial_setup(Grape::API == self ? Grape::API::Instance : @base_instance)
         api.override_all_methods!
-        make_inheritable(api)
       end
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
       def initial_setup(base_instance_parent)
         @instances = []
-        @setup = []
+        @setup = Set.new
         @base_parent = base_instance_parent
         @base_instance = mount_instance
       end
@@ -68,15 +81,6 @@ module Grape
         instance_for_rack.call(*args, &block)
       end
 
-      # Allows an API to itself be inheritable:
-      def make_inheritable(api)
-        # When a child API inherits from a parent API.
-        def api.inherited(child_api)
-          # The instances of the child API inherit from the instances of the parent API
-          Grape::API.inherited(child_api, base_instance)
-        end
-      end
-
       # Alleviates problems with autoloading by tring to search for the constant
       def const_missing(*args)
         if base_instance.const_defined?(*args)
@@ -87,10 +91,10 @@ module Grape
       end
 
       # The remountable class can have a configuration hash to provide some dynamic class-level variables.
-      # For instance, a descripcion could be done using: `desc configuration[:description]` if it may vary
+      # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def mount_instance(opts = {})
+      def mount_instance(**opts)
         instance = Class.new(@base_parent)
         instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
         instance.base = self
@@ -141,7 +145,7 @@ module Grape
       # Adds a new stage to the set up require to get a Grape::API up and running
       def add_setup(method, *args, &block)
         setup_step = { method: method, args: args, block: block }
-        @setup << setup_step
+        @setup += [setup_step]
         last_response = nil
         @instances.each do |instance|
           last_response = replay_step_on(instance, setup_step)
@@ -151,6 +155,7 @@ module Grape
 
       def replay_step_on(instance, setup_step)
         return if skip_immediate_run?(instance, setup_step[:args])
+
         args = evaluate_arguments(instance.configuration, *setup_step[:args])
         response = instance.send(setup_step[:method], *args, &setup_step[:block])
         if skip_immediate_run?(instance, [response])

@@ -8,15 +8,16 @@ module Grape
       include Helpers
 
       attr_reader :app, :env, :options
+
       TEXT_HTML = 'text/html'
 
       include Grape::DSL::Headers
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
-      def initialize(app, **options)
+      def initialize(app, *options)
         @app = app
-        @options = default_options.merge(**options)
+        @options = options.any? ? default_options.merge(options.shift) : default_options
         @app_response = nil
       end
 
@@ -58,7 +59,8 @@ module Grape
 
       def response
         return @app_response if @app_response.is_a?(Rack::Response)
-        Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
+
+        @app_response = Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
       end
 
       def content_type_for(format)
@@ -83,6 +85,7 @@ module Grape
 
       def merge_headers(response)
         return unless headers.is_a?(Hash)
+
         case response
         when Rack::Response then response.headers.merge!(headers)
         when Array          then response[1].merge!(headers)

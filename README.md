@@ -1,7 +1,7 @@
 ![grape logo](grape.png)
 
 [![Gem Version](https://badge.fury.io/rb/grape.svg)](http://badge.fury.io/rb/grape)
-[![Build Status](https://travis-ci.org/ruby-grape/grape.svg?branch=master)](https://travis-ci.org/ruby-grape/grape)
+[![Build Status](https://github.com/ruby-grape/grape/workflows/test/badge.svg?branch=master)](https://github.com/ruby-grape/grape/actions)
 [![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
 [![Coverage Status](https://coveralls.io/repos/github/ruby-grape/grape/badge.svg?branch=master)](https://coveralls.io/github/ruby-grape/grape?branch=master)
 [![Inline docs](https://inch-ci.org/github/ruby-grape/grape.svg)](https://inch-ci.org/github/ruby-grape/grape)
@@ -12,12 +12,15 @@
 - [What is Grape?](#what-is-grape)
 - [Stable Release](#stable-release)
 - [Project Resources](#project-resources)
+- [Grape for Enterprise](#grape-for-enterprise)
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
 - [Mounting](#mounting)
   - [All](#all)
   - [Rack](#rack)
   - [ActiveRecord without Rails](#activerecord-without-rails)
+    - [Rails 4](#rails-4)
+    - [Rails 5+](#rails-5)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
     - [Rails < 5.2](#rails--52)
@@ -142,6 +145,7 @@
     - [format_response.grape](#format_responsegrape)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
+- [Security](#security)
 - [License](#license)
 - [Copyright](#copyright)
 
@@ -155,9 +159,8 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.3.2**.
+You're reading the documentation for the stable release of Grape, **1.6.2**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.3.1](https://github.com/ruby-grape/grape/blob/v1.3.1/README.md).
 
 ## Project Resources
 
@@ -165,6 +168,14 @@ The current stable release is [1.3.1](https://github.com/ruby-grape/grape/blob/v
 * [Documentation](http://www.rubydoc.info/gems/grape)
 * Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
 * [Follow us on Twitter](https://twitter.com/grapeframework)
+
+## Grape for Enterprise
+
+Available as part of the Tidelift Subscription.
+
+The maintainers of Grape are working with Tidelift to deliver commercial support and maintenance. Save time, reduce risk, and improve code health, while paying the maintainers of Grape. Click [here](https://tidelift.com/subscription/request-a-demo?utm_source=rubygems-grape&utm_medium=referral&utm_campaign=enterprise) for more details.
+
+In 2020, we plan to use the money towards gathering Grape contributors for dinner in New York City.
 
 ## Installation
 
@@ -308,13 +319,21 @@ Grape will also automatically respond to HEAD and OPTIONS for all GET, and just 
 If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool
 is handled correctly.
 
+#### Rails 4
+
 The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement` middleware in your
 `config.ru` before mounting Grape, e.g.:
 
 ```ruby
 use ActiveRecord::ConnectionAdapters::ConnectionManagement
+```
 
-run Twitter::API
+#### Rails 5+
+
+Use [otr-activerecord](https://github.com/jhollinger/otr-activerecord) as follows:
+
+```ruby
+use OTR::ActiveRecord::ConnectionManagement
 ```
 
 ### Alongside Sinatra (or other frameworks)
@@ -341,8 +360,11 @@ class Web < Sinatra::Base
 end
 
 use Rack::Session::Cookie
-run Rack::Cascade.new [API, Web]
+run Rack::Cascade.new [Web, API]
 ```
+
+Note that order of loading apps using `Rack::Cascade` matters. The grape application must be last if you want to raise custom 404 errors from grape (such as `error!('Not Found',404)`). If the grape application is not last and returns 404 or 405 response, [cascade utilizes that as a signal to try the next app](https://www.rubydoc.info/gems/rack/Rack/Cascade). This may lead to undesirable behavior showing the [wrong 404 page from the wrong app](https://github.com/ruby-grape/grape/issues/1515).
+
 
 ### Rails
 
@@ -775,7 +797,13 @@ Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape
 
 ### Declared
 
-Grape allows you to access only the parameters that have been declared by your `params` block. It filters out the params that have been passed, but are not allowed. Consider the following API endpoint:
+Grape allows you to access only the parameters that have been declared by your `params` block. It will:
+
+  * Filter out the params that have been passed, but are not allowed.
+  * Include any optional params that are declared but not passed.
+  * Perform any parameter renaming on the resulting hash.
+
+Consider the following API endpoint:
 
 ````ruby
 format :json
@@ -808,9 +836,9 @@ Once we add parameters requirements, grape will start returning only the declare
 format :json
 
 params do
-  requires :user, type: Hash do
-    requires :first_name, type: String
-    requires :last_name, type: String
+  optional :user, type: Hash do
+    optional :first_name, type: String
+    optional :last_name, type: String
   end
 end
 
@@ -834,6 +862,44 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
       "first_name": "first name",
       "last_name": "last name"
     }
+  }
+}
+````
+
+Missing params that are declared as type `Hash` or `Array` will be included.
+
+````ruby
+format :json
+
+params do
+  optional :user, type: Hash do
+    optional :first_name, type: String
+    optional :last_name, type: String
+  end
+  optional :widgets, type: Array
+end
+
+post 'users/signup' do
+  { 'declared_params' => declared(params) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{}'
+````
+
+**Response**
+
+````json
+{
+  "declared_params": {
+    "user": {
+      "first_name": null,
+      "last_name": null
+    },
+    "widgets": []
   }
 }
 ````
@@ -896,8 +962,10 @@ By default `declared(params)` includes parameters that have `nil` values. If you
 format :json
 
 params do
-  requires :first_name, type: String
-  optional :last_name, type: String
+  requires :user, type: Hash do
+    requires :first_name, type: String
+    optional :last_name, type: String
+  end
 end
 
 post 'users/signup' do
@@ -928,8 +996,10 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 ````json
 {
   "declared_params": {
-    "first_name": "first name",
-    "last_name": null
+    "user": {
+      "first_name": "first name",
+      "last_name": null
+    }
   }
 }
 ````
@@ -1050,12 +1120,12 @@ params do
 end
 ```
 
-Note that default values will be passed through to any validation options specified.
-The following example will always fail if `:color` is not explicitly provided.
-
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same
 number for each call to the endpoint of this `params` block. To have the default evaluate
 lazily with each request use a lambda, like `:random_number` above.
+
+Note that default values will be passed through to any validation options specified.
+The following example will always fail if `:color` is not explicitly provided.
 
 ```ruby
 params do
@@ -1116,7 +1186,8 @@ Aside from the default set of supported types listed above, any class can be
 used as a type as long as an explicit coercion method is supplied. If the type
 implements a class-level `parse` method, Grape will use it automatically.
 This method must take one string argument and return an instance of the correct
-type, or raise an exception to indicate the value was invalid. E.g.,
+type, or return an instance of `Grape::Types::InvalidValue` which optionally
+accepts a message to be returned in the response.
 
 ```ruby
 class Color
@@ -1126,8 +1197,9 @@ class Color
   end
 
   def self.parse(value)
-    fail 'Invalid color' unless %w(blue red green).include?(value)
-    new(value)
+    return new(value) if %w[blue red green]).include?(value)
+
+    Grape::Types::InvalidValue.new('Unsupported color')
   end
 end
 
@@ -1159,6 +1231,7 @@ params do
   end
 end
 ```
+Note that, a `nil` value will call the custom coercion method, while a missing parameter will not.
 
 Example of use of `coerce_with` with a lambda (a class with a `parse` method could also have been used)
 It will parse a string and return an Array of Integers, matching the `Array[Integer]` `type`.
@@ -1459,6 +1532,14 @@ end
 ```
 
 While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
+
+Note that [allow_blank](#allow_blank) validator applies while using `:values`. In the following example the absence of `:allow_blank` does not prevent `:state` from receiving blank values because `:allow_blank` defaults to `true`.
+
+```ruby
+params do
+  requires :state, type: Symbol, values: [:active, :inactive]
+end
+```
 
 #### `except_values`
 
@@ -1983,10 +2064,10 @@ end
 
 # is NOT the same as
 
-get ':status' do # this makes param[:status] available
+get ':status' do # this makes params[:status] available
 end
 
-# This will make both param[:status_id] and param[:id] available
+# This will make both params[:status_id] and params[:id] available
 
 get 'statuses/:status_id/reviews/:id' do
 end
@@ -3159,22 +3240,44 @@ end
 
 Use `body false` to return `204 No Content` without any data or content-type.
 
-You can also set the response to a file with `file`.
+You can also set the response to a file with `sendfile`. This works with the
+[Rack::Sendfile](https://www.rubydoc.info/gems/rack/Rack/Sendfile) middleware to optimally send
+the file through your web server software.
 
 ```ruby
 class API < Grape::API
   get '/' do
-    file '/path/to/file'
+    sendfile '/path/to/file'
   end
 end
 ```
 
-If you want a file to be streamed using Rack::Chunked, use `stream`.
+To stream a file in chunks use `stream`
 
 ```ruby
 class API < Grape::API
   get '/' do
     stream '/path/to/file'
+  end
+end
+```
+
+If you want to stream non-file data use the `stream` method and a `Stream` object.
+This is an object that responds to `each` and yields for each chunk to send to the client.
+Each chunk will be sent as it is yielded instead of waiting for all of the content to be available.
+
+```ruby
+class MyStream
+  def each
+    yield 'part 1'
+    yield 'part 2'
+    yield 'part 3'
+  end
+end
+
+class API < Grape::API
+  get '/' do
+    stream MyStream.new
   end
 end
 ```
@@ -3190,14 +3293,21 @@ applies to the current namespace and any children, but not parents.
 ```ruby
 http_basic do |username, password|
   # verify user's password here
-  { 'test' => 'password1' }[username] == password
+  # IMPORTANT: make sure you use a comparison method which isn't prone to a timing attack
 end
 ```
+
+Digest auth supports clear-text passwords and password hashes.
 
 ```ruby
 http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
   # lookup the user's password here
-  { 'user1' => 'password1' }[username]
+end
+```
+
+```ruby
+http_digest(realm: { realm: 'Test Api', opaque: 'app secret', passwords_hashed: true }) do |username|
+  # lookup the user's password hash here
 end
 ```
 
@@ -3551,6 +3661,14 @@ You can access the controller params, headers, and helpers through the context w
 Note that when you're using Grape mounted on Rails you don't have to use Rails middleware because it's already included into your middleware stack.
 You only have to implement the helpers to access the specific `env` variable.
 
+If you are using a custom application that is inherited from `Rails::Application` and need to insert a new middleware among the ones initiated via Rails, you will need to register it manually in your custom application class.
+
+```ruby
+class Company::Application < Rails::Application
+  config.middleware.insert_before(Rack::Attack, Middleware::ApiLogger)
+end
+```
+
 ### Remote IP
 
 By default you can access remote IP with `request.ip`. This is the remote IP address implemented by Rack. Sometimes it is desirable to get the remote IP [Rails-style](http://stackoverflow.com/questions/10997005/whats-the-difference-between-request-remote-ip-and-request-ip-in-rails) with `ActionDispatch::RemoteIp`.
@@ -3862,7 +3980,8 @@ Grape integrates with following third-party tools:
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 * **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
-* **[ElasticAPM](https://www.elastic.co/products/apm) - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
+* **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
+* **[Datadog APM](https://docs.datadoghq.com/tracing/)** - [ddtrace](https://github.com/datadog/dd-trace-rb) gem, [documentation](https://docs.datadoghq.com/tracing/setup_overview/setup/ruby/#grape)
 
 ## Contributing to Grape
 
@@ -3871,10 +3990,14 @@ features and discuss issues.
 
 See [CONTRIBUTING](CONTRIBUTING.md).
 
+## Security
+
+See [SECURITY](SECURITY.md) for details.
+
 ## License
 
-MIT License. See LICENSE for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ## Copyright
 
-Copyright (c) 2010-2019 Michael Bleigh, Intridea Inc. and Contributors.
+Copyright (c) 2010-2020 Michael Bleigh, Intridea Inc. and Contributors.

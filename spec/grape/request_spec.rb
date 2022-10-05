@@ -21,7 +21,7 @@ module Grape
     let(:env) { default_env }
 
     let(:request) do
-      Grape::Request.new(env)
+      described_class.new(env)
     end
 
     describe '#params' do
@@ -38,7 +38,7 @@ module Grape
 
       context 'when build_params_with: Grape::Extensions::Hash::ParamBuilder is specified' do
         let(:request) do
-          Grape::Request.new(env, build_params_with: Grape::Extensions::Hash::ParamBuilder)
+          described_class.new(env, build_params_with: Grape::Extensions::Hash::ParamBuilder)
         end
 
         it 'returns symbolized params' do
@@ -65,6 +65,8 @@ module Grape
     end
 
     describe 'when the param_builder is set to Hashie' do
+      subject(:request_params) { described_class.new(env, **opts).params }
+
       before do
         Grape.configure do |config|
           config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
@@ -75,15 +77,15 @@ module Grape
         Grape.config.reset
       end
 
-      subject(:request_params) { Grape::Request.new(env, opts).params }
-
       context 'when the API does not include a specific param builder' do
         let(:opts) { {} }
+
         it { is_expected.to be_a(Hashie::Mash) }
       end
 
       context 'when the API includes a specific param builder' do
         let(:opts) { { build_params_with: Grape::Extensions::Hash::ParamBuilder } }
+
         it { is_expected.to be_a(Hash) }
       end
     end

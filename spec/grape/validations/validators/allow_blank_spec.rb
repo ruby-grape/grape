@@ -2,24 +2,139 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::AllowBlankValidator do
-  module ValidationsSpec
-    module AllowBlankValidatorSpec
-      class API < Grape::API
-        default_format :json
+describe Grape::Validations::Validators::AllowBlankValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      default_format :json
 
-        params do
+      params do
+        requires :name, allow_blank: false
+      end
+      get '/disallow_blank'
+
+      params do
+        optional :name, type: String, allow_blank: false
+      end
+      get '/opt_disallow_string_blank'
+
+      params do
+        optional :name, allow_blank: false
+      end
+      get '/disallow_blank_optional_param'
+
+      params do
+        requires :name, allow_blank: true
+      end
+      get '/allow_blank'
+
+      params do
+        requires :val, type: DateTime, allow_blank: true
+      end
+      get '/allow_datetime_blank'
+
+      params do
+        requires :val, type: DateTime, allow_blank: false
+      end
+      get '/disallow_datetime_blank'
+
+      params do
+        requires :val, type: DateTime
+      end
+      get '/default_allow_datetime_blank'
+
+      params do
+        requires :val, type: Date, allow_blank: true
+      end
+      get '/allow_date_blank'
+
+      params do
+        requires :val, type: Integer, allow_blank: true
+      end
+      get '/allow_integer_blank'
+
+      params do
+        requires :val, type: Float, allow_blank: true
+      end
+      get '/allow_float_blank'
+
+      params do
+        requires :val, type: Integer, allow_blank: true
+      end
+      get '/allow_integer_blank'
+
+      params do
+        requires :val, type: Symbol, allow_blank: true
+      end
+      get '/allow_symbol_blank'
+
+      params do
+        requires :val, type: Grape::API::Boolean, allow_blank: true
+      end
+      get '/allow_boolean_blank'
+
+      params do
+        requires :val, type: Grape::API::Boolean, allow_blank: false
+      end
+      get '/disallow_boolean_blank'
+
+      params do
+        optional :user, type: Hash do
           requires :name, allow_blank: false
         end
-        get '/disallow_blank'
+      end
+      get '/disallow_blank_required_param_in_an_optional_group'
 
-        params do
-          optional :name, type: String, allow_blank: false
+      params do
+        optional :user, type: Hash do
+          requires :name, type: Date, allow_blank: true
         end
-        get '/opt_disallow_string_blank'
+      end
+      get '/allow_blank_date_param_in_an_optional_group'
+
+      params do
+        optional :user, type: Hash do
+          optional :name, allow_blank: false
+          requires :age
+        end
+      end
+      get '/disallow_blank_optional_param_in_an_optional_group'
+
+      params do
+        requires :user, type: Hash do
+          requires :name, allow_blank: false
+        end
+      end
+      get '/disallow_blank_required_param_in_a_required_group'
+
+      params do
+        requires :user, type: Hash do
+          requires :name, allow_blank: false
+        end
+      end
+      get '/disallow_string_value_in_a_required_hash_group'
+
+      params do
+        requires :user, type: Hash do
+          optional :name, allow_blank: false
+        end
+      end
+      get '/disallow_blank_optional_param_in_a_required_group'
+
+      params do
+        optional :user, type: Hash do
+          optional :name, allow_blank: false
+        end
+      end
+      get '/disallow_string_value_in_an_optional_hash_group'
+
+      resources :custom_message do
+        params do
+          requires :name, allow_blank: { value: false, message: 'has no value' }
+        end
+        get
 
         params do
-          optional :name, allow_blank: false
+          optional :name, allow_blank: { value: false, message: 'has no value' }
         end
         get '/disallow_blank_optional_param'
 
@@ -34,7 +149,7 @@ describe Grape::Validations::AllowBlankValidator do
         get '/allow_datetime_blank'
 
         params do
-          requires :val, type: DateTime, allow_blank: false
+          requires :val, type: DateTime, allow_blank: { value: false, message: 'has no value' }
         end
         get '/disallow_datetime_blank'
 
@@ -69,18 +184,18 @@ describe Grape::Validations::AllowBlankValidator do
         get '/allow_symbol_blank'
 
         params do
-          requires :val, type: Boolean, allow_blank: true
+          requires :val, type: Grape::API::Boolean, allow_blank: true
         end
         get '/allow_boolean_blank'
 
         params do
-          requires :val, type: Boolean, allow_blank: false
+          requires :val, type: Grape::API::Boolean, allow_blank: { value: false, message: 'has no value' }
         end
         get '/disallow_boolean_blank'
 
         params do
           optional :user, type: Hash do
-            requires :name, allow_blank: false
+            requires :name, allow_blank: { value: false, message: 'has no value' }
           end
         end
         get '/disallow_blank_required_param_in_an_optional_group'
@@ -94,7 +209,7 @@ describe Grape::Validations::AllowBlankValidator do
 
         params do
           optional :user, type: Hash do
-            optional :name, allow_blank: false
+            optional :name, allow_blank: { value: false, message: 'has no value' }
             requires :age
           end
         end
@@ -102,154 +217,33 @@ describe Grape::Validations::AllowBlankValidator do
 
         params do
           requires :user, type: Hash do
-            requires :name, allow_blank: false
+            requires :name, allow_blank: { value: false, message: 'has no value' }
           end
         end
         get '/disallow_blank_required_param_in_a_required_group'
 
         params do
           requires :user, type: Hash do
-            requires :name, allow_blank: false
+            requires :name, allow_blank: { value: false, message: 'has no value' }
           end
         end
         get '/disallow_string_value_in_a_required_hash_group'
 
         params do
           requires :user, type: Hash do
-            optional :name, allow_blank: false
+            optional :name, allow_blank: { value: false, message: 'has no value' }
           end
         end
         get '/disallow_blank_optional_param_in_a_required_group'
 
         params do
           optional :user, type: Hash do
-            optional :name, allow_blank: false
+            optional :name, allow_blank: { value: false, message: 'has no value' }
           end
         end
         get '/disallow_string_value_in_an_optional_hash_group'
-
-        resources :custom_message do
-          params do
-            requires :name, allow_blank: { value: false, message: 'has no value' }
-          end
-          get
-
-          params do
-            optional :name, allow_blank: { value: false, message: 'has no value' }
-          end
-          get '/disallow_blank_optional_param'
-
-          params do
-            requires :name, allow_blank: true
-          end
-          get '/allow_blank'
-
-          params do
-            requires :val, type: DateTime, allow_blank: true
-          end
-          get '/allow_datetime_blank'
-
-          params do
-            requires :val, type: DateTime, allow_blank: { value: false, message: 'has no value' }
-          end
-          get '/disallow_datetime_blank'
-
-          params do
-            requires :val, type: DateTime
-          end
-          get '/default_allow_datetime_blank'
-
-          params do
-            requires :val, type: Date, allow_blank: true
-          end
-          get '/allow_date_blank'
-
-          params do
-            requires :val, type: Integer, allow_blank: true
-          end
-          get '/allow_integer_blank'
-
-          params do
-            requires :val, type: Float, allow_blank: true
-          end
-          get '/allow_float_blank'
-
-          params do
-            requires :val, type: Integer, allow_blank: true
-          end
-          get '/allow_integer_blank'
-
-          params do
-            requires :val, type: Symbol, allow_blank: true
-          end
-          get '/allow_symbol_blank'
-
-          params do
-            requires :val, type: Boolean, allow_blank: true
-          end
-          get '/allow_boolean_blank'
-
-          params do
-            requires :val, type: Boolean, allow_blank: { value: false, message: 'has no value' }
-          end
-          get '/disallow_boolean_blank'
-
-          params do
-            optional :user, type: Hash do
-              requires :name, allow_blank: { value: false, message: 'has no value' }
-            end
-          end
-          get '/disallow_blank_required_param_in_an_optional_group'
-
-          params do
-            optional :user, type: Hash do
-              requires :name, type: Date, allow_blank: true
-            end
-          end
-          get '/allow_blank_date_param_in_an_optional_group'
-
-          params do
-            optional :user, type: Hash do
-              optional :name, allow_blank: { value: false, message: 'has no value' }
-              requires :age
-            end
-          end
-          get '/disallow_blank_optional_param_in_an_optional_group'
-
-          params do
-            requires :user, type: Hash do
-              requires :name, allow_blank: { value: false, message: 'has no value' }
-            end
-          end
-          get '/disallow_blank_required_param_in_a_required_group'
-
-          params do
-            requires :user, type: Hash do
-              requires :name, allow_blank: { value: false, message: 'has no value' }
-            end
-          end
-          get '/disallow_string_value_in_a_required_hash_group'
-
-          params do
-            requires :user, type: Hash do
-              optional :name, allow_blank: { value: false, message: 'has no value' }
-            end
-          end
-          get '/disallow_blank_optional_param_in_a_required_group'
-
-          params do
-            optional :user, type: Hash do
-              optional :name, allow_blank: { value: false, message: 'has no value' }
-            end
-          end
-          get '/disallow_string_value_in_an_optional_hash_group'
-        end
       end
     end
-  end
-
-  def app
-    ValidationsSpec::AllowBlankValidatorSpec::API
   end
 
   context 'invalid input' do
@@ -289,10 +283,12 @@ describe Grape::Validations::AllowBlankValidator do
         get '/custom_message', name: ''
         expect(last_response.body).to eq('{"error":"name has no value"}')
       end
+
       it 'refuses empty string for an optional param' do
         get '/custom_message/disallow_blank_optional_param', name: ''
         expect(last_response.body).to eq('{"error":"name has no value"}')
       end
+
       it 'refuses only whitespaces' do
         get '/custom_message', name: '   '
         expect(last_response.body).to eq('{"error":"name has no value"}')

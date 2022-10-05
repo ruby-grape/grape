@@ -38,7 +38,7 @@ module Grape
 
             @versions = versions | requested_versions
 
-            if block_given?
+            if block
               within_namespace do
                 namespace_inheritable(:version, requested_versions)
                 namespace_inheritable(:version_options, options)
@@ -79,11 +79,12 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
-        def mount(mounts, opts = {})
+        def mount(mounts, *opts)
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
             if app.respond_to?(:mount_instance)
-              mount(app.mount_instance(configuration: opts[:with] || {}) => path)
+              opts_with = opts.any? ? opts.shift[:with] : {}
+              mount({ app.mount_instance(configuration: opts_with) => path })
               next
             end
             in_setting = inheritable_setting
@@ -151,7 +152,7 @@ module Grape
         end
 
         # Declare a "namespace", which prefixes all subordinate routes with its
-        # name. Any endpoints within a namespace, or group, resource, segment,
+        # name. Any endpoints within a namespace, group, resource or segment,
         # etc., will share their parent context as well as any configuration
         # done in the namespace context.
         #
@@ -165,14 +166,12 @@ module Grape
         def namespace(space = nil, options = {}, &block)
           @namespace_description = nil unless instance_variable_defined?(:@namespace_description) && @namespace_description
 
-          if space || block_given?
+          if space || block
             within_namespace do
               previous_namespace_description = @namespace_description
               @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
               nest(block) do
-                if space
-                  namespace_stackable(:namespace, Namespace.new(space, **options))
-                end
+                namespace_stackable(:namespace, Namespace.new(space, **options)) if space
               end
               @namespace_description = previous_namespace_description
             end
@@ -201,7 +200,7 @@ module Grape
           @endpoints = []
         end
 
-        # Thie method allows you to quickly define a parameter route segment
+        # This method allows you to quickly define a parameter route segment
         # in your API.
         #
         # @param param [Symbol] The name of the parameter you wish to declare.

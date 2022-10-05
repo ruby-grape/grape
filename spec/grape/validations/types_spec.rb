@@ -17,16 +17,16 @@ describe Grape::Validations::Types do
     [
       Integer, Float, Numeric, BigDecimal,
       Grape::API::Boolean, String, Symbol,
-      Date, DateTime, Time, Rack::Multipart::UploadedFile
+      Date, DateTime, Time
     ].each do |type|
       it "recognizes #{type} as a primitive" do
-        expect(described_class.primitive?(type)).to be_truthy
+        expect(described_class).to be_primitive(type)
       end
     end
 
     it 'identifies unknown types' do
-      expect(described_class.primitive?(Object)).to be_falsy
-      expect(described_class.primitive?(TypesSpec::FooType)).to be_falsy
+      expect(described_class).not_to be_primitive(Object)
+      expect(described_class).not_to be_primitive(TypesSpec::FooType)
     end
   end
 
@@ -35,7 +35,7 @@ describe Grape::Validations::Types do
       Hash, Array, Set
     ].each do |type|
       it "recognizes #{type} as a structure" do
-        expect(described_class.structure?(type)).to be_truthy
+        expect(described_class).to be_structure(type)
       end
     end
   end
@@ -45,22 +45,22 @@ describe Grape::Validations::Types do
       JSON, Array[JSON], File, Rack::Multipart::UploadedFile
     ].each do |type|
       it "provides special handling for #{type.inspect}" do
-        expect(described_class.special?(type)).to be_truthy
+        expect(described_class).to be_special(type)
       end
     end
   end
 
   describe '::custom?' do
     it 'returns false if the type does not respond to :parse' do
-      expect(described_class.custom?(Object)).to be_falsy
+      expect(described_class).not_to be_custom(Object)
     end
 
     it 'returns true if the type responds to :parse with one argument' do
-      expect(described_class.custom?(TypesSpec::FooType)).to be_truthy
+      expect(described_class).to be_custom(TypesSpec::FooType)
     end
 
     it 'returns false if the type\'s #parse method takes other than one argument' do
-      expect(described_class.custom?(TypesSpec::BarType)).to be_falsy
+      expect(described_class).not_to be_custom(TypesSpec::BarType)
     end
   end
 

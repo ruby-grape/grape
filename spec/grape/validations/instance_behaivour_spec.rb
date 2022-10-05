@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe 'Validator with instance variables' do
   let(:validator_type) do
-    Class.new(Grape::Validations::Base) do
+    Class.new(Grape::Validations::Validators::Base) do
       def validate_param!(_attr_name, _params)
         if instance_variable_defined?(:@instance_variable) && @instance_variable
           raise Grape::Exceptions::Validation.new(params: ['params'],
@@ -14,15 +14,6 @@ describe 'Validator with instance variables' do
       end
     end
   end
-
-  before do
-    Grape::Validations.register_validator('instance_validator', validator_type)
-  end
-
-  after do
-    Grape::Validations.deregister_validator('instance_validator')
-  end
-
   let(:app) do
     Class.new(Grape::API) do
       params do
@@ -33,6 +24,14 @@ describe 'Validator with instance variables' do
         'noop'
       end
     end
+  end
+
+  before do
+    Grape::Validations.register_validator('instance_validator', validator_type)
+  end
+
+  after do
+    Grape::Validations.deregister_validator('instance_validator')
   end
 
   it 'passes validation every time' do

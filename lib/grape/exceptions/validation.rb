@@ -5,8 +5,7 @@ require 'grape/exceptions/base'
 module Grape
   module Exceptions
     class Validation < Grape::Exceptions::Base
-      attr_accessor :params
-      attr_accessor :message_key
+      attr_accessor :params, :message_key
 
       def initialize(params:, message: nil, **args)
         @params = params
@@ -17,7 +16,7 @@ module Grape
         super(**args)
       end
 
-      # remove all the unnecessary stuff from Grape::Exceptions::Base like status
+      # Remove all the unnecessary stuff from Grape::Exceptions::Base like status
       # and headers when converting a validation error to json or string
       def as_json(*_args)
         to_s

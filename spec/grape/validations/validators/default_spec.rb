@@ -2,102 +2,96 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::DefaultValidator do
-  module ValidationsSpec
-    module DefaultValidatorSpec
-      class API < Grape::API
-        default_format :json
+describe Grape::Validations::Validators::DefaultValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      default_format :json
 
-        params do
-          optional :id
-          optional :type, default: 'default-type'
-        end
-        get '/' do
-          { id: params[:id], type: params[:type] }
-        end
+      params do
+        optional :id
+        optional :type, default: 'default-type'
+      end
+      get '/' do
+        { id: params[:id], type: params[:type] }
+      end
 
-        params do
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
-        end
-        get '/user' do
-          { type1: params[:type1], type2: params[:type2] }
-        end
+      params do
+        optional :type1, default: 'default-type1'
+        optional :type2, default: 'default-type2'
+      end
+      get '/user' do
+        { type1: params[:type1], type2: params[:type2] }
+      end
 
-        params do
-          requires :id
-          optional :type1, default: 'default-type1'
-          optional :type2, default: 'default-type2'
-        end
+      params do
+        requires :id
+        optional :type1, default: 'default-type1'
+        optional :type2, default: 'default-type2'
+      end
 
-        get '/message' do
-          { id: params[:id], type1: params[:type1], type2: params[:type2] }
-        end
+      get '/message' do
+        { id: params[:id], type1: params[:type1], type2: params[:type2] }
+      end
 
-        params do
-          optional :random, default: -> { Random.rand }
-          optional :not_random, default: Random.rand
-        end
-        get '/numbers' do
-          { random_number: params[:random], non_random_number: params[:non_random_number] }
-        end
+      params do
+        optional :random, default: -> { Random.rand }
+        optional :not_random, default: Random.rand
+      end
+      get '/numbers' do
+        { random_number: params[:random], non_random_number: params[:non_random_number] }
+      end
 
-        params do
-          optional :array, type: Array do
-            requires :name
-            optional :with_default, default: 'default'
-          end
-        end
-        get '/array' do
-          { array: params[:array] }
-        end
-
-        params do
-          requires :thing1
-          optional :more_things, type: Array do
-            requires :nested_thing
-            requires :other_thing, default: 1
-          end
-        end
-        get '/optional_array' do
-          { thing1: params[:thing1] }
-        end
-
-        params do
-          requires :root, type: Hash do
-            optional :some_things, type: Array do
-              requires :foo
-              optional :options, type: Array do
-                requires :name, type: String
-                requires :value, type: String
-              end
-            end
-          end
-        end
-        get '/nested_optional_array' do
-          { root: params[:root] }
-        end
-
-        params do
-          requires :root, type: Hash do
-            optional :some_things, type: Array do
-              requires :foo
-              optional :options, type: Array do
-                optional :name, type: String
-                optional :value, type: String
-              end
-            end
-          end
-        end
-        get '/another_nested_optional_array' do
-          { root: params[:root] }
+      params do
+        optional :array, type: Array do
+          requires :name
+          optional :with_default, default: 'default'
         end
       end
-    end
-  end
+      get '/array' do
+        { array: params[:array] }
+      end
 
-  def app
-    ValidationsSpec::DefaultValidatorSpec::API
+      params do
+        requires :thing1
+        optional :more_things, type: Array do
+          requires :nested_thing
+          requires :other_thing, default: 1
+        end
+      end
+      get '/optional_array' do
+        { thing1: params[:thing1] }
+      end
+
+      params do
+        requires :root, type: Hash do
+          optional :some_things, type: Array do
+            requires :foo
+            optional :options, type: Array do
+              requires :name, type: String
+              requires :value, type: String
+            end
+          end
+        end
+      end
+      get '/nested_optional_array' do
+        { root: params[:root] }
+      end
+
+      params do
+        requires :root, type: Hash do
+          optional :some_things, type: Array do
+            requires :foo
+            optional :options, type: Array do
+              optional :name, type: String
+              optional :value, type: String
+            end
+          end
+        end
+      end
+      get '/another_nested_optional_array' do
+        { root: params[:root] }
+      end
+    end
   end
 
   it 'lets you leave required values nested inside an optional blank' do
@@ -296,6 +290,176 @@ describe Grape::Validations::DefaultValidator do
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq({ foo_in_optional_hash: 'own_default' }.to_json)
       end
+    end
+  end
+
+  context 'optional with nil as value' do
+    subject do
+      Class.new(Grape::API) do
+        default_format :json
+      end
+    end
+
+    def app
+      subject
+    end
+
+    context 'primitive types' do
+      [
+        [Integer, 0],
+        [Integer, 42],
+        [Float, 0.0],
+        [Float, 4.2],
+        [BigDecimal, 0.0],
+        [BigDecimal, 4.2],
+        [Numeric, 0],
+        [Numeric, 42],
+        [Date, Date.today],
+        [DateTime, DateTime.now],
+        [Time, Time.now],
+        [Time, Time.at(0)],
+        [Grape::API::Boolean, false],
+        [String, ''],
+        [String, 'non-empty-string'],
+        [Symbol, :symbol],
+        [TrueClass, true],
+        [FalseClass, false]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'structures types' do
+      [
+        [Hash, {}],
+        [Hash, { test: 'non-empty' }],
+        [Array, []],
+        [Array, ['non-empty']],
+        [Array[Integer], []],
+        [Set, []],
+        [Set, [1]]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'special types' do
+      [
+        [JSON, ''],
+        [JSON, { test: 'non-empty-string' }.to_json],
+        [Array[JSON], []],
+        [Array[JSON], [{ test: 'non-empty-string' }.to_json]],
+        [::File, ''],
+        [::File, { test: 'non-empty-string' }.to_json],
+        [Rack::Multipart::UploadedFile, ''],
+        [Rack::Multipart::UploadedFile, { test: 'non-empty-string' }.to_json]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+
+    context 'variant-member-type collections' do
+      [
+        [Array[Integer, String], [0, '']],
+        [Array[Integer, String], [42, 'non-empty-string']],
+        [[Integer, String, Array[Integer, String]], [0, '', [0, '']]],
+        [[Integer, String, Array[Integer, String]], [42, 'non-empty-string', [42, 'non-empty-string']]]
+      ].each do |type, default|
+        it 'respects the default value' do
+          subject.params do
+            optional :param, type: type, default: default
+          end
+          subject.get '/default_value' do
+            params[:param]
+          end
+
+          get '/default_value', param: nil
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to eq(default.to_json)
+        end
+      end
+    end
+  end
+
+  context 'array with default values and given conditions' do
+    subject do
+      Class.new(Grape::API) do
+        default_format :json
+      end
+    end
+
+    def app
+      subject
+    end
+
+    it 'applies the default values only if the conditions are met' do
+      subject.params do
+        requires :ary, type: Array do
+          requires :has_value, type: Grape::API::Boolean
+          given has_value: ->(has_value) { has_value } do
+            optional :type, type: String, values: %w[str int], default: 'str'
+            given type: ->(type) { type == 'str' } do
+              optional :str, type: String, default: 'a'
+            end
+            given type: ->(type) { type == 'int' } do
+              optional :int, type: Integer, default: 1
+            end
+          end
+        end
+      end
+      subject.post('/nested_given_and_default') { declared(self.params) }
+
+      params = {
+        ary: [
+          { has_value: false },
+          { has_value: true, type: 'int', int: 123 },
+          { has_value: true, type: 'str', str: 'b' }
+        ]
+      }
+      expected = {
+        'ary' => [
+          { 'has_value' => false, 'type' => nil,   'int' => nil, 'str' => nil },
+          { 'has_value' => true,  'type' => 'int', 'int' => 123, 'str' => nil },
+          { 'has_value' => true,  'type' => 'str', 'int' => nil, 'str' => 'b' }
+        ]
+      }
+
+      post '/nested_given_and_default', params
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq(expected)
     end
   end
 end

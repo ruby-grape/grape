@@ -10,32 +10,32 @@ describe Grape::Endpoint do
   end
 
   describe '.before_each' do
-    after { Grape::Endpoint.before_each.clear }
+    after { described_class.before_each.clear }
 
     it 'is settable via block' do
       block = ->(_endpoint) { 'noop' }
-      Grape::Endpoint.before_each(&block)
-      expect(Grape::Endpoint.before_each.first).to eq(block)
+      described_class.before_each(&block)
+      expect(described_class.before_each.first).to eq(block)
     end
 
     it 'is settable via reference' do
       block = ->(_endpoint) { 'noop' }
-      Grape::Endpoint.before_each block
-      expect(Grape::Endpoint.before_each.first).to eq(block)
+      described_class.before_each block
+      expect(described_class.before_each.first).to eq(block)
     end
 
     it 'is able to override a helper' do
       subject.get('/') { current_user }
       expect { get '/' }.to raise_error(NameError)
 
-      Grape::Endpoint.before_each do |endpoint|
+      described_class.before_each do |endpoint|
         allow(endpoint).to receive(:current_user).and_return('Bob')
       end
 
       get '/'
       expect(last_response.body).to eq('Bob')
 
-      Grape::Endpoint.before_each(nil)
+      described_class.before_each(nil)
       expect { get '/' }.to raise_error(NameError)
     end
 
@@ -46,18 +46,18 @@ describe Grape::Endpoint do
       end
       expect { get '/' }.to raise_error(NameError)
 
-      Grape::Endpoint.before_each do |endpoint|
+      described_class.before_each do |endpoint|
         allow(endpoint).to receive(:current_user).and_return('Bob')
       end
 
-      Grape::Endpoint.before_each do |endpoint|
+      described_class.before_each do |endpoint|
         allow(endpoint).to receive(:authenticate_user!).and_return(true)
       end
 
       get '/'
       expect(last_response.body).to eq('Bob')
 
-      Grape::Endpoint.before_each(nil)
+      described_class.before_each(nil)
       expect { get '/' }.to raise_error(NameError)
     end
   end
@@ -66,7 +66,7 @@ describe Grape::Endpoint do
     it 'takes a settings stack, options, and a block' do
       p = proc {}
       expect do
-        Grape::Endpoint.new(Grape::Util::InheritableSetting.new, {
+        described_class.new(Grape::Util::InheritableSetting.new, {
                               path: '/',
                               method: :get
                             }, &p)
@@ -77,7 +77,7 @@ describe Grape::Endpoint do
   it 'sets itself in the env upon call' do
     subject.get('/') { 'Hello world.' }
     get '/'
-    expect(last_request.env['api.endpoint']).to be_kind_of(Grape::Endpoint)
+    expect(last_request.env['api.endpoint']).to be_kind_of(described_class)
   end
 
   describe '#status' do
@@ -137,6 +137,7 @@ describe Grape::Endpoint do
         headers.to_json
       end
     end
+
     it 'includes request headers' do
       get '/headers'
       expect(JSON.parse(last_response.body)).to eq(
@@ -144,13 +145,15 @@ describe Grape::Endpoint do
         'Cookie' => ''
       )
     end
+
     it 'includes additional request headers' do
       get '/headers', nil, 'HTTP_X_GRAPE_CLIENT' => '1'
       expect(JSON.parse(last_response.body)['X-Grape-Client']).to eq('1')
     end
+
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for('/headers')
-      env['HTTP_SYMBOL_HEADER'.to_sym] = 'Goliath passes symbols'
+      env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
       body = read_chunks(subject.call(env)[2]).join
       expect(JSON.parse(body)['Symbol-Header']).to eq('Goliath passes symbols')
     end
@@ -212,10 +215,10 @@ describe Grape::Endpoint do
       end
       get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
       expect(last_response.body).to eq('3')
-      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end]
+      end.to_h
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
@@ -236,10 +239,10 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       expect(last_response.body).to eq('3')
-      cookies = Hash[last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end]
+      end.to_h
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
@@ -253,7 +256,7 @@ describe Grape::Endpoint do
 
   describe '#params' do
     context 'default class' do
-      it 'should be a ActiveSupport::HashWithIndifferentAccess' do
+      it 'is a ActiveSupport::HashWithIndifferentAccess' do
         subject.get '/foo' do
           params.class
         end
@@ -277,527 +280,6 @@ describe Grape::Endpoint do
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('bar')
       end
-    end
-  end
-
-  describe '#declared' do
-    before do
-      subject.format :json
-      subject.params do
-        requires :first
-        optional :second
-        optional :third, default: 'third-default'
-        optional :nested, type: Hash do
-          optional :fourth
-          optional :fifth
-          optional :nested_two, type: Hash do
-            optional :sixth
-            optional :nested_three, type: Hash do
-              optional :seventh
-            end
-          end
-        end
-        optional :nested_arr, type: Array do
-          optional :eighth
-        end
-      end
-    end
-
-    context 'when params are not built with default class' do
-      it 'returns an object that corresponds with the params class - hash with indifferent access' do
-        subject.params do
-          build_with Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
-        end
-        subject.get '/declared' do
-          d = declared(params, include_missing: true)
-          { declared_class: d.class.to_s }
-        end
-
-        get '/declared?first=present'
-        expect(JSON.parse(last_response.body)['declared_class']).to eq('ActiveSupport::HashWithIndifferentAccess')
-      end
-
-      it 'returns an object that corresponds with the params class - hashie mash' do
-        subject.params do
-          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
-        end
-        subject.get '/declared' do
-          d = declared(params, include_missing: true)
-          { declared_class: d.class.to_s }
-        end
-
-        get '/declared?first=present'
-        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hashie::Mash')
-      end
-
-      it 'returns an object that corresponds with the params class - hash' do
-        subject.params do
-          build_with Grape::Extensions::Hash::ParamBuilder
-        end
-        subject.get '/declared' do
-          d = declared(params, include_missing: true)
-          { declared_class: d.class.to_s }
-        end
-
-        get '/declared?first=present'
-        expect(JSON.parse(last_response.body)['declared_class']).to eq('Hash')
-      end
-    end
-
-    it 'should show nil for nested params if include_missing is true' do
-      subject.get '/declared' do
-        declared(params, include_missing: true)
-      end
-
-      get '/declared?first=present'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested']['fourth']).to be_nil
-    end
-
-    it 'does not work in a before filter' do
-      subject.before do
-        declared(params)
-      end
-      subject.get('/declared') { declared(params) }
-
-      expect { get('/declared') }.to raise_error(
-        Grape::DSL::InsideRoute::MethodNotYetAvailable
-      )
-    end
-
-    it 'has as many keys as there are declared params' do
-      subject.get '/declared' do
-        declared(params)
-      end
-      get '/declared?first=present'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(5)
-    end
-
-    it 'has a optional param with default value all the time' do
-      subject.get '/declared' do
-        declared(params)
-      end
-      get '/declared?first=one'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['third']).to eql('third-default')
-    end
-
-    it 'builds nested params' do
-      subject.get '/declared' do
-        declared(params)
-      end
-
-      get '/declared?first=present&nested[fourth]=1'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested'].keys.size).to eq 3
-    end
-
-    it 'builds nested params when given array' do
-      subject.get '/dummy' do
-      end
-      subject.params do
-        requires :first
-        optional :second
-        optional :third, default: 'third-default'
-        optional :nested, type: Array do
-          optional :fourth
-        end
-      end
-      subject.get '/declared' do
-        declared(params)
-      end
-
-      get '/declared?first=present&nested[][fourth]=1&nested[][fourth]=2'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['nested'].size).to eq 2
-    end
-
-    context 'sets nested objects when the param is missing' do
-      it 'to be a hash when include_missing is true' do
-        subject.get '/declared' do
-          declared(params, include_missing: true)
-        end
-
-        get '/declared?first=present'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested']).to be_a(Hash)
-      end
-
-      it 'to be an array when include_missing is true' do
-        subject.get '/declared' do
-          declared(params, include_missing: true)
-        end
-
-        get '/declared?first=present'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested_arr']).to be_a(Array)
-      end
-
-      it 'to be nil when include_missing is false' do
-        subject.get '/declared' do
-          declared(params, include_missing: false)
-        end
-
-        get '/declared?first=present'
-        expect(last_response.status).to eq(200)
-        expect(JSON.parse(last_response.body)['nested']).to be_nil
-      end
-    end
-
-    it 'filters out any additional params that are given' do
-      subject.get '/declared' do
-        declared(params)
-      end
-      get '/declared?first=one&other=two'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).key?(:other)).to eq false
-    end
-
-    it 'stringifies if that option is passed' do
-      subject.get '/declared' do
-        declared(params, stringify: true)
-      end
-
-      get '/declared?first=one&other=two'
-      expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body)['first']).to eq 'one'
-    end
-
-    it 'does not include missing attributes if that option is passed' do
-      subject.get '/declared' do
-        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:second)
-        ''
-      end
-
-      get '/declared?first=one&other=two'
-      expect(last_response.status).to eq(200)
-    end
-
-    it 'does not include renamed missing attributes if that option is passed' do
-      subject.params do
-        optional :renamed_original, as: :renamed
-      end
-      subject.get '/declared' do
-        error! 'expected nil', 400 if declared(params, include_missing: false).key?(:renamed)
-        ''
-      end
-
-      get '/declared?first=one&other=two'
-      expect(last_response.status).to eq(200)
-    end
-
-    it 'includes attributes with value that evaluates to false' do
-      subject.params do
-        requires :first
-        optional :boolean
-      end
-
-      subject.post '/declared' do
-        error!('expected false', 400) if declared(params, include_missing: false)[:boolean] != false
-        ''
-      end
-
-      post '/declared', ::Grape::Json.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
-      expect(last_response.status).to eq(201)
-    end
-
-    it 'includes attributes with value that evaluates to nil' do
-      subject.params do
-        requires :first
-        optional :second
-      end
-
-      subject.post '/declared' do
-        error!('expected nil', 400) unless declared(params, include_missing: false)[:second].nil?
-        ''
-      end
-
-      post '/declared', ::Grape::Json.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
-      expect(last_response.status).to eq(201)
-    end
-
-    it 'includes missing attributes with defaults when there are nested hashes' do
-      subject.get '/dummy' do
-      end
-
-      subject.params do
-        requires :first
-        optional :second
-        optional :third, default: nil
-        optional :nested, type: Hash do
-          optional :fourth, default: nil
-          optional :fifth, default: nil
-          requires :nested_nested, type: Hash do
-            optional :sixth, default: 'sixth-default'
-            optional :seven, default: nil
-          end
-        end
-      end
-
-      subject.get '/declared' do
-        declared(params, include_missing: false)
-      end
-
-      get '/declared?first=present&nested[fourth]=&nested[nested_nested][sixth]=sixth'
-      json = JSON.parse(last_response.body)
-      expect(last_response.status).to eq(200)
-      expect(json['first']).to eq 'present'
-      expect(json['nested'].keys).to eq %w[fourth fifth nested_nested]
-      expect(json['nested']['fourth']).to eq ''
-      expect(json['nested']['nested_nested'].keys).to eq %w[sixth seven]
-      expect(json['nested']['nested_nested']['sixth']).to eq 'sixth'
-    end
-
-    it 'does not include missing attributes when there are nested hashes' do
-      subject.get '/dummy' do
-      end
-
-      subject.params do
-        requires :first
-        optional :second
-        optional :third
-        optional :nested, type: Hash do
-          optional :fourth
-          optional :fifth
-        end
-      end
-
-      subject.get '/declared' do
-        declared(params, include_missing: false)
-      end
-
-      get '/declared?first=present&nested[fourth]=4'
-      json = JSON.parse(last_response.body)
-      expect(last_response.status).to eq(200)
-      expect(json['first']).to eq 'present'
-      expect(json['nested'].keys).to eq %w[fourth]
-      expect(json['nested']['fourth']).to eq '4'
-    end
-  end
-
-  describe '#declared; call from child namespace' do
-    before do
-      subject.format :json
-      subject.namespace :parent do
-        params do
-          requires :parent_name, type: String
-        end
-
-        namespace ':parent_name' do
-          params do
-            requires :child_name, type: String
-            requires :child_age, type: Integer
-          end
-
-          namespace ':child_name' do
-            params do
-              requires :grandchild_name, type: String
-            end
-
-            get ':grandchild_name' do
-              {
-                'params' => params,
-                'without_parent_namespaces' => declared(params, include_parent_namespaces: false),
-                'with_parent_namespaces' => declared(params, include_parent_namespaces: true)
-              }
-            end
-          end
-        end
-      end
-
-      get '/parent/foo/bar/baz', child_age: 5, extra: 'hello'
-    end
-
-    let(:parsed_response) { JSON.parse(last_response.body, symbolize_names: true) }
-
-    it { expect(last_response.status).to eq 200 }
-
-    context 'with include_parent_namespaces: false' do
-      it 'returns declared parameters only from current namespace' do
-        expect(parsed_response[:without_parent_namespaces]).to eq(
-          grandchild_name: 'baz'
-        )
-      end
-    end
-
-    context 'with include_parent_namespaces: true' do
-      it 'returns declared parameters from every parent namespace' do
-        expect(parsed_response[:with_parent_namespaces]).to eq(
-          parent_name: 'foo',
-          child_name: 'bar',
-          grandchild_name: 'baz',
-          child_age: 5
-        )
-      end
-    end
-
-    context 'without declaration' do
-      it 'returns all requested parameters' do
-        expect(parsed_response[:params]).to eq(
-          parent_name: 'foo',
-          child_name: 'bar',
-          grandchild_name: 'baz',
-          child_age: 5,
-          extra: 'hello'
-        )
-      end
-    end
-  end
-
-  describe '#declared; from a nested mounted endpoint' do
-    before do
-      doubly_mounted = Class.new(Grape::API)
-      doubly_mounted.namespace :more do
-        params do
-          requires :y, type: Integer
-        end
-        route_param :y do
-          get do
-            {
-              params: params,
-              declared_params: declared(params)
-            }
-          end
-        end
-      end
-
-      mounted = Class.new(Grape::API)
-      mounted.namespace :another do
-        params do
-          requires :mount_space, type: Integer
-        end
-        route_param :mount_space do
-          mount doubly_mounted
-        end
-      end
-
-      subject.format :json
-      subject.namespace :something do
-        params do
-          requires :id, type: Integer
-        end
-        resource ':id' do
-          mount mounted
-        end
-      end
-    end
-
-    it 'can access parent attributes' do
-      get '/something/123/another/456/more/789'
-      expect(last_response.status).to eq 200
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      # test all three levels of params
-      expect(json[:declared_params][:y]).to eq 789
-      expect(json[:declared_params][:mount_space]).to eq 456
-      expect(json[:declared_params][:id]).to eq 123
-    end
-  end
-
-  describe '#declared; mixed nesting' do
-    before do
-      subject.format :json
-      subject.resource :users do
-        route_param :id, type: Integer, desc: 'ID desc' do
-          # Adding this causes route_setting(:declared_params) to be nil for the
-          # get block in namespace 'foo' below
-          get do
-          end
-
-          namespace 'foo' do
-            get do
-              {
-                params: params,
-                declared_params: declared(params),
-                declared_params_no_parent: declared(params, include_parent_namespaces: false)
-              }
-            end
-          end
-        end
-      end
-    end
-
-    it 'can access parent route_param' do
-      get '/users/123/foo', bar: 'bar'
-      expect(last_response.status).to eq 200
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      expect(json[:declared_params][:id]).to eq 123
-      expect(json[:declared_params_no_parent][:id]).to eq nil
-    end
-  end
-
-  describe '#declared; with multiple route_param' do
-    before do
-      mounted = Class.new(Grape::API)
-      mounted.namespace :albums do
-        get do
-          declared(params)
-        end
-      end
-
-      subject.format :json
-      subject.namespace :artists do
-        route_param :id, type: Integer do
-          get do
-            declared(params)
-          end
-
-          params do
-            requires :filter, type: String
-          end
-          get :some_route do
-            declared(params)
-          end
-        end
-
-        route_param :artist_id, type: Integer do
-          namespace :compositions do
-            get do
-              declared(params)
-            end
-          end
-        end
-
-        route_param :compositor_id, type: Integer do
-          mount mounted
-        end
-      end
-    end
-
-    it 'return only :id without :artist_id' do
-      get '/artists/1'
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      expect(json.key?(:id)).to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
-    end
-
-    it 'return only :artist_id without :id' do
-      get '/artists/1/compositions'
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      expect(json.key?(:artist_id)).to be_truthy
-      expect(json.key?(:id)).not_to be_truthy
-    end
-
-    it 'return :filter and :id parameters in declared for second enpoint inside route_param' do
-      get '/artists/1/some_route', filter: 'some_filter'
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      expect(json.key?(:filter)).to be_truthy
-      expect(json.key?(:id)).to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
-    end
-
-    it 'return :compositor_id for mounter in route_param' do
-      get '/artists/1/albums'
-      json = JSON.parse(last_response.body, symbolize_names: true)
-
-      expect(json.key?(:compositor_id)).to be_truthy
-      expect(json.key?(:id)).not_to be_truthy
-      expect(json.key?(:artist_id)).not_to be_truthy
     end
   end
 
@@ -860,7 +342,7 @@ describe Grape::Endpoint do
       end
 
       context 'namespace requirements' do
-        before :each do
+        before do
           subject.namespace :outer, requirements: { person_email: /abc@(.*).com/ } do
             get('/:person_email') do
               params[:person_email]
@@ -879,7 +361,7 @@ describe Grape::Endpoint do
           expect(last_response.body).to eq('abc@example.com')
         end
 
-        it "should override outer namespace's requirements" do
+        it "overrides outer namespace's requirements" do
           get '/outer/inner/someone@testing.wrong/test/1'
           expect(last_response.status).to eq(404)
 
@@ -891,7 +373,7 @@ describe Grape::Endpoint do
     end
 
     context 'from body parameters' do
-      before(:each) do
+      before do
         subject.post '/request_body' do
           params[:user]
         end
@@ -941,6 +423,19 @@ describe Grape::Endpoint do
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('Bob')
       end
+
+      # Rack swallowed this error until v2.2.0
+      it 'returns a 400 if given an invalid multipart body', if: Gem::Version.new(Rack.release) >= Gem::Version.new('2.2.0') do
+        subject.params do
+          requires :file, type: Rack::Multipart::UploadedFile
+        end
+        subject.post '/upload' do
+          params[:file][:filename]
+        end
+        post '/upload', { file: '' }, 'CONTENT_TYPE' => 'multipart/form-data; boundary=foobar'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('Empty message body supplied with multipart/form-data; boundary=foobar content-type')
+      end
     end
 
     it 'responds with a 415 for an unsupported content-type' do
@@ -977,11 +472,11 @@ describe Grape::Endpoint do
         post '/', ::Grape::Json.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
       end
 
-      it 'should not response with 406 for same type without params' do
+      it 'does not response with 406 for same type without params' do
         expect(last_response.status).not_to be 406
       end
 
-      it 'should response with given content type in headers' do
+      it 'responses with given content type in headers' do
         expect(last_response.headers['Content-Type']).to eq 'application/json; charset=utf-8'
       end
     end
@@ -1217,16 +712,18 @@ describe Grape::Endpoint do
   describe '.generate_api_method' do
     it 'raises NameError if the method name is already in use' do
       expect do
-        Grape::Endpoint.generate_api_method('version', &proc {})
+        described_class.generate_api_method('version', &proc {})
       end.to raise_error(NameError)
     end
+
     it 'raises ArgumentError if a block is not given' do
       expect do
-        Grape::Endpoint.generate_api_method('GET without a block method')
+        described_class.generate_api_method('GET without a block method')
       end.to raise_error(ArgumentError)
     end
+
     it 'returns a Proc' do
-      expect(Grape::Endpoint.generate_api_method('GET test for a proc', &proc {})).to be_a Proc
+      expect(described_class.generate_api_method('GET test for a proc', &proc {})).to be_a Proc
     end
   end
 
@@ -1285,7 +782,7 @@ describe Grape::Endpoint do
         end
 
         get '/error_filters'
-        expect(last_response.status).to eql 500
+        expect(last_response.status).to be 500
         expect(called).to match_array %w[before before_validation]
       end
 
@@ -1294,8 +791,11 @@ describe Grape::Endpoint do
         subject.before { called << 'parent' }
         subject.namespace :parent do
           before { called << 'prior' }
+
           before { error! :oops, 500 }
+
           before { called << 'subsequent' }
+
           get :hello do
             called << :endpoint
             'Hello!'
@@ -1303,7 +803,7 @@ describe Grape::Endpoint do
         end
 
         get '/parent/hello'
-        expect(last_response.status).to eql 500
+        expect(last_response.status).to be 500
         expect(called).to match_array %w[parent prior]
       end
     end
@@ -1314,19 +814,19 @@ describe Grape::Endpoint do
       it 'allows for the anchoring option with a delete method' do
         subject.send(:delete, '/example', anchor: true) {}
         send(:delete, '/example/and/some/more')
-        expect(last_response.status).to eql 404
+        expect(last_response.status).to be 404
       end
 
       it 'anchors paths by default for the delete method' do
         subject.send(:delete, '/example') {}
         send(:delete, '/example/and/some/more')
-        expect(last_response.status).to eql 404
+        expect(last_response.status).to be 404
       end
 
       it 'responds to /example/and/some/more for the non-anchored delete method' do
         subject.send(:delete, '/example', anchor: false) {}
         send(:delete, '/example/and/some/more')
-        expect(last_response.status).to eql 204
+        expect(last_response.status).to be 204
         expect(last_response.body).to be_empty
       end
     end
@@ -1338,7 +838,7 @@ describe Grape::Endpoint do
           body 'deleted'
         end
         send(:delete, '/example/and/some/more')
-        expect(last_response.status).to eql 200
+        expect(last_response.status).to be 200
         expect(last_response.body).not_to be_empty
       end
     end
@@ -1347,7 +847,7 @@ describe Grape::Endpoint do
       it 'responds to /example delete method' do
         subject.delete(:example) { 'deleted' }
         delete '/example'
-        expect(last_response.status).to eql 200
+        expect(last_response.status).to be 200
         expect(last_response.body).not_to be_empty
       end
     end
@@ -1356,7 +856,7 @@ describe Grape::Endpoint do
       it 'responds to /example delete method' do
         subject.delete(:example) { nil }
         delete '/example'
-        expect(last_response.status).to eql 204
+        expect(last_response.status).to be 204
         expect(last_response.body).to be_empty
       end
     end
@@ -1365,7 +865,7 @@ describe Grape::Endpoint do
       it 'responds to /example delete method' do
         subject.delete(:example) { '' }
         delete '/example'
-        expect(last_response.status).to eql 204
+        expect(last_response.status).to be 204
         expect(last_response.body).to be_empty
       end
     end
@@ -1377,7 +877,7 @@ describe Grape::Endpoint do
             verb
           end
           send(verb, '/example/and/some/more')
-          expect(last_response.status).to eql 404
+          expect(last_response.status).to be 404
         end
 
         it "anchors paths by default for the #{verb.upcase} method" do
@@ -1385,7 +885,7 @@ describe Grape::Endpoint do
             verb
           end
           send(verb, '/example/and/some/more')
-          expect(last_response.status).to eql 404
+          expect(last_response.status).to be 404
         end
 
         it "responds to /example/and/some/more for the non-anchored #{verb.upcase} method" do
@@ -1408,8 +908,9 @@ describe Grape::Endpoint do
       get '/url'
       expect(last_response.body).to eq('http://example.org/url')
     end
+
     ['v1', :v1].each do |version|
-      it "should include version #{version}" do
+      it "includes version #{version}" do
         subject.version version, using: :path
         subject.get('/url') do
           request.url
@@ -1418,7 +919,7 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq("http://example.org/#{version}/url")
       end
     end
-    it 'should include prefix' do
+    it 'includes prefix' do
       subject.version 'v1', using: :path
       subject.prefix 'api'
       subject.get('/url') do
@@ -1508,26 +1009,26 @@ describe Grape::Endpoint do
 
       # In order that the events finalized (time each block ended)
       expect(@events).to contain_exactly(
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :before_validation }),
-        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(described_class),
                                                                           validators: [],
                                                                           request: a_kind_of(Grape::Request) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :after_validation }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(described_class) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :after }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :finally }),
-        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(described_class),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
                                                                   formatter: a_kind_of(Module) }),
@@ -1539,25 +1040,25 @@ describe Grape::Endpoint do
       # In order that events were initialized
       expect(@events.sort_by(&:time)).to contain_exactly(
         have_attributes(name: 'endpoint_call.grape'),
-        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(described_class),
                                                                env: an_instance_of(Hash) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :before_validation }),
-        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(described_class),
                                                                           validators: [],
                                                                           request: a_kind_of(Grape::Request) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :after_validation }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(Grape::Endpoint) }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(described_class) }),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :after }),
-        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(Grape::Endpoint),
+        have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: [],
                                                                        type: :finally }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),

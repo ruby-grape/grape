@@ -72,7 +72,7 @@ module Grape
 
       # Require one or more parameters for the current endpoint.
       #
-      # @param attrs list of parameter names, or, if :using is
+      # @param attrs list of parameters names, or, if :using is
       #   passed as an option, which keys to include (:all or :none) from
       #   the :using hash. The last key can be a hash, which specifies
       #   options for the parameters
@@ -133,7 +133,7 @@ module Grape
           require_required_and_optional_fields(attrs.first, opts)
         else
           validate_attributes(attrs, opts, &block)
-          block_given? ? new_scope(orig_attrs, &block) : push_declared_params(attrs, **opts.slice(:as))
+          block ? new_scope(orig_attrs, &block) : push_declared_params(attrs, **opts.slice(:as))
         end
       end
 
@@ -149,7 +149,7 @@ module Grape
         opts = @group.merge(opts) if instance_variable_defined?(:@group) && @group
 
         # check type for optional parameter group
-        if attrs && block_given?
+        if attrs && block
           raise Grape::Exceptions::MissingGroupTypeError.new if type.nil?
           raise Grape::Exceptions::UnsupportedGroupTypeError.new unless Grape::Validations::Types.group?(type)
         end
@@ -159,7 +159,7 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block_given? ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, **opts.slice(:as))
+          block ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, **opts.slice(:as))
         end
       end
 
@@ -227,13 +227,17 @@ module Grape
 
       alias group requires
 
-      def map_params(params, element)
+      class EmptyOptionalValue; end
+
+      def map_params(params, element, is_array = false)
         if params.is_a?(Array)
           params.map do |el|
-            map_params(el, element)
+            map_params(el, element, true)
           end
         elsif params.is_a?(Hash)
-          params[element] || {}
+          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
+        elsif params == EmptyOptionalValue
+          EmptyOptionalValue
         else
           {}
         end

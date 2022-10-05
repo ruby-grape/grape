@@ -1,7 +1,262 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.6.0
+
+#### Parameter renaming with :as
+
+Prior to 1.6.0 the [parameter renaming](https://github.com/ruby-grape/grape#renaming) with `:as` was directly touching the request payload ([`#params`](https://github.com/ruby-grape/grape#parameters)) while duplicating the old and the new key to be both available in the hash. This allowed clients to bypass any validation in case they knew the internal name of the parameter.  Unfortunately, in combination with [grape-swagger](https://github.com/ruby-grape/grape-swagger) the internal name (name set with `:as`) of the parameters were documented.
+
+This behavior was fixed. Parameter renaming is now done when using the [`#declared(params)`](https://github.com/ruby-grape/grape#declared) parameters helper. This stops confusing validation/coercion behavior.
+
+Here comes an illustration of the old and new behaviour as code:
+
+```ruby
+# (1) Rename a to b, while client sends +a+
+optional :a, type: Integer, as: :b
+params = { a: 1 }
+declared(params, include_missing: false)
+# expected => { b: 1 }
+# actual   => { b: 1 }
+
+# (2) Rename a to b, while client sends +b+
+optional :a, type: Integer, as: :b, values: [1, 2, 3]
+params = { b: '5' }
+declared(params, include_missing: false)
+# expected => { }        (>= 1.6.0)
+# actual   => { b: '5' } (uncasted, unvalidated, <= 1.5.3)
+```
+
+Another implication of this change is the dependent parameter resolution. Prior to 1.6.0 the following code produced a `Grape::Exceptions::UnknownParameter` because `:a` was replaced by `:b`:
+
+```ruby
+params do
+  optional :a, as: :b
+  given :a do # (<= 1.5.3 you had to reference +:b+ here to make it work)
+    requires :c
+  end
+end
+```
+
+This code now works without any errors, as the renaming is just an internal behaviour of the `#declared(params)` parameter helper.
+
+See [#2189](https://github.com/ruby-grape/grape/pull/2189) for more information.
+
+### Upgrading to >= 1.5.3
+
+#### Nil value and coercion
+
+Prior to 1.2.5 version passing a `nil` value for a parameter with a custom coercer would invoke the coercer, and not passing a parameter would not invoke it.
+This behavior was not tested or documented. Version 1.3.0 quietly changed this behavior, in that `nil` values skipped the coercion. Version 1.5.3 fixes and documents this as follows:
+
+```ruby
+class Api < Grape::API
+  params do
+    optional :value, type: Integer, coerce_with: ->(val) { val || 0 }
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { value: nil }
+  # 1.5.2 = nil
+  # 1.5.3 = 0
+  get '/example', params: {}
+  # 1.5.2 = nil
+  # 1.5.3 = nil
+end
+```
+See [#2164](https://github.com/ruby-grape/grape/pull/2164) for more information.
+
+### Upgrading to >= 1.5.1
+
+#### Dependent params
+
+If you use [dependent params](https://github.com/ruby-grape/grape#dependent-parameters) with
+`Grape::Extensions::Hash::ParamBuilder`, make sure a parameter to be dependent on is set as a Symbol.
+If a String is given, a parameter that other parameters depend on won't be found even if it is present.
+
+_Correct_:
+```ruby
+given :matrix do
+  # dependent params
+end
+```
+
+_Wrong_:
+```ruby
+given 'matrix' do
+  # dependent params
+end
+```
+
+### Upgrading to >= 1.5.0
+
+Prior to 1.3.3, the `declared` helper would always return the complete params structure if `include_missing=true` was set. In 1.3.3 a regression was introduced such that a missing Hash with or without nested parameters would always resolve to `{}`.
+
+In 1.5.0 this behavior is reverted, so the whole params structure will always be available via `declared`, regardless of whether any params are passed.
+
+The following rules now apply to the `declared` helper when params are missing and `include_missing=true`:
+
+* Hash params with children will resolve to a Hash with keys for each declared child.
+* Hash params with no children will resolve to `{}`.
+* Set params will resolve to `Set.new`.
+* Array params will resolve to `[]`.
+* All other params will resolve to `nil`.
+
+#### Example
+
+```ruby
+class Api < Grape::API
+  params do
+    optional :outer, type: Hash do
+      optional :inner, type: Hash do
+        optional :value, type: String
+      end
+    end
+  end
+  get 'example' do
+    declared(params, include_missing: true)
+  end
+end
+```
+
+```
+get '/example'
+# 1.3.3 = {}
+# 1.5.0 = {outer: {inner: {value:null}}}
+```
+
+For more information see [#2103](https://github.com/ruby-grape/grape/pull/2103).
+
+### Upgrading to >= 1.4.0
+
+#### Reworking stream and file and un-deprecating stream like-objects
+
+Previously in 0.16 stream-like objects were deprecated. This release restores their functionality for use-cases other than file streaming.
+
+This release deprecated `file` in favor of `sendfile` to better document its purpose.
+
+To deliver a file via the Sendfile support in your web server and have the Rack::Sendfile middleware enabled. See [`Rack::Sendfile`](https://www.rubydoc.info/gems/rack/Rack/Sendfile).
+```ruby
+class API < Grape::API
+  get '/' do
+    sendfile '/path/to/file'
+  end
+end
+```
+
+Use `stream` to stream file content in chunks.
+
+```ruby
+class API < Grape::API
+  get '/' do
+    stream '/path/to/file'
+  end
+end
+```
+
+Or use `stream` to stream other kinds of content. In the following example a streamer class
+streams paginated data from a database.
+
+```ruby
+class MyObject
+  attr_accessor :result
+
+  def initialize(query)
+    @result = query
+  end
+
+  def each
+    yield '['
+    # Do paginated DB fetches and return each page formatted
+    first = false
+    result.find_in_batches do |records|
+      yield process_records(records, first)
+      first = false
+    end
+    yield ']'
+  end
+
+  def process_records(records, first)
+    buffer = +''
+    buffer << ',' unless first
+    buffer << records.map(&:to_json).join(',')
+    buffer
+  end
+end
+
+class API < Grape::API
+  get '/' do
+    stream MyObject.new(Sprocket.all)
+  end
+end
+```
+
+### Upgrading to >= 1.3.3
+
+#### Nil values for structures
+
+Nil values have always been a special case when dealing with types, especially with the following structures:
+
+- Array
+- Hash
+- Set
+
+The behavior for these structures has changed throughout the latest releases. For example:
+
+```ruby
+class Api < Grape::API
+  params do
+    require :my_param, type: Array[Integer]
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil }
+  # 1.3.1 = []
+  # 1.3.2 = nil
+end
+```
+
+For now on, `nil` values stay `nil` values for all types, including arrays, sets and hashes.
+
+If you want to have the same behavior as 1.3.1, apply a `default` validator:
+
+```ruby
+class Api < Grape::API
+  params do
+    require :my_param, type: Array[Integer], default: []
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil } # => []
+end
+```
+
+#### Default validator
+
+Default validator is now applied for `nil` values.
+
+```ruby
+class Api < Grape::API
+  params do
+    requires :my_param, type: Integer, default: 0
+  end
+
+  get 'example' do
+     params[:my_param]
+  end
+  get '/example', params: { my_param: nil } #=> before: nil, after: 0
+end
+```
+
 ### Upgrading to >= 1.3.0
+
+You will need to upgrade to this version if you depend on `rack >= 2.1.0`.
 
 #### Ruby
 
@@ -9,54 +264,77 @@ After adding dry-types, Ruby 2.4 or newer is required.
 
 #### Coercion
 
-[Virtus](https://github.com/solnic/virtus) has been replaced by [dry-types](https://dry-rb.org/gems/dry-types/1.2/) for parameter coercion. If your project depends on Virtus, explicitly add it to your `Gemfile`. Also, if Virtus is used for defining custom types
+[Virtus](https://github.com/solnic/virtus) has been replaced by [dry-types](https://dry-rb.org/gems/dry-types/1.2/) for parameter coercion. If your project depends on Virtus outside of Grape, explicitly add it to your `Gemfile`.
+
+Here's an example of how to migrate a custom type from Virtus to dry-types:
 
 ```ruby
-class User
-  include Virtus.model
+# Legacy Grape parser
+class SecureUriType < Virtus::Attribute
+  def coerce(input)
+    URI.parse value
+  end
 
-  attribute :id, Integer
-  attribute :name, String
-end
-
-# somewhere in your API
-params do
-  requires :user, type: User
-end
-```
-
-Add a class-level `parse` method to the model:
-
-```ruby
-class User
-  include Virtus.model
-
-  attribute :id, Integer
-  attribute :name, String
-
-  def self.parse(attrs)
-    new(attrs)
+  def value_coerced?(input)
+    value.is_a? String
   end
 end
+
+params do
+  requires :secure_uri, type: SecureUri
+end
 ```
 
-Custom types which don't depend on Virtus don't require any changes.
+To use dry-types, we need to:
+
+1. Remove the inheritance of `Virtus::Attribute`
+1. Rename `coerce` to `self.parse`
+1. Rename `value_coerced?` to `self.parsed?`
+
+The custom type must have a class-level `parse` method to the model. A class-level `parsed?` is needed if the parsed type differs from the defined type. In the example below, since `SecureUri` is not the same as `URI::HTTPS`, `self.parsed?` is needed:
+
+```ruby
+# New dry-types parser
+class SecureUri
+  def self.parse(value)
+    URI.parse value
+  end
+
+  def self.parsed?(value)
+    value.is_a? URI::HTTPS
+  end
+end
+
+params do
+  requires :secure_uri, type: SecureUri
+end
+```
+
+#### Coercing to `FalseClass` or `TrueClass` no longer works
+
+Previous Grape versions allowed this, though it wasn't documented:
+
+```ruby
+requires :true_value, type: TrueClass
+requires :bool_value, types: [FalseClass, TrueClass]
+```
+
+This is no longer supported, if you do this, your values will never be valid. Instead you should do this:
+
+```ruby
+requires :true_value, type: Boolean # in your endpoint you should validate if this is actually `true`
+requires :bool_value, type: Boolean
+```
 
 #### Ensure that Array types have explicit coercions
 
-Unlike Virtus, dry-types does not perform any implict coercions. If you
-have any uses of `Array[String]`, `Array[Integer]`, etc. be sure they
-use a `coerce_with` block. For example:
+Unlike Virtus, dry-types does not perform any implict coercions. If you have any uses of `Array[String]`, `Array[Integer]`, etc. be sure they use a `coerce_with` block. For example:
 
 ```ruby
 requires :values, type: Array[String]
 ```
 
-It's quite common to pass a comma-separated list, such as `tag1,tag2` as
-`values`. Previously Virtus would implicitly coerce this to
-`Array(values)` so that `["tag1,tag2"]` would pass the type checks, but
-with `dry-types` the values are no longer coerced for you. To fix this,
-you might do:
+It's quite common to pass a comma-separated list, such as `tag1,tag2` as `values`. Previously Virtus would implicitly coerce this to `Array(values)` so that `["tag1,tag2"]` would pass the type checks, but with `dry-types` the values are no longer coerced for you. To fix this, you might do:
 
 ```ruby
 requires :values, type: Array[String], coerce_with: ->(val) { val.split(',').map(&:strip) }
@@ -123,12 +401,9 @@ In order to make obtaining the name of a mounted class simpler, we've delegated 
 
 ##### Patching the class
 
-In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
-rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
-with a class that can contain several instances of `Grape::API`.
+In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance, rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced with a class that can contain several instances of `Grape::API`.
 
-This changes were done in such a way that no code-changes should be required.
-However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
+This changes were done in such a way that no code-changes should be required. However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
 
 Note, this is particularly relevant if you are opening the class `Grape::API` for modification.
 
@@ -151,15 +426,20 @@ end
 
 After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class
 which inherit from `Grape::API::Instance`.
+
 What this means in practice, is:
+
 - Generally: you can access the named class from the instance calling the getter `base`.
-- In particular: If you need the `name`, you can use `base`.`name`
+- In particular: If you need the `name`, you can use `base`.`name`.
 
 **Deprecated**
+
 ```ruby
   payload[:endpoint].options[:for].name
 ```
+
 **New**
+
 ```ruby
   payload[:endpoint].options[:for].base.name
 ```
@@ -250,8 +530,7 @@ See [#1610](https://github.com/ruby-grape/grape/pull/1610) for more information.
 
 #### The `except`, `except_message`, and `proc` options of the `values` validator are deprecated.
 
-The new `except_values` validator should be used in place of the `except` and `except_message` options of
-the `values` validator.
+The new `except_values` validator should be used in place of the `except` and `except_message` options of the `values` validator.
 
 Arity one Procs may now be used directly as the `values` option to explicitly test param values.
 
@@ -327,9 +606,7 @@ get '/example' #=> before: 405, after: 404
 
 #### Removed param processing from built-in OPTIONS handler
 
-When a request is made to the built-in `OPTIONS` handler, only the `before` and `after`
-callbacks associated with the resource will be run.  The `before_validation` and
-`after_validation` callbacks and parameter validations will be skipped.
+When a request is made to the built-in `OPTIONS` handler, only the `before` and `after` callbacks associated with the resource will be run.  The `before_validation` and `after_validation` callbacks and parameter validations will be skipped.
 
 See [#1505](https://github.com/ruby-grape/grape/pull/1505) for more information.
 
@@ -350,8 +627,7 @@ See [#1510](https://github.com/ruby-grape/grape/pull/1510) for more information.
 
 #### The default status code for DELETE is now 204 instead of 200.
 
-Breaking change: Sets the default response status code for a delete request to 204.
-A status of 204 makes the response more distinguishable and therefore easier to handle on the client side, particularly because a DELETE request typically returns an empty body as the resource was deleted or voided.
+Breaking change: Sets the default response status code for a delete request to 204. A status of 204 makes the response more distinguishable and therefore easier to handle on the client side, particularly because a DELETE request typically returns an empty body as the resource was deleted or voided.
 
 To achieve the old behavior, one has to set it explicitly:
 ```ruby
@@ -529,18 +805,14 @@ See [#1114](https://github.com/ruby-grape/grape/pull/1114) for more information.
 
 #### Bypasses formatters when status code indicates no content
 
-To be consistent with rack and it's handling of standard responses
-associated with no content, both default and custom formatters will now
+To be consistent with rack and it's handling of standard responses associated with no content, both default and custom formatters will now
 be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
 
 See [#1190](https://github.com/ruby-grape/grape/pull/1190) for more information.
 
 #### Redirects respond as plain text with message
 
-`#redirect` now uses `text/plain` regardless of whether that format has
-been enabled. This prevents formatters from attempting to serialize the
-message body and allows for a descriptive message body to be provided - and
-optionally overridden - that better fulfills the theme of the HTTP spec.
+`#redirect` now uses `text/plain` regardless of whether that format has been enabled. This prevents formatters from attempting to serialize the message body and allows for a descriptive message body to be provided - and optionally overridden - that better fulfills the theme of the HTTP spec.
 
 See [#1194](https://github.com/ruby-grape/grape/pull/1194) for more information.
 
@@ -574,10 +846,7 @@ end
 
 See [#1029](https://github.com/ruby-grape/grape/pull/1029) for more information.
 
-There is a known issue because of this change. When Grape is used with an older
-than 1.2.4 version of [warden](https://github.com/hassox/warden) there may be raised
-the following exception having the [rack-mount](https://github.com/jm/rack-mount) gem's
-lines as last ones in the backtrace:
+There is a known issue because of this change. When Grape is used with an older than 1.2.4 version of [warden](https://github.com/hassox/warden) there may be raised the following exception having the [rack-mount](https://github.com/jm/rack-mount) gem's lines as last ones in the backtrace:
 
 ```
 NoMethodError: undefined method `[]' for nil:NilClass

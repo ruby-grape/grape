@@ -21,6 +21,7 @@ module Grape
       OPTIONS = 'OPTIONS'
 
       SUPPORTED_METHODS = [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS].freeze
+      SUPPORTED_METHODS_WITHOUT_OPTIONS = Grape::Util::LazyObject.new { [GET, POST, PUT, PATCH, DELETE, HEAD].freeze }
 
       HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'
       X_CASCADE              = 'X-Cascade'

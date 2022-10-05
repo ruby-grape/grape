@@ -4,19 +4,40 @@ module Grape
   class Router
     # this could be an OpenStruct, but doesn't work in Ruby 2.3.0, see https://bugs.ruby-lang.org/issues/12251
     class AttributeTranslator
-      attr_reader :attributes, :request_method, :requirements
+      attr_reader :attributes
 
-      def initialize(attributes = {})
+      ROUTE_ATTRIBUTES = %i[
+        prefix
+        version
+        settings
+        format
+        description
+        http_codes
+        headers
+        entity
+        details
+        requirements
+        request_method
+        namespace
+      ].freeze
+
+      ROUTER_ATTRIBUTES = %i[pattern index].freeze
+
+      def initialize(**attributes)
         @attributes = attributes
-        @request_method = attributes[:request_method]
-        @requirements = attributes[:requirements]
+      end
+
+      (ROUTER_ATTRIBUTES + ROUTE_ATTRIBUTES).each do |attr|
+        define_method attr do
+          attributes[attr]
+        end
       end
 
       def to_h
         attributes
       end
 
-      def method_missing(method_name, *args) # rubocop:disable Style/MethodMissing
+      def method_missing(method_name, *args)
         if setter?(method_name[-1])
           attributes[method_name[0..-1]] = *args
         else

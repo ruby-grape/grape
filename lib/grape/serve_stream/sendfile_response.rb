@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Grape
-  module ServeFile
+  module ServeStream
     # Response should respond to to_path method
     # for using Rack::SendFile middleware
     class SendfileResponse < Rack::Response

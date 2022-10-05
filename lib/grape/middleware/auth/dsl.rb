@@ -32,7 +32,13 @@ module Grape
 
           def http_digest(options = {}, &block)
             options[:realm] ||= 'API Authorization'
-            options[:opaque] ||= 'secret'
+
+            if options[:realm].respond_to?(:values_at)
+              options[:realm][:opaque] ||= 'secret'
+            else
+              options[:opaque] ||= 'secret'
+            end
+
             auth :http_digest, options, &block
           end
         end

@@ -2,73 +2,67 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::AllOrNoneOfValidator do
-  describe '#validate!' do
-    subject(:validate) { post path, params }
+describe Grape::Validations::Validators::AllOrNoneOfValidator do
+  let_it_be(:app) do
+    Class.new(Grape::API) do
+      rescue_from Grape::Exceptions::ValidationErrors do |e|
+        error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+      end
 
-    module ValidationsSpec
-      module AllOrNoneOfValidatorSpec
-        class API < Grape::API
-          rescue_from Grape::Exceptions::ValidationErrors do |e|
-            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
-          end
+      params do
+        optional :beer, :wine, type: Grape::API::Boolean
+        all_or_none_of :beer, :wine
+      end
+      post do
+      end
 
-          params do
-            optional :beer, :wine, type: Boolean
+      params do
+        optional :beer, :wine, :other, type: Grape::API::Boolean
+        all_or_none_of :beer, :wine
+      end
+      post 'mixed-params' do
+      end
+
+      params do
+        optional :beer, :wine, type: Grape::API::Boolean
+        all_or_none_of :beer, :wine, message: 'choose all or none'
+      end
+      post '/custom-message' do
+      end
+
+      params do
+        requires :item, type: Hash do
+          optional :beer, :wine, type: Grape::API::Boolean
+          all_or_none_of :beer, :wine
+        end
+      end
+      post '/nested-hash' do
+      end
+
+      params do
+        requires :items, type: Array do
+          optional :beer, :wine, type: Grape::API::Boolean
+          all_or_none_of :beer, :wine
+        end
+      end
+      post '/nested-array' do
+      end
+
+      params do
+        requires :items, type: Array do
+          requires :nested_items, type: Array do
+            optional :beer, :wine, type: Grape::API::Boolean
             all_or_none_of :beer, :wine
-          end
-          post do
-          end
-
-          params do
-            optional :beer, :wine, :other, type: Boolean
-            all_or_none_of :beer, :wine
-          end
-          post 'mixed-params' do
-          end
-
-          params do
-            optional :beer, :wine, type: Boolean
-            all_or_none_of :beer, :wine, message: 'choose all or none'
-          end
-          post '/custom-message' do
-          end
-
-          params do
-            requires :item, type: Hash do
-              optional :beer, :wine, type: Boolean
-              all_or_none_of :beer, :wine
-            end
-          end
-          post '/nested-hash' do
-          end
-
-          params do
-            requires :items, type: Array do
-              optional :beer, :wine, type: Boolean
-              all_or_none_of :beer, :wine
-            end
-          end
-          post '/nested-array' do
-          end
-
-          params do
-            requires :items, type: Array do
-              requires :nested_items, type: Array do
-                optional :beer, :wine, type: Boolean
-                all_or_none_of :beer, :wine
-              end
-            end
-          end
-          post '/deeply-nested-array' do
           end
         end
       end
+      post '/deeply-nested-array' do
+      end
     end
+  end
 
-    def app
-      ValidationsSpec::AllOrNoneOfValidatorSpec::API
-    end
+  describe '#validate!' do
+    subject(:validate) { post path, params }
 
     context 'when all restricted params are present' do
       let(:path) { '/' }

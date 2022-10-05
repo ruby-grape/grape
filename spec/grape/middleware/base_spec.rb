@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Base do
-  subject { Grape::Middleware::Base.new(blank_app) }
+  subject { described_class.new(blank_app) }
+
   let(:blank_app) { ->(_) { [200, {}, 'Hi there.'] } }
 
   before do
@@ -20,6 +21,8 @@ describe Grape::Middleware::Base do
   end
 
   context 'callbacks' do
+    after { subject.call!({}) }
+
     it 'calls #before' do
       expect(subject).to receive(:before)
     end
@@ -27,8 +30,6 @@ describe Grape::Middleware::Base do
     it 'calls #after' do
       expect(subject).to receive(:after)
     end
-
-    after { subject.call!({}) }
   end
 
   context 'callbacks on error' do
@@ -58,7 +59,7 @@ describe Grape::Middleware::Base do
     context 'with patched warnings' do
       before do
         @warnings = warnings = []
-        allow_any_instance_of(Grape::Middleware::Base).to receive(:warn) { |m| warnings << m }
+        allow_any_instance_of(described_class).to receive(:warn) { |m| warnings << m }
         allow(subject).to receive(:after).and_raise(StandardError)
       end
 
@@ -75,49 +76,57 @@ describe Grape::Middleware::Base do
   end
 
   describe '#response' do
-    subject { Grape::Middleware::Base.new(response) }
+    subject do
+      puts described_class
+      described_class.new(response)
+    end
 
-    context Array do
+    before { subject.call({}) }
+
+    context 'when Array' do
       let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
       it 'status' do
-        subject.call({})
         expect(subject.response.status).to eq(204)
       end
 
       it 'body' do
-        subject.call({})
         expect(subject.response.body).to eq(['test'])
       end
 
       it 'header' do
-        subject.call({})
         expect(subject.response.header).to have_key(:abc)
+      end
+
+      it 'returns the memoized Rack::Response instance' do
+        expect(subject.response).to be(subject.response)
       end
     end
 
-    context Rack::Response do
+    context 'when Rack::Response' do
       let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
 
       it 'status' do
-        subject.call({})
         expect(subject.response.status).to eq(204)
       end
 
       it 'body' do
-        subject.call({})
         expect(subject.response.body).to eq(['test'])
       end
 
       it 'header' do
-        subject.call({})
         expect(subject.response.header).to have_key(:abc)
+      end
+
+      it 'returns the memoized Rack::Response instance' do
+        expect(subject.response).to be(subject.response)
       end
     end
   end
 
   describe '#context' do
-    subject { Grape::Middleware::Base.new(blank_app) }
+    subject { described_class.new(blank_app) }
+
     it 'allows access to response context' do
       subject.call(Grape::Env::API_ENDPOINT => { header: 'some header' })
       expect(subject.context).to eq(header: 'some header')
@@ -126,7 +135,7 @@ describe Grape::Middleware::Base do
 
   context 'options' do
     it 'persists options passed at initialization' do
-      expect(Grape::Middleware::Base.new(blank_app, abc: true).options[:abc]).to be true
+      expect(described_class.new(blank_app, abc: true).options[:abc]).to be true
     end
 
     context 'defaults' do

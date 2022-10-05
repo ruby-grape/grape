@@ -43,6 +43,7 @@ describe Grape::Endpoint do
       before do
         catch(:error) { subject.error! 'Not Found', 404 }
       end
+
       it 'sets status' do
         expect(subject.status).to eq 404
       end
@@ -53,6 +54,7 @@ describe Grape::Endpoint do
         subject.namespace_inheritable(:default_error_status, 500)
         catch(:error) { subject.error! 'Unknown' }
       end
+
       it 'sets status to default_error_status' do
         expect(subject.status).to eq 500
       end
@@ -136,7 +138,7 @@ describe Grape::Endpoint do
     end
 
     it 'accepts unknown Integer status codes' do
-      expect { subject.status 210 }.to_not raise_error
+      expect { subject.status 210 }.not_to raise_error
     end
 
     it 'raises error if status is not a integer or symbol' do
@@ -203,80 +205,229 @@ describe Grape::Endpoint do
   end
 
   describe '#file' do
+    before do
+      allow(subject).to receive(:warn)
+    end
+
+    describe 'set' do
+      context 'as file path' do
+        let(:file_path) { '/some/file/path' }
+
+        it 'emits a warning that this method is deprecated' do
+          expect(subject).to receive(:warn).with(/Use sendfile or stream/)
+
+          subject.file file_path
+        end
+
+        it 'forwards the call to sendfile' do
+          expect(subject).to receive(:sendfile).with(file_path)
+
+          subject.file file_path
+        end
+      end
+
+      context 'as object (backward compatibility)' do
+        let(:file_object) { double('StreamerObject', each: nil) }
+
+        it 'emits a warning that this method is deprecated' do
+          expect(subject).to receive(:warn).with(/Use stream to use a Stream object/)
+
+          subject.file file_object
+        end
+
+        it 'forwards the call to stream' do
+          expect(subject).to receive(:stream).with(file_object)
+
+          subject.file file_object
+        end
+      end
+    end
+
+    describe 'get' do
+      it 'emits a warning that this method is deprecated' do
+        expect(subject).to receive(:warn).with(/Use sendfile or stream/)
+
+        subject.file
+      end
+
+      it 'fowards call to sendfile' do
+        expect(subject).to receive(:sendfile)
+
+        subject.file
+      end
+    end
+  end
+
+  describe '#sendfile' do
     describe 'set' do
       context 'as file path' do
         let(:file_path) { '/some/file/path' }
 
         let(:file_response) do
-          file_body = Grape::ServeFile::FileBody.new(file_path)
-          Grape::ServeFile::FileResponse.new(file_body)
+          file_body = Grape::ServeStream::FileBody.new(file_path)
+          Grape::ServeStream::StreamResponse.new(file_body)
         end
 
         before do
-          subject.file file_path
+          subject.header 'Cache-Control', 'cache'
+          subject.header 'Content-Length', 123
+          subject.header 'Transfer-Encoding', 'base64'
         end
 
-        it 'returns value wrapped in FileResponse' do
-          expect(subject.file).to eq file_response
+        it 'sends no deprecation warnings' do
+          expect(subject).not_to receive(:warn)
+
+          subject.sendfile file_path
+        end
+
+        it 'returns value wrapped in StreamResponse' do
+          subject.sendfile file_path
+
+          expect(subject.sendfile).to eq file_response
+        end
+
+        it 'does not change the Cache-Control header' do
+          subject.sendfile file_path
+
+          expect(subject.header['Cache-Control']).to eq 'cache'
+        end
+
+        it 'does not change the Content-Length header' do
+          subject.sendfile file_path
+
+          expect(subject.header['Content-Length']).to eq 123
+        end
+
+        it 'does not change the Transfer-Encoding header' do
+          subject.sendfile file_path
+
+          expect(subject.header['Transfer-Encoding']).to eq 'base64'
         end
       end
 
-      context 'as object (backward compatibility)' do
-        let(:file_object) { Class.new }
+      context 'as object' do
+        let(:file_object) { double('StreamerObject', each: nil) }
 
-        let(:file_response) do
-          Grape::ServeFile::FileResponse.new(file_object)
-        end
-
-        before do
-          subject.file file_object
-        end
-
-        it 'returns value wrapped in FileResponse' do
-          expect(subject.file).to eq file_response
+        it 'raises an error that only a file path is supported' do
+          expect { subject.sendfile file_object }.to raise_error(ArgumentError, /Argument must be a file path/)
         end
       end
     end
 
     it 'returns default' do
-      expect(subject.file).to be nil
+      expect(subject.sendfile).to be nil
     end
   end
 
   describe '#stream' do
     describe 'set' do
-      let(:file_object) { Class.new }
+      context 'as a file path' do
+        let(:file_path) { '/some/file/path' }
 
-      before do
-        subject.header 'Cache-Control', 'cache'
-        subject.header 'Content-Length', 123
-        subject.header 'Transfer-Encoding', 'base64'
-        subject.stream file_object
+        let(:file_response) do
+          file_body = Grape::ServeStream::FileBody.new(file_path)
+          Grape::ServeStream::StreamResponse.new(file_body)
+        end
+
+        before do
+          subject.header 'Cache-Control', 'cache'
+          subject.header 'Content-Length', 123
+          subject.header 'Transfer-Encoding', 'base64'
+        end
+
+        it 'emits no deprecation warnings' do
+          expect(subject).not_to receive(:warn)
+
+          subject.stream file_path
+        end
+
+        it 'returns file body wrapped in StreamResponse' do
+          subject.stream file_path
+
+          expect(subject.stream).to eq file_response
+        end
+
+        it 'sets Cache-Control header to no-cache' do
+          subject.stream file_path
+
+          expect(subject.header['Cache-Control']).to eq 'no-cache'
+        end
+
+        it 'does not change Cache-Control header' do
+          subject.stream
+
+          expect(subject.header['Cache-Control']).to eq 'cache'
+        end
+
+        it 'sets Content-Length header to nil' do
+          subject.stream file_path
+
+          expect(subject.header['Content-Length']).to eq nil
+        end
+
+        it 'sets Transfer-Encoding header to nil' do
+          subject.stream file_path
+
+          expect(subject.header['Transfer-Encoding']).to eq nil
+        end
       end
 
-      it 'returns value wrapped in FileResponse' do
-        expect(subject.stream).to eq Grape::ServeFile::FileResponse.new(file_object)
+      context 'as a stream object' do
+        let(:stream_object) { double('StreamerObject', each: nil) }
+
+        let(:stream_response) do
+          Grape::ServeStream::StreamResponse.new(stream_object)
+        end
+
+        before do
+          subject.header 'Cache-Control', 'cache'
+          subject.header 'Content-Length', 123
+          subject.header 'Transfer-Encoding', 'base64'
+        end
+
+        it 'emits no deprecation warnings' do
+          expect(subject).not_to receive(:warn)
+
+          subject.stream stream_object
+        end
+
+        it 'returns value wrapped in StreamResponse' do
+          subject.stream stream_object
+
+          expect(subject.stream).to eq stream_response
+        end
+
+        it 'sets Cache-Control header to no-cache' do
+          subject.stream stream_object
+
+          expect(subject.header['Cache-Control']).to eq 'no-cache'
+        end
+
+        it 'sets Content-Length header to nil' do
+          subject.stream stream_object
+
+          expect(subject.header['Content-Length']).to eq nil
+        end
+
+        it 'sets Transfer-Encoding header to nil' do
+          subject.stream stream_object
+
+          expect(subject.header['Transfer-Encoding']).to eq nil
+        end
       end
 
-      it 'also sets result of file to value wrapped in FileResponse' do
-        expect(subject.file).to eq Grape::ServeFile::FileResponse.new(file_object)
-      end
+      context 'as a non-stream object' do
+        let(:non_stream_object) { double('NonStreamerObject') }
 
-      it 'sets Cache-Control header to no-cache' do
-        expect(subject.header['Cache-Control']).to eq 'no-cache'
-      end
-
-      it 'sets Content-Length header to nil' do
-        expect(subject.header['Content-Length']).to eq nil
-      end
-
-      it 'sets Transfer-Encoding header to nil' do
-        expect(subject.header['Transfer-Encoding']).to eq nil
+        it 'raises an error that the object must implement :each' do
+          expect { subject.stream non_stream_object }.to raise_error(ArgumentError, /:each/)
+        end
       end
     end
 
     it 'returns default' do
-      expect(subject.file).to be nil
+      expect(subject.stream).to be nil
+      expect(subject.header['Cache-Control']).to eq nil
     end
   end
 

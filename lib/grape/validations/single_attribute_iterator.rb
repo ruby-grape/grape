@@ -7,7 +7,7 @@ module Grape
 
       def yield_attributes(val, attrs)
         attrs.each do |attr_name|
-          yield val, attr_name, empty?(val)
+          yield val, attr_name, empty?(val), skip?(val)
         end
       end
 

@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 describe Grape::Middleware::Formatter do
-  subject { Grape::Middleware::Formatter.new(app) }
+  subject { described_class.new(app) }
+
   before { allow(subject).to receive(:dup).and_return(subject) }
 
   let(:body) { { 'foo' => 'bar' } }
@@ -11,6 +12,7 @@ describe Grape::Middleware::Formatter do
 
   context 'serialization' do
     let(:body) { { 'abc' => 'def' } }
+
     it 'looks at the bodies for possibly serializable data' do
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
       bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) }
@@ -18,9 +20,10 @@ describe Grape::Middleware::Formatter do
 
     context 'default format' do
       let(:body) { ['foo'] }
+
       it 'calls #to_json since default format is json' do
         body.instance_eval do
-          def to_json
+          def to_json(*_args)
             '"bar"'
           end
         end
@@ -31,9 +34,10 @@ describe Grape::Middleware::Formatter do
 
     context 'jsonapi' do
       let(:body) { { 'foos' => [{ 'bar' => 'baz' }] } }
+
       it 'calls #to_json if the content type is jsonapi' do
         body.instance_eval do
-          def to_json
+          def to_json(*_args)
             '{"foos":[{"bar":"baz"}] }'
           end
         end
@@ -44,6 +48,7 @@ describe Grape::Middleware::Formatter do
 
     context 'xml' do
       let(:body) { +'string' }
+
       it 'calls #to_xml if the content type is xml' do
         body.instance_eval do
           def to_xml
@@ -58,6 +63,7 @@ describe Grape::Middleware::Formatter do
 
   context 'error handling' do
     let(:formatter) { double(:formatter) }
+
     before do
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
     end
@@ -67,7 +73,7 @@ describe Grape::Middleware::Formatter do
 
       expect do
         catch(:error) { subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
-      end.to_not raise_error
+      end.not_to raise_error
     end
 
     it 'does not rescue other exceptions' do
@@ -147,7 +153,7 @@ describe Grape::Middleware::Formatter do
         subject.options[:content_types][:custom] = 'application/vnd.test+json'
       end
 
-      it 'it uses the custom type' do
+      it 'uses the custom type' do
         subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
         expect(subject.env['api.format']).to eq(:custom)
       end
@@ -164,26 +170,31 @@ describe Grape::Middleware::Formatter do
       _, headers, = subject.call('PATH_INFO' => '/info.json')
       expect(headers['Content-type']).to eq('application/json')
     end
+
     it 'is set for xml' do
       _, headers, = subject.call('PATH_INFO' => '/info.xml')
       expect(headers['Content-type']).to eq('application/xml')
     end
+
     it 'is set for txt' do
       _, headers, = subject.call('PATH_INFO' => '/info.txt')
       expect(headers['Content-type']).to eq('text/plain')
     end
+
     it 'is set for custom' do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = 'application/x-custom'
       _, headers, = subject.call('PATH_INFO' => '/info.custom')
       expect(headers['Content-type']).to eq('application/x-custom')
     end
+
     it 'is set for vendored with registered type' do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = 'application/vnd.test+json'
       _, headers, = subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
       expect(headers['Content-type']).to eq('application/vnd.test+json')
     end
+
     it 'is set to closest generic for custom vendored/versioned without registered type' do
       _, headers, = subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
       expect(headers['Content-type']).to eq('application/json')
@@ -198,13 +209,16 @@ describe Grape::Middleware::Formatter do
       _, _, body = subject.call('PATH_INFO' => '/info.custom')
       expect(read_chunks(body)).to eq(['CUSTOM FORMAT'])
     end
+
     context 'default' do
       let(:body) { ['blah'] }
+
       it 'uses default json formatter' do
         _, _, body = subject.call('PATH_INFO' => '/info.json')
         expect(read_chunks(body)).to eq(['["blah"]'])
       end
     end
+
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
       _, _, body = subject.call('PATH_INFO' => '/info.json')
@@ -272,6 +286,7 @@ describe Grape::Middleware::Formatter do
 
       context 'when body is nil' do
         let(:io) { double }
+
         before do
           allow(io).to receive_message_chain(:rewind, :read).and_return(nil)
         end
@@ -290,6 +305,7 @@ describe Grape::Middleware::Formatter do
 
       context 'when body is empty' do
         let(:io) { double }
+
         before do
           allow(io).to receive_message_chain(:rewind, :read).and_return('')
         end
@@ -334,6 +350,7 @@ describe Grape::Middleware::Formatter do
         expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
         expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
+
       it 'rewinds IO' do
         io = StringIO.new('{"is_boolean":true,"string":"thing"}')
         io.read
@@ -347,6 +364,7 @@ describe Grape::Middleware::Formatter do
         expect(subject.env['rack.request.form_hash']['is_boolean']).to be true
         expect(subject.env['rack.request.form_hash']['string']).to eq('thing')
       end
+
       it "parses the body from an xml #{method} and copies values into rack.request.from_hash" do
         io = StringIO.new('<thing><name>Test</name></thing>')
         subject.call(
@@ -362,6 +380,7 @@ describe Grape::Middleware::Formatter do
           expect(subject.env['rack.request.form_hash']['thing']['name']['__content__']).to eq('Test')
         end
       end
+
       [Rack::Request::FORM_DATA_MEDIA_TYPES, Rack::Request::PARSEABLE_DATA_MEDIA_TYPES].flatten.each do |content_type|
         it "ignores #{content_type}" do
           io = StringIO.new('name=Other+Test+Thing')
@@ -380,7 +399,7 @@ describe Grape::Middleware::Formatter do
 
   context 'send file' do
     let(:file) { double(File) }
-    let(:file_body) { Grape::ServeFile::FileResponse.new(file) }
+    let(:file_body) { Grape::ServeStream::StreamResponse.new(file) }
     let(:app) { ->(_env) { [200, {}, file_body] } }
 
     it 'returns a file response' do
@@ -400,10 +419,12 @@ describe Grape::Middleware::Formatter do
       end
     end
     let(:app) { ->(_env) { [200, {}, ['']] } }
+
     before do
       Grape::Formatter.register :invalid, InvalidFormatter
       Grape::ContentTypes.register :invalid, 'application/x-invalid'
     end
+
     after do
       Grape::ContentTypes.default_elements.delete(:invalid)
       Grape::Formatter.default_elements.delete(:invalid)
@@ -418,7 +439,7 @@ describe Grape::Middleware::Formatter do
 
   context 'custom parser raises exception and rescue options are enabled for backtrace and original_exception' do
     it 'adds the backtrace and original_exception to the error output' do
-      subject = Grape::Middleware::Formatter.new(
+      subject = described_class.new(
         app,
         rescue_options: { backtrace: true, original_exception: true },
         parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }

@@ -4,12 +4,16 @@ require 'spec_helper'
 
 describe Rack::Sendfile do
   subject do
-    send_file = file_streamer
+    content_object = file_object
     app = Class.new(Grape::API) do
       use Rack::Sendfile
       format :json
       get do
-        file send_file
+        if content_object.is_a?(String)
+          sendfile content_object
+        else
+          stream content_object
+        end
       end
     end
 
@@ -22,9 +26,9 @@ describe Rack::Sendfile do
     app.call(env)
   end
 
-  context do
-    let(:file_streamer) do
-      double(:file_streamer, to_path: '/accel/mapping/some/path')
+  context 'when calling sendfile' do
+    let(:file_object) do
+      '/accel/mapping/some/path'
     end
 
     it 'contains Sendfile headers' do
@@ -33,14 +37,14 @@ describe Rack::Sendfile do
     end
   end
 
-  context do
-    let(:file_streamer) do
-      double(:file_streamer)
+  context 'when streaming non file content' do
+    let(:file_object) do
+      double(:file_object, each: nil)
     end
 
     it 'not contains Sendfile headers' do
       headers = subject[1]
-      expect(headers).to_not include('X-Accel-Redirect')
+      expect(headers).not_to include('X-Accel-Redirect')
     end
   end
 end

@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe Grape::Validations::PresenceValidator do
+describe Grape::Validations::Validators::PresenceValidator do
   subject do
     Class.new(Grape::API) do
       format :json
     end
   end
+
   def app
     subject
   end
@@ -20,6 +21,7 @@ describe Grape::Validations::PresenceValidator do
         end
       end
     end
+
     it 'does not validate for any params' do
       get '/bacons'
       expect(last_response.status).to eq(200)
@@ -38,15 +40,18 @@ describe Grape::Validations::PresenceValidator do
         end
       end
     end
+
     it 'requires when missing' do
       get '/requires'
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"email is required, email has no value"}')
     end
+
     it 'requires when empty' do
       get '/requires', email: ''
       expect(last_response.body).to eq('{"error":"email has no value, email format is invalid"}')
     end
+
     it 'valid when set' do
       get '/requires', email: 'bob@example.com'
       expect(last_response.status).to eq(200)
@@ -64,6 +69,7 @@ describe Grape::Validations::PresenceValidator do
         { ret: params[:id] }
       end
     end
+
     it 'validates id' do
       post '/'
       expect(last_response.status).to eq(400)
@@ -90,16 +96,19 @@ describe Grape::Validations::PresenceValidator do
         'Hello'
       end
     end
+
     it 'requires when missing' do
       get '/'
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"email is missing, email is empty"}')
     end
+
     it 'requires when empty' do
       get '/', email: ''
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('{"error":"email is empty, email is invalid"}')
     end
+
     it 'valid when set' do
       get '/', email: 'bob@example.com'
       expect(last_response.status).to eq(200)
@@ -124,6 +133,7 @@ describe Grape::Validations::PresenceValidator do
         'Hello'
       end
     end
+
     it 'validates for all defined params' do
       get '/single-requires'
       expect(last_response.status).to eq(400)
@@ -144,6 +154,7 @@ describe Grape::Validations::PresenceValidator do
         'Hello'
       end
     end
+
     it 'validates name, company' do
       get '/'
       expect(last_response.status).to eq(400)
@@ -171,6 +182,7 @@ describe Grape::Validations::PresenceValidator do
         'Nested'
       end
     end
+
     it 'validates nested parameters' do
       get '/nested'
       expect(last_response.status).to eq(400)
@@ -203,6 +215,7 @@ describe Grape::Validations::PresenceValidator do
         'Nested triple'
       end
     end
+
     it 'validates triple nested parameters' do
       get '/nested_triple'
       expect(last_response.status).to eq(400)
@@ -252,6 +265,7 @@ describe Grape::Validations::PresenceValidator do
         'Hello optional'
       end
     end
+
     it 'works with required' do
       get '/required'
       expect(last_response.status).to eq(400)
@@ -261,6 +275,7 @@ describe Grape::Validations::PresenceValidator do
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('Hello required'.to_json)
     end
+
     it 'works with optional' do
       get '/optional'
       expect(last_response.status).to eq(200)

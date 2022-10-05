@@ -30,6 +30,10 @@ module Grape
         def inspect
           klass.to_s
         end
+
+        def use_in(builder)
+          builder.use(@klass, *@args, &@block)
+        end
       end
 
       include Enumerable
@@ -41,8 +45,8 @@ module Grape
         @others = []
       end
 
-      def each
-        @middlewares.each { |x| yield x }
+      def each(&block)
+        @middlewares.each(&block)
       end
 
       def size
@@ -62,6 +66,7 @@ module Grape
         middleware = self.class::Middleware.new(*args, &block)
         middlewares.insert(index, middleware)
       end
+      ruby2_keywords :insert if respond_to?(:ruby2_keywords, true)
 
       alias insert_before insert
 
@@ -69,11 +74,13 @@ module Grape
         index = assert_index(index, :after)
         insert(index + 1, *args, &block)
       end
+      ruby2_keywords :insert_after if respond_to?(:ruby2_keywords, true)
 
       def use(*args, &block)
         middleware = self.class::Middleware.new(*args, &block)
         middlewares.push(middleware)
       end
+      ruby2_keywords :use if respond_to?(:ruby2_keywords, true)
 
       def merge_with(middleware_specs)
         middleware_specs.each do |operation, *args|
@@ -90,7 +97,7 @@ module Grape
       def build(builder = Rack::Builder.new)
         others.shift(others.size).each(&method(:merge_with))
         middlewares.each do |m|
-          m.block ? builder.use(m.klass, *m.args, &m.block) : builder.use(m.klass, *m.args)
+          m.use_in(builder)
         end
         builder
       end

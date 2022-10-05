@@ -35,6 +35,7 @@ bundle exec rake
 Run tests against all supported versions of Rails.
 
 ```
+gem install appraisal
 appraisal install
 appraisal rake spec
 ```
@@ -118,7 +119,7 @@ Go back to your pull request after a few minutes and see whether it passed muste
 
 #### Be Patient
 
-It's likely that your change will not be merged and that the nitpicky maintainers will ask you to do more, or fix seemingly benign problems. Hang on there!
+It's likely that your change will not be merged and that the nitpicky maintainers will ask you to do more, or fix seemingly benign problems. Hang in there!
 
 #### Thank You
 

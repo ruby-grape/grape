@@ -18,28 +18,28 @@ module Grape
         #   to inject.
         def use(middleware_class, *args, &block)
           arr = [:use, middleware_class, *args]
-          arr << block if block_given?
+          arr << block if block
 
           namespace_stackable(:middleware, arr)
         end
 
         def insert(*args, &block)
           arr = [:insert, *args]
-          arr << block if block_given?
+          arr << block if block
 
           namespace_stackable(:middleware, arr)
         end
 
         def insert_before(*args, &block)
           arr = [:insert_before, *args]
-          arr << block if block_given?
+          arr << block if block
 
           namespace_stackable(:middleware, arr)
         end
 
         def insert_after(*args, &block)
           arr = [:insert_after, *args]
-          arr << block if block_given?
+          arr << block if block
 
           namespace_stackable(:middleware, arr)
         end

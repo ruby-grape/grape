@@ -7,6 +7,7 @@ require_relative 'types/multiple_type_coercer'
 require_relative 'types/variant_collection_coercer'
 require_relative 'types/json'
 require_relative 'types/file'
+require_relative 'types/invalid_value'
 
 module Grape
   module Validations
@@ -21,10 +22,6 @@ module Grape
     # and {Grape::Dsl::Parameters#optional}. The main
     # entry point for this process is {Types.build_coercer}.
     module Types
-      # Instances of this class may be used as tokens to denote that
-      # a parameter value could not be coerced.
-      class InvalidValue; end
-
       # Types representing a single value, which are coerced.
       PRIMITIVES = [
         # Numerical
@@ -42,7 +39,6 @@ module Grape
         Grape::API::Boolean,
         String,
         Symbol,
-        Rack::Multipart::UploadedFile,
         TrueClass,
         FalseClass
       ].freeze
@@ -54,8 +50,7 @@ module Grape
         Set
       ].freeze
 
-      # Types for which Grape provides special coercion
-      # and type-checking logic.
+      # Special custom types provided by Grape.
       SPECIAL = {
         JSON => Json,
         Array[JSON] => JsonArray,
@@ -130,7 +125,6 @@ module Grape
         !primitive?(type) &&
           !structure?(type) &&
           !multiple?(type) &&
-          !special?(type) &&
           type.respond_to?(:parse) &&
           type.method(:parse).arity == 1
       end
@@ -143,7 +137,11 @@ module Grape
       def self.collection_of_custom?(type)
         (type.is_a?(Array) || type.is_a?(Set)) &&
           type.length == 1 &&
-          custom?(type.first)
+          (custom?(type.first) || special?(type.first))
+      end
+
+      def self.map_special(type)
+        SPECIAL.fetch(type, type)
       end
     end
   end

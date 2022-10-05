@@ -9,6 +9,10 @@ describe Grape::Validations do
     subject
   end
 
+  def declared_params
+    subject.namespace_stackable(:declared_params).flatten
+  end
+
   describe 'params' do
     context 'optional' do
       before do
@@ -41,7 +45,7 @@ describe Grape::Validations do
         subject.params do
           optional :some_param
         end
-        expect(subject.route_setting(:declared_params)).to eq([:some_param])
+        expect(declared_params).to eq([:some_param])
       end
     end
 
@@ -61,7 +65,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_optional_using
-        expect(subject.route_setting(:declared_params)).to eq(%i[field_a field_b])
+        expect(declared_params).to eq(%i[field_a field_b])
       end
 
       it 'works when field_a and field_b are not present' do
@@ -108,7 +112,7 @@ describe Grape::Validations do
         subject.params do
           requires :some_param
         end
-        expect(subject.route_setting(:declared_params)).to eq([:some_param])
+        expect(declared_params).to eq([:some_param])
       end
 
       it 'works when required field is present but nil' do
@@ -193,7 +197,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
+        expect(declared_params).to eq(%i[required_field optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -228,7 +232,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_none
-        expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
+        expect(declared_params).to eq(%i[required_field optional_field])
       end
 
       it 'errors when required_field is not present' do
@@ -258,7 +262,7 @@ describe Grape::Validations do
 
         it 'adds only the entity documentation to declared params, nothing more' do
           define_requires_all
-          expect(subject.route_setting(:declared_params)).to eq(%i[required_field optional_field])
+          expect(declared_params).to eq(%i[required_field optional_field])
         end
       end
 
@@ -324,7 +328,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
+        expect(declared_params).to eq([items: [:key]])
       end
     end
 
@@ -396,7 +400,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
+        expect(declared_params).to eq([items: [:key]])
       end
     end
 
@@ -459,7 +463,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
+        expect(declared_params).to eq([items: [:key]])
       end
     end
 
@@ -485,15 +489,22 @@ describe Grape::Validations do
     end
 
     context 'custom validator for a Hash' do
-      module ValuesSpec
-        module DateRangeValidations
-          class DateRangeValidator < Grape::Validations::Base
-            def validate_param!(attr_name, params)
-              return if params[attr_name][:from] <= params[attr_name][:to]
-              raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'")
-            end
+      let(:date_range_validator) do
+        Class.new(Grape::Validations::Validators::Base) do
+          def validate_param!(attr_name, params)
+            return if params[attr_name][:from] <= params[attr_name][:to]
+
+            raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "'from' must be lower or equal to 'to'")
           end
         end
+      end
+
+      before do
+        described_class.register_validator('date_range', date_range_validator)
+      end
+
+      after do
+        described_class.deregister_validator('date_range')
       end
 
       before do
@@ -574,7 +585,7 @@ describe Grape::Validations do
         # NOTE: with body parameters in json or XML or similar this
         # should actually fail with: children[parents][name] is missing.
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[1][parents] is missing')
+        expect(last_response.body).to eq('children[1][parents] is missing, children[0][parents][1][name] is missing, children[0][parents][1][name] is empty')
       end
 
       it 'errors when a parameter is not present in array within array' do
@@ -615,7 +626,7 @@ describe Grape::Validations do
 
         get '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing, children[0][parents][0][name] is empty')
       end
 
       it 'errors when param is not an Array' do
@@ -763,7 +774,7 @@ describe Grape::Validations do
         expect(last_response.status).to eq(200)
         put_with_json '/within_array', children: [name: 'Jay']
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('children[0][parents] is missing')
+        expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing')
       end
     end
 
@@ -813,7 +824,7 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(subject.route_setting(:declared_params)).to eq([items: [:key]])
+        expect(declared_params).to eq([items: [:key]])
       end
     end
 
@@ -838,7 +849,7 @@ describe Grape::Validations do
       it 'does internal validations if the outer group is present' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
@@ -858,7 +869,7 @@ describe Grape::Validations do
       it 'handles validation within arrays' do
         get '/nested_optional_group', items: [{ key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[0][required_subitems] is missing')
+        expect(last_response.body).to eq('items[0][required_subitems] is missing, items[0][required_subitems][0][value] is missing')
 
         get '/nested_optional_group', items: [{ key: 'foo', required_subitems: [{ value: 'bar' }] }]
         expect(last_response.status).to eq(200)
@@ -877,7 +888,284 @@ describe Grape::Validations do
             requires(:required_subitems, type: Array) { requires :value }
           end
         end
-        expect(subject.route_setting(:declared_params)).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
+        expect(declared_params).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
+      end
+
+      context <<~DESC do
+        Issue occurs whenever:
+        * param structure with at least three levels
+        * 1st level item is a required Array that has >1 entry with an optional item present and >1 entry with an optional item missing#{'  '}
+        * 2nd level is an optional Array or Hash#{' '}
+        * 3rd level is a required item (can be any type)
+        * additional levels do not effect the issue from occuring
+      DESC
+
+        it 'example based off actual real world use case' do
+          subject.params do
+            requires :orders, type: Array do
+              requires :id, type: Integer
+              optional :drugs, type: Array do
+                requires :batches, type: Array do
+                  requires :batch_no, type: String
+                end
+              end
+            end
+          end
+
+          subject.get '/validate_required_arrays_under_optional_arrays' do
+            'validate_required_arrays_under_optional_arrays works!'
+          end
+
+          data = {
+            orders: [
+              { id: 77, drugs: [{ batches: [{ batch_no: 'A1234567' }] }] },
+              { id: 70 }
+            ]
+          }
+
+          get '/validate_required_arrays_under_optional_arrays', data
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'simplest example using Array -> Array -> Hash -> String' do
+          subject.params do
+            requires :orders, type: Array do
+              requires :id, type: Integer
+              optional :drugs, type: Array do
+                requires :batch_no, type: String
+              end
+            end
+          end
+
+          subject.get '/validate_required_arrays_under_optional_arrays' do
+            'validate_required_arrays_under_optional_arrays works!'
+          end
+
+          data = {
+            orders: [
+              { id: 77, drugs: [{ batch_no: 'A1234567' }] },
+              { id: 70 }
+            ]
+          }
+
+          get '/validate_required_arrays_under_optional_arrays', data
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'simplest example using Array -> Hash -> String' do
+          subject.params do
+            requires :orders, type: Array do
+              requires :id, type: Integer
+              optional :drugs, type: Hash do
+                requires :batch_no, type: String
+              end
+            end
+          end
+
+          subject.get '/validate_required_arrays_under_optional_arrays' do
+            'validate_required_arrays_under_optional_arrays works!'
+          end
+
+          data = {
+            orders: [
+              { id: 77, drugs: { batch_no: 'A1234567' } },
+              { id: 70 }
+            ]
+          }
+
+          get '/validate_required_arrays_under_optional_arrays', data
+          expect(last_response.body).to eq('validate_required_arrays_under_optional_arrays works!')
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'correctly indexes invalida data' do
+          subject.params do
+            requires :orders, type: Array do
+              requires :id, type: Integer
+              optional :drugs, type: Array do
+                requires :batch_no, type: String
+                requires :quantity, type: Integer
+              end
+            end
+          end
+
+          subject.get '/correctly_indexes' do
+            'correctly_indexes works!'
+          end
+
+          data = {
+            orders: [
+              { id: 70 },
+              { id: 77, drugs: [{ batch_no: 'A1234567', quantity: 12 }, { batch_no: 'B222222' }] }
+            ]
+          }
+
+          get '/correctly_indexes', data
+          expect(last_response.body).to eq('orders[1][drugs][1][quantity] is missing')
+          expect(last_response.status).to eq(400)
+        end
+
+        context 'multiple levels of optional and requires settings' do
+          before do
+            subject.params do
+              requires :top, type: Array do
+                requires :top_id, type: Integer, allow_blank: false
+                optional :middle_1, type: Array do
+                  requires :middle_1_id, type: Integer, allow_blank: false
+                  optional :middle_2, type: Array do
+                    requires :middle_2_id, type: String, allow_blank: false
+                    optional :bottom, type: Array do
+                      requires :bottom_id, type: Integer, allow_blank: false
+                    end
+                  end
+                end
+              end
+            end
+
+            subject.get '/multi_level' do
+              'multi_level works!'
+            end
+          end
+
+          it 'with valid data' do
+            data = {
+              top: [
+                { top_id: 1, middle_1: [
+                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
+                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: 1221 }] }
+                  ] }
+                ] },
+                { top_id: 2, middle_1: [
+                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [
+                    { middle_2_id: 221 }
+                  ] }
+                ] },
+                { top_id: 3, middle_1: [
+                  { middle_1_id: 31 }, { middle_1_id: 32 }
+                ] },
+                { top_id: 4 }
+              ]
+            }
+
+            get '/multi_level', data
+            expect(last_response.body).to eq('multi_level works!')
+            expect(last_response.status).to eq(200)
+          end
+
+          it 'with invalid data' do
+            data = {
+              top: [
+                { top_id: 1, middle_1: [
+                  { middle_1_id: 11 }, { middle_1_id: 12, middle_2: [
+                    { middle_2_id: 121 }, { middle_2_id: 122, bottom: [{ bottom_id: nil }] }
+                  ] }
+                ] },
+                { top_id: 2, middle_1: [
+                  { middle_1_id: 21 }, { middle_1_id: 22, middle_2: [{ middle_2_id: nil }] }
+                ] },
+                { top_id: 3, middle_1: [
+                  { middle_1_id: nil }, { middle_1_id: 32 }
+                ] },
+                { top_id: nil, missing_top_id: 4 }
+              ]
+            }
+            # debugger
+            get '/multi_level', data
+            expect(last_response.body.split(', ')).to match_array([
+                                                                    'top[3][top_id] is empty',
+                                                                    'top[2][middle_1][0][middle_1_id] is empty',
+                                                                    'top[1][middle_1][1][middle_2][0][middle_2_id] is empty',
+                                                                    'top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty'
+                                                                  ])
+            expect(last_response.status).to eq(400)
+          end
+        end
+      end
+
+      it 'exactly_one_of' do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              exactly_one_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/exactly_one_of' do
+          'exactly_one_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: { batch_no: 'A1234567' } },
+            { id: 70 }
+          ]
+        }
+
+        get '/exactly_one_of', data
+        expect(last_response.body).to eq('exactly_one_of works!')
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'at_least_one_of' do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              at_least_one_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/at_least_one_of' do
+          'at_least_one_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: { batch_no: 'A1234567' } },
+            { id: 70 }
+          ]
+        }
+
+        get '/at_least_one_of', data
+        expect(last_response.body).to eq('at_least_one_of works!')
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'all_or_none_of' do
+        subject.params do
+          requires :orders, type: Array do
+            requires :id, type: Integer
+            optional :drugs, type: Hash do
+              optional :batch_no, type: String
+              optional :batch_id, type: String
+              all_or_none_of :batch_no, :batch_id
+            end
+          end
+        end
+
+        subject.get '/all_or_none_of' do
+          'all_or_none_of works!'
+        end
+
+        data = {
+          orders: [
+            { id: 77, drugs: { batch_no: 'A1234567', batch_id: '12' } },
+            { id: 70 }
+          ]
+        }
+
+        get '/all_or_none_of', data
+        expect(last_response.body).to eq('all_or_none_of works!')
+        expect(last_response.status).to eq(200)
       end
     end
 
@@ -901,13 +1189,22 @@ describe Grape::Validations do
     end
 
     context 'custom validation' do
-      module CustomValidations
-        class Customvalidator < Grape::Validations::Base
+      let(:custom_validator) do
+        Class.new(Grape::Validations::Validators::Base) do
           def validate_param!(attr_name, params)
             return if params[attr_name] == 'im custom'
+
             raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: 'is not custom!')
           end
         end
+      end
+
+      before do
+        described_class.register_validator('customvalidator', custom_validator)
+      end
+
+      after do
+        described_class.deregister_validator('customvalidator')
       end
 
       context 'when using optional with a custom validator' do
@@ -1049,13 +1346,22 @@ describe Grape::Validations do
       end
 
       context 'when using options on param' do
-        module CustomValidations
-          class CustomvalidatorWithOptions < Grape::Validations::Base
+        let(:custom_validator_with_options) do
+          Class.new(Grape::Validations::Validators::Base) do
             def validate_param!(attr_name, params)
               return if params[attr_name] == @option[:text]
+
               raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message)
             end
           end
+        end
+
+        before do
+          described_class.register_validator('customvalidator_with_options', custom_validator_with_options)
+        end
+
+        after do
+          described_class.deregister_validator('customvalidator_with_options')
         end
 
         before do
@@ -1122,14 +1428,14 @@ describe Grape::Validations do
           subject.params do
             use :pagination
           end
-          expect(subject.route_setting(:declared_params)).to eq %i[page per_page]
+          expect(declared_params).to eq %i[page per_page]
         end
 
         it 'by #use with multiple params' do
           subject.params do
             use :pagination, :period
           end
-          expect(subject.route_setting(:declared_params)).to eq %i[page per_page start_date end_date]
+          expect(declared_params).to eq %i[page per_page start_date end_date]
         end
       end
 
@@ -1152,21 +1458,25 @@ describe Grape::Validations do
             }
           end
         end
+
         it 'returns defaults' do
           get '/order'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :asc, order_by: :created_at }.to_json)
         end
+
         it 'overrides default value for order' do
           get '/order?order=desc'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :desc, order_by: :created_at }.to_json)
         end
+
         it 'overrides default value for order_by' do
           get '/order?order_by=name'
           expect(last_response.status).to eq(200)
           expect(last_response.body).to eq({ order: :asc, order_by: :name }.to_json)
         end
+
         it 'fails with invalid value' do
           get '/order?order=invalid'
           expect(last_response.status).to eq(400)
@@ -1191,7 +1501,7 @@ describe Grape::Validations do
 
     context 'all or none' do
       context 'optional params' do
-        before :each do
+        before do
           subject.resource :custom_message do
             params do
               optional :beer
@@ -1204,17 +1514,20 @@ describe Grape::Validations do
             end
           end
         end
+
         context 'with a custom validation message' do
           it 'errors when any one is present' do
             get '/custom_message/all_or_none', beer: 'string'
             expect(last_response.status).to eq(400)
             expect(last_response.body).to eq 'beer, wine, juice all params are required or none is required'
           end
+
           it 'works when all params are present' do
             get '/custom_message/all_or_none', beer: 'string', wine: 'anotherstring', juice: 'anotheranotherstring'
             expect(last_response.status).to eq(200)
             expect(last_response.body).to eq 'all_or_none works!'
           end
+
           it 'works when none are present' do
             get '/custom_message/all_or_none'
             expect(last_response.status).to eq(200)
@@ -1378,7 +1691,7 @@ describe Grape::Validations do
 
     context 'exactly one of' do
       context 'params' do
-        before :each do
+        before do
           subject.resources :custom_message do
             params do
               optional :beer
@@ -1442,7 +1755,7 @@ describe Grape::Validations do
       end
 
       context 'nested params' do
-        before :each do
+        before do
           subject.params do
             requires :nested, type: Hash do
               optional :beer_nested
@@ -1484,7 +1797,7 @@ describe Grape::Validations do
 
     context 'at least one of' do
       context 'params' do
-        before :each do
+        before do
           subject.resources :custom_message do
             params do
               optional :beer
@@ -1548,7 +1861,7 @@ describe Grape::Validations do
       end
 
       context 'nested params' do
-        before :each do
+        before do
           subject.params do
             requires :nested, type: Hash do
               optional :beer

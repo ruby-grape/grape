@@ -98,6 +98,7 @@ describe Grape::Validations::ParamsScope do
 
         def self.parse(value)
           raise if value == 'invalid'
+
           new(value)
         end
 
@@ -144,7 +145,7 @@ describe Grape::Validations::ParamsScope do
       get '/renaming-coerced', foo: ' there we go '
 
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('there we go-')
+      expect(last_response.body).to eq('-there we go')
     end
 
     it do
@@ -179,6 +180,28 @@ describe Grape::Validations::ParamsScope do
 
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('{"baz":{"qux":"any"}}')
+    end
+
+    it 'renaming can be defined before default' do
+      subject.params do
+        optional :foo, as: :bar, default: 'before'
+      end
+      subject.get('/rename-before-default') { declared(params)[:bar] }
+      get '/rename-before-default'
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('before')
+    end
+
+    it 'renaming can be defined after default' do
+      subject.params do
+        optional :foo, default: 'after', as: :bar
+      end
+      subject.get('/rename-after-default') { declared(params)[:bar] }
+      get '/rename-after-default'
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('after')
     end
   end
 
@@ -269,7 +292,7 @@ describe Grape::Validations::ParamsScope do
         it 'does not raise an exception' do
           expect do
             subject.params { optional :numbers, type: Array[Integer], values: 0..2, default: 0..2 }
-          end.to_not raise_error
+          end.not_to raise_error
         end
       end
 
@@ -277,7 +300,7 @@ describe Grape::Validations::ParamsScope do
         it 'does not raise an exception' do
           expect do
             subject.params { optional :numbers, type: Array[Integer], values: [0, 1, 2], default: [1, 0] }
-          end.to_not raise_error
+          end.not_to raise_error
         end
       end
     end
@@ -501,7 +524,7 @@ describe Grape::Validations::ParamsScope do
             requires :c
           end
         end
-      end.to_not raise_error
+      end.not_to raise_error
     end
 
     it 'does not raise an error if when using nested given' do
@@ -517,7 +540,7 @@ describe Grape::Validations::ParamsScope do
             end
           end
         end
-      end.to_not raise_error
+      end.not_to raise_error
     end
 
     it 'allows nested dependent parameters' do
@@ -562,13 +585,13 @@ describe Grape::Validations::ParamsScope do
       body = JSON.parse(last_response.body)
 
       expect(body.keys).to include('c')
-      expect(body.keys).to_not include('b')
+      expect(body.keys).not_to include('b')
     end
 
     it 'allows renaming of dependent on parameter' do
       subject.params do
         optional :a, as: :b
-        given b: ->(val) { val == 'x' } do
+        given a: ->(val) { val == 'x' } do
           requires :c
         end
       end
@@ -582,11 +605,22 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.status).to eq 200
     end
 
-    it 'raises an error if the dependent parameter is not the renamed one' do
+    it 'does not raise if the dependent parameter is not the renamed one' do
       expect do
         subject.params do
           optional :a, as: :b
           given :a do
+            requires :c
+          end
+        end
+      end.not_to raise_error
+    end
+
+    it 'raises an error if the dependent parameter is the renamed one' do
+      expect do
+        subject.params do
+          optional :a, as: :b
+          given :b do
             requires :c
           end
         end
@@ -631,6 +665,32 @@ describe Grape::Validations::ParamsScope do
 
       get '/varying', a: 'z', inner3: [{ bar: 3, baz: [{ baz_category: 'barstools' }] }]
       expect(last_response.status).to eq(200)
+    end
+
+    it 'detect unmet nested dependency' do
+      subject.params do
+        requires :a, type: String, allow_blank: false, values: %w[x y z]
+        given a: ->(val) { val == 'z' } do
+          requires :inner3, type: Array, allow_blank: false do
+            requires :bar, type: String, allow_blank: false
+            given bar: ->(val) { val == 'b' } do
+              requires :baz, type: Array do
+                optional :baz_category, type: String
+              end
+            end
+            given bar: ->(val) { val == 'c' } do
+              requires :baz, type: Array do
+                requires :baz_category, type: String
+              end
+            end
+          end
+        end
+      end
+      subject.get('/nested-dependency') { declared(params).to_json }
+
+      get '/nested-dependency', a: 'z', inner3: [{ bar: 'c', baz: [{ unrelated: 'nope' }] }]
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq 'inner3[0][baz][0][baz_category] is missing'
     end
 
     it 'includes the parameter within #declared(params)' do
@@ -727,7 +787,7 @@ describe Grape::Validations::ParamsScope do
       subject.get('/test') { 'ok' }
     end
 
-    it 'should pass none Hash params' do
+    it 'passes none Hash params' do
       get '/test', foos: ['']
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('ok')
@@ -903,6 +963,7 @@ describe Grape::Validations::ParamsScope do
         expect(last_response.body).to eq('one is missing, two is missing, three is missing')
       end
     end
+
     context 'when fail_fast is defined it stops the validation' do
       it 'of other params' do
         subject.params do
@@ -915,6 +976,7 @@ describe Grape::Validations::ParamsScope do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('one is missing')
       end
+
       it 'for a single param' do
         subject.params do
           requires :one, allow_blank: false, regexp: /[0-9]+/, fail_fast: true
@@ -965,7 +1027,7 @@ describe Grape::Validations::ParamsScope do
         end
 
         it 'prioritizes parameter validation over group validation' do
-          expect(last_response.body).to_not include('address is empty')
+          expect(last_response.body).not_to include('address is empty')
         end
       end
     end

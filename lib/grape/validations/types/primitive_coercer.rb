@@ -11,15 +11,15 @@ module Grape
       class PrimitiveCoercer < DryTypeCoercer
         MAPPING = {
           Grape::API::Boolean => DryTypes::Params::Bool,
+          BigDecimal => DryTypes::Params::Decimal,
 
           # unfortunately, a +Params+ scope doesn't contain String
-          String              => DryTypes::Coercible::String,
-          BigDecimal          => DryTypes::Coercible::Decimal
+          String => DryTypes::Coercible::String
         }.freeze
 
         STRICT_MAPPING = {
           Grape::API::Boolean => DryTypes::Strict::Bool,
-          BigDecimal          => DryTypes::Strict::Decimal
+          BigDecimal => DryTypes::Strict::Decimal
         }.freeze
 
         def initialize(type, strict = false)
@@ -36,8 +36,7 @@ module Grape
 
         def call(val)
           return InvalidValue.new if reject?(val)
-          return nil if val.nil?
-          return '' if val == ''
+          return nil if val.nil? || treat_as_nil?(val)
 
           super
         end
@@ -46,7 +45,7 @@ module Grape
 
         attr_reader :type
 
-        # This method maintaine logic which was defined by Virtus. For example,
+        # This method maintains logic which was defined by Virtus. For example,
         # dry-types is ok to convert an array or a hash to a string, it is supported,
         # but Virtus wouldn't accept it. So, this method only exists to not introduce
         # breaking changes.
@@ -54,6 +53,13 @@ module Grape
           (val.is_a?(Array) && type == String) ||
             (val.is_a?(String) && type == Hash) ||
             (val.is_a?(Hash) && type == String)
+        end
+
+        # Dry-Types treats an empty string as invalid. However, Grape considers an empty string as
+        # absence of a value and coerces it into nil. See a discussion there
+        # https://github.com/ruby-grape/grape/pull/2045
+        def treat_as_nil?(val)
+          val == '' && type != String
         end
       end
     end

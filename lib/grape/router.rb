@@ -7,29 +7,12 @@ module Grape
   class Router
     attr_reader :map, :compiled
 
-    class Any < AttributeTranslator
-      attr_reader :pattern, :index
-      def initialize(pattern, index, **attributes)
-        @pattern = pattern
-        @index = index
-        super(attributes)
-      end
-    end
-
-    class NormalizePathCache < Grape::Util::Cache
-      def initialize
-        @cache = Hash.new do |h, path|
-          normalized_path = +"/#{path}"
-          normalized_path.squeeze!('/')
-          normalized_path.sub!(%r{/+\Z}, '')
-          normalized_path = '/' if normalized_path.empty?
-          h[path] = -normalized_path
-        end
-      end
-    end
-
     def self.normalize_path(path)
-      NormalizePathCache[path]
+      path = +"/#{path}"
+      path.squeeze!('/')
+      path.sub!(%r{/+\Z}, '')
+      path = '/' if path == ''
+      path
     end
 
     def self.supported_methods
@@ -45,6 +28,7 @@ module Grape
 
     def compile!
       return if compiled
+
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
       self.class.supported_methods.each do |method|
@@ -64,7 +48,7 @@ module Grape
 
     def associate_routes(pattern, **options)
       @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Any.new(pattern, @neutral_map.length, **options)
+      @neutral_map << Grape::Router::AttributeTranslator.new(**options, pattern: pattern, index: @neutral_map.length)
     end
 
     def call(env)
@@ -77,6 +61,7 @@ module Grape
     def recognize_path(input)
       any = with_optimization { greedy_match?(input) }
       return if any == default_response
+
       any.endpoint
     end
 
@@ -97,6 +82,7 @@ module Grape
       map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
+
         response = process_route(route, env)
         break unless cascade?(response)
       end
@@ -108,37 +94,35 @@ module Grape
       response = yield(input, method)
 
       return response if response && !(cascade = cascade?(response))
-      neighbor = greedy_match?(input)
 
-      # If neighbor exists and request method is OPTIONS,
+      last_neighbor_route = greedy_match?(input)
+
+      # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #call_with_allow_headers.
-      return call_with_allow_headers(
-        env,
-        neighbor.allow_header,
-        neighbor.endpoint
-      ) if neighbor && method == Grape::Http::Headers::OPTIONS && !cascade
+      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Grape::Http::Headers::OPTIONS && !cascade
 
       route = match?(input, '*')
-      return neighbor.endpoint.call(env) if neighbor && cascade && route
+
+      return last_neighbor_route.endpoint.call(env) if last_neighbor_route && cascade && route
 
       if route
         response = process_route(route, env)
         return response if response && !(cascade = cascade?(response))
       end
 
-      !cascade && neighbor ? call_with_allow_headers(env, neighbor.allow_header, neighbor.endpoint) : nil
+      return call_with_allow_headers(env, last_neighbor_route) if !cascade && last_neighbor_route
+
+      nil
     end
 
     def process_route(route, env)
-      input, = *extract_input_and_method(env)
-      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]
-      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(routing_args, route, input)
+      prepare_env_from_route(env, route)
       route.exec(env)
     end
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input))
+      args.merge(route.params(input) || {})
     end
 
     def extract_input_and_method(env)
@@ -159,19 +143,27 @@ module Grape
     def match?(input, method)
       current_regexp = @optimized_map[method]
       return unless current_regexp.match(input)
+
       last_match = Regexp.last_match
       @map[method].detect { |route| last_match["_#{route.index}"] }
     end
 
     def greedy_match?(input)
       return unless @union.match(input)
+
       last_match = Regexp.last_match
       @neutral_map.detect { |route| last_match["_#{route.index}"] }
     end
 
-    def call_with_allow_headers(env, methods, endpoint)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = methods.join(', ').freeze
-      endpoint.call(env)
+    def call_with_allow_headers(env, route)
+      prepare_env_from_route(env, route)
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
+      route.endpoint.call(env)
+    end
+
+    def prepare_env_from_route(env, route)
+      input, = *extract_input_and_method(env)
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Env::GRAPE_ROUTING_ARGS], route, input)
     end
 
     def cascade?(response)

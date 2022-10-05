@@ -40,6 +40,7 @@ module Grape
 
         def extract_message_option(attrs)
           return nil unless attrs.is_a?(Array)
+
           opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
           opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
         end
@@ -54,6 +55,7 @@ module Grape
           allow_message_expectations_on_nil
           allow(subject.api).to receive(:namespace_stackable).with(:named_params)
         end
+
         let(:options) { { option: 'value' } }
         let(:named_params) { { params_group: proc {} } }
 

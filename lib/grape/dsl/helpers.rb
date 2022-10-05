@@ -36,8 +36,8 @@ module Grape
         #
         def helpers(*new_modules, &block)
           include_new_modules(new_modules) if new_modules.any?
-          include_block(block) if block_given?
-          include_all_in_scope if !block_given? && new_modules.empty?
+          include_block(block) if block
+          include_all_in_scope if !block && new_modules.empty?
         end
 
         protected
@@ -67,12 +67,13 @@ module Grape
 
         def define_boolean_in_mod(mod)
           return if defined? mod::Boolean
-          mod.const_set('Boolean', Grape::API::Boolean)
+
+          mod.const_set(:Boolean, Grape::API::Boolean)
         end
 
-        def inject_api_helpers_to_mod(mod, &_block)
+        def inject_api_helpers_to_mod(mod, &block)
           mod.extend(BaseHelper) unless mod.is_a?(BaseHelper)
-          yield if block_given?
+          yield if block
           mod.api_changed(self)
         end
       end
@@ -81,6 +82,7 @@ module Grape
       # to provide some API-specific functionality.
       module BaseHelper
         attr_accessor :api
+
         def params(name, &block)
           @named_params ||= {}
           @named_params[name] = block
@@ -95,6 +97,7 @@ module Grape
 
         def process_named_params
           return unless instance_variable_defined?(:@named_params) && @named_params && @named_params.any?
+
           api.namespace_stackable(:named_params, @named_params)
         end
       end

@@ -16,8 +16,7 @@ describe Grape::Middleware::Error do
 
     class ErrApp
       class << self
-        attr_accessor :error
-        attr_accessor :format
+        attr_accessor :error, :format
 
         def call(_env)
           throw :error, error
@@ -30,7 +29,7 @@ describe Grape::Middleware::Error do
     opts = options
     Rack::Builder.app do
       use Spec::Support::EndpointFaker
-      use Grape::Middleware::Error, opts
+      use Grape::Middleware::Error, **opts
       run ErrorSpec::ErrApp
     end
   end
@@ -63,6 +62,7 @@ describe Grape::Middleware::Error do
 
   context 'with http code' do
     let(:options) {  { default_message: 'Aww, hamburgers.' } }
+
     it 'adds the status code if wanted' do
       ErrorSpec::ErrApp.error = { message: { code: 200 } }
       get '/'
