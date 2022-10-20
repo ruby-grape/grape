@@ -2291,7 +2291,7 @@ describe Grape::API do
       subject.rescue_from :all, with: :not_exist_method
       subject.get('/rescue_method') { raise StandardError }
 
-      expect { get '/rescue_method' }.to raise_error(NoMethodError, /^undefined method `not_exist_method'/)
+      expect { get '/rescue_method' }.to raise_error(NoMethodError, /^undefined method 'not_exist_method'/)
     end
 
     it 'correctly chooses exception handler if :all handler is specified' do
