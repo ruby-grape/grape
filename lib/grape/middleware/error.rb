@@ -121,7 +121,7 @@ module Grape
 
       def run_rescue_handler(handler, error)
         if handler.instance_of?(Symbol)
-          raise NoMethodError, "undefined method `#{handler}'" unless respond_to?(handler)
+          raise NoMethodError, "undefined method '#{handler}'" unless respond_to?(handler)
 
           handler = public_method(handler)
         end
