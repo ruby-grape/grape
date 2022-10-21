@@ -26,6 +26,7 @@
 * [#2250](https://github.com/ruby-grape/grape/pull/2250): Add deprecation warning for `UnsupportedGroupTypeError` and `MissingGroupTypeError` - [@ericproulx](https://github.com/ericproulx).
 * [#2256](https://github.com/ruby-grape/grape/pull/2256): Raise `Grape::Exceptions::MultipartPartLimitError` from Rack when too many files are uploaded - [@bschmeck](https://github.com/bschmeck).
 * [#2266](https://github.com/ruby-grape/grape/pull/2266): Fix code coverage - [@duffn](https://github.com/duffn).
+* [#2284](https://github.com/ruby-grape/grape/pull/2284): Fix an unexpected backtick - [@zysend](https://github.com/zysend).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)
