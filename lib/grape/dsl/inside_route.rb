@@ -28,7 +28,7 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [])
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true)
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, include_not_dependent: true)
           declared_params ||= optioned_declared_params(**options)
 
           if passed_params.is_a?(Array)
@@ -49,6 +49,19 @@ module Grape
         def declared_hash(passed_params, options, declared_params, params_nested_path)
           renamed_params = route_setting(:renamed_params) || {}
 
+          if options[:include_not_dependent]
+            declared_hash_scope(passed_params, options, declared_params, params_nested_path)
+          else
+            declared_params.each do |params_and_dependency|
+              # Check given
+              # next if params_and_dependency[:dependency] && params_and_dependency[:dependency].call
+
+              declared_hash_scope(passed_params, options, params_and_dependency[:attrs], params_nested_path)
+            end
+          end
+        end
+
+        def declared_hash_scope(passed_params, options, declared_params, params_nested_path)
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             if declared_param.is_a?(Hash)
               declared_param.each_pair do |declared_parent_param, declared_children_params|
@@ -112,12 +125,13 @@ module Grape
         end
 
         def optioned_declared_params(**options)
+          declared_params_key = options[:include_not_dependent] ? :declared_params : :declared_params_with_dependency
           declared_params = if options[:include_parent_namespaces]
                               # Declared params including parent namespaces
-                              route_setting(:declared_params)
+                              route_setting(declared_params_key)
                             else
                               # Declared params at current namespace
-                              namespace_stackable(:declared_params).last || []
+                              namespace_stackable(declared_params_key).last || []
                             end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
