@@ -131,7 +131,12 @@ module Grape
           require_required_and_optional_fields(attrs.first, opts)
         else
           validate_attributes(attrs, opts, &block)
-          block ? new_scope(orig_attrs, &block) : push_declared_params(attrs, **opts.slice(:as))
+          if block
+            new_scope(orig_attrs, &block)
+          else
+            push_declared_params_with_dependency(attrs, **opts.slice(:as))
+            push_declared_params(attrs, **opts.slice(:as))
+          end
         end
       end
 
@@ -157,7 +162,12 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, **opts.slice(:as))
+          if block
+            new_scope(orig_attrs, &block)
+          else
+            push_declared_params_with_dependency(attrs, **opts.slice(:as))
+            push_declared_params(attrs, **opts.slice(:as))
+          end
         end
       end
 

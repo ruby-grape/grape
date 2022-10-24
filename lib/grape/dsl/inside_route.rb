@@ -50,18 +50,22 @@ module Grape
           renamed_params = route_setting(:renamed_params) || {}
 
           if options[:include_not_dependent]
-            declared_hash_scope(passed_params, options, declared_params, params_nested_path)
+            declared_hash_scope(passed_params, options, declared_params, params_nested_path, renamed_params)
           else
+            res = {}
             declared_params.each do |params_and_dependency|
               # Check given
               # next if params_and_dependency[:dependency] && params_and_dependency[:dependency].call
+              # p params_and_dependency[:attrs]
+              next if params_and_dependency[:attrs].first.is_a?(Hash) && params_and_dependency[:attrs].first.keys.map(&:to_s).include?('device_config')
 
-              declared_hash_scope(passed_params, options, params_and_dependency[:attrs], params_nested_path)
+              res.merge! declared_hash_scope(passed_params, options, params_and_dependency[:attrs], params_nested_path, renamed_params)
             end
+            res
           end
         end
 
-        def declared_hash_scope(passed_params, options, declared_params, params_nested_path)
+        def declared_hash_scope(passed_params, options, declared_params, params_nested_path, renamed_params)
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             if declared_param.is_a?(Hash)
               declared_param.each_pair do |declared_parent_param, declared_children_params|
