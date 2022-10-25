@@ -682,15 +682,15 @@ describe Grape::Validations::ParamsScope do
           requires :c
         end
       end
-      subject.get('/test') { declared(params, include_not_dependent: false).to_json }
+      subject.get('/include_not_dependent') { declared(params, include_not_dependent: false).to_json }
 
-      get '/test', a: 'x', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/include_not_dependent', a: 'x', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => 'd' })
 
-      get '/test', a: 'y', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/include_not_dependent', a: 'y', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'e' => 'e' })
 
-      get '/test', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/include_not_dependent', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'z', 'c' => 'c')
     end
   end
