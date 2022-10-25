@@ -54,7 +54,6 @@ module Grape
               declared_hash_scope(passed_params, options, declared_param, params_nested_path, renamed_params, memo)
             else
               # Check given
-              # next if params_and_dependency[:dependency] && params_and_dependency[:dependency].call
               next if declared_param[:scope] && (!declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params))
 
               declared_param[:attrs].each do |param_attr|
