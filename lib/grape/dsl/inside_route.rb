@@ -47,28 +47,28 @@ module Grape
         end
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
-          renamed_params = route_setting(:renamed_params) || {}
 
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             if options[:include_not_dependent]
-              declared_hash_scope(passed_params, options, declared_param, params_nested_path, renamed_params, memo)
+              declared_hash_scope(passed_params, options, declared_param, params_nested_path, memo)
             else
               # Check given
               next if declared_param[:scope] && (!declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params))
 
               declared_param[:attrs].each do |param_attr|
-                declared_hash_scope(passed_params, options, param_attr, params_nested_path, renamed_params, memo)
+                declared_hash_scope(passed_params, options, param_attr, params_nested_path, memo)
               end
             end
           end
         end
 
-        def declared_hash_scope(passed_params, options, declared_param, params_nested_path, renamed_params, memo)
+        def declared_hash_scope(passed_params, options, declared_param, params_nested_path, memo)
+          renamed_params = route_setting(:renamed_params) || {}
           if declared_param.is_a?(Hash)
             declared_param.each_pair do |declared_parent_param, declared_children_params|
               params_nested_path_dup = params_nested_path.dup
               params_nested_path_dup << declared_parent_param.to_s
-              return unless options[:include_missing] || passed_params.key?(declared_parent_param)
+              next unless options[:include_missing] || passed_params.key?(declared_parent_param)
 
               rename_path = params_nested_path + [declared_parent_param.to_s]
               renamed_param_name = renamed_params[rename_path]
