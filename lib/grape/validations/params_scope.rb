@@ -131,8 +131,8 @@ module Grape
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs, **opts)
+        opts[:declared_params_scope] ||= self
         if lateral?
-          opts[:declared_params_scope] ||= self
           @parent.push_declared_params(attrs, **opts)
         else
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
