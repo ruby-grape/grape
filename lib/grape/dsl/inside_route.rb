@@ -47,13 +47,12 @@ module Grape
         end
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
-
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
             if options[:include_not_dependent]
               declared_hash_scope(passed_params, options, declared_param, params_nested_path, memo)
             else
               # Check given
-              next if declared_param[:scope] && (!declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params))
+              next if declared_param[:scope] && !declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params)
 
               declared_param[:attrs].each do |param_attr|
                 declared_hash_scope(passed_params, options, param_attr, params_nested_path, memo)
