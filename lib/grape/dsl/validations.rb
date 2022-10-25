@@ -28,7 +28,7 @@ module Grape
         #    end
         def reset_validations!
           unset_namespace_stackable :declared_params
-          unset_namespace_stackable :declared_params_with_dependency
+          unset_namespace_stackable :declared_params_with_scope
           unset_namespace_stackable :validations
           unset_namespace_stackable :params
         end

@@ -124,7 +124,7 @@ module Grape
         end
 
         def optioned_declared_params(**options)
-          declared_params_key = options[:include_not_dependent] ? :declared_params : :declared_params_with_dependency
+          declared_params_key = options[:include_not_dependent] ? :declared_params : :declared_params_with_scope
           declared_params = if options[:include_parent_namespaces]
                               # Declared params including parent namespaces
                               route_setting(declared_params_key)

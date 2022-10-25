@@ -36,7 +36,7 @@ module Grape
         @group            = opts[:group]
         @dependent_on     = opts[:dependent_on]
         @declared_params = []
-        @declared_params_with_dependency = []
+        @declared_params_with_scope = []
         @index = nil
 
         instance_eval(&block) if block
@@ -140,10 +140,10 @@ module Grape
 
           if attrs.is_a?(Hash)
             @declared_params.concat attrs[:declared_params]
-            @declared_params_with_dependency.push(attrs: attrs[:declared_params_with_dependency], scope: opts[:declared_params_scope])
+            @declared_params_with_scope.push(attrs: attrs[:declared_params_with_scope], scope: opts[:declared_params_scope])
           else
             @declared_params.concat attrs
-            @declared_params_with_dependency.push(attrs: attrs, scope: opts[:declared_params_scope])
+            @declared_params_with_scope.push(attrs: attrs, scope: opts[:declared_params_scope])
           end
         end
       end
@@ -269,14 +269,14 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params(declared_params: [element => @declared_params], declared_params_with_dependency: [element => @declared_params_with_dependency])
+          @parent.push_declared_params(declared_params: [element => @declared_params], declared_params_with_scope: [element => @declared_params_with_scope])
         else
           @api.namespace_stackable(:declared_params, @declared_params)
-          @api.namespace_stackable(:declared_params_with_dependency, @declared_params_with_dependency)
+          @api.namespace_stackable(:declared_params_with_scope, @declared_params_with_scope)
         end
 
         # params were stored in settings, it can be cleaned from the params scope
-        @declared_params_with_dependency = nil
+        @declared_params_with_scope = nil
         @declared_params = nil
       end
 
