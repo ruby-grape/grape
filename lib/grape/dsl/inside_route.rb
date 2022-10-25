@@ -49,56 +49,53 @@ module Grape
         def declared_hash(passed_params, options, declared_params, params_nested_path)
           renamed_params = route_setting(:renamed_params) || {}
 
-          if options[:include_not_dependent]
-            declared_hash_scope(passed_params, options, declared_params, params_nested_path, renamed_params)
-          else
-            res = {}
-            declared_params.each do |params_and_dependency|
+          declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
+            if options[:include_not_dependent]
+              declared_hash_scope(passed_params, options, declared_param, params_nested_path, renamed_params, memo)
+            else
               # Check given
               # next if params_and_dependency[:dependency] && params_and_dependency[:dependency].call
-              # p params_and_dependency[:attrs]
-              next if params_and_dependency[:attrs].first.is_a?(Hash) && params_and_dependency[:attrs].first.keys.map(&:to_s).include?('device_config')
+              next if declared_param[:scope] && (!declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params))
 
-              res.merge! declared_hash_scope(passed_params, options, params_and_dependency[:attrs], params_nested_path, renamed_params)
+              declared_param[:attrs].each do |param_attr|
+                declared_hash_scope(passed_params, options, param_attr, params_nested_path, renamed_params, memo)
+              end
             end
-            res
           end
         end
 
-        def declared_hash_scope(passed_params, options, declared_params, params_nested_path, renamed_params)
-          declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
-            if declared_param.is_a?(Hash)
-              declared_param.each_pair do |declared_parent_param, declared_children_params|
-                params_nested_path_dup = params_nested_path.dup
-                params_nested_path_dup << declared_parent_param.to_s
-                next unless options[:include_missing] || passed_params.key?(declared_parent_param)
+        def declared_hash_scope(passed_params, options, declared_param, params_nested_path, renamed_params, memo)
+          if declared_param.is_a?(Hash)
+            declared_param.each_pair do |declared_parent_param, declared_children_params|
+              params_nested_path_dup = params_nested_path.dup
+              params_nested_path_dup << declared_parent_param.to_s
+              return unless options[:include_missing] || passed_params.key?(declared_parent_param)
 
-                rename_path = params_nested_path + [declared_parent_param.to_s]
-                renamed_param_name = renamed_params[rename_path]
-
-                memo_key = optioned_param_key(renamed_param_name || declared_parent_param, options)
-                passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
-
-                memo[memo_key] = handle_passed_param(params_nested_path_dup, passed_children_params.any?) do
-                  declared(passed_children_params, options, declared_children_params, params_nested_path_dup)
-                end
-              end
-            else
-              # If it is not a Hash then it does not have children.
-              # Find its value or set it to nil.
-              next unless options[:include_missing] || passed_params.key?(declared_param)
-
-              rename_path = params_nested_path + [declared_param.to_s]
+              rename_path = params_nested_path + [declared_parent_param.to_s]
               renamed_param_name = renamed_params[rename_path]
 
-              memo_key = optioned_param_key(renamed_param_name || declared_param, options)
-              passed_param = passed_params[declared_param]
+              memo_key = optioned_param_key(renamed_param_name || declared_parent_param, options)
+              passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
 
-              params_nested_path_dup = params_nested_path.dup
-              params_nested_path_dup << declared_param.to_s
-              memo[memo_key] = passed_param || handle_passed_param(params_nested_path_dup) do
-                passed_param
+              memo[memo_key] = handle_passed_param(params_nested_path_dup, passed_children_params.any?) do
+                declared(passed_children_params, options, declared_children_params, params_nested_path_dup)
               end
+            end
+          else
+            # If it is not a Hash then it does not have children.
+            # Find its value or set it to nil.
+            return unless options[:include_missing] || passed_params.key?(declared_param)
+
+            rename_path = params_nested_path + [declared_param.to_s]
+            renamed_param_name = renamed_params[rename_path]
+
+            memo_key = optioned_param_key(renamed_param_name || declared_param, options)
+            passed_param = passed_params[declared_param]
+
+            params_nested_path_dup = params_nested_path.dup
+            params_nested_path_dup << declared_param.to_s
+            memo[memo_key] = passed_param || handle_passed_param(params_nested_path_dup) do
+              passed_param
             end
           end
         end

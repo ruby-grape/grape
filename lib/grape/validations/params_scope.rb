@@ -132,25 +132,19 @@ module Grape
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs, **opts)
         if lateral?
+          opts[:declared_params_scope] ||= self
           @parent.push_declared_params(attrs, **opts)
         else
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
             if opts && opts[:as]
 
-          @declared_params.concat attrs
-        end
-      end
-
-      # Adds a parameter declaration to our list of validations.
-      # @param attrs [Array] (see Grape::DSL::Parameters#requires)
-      def push_declared_params_with_dependency(attrs, **opts)
-        if lateral?
-          @parent.push_declared_params_with_dependency(attrs, **opts)
-        else
-          push_renamed_param(full_path + [attrs.first], opts[:as]) \
-            if opts && opts[:as]
-
-          @declared_params_with_dependency.push(attrs: attrs, dependency: @dependent_on)
+          if attrs.is_a?(Hash)
+            @declared_params.concat attrs[:declared_params]
+            @declared_params_with_dependency.push(attrs: attrs[:declared_params_with_dependency], scope: opts[:declared_params_scope])
+          else
+            @declared_params.concat attrs
+            @declared_params_with_dependency.push(attrs: attrs, scope: opts[:declared_params_scope])
+          end
         end
       end
 
@@ -275,8 +269,7 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params [element => @declared_params]
-          @parent.push_declared_params_with_dependency [element => @declared_params_with_dependency]
+          @parent.push_declared_params(declared_params: [element => @declared_params], declared_params_with_dependency: [element => @declared_params_with_dependency])
         else
           @api.namespace_stackable(:declared_params, @declared_params)
           @api.namespace_stackable(:declared_params_with_dependency, @declared_params_with_dependency)

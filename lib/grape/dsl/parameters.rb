@@ -134,7 +134,6 @@ module Grape
           if block
             new_scope(orig_attrs, &block)
           else
-            push_declared_params_with_dependency(attrs, **opts.slice(:as))
             push_declared_params(attrs, **opts.slice(:as))
           end
         end
@@ -165,7 +164,6 @@ module Grape
           if block
             new_scope(orig_attrs, &block)
           else
-            push_declared_params_with_dependency(attrs, **opts.slice(:as))
             push_declared_params(attrs, **opts.slice(:as))
           end
         end
