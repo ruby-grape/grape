@@ -269,7 +269,7 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params(declared_params: [element => @declared_params], declared_params_with_scope: [element => @declared_params_with_scope])
+          @parent.push_declared_params({ declared_params: [element => @declared_params], declared_params_with_scope: [element => @declared_params_with_scope] })
         else
           @api.namespace_stackable(:declared_params, @declared_params)
           @api.namespace_stackable(:declared_params_with_scope, @declared_params_with_scope)
