@@ -664,6 +664,35 @@ describe Grape::Validations::ParamsScope do
       get '/nested', bar: { a: true, c: { b: 'yes' } }
       expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'true', 'c' => { 'b' => 'yes' } })
     end
+
+    it 'excludes the parameter that given is false when set not include not dependent' do
+      subject.params do
+        requires :a, type: String, allow_blank: false, values: %w[x y z]
+        given a: ->(val) { val == 'x' } do
+          requires :b, type: Hash, allow_blank: false do
+            requires :d
+          end
+        end
+        given a: ->(val) { val == 'y' } do
+          requires :b, type: Hash, allow_blank: false do
+            requires :e
+          end
+        end
+        given a: ->(val) { val == 'z' } do
+          requires :c
+        end
+      end
+      subject.get('/test') { declared(params, include_not_dependent: false).to_json }
+
+      get '/test', a: 'x', b: { d: 'd', e: 'e' }, c: 'c'
+      expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => 'd' })
+
+      get '/test', a: 'y', b: { d: 'd', e: 'e' }, c: 'c'
+      expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'e' => 'e' })
+
+      get '/test', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
+      expect(JSON.parse(last_response.body)).to eq('a' => 'z', 'c' => 'c')
+    end
   end
 
   context 'default value in given block' do
