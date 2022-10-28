@@ -28,7 +28,7 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [])
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, include_not_dependent: true)
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: true)
           declared_params ||= optioned_declared_params(**options)
 
           if passed_params.is_a?(Array)
@@ -48,20 +48,19 @@ module Grape
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
           declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
-            if options[:include_not_dependent]
-              declared_hash_scope(passed_params, options, declared_param, params_nested_path, memo)
+            if options[:evaluate_given]
+              declared_hash_attr(passed_params, options, declared_param, params_nested_path, memo)
             else
-              # Check given
               next if declared_param[:scope] && !declared_param[:scope].meets_dependency?(declared_param[:scope].params(passed_params), passed_params)
 
               declared_param[:attrs].each do |param_attr|
-                declared_hash_scope(passed_params, options, param_attr, params_nested_path, memo)
+                declared_hash_attr(passed_params, options, param_attr, params_nested_path, memo)
               end
             end
           end
         end
 
-        def declared_hash_scope(passed_params, options, declared_param, params_nested_path, memo)
+        def declared_hash_attr(passed_params, options, declared_param, params_nested_path, memo)
           renamed_params = route_setting(:renamed_params) || {}
           if declared_param.is_a?(Hash)
             declared_param.each_pair do |declared_parent_param, declared_children_params|
@@ -124,7 +123,7 @@ module Grape
         end
 
         def optioned_declared_params(**options)
-          declared_params_key = options[:include_not_dependent] ? :declared_params : :declared_params_with_scope
+          declared_params_key = options[:evaluate_given] ? :declared_params : :declared_params_with_scope
           declared_params = if options[:include_parent_namespaces]
                               # Declared params including parent namespaces
                               route_setting(declared_params_key)
