@@ -682,16 +682,70 @@ describe Grape::Validations::ParamsScope do
           requires :c
         end
       end
-      subject.get('/include_not_dependent') { declared(params, include_not_dependent: false).to_json }
+      subject.get('/evaluate_given') { declared(params, evaluate_given: false).to_json }
 
-      get '/include_not_dependent', a: 'x', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/evaluate_given', a: 'x', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => 'd' })
 
-      get '/include_not_dependent', a: 'y', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/evaluate_given', a: 'y', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'e' => 'e' })
 
-      get '/include_not_dependent', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
+      get '/evaluate_given', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'z', 'c' => 'c')
+    end
+    context 'when the dependent parameter is not present #declared(params)' do
+      before do
+        subject.params do
+          requires :a, type: String, allow_blank: false, values: %w[x y z]
+          given a: ->(val) { val == 'x' } do
+            requires :b, type: Hash, allow_blank: false do
+              requires :d
+            end
+          end
+          given a: ->(val) { val == 'y' } do
+            requires :b, type: Hash, allow_blank: false do
+              requires :e
+            end
+          end
+          given a: ->(val) { val == 'z' } do
+            requires :c
+          end
+        end
+        subject.get('/declared_params') { declared(params).to_json }
+      end
+
+      context 'works properly' do
+        it '' do
+          subject.params do
+            optional :a
+            given :a do
+              optional :b, type: Hash do
+                optional 
+              end
+            end
+            given :a do
+              optional :b, type: Hash do
+              end
+            end
+          end
+          subject.get('/test') { declared(params).to_json }
+        end
+
+        it '' do
+          subject.params do
+            optional :a
+            given :a do
+              optional :b, type: Hash do
+
+              end
+            end
+          end
+          subject.get('/test') { declared(params).to_json }
+        end
+      end
+
+      context 'does not evaluate_given' do
+      end
     end
   end
 
