@@ -10,6 +10,15 @@ module Grape
 
       include Grape::DSL::Parameters
 
+      class Attr
+        attr_accessor :key, :scope
+
+        def initialize(key, scope)
+          @key = key
+          @scope = scope
+        end
+      end
+
       # Open up a new ParamsScope, allowing parameter definitions per
       #   Grape::DSL::Params.
       # @param opts [Hash] options for this scope
@@ -138,13 +147,8 @@ module Grape
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
             if opts && opts[:as]
 
-          if attrs.is_a?(Hash)
-            @declared_params.concat attrs[:declared_params]
-            @declared_params_with_scope.push(attrs: attrs[:declared_params_with_scope], scope: opts[:declared_params_scope])
-          else
-            @declared_params.concat attrs
-            @declared_params_with_scope.push(attrs: attrs, scope: opts[:declared_params_scope])
-          end
+          @declared_params.concat(attrs.is_a?(Hash) ? attrs[:declared_params] : attrs)
+          @declared_params_with_scope.concat((attrs.is_a?(Hash) ? attrs[:declared_params_with_scope] : attrs).map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) } )
         end
       end
 

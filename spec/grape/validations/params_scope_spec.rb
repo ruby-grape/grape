@@ -693,58 +693,127 @@ describe Grape::Validations::ParamsScope do
       get '/evaluate_given', a: 'z', b: { d: 'd', e: 'e' }, c: 'c'
       expect(JSON.parse(last_response.body)).to eq('a' => 'z', 'c' => 'c')
     end
+
     context 'when the dependent parameter is not present #declared(params)' do
-      before do
-        subject.params do
-          requires :a, type: String, allow_blank: false, values: %w[x y z]
-          given a: ->(val) { val == 'x' } do
-            requires :b, type: Hash, allow_blank: false do
-              requires :d
-            end
-          end
-          given a: ->(val) { val == 'y' } do
-            requires :b, type: Hash, allow_blank: false do
-              requires :e
-            end
-          end
-          given a: ->(val) { val == 'z' } do
-            requires :c
-          end
-        end
-        subject.get('/declared_params') { declared(params).to_json }
-      end
-
-      context 'works properly' do
-        it '' do
+      context 'lateral parameter' do
+        before do
           subject.params do
             optional :a
             given :a do
-              optional :b, type: Hash do
-                optional 
-              end
-            end
-            given :a do
-              optional :b, type: Hash do
-              end
+              optional :b
             end
           end
-          subject.get('/test') { declared(params).to_json }
+          subject.get('/evaluate_given') { declared(params).to_json }
+          subject.get('/not_evaluate_given') { declared(params, evaluate_given: false).to_json }
         end
 
-        it '' do
-          subject.params do
-            optional :a
-            given :a do
-              optional :b, type: Hash do
+        it 'evaluate_given' do
+          get '/evaluate_given', b: 'b'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil, 'b' => 'b')
+        end
 
-              end
-            end
-          end
-          subject.get('/test') { declared(params).to_json }
+        it 'not_evaluate_given' do
+          get '/not_evaluate_given', b: 'b'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil)
         end
       end
 
-      context 'does not evaluate_given' do
+      context 'nested parameter' do
+        before do
+          subject.params do
+            optional :a, values: %w[x y]
+            given a: ->(a) { a == 'x' } do
+              optional :b, type: Hash do
+                optional :c
+              end
+              optional :e
+            end
+            given a: ->(a) { a == 'y' } do
+              optional :b, type: Hash do
+                optional :d
+              end
+              optional :f
+            end
+          end
+          subject.get('/evaluate_given') { declared(params).to_json }
+          subject.get('/not_evaluate_given') { declared(params, evaluate_given: false).to_json }
+        end
+
+        it 'evaluate_given' do
+          get '/evaluate_given', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
+
+          get '/evaluate_given', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
+        end
+
+        it 'not_evaluate_given' do
+          get '/not_evaluate_given', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil }, 'e' => nil)
+
+          get '/not_evaluate_given', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'f' => nil)
+        end
+      end
+
+      context 'nested given parameter' do
+        before do
+          subject.params do
+            optional :a, values: %w[x y]
+            given a: ->(a) { a == 'x' } do
+              optional :b, type: Hash do
+                optional :c
+                given :c do
+                  optional :g
+                  optional :e, type: Hash do
+                    optional :h
+                  end
+                end
+              end
+            end
+            given a: ->(a) { a == 'y' } do
+              optional :b, type: Hash do
+                optional :d
+                given :d do
+                  optional :f
+                  optional :e, type: Hash do
+                    optional :i
+                  end
+                end
+              end
+            end
+          end
+          subject.get('/evaluate_given') { declared(params).to_json }
+          subject.get('/not_evaluate_given') { declared(params, evaluate_given: false).to_json }
+        end
+
+        it 'evaluate_given' do
+          get '/not_evaluate_given', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/not_evaluate_given', a: 'x', b: { c: 'c' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/not_evaluate_given', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/not_evaluate_given', a: 'y', b: { d: 'd' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
+        end
+
+        it 'not_evaluate_given' do
+          get '/not_evaluate_given', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil })
+
+          get '/not_evaluate_given', a: 'x', b: { c: 'c' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => 'c', 'g' => nil, 'e' => { 'h' => nil } })
+
+          get '/not_evaluate_given', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil })
+
+          get '/not_evaluate_given', a: 'y', b: { d: 'd' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
+        end
       end
     end
   end
