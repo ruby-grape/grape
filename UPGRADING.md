@@ -35,7 +35,6 @@ declared(params, evaluate_given: false)
 
 ```
 
-
 ### Upgrading to >= 1.6.0
 
 #### Parameter renaming with :as
