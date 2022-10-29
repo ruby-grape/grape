@@ -47,16 +47,16 @@ module Grape
         end
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
-          renamed_params = route_setting(:renamed_params) || {}
           declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
             # Check given
             next if !options[:evaluate_given] && !declared_param_attr.meets_dependency?(options[:request_params])
 
-            declared_hash_attrs(passed_params, options, declared_param_attr.key, params_nested_path)
+            declared_hash_attr(passed_params, options, declared_param_attr.key, params_nested_path)
           end
         end
 
-        def declared_hash_attrs(passed_params, options, declared_param, params_nested_path)
+        def declared_hash_attr(passed_params, options, declared_param, params_nested_path, memo)
+          renamed_params = route_setting(:renamed_params) || {}
           if declared_param.is_a?(Hash)
             declared_param.each_pair do |declared_parent_param, declared_children_params|
               params_nested_path_dup = params_nested_path.dup
