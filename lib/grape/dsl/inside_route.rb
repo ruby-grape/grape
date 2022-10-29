@@ -49,13 +49,11 @@ module Grape
 
         def declared_hash(passed_params, options, declared_params, params_nested_path, request_params)
           renamed_params = route_setting(:renamed_params) || {}
-          declared_params.each_with_object(passed_params.class.new) do |declared_param, memo|
+          declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
             # Check given
-            if !options[:evaluate_given]
-              next if declared_param.scope && !declared_param.scope.meets_dependency?(declared_param.scope.params(request_params), request_params)
+            next if !options[:evaluate_given] && !declared_param_attr.meets_dependency?(request_params)
 
-              declared_param = declared_param.key
-            end
+            declared_param = declared_param_attr.key
             if declared_param.is_a?(Hash)
               declared_param.each_pair do |declared_parent_param, declared_children_params|
                 params_nested_path_dup = params_nested_path.dup
@@ -118,13 +116,12 @@ module Grape
         end
 
         def optioned_declared_params(**options)
-          declared_params_key = options[:evaluate_given] ? :declared_params : :declared_params_with_scope
           declared_params = if options[:include_parent_namespaces]
                               # Declared params including parent namespaces
-                              route_setting(declared_params_key)
+                              route_setting(:declared_params)
                             else
                               # Declared params at current namespace
-                              namespace_stackable(declared_params_key).last || []
+                              namespace_stackable(:declared_params).last || []
                             end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params

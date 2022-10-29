@@ -17,6 +17,12 @@ module Grape
           @key = key
           @scope = scope
         end
+
+        def meets_dependency?(request_params)
+          return true if scope.nil?
+
+          scope.meets_dependency?(scope.params(request_params), request_params)
+        end
       end
 
       # Open up a new ParamsScope, allowing parameter definitions per
@@ -45,7 +51,6 @@ module Grape
         @group            = opts[:group]
         @dependent_on     = opts[:dependent_on]
         @declared_params = []
-        @declared_params_with_scope = []
         @index = nil
 
         instance_eval(&block) if block
@@ -147,8 +152,7 @@ module Grape
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
             if opts && opts[:as]
 
-          @declared_params.concat(attrs.is_a?(Hash) ? attrs[:declared_params] : attrs)
-          @declared_params_with_scope.concat((attrs.is_a?(Hash) ? attrs[:declared_params_with_scope] : attrs).map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) } )
+          @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) } )
         end
       end
 
@@ -273,14 +277,12 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params({ declared_params: [element => @declared_params], declared_params_with_scope: [element => @declared_params_with_scope] })
+          @parent.push_declared_params([element => @declared_params])
         else
           @api.namespace_stackable(:declared_params, @declared_params)
-          @api.namespace_stackable(:declared_params_with_scope, @declared_params_with_scope)
         end
 
         # params were stored in settings, it can be cleaned from the params scope
-        @declared_params_with_scope = nil
         @declared_params = nil
       end
 
