@@ -38,9 +38,7 @@ module Grape
           return attr_key(declared_param_attr.key) if declared_param_attr.is_a?(self)
 
           if declared_param_attr.is_a?(Hash)
-            declared_param_attr.each_with_object({}) do |(key, value), result|
-              result[key] = attrs_keys(value)
-            end
+            declared_param_attr.transform_values { |value| attrs_keys(value) }
           else
             declared_param_attr
           end
@@ -174,7 +172,7 @@ module Grape
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
             if opts && opts[:as]
 
-          @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) } )
+          @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
         end
       end
 

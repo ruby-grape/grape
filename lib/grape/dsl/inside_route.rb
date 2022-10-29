@@ -27,31 +27,30 @@ module Grape
       # Methods which should not be available in filters until the before filter
       # has completed
       module PostBeforeFilter
-        def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [], request_params = nil)
-          request_params ||= passed_params
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: true)
+        def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [])
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: true, request_params: passed_params)
           declared_params ||= optioned_declared_params(**options)
 
           if passed_params.is_a?(Array)
-            declared_array(passed_params, options, declared_params, params_nested_path, request_params)
+            declared_array(passed_params, options, declared_params, params_nested_path)
           else
-            declared_hash(passed_params, options, declared_params, params_nested_path, request_params)
+            declared_hash(passed_params, options, declared_params, params_nested_path)
           end
         end
 
         private
 
-        def declared_array(passed_params, options, declared_params, params_nested_path, request_params)
+        def declared_array(passed_params, options, declared_params, params_nested_path)
           passed_params.map do |passed_param|
-            declared(passed_param || {}, options, declared_params, params_nested_path, request_params)
+            declared(passed_param || {}, options, declared_params, params_nested_path)
           end
         end
 
-        def declared_hash(passed_params, options, declared_params, params_nested_path, request_params)
+        def declared_hash(passed_params, options, declared_params, params_nested_path)
           renamed_params = route_setting(:renamed_params) || {}
           declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
             # Check given
-            next if !options[:evaluate_given] && !declared_param_attr.meets_dependency?(request_params)
+            next if !options[:evaluate_given] && !declared_param_attr.meets_dependency?(options[:request_params])
 
             declared_param = declared_param_attr.key
             if declared_param.is_a?(Hash)
@@ -67,7 +66,7 @@ module Grape
                 passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
 
                 memo[memo_key] = handle_passed_param(params_nested_path_dup, passed_children_params.any?) do
-                  declared(passed_children_params, options, declared_children_params, params_nested_path_dup, request_params)
+                  declared(passed_children_params, options, declared_children_params, params_nested_path_dup)
                 end
               end
             else

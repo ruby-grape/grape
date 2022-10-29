@@ -16,6 +16,9 @@ See [#2227](https://github.com/ruby-grape/grape/pull/2227) for more information.
 
 Rack supports a configurable limit on the number of files created from multipart parameters (`Rack::Utils.multipart_part_limit`) and raises an error if params are received that create too many files.  If you were handling the Rack error directly, Grape now wraps that error in `Grape::Execeptions::TooManyMultipartFiles`.  Additionally, Grape will return a 413 status code if the exception goes unhandled.
 
+#### evaluate given
+
+
 ### Upgrading to >= 1.6.0
 
 #### Parameter renaming with :as
