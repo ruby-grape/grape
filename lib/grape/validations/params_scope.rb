@@ -13,6 +13,9 @@ module Grape
       class Attr
         attr_accessor :key, :scope
 
+        # Open up a new ParamsScope::Attr
+        # @param key [Hash, Symbol] key of attr
+        # @param scope [Grape::Validations::ParamsScope] scope of attr
         def initialize(key, scope)
           @key = key
           @scope = scope
@@ -22,6 +25,25 @@ module Grape
           return true if scope.nil?
 
           scope.meets_dependency?(scope.params(request_params), request_params)
+        end
+
+        # @return Array[Symbol, Hash[Symbol => Array]] declared_params with symbol instead of Attr
+        def self.attrs_keys(declared_params)
+          declared_params.map do |declared_param_attr|
+            attr_key(declared_param_attr)
+          end
+        end
+
+        def self.attr_key(declared_param_attr)
+          return attr_key(declared_param_attr.key) if declared_param_attr.is_a?(self)
+
+          if declared_param_attr.is_a?(Hash)
+            declared_param_attr.each_with_object({}) do |(key, value), result|
+              result[key] = attrs_keys(value)
+            end
+          else
+            declared_param_attr
+          end
         end
       end
 
