@@ -30,8 +30,8 @@ params = { b: 'b' }
 declared(params)
 declared(params, evaluate_given: false)
 # expect => {}
-# actual => { b: 1 }
-# evaluate_given false => {}
+# actual => { b: 'b' }
+# evaluate_given: false => {}
 
 ```
 
