@@ -277,7 +277,7 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params([element => @declared_params])
+          @parent.push_declared_params [element => @declared_params]
         else
           @api.namespace_stackable(:declared_params, @declared_params)
         end
