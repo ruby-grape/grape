@@ -40,6 +40,7 @@
   - [Declared](#declared)
   - [Include Parent Namespaces](#include-parent-namespaces)
   - [Include Missing](#include-missing)
+  - [Evaluate Given](#evaluate-given)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
@@ -972,7 +973,6 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 ````
 
 **Response with include_missing:false**
-
 
 ````json
 {
