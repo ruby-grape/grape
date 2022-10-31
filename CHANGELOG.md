@@ -12,6 +12,7 @@
 * [#2272](https://github.com/ruby-grape/grape/pull/2272): Added error on param init when provided type does not have `[]` coercion method, previously validation silently failed for any value - [@vasfed](https://github.com/Vasfed).
 * [#2274](https://github.com/ruby-grape/grape/pull/2274): Error middleware support using rack util's symbols as status - [@dhruvCW](https://github.com/dhruvCW).
 * [#2276](https://github.com/ruby-grape/grape/pull/2276): Fix exception super - [@ericproulx](https://github.com/ericproulx).
+* [#2285](https://github.com/ruby-grape/grape/pull/2285): Added :evaluate_given to declared(params) - [@zysend](https://github.com/zysend).
 * Your contribution here.
 
 #### Fixes
@@ -27,7 +28,6 @@
 * [#2256](https://github.com/ruby-grape/grape/pull/2256): Raise `Grape::Exceptions::MultipartPartLimitError` from Rack when too many files are uploaded - [@bschmeck](https://github.com/bschmeck).
 * [#2266](https://github.com/ruby-grape/grape/pull/2266): Fix code coverage - [@duffn](https://github.com/duffn).
 * [#2284](https://github.com/ruby-grape/grape/pull/2284): Fix an unexpected backtick - [@zysend](https://github.com/zysend).
-* [#2285](https://github.com/ruby-grape/grape/pull/2285): Try to fix the declared with not given - [@zysend](https://github.com/zysend).
 * Your contribution here.
 
 ### 1.6.2 (2021/12/30)

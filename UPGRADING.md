@@ -16,25 +16,6 @@ See [#2227](https://github.com/ruby-grape/grape/pull/2227) for more information.
 
 Rack supports a configurable limit on the number of files created from multipart parameters (`Rack::Utils.multipart_part_limit`) and raises an error if params are received that create too many files.  If you were handling the Rack error directly, Grape now wraps that error in `Grape::Execeptions::TooManyMultipartFiles`.  Additionally, Grape will return a 413 status code if the exception goes unhandled.
 
-#### Declared params can choose not to evaluate given
-
-The [`#declared(params)`] will return parameters even if depend on another parameters not given,but it will not return these if `evaluate_given=false` was set.
-Here comes an illustration of the old and new behaviour as code:
-
-```ruby
-# b depends on a, while a is not given
-optional :a
-given :a { optional :b }
-
-params = { b: 'b' }
-declared(params)
-declared(params, evaluate_given: false)
-# expect => {}
-# actual => { b: 'b' }
-# evaluate_given: false => {}
-
-```
-
 ### Upgrading to >= 1.6.0
 
 #### Parameter renaming with :as

@@ -965,33 +965,48 @@ post 'users/signup' do
 end
 ````
 
+### Evaluate Given
+
+By default `declared(params)` will return parameters even if depend on another parameters not given. If you do not want to return these, you can use the `evaluate_given` option. By default, `evaluate_given` is set to `true`. Consider the following API:
+
+````ruby
+format :json
+
+params do
+  optional :child_id, type: Integer
+  given :child_id do
+    requires :father_id, type: Integer
+  end
+end
+
+post 'child' do
+  { 'declared_params' => declared(params, evaluate_given: false) }
+end
+````
+
 **Request**
 
 ````bash
-curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown"}}'
+curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"father_id": 1}'
 ````
 
-**Response with include_missing:false**
+**Response with evaluate_given:false**
 
 ````json
 {
   "declared_params": {
-    "user": {
-      "first_name": "first name"
-    }
+    "child_id": null
   }
 }
 ````
 
-**Response with include_missing:true**
+**Response with evaluate_given:true**
 
 ````json
 {
   "declared_params": {
-    "user": {
-      "first_name": "first name",
-      "last_name": null
-    }
+    "child_id": null,
+    "father_id": 1
   }
 }
 ````
