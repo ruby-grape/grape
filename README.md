@@ -965,48 +965,34 @@ post 'users/signup' do
 end
 ````
 
-### Evaluate Given
-
-By default `declared(params)` will return parameters even if depend on another parameters not given. If you do not want to return these, you can use the `evaluate_given` option. By default, `evaluate_given` is set to `true`. Consider the following API:
-
-````ruby
-format :json
-
-params do
-  optional :child_id, type: Integer
-  given :child_id do
-    requires :father_id, type: Integer
-  end
-end
-
-post 'child' do
-  { 'declared_params' => declared(params, evaluate_given: false) }
-end
-````
-
 **Request**
 
 ````bash
-curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"father_id": 1}'
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"user": {"first_name":"first name", "random": "never shown"}}'
 ````
 
-**Response with evaluate_given:false**
+**Response with include_missing:false**
+
 
 ````json
 {
   "declared_params": {
-    "child_id": null
+    "user": {
+      "first_name": "first name"
+    }
   }
 }
 ````
 
-**Response with evaluate_given:true**
+**Response with include_missing:true**
 
 ````json
 {
   "declared_params": {
-    "child_id": null,
-    "father_id": 1
+    "user": {
+      "first_name": "first name",
+      "last_name": null
+    }
   }
 }
 ````
@@ -1088,6 +1074,102 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
       "first_name": "first name",
       "last_name": null,
       "address": { "city": "SF"}
+    }
+  }
+}
+````
+
+### Evaluate Given
+
+By default `declared(params)` will return parameters even if depend on another parameters not given. If you do not want to return these, you can use the `evaluate_given` option. By default, `evaluate_given` is set to `false`. Consider the following API:
+
+````ruby
+format :json
+
+params do
+  optional :child_id, type: Integer
+  given :child_id do
+    requires :father_id, type: Integer
+  end
+end
+
+post 'child' do
+  { 'declared_params' => declared(params, evaluate_given: true) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"father_id": 1}'
+````
+
+**Response with evaluate_given:false**
+
+````json
+{
+  "declared_params": {
+    "child_id": null,
+    "father_id": 1
+  }
+}
+````
+
+**Response with evaluate_given:true**
+
+````json
+{
+  "declared_params": {
+    "child_id": null
+  }
+}
+````
+
+
+
+````ruby
+format :json
+
+params do
+  requires :child, type: Hash do
+    optional :child_id, type: Integer
+    given :child_id do
+      requires :father_id, type: Integer
+    end
+  end
+end
+
+post 'users/signup' do
+  { 'declared_params' => declared(params, evaluate_given: true) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"child": {"father_id": 1}'
+````
+
+**Response with evaluate_given:false**
+
+````json
+{
+  "declared_params": {
+    "child": {
+      "child_id": null,
+      "father_id": 1
+    }
+  }
+}
+````
+
+**Response with evaluate_given:true**
+
+````json
+{
+  "declared_params": {
+    "child": {
+      "child_id": null
     }
   }
 }

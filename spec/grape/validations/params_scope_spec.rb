@@ -679,13 +679,13 @@ describe Grape::Validations::ParamsScope do
           end
         end
 
-        it 'evaluate_given_true' do
-          get '/evaluate_given_true', b: 'b'
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', b: 'b'
           expect(JSON.parse(last_response.body)).to eq('a' => nil, 'b' => 'b')
         end
 
-        it 'evaluate_given_false' do
-          get '/evaluate_given_false', b: 'b'
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', b: 'b'
           expect(JSON.parse(last_response.body)).to eq('a' => nil)
         end
       end
@@ -712,19 +712,19 @@ describe Grape::Validations::ParamsScope do
           end
         end
 
-        it 'evaluate_given_true' do
-          get '/evaluate_given_true', a: 'x'
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', a: 'x'
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
 
-          get '/evaluate_given_true', a: 'y'
+          get '/evaluate_given_false', a: 'y'
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
         end
 
-        it 'evaluate_given_false' do
-          get '/evaluate_given_false', a: 'x'
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', a: 'x'
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil }, 'e' => nil)
 
-          get '/evaluate_given_false', a: 'y'
+          get '/evaluate_given_true', a: 'y'
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'f' => nil)
         end
       end
@@ -761,31 +761,31 @@ describe Grape::Validations::ParamsScope do
           end
         end
 
-        it 'evaluate_given_true' do
-          get '/evaluate_given_true', a: 'x'
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', a: 'x'
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
 
-          get '/evaluate_given_true', a: 'x', b: { c: 'c' }
+          get '/evaluate_given_false', a: 'x', b: { c: 'c' }
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
 
-          get '/evaluate_given_true', a: 'y'
+          get '/evaluate_given_false', a: 'y'
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
 
-          get '/evaluate_given_true', a: 'y', b: { d: 'd' }
+          get '/evaluate_given_false', a: 'y', b: { d: 'd' }
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
         end
 
-        it 'evaluate_given_false' do
-          get '/evaluate_given_false', a: 'x'
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', a: 'x'
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil })
 
-          get '/evaluate_given_false', a: 'x', b: { c: 'c' }
+          get '/evaluate_given_true', a: 'x', b: { c: 'c' }
           expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => 'c', 'g' => nil, 'e' => { 'h' => nil } })
 
-          get '/evaluate_given_false', a: 'y'
+          get '/evaluate_given_true', a: 'y'
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil })
 
-          get '/evaluate_given_false', a: 'y', b: { d: 'd' }
+          get '/evaluate_given_true', a: 'y', b: { d: 'd' }
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
         end
       end

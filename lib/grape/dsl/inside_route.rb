@@ -28,7 +28,7 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [])
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: true, request_params: passed_params)
+          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: false, request_params: passed_params)
           declared_params ||= optioned_declared_params(**options)
 
           if passed_params.is_a?(Array)
@@ -49,7 +49,7 @@ module Grape
         def declared_hash(passed_params, options, declared_params, params_nested_path)
           declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
             # Check given
-            next if !options[:evaluate_given] && !declared_param_attr.meets_dependency?(options[:request_params])
+            next if options[:evaluate_given] && !declared_param_attr.meets_dependency?(options[:request_params])
 
             declared_hash_attr(passed_params, options, declared_param_attr.key, params_nested_path, memo)
           end
