@@ -1125,7 +1125,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"fath
 }
 ````
 
-
+It also works on nested hashes:
 
 ````ruby
 format :json
@@ -1139,7 +1139,7 @@ params do
   end
 end
 
-post 'users/signup' do
+post 'child' do
   { 'declared_params' => declared(params, evaluate_given: true) }
 end
 ````
@@ -1147,7 +1147,7 @@ end
 **Request**
 
 ````bash
-curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d '{"child": {"father_id": 1}'
+curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"child": {"father_id": 1}}'
 ````
 
 **Response with evaluate_given:false**
