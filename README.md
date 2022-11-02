@@ -40,6 +40,7 @@
   - [Declared](#declared)
   - [Include Parent Namespaces](#include-parent-namespaces)
   - [Include Missing](#include-missing)
+  - [Evaluate Given](#evaluate-given)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
@@ -1073,6 +1074,102 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
       "first_name": "first name",
       "last_name": null,
       "address": { "city": "SF"}
+    }
+  }
+}
+````
+
+### Evaluate Given
+
+By default `declared(params)` will not evaluate `given` and return all parameters. Use `evaluate_given` to evaluate all `given` blocks and return only parameters that satisfy `given` conditions. Consider the following API:
+
+````ruby
+format :json
+
+params do
+  optional :child_id, type: Integer
+  given :child_id do
+    requires :father_id, type: Integer
+  end
+end
+
+post 'child' do
+  { 'declared_params' => declared(params, evaluate_given: true) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"father_id": 1}'
+````
+
+**Response with evaluate_given:false**
+
+````json
+{
+  "declared_params": {
+    "child_id": null,
+    "father_id": 1
+  }
+}
+````
+
+**Response with evaluate_given:true**
+
+````json
+{
+  "declared_params": {
+    "child_id": null
+  }
+}
+````
+
+It also works on nested hashes:
+
+````ruby
+format :json
+
+params do
+  requires :child, type: Hash do
+    optional :child_id, type: Integer
+    given :child_id do
+      requires :father_id, type: Integer
+    end
+  end
+end
+
+post 'child' do
+  { 'declared_params' => declared(params, evaluate_given: true) }
+end
+````
+
+**Request**
+
+````bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"child": {"father_id": 1}}'
+````
+
+**Response with evaluate_given:false**
+
+````json
+{
+  "declared_params": {
+    "child": {
+      "child_id": null,
+      "father_id": 1
+    }
+  }
+}
+````
+
+**Response with evaluate_given:true**
+
+````json
+{
+  "declared_params": {
+    "child": {
+      "child_id": null
     }
   }
 }

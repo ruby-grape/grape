@@ -664,6 +664,132 @@ describe Grape::Validations::ParamsScope do
       get '/nested', bar: { a: true, c: { b: 'yes' } }
       expect(JSON.parse(last_response.body)).to eq('bar' => { 'a' => 'true', 'c' => { 'b' => 'yes' } })
     end
+
+    context 'when the dependent parameter is not present #declared(params)' do
+      context 'lateral parameter' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :a
+              given :a do
+                optional :b
+              end
+            end
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+          end
+        end
+
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', b: 'b'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil, 'b' => 'b')
+        end
+
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', b: 'b'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil)
+        end
+      end
+
+      context 'nested parameter' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :a, values: %w[x y]
+              given a: ->(a) { a == 'x' } do
+                optional :b, type: Hash do
+                  optional :c
+                end
+                optional :e
+              end
+              given a: ->(a) { a == 'y' } do
+                optional :b, type: Hash do
+                  optional :d
+                end
+                optional :f
+              end
+            end
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+          end
+        end
+
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
+
+          get '/evaluate_given_false', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'e' => nil, 'f' => nil)
+        end
+
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil }, 'e' => nil)
+
+          get '/evaluate_given_true', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil }, 'f' => nil)
+        end
+      end
+
+      context 'nested given parameter' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :a, values: %w[x y]
+              given a: ->(a) { a == 'x' } do
+                optional :b, type: Hash do
+                  optional :c
+                  given :c do
+                    optional :g
+                    optional :e, type: Hash do
+                      optional :h
+                    end
+                  end
+                end
+              end
+              given a: ->(a) { a == 'y' } do
+                optional :b, type: Hash do
+                  optional :d
+                  given :d do
+                    optional :f
+                    optional :e, type: Hash do
+                      optional :i
+                    end
+                  end
+                end
+              end
+            end
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+          end
+        end
+
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/evaluate_given_false', a: 'x', b: { c: 'c' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/evaluate_given_false', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil, 'f' => nil, 'e' => { 'i' => nil } })
+
+          get '/evaluate_given_false', a: 'y', b: { d: 'd' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
+        end
+
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', a: 'x'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => nil })
+
+          get '/evaluate_given_true', a: 'x', b: { c: 'c' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'x', 'b' => { 'c' => 'c', 'g' => nil, 'e' => { 'h' => nil } })
+
+          get '/evaluate_given_true', a: 'y'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => nil })
+
+          get '/evaluate_given_true', a: 'y', b: { d: 'd' }
+          expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
+        end
+      end
+    end
   end
 
   context 'default value in given block' do

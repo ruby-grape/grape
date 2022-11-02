@@ -217,8 +217,8 @@ module Grape
         else
           # @declared_params also includes hashes of options and such, but those
           # won't be flattened out.
-          @declared_params.flatten.any? do |declared_param|
-            first_hash_key_or_param(declared_param) == param
+          @declared_params.flatten.any? do |declared_param_attr|
+            first_hash_key_or_param(declared_param_attr.key) == param
           end
         end
       end

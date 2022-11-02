@@ -10,6 +10,41 @@ module Grape
 
       include Grape::DSL::Parameters
 
+      class Attr
+        attr_accessor :key, :scope
+
+        # Open up a new ParamsScope::Attr
+        # @param key [Hash, Symbol] key of attr
+        # @param scope [Grape::Validations::ParamsScope] scope of attr
+        def initialize(key, scope)
+          @key = key
+          @scope = scope
+        end
+
+        def meets_dependency?(request_params)
+          return true if scope.nil?
+
+          scope.meets_dependency?(scope.params(request_params), request_params)
+        end
+
+        # @return Array[Symbol, Hash[Symbol => Array]] declared_params with symbol instead of Attr
+        def self.attrs_keys(declared_params)
+          declared_params.map do |declared_param_attr|
+            attr_key(declared_param_attr)
+          end
+        end
+
+        def self.attr_key(declared_param_attr)
+          return attr_key(declared_param_attr.key) if declared_param_attr.is_a?(self)
+
+          if declared_param_attr.is_a?(Hash)
+            declared_param_attr.transform_values { |value| attrs_keys(value) }
+          else
+            declared_param_attr
+          end
+        end
+      end
+
       # Open up a new ParamsScope, allowing parameter definitions per
       #   Grape::DSL::Params.
       # @param opts [Hash] options for this scope
@@ -130,13 +165,14 @@ module Grape
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
       def push_declared_params(attrs, **opts)
+        opts = opts.merge(declared_params_scope: self) unless opts.key?(:declared_params_scope)
         if lateral?
           @parent.push_declared_params(attrs, **opts)
         else
           push_renamed_param(full_path + [attrs.first], opts[:as]) \
             if opts && opts[:as]
 
-          @declared_params.concat attrs
+          @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
         end
       end
 
