@@ -48,7 +48,6 @@ module Grape
 
         def declared_hash(passed_params, options, declared_params, params_nested_path)
           declared_params.each_with_object(passed_params.class.new) do |declared_param_attr, memo|
-            # Check given
             next if options[:evaluate_given] && !declared_param_attr.meets_dependency?(options[:request_params])
 
             declared_hash_attr(passed_params, options, declared_param_attr.key, params_nested_path, memo)

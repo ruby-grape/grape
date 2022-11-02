@@ -1081,7 +1081,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
 
 ### Evaluate Given
 
-By default `declared(params)` will return parameters even if depend on another parameters not given. If you do not want to return these, you can use the `evaluate_given` option. By default, `evaluate_given` is set to `false`. Consider the following API:
+By default `declared(params)` will not evaluate `given` and return all parameters. Use `evaluate_given` to evaluate all `given` blocks and return only parameters that satisfy `given` conditions. Consider the following API:
 
 ````ruby
 format :json
