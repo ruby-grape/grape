@@ -696,23 +696,25 @@ describe Grape::Validations::ParamsScope do
             subject.params do
               optional :array, type: Array do
                 optional :a
-                given :a do
+                given a: ->(a) { a == 'a' } do
                   optional :b
                 end
               end
             end
-            subject.post("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+            subject.get("/evaluate_given_#{evaluate_given}") do
+              declared(params, evaluate_given: evaluate_given).to_json
+            end
           end
         end
 
         it 'evaluate_given_false' do
-          post '/evaluate_given_false', array: [{ b: 'b' }, { a: 'a', b: 'b' }]
-          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil, 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
+          get '/evaluate_given_false', array: [{ a: 'c', b: 'b' }, { a: 'a', b: 'b' }]
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => 'c', 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
         end
 
         it 'evaluate_given_true' do
-          post '/evaluate_given_true', array: [{ b: 'b' }, { a: 'a', b: 'b' }]
-          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil }, { 'a' => 'a', 'b' => 'b' }])
+          get '/evaluate_given_true', array: [{ a: 'c', b: 'b' }, { a: 'a', b: 'b' }]
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => 'c' }, { 'a' => 'a', 'b' => 'b' }])
         end
       end
 
