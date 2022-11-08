@@ -701,18 +701,18 @@ describe Grape::Validations::ParamsScope do
                 end
               end
             end
-            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+            subject.post("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
           end
         end
 
         it 'evaluate_given_false' do
-          get '/evaluate_given_false', array: [{ b: 'b'}, { a: 'a', b: 'b'}]
+          post '/evaluate_given_false', array: [{ b: 'b' }, { a: 'a', b: 'b' }]
           expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil, 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
         end
 
         it 'evaluate_given_true' do
-          get '/evaluate_given_true', array: [{ b: 'b'}, { a: 'a', b: 'b'}]
-          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil}, { 'a' => 'a', 'b' => 'b' }])
+          post '/evaluate_given_true', array: [{ b: 'b' }, { a: 'a', b: 'b' }]
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil }, { 'a' => 'a', 'b' => 'b' }])
         end
       end
 
