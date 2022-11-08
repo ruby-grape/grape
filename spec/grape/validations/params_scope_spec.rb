@@ -690,6 +690,32 @@ describe Grape::Validations::ParamsScope do
         end
       end
 
+      context 'lateral parameter within an array param' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :array, type: Array do
+                optional :a
+                given :a do
+                  optional :b
+                end
+              end
+            end
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+          end
+        end
+
+        it 'evaluate_given_false' do
+          get '/evaluate_given_false', array: [{ b: 'b'}, { a: 'a', b: 'b'}]
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil, 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
+        end
+
+        it 'evaluate_given_true' do
+          get '/evaluate_given_true', array: [{ b: 'b'}, { a: 'a', b: 'b'}]
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil}, { 'a' => 'a', 'b' => 'b' }])
+        end
+      end
+
       context 'nested parameter' do
         before do
           [true, false].each do |evaluate_given|

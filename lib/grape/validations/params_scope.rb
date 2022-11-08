@@ -21,12 +21,6 @@ module Grape
           @scope = scope
         end
 
-        def meets_dependency?(request_params)
-          return true if scope.nil?
-
-          scope.meets_dependency?(scope.params(request_params), request_params)
-        end
-
         # @return Array[Symbol, Hash[Symbol => Array]] declared_params with symbol instead of Attr
         def self.attrs_keys(declared_params)
           declared_params.map do |declared_param_attr|
