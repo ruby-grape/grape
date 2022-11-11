@@ -690,35 +690,7 @@ describe Grape::Validations::ParamsScope do
         end
       end
 
-      context 'lateral parameter within an array param' do
-        before do
-          [true, false].each do |evaluate_given|
-            subject.params do
-              optional :array, type: Array do
-                optional :a
-                given :a do
-                  optional :b
-                end
-              end
-            end
-            subject.post("/evaluate_given_#{evaluate_given}") do
-              declared(params, evaluate_given: evaluate_given).to_json
-            end
-          end
-        end
-
-        it 'evaluate_given_false' do
-          post '/evaluate_given_false', { array: [{ b: 'b' }, { a: 'a', b: 'b' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
-          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil, 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
-        end
-
-        it 'evaluate_given_true' do
-          post '/evaluate_given_true', { array: [{ b: 'b' }, { a: 'a', b: 'b' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
-          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil }, { 'a' => 'a', 'b' => 'b' }])
-        end
-      end
-
-      context 'nested parameter' do
+      context 'lateral hash parameter' do
         before do
           [true, false].each do |evaluate_given|
             subject.params do
@@ -757,7 +729,7 @@ describe Grape::Validations::ParamsScope do
         end
       end
 
-      context 'nested given parameter' do
+      context 'lateral parameter within lateral hash parameter' do
         before do
           [true, false].each do |evaluate_given|
             subject.params do
@@ -815,6 +787,191 @@ describe Grape::Validations::ParamsScope do
 
           get '/evaluate_given_true', a: 'y', b: { d: 'd' }
           expect(JSON.parse(last_response.body)).to eq('a' => 'y', 'b' => { 'd' => 'd', 'f' => nil, 'e' => { 'i' => nil } })
+        end
+      end
+
+      context 'lateral parameter within an array param' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :array, type: Array do
+                optional :a
+                given :a do
+                  optional :b
+                end
+              end
+            end
+            subject.post("/evaluate_given_#{evaluate_given}") do
+              declared(params, evaluate_given: evaluate_given).to_json
+            end
+          end
+        end
+
+        it 'evaluate_given_false' do
+          post '/evaluate_given_false', { array: [{ b: 'b' }, { a: 'a', b: 'b' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil, 'b' => 'b' }, { 'a' => 'a', 'b' => 'b' }])
+        end
+
+        it 'evaluate_given_true' do
+          post '/evaluate_given_true', { array: [{ b: 'b' }, { a: 'a', b: 'b' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => nil }, { 'a' => 'a', 'b' => 'b' }])
+        end
+      end
+
+      context 'nested given parameter' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :a
+              optional :c
+              given :a do
+                given :c do
+                  optional :b
+                end
+              end
+            end
+            subject.post("/evaluate_given_#{evaluate_given}") do
+              declared(params, evaluate_given: evaluate_given).to_json
+            end
+          end
+        end
+
+        it 'evaluate_given_false' do
+          post '/evaluate_given_false', { a: 'a', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'a', 'b' => 'b', 'c' => nil)
+
+          post '/evaluate_given_false', { c: 'c', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil, 'b' => 'b', 'c' => 'c')
+
+          post '/evaluate_given_false', { a: 'a', c: 'c', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'a', 'b' => 'b', 'c' => 'c')
+        end
+
+        it 'evaluate_given_true' do
+          post '/evaluate_given_true', { a: 'a', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'a', 'c' => nil)
+
+          post '/evaluate_given_true', { c: 'c', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => nil, 'c' => 'c')
+
+          post '/evaluate_given_true', { a: 'a', c: 'c', b: 'b' }.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('a' => 'a', 'b' => 'b', 'c' => 'c')
+        end
+      end
+
+      context 'nested given parameter within an array param' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :array, type: Array do
+                optional :a
+                optional :c
+                given :a do
+                  given :c do
+                    optional :b
+                  end
+                end
+              end
+            end
+            subject.post("/evaluate_given_#{evaluate_given}") do
+              declared(params, evaluate_given: evaluate_given).to_json
+            end
+          end
+        end
+
+        let :evaluate_given_params do
+          {
+            array: [
+              { a: 'a', b: 'b' },
+              { c: 'c', b: 'b' },
+              { a: 'a', c: 'c', b: 'b' }
+            ]
+          }
+        end
+
+        it 'evaluate_given_false' do
+          post '/evaluate_given_false', evaluate_given_params.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => 'a', 'b' => 'b', 'c' => nil }, { 'a' => nil, 'b' => 'b', 'c' => 'c' }, { 'a' => 'a', 'b' => 'b', 'c' => 'c' }])
+        end
+
+        it 'evaluate_given_true' do
+          post '/evaluate_given_true', evaluate_given_params.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq('array' => [{ 'a' => 'a', 'c' => nil }, { 'a' => nil, 'c' => 'c' }, { 'a' => 'a', 'b' => 'b', 'c' => 'c' }])
+        end
+      end
+
+      context 'nested given parameter within a nested given parameter within an array param' do
+        before do
+          [true, false].each do |evaluate_given|
+            subject.params do
+              optional :array, type: Array do
+                optional :a
+                optional :c
+                given :a do
+                  given :c do
+                    optional :array, type: Array do
+                      optional :a
+                      optional :c
+                      given :a do
+                        given :c do
+                          optional :b
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+            subject.post("/evaluate_given_#{evaluate_given}") do
+              declared(params, evaluate_given: evaluate_given).to_json
+            end
+          end
+        end
+
+        let :evaluate_given_params do
+          {
+            array: [{
+              a: 'a',
+              c: 'c',
+              array: [
+                { a: 'a', b: 'b' },
+                { c: 'c', b: 'b' },
+                { a: 'a', c: 'c', b: 'b' }
+              ]
+            }]
+          }
+        end
+
+        it 'evaluate_given_false' do
+          expected_response_hash = {
+            'array' => [{
+              'a' => 'a',
+              'c' => 'c',
+              'array' => [
+                { 'a' => 'a', 'b' => 'b', 'c' => nil },
+                { 'a' => nil, 'c' => 'c', 'b' => 'b' },
+                { 'a' => 'a', 'c' => 'c', 'b' => 'b' }
+              ]
+            }]
+          }
+          post '/evaluate_given_false', evaluate_given_params.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq(expected_response_hash)
+        end
+
+        it 'evaluate_given_true' do
+          expected_response_hash = {
+            'array' => [{
+              'a' => 'a',
+              'c' => 'c',
+              'array' => [
+                { 'a' => 'a', 'c' => nil },
+                { 'a' => nil, 'c' => 'c' },
+                { 'a' => 'a', 'b' => 'b', 'c' => 'c' }
+              ]
+            }]
+          }
+          post '/evaluate_given_true', evaluate_given_params.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(JSON.parse(last_response.body)).to eq(expected_response_hash)
         end
       end
     end
