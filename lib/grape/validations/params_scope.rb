@@ -88,13 +88,25 @@ module Grape
         parent.should_validate?(parameters)
       end
 
-      def meets_dependency?(params, *request_params)
+      def meets_dependency?(params, request_params)
         return true unless @dependent_on
 
-        return false if @parent.present? && !@parent.meets_dependency?(request_params.present? ? @parent.params(*request_params) : params, *request_params)
+        return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
-        return params.any? { |param| meets_dependency?(param, *request_params) } if params.is_a?(Array)
+        return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
 
+        meets_hash_dependency?(params)
+      end
+
+      def attr_meets_dependency?(params)
+        return true unless @dependent_on
+
+        return false if @parent.present? && !@parent.attr_meets_dependency?(params)
+
+        meets_hash_dependency?(params)
+      end
+
+      def meets_hash_dependency?(params)
         # params might be anything what looks like a hash, so it must implement a `key?` method
         return false unless params.respond_to?(:key?)
 
