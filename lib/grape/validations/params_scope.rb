@@ -21,12 +21,6 @@ module Grape
           @scope = scope
         end
 
-        def meets_dependency?(request_params)
-          return true if scope.nil?
-
-          scope.meets_dependency?(scope.params(request_params), request_params)
-        end
-
         # @return Array[Symbol, Hash[Symbol => Array]] declared_params with symbol instead of Attr
         def self.attrs_keys(declared_params)
           declared_params.map do |declared_param_attr|
@@ -101,6 +95,18 @@ module Grape
 
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
 
+        meets_hash_dependency?(params)
+      end
+
+      def attr_meets_dependency?(params)
+        return true unless @dependent_on
+
+        return false if @parent.present? && !@parent.attr_meets_dependency?(params)
+
+        meets_hash_dependency?(params)
+      end
+
+      def meets_hash_dependency?(params)
         # params might be anything what looks like a hash, so it must implement a `key?` method
         return false unless params.respond_to?(:key?)
 
