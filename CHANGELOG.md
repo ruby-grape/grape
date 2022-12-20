@@ -1,4 +1,4 @@
-### 1.7.0 (Next)
+### 1.7.0 (2022/12/20)
 
 #### Features
 
@@ -13,7 +13,6 @@
 * [#2274](https://github.com/ruby-grape/grape/pull/2274): Error middleware support using rack util's symbols as status - [@dhruvCW](https://github.com/dhruvCW).
 * [#2276](https://github.com/ruby-grape/grape/pull/2276): Fix exception super - [@ericproulx](https://github.com/ericproulx).
 * [#2285](https://github.com/ruby-grape/grape/pull/2285), [#2287](https://github.com/ruby-grape/grape/pull/2287): Added :evaluate_given to declared(params) - [@zysend](https://github.com/zysend).
-* Your contribution here.
 
 #### Fixes
 
@@ -28,7 +27,6 @@
 * [#2256](https://github.com/ruby-grape/grape/pull/2256): Raise `Grape::Exceptions::MultipartPartLimitError` from Rack when too many files are uploaded - [@bschmeck](https://github.com/bschmeck).
 * [#2266](https://github.com/ruby-grape/grape/pull/2266): Fix code coverage - [@duffn](https://github.com/duffn).
 * [#2284](https://github.com/ruby-grape/grape/pull/2284): Fix an unexpected backtick - [@zysend](https://github.com/zysend).
-* Your contribution here.
 
 ### 1.6.2 (2021/12/30)
 
