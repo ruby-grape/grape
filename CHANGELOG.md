@@ -1,3 +1,13 @@
+### 1.7.1 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 1.7.0 (2022/12/20)
 
 #### Features
