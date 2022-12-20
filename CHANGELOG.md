@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2288](https://github.com/ruby-grape/grape/pull/2288): Update rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
