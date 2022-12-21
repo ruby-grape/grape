@@ -27,7 +27,9 @@ ENV PATH /gems/bin:$PATH
 
 RUN mkdir -p $GEM_HOME && mkdir -p $LIB_PATH \
   && chown $USER:$USER $GEM_HOME \
-  && chown $USER:$USER $LIB_PATH
+  && chown $USER:$USER $LIB_PATH \
+  && gem update --system \
+  && gem install bundler
 
 WORKDIR $LIB_PATH
 USER $USER

@@ -5,6 +5,7 @@ volumes:
 
 services:
   grape:
+    image: grape.ruby:${RUBY_VERSION}
     build:
       context: .
       dockerfile: docker/Dockerfile
