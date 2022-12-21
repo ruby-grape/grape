@@ -12,7 +12,7 @@ jobs:
     name: RuboCop
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -25,7 +25,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 2.5
           - 2.6
           - 2.7
           - "3.0"
@@ -61,7 +60,7 @@ jobs:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
