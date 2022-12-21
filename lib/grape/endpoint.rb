@@ -222,7 +222,10 @@ module Grape
     def call!(env)
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
-      @app.call(env)
+      context = { endpoint: self, env: @env }
+      ActiveSupport::Notifications.instrument('endpoint_call.grape', context) do
+        @app.call(env).tap { |response| context[:response] = response }
+      end
     end
 
     # Return the collection of endpoints within this endpoint.
