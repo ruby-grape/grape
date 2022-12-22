@@ -1,8 +1,8 @@
 ---
 name: danger
-on:
-  pull_request:
-    types: [opened, reopened, edited, synchronize]
+
+on: pull_request
+
 jobs:
   danger:
     runs-on: ubuntu-20.04
