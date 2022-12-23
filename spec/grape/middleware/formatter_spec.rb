@@ -13,7 +13,7 @@ describe Grape::Middleware::Formatter do
 
     it 'looks at the bodies for possibly serializable data' do
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      expect(bodies).to all(eq(::Grape::Json.dump(body)))
+      bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) } # rubocop:disable RSpec/IteratedExpectation
     end
 
     context 'default format' do
@@ -26,7 +26,7 @@ describe Grape::Middleware::Formatter do
           end
         end
 
-        expect(subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last).to all(eq('"bar"'))
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
 
@@ -40,7 +40,7 @@ describe Grape::Middleware::Formatter do
           end
         end
 
-        expect(subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last).to all(eq('{"foos":[{"bar":"baz"}] }'))
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
 
@@ -53,8 +53,7 @@ describe Grape::Middleware::Formatter do
             '<bar/>'
           end
         end
-
-        expect(subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last).to all(eq('<bar/>'))
+        subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
   end
