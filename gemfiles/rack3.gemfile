@@ -4,7 +4,7 @@
 
 source 'https://rubygems.org'
 
-gem 'multi_json', require: 'multi_json'
+gem 'rack', '~> 3.0.0'
 
 group :development, :test do
   gem 'bundler'
@@ -31,7 +31,6 @@ group :test do
   gem 'maruku'
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
-  gem 'rack', '~> 2'
   gem 'rack-test'
   gem 'rspec', '~> 3.11.0'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false

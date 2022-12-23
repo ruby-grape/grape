@@ -140,7 +140,8 @@ describe Grape::Endpoint do
       get '/headers'
       expect(JSON.parse(last_response.body)).to eq(
         'Host' => 'example.org',
-        'Cookie' => ''
+        'Cookie' => '',
+        "Version"=>"HTTP/1.0"
       )
     end
 
@@ -432,7 +433,7 @@ describe Grape::Endpoint do
         end
         post '/upload', { file: '' }, 'CONTENT_TYPE' => 'multipart/form-data; boundary=foobar'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('empty message body supplied with multipart/form-data; boundary=foobar content-type')
+        expect(last_response.body).to eq('file is invalid')
       end
     end
 
