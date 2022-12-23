@@ -27,19 +27,20 @@ describe Rack do
   end
 
   context 'when the app is mounted' do
-    def app
-      @main_app ||= Class.new(Grape::API) do
+    let(:ping_mount) do
+      Class.new(Grape::API) do
         get 'ping'
       end
     end
 
-    let!(:base) do
-      app_to_mount = app
-      Class.new(Grape::API) do
+    let(:app) do
+      app_to_mount = ping_mount
+      app = Class.new(Grape::API) do
         namespace 'namespace' do
           mount app_to_mount
         end
       end
+      Rack::Builder.new(app)
     end
 
     it 'finds the app on the namespace' do

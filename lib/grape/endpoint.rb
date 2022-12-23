@@ -299,7 +299,7 @@ module Grape
 
       if namespace_inheritable(:version)
         stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-                  versions: namespace_inheritable(:version) ? namespace_inheritable(:version).flatten : nil,
+                  versions: namespace_inheritable(:version)&.flatten,
                   version_options: namespace_inheritable(:version_options),
                   prefix: namespace_inheritable(:root_prefix),
                   mount_path: namespace_stackable(:mount_path).first
@@ -325,7 +325,7 @@ module Grape
     private :build_stack, :build_helpers
 
     def execute
-      @block ? @block.call(self) : nil
+      @block&.call(self)
     end
 
     def helpers

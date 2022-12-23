@@ -39,7 +39,7 @@ module Grape
 
       def method_missing(method_name, *args)
         if setter?(method_name[-1])
-          attributes[method_name[0..-1]] = *args
+          attributes[method_name[0..]] = *args
         else
           attributes[method_name]
         end
