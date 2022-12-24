@@ -141,7 +141,7 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)).to eq(
         'Host' => 'example.org',
         'Cookie' => '',
-        "Version"=>"HTTP/1.0"
+        'Version' => 'HTTP/1.0'
       )
     end
 

@@ -30,9 +30,8 @@ group :test do
   gem 'grape-entity', '~> 0.6'
   gem 'maruku'
   gem 'mime-types'
-  gem 'rack-jsonp', require: 'rack/jsonp'
-  gem 'rack-test'
   gem 'rack', '~> 2'
+  gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test'
   gem 'rspec', '~> 3.11.0'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false
