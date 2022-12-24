@@ -1,16 +1,10 @@
 ---
 name: test
-on:
-  push:
-    branches:
-      - "*"
-  pull_request:
-    branches:
-      - "*"
+on: [push, pull_request]
 jobs:
   lint:
     name: RuboCop
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up Ruby
@@ -24,10 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby:
-          - 2.6
-          - 2.7
-          - "3.0"
+        ruby: [2.6, 2.7, 3.0, 3.1]
         gemfile:
           - Gemfile
           - gemfiles/rack1.gemfile
@@ -36,29 +27,15 @@ jobs:
           - gemfiles/rails_5.gemfile
           - gemfiles/rails_6.gemfile
           - gemfiles/rails_6_1.gemfile
-        include:
-          - ruby: 3.1
-            gemfile: 'gemfiles/multi_json.gemfile'
-          - ruby: 3.1
-            gemfile: 'gemfiles/multi_xml.gemfile'
-          - ruby: 3.1
-            gemfile: 'gemfiles/rails_7.gemfile'
-          - ruby: "3.0"
-            gemfile: 'gemfiles/multi_json.gemfile'
-          - ruby: "3.0"
-            gemfile: 'gemfiles/multi_xml.gemfile'
-          - ruby: "3.0"
-            gemfile: 'gemfiles/rails_7.gemfile'
-          - ruby: 2.7
-            gemfile: 'gemfiles/multi_json.gemfile'
-          - ruby: 2.7
-            gemfile: 'gemfiles/multi_xml.gemfile'
-          - ruby: 2.7
-            gemfile: 'gemfiles/rails_7.gemfile'
-    runs-on: ubuntu-20.04
+          - gemfiles/rails_7.gemfile
+          - gemfiles/multi_xml.gemfile
+          - gemfiles/multi_json.gemfile
+        exclude:
+          - ruby: 2.6
+            gemfile: gemfiles/rails_7.gemfile
+    runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-
     steps:
     - uses: actions/checkout@v3
 
