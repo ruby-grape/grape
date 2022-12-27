@@ -12,6 +12,9 @@ require:
 
 inherit_from: .rubocop_todo.yml
 
+Layout/LineLength:
+  Max: 215
+
 Style/Documentation:
   Enabled: false
 
@@ -21,18 +24,34 @@ Style/MultilineIfModifier:
 Style/RaiseArgs:
   Enabled: false
 
-Style/HashEachMethods:
-  Enabled: true
-
-Style/HashTransformKeys:
-  Enabled: true
-
-Style/HashTransformValues:
-  Enabled: true
+Metrics/AbcSize:
+  Max: 45
 
 Metrics/BlockLength:
+  Max: 30
   Exclude:
     - spec/**/*_spec.rb
 
+Metrics/ClassLength:
+  Max: 300
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+Metrics/ParameterLists:
+  MaxOptionalParameters: 4
+
+Metrics/MethodLength:
+  Max: 32
+
+Metrics/ModuleLength:
+  Max: 220
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
 RSpec/Capybara/FeatureMethods:
   Enabled: false
+
+RSpec/ExampleLength:
+  Max: 60

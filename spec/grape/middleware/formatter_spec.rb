@@ -13,7 +13,7 @@ describe Grape::Middleware::Formatter do
 
     it 'looks at the bodies for possibly serializable data' do
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) }
+      bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) } # rubocop:disable RSpec/IteratedExpectation
     end
 
     context 'default format' do
@@ -26,7 +26,7 @@ describe Grape::Middleware::Formatter do
           end
         end
 
-        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') }
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
 
@@ -40,7 +40,7 @@ describe Grape::Middleware::Formatter do
           end
         end
 
-        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') }
+        subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
 
@@ -53,8 +53,7 @@ describe Grape::Middleware::Formatter do
             '<bar/>'
           end
         end
-
-        subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') }
+        subject.call('PATH_INFO' => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') } # rubocop:disable RSpec/IteratedExpectation
       end
     end
   end
@@ -243,6 +242,7 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'input' do
+    content_types = ['application/json', 'application/json; charset=utf-8'].freeze
     %w[POST PATCH PUT DELETE].each do |method|
       context 'when body is not nil or empty' do
         context 'when Content-Type is supported' do
@@ -320,7 +320,7 @@ describe Grape::Middleware::Formatter do
         end
       end
 
-      ['application/json', 'application/json; charset=utf-8'].each do |content_type|
+      content_types.each do |content_type|
         context content_type do
           it "parses the body from #{method} and copies values into rack.request.form_hash" do
             io = StringIO.new('{"is_boolean":true,"string":"thing"}')

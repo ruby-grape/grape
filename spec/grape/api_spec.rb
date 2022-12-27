@@ -103,22 +103,6 @@ describe Grape::API do
         }
       end
     end
-
-    # Behavior as defined by rfc2616 when no header is defined
-    # http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-    describe 'no specified accept header' do
-      # subject.version 'v1', using: :header
-      # subject.get '/hello' do
-      #   'hello'
-      # end
-
-      # it 'routes' do
-      #   get '/hello'
-      #   last_response.status.should eql 200
-      # end
-    end
-
-    # pending 'routes if any media type is allowed'
   end
 
   describe '.version using accept_version_header' do
@@ -448,9 +432,10 @@ describe Grape::API do
       expect(last_response.body).to eql 'hiya'
     end
 
+    objects = ['string', :symbol, 1, -1.1, {}, [], true, false, nil].freeze
     %i[put post].each do |verb|
       context verb.to_s do
-        ['string', :symbol, 1, -1.1, {}, [], true, false, nil].each do |object|
+        objects.each do |object|
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
             subject.send(verb) do
@@ -1601,7 +1586,7 @@ describe Grape::API do
 
       subject.get(:hello) { 'Hello, world.' }
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(basic_auth_context).to be_a_kind_of(Grape::Endpoint)
+      expect(basic_auth_context).to be_a(Grape::Endpoint)
     end
 
     it 'has access to helper methods' do
@@ -3067,7 +3052,7 @@ describe Grape::API do
       expect(route.description).to eq('first method')
       expect(route.route_foo).to be_nil
       expect(route.params).to eq({})
-      expect(route.options).to be_a_kind_of(Hash)
+      expect(route.options).to be_a(Hash)
     end
 
     it 'has params which does not include format and version as named captures' do
@@ -3725,7 +3710,7 @@ describe Grape::API do
     it 'sets the instance' do
       expect(subject.instance).to be_nil
       subject.compile
-      expect(subject.instance).to be_kind_of(subject.base_instance)
+      expect(subject.instance).to be_a(subject.base_instance)
     end
   end
 

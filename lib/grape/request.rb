@@ -47,7 +47,7 @@ module Grape
     end
 
     def transform_header(header)
-      -header[5..-1].split('_').each(&:capitalize!).join('-')
+      -header[5..].split('_').each(&:capitalize!).join('-')
     end
   end
 end

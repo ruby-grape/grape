@@ -95,7 +95,7 @@ module Grape
 
       # @return [Rack::Builder] the builder object with our middlewares applied
       def build(builder = Rack::Builder.new)
-        others.shift(others.size).each(&method(:merge_with))
+        others.shift(others.size).each { |m| merge_with(m) }
         middlewares.each do |m|
           m.use_in(builder)
         end

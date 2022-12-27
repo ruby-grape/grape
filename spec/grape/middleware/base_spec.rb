@@ -70,18 +70,18 @@ describe Grape::Middleware::Base do
 
   it 'is able to access the response' do
     subject.call({})
-    expect(subject.response).to be_kind_of(Rack::Response)
+    expect(subject.response).to be_a(Rack::Response)
   end
 
   describe '#response' do
     subject do
-      puts described_class
       described_class.new(response)
     end
 
     before { subject.call({}) }
 
     context 'when Array' do
+      let(:rack_response) { Rack::Response.new('test', 204, abc: 1) }
       let(:response) { ->(_) { [204, { abc: 1 }, 'test'] } }
 
       it 'status' do
@@ -97,12 +97,14 @@ describe Grape::Middleware::Base do
       end
 
       it 'returns the memoized Rack::Response instance' do
-        expect(subject.response).to be(subject.response)
+        allow(Rack::Response).to receive(:new).and_return(rack_response)
+        expect(subject.response).to eq(rack_response)
       end
     end
 
     context 'when Rack::Response' do
-      let(:response) { ->(_) { Rack::Response.new('test', 204, abc: 1) } }
+      let(:rack_response) { Rack::Response.new('test', 204, abc: 1) }
+      let(:response) { ->(_) { rack_response } }
 
       it 'status' do
         expect(subject.response.status).to eq(204)
@@ -117,7 +119,7 @@ describe Grape::Middleware::Base do
       end
 
       it 'returns the memoized Rack::Response instance' do
-        expect(subject.response).to be(subject.response)
+        expect(subject.response).to eq(rack_response)
       end
     end
   end
