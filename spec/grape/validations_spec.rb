@@ -1509,6 +1509,29 @@ describe Grape::Validations do
       end
     end
 
+    context 'with block and empty args' do
+      before do
+        subject.helpers do
+          params :shared_params do |empty_args|
+            optional :param, default: empty_args[:some]
+          end
+        end
+        subject.format :json
+        subject.params do
+          use :shared_params
+        end
+        subject.get '/shared_params' do
+          :ok
+        end
+      end
+
+      it 'works' do
+        get '/shared_params'
+
+        expect(last_response.status).to eq(200)
+      end
+    end
+
     context 'all or none' do
       context 'optional params' do
         before do
