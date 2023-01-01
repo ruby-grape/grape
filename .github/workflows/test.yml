@@ -27,6 +27,7 @@ jobs:
         include:
           - ruby: '2.6'
             gemfile: rails_5_2
+
     runs-on: ${{ matrix.os }}
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
