@@ -1,27 +1,18 @@
 ---
 name: edge
-on:
-  pull_request:
-    branches:
-      - "*"
+on: [pull_request]
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - ruby: 2.7
-            gemfile: 'gemfiles/rails_edge.gemfile'
-          - ruby: 2.7
-            gemfile: 'gemfiles/rack_edge.gemfile'
-          - ruby: "ruby-head"
-          - ruby: "truffleruby-head"
-          - ruby: "jruby-head"
-    runs-on: ubuntu-20.04
+        os: [ ubuntu-latest ]
+        ruby: [ '2.7', '3.0', '3.1', '3.2', ruby-head, truffleruby-head, jruby-head ]
+        gemfile: [ rails_edge, rack_edge ]
+    runs-on: ubuntu-latest
     continue-on-error: true
     env:
-      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
     - uses: actions/checkout@v3
 
@@ -30,6 +21,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
+        ruby-gems: latest
 
     - name: Run tests
       run: bundle exec rake spec
