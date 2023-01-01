@@ -21,7 +21,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-        ruby-gems: latest
+        rubygems: latest
 
     - name: Run tests
       run: bundle exec rake spec
