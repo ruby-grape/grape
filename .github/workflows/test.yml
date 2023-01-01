@@ -22,6 +22,8 @@ jobs:
         ruby: [ '2.6', '2.7', '3.0', '3.1', '3.2' ]
         gemfile: [ multi_json, multi_xml, rack_1_0, rack_2_0, rack_2_2, rails_5_2, rails_6_0, rails_6_1, rails_7_0 ]
         exclude:
+          - ruby: [ '2.6' ]
+            gemfile: [ rails_7_0 ]
           - ruby: ['2.7', '3.0', '3.1', '3.2']
             gemfile: [ rails_5_2 ]
     runs-on: ${{ matrix.os }}
