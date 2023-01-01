@@ -6,9 +6,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
-        ruby: [ '2.7', '3.0', '3.1', '3.2', ruby-head, truffleruby-head, jruby-head ]
-        gemfile: [ rails_edge, rack_edge ]
+        os: [ubuntu-latest]
+        ruby: ['2.7', '3.0', '3.1', '3.2', ruby-head, truffleruby-head, jruby-head]
+        gemfile: [rails_edge, rack_edge]
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
