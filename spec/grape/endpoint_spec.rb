@@ -75,7 +75,7 @@ describe Grape::Endpoint do
   it 'sets itself in the env upon call' do
     subject.get('/') { 'Hello world.' }
     get '/'
-    expect(last_request.env['api.endpoint']).to be_kind_of(described_class)
+    expect(last_request.env['api.endpoint']).to be_a(described_class)
   end
 
   describe '#status' do
@@ -213,10 +213,10 @@ describe Grape::Endpoint do
       end
       get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
       expect(last_response.body).to eq('3')
-      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").to_h do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end.to_h
+      end
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]
@@ -237,10 +237,10 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       expect(last_response.body).to eq('3')
-      cookies = last_response.headers['Set-Cookie'].split("\n").map do |set_cookie|
+      cookies = last_response.headers['Set-Cookie'].split("\n").to_h do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
-      end.to_h
+      end
       expect(cookies.size).to eq(2)
       %w[and_this delete_this_cookie].each do |cookie_name|
         cookie = cookies[cookie_name]

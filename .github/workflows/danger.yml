@@ -1,13 +1,15 @@
 ---
 name: danger
-on:
-  pull_request:
-    types: [opened, reopened, edited, synchronize]
+
+on: pull_request
+
 jobs:
   danger:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 100    
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -15,7 +17,6 @@ jobs:
         bundler-cache: true
     - name: Run Danger
       run: |
-        # the token is public, this is ok
-        TOKEN='b8b19daa0ade737762c'
-        TOKEN+='f35edcb328642d371ce86'
+        # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok
+        TOKEN=$(echo -n Z2hwX2lYb0dPNXNyejYzOFJyaTV3QUxUdkNiS1dtblFwZTFuRXpmMwo= | base64 --decode)
         DANGER_GITHUB_API_TOKEN=$TOKEN bundle exec danger --verbose

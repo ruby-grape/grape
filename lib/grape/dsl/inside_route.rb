@@ -95,7 +95,7 @@ module Grape
           return yield if has_passed_children
 
           key = params_nested_path[0]
-          key += "[#{params_nested_path[1..-1].join('][')}]" if params_nested_path.size > 1
+          key += "[#{params_nested_path[1..].join('][')}]" if params_nested_path.size > 1
 
           route_options_params = options[:route_options][:params] || {}
           type = route_options_params.dig(key, :type)
