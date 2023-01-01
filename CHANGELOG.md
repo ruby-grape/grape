@@ -5,6 +5,7 @@
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Droped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Updated rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2296](https://github.com/ruby-grape/grape/pull/2296): Fix cops and enables some - [@ericproulx](https://github.com/ericproulx).
+* [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
