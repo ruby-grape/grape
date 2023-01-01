@@ -2,15 +2,8 @@
 
 set -e
 
-echo ${id}
+# echoes version of ruby, rubygems and bundle
+echo -e "$(ruby --version)\nrubygems $(gem --version)\n$(bundle version)"
 
-# install missing gems
-bundle check || bundle install
-
-# run passed commands
-if [ "$1" = "update" ];
-then
-  bundle ${@}
-else
-  bundle exec ${@}
-fi
+# keep gems in the latest possible state
+(bundle check || bundle install) && bundle update && bundle exec ${@}
