@@ -1,0 +1,49 @@
+## MAC OS
+.DS_Store
+.com.apple.timemachine.supported
+
+## TEXTMATE
+*.tmproj
+tmtags
+
+## EMACS
+*~
+\#*
+.\#*
+
+## REDCAR
+.redcar
+
+## VIM
+*.swp
+*.swo
+
+## RUBYMINE
+.idea
+
+## PROJECT::GENERAL
+coverage
+doc
+pkg
+.rvmrc
+.ruby-version
+.ruby-gemset
+.rspec_status
+.bundle
+.byebug_history
+dist
+Gemfile.lock
+gemfiles/*.lock
+tmp
+
+## Rubinius
+.rbx
+
+## Bundler binstubs
+bin
+
+## ripper-tags and gem-ctags
+tags
+
+## PROJECT::SPECIFIC
+.project
