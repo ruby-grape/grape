@@ -1,9 +1,6 @@
 ---
 name: edge
-on:
-  pull_request:
-    branches:
-      - "*"
+on: pull_request
 jobs:
   test:
     strategy:
@@ -14,10 +11,12 @@ jobs:
             gemfile: 'gemfiles/rails_edge.gemfile'
           - ruby: 2.7
             gemfile: 'gemfiles/rack_edge.gemfile'
+          - ruby: 2.7
+            gemfile: 'gemfiles/rack3.gemfile'
           - ruby: "ruby-head"
           - ruby: "truffleruby-head"
           - ruby: "jruby-head"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
