@@ -4,7 +4,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rack', github: 'rack/rack'
+gem 'rack', '~> 3'
 
 group :development, :test do
   gem 'bundler'
