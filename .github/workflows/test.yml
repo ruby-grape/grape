@@ -49,16 +49,16 @@ jobs:
       run: bundle exec rake spec
 
     - name: Run tests (spec/integration/eager_load)
-      # with rack-test < 2, rack_2_2.gemfile is equals to Gemfile
-      if: ${{ matrix.gemfile == 'gemfiles/rack_2_2.gemfile' }}
+      # with rack-test < 2, rack_2_0.gemfile is equals to Gemfile
+      if: ${{ matrix.gemfile == 'rack_2_0' }}
       run: bundle exec rspec spec/integration/eager_load
 
     - name: Run tests (spec/integration/multi_json)
-      if: ${{ matrix.gemfile == 'gemfiles/multi_json.gemfile' }}
+      if: ${{ matrix.gemfile == 'multi_json' }}
       run: bundle exec rspec spec/integration/multi_json
 
     - name: Run tests (spec/integration/multi_xml)
-      if: ${{ matrix.gemfile == 'gemfiles/multi_xml.gemfile' }}
+      if: ${{ matrix.gemfile == 'multi_xml' }}
       run: bundle exec rspec spec/integration/multi_xml
 
     - name: Coveralls
