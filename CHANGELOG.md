@@ -6,6 +6,7 @@
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Updated rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2296](https://github.com/ruby-grape/grape/pull/2296): Fix cops and enables some - [@ericproulx](https://github.com/ericproulx).
 * [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
+* [#2303](https://github.com/ruby-grape/grape/pull/2302): Rack >= 1.3.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
