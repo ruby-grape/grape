@@ -14,6 +14,7 @@ jobs:
       with:
         ruby-version: 2.7
         bundler-cache: true
+        rubygems: latest
 
     - name: Run RuboCop
       run: bundle exec rubocop
@@ -50,7 +51,7 @@ jobs:
       run: bundle exec rake spec
 
     - name: Run tests (spec/integration/eager_load)
-      # with rack-test < 2, rack_2_0.gemfile is equals to Gemfile
+      # rack_2_0.gemfile is equals to Gemfile
       if: ${{ matrix.gemfile == 'rack_2_0' }}
       run: bundle exec rspec spec/integration/eager_load
 
