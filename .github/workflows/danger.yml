@@ -1,11 +1,10 @@
 ---
 name: danger
-
 on: pull_request
 
 jobs:
   danger:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
@@ -13,8 +12,9 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.6
+        ruby-version: 2.7
         bundler-cache: true
+        rubygems: latest
     - name: Run Danger
       run: |
         # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok
