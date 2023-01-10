@@ -10,9 +10,10 @@ module Grape
       attr_reader :status, :headers
 
       def initialize(status: nil, message: nil, headers: nil, **_options)
+        super(message)
+
         @status  = status
         @headers = headers
-        super(message)
       end
 
       def [](index)
