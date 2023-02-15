@@ -539,12 +539,12 @@ end
 
 class V1 < Grape::API
   version 'v1'
-  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::Status } }
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Entities::Status } }
 end
 
 class V2 < Grape::API
   version 'v2'
-  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::V2::Status } }
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Entities::V2::Status } }
 end
 ```
 
