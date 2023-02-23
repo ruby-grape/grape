@@ -277,6 +277,14 @@ module Grape
       end
     end
   end
+
+  module Types
+    extend ::ActiveSupport::Autoload
+
+    eager_autoload do
+      autoload :InvalidValue
+    end
+  end
 end
 
 require 'grape/config'
