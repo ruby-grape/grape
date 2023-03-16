@@ -3341,6 +3341,17 @@ end
 
 Use `body false` to return `204 No Content` without any data or content-type.
 
+If you want to empty the body with an HTTP status code other than `204 No Content`, you can override the status code after specifying `body false` as follows
+
+```ruby
+class API < Grape::API
+  get '/' do
+    body false
+    status 304
+  end
+end
+```
+
 You can also set the response to a file with `sendfile`. This works with the
 [Rack::Sendfile](https://www.rubydoc.info/gems/rack/Rack/Sendfile) middleware to optimally send
 the file through your web server software.
