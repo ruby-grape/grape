@@ -8,6 +8,7 @@
 * [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
 * [#2303](https://github.com/ruby-grape/grape/pull/2302): Rack >= 1.3.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
+* [#2310](https://github.com/ruby-grape/grape/pull/2310): Fix YARD docs markdown rendering - [@duffn](https://github.com/duffn).
 * Your contribution here.
 
 #### Fixes

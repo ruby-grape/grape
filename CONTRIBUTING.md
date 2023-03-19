@@ -58,6 +58,8 @@ Make sure that `bundle exec rake` completes without errors.
 
 Document any external behavior in the [README](README.md).
 
+You should also document code as necessary, using current code as examples. This project uses [YARD](https://yardoc.org/). You can run and preview the docs locally by [installing `yard`](https://yardoc.org/), running `yard server --reload` and view the docs at http://localhost:8808.
+
 #### Update Changelog
 
 Add a line to [CHANGELOG](CHANGELOG.md) under *Next Release*. Make it look like every other line, including your name and link to your Github account.
