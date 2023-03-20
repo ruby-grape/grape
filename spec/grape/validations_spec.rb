@@ -1071,12 +1071,12 @@ describe Grape::Validations do
             }
             # debugger
             get '/multi_level', data
-            expect(last_response.body.split(', ')).to match_array([
-                                                                    'top[3][top_id] is empty',
-                                                                    'top[2][middle_1][0][middle_1_id] is empty',
-                                                                    'top[1][middle_1][1][middle_2][0][middle_2_id] is empty',
-                                                                    'top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty'
-                                                                  ])
+            expect(last_response.body.split(', ')).to contain_exactly([
+                                                                        'top[3][top_id] is empty',
+                                                                        'top[2][middle_1][0][middle_1_id] is empty',
+                                                                        'top[1][middle_1][1][middle_2][0][middle_2_id] is empty',
+                                                                        'top[0][middle_1][1][middle_2][1][bottom][0][bottom_id] is empty'
+                                                                      ])
             expect(last_response.status).to eq(400)
           end
         end
