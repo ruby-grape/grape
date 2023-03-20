@@ -8,6 +8,7 @@
 * [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
 * [#2303](https://github.com/ruby-grape/grape/pull/2302): Rack >= 1.3.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
+* [#2311](https://github.com/ruby-grape/grape/pull/2311): Fix tests by pinning rack-test to < 2.1 - [@duffn](https://github.com/duffn).
 * Your contribution here.
 
 #### Fixes
