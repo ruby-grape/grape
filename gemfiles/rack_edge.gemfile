@@ -32,7 +32,7 @@ group :test do
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '< 2.1'
-  gem 'rspec', '~> 3.11.0'
+  gem 'rspec', '< 4'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false
   gem 'simplecov', '~> 0.21.2'
   gem 'simplecov-lcov', '~> 0.8.0'
