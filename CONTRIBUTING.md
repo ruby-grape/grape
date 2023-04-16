@@ -23,6 +23,34 @@ git pull upstream master
 git checkout -b my-feature-branch
 ```
 
+### Docker
+
+If you're familiar with [Docker](https://www.docker.com/), you can run everything through the following command:
+
+```
+docker-compose run --rm --build grape <command_and_parameters>
+```
+
+About the execution process:
+ - displays Ruby, Rubygems, Bundle and Gemfile version when starting:
+    ```
+    ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux-musl]
+    rubygems 3.4.12
+    Bundler version 2.4.1 (2022-12-24 commit f3175f033c)
+    Running default Gemfile
+   ```
+ - keeps the gems to the latest possible version.
+ - executes under `bundle exec`
+
+Here a some examples:
+
+- Running all specs `docker-compose run --rm --build grape rspec`
+- Running rspec on a specific file `docker-compose run --rm --build grape rspec spec/:file_path`
+- Running task `docker-compose run --rm --build grape rake <task_name>`
+- Running rubocop `docker-compose run --rm --build grape rubocop`
+- Running all specs on a specific ruby version (e.g 2.7.7) `RUBY_VERSION=2.7.7 docker-compose run --rm --build grape rspec`
+- Running specs on a specific gemfile (e.g rails_7.gemfile) `docker-compose run -e GEMFILE=rails_7 --rm --build grape rspec`
+
 #### Bundle Install and Test
 
 Ensure that you can build the project and run tests.
