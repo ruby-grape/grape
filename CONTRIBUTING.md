@@ -38,8 +38,8 @@ About the execution process:
     rubygems 3.4.12
     Bundler version 2.4.1 (2022-12-24 commit f3175f033c)
     Running default Gemfile
-   ```
- - keeps the gems to the latest possible version.
+    ```
+ - keeps the gems to the latest possible version
  - executes under `bundle exec`
 
 Here a some examples:
