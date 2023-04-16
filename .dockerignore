@@ -35,6 +35,7 @@ dist
 Gemfile.lock
 gemfiles/*.lock
 tmp
+.yardoc
 
 ## Rubinius
 .rbx
