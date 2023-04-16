@@ -11,7 +11,6 @@ group :development, :test do
   gem 'hashie'
   gem 'rake'
   gem 'rubocop', '1.41.0'
-  gem 'rubocop-ast'
   gem 'rubocop-performance', require: false
   gem 'rubocop-rspec', require: false
 end
@@ -28,7 +27,6 @@ end
 group :test do
   gem 'cookiejar'
   gem 'grape-entity', '~> 0.6'
-  gem 'maruku'
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '< 2.1'
