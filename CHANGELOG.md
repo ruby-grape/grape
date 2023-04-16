@@ -16,6 +16,7 @@
 
 * [#2299](https://github.com/ruby-grape/grape/pull/2299): Fix, do not use kwargs for empty args  - [@dm1try](https://github.com/dm1try).
 * [#2307](https://github.com/ruby-grape/grape/pull/2307): Fixed autoloading of InvalidValue - [@fixlr](https://github.com/fixlr).
+* [#23015](https://github.com/ruby-grape/grape/pull/2315): Update rspec - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.7.0 (2022/12/20)
