@@ -5,12 +5,18 @@
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Droped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Updated rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2296](https://github.com/ruby-grape/grape/pull/2296): Fix cops and enables some - [@ericproulx](https://github.com/ericproulx).
-* [#2292](https://github.com/ruby-grape/grape/pull/2292): Add Dockerfile and Docker-compose - [@ericproulx](https://github.com/ericproulx).
+* [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
+* [#2303](https://github.com/ruby-grape/grape/pull/2302): Rack >= 1.3.0 - [@ericproulx](https://github.com/ericproulx).
+* [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
+* [#2311](https://github.com/ruby-grape/grape/pull/2311): Fix tests by pinning rack-test to < 2.1 - [@duffn](https://github.com/duffn).
+* [#2310](https://github.com/ruby-grape/grape/pull/2310): Fix YARD docs markdown rendering - [@duffn](https://github.com/duffn).
+* [#2292](https://github.com/ruby-grape/grape/pull/2292): Introduce Docker - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
 * [#2299](https://github.com/ruby-grape/grape/pull/2299): Fix, do not use kwargs for empty args  - [@dm1try](https://github.com/dm1try).
+* [#2307](https://github.com/ruby-grape/grape/pull/2307): Fixed autoloading of InvalidValue - [@fixlr](https://github.com/fixlr).
 * Your contribution here.
 
 ### 1.7.0 (2022/12/20)

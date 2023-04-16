@@ -539,12 +539,12 @@ end
 
 class V1 < Grape::API
   version 'v1'
-  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::Status } }
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Entities::Status } }
 end
 
 class V2 < Grape::API
   version 'v2'
-  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Enitities::V2::Status } }
+  mount BasicAPI, with: { entity: mounted { configuration[:entity] || API::Entities::V2::Status } }
 end
 ```
 
@@ -3340,6 +3340,17 @@ end
 ```
 
 Use `body false` to return `204 No Content` without any data or content-type.
+
+If you want to empty the body with an HTTP status code other than `204 No Content`, you can override the status code after specifying `body false` as follows
+
+```ruby
+class API < Grape::API
+  get '/' do
+    body false
+    status 304
+  end
+end
+```
 
 You can also set the response to a file with `sendfile`. This works with the
 [Rack::Sendfile](https://www.rubydoc.info/gems/rack/Rack/Sendfile) middleware to optimally send
