@@ -42,14 +42,14 @@ About the execution process:
  - keeps the gems to the latest possible version
  - executes under `bundle exec`
 
-Here a some examples:
+Here are some examples:
 
-- Running all specs `docker-compose run --rm --build grape rspec`
-- Running rspec on a specific file `docker-compose run --rm --build grape rspec spec/:file_path`
-- Running task `docker-compose run --rm --build grape rake <task_name>`
-- Running rubocop `docker-compose run --rm --build grape rubocop`
-- Running all specs on a specific ruby version (e.g 2.7.7) `RUBY_VERSION=2.7.7 docker-compose run --rm --build grape rspec`
-- Running specs on a specific gemfile (e.g rails_7.gemfile) `docker-compose run -e GEMFILE=rails_7 --rm --build grape rspec`
+- running all specs `docker-compose run --rm --build grape rspec`
+- running rspec on a specific file `docker-compose run --rm --build grape rspec spec/:file_path`
+- running task `docker-compose run --rm --build grape rake <task_name>`
+- running rubocop `docker-compose run --rm --build grape rubocop`
+- running all specs on a specific ruby version (e.g 2.7.7) `RUBY_VERSION=2.7.7 docker-compose run --rm --build grape rspec`
+- running specs on a specific gemfile (e.g rails_7.gemfile) `docker-compose run -e GEMFILE=rails_7 --rm --build grape rspec`
 
 #### Bundle Install and Test
 
