@@ -10,6 +10,7 @@
 * [#2301](https://github.com/ruby-grape/grape/pull/2301): Revisit GH workflows - [@ericproulx](https://github.com/ericproulx).
 * [#2311](https://github.com/ruby-grape/grape/pull/2311): Fix tests by pinning rack-test to < 2.1 - [@duffn](https://github.com/duffn).
 * [#2310](https://github.com/ruby-grape/grape/pull/2310): Fix YARD docs markdown rendering - [@duffn](https://github.com/duffn).
+* [#2317](https://github.com/ruby-grape/grape/pull/2317): Remove maruku and rubocop-ast as direct development/testing dependencies - [@ericproulx](https://github.com/ericproulx).
 * [#2292](https://github.com/ruby-grape/grape/pull/2292): Introduce Docker to local development - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
@@ -17,6 +18,7 @@
 
 * [#2299](https://github.com/ruby-grape/grape/pull/2299): Fix, do not use kwargs for empty args  - [@dm1try](https://github.com/dm1try).
 * [#2307](https://github.com/ruby-grape/grape/pull/2307): Fixed autoloading of InvalidValue - [@fixlr](https://github.com/fixlr).
+* [#23015](https://github.com/ruby-grape/grape/pull/2315): Update rspec - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.7.0 (2022/12/20)
