@@ -10,11 +10,13 @@ describe Grape::Exceptions::InvalidAcceptHeader do
       expect(last_response.body).to eq('beer received')
     end
   end
+
   shared_examples_for 'a cascaded request' do
     it 'does not find a matching route' do
       expect(last_response.status).to eq 404
     end
   end
+
   shared_examples_for 'a not-cascaded request' do
     it 'does not include the X-Cascade=pass header' do
       expect(last_response.headers['X-Cascade']).to be_nil
@@ -24,6 +26,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
       expect(last_response.status).to eq 406
     end
   end
+
   shared_examples_for 'a rescued request' do
     it 'does not include the X-Cascade=pass header' do
       expect(last_response.headers['X-Cascade']).to be_nil
