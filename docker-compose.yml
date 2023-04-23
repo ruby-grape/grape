@@ -1,0 +1,17 @@
+version: '3'
+
+volumes:
+  gems:
+
+services:
+  grape:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - RUBY_VERSION=${RUBY_VERSION:-3}
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/var/grape
+      - gems:/usr/local/bundle
