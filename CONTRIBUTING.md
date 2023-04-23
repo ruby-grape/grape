@@ -49,7 +49,7 @@ Here a some examples:
 - Running task `docker-compose run --rm --build grape rake <task_name>`
 - Running rubocop `docker-compose run --rm --build grape rubocop`
 - Running all specs on a specific ruby version (e.g 2.7.7) `RUBY_VERSION=2.7.7 docker-compose run --rm --build grape rspec`
-- Running specs on a specific gemfile (e.g rails_7.gemfile) `docker-compose run -e GEMFILE=rails_7 --rm --build grape rspec`
+- Running specs on a specific gemfile (e.g rails_7_0.gemfile) `docker-compose run -e GEMFILE=rails_7_0 --rm --build grape rspec`
 
 #### Bundle Install and Test
 
