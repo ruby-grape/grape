@@ -34,6 +34,8 @@ jobs:
             gemfile: multi_json
           - ruby: '2.7'
             gemfile: multi_xml
+          - ruby: 'truffleruby'
+            gemfile: rails_7_0
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
