@@ -73,7 +73,7 @@ module Grape
         options = options.dup
         options[:default] &&= options[:default].to_s
         message = ::I18n.translate(key, **options)
-        message.present? ? message : fallback_message(key, **options)
+        message.presence || fallback_message(key, **options)
       end
 
       def fallback_message(key, **options)

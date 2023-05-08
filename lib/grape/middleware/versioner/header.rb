@@ -57,8 +57,7 @@ module Grape
         end
 
         def strict_version_vendor_accept_header_presence_check
-          return unless versions.present?
-          return if an_accept_header_with_version_and_vendor_is_present?
+          return if versions.blank? || an_accept_header_with_version_and_vendor_is_present?
 
           fail_with_invalid_accept_header!('API vendor or version not found.')
         end

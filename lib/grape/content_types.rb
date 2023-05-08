@@ -21,11 +21,7 @@ module Grape
       end
 
       def content_types_for(from_settings)
-        if from_settings.present?
-          from_settings
-        else
-          Grape::ContentTypes::CONTENT_TYPES.merge(default_elements)
-        end
+        from_settings.presence || Grape::ContentTypes::CONTENT_TYPES.merge(default_elements)
       end
     end
   end
