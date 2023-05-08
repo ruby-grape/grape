@@ -122,7 +122,7 @@ module Grape
 
         def headers_contain_wrong_version?
           header.values.all? do |header_value|
-            version?(header_value) && !versions.include?(request_version(header_value))
+            version?(header_value) && versions.exclude?(request_version(header_value))
           end
         end
 
