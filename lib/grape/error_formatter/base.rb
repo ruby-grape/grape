@@ -27,7 +27,7 @@ module Grape
 
         if presenter
           embeds = { env: env }
-          embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
+          embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
           presented_message = presenter.represent(presented_message, embeds).serializable_hash
         end
 

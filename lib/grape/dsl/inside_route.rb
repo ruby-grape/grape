@@ -433,7 +433,7 @@ module Grape
       #   the given entity_class.
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
-        embeds[:version] = env[Grape::Env::API_VERSION] if env[Grape::Env::API_VERSION]
+        embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
         entity_class.represent(object, **embeds.merge(options))
       end
     end
