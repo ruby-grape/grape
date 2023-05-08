@@ -171,10 +171,9 @@ module Grape
     end
 
     def prepare_routes_requirements
-      endpoint_requirements = options[:route_options][:requirements] || {}
-      all_requirements = (namespace_stackable(:namespace).map(&:requirements) << endpoint_requirements)
-      all_requirements.reduce({}) do |base_requirements, single_requirements|
-        base_requirements.merge!(single_requirements)
+      {}.merge!(*namespace_stackable(:namespace).map(&:requirements)).tap do |requirements|
+        endpoint_requirements = options.dig(:route_options, :requirements)
+        requirements.merge!(endpoint_requirements) if endpoint_requirements
       end
     end
 

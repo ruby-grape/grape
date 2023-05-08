@@ -13,12 +13,7 @@ module Grape
       attr_reader :errors
 
       def initialize(errors: [], headers: {}, **_options)
-        @errors = {}
-        errors.each do |validation_error|
-          @errors[validation_error.params] ||= []
-          @errors[validation_error.params] << validation_error
-        end
-
+        @errors = errors.group_by(&:params)
         super message: full_messages.join(', '), status: 400, headers: headers
       end
 

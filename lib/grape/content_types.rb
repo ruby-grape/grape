@@ -17,9 +17,7 @@ module Grape
 
     class << self
       def content_types_for_settings(settings)
-        return if settings.blank?
-
-        settings.each_with_object({}) { |value, result| result.merge!(value) }
+        settings&.inject(:merge!)
       end
 
       def content_types_for(from_settings)

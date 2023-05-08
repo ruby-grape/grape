@@ -70,29 +70,21 @@ module Grape
       end
 
       def evaluate
-        evaluated = []
-        @value_hash.each_with_index do |value, index|
-          evaluated[index] = value.evaluate
-        end
-        evaluated
+        @value_hash.map(&:evaluate)
       end
     end
 
     class LazyValueHash < LazyValueEnumerable
       def initialize(hash)
         super
-        @value_hash = {}.with_indifferent_access
+        @value_hash = ActiveSupport::HashWithIndifferentAccess.new
         hash.each do |key, value|
           self[key] = value
         end
       end
 
       def evaluate
-        evaluated = {}.with_indifferent_access
-        @value_hash.each do |key, value|
-          evaluated[key] =  value.evaluate
-        end
-        evaluated
+        @value_hash.transform_values(&:evaluate)
       end
     end
   end

@@ -101,25 +101,18 @@ module Grape
         end
 
         def available_media_types
-          available_media_types = []
-
-          content_types.each_key do |extension|
-            versions.reverse_each do |version|
-              available_media_types += [
-                "application/vnd.#{vendor}-#{version}+#{extension}",
-                "application/vnd.#{vendor}-#{version}"
-              ]
+          [].tap do|available_media_types|
+            content_types.each_key do |extension|
+              versions.reverse_each do |version|
+                available_media_types << "application/vnd.#{vendor}-#{version}+#{extension}"
+                available_media_types << "application/vnd.#{vendor}-#{version}"
+              end
+              available_media_types << "application/vnd.#{vendor}+#{extension}"
             end
-            available_media_types << "application/vnd.#{vendor}+#{extension}"
+
+            available_media_types << "application/vnd.#{vendor}"
+            available_media_types.concat(content_types.values.flatten)
           end
-
-          available_media_types << "application/vnd.#{vendor}"
-
-          content_types.each_value do |media_type|
-            available_media_types << media_type
-          end
-
-          available_media_types.flatten
         end
 
         def headers_contain_wrong_vendor?
