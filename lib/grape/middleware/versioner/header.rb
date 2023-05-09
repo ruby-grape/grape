@@ -100,7 +100,7 @@ module Grape
         end
 
         def available_media_types
-          [].tap do|available_media_types|
+          [].tap do |available_media_types|
             content_types.each_key do |extension|
               versions.reverse_each do |version|
                 available_media_types << "application/vnd.#{vendor}-#{version}+#{extension}"
