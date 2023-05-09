@@ -1587,6 +1587,15 @@ params do
 end
 ```
 
+Note endless ranges are also supported with ActiveSupport >= 6.0, but they require that the type be provided.
+
+```ruby
+params do
+  requires :minimum, type: Integer, values: 10..
+  optional :maximum, type: Integer, values: ..10 
+end
+```
+
 Note that *both* range endpoints have to be a `#kind_of?` your `:type` option (if you don't supply the `:type` option, it will be guessed to be equal to the class of the range's first endpoint). So the following is invalid:
 
 ```ruby

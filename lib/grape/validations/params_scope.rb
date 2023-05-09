@@ -485,7 +485,7 @@ module Grape
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
 
-          value_types = values.is_a?(Range) ? [values.begin, values.end] : values
+          value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
           value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if coerce_type == Grape::API::Boolean
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values) unless value_types.all?(coerce_type)
         end

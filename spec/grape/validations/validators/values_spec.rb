@@ -115,6 +115,13 @@ describe Grape::Validations::Validators::ValuesValidator do
       end
 
       params do
+        optional :type, type: Integer, values: 1..
+      end
+      get '/endless' do
+        { type: params[:type] }
+      end
+
+      params do
         requires :type, values: ->(v) { ValuesModel.include? v }
       end
       get '/lambda_val' do
@@ -370,6 +377,18 @@ describe Grape::Validations::Validators::ValuesValidator do
 
   it 'does not allow an invalid value for a parameter using lambda' do
     get('/lambda', type: 'invalid-type')
+    expect(last_response.status).to eq 400
+    expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+  end
+
+  it 'validates against values in an endless range', if: ActiveSupport::VERSION::MAJOR >= 6 do
+    get('/endless', type: 10)
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ type: 10 }.to_json)
+  end
+
+  it 'does not allow an invalid value for a parameter using an endless range', if: ActiveSupport::VERSION::MAJOR >= 6 do
+    get('/endless', type: 0)
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
