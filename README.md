@@ -1587,7 +1587,7 @@ params do
 end
 ```
 
-Note endless ranges are also supported but they require that the type be provided.
+Note endless ranges are also supported with ActiveSupport >= 6.0, but they require that the type be provided.
 
 ```ruby
 params do

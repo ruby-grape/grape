@@ -12,6 +12,7 @@
 * [#2310](https://github.com/ruby-grape/grape/pull/2310): Fix YARD docs markdown rendering - [@duffn](https://github.com/duffn).
 * [#2317](https://github.com/ruby-grape/grape/pull/2317): Remove maruku and rubocop-ast as direct development/testing dependencies - [@ericproulx](https://github.com/ericproulx).
 * [#2292](https://github.com/ruby-grape/grape/pull/2292): Introduce Docker to local development - [@ericproulx](https://github.com/ericproulx).
+* [#2325](https://github.com/ruby-grape/grape/pull/2325): Change edge test workflows only run on demand - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes

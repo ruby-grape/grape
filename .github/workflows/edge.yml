@@ -1,6 +1,6 @@
 ---
 name: edge
-on: pull_request
+on: workflow_dispatch
 jobs:
   test:
     strategy:
