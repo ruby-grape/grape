@@ -26,6 +26,7 @@ module Grape
             detail: 'more details',
             params: { first: :param },
             entity: Object,
+            default: { code: 400, message: 'Invalid' },
             http_codes: [[401, 'Unauthorized', 'Entities::Error']],
             named: 'My named route',
             body_name: 'My body name',
@@ -54,6 +55,7 @@ module Grape
             detail 'more details'
             params(first: :param)
             success Object
+            default code: 400, message: 'Invalid'
             failure [[401, 'Unauthorized', 'Entities::Error']]
             named 'My named route'
             body_name 'My body name'

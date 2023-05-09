@@ -98,7 +98,8 @@ module Grape
             :produces,
             :consumes,
             :security,
-            :tags
+            :tags,
+            :default
           )
           config_context.define_singleton_method(:configuration) do
             endpoint_configuration
