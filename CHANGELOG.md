@@ -13,8 +13,9 @@
 * [#2317](https://github.com/ruby-grape/grape/pull/2317): Remove maruku and rubocop-ast as direct development/testing dependencies - [@ericproulx](https://github.com/ericproulx).
 * [#2292](https://github.com/ruby-grape/grape/pull/2292): Introduce Docker to local development - [@ericproulx](https://github.com/ericproulx).
 * [#2325](https://github.com/ruby-grape/grape/pull/2325): Change edge test workflows only run on demand - [@dblock](https://github.com/dblock).
+* [#2324](https://github.com/ruby-grape/grape/pull/2324): Expose default in the description dsl - [@dhruvCW](https://github.com/dhruvCW).
 * [#2326](https://github.com/ruby-grape/grape/pull/2326): Use ActiveSupport extensions - [@ericproulx](https://github.com/ericproulx).
-
+* 
 * Your contribution here.
 
 #### Fixes
