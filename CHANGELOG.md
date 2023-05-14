@@ -1,4 +1,15 @@
-### 1.7.1 (Next)
+### 1.7.2 (Next)
+
+#### Features
+
+* [#2326](https://github.com/ruby-grape/grape/pull/2326): Use ActiveSupport extensions - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
+## 1.7.1 (2023/05/14)
 
 #### Features
 
@@ -14,8 +25,6 @@
 * [#2292](https://github.com/ruby-grape/grape/pull/2292): Introduce Docker to local development - [@ericproulx](https://github.com/ericproulx).
 * [#2325](https://github.com/ruby-grape/grape/pull/2325): Change edge test workflows only run on demand - [@dblock](https://github.com/dblock).
 * [#2324](https://github.com/ruby-grape/grape/pull/2324): Expose default in the description dsl - [@dhruvCW](https://github.com/dhruvCW).
-* [#2326](https://github.com/ruby-grape/grape/pull/2326): Use ActiveSupport extensions - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -24,7 +33,6 @@
 * [#2315](https://github.com/ruby-grape/grape/pull/2315): Update rspec - [@ericproulx](https://github.com/ericproulx).
 * [#2319](https://github.com/ruby-grape/grape/pull/2319): Update rubocop - [@ericproulx](https://github.com/ericproulx).
 * [#2323](https://github.com/ruby-grape/grape/pull/2323): Fix using endless ranges for values parameter - [@dhruvCW](https://github.com/dhruvCW).
-* Your contribution here.
 
 ### 1.7.0 (2022/12/20)
 
