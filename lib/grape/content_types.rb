@@ -17,17 +17,11 @@ module Grape
 
     class << self
       def content_types_for_settings(settings)
-        return if settings.blank?
-
-        settings.each_with_object({}) { |value, result| result.merge!(value) }
+        settings&.inject(:merge!)
       end
 
       def content_types_for(from_settings)
-        if from_settings.present?
-          from_settings
-        else
-          Grape::ContentTypes::CONTENT_TYPES.merge(default_elements)
-        end
+        from_settings.presence || Grape::ContentTypes::CONTENT_TYPES.merge(default_elements)
       end
     end
   end

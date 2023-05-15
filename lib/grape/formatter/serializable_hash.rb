@@ -15,23 +15,23 @@ module Grape
         private
 
         def serializable?(object)
-          object.respond_to?(:serializable_hash) || (object.is_a?(Array) && object.all? { |o| o.respond_to? :serializable_hash }) || object.is_a?(Hash)
+          object.respond_to?(:serializable_hash) || array_serializable?(object) || object.is_a?(Hash)
         end
 
         def serialize(object)
           if object.respond_to? :serializable_hash
             object.serializable_hash
-          elsif object.is_a?(Array) && object.all? { |o| o.respond_to? :serializable_hash }
+          elsif array_serializable?(object)
             object.map(&:serializable_hash)
           elsif object.is_a?(Hash)
-            h = {}
-            object.each_pair do |k, v|
-              h[k] = serialize(v)
-            end
-            h
+            object.transform_values { |v| serialize(v) }
           else
             object
           end
+        end
+
+        def array_serializable?(object)
+          object.is_a?(Array) && object.all? { |o| o.respond_to? :serializable_hash }
         end
       end
     end

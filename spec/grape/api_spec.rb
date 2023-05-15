@@ -3311,7 +3311,7 @@ describe Grape::API do
       it 'is able to cascade' do
         subject.mount lambda { |env|
           headers = {}
-          headers['X-Cascade'] == 'pass' unless env['PATH_INFO'].include?('boo')
+          headers['X-Cascade'] == 'pass' if env['PATH_INFO'].exclude?('boo')
           [200, headers, ['Farfegnugen']]
         } => '/'
 
