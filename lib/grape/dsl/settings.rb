@@ -109,13 +109,9 @@ module Grape
         settings = get_or_set :namespace_reverse_stackable, key, nil
         return if settings.blank?
 
-        result = {}
-        settings.each do |setting|
-          setting.each do |field, value|
-            result[field] ||= value
-          end
+        settings.each_with_object({}) do |setting, result|
+          result.merge!(setting) { |_k, s1, _s2| s1 }
         end
-        result
       end
 
       # (see #unset_global_setting)

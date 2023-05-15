@@ -414,7 +414,7 @@ module Grape
 
         # but not special JSON types, which
         # already imply coercion method
-        return unless [JSON, Array[JSON]].include? validations[:coerce]
+        return if [JSON, Array[JSON]].exclude? validations[:coerce]
 
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end

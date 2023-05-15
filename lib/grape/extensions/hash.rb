@@ -11,13 +11,10 @@ module Grape
         end
 
         def build_params
-          params = Grape::Extensions::DeepMergeableHash[rack_params]
-          params.deep_merge!(grape_routing_args) if env[Grape::Env::GRAPE_ROUTING_ARGS]
-          post_process_params(params)
-        end
-
-        def post_process_params(params)
-          Grape::Extensions::DeepSymbolizeHash.deep_symbolize_keys_in(params)
+          rack_params.deep_dup.tap do |params|
+            params.deep_merge!(grape_routing_args) if env.key?(Grape::Env::GRAPE_ROUTING_ARGS)
+            params.deep_symbolize_keys!
+          end
         end
       end
     end

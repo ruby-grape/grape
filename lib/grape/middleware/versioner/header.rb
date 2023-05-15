@@ -57,8 +57,7 @@ module Grape
         end
 
         def strict_version_vendor_accept_header_presence_check
-          return unless versions.present?
-          return if an_accept_header_with_version_and_vendor_is_present?
+          return if versions.blank? || an_accept_header_with_version_and_vendor_is_present?
 
           fail_with_invalid_accept_header!('API vendor or version not found.')
         end
@@ -101,25 +100,18 @@ module Grape
         end
 
         def available_media_types
-          available_media_types = []
-
-          content_types.each_key do |extension|
-            versions.reverse_each do |version|
-              available_media_types += [
-                "application/vnd.#{vendor}-#{version}+#{extension}",
-                "application/vnd.#{vendor}-#{version}"
-              ]
+          [].tap do |available_media_types|
+            content_types.each_key do |extension|
+              versions.reverse_each do |version|
+                available_media_types << "application/vnd.#{vendor}-#{version}+#{extension}"
+                available_media_types << "application/vnd.#{vendor}-#{version}"
+              end
+              available_media_types << "application/vnd.#{vendor}+#{extension}"
             end
-            available_media_types << "application/vnd.#{vendor}+#{extension}"
+
+            available_media_types << "application/vnd.#{vendor}"
+            available_media_types.concat(content_types.values.flatten)
           end
-
-          available_media_types << "application/vnd.#{vendor}"
-
-          content_types.each_value do |media_type|
-            available_media_types << media_type
-          end
-
-          available_media_types.flatten
         end
 
         def headers_contain_wrong_vendor?
@@ -130,7 +122,7 @@ module Grape
 
         def headers_contain_wrong_version?
           header.values.all? do |header_value|
-            version?(header_value) && !versions.include?(request_version(header_value))
+            version?(header_value) && versions.exclude?(request_version(header_value))
           end
         end
 

@@ -1,7 +1,8 @@
-### 1.7.2 (Next)
+### 1.8.0 (Next)
 
 #### Features
 
+* [#2326](https://github.com/ruby-grape/grape/pull/2326): Use ActiveSupport extensions - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -15,9 +15,9 @@ module Grape
           end
 
           def build_params
-            params = ::Hashie::Mash.new(rack_params)
-            params.deep_merge!(grape_routing_args) if env[Grape::Env::GRAPE_ROUTING_ARGS]
-            params
+            ::Hashie::Mash.new(rack_params).tap do |params|
+              params.deep_merge!(grape_routing_args) if env.key?(Grape::Env::GRAPE_ROUTING_ARGS)
+            end
           end
         end
       end

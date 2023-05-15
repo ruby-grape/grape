@@ -20,9 +20,11 @@ require 'active_support/core_ext/hash/conversions'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/object/duplicable'
 require 'active_support/dependencies/autoload'
 require 'active_support/deprecation'
 require 'active_support/notifications'
@@ -93,8 +95,6 @@ module Grape
   module Extensions
     extend ::ActiveSupport::Autoload
     eager_autoload do
-      autoload :DeepMergeableHash
-      autoload :DeepSymbolizeHash
       autoload :Hash
     end
     module ActiveSupport

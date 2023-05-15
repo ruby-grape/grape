@@ -12,10 +12,10 @@ module Grape
         def validate_param!(attr_name, params)
           params[attr_name] = if @default.is_a? Proc
                                 @default.call
-                              elsif @default.frozen? || !duplicatable?(@default)
+                              elsif @default.frozen? || !@default.duplicable?
                                 @default
                               else
-                                duplicate(@default)
+                                @default.dup
                               end
         end
 
@@ -26,24 +26,6 @@ module Grape
 
             validate_param!(attr_name, resource_params) if resource_params.is_a?(Hash) && resource_params[attr_name].nil?
           end
-        end
-
-        private
-
-        # return true if we might be able to dup this object
-        def duplicatable?(obj)
-          !obj.nil? &&
-            obj != true &&
-            obj != false &&
-            !obj.is_a?(Symbol) &&
-            !obj.is_a?(Numeric)
-        end
-
-        # make a best effort to dup the object
-        def duplicate(obj)
-          obj.dup
-        rescue TypeError
-          obj
         end
       end
     end

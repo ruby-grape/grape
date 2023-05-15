@@ -141,7 +141,7 @@ module Grape
             lambda do |val|
               method.call(val).tap do |new_val|
                 new_val.map do |item|
-                  item.is_a?(Hash) ? symbolize_keys(item) : item
+                  item.is_a?(Hash) ? item.deep_symbolize_keys : item
                 end
               end
             end
@@ -149,27 +149,13 @@ module Grape
           # Hash objects are processed directly
           elsif type == Hash
             lambda do |val|
-              symbolize_keys method.call(val)
+              method.call(val).deep_symbolize_keys
             end
 
           # Simple types are not processed.
           # This includes Array<primitive> types.
           else
             method
-          end
-        end
-
-        def symbolize_keys!(hash)
-          hash.each_key do |key|
-            hash[key.to_sym] = hash.delete(key) if key.respond_to?(:to_sym)
-          end
-          hash
-        end
-
-        def symbolize_keys(hash)
-          hash.inject({}) do |new_hash, (key, value)|
-            new_key = key.respond_to?(:to_sym) ? key.to_sym : key
-            new_hash.merge!(new_key => value)
           end
         end
       end

@@ -71,7 +71,7 @@ module Grape
         end
 
         def self.inherited(klass)
-          return unless klass.name.present?
+          return if klass.name.blank?
 
           Validations.register_validator(convert_to_short_name(klass), klass)
         end
