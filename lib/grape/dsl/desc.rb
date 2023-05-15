@@ -68,7 +68,7 @@ module Grape
           end
 
           config_class.configure(&config_block)
-          warn '[DEPRECATION] Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.' unless options.empty?
+          ActiveSupport::Deprecation.warn('Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.') if options.any?
           options = config_class.settings
         else
           options = options.merge(description: description)

@@ -203,16 +203,12 @@ describe Grape::Endpoint do
   end
 
   describe '#file' do
-    before do
-      allow(subject).to receive(:warn)
-    end
-
     describe 'set' do
       context 'as file path' do
         let(:file_path) { '/some/file/path' }
 
         it 'emits a warning that this method is deprecated' do
-          expect(subject).to receive(:warn).with(/Use sendfile or stream/)
+          expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use sendfile or stream/)
 
           subject.file file_path
         end
@@ -228,7 +224,7 @@ describe Grape::Endpoint do
         let(:file_object) { double('StreamerObject', each: nil) }
 
         it 'emits a warning that this method is deprecated' do
-          expect(subject).to receive(:warn).with(/Use stream to use a Stream object/)
+          expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use stream to use a Stream object/)
 
           subject.file file_object
         end
@@ -243,7 +239,7 @@ describe Grape::Endpoint do
 
     describe 'get' do
       it 'emits a warning that this method is deprecated' do
-        expect(subject).to receive(:warn).with(/Use sendfile or stream/)
+        expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use sendfile or stream/)
 
         subject.file
       end
@@ -273,7 +269,7 @@ describe Grape::Endpoint do
         end
 
         it 'sends no deprecation warnings' do
-          expect(subject).not_to receive(:warn)
+          expect(ActiveSupport::Deprecation).not_to receive(:warn)
 
           subject.sendfile file_path
         end
@@ -334,7 +330,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(subject).not_to receive(:warn)
+          expect(ActiveSupport::Deprecation).not_to receive(:warn)
 
           subject.stream file_path
         end
@@ -384,7 +380,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(subject).not_to receive(:warn)
+          expect(ActiveSupport::Deprecation).not_to receive(:warn)
 
           subject.stream stream_object
         end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe Grape::Validations do
-  context 'deprecated Grape::Validations::Base' do
+  describe 'deprecated Grape::Validations::Base' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -20,29 +20,24 @@ describe Grape::Validations do
       end
     end
 
+    let(:app) { Rack::Builder.new(subject) }
+
     before do
+      allow(ActiveSupport::Deprecation).to receive(:warn)
       described_class.register_validator('validator_with_old_base', validator_with_old_base)
-      allow(Warning).to receive(:warn)
     end
 
     after do
       described_class.deregister_validator('validator_with_old_base')
     end
 
-    def app
-      subject
-    end
-
     it 'puts a deprecation warning' do
-      expect(Warning).to receive(:warn) do |message|
-        expect(message).to include('`Grape::Validations::Base` is deprecated')
-      end
-
       get '/'
+      expect(ActiveSupport::Deprecation).to have_received(:warn).with('Grape::Validations::Base is deprecated! Use Grape::Validations::Validators::Base instead.')
     end
   end
 
-  context 'using a custom length validator' do
+  describe 'using a custom length validator' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -73,9 +68,7 @@ describe Grape::Validations do
       described_class.deregister_validator('default_length')
     end
 
-    def app
-      subject
-    end
+    let(:app) { Rack::Builder.new(subject) }
 
     it 'under 140 characters' do
       get '/', text: 'abc'
@@ -96,7 +89,7 @@ describe Grape::Validations do
     end
   end
 
-  context 'using a custom body-only validator' do
+  describe 'using a custom body-only validator' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -124,9 +117,7 @@ describe Grape::Validations do
       described_class.deregister_validator('in_body')
     end
 
-    def app
-      subject
-    end
+    let(:app) { Rack::Builder.new(subject) }
 
     it 'allows field in body' do
       get '/', text: 'abc'
@@ -141,7 +132,7 @@ describe Grape::Validations do
     end
   end
 
-  context 'using a custom validator with message_key' do
+  describe 'using a custom validator with message_key' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -169,9 +160,7 @@ describe Grape::Validations do
       described_class.deregister_validator('with_message_key')
     end
 
-    def app
-      subject
-    end
+    let(:app) { Rack::Builder.new(subject) }
 
     it 'fails with message' do
       get '/', text: 'foobar'
@@ -180,7 +169,7 @@ describe Grape::Validations do
     end
   end
 
-  context 'using a custom request/param validator' do
+  describe 'using a custom request/param validator' do
     subject do
       Class.new(Grape::API) do
         params do
@@ -217,9 +206,7 @@ describe Grape::Validations do
       described_class.deregister_validator('admin')
     end
 
-    def app
-      subject
-    end
+    let(:app) { Rack::Builder.new(subject) }
 
     it 'fail when non-admin user sets an admin field' do
       get '/', admin_field: 'tester', non_admin_field: 'toaster'

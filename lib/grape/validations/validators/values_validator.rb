@@ -10,13 +10,11 @@ module Grape
             @values = options[:value]
             @proc = options[:proc]
 
-            warn '[DEPRECATION] The values validator except option is deprecated. ' \
-                 'Use the except validator instead.' if @excepts
+            ActiveSupport::Deprecation.warn('The values validator except option is deprecated. Use the except validator instead.') if @excepts
 
             raise ArgumentError, 'proc must be a Proc' if @proc && !@proc.is_a?(Proc)
 
-            warn '[DEPRECATION] The values validator proc option is deprecated. ' \
-                 'The lambda expression can now be assigned directly to values.' if @proc
+            ActiveSupport::Deprecation.warn('The values validator proc option is deprecated. The lambda expression can now be assigned directly to values.')  if @proc
           else
             @excepts = nil
             @values = nil

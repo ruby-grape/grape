@@ -12,12 +12,15 @@ RSpec.describe Grape::Exceptions::UnsupportedGroupType do
   describe 'deprecated Grape::Exceptions::UnsupportedGroupTypeError' do
     subject { Grape::Exceptions::UnsupportedGroupTypeError.new }
 
-    it 'puts a deprecation warning' do
-      expect(Warning).to receive(:warn) do |message|
-        expect(message).to include('`Grape::Exceptions::UnsupportedGroupTypeError` is deprecated')
-      end
+    around do |example|
+      old_deprec_behavior = ActiveSupport::Deprecation.behavior
+      ActiveSupport::Deprecation.behavior = :raise
+      example.run
+      ActiveSupport::Deprecation.behavior = old_deprec_behavior
+    end
 
-      subject
+    it 'puts a deprecation warning' do
+      expect { subject }.to raise_error(ActiveSupport::DeprecationException)
     end
   end
 end

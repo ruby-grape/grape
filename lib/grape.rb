@@ -24,6 +24,7 @@ require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
 require 'active_support/dependencies/autoload'
+require 'active_support/deprecation'
 require 'active_support/notifications'
 require 'i18n'
 
