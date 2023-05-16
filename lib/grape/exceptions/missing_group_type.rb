@@ -10,9 +10,4 @@ module Grape
   end
 end
 
-Grape::Exceptions::MissingGroupTypeError = Class.new(Grape::Exceptions::MissingGroupType) do
-  def initialize(*)
-    super
-    warn '[DEPRECATION] `Grape::Exceptions::MissingGroupTypeError` is deprecated. Use `Grape::Exceptions::MissingGroupType` instead.'
-  end
-end
+Grape::Exceptions::MissingGroupTypeError = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('Grape::Exceptions::MissingGroupTypeError', 'Grape::Exceptions::MissingGroupType')
