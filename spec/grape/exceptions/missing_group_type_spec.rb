@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'shared/deprecated_class_examples'
+
 RSpec.describe Grape::Exceptions::MissingGroupType do
   describe '#message' do
     subject { described_class.new.message }
@@ -7,18 +9,9 @@ RSpec.describe Grape::Exceptions::MissingGroupType do
     it { is_expected.to include 'group type is required' }
   end
 
-  describe 'deprecated Grape::Exceptions::MissingGroupTypeError' do
-    subject { Grape::Exceptions::MissingGroupTypeError.new }
+  describe 'Grape::Exceptions::MissingGroupTypeError' do
+    let(:deprecated_class) { Grape::Exceptions::MissingGroupTypeError }
 
-    around do |example|
-      old_deprec_behavior = ActiveSupport::Deprecation.behavior
-      ActiveSupport::Deprecation.behavior = :raise
-      example.run
-      ActiveSupport::Deprecation.behavior = old_deprec_behavior
-    end
-
-    it 'puts a deprecation warning' do
-      expect { subject }.to raise_error(ActiveSupport::DeprecationException)
-    end
+    it_behaves_like 'deprecated class'
   end
 end

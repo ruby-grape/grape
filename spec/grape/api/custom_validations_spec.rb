@@ -1,40 +1,14 @@
 # frozen_string_literal: true
 
+require 'shared/deprecated_class_examples'
+
 describe Grape::Validations do
-  describe 'deprecated Grape::Validations::Base' do
-    subject do
-      Class.new(Grape::API) do
-        params do
-          requires :text, validator_with_old_base: true
-        end
-        get do
-        end
-      end
+  describe 'Grape::Validations::Base' do
+    let(:deprecated_class) do
+      Class.new(Grape::Validations::Base)
     end
 
-    let(:validator_with_old_base) do
-      Class.new(Grape::Validations::Base) do
-        def validate_param!(_attr_name, _params)
-          true
-        end
-      end
-    end
-
-    let(:app) { Rack::Builder.new(subject) }
-
-    before do
-      allow(ActiveSupport::Deprecation).to receive(:warn)
-      described_class.register_validator('validator_with_old_base', validator_with_old_base)
-    end
-
-    after do
-      described_class.deregister_validator('validator_with_old_base')
-    end
-
-    it 'puts a deprecation warning' do
-      get '/'
-      expect(ActiveSupport::Deprecation).to have_received(:warn).with('Grape::Validations::Base is deprecated! Use Grape::Validations::Validators::Base instead.')
-    end
+    it_behaves_like 'deprecated class'
   end
 
   describe 'using a custom length validator' do
@@ -59,6 +33,7 @@ describe Grape::Validations do
         end
       end
     end
+    let(:app) { Rack::Builder.new(subject) }
 
     before do
       described_class.register_validator('default_length', default_length_validator)
@@ -67,8 +42,6 @@ describe Grape::Validations do
     after do
       described_class.deregister_validator('default_length')
     end
-
-    let(:app) { Rack::Builder.new(subject) }
 
     it 'under 140 characters' do
       get '/', text: 'abc'
@@ -108,6 +81,7 @@ describe Grape::Validations do
         end
       end
     end
+    let(:app) { Rack::Builder.new(subject) }
 
     before do
       described_class.register_validator('in_body', in_body_validator)
@@ -116,8 +90,6 @@ describe Grape::Validations do
     after do
       described_class.deregister_validator('in_body')
     end
-
-    let(:app) { Rack::Builder.new(subject) }
 
     it 'allows field in body' do
       get '/', text: 'abc'
@@ -151,6 +123,7 @@ describe Grape::Validations do
         end
       end
     end
+    let(:app) { Rack::Builder.new(subject) }
 
     before do
       described_class.register_validator('with_message_key', message_key_validator)
@@ -159,8 +132,6 @@ describe Grape::Validations do
     after do
       described_class.deregister_validator('with_message_key')
     end
-
-    let(:app) { Rack::Builder.new(subject) }
 
     it 'fails with message' do
       get '/', text: 'foobar'
@@ -197,6 +168,7 @@ describe Grape::Validations do
         end
       end
     end
+    let(:app) { Rack::Builder.new(subject) }
 
     before do
       described_class.register_validator('admin', admin_validator)
@@ -205,8 +177,6 @@ describe Grape::Validations do
     after do
       described_class.deregister_validator('admin')
     end
-
-    let(:app) { Rack::Builder.new(subject) }
 
     it 'fail when non-admin user sets an admin field' do
       get '/', admin_field: 'tester', non_admin_field: 'toaster'

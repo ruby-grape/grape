@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 describe Grape::DSL::Desc do
+  subject { dummy_class }
+
   let(:dummy_class) do
     Class.new do
       extend Grape::DSL::Desc
     end
   end
-
-  subject { dummy_class }
 
   describe '.desc' do
     it 'sets a description' do
@@ -59,15 +59,15 @@ describe Grape::DSL::Desc do
         named 'My named route'
         body_name 'My body name'
         headers [
-                  XAuthToken: {
-                    description: 'Valdates your identity',
-                    required: true
-                  },
-                  XOptionalHeader: {
-                    description: 'Not really needed',
-                    required: false
-                  }
-                ]
+          XAuthToken: {
+            description: 'Valdates your identity',
+            required: true
+          },
+          XOptionalHeader: {
+            description: 'Not really needed',
+            required: false
+          }
+        ]
         hidden false
         deprecated false
         is_array true

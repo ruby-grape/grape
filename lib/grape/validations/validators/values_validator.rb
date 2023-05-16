@@ -14,7 +14,7 @@ module Grape
 
             raise ArgumentError, 'proc must be a Proc' if @proc && !@proc.is_a?(Proc)
 
-            ActiveSupport::Deprecation.warn('The values validator proc option is deprecated. The lambda expression can now be assigned directly to values.')  if @proc
+            ActiveSupport::Deprecation.warn('The values validator proc option is deprecated. The lambda expression can now be assigned directly to values.') if @proc
           else
             @excepts = nil
             @values = nil
