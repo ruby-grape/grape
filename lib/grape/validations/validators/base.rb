@@ -61,19 +61,11 @@ module Grape
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
         end
 
-        def self.convert_to_short_name(klass)
-          ret = klass.name.gsub(/::/, '/')
-          ret.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
-          ret.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
-          ret.tr!('-', '_')
-          ret.downcase!
-          File.basename(ret, '_validator')
-        end
-
         def self.inherited(klass)
           return if klass.name.blank?
 
-          Validations.register_validator(convert_to_short_name(klass), klass)
+          short_validator_name = klass.name.demodulize.underscore.delete_suffix!('_validator')
+          Validations.register_validator(short_validator_name, klass)
         end
 
         def message(default_key = nil)
