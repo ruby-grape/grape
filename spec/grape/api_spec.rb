@@ -4226,6 +4226,15 @@ describe Grape::API do
       end
     end
 
+    it 'does not override methods inherited from Class' do
+      Class.define_method(:test_method) {}
+      subclass = Class.new(described_class)
+      expect(subclass).not_to receive(:add_setup)
+      subclass.test_method
+    ensure
+      Class.remove_method(:test_method)
+    end
+
     context 'overriding via composition' do
       module Inherited
         def inherited(api)

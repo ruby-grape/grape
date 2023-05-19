@@ -8,7 +8,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = (Class.new.methods + %i[call call! configuration compile! inherited]).freeze
+    NON_OVERRIDABLE = %i[call call! configuration compile! inherited].freeze
 
     class Boolean
       def self.build(val)
@@ -50,7 +50,7 @@ module Grape
 
       # Redefines all methods so that are forwarded to add_setup and be recorded
       def override_all_methods!
-        (base_instance.methods - NON_OVERRIDABLE).each do |method_override|
+        (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, &block|
             add_setup(method_override, *args, &block)
           end
