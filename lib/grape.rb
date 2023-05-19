@@ -27,6 +27,7 @@ require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/duplicable'
 require 'active_support/dependencies/autoload'
 require 'active_support/deprecation'
+require 'active_support/inflector'
 require 'active_support/notifications'
 require 'i18n'
 
