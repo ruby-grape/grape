@@ -317,8 +317,8 @@ module Grape
     end
 
     def build_helpers
-      helpers = namespace_stackable(:helpers) || []
-      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
+      helpers = namespace_stackable(:helpers)
+      Module.new { helpers&.each { |mod_to_include| include mod_to_include } }
     end
 
     private :build_stack, :build_helpers
@@ -344,10 +344,8 @@ module Grape
       end
     end
 
-    def run_validators(validator_factories, request)
+    def run_validators(validators, request)
       validation_errors = []
-
-      validators = validator_factories.map { |options| Grape::Validations::ValidatorFactory.create_validator(**options) }
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
         validators.each do |validator|
@@ -366,34 +364,38 @@ module Grape
 
     def run_filters(filters, type = :other)
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
-        (filters || []).each { |filter| instance_eval(&filter) }
+        filters&.each { |filter| instance_eval(&filter) }
       end
       post_extension = DSL::InsideRoute.post_filter_methods(type)
       extend post_extension if post_extension
     end
 
     def befores
-      namespace_stackable(:befores) || []
+      namespace_stackable(:befores)
     end
 
     def before_validations
-      namespace_stackable(:before_validations) || []
+      namespace_stackable(:before_validations)
     end
 
     def after_validations
-      namespace_stackable(:after_validations) || []
+      namespace_stackable(:after_validations)
     end
 
     def afters
-      namespace_stackable(:afters) || []
+      namespace_stackable(:afters)
     end
 
     def finallies
-      namespace_stackable(:finallies) || []
+      namespace_stackable(:finallies)
     end
 
     def validations
-      route_setting(:saved_validations) || []
+      return enum_for(:validations) unless block_given?
+
+      route_setting(:saved_validations)&.each do |saved_validation|
+        yield Grape::Validations::ValidatorFactory.create_validator(**saved_validation)
+      end
     end
 
     def options?
