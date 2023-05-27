@@ -65,14 +65,11 @@ module Grape
     describe 'when the param_builder is set to Hashie' do
       subject(:request_params) { described_class.new(env, **opts).params }
 
-      before do
-        Grape.configure do |config|
-          config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
-        end
-      end
-
-      after do
-        Grape.config.reset
+      around do |example|
+        old_param_builder = Grape.config.param_builder
+        Grape.config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
+        example.call
+        Grape.config.param_builder = old_param_builder
       end
 
       context 'when the API does not include a specific param builder' do
