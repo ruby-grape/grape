@@ -11,6 +11,7 @@ require 'bigdecimal'
 require 'date'
 require 'active_support'
 require 'active_support/concern'
+require 'active_support/configurable'
 require 'active_support/version'
 require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
 require 'active_support/core_ext/array/conversions'
@@ -34,6 +35,7 @@ require 'i18n'
 I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 
 module Grape
+  include ActiveSupport::Configurable
   extend ::ActiveSupport::Autoload
 
   eager_autoload do
@@ -287,9 +289,13 @@ module Grape
       autoload :InvalidValue
     end
   end
+
+  configure do |config|
+    config.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+    config.compile_methods!
+  end
 end
 
-require 'grape/config'
 require 'grape/content_types'
 
 require 'grape/util/lazy_value'

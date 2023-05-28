@@ -6,6 +6,7 @@
 * [#2327](https://github.com/ruby-grape/grape/pull/2327): Use ActiveSupport deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2330](https://github.com/ruby-grape/grape/pull/2330): Use ActiveSupport inflector - [@ericproulx](https://github.com/ericproulx).
 * [#2331](https://github.com/ruby-grape/grape/pull/2331): Memory optimization when running validators - [@ericproulx](https://github.com/ericproulx).
+* [#2332](https://github.com/ruby-grape/grape/pull/2332): Use ActiveSupport configurable - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
