@@ -2,7 +2,7 @@
 
 RSpec.describe Grape do
   describe '.config' do
-    subject { Grape.config }
+    subject { described_class.config }
 
     it { is_expected.to eq(param_builder: Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder) }
   end
