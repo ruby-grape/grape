@@ -292,6 +292,7 @@ module Grape
 
   configure do |config|
     config.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+    config.compile_methods!
   end
 end
 
