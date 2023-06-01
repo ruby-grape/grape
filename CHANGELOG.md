@@ -2,7 +2,7 @@
 
 #### Features
 
-* : The `validate_param!` method to allow procs to validate and use custom messages [@thedevjoao](https://github.com/TheDevJoao).
+* [#2333] (https://github.com/ruby-grape/grape/pull/2333): The `validate_param!` now allows procs to validate and use custom messages [@thedevjoao](https://github.com/TheDevJoao).
 * [#2326](https://github.com/ruby-grape/grape/pull/2326): Use ActiveSupport extensions - [@ericproulx](https://github.com/ericproulx).
 * [#2327](https://github.com/ruby-grape/grape/pull/2327): Use ActiveSupport deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2330](https://github.com/ruby-grape/grape/pull/2330): Use ActiveSupport inflector - [@ericproulx](https://github.com/ericproulx).
