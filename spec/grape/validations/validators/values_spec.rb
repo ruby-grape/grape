@@ -246,7 +246,7 @@ describe Grape::Validations::Validators::ValuesValidator do
       get '/proc/message'
 
       params do
-        requires :number, values: { proc: ->(v) { ValuesModel.even?(v) }, message: 'must be even' }
+        requires :number, values: { value: ->(v) { ValuesModel.even? v }, message: 'must be even' }
       end
       get '/proc/custom_message' do
         { message: 'success' }
@@ -704,17 +704,17 @@ describe Grape::Validations::Validators::ValuesValidator do
       expect(last_response.body).to eq({ error: 'type failed check' }.to_json)
     end
 
-    context 'when using a custom message' do
-      it 'accepts a single valid value' do
-        get '/proc/custom_message', number: 2
-        expect(last_response.status).to eq(200)
+    context 'when proc has an arity of 1' do
+      it 'accepts a valid value' do
+        get '/proc/custom_message', number: 4
+        expect(last_response.status).to eq 200
         expect(last_response.body).to eq({ message: 'success' }.to_json)
       end
 
-      it "returns the proc's custom message" do
+      it 'rejects an invalid value' do
         get '/proc/custom_message', number: 5
-        expect(last_response.status).to eq(400)
-        expect(last_response.body).to include('must be even')
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'number must be even' }.to_json)
       end
     end
   end

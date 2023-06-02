@@ -9,7 +9,6 @@ module Grape
             @excepts = options[:except]
             @values = options[:value]
             @proc = options[:proc]
-            @proc_message = options[:proc_message]
 
             ActiveSupport::Deprecation.warn('The values validator except option is deprecated. Use the except validator instead.') if @excepts
 
@@ -20,7 +19,6 @@ module Grape
             @excepts = nil
             @values = nil
             @proc = nil
-            @proc_message = nil
             @values = options
           end
           super
@@ -30,7 +28,11 @@ module Grape
           return unless params.is_a?(Hash)
 
           val = params[attr_name]
-          return if skip_validation?(val)
+
+          return if val.nil? && !required_for_root_scope?
+
+          # don't forget that +false.blank?+ is true
+          return if val != false && val.blank? && @allow_blank
 
           param_array = val.nil? ? [nil] : Array.wrap(val)
 
@@ -41,10 +43,7 @@ module Grape
           unless check_values(param_array, attr_name)
 
           raise validation_exception(attr_name, message(:values)) \
-          if @proc && !param_array.all? { |param| @proc.call(param) }
-
-          raise validation_exception(attr_name, @proc_message) \
-          if @proc && !param_array.all? { |param| @proc.call(param) }
+            if @proc && !validate_proc(@proc, param_array)
         end
 
         private
@@ -69,20 +68,24 @@ module Grape
           param_array.none? { |param| excepts.include?(param) }
         end
 
-        def except_message
-          return @proc_message if @proc_message.present?
+        def validate_proc(proc, param_array)
+          case proc.arity
+          when 0
+            param_array.all? { |_param| proc.call }
+          when 1
+            param_array.all? { |param| proc.call(param) }
+          else
+            raise ArgumentError, 'proc arity must be 0 or 1'
+          end
+        end
 
+        def except_message
           options = instance_variable_get(:@option)
           options_key?(:except_message) ? options[:except_message] : message(:except_values)
         end
 
         def required_for_root_scope?
           @required && @scope.root?
-        end
-
-        def skip_validation?(val)
-          # don't forget that +false.blank?+ is true
-          (val.nil? && !required_for_root_scope?) || (val != false && val.blank? && @allow_blank)
         end
 
         def validation_exception(attr_name, message)
