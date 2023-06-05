@@ -30,6 +30,10 @@ describe Grape::Validations::Validators::ValuesValidator do
         def include?(value)
           values.include?(value)
         end
+
+        def even?(value)
+          value.to_i.even?
+        end
       end
     end
   end
@@ -240,6 +244,18 @@ describe Grape::Validations::Validators::ValuesValidator do
         requires :type, values: { proc: ->(v) { ValuesModel.include? v }, message: 'failed check' }
       end
       get '/proc/message'
+
+      params do
+        requires :number, values: { value: ->(v) { ValuesModel.even? v }, message: 'must be even' }
+      end
+      get '/proc/custom_message' do
+        { message: 'success' }
+      end
+
+      params do
+        requires :input_one, :input_two, values: { value: ->(v1, v2) { v1 + v2 > 10 } }
+      end
+      get '/proc/arity2'
 
       params do
         optional :name, type: String, values: %w[a b], allow_blank: true
@@ -691,6 +707,27 @@ describe Grape::Validations::Validators::ValuesValidator do
       get '/proc/message', type: 'invalid-type1'
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type failed check' }.to_json)
+    end
+
+    context 'when proc has an arity of 1' do
+      it 'accepts a valid value' do
+        get '/proc/custom_message', number: 4
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ message: 'success' }.to_json)
+      end
+
+      it 'rejects an invalid value' do
+        get '/proc/custom_message', number: 5
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'number must be even' }.to_json)
+      end
+    end
+
+    context 'when arity is > 1' do
+      it 'returns an error status code' do
+        get '/proc/arity2', input_one: 2, input_two: 3
+        expect(last_response.status).to eq 400
+      end
     end
   end
 end

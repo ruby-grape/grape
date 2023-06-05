@@ -43,7 +43,7 @@ module Grape
           unless check_values(param_array, attr_name)
 
           raise validation_exception(attr_name, message(:values)) \
-          if @proc && !param_array.all? { |param| @proc.call(param) }
+            if @proc && !validate_proc(@proc, param_array)
         end
 
         private
@@ -66,6 +66,17 @@ module Grape
           return true if excepts.nil?
 
           param_array.none? { |param| excepts.include?(param) }
+        end
+
+        def validate_proc(proc, param_array)
+          case proc.arity
+          when 0
+            param_array.all? { |_param| proc.call }
+          when 1
+            param_array.all? { |param| proc.call(param) }
+          else
+            raise ArgumentError, 'proc arity must be 0 or 1'
+          end
         end
 
         def except_message
