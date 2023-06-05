@@ -253,6 +253,11 @@ describe Grape::Validations::Validators::ValuesValidator do
       end
 
       params do
+        requires :input_one, :input_two, values: { value: ->(v1, v2) { v1 + v2 > 10 } }
+      end
+      get '/proc/arity2'
+
+      params do
         optional :name, type: String, values: %w[a b], allow_blank: true
       end
       get '/allow_blank'
@@ -715,6 +720,13 @@ describe Grape::Validations::Validators::ValuesValidator do
         get '/proc/custom_message', number: 5
         expect(last_response.status).to eq 400
         expect(last_response.body).to eq({ error: 'number must be even' }.to_json)
+      end
+    end
+
+    context 'when arity is > 1' do
+      it 'returns an error status code' do
+        get '/proc/arity2', input_one: 2, input_two: 3
+        expect(last_response.status).to eq 400
       end
     end
   end
