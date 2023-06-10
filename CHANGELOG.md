@@ -13,6 +13,7 @@
 #### Fixes
 
 * [#2328](https://github.com/ruby-grape/grape/pull/2328): Don't cache Class.instance_methods - [@byroot](https://github.com/byroot).
+* [#2337](https://github.com/ruby-grape/grape/pull/2337): Fix custom validator registering - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ## 1.7.1 (2023/05/14)
