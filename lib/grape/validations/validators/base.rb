@@ -64,7 +64,7 @@ module Grape
         def self.inherited(klass)
           return if klass.name.blank?
 
-          short_validator_name = klass.name.demodulize.underscore.delete_suffix!('_validator')
+          short_validator_name = klass.name.demodulize.underscore.delete_suffix('_validator')
           Validations.register_validator(short_validator_name, klass)
         end
 
