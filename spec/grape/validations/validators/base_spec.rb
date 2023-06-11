@@ -2,7 +2,7 @@
 
 RSpec.describe Grape::Validations::Validators::Base do
   describe '#inherited' do
-    context "when validator is anonymous" do
+    context 'when validator is anonymous' do
       subject(:custom_validator) { Class.new(described_class) }
 
       it 'does not register the validator' do
