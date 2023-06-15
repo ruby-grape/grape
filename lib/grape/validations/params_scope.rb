@@ -358,8 +358,9 @@ module Grape
         # type casted values
         coerce_type validations, attrs, doc, opts
 
+        excluded_keywords = %i[as required param_type is_array format]
         validations.each do |type, options|
-          next if type == :as
+          next if excluded_keywords.include?(type)
 
           validate(type, options, attrs, doc, opts)
         end
