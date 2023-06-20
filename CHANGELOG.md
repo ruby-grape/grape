@@ -12,6 +12,7 @@
 
 #### Fixes
 
+* [#2339](https://github.com/ruby-grape/grape/pull/2339): Documentation and specs for remountable configuration in params -  [@myxoh](https://github.com/myxoh).
 * [#2328](https://github.com/ruby-grape/grape/pull/2328): Don't cache Class.instance_methods - [@byroot](https://github.com/byroot).
 * [#2337](https://github.com/ruby-grape/grape/pull/2337): Fix: allow custom validators that do not end with _validator - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
