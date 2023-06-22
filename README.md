@@ -526,15 +526,15 @@ end
 ```ruby
 class BasicAPI < Grape::API
   desc 'Statuses index' do
-    params: mounted { configuration[:entity] || API::Entities::Status }.documentation
+    params: (configuration[:entity] || API::Entities::Status).documentation
   end
   params do
-    requires :all, using: mounted { configuration[:entity] || API::Entities::Status }.documentation
+    requires :all, using: (configuration[:entity] || API::Entities::Status).documentation
   end
   get '/statuses' do
     statuses = Status.all
     type = current_user.admin? ? :full : :default
-    present statuses, with: mounted { configuration[:entity] || API::Entities::Status }, type: type
+    present statuses, with: (configuration[:entity] || API::Entities::Status), type: type
   end
 end
 
