@@ -9,11 +9,9 @@ module Grape
           array_errors = []
 
           attributes.each do |resource_params|
-            begin
-              validate_params!(resource_params)
-            rescue Grape::Exceptions::Validation => e
-              array_errors << e
-            end
+            validate_params!(resource_params)
+          rescue Grape::Exceptions::Validation => e
+            array_errors << e
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?

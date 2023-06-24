@@ -50,11 +50,9 @@ module Grape
             next if !@scope.required? && empty_val
             next unless @scope.meets_dependency?(val, params)
 
-            begin
-              validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
-            rescue Grape::Exceptions::Validation => e
-              array_errors << e
-            end
+            validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
+          rescue Grape::Exceptions::Validation => e
+            array_errors << e
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
