@@ -147,6 +147,42 @@ describe Grape::API do
         end
       end
 
+      context 'when the params are configured via a configuration' do
+        subject(:a_remounted_api) do
+          Class.new(described_class) do
+            params do
+              requires configuration[:required_attr_name], type: String
+            end
+
+            get(mounted { configuration[:endpoint] }) do
+              status 200
+            end
+          end
+        end
+
+        context 'when the configured param is my_attr' do
+          it 'requires the configured params' do
+            root_api.mount a_remounted_api, with: {
+              required_attr_name: 'my_attr',
+              endpoint: 'test'
+            }
+            get 'test?another_attr=1'
+            expect(last_response.status).to eq 400
+            get 'test?my_attr=1'
+            expect(last_response.status).to eq 200
+
+            root_api.mount a_remounted_api, with: {
+              required_attr_name: 'another_attr',
+              endpoint: 'test_b'
+            }
+            get 'test_b?another_attr=1'
+            expect(last_response.status).to eq 200
+            get 'test_b?my_attr=1'
+            expect(last_response.status).to eq 400
+          end
+        end
+      end
+
       context 'when executing a standard block within a `mounted` block with all dynamic params' do
         subject(:a_remounted_api) do
           Class.new(described_class) do

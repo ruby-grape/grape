@@ -7,11 +7,14 @@
 * [#2330](https://github.com/ruby-grape/grape/pull/2330): Use ActiveSupport inflector - [@ericproulx](https://github.com/ericproulx).
 * [#2331](https://github.com/ruby-grape/grape/pull/2331): Memory optimization when running validators - [@ericproulx](https://github.com/ericproulx).
 * [#2332](https://github.com/ruby-grape/grape/pull/2332): Use ActiveSupport configurable - [@ericproulx](https://github.com/ericproulx).
+* [#2333](https://github.com/ruby-grape/grape/pull/2333): Use custom messages in parameter validation with arity 1 - [@thedevjoao](https://github.com/TheDevJoao).
 * Your contribution here.
 
 #### Fixes
 
+* [#2339](https://github.com/ruby-grape/grape/pull/2339): Documentation and specs for remountable configuration in params - [@myxoh](https://github.com/myxoh).
 * [#2328](https://github.com/ruby-grape/grape/pull/2328): Don't cache Class.instance_methods - [@byroot](https://github.com/byroot).
+* [#2337](https://github.com/ruby-grape/grape/pull/2337): Fix: allow custom validators that do not end with _validator - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ## 1.7.1 (2023/05/14)
