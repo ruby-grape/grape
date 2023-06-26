@@ -45,7 +45,7 @@ describe Grape::Validations::SingleAttributeIterator do
       context 'when missing optional value' do
         let(:params) { [Grape::DSL::Parameters::EmptyOptionalValue, 10] }
 
-        it 'doest not yield skipped values' do
+        it 'does not yield skipped values' do
           expect { |b| iterator.each(&b) }.to yield_successive_args(
             [params[1], :first, false], [params[1], :second, false]
           )
