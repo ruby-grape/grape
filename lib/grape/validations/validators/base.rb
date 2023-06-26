@@ -46,16 +46,13 @@ module Grape
           # there may be more than one error per field
           array_errors = []
 
-          attributes.each do |val, attr_name, empty_val, skip_value|
-            next if skip_value
+          attributes.each do |val, attr_name, empty_val|
             next if !@scope.required? && empty_val
             next unless @scope.meets_dependency?(val, params)
 
-            begin
-              validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
-            rescue Grape::Exceptions::Validation => e
-              array_errors << e
-            end
+            validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
+          rescue Grape::Exceptions::Validation => e
+            array_errors << e
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?

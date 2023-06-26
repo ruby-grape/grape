@@ -8,6 +8,7 @@
 * [#2331](https://github.com/ruby-grape/grape/pull/2331): Memory optimization when running validators - [@ericproulx](https://github.com/ericproulx).
 * [#2332](https://github.com/ruby-grape/grape/pull/2332): Use ActiveSupport configurable - [@ericproulx](https://github.com/ericproulx).
 * [#2333](https://github.com/ruby-grape/grape/pull/2333): Use custom messages in parameter validation with arity 1 - [@thedevjoao](https://github.com/TheDevJoao).
+* [#2341](https://github.com/ruby-grape/grape/pull/2341): Stop yielding skip value - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

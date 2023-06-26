@@ -8,14 +8,10 @@ module Grape
           attributes = MultipleAttributesIterator.new(self, @scope, params)
           array_errors = []
 
-          attributes.each do |resource_params, skip_value|
-            next if skip_value
-
-            begin
-              validate_params!(resource_params)
-            rescue Grape::Exceptions::Validation => e
-              array_errors << e
-            end
+          attributes.each do |resource_params|
+            validate_params!(resource_params)
+          rescue Grape::Exceptions::Validation => e
+            array_errors << e
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
