@@ -109,7 +109,7 @@ module Grape
         return :error_response if klass == Grape::Exceptions::InvalidVersionHeader
         return unless options[:rescue_grape_exceptions] || !options[:rescue_all]
 
-        :error_response
+        options[:grape_exceptions_rescue_handler] || :default_rescue_handler
       end
 
       def rescue_handler_for_any_class(klass)
