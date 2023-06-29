@@ -276,6 +276,7 @@ module Grape
       end
     end
 
+    # rubocop:disable Metrics/MethodLength
     def build_stack(helpers)
       stack = Grape::Middleware::Stack.new
 
@@ -316,6 +317,7 @@ module Grape
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
       builder.to_app
     end
+    # rubocop:enable Metrics/MethodLength
 
     def build_helpers
       helpers = namespace_stackable(:helpers)

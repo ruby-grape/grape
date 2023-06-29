@@ -175,7 +175,6 @@ module Grape
             expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, an_instance_of(Proc))
             subject.rescue_from :grape_exceptions, with: with_block
           end
-
         end
 
         describe 'list of exceptions is passed' do
