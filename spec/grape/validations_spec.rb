@@ -179,11 +179,12 @@ describe Grape::Validations do
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
-          required_field: { type: String },
-          optional_field: { type: String }
+          required_field: { type: String, required: true, param_type: 'query' },
+          optional_field: { type: String },
+          optional_array_field: { type: Array[String], is_array: true }
         }
         subject.params do
-          requires :all, except: :optional_field, using: documentation
+          requires :all, except: %i[optional_field optional_array_field], using: documentation
         end
       end
       before do
@@ -195,7 +196,7 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[required_field optional_field])
+        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[required_field optional_field optional_array_field])
       end
 
       it 'errors when required_field is not present' do
@@ -214,8 +215,8 @@ describe Grape::Validations do
     context 'requires :none using Grape::Entity documentation' do
       def define_requires_none
         documentation = {
-          required_field: { type: String },
-          optional_field: { type: String }
+          required_field: { type: String, example: 'Foo' },
+          optional_field: { type: Integer, format: 'int64' }
         }
         subject.params do
           requires :none, except: :required_field, using: documentation

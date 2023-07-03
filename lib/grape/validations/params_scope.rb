@@ -358,9 +358,12 @@ module Grape
         # type casted values
         coerce_type validations, attrs, doc, opts
 
-        excluded_keywords = %i[as required param_type is_array format]
+        # There are a number of documentation options on entities that don't have
+        # corresponding validators. Since there is nowhere that enumerates them all,
+        # we maintain a list of them here and skip looking up validators for them.
+        reserved_keywords = %i[as required param_type is_array format example]
         validations.each do |type, options|
-          next if excluded_keywords.include?(type)
+          next if reserved_keywords.include?(type)
 
           validate(type, options, attrs, doc, opts)
         end
