@@ -148,13 +148,32 @@ module Grape
           it 'sets rescue all to true' do
             expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
             expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
+            expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, nil)
             subject.rescue_from :grape_exceptions
           end
 
-          it 'sets rescue_grape_exceptions to true' do
+          it 'sets given proc as rescue handler' do
+            rescue_handler_proc = proc {}
             expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
             expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
-            subject.rescue_from :grape_exceptions
+            expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, rescue_handler_proc)
+            subject.rescue_from :grape_exceptions, rescue_handler_proc
+          end
+
+          it 'sets given block as rescue handler' do
+            rescue_handler_proc = proc {}
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
+            expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, rescue_handler_proc)
+            subject.rescue_from :grape_exceptions, &rescue_handler_proc
+          end
+
+          it 'sets a rescue handler declared through :with option' do
+            with_block = -> { 'hello' }
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
+            expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
+            expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, an_instance_of(Proc))
+            subject.rescue_from :grape_exceptions, with: with_block
           end
         end
 

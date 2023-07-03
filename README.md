@@ -2626,6 +2626,14 @@ class Twitter::API < Grape::API
 end
 ```
 
+If you want to customize the shape of grape exceptions returned to the user, to match your `:all` handler for example, you can pass a block to `rescue_from :grape_exceptions`.
+
+```ruby
+rescue_from :grape_exceptions do |e|
+  error!(e, e.status)
+end
+```
+
 You can also rescue specific exceptions.
 
 ```ruby

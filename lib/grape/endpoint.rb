@@ -292,7 +292,8 @@ module Grape
                 rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
                 rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers) || {},
                 base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
-                all_rescue_handler: namespace_inheritable(:all_rescue_handler)
+                all_rescue_handler: namespace_inheritable(:all_rescue_handler),
+                grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
 
       stack.concat namespace_stackable(:middleware)
 
