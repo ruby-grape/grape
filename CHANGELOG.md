@@ -10,6 +10,7 @@
 * [#2333](https://github.com/ruby-grape/grape/pull/2333): Use custom messages in parameter validation with arity 1 - [@thedevjoao](https://github.com/TheDevJoao).
 * [#2341](https://github.com/ruby-grape/grape/pull/2341): Stop yielding skip value - [@ericproulx](https://github.com/ericproulx).
 * [#2342](https://github.com/ruby-grape/grape/pull/2342): Allow specifying a handler for grape_exceptions - [@mscrivo](https://github.com/mscrivo).
+* [#2338](https://github.com/ruby-grape/grape/pull/2338): Fix unknown validator when using requires/optional with entity - [@mscrivo](https://github.com/mscrivo).
 * Your contribution here.
 
 #### Fixes

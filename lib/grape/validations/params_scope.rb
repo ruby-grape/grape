@@ -10,6 +10,11 @@ module Grape
 
       include Grape::DSL::Parameters
 
+      # There are a number of documentation options on entities that don't have
+      # corresponding validators. Since there is nowhere that enumerates them all,
+      # we maintain a list of them here and skip looking up validators for them.
+      RESERVED_DOCUMENTATION_KEYWORDS = %i[as required param_type is_array format example].freeze
+
       class Attr
         attr_accessor :key, :scope
 
@@ -358,12 +363,9 @@ module Grape
         # type casted values
         coerce_type validations, attrs, doc, opts
 
-        # There are a number of documentation options on entities that don't have
-        # corresponding validators. Since there is nowhere that enumerates them all,
-        # we maintain a list of them here and skip looking up validators for them.
-        reserved_keywords = %i[as required param_type is_array format example]
         validations.each do |type, options|
-          next if reserved_keywords.include?(type)
+          # Don't try to look up validators for documentation params that don't have one.
+          next if RESERVED_DOCUMENTATION_KEYWORDS.include?(type)
 
           validate(type, options, attrs, doc, opts)
         end
