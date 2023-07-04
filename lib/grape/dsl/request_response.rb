@@ -112,10 +112,11 @@ module Grape
 
           if args.include?(:all)
             namespace_inheritable(:rescue_all, true)
-            namespace_inheritable :all_rescue_handler, handler
+            namespace_inheritable(:all_rescue_handler, handler)
           elsif args.include?(:grape_exceptions)
             namespace_inheritable(:rescue_all, true)
             namespace_inheritable(:rescue_grape_exceptions, true)
+            namespace_inheritable(:grape_exceptions_rescue_handler, handler)
           else
             handler_type =
               case options[:rescue_subclasses]

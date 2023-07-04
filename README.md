@@ -526,15 +526,15 @@ end
 ```ruby
 class BasicAPI < Grape::API
   desc 'Statuses index' do
-    params: mounted { configuration[:entity] || API::Entities::Status }.documentation
+    params: (configuration[:entity] || API::Entities::Status).documentation
   end
   params do
-    requires :all, using: mounted { configuration[:entity] || API::Entities::Status }.documentation
+    requires :all, using: (configuration[:entity] || API::Entities::Status).documentation
   end
   get '/statuses' do
     statuses = Status.all
     type = current_user.admin? ? :full : :default
-    present statuses, with: mounted { configuration[:entity] || API::Entities::Status }, type: type
+    present statuses, with: (configuration[:entity] || API::Entities::Status), type: type
   end
 end
 
@@ -2623,6 +2623,14 @@ The intent of this setting is to provide a simple way to cover the most common e
 ```ruby
 class Twitter::API < Grape::API
   rescue_from :grape_exceptions
+end
+```
+
+If you want to customize the shape of grape exceptions returned to the user, to match your `:all` handler for example, you can pass a block to `rescue_from :grape_exceptions`.
+
+```ruby
+rescue_from :grape_exceptions do |e|
+  error!(e, e.status)
 end
 ```
 
