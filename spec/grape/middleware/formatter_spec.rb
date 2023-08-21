@@ -405,7 +405,7 @@ describe Grape::Middleware::Formatter do
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
       status, headers, body = subject.call(env)
       expect(status).to be == 200
-      expect(headers).to be == { 'Content-Type' => 'application/json' }
+      expect(headers.transform_keys(&:downcase)).to be == { 'content-type' => 'application/json' }
       expect(read_chunks(body)).to be == ['data']
     end
   end
