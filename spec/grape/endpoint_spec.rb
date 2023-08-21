@@ -138,10 +138,9 @@ describe Grape::Endpoint do
 
     it 'includes request headers' do
       get '/headers'
-      expect(JSON.parse(last_response.body)).to eq(
+      expect(JSON.parse(last_response.body)).to include(
         'Host' => 'example.org',
-        'Cookie' => '',
-        'Version' => 'HTTP/1.0'
+        'Cookie' => ''
       )
     end
 
@@ -174,7 +173,7 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
 
-      expect(last_response.headers['Set-Cookie'].split("\n").sort).to eql [
+      expect(Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.sort).to eql [
         'cookie3=symbol',
         'cookie4=secret+code+here',
         'my-awesome-cookie1=is+cool',
@@ -199,8 +198,9 @@ describe Grape::Endpoint do
       end
       get('/username', {}, 'HTTP_COOKIE' => 'username=user; sandbox=false')
       expect(last_response.body).to eq('user_test')
-      expect(last_response.headers['Set-Cookie']).to match(/username=user_test/)
-      expect(last_response.headers['Set-Cookie']).to match(/sandbox=true/)
+      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }
+      expect(cookies.first).to match(/username=user_test/)
+      expect(cookies.second).to match(/sandbox=true/)
     end
 
     it 'deletes cookie' do
@@ -214,7 +214,7 @@ describe Grape::Endpoint do
       end
       get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
       expect(last_response.body).to eq('3')
-      cookies = last_response.headers['Set-Cookie'].split("\n").to_h do |set_cookie|
+      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
       end
@@ -238,7 +238,7 @@ describe Grape::Endpoint do
       end
       get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
       expect(last_response.body).to eq('3')
-      cookies = last_response.headers['Set-Cookie'].split("\n").to_h do |set_cookie|
+      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
         cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
         [cookie.name, cookie]
       end

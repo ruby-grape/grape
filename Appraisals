@@ -39,3 +39,7 @@ end
 appraise 'rack2' do
   gem 'rack', '~> 2.0.0'
 end
+
+appraise 'rack3' do
+  gem 'rack', '~> 3.0.0'
+end
