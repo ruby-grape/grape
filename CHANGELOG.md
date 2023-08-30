@@ -1,4 +1,4 @@
-### 1.8.0 (Next)
+### 1.8.0 (2023/08/30)
 
 #### Features
 
@@ -11,7 +11,6 @@
 * [#2341](https://github.com/ruby-grape/grape/pull/2341): Stop yielding skip value - [@ericproulx](https://github.com/ericproulx).
 * [#2342](https://github.com/ruby-grape/grape/pull/2342): Allow specifying a handler for grape_exceptions - [@mscrivo](https://github.com/mscrivo).
 * [#2338](https://github.com/ruby-grape/grape/pull/2338): Fix unknown validator when using requires/optional with entity - [@mscrivo](https://github.com/mscrivo).
-* Your contribution here.
 
 #### Fixes
 
@@ -19,7 +18,6 @@
 * [#2328](https://github.com/ruby-grape/grape/pull/2328): Don't cache Class.instance_methods - [@byroot](https://github.com/byroot).
 * [#2337](https://github.com/ruby-grape/grape/pull/2337): Fix: allow custom validators that do not end with _validator - [@ericproulx](https://github.com/ericproulx).
 * [#2346](https://github.com/ruby-grape/grape/pull/2346): Adjust test expectations to conform to rack 3 - [@kbarrette](https://github.com/kbarrette).
-* Your contribution here.
 
 ## 1.7.1 (2023/05/14)
 

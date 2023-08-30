@@ -39,7 +39,7 @@ Remove the line with "Your contribution here.", since there will be no more cont
 Commit your changes.
 
 ```
-git add README.md CHANGELOG.md lib/grape/version.rb
+git add README.md CHANGELOG.md
 git commit -m "Preparing for release, 0.6.0."
 git push origin master
 ```
