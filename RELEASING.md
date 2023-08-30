@@ -20,11 +20,6 @@ Those with r/w permissions to the [master Grape repository](https://github.com/r
 gem grape, github: 'ruby-grape/grape'
 ```
 
-Increment the version, modify [lib/grape/version.rb](lib/grape/version.rb).
-
-*  Increment the third number if the release has bug fixes and/or very minor features, only (eg. change `0.5.1` to `0.5.2`).
-*  Increment the second number if the release contains major features or breaking API changes (eg. change `0.5.1` to `0.6.0`).
-
 Modify the "Stable Release" section in [README.md](README.md). Change the text to reflect that this is going to be the documentation for a stable release. Remove references to the previous release of Grape. Keep the file open, you'll have to undo this change after the release.
 
 ```
