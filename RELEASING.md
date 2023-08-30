@@ -12,7 +12,7 @@ bundle install
 rake
 ```
 
-Check that the last build succeeded in [Travis CI](https://travis-ci.org/ruby-grape/grape) for all supported platforms.
+Double-check that the [last build succeeded](https://github.com/ruby-grape/grape/actions) for all supported platforms.
 
 Those with r/w permissions to the [master Grape repository](https://github.com/ruby-grape/grape) generally have large Grape-based projects. Point one to Grape HEAD and run all your API tests to catch any obvious regressions.
 
