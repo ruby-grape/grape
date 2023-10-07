@@ -83,7 +83,7 @@ describe Grape::DSL::Desc do
     end
 
     it 'can be set with options and a block' do
-      expect(ActiveSupport::Deprecation).to receive(:warn).with('Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.')
+      expect(Grape.deprecator).to receive(:warn).with('Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.')
 
       desc_text = 'The description'
       detail_text = 'more details'

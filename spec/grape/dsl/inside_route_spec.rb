@@ -208,7 +208,7 @@ describe Grape::Endpoint do
         let(:file_path) { '/some/file/path' }
 
         it 'emits a warning that this method is deprecated' do
-          expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use sendfile or stream/)
+          expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
 
           subject.file file_path
         end
@@ -224,7 +224,7 @@ describe Grape::Endpoint do
         let(:file_object) { double('StreamerObject', each: nil) }
 
         it 'emits a warning that this method is deprecated' do
-          expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use stream to use a Stream object/)
+          expect(Grape.deprecator).to receive(:warn).with(/Use stream to use a Stream object/)
 
           subject.file file_object
         end
@@ -239,7 +239,7 @@ describe Grape::Endpoint do
 
     describe 'get' do
       it 'emits a warning that this method is deprecated' do
-        expect(ActiveSupport::Deprecation).to receive(:warn).with(/Use sendfile or stream/)
+        expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
 
         subject.file
       end
@@ -269,7 +269,7 @@ describe Grape::Endpoint do
         end
 
         it 'sends no deprecation warnings' do
-          expect(ActiveSupport::Deprecation).not_to receive(:warn)
+          expect(Grape.deprecator).not_to receive(:warn)
 
           subject.sendfile file_path
         end
@@ -330,7 +330,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(ActiveSupport::Deprecation).not_to receive(:warn)
+          expect(Grape.deprecator).not_to receive(:warn)
 
           subject.stream file_path
         end
@@ -380,7 +380,7 @@ describe Grape::Endpoint do
         end
 
         it 'emits no deprecation warnings' do
-          expect(ActiveSupport::Deprecation).not_to receive(:warn)
+          expect(Grape.deprecator).not_to receive(:warn)
 
           subject.stream stream_object
         end
