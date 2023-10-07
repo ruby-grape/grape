@@ -10,7 +10,7 @@ Bundler.require :default, :test
 
 require 'grape'
 
-%w(config support).each do |dir|
+%w[config support].each do |dir|
   Dir["#{File.dirname(__FILE__)}/#{dir}/**/*.rb"].sort.each do |file|
     require file
   end
