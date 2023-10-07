@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2353](https://github.com/ruby-grape/grape/pull/2353): Add rails 7.1 in test suite + compatibility - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -309,4 +309,4 @@ require 'grape/version'
 
 # https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html
 # adding Grape.deprecator to Rails App if any
-require 'grape/railtie' if defined?(Rails::Railtie) && ActiveSupport::VERSION::MAJOR == 7 && ActiveSupport::VERSION::MINOR.positive?
+require 'grape/railtie' if defined?(Rails::Railtie) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
