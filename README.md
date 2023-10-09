@@ -15,6 +15,7 @@
 - [Grape for Enterprise](#grape-for-enterprise)
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
+- [Rails 7.1](#rails-71)
 - [Mounting](#mounting)
   - [All](#all)
   - [Rack](#rack)
@@ -179,7 +180,7 @@ The maintainers of Grape are working with Tidelift to deliver commercial support
 
 ## Installation
 
-Ruby 2.4 or newer is required.
+Ruby 2.6 or newer is required.
 
 Grape is available as a gem, to install it run:
 
@@ -267,6 +268,10 @@ module Twitter
   end
 end
 ```
+
+## Rails 7.1
+
+Grape's [deprecator](https://api.rubyonrails.org/v7.1.0/classes/ActiveSupport/Deprecation.html) will be added to your application's deprecators [automatically](lib/grape/railtie.rb) as `:grape`, so that your application's configuration can be applied to it.
 
 ## Mounting
 
