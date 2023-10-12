@@ -280,13 +280,13 @@ module Grape
       # Deprecated method to send files to the client. Use `sendfile` or `stream`
       def file(value = nil)
         if value.is_a?(String)
-          ActiveSupport::Deprecation.warn('Use sendfile or stream to send files.')
+          Grape.deprecator.warn('Use sendfile or stream to send files.')
           sendfile(value)
         elsif !value.is_a?(NilClass)
-          ActiveSupport::Deprecation.warn('Use stream to use a Stream object.')
+          Grape.deprecator.warn('Use stream to use a Stream object.')
           stream(value)
         else
-          ActiveSupport::Deprecation.warn('Use sendfile or stream to send files.')
+          Grape.deprecator.warn('Use sendfile or stream to send files.')
           sendfile
         end
       end

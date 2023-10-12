@@ -4,23 +4,16 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
 
-require 'grape'
-require 'test_prof/recipes/rspec/let_it_be'
-
-class NullAdapter
-  def begin_transaction; end
-
-  def rollback_transaction; end
-end
-
-TestProf::BeforeAll.adapter = NullAdapter.new
-
 require 'rubygems'
 require 'bundler'
 Bundler.require :default, :test
 
-Dir["#{File.dirname(__FILE__)}/support/*.rb"].sort.each do |file|
-  require file
+require 'grape'
+
+%w[config support].each do |dir|
+  Dir["#{File.dirname(__FILE__)}/#{dir}/**/*.rb"].sort.each do |file|
+    require file
+  end
 end
 
 # The default value for this setting is true in a standard Rails app,

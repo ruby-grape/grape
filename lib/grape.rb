@@ -38,6 +38,10 @@ module Grape
   include ActiveSupport::Configurable
   extend ::ActiveSupport::Autoload
 
+  def self.deprecator
+    @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
+  end
+
   eager_autoload do
     autoload :API
     autoload :Endpoint
@@ -301,5 +305,8 @@ require 'grape/content_types'
 require 'grape/util/lazy_value'
 require 'grape/util/lazy_block'
 require 'grape/util/endpoint_configuration'
-
 require 'grape/version'
+
+# https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html
+# adding Grape.deprecator to Rails App if any
+require 'grape/railtie' if defined?(Rails::Railtie) && ActiveSupport.gem_version >= Gem::Version.new('7.1')

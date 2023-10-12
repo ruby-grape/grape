@@ -10,4 +10,4 @@ module Grape
   end
 end
 
-Grape::Exceptions::UnsupportedGroupTypeError = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('Grape::Exceptions::UnsupportedGroupTypeError', 'Grape::Exceptions::UnsupportedGroupType')
+Grape::Exceptions::UnsupportedGroupTypeError = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('Grape::Exceptions::UnsupportedGroupTypeError', 'Grape::Exceptions::UnsupportedGroupType', Grape.deprecator)

@@ -84,7 +84,7 @@ module Grape
         path, line = *location.scan(SOURCE_LOCATION_REGEXP).first
         path = File.realpath(path) if Pathname.new(path).relative?
         expected ||= name
-        ActiveSupport::Deprecation.warn("#{path}:#{line}: The route_xxx methods such as route_#{name} have been deprecated, please use #{expected}.")
+        Grape.deprecator.warn("#{path}:#{line}: The route_xxx methods such as route_#{name} have been deprecated, please use #{expected}.")
       end
     end
   end
