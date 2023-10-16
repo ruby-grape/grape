@@ -280,6 +280,8 @@ RSpec/FilePath:
     - 'spec/integration/eager_load/eager_load_spec.rb'
     - 'spec/integration/multi_json/json_spec.rb'
     - 'spec/integration/multi_xml/xml_spec.rb'
+    - 'spec/integration/rack/v2/headers_spec.rb'
+    - 'spec/integration/rack/v3/headers_spec.rb'
 
 # Offense count: 12
 # Configuration parameters: Max.

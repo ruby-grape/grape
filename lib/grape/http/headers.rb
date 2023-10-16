@@ -10,7 +10,14 @@ module Grape
       PATH_INFO       = 'PATH_INFO'
       REQUEST_METHOD  = 'REQUEST_METHOD'
       QUERY_STRING    = 'QUERY_STRING'
-      CONTENT_TYPE    = 'Content-Type'
+
+      if Gem::Version.new(Rack::RELEASE) < Gem::Version.new('3')
+        CONTENT_TYPE = 'Content-Type'
+        X_CASCADE    = 'X-Cascade'
+      else
+        CONTENT_TYPE = 'content-type'
+        X_CASCADE    = 'x-cascade'
+      end
 
       GET     = 'GET'
       POST    = 'POST'
@@ -24,7 +31,6 @@ module Grape
       SUPPORTED_METHODS_WITHOUT_OPTIONS = Grape::Util::LazyObject.new { [GET, POST, PUT, PATCH, DELETE, HEAD].freeze }
 
       HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'
-      X_CASCADE              = 'X-Cascade'
       HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'
       HTTP_ACCEPT            = 'HTTP_ACCEPT'
 
