@@ -1,6 +1,20 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.9.0
+
+#### Response Headers
+
+For Rack >= 3 the following response headers are returned lowercase:
+
+* `content-type`
+* `x-cascade`
+
+For Rack < 3 the following response headers are returned capitalized:
+
+* `Content-Type`
+* `X-Cascade`
+
 ### Upgrading to >= 1.7.0
 
 #### Exceptions renaming

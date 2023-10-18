@@ -1,14 +1,19 @@
-### 1.8.1 (Next)
+### 1.9.1 (Next)
 
 #### Features
 
-* [#2353](https://github.com/ruby-grape/grape/pull/2353): Added Rails 7.1 support - [@ericproulx](https://github.com/ericproulx).
-* [#2355](https://github.com/ruby-grape/grape/pull/2355): Set response headers based on Rack version - [@schinery](https://github.com/schinery).
 * Your contribution here.
 
 #### Fixes
 
 * Your contribution here.
+* 
+### 1.9.0 (2023/10/18)
+
+#### Features
+
+* [#2353](https://github.com/ruby-grape/grape/pull/2353): Added Rails 7.1 support - [@ericproulx](https://github.com/ericproulx).
+* [#2355](https://github.com/ruby-grape/grape/pull/2355): Set response headers based on Rack version - [@schinery](https://github.com/schinery).
 
 ### 1.8.0 (2023/08/30)
 
