@@ -1849,7 +1849,7 @@ end
 ### Custom Validators
 
 ```ruby
-class AlphaNumeric < Grape::Validations::Validators::Base
+class AlphaNumericValidator < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     unless params[attr_name] =~ /\A[[:alnum:]]+\z/
       raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
@@ -1867,7 +1867,7 @@ end
 You can also create custom classes that take parameters.
 
 ```ruby
-class Length < Grape::Validations::Validators::Base
+class LengthValidator < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     unless params[attr_name].length <= @option
       raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
@@ -1885,7 +1885,7 @@ end
 You can also create custom validation that use request to validate the attribute. For example if you want to have parameters that are available to only admins, you can do the following.
 
 ```ruby
-class Admin < Grape::Validations::Validators::Base
+class AdminValidator < Grape::Validations::Validators::Base
   def validate(request)
     # return if the param we are checking was not in request
     # @attrs is a list containing the attribute we are currently validating
