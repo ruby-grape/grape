@@ -11,7 +11,7 @@ module Grape
       REQUEST_METHOD  = 'REQUEST_METHOD'
       QUERY_STRING    = 'QUERY_STRING'
 
-      if Gem::Version.new(Rack::RELEASE) < Gem::Version.new('3')
+      if Gem::Version.new(Rack.release) < Gem::Version.new('3')
         CONTENT_TYPE = 'Content-Type'
         X_CASCADE    = 'X-Cascade'
       else
