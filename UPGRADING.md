@@ -5,15 +5,17 @@ Upgrading Grape
 
 #### Response Headers
 
-For Rack >= 3 the following response headers are returned lowercase:
+As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 1.9.0, the following headers are now lowercase:
 
 * `content-type`
 * `x-cascade`
 
-For Rack < 3 the following response headers are returned capitalized:
+For Rack < 3 the following response headers are returned using HTTP/1 semantics, like so:
 
 * `Content-Type`
 * `X-Cascade`
+
+See [#2355](https://github.com/ruby-grape/grape/pull/2355) for more information.
 
 ### Upgrading to >= 1.7.0
 
