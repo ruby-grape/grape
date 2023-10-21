@@ -3,6 +3,7 @@
 #### Features
 
 * [#2353](https://github.com/ruby-grape/grape/pull/2353): Added Rails 7.1 support - [@ericproulx](https://github.com/ericproulx).
+* [#2360](https://github.com/ruby-grape/grape/pull/2360): Reduce gem size by removing specs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
