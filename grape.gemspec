@@ -27,10 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack', '>= 1.3.0'
   s.add_runtime_dependency 'rack-accept'
 
-  s.files         = %w[CHANGELOG.md CONTRIBUTING.md README.md grape.png UPGRADING.md LICENSE]
-  s.files        += %w[grape.gemspec]
-  s.files        += Dir['lib/**/*']
-  s.test_files    = Dir['spec/**/*']
+  s.files = Dir['lib/**/*', 'CHANGELOG.md', 'CONTRIBUTING.md', 'README.md', 'grape.png', 'UPGRADING.md', 'LICENSE', 'grape.gemspec']
   s.require_paths = ['lib']
   s.required_ruby_version = '>= 2.6.0'
 end
