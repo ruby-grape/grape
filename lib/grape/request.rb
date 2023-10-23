@@ -46,11 +46,13 @@ module Grape
       end
     end
 
-    def transform_header(header)
-      if Gem::Version.new(Rack.release) < Gem::Version.new('3')
-        -header[5..].split('_').map(&:capitalize).join('-')
-      else
+    if Grape.rack3?
+      def transform_header(header)
         -header[5..].tr('_', '-').downcase
+      end
+    else
+      def transform_header(header)
+        -header[5..].split('_').map(&:capitalize).join('-')
       end
     end
   end
