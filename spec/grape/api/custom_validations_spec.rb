@@ -165,12 +165,15 @@ describe Grape::Validations do
 
           # check if user is admin or not
           # as an example get a token from request and check if it's admin or not
-          header = if Gem::Version.new(Rack.release) < Gem::Version.new('3')
-                     'X-Access-Token'
-                   else
-                     'x-access-token'
-                   end
-          raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers[header] == 'admin'
+          raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers[access_header] == 'admin'
+        end
+
+        def access_header
+          if Gem::Version.new(Rack.release) < Gem::Version.new('3')
+            'X-Access-Token'
+          else
+            'x-access-token'
+          end
         end
       end
     end
