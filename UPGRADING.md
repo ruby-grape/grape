@@ -7,12 +7,22 @@ Upgrading Grape
 
 As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 1.9.0, the following headers are now lowercase:
 
+* `allow`
+* `cache-control`
+* `content-length`
 * `content-type`
+* `location`
+* `transfer-encoding`
 * `x-cascade`
 
 For Rack < 3 the following response headers are returned using HTTP/1 semantics, like so:
 
+* `Allow`
+* `Cache-Control`
+* `Content-Length`
 * `Content-Type`
+* `Location`
+* `Transfer-Encoding`
 * `X-Cascade`
 
 See [#2355](https://github.com/ruby-grape/grape/pull/2355) for more information.

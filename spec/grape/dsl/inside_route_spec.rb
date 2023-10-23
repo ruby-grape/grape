@@ -73,7 +73,7 @@ describe Grape::Endpoint do
       end
 
       it 'sets location header' do
-        expect(subject.header['Location']).to eq '/'
+        expect(subject.header[rack_versioned_headers[:location]]).to eq '/'
       end
     end
 
@@ -87,7 +87,7 @@ describe Grape::Endpoint do
       end
 
       it 'sets location header' do
-        expect(subject.header['Location']).to eq '/'
+        expect(subject.header[rack_versioned_headers[:location]]).to eq '/'
       end
     end
   end
@@ -263,9 +263,9 @@ describe Grape::Endpoint do
         end
 
         before do
-          subject.header 'Cache-Control', 'cache'
-          subject.header 'Content-Length', 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header rack_versioned_headers[:cache_control], 'cache'
+          subject.header rack_versioned_headers[:content_length], 123
+          subject.header rack_versioned_headers[:transfer_encoding], 'base64'
         end
 
         it 'sends no deprecation warnings' do
@@ -283,19 +283,19 @@ describe Grape::Endpoint do
         it 'does not change the Cache-Control header' do
           subject.sendfile file_path
 
-          expect(subject.header['Cache-Control']).to eq 'cache'
+          expect(subject.header[rack_versioned_headers[:cache_control]]).to eq 'cache'
         end
 
         it 'does not change the Content-Length header' do
           subject.sendfile file_path
 
-          expect(subject.header['Content-Length']).to eq 123
+          expect(subject.header[rack_versioned_headers[:content_length]]).to eq 123
         end
 
         it 'does not change the Transfer-Encoding header' do
           subject.sendfile file_path
 
-          expect(subject.header['Transfer-Encoding']).to eq 'base64'
+          expect(subject.header[rack_versioned_headers[:transfer_encoding]]).to eq 'base64'
         end
       end
 
@@ -324,9 +324,9 @@ describe Grape::Endpoint do
         end
 
         before do
-          subject.header 'Cache-Control', 'cache'
-          subject.header 'Content-Length', 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header rack_versioned_headers[:cache_control], 'cache'
+          subject.header rack_versioned_headers[:content_length], 123
+          subject.header rack_versioned_headers[:transfer_encoding], 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -344,25 +344,25 @@ describe Grape::Endpoint do
         it 'sets Cache-Control header to no-cache' do
           subject.stream file_path
 
-          expect(subject.header['Cache-Control']).to eq 'no-cache'
+          expect(subject.header[rack_versioned_headers[:cache_control]]).to eq 'no-cache'
         end
 
         it 'does not change Cache-Control header' do
           subject.stream
 
-          expect(subject.header['Cache-Control']).to eq 'cache'
+          expect(subject.header[rack_versioned_headers[:cache_control]]).to eq 'cache'
         end
 
         it 'sets Content-Length header to nil' do
           subject.stream file_path
 
-          expect(subject.header['Content-Length']).to be_nil
+          expect(subject.header[rack_versioned_headers[:content_length]]).to be_nil
         end
 
         it 'sets Transfer-Encoding header to nil' do
           subject.stream file_path
 
-          expect(subject.header['Transfer-Encoding']).to be_nil
+          expect(subject.header[rack_versioned_headers[:transfer_encoding]]).to be_nil
         end
       end
 
@@ -374,9 +374,9 @@ describe Grape::Endpoint do
         end
 
         before do
-          subject.header 'Cache-Control', 'cache'
-          subject.header 'Content-Length', 123
-          subject.header 'Transfer-Encoding', 'base64'
+          subject.header rack_versioned_headers[:cache_control], 'cache'
+          subject.header rack_versioned_headers[:content_length], 123
+          subject.header rack_versioned_headers[:transfer_encoding], 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -394,19 +394,19 @@ describe Grape::Endpoint do
         it 'sets Cache-Control header to no-cache' do
           subject.stream stream_object
 
-          expect(subject.header['Cache-Control']).to eq 'no-cache'
+          expect(subject.header[rack_versioned_headers[:cache_control]]).to eq 'no-cache'
         end
 
         it 'sets Content-Length header to nil' do
           subject.stream stream_object
 
-          expect(subject.header['Content-Length']).to be_nil
+          expect(subject.header[rack_versioned_headers[:content_length]]).to be_nil
         end
 
         it 'sets Transfer-Encoding header to nil' do
           subject.stream stream_object
 
-          expect(subject.header['Transfer-Encoding']).to be_nil
+          expect(subject.header[rack_versioned_headers[:transfer_encoding]]).to be_nil
         end
       end
 
@@ -421,7 +421,7 @@ describe Grape::Endpoint do
 
     it 'returns default' do
       expect(subject.stream).to be_nil
-      expect(subject.header['Cache-Control']).to be_nil
+      expect(subject.header[rack_versioned_headers[:cache_control]]).to be_nil
     end
   end
 

@@ -162,9 +162,15 @@ describe Grape::Validations do
           return unless request.params.key? @attrs.first
           # check if admin flag is set to true
           return unless @option
+
           # check if user is admin or not
           # as an example get a token from request and check if it's admin or not
-          raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers['X-Access-Token'] == 'admin'
+          header = if Gem::Version.new(Rack.release) < Gem::Version.new('3')
+                     'X-Access-Token'
+                   else
+                     'x-access-token'
+                   end
+          raise Grape::Exceptions::Validation.new(params: @attrs, message: 'Can not set Admin only field.') unless request.headers[header] == 'admin'
         end
       end
     end
@@ -197,14 +203,14 @@ describe Grape::Validations do
     end
 
     it 'does not fail when we send admin fields and we are admin' do
-      header 'X-Access-Token', 'admin'
+      header rack_versioned_headers[:x_access_token], 'admin'
       get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq 'bacon'
     end
 
     it 'fails when we send admin fields and we are not admin' do
-      header 'X-Access-Token', 'user'
+      header rack_versioned_headers[:x_access_token], 'user'
       get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
       expect(last_response.status).to eq 400
       expect(last_response.body).to include 'Can not set Admin only field.'

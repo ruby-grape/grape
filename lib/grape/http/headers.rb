@@ -12,11 +12,21 @@ module Grape
       QUERY_STRING    = 'QUERY_STRING'
 
       if Gem::Version.new(Rack.release) < Gem::Version.new('3')
-        CONTENT_TYPE = 'Content-Type'
-        X_CASCADE    = 'X-Cascade'
+        ALLOW             = 'Allow'
+        CACHE_CONTROL     = 'Cache-Control'
+        CONTENT_LENGTH    = 'Content-Length'
+        CONTENT_TYPE      = 'Content-Type'
+        LOCATION          = 'Location'
+        TRANSFER_ENCODING = 'Transfer-Encoding'
+        X_CASCADE         = 'X-Cascade'
       else
-        CONTENT_TYPE = 'content-type'
-        X_CASCADE    = 'x-cascade'
+        ALLOW             = 'allow'
+        CACHE_CONTROL     = 'cache-control'
+        CONTENT_LENGTH    = 'content-length'
+        CONTENT_TYPE      = 'content-type'
+        LOCATION          = 'location'
+        TRANSFER_ENCODING = 'transfer-encoding'
+        X_CASCADE         = 'x-cascade'
       end
 
       GET     = 'GET'
