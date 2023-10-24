@@ -1,6 +1,35 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.9.0
+
+#### Headers
+
+As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 1.9.0, headers will be cased based on what version of Rack you are using.
+
+Given this request:
+
+```shell
+curl -H "Content-Type: application/json" -H "Secret-Password: foo" ...
+```
+
+If you are using Rack 3 in your application then the headers will be set to:
+
+```ruby
+{ "content-type" => "application/json", "secret-password" => "foo"}
+```
+
+This means if you are checking for header values in your application, you would need to change your code to use downcased keys. 
+
+```ruby
+get do
+  # This would use headers['Secret-Password'] in Rack < 3
+  error!('Unauthorized', 401) unless headers['secret-password'] == 'swordfish'
+end
+```
+
+See [#2355](https://github.com/ruby-grape/grape/pull/2355) for more information.
+
 ### Upgrading to >= 1.7.0
 
 #### Exceptions renaming

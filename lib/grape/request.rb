@@ -46,8 +46,14 @@ module Grape
       end
     end
 
-    def transform_header(header)
-      -header[5..].split('_').each(&:capitalize!).join('-')
+    if Grape.rack3?
+      def transform_header(header)
+        -header[5..].tr('_', '-').downcase
+      end
+    else
+      def transform_header(header)
+        -header[5..].split('_').map(&:capitalize).join('-')
+      end
     end
   end
 end
