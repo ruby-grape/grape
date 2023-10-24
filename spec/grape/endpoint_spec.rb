@@ -499,7 +499,7 @@ describe Grape::Endpoint do
       end
 
       it 'responses with given content type in headers' do
-        expect(last_response.headers[Grape::Http::Headers::CONTENT_TYPE]).to eq 'application/json; charset=utf-8'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq 'application/json; charset=utf-8'
       end
     end
 

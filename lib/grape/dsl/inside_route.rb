@@ -224,9 +224,9 @@ module Grape
       # Set response content-type
       def content_type(val = nil)
         if val
-          header(Grape::Http::Headers::CONTENT_TYPE, val)
+          header(Rack::CONTENT_TYPE, val)
         else
-          header[Grape::Http::Headers::CONTENT_TYPE]
+          header[Rack::CONTENT_TYPE]
         end
       end
 
@@ -328,9 +328,9 @@ module Grape
       def stream(value = nil)
         return if value.nil? && @stream.nil?
 
-        header Grape::Http::Headers::CONTENT_LENGTH, nil
-        header Grape::Http::Headers::TRANSFER_ENCODING, nil
-        header Grape::Http::Headers::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
+        header Rack::CONTENT_LENGTH, nil
+        header Rack::TRANSFER_ENCODING, nil
+        header Rack::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
         if value.is_a?(String)
           file_body = Grape::ServeStream::FileBody.new(value)
           @stream = Grape::ServeStream::StreamResponse.new(file_body)
