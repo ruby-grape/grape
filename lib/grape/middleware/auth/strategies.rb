@@ -12,8 +12,7 @@ module Grape
 
         def auth_strategies
           @auth_strategies ||= {
-            http_basic: StrategyInfo.new(Rack::Auth::Basic, ->(settings) { [settings[:realm]] }),
-            http_digest: StrategyInfo.new(Rack::Auth::Digest::MD5, ->(settings) { [settings[:realm], settings[:opaque]] })
+            http_basic: StrategyInfo.new(Rack::Auth::Basic, ->(settings) { [settings[:realm]] })
           }
         end
 
