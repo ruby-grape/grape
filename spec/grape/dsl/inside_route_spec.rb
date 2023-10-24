@@ -265,7 +265,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Rack::TRANSFER_ENCODING, 'base64'
+          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
         end
 
         it 'sends no deprecation warnings' do
@@ -295,7 +295,7 @@ describe Grape::Endpoint do
         it 'does not change the Transfer-Encoding header' do
           subject.sendfile file_path
 
-          expect(subject.header[Rack::TRANSFER_ENCODING]).to eq 'base64'
+          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to eq 'base64'
         end
       end
 
@@ -326,7 +326,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Rack::TRANSFER_ENCODING, 'base64'
+          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -362,7 +362,7 @@ describe Grape::Endpoint do
         it 'sets Transfer-Encoding header to nil' do
           subject.stream file_path
 
-          expect(subject.header[Rack::TRANSFER_ENCODING]).to be_nil
+          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
         end
       end
 
@@ -376,7 +376,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Rack::TRANSFER_ENCODING, 'base64'
+          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -406,7 +406,7 @@ describe Grape::Endpoint do
         it 'sets Transfer-Encoding header to nil' do
           subject.stream stream_object
 
-          expect(subject.header[Rack::TRANSFER_ENCODING]).to be_nil
+          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
         end
       end
 
