@@ -1,11 +1,11 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.9.0
+### Upgrading to >= 2.0.0
 
 #### Headers
 
-As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 1.9.0, headers will be cased based on what version of Rack you are using.
+As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 2.0.0, headers will be cased based on what version of Rack you are using.
 
 Given this request:
 
@@ -29,6 +29,12 @@ end
 ```
 
 See [#2355](https://github.com/ruby-grape/grape/pull/2355) for more information.
+
+#### Digest auth deprecation
+
+Digest auth has been removed along with the deprecation of `Rack::Auth::Digest` in Rack 3.
+
+See [#2294](https://github.com/ruby-grape/grape/issues/2294) for more information.
 
 ### Upgrading to >= 1.7.0
 
