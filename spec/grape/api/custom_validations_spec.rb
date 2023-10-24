@@ -169,15 +169,12 @@ describe Grape::Validations do
         end
 
         def access_header
-          if Gem::Version.new(Rack.release) < Gem::Version.new('3')
-            'X-Access-Token'
-          else
-            'x-access-token'
-          end
+          Grape.rack3? ? 'x-access-token' : 'X-Access-Token'
         end
       end
     end
     let(:app) { Rack::Builder.new(subject) }
+    let(:x_access_token_header) { Grape.rack3? ? 'x-access-token' : 'X-Access-Token' }
 
     before do
       described_class.register_validator('admin', admin_validator)
@@ -206,14 +203,14 @@ describe Grape::Validations do
     end
 
     it 'does not fail when we send admin fields and we are admin' do
-      header rack_versioned_headers[:x_access_token], 'admin'
+      header x_access_token_header, 'admin'
       get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq 'bacon'
     end
 
     it 'fails when we send admin fields and we are not admin' do
-      header rack_versioned_headers[:x_access_token], 'user'
+      header x_access_token_header, 'user'
       get '/', admin_field: 'tester', non_admin_field: 'toaster', admin_false_field: 'test'
       expect(last_response.status).to eq 400
       expect(last_response.body).to include 'Can not set Admin only field.'

@@ -146,14 +146,16 @@ describe Grape::Endpoint do
 
     it 'includes additional request headers' do
       get '/headers', nil, 'HTTP_X_GRAPE_CLIENT' => '1'
-      expect(JSON.parse(last_response.body)[rack_versioned_headers[:x_grape_client]]).to eq('1')
+      x_grape_client_header = Grape.rack3? ? 'x-grape-client' : 'X-Grape-Client'
+      expect(JSON.parse(last_response.body)[x_grape_client_header]).to eq('1')
     end
 
     it 'includes headers passed as symbols' do
       env = Rack::MockRequest.env_for('/headers')
       env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
       body = read_chunks(subject.call(env)[2]).join
-      expect(JSON.parse(body)[rack_versioned_headers[:symbol_header]]).to eq('Goliath passes symbols')
+      symbol_header = Grape.rack3? ? 'symbol-header' : 'Symbol-Header'
+      expect(JSON.parse(body)[symbol_header]).to eq('Goliath passes symbols')
     end
   end
 
@@ -497,7 +499,7 @@ describe Grape::Endpoint do
       end
 
       it 'responses with given content type in headers' do
-        expect(last_response.headers[rack_versioned_headers[:content_type]]).to eq 'application/json; charset=utf-8'
+        expect(last_response.headers[Grape::Http::Headers::CONTENT_TYPE]).to eq 'application/json; charset=utf-8'
       end
     end
 

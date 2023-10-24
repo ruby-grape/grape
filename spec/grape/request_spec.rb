@@ -89,9 +89,12 @@ module Grape
             'HTTP_X_GRAPE_IS_COOL' => 'yeah'
           }
         end
+        let(:x_grape_is_cool_header) do
+          Grape.rack3? ? 'x-grape-is-cool' : 'X-Grape-Is-Cool'
+        end
 
         it 'cuts HTTP_ prefix and capitalizes header name words' do
-          expect(request.headers).to eq(rack_versioned_headers[:x_grape_is_cool] => 'yeah')
+          expect(request.headers).to eq(x_grape_is_cool_header => 'yeah')
         end
       end
 
@@ -116,9 +119,12 @@ module Grape
         let(:env) do
           default_env.merge(request_headers)
         end
+        let(:grape_likes_symbolic_header) do
+          Grape.rack3? ? 'grape-likes-symbolic' : 'Grape-Likes-Symbolic'
+        end
 
         it 'converts them to string' do
-          expect(request.headers).to eq(rack_versioned_headers[:grape_likes_symbolic] => 'it is true')
+          expect(request.headers).to eq(grape_likes_symbolic_header => 'it is true')
         end
       end
     end
