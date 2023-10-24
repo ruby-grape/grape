@@ -41,6 +41,10 @@ module Grape
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
   end
 
+  def self.rack3?
+    Gem::Version.new(::Rack.release) >= Gem::Version.new('3')
+  end
+
   eager_autoload do
     autoload :API
     autoload :Endpoint
