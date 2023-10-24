@@ -63,6 +63,16 @@ jobs:
       if: ${{ matrix.gemfile == 'multi_xml' }}
       run: bundle exec rspec spec/integration/multi_xml
 
+    - name: Run tests (spec/integration/rack/v2)
+      # rack_2_0.gemfile is equals to Gemfile
+      if: ${{ matrix.gemfile == 'rack_2_0' }}
+      run: bundle exec rspec spec/integration/rack/v2
+
+    - name: Run tests (spec/integration/rack/v3)
+      # rack_2_0.gemfile is equals to Gemfile
+      if: ${{ matrix.gemfile == 'rack_3_0' }}
+      run: bundle exec rspec spec/integration/rack/v3
+
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
