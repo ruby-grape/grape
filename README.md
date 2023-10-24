@@ -2130,8 +2130,9 @@ curl -H "secret_PassWord: swordfish" ...
 
 The header name will have been normalized for you.
 
-- In the `header` helper names will be coerced into a capitalized kebab case.
-- In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_'.
+- In the `header` helper names will be coerced into a downcased kebab case as `secret-password` if using Rack 3.
+- In the `header` helper names will be coerced into a capitalized kebab case as `Secret-PassWord` if using Rack < 3.
+- In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_' as `HTTP_SECRET_PASSWORD`
 
 The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
 
