@@ -20,7 +20,7 @@ module Grape
         TRANSFER_ENCODING = 'transfer-encoding'
         X_CASCADE         = 'x-cascade'
       else
-        ALLOW = 'Allow'
+        ALLOW             = 'Allow'
         CACHE_CONTROL     = 'Cache-Control'
         CONTENT_LENGTH    = 'Content-Length'
         CONTENT_TYPE      = 'Content-Type'
