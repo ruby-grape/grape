@@ -90,7 +90,7 @@ module Grape
           }
         end
         let(:x_grape_is_cool_header) do
-          Grape.rack3? ? 'x-grape-is-cool' : 'X-Grape-Is-Cool'
+          Grape.lowercase_headers? ? 'x-grape-is-cool' : 'X-Grape-Is-Cool'
         end
 
         it 'cuts HTTP_ prefix and capitalizes header name words' do
@@ -120,7 +120,7 @@ module Grape
           default_env.merge(request_headers)
         end
         let(:grape_likes_symbolic_header) do
-          Grape.rack3? ? 'grape-likes-symbolic' : 'Grape-Likes-Symbolic'
+          Grape.lowercase_headers? ? 'grape-likes-symbolic' : 'Grape-Likes-Symbolic'
         end
 
         it 'converts them to string' do

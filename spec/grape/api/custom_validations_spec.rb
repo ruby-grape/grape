@@ -169,12 +169,12 @@ describe Grape::Validations do
         end
 
         def access_header
-          Grape.rack3? ? 'x-access-token' : 'X-Access-Token'
+          Grape.lowercase_headers? ? 'x-access-token' : 'X-Access-Token'
         end
       end
     end
     let(:app) { Rack::Builder.new(subject) }
-    let(:x_access_token_header) { Grape.rack3? ? 'x-access-token' : 'X-Access-Token' }
+    let(:x_access_token_header) { Grape.lowercase_headers? ? 'x-access-token' : 'X-Access-Token' }
 
     before do
       described_class.register_validator('admin', admin_validator)

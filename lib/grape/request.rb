@@ -46,7 +46,7 @@ module Grape
       end
     end
 
-    if Grape.rack3?
+    if Grape.lowercase_headers?
       def transform_header(header)
         -header[5..].tr('_', '-').downcase
       end
