@@ -11,19 +11,13 @@ module Grape
       REQUEST_METHOD  = 'REQUEST_METHOD'
       QUERY_STRING    = 'QUERY_STRING'
 
-      if Grape.rack3?
+      if Grape.lowercase_headers?
         ALLOW             = 'allow'
-        CACHE_CONTROL     = 'cache-control'
-        CONTENT_LENGTH    = 'content-length'
-        CONTENT_TYPE      = 'content-type'
         LOCATION          = 'location'
         TRANSFER_ENCODING = 'transfer-encoding'
         X_CASCADE         = 'x-cascade'
       else
         ALLOW             = 'Allow'
-        CACHE_CONTROL     = 'Cache-Control'
-        CONTENT_LENGTH    = 'Content-Length'
-        CONTENT_TYPE      = 'Content-Type'
         LOCATION          = 'Location'
         TRANSFER_ENCODING = 'Transfer-Encoding'
         X_CASCADE         = 'X-Cascade'

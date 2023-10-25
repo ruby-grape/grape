@@ -42,8 +42,8 @@ module Grape
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
   end
 
-  def self.rack3?
-    Gem::Version.new(::Rack.release) >= Gem::Version.new('3')
+  def self.lowercase_headers?
+    Rack::CONTENT_TYPE == 'content-type'
   end
 
   eager_autoload do
