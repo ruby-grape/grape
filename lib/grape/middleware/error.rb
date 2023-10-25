@@ -51,7 +51,7 @@ module Grape
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
-        headers = headers.reverse_merge(Grape::Http::Headers::CONTENT_TYPE => content_type)
+        headers = headers.reverse_merge(Rack::CONTENT_TYPE => content_type)
         rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
@@ -63,15 +63,15 @@ module Grape
       def error_response(error = {})
         status = error[:status] || options[:default_status]
         message = error[:message] || options[:default_message]
-        headers = { Grape::Http::Headers::CONTENT_TYPE => content_type }
+        headers = { Rack::CONTENT_TYPE => content_type }
         headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
         original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
         rack_response(format_message(message, backtrace, original_exception), status, headers)
       end
 
-      def rack_response(message, status = options[:default_status], headers = { Grape::Http::Headers::CONTENT_TYPE => content_type })
-        message = ERB::Util.html_escape(message) if headers[Grape::Http::Headers::CONTENT_TYPE] == TEXT_HTML
+      def rack_response(message, status = options[:default_status], headers = { Rack::CONTENT_TYPE => content_type })
+        message = ERB::Util.html_escape(message) if headers[Rack::CONTENT_TYPE] == TEXT_HTML
         Rack::Response.new([message], Rack::Utils.status_code(status), headers)
       end
 

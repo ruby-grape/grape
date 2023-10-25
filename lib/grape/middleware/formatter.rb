@@ -54,7 +54,7 @@ module Grape
       end
 
       def fetch_formatter(headers, options)
-        api_format = mime_types[headers[Grape::Http::Headers::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
+        api_format = mime_types[headers[Rack::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
         Grape::Formatter.formatter_for(api_format, **options)
       end
 
@@ -63,10 +63,10 @@ module Grape
       # @param headers [Hash]
       # @return [Hash]
       def ensure_content_type(headers)
-        if headers[Grape::Http::Headers::CONTENT_TYPE]
+        if headers[Rack::CONTENT_TYPE]
           headers
         else
-          headers.merge(Grape::Http::Headers::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
+          headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
         end
       end
 
