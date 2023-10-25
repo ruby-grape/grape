@@ -1,7 +1,7 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 1.9.0
+### Upgrading to >= 2.0.0
 
 #### Headers
 
@@ -29,6 +29,12 @@ end
 ```
 
 See [#2355](https://github.com/ruby-grape/grape/pull/2355) for more information.
+
+#### Digest auth deprecation
+
+Digest auth has been removed along with the deprecation of `Rack::Auth::Digest` in Rack 3.
+
+See [#2294](https://github.com/ruby-grape/grape/issues/2294) for more information.
 
 ### Upgrading to >= 1.7.0
 

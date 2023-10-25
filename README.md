@@ -115,7 +115,7 @@
   - [Active Model Serializers](#active-model-serializers)
 - [Sending Raw or No Data](#sending-raw-or-no-data)
 - [Authentication](#authentication)
-  - [Basic and Digest Auth](#basic-and-digest-auth)
+  - [Basic Auth](#basic-auth)
   - [Register custom middleware for authentication](#register-custom-middleware-for-authentication)
 - [Describing and Inspecting an API](#describing-and-inspecting-an-api)
 - [Current Route and Endpoint](#current-route-and-endpoint)
@@ -160,7 +160,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **1.9.0**.
+You're reading the documentation for the next release of Grape, which should be **2.0.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
 The current stable release is [1.8.0](https://github.com/ruby-grape/grape/blob/v1.8.0/README.md).
 
@@ -3422,9 +3422,9 @@ end
 
 ## Authentication
 
-### Basic and Digest Auth
+### Basic Auth
 
-Grape has built-in Basic and Digest authentication (the given `block`
+Grape has built-in Basic authentication (the given `block`
 is executed in the context of the current `Endpoint`).  Authentication
 applies to the current namespace and any children, but not parents.
 
@@ -3432,20 +3432,6 @@ applies to the current namespace and any children, but not parents.
 http_basic do |username, password|
   # verify user's password here
   # IMPORTANT: make sure you use a comparison method which isn't prone to a timing attack
-end
-```
-
-Digest auth supports clear-text passwords and password hashes.
-
-```ruby
-http_digest({ realm: 'Test Api', opaque: 'app secret' }) do |username|
-  # lookup the user's password here
-end
-```
-
-```ruby
-http_digest(realm: { realm: 'Test Api', opaque: 'app secret', passwords_hashed: true }) do |username|
-  # lookup the user's password hash here
 end
 ```
 
