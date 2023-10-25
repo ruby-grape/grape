@@ -5,7 +5,7 @@ Upgrading Grape
 
 #### Headers
 
-As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3.0 is enforcing the HTTP/2 semantics, and thus treats all headers as lowercase. Starting with Grape 2.0.0, headers will be cased based on what version of Rack you are using.
+As per [rack/rack#1592](https://github.com/rack/rack/issues/1592) Rack 3 is following the HTTP/2+ semantics which require header names to be lower case. To avoid compatibility issues, starting with Grape 1.9.0, headers will be cased based on what version of Rack you are using.
 
 Given this request:
 
