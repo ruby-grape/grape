@@ -5,7 +5,7 @@
 * [#2353](https://github.com/ruby-grape/grape/pull/2353): Added Rails 7.1 support - [@ericproulx](https://github.com/ericproulx).
 * [#2355](https://github.com/ruby-grape/grape/pull/2355): Set response headers based on Rack version - [@schinery](https://github.com/schinery).
 * [#2360](https://github.com/ruby-grape/grape/pull/2360): Reduce gem size by removing specs - [@ericproulx](https://github.com/ericproulx).
-* [#2361](https://github.com/ruby-grape/grape/pull/2361): Remove Rack::Auth::Digest - [@ninoseki](https://github.com/ninoseki).
+* [#2361](https://github.com/ruby-grape/grape/pull/2361): Remove `Rack::Auth::Digest` - [@ninoseki](https://github.com/ninoseki).
 * Your contribution here.
   
 #### Fixes
