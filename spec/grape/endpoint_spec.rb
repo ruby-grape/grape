@@ -146,7 +146,7 @@ describe Grape::Endpoint do
 
     it 'includes additional request headers' do
       get '/headers', nil, 'HTTP_X_GRAPE_CLIENT' => '1'
-      x_grape_client_header = Grape.lowercase_headers? ? 'x-grape-client' : 'X-Grape-Client'
+      x_grape_client_header = Grape::Http::Headers.lowercase? ? 'x-grape-client' : 'X-Grape-Client'
       expect(JSON.parse(last_response.body)[x_grape_client_header]).to eq('1')
     end
 
@@ -154,7 +154,7 @@ describe Grape::Endpoint do
       env = Rack::MockRequest.env_for('/headers')
       env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
       body = read_chunks(subject.call(env)[2]).join
-      symbol_header = Grape.lowercase_headers? ? 'symbol-header' : 'Symbol-Header'
+      symbol_header = Grape::Http::Headers.lowercase? ? 'symbol-header' : 'Symbol-Header'
       expect(JSON.parse(body)[symbol_header]).to eq('Goliath passes symbols')
     end
   end
@@ -384,7 +384,7 @@ describe Grape::Endpoint do
       end
 
       it 'converts JSON bodies to params' do
-        post '/request_body', ::Grape::Json.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
+        post '/request_body', ::Grape::Util::Json.dump(user: 'Bobby T.'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.body).to eq('Bobby T.')
       end
 
@@ -420,7 +420,7 @@ describe Grape::Endpoint do
           error! 400, 'expected nil' if params[:version]
           params[:user]
         end
-        post '/omitted_params', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
+        post '/omitted_params', ::Grape::Util::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('Bob')
       end
@@ -477,7 +477,7 @@ describe Grape::Endpoint do
       subject.put '/request_body' do
         params[:user]
       end
-      put '/request_body', ::Grape::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
+      put '/request_body', ::Grape::Util::Json.dump(user: 'Bob'), 'CONTENT_TYPE' => 'text/plain'
 
       expect(last_response.status).to eq(415)
       expect(last_response.body).to eq('{"error":"The provided content-type \'text/plain\' is not supported."}')
@@ -491,7 +491,7 @@ describe Grape::Endpoint do
         subject.post do
           params[:data]
         end
-        post '/', ::Grape::Json.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
+        post '/', ::Grape::Util::Json.dump(data: { some: 'payload' }), 'CONTENT_TYPE' => 'application/json'
       end
 
       it 'does not response with 406 for same type without params' do

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-
 module Grape
   module Middleware
     module Versioner
@@ -39,7 +37,7 @@ module Grape
           return unless potential_version&.match?(options[:pattern])
 
           throw :error, status: 404, message: '404 API Version Not Found' if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
-          env[Grape::Env::API_VERSION] = potential_version
+          env[Grape::Util::Env::API_VERSION] = potential_version
         end
 
         private

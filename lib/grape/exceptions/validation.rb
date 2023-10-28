@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/exceptions/base'
-
 module Grape
   module Exceptions
     class Validation < Grape::Exceptions::Base

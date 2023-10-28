@@ -441,9 +441,9 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.body']
             end
-            send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', ::Grape::Util::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql ::Grape::Json.dump(object)
+            expect(last_response.body).to eql ::Grape::Util::Json.dump(object)
             expect(last_request.params).to eql({})
           end
 
@@ -452,9 +452,9 @@ describe Grape::API do
             subject.send(verb) do
               env['api.request.input']
             end
-            send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', ::Grape::Util::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
+            expect(last_response.body).to eql ::Grape::Util::Json.dump(object).to_json
           end
 
           context 'chunked transfer encoding' do
@@ -463,9 +463,9 @@ describe Grape::API do
               subject.send(verb) do
                 env['api.request.input']
               end
-              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
+              send verb, '/', ::Grape::Util::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
-              expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
+              expect(last_response.body).to eql ::Grape::Util::Json.dump(object).to_json
             end
           end
         end
@@ -996,11 +996,6 @@ describe Grape::API do
   end
 
   describe '.compile!' do
-    it 'requires the grape/eager_load file' do
-      expect(app).to receive(:require).with('grape/eager_load').and_return(nil)
-      app.compile!
-    end
-
     it 'compiles the instance for rack!' do
       stubbed_object = double(:instance_for_rack)
       allow(app).to receive(:instance_for_rack) { stubbed_object }
@@ -2502,7 +2497,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      json = ::Grape::Json.load(last_response.body)
+      json = ::Grape::Util::Json.load(last_response.body)
       expect(json['error']).to eql 'rain!'
       expect(json['backtrace'].length).to be > 0
     end
@@ -3735,7 +3730,7 @@ describe Grape::API do
 
     it 'path' do
       get '/endpoint/options'
-      options = ::Grape::Json.load(last_response.body)
+      options = ::Grape::Util::Json.load(last_response.body)
       expect(options['path']).to eq(['/endpoint/options'])
       expect(options['source_location'][0]).to include 'api_spec.rb'
       expect(options['source_location'][1].to_i).to be > 0

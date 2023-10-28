@@ -17,7 +17,7 @@ module Grape
 
           def build_params
             ::ActiveSupport::HashWithIndifferentAccess.new(rack_params).tap do |params|
-              params.deep_merge!(grape_routing_args) if env.key?(Grape::Env::GRAPE_ROUTING_ARGS)
+              params.deep_merge!(grape_routing_args) if env.key?(Grape::Util::Env::GRAPE_ROUTING_ARGS)
             end
           end
         end

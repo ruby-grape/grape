@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dry-types'
-
 module DryTypes
   # Call +Dry.Types()+ to add all registered types to +DryTypes+ which is
   # a container in this case. Check documentation for more information

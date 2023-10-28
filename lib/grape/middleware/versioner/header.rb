@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-require 'grape/middleware/versioner/parse_media_type_patch'
-
 module Grape
   module Middleware
     module Versioner
@@ -34,7 +31,7 @@ module Grape
         def before
           strict_header_checks if strict?
 
-          if media_type || env[Grape::Env::GRAPE_ALLOWED_METHODS]
+          if media_type || env[Grape::Util::Env::GRAPE_ALLOWED_METHODS]
             media_type_header_handler
           elsif headers_contain_wrong_vendor?
             fail_with_invalid_accept_header!('API vendor not found.')
@@ -77,16 +74,16 @@ module Grape
         end
 
         def media_type_header_handler
-          type, subtype = Rack::Accept::Header.parse_media_type(media_type)
-          env[Grape::Env::API_TYPE] = type
-          env[Grape::Env::API_SUBTYPE] = subtype
+          type, subtype = Grape::Util::Accept::Header.parse_media_type(media_type)
+          env[Grape::Util::Env::API_TYPE] = type
+          env[Grape::Util::Env::API_SUBTYPE] = subtype
 
           return unless VENDOR_VERSION_HEADER_REGEX =~ subtype
 
-          env[Grape::Env::API_VENDOR] = Regexp.last_match[1]
-          env[Grape::Env::API_VERSION] = Regexp.last_match[2]
+          env[Grape::Util::Env::API_VENDOR] = Regexp.last_match[1]
+          env[Grape::Util::Env::API_VERSION] = Regexp.last_match[2]
           # weird that Grape::Middleware::Formatter also does this
-          env[Grape::Env::API_FORMAT] = Regexp.last_match[3]
+          env[Grape::Util::Env::API_FORMAT] = Regexp.last_match[3]
         end
 
         def fail_with_invalid_accept_header!(message)
@@ -127,7 +124,7 @@ module Grape
         end
 
         def rack_accept_header
-          Rack::Accept::MediaType.new env[Grape::Http::Headers::HTTP_ACCEPT]
+          Grape::Util::Accept::MediaType.new env[Grape::Http::Headers::HTTP_ACCEPT]
         rescue RuntimeError => e
           fail_with_invalid_accept_header!(e.message)
         end
@@ -168,24 +165,24 @@ module Grape
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets a vendor
         def vendor?(media_type)
-          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          _, subtype = Grape::Util::Accept::Header.parse_media_type(media_type)
           subtype.present? && subtype[HAS_VENDOR_REGEX]
         end
 
         def request_vendor(media_type)
-          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          _, subtype = Grape::Util::Accept::Header.parse_media_type(media_type)
           subtype.match(VENDOR_VERSION_HEADER_REGEX)[1]
         end
 
         def request_version(media_type)
-          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          _, subtype = Grape::Util::Accept::Header.parse_media_type(media_type)
           subtype.match(VENDOR_VERSION_HEADER_REGEX)[2]
         end
 
         # @param [String] media_type a content type
         # @return [Boolean] whether the content type sets an API version
         def version?(media_type)
-          _, subtype = Rack::Accept::Header.parse_media_type(media_type)
+          _, subtype = Grape::Util::Accept::Header.parse_media_type(media_type)
           subtype.present? && subtype[HAS_VERSION_REGEX]
         end
       end

@@ -128,7 +128,7 @@ describe Grape::Middleware::Base do
     subject { described_class.new(blank_app) }
 
     it 'allows access to response context' do
-      subject.call(Grape::Env::API_ENDPOINT => { header: 'some header' })
+      subject.call(Grape::Util::Env::API_ENDPOINT => { header: 'some header' })
       expect(subject.context).to eq(header: 'some header')
     end
   end

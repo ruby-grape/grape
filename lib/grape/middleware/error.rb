@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-require 'active_support/core_ext/string/output_safety'
+
 
 module Grape
   module Middleware
@@ -76,7 +75,7 @@ module Grape
       end
 
       def format_message(message, backtrace, original_exception = nil)
-        format = env[Grape::Env::API_FORMAT] || options[:format]
+        format = env[Grape::Util::Env::API_FORMAT] || options[:format]
         formatter = Grape::ErrorFormatter.formatter_for(format, **options)
         throw :error,
               status: 406,

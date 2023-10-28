@@ -12,7 +12,7 @@ module Grape
           rescue_options = options[:rescue_options] || {}
           result = result.merge(backtrace: backtrace) if rescue_options[:backtrace] && backtrace && !backtrace.empty?
           result = result.merge(original_exception: original_exception.inspect) if rescue_options[:original_exception] && original_exception
-          ::Grape::Json.dump(result)
+          ::Grape::Util::Json.dump(result)
         end
 
         private

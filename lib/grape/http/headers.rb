@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/lazy_object'
-
 module Grape
   module Http
     module Headers
@@ -11,7 +9,11 @@ module Grape
       REQUEST_METHOD  = 'REQUEST_METHOD'
       QUERY_STRING    = 'QUERY_STRING'
 
-      if Grape.lowercase_headers?
+      def self.lowercase?
+        Rack::CONTENT_TYPE == 'content-type'
+      end
+
+      if lowercase?
         ALLOW             = 'allow'
         LOCATION          = 'location'
         TRANSFER_ENCODING = 'transfer-encoding'

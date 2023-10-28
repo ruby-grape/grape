@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/lazy_object'
-
 module Grape
   class Request < Rack::Request
     HTTP_PREFIX = 'HTTP_'
@@ -28,7 +26,7 @@ module Grape
     private
 
     def grape_routing_args
-      args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
+      args = env[Grape::Util::Env::GRAPE_ROUTING_ARGS].dup
       # preserve version from query string parameters
       args.delete(:version)
       args.delete(:route_info)
@@ -46,7 +44,7 @@ module Grape
       end
     end
 
-    if Grape.lowercase_headers?
+    if Grape::Http::Headers.lowercase?
       def transform_header(header)
         -header[5..].tr('_', '-').downcase
       end

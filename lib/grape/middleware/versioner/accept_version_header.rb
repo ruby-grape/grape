@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-
 module Grape
   module Middleware
     module Versioner
@@ -32,7 +30,7 @@ module Grape
           # If the requested version is not supported:
           throw :error, status: 406, headers: error_headers, message: 'The requested version is not supported.' unless versions.any? { |v| v.to_s == potential_version }
 
-          env[Grape::Env::API_VERSION] = potential_version
+          env[Grape::Util::Env::API_VERSION] = potential_version
         end
 
         private

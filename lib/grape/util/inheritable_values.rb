@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base_inheritable'
-
 module Grape
   module Util
     class InheritableValues < BaseInheritable

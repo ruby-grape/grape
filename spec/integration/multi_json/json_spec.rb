@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Grape::Json do
+describe Grape::Util::Json, if: defined?(::MultiJson) do
   it 'uses multi_json' do
     expect(described_class).to eq(::MultiJson)
   end

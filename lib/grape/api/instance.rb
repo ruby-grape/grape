@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/router'
-
 module Grape
   class API
     # The API Instance class, is the engine behind Grape::API. Each class that inherits

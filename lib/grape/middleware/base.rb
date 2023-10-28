@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/dsl/headers'
-
 module Grape
   module Middleware
     class Base
@@ -72,7 +70,7 @@ module Grape
       end
 
       def content_type
-        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || TEXT_HTML
+        content_type_for(env[Grape::Util::Env::API_FORMAT] || options[:format]) || TEXT_HTML
       end
 
       def mime_types

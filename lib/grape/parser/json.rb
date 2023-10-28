@@ -5,8 +5,8 @@ module Grape
     module Json
       class << self
         def call(object, _env)
-          ::Grape::Json.load(object)
-        rescue ::Grape::Json::ParseError
+          ::Grape::Util::Json.load(object)
+        rescue ::Grape::Util::Json::ParseError
           # handle JSON parsing errors via the rescue handlers or provide error message
           raise Grape::Exceptions::InvalidMessageBody.new('application/json')
         end

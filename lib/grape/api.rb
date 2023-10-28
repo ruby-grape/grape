@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/router'
-require 'grape/api/instance'
-
 module Grape
   # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
@@ -128,7 +125,7 @@ module Grape
       end
 
       def compile!
-        require 'grape/eager_load'
+        Zeitwerk::Loader.eager_load_all
         instance_for_rack.compile! # See API::Instance.compile!
       end
 
