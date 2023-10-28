@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-
-
 module Grape
   class Router
     class Pattern

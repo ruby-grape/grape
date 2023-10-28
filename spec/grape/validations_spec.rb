@@ -3,9 +3,8 @@
 describe Grape::Validations do
   subject { Class.new(Grape::API) }
 
-  def app
-    subject
-  end
+  let(:app) { subject }
+  let(:declard_params) {}
 
   def declared_params
     subject.namespace_stackable(:declared_params).flatten

@@ -1,18 +1,5 @@
 # frozen_string_literal: true
 
-require 'logger'
-require 'rack'
-require 'rack/builder'
-require 'rack/accept'
-require 'set'
-require 'dry-types'
-require 'bigdecimal'
-require 'forwardable'
-require 'json'
-require 'date'
-require 'mustermann/grape'
-require 'singleton'
-require 'pathname'
 require 'active_support'
 require 'active_support/concern'
 require 'active_support/configurable'
@@ -34,12 +21,26 @@ require 'active_support/core_ext/string/output_safety'
 require 'active_support/deprecation'
 require 'active_support/inflector'
 require 'active_support/notifications'
+
+require 'bigdecimal'
+require 'date'
+require 'dry-types'
+require 'forwardable'
+require 'json'
+require 'logger'
+require 'mustermann/grape'
+require 'pathname'
+require 'rack'
+require 'rack/accept'
+require 'rack/builder'
+require 'set'
+require 'singleton'
 require 'zeitwerk'
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
-  "api" => 'API',
-  "dsl" => 'DSL'
+  'api' => 'API',
+  'dsl' => 'DSL'
 )
 railtie = "#{__dir__}/grape/railtie.rb"
 loader.do_not_eager_load(railtie)
@@ -49,7 +50,6 @@ I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 
 module Grape
   include ActiveSupport::Configurable
-  extend ::ActiveSupport::Autoload
 
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')

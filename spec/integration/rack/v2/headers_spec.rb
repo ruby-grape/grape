@@ -6,4 +6,3 @@ describe Grape::Http::Headers, if: Gem::Version.new(Rack.release) < Gem::Version
   it { expect(described_class::TRANSFER_ENCODING).to eq('Transfer-Encoding') }
   it { expect(described_class::X_CASCADE).to eq('X-Cascade') }
 end
-

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-
-
 module Grape
   module Middleware
     class Error < Base
