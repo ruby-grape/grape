@@ -221,7 +221,7 @@ describe Grape::Validations do
     before { stub_const('Grape::Validations::Validators::InstanceValidatorValidator', validator_type) }
 
     it 'passes validation every time' do
-      expect(validator_type).to receive(:new).exactly(2).times.and_call_original
+      expect(validator_type).to receive(:new).twice.and_call_original
       get '/', param_to_validate: 'value', another_param_to_validate: 'value'
       expect(last_response.status).to eq 200
     end
