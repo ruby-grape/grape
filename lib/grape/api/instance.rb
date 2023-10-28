@@ -110,7 +110,7 @@ module Grape
         end
 
         def evaluate_as_instance_with_configuration(block, lazy: false)
-          lazy_block = Grape::Util::LazyBlock.new do |configuration|
+          lazy_block = Grape::Util::Lazy::Block.new do |configuration|
             value_for_configuration = configuration
             self.configuration = value_for_configuration.evaluate if value_for_configuration.respond_to?(:lazy?) && value_for_configuration.lazy?
             response = instance_eval(&block)

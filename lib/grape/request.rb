@@ -34,7 +34,7 @@ module Grape
     end
 
     def build_headers
-      Grape::Util::LazyObject.new do
+      Grape::Util::Lazy::Object.new do
         env.each_pair.with_object({}) do |(k, v), headers|
           next unless k.to_s.start_with? HTTP_PREFIX
 

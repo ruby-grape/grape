@@ -24,13 +24,7 @@ describe 'Validator with instance variables' do
     end
   end
 
-  before do
-    Grape::Validations.register_validator('instance_validator', validator_type)
-  end
-
-  after do
-    Grape::Validations.deregister_validator('instance_validator')
-  end
+  before { stub_const('Grape::Validations::Validators::InstanceValidatorValidator', validator_type) }
 
   it 'passes validation every time' do
     expect(validator_type).to receive(:new).exactly(4).times.and_call_original

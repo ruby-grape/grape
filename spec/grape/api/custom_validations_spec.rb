@@ -35,13 +35,7 @@ describe Grape::Validations do
     end
     let(:app) { Rack::Builder.new(subject) }
 
-    before do
-      described_class.register_validator('default_length', default_length_validator)
-    end
-
-    after do
-      described_class.deregister_validator('default_length')
-    end
+    before { stub_const('Grape::Validations::Validators::DefaultLengthValidator', default_length_validator) }
 
     it 'under 140 characters' do
       get '/', text: 'abc'
@@ -83,13 +77,7 @@ describe Grape::Validations do
     end
     let(:app) { Rack::Builder.new(subject) }
 
-    before do
-      described_class.register_validator('in_body', in_body_validator)
-    end
-
-    after do
-      described_class.deregister_validator('in_body')
-    end
+    before { stub_const('Grape::Validations::Validators::InBodyValidator', in_body_validator) }
 
     it 'allows field in body' do
       get '/', text: 'abc'
@@ -125,13 +113,7 @@ describe Grape::Validations do
     end
     let(:app) { Rack::Builder.new(subject) }
 
-    before do
-      described_class.register_validator('with_message_key', message_key_validator)
-    end
-
-    after do
-      described_class.deregister_validator('with_message_key')
-    end
+    before { stub_const('Grape::Validations::Validators::WithMessageKeyValidator', message_key_validator) }
 
     it 'fails with message' do
       get '/', text: 'foobar'
@@ -173,16 +155,11 @@ describe Grape::Validations do
         end
       end
     end
+
     let(:app) { Rack::Builder.new(subject) }
     let(:x_access_token_header) { Grape::Http::Headers.lowercase? ? 'x-access-token' : 'X-Access-Token' }
 
-    before do
-      described_class.register_validator('admin', admin_validator)
-    end
-
-    after do
-      described_class.deregister_validator('admin')
-    end
+    before { stub_const('Grape::Validations::Validators::AdminValidator', admin_validator) }
 
     it 'fail when non-admin user sets an admin field' do
       get '/', admin_field: 'tester', non_admin_field: 'toaster'
