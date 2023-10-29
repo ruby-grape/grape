@@ -10,7 +10,7 @@
   
 #### Fixes
 
-* [#2364](https://github.com/ruby-grape/grape/pull/2364): Fix missing exclude? method - [@ericproulx](https://github.com/ericproulx).
+* [#2364](https://github.com/ruby-grape/grape/pull/2364): Add missing requires - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 1.8.0 (2023/08/30)
