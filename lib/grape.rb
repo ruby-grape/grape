@@ -16,6 +16,7 @@ require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJ
 require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/array/wrap'
+require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash/conversions'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/except'
