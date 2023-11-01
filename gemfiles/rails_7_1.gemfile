@@ -27,7 +27,7 @@ end
 
 group :test do
   gem 'cookiejar'
-  gem 'grape-entity', '~> 0.6'
+  gem 'grape-entity', '~> 0.6', require: false
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '< 2.1'

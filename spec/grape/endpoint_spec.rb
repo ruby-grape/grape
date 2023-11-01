@@ -201,8 +201,8 @@ describe Grape::Endpoint do
       get('/username', {}, 'HTTP_COOKIE' => 'username=user; sandbox=false')
       expect(last_response.body).to eq('user_test')
       cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }
-      expect(cookies.first).to match(/username=user_test/)
-      expect(cookies.second).to match(/sandbox=true/)
+      expect(cookies[0]).to match(/username=user_test/)
+      expect(cookies[1]).to match(/sandbox=true/)
     end
 
     it 'deletes cookie' do
