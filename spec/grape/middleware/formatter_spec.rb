@@ -131,7 +131,16 @@ describe Grape::Middleware::Formatter do
 
     it 'handles quality rankings mixed with nothing' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0')
+      expect(subject.env['api.format']).to eq(:json)
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml; q=1.0,application/json')
       expect(subject.env['api.format']).to eq(:xml)
+    end
+
+    it 'handles quality rankings that have a default 1.0 value' do
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml;q=0.5')
+      expect(subject.env['api.format']).to eq(:json)
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml;q=0.5,application/json')
+      expect(subject.env['api.format']).to eq(:json)
     end
 
     it 'parses headers with other attributes' do
