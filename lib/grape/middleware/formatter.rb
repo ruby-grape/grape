@@ -171,7 +171,6 @@ module Grape
         vendor_prefix_pattern = /vnd\.[^+]+\+/
 
         accept.scan(accept_into_mime_and_quality)
-              .sort_by { |_, quality_preference| -quality_preference.to_f }
               .sort_by { |_, quality_preference| -(quality_preference || '1.0').to_f }
               .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
       end
