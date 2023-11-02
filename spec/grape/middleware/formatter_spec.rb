@@ -125,6 +125,7 @@ describe Grape::Middleware::Formatter do
     it 'uses quality rankings to determine formats' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=0.3,application/xml; q=1.0')
       expect(subject.env['api.format']).to eq(:xml)
+
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json; q=1.0,application/xml; q=0.3')
       expect(subject.env['api.format']).to eq(:json)
     end
@@ -132,6 +133,7 @@ describe Grape::Middleware::Formatter do
     it 'handles quality rankings mixed with nothing' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0')
       expect(subject.env['api.format']).to eq(:json)
+
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml; q=1.0,application/json')
       expect(subject.env['api.format']).to eq(:xml)
     end
