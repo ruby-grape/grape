@@ -164,14 +164,14 @@ module Grape
             \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
           (?:
            (?:;[^,]*?)?       # optionally multiple formats in a row
-           ;\s*q=([\d.]+)     # optional "quality" preference (eg q=0.5)
+           ;\s*q=([\w.]+)     # optional "quality" preference (eg q=0.5)
           )?
         }x
 
         vendor_prefix_pattern = /vnd\.[^+]+\+/
 
         accept.scan(accept_into_mime_and_quality)
-              .sort_by { |_, quality_preference| -(quality_preference || '1.0').to_f }
+              .sort_by { |_, quality_preference| -(quality_preference ? quality_preference.to_f : 1.0) }
               .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
       end
     end

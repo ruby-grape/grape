@@ -150,6 +150,26 @@ describe Grape::Middleware::Formatter do
       expect(subject.env['api.format']).to eq(:json)
     end
 
+    it 'ensures that a quality of 0 is less preferred than any other content type' do
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json;q=0.0,application/xml')
+      expect(subject.env['api.format']).to eq(:xml)
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml,application/json;q=0.0')
+      expect(subject.env['api.format']).to eq(:xml)
+    end
+
+    it 'ignores invalid quality rankings' do
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json;q=invalid,application/xml;q=0.5')
+      expect(subject.env['api.format']).to eq(:xml)
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/xml;q=0.5,application/json;q=invalid')
+      expect(subject.env['api.format']).to eq(:xml)
+
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json;q=,application/xml;q=0.5')
+      expect(subject.env['api.format']).to eq(:json)
+
+      subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/json;q=nil,application/xml;q=0.5')
+      expect(subject.env['api.format']).to eq(:xml)
+    end
+
     it 'parses headers with vendor and api version' do
       subject.call('PATH_INFO' => '/info', 'HTTP_ACCEPT' => 'application/vnd.test-v1+xml')
       expect(subject.env['api.format']).to eq(:xml)
