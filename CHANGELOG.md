@@ -7,11 +7,11 @@
 * [#2360](https://github.com/ruby-grape/grape/pull/2360): Reduce gem size by removing specs - [@ericproulx](https://github.com/ericproulx).
 * [#2361](https://github.com/ruby-grape/grape/pull/2361): Remove `Rack::Auth::Digest` - [@ninoseki](https://github.com/ninoseki).
 * Your contribution here.
-  
+
 #### Fixes
 
 * [#2364](https://github.com/ruby-grape/grape/pull/2364): Add missing requires - [@ericproulx](https://github.com/ericproulx).
-* [#2366](https://github.com/ruby-grape/grape/pull/2366): Quality arguments to `accept` header should default to 1.0 - [@hiddewie](https://github.com/hiddewie).
+* [#2366](https://github.com/ruby-grape/grape/pull/2366): Default quality to 1.0 in the `Accept` header when omitted - [@hiddewie](https://github.com/hiddewie).
 * Your contribution here.
 
 ### 1.8.0 (2023/08/30)

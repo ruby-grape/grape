@@ -596,6 +596,10 @@ When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is ret
 option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route
 matches.
 
+Grape will evaluate the relative quality preference included in Accept headers and default to a quality of 1.0 when omitted. In the following example a Grape API that supports XML and JSON in that order will return JSON:
+
+    curl -H "Accept: text/xml;q=0.8, application/json;q=0.9" localhost:1234/resource
+
 ### Accept-Version Header
 
 ```ruby
@@ -1600,7 +1604,7 @@ Note endless ranges are also supported with ActiveSupport >= 6.0, but they requi
 ```ruby
 params do
   requires :minimum, type: Integer, values: 10..
-  optional :maximum, type: Integer, values: ..10 
+  optional :maximum, type: Integer, values: ..10
 end
 ```
 
