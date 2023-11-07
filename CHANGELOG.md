@@ -11,6 +11,7 @@
 #### Fixes
 
 * [#2364](https://github.com/ruby-grape/grape/pull/2364): Add missing requires - [@ericproulx](https://github.com/ericproulx).
+* [#2366](https://github.com/ruby-grape/grape/pull/2366): Quality arguments to `accept` header should default to 1.0 - [@hiddewie](https://github.com/hiddewie).
 * Your contribution here.
 
 ### 1.8.0 (2023/08/30)
