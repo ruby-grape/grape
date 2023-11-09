@@ -692,6 +692,17 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#method_missing' do
+    it 'raises NoMethodError but stripping the internals of the Grape::Endpoint class' do
+      subject.get('/hey') do
+        undefined_helper
+      end
+      expect {
+        get '/hey'
+      }.to raise_error(NoMethodError, /^undefined method `undefined_helper` for #<Class:0x[0-9a-fA-F]+>$/)
+    end
+  end
+
   it 'does not persist params between calls' do
     subject.post('/new') do
       params[:text]

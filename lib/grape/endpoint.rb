@@ -403,5 +403,9 @@ module Grape
       options[:options_route_enabled] &&
         env[Grape::Http::Headers::REQUEST_METHOD] == Grape::Http::Headers::OPTIONS
     end
+
+    def method_missing(name, *args)
+      raise NoMethodError.new("undefined method `#{name}` for #{self.class}")
+    end
   end
 end
