@@ -404,8 +404,12 @@ module Grape
         env[Grape::Http::Headers::REQUEST_METHOD] == Grape::Http::Headers::OPTIONS
     end
 
-    def method_missing(name, *args)
-      raise NoMethodError.new("undefined method `#{name}' for #{self.class} in `#{self.route.origin}' endpoint")
+    def method_missing(name, *_args)
+      raise NoMethodError.new("undefined method `#{name}' for #{self.class} in `#{route.origin}' endpoint")
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      super
     end
   end
 end

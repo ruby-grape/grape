@@ -698,9 +698,9 @@ describe Grape::Endpoint do
         subject.get('/hey') do
           undefined_helper
         end
-        expect {
+        expect do
           get '/hey'
-        }.to raise_error(NoMethodError, /^undefined method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `\/hey' endpoint/)
+        end.to raise_error(NoMethodError, %r{^undefined method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint})
       end
     end
 
@@ -709,9 +709,9 @@ describe Grape::Endpoint do
         subject.get('/hey') do
           Object.new.x
         end
-        expect {
+        expect do
           get '/hey'
-        }.to raise_error(NoMethodError, /^undefined method `x' for #<Object:0x[0-9a-fA-F]+>$/)
+        end.to raise_error(NoMethodError, /^undefined method `x' for #<Object:0x[0-9a-fA-F]+>$/)
       end
     end
   end
