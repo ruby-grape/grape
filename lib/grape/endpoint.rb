@@ -405,7 +405,7 @@ module Grape
     end
 
     def method_missing(name, *args)
-      raise NoMethodError.new("undefined method `#{name}` for #{self.class}")
+      raise NoMethodError.new("undefined method `#{name}' for #{self.class} in `#{self.route.origin}' endpoint")
     end
   end
 end

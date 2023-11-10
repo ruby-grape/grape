@@ -693,13 +693,26 @@ describe Grape::Endpoint do
   end
 
   describe '#method_missing' do
-    it 'raises NoMethodError but stripping the internals of the Grape::Endpoint class' do
-      subject.get('/hey') do
-        undefined_helper
+    context 'when referencing an undefined local variable' do
+      it 'raises NoMethodError but stripping the internals of the Grape::Endpoint class and including the API route' do
+        subject.get('/hey') do
+          undefined_helper
+        end
+        expect {
+          get '/hey'
+        }.to raise_error(NoMethodError, /^undefined method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `\/hey' endpoint/)
       end
-      expect {
-        get '/hey'
-      }.to raise_error(NoMethodError, /^undefined method `undefined_helper` for #<Class:0x[0-9a-fA-F]+>$/)
+    end
+
+    context 'when performing an undefined method of an instance inside the API' do
+      it 'raises NoMethodError but stripping the internals of the Object class' do
+        subject.get('/hey') do
+          Object.new.x
+        end
+        expect {
+          get '/hey'
+        }.to raise_error(NoMethodError, /^undefined method `x' for #<Object:0x[0-9a-fA-F]+>$/)
+      end
     end
   end
 
