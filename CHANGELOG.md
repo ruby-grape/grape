@@ -12,6 +12,7 @@
 
 * [#2364](https://github.com/ruby-grape/grape/pull/2364): Add missing requires - [@ericproulx](https://github.com/ericproulx).
 * [#2366](https://github.com/ruby-grape/grape/pull/2366): Default quality to 1.0 in the `Accept` header when omitted - [@hiddewie](https://github.com/hiddewie).
+* [#2368](https://github.com/ruby-grape/grape/pull/2368): Stripping the internals of `Grape::Endpoint` when `NoMethodError` is raised - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 ### 1.8.0 (2023/08/30)
