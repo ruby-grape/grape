@@ -265,7 +265,6 @@ RSpec/FilePath:
     - 'spec/grape/validations/validators/regexp_spec.rb'
     - 'spec/grape/validations/validators/same_as_spec.rb'
     - 'spec/grape/validations/validators/values_spec.rb'
-    - 'spec/integration/eager_load/eager_load_spec.rb'
     - 'spec/integration/multi_json/json_spec.rb'
     - 'spec/integration/multi_xml/xml_spec.rb'
     - 'spec/integration/rack/v2/headers_spec.rb'

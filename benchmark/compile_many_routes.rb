@@ -3,9 +3,6 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'grape'
 require 'benchmark/ips'
-require 'grape/eager_load'
-
-Grape.eager_load!
 
 class API < Grape::API
   prefix :api

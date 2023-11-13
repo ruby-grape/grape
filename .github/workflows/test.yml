@@ -50,11 +50,6 @@ jobs:
     - name: Run tests
       run: bundle exec rake spec
 
-    - name: Run tests (spec/integration/eager_load)
-      # rack_2_0.gemfile is equals to Gemfile
-      if: ${{ matrix.gemfile == 'rack_2_0' }}
-      run: bundle exec rspec spec/integration/eager_load
-
     - name: Run tests (spec/integration/multi_json)
       if: ${{ matrix.gemfile == 'multi_json' }}
       run: bundle exec rspec spec/integration/multi_json
