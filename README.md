@@ -160,9 +160,9 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **2.0.0**.
+You're reading the documentation for the next release of Grape, which should be **2.0.1**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
-The current stable release is [1.8.0](https://github.com/ruby-grape/grape/blob/v1.8.0/README.md).
+The current stable release is [2.0.0](https://github.com/ruby-grape/grape/blob/v2.0.0/README.md).
 
 
 ## Project Resources
@@ -595,6 +595,10 @@ is returned when no correct `Accept` header is supplied.
 When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is returned if the `:cascade`
 option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route
 matches.
+
+Grape will evaluate the relative quality preference included in Accept headers and default to a quality of 1.0 when omitted. In the following example a Grape API that supports XML and JSON in that order will return JSON:
+
+    curl -H "Accept: text/xml;q=0.8, application/json;q=0.9" localhost:1234/resource
 
 ### Accept-Version Header
 
@@ -1600,7 +1604,7 @@ Note endless ranges are also supported with ActiveSupport >= 6.0, but they requi
 ```ruby
 params do
   requires :minimum, type: Integer, values: 10..
-  optional :maximum, type: Integer, values: ..10 
+  optional :maximum, type: Integer, values: ..10
 end
 ```
 

@@ -1,4 +1,15 @@
-### 2.0.0 (Next)
+### 2.0.1 (Next)
+
+#### Features
+
+* [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
+### 2.0.0 (2023/11/11)
 
 #### Features
 
@@ -6,13 +17,12 @@
 * [#2355](https://github.com/ruby-grape/grape/pull/2355): Set response headers based on Rack version - [@schinery](https://github.com/schinery).
 * [#2360](https://github.com/ruby-grape/grape/pull/2360): Reduce gem size by removing specs - [@ericproulx](https://github.com/ericproulx).
 * [#2361](https://github.com/ruby-grape/grape/pull/2361): Remove `Rack::Auth::Digest` - [@ninoseki](https://github.com/ninoseki).
-* [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
-  
+
 #### Fixes
 
 * [#2364](https://github.com/ruby-grape/grape/pull/2364): Add missing requires - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
+* [#2366](https://github.com/ruby-grape/grape/pull/2366): Default quality to 1.0 in the `Accept` header when omitted - [@hiddewie](https://github.com/hiddewie).
+* [#2368](https://github.com/ruby-grape/grape/pull/2368): Stripping the internals of `Grape::Endpoint` when `NoMethodError` is raised - [@jcagarcia](https://github.com/jcagarcia).
 
 ### 1.8.0 (2023/08/30)
 
