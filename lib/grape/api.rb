@@ -125,7 +125,6 @@ module Grape
       end
 
       def compile!
-        Zeitwerk::Loader.eager_load_all
         instance_for_rack.compile! # See API::Instance.compile!
       end
 

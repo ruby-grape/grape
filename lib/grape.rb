@@ -25,6 +25,7 @@ require 'active_support/deprecation'
 require 'active_support/inflector'
 require 'active_support/notifications'
 
+require 'English'
 require 'bigdecimal'
 require 'date'
 require 'dry-types'
@@ -38,6 +39,7 @@ require 'rack/auth/basic'
 require 'rack/accept/header'
 require 'rack/accept/media_type'
 require 'rack/builder'
+require 'rack/head'
 require 'set'
 require 'singleton'
 require 'zeitwerk'
@@ -69,3 +71,4 @@ end
 # https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html
 # adding Grape.deprecator to Rails App if any
 require 'grape/railtie' if defined?(Rails::Railtie) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
+loader.eager_load
