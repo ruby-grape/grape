@@ -82,14 +82,4 @@ describe Grape::Middleware::Error do
       expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)
     end
   end
-
-  context 'NotImplementedError' do
-    let(:api) do
-      Class.new(Grape::Api) do
-        get :test do
-          raise NotImplementedError
-        end
-      end
-    end
-  end
 end
