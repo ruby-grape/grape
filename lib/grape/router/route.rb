@@ -86,6 +86,10 @@ module Grape
         expected ||= name
         Grape.deprecator.warn("#{path}:#{line}: The route_xxx methods such as route_#{name} have been deprecated, please use #{expected}.")
       end
+
+      def to_ary
+        nil
+      end
     end
   end
 end
