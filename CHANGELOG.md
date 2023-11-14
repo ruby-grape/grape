@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2370](https://github.com/ruby-grape/grape/pull/2370): Stop method_missing to_ary - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
