@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 #### Fixes
