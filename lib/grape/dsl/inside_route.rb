@@ -99,7 +99,7 @@ module Grape
 
           route_options_params = options[:route_options][:params] || {}
           type = route_options_params.dig(key, :type)
-          has_children = route_options_params.keys.any? { |k| k != key && k.start_with?(key) }
+          has_children = route_options_params.keys.any? { |k| k != key && k.start_with?("#{key}[") }
 
           if type == 'Hash' && !has_children
             {}
