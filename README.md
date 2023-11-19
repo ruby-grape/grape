@@ -1242,9 +1242,7 @@ params do
 end
 ```
 
-You can use the value of one parameter as the default value of some other parameter. In this
-case, if the `primary_color` parameter is not provided, it will have the same value as the `color`
-one. If both of them not provided, both of them will have `blue` value.
+You can use the value of one parameter as the default value of some other parameter. In this case, if the `primary_color` parameter is not provided, it will have the same value as the `color` one. If both of them not provided, both of them will have `blue` value.
 
 ```ruby
 params do
