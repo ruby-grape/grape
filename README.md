@@ -160,7 +160,7 @@ content negotiation, versioning and much more.
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be **2.0.1**.
+You're reading the documentation for the next release of Grape, which should be **2.1.0**.
 Please read [UPGRADING](UPGRADING.md) when upgrading from a previous version.
 The current stable release is [2.0.0](https://github.com/ruby-grape/grape/blob/v2.0.0/README.md).
 
@@ -1239,6 +1239,15 @@ The correct implementation is to ensure the default value passes all validations
 ```ruby
 params do
   optional :color, type: String, default: 'blue', values: ['blue', 'red', 'green']
+end
+```
+
+You can use the value of one parameter as the default value of some other parameter. In this case, if the `primary_color` parameter is not provided, it will have the same value as the `color` one. If both of them not provided, both of them will have `blue` value.
+
+```ruby
+params do
+  optional :color, type: String, default: 'blue'
+  optional :primary_color, type: String, default: -> (params) { params[:color] }
 end
 ```
 
