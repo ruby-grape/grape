@@ -11,7 +11,11 @@ module Grape
 
         def validate_param!(attr_name, params)
           params[attr_name] = if @default.is_a? Proc
-                                @default.call
+                                if @default.parameters.empty?
+                                  @default.call
+                                else
+                                  @default.call(params)
+                                end
                               elsif @default.frozen? || !@default.duplicable?
                                 @default
                               else

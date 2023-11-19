@@ -1,12 +1,14 @@
-### 2.0.1 (Next)
+### 2.1.0 (Next)
 
 #### Features
 
+* [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 #### Fixes
 
 * [#2370](https://github.com/ruby-grape/grape/pull/2370): Stop method_missing to_ary - [@ericproulx](https://github.com/ericproulx).
+* [#2372](https://github.com/ruby-grape/grape/pull/2372): Fix `declared` method for hash params with overlapping names - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)

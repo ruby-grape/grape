@@ -39,6 +39,7 @@ describe Grape::Endpoint do
         optional :empty_arr, type: Array
         optional :empty_typed_arr, type: Array[String]
         optional :empty_hash, type: Hash
+        optional :empty_hash_two, type: Hash
         optional :empty_set, type: Set
         optional :empty_typed_set, type: Set[String]
       end
@@ -122,7 +123,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response.status).to eq(200)
-      expect(JSON.parse(last_response.body).keys.size).to eq(11)
+      expect(JSON.parse(last_response.body).keys.size).to eq(12)
     end
 
     it 'has a optional param with default value all the time' do
@@ -201,6 +202,7 @@ describe Grape::Endpoint do
 
         body = JSON.parse(last_response.body)
         expect(body['empty_hash']).to eq({})
+        expect(body['empty_hash_two']).to eq({})
         expect(body['nested']).to be_a(Hash)
         expect(body['nested']['empty_hash']).to eq({})
         expect(body['nested']['nested_two']).to be_a(Hash)
