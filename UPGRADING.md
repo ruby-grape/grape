@@ -474,8 +474,7 @@ end
 
 ##### `name` (and other caveats) of the mounted API
 
-After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class
-which inherit from `Grape::API::Instance`.
+After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class which inherit from `Grape::API::Instance`.
 
 What this means in practice, is:
 
@@ -855,8 +854,7 @@ See [#1114](https://github.com/ruby-grape/grape/pull/1114) for more information.
 
 #### Bypasses formatters when status code indicates no content
 
-To be consistent with rack and it's handling of standard responses associated with no content, both default and custom formatters will now
-be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
+To be consistent with rack and it's handling of standard responses associated with no content, both default and custom formatters will now be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
 
 See [#1190](https://github.com/ruby-grape/grape/pull/1190) for more information.
 
@@ -1297,8 +1295,7 @@ As replacement can be used
 * `Grape::Middleware::Auth::Digest` => [`Rack::Auth::Digest::MD5`](https://github.com/rack/rack/blob/master/lib/rack/auth/digest/md5.rb)
 * `Grape::Middleware::Auth::OAuth2` => [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2)
 
-If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/ruby-grape/grape/tree/v0.7.0/lib/grape/middleware/auth)
-and host these files within your application
+If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/ruby-grape/grape/tree/v0.7.0/lib/grape/middleware/auth) and host these files within your application
 
 See [#703](https://github.com/ruby-grape/Grape/pull/703) for more information.
 
