@@ -3506,7 +3506,7 @@ TwitterAPI::routes[0].description # => 'Includes custom settings.'
 TwitterAPI::routes[0].settings[:custom] # => { key: 'value' }
 ```
 
-Note that `Route#route_xyz` methods have been deprecated since 0.15.0 and removed since 2.0.1
+Note that `Route#route_xyz` methods have been deprecated since 0.15.0 and removed since 2.0.1.
 
 Please use `Route#xyz` instead.
 
