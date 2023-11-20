@@ -3483,7 +3483,7 @@ You can access the controller params, headers, and helpers through the context w
 
 Grape routes can be reflected at runtime. This can notably be useful for generating documentation.
 
-Grape exposes arrays of API versions and compiled routes. Each route contains a `route_prefix`, `route_version`, `route_namespace`, `route_method`, `route_path` and `route_params`. You can add custom route settings to the route metadata with `route_setting`.
+Grape exposes arrays of API versions and compiled routes. Each route contains a `prefix`, `version`, `namespace`, `method` and `params`. You can add custom route settings to the route metadata with `route_setting`.
 
 ```ruby
 class TwitterAPI < Grape::API
@@ -3506,7 +3506,7 @@ TwitterAPI::routes[0].description # => 'Includes custom settings.'
 TwitterAPI::routes[0].settings[:custom] # => { key: 'value' }
 ```
 
-Note that `Route#route_xyz` methods have been deprecated since 0.15.0.
+Note that `Route#route_xyz` methods have been deprecated since 0.15.0 and removed since 2.0.1
 
 Please use `Route#xyz` instead.
 
@@ -3526,7 +3526,7 @@ class MyAPI < Grape::API
     requires :id, type: Integer, desc: 'Identity.'
   end
   get 'params/:id' do
-    route.route_params[params[:id]] # yields the parameter description
+    route.params[params[:id]] # yields the parameter description
   end
 end
 ```

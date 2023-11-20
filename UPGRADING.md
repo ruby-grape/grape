@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.0.1
+
+#### Grape::Router::Route.route_xxx methods have been removed
+
+- `route_method` is accessible through `request_method`
+- `route_path` is accessible through `path`
+- Any other `route_xyz` are accessible through `options[xyz]`
+
 ### Upgrading to >= 2.0.0
 
 #### Headers
