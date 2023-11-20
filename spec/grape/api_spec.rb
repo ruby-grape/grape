@@ -3050,7 +3050,6 @@ describe Grape::API do
       expect(subject.routes.length).to eq(1)
       route = subject.routes.first
       expect(route.description).to eq('first method')
-      expect(route.route_foo).to be_nil
       expect(route.params).to eq({})
       expect(route.options).to be_a(Hash)
     end
@@ -3095,7 +3094,7 @@ describe Grape::API do
         get 'second'
       end
       expect(subject.routes.map do |route|
-        { description: route.description, foo: route.route_foo, params: route.params }
+        { description: route.description, foo: route.options[:foo], params: route.params }
       end).to eq [
         { description: 'ns second', foo: 'bar', params: {} }
       ]
