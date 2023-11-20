@@ -12,6 +12,7 @@
 
 #### Fixes
 
+* [#2375](https://github.com/ruby-grape/grape/pull/2375): Fix setter methods for `Grape::Router::AttributeTranslator` - [@Jell](https://github.com/Jell).
 * [#2370](https://github.com/ruby-grape/grape/pull/2370): Remove route_xyz method_missing deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2372](https://github.com/ruby-grape/grape/pull/2372): Fix `declared` method for hash params with overlapping names - [@jcagarcia](https://github.com/jcagarcia).
 * [#2373](https://github.com/ruby-grape/grape/pull/2373): Fix markdown files for following 1-line format - [@jcagarcia](https://github.com/jcagarcia).
