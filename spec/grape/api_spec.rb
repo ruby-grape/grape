@@ -2130,6 +2130,25 @@ describe Grape::API do
       expect(last_response.status).to be 500
       expect(last_response.body).to eql 'Invalid response'
     end
+
+    context 'when using instance variables inside the rescue_from' do
+      it 'is able to access the values' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.rescue_from(:all) do
+          body = { my_var: @my_var }
+          error!(body, 400)
+        end
+        subject.get('/') do
+          @my_var = expected_instance_variable_value
+          raise
+        end
+
+        get '/'
+        expect(last_response.status).to be 400
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+    end
   end
 
   describe '.rescue_from klass, block' do
