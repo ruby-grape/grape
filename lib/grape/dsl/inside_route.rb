@@ -179,7 +179,7 @@ module Grape
       # Returns:
       # A Rack::Response object containing the specified message, status, and headers.
       #
-      def rack_response(message, status, headers = { Rack::CONTENT_TYPE => content_type })
+      def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
         message = ERB::Util.html_escape(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
         Rack::Response.new([message], Rack::Utils.status_code(status), headers)
       end

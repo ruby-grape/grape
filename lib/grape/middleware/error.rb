@@ -130,9 +130,7 @@ module Grape
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
         end)
 
-        if error?(response)
-          response = error!(response[:message], response[:status], response[:headers])
-        end
+        response = error!(response[:message], response[:status], response[:headers]) if error?(response)
 
         if response.is_a?(Rack::Response)
           response
@@ -142,7 +140,7 @@ module Grape
       end
 
       def error?(response)
-        response && response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]
+        response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]
       end
     end
   end
