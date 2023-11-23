@@ -1,13 +1,19 @@
 Upgrading Grape
 ===============
 
-### Upgrading to >= 2.0.1
+### Upgrading to >= 2.1.0
 
 #### Grape::Router::Route.route_xxx methods have been removed
 
 - `route_method` is accessible through `request_method`
 - `route_path` is accessible through `path`
 - Any other `route_xyz` are accessible through `options[xyz]`
+
+#### Instance variables scope
+
+Due to the changes done in [#2377](https://github.com/ruby-grape/grape/pull/2377), the instance variables defined inside each of the endpoints (or inside a `before` validator) are now accessible inside the `rescue_from`. This means the scope of the instance variables has changed.
+
+If you were using the same variable name defined inside an endpoint or `before` validator inside a `rescue_from` handler, you need to take in mind that you can start getting different values or you can be overriding values.
 
 ### Upgrading to >= 2.0.0
 
