@@ -39,6 +39,7 @@
   - [Include Parent Namespaces](#include-parent-namespaces)
   - [Include Missing](#include-missing)
   - [Evaluate Given](#evaluate-given)
+  - [Parameter Precedence](#parameter-precedence)
 - [Parameter Validation and Coercion](#parameter-validation-and-coercion)
   - [Supported Parameter Types](#supported-parameter-types)
   - [Integer/Fixnum and Coercions](#integerfixnum-and-coercions)
@@ -1197,6 +1198,35 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"chil
   }
 }
 ````
+
+### Parameter Precedence
+
+Using `route_param` takes higher precedence over a regular parameter defined with same name:
+
+```ruby
+params do
+  requires :foo, type: String
+end
+route_param :foo do
+  get do
+    { value: params[:foo] }
+  end
+end
+```
+
+**Request**
+
+```bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/bar -d '{"foo": "baz"}'
+```
+
+**Response**
+
+```json
+{
+  "value": "bar"
+}
+```
 
 ## Parameter Validation and Coercion
 
