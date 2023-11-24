@@ -11,9 +11,45 @@ Upgrading Grape
 
 #### Instance variables scope
 
-Due to the changes done in [#2377](https://github.com/ruby-grape/grape/pull/2377), the instance variables defined inside each of the endpoints (or inside a `before` validator) are now accessible inside the `rescue_from`. This means the scope of the instance variables has changed.
+Due to the changes done in [#2377](https://github.com/ruby-grape/grape/pull/2377), the instance variables defined inside each of the endpoints (or inside a `before` validator) are now accessible inside the `rescue_from`. The behavior of the instance variables was undefined until `2.1.0`.
 
 If you were using the same variable name defined inside an endpoint or `before` validator inside a `rescue_from` handler, you need to take in mind that you can start getting different values or you can be overriding values.
+
+Before:
+```ruby
+class TwitterAPI < Grape::API
+  before do
+    @var = 1
+  end
+
+  get '/' do
+    puts @var # => 1
+    raise
+  end
+
+  rescue_from :all do
+    puts @var # => nil
+  end
+end
+```
+
+After:
+```ruby
+class TwitterAPI < Grape::API
+  before do
+    @var = 1
+  end
+
+  get '/' do
+    puts @var # => 1
+    raise
+  end
+
+  rescue_from :all do
+    puts @var # => 1
+  end
+end
+```
 
 ### Upgrading to >= 2.0.0
 
