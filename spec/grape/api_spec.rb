@@ -4352,4 +4352,61 @@ describe Grape::API do
       expect(last_response.body).to be_eql('1-2')
     end
   end
+
+  context 'instance variables' do
+    context 'when setting instance variables in a before validation' do
+      it 'is accessible inside the endpoint' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.before do
+          @my_var = expected_instance_variable_value
+        end
+
+        subject.get('/') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+    end
+
+    context 'when setting instance variables inside the endpoint code' do
+      it 'is accessible inside the rescue_from handler' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.rescue_from(:all) do
+          body = { my_var: @my_var }
+          error!(body, 400)
+        end
+
+        subject.get('/') do
+          @my_var = expected_instance_variable_value
+          raise
+        end
+
+        get '/'
+        expect(last_response.status).to be 400
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+
+      it 'is NOT available in other endpoints of the same api' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.get('/first') do
+          @my_var = expected_instance_variable_value
+          { my_var: @my_var }.to_json
+        end
+
+        subject.get('/second') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/first'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        get '/second'
+        expect(last_response.body).to eq({ my_var: nil }.to_json)
+      end
+    end
+  end
 end

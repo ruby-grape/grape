@@ -121,6 +121,7 @@
 - [Current Route and Endpoint](#current-route-and-endpoint)
 - [Before, After and Finally](#before-after-and-finally)
 - [Anchoring](#anchoring)
+- [Instance Variables](#instance-variables)
 - [Using Custom Middleware](#using-custom-middleware)
   - [Grape Middleware](#grape-middleware)
   - [Rails Middleware](#rails-middleware)
@@ -3594,6 +3595,42 @@ end
 
 This will match all paths starting with '/statuses/'. There is one caveat though: the `params[:status]` parameter only holds the first part of the request url.
 Luckily this can be circumvented by using the described above syntax for path specification and using the `PATH_INFO` Rack environment variable, using `env['PATH_INFO']`. This will hold everything that comes after the '/statuses/' part.
+
+## Instance Variables
+
+You can use instance variables to pass information across the various stages of a request. An instance variable set within a `before` validator is accessible within the endpoint's code and can also be utilized within the `rescue_from` handler.
+
+```ruby
+class TwitterAPI < Grape::API
+  before do
+    @var = 1
+  end
+
+  get '/' do
+    puts @var # => 1
+    raise
+  end
+
+  rescue_from :all do
+    puts @var # => 1
+  end
+end
+```
+
+The values of instance variables cannot be shared among various endpoints within the same API. This limitation arises due to Grape generating a new instance for each request made. Consequently, instance variables set within an endpoint during one request differ from those set during a subsequent request, as they exist within separate instances.
+
+```ruby
+class TwitterAPI < Grape::API
+  get '/first' do
+    @var = 1
+    puts @var # => 1
+  end
+
+  get '/second' do
+    puts @var # => nil
+  end
+end
+```
 
 ## Using Custom Middleware
 
