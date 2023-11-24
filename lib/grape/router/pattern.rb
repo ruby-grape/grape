@@ -28,8 +28,10 @@ module Grape
 
       def pattern_options(options)
         capture = extract_capture(**options)
+        params = options[:params]
         options = DEFAULT_PATTERN_OPTIONS.dup
         options[:capture] = capture if capture.present?
+        options[:params] = params if params.present?
         options
       end
 

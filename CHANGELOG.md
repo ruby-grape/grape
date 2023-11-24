@@ -4,6 +4,7 @@
 
 * [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * [#2377](https://github.com/ruby-grape/grape/pull/2377): Allow to use instance variables values inside `rescue_from` - [@jcagarcia](https://github.com/jcagarcia).
+* [#2379](https://github.com/ruby-grape/grape/pull/2379): `recognize_path` now takes into account the `route_param` type - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 #### Fixes

@@ -1132,7 +1132,7 @@ describe Grape::API do
       d = double('after mock')
 
       subject.params do
-        requires :id, type: Integer
+        requires :id, type: Integer, values: [1, 2, 3]
       end
       subject.resource ':id' do
         before { a.do_something! }
@@ -1151,9 +1151,9 @@ describe Grape::API do
       expect(c).to receive(:do_something!).exactly(0).times
       expect(d).to receive(:do_something!).exactly(0).times
 
-      get '/abc'
+      get '/4'
       expect(last_response.status).to be 400
-      expect(last_response.body).to eql 'id is invalid'
+      expect(last_response.body).to eql 'id does not have a valid value'
     end
 
     it 'calls filters in the correct order' do
@@ -4406,6 +4406,23 @@ describe Grape::API do
         expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
         get '/second'
         expect(last_response.body).to eq({ my_var: nil }.to_json)
+      end
+    end
+
+    context 'when set type to a route_param' do
+      context 'and the param does not match' do
+        it 'returns a 404 response' do
+          subject.namespace :books do
+            route_param :id, type: Integer do
+              get do
+                params[:id]
+              end
+            end
+          end
+
+          get '/books/other'
+          expect(last_response.status).to be 404
+        end
       end
     end
   end
