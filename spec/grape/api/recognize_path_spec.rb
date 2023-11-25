@@ -47,41 +47,29 @@ describe Grape::API do
         end
       end
 
-      context 'when the parameter does not match with the specified type' do
-        it 'recognizes the static route' do
-          actual = subject.recognize_path('/books/share').routes[0].origin
-          expect(actual).to eq('/books/share')
-        end
-
-        context 'when there is not other endpoint that matches with the requested path' do
-          it 'does not recognize any endpoint' do
-            actual = subject.recognize_path('/books/other')
-            expect(actual).to be_nil
-          end
-        end
+      it 'recognizes the static route when the parameter does not match with the specified type' do
+        actual = subject.recognize_path('/books/share').routes[0].origin
+        expect(actual).to eq('/books/share')
       end
 
-      context 'when the parameter matches with the specified type' do
-        it 'recognizes the parametrized route' do
-          actual = subject.recognize_path('/books/1').routes[0].origin
-          expect(actual).to eq('/books/:id')
-        end
+      it 'does not recognize any endpoint when there is not other endpoint that matches with the requested path' do
+        actual = subject.recognize_path('/books/other')
+        expect(actual).to be_nil
       end
 
-      context 'when requesting nested paths' do
-        context 'when the parameter does not match with the specified type' do
-          it 'recognizes the static route' do
-            actual = subject.recognize_path('/books/1/loans/print').routes[0].origin
-            expect(actual).to eq('/books/:id/loans/print')
-          end
-        end
+      it 'recognizes the parametrized route when the parameter matches with the specified type' do
+        actual = subject.recognize_path('/books/1').routes[0].origin
+        expect(actual).to eq('/books/:id')
+      end
 
-        context 'when the parameter matches with the specified type' do
-          it 'recognizes the parametrized route' do
-            actual = subject.recognize_path('/books/1/loans/33').routes[0].origin
-            expect(actual).to eq('/books/:id/loans/:loan_id')
-          end
-        end
+      it 'recognizes the static nested route when the parameter does not match with the specified type' do
+        actual = subject.recognize_path('/books/1/loans/print').routes[0].origin
+        expect(actual).to eq('/books/:id/loans/print')
+      end
+
+      it 'recognizes the nested parametrized route when the parameter matches with the specified type' do
+        actual = subject.recognize_path('/books/1/loans/33').routes[0].origin
+        expect(actual).to eq('/books/:id/loans/:loan_id')
       end
     end
   end

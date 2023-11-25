@@ -53,7 +53,7 @@ end
 
 #### Recognizing Path
 
-Due to the changes done in [#2379](https://github.com/ruby-grape/grape/pull/2379), Grape now takes in mind the types of the configured `route_params` in order to determine the endpoint that matches with the performed request. 
+Grape now considers the types of the configured `route_params` in order to determine the endpoint that matches with the performed request.
 
 So taking into account this `Grape::API` class
 
@@ -77,14 +77,14 @@ class Books < Grape::API
 end
 ```
 
-This was the behavior before the changes:
+Before:
 ```ruby
 API.recognize_path '/books/1' # => /books/:id
 API.recognize_path '/books/share' # => /books/:id
 API.recognize_path '/books/other' # => /books/:id
 ```
 
-And this is the behavior now:
+After:
 ```ruby
 API.recognize_path '/books/1' # => /books/:id
 API.recognize_path '/books/share' # => /books/share
@@ -92,6 +92,8 @@ API.recognize_path '/books/other' # => nil
 ```
 
 This implies that before this changes, when you performed `/books/other` and it matched with the `/books/:id` endpoint, you get a `400 Bad Request` response because the type of the provided `:id` param was not an `Integer`. However, after upgrading to version `2.1.0` you will get a `404 Not Found` response, because there is not a defined endpoint that matches with `/books/other`.
+
+See [#2379](https://github.com/ruby-grape/grape/pull/2379) for more information.
 
 ### Upgrading to >= 2.0.0
 
