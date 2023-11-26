@@ -2408,6 +2408,33 @@ end
 API.recognize_path '/statuses'
 ```
 
+Since version `2.1.0`, the `recognize_path` method takes into account the parameters type to determine which endpoint should match with given path.
+
+```ruby
+class Books < Grape::API
+  resource :books do
+    route_param :id, type: Integer do
+      # GET /books/:id
+      get do
+        #...
+      end
+    end
+
+    resource :share do
+      # POST /books/share
+      post do
+      # ....
+      end
+    end
+  end
+end
+
+API.recognize_path '/books/1' # => /books/:id
+API.recognize_path '/books/share' # => /books/share
+API.recognize_path '/books/other' # => nil
+```
+
+
 ## Allowed Methods
 
 When you add a `GET` route for a resource, a route for the `HEAD` method will also be added automatically. You can disable this behavior with `do_not_route_head!`.
