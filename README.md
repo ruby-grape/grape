@@ -30,10 +30,11 @@
 - [Remounting](#remounting)
   - [Mount Configuration](#mount-configuration)
 - [Versioning](#versioning)
-  - [Path](#path)
-  - [Header](#header)
-  - [Accept-Version Header](#accept-version-header)
-  - [Param](#param)
+  - [Strategies](#strategies)
+    - [Path](#path)
+    - [Header](#header)
+    - [Accept-Version Header](#accept-version-header)
+    - [Param](#param)
 - [Describing Methods](#describing-methods)
 - [Configuration](#configuration)
 - [Parameters](#parameters)
@@ -547,10 +548,69 @@ end
 
 ## Versioning
 
-There are four strategies in which clients can reach your API's endpoints: `:path`,
-`:header`, `:accept_version_header` and `:param`. The default strategy is `:path`.
+You have the option to provide various versions of your API by establishing a separate `Grape::API` class for each offered version and then integrating them into a primary `Grape::API` class. Ensure that newer versions are mounted before older ones. The default approach to versioning directs the request to the subsequent Rack middleware if a specific version is not found.
 
-### Path
+```ruby
+require 'v1'
+require 'v2'
+require 'v3'
+class App < Grape::API
+  mount V3
+  mount V2
+  mount V1
+end
+```
+
+To maintain the same endpoints from earlier API versions without rewriting them, you can indicate multiple versions within the previous API versions.
+
+```ruby
+class V1 < Grape::API
+  version 'v1', 'v2', 'v3'
+
+  get '/foo' do
+    # your code for GET /foo
+  end
+
+  get '/other' do
+    # your code for GET /other
+  end
+end
+
+class V2 < Grape::API
+  version 'v2', 'v3'
+
+  get '/var' do
+    # your code for GET /var
+  end
+end
+
+class V3 < Grape::API
+  version 'v3'
+
+  get '/foo' do
+    # your new code for GET /foo
+  end
+end
+```
+
+Using the example provided, the subsequent endpoints will be accessible across various versions:
+
+```shell
+GET /v1/foo
+GET /v1/other
+GET /v2/foo # => Same behavior as v1
+GET /v2/other # => Same behavior as v1
+GET /v2/var # => New endpoint not available in v1
+GET /v3/foo # => Different behavior to v1 and v2
+GET /v3/other # => Same behavior as v1 and v2
+GET /v3/var # => Same behavior as v2
+```
+
+There are four strategies in which clients can reach your API's endpoints: `:path`, `:header`, `:accept_version_header` and `:param`. The default strategy is `:path`.
+
+### Strategies
+
+#### Path
 
 ```ruby
 version 'v1', using: :path
@@ -560,7 +620,7 @@ Using this versioning strategy, clients should pass the desired version in the U
 
     curl http://localhost:9292/v1/statuses/public_timeline
 
-### Header
+#### Header
 
 ```ruby
 version 'v1', using: :header, vendor: 'twitter'
@@ -586,7 +646,7 @@ Grape will evaluate the relative quality preference included in Accept headers a
 
     curl -H "Accept: text/xml;q=0.8, application/json;q=0.9" localhost:1234/resource
 
-### Accept-Version Header
+#### Accept-Version Header
 
 ```ruby
 version 'v1', using: :accept_version_header
@@ -598,7 +658,7 @@ Using this versioning strategy, clients should pass the desired version in the H
 
 By default, the first matching version is used when no `Accept-Version` header is supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error is returned when no correct `Accept` header is supplied and the `:cascade` option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
 
-### Param
+#### Param
 
 ```ruby
 version 'v1', using: :param
