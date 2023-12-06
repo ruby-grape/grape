@@ -261,6 +261,13 @@ describe Grape::Validations::Validators::ValuesValidator do
         optional :name, type: String, values: %w[a b], allow_blank: true
       end
       get '/allow_blank'
+
+      params do
+        with(type: String) do
+          requires :type, values: ValuesModel.values
+        end
+      end
+      get 'values_wrapped_by_with_block'
     end
   end
 
@@ -728,6 +735,15 @@ describe Grape::Validations::Validators::ValuesValidator do
         get '/proc/arity2', input_one: 2, input_two: 3
         expect(last_response.status).to eq 400
       end
+    end
+  end
+
+  context 'when wrapped by with block' do
+    it 'rejects an invalid value' do
+      get 'values_wrapped_by_with_block'
+
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type is missing, type does not have a valid value' }.to_json)
     end
   end
 end
