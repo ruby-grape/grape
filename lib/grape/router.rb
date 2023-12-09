@@ -145,7 +145,7 @@ module Grape
     end
 
     def greedy_match?(input)
-      @union.match(input) { |m|  @neutral_map.detect { |route| m["_#{route.index}"] } }
+      @union.match(input) { |m| @neutral_map.detect { |route| m["_#{route.index}"] } }
     end
 
     def call_with_allow_headers(env, route)
