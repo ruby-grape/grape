@@ -85,8 +85,8 @@ module Grape
           mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
           mounts.each_pair do |app, path|
             if app.respond_to?(:mount_instance)
-              opts_with = opts.any? ? opts.shift[:with] : {}
-              mount({ app.mount_instance(configuration: opts_with) => path })
+              opts_with = opts.any? ? opts.first[:with] : {}
+              mount({ app.mount_instance(configuration: opts_with) => path }, *opts)
               next
             end
             in_setting = inheritable_setting
@@ -101,6 +101,15 @@ module Grape
 
               app.change!
               change!
+            end
+
+            # When trying to mount multiple times the same endpoint, remove the previous ones
+            # from the list of endpoints if refresh_already_mounted parameter is true
+            refresh_already_mounted = opts.any? ? opts.first[:refresh_already_mounted] : false
+            if refresh_already_mounted && !endpoints.empty?
+              endpoints.delete_if do |endpoint|
+                endpoint.options[:app].to_s == app.to_s
+              end
             end
 
             endpoints << Grape::Endpoint.new(
@@ -224,6 +233,13 @@ module Grape
         # @return array of defined versions
         def versions
           @versions ||= []
+        end
+
+        private
+
+        def refresh_mounted_api(mounts, *opts)
+          opts << { refresh_already_mounted: true }
+          mount(mounts, *opts)
         end
       end
     end

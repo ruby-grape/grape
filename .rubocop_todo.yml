@@ -27,6 +27,8 @@ Lint/ConstantDefinitionInBlock:
   Exclude:
     - 'spec/grape/api/defines_boolean_in_params_spec.rb'
     - 'spec/grape/api/inherited_helpers_spec.rb'
+    - 'spec/grape/api/mount_and_helpers_order_spec.rb'
+    - 'spec/grape/api/mount_and_rescue_from_spec.rb'
     - 'spec/grape/api/nested_helpers_spec.rb'
     - 'spec/grape/api/patch_method_helpers_spec.rb'
     - 'spec/grape/api_spec.rb'
@@ -235,6 +237,8 @@ RSpec/FilePath:
     - 'spec/grape/api/documentation_spec.rb'
     - 'spec/grape/api/inherited_helpers_spec.rb'
     - 'spec/grape/api/invalid_format_spec.rb'
+    - 'spec/grape/api/mount_and_helpers_order_spec.rb'
+    - 'spec/grape/api/mount_and_rescue_from_spec.rb'
     - 'spec/grape/api/namespace_parameters_in_route_spec.rb'
     - 'spec/grape/api/nested_helpers_spec.rb'
     - 'spec/grape/api/optional_parameters_in_route_spec.rb'
@@ -289,6 +293,7 @@ RSpec/IndexedLet:
 # Configuration parameters: AssignmentOnly.
 RSpec/InstanceVariable:
   Exclude:
+    - 'spec/grape/api/mount_and_helpers_order_spec.rb'
     - 'spec/grape/api_spec.rb'
     - 'spec/grape/endpoint_spec.rb'
     - 'spec/grape/middleware/base_spec.rb'
@@ -301,6 +306,8 @@ RSpec/LeakyConstantDeclaration:
   Exclude:
     - 'spec/grape/api/defines_boolean_in_params_spec.rb'
     - 'spec/grape/api/inherited_helpers_spec.rb'
+    - 'spec/grape/api/mount_and_helpers_order_spec.rb'
+    - 'spec/grape/api/mount_and_rescue_from_spec.rb'
     - 'spec/grape/api/nested_helpers_spec.rb'
     - 'spec/grape/api/patch_method_helpers_spec.rb'
     - 'spec/grape/api_spec.rb'
@@ -343,6 +350,8 @@ RSpec/MultipleExpectations:
     - 'spec/grape/api/deeply_included_options_spec.rb'
     - 'spec/grape/api/defines_boolean_in_params_spec.rb'
     - 'spec/grape/api/invalid_format_spec.rb'
+    - 'spec/grape/api/mount_and_helpers_order_spec.rb'
+    - 'spec/grape/api/mount_and_rescue_from_spec.rb'
     - 'spec/grape/api/namespace_parameters_in_route_spec.rb'
     - 'spec/grape/api/optional_parameters_in_route_spec.rb'
     - 'spec/grape/api/parameters_modification_spec.rb'
