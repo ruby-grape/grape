@@ -152,7 +152,7 @@ module Grape
         end
 
         # Updating all previously mounted classes in the case that new methods have been executed.
-        if method != :mount && @setup.size > 1
+        if method != :mount && @setup.any?
           previous_mount_steps = @setup.select { |step| step[:method] == :mount }
           previous_mount_steps.each do |mount_step|
             refresh_mount_step = mount_step.merge(method: :refresh_mounted_api)
