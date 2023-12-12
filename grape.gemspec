@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'activesupport', '>= 5'
   s.add_runtime_dependency 'builder'
   s.add_runtime_dependency 'dry-types', '>= 1.1'
-  s.add_runtime_dependency 'mustermann-grape', '~> 1.0.0'
+  s.add_runtime_dependency 'mustermann-grape', '~> 1.1.0'
   s.add_runtime_dependency 'rack', '>= 1.3.0'
   s.add_runtime_dependency 'rack-accept'
 

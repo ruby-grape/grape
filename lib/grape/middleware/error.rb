@@ -46,7 +46,7 @@ module Grape
             rescue_handler_for_any_class(e.class) ||
             raise
 
-          run_rescue_handler(handler, e)
+          run_rescue_handler(handler, e, @env[Grape::Env::API_ENDPOINT])
         end
       end
 
@@ -119,20 +119,28 @@ module Grape
         options[:all_rescue_handler] || :default_rescue_handler
       end
 
-      def run_rescue_handler(handler, error)
+      def run_rescue_handler(handler, error, endpoint)
         if handler.instance_of?(Symbol)
           raise NoMethodError, "undefined method '#{handler}'" unless respond_to?(handler)
 
           handler = public_method(handler)
         end
 
-        response = handler.arity.zero? ? instance_exec(&handler) : instance_exec(error, &handler)
+        response = (catch(:error) do
+          handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
+        end)
+
+        response = error!(response[:message], response[:status], response[:headers]) if error?(response)
 
         if response.is_a?(Rack::Response)
           response
         else
-          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new)
+          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new, endpoint)
         end
+      end
+
+      def error?(response)
+        response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]
       end
     end
   end

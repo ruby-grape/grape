@@ -1132,7 +1132,7 @@ describe Grape::API do
       d = double('after mock')
 
       subject.params do
-        requires :id, type: Integer
+        requires :id, type: Integer, values: [1, 2, 3]
       end
       subject.resource ':id' do
         before { a.do_something! }
@@ -1151,9 +1151,9 @@ describe Grape::API do
       expect(c).to receive(:do_something!).exactly(0).times
       expect(d).to receive(:do_something!).exactly(0).times
 
-      get '/abc'
+      get '/4'
       expect(last_response.status).to be 400
-      expect(last_response.body).to eql 'id is invalid'
+      expect(last_response.body).to eql 'id does not have a valid value'
     end
 
     it 'calls filters in the correct order' do
@@ -3050,7 +3050,6 @@ describe Grape::API do
       expect(subject.routes.length).to eq(1)
       route = subject.routes.first
       expect(route.description).to eq('first method')
-      expect(route.route_foo).to be_nil
       expect(route.params).to eq({})
       expect(route.options).to be_a(Hash)
     end
@@ -3095,7 +3094,7 @@ describe Grape::API do
         get 'second'
       end
       expect(subject.routes.map do |route|
-        { description: route.description, foo: route.route_foo, params: route.params }
+        { description: route.description, foo: route.options[:foo], params: route.params }
       end).to eq [
         { description: 'ns second', foo: 'bar', params: {} }
       ]
@@ -4351,6 +4350,80 @@ describe Grape::API do
     it 'returns the given id when it is valid' do
       get '/v1/orders/1-2'
       expect(last_response.body).to be_eql('1-2')
+    end
+  end
+
+  context 'instance variables' do
+    context 'when setting instance variables in a before validation' do
+      it 'is accessible inside the endpoint' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.before do
+          @my_var = expected_instance_variable_value
+        end
+
+        subject.get('/') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+    end
+
+    context 'when setting instance variables inside the endpoint code' do
+      it 'is accessible inside the rescue_from handler' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.rescue_from(:all) do
+          body = { my_var: @my_var }
+          error!(body, 400)
+        end
+
+        subject.get('/') do
+          @my_var = expected_instance_variable_value
+          raise
+        end
+
+        get '/'
+        expect(last_response.status).to be 400
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+
+      it 'is NOT available in other endpoints of the same api' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.get('/first') do
+          @my_var = expected_instance_variable_value
+          { my_var: @my_var }.to_json
+        end
+
+        subject.get('/second') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/first'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        get '/second'
+        expect(last_response.body).to eq({ my_var: nil }.to_json)
+      end
+    end
+
+    context 'when set type to a route_param' do
+      context 'and the param does not match' do
+        it 'returns a 404 response' do
+          subject.namespace :books do
+            route_param :id, type: Integer do
+              get do
+                params[:id]
+              end
+            end
+          end
+
+          get '/books/other'
+          expect(last_response.status).to be 404
+        end
+      end
     end
   end
 end
