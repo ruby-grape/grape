@@ -408,7 +408,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-Keep in mind such declarations as `before/after/rescue_from` must be placed before `mount` in a case where they should be inherited.
+Declarations as `before/after/rescue_from` can be placed before or after `mount`. In any case they will be inherited.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -416,8 +416,20 @@ class Twitter::API < Grape::API
     header 'X-Base-Header', 'will be defined for all APIs that are mounted below'
   end
 
+  rescue_from :all do
+    error!({ "error" => "Internal Server Error" }, 500)
+  end
+
   mount Twitter::Users
   mount Twitter::Search
+
+  after do
+    clean_cache!
+  end
+
+  rescue_from ZeroDivisionError do
+    error!({ "error" => "Not found" }, 404)
+  end
 end
 ```
 
