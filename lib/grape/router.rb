@@ -141,18 +141,11 @@ module Grape
     end
 
     def match?(input, method)
-      current_regexp = @optimized_map[method]
-      return unless current_regexp.match(input)
-
-      last_match = Regexp.last_match
-      @map[method].detect { |route| last_match["_#{route.index}"] }
+      @optimized_map[method].match(input) { |m| @map[method].detect { |route| m["_#{route.index}"] } }
     end
 
     def greedy_match?(input)
-      return unless @union.match(input)
-
-      last_match = Regexp.last_match
-      @neutral_map.detect { |route| last_match["_#{route.index}"] }
+      @union.match(input) { |m| @neutral_map.detect { |route| m["_#{route.index}"] } }
     end
 
     def call_with_allow_headers(env, route)

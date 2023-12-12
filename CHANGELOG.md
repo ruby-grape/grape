@@ -4,7 +4,8 @@
 
 * [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * [#2377](https://github.com/ruby-grape/grape/pull/2377): Allow to use instance variables values inside `rescue_from` - [@jcagarcia](https://github.com/jcagarcia).
-* [#2379](https://github.com/ruby-grape/grape/pull/2379): `recognize_path` now takes into account the `route_param` type - [@jcagarcia](https://github.com/jcagarcia).
+* [#2379](https://github.com/ruby-grape/grape/pull/2379): Take into account the `route_param` type in `recognize_path` - [@jcagarcia](https://github.com/jcagarcia).
+* [#2383](https://github.com/ruby-grape/grape/pull/2383): Use regex block instead of if - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
