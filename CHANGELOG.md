@@ -15,6 +15,7 @@
 * [#2372](https://github.com/ruby-grape/grape/pull/2372): Fix `declared` method for hash params with overlapping names - [@jcagarcia](https://github.com/jcagarcia).
 * [#2373](https://github.com/ruby-grape/grape/pull/2373): Fix markdown files for following 1-line format - [@jcagarcia](https://github.com/jcagarcia).
 * [#2382](https://github.com/ruby-grape/grape/pull/2382): Fix values validator for params wrapped in `with` block - [@numbata](https://github.com/numbata).
+* [#2387](https://github.com/ruby-grape/grape/pull/2387): Fix rubygems version within workflows - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
