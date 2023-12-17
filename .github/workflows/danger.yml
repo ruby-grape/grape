@@ -12,7 +12,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.7
+        ruby-version: latest
         bundler-cache: true
         rubygems: latest
     - name: Run Danger
