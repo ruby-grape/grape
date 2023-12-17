@@ -12,9 +12,8 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.2
+        ruby-version: 2.7
         bundler-cache: true
-        rubygems: latest
     - name: Run Danger
       run: |
         # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok
