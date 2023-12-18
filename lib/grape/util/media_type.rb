@@ -18,7 +18,6 @@ module Grape
       end
 
       class << self
-
         def q_values(header)
           Rack::Utils.q_values(header)
         end

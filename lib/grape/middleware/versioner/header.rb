@@ -25,7 +25,6 @@ module Grape
       # X-Cascade header to alert Grape::Router to attempt the next matched
       # route.
       class Header < Base
-
         def before
           header = env[Grape::Http::Headers::HTTP_ACCEPT]
           qvalues = Grape::Util::MediaType.q_values(header)
