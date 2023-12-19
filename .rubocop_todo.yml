@@ -127,12 +127,6 @@ Naming/VariableNumber:
     - 'spec/grape/exceptions/validation_errors_spec.rb'
     - 'spec/grape/validations_spec.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Performance/BindCall:
-  Exclude:
-    - 'lib/grape/endpoint.rb'
-
 # Offense count: 4
 RSpec/AnyInstance:
   Exclude:
@@ -605,14 +599,6 @@ RSpec/VoidExpect:
   Exclude:
     - 'spec/grape/api_spec.rb'
     - 'spec/grape/dsl/headers_spec.rb'
-
-# Offense count: 6
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowOnlyRestArgument.
-Style/ArgumentsForwarding:
-  Exclude:
-    - 'lib/grape/api.rb'
-    - 'lib/grape/endpoint.rb'
 
 # Offense count: 1
 Style/CombinableLoops:
