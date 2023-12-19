@@ -7,6 +7,7 @@
 * [#2379](https://github.com/ruby-grape/grape/pull/2379): Take into account the `route_param` type in `recognize_path` - [@jcagarcia](https://github.com/jcagarcia).
 * [#2383](https://github.com/ruby-grape/grape/pull/2383): Use regex block instead of if - [@ericproulx](https://github.com/ericproulx).
 * [#2384](https://github.com/ruby-grape/grape/pull/2384): Allow to use `before/after/rescue_from` methods in any order when using `mount` - [@jcagarcia](https://github.com/jcagarcia).
+* [#2390](https://github.com/ruby-grape/grape/pull/2390): Drop support for Ruby 2.6 and Rails 5 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
