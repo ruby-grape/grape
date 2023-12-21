@@ -38,15 +38,15 @@ module Grape
       end
 
       def method_missing(method_name, *args)
-        if setter?(method_name[-1])
-          attributes[method_name[0..]] = *args
+        if setter?(method_name)
+          attributes[method_name.to_s.chomp('=').to_sym] = args.first
         else
           attributes[method_name]
         end
       end
 
       def respond_to_missing?(method_name, _include_private = false)
-        if setter?(method_name[-1])
+        if setter?(method_name)
           true
         else
           @attributes.key?(method_name)
@@ -56,7 +56,7 @@ module Grape
       private
 
       def setter?(method_name)
-        method_name[-1] == '='
+        method_name.end_with?('=')
       end
     end
   end
