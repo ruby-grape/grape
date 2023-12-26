@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'grape/router/route'
+require 'grape/router/greedy_route'
 require 'grape/util/cache'
 
 module Grape
@@ -48,7 +49,7 @@ module Grape
 
     def associate_routes(pattern, **options)
       @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Grape::Router::AttributeTranslator.new(**options, pattern: pattern, index: @neutral_map.length)
+      @neutral_map << Grape::Router::GreedyRoute.new(pattern: pattern, index: @neutral_map.length, **options)
     end
 
     def call(env)
@@ -122,7 +123,7 @@ module Grape
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input) || {})
+      args.merge(route.params(input))
     end
 
     def extract_input_and_method(env)
