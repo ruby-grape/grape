@@ -3,8 +3,10 @@
 module Grape
   module Util
     class MediaType
-      attr_reader :type, :subtype,  :vendor, :version, :format
+      attr_reader :type, :subtype, :vendor, :version, :format
 
+      # based on the HTTP Accept header with the pattern:
+      # application/vnd.:vendor-:version+:format
       VENDOR_VERSION_HEADER_REGEX = /\Avnd\.(?<vendor>[a-z0-9.\-_!^]+?)(?:-(?<version>[a-z0-9*.]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/.freeze
 
       def initialize(type:, subtype:)
@@ -17,12 +19,10 @@ module Grape
         end
       end
 
-      class << self
-        def q_values(header)
-          Rack::Utils.q_values(header)
-        end
+      private_class_method :new
 
-        def from_best_quality_media_type(header, available_media_types)
+      class << self
+        def best_quality(header, available_media_types)
           parse(best_quality_media_type(header, available_media_types))
         end
 
@@ -30,7 +30,7 @@ module Grape
           return if media_type.blank?
 
           type, subtype = media_type.split('/', 2)
-          return if type.blank? && subtype.blank?
+          return if type.blank? || subtype.blank?
 
           new(type: type, subtype: subtype)
         end
@@ -48,6 +48,8 @@ module Grape
           header.blank? ? available_media_types.first : Rack::Utils.best_q_match(header, available_media_types)
         end
       end
+
+      private_class_method :best_quality_media_type
     end
   end
 end
