@@ -8,7 +8,6 @@ module Grape
       ROUTE_ATTRIBUTES = (%i[
         allow_header
         anchor
-        details
         endpoint
         format
         forward_match
