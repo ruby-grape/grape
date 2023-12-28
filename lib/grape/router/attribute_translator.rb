@@ -5,8 +5,6 @@ module Grape
     # this could be an OpenStruct, but doesn't work in Ruby 2.3.0, see https://bugs.ruby-lang.org/issues/12251
     # fixed >= 3.0
     class AttributeTranslator
-      attr_reader :attributes, :options
-
       ROUTE_ATTRIBUTES = (%i[
         allow_header
         anchor
@@ -26,28 +24,27 @@ module Grape
 
       def initialize(**attributes)
         @attributes = attributes
-        @options = attributes.delete(:options)
       end
 
       ROUTE_ATTRIBUTES.each do |attr|
         define_method attr do
-          attributes[attr]
+          @attributes[attr]
         end
 
         define_method("#{attr}=") do |val|
-          attributes[attr] = val
+          @attributes[attr] = val
         end
       end
 
       def to_h
-        attributes
+        @attributes
       end
 
       def method_missing(method_name, *args)
         if setter?(method_name)
-          attributes[method_name.to_s.chomp('=').to_sym] = args.first
+          @attributes[method_name.to_s.chomp('=').to_sym] = args.first
         else
-          attributes[method_name]
+          @attributes[method_name]
         end
       end
 
