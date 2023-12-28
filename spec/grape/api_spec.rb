@@ -3100,13 +3100,13 @@ describe Grape::API do
       ]
     end
 
-    it 'includes details' do
-      subject.desc 'method', details: 'method details'
+    it 'includes detail' do
+      subject.desc 'method', detail: 'method details'
       subject.get 'method'
       expect(subject.routes.map do |route|
-        { description: route.description, details: route.details, params: route.params }
+        { description: route.description, detail: route.detail, params: route.params }
       end).to eq [
-        { description: 'method', details: 'method details', params: {} }
+        { description: 'method', detail: 'method details', params: {} }
       ]
     end
 

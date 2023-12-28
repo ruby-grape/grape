@@ -3,54 +3,54 @@
 module Grape
   class Router
     # this could be an OpenStruct, but doesn't work in Ruby 2.3.0, see https://bugs.ruby-lang.org/issues/12251
+    # fixed >= 3.0
     class AttributeTranslator
-      attr_reader :attributes
-
-      ROUTE_ATTRIBUTES = %i[
-        prefix
-        version
-        settings
+      ROUTE_ATTRIBUTES = (%i[
+        allow_header
+        anchor
+        endpoint
         format
-        description
-        http_codes
-        headers
-        entity
-        details
-        requirements
-        request_method
+        forward_match
         namespace
-      ].freeze
-
-      ROUTER_ATTRIBUTES = %i[pattern index].freeze
+        not_allowed_method
+        prefix
+        request_method
+        requirements
+        settings
+        suffix
+        version
+      ] | Grape::DSL::Desc::ROUTE_ATTRIBUTES).freeze
 
       def initialize(**attributes)
         @attributes = attributes
       end
 
-      (ROUTER_ATTRIBUTES + ROUTE_ATTRIBUTES).each do |attr|
+      ROUTE_ATTRIBUTES.each do |attr|
         define_method attr do
-          attributes[attr]
+          @attributes[attr]
+        end
+
+        define_method("#{attr}=") do |val|
+          @attributes[attr] = val
         end
       end
 
       def to_h
-        attributes
+        @attributes
       end
 
       def method_missing(method_name, *args)
         if setter?(method_name)
-          attributes[method_name.to_s.chomp('=').to_sym] = args.first
+          @attributes[method_name.to_s.chomp('=').to_sym] = args.first
         else
-          attributes[method_name]
+          @attributes[method_name]
         end
       end
 
       def respond_to_missing?(method_name, _include_private = false)
-        if setter?(method_name)
-          true
-        else
-          @attributes.key?(method_name)
-        end
+        return true if setter?(method_name)
+
+        @attributes.key?(method_name)
       end
 
       private

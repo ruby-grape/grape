@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe Grape::Router::AttributeTranslator do
-  (Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES + Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES).each do |attribute|
+  described_class::ROUTE_ATTRIBUTES.each do |attribute|
     describe "##{attribute}" do
       it "returns value from #{attribute} key if present" do
         translator = described_class.new(attribute => 'value')
