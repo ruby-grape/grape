@@ -184,7 +184,7 @@ module Grape
         requirements: prepare_routes_requirements,
         prefix: namespace_inheritable(:root_prefix),
         anchor: options[:route_options].fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:declared_params, :saved_validations, :description),
+        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
         forward_match: options[:forward_match]
       }
     end
