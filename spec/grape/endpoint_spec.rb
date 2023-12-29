@@ -174,11 +174,12 @@ describe Grape::Endpoint do
       end
 
       get('/get/cookies')
-      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        'my-awesome-cookie1=is+cool',
-        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure',
+
+      expect(last_response_cookies).to contain_exactly(
         'cookie3=symbol',
-        'cookie4=secret+code+here'
+        'cookie4=secret+code+here',
+        'my-awesome-cookie1=is+cool',
+        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure'
       )
     end
 
@@ -190,7 +191,7 @@ describe Grape::Endpoint do
 
       get '/username'
       expect(last_response.body).to eq('mrplum')
-      expect(last_response.cookies).to be_empty
+      expect(last_response.headers['Set-Cookie']).to be_nil
     end
 
     it 'sets and update browser cookies' do
@@ -202,7 +203,7 @@ describe Grape::Endpoint do
 
       get '/username'
       expect(last_response.body).to eq('user_test')
-      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
+      expect(last_response_cookies).to contain_exactly(
         'sandbox=true',
         'username=user_test'
       )
@@ -220,9 +221,9 @@ describe Grape::Endpoint do
       end
       get '/test'
       expect(last_response.body).to eq('3')
-      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        'and_this=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-        'delete_this_cookie=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      expect(last_response_cookies).to contain_exactly(
+        "and_this=; max-age=0; expires=#{cookie_expires_value}",
+        "delete_this_cookie=; max-age=0; expires=#{cookie_expires_value}"
       )
     end
 
@@ -238,9 +239,9 @@ describe Grape::Endpoint do
       end
       get '/test'
       expect(last_response.body).to eq('3')
-      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        'and_this=; path=/test; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-        'delete_this_cookie=; path=/test; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      expect(last_response_cookies).to contain_exactly(
+        "and_this=; path=/test; max-age=0; expires=#{cookie_expires_value}",
+        "delete_this_cookie=; path=/test; max-age=0; expires=#{cookie_expires_value}"
       )
     end
   end
