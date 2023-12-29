@@ -4,7 +4,6 @@ require 'shared/versioning_examples'
 
 describe Grape::API do
   subject do
-    puts described_class
     Class.new(described_class)
   end
 

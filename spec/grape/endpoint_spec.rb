@@ -174,38 +174,42 @@ describe Grape::Endpoint do
       end
 
       get('/get/cookies')
-
-      expect(Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.sort).to eql [
-        'cookie3=symbol',
-        'cookie4=secret+code+here',
-        'my-awesome-cookie1=is+cool',
-        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure'
-      ]
+      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
+        Rack::Utils.set_cookie_header('my-awesome-cookie1', 'is cool'),
+        Rack::Utils.set_cookie_header('my-awesome-cookie2', { value: 'is cool too', domain: 'my.example.com', secure: true, path: '/' }),
+        Rack::Utils.set_cookie_header('cookie3', 'symbol'),
+        Rack::Utils.set_cookie_header('cookie4', 'secret code here')
+      )
     end
 
     it 'sets browser cookies and does not set response cookies' do
+      set_cookie %w[username=mrplum sandbox=true]
       subject.get('/username') do
         cookies[:username]
       end
-      get('/username', {}, 'HTTP_COOKIE' => 'username=mrplum; sandbox=true')
 
+      get '/username'
       expect(last_response.body).to eq('mrplum')
-      expect(last_response.headers['Set-Cookie']).to be_nil
+      expect(last_response.cookies).to be_empty
     end
 
     it 'sets and update browser cookies' do
+      set_cookie %w[username=user sandbox=false]
       subject.get('/username') do
         cookies[:sandbox] = true if cookies[:sandbox] == 'false'
         cookies[:username] += '_test'
       end
-      get('/username', {}, 'HTTP_COOKIE' => 'username=user; sandbox=false')
+
+      get '/username'
       expect(last_response.body).to eq('user_test')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }
-      expect(cookies[0]).to match(/username=user_test/)
-      expect(cookies[1]).to match(/sandbox=true/)
+      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
+        Rack::Utils.set_cookie_header('username', 'user_test'),
+        Rack::Utils.set_cookie_header('sandbox', 'true')
+      )
     end
 
     it 'deletes cookie' do
+      set_cookie %w[delete_this_cookie=1 and_this=2]
       subject.get('/test') do
         sum = 0
         cookies.each do |name, val|
@@ -214,22 +218,16 @@ describe Grape::Endpoint do
         end
         sum
       end
-      get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
+      get '/test'
       expect(last_response.body).to eq('3')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
-        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [cookie.name, cookie]
-      end
-      expect(cookies.size).to eq(2)
-      %w[and_this delete_this_cookie].each do |cookie_name|
-        cookie = cookies[cookie_name]
-        expect(cookie).not_to be_nil
-        expect(cookie.value).to eq('deleted')
-        expect(cookie.expired?).to be true
-      end
+      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
+        Rack::Utils.delete_set_cookie_header('delete_this_cookie'),
+        Rack::Utils.delete_set_cookie_header('and_this')
+      )
     end
 
     it 'deletes cookies with path' do
+      set_cookie %w[delete_this_cookie=1 and_this=2]
       subject.get('/test') do
         sum = 0
         cookies.each do |name, val|
@@ -238,20 +236,12 @@ describe Grape::Endpoint do
         end
         sum
       end
-      get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
+      get '/test'
       expect(last_response.body).to eq('3')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
-        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [cookie.name, cookie]
-      end
-      expect(cookies.size).to eq(2)
-      %w[and_this delete_this_cookie].each do |cookie_name|
-        cookie = cookies[cookie_name]
-        expect(cookie).not_to be_nil
-        expect(cookie.value).to eq('deleted')
-        expect(cookie.path).to eq('/test')
-        expect(cookie.expired?).to be true
-      end
+      expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
+        Rack::Utils.delete_set_cookie_header('delete_this_cookie', path: '/test'),
+        Rack::Utils.delete_set_cookie_header('and_this', path: '/test')
+      )
     end
   end
 
