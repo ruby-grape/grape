@@ -4,7 +4,7 @@ module Spec
   module Support
     module Helpers
       def cookie_expires_value
-        @cookie_expired ||= Gem::Version.new(Rack.release) <= Gem::Version.new('2') ? Time.at(0).gmtime.rfc2822 : Time.at(0).httpdate
+        @cookie_expires_value ||= Gem::Version.new(Rack.release) <= Gem::Version.new('2') ? Time.at(0).gmtime.rfc2822 : Time.at(0).httpdate
       end
 
       def last_response_cookies
