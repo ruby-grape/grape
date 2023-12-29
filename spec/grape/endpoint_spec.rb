@@ -175,10 +175,10 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
       expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        Rack::Utils.set_cookie_header('my-awesome-cookie1', 'is cool'),
-        Rack::Utils.set_cookie_header('my-awesome-cookie2', { value: 'is cool too', domain: 'my.example.com', secure: true, path: '/' }),
-        Rack::Utils.set_cookie_header('cookie3', 'symbol'),
-        Rack::Utils.set_cookie_header('cookie4', 'secret code here')
+        'my-awesome-cookie1=is+cool',
+        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure',
+        'cookie3=symbol',
+        'cookie4=secret+code+here'
       )
     end
 
@@ -203,8 +203,8 @@ describe Grape::Endpoint do
       get '/username'
       expect(last_response.body).to eq('user_test')
       expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        Rack::Utils.set_cookie_header('username', 'user_test'),
-        Rack::Utils.set_cookie_header('sandbox', 'true')
+        'sandbox=true',
+        'username=user_test'
       )
     end
 
@@ -221,8 +221,8 @@ describe Grape::Endpoint do
       get '/test'
       expect(last_response.body).to eq('3')
       expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        Rack::Utils.delete_set_cookie_header('delete_this_cookie'),
-        Rack::Utils.delete_set_cookie_header('and_this')
+        'and_this=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'delete_this_cookie=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       )
     end
 
@@ -239,8 +239,8 @@ describe Grape::Endpoint do
       get '/test'
       expect(last_response.body).to eq('3')
       expect(last_response.headers[Rack::SET_COOKIE]).to contain_exactly(
-        Rack::Utils.delete_set_cookie_header('delete_this_cookie', path: '/test'),
-        Rack::Utils.delete_set_cookie_header('and_this', path: '/test')
+        'and_this=; path=/test; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'delete_this_cookie=; path=/test; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       )
     end
   end
