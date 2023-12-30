@@ -175,11 +175,11 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
 
-      expect(last_response_cookies).to contain_exactly(
-        'cookie3=symbol',
-        'cookie4=secret+code+here',
-        'my-awesome-cookie1=is+cool',
-        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure'
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'cookie3', 'value' => 'symbol' },
+        { 'name' => 'cookie4', 'value' => 'secret code here' },
+        { 'name' => 'my-awesome-cookie1', 'value' => 'is cool' },
+        { 'name' => 'my-awesome-cookie2', 'value' => 'is cool too', 'domain' => 'my.example.com', 'path' => '/', 'secure' => true }
       )
     end
 
@@ -191,7 +191,7 @@ describe Grape::Endpoint do
 
       get '/username'
       expect(last_response.body).to eq('mrplum')
-      expect(last_response.headers['Set-Cookie']).to be_nil
+      expect(last_response.cookie_jar).to be_empty
     end
 
     it 'sets and update browser cookies' do
@@ -203,9 +203,9 @@ describe Grape::Endpoint do
 
       get '/username'
       expect(last_response.body).to eq('user_test')
-      expect(last_response_cookies).to contain_exactly(
-        'sandbox=true',
-        'username=user_test'
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'sandbox', 'value' => 'true' },
+        { 'name' => 'username', 'value' => 'user_test' }
       )
     end
 
@@ -221,9 +221,9 @@ describe Grape::Endpoint do
       end
       get '/test'
       expect(last_response.body).to eq('3')
-      expect(last_response_cookies).to contain_exactly(
-        "and_this=; max-age=0; expires=#{cookie_expires_value}",
-        "delete_this_cookie=; max-age=0; expires=#{cookie_expires_value}"
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'and_this', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) },
+        { 'name' => 'delete_this_cookie', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) }
       )
     end
 
@@ -239,9 +239,9 @@ describe Grape::Endpoint do
       end
       get '/test'
       expect(last_response.body).to eq('3')
-      expect(last_response_cookies).to contain_exactly(
-        "and_this=; path=/test; max-age=0; expires=#{cookie_expires_value}",
-        "delete_this_cookie=; path=/test; max-age=0; expires=#{cookie_expires_value}"
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'and_this', 'path' => '/test', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) },
+        { 'name' => 'delete_this_cookie', 'path' => '/test', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) }
       )
     end
   end
