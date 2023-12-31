@@ -9,6 +9,7 @@
 * [#2384](https://github.com/ruby-grape/grape/pull/2384): Allow to use `before/after/rescue_from` methods in any order when using `mount` - [@jcagarcia](https://github.com/jcagarcia).
 * [#2390](https://github.com/ruby-grape/grape/pull/2390): Drop support for Ruby 2.6 and Rails 5 - [@ericproulx](https://github.com/ericproulx).
 * [#2393](https://github.com/ruby-grape/grape/pull/2393): Optimize AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
+* [#2395](https://github.com/ruby-grape/grape/pull/2395): Set `max-age` to 0 when `cookies.delete` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

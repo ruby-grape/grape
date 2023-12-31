@@ -25,7 +25,6 @@ group :development do
 end
 
 group :test do
-  gem 'cookiejar'
   gem 'grape-entity', '~> 0.6', require: false
   gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
