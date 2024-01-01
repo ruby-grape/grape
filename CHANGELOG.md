@@ -10,6 +10,7 @@
 * [#2390](https://github.com/ruby-grape/grape/pull/2390): Drop support for Ruby 2.6 and Rails 5 - [@ericproulx](https://github.com/ericproulx).
 * [#2393](https://github.com/ruby-grape/grape/pull/2393): Optimize AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
 * [#2395](https://github.com/ruby-grape/grape/pull/2395): Set `max-age` to 0 when `cookies.delete` - [@ericproulx](https://github.com/ericproulx).
+* [#2397](https://github.com/ruby-grape/grape/pull/2397): Add support for ruby 3.3 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -62,7 +63,7 @@
 
 #### Features
 
-* [#2288](https://github.com/ruby-grape/grape/pull/2288): Droped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
+* [#2288](https://github.com/ruby-grape/grape/pull/2288): Dropped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Updated rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2296](https://github.com/ruby-grape/grape/pull/2296): Fix cops and enables some - [@ericproulx](https://github.com/ericproulx).
 * [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
