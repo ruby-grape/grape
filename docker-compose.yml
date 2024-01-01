@@ -9,9 +9,10 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        - RUBY_VERSION=${RUBY_VERSION:-3}
+        - RUBY_VERSION=${RUBY_VERSION:-3.3}
     stdin_open: true
     tty: true
+    platform: linux/amd64
     volumes:
       - .:/var/grape
       - gems:/usr/local/bundle

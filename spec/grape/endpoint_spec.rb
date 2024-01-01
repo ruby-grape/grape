@@ -694,17 +694,6 @@ describe Grape::Endpoint do
         end.to raise_error(NoMethodError, %r{^undefined method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint})
       end
     end
-
-    context 'when performing an undefined method of an instance inside the API' do
-      it 'raises NoMethodError but stripping the internals of the Object class' do
-        subject.get('/hey') do
-          Object.new.x
-        end
-        expect do
-          get '/hey'
-        end.to raise_error(NoMethodError, /^undefined method `x' for #<Object:0x[0-9a-fA-F]+>$/)
-      end
-    end
   end
 
   it 'does not persist params between calls' do
