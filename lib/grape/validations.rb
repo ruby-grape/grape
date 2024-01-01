@@ -25,7 +25,7 @@ module Grape
     def require_validator(short_name)
       str_name = short_name.to_s
       validators.fetch(str_name) do
-        Grape::Validations::Validators.const_get("#{str_name.camelize}Validator")
+        Grape::Validations::Validators.const_get(:"#{str_name.camelize}Validator")
       end
     rescue NameError
       raise Grape::Exceptions::UnknownValidator.new(short_name)

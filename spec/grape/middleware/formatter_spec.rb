@@ -435,22 +435,25 @@ describe Grape::Middleware::Formatter do
       expect(file).to receive(:each).and_yield('data')
       env = { 'PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
       status, headers, body = subject.call(env)
-      expect(status).to be == 200
-      expect(headers.transform_keys(&:downcase)).to be == { 'content-type' => 'application/json' }
-      expect(read_chunks(body)).to be == ['data']
+      expect(status).to eq 200
+      expect(headers.transform_keys(&:downcase)).to eq({ 'content-type' => 'application/json' })
+      expect(read_chunks(body)).to eq ['data']
     end
   end
 
   context 'inheritable formatters' do
-    class InvalidFormatter
-      def self.call(_, _)
-        { message: 'invalid' }.to_json
+    let(:invalid_formatter) do
+      Class.new do
+        def self.call(_, _)
+          { message: 'invalid' }.to_json
+        end
       end
     end
+
     let(:app) { ->(_env) { [200, {}, ['']] } }
 
     before do
-      Grape::Formatter.register :invalid, InvalidFormatter
+      Grape::Formatter.register :invalid, invalid_formatter
       Grape::ContentTypes.register :invalid, 'application/x-invalid'
     end
 
