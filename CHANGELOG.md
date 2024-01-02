@@ -10,7 +10,7 @@
 * [#2390](https://github.com/ruby-grape/grape/pull/2390): Drop support for Ruby 2.6 and Rails 5 - [@ericproulx](https://github.com/ericproulx).
 * [#2393](https://github.com/ruby-grape/grape/pull/2393): Optimize AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
 * [#2395](https://github.com/ruby-grape/grape/pull/2395): Set `max-age` to 0 when `cookies.delete` - [@ericproulx](https://github.com/ericproulx).
-* [#2399](https://github.com/ruby-grape/grape/pull/2399): Update Rubocop gems - [@ericproulx](https://github.com/ericproulx).
+* [#2399](https://github.com/ruby-grape/grape/pull/2399): Update `rubocop` to 1.59.0, `rubocop-performance` to 1.20.1 and `rubocop-rspec` to 2.25.0 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
