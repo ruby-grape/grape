@@ -18,7 +18,7 @@ describe Grape::Router::AttributeTranslator do
       it "sets value for #{attribute}", :aggregate_failures do
         translator = described_class.new(attribute => 'value')
         expect do
-          translator.public_send("#{attribute}=", 'new_value')
+          translator.public_send(:"#{attribute}=", 'new_value')
         end.to change(translator, attribute).from('value').to('new_value')
       end
     end

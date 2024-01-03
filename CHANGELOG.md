@@ -11,6 +11,7 @@
 * [#2393](https://github.com/ruby-grape/grape/pull/2393): Optimize AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
 * [#2395](https://github.com/ruby-grape/grape/pull/2395): Set `max-age` to 0 when `cookies.delete` - [@ericproulx](https://github.com/ericproulx).
 * [#2397](https://github.com/ruby-grape/grape/pull/2397): Add support for ruby 3.3 - [@ericproulx](https://github.com/ericproulx).
+* [#2399](https://github.com/ruby-grape/grape/pull/2399): Update `rubocop` to 1.59.0, `rubocop-performance` to 1.20.1 and `rubocop-rspec` to 2.25.0 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

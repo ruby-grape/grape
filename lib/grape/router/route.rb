@@ -31,7 +31,7 @@ module Grape
       end
 
       def match?(input)
-        return if input.blank?
+        return false if input.blank?
 
         attributes.forward_match ? input.start_with?(pattern.origin) : pattern.match?(input)
       end
@@ -42,7 +42,7 @@ module Grape
         parsed = pattern.params(input)
         return {} unless parsed
 
-        parsed.delete_if { |_, value| value.nil? }.symbolize_keys
+        parsed.compact.symbolize_keys
       end
 
       private
