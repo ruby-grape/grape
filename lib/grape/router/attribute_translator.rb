@@ -30,7 +30,7 @@ module Grape
           @attributes[attr]
         end
 
-        define_method("#{attr}=") do |val|
+        define_method(:"#{attr}=") do |val|
           @attributes[attr] = val
         end
       end

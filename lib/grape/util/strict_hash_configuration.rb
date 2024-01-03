@@ -56,19 +56,19 @@ module Grape
       def self.nested_settings_methods(setting_name, new_config_class)
         new_config_class.class_eval do
           setting_name.each_pair do |key, value|
-            define_method "#{key}_context" do
+            define_method :"#{key}_context" do
               @contexts[key] ||= Grape::Util::StrictHashConfiguration.config_class(*value).new
             end
 
             define_method key do |&block|
-              send("#{key}_context").instance_exec(&block)
+              send(:"#{key}_context").instance_exec(&block)
             end
           end
 
           define_method :to_hash do
             @settings.to_hash.merge(
               setting_name.each_key.with_object({}) do |k, merge_hash|
-                merge_hash[k] = send("#{k}_context").to_hash
+                merge_hash[k] = send(:"#{k}_context").to_hash
               end
             )
           end

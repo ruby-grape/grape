@@ -24,6 +24,9 @@ Style/MultilineIfModifier:
 Style/RaiseArgs:
   Enabled: false
 
+Style/RedundantArrayConstructor:
+  Enabled: false  # doesn't work well with params definition
+
 Metrics/AbcSize:
   Max: 45
 
