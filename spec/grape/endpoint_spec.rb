@@ -979,7 +979,7 @@ describe Grape::Endpoint do
   context 'binary' do
     before do
       subject.get do
-        file FileStreamer.new(__FILE__)
+        stream FileStreamer.new(__FILE__)
       end
     end
 

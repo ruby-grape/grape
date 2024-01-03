@@ -12,6 +12,7 @@ services:
         - RUBY_VERSION=${RUBY_VERSION:-3}
     stdin_open: true
     tty: true
+    platform: linux/amd64
     volumes:
       - .:/var/grape
       - gems:/usr/local/bundle
