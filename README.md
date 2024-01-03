@@ -1348,7 +1348,7 @@ class Color
   end
 
   def self.parse(value)
-    return new(value) if %w[blue red green]).include?(value)
+    return new(value) if %w[blue red green].include?(value)
 
     Grape::Types::InvalidValue.new('Unsupported color')
   end
