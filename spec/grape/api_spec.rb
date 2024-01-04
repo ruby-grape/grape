@@ -1239,7 +1239,7 @@ describe Grape::API do
       test_file.write file_content
       test_file.rewind
 
-      subject.get('/file') { file test_file }
+      subject.get('/file') { stream test_file }
       get '/file'
       expect(last_response.headers[Rack::CONTENT_LENGTH]).to eq('25')
       expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')

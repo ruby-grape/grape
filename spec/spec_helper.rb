@@ -10,6 +10,8 @@ Bundler.require :default, :test
 
 require 'grape'
 
+Grape.deprecator.behavior = :raise
+
 %w[config support].each do |dir|
   Dir["#{File.dirname(__FILE__)}/#{dir}/**/*.rb"].sort.each do |file|
     require file
