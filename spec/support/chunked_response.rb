@@ -35,8 +35,7 @@ class ChunkedResponse
     private
 
     # Do nothing as this class does not support trailer headers.
-    def yield_trailers
-    end
+    def yield_trailers; end
   end
 
   class TrailerBody < Body
@@ -58,15 +57,15 @@ class ChunkedResponse
     status, headers, body = response = @app.call(env)
 
     if !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.key?(status.to_i) &&
-      !headers[Rack::CONTENT_LENGTH] &&
-      !headers[Rack::TRANSFER_ENCODING]
+       !headers[Rack::CONTENT_LENGTH] &&
+       !headers[Rack::TRANSFER_ENCODING]
 
       headers[Rack::TRANSFER_ENCODING] = 'chunked'
-      if headers['trailer']
-        response[2] = TrailerBody.new(body)
-      else
-        response[2] = Body.new(body)
-      end
+      response[2] = if headers['trailer']
+                      TrailerBody.new(body)
+                    else
+                      Body.new(body)
+                    end
     end
 
     response
