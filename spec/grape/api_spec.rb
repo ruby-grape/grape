@@ -688,7 +688,7 @@ describe Grape::API do
         'example'
       end
       put '/example'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'text/plain'
+      expect(last_response.content_type).to eql 'text/plain'
     end
 
     describe 'adds an OPTIONS route that' do
@@ -1195,7 +1195,7 @@ describe Grape::API do
 
     it 'sets content type for txt format' do
       get '/foo'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+      expect(last_response.content_type).to eq('text/plain')
     end
 
     it 'does not set Cache-Control' do
@@ -1205,22 +1205,22 @@ describe Grape::API do
 
     it 'sets content type for xml' do
       get '/foo.xml'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/xml')
+      expect(last_response.content_type).to eq('application/xml')
     end
 
     it 'sets content type for json' do
       get '/foo.json'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+      expect(last_response.content_type).to eq('application/json')
     end
 
     it 'sets content type for serializable hash format' do
       get '/foo.serializable_hash'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+      expect(last_response.content_type).to eq('application/json')
     end
 
     it 'sets content type for binary format' do
       get '/foo.binary'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/octet-stream')
+      expect(last_response.content_type).to eq('application/octet-stream')
     end
 
     it 'returns raw data when content type binary' do
@@ -1229,7 +1229,7 @@ describe Grape::API do
       subject.format :binary
       subject.get('/binary_file') { File.binread(image_filename) }
       get '/binary_file'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/octet-stream')
+      expect(last_response.content_type).to eq('application/octet-stream')
       expect(last_response.body).to eq(file)
     end
 
@@ -1241,8 +1241,8 @@ describe Grape::API do
 
       subject.get('/file') { stream test_file }
       get '/file'
-      expect(last_response.headers[Rack::CONTENT_LENGTH]).to eq('25')
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+      expect(last_response.content_length).to eq(25)
+      expect(last_response.content_type).to eq('text/plain')
       expect(last_response.body).to eq(file_content)
     end
 
@@ -1252,12 +1252,12 @@ describe Grape::API do
         blk.yield ' file content'
       end
 
-      subject.use Rack::Chunked
+      subject.use defined?(Rack::Chunked) ? Rack::Chunked : ChunkedResponse
       subject.get('/stream') { stream test_stream }
       get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
 
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
-      expect(last_response.headers[Rack::CONTENT_LENGTH]).to be_nil
+      expect(last_response.content_type).to eq('text/plain')
+      expect(last_response.content_length).to be_nil
       expect(last_response.headers[Rack::CACHE_CONTROL]).to eq('no-cache')
       expect(last_response.headers[Grape::Http::Headers::TRANSFER_ENCODING]).to eq('chunked')
 
@@ -1267,7 +1267,7 @@ describe Grape::API do
     it 'sets content type for error' do
       subject.get('/error') { error!('error in plain text', 500) }
       get '/error'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'text/plain'
+      expect(last_response.content_type).to eql 'text/plain'
     end
 
     it 'sets content type for json error' do
@@ -1275,7 +1275,7 @@ describe Grape::API do
       subject.get('/error') { error!('error in json', 500) }
       get '/error.json'
       expect(last_response.status).to be 500
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/json'
+      expect(last_response.content_type).to eql 'application/json'
     end
 
     it 'sets content type for xml error' do
@@ -1283,7 +1283,7 @@ describe Grape::API do
       subject.get('/error') { error!('error in xml', 500) }
       get '/error'
       expect(last_response.status).to be 500
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/xml'
+      expect(last_response.content_type).to eql 'application/xml'
     end
 
     it 'includes extension in format' do
@@ -1313,12 +1313,12 @@ describe Grape::API do
 
       it 'sets content type' do
         get '/custom.custom'
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/custom'
+        expect(last_response.content_type).to eql 'application/custom'
       end
 
       it 'sets content type for error' do
         get '/error.custom'
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/custom'
+        expect(last_response.content_type).to eql 'application/custom'
       end
     end
 
@@ -1338,7 +1338,7 @@ describe Grape::API do
           image_filename = 'grape.png'
           post url, file: Rack::Test::UploadedFile.new(image_filename, 'image/png', true)
           expect(last_response.status).to eq(201)
-          expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('image/png')
+          expect(last_response.content_type).to eq('image/png')
           expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
           File.open(image_filename, 'rb') do |io|
             expect(last_response.body).to eq io.read
@@ -1350,7 +1350,7 @@ describe Grape::API do
         filename = __FILE__
         post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, 'application/x-ruby', true)
         expect(last_response.status).to eq(201)
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/x-ruby')
+        expect(last_response.content_type).to eq('application/x-ruby')
         expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
         File.open(filename, 'rb') do |io|
           expect(last_response.body).to eq io.read

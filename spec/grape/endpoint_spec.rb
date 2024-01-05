@@ -490,7 +490,7 @@ describe Grape::Endpoint do
       end
 
       it 'responses with given content type in headers' do
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq 'application/json; charset=utf-8'
+        expect(last_response.content_type).to eq 'application/json; charset=utf-8'
       end
     end
 
@@ -650,7 +650,7 @@ describe Grape::Endpoint do
       end
       get '/hey'
       expect(last_response.status).to eq 302
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
     end
 
@@ -660,7 +660,7 @@ describe Grape::Endpoint do
       end
       post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
       expect(last_response.status).to eq 303
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'An alternate resource is located at /ha.'
     end
 
@@ -670,7 +670,7 @@ describe Grape::Endpoint do
       end
       get '/hey'
       expect(last_response.status).to eq 301
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'This resource has been moved permanently to /ha.'
     end
 
