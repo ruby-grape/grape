@@ -1324,36 +1324,45 @@ describe Grape::API do
 
     context 'env["api.format"]' do
       before do
+        ct = content_type
         subject.post 'attachment' do
           filename = params[:file][:filename]
-          content_type MIME::Types.type_for(filename)[0].to_s
+          content_type ct
           env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
           header 'Content-Disposition', "attachment; filename*=UTF-8''#{CGI.escape(filename)}"
           params[:file][:tempfile].read
         end
       end
 
-      ['/attachment.png', 'attachment'].each do |url|
-        it "uploads and downloads a PNG file via #{url}" do
-          image_filename = 'grape.png'
-          post url, file: Rack::Test::UploadedFile.new(image_filename, 'image/png', true)
-          expect(last_response.status).to eq(201)
-          expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('image/png')
-          expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
-          File.open(image_filename, 'rb') do |io|
-            expect(last_response.body).to eq io.read
+      context 'when image/png' do
+        let(:content_type) { 'image/png' }
+
+        %w[/attachment.png attachment].each do |url|
+          it "uploads and downloads a PNG file via #{url}" do
+            image_filename = 'grape.png'
+            post url, file: Rack::Test::UploadedFile.new(image_filename, content_type, true)
+            expect(last_response.status).to eq(201)
+            expect(last_response.headers[Rack::CONTENT_TYPE]).to eq(content_type)
+            expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
+            File.open(image_filename, 'rb') do |io|
+              expect(last_response.body).to eq io.read
+            end
           end
         end
       end
 
-      it 'uploads and downloads a Ruby file' do
-        filename = __FILE__
-        post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, 'application/x-ruby', true)
-        expect(last_response.status).to eq(201)
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/x-ruby')
-        expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
-        File.open(filename, 'rb') do |io|
-          expect(last_response.body).to eq io.read
+      context 'when ruby file' do
+        let(:content_type) { 'application/x-ruby' }
+
+        it 'uploads and downloads a Ruby file' do
+          filename = __FILE__
+          post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, content_type, true)
+          expect(last_response.status).to eq(201)
+          expect(last_response.headers[Rack::CONTENT_TYPE]).to eq(content_type)
+          expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
+          File.open(filename, 'rb') do |io|
+            expect(last_response.body).to eq io.read
+          end
         end
       end
     end
