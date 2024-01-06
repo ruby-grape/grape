@@ -5,7 +5,7 @@ Warning[:deprecated] = true
 module DeprecatedWarningHandler
   class DeprecationWarning < StandardError; end
 
-  DEPRECATION_REGEX = /deprecat/.freeze
+  DEPRECATION_REGEX = /is deprecated/.freeze
 
   def warn(message)
     return super(message) unless message.match?(DEPRECATION_REGEX)
