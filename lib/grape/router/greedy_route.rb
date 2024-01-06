@@ -13,7 +13,8 @@ module Grape
 
       attr_reader :index, :pattern, :options, :attributes
 
-      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES => :@attributes
+      # params must be handled in this class to avoid method redefined warning
+      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES - [:params] => :@attributes
 
       def initialize(index:, pattern:, **options)
         @index = index
