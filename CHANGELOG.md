@@ -14,6 +14,7 @@
 * [#2399](https://github.com/ruby-grape/grape/pull/2399): Update `rubocop` to 1.59.0, `rubocop-performance` to 1.20.1 and `rubocop-rspec` to 2.25.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2402](https://github.com/ruby-grape/grape/pull/2402): Grape::Deprecations will be raised when running specs  - [@ericproulx](https://github.com/ericproulx).
 * [#2406](https://github.com/ruby-grape/grape/pull/2406): Remove mime-types dependency in specs - [@ericproulx](https://github.com/ericproulx).
+* [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
