@@ -15,6 +15,7 @@
 * [#2402](https://github.com/ruby-grape/grape/pull/2402): Grape::Deprecations will be raised when running specs  - [@ericproulx](https://github.com/ericproulx).
 * [#2406](https://github.com/ruby-grape/grape/pull/2406): Remove mime-types dependency in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
+* [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
