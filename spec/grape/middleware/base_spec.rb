@@ -93,7 +93,7 @@ describe Grape::Middleware::Base do
       end
 
       it 'header' do
-        expect(subject.response.header).to have_key(:abc)
+        expect(subject.response.headers).to have_key(:abc)
       end
 
       it 'returns the memoized Rack::Response instance' do
@@ -115,7 +115,7 @@ describe Grape::Middleware::Base do
       end
 
       it 'header' do
-        expect(subject.response.header).to have_key(:abc)
+        expect(subject.response.headers).to have_key(:abc)
       end
 
       it 'returns the memoized Rack::Response instance' do
