@@ -14,7 +14,7 @@ module Grape
 
       def initialize(errors: [], headers: {}, **_options)
         @errors = errors.group_by(&:params)
-        super message: full_messages.join(', '), status: 400, headers: headers
+        super(message: full_messages.join(', '), status: 400, headers: headers)
       end
 
       def each

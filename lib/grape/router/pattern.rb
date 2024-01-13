@@ -7,10 +7,7 @@ require 'grape/util/cache'
 module Grape
   class Router
     class Pattern
-      DEFAULT_PATTERN_OPTIONS   = { uri_decode: true }.freeze
-      DEFAULT_SUPPORTED_CAPTURE = %i[format version].freeze
-
-      attr_reader :origin, :path, :pattern, :to_regexp
+      attr_reader :origin, :path, :pattern, :to_regexp, :captures_default
 
       extend Forwardable
       def_delegators :pattern, :named_captures, :params
@@ -18,42 +15,52 @@ module Grape
       alias match? ===
 
       def initialize(pattern, **options)
-        @origin  = pattern
-        @path    = build_path(pattern, **options)
-        @pattern = Mustermann::Grape.new(@path, **pattern_options(options))
+        @origin = pattern
+        @path = build_path(pattern, anchor: options[:anchor], suffix: options[:suffix])
+        @pattern = build_pattern(@path, options)
         @to_regexp = @pattern.to_regexp
+        @captures_default = regex_captures_default(@to_regexp)
       end
 
       private
 
-      def pattern_options(options)
-        capture = extract_capture(**options)
-        params = options[:params]
-        options = DEFAULT_PATTERN_OPTIONS.dup
-        options[:capture] = capture if capture.present?
-        options[:params] = params if params.present?
-        options
+      def build_pattern(path, options)
+        Mustermann::Grape.new(
+          path,
+          uri_decode: true,
+          params: options[:params],
+          capture: extract_capture(**options)
+        )
       end
 
-      def build_path(pattern, anchor: false, suffix: nil, **_options)
-        unless anchor || pattern.end_with?('*path')
-          pattern = +pattern
-          pattern << '/' unless pattern.end_with?('/')
-          pattern << '*path'
-        end
-
-        pattern = -pattern.split('/').tap do |parts|
-          parts[parts.length - 1] = "?#{parts.last}"
-        end.join('/') if pattern.end_with?('*path')
-
-        PatternCache[[pattern, suffix]]
+      def build_path(pattern, anchor: false, suffix: nil)
+        PatternCache[[build_path_from_pattern(pattern, anchor: anchor), suffix]]
       end
 
-      def extract_capture(requirements: {}, **options)
-        requirements = {}.merge(requirements)
-        DEFAULT_SUPPORTED_CAPTURE.each_with_object(requirements) do |field, capture|
-          option = Array(options[field])
-          capture[field] = option.map(&:to_s) if option.present?
+      def extract_capture(**options)
+        sliced_options = options
+                         .slice(:format, :version)
+                         .delete_if { |_k, v| v.blank? }
+                         .transform_values { |v| Array.wrap(v).map(&:to_s) }
+        return sliced_options if options[:requirements].blank?
+
+        options[:requirements].merge(sliced_options)
+      end
+
+      def regex_captures_default(regex)
+        names = regex.names - %w[format version] # remove default format and version
+        names.to_h { |k| [k, ''] }
+      end
+
+      def build_path_from_pattern(pattern, anchor: false)
+        if pattern.end_with?('*path')
+          pattern.dup.insert(pattern.rindex('/') + 1, '?')
+        elsif anchor
+          pattern
+        elsif pattern.end_with?('/')
+          "#{pattern}?*path"
+        else
+          "#{pattern}/?*path"
         end
       end
 

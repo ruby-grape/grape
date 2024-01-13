@@ -236,7 +236,7 @@ describe Grape::Entity do
       end
       get '/example'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq('application/xml')
+      expect(last_response.content_type).to eq('application/xml')
       expect(last_response.body).to eq <<~XML
         <?xml version="1.0" encoding="UTF-8"?>
         <hash>
@@ -266,7 +266,7 @@ describe Grape::Entity do
       end
       get '/example'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq('application/json')
+      expect(last_response.content_type).to eq('application/json')
       expect(last_response.body).to eq('{"example":{"name":"johnnyiller"}}')
     end
 
@@ -298,7 +298,7 @@ describe Grape::Entity do
 
       get '/example?callback=abcDef'
       expect(last_response.status).to eq(200)
-      expect(last_response.headers['Content-type']).to eq('application/javascript')
+      expect(last_response.content_type).to eq('application/javascript')
       expect(last_response.body).to include 'abcDef({"example":{"name":"johnnyiller"}})'
     end
 

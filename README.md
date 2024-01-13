@@ -178,7 +178,7 @@ The maintainers of Grape are working with Tidelift to deliver commercial support
 
 ## Installation
 
-Ruby 2.6 or newer is required.
+Ruby 2.7 or newer is required.
 
 Grape is available as a gem, to install it run:
 
@@ -1348,7 +1348,7 @@ class Color
   end
 
   def self.parse(value)
-    return new(value) if %w[blue red green]).include?(value)
+    return new(value) if %w[blue red green].include?(value)
 
     Grape::Types::InvalidValue.new('Unsupported color')
   end

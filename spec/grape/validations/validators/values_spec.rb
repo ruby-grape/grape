@@ -63,17 +63,17 @@ describe Grape::Validations::Validators::ValuesValidator do
         end
 
         params do
-          requires :type, values: { except: ValuesModel.excepts, except_message: 'value is on exclusions list', message: 'default exclude message' }
+          requires :type, except_values: { value: ValuesModel.excepts, message: 'value is on exclusions list' }, default: 'default exclude message'
         end
         get '/exclude/exclude_message'
 
         params do
-          requires :type, values: { except: -> { ValuesModel.excepts }, except_message: 'value is on exclusions list' }
+          requires :type, except_values: { value: -> { ValuesModel.excepts }, message: 'value is on exclusions list' }
         end
         get '/exclude/lambda/exclude_message'
 
         params do
-          requires :type, values: { except: ValuesModel.excepts, message: 'default exclude message' }
+          requires :type, except_values: { value: ValuesModel.excepts, message: 'default exclude message' }
         end
         get '/exclude/fallback_message'
       end
@@ -105,7 +105,7 @@ describe Grape::Validations::Validators::ValuesValidator do
       end
 
       params do
-        optional :type, values: { except: ValuesModel.excepts }, default: 'valid-type2'
+        optional :type, except_values: ValuesModel.excepts, default: 'valid-type2'
       end
       get '/default/except' do
         { type: params[:type] }
@@ -187,42 +187,42 @@ describe Grape::Validations::Validators::ValuesValidator do
       get '/optional_with_required_values'
 
       params do
-        requires :type, values: { except: ValuesModel.excepts }
+        requires :type, except_values: ValuesModel.excepts
       end
       get '/except/exclusive' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, type: String, values: { except: ValuesModel.excepts }
+        requires :type, type: String, except_values: ValuesModel.excepts
       end
       get '/except/exclusive/type' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, values: { except: -> { ValuesModel.excepts } }
+        requires :type, except_values: ValuesModel.excepts
       end
       get '/except/exclusive/lambda' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, type: String, values: { except: -> { ValuesModel.excepts } }
+        requires :type, type: String, except_values: -> { ValuesModel.excepts }
       end
       get '/except/exclusive/lambda/type' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, type: Integer, values: { except: -> { [3, 4, 5] } }
+        requires :type, type: Integer, except_values: -> { [3, 4, 5] }
       end
       get '/except/exclusive/lambda/coercion' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, type: Integer, values: { value: 1..5, except: [3] }
+        requires :type, type: Integer, values: 1..5, except_values: [3]
       end
       get '/mixed/value/except' do
         { type: params[:type] }
@@ -234,14 +234,14 @@ describe Grape::Validations::Validators::ValuesValidator do
       put '/optional_with_array_of_string_values'
 
       params do
-        requires :type, values: { proc: ->(v) { ValuesModel.include? v } }
+        requires :type, values: ->(v) { ValuesModel.include? v }
       end
       get '/proc' do
         { type: params[:type] }
       end
 
       params do
-        requires :type, values: { proc: ->(v) { ValuesModel.include? v }, message: 'failed check' }
+        requires :type, values: { value: ->(v) { ValuesModel.include? v }, message: 'failed check' }
       end
       get '/proc/message'
 
@@ -520,7 +520,7 @@ describe Grape::Validations::Validators::ValuesValidator do
   it 'raises IncompatibleOptionValues when except contains a value that is not a kind of the type' do
     subject = Class.new(Grape::API)
     expect do
-      subject.params { requires :type, values: { except: [10.5, 11] }, type: Integer }
+      subject.params { requires :type, except_values: [10.5, 11], type: Integer }
     end.to raise_error Grape::Exceptions::IncompatibleOptionValues
   end
 

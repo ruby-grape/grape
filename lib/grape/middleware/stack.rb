@@ -76,11 +76,10 @@ module Grape
       end
       ruby2_keywords :insert_after if respond_to?(:ruby2_keywords, true)
 
-      def use(*args, &block)
-        middleware = self.class::Middleware.new(*args, &block)
+      def use(...)
+        middleware = self.class::Middleware.new(...)
         middlewares.push(middleware)
       end
-      ruby2_keywords :use if respond_to?(:ruby2_keywords, true)
 
       def merge_with(middleware_specs)
         middleware_specs.each do |operation, *args|
