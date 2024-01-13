@@ -19,7 +19,22 @@ module Grape
         end
       end
 
-      private_class_method :new
+      def ==(other)
+        self.eql?(other)
+      end
+
+      def eql?(other)
+        self.class == other.class &&
+          other.type == type &&
+          other.subtype == subtype &&
+          other.vendor == vendor &&
+          other.version == version &&
+          other.format == format
+      end
+
+      def hash
+        [self.class, type, subtype, vendor, version, format].hash
+      end
 
       class << self
         def best_quality(header, available_media_types)
@@ -36,10 +51,10 @@ module Grape
         end
 
         def match?(media_type)
-          return if media_type.blank?
+          return false if media_type.blank?
 
           subtype = media_type.split('/', 2).last
-          return if subtype.blank?
+          return false if subtype.blank?
 
           VENDOR_VERSION_HEADER_REGEX.match?(subtype)
         end

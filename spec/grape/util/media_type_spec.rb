@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
-require 'grape/util/media_type'
+
 
 RSpec.describe Grape::Util::MediaType do
+
+  shared_examples 'MediaType' do
+    it { is_expected.to eq(described_class.new(type: type, subtype: subtype)) }
+  end
+
   describe '.parse' do
     subject(:media_type) { described_class.parse(header) }
 
@@ -19,37 +24,22 @@ RSpec.describe Grape::Util::MediaType do
     end
 
     context 'when header is a valid mime type' do
-      let(:header) { 'text/html' }
+      let(:header) { [type, subtype].join('/') }
+      let(:type) { 'text' }
+      let(:subtype) { 'html' }
 
-      it 'returns an instance of MediaType' do
-        expect(media_type).to be_a described_class
-        expect(media_type.type).to eq('text')
-        expect(media_type.subtype).to eq('html')
-      end
+      it_behaves_like 'MediaType'
 
       context 'when header is a vendor mime type' do
-        let(:header) { 'application/vnd.test-v1+json' }
+        let(:type) { 'application' }
+        let(:subtype) { 'vnd.test-v1+json' }
 
-        it 'returns an instance of MediaType' do
-          expect(media_type).to be_a described_class
-          expect(media_type.type).to eq('application')
-          expect(media_type.subtype).to eq('vnd.test-v1+json')
-          expect(media_type.vendor).to eq('test')
-          expect(media_type.version).to eq('v1')
-          expect(media_type.format).to eq('json')
-        end
+        it_behaves_like 'MediaType'
 
         context 'when header is a vendor mime type without version' do
-          let(:header) { 'application/vnd.ms-word' }
+          let(:subtype) { 'vnd.ms-word' }
 
-          it 'returns an instance of MediaType' do
-            expect(media_type).to be_a described_class
-            expect(media_type.type).to eq('application')
-            expect(media_type.subtype).to eq('vnd.ms-word')
-            expect(media_type.vendor).to eq('ms')
-            expect(media_type.version).to eq('word')
-            expect(media_type.format).to be_nil
-          end
+          it_behaves_like 'MediaType'
         end
       end
     end
@@ -84,35 +74,47 @@ RSpec.describe Grape::Util::MediaType do
   end
 
   describe '.best_quality' do
-    subject { described_class.best_quality(header, available_media_types) }
+    subject(:media_type) { described_class.best_quality(header, available_media_types) }
 
     let(:available_media_types) { %w[application/json text/html] }
 
     context 'when header is blank?' do
       let(:header) { nil }
+      let(:type) { 'application' }
+      let(:subtype) { 'json' }
 
-      it 'return a MediaType with the first available_media_types' do
-        expect(media_type).to be_a described_class
-        expect(media_type.type).to eq('application')
-        expect(media_type.subtype).to eq('json')
-        expect(media_type.vendor).to be_nil
-        expect(media_type.version).to be_nil
-        expect(media_type.format).to be_nil
-      end
+      it_behaves_like 'MediaType'
     end
 
     context 'when header is not blank' do
-      let(:header) { 'text/html' }
+      let(:header) { [type, subtype].join('/') }
+      let(:type) { 'text' }
+      let(:subtype) { 'html' }
 
       it 'calls Rack::Utils.best_q_match' do
         expect(Rack::Utils).to receive(:best_q_match).and_call_original
-        expect(media_type).to be_a described_class
-        expect(media_type.type).to eq('text')
-        expect(media_type.subtype).to eq('html')
-        expect(media_type.vendor).to be_nil
-        expect(media_type.version).to be_nil
-        expect(media_type.format).to be_nil
+        expect(media_type).to eq(described_class.new(type: type, subtype: subtype))
       end
     end
+  end
+
+  describe '.==' do
+    subject { described_class.new(type: type, subtype: subtype) }
+
+    let(:type) { 'application' }
+    let(:subtype) { 'vnd.test-v1+json' }
+    let(:other_media_type_class) { Class.new(Struct.new(:type, :subtype, :vendor, :version, :format)) }
+    let(:other_media_type_instance) { other_media_type_class.new(type, subtype, 'test', 'v1', 'json') }
+
+    it { is_expected.not_to eq(other_media_type_class.new(type, subtype, 'test', 'v1', 'json'))}
+  end
+
+  describe '.hash' do
+    subject { Set.new([described_class.new(type: type, subtype: subtype)]) }
+
+    let(:type) { 'text' }
+    let(:subtype) { 'html' }
+
+    it { is_expected.to include(described_class.new(type: type, subtype: subtype)) }
   end
 end
