@@ -3100,7 +3100,7 @@ end
 Built-in formatters are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
-* `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
+* `:xml`: use object's `to_xml` when available, usually via `MultiXml`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
