@@ -21,6 +21,7 @@
   - [Rack](#rack)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
+    - [Zeitwerk](#zeitwerk)
   - [Modules](#modules)
 - [Remounting](#remounting)
   - [Mount Configuration](#mount-configuration)
