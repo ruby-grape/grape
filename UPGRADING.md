@@ -3,6 +3,9 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
+#### Changes in rescue_from
+`rack_response` has been deprecated and `error_response` has been removed. Use `error!` instead.
+
 #### Grape::Router::Route.route_xxx methods have been removed
 
 - `route_method` is accessible through `request_method`

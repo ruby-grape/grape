@@ -167,6 +167,24 @@ module Grape
         throw :error, message: message, status: status, headers: headers
       end
 
+      # Creates a Rack response based on the provided message, status, and headers.
+      # The content type in the headers is set to the default content type unless provided.
+      # The message is HTML-escaped if the content type is 'text/html'.
+      #
+      # @param message [String] The content of the response.
+      # @param status [Integer] The HTTP status code.
+      # @params headers [Hash] (optional) Headers for the response
+      #                      (default: {Rack::CONTENT_TYPE => content_type}).
+      #
+      # Returns:
+      # A Rack::Response object containing the specified message, status, and headers.
+      #
+      def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
+        Grape.deprecator.warn('Use error! instead of rack_response')
+        message = Rack::Utils::escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
+        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
+      end
+
       # Redirect to a new url.
       #
       # @param url [String] The url to be redirect.
