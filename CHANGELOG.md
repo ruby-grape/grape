@@ -27,6 +27,7 @@
 * [#2382](https://github.com/ruby-grape/grape/pull/2382): Fix values validator for params wrapped in `with` block - [@numbata](https://github.com/numbata).
 * [#2387](https://github.com/ruby-grape/grape/pull/2387): Fix rubygems version within workflows - [@ericproulx](https://github.com/ericproulx).
 * [#2405](https://github.com/ruby-grape/grape/pull/2405): Fix edge workflow - [@ericproulx](https://github.com/ericproulx).
+* [#2414](https://github.com/ruby-grape/grape/pull/2414): Fix Rack::Lint missing content-type - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
