@@ -404,13 +404,13 @@ describe Grape::Validations::Validators::ValuesValidator do
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
   end
 
-  it 'validates against values in an endless range', if: ActiveSupport::VERSION::MAJOR >= 6 do
+  it 'validates against values in an endless range' do
     get('/endless', type: 10)
     expect(last_response.status).to eq 200
     expect(last_response.body).to eq({ type: 10 }.to_json)
   end
 
-  it 'does not allow an invalid value for a parameter using an endless range', if: ActiveSupport::VERSION::MAJOR >= 6 do
+  it 'does not allow an invalid value for a parameter using an endless range' do
     get('/endless', type: 0)
     expect(last_response.status).to eq 400
     expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
