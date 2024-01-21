@@ -38,13 +38,6 @@ module Grape
         run_rescue_handler(find_handler(e.class), e, @env[Grape::Env::API_ENDPOINT])
       end
 
-      def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
-        rack_response(
-          status, headers.reverse_merge(Rack::CONTENT_TYPE => content_type),
-          format_message(message, backtrace, original_exception)
-        )
-      end
-
       private
 
       def rack_response(status, headers, message)
@@ -137,6 +130,14 @@ module Grape
           run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new, endpoint)
         end
       end
+
+      def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
+        rack_response(
+          status, headers.reverse_merge(Rack::CONTENT_TYPE => content_type),
+          format_message(message, backtrace, original_exception)
+        )
+      end
+
 
       def error?(response)
         response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]

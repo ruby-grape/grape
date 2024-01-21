@@ -162,9 +162,9 @@ module Grape
       # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
       # @param additional_headers [Hash] Addtional headers for the response.
       def error!(message, status = nil, additional_headers = nil)
-        self.status(status || namespace_inheritable(:default_error_status))
+        status = self.status(status || namespace_inheritable(:default_error_status))
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, message: message, status: self.status, headers: headers
+        throw :error, message: message, status: status, headers: headers
       end
 
       # Redirect to a new url.
