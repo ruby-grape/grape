@@ -181,7 +181,7 @@ module Grape
       #
       def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
         Grape.deprecator.warn('Use error! instead of rack_response')
-        message = Rack::Utils::escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
+        message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
         Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
       end
 
