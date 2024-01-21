@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'grape/middleware/base'
-require 'active_support/core_ext/string/output_safety'
 
 module Grape
   module Middleware
@@ -34,66 +33,66 @@ module Grape
 
       def call!(env)
         @env = env
-        begin
-          error_response(catch(:error) do
-            return @app.call(@env)
-          end)
-        rescue Exception => e # rubocop:disable Lint/RescueException
-          handler =
-            rescue_handler_for_base_only_class(e.class) ||
-            rescue_handler_for_class_or_its_ancestor(e.class) ||
-            rescue_handler_for_grape_exception(e.class) ||
-            rescue_handler_for_any_class(e.class) ||
-            raise
-
-          run_rescue_handler(handler, e, @env[Grape::Env::API_ENDPOINT])
-        end
+        error_response(catch(:error) { return @app.call(@env) })
+      rescue Exception => e # rubocop:disable Lint/RescueException
+        run_rescue_handler(find_handler(e.class), e, @env[Grape::Env::API_ENDPOINT])
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
-        headers = headers.reverse_merge(Rack::CONTENT_TYPE => content_type)
-        rack_response(format_message(message, backtrace, original_exception), status, headers)
+        rack_response(
+          status, headers.reverse_merge(Rack::CONTENT_TYPE => content_type),
+          format_message(message, backtrace, original_exception)
+        )
+      end
+
+      private
+
+      def rack_response(status, headers, message)
+        message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == TEXT_HTML
+        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
+      end
+
+      def format_message(message, backtrace, original_exception = nil)
+        format = env[Grape::Env::API_FORMAT] || options[:format]
+        formatter = Grape::ErrorFormatter.formatter_for(format, **options)
+        return formatter.call(message, backtrace, options, env, original_exception) if formatter
+
+        throw :error,
+              status: 406,
+              message: "The requested format '#{format}' is not supported.",
+              backtrace: backtrace,
+              original_exception: original_exception
+      end
+
+      def find_handler(klass)
+        rescue_handler_for_base_only_class(klass) ||
+          rescue_handler_for_class_or_its_ancestor(klass) ||
+          rescue_handler_for_grape_exception(klass) ||
+          rescue_handler_for_any_class(klass) ||
+          raise
+      end
+
+      def error_response(error = {})
+        status = error[:status] || options[:default_status]
+        message = error[:message] || options[:default_message]
+        headers = { Rack::CONTENT_TYPE => content_type }.tap do |h|
+          h.merge!(error[:headers]) if error[:headers].is_a?(Hash)
+        end
+        backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
+        original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
+        rack_response(status, headers, format_message(message, backtrace, original_exception))
       end
 
       def default_rescue_handler(e)
         error_response(message: e.message, backtrace: e.backtrace, original_exception: e)
       end
 
-      # TODO: This method is deprecated. Refactor out.
-      def error_response(error = {})
-        status = error[:status] || options[:default_status]
-        message = error[:message] || options[:default_message]
-        headers = { Rack::CONTENT_TYPE => content_type }
-        headers.merge!(error[:headers]) if error[:headers].is_a?(Hash)
-        backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
-        original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
-        rack_response(format_message(message, backtrace, original_exception), status, headers)
-      end
-
-      def rack_response(message, status = options[:default_status], headers = { Rack::CONTENT_TYPE => content_type })
-        message = ERB::Util.html_escape(message) if headers[Rack::CONTENT_TYPE] == TEXT_HTML
-        Rack::Response.new([message], Rack::Utils.status_code(status), headers)
-      end
-
-      def format_message(message, backtrace, original_exception = nil)
-        format = env[Grape::Env::API_FORMAT] || options[:format]
-        formatter = Grape::ErrorFormatter.formatter_for(format, **options)
-        throw :error,
-              status: 406,
-              message: "The requested format '#{format}' is not supported.",
-              backtrace: backtrace,
-              original_exception: original_exception unless formatter
-        formatter.call(message, backtrace, options, env, original_exception)
-      end
-
-      private
-
       def rescue_handler_for_base_only_class(klass)
         error, handler = options[:base_only_rescue_handlers].find { |err, _handler| klass == err }
 
         return unless error
 
-        handler || :default_rescue_handler
+        handler || method(:default_rescue_handler)
       end
 
       def rescue_handler_for_class_or_its_ancestor(klass)
@@ -101,22 +100,22 @@ module Grape
 
         return unless error
 
-        handler || :default_rescue_handler
+        handler || method(:default_rescue_handler)
       end
 
       def rescue_handler_for_grape_exception(klass)
         return unless klass <= Grape::Exceptions::Base
-        return :error_response if klass == Grape::Exceptions::InvalidVersionHeader
+        return method(:error_response) if klass == Grape::Exceptions::InvalidVersionHeader
         return unless options[:rescue_grape_exceptions] || !options[:rescue_all]
 
-        options[:grape_exceptions_rescue_handler] || :error_response
+        options[:grape_exceptions_rescue_handler] || method(:error_response)
       end
 
       def rescue_handler_for_any_class(klass)
         return unless klass <= StandardError
         return unless options[:rescue_all] || options[:rescue_grape_exceptions]
 
-        options[:all_rescue_handler] || :default_rescue_handler
+        options[:all_rescue_handler] || method(:default_rescue_handler)
       end
 
       def run_rescue_handler(handler, error, endpoint)
@@ -126,9 +125,9 @@ module Grape
           handler = public_method(handler)
         end
 
-        response = (catch(:error) do
+        response = catch(:error) do
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
-        end)
+        end
 
         response = error!(response[:message], response[:status], response[:headers]) if error?(response)
 
