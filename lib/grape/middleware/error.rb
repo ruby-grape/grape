@@ -138,7 +138,6 @@ module Grape
         )
       end
 
-
       def error?(response)
         response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]
       end
