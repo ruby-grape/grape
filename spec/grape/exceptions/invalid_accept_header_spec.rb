@@ -44,7 +44,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.rescue_from :all do |e|
-        rack_response 'message was processed', 400, e[:headers]
+        error! 'message was processed', 400, e[:headers]
       end
       subject.get '/beer' do
         'beer received'
@@ -114,7 +114,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
       subject.rescue_from :all do |e|
-        rack_response 'message was processed', 400, e[:headers]
+        error! 'message was processed', 400, e[:headers]
       end
       subject.desc 'Get beer' do
         failure [[400, 'Bad Request'], [401, 'Unauthorized'], [403, 'Forbidden'],
@@ -194,7 +194,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.rescue_from :all do |e|
-        rack_response 'message was processed', 400, e[:headers]
+        error! 'message was processed', 400, e[:headers]
       end
       subject.get '/beer' do
         'beer received'
@@ -273,7 +273,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     before do
       subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
       subject.rescue_from :all do |e|
-        rack_response 'message was processed', 400, e[:headers]
+        error! 'message was processed', 400, e[:headers]
       end
       subject.desc 'Get beer' do
         failure [[400, 'Bad Request'], [401, 'Unauthorized'], [403, 'Forbidden'],

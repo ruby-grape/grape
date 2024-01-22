@@ -162,9 +162,9 @@ module Grape
       # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
       # @param additional_headers [Hash] Addtional headers for the response.
       def error!(message, status = nil, additional_headers = nil)
-        self.status(status || namespace_inheritable(:default_error_status))
+        status = self.status(status || namespace_inheritable(:default_error_status))
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, message: message, status: self.status, headers: headers
+        throw :error, message: message, status: status, headers: headers
       end
 
       # Creates a Rack response based on the provided message, status, and headers.
@@ -180,8 +180,9 @@ module Grape
       # A Rack::Response object containing the specified message, status, and headers.
       #
       def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
-        message = ERB::Util.html_escape(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
-        Rack::Response.new([message], Rack::Utils.status_code(status), headers)
+        Grape.deprecator.warn('The rack_response method has been deprecated, use error! instead.')
+        message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
+        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
       end
 
       # Redirect to a new url.

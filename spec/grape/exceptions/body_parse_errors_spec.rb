@@ -6,7 +6,7 @@ describe Grape::Exceptions::ValidationErrors do
 
     before do
       subject.rescue_from :all do |_e|
-        rack_response 'message was processed', 400
+        error! 'message was processed', 400
       end
       subject.params do
         requires :beer
@@ -58,7 +58,7 @@ describe Grape::Exceptions::ValidationErrors do
 
     before do
       subject.rescue_from :all do |_e|
-        rack_response 'message was processed', 400
+        error! 'message was processed', 400
       end
       subject.rescue_from :grape_exceptions
 
@@ -96,7 +96,7 @@ describe Grape::Exceptions::ValidationErrors do
 
     before do
       subject.rescue_from :grape_exceptions do |e|
-        rack_response "Custom Error Contents, Original Message: #{e.message}", 400
+        error! "Custom Error Contents, Original Message: #{e.message}", 400
       end
 
       subject.params do
