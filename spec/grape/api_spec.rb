@@ -4437,8 +4437,9 @@ describe Grape::API do
     end
 
     it 'raises a deprecation' do
-      expect(Grape.deprecator).to receive(:warn).with('Use error! instead of rack_response')
+      expect(Grape.deprecator).to receive(:warn).with('The rack_response method has been deprecated, use error! instead.')
       get 'test'
+      expect(last_response.body).to eq('deprecated')
     end
   end
 end

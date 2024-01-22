@@ -180,7 +180,7 @@ module Grape
       # A Rack::Response object containing the specified message, status, and headers.
       #
       def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
-        Grape.deprecator.warn('Use error! instead of rack_response')
+        Grape.deprecator.warn('The rack_response method has been deprecated, use error! instead.')
         message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
         Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
       end
