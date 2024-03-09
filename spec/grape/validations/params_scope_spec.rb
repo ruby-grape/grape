@@ -179,7 +179,7 @@ describe Grape::Validations::ParamsScope do
     end
 
     it 'allows the proc to pass validation without checking in except' do
-      subject.params { requires :numbers, type: Integer, values: { except: -> { [0, 1, 2] } } }
+      subject.params { requires :numbers, type: Integer, except_values: -> { [0, 1, 2] } }
 
       subject.post('/required') { 'coercion with proc works' }
       post '/required', numbers: '10'

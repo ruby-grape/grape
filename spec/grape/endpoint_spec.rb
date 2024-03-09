@@ -175,37 +175,42 @@ describe Grape::Endpoint do
 
       get('/get/cookies')
 
-      expect(Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.sort).to eql [
-        'cookie3=symbol',
-        'cookie4=secret+code+here',
-        'my-awesome-cookie1=is+cool',
-        'my-awesome-cookie2=is+cool+too; domain=my.example.com; path=/; secure'
-      ]
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'cookie3', 'value' => 'symbol' },
+        { 'name' => 'cookie4', 'value' => 'secret code here' },
+        { 'name' => 'my-awesome-cookie1', 'value' => 'is cool' },
+        { 'name' => 'my-awesome-cookie2', 'value' => 'is cool too', 'domain' => 'my.example.com', 'path' => '/', 'secure' => true }
+      )
     end
 
     it 'sets browser cookies and does not set response cookies' do
+      set_cookie %w[username=mrplum sandbox=true]
       subject.get('/username') do
         cookies[:username]
       end
-      get('/username', {}, 'HTTP_COOKIE' => 'username=mrplum; sandbox=true')
 
+      get '/username'
       expect(last_response.body).to eq('mrplum')
-      expect(last_response.headers['Set-Cookie']).to be_nil
+      expect(last_response.cookie_jar).to be_empty
     end
 
     it 'sets and update browser cookies' do
+      set_cookie %w[username=user sandbox=false]
       subject.get('/username') do
         cookies[:sandbox] = true if cookies[:sandbox] == 'false'
         cookies[:username] += '_test'
       end
-      get('/username', {}, 'HTTP_COOKIE' => 'username=user; sandbox=false')
+
+      get '/username'
       expect(last_response.body).to eq('user_test')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }
-      expect(cookies[0]).to match(/username=user_test/)
-      expect(cookies[1]).to match(/sandbox=true/)
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'sandbox', 'value' => 'true' },
+        { 'name' => 'username', 'value' => 'user_test' }
+      )
     end
 
     it 'deletes cookie' do
+      set_cookie %w[delete_this_cookie=1 and_this=2]
       subject.get('/test') do
         sum = 0
         cookies.each do |name, val|
@@ -214,22 +219,16 @@ describe Grape::Endpoint do
         end
         sum
       end
-      get '/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2'
+      get '/test'
       expect(last_response.body).to eq('3')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
-        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [cookie.name, cookie]
-      end
-      expect(cookies.size).to eq(2)
-      %w[and_this delete_this_cookie].each do |cookie_name|
-        cookie = cookies[cookie_name]
-        expect(cookie).not_to be_nil
-        expect(cookie.value).to eq('deleted')
-        expect(cookie.expired?).to be true
-      end
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'and_this', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) },
+        { 'name' => 'delete_this_cookie', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) }
+      )
     end
 
     it 'deletes cookies with path' do
+      set_cookie %w[delete_this_cookie=1 and_this=2]
       subject.get('/test') do
         sum = 0
         cookies.each do |name, val|
@@ -238,20 +237,12 @@ describe Grape::Endpoint do
         end
         sum
       end
-      get('/test', {}, 'HTTP_COOKIE' => 'delete_this_cookie=1; and_this=2')
+      get '/test'
       expect(last_response.body).to eq('3')
-      cookies = Array(last_response.headers['Set-Cookie']).flat_map { |h| h.split("\n") }.to_h do |set_cookie|
-        cookie = CookieJar::Cookie.from_set_cookie 'http://localhost/test', set_cookie
-        [cookie.name, cookie]
-      end
-      expect(cookies.size).to eq(2)
-      %w[and_this delete_this_cookie].each do |cookie_name|
-        cookie = cookies[cookie_name]
-        expect(cookie).not_to be_nil
-        expect(cookie.value).to eq('deleted')
-        expect(cookie.path).to eq('/test')
-        expect(cookie.expired?).to be true
-      end
+      expect(last_response.cookie_jar).to contain_exactly(
+        { 'name' => 'and_this', 'path' => '/test', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) },
+        { 'name' => 'delete_this_cookie', 'path' => '/test', 'value' => '', 'max-age' => 0, 'expires' => Time.at(0) }
+      )
     end
   end
 
@@ -499,7 +490,7 @@ describe Grape::Endpoint do
       end
 
       it 'responses with given content type in headers' do
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq 'application/json; charset=utf-8'
+        expect(last_response.content_type).to eq 'application/json; charset=utf-8'
       end
     end
 
@@ -659,7 +650,7 @@ describe Grape::Endpoint do
       end
       get '/hey'
       expect(last_response.status).to eq 302
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
     end
 
@@ -669,7 +660,7 @@ describe Grape::Endpoint do
       end
       post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
       expect(last_response.status).to eq 303
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'An alternate resource is located at /ha.'
     end
 
@@ -679,7 +670,7 @@ describe Grape::Endpoint do
       end
       get '/hey'
       expect(last_response.status).to eq 301
-      expect(last_response.headers['Location']).to eq '/ha'
+      expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'This resource has been moved permanently to /ha.'
     end
 
@@ -701,17 +692,6 @@ describe Grape::Endpoint do
         expect do
           get '/hey'
         end.to raise_error(NoMethodError, %r{^undefined method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint})
-      end
-    end
-
-    context 'when performing an undefined method of an instance inside the API' do
-      it 'raises NoMethodError but stripping the internals of the Object class' do
-        subject.get('/hey') do
-          Object.new.x
-        end
-        expect do
-          get '/hey'
-        end.to raise_error(NoMethodError, /^undefined method `x' for #<Object:0x[0-9a-fA-F]+>$/)
       end
     end
   end
@@ -999,7 +979,7 @@ describe Grape::Endpoint do
   context 'binary' do
     before do
       subject.get do
-        file FileStreamer.new(__FILE__)
+        stream FileStreamer.new(__FILE__)
       end
     end
 

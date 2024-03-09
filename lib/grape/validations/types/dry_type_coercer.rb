@@ -25,7 +25,7 @@ module Grape
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
             collection_coercers.fetch(type) do
-              DryTypeCoercer.collection_coercers[type] = Grape::Validations::Types.const_get("#{type.name.camelize}Coercer")
+              DryTypeCoercer.collection_coercers[type] = Grape::Validations::Types.const_get(:"#{type.name.camelize}Coercer")
             end
           end
 

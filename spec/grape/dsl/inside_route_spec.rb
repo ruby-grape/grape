@@ -209,13 +209,7 @@ describe Grape::Endpoint do
 
         it 'emits a warning that this method is deprecated' do
           expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-
-          subject.file file_path
-        end
-
-        it 'forwards the call to sendfile' do
           expect(subject).to receive(:sendfile).with(file_path)
-
           subject.file file_path
         end
       end
@@ -225,13 +219,7 @@ describe Grape::Endpoint do
 
         it 'emits a warning that this method is deprecated' do
           expect(Grape.deprecator).to receive(:warn).with(/Use stream to use a Stream object/)
-
-          subject.file file_object
-        end
-
-        it 'forwards the call to stream' do
           expect(subject).to receive(:stream).with(file_object)
-
           subject.file file_object
         end
       end
@@ -240,13 +228,7 @@ describe Grape::Endpoint do
     describe 'get' do
       it 'emits a warning that this method is deprecated' do
         expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-
-        subject.file
-      end
-
-      it 'fowards call to sendfile' do
         expect(subject).to receive(:sendfile)
-
         subject.file
       end
     end

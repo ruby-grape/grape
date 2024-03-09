@@ -26,8 +26,8 @@ module Grape
       attr_accessor :base_instance, :instances
 
       # Rather than initializing an object of type Grape::API, create an object of type Instance
-      def new(*args, &block)
-        base_instance.new(*args, &block)
+      def new(...)
+        base_instance.new(...)
       end
 
       # When inherited, will create a list of all instances (times the API was mounted)
@@ -77,8 +77,8 @@ module Grape
       # the headers, and the body. See [the rack specification]
       # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def call(*args, &block)
-        instance_for_rack.call(*args, &block)
+      def call(...)
+        instance_for_rack.call(...)
       end
 
       # Alleviates problems with autoloading by tring to search for the constant

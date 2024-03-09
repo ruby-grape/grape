@@ -8,15 +8,27 @@
 * [#2383](https://github.com/ruby-grape/grape/pull/2383): Use regex block instead of if - [@ericproulx](https://github.com/ericproulx).
 * [#2384](https://github.com/ruby-grape/grape/pull/2384): Allow to use `before/after/rescue_from` methods in any order when using `mount` - [@jcagarcia](https://github.com/jcagarcia).
 * [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
+* [#2390](https://github.com/ruby-grape/grape/pull/2390): Drop support for Ruby 2.6 and Rails 5 - [@ericproulx](https://github.com/ericproulx).
+* [#2393](https://github.com/ruby-grape/grape/pull/2393): Optimize AttributeTranslator - [@ericproulx](https://github.com/ericproulx).
+* [#2395](https://github.com/ruby-grape/grape/pull/2395): Set `max-age` to 0 when `cookies.delete` - [@ericproulx](https://github.com/ericproulx).
+* [#2397](https://github.com/ruby-grape/grape/pull/2397): Add support for ruby 3.3 - [@ericproulx](https://github.com/ericproulx).
+* [#2399](https://github.com/ruby-grape/grape/pull/2399): Update `rubocop` to 1.59.0, `rubocop-performance` to 1.20.1 and `rubocop-rspec` to 2.25.0 - [@ericproulx](https://github.com/ericproulx).
+* [#2402](https://github.com/ruby-grape/grape/pull/2402): Grape::Deprecations will be raised when running specs  - [@ericproulx](https://github.com/ericproulx).
+* [#2406](https://github.com/ruby-grape/grape/pull/2406): Remove mime-types dependency in specs - [@ericproulx](https://github.com/ericproulx).
+* [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
+* [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
+* [#2375](https://github.com/ruby-grape/grape/pull/2375): Fix setter methods for `Grape::Router::AttributeTranslator` - [@Jell](https://github.com/Jell).
 * [#2370](https://github.com/ruby-grape/grape/pull/2370): Remove route_xyz method_missing deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2372](https://github.com/ruby-grape/grape/pull/2372): Fix `declared` method for hash params with overlapping names - [@jcagarcia](https://github.com/jcagarcia).
 * [#2373](https://github.com/ruby-grape/grape/pull/2373): Fix markdown files for following 1-line format - [@jcagarcia](https://github.com/jcagarcia).
 * [#2382](https://github.com/ruby-grape/grape/pull/2382): Fix values validator for params wrapped in `with` block - [@numbata](https://github.com/numbata).
 * [#2387](https://github.com/ruby-grape/grape/pull/2387): Fix rubygems version within workflows - [@ericproulx](https://github.com/ericproulx).
+* [#2405](https://github.com/ruby-grape/grape/pull/2405): Fix edge workflow - [@ericproulx](https://github.com/ericproulx).
+* [#2414](https://github.com/ruby-grape/grape/pull/2414): Fix Rack::Lint missing content-type - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
@@ -59,7 +71,7 @@
 
 #### Features
 
-* [#2288](https://github.com/ruby-grape/grape/pull/2288): Droped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
+* [#2288](https://github.com/ruby-grape/grape/pull/2288): Dropped support for Ruby 2.5 - [@ericproulx](https://github.com/ericproulx).
 * [#2288](https://github.com/ruby-grape/grape/pull/2288): Updated rubocop to 1.41.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2296](https://github.com/ruby-grape/grape/pull/2296): Fix cops and enables some - [@ericproulx](https://github.com/ericproulx).
 * [#2302](https://github.com/ruby-grape/grape/pull/2302): Rack < 3 and update rack-test - [@ericproulx](https://github.com/ericproulx).
