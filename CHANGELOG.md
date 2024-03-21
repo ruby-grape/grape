@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2419](https://github.com/ruby-grape/grape/pull/2419): Add the `contract` DSL - [@dgutov](https://github.com/dgutov).
 * [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * [#2377](https://github.com/ruby-grape/grape/pull/2377): Allow to use instance variables values inside `rescue_from` - [@jcagarcia](https://github.com/jcagarcia).
 * [#2379](https://github.com/ruby-grape/grape/pull/2379): Take into account the `route_param` type in `recognize_path` - [@jcagarcia](https://github.com/jcagarcia).
