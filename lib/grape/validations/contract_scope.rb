@@ -10,6 +10,8 @@ module Grape
       def initialize(api, klass = nil, &block)
         klass = Dry::Schema.Params(parent: klass, &block) if block
 
+        api.namespace_stackable(:contract_key_map, klass.key_map)
+
         validator_options = {
           validator_class: Validator,
           opts: { schema: klass }

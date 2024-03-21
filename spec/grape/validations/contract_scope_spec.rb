@@ -91,6 +91,20 @@ describe Grape::Validations::ContractScope do
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('number is missing')
     end
+
+    it 'includes keys from all sources into declared' do
+      declared_params = nil
+
+      app.after_validation do
+        declared_params = declared(params)
+      end
+
+      post '/foos/123/required', number: '1', string: '2'
+      expect(last_response.status).to eq(201)
+      expected = { 'foo_id' => 123, 'number' => 1 }
+      expect(validated_params).to eq(expected.merge('string' => '2'))
+      expect(declared_params).to eq(expected)
+    end
   end
 
   context 'with schema config validate_keys=true' do

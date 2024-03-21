@@ -53,7 +53,7 @@ module Grape
 
       describe '.contract' do
         it 'saves the schema instance' do
-          expect(subject.contract(:some_schema)).to be_a Grape::Validations::ContractScope
+          expect(subject.contract(Dry::Schema.Params)).to be_a Grape::Validations::ContractScope
         end
 
         it 'errors without params or block' do
