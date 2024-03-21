@@ -77,6 +77,7 @@
     - [Pass symbols for i18n translations](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
+  - [Using `dry-validation` or `dry-schema`](#using-dry-validation-or-dry-schema)
 - [Headers](#headers)
   - [Request](#request)
     - [Header Case Handling](#header-case-handling)
@@ -2086,9 +2087,11 @@ params do
 end
 ```
 
-### With `dry-validation` contract or `dry-schema` schema
+### Using `dry-validation` or `dry-schema`
 
-As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. Call `contract` with a schema defined previously
+As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. This can be especially useful if you use the above already in some other parts of your application.
+
+Call `contract` with a schema defined previously
 
 ```rb
 contract CreateFoosSchema
