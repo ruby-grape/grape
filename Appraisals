@@ -48,3 +48,9 @@ end
 appraise 'rack_3_0' do
   gem 'rack', '~> 3.0.0'
 end
+
+appraise 'no_dry_schema' do
+  group :development, :test do
+    remove_gem 'dry-schema'
+  end
+end
