@@ -15,14 +15,14 @@ describe Grape::Validations::ContractScope do
   end
 
   context 'with simple schema, pre-defined' do
-    let(:schema) do
+    let(:contract) do
       Dry::Schema.Params do
         required(:number).filled(:integer)
       end
     end
 
     before do
-      app.contract(schema)
+      app.contract(contract)
       app.post('/required')
     end
 
@@ -36,6 +36,38 @@ describe Grape::Validations::ContractScope do
       post '/required'
       expect(last_response.status).to eq(400)
       expect(last_response.body).to eq('number is missing')
+    end
+  end
+
+  context 'with contract class' do
+    let(:contract) do
+      Class.new(Dry::Validation::Contract) do
+        params do
+          required(:number).filled(:integer)
+          required(:name).filled(:string)
+        end
+
+        rule(:number) do
+          key.failure('is too high') if value > 5
+        end
+      end
+    end
+
+    before do
+      app.contract(contract)
+      app.post('/required')
+    end
+
+    it 'coerces the parameter' do
+      post '/required', number: '1', name: '2'
+      expect(last_response.status).to eq(201)
+      expect(validated_params).to eq('number' => 1, 'name' => '2')
+    end
+
+    it 'shows expected validation error' do
+      post '/required', number: '6'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('name is missing, number is too high')
     end
   end
 

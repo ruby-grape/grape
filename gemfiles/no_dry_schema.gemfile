@@ -7,6 +7,7 @@ source 'https://rubygems.org'
 group :development, :test do
   gem 'bundler'
   gem 'hashie'
+  gem 'dry-validation'
   gem 'rake'
   gem 'rubocop', '1.59.0', require: false
   gem 'rubocop-performance', '1.20.1', require: false
