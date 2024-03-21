@@ -249,6 +249,7 @@ module Grape
       autoload :SingleAttributeIterator
       autoload :Types
       autoload :ParamsScope
+      autoload :ContractScope
       autoload :ValidatorFactory
       autoload :Base, 'grape/validations/validators/base'
     end

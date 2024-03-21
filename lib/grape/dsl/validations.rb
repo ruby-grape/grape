@@ -38,6 +38,18 @@ module Grape
         def params(&block)
           Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
         end
+
+        # Declare the contract to be used for the endpoint's parameters.
+        # @param klass [Class<Dry::Validation::Contract> | Class<Dry::Schema::Processor>]
+        #   The contract or schema class to be used for validation. Optional.
+        # @yield a block yielding a new instance of Dry::Schema::Params
+        #   subclass, allowing to define the schema inline. When the
+        #   +klass+ parameter is non-nil, it will be used as a parent. Optional.
+        def contract(klass = nil, &block)
+          raise ArgumentError, 'Either klass or block must be provided' unless klass || block
+
+          Grape::Validations::ContractScope.new(self, klass, &block)
+        end
       end
     end
   end

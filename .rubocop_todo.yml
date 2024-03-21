@@ -392,6 +392,7 @@ RSpec/MultipleExpectations:
     - 'spec/grape/util/reverse_stackable_values_spec.rb'
     - 'spec/grape/util/stackable_values_spec.rb'
     - 'spec/grape/validations/attributes_doc_spec.rb'
+    - 'spec/grape/validations/contract_scope_spec.rb'
     - 'spec/grape/validations/instance_behaivour_spec.rb'
     - 'spec/grape/validations/params_scope_spec.rb'
     - 'spec/grape/validations/types/array_coercer_spec.rb'
