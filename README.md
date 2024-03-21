@@ -2086,7 +2086,7 @@ params do
 end
 ```
 
-## Parameter Validation and Coercion using `dry-schema`
+### With `dry-validation` contract or `dry-schema` schema
 
 As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. Call `contract` with a schema defined previously
 
