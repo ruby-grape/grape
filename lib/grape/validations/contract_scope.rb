@@ -3,8 +3,6 @@
 module Grape
   module Validations
     class ContractScope
-      attr_accessor :api
-
       # Declare the contract to be used for the endpoint's parameters.
       # @param api [API] the API endpoint to modify.
       # @param klass [Class] contract or schema class to be used for validation. Optional.
