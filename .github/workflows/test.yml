@@ -34,7 +34,7 @@ jobs:
           - ruby: '2.7'
             gemfile: multi_xml
           - ruby: '3.3'
-            gemfile: no_dry_schema
+            gemfile: no_dry_validation
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
@@ -74,9 +74,9 @@ jobs:
       if: ${{ matrix.gemfile == 'rack_3_0' }}
       run: bundle exec rspec spec/integration/rack/v3
 
-    - name: Run tests (spec/integration/no_dry_schema)
-      if: ${{ matrix.gemfile == 'no_dry_schema' }}
-      run: bundle exec rspec spec/integration/no_dry_schema
+    - name: Run tests (spec/integration/no_dry_validation)
+      if: ${{ matrix.gemfile == 'no_dry_validation' }}
+      run: bundle exec rspec spec/integration/no_dry_validation
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
