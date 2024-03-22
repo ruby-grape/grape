@@ -2091,7 +2091,7 @@ end
 
 As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. This can be especially useful if you use the above already in some other parts of your application. If not, you'll need to add `dry-validation` or `dry-schema` to your `Gemfile`.
 
-Then call `contract` with a contract or schema defined previously
+Then call `contract` with a contract or schema defined previously:
 
 ```rb
 contract CreateFoosSchema
