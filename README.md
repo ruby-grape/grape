@@ -77,7 +77,7 @@
     - [Pass symbols for i18n translations](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
-  - [Using `dry-validation` or `dry-schema`](#using-dry-validation-or-dry-schema)
+  - [Using dry-validation or dry-schema](#using-dry-validation-or-dry-schema)
 - [Headers](#headers)
   - [Request](#request)
     - [Header Case Handling](#header-case-handling)
