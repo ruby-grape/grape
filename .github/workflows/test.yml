@@ -35,6 +35,7 @@ jobs:
             gemfile: multi_xml
           - ruby: '3.3'
             gemfile: no_dry_validation
+            integration_only: true
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
