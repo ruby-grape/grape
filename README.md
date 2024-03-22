@@ -2094,14 +2094,23 @@ As an alternative to the `params` DSL described above, you can use a schema or `
 Then call `contract` with a contract or schema defined previously:
 
 ```rb
-contract CreateFoosSchema
+CreateOrdersSchema = Dry::Schema.Params do
+  required(:orders).array(:hash) do
+    required(:name).filled(:string)
+    optional(:volume).maybe(:integer, lt?: 9)
+  end
+end
+
+# ...
+
+contract CreateOrdersSchema
 ```
 
 or with a block, using the [schema definition syntax](https://dry-rb.org/gems/dry-schema/1.13/#quick-start):
 
 ```rb
 contract do
-  required(:foos).array do
+  required(:orders).array(:hash) do
     required(:name).filled(:string)
     optional(:volume).maybe(:integer, lt?: 9)
   end
@@ -2110,7 +2119,7 @@ end
 
 The latter will define a coercing schema (`Dry::Schema.Params`). When using the former approach, it's up to you to decide whether the input will need coercing.
 
-`params` and `contract` declarations can also be used together, e.g. to describe different parts of a nested namespace for an endpoint.
+The `params` and `contract` declarations can also be used together in the same API, e.g. to describe different parts of a nested namespace for an endpoint.
 
 ## Headers
 
