@@ -2089,9 +2089,9 @@ end
 
 ### Using `dry-validation` or `dry-schema`
 
-As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. This can be especially useful if you use the above already in some other parts of your application.
+As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. This can be especially useful if you use the above already in some other parts of your application. If not, you'll need to add `dry-validation` or `dry-schema` to your `Gemfile`.
 
-Call `contract` with a contract or schema defined previously
+Then call `contract` with a contract or schema defined previously
 
 ```rb
 contract CreateFoosSchema
@@ -2108,7 +2108,7 @@ contract do
 end
 ```
 
-The latter will define a coercing schema (`Dry::Schema.Params`). With the former syntax it's up to you to decide whether the input will need coercing.
+The latter will define a coercing schema (`Dry::Schema.Params`). When using the former approach, it's up to you to decide whether the input will need coercing.
 
 `params` and `contract` declarations can also be used together, e.g. to describe different parts of a nested namespace for an endpoint.
 
