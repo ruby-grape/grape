@@ -228,7 +228,7 @@ RSpec/ExpectInHook:
     - 'spec/grape/api_spec.rb'
     - 'spec/grape/validations/validators/values_spec.rb'
 
-# Offense count: 47
+# Offense count: 48
 # Configuration parameters: Include, CustomTransform, IgnoreMethods, SpecSuffixOnly.
 # Include: **/*_spec*rb*, **/spec/**/*
 RSpec/FilePath:
@@ -278,6 +278,7 @@ RSpec/FilePath:
     - 'spec/integration/eager_load/eager_load_spec.rb'
     - 'spec/integration/multi_json/json_spec.rb'
     - 'spec/integration/multi_xml/xml_spec.rb'
+    - 'spec/integration/no_dry_validation/no_dry_validation_spec.rb'
     - 'spec/integration/rack/v2/headers_spec.rb'
     - 'spec/integration/rack/v3/headers_spec.rb'
 
@@ -341,7 +342,7 @@ RSpec/MissingExampleGroupArgument:
   Exclude:
     - 'spec/grape/middleware/exception_spec.rb'
 
-# Offense count: 788
+# Offense count: 804
 # Configuration parameters: Max.
 RSpec/MultipleExpectations:
   Exclude:
@@ -412,6 +413,7 @@ RSpec/MultipleExpectations:
     - 'spec/grape/validations/validators/same_as_spec.rb'
     - 'spec/grape/validations/validators/values_spec.rb'
     - 'spec/grape/validations_spec.rb'
+    - 'spec/integration/no_dry_validation/no_dry_validation_spec.rb'
     - 'spec/shared/versioning_examples.rb'
 
 # Offense count: 38
@@ -558,7 +560,7 @@ RSpec/ScatteredSetup:
     - 'spec/grape/util/inheritable_setting_spec.rb'
     - 'spec/grape/validations_spec.rb'
 
-# Offense count: 47
+# Offense count: 48
 # Configuration parameters: Include, CustomTransform, IgnoreMethods, IgnoreMetadata.
 # Include: **/*_spec.rb
 RSpec/SpecFilePathFormat:
@@ -609,6 +611,7 @@ RSpec/SpecFilePathFormat:
     - 'spec/integration/eager_load/eager_load_spec.rb'
     - 'spec/integration/multi_json/json_spec.rb'
     - 'spec/integration/multi_xml/xml_spec.rb'
+    - 'spec/integration/no_dry_validation/no_dry_validation_spec.rb'
     - 'spec/integration/rack/v2/headers_spec.rb'
     - 'spec/integration/rack/v3/headers_spec.rb'
 
