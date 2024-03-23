@@ -58,3 +58,6 @@ RSpec/Capybara/FeatureMethods:
 
 RSpec/ExampleLength:
   Max: 60
+
+RSpec/NestedGroups:
+  Max: 4

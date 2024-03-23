@@ -3,6 +3,8 @@
 require 'grape/util/accept_header_handler'
 
 RSpec.describe Grape::Util::AcceptHeaderHandler do
+  subject(:match_best_quality_media_type!) { instance.match_best_quality_media_type! }
+
   let(:instance) do
     described_class.new(
       accept_header: accept_header,
@@ -10,9 +12,6 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
       **options
     )
   end
-
-  subject { instance.match_best_quality_media_type! }
-
   let(:accept_header) { '*/*' }
   let(:versions) { ['v1'] }
   let(:options) { {} }
@@ -20,12 +19,12 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
   shared_examples 'an invalid accept header exception' do |message|
     before do
       allow(Grape::Exceptions::InvalidAcceptHeader).to receive(:new)
-                                                         .with(message, { Grape::Http::Headers::X_CASCADE => 'pass' })
-                                                         .and_call_original
+        .with(message, { Grape::Http::Headers::X_CASCADE => 'pass' })
+        .and_call_original
     end
 
     it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
-      expect { subject }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
+      expect { match_best_quality_media_type! }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
     end
   end
 
@@ -33,7 +32,7 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
     context 'when no vendor set' do
       let(:options) do
         {
-          vendor: nil,
+          vendor: nil
         }
       end
 
@@ -55,7 +54,7 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
       end
 
       context 'when vendor not found' do
-        let(:accept_header) { '*/*'}
+        let(:accept_header) { '*/*' }
 
         it_behaves_like 'an invalid accept header exception', 'API vendor or version not found.'
       end
@@ -64,7 +63,7 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
     context 'when media_type found' do
       let(:options) do
         {
-          vendor: 'vendor',
+          vendor: 'vendor'
         }
       end
 
@@ -78,16 +77,16 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
     context 'when media_type is not found' do
       let(:options) do
         {
-          vendor: 'vendor',
+          vendor: 'vendor'
         }
       end
 
       let(:accept_header) { 'application/vnd.another_vendor-v1+json' }
 
       context 'when allowed_methods present' do
-        let(:allowed_methods) { ['OPTIONS'] }
-
         subject { instance.match_best_quality_media_type!(allowed_methods: allowed_methods) }
+
+        let(:allowed_methods) { ['OPTIONS'] }
 
         it { is_expected.to match_array(allowed_methods) }
       end
@@ -102,12 +101,12 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
 
         before do
           allow(Grape::Exceptions::InvalidVersionHeader).to receive(:new)
-                                                             .with('API version not found.', { Grape::Http::Headers::X_CASCADE => 'pass' })
-                                                             .and_call_original
+            .with('API version not found.', { Grape::Http::Headers::X_CASCADE => 'pass' })
+            .and_call_original
         end
 
         it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
-          expect { subject }.to raise_error(Grape::Exceptions::InvalidVersionHeader)
+          expect { match_best_quality_media_type! }.to raise_error(Grape::Exceptions::InvalidVersionHeader)
         end
       end
     end

@@ -20,7 +20,7 @@ module Grape
       end
 
       def ==(other)
-        self.eql?(other)
+        eql?(other)
       end
 
       def eql?(other)

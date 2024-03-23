@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-
-
 RSpec.describe Grape::Util::MediaType do
-
   shared_examples 'MediaType' do
     it { is_expected.to eq(described_class.new(type: type, subtype: subtype)) }
   end
@@ -35,12 +32,13 @@ RSpec.describe Grape::Util::MediaType do
         let(:subtype) { 'vnd.test-v1+json' }
 
         it_behaves_like 'MediaType'
+      end
 
-        context 'when header is a vendor mime type without version' do
-          let(:subtype) { 'vnd.ms-word' }
+      context 'when header is a vendor mime type without version' do
+        let(:type) { 'application' }
+        let(:subtype) { 'vnd.ms-word' }
 
-          it_behaves_like 'MediaType'
-        end
+        it_behaves_like 'MediaType'
       end
     end
   end
@@ -64,12 +62,12 @@ RSpec.describe Grape::Util::MediaType do
       let(:media_type) { 'text/html' }
 
       it { is_expected.to be_falsey }
+    end
 
-      context 'when header is a vendor mime type' do
-        let(:media_type) { 'application/vnd.test-v1+json' }
+    context 'when header is a vendor mime type' do
+      let(:media_type) { 'application/vnd.test-v1+json' }
 
-        it { is_expected.to be_truthy }
-      end
+      it { is_expected.to be_truthy }
     end
   end
 
@@ -92,7 +90,7 @@ RSpec.describe Grape::Util::MediaType do
       let(:subtype) { 'html' }
 
       it 'calls Rack::Utils.best_q_match' do
-        expect(Rack::Utils).to receive(:best_q_match).and_call_original
+        allow(Rack::Utils).to receive(:best_q_match).and_call_original
         expect(media_type).to eq(described_class.new(type: type, subtype: subtype))
       end
     end
@@ -106,7 +104,7 @@ RSpec.describe Grape::Util::MediaType do
     let(:other_media_type_class) { Class.new(Struct.new(:type, :subtype, :vendor, :version, :format)) }
     let(:other_media_type_instance) { other_media_type_class.new(type, subtype, 'test', 'v1', 'json') }
 
-    it { is_expected.not_to eq(other_media_type_class.new(type, subtype, 'test', 'v1', 'json'))}
+    it { is_expected.not_to eq(other_media_type_class.new(type, subtype, 'test', 'v1', 'json')) }
   end
 
   describe '.hash' do

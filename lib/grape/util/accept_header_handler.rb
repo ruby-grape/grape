@@ -7,12 +7,12 @@ module Grape
     class AcceptHeaderHandler
       attr_reader :accept_header, :versions, :vendor, :strict, :cascade
 
-      def initialize(accept_header:, versions:, vendor: nil, strict: false, cascade: true, **_options)
+      def initialize(accept_header:, versions:, **options)
         @accept_header = accept_header
         @versions = versions
-        @vendor = vendor
-        @strict = strict
-        @cascade = cascade
+        @vendor = options.fetch(:vendor, nil)
+        @strict = options.fetch(:strict, false)
+        @cascade = options.fetch(:cascade, true)
       end
 
       def match_best_quality_media_type!(content_types: Grape::ContentTypes::CONTENT_TYPES, allowed_methods: nil)
