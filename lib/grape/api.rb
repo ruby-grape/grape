@@ -23,8 +23,8 @@ module Grape
       attr_accessor :base_instance, :instances
 
       # Rather than initializing an object of type Grape::API, create an object of type Instance
-      def new(*args, &block)
-        base_instance.new(*args, &block)
+      def new(...)
+        base_instance.new(...)
       end
 
       # When inherited, will create a list of all instances (times the API was mounted)
@@ -74,8 +74,8 @@ module Grape
       # the headers, and the body. See [the rack specification]
       # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def call(*args, &block)
-        instance_for_rack.call(*args, &block)
+      def call(...)
+        instance_for_rack.call(...)
       end
 
       # Alleviates problems with autoloading by tring to search for the constant
@@ -146,6 +146,19 @@ module Grape
         @instances.each do |instance|
           last_response = replay_step_on(instance, setup_step)
         end
+
+        # Updating all previously mounted classes in the case that new methods have been executed.
+        if method != :mount && @setup.any?
+          previous_mount_steps = @setup.select { |step| step[:method] == :mount }
+          previous_mount_steps.each do |mount_step|
+            refresh_mount_step = mount_step.merge(method: :refresh_mounted_api)
+            @setup += [refresh_mount_step]
+            @instances.each do |instance|
+              replay_step_on(instance, refresh_mount_step)
+            end
+          end
+        end
+
         last_response
       end
 

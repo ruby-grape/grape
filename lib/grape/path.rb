@@ -25,7 +25,7 @@ module Grape
 
     def uses_specific_format?
       if settings.key?(:format) && settings.key?(:content_types)
-        (settings[:format] && Array(settings[:content_types]).size == 1)
+        settings[:format] && Array(settings[:content_types]).size == 1
       else
         false
       end
@@ -33,7 +33,7 @@ module Grape
 
     def uses_path_versioning?
       if settings.key?(:version) && settings[:version_options] && settings[:version_options].key?(:using)
-        (settings[:version] && settings[:version_options][:using] == :path)
+        settings[:version] && settings[:version_options][:using] == :path
       else
         false
       end

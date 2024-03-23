@@ -85,7 +85,12 @@ module Grape
         end
 
         def required_for_root_scope?
-          @required && @scope.root?
+          return false unless @required
+
+          scope = @scope
+          scope = scope.parent while scope.lateral?
+
+          scope.root?
         end
 
         def validation_exception(attr_name, message)

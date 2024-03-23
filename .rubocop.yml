@@ -1,6 +1,6 @@
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
   SuggestExtensions: false
   Exclude:
     - vendor/**/*
@@ -23,6 +23,9 @@ Style/MultilineIfModifier:
 
 Style/RaiseArgs:
   Enabled: false
+
+Style/RedundantArrayConstructor:
+  Enabled: false  # doesn't work well with params definition
 
 Metrics/AbcSize:
   Max: 45

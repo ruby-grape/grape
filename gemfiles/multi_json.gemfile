@@ -10,9 +10,9 @@ group :development, :test do
   gem 'bundler'
   gem 'hashie'
   gem 'rake'
-  gem 'rubocop', '1.50.2', require: false
-  gem 'rubocop-performance', '1.17.1', require: false
-  gem 'rubocop-rspec', '2.20.0', require: false
+  gem 'rubocop', '1.59.0', require: false
+  gem 'rubocop-performance', '1.20.1', require: false
+  gem 'rubocop-rspec', '2.25.0', require: false
 end
 
 group :development do
@@ -25,9 +25,7 @@ group :development do
 end
 
 group :test do
-  gem 'cookiejar'
   gem 'grape-entity', '~> 0.6', require: false
-  gem 'mime-types'
   gem 'rack-jsonp', require: 'rack/jsonp'
   gem 'rack-test', '< 2.1'
   gem 'rspec', '< 4'

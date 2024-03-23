@@ -6,7 +6,7 @@ jobs:
   danger:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 100    
     - name: Set up Ruby
@@ -14,7 +14,6 @@ jobs:
       with:
         ruby-version: 2.7
         bundler-cache: true
-        rubygems: latest
     - name: Run Danger
       run: |
         # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok

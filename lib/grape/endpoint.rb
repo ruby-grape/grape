@@ -13,8 +13,8 @@ module Grape
     attr_reader :env, :request, :headers, :params
 
     class << self
-      def new(*args, &block)
-        self == Endpoint ? Class.new(Endpoint).new(*args, &block) : super
+      def new(...)
+        self == Endpoint ? Class.new(Endpoint).new(...) : super
       end
 
       def before_each(new_setup = false, &block)
@@ -55,7 +55,7 @@ module Grape
 
         proc do |endpoint_instance|
           ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
-            method.bind(endpoint_instance).call
+            method.bind_call(endpoint_instance)
           end
         end
       end

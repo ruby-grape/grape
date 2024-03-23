@@ -4,7 +4,6 @@ require 'shared/versioning_examples'
 
 describe Grape::API do
   subject do
-    puts described_class
     Class.new(described_class)
   end
 
@@ -689,7 +688,7 @@ describe Grape::API do
         'example'
       end
       put '/example'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'text/plain'
+      expect(last_response.content_type).to eql 'text/plain'
     end
 
     describe 'adds an OPTIONS route that' do
@@ -1127,7 +1126,7 @@ describe Grape::API do
       d = double('after mock')
 
       subject.params do
-        requires :id, type: Integer
+        requires :id, type: Integer, values: [1, 2, 3]
       end
       subject.resource ':id' do
         before { a.do_something! }
@@ -1146,9 +1145,9 @@ describe Grape::API do
       expect(c).to receive(:do_something!).exactly(0).times
       expect(d).to receive(:do_something!).exactly(0).times
 
-      get '/abc'
+      get '/4'
       expect(last_response.status).to be 400
-      expect(last_response.body).to eql 'id is invalid'
+      expect(last_response.body).to eql 'id does not have a valid value'
     end
 
     it 'calls filters in the correct order' do
@@ -1191,7 +1190,7 @@ describe Grape::API do
 
     it 'sets content type for txt format' do
       get '/foo'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+      expect(last_response.content_type).to eq('text/plain')
     end
 
     it 'does not set Cache-Control' do
@@ -1201,22 +1200,22 @@ describe Grape::API do
 
     it 'sets content type for xml' do
       get '/foo.xml'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/xml')
+      expect(last_response.content_type).to eq('application/xml')
     end
 
     it 'sets content type for json' do
       get '/foo.json'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+      expect(last_response.content_type).to eq('application/json')
     end
 
     it 'sets content type for serializable hash format' do
       get '/foo.serializable_hash'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+      expect(last_response.content_type).to eq('application/json')
     end
 
     it 'sets content type for binary format' do
       get '/foo.binary'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/octet-stream')
+      expect(last_response.content_type).to eq('application/octet-stream')
     end
 
     it 'returns raw data when content type binary' do
@@ -1225,7 +1224,7 @@ describe Grape::API do
       subject.format :binary
       subject.get('/binary_file') { File.binread(image_filename) }
       get '/binary_file'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/octet-stream')
+      expect(last_response.content_type).to eq('application/octet-stream')
       expect(last_response.body).to eq(file)
     end
 
@@ -1235,10 +1234,10 @@ describe Grape::API do
       test_file.write file_content
       test_file.rewind
 
-      subject.get('/file') { file test_file }
+      subject.get('/file') { stream test_file }
       get '/file'
-      expect(last_response.headers[Rack::CONTENT_LENGTH]).to eq('25')
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+      expect(last_response.content_length).to eq(25)
+      expect(last_response.content_type).to eq('text/plain')
       expect(last_response.body).to eq(file_content)
     end
 
@@ -1248,12 +1247,12 @@ describe Grape::API do
         blk.yield ' file content'
       end
 
-      subject.use Rack::Chunked
+      subject.use Gem::Version.new(Rack.release) < Gem::Version.new('3') ? Rack::Chunked : ChunkedResponse
       subject.get('/stream') { stream test_stream }
       get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
 
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
-      expect(last_response.headers[Rack::CONTENT_LENGTH]).to be_nil
+      expect(last_response.content_type).to eq('text/plain')
+      expect(last_response.content_length).to be_nil
       expect(last_response.headers[Rack::CACHE_CONTROL]).to eq('no-cache')
       expect(last_response.headers[Grape::Http::Headers::TRANSFER_ENCODING]).to eq('chunked')
 
@@ -1263,7 +1262,7 @@ describe Grape::API do
     it 'sets content type for error' do
       subject.get('/error') { error!('error in plain text', 500) }
       get '/error'
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'text/plain'
+      expect(last_response.content_type).to eql 'text/plain'
     end
 
     it 'sets content type for json error' do
@@ -1271,7 +1270,7 @@ describe Grape::API do
       subject.get('/error') { error!('error in json', 500) }
       get '/error.json'
       expect(last_response.status).to be 500
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/json'
+      expect(last_response.content_type).to eql 'application/json'
     end
 
     it 'sets content type for xml error' do
@@ -1279,7 +1278,7 @@ describe Grape::API do
       subject.get('/error') { error!('error in xml', 500) }
       get '/error'
       expect(last_response.status).to be 500
-      expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/xml'
+      expect(last_response.content_type).to eql 'application/xml'
     end
 
     it 'includes extension in format' do
@@ -1309,47 +1308,56 @@ describe Grape::API do
 
       it 'sets content type' do
         get '/custom.custom'
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/custom'
+        expect(last_response.content_type).to eql 'application/custom'
       end
 
       it 'sets content type for error' do
         get '/error.custom'
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eql 'application/custom'
+        expect(last_response.content_type).to eql 'application/custom'
       end
     end
 
     context 'env["api.format"]' do
       before do
+        ct = content_type
         subject.post 'attachment' do
           filename = params[:file][:filename]
-          content_type MIME::Types.type_for(filename)[0].to_s
+          content_type ct
           env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
           header 'Content-Disposition', "attachment; filename*=UTF-8''#{CGI.escape(filename)}"
           params[:file][:tempfile].read
         end
       end
 
-      ['/attachment.png', 'attachment'].each do |url|
-        it "uploads and downloads a PNG file via #{url}" do
-          image_filename = 'grape.png'
-          post url, file: Rack::Test::UploadedFile.new(image_filename, 'image/png', true)
-          expect(last_response.status).to eq(201)
-          expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('image/png')
-          expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
-          File.open(image_filename, 'rb') do |io|
-            expect(last_response.body).to eq io.read
+      context 'when image/png' do
+        let(:content_type) { 'image/png' }
+
+        %w[/attachment.png attachment].each do |url|
+          it "uploads and downloads a PNG file via #{url}" do
+            image_filename = 'grape.png'
+            post url, file: Rack::Test::UploadedFile.new(image_filename, content_type, true)
+            expect(last_response.status).to eq(201)
+            expect(last_response.content_type).to eq(content_type)
+            expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
+            File.open(image_filename, 'rb') do |io|
+              expect(last_response.body).to eq io.read
+            end
           end
         end
       end
 
-      it 'uploads and downloads a Ruby file' do
-        filename = __FILE__
-        post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, 'application/x-ruby', true)
-        expect(last_response.status).to eq(201)
-        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/x-ruby')
-        expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
-        File.open(filename, 'rb') do |io|
-          expect(last_response.body).to eq io.read
+      context 'when ruby file' do
+        let(:content_type) { 'application/x-ruby' }
+
+        it 'uploads and downloads a Ruby file' do
+          filename = __FILE__
+          post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, content_type, true)
+          expect(last_response.status).to eq(201)
+          expect(last_response.content_type).to eq(content_type)
+          expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
+          File.open(filename, 'rb') do |io|
+            expect(last_response.body).to eq io.read
+          end
         end
       end
     end
@@ -2089,7 +2097,7 @@ describe Grape::API do
 
       it 'rescues custom grape exceptions' do
         subject.rescue_from ApiSpec::CustomError do |e|
-          rack_response('New Error', e.status)
+          error!('New Error', e.status)
         end
         subject.get '/custom_error' do
           raise ApiSpec::CustomError.new(status: 400, message: 'Custom Error')
@@ -2107,7 +2115,7 @@ describe Grape::API do
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
 
       subject.rescue_from :all do |_e|
-        rack_response('Formatter Error', 500)
+        error!('Formatter Error', 500)
       end
       subject.get('/formatter_exception') { 'Hello world' }
 
@@ -2130,7 +2138,7 @@ describe Grape::API do
   describe '.rescue_from klass, block' do
     it 'rescues Exception' do
       subject.rescue_from RuntimeError do |e|
-        rack_response("rescued from #{e.message}", 202)
+        error!("rescued from #{e.message}", 202)
       end
       subject.get '/exception' do
         raise 'rain!'
@@ -2151,7 +2159,7 @@ describe Grape::API do
 
       it 'rescues an error via rescue_from :all' do
         subject.rescue_from :all do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2163,7 +2171,7 @@ describe Grape::API do
 
       it 'rescues a specific error' do
         subject.rescue_from ConnectionError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2175,7 +2183,7 @@ describe Grape::API do
 
       it 'rescues a subclass of an error by default' do
         subject.rescue_from RuntimeError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2187,10 +2195,10 @@ describe Grape::API do
 
       it 'rescues multiple specific errors' do
         subject.rescue_from ConnectionError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.rescue_from DatabaseError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/connection' do
           raise ConnectionError
@@ -2208,7 +2216,7 @@ describe Grape::API do
 
       it 'does not rescue a different error' do
         subject.rescue_from RuntimeError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/uncaught' do
           raise CommunicationError
@@ -2221,7 +2229,7 @@ describe Grape::API do
   describe '.rescue_from klass, lambda' do
     it 'rescues an error with the lambda' do
       subject.rescue_from ArgumentError, lambda {
-        rack_response('rescued with a lambda', 400)
+        error!('rescued with a lambda', 400)
       }
       subject.get('/rescue_lambda') { raise ArgumentError }
 
@@ -2232,7 +2240,7 @@ describe Grape::API do
 
     it 'can execute the lambda with an argument' do
       subject.rescue_from ArgumentError, lambda { |e|
-        rack_response(e.message, 400)
+        error!(e.message, 400)
       }
       subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
 
@@ -2313,7 +2321,7 @@ describe Grape::API do
 
     it 'rescues error as well as subclass errors with rescue_subclasses option set' do
       subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: true do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
         raise ApiSpec::APIErrors::ChildError
@@ -2334,7 +2342,7 @@ describe Grape::API do
 
     it 'sets rescue_subclasses to true by default' do
       subject.rescue_from ApiSpec::APIErrors::ParentError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
         raise ApiSpec::APIErrors::ChildError
@@ -2346,7 +2354,7 @@ describe Grape::API do
 
     it 'does not rescue child errors if rescue_subclasses is false' do
       subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: false do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
         raise ApiSpec::APIErrors::ChildError
@@ -2376,7 +2384,7 @@ describe Grape::API do
 
     it 'rescues grape exceptions with a user-defined handler' do
       subject.rescue_from grape_exception.class do |_error|
-        rack_response('Redefined Error', 403)
+        error!('Redefined Error', 403)
       end
 
       exception = grape_exception
@@ -2559,11 +2567,7 @@ describe Grape::API do
       end
       get '/excel.json'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('The requested format &#x27;txt&#x27; is not supported.')
-      else
-        expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format 'txt' is not supported."))
     end
   end
 
@@ -3045,7 +3049,6 @@ describe Grape::API do
       expect(subject.routes.length).to eq(1)
       route = subject.routes.first
       expect(route.description).to eq('first method')
-      expect(route.route_foo).to be_nil
       expect(route.params).to eq({})
       expect(route.options).to be_a(Hash)
     end
@@ -3090,19 +3093,19 @@ describe Grape::API do
         get 'second'
       end
       expect(subject.routes.map do |route|
-        { description: route.description, foo: route.route_foo, params: route.params }
+        { description: route.description, foo: route.options[:foo], params: route.params }
       end).to eq [
         { description: 'ns second', foo: 'bar', params: {} }
       ]
     end
 
-    it 'includes details' do
-      subject.desc 'method', details: 'method details'
+    it 'includes detail' do
+      subject.desc 'method', detail: 'method details'
       subject.get 'method'
       expect(subject.routes.map do |route|
-        { description: route.description, details: route.details, params: route.params }
+        { description: route.description, detail: route.detail, params: route.params }
       end).to eq [
-        { description: 'method', details: 'method details', params: {} }
+        { description: 'method', detail: 'method details', params: {} }
       ]
     end
 
@@ -3363,7 +3366,7 @@ describe Grape::API do
       context 'when some rescues are defined by mounted' do
         it 'inherits parent rescues' do
           subject.rescue_from :all do |e|
-            rack_response("rescued from #{e.message}", 202)
+            error!("rescued from #{e.message}", 202)
           end
 
           app = Class.new(described_class)
@@ -3381,14 +3384,14 @@ describe Grape::API do
 
         it 'prefers rescues defined by mounted if they rescue similar error class' do
           subject.rescue_from StandardError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise 'doh!' }
             mount app
@@ -3400,14 +3403,14 @@ describe Grape::API do
 
         it 'prefers rescues defined by mounted even if outer is more specific' do
           subject.rescue_from ArgumentError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise ArgumentError.new }
             mount app
@@ -3419,14 +3422,14 @@ describe Grape::API do
 
         it 'prefers more specific rescues defined by mounted' do
           subject.rescue_from StandardError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from ArgumentError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise ArgumentError.new }
             mount app
@@ -4113,11 +4116,7 @@ describe Grape::API do
       end
       get '/something'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#x27;txt&#x27; is not supported.&quot;}')
-      else
-        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html({ error: "The requested format 'txt' is not supported." }.to_json))
     end
   end
 
@@ -4129,11 +4128,7 @@ describe Grape::API do
       end
       get '/something?format=<script>blah</script>'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('The requested format &#x27;&lt;script&gt;blah&lt;/script&gt;&#x27; is not supported.')
-      else
-        expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format '<script>blah</script>' is not supported."))
     end
   end
 
@@ -4346,6 +4341,100 @@ describe Grape::API do
     it 'returns the given id when it is valid' do
       get '/v1/orders/1-2'
       expect(last_response.body).to be_eql('1-2')
+    end
+  end
+
+  context 'instance variables' do
+    context 'when setting instance variables in a before validation' do
+      it 'is accessible inside the endpoint' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.before do
+          @my_var = expected_instance_variable_value
+        end
+
+        subject.get('/') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+    end
+
+    context 'when setting instance variables inside the endpoint code' do
+      it 'is accessible inside the rescue_from handler' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.rescue_from(:all) do
+          body = { my_var: @my_var }
+          error!(body, 400)
+        end
+
+        subject.get('/') do
+          @my_var = expected_instance_variable_value
+          raise
+        end
+
+        get '/'
+        expect(last_response.status).to be 400
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+      end
+
+      it 'is NOT available in other endpoints of the same api' do
+        expected_instance_variable_value = 'wadus'
+
+        subject.get('/first') do
+          @my_var = expected_instance_variable_value
+          { my_var: @my_var }.to_json
+        end
+
+        subject.get('/second') do
+          { my_var: @my_var }.to_json
+        end
+
+        get '/first'
+        expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
+        get '/second'
+        expect(last_response.body).to eq({ my_var: nil }.to_json)
+      end
+    end
+
+    context 'when set type to a route_param' do
+      context 'and the param does not match' do
+        it 'returns a 404 response' do
+          subject.namespace :books do
+            route_param :id, type: Integer do
+              get do
+                params[:id]
+              end
+            end
+          end
+
+          get '/books/other'
+          expect(last_response.status).to be 404
+        end
+      end
+    end
+  end
+
+  context 'rack_response deprecated' do
+    let(:app) do
+      Class.new(described_class) do
+        rescue_from :all do
+          rack_response('deprecated', 500)
+        end
+
+        get 'test' do
+          raise ArgumentError
+        end
+      end
+    end
+
+    it 'raises a deprecation' do
+      expect(Grape.deprecator).to receive(:warn).with('The rack_response method has been deprecated, use error! instead.')
+      get 'test'
+      expect(last_response.body).to eq('deprecated')
     end
   end
 end

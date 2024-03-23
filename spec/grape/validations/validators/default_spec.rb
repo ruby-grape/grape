@@ -89,6 +89,19 @@ describe Grape::Validations::Validators::DefaultValidator do
       get '/another_nested_optional_array' do
         { root: params[:root] }
       end
+
+      params do
+        requires :foo
+        optional :bar, default: ->(params) { params[:foo] }
+        optional :qux, default: ->(params) { params[:bar] }
+      end
+      get '/default_values_from_other_params' do
+        {
+          foo: params[:foo],
+          bar: params[:bar],
+          qux: params[:qux]
+        }
+      end
     end
   end
 
@@ -459,5 +472,18 @@ describe Grape::Validations::Validators::DefaultValidator do
       expect(last_response.status).to eq(201)
       expect(JSON.parse(last_response.body)).to eq(expected)
     end
+  end
+
+  it 'sets default value for optional params using other params values' do
+    expected_foo_value = 'foo-value'
+
+    get("/default_values_from_other_params?foo=#{expected_foo_value}")
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq({
+      foo: expected_foo_value,
+      bar: expected_foo_value,
+      qux: expected_foo_value
+    }.to_json)
   end
 end

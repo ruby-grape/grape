@@ -3,50 +3,19 @@
 module Grape
   class Router
     class Route
-      ROUTE_ATTRIBUTE_REGEXP = /route_([_a-zA-Z]\w*)/.freeze
-      SOURCE_LOCATION_REGEXP = /^(.*?):(\d+?)(?::in `.+?')?$/.freeze
-      FIXED_NAMED_CAPTURES = %w[format version].freeze
-
-      attr_accessor :pattern, :translator, :app, :index, :options
-
-      alias attributes translator
-
       extend Forwardable
+
+      attr_reader :app, :pattern, :options, :attributes
+      attr_accessor :index
+
       def_delegators :pattern, :path, :origin
-      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES => :attributes
-
-      def method_missing(method_id, *arguments)
-        match = ROUTE_ATTRIBUTE_REGEXP.match(method_id.to_s)
-        if match
-          method_name = match.captures.last.to_sym
-          warn_route_methods(method_name, caller(1).shift)
-          @options[method_name]
-        else
-          super
-        end
-      end
-
-      def respond_to_missing?(method_id, _)
-        ROUTE_ATTRIBUTE_REGEXP.match?(method_id.to_s)
-      end
-
-      def route_method
-        warn_route_methods(:method, caller(1).shift, :request_method)
-        request_method
-      end
-
-      def route_path
-        warn_route_methods(:path, caller(1).shift)
-        pattern.path
-      end
+      # params must be handled in this class to avoid method redefined warning
+      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES - [:params] => :attributes
 
       def initialize(method, pattern, **options)
-        method_s = method.to_s
-        method_upcase = Grape::Http::Headers.find_supported_method(method_s) || method_s.upcase
-
-        @options    = options.merge(method: method_upcase)
-        @pattern    = Pattern.new(pattern, **options)
-        @translator = AttributeTranslator.new(**options, request_method: method_upcase)
+        @options = options
+        @pattern = Grape::Router::Pattern.new(pattern, **options)
+        @attributes = Grape::Router::AttributeTranslator.new(**options, request_method: upcase_method(method))
       end
 
       def exec(env)
@@ -59,27 +28,29 @@ module Grape
       end
 
       def match?(input)
-        translator.respond_to?(:forward_match) && translator.forward_match ? input.start_with?(pattern.origin) : pattern.match?(input)
+        return false if input.blank?
+
+        attributes.forward_match ? input.start_with?(pattern.origin) : pattern.match?(input)
       end
 
       def params(input = nil)
-        if input.nil?
-          pattern.named_captures.keys.each_with_object(translator.params) do |(key), defaults|
-            defaults[key] ||= '' unless FIXED_NAMED_CAPTURES.include?(key) || defaults.key?(key)
-          end
-        else
-          parsed = pattern.params(input)
-          parsed ? parsed.delete_if { |_, value| value.nil? }.symbolize_keys : {}
-        end
+        return params_without_input if input.blank?
+
+        parsed = pattern.params(input)
+        return {} unless parsed
+
+        parsed.compact.symbolize_keys
       end
 
       private
 
-      def warn_route_methods(name, location, expected = nil)
-        path, line = *location.scan(SOURCE_LOCATION_REGEXP).first
-        path = File.realpath(path) if Pathname.new(path).relative?
-        expected ||= name
-        Grape.deprecator.warn("#{path}:#{line}: The route_xxx methods such as route_#{name} have been deprecated, please use #{expected}.")
+      def params_without_input
+        pattern.captures_default.merge(attributes.params)
+      end
+
+      def upcase_method(method)
+        method_s = method.to_s
+        Grape::Http::Headers.find_supported_method(method_s) || method_s.upcase
       end
     end
   end

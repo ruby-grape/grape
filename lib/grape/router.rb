@@ -45,7 +45,7 @@ module Grape
 
     def associate_routes(pattern, **options)
       @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Grape::Router::AttributeTranslator.new(**options, pattern: pattern, index: @neutral_map.length)
+      @neutral_map << Grape::Router::GreedyRoute.new(pattern: pattern, index: @neutral_map.length, **options)
     end
 
     def call(env)
@@ -119,7 +119,7 @@ module Grape
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input) || {})
+      args.merge(route.params(input))
     end
 
     def extract_input_and_method(env)
@@ -138,18 +138,11 @@ module Grape
     end
 
     def match?(input, method)
-      current_regexp = @optimized_map[method]
-      return unless current_regexp.match(input)
-
-      last_match = Regexp.last_match
-      @map[method].detect { |route| last_match["_#{route.index}"] }
+      @optimized_map[method].match(input) { |m| @map[method].detect { |route| m["_#{route.index}"] } }
     end
 
     def greedy_match?(input)
-      return unless @union.match(input)
-
-      last_match = Regexp.last_match
-      @neutral_map.detect { |route| last_match["_#{route.index}"] }
+      @union.match(input) { |m| @neutral_map.detect { |route| m["_#{route.index}"] } }
     end
 
     def call_with_allow_headers(env, route)

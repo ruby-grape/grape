@@ -22,7 +22,7 @@ module Grape
           #    collection_coercer_for(Array)
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
-            Grape::Validations::Types.const_get("#{type.name.camelize}Coercer")
+            Grape::Validations::Types.const_get(:"#{type.name.camelize}Coercer")
           end
 
           # Returns an instance of a coercer for a given type

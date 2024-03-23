@@ -5,6 +5,27 @@ module Grape
     module Desc
       include Grape::DSL::Settings
 
+      ROUTE_ATTRIBUTES = %i[
+        body_name
+        consumes
+        default
+        deprecated
+        description
+        detail
+        entity
+        headers
+        hidden
+        http_codes
+        is_array
+        named
+        nickname
+        params
+        produces
+        security
+        summary
+        tags
+      ].freeze
+
       # Add a description to the next namespace or function.
       # @param description [String] descriptive string for this endpoint
       #   or namespace
@@ -81,26 +102,7 @@ module Grape
       # Returns an object which configures itself via an instance-context DSL.
       def desc_container(endpoint_configuration)
         Module.new do
-          include Grape::Util::StrictHashConfiguration.module(
-            :summary,
-            :description,
-            :detail,
-            :params,
-            :entity,
-            :http_codes,
-            :named,
-            :body_name,
-            :headers,
-            :hidden,
-            :deprecated,
-            :is_array,
-            :nickname,
-            :produces,
-            :consumes,
-            :security,
-            :tags,
-            :default
-          )
+          include Grape::Util::StrictHashConfiguration.module(*ROUTE_ATTRIBUTES)
           config_context.define_singleton_method(:configuration) do
             endpoint_configuration
           end

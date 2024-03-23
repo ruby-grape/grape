@@ -97,7 +97,7 @@ module Grape
 
           route_options_params = options[:route_options][:params] || {}
           type = route_options_params.dig(key, :type)
-          has_children = route_options_params.keys.any? { |k| k != key && k.start_with?(key) }
+          has_children = route_options_params.keys.any? { |k| k != key && k.start_with?("#{key}[") }
 
           if type == 'Hash' && !has_children
             {}
@@ -160,9 +160,27 @@ module Grape
       # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
       # @param additional_headers [Hash] Addtional headers for the response.
       def error!(message, status = nil, additional_headers = nil)
-        self.status(status || namespace_inheritable(:default_error_status))
+        status = self.status(status || namespace_inheritable(:default_error_status))
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, message: message, status: self.status, headers: headers
+        throw :error, message: message, status: status, headers: headers
+      end
+
+      # Creates a Rack response based on the provided message, status, and headers.
+      # The content type in the headers is set to the default content type unless provided.
+      # The message is HTML-escaped if the content type is 'text/html'.
+      #
+      # @param message [String] The content of the response.
+      # @param status [Integer] The HTTP status code.
+      # @params headers [Hash] (optional) Headers for the response
+      #                      (default: {Rack::CONTENT_TYPE => content_type}).
+      #
+      # Returns:
+      # A Rack::Response object containing the specified message, status, and headers.
+      #
+      def rack_response(message, status = 200, headers = { Rack::CONTENT_TYPE => content_type })
+        Grape.deprecator.warn('The rack_response method has been deprecated, use error! instead.')
+        message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
+        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
       end
 
       # Redirect to a new url.

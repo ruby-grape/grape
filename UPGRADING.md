@@ -1,6 +1,106 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.1.0
+
+#### Changes in rescue_from
+
+The `rack_response` method has been deprecated and the `error_response` method has been removed. Use `error!` instead.
+
+See [#2414](https://github.com/ruby-grape/grape/pull/2414) for more information.
+
+#### Grape::Router::Route.route_xxx methods have been removed
+
+- `route_method` is accessible through `request_method`
+- `route_path` is accessible through `path`
+- Any other `route_xyz` are accessible through `options[xyz]`
+
+#### Instance variables scope
+
+Due to the changes done in [#2377](https://github.com/ruby-grape/grape/pull/2377), the instance variables defined inside each of the endpoints (or inside a `before` validator) are now accessible inside the `rescue_from`. The behavior of the instance variables was undefined until `2.1.0`.
+
+If you were using the same variable name defined inside an endpoint or `before` validator inside a `rescue_from` handler, you need to take in mind that you can start getting different values or you can be overriding values.
+
+Before:
+```ruby
+class TwitterAPI < Grape::API
+  before do
+    @var = 1
+  end
+
+  get '/' do
+    puts @var # => 1
+    raise
+  end
+
+  rescue_from :all do
+    puts @var # => nil
+  end
+end
+```
+
+After:
+```ruby
+class TwitterAPI < Grape::API
+  before do
+    @var = 1
+  end
+
+  get '/' do
+    puts @var # => 1
+    raise
+  end
+
+  rescue_from :all do
+    puts @var # => 1
+  end
+end
+```
+
+#### Recognizing Path
+
+Grape now considers the types of the configured `route_params` in order to determine the endpoint that matches with the performed request.
+
+So taking into account this `Grape::API` class
+
+```ruby
+class Books < Grape::API
+  resource :books do
+    route_param :id, type: Integer do
+      # GET /books/:id
+      get do
+        #...
+      end
+    end
+
+    resource :share do
+      # POST /books/share
+      post do
+      # ....
+      end
+    end
+  end
+end
+```
+
+Before:
+```ruby
+API.recognize_path '/books/1' # => /books/:id
+API.recognize_path '/books/share' # => /books/:id
+API.recognize_path '/books/other' # => /books/:id
+```
+
+After:
+```ruby
+API.recognize_path '/books/1' # => /books/:id
+API.recognize_path '/books/share' # => /books/share
+API.recognize_path '/books/other' # => nil
+```
+
+This implies that before this changes, when you performed `/books/other` and it matched with the `/books/:id` endpoint, you get a `400 Bad Request` response because the type of the provided `:id` param was not an `Integer`. However, after upgrading to version `2.1.0` you will get a `404 Not Found` response, because there is not a defined endpoint that matches with `/books/other`.
+
+See [#2379](https://github.com/ruby-grape/grape/pull/2379) for more information.
+
 ### Upgrading to >= 2.0.0
 
 #### Headers
@@ -474,8 +574,7 @@ end
 
 ##### `name` (and other caveats) of the mounted API
 
-After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class
-which inherit from `Grape::API::Instance`.
+After the patch, the mounted API is no longer a Named class inheriting from `Grape::API`, it is an anonymous class which inherit from `Grape::API::Instance`.
 
 What this means in practice, is:
 
@@ -855,8 +954,7 @@ See [#1114](https://github.com/ruby-grape/grape/pull/1114) for more information.
 
 #### Bypasses formatters when status code indicates no content
 
-To be consistent with rack and it's handling of standard responses associated with no content, both default and custom formatters will now
-be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
+To be consistent with rack and it's handling of standard responses associated with no content, both default and custom formatters will now be bypassed when processing responses for status codes defined [by rack](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567)
 
 See [#1190](https://github.com/ruby-grape/grape/pull/1190) for more information.
 
@@ -1297,8 +1395,7 @@ As replacement can be used
 * `Grape::Middleware::Auth::Digest` => [`Rack::Auth::Digest::MD5`](https://github.com/rack/rack/blob/master/lib/rack/auth/digest/md5.rb)
 * `Grape::Middleware::Auth::OAuth2` => [warden-oauth2](https://github.com/opperator/warden-oauth2) or [rack-oauth2](https://github.com/nov/rack-oauth2)
 
-If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/ruby-grape/grape/tree/v0.7.0/lib/grape/middleware/auth)
-and host these files within your application
+If this is not possible you can extract the middleware files from [grape v0.7.0](https://github.com/ruby-grape/grape/tree/v0.7.0/lib/grape/middleware/auth) and host these files within your application
 
 See [#703](https://github.com/ruby-grape/Grape/pull/703) for more information.
 

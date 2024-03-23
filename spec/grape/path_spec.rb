@@ -184,8 +184,7 @@ module Grape
       context 'when using a specific format' do
         it 'accepts specified format' do
           path = described_class.new(nil, nil, {})
-          allow(path).to receive(:uses_specific_format?).and_return(true)
-          allow(path).to receive(:settings).and_return({ format: :json })
+          allow(path).to receive_messages(uses_specific_format?: true, settings: { format: :json })
 
           expect(path.suffix).to eql('(.json)')
         end
@@ -194,8 +193,7 @@ module Grape
       context 'when path versioning is used' do
         it "includes a '/'" do
           path = described_class.new(nil, nil, {})
-          allow(path).to receive(:uses_specific_format?).and_return(false)
-          allow(path).to receive(:uses_path_versioning?).and_return(true)
+          allow(path).to receive_messages(uses_specific_format?: false, uses_path_versioning?: true)
 
           expect(path.suffix).to eql('(/.:format)')
         end
@@ -204,24 +202,21 @@ module Grape
       context 'when path versioning is not used' do
         it "does not include a '/' when the path has a namespace" do
           path = described_class.new(nil, 'namespace', {})
-          allow(path).to receive(:uses_specific_format?).and_return(false)
-          allow(path).to receive(:uses_path_versioning?).and_return(true)
+          allow(path).to receive_messages(uses_specific_format?: false, uses_path_versioning?: true)
 
           expect(path.suffix).to eql('(.:format)')
         end
 
         it "does not include a '/' when the path has a path" do
           path = described_class.new('/path', nil, {})
-          allow(path).to receive(:uses_specific_format?).and_return(false)
-          allow(path).to receive(:uses_path_versioning?).and_return(true)
+          allow(path).to receive_messages(uses_specific_format?: false, uses_path_versioning?: true)
 
           expect(path.suffix).to eql('(.:format)')
         end
 
         it "includes a '/' otherwise" do
           path = described_class.new(nil, nil, {})
-          allow(path).to receive(:uses_specific_format?).and_return(false)
-          allow(path).to receive(:uses_path_versioning?).and_return(true)
+          allow(path).to receive_messages(uses_specific_format?: false, uses_path_versioning?: true)
 
           expect(path.suffix).to eql('(/.:format)')
         end
@@ -231,8 +226,7 @@ module Grape
     describe '#path_with_suffix' do
       it 'combines the path and suffix' do
         path = described_class.new(nil, nil, {})
-        allow(path).to receive(:path).and_return('/the/path')
-        allow(path).to receive(:suffix).and_return('suffix')
+        allow(path).to receive_messages(path: '/the/path', suffix: 'suffix')
 
         expect(path.path_with_suffix).to eql('/the/pathsuffix')
       end
@@ -240,9 +234,7 @@ module Grape
       context 'when using a specific format' do
         it 'might have a suffix with specified format' do
           path = described_class.new(nil, nil, {})
-          allow(path).to receive(:path).and_return('/the/path')
-          allow(path).to receive(:uses_specific_format?).and_return(true)
-          allow(path).to receive(:settings).and_return({ format: :json })
+          allow(path).to receive_messages(path: '/the/path', uses_specific_format?: true, settings: { format: :json })
 
           expect(path.path_with_suffix).to eql('/the/path(.json)')
         end
