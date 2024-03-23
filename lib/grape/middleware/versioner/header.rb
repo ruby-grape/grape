@@ -30,7 +30,7 @@ module Grape
           handler = Grape::Util::AcceptHeaderHandler.new(
             accept_header: env[Grape::Http::Headers::HTTP_ACCEPT],
             versions: options[:versions],
-            version_options: options[:version_options]
+            **options.fetch(:version_options) { {} }
           )
 
           handler.match_best_quality_media_type!(

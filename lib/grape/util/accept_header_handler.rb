@@ -1,17 +1,23 @@
 # frozen_string_literal: true
 
+require 'grape/util/media_type'
+
 module Grape
   module Util
     class AcceptHeaderHandler
-      attr_reader :accept_header, :versions, :version_options
+      attr_reader :accept_header, :versions, :vendor, :strict, :cascade
 
-      def initialize(accept_header:, versions:, version_options:)
+      def initialize(accept_header:, versions:, vendor: nil, strict: false, cascade: true, **_options)
         @accept_header = accept_header
         @versions = versions
-        @version_options = version_options
+        @vendor = vendor
+        @strict = strict
+        @cascade = cascade
       end
 
-      def match_best_quality_media_type!(content_types:, allowed_methods:)
+      def match_best_quality_media_type!(content_types: Grape::ContentTypes::CONTENT_TYPES, allowed_methods: nil)
+        return unless vendor
+
         strict_header_checks!
         media_type = Grape::Util::MediaType.best_quality(accept_header, available_media_types(content_types))
         if media_type
@@ -21,8 +27,10 @@ module Grape
         end
       end
 
+      private
+
       def strict_header_checks!
-        return unless strict?
+        return unless strict
 
         accept_header_check!
         version_and_vendor_check!
@@ -40,14 +48,12 @@ module Grape
         invalid_accept_header!('API vendor or version not found.')
       end
 
-      def version_and_vendor?
-        q_values_mime_types.any? { |mime_type| Grape::Util::MediaType.match?(mime_type) }
-      end
-
-      private
-
       def q_values_mime_types
         @q_values_mime_types ||= Rack::Utils.q_values(accept_header).map(&:first)
+      end
+
+      def version_and_vendor?
+        q_values_mime_types.any? { |mime_type| Grape::Util::MediaType.match?(mime_type) }
       end
 
       def invalid_accept_header!(message)
@@ -65,18 +71,6 @@ module Grape
         vendor_not_found!(media_types) || version_not_found!(media_types)
       end
 
-      def vendor
-        version_options && version_options[:vendor]
-      end
-
-      def strict?
-        version_options && version_options[:strict]
-      end
-
-      def cascade?
-        version_options&.fetch(:cascade, true)
-      end
-
       def vendor_not_found!(media_types)
         return unless media_types.all? { |media_type| media_type&.vendor && media_type.vendor != vendor }
 
@@ -90,7 +84,7 @@ module Grape
       end
 
       def error_headers
-        cascade? ? { Grape::Http::Headers::X_CASCADE => 'pass' } : {}
+        cascade ? { Grape::Http::Headers::X_CASCADE => 'pass' } : {}
       end
 
       def available_media_types(content_types)
