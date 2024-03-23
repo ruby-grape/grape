@@ -2102,7 +2102,7 @@ describe Grape::API do
 
       it 'rescues custom grape exceptions' do
         subject.rescue_from ApiSpec::CustomError do |e|
-          rack_response('New Error', e.status)
+          error!('New Error', e.status)
         end
         subject.get '/custom_error' do
           raise ApiSpec::CustomError.new(status: 400, message: 'Custom Error')
@@ -2120,7 +2120,7 @@ describe Grape::API do
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
 
       subject.rescue_from :all do |_e|
-        rack_response('Formatter Error', 500)
+        error!('Formatter Error', 500)
       end
       subject.get('/formatter_exception') { 'Hello world' }
 
@@ -2143,7 +2143,7 @@ describe Grape::API do
   describe '.rescue_from klass, block' do
     it 'rescues Exception' do
       subject.rescue_from RuntimeError do |e|
-        rack_response("rescued from #{e.message}", 202)
+        error!("rescued from #{e.message}", 202)
       end
       subject.get '/exception' do
         raise 'rain!'
@@ -2164,7 +2164,7 @@ describe Grape::API do
 
       it 'rescues an error via rescue_from :all' do
         subject.rescue_from :all do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2176,7 +2176,7 @@ describe Grape::API do
 
       it 'rescues a specific error' do
         subject.rescue_from ConnectionError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2188,7 +2188,7 @@ describe Grape::API do
 
       it 'rescues a subclass of an error by default' do
         subject.rescue_from RuntimeError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/exception' do
           raise ConnectionError
@@ -2200,10 +2200,10 @@ describe Grape::API do
 
       it 'rescues multiple specific errors' do
         subject.rescue_from ConnectionError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.rescue_from DatabaseError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/connection' do
           raise ConnectionError
@@ -2221,7 +2221,7 @@ describe Grape::API do
 
       it 'does not rescue a different error' do
         subject.rescue_from RuntimeError do |e|
-          rack_response("rescued from #{e.class.name}", 500)
+          error!("rescued from #{e.class.name}", 500)
         end
         subject.get '/uncaught' do
           raise CommunicationError
@@ -2234,7 +2234,7 @@ describe Grape::API do
   describe '.rescue_from klass, lambda' do
     it 'rescues an error with the lambda' do
       subject.rescue_from ArgumentError, lambda {
-        rack_response('rescued with a lambda', 400)
+        error!('rescued with a lambda', 400)
       }
       subject.get('/rescue_lambda') { raise ArgumentError }
 
@@ -2245,7 +2245,7 @@ describe Grape::API do
 
     it 'can execute the lambda with an argument' do
       subject.rescue_from ArgumentError, lambda { |e|
-        rack_response(e.message, 400)
+        error!(e.message, 400)
       }
       subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
 
@@ -2326,7 +2326,7 @@ describe Grape::API do
 
     it 'rescues error as well as subclass errors with rescue_subclasses option set' do
       subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: true do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
         raise ApiSpec::APIErrors::ChildError
@@ -2347,7 +2347,7 @@ describe Grape::API do
 
     it 'sets rescue_subclasses to true by default' do
       subject.rescue_from ApiSpec::APIErrors::ParentError do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/caught_child' do
         raise ApiSpec::APIErrors::ChildError
@@ -2359,7 +2359,7 @@ describe Grape::API do
 
     it 'does not rescue child errors if rescue_subclasses is false' do
       subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: false do |e|
-        rack_response("rescued from #{e.class.name}", 500)
+        error!("rescued from #{e.class.name}", 500)
       end
       subject.get '/uncaught' do
         raise ApiSpec::APIErrors::ChildError
@@ -2389,7 +2389,7 @@ describe Grape::API do
 
     it 'rescues grape exceptions with a user-defined handler' do
       subject.rescue_from grape_exception.class do |_error|
-        rack_response('Redefined Error', 403)
+        error!('Redefined Error', 403)
       end
 
       exception = grape_exception
@@ -2572,11 +2572,7 @@ describe Grape::API do
       end
       get '/excel.json'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('The requested format &#x27;txt&#x27; is not supported.')
-      else
-        expect(last_response.body).to eq('The requested format &#39;txt&#39; is not supported.')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format 'txt' is not supported."))
     end
   end
 
@@ -3375,7 +3371,7 @@ describe Grape::API do
       context 'when some rescues are defined by mounted' do
         it 'inherits parent rescues' do
           subject.rescue_from :all do |e|
-            rack_response("rescued from #{e.message}", 202)
+            error!("rescued from #{e.message}", 202)
           end
 
           app = Class.new(described_class)
@@ -3393,14 +3389,14 @@ describe Grape::API do
 
         it 'prefers rescues defined by mounted if they rescue similar error class' do
           subject.rescue_from StandardError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise 'doh!' }
             mount app
@@ -3412,14 +3408,14 @@ describe Grape::API do
 
         it 'prefers rescues defined by mounted even if outer is more specific' do
           subject.rescue_from ArgumentError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from StandardError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise ArgumentError.new }
             mount app
@@ -3431,14 +3427,14 @@ describe Grape::API do
 
         it 'prefers more specific rescues defined by mounted' do
           subject.rescue_from StandardError do
-            rack_response('outer rescue')
+            error!('outer rescue')
           end
 
           app = Class.new(described_class)
 
           subject.namespace :mounted do
             rescue_from ArgumentError do
-              rack_response('inner rescue')
+              error!('inner rescue')
             end
             app.get('/fail') { raise ArgumentError.new }
             mount app
@@ -4125,11 +4121,7 @@ describe Grape::API do
       end
       get '/something'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#x27;txt&#x27; is not supported.&quot;}')
-      else
-        expect(last_response.body).to eq('{&quot;error&quot;:&quot;The requested format &#39;txt&#39; is not supported.&quot;}')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html({ error: "The requested format 'txt' is not supported." }.to_json))
     end
   end
 
@@ -4141,11 +4133,7 @@ describe Grape::API do
       end
       get '/something?format=<script>blah</script>'
       expect(last_response.status).to eq(406)
-      if ActiveSupport::VERSION::MAJOR == 3
-        expect(last_response.body).to eq('The requested format &#x27;&lt;script&gt;blah&lt;/script&gt;&#x27; is not supported.')
-      else
-        expect(last_response.body).to eq('The requested format &#39;&lt;script&gt;blah&lt;/script&gt;&#39; is not supported.')
-      end
+      expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format '<script>blah</script>' is not supported."))
     end
   end
 
@@ -4432,6 +4420,26 @@ describe Grape::API do
           expect(last_response.status).to be 404
         end
       end
+    end
+  end
+
+  context 'rack_response deprecated' do
+    let(:app) do
+      Class.new(described_class) do
+        rescue_from :all do
+          rack_response('deprecated', 500)
+        end
+
+        get 'test' do
+          raise ArgumentError
+        end
+      end
+    end
+
+    it 'raises a deprecation' do
+      expect(Grape.deprecator).to receive(:warn).with('The rack_response method has been deprecated, use error! instead.')
+      get 'test'
+      expect(last_response.body).to eq('deprecated')
     end
   end
 end

@@ -19,13 +19,9 @@
 - [Mounting](#mounting)
   - [All](#all)
   - [Rack](#rack)
-  - [ActiveRecord without Rails](#activerecord-without-rails)
-    - [Rails 4](#rails-4)
-    - [Rails 5+](#rails-5)
   - [Alongside Sinatra (or other frameworks)](#alongside-sinatra-or-other-frameworks)
   - [Rails](#rails)
-    - [Rails < 5.2](#rails--52)
-    - [Rails 6.0](#rails-60)
+    - [Zeitwerk](#zeitwerk)
   - [Modules](#modules)
 - [Remounting](#remounting)
   - [Mount Configuration](#mount-configuration)
@@ -101,7 +97,6 @@
     - [Rescuing exceptions inside namespaces](#rescuing-exceptions-inside-namespaces)
     - [Unrescuable Exceptions](#unrescuable-exceptions)
     - [Exceptions that should be rescued explicitly](#exceptions-that-should-be-rescued-explicitly)
-  - [Rails 3.x](#rails-3x)
 - [Logging](#logging)
 - [API Formats](#api-formats)
   - [JSONP](#jsonp)
@@ -309,26 +304,6 @@ And would respond to the following routes:
 
 Grape will also automatically respond to HEAD and OPTIONS for all GET, and just OPTIONS for all other routes.
 
-### ActiveRecord without Rails
-
-If you want to use ActiveRecord within Grape, you will need to make sure that ActiveRecord's connection pool is handled correctly.
-
-#### Rails 4
-
-The easiest way to achieve that is by using ActiveRecord's `ConnectionManagement` middleware in your `config.ru` before mounting Grape, e.g.:
-
-```ruby
-use ActiveRecord::ConnectionAdapters::ConnectionManagement
-```
-
-#### Rails 5+
-
-Use [otr-activerecord](https://github.com/jhollinger/otr-activerecord) as follows:
-
-```ruby
-use OTR::ActiveRecord::ConnectionManagement
-```
-
 ### Alongside Sinatra (or other frameworks)
 
 If you wish to mount Grape alongside another Rack framework such as Sinatra, you can do so easily using `Rack::Cascade`:
@@ -367,21 +342,8 @@ Modify `config/routes`:
 ```ruby
 mount Twitter::API => '/'
 ```
-
-#### Rails < 5.2
-
-Modify `application.rb`:
-
-```ruby
-config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
-```
-
-See [below](#reloading-api-changes-in-development) for additional code that enables reloading of API changes in development.
-
-#### Rails 6.0
-
-For Rails versions greater than 6.0.0.beta2, `Zeitwerk` autoloader is the default for CRuby. By default `Zeitwerk` inflects `api` as `Api` instead of `API`. To make our example work, you need to uncomment the lines at the bottom of `config/initializers/inflections.rb`, and add `API` as an acronym:
+#### Zeitwerk
+Rails's default autoloader is `Zeitwerk`. By default, it inflects `api` as `Api` instead of `API`. To make our example work, you need to uncomment the lines at the bottom of `config/initializers/inflections.rb`, and add `API` as an acronym:
 
 ```ruby
 ActiveSupport::Inflector.inflections(:en) do |inflect|
@@ -2883,20 +2845,6 @@ Any exception that is not subclass of `StandardError` should be rescued explicit
 Usually it is not a case for an application logic as such errors point to problems in Ruby runtime.
 This is following [standard recommendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
 
-### Rails 3.x
-
-When mounted inside containers, such as Rails 3.x, errors such as "404 Not Found" or "406 Not Acceptable" will likely be handled and rendered by Rails handlers. For instance, accessing a nonexistent route "/api/foo" raises a 404, which inside rails will ultimately be translated to an `ActionController::RoutingError`, which most likely will get rendered to a HTML error page.
-
-Most APIs will enjoy preventing downstream handlers from handling errors. You may set the `:cascade` option to `false` for the entire API or separately on specific `version` definitions, which will remove the `X-Cascade: true` header from API responses.
-
-```ruby
-cascade false
-```
-
-```ruby
-version 'v1', using: :header, vendor: 'twitter', cascade: false
-```
-
 ## Logging
 
 `Grape::API` provides a `logger` method which by default will return an instance of the `Logger` class from Ruby's standard library.
@@ -3100,7 +3048,7 @@ end
 Built-in formatters are the following.
 
 * `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
-* `:xml`: use object's `to_xml` when available, usually via `MultiXml`, otherwise call `to_s`
+* `:xml`: use object's `to_xml` when available, usually via `MultiXml`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
