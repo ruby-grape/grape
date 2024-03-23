@@ -17,6 +17,18 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
   let(:versions) { ['v1'] }
   let(:options) { {} }
 
+  shared_examples 'an invalid accept header exception' do |message|
+    before do
+      allow(Grape::Exceptions::InvalidAcceptHeader).to receive(:new)
+                                                         .with(message, { Grape::Http::Headers::X_CASCADE => 'pass' })
+                                                         .and_call_original
+    end
+
+    it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
+      expect { subject }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
+    end
+  end
+
   describe '#match_best_quality_media_type!' do
     context 'when no vendor set' do
       let(:options) do
@@ -39,29 +51,13 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
       context 'when accept_header blank' do
         let(:accept_header) { nil }
 
-        before do
-          allow(Grape::Exceptions::InvalidAcceptHeader).to receive(:new)
-              .with('Accept header must be set.', { Grape::Http::Headers::X_CASCADE => 'pass' })
-              .and_call_original
-        end
-
-        it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
-          expect { subject }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
-        end
+        it_behaves_like 'an invalid accept header exception', 'Accept header must be set.'
       end
 
       context 'when vendor not found' do
         let(:accept_header) { '*/*'}
 
-        before do
-          allow(Grape::Exceptions::InvalidAcceptHeader).to receive(:new)
-            .with('API vendor or version not found.', { Grape::Http::Headers::X_CASCADE => 'pass' })
-            .and_call_original
-        end
-
-        it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
-          expect { subject }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
-        end
+        it_behaves_like 'an invalid accept header exception', 'API vendor or version not found.'
       end
     end
 
@@ -97,15 +93,7 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
       end
 
       context 'when vendor not found' do
-        before do
-          allow(Grape::Exceptions::InvalidAcceptHeader).to receive(:new)
-                                                             .with('API vendor not found.', { Grape::Http::Headers::X_CASCADE => 'pass' })
-                                                             .and_call_original
-        end
-
-        it 'raises a Grape::Exceptions::InvalidAcceptHeader' do
-          expect { subject }.to raise_error(Grape::Exceptions::InvalidAcceptHeader)
-        end
+        it_behaves_like 'an invalid accept header exception', 'API vendor not found.'
       end
 
       context 'when version not found' do
