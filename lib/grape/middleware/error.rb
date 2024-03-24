@@ -33,7 +33,7 @@ module Grape
         @env = env
         error_response(catch(:error) { return @app.call(@env) })
       rescue Exception => e # rubocop:disable Lint/RescueException
-        run_rescue_handler(find_handler(e.class), e, @env[Grape::Util::Env::API_ENDPOINT])
+        run_rescue_handler(find_handler(e.class), e, @env[Grape::Env::API_ENDPOINT])
       end
 
       private
@@ -44,7 +44,7 @@ module Grape
       end
 
       def format_message(message, backtrace, original_exception = nil)
-        format = env[Grape::Util::Env::API_FORMAT] || options[:format]
+        format = env[Grape::Env::API_FORMAT] || options[:format]
         formatter = Grape::ErrorFormatter.formatter_for(format, **options)
         return formatter.call(message, backtrace, options, env, original_exception) if formatter
 

@@ -52,7 +52,7 @@ module Grape
       end
 
       def fetch_formatter(headers, options)
-        api_format = mime_types[headers[Rack::CONTENT_TYPE]] || env[Grape::Util::Env::API_FORMAT]
+        api_format = mime_types[headers[Rack::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
         Grape::Formatter.formatter_for(api_format, **options)
       end
 
@@ -64,7 +64,7 @@ module Grape
         if headers[Rack::CONTENT_TYPE]
           headers
         else
-          headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Util::Env::API_FORMAT]))
+          headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
         end
       end
 
@@ -80,10 +80,10 @@ module Grape
           !request.parseable_data? &&
           (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
-        return unless (input = env[Grape::Util::Env::RACK_INPUT])
+        return unless (input = env[Grape::Env::RACK_INPUT])
 
         input.rewind
-        body = env[Grape::Util::Env::API_REQUEST_INPUT] = input.read
+        body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
           read_rack_input(body) if body && !body.empty?
         ensure
@@ -99,14 +99,14 @@ module Grape
         parser = Grape::Parser.parser_for fmt, **options
         if parser
           begin
-            body = (env[Grape::Util::Env::API_REQUEST_BODY] = parser.call(body, env))
+            body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
             if body.is_a?(Hash)
-              env[Grape::Util::Env::RACK_REQUEST_FORM_HASH] = if env.key?(Grape::Util::Env::RACK_REQUEST_FORM_HASH)
-                                                                env[Grape::Util::Env::RACK_REQUEST_FORM_HASH].merge(body)
+              env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env.key?(Grape::Env::RACK_REQUEST_FORM_HASH)
+                                                                env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
                                                               else
                                                                 body
                                                               end
-              env[Grape::Util::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Util::Env::RACK_INPUT]
+              env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
             end
           rescue Grape::Exceptions::Base => e
             raise e
@@ -114,14 +114,14 @@ module Grape
             throw :error, status: 400, message: e.message, backtrace: e.backtrace, original_exception: e
           end
         else
-          env[Grape::Util::Env::API_REQUEST_BODY] = body
+          env[Grape::Env::API_REQUEST_BODY] = body
         end
       end
 
       def negotiate_content_type
         fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
         if content_type_for(fmt)
-          env[Grape::Util::Env::API_FORMAT] = fmt
+          env[Grape::Env::API_FORMAT] = fmt
         else
           throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
         end

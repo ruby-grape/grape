@@ -147,13 +147,13 @@ module Grape
 
     def call_with_allow_headers(env, route)
       prepare_env_from_route(env, route)
-      env[Grape::Util::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
       route.endpoint.call(env)
     end
 
     def prepare_env_from_route(env, route)
       input, = *extract_input_and_method(env)
-      env[Grape::Util::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Util::Env::GRAPE_ROUTING_ARGS], route, input)
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Env::GRAPE_ROUTING_ARGS], route, input)
     end
 
     def cascade?(response)

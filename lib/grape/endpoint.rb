@@ -219,7 +219,7 @@ module Grape
     end
 
     def call!(env)
-      env[Grape::Util::Env::API_ENDPOINT] = self
+      env[Grape::Env::API_ENDPOINT] = self
       @env = env
       @app.call(env)
     end
@@ -247,7 +247,7 @@ module Grape
           self.class.run_before_each(self)
           run_filters befores, :before
 
-          if (allowed_methods = env[Grape::Util::Env::GRAPE_ALLOWED_METHODS])
+          if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
             raise Grape::Exceptions::MethodNotAllowed.new(header.merge('Allow' => allowed_methods)) unless options?
 
             header Grape::Http::Headers::ALLOW, allowed_methods
@@ -313,7 +313,7 @@ module Grape
                 parsers: namespace_stackable_with_hash(:parsers)
 
       builder = stack.build
-      builder.run ->(env) { env[Grape::Util::Env::API_ENDPOINT].run }
+      builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
       builder.to_app
     end
 

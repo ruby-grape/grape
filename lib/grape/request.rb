@@ -26,7 +26,7 @@ module Grape
     private
 
     def grape_routing_args
-      args = env[Grape::Util::Env::GRAPE_ROUTING_ARGS].dup
+      args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
       # preserve version from query string parameters
       args.delete(:version)
       args.delete(:route_info)

@@ -12,7 +12,7 @@ module Grape
 
         def build_params
           rack_params.deep_dup.tap do |params|
-            params.deep_merge!(grape_routing_args) if env.key?(Grape::Util::Env::GRAPE_ROUTING_ARGS)
+            params.deep_merge!(grape_routing_args) if env.key?(Grape::Env::GRAPE_ROUTING_ARGS)
             params.deep_symbolize_keys!
           end
         end

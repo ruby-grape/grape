@@ -152,7 +152,7 @@ module Grape
 
       # The API version as specified in the URL.
       def version
-        env[Grape::Util::Env::API_VERSION]
+        env[Grape::Env::API_VERSION]
       end
 
       def configuration
@@ -419,7 +419,7 @@ module Grape
       #     route.description
       #   end
       def route
-        env[Grape::Util::Env::GRAPE_ROUTING_ARGS][:route_info]
+        env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info]
       end
 
       # Attempt to locate the Entity class for a given object, if not given
@@ -455,7 +455,7 @@ module Grape
       #   the given entity_class.
       def entity_representation_for(entity_class, object, options)
         embeds = { env: env }
-        embeds[:version] = env[Grape::Util::Env::API_VERSION] if env.key?(Grape::Util::Env::API_VERSION)
+        embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
         entity_class.represent(object, **embeds.merge(options))
       end
     end

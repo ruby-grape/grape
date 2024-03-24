@@ -5,7 +5,7 @@ module Grape
     # Common methods for all types of Grape middleware
     module Helpers
       def context
-        env[Grape::Util::Env::API_ENDPOINT]
+        env[Grape::Env::API_ENDPOINT]
       end
     end
   end
