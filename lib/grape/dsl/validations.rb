@@ -38,6 +38,19 @@ module Grape
         def params(&block)
           Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
         end
+
+        # Declare the contract to be used for the endpoint's parameters.
+        # @param contract [Class<Dry::Validation::Contract> | Dry::Schema::Processor]
+        #   The contract or schema to be used for validation. Optional.
+        # @yield a block yielding a new instance of Dry::Schema::Params
+        #   subclass, allowing to define the schema inline. When the
+        #   +contract+ parameter is a schema, it will be used as a parent. Optional.
+        def contract(contract = nil, &block)
+          raise ArgumentError, 'Either contract or block must be provided' unless contract || block
+          raise ArgumentError, 'Cannot inherit from contract, only schema' if block && contract.respond_to?(:schema)
+
+          Grape::Validations::ContractScope.new(self, contract, &block)
+        end
       end
     end
   end

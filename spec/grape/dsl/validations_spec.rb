@@ -50,6 +50,16 @@ module Grape
           expect { subject.params { raise 'foo' } }.to raise_error RuntimeError, 'foo'
         end
       end
+
+      describe '.contract' do
+        it 'saves the schema instance' do
+          expect(subject.contract(Dry::Schema.Params)).to be_a Grape::Validations::ContractScope
+        end
+
+        it 'errors without params or block' do
+          expect { subject.contract }.to raise_error(ArgumentError)
+        end
+      end
     end
   end
 end

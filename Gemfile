@@ -8,6 +8,7 @@ gemspec
 
 group :development, :test do
   gem 'bundler'
+  gem 'dry-validation'
   gem 'hashie'
   gem 'rake'
   gem 'rubocop', '1.59.0', require: false

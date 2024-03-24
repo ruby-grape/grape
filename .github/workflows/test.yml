@@ -25,6 +25,7 @@ jobs:
       matrix:
         ruby: ['2.7', '3.0', '3.1', '3.2', '3.3']
         gemfile: [rack_2_0, rack_3_0, rails_6_0, rails_6_1, rails_7_0, rails_7_1]
+        integration_only: [false]
         include:
           - ruby: '2.7'
             gemfile: rack_1_0
@@ -32,6 +33,9 @@ jobs:
             gemfile: multi_json
           - ruby: '2.7'
             gemfile: multi_xml
+          - ruby: '3.3'
+            gemfile: no_dry_validation
+            integration_only: true
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
@@ -45,6 +49,7 @@ jobs:
         bundler-cache: true
 
     - name: Run tests
+      if: ${{ matrix.integration_only == false }}
       run: bundle exec rake spec
 
     - name: Run tests (spec/integration/eager_load)
@@ -69,6 +74,10 @@ jobs:
       # rack_2_0.gemfile is equals to Gemfile
       if: ${{ matrix.gemfile == 'rack_3_0' }}
       run: bundle exec rspec spec/integration/rack/v3
+
+    - name: Run tests (spec/integration/no_dry_validation)
+      if: ${{ matrix.gemfile == 'no_dry_validation' }}
+      run: bundle exec rspec spec/integration/no_dry_validation
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
