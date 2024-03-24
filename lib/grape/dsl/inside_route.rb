@@ -29,11 +29,17 @@ module Grape
           options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: false)
           declared_params ||= optioned_declared_params(**options)
 
-          if passed_params.is_a?(Array)
-            declared_array(passed_params, options, declared_params, params_nested_path)
-          else
-            declared_hash(passed_params, options, declared_params, params_nested_path)
+          res = if passed_params.is_a?(Array)
+                  declared_array(passed_params, options, declared_params, params_nested_path)
+                else
+                  declared_hash(passed_params, options, declared_params, params_nested_path)
+                end
+
+          if (key_maps = namespace_stackable(:contract_key_map))
+            key_maps.each { |key_map| key_map.write(passed_params, res) }
           end
+
+          res
         end
 
         private

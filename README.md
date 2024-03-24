@@ -77,6 +77,7 @@
     - [Pass symbols for i18n translations](#pass-symbols-for-i18n-translations)
     - [Overriding Attribute Names](#overriding-attribute-names)
     - [With Default](#with-default)
+  - [Using dry-validation or dry-schema](#using-dry-validation-or-dry-schema)
 - [Headers](#headers)
   - [Request](#request)
     - [Header Case Handling](#header-case-handling)
@@ -2085,6 +2086,40 @@ params do
   requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
 end
 ```
+
+### Using `dry-validation` or `dry-schema`
+
+As an alternative to the `params` DSL described above, you can use a schema or `dry-validation` contract to describe an endpoint's parameters. This can be especially useful if you use the above already in some other parts of your application. If not, you'll need to add `dry-validation` or `dry-schema` to your `Gemfile`.
+
+Then call `contract` with a contract or schema defined previously:
+
+```rb
+CreateOrdersSchema = Dry::Schema.Params do
+  required(:orders).array(:hash) do
+    required(:name).filled(:string)
+    optional(:volume).maybe(:integer, lt?: 9)
+  end
+end
+
+# ...
+
+contract CreateOrdersSchema
+```
+
+or with a block, using the [schema definition syntax](https://dry-rb.org/gems/dry-schema/1.13/#quick-start):
+
+```rb
+contract do
+  required(:orders).array(:hash) do
+    required(:name).filled(:string)
+    optional(:volume).maybe(:integer, lt?: 9)
+  end
+end
+```
+
+The latter will define a coercing schema (`Dry::Schema.Params`). When using the former approach, it's up to you to decide whether the input will need coercing.
+
+The `params` and `contract` declarations can also be used together in the same API, e.g. to describe different parts of a nested namespace for an endpoint.
 
 ## Headers
 

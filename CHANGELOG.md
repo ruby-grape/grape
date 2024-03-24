@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2419](https://github.com/ruby-grape/grape/pull/2419): Add the `contract` DSL - [@dgutov](https://github.com/dgutov).
 * [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * [#2377](https://github.com/ruby-grape/grape/pull/2377): Allow to use instance variables values inside `rescue_from` - [@jcagarcia](https://github.com/jcagarcia).
 * [#2379](https://github.com/ruby-grape/grape/pull/2379): Take into account the `route_param` type in `recognize_path` - [@jcagarcia](https://github.com/jcagarcia).
@@ -16,6 +17,7 @@
 * [#2406](https://github.com/ruby-grape/grape/pull/2406): Remove mime-types dependency in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
 * [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
+* [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
 * [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

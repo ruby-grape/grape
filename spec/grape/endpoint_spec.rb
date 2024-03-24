@@ -970,7 +970,7 @@ describe Grape::Endpoint do
       expect(last_response.status).to eq(406)
     end
 
-    it 'result in a 406 response if they cannot be parsed by rack-accept' do
+    it 'result in a 406 response if they cannot be parsed' do
       get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json; version=1'
       expect(last_response.status).to eq(406)
     end
