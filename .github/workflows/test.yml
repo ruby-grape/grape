@@ -25,20 +25,23 @@ jobs:
       matrix:
         ruby: ['2.7', '3.0', '3.1', '3.2', '3.3']
         gemfile: [rack_2_0, rack_3_0, rails_6_0, rails_6_1, rails_7_0, rails_7_1]
-        integration_only: [false]
+        integration: [false]
         include:
           - ruby: '2.7'
             gemfile: rack_1_0
           - ruby: '2.7'
-            gemfile: multi_json
+            integration: multi_json
           - ruby: '2.7'
-            gemfile: multi_xml
+            integration: multi_xml
+          - ruby: '2.7'
+            integration: rack_2_0
+          - ruby: '2.7'
+            integration: rack_3_0
           - ruby: '3.3'
-            gemfile: no_dry_validation
-            integration_only: true
+            integration: no_dry_validation
     runs-on: ubuntu-latest
     env:
-      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.integration || matrix.gemfile }}.gemfile
     steps:
     - uses: actions/checkout@v4
 
@@ -49,35 +52,11 @@ jobs:
         bundler-cache: true
 
     - name: Run tests
-      if: ${{ matrix.integration_only == false }}
       run: bundle exec rake spec
 
-    - name: Run tests (spec/integration/eager_load)
-      # rack_2_0.gemfile is equals to Gemfile
-      if: ${{ matrix.gemfile == 'rack_2_0' }}
-      run: bundle exec rspec spec/integration/eager_load
-
-    - name: Run tests (spec/integration/multi_json)
-      if: ${{ matrix.gemfile == 'multi_json' }}
-      run: bundle exec rspec spec/integration/multi_json
-
-    - name: Run tests (spec/integration/multi_xml)
-      if: ${{ matrix.gemfile == 'multi_xml' }}
-      run: bundle exec rspec spec/integration/multi_xml
-
-    - name: Run tests (spec/integration/rack/v2)
-      # rack_2_0.gemfile is equals to Gemfile
-      if: ${{ matrix.gemfile == 'rack_2_0' }}
-      run: bundle exec rspec spec/integration/rack/v2
-
-    - name: Run tests (spec/integration/rack/v3)
-      # rack_2_0.gemfile is equals to Gemfile
-      if: ${{ matrix.gemfile == 'rack_3_0' }}
-      run: bundle exec rspec spec/integration/rack/v3
-
-    - name: Run tests (spec/integration/no_dry_validation)
-      if: ${{ matrix.gemfile == 'no_dry_validation' }}
-      run: bundle exec rspec spec/integration/no_dry_validation
+    - name: Run integration tests (spec/integration/${{ matrix.integration }})
+      if: ${{ matrix.integration }}
+      run: bundle exec rspec spec/integration/${{ matrix.integration }}
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
