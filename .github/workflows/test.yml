@@ -52,6 +52,7 @@ jobs:
         bundler-cache: true
 
     - name: Run tests
+      if: ${{ !matrix.integration }}
       run: bundle exec rake spec
 
     - name: Run integration tests (spec/integration/${{ matrix.integration }})
