@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/router/attribute_translator'
-require 'forwardable'
-
 # Act like a Grape::Router::Route but for greedy_match
 # see @neutral_map
 

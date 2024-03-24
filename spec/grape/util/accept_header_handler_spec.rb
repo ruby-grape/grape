@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/accept_header_handler'
-
 RSpec.describe Grape::Util::AcceptHeaderHandler do
   subject(:match_best_quality_media_type!) { instance.match_best_quality_media_type! }
 
