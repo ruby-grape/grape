@@ -3,7 +3,6 @@
 require 'logger'
 require 'rack'
 require 'rack/builder'
-require 'rack/accept'
 require 'rack/auth/basic'
 require 'set'
 require 'bigdecimal'
