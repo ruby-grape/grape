@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-require 'grape/util/media_type'
-require 'grape/util/accept_header_handler'
-
 module Grape
   module Middleware
     module Versioner
@@ -37,11 +33,13 @@ module Grape
             content_types: content_types,
             allowed_methods: env[Grape::Env::GRAPE_ALLOWED_METHODS]
           ) do |media_type|
-            env[Grape::Env::API_TYPE] = media_type.type
-            env[Grape::Env::API_SUBTYPE] = media_type.subtype
-            env[Grape::Env::API_VENDOR] = media_type.vendor
-            env[Grape::Env::API_VERSION] = media_type.version
-            env[Grape::Env::API_FORMAT] = media_type.format
+            env.update(
+              Grape::Env::API_TYPE => media_type.type,
+              Grape::Env::API_SUBTYPE => media_type.subtype,
+              Grape::Env::API_VENDOR => media_type.vendor,
+              Grape::Env::API_VERSION => media_type.version,
+              Grape::Env::API_FORMAT => media_type.format
+            )
           end
         end
       end

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'singleton'
-require 'forwardable'
-
 module Grape
   module Util
     class Cache

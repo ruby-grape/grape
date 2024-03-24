@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/lazy_object'
-
 module Grape
   module Http
     module Headers
@@ -11,7 +9,11 @@ module Grape
       REQUEST_METHOD  = 'REQUEST_METHOD'
       QUERY_STRING    = 'QUERY_STRING'
 
-      if Grape.lowercase_headers?
+      def self.lowercase?
+        Rack::CONTENT_TYPE == 'content-type'
+      end
+
+      if lowercase?
         ALLOW             = 'allow'
         LOCATION          = 'location'
         TRANSFER_ENCODING = 'transfer-encoding'
@@ -32,7 +34,7 @@ module Grape
       OPTIONS = 'OPTIONS'
 
       SUPPORTED_METHODS = [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS].freeze
-      SUPPORTED_METHODS_WITHOUT_OPTIONS = Grape::Util::LazyObject.new { [GET, POST, PUT, PATCH, DELETE, HEAD].freeze }
+      SUPPORTED_METHODS_WITHOUT_OPTIONS = Grape::Util::Lazy::Object.new { [GET, POST, PUT, PATCH, DELETE, HEAD].freeze }
 
       HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'
       HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'
@@ -40,7 +42,7 @@ module Grape
 
       FORMAT                 = 'format'
 
-      HTTP_HEADERS = Grape::Util::LazyObject.new do
+      HTTP_HEADERS = Grape::Util::Lazy::Object.new do
         common_http_headers = %w[
           Version
           Host

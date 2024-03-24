@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'attributes_doc'
-
 module Grape
   module Validations
     class ParamsScope

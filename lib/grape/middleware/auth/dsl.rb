@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'rack/auth/basic'
-
 module Grape
   module Middleware
     module Auth

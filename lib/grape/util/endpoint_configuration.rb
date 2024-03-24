@@ -2,7 +2,7 @@
 
 module Grape
   module Util
-    class EndpointConfiguration < LazyValueHash
+    class EndpointConfiguration < Lazy::ValueHash
     end
   end
 end

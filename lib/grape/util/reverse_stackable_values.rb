@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'stackable_values'
-
 module Grape
   module Util
     class ReverseStackableValues < StackableValues

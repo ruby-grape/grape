@@ -18,6 +18,7 @@
 * [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
 * [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
+* [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/middleware/base'
-
 module Grape
   module Middleware
     class Globals < Base

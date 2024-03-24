@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/registrable'
-
 module Grape
   module ContentTypes
     extend Util::Registrable

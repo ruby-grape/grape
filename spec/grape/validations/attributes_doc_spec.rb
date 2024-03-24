@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Grape::Validations::ParamsScope::AttributesDoc do
+describe Grape::Validations::AttributesDoc do
   shared_examples 'an optional doc attribute' do |attr|
     it 'does not mention it' do
       expected_opts.delete(attr)

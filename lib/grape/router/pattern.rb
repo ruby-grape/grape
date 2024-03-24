@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'forwardable'
-require 'mustermann/grape'
-require 'grape/util/cache'
-
 module Grape
   class Router
     class Pattern

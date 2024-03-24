@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dry-types'
-
 module Grape
   module DryTypes
     # Call +Dry.Types()+ to add all registered types to +DryTypes+ which is

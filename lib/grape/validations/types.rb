@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/validations/types/json'
-require 'grape/validations/types/file'
-
 module Grape
   module Validations
     # Module for code related to grape's system for
