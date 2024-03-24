@@ -102,10 +102,10 @@ module Grape
             body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
             if body.is_a?(Hash)
               env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env.key?(Grape::Env::RACK_REQUEST_FORM_HASH)
-                                                                env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
-                                                              else
-                                                                body
-                                                              end
+                                                          env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
+                                                        else
+                                                          body
+                                                        end
               env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
             end
           rescue Grape::Exceptions::Base => e
