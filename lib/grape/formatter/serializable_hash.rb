@@ -6,10 +6,10 @@ module Grape
       class << self
         def call(object, _env)
           return object if object.is_a?(String)
-          return ::Grape::Util::Json.dump(serialize(object)) if serializable?(object)
+          return ::Grape::Json.dump(serialize(object)) if serializable?(object)
           return object.to_json if object.respond_to?(:to_json)
 
-          ::Grape::Util::Json.dump(object)
+          ::Grape::Json.dump(object)
         end
 
         private

@@ -7,7 +7,7 @@ module Grape
         def call(object, _env)
           return object.to_json if object.respond_to?(:to_json)
 
-          ::Grape::Util::Json.dump(object)
+          ::Grape::Json.dump(object)
         end
       end
     end

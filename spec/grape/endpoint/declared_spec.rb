@@ -296,7 +296,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', ::Grape::Util::Json.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', boolean: false), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 
@@ -311,7 +311,7 @@ describe Grape::Endpoint do
         ''
       end
 
-      post '/declared', ::Grape::Util::Json.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
+      post '/declared', ::Grape::Json.dump(first: 'one', second: nil), 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(201)
     end
 

@@ -13,7 +13,7 @@ describe Grape::Middleware::Formatter do
 
     it 'looks at the bodies for possibly serializable data' do
       _, _, bodies = *subject.call('PATH_INFO' => '/somewhere', 'HTTP_ACCEPT' => 'application/json')
-      bodies.each { |b| expect(b).to eq(::Grape::Util::Json.dump(body)) } # rubocop:disable RSpec/IteratedExpectation
+      bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) } # rubocop:disable RSpec/IteratedExpectation
     end
 
     context 'default format' do
