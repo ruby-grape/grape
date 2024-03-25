@@ -66,11 +66,7 @@ RSpec/FilePath:
   SpecSuffixOnly: true
 
 RSpec/SpecFilePathFormat:
-  Exclude:
-    - '**/spec/routing/**/*'
-    - '**/spec/grape/api/*'
-    - '**/spec/integration/**/*'
-    - '**/spec/grape/validations/validators/*'
+  Enabled: false
 
 RSpec/MultipleExpectations:
   Max: 4
