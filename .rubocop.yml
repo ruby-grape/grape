@@ -61,3 +61,16 @@ RSpec/ExampleLength:
 
 RSpec/NestedGroups:
   Max: 4
+
+RSpec/FilePath:
+  SpecSuffixOnly: true
+
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - '**/spec/routing/**/*'
+    - '**/spec/grape/api/*'
+    - '**/spec/integration/**/*'
+    - '**/spec/grape/validations/validators/*'
+
+RSpec/MultipleExpectations:
+  Max: 4
