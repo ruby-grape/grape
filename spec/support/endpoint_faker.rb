@@ -4,8 +4,7 @@ module Spec
   module Support
     class EndpointFaker
       class FakerAPI < Grape::API
-        get '/' do
-        end
+        get('/')
       end
 
       def initialize(app, endpoint = FakerAPI.endpoints.first)

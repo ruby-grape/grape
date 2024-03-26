@@ -10,13 +10,15 @@ describe Grape::Validations::Validators::CoerceValidator do
   end
 
   describe 'coerce' do
-    class SecureURIOnly
-      def self.parse(value)
-        URI.parse(value)
-      end
+    let(:secure_uri_only) do
+      Class.new do
+        def self.parse(value)
+          URI.parse(value)
+        end
 
-      def self.parsed?(value)
-        value.is_a? URI::HTTPS
+        def self.parsed?(value)
+          value.is_a? URI::HTTPS
+        end
       end
     end
 
@@ -228,8 +230,9 @@ describe Grape::Validations::Validators::CoerceValidator do
 
       context 'a custom type' do
         it 'coerces the given value' do
+          context = self
           subject.params do
-            requires :uri, coerce: SecureURIOnly
+            requires :uri, coerce: context.secure_uri_only
           end
           subject.get '/secure_uri' do
             params[:uri].class
@@ -325,8 +328,9 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         it 'Array of a custom type' do
+          context = self
           subject.params do
-            requires :uri, type: Array[SecureURIOnly]
+            requires :uri, type: Array[context.secure_uri_only]
           end
           subject.get '/secure_uris' do
             params[:uri].first.class

@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Types do
-  module TypesSpec
-    class FooType
+  let(:foo_type) do
+    Class.new do
       def self.parse(_); end
     end
-
-    class BarType
+  end
+  let(:bar_type) do
+    Class.new do
       def self.parse; end
     end
   end
@@ -24,7 +25,7 @@ describe Grape::Validations::Types do
 
     it 'identifies unknown types' do
       expect(described_class).not_to be_primitive(Object)
-      expect(described_class).not_to be_primitive(TypesSpec::FooType)
+      expect(described_class).not_to be_primitive(foo_type)
     end
   end
 
@@ -82,11 +83,11 @@ describe Grape::Validations::Types do
     end
 
     it 'returns true if the type responds to :parse with one argument' do
-      expect(described_class).to be_custom(TypesSpec::FooType)
+      expect(described_class).to be_custom(foo_type)
     end
 
     it 'returns false if the type\'s #parse method takes other than one argument' do
-      expect(described_class).not_to be_custom(TypesSpec::BarType)
+      expect(described_class).not_to be_custom(bar_type)
     end
   end
 
