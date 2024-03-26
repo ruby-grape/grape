@@ -22,13 +22,11 @@ describe Grape::Middleware::Error do
   end
 
   let(:custom_error_app) do
-    Class.new do
-      class << self
-        class CustomError < Grape::Exceptions::Base; end
+    custom_error = Class.new(Grape::Exceptions::Base)
 
-        def call(_env)
-          raise CustomError.new(status: 400, message: 'failed validation')
-        end
+    Class.new do
+      define_singleton_method(:call) do |_env|
+        raise custom_error.new(status: 400, message: 'failed validation')
       end
     end
   end

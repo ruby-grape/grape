@@ -46,24 +46,20 @@ describe Grape::Entity do
       entity = Class.new(described_class)
       allow(entity).to receive(:represent).and_return('Hiya')
 
-      module EntitySpec
-        class TestObject
-        end
-
-        class FakeCollection
-          def first
-            TestObject.new
-          end
+      test_object_class = Class.new
+      fake_collection_class = Class.new do
+        define_method(:first) do
+          test_object_class.new
         end
       end
 
-      subject.represent EntitySpec::TestObject, with: entity
+      subject.represent test_object_class, with: entity
       subject.get '/example' do
-        present [EntitySpec::TestObject.new]
+        present [test_object_class.new]
       end
 
       subject.get '/example2' do
-        present EntitySpec::FakeCollection.new
+        present fake_collection_class.new
       end
 
       get '/example'

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'shared/versioning_examples'
+require 'grape-entity'
 
 describe Grape::API do
   subject do
@@ -369,17 +370,19 @@ describe Grape::API do
     end
 
     context 'format' do
-      module ApiSpec
-        class DummyFormatClass
-        end
-      end
-
       before do
-        allow_any_instance_of(ApiSpec::DummyFormatClass).to receive(:to_json).and_return('abc')
-        allow_any_instance_of(ApiSpec::DummyFormatClass).to receive(:to_txt).and_return('def')
+        dummy_class = Class.new do
+          def to_json(*_rest)
+            'abc'
+          end
+
+          def to_txt
+            'def'
+          end
+        end
 
         subject.get('/abc') do
-          ApiSpec::DummyFormatClass.new
+          dummy_class.new
         end
       end
 
@@ -1369,8 +1372,8 @@ describe Grape::API do
   end
 
   context 'custom middleware' do
-    module ApiSpec
-      class PhonyMiddleware
+    let(:phony_middleware) do
+      Class.new do
         def initialize(app, *args)
           @args = args
           @app = app
@@ -1388,43 +1391,44 @@ describe Grape::API do
 
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
-        subject.use ApiSpec::PhonyMiddleware, 'abc', 123
-        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 'abc', 123]]
+        subject.use phony_middleware, 'abc', 123
+        expect(subject.middleware).to eql [[:use, phony_middleware, 'abc', 123]]
       end
 
       it 'includes all middleware from stacked settings' do
-        subject.use ApiSpec::PhonyMiddleware, 123
-        subject.use ApiSpec::PhonyMiddleware, 'abc'
-        subject.use ApiSpec::PhonyMiddleware, 'foo'
+        subject.use phony_middleware, 123
+        subject.use phony_middleware, 'abc'
+        subject.use phony_middleware, 'foo'
 
         expect(subject.middleware).to eql [
-          [:use, ApiSpec::PhonyMiddleware, 123],
-          [:use, ApiSpec::PhonyMiddleware, 'abc'],
-          [:use, ApiSpec::PhonyMiddleware, 'foo']
+          [:use, phony_middleware, 123],
+          [:use, phony_middleware, 'abc'],
+          [:use, phony_middleware, 'foo']
         ]
       end
     end
 
     describe '.use' do
       it 'adds middleware' do
-        subject.use ApiSpec::PhonyMiddleware, 123
-        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123]]
+        subject.use phony_middleware, 123
+        expect(subject.middleware).to eql [[:use, phony_middleware, 123]]
       end
 
       it 'does not show up outside the namespace' do
+        example = self
         inner_middleware = nil
-        subject.use ApiSpec::PhonyMiddleware, 123
+        subject.use phony_middleware, 123
         subject.namespace :awesome do
-          use ApiSpec::PhonyMiddleware, 'abc'
+          use example.phony_middleware, 'abc'
           inner_middleware = middleware
         end
 
-        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123]]
-        expect(inner_middleware).to eql [[:use, ApiSpec::PhonyMiddleware, 123], [:use, ApiSpec::PhonyMiddleware, 'abc']]
+        expect(subject.middleware).to eql [[:use, phony_middleware, 123]]
+        expect(inner_middleware).to eql [[:use, phony_middleware, 123], [:use, phony_middleware, 'abc']]
       end
 
       it 'calls the middleware' do
-        subject.use ApiSpec::PhonyMiddleware, 'hello'
+        subject.use phony_middleware, 'hello'
         subject.get '/' do
           env['phony.args'].first.first
         end
@@ -1435,13 +1439,13 @@ describe Grape::API do
 
       it 'adds a block if one is given' do
         block = -> {}
-        subject.use ApiSpec::PhonyMiddleware, &block
-        expect(subject.middleware).to eql [[:use, ApiSpec::PhonyMiddleware, block]]
+        subject.use phony_middleware, &block
+        expect(subject.middleware).to eql [[:use, phony_middleware, block]]
       end
 
       it 'uses a block if one is given' do
         block = -> {}
-        subject.use ApiSpec::PhonyMiddleware, &block
+        subject.use phony_middleware, &block
         subject.get '/' do
           env['phony.block'].inspect
         end
@@ -1452,7 +1456,7 @@ describe Grape::API do
 
       it 'does not destroy the middleware settings on multiple runs' do
         block = -> {}
-        subject.use ApiSpec::PhonyMiddleware, &block
+        subject.use phony_middleware, &block
         subject.get '/' do
           env['phony.block'].inspect
         end
@@ -1488,8 +1492,8 @@ describe Grape::API do
           end
         end
 
-        subject.use ApiSpec::PhonyMiddleware, 'hello'
-        subject.insert_before ApiSpec::PhonyMiddleware, m, message: 'bye'
+        subject.use phony_middleware, 'hello'
+        subject.insert_before phony_middleware, m, message: 'bye'
         subject.get '/' do
           env['phony.args'].join(' ')
         end
@@ -1509,8 +1513,8 @@ describe Grape::API do
           end
         end
 
-        subject.use ApiSpec::PhonyMiddleware, 'hello'
-        subject.insert_after ApiSpec::PhonyMiddleware, m, message: 'bye'
+        subject.use phony_middleware, 'hello'
+        subject.insert_after phony_middleware, m, message: 'bye'
         subject.get '/' do
           env['phony.args'].join(' ')
         end
@@ -1519,27 +1523,27 @@ describe Grape::API do
         expect(last_response.body).to eql 'hello bye'
       end
     end
-  end
 
-  describe '.insert' do
-    it 'inserts middleware in a specific location in the stack' do
-      m = Class.new(Grape::Middleware::Base) do
-        def call(env)
-          env['phony.args'] ||= []
-          env['phony.args'] << @options[:message]
-          @app.call(env)
+    describe '.insert' do
+      it 'inserts middleware in a specific location in the stack' do
+        m = Class.new(Grape::Middleware::Base) do
+          def call(env)
+            env['phony.args'] ||= []
+            env['phony.args'] << @options[:message]
+            @app.call(env)
+          end
         end
-      end
 
-      subject.use ApiSpec::PhonyMiddleware, 'bye'
-      subject.insert 0, m, message: 'good'
-      subject.insert 0, m, message: 'hello'
-      subject.get '/' do
-        env['phony.args'].join(' ')
-      end
+        subject.use phony_middleware, 'bye'
+        subject.insert 0, m, message: 'good'
+        subject.insert 0, m, message: 'hello'
+        subject.get '/' do
+          env['phony.args'].join(' ')
+        end
 
-      get '/'
-      expect(last_response.body).to eql 'hello good bye'
+        get '/'
+        expect(last_response.body).to eql 'hello good bye'
+      end
     end
   end
 
@@ -2089,9 +2093,7 @@ describe Grape::API do
 
     context 'CustomError subclass of Grape::Exceptions::Base' do
       before do
-        module ApiSpec
-          class CustomError < Grape::Exceptions::Base; end
-        end
+        stub_const('ApiSpec::CustomError', Class.new(Grape::Exceptions::Base))
       end
 
       it 'does not re-raise exceptions of type Grape::Exceptions::Base' do
@@ -2155,11 +2157,9 @@ describe Grape::API do
 
     context 'custom errors' do
       before do
-        class ConnectionError < RuntimeError; end
-
-        class DatabaseError < RuntimeError; end
-
-        class CommunicationError < StandardError; end
+        stub_const('ConnectionError', Class.new(RuntimeError))
+        stub_const('DatabaseError', Class.new(RuntimeError))
+        stub_const('CommunicationError', Class.new(StandardError))
       end
 
       it 'rescues an error via rescue_from :all' do
@@ -2315,13 +2315,9 @@ describe Grape::API do
 
   describe '.rescue_from klass, rescue_subclasses: boolean' do
     before do
-      module ApiSpec
-        module APIErrors
-          class ParentError < StandardError; end
-
-          class ChildError < ParentError; end
-        end
-      end
+      parent_error = Class.new(StandardError)
+      stub_const('ApiSpec::APIErrors::ParentError', parent_error)
+      stub_const('ApiSpec::APIErrors::ChildError', Class.new(parent_error))
     end
 
     it 'rescues error as well as subclass errors with rescue_subclasses option set' do
@@ -2449,47 +2445,30 @@ describe Grape::API do
     end
 
     context 'class' do
-      before do
-        module ApiSpec
-          class CustomErrorFormatter
-            def self.call(message, _backtrace, _options, _env, _original_exception)
-              "message: #{message} @backtrace"
-            end
+      let(:custom_error_formatter) do
+        Class.new do
+          def self.call(message, _backtrace, _options, _env, _original_exception)
+            "message: #{message} @backtrace"
           end
         end
       end
 
       it 'returns a custom error format' do
         subject.rescue_from :all, backtrace: true
-        subject.error_formatter :txt, ApiSpec::CustomErrorFormatter
-        subject.get '/exception' do
-          raise 'rain!'
-        end
+        subject.error_formatter :txt, custom_error_formatter
+        subject.get('/exception') { raise 'rain!' }
+
         get '/exception'
         expect(last_response.body).to eq('message: rain! @backtrace')
       end
-    end
 
-    describe 'with' do
-      context 'class' do
-        before do
-          module ApiSpec
-            class CustomErrorFormatter
-              def self.call(message, _backtrace, _option, _env, _original_exception)
-                "message: #{message} @backtrace"
-              end
-            end
-          end
-        end
+      it 'returns a custom error format (using keyword :with)' do
+        subject.rescue_from :all, backtrace: true
+        subject.error_formatter :txt, with: custom_error_formatter
+        subject.get('/exception') { raise 'rain!' }
 
-        it 'returns a custom error format' do
-          subject.rescue_from :all, backtrace: true
-          subject.error_formatter :txt, with: ApiSpec::CustomErrorFormatter
-          subject.get('/exception') { raise 'rain!' }
-
-          get '/exception'
-          expect(last_response.body).to eq('message: rain! @backtrace')
-        end
+        get '/exception'
+        expect(last_response.body).to eq('message: rain! @backtrace')
       end
     end
 
@@ -2619,17 +2598,18 @@ describe Grape::API do
     end
 
     context 'custom formatter class' do
-      module ApiSpec
-        module CustomFormatter
+      let(:custom_formatter) do
+        Module.new do
           def self.call(object, _env)
             "{\"custom_formatter\":\"#{object[:some]}\"}"
           end
         end
       end
+
       before do
         subject.content_type :json, 'application/json'
         subject.content_type :custom, 'application/custom'
-        subject.formatter :custom, ApiSpec::CustomFormatter
+        subject.formatter :custom, custom_formatter
         subject.get :simple do
           { some: 'hash' }
         end
@@ -2678,17 +2658,18 @@ describe Grape::API do
     end
 
     context 'custom parser class' do
-      module ApiSpec
-        module CustomParser
+      let(:custom_parser) do
+        Module.new do
           def self.call(object, _env)
             { object.to_sym => object.to_s.reverse }
           end
         end
       end
+
       before do
         subject.content_type :txt, 'text/plain'
         subject.content_type :custom, 'text/custom'
-        subject.parser :custom, ApiSpec::CustomParser
+        subject.parser :custom, custom_parser
         subject.put :simple do
           params[:simple]
         end
@@ -3471,15 +3452,15 @@ describe Grape::API do
       end
 
       it 'mounts on a nested path' do
-        APP1 = Class.new(described_class)
-        APP2 = Class.new(described_class)
-        APP2.get '/nice' do
+        app1 = Class.new(described_class)
+        app2 = Class.new(described_class)
+        app2.get '/nice' do
           'play'
         end
         # NOTE: that the reverse won't work, mount from outside-in
-        APP3 = subject
-        APP3.mount APP1 => '/app1'
-        APP1.mount APP2 => '/app2'
+        app3 = subject
+        app3.mount app1 => '/app1'
+        app1.mount app2 => '/app2'
         get '/app1/app2/nice'
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('play')
@@ -3667,13 +3648,18 @@ describe Grape::API do
             def self.included(base)
               base.extend(ClassMethods)
             end
+          end
+        end
 
-            module ClassMethods
+        before do
+          stub_const(
+            'ClassMethods',
+            Module.new do
               def my_method
                 @test = true
               end
             end
-          end
+          )
         end
 
         it 'correctlies include module in nested mount' do
@@ -3892,13 +3878,16 @@ describe Grape::API do
     end
 
     context ':serializable_hash' do
-      class SerializableHashExample
-        def serializable_hash
-          { abc: 'def' }
-        end
-      end
-
       before do
+        stub_const(
+          'SerializableHashExample',
+          Class.new do
+            def serializable_hash
+              { abc: 'def' }
+            end
+          end
+        )
+
         subject.format :serializable_hash
       end
 
@@ -4231,17 +4220,21 @@ describe Grape::API do
     end
 
     context 'overriding via composition' do
-      module Inherited
-        def inherited(api)
-          super
-          api.instance_variable_set(:@foo, @bar.dup)
+      let(:inherited) do
+        Module.new do
+          def inherited(api)
+            super
+            api.instance_variable_set(:@foo, @bar.dup)
+          end
         end
       end
 
       let(:root_api) do
+        context = self
+
         Class.new(described_class) do
           @bar = 'Hello, world'
-          extend Inherited
+          extend context.inherited
         end
       end
 

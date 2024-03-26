@@ -1,31 +1,35 @@
 # frozen_string_literal: true
 
 describe Grape::API do
-  def app
-    subject
-  end
-
   describe 'rescue_from' do
     context 'when the API is mounted AFTER defining the class rescue_from handler' do
-      class APIRescueFrom < Grape::API
-        rescue_from :all do
-          error!({ type: 'all' }, 404)
-        end
+      let(:api_rescue_from) do
+        Class.new(Grape::API) do
+          rescue_from :all do
+            error!({ type: 'all' }, 404)
+          end
 
-        get do
-          { count: 1 / 0 }
+          get do
+            { count: 1 / 0 }
+          end
         end
       end
 
-      class MainRescueFromAfter < Grape::API
-        rescue_from ZeroDivisionError do
-          error!({ type: 'zero' }, 500)
-        end
+      let(:main_rescue_from_after) do
+        context = self
 
-        mount APIRescueFrom
+        Class.new(Grape::API) do
+          rescue_from ZeroDivisionError do
+            error!({ type: 'zero' }, 500)
+          end
+
+          mount context.api_rescue_from
+        end
       end
 
-      subject { MainRescueFromAfter }
+      def app
+        main_rescue_from_after
+      end
 
       it 'is rescued by the rescue_from ZeroDivisionError handler from Main class' do
         get '/'
@@ -36,25 +40,32 @@ describe Grape::API do
     end
 
     context 'when the API is mounted BEFORE defining the class rescue_from handler' do
-      class APIRescueFrom < Grape::API
-        rescue_from :all do
-          error!({ type: 'all' }, 404)
-        end
+      let(:api_rescue_from) do
+        Class.new(Grape::API) do
+          rescue_from :all do
+            error!({ type: 'all' }, 404)
+          end
 
-        get do
-          { count: 1 / 0 }
+          get do
+            { count: 1 / 0 }
+          end
+        end
+      end
+      let(:main_rescue_from_before) do
+        context = self
+
+        Class.new(Grape::API) do
+          mount context.api_rescue_from
+
+          rescue_from ZeroDivisionError do
+            error!({ type: 'zero' }, 500)
+          end
         end
       end
 
-      class MainRescueFromBefore < Grape::API
-        mount APIRescueFrom
-
-        rescue_from ZeroDivisionError do
-          error!({ type: 'zero' }, 500)
-        end
+      def app
+        main_rescue_from_before
       end
-
-      subject { MainRescueFromBefore }
 
       it 'is rescued by the rescue_from ZeroDivisionError handler from Main class' do
         get '/'
@@ -67,21 +78,28 @@ describe Grape::API do
 
   describe 'before' do
     context 'when the API is mounted AFTER defining the before helper' do
-      class APIBeforeHandler < Grape::API
-        get do
-          { count: @count }.to_json
+      let(:api_before_handler) do
+        Class.new(Grape::API) do
+          get do
+            { count: @count }.to_json
+          end
+        end
+      end
+      let(:main_before_handler_after) do
+        context = self
+
+        Class.new(Grape::API) do
+          before do
+            @count = 1
+          end
+
+          mount context.api_before_handler
         end
       end
 
-      class MainBeforeHandlerAfter < Grape::API
-        before do
-          @count = 1
-        end
-
-        mount APIBeforeHandler
+      def app
+        main_before_handler_after
       end
-
-      subject { MainBeforeHandlerAfter }
 
       it 'is able to access the variables defined in the before helper' do
         get '/'
@@ -92,21 +110,28 @@ describe Grape::API do
     end
 
     context 'when the API is mounted BEFORE defining the before helper' do
-      class APIBeforeHandler < Grape::API
-        get do
-          { count: @count }.to_json
+      let(:api_before_handler) do
+        Class.new(Grape::API) do
+          get do
+            { count: @count }.to_json
+          end
+        end
+      end
+      let(:main_before_handler_before) do
+        context = self
+
+        Class.new(Grape::API) do
+          mount context.api_before_handler
+
+          before do
+            @count = 1
+          end
         end
       end
 
-      class MainBeforeHandlerBefore < Grape::API
-        mount APIBeforeHandler
-
-        before do
-          @count = 1
-        end
+      def app
+        main_before_handler_before
       end
-
-      subject { MainBeforeHandlerBefore }
 
       it 'is able to access the variables defined in the before helper' do
         get '/'
@@ -119,21 +144,28 @@ describe Grape::API do
 
   describe 'after' do
     context 'when the API is mounted AFTER defining the after handler' do
-      class APIAfterHandler < Grape::API
-        get do
-          { count: 1 }.to_json
+      let(:api_after_handler) do
+        Class.new(Grape::API) do
+          get do
+            { count: 1 }.to_json
+          end
+        end
+      end
+      let(:main_after_handler_after) do
+        context = self
+
+        Class.new(Grape::API) do
+          after do
+            error!({ type: 'after' }, 500)
+          end
+
+          mount context.api_after_handler
         end
       end
 
-      class MainAfterHandlerAfter < Grape::API
-        after do
-          error!({ type: 'after' }, 500)
-        end
-
-        mount APIAfterHandler
+      def app
+        main_after_handler_after
       end
-
-      subject { MainAfterHandlerAfter }
 
       it 'is able to access the variables defined in the after helper' do
         get '/'
@@ -144,21 +176,28 @@ describe Grape::API do
     end
 
     context 'when the API is mounted BEFORE defining the after helper' do
-      class APIAfterHandler < Grape::API
-        get do
-          { count: 1 }.to_json
+      let(:api_after_handler) do
+        Class.new(Grape::API) do
+          get do
+            { count: 1 }.to_json
+          end
+        end
+      end
+      let(:main_after_handler_before) do
+        context = self
+
+        Class.new(Grape::API) do
+          mount context.api_after_handler
+
+          after do
+            error!({ type: 'after' }, 500)
+          end
         end
       end
 
-      class MainAfterHandlerBefore < Grape::API
-        mount APIAfterHandler
-
-        after do
-          error!({ type: 'after' }, 500)
-        end
+      def app
+        main_after_handler_before
       end
-
-      subject { MainAfterHandlerBefore }
 
       it 'is able to access the variables defined in the after helper' do
         get '/'

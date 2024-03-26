@@ -2,10 +2,11 @@
 
 describe Grape::API do
   subject do
-    CombinedApi = combined_api
+    context = self
+
     Class.new(Grape::API) do
       format :json
-      mount CombinedApi => '/'
+      mount context.combined_api => '/'
     end
   end
 
@@ -16,6 +17,7 @@ describe Grape::API do
           namespace :three do
             get :one do
             end
+
             get :two do
             end
           end
@@ -25,10 +27,11 @@ describe Grape::API do
   end
 
   let(:combined_api) do
-    JobsApi = jobs_api
+    context = self
+
     Class.new(Grape::API) do
       version :v1, using: :accept_version_header, cascade: true
-      mount JobsApi
+      mount context.jobs_api
     end
   end
 

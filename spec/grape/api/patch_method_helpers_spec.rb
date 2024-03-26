@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 describe Grape::API::Helpers do
-  module PatchHelpersSpec
-    class PatchPublic < Grape::API
+  let(:patch_public) do
+    Class.new(Grape::API) do
       format :json
       version 'public-v1', using: :header, vendor: 'grape'
 
@@ -10,16 +10,20 @@ describe Grape::API::Helpers do
         { ok: 'public' }
       end
     end
-
-    module AuthMethods
+  end
+  let(:auth_methods) do
+    Module.new do
       def authenticate!; end
     end
+  end
+  let(:patch_private) do
+    context = self
 
-    class PatchPrivate < Grape::API
+    Class.new(Grape::API) do
       format :json
       version 'private-v1', using: :header, vendor: 'grape'
 
-      helpers AuthMethods
+      helpers context.auth_methods
 
       before do
         authenticate!
@@ -29,15 +33,18 @@ describe Grape::API::Helpers do
         { ok: 'private' }
       end
     end
+  end
+  let(:main) do
+    context = self
 
-    class Main < Grape::API
-      mount PatchPublic
-      mount PatchPrivate
+    Class.new(Grape::API) do
+      mount context.patch_public
+      mount context.patch_private
     end
   end
 
   def app
-    PatchHelpersSpec::Main
+    main
   end
 
   context 'patch' do
