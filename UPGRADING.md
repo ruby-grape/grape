@@ -9,6 +9,59 @@ The `rack_response` method has been deprecated and the `error_response` method h
 
 See [#2414](https://github.com/ruby-grape/grape/pull/2414) for more information.
 
+#### Change in parameters precedence
+
+When using together with `Grape::Extensions::Hash::ParamBuilder`, `route_param` takes higher precedence over a regular parameter defined with same name, which now matches the default param builder behavior.
+
+This was a regression introduced by [#2326](https://github.com/ruby-grape/grape/pull/2326) in Grape v1.8.0.
+
+```ruby
+grape.configure do |config|
+  config.param_builder = Grape::Extensions::Hash::ParamBuilder
+end
+
+params do
+  requires :foo, type: String
+end
+route_param :foo do
+  get do
+    { value: params[:foo] }
+  end
+end
+```
+
+Request:
+
+```bash
+curl -X POST -H "Content-Type: application/json" localhost:9292/bar -d '{"foo": "baz"}'
+```
+
+Response prior to v1.8.0:
+
+```json
+{
+  "value": "bar"
+}
+```
+
+v1.8.0..v2.0.0:
+
+```json
+{
+  "value": "baz"
+}
+```
+
+v2.1.0+:
+
+```json
+{
+  "value": "bar"
+}
+```
+
+See [#2378](https://github.com/ruby-grape/grape/pull/2378) for details.
+
 #### Grape::Router::Route.route_xxx methods have been removed
 
 - `route_method` is accessible through `request_method`
