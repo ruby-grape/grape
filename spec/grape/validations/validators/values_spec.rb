@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::ValuesValidator do
-  let_it_be(:values_model) do
+  let(:values_model) do
     Class.new do
-      DEFAULT_VALUES = %w[valid-type1 valid-type2 valid-type3].freeze
-      DEFAULT_EXCEPTS = %w[invalid-type1 invalid-type2 invalid-type3].freeze
-
       class << self
         def values
           @values ||= []
-          [DEFAULT_VALUES + @values].flatten.uniq
+          [default_values + @values].flatten.uniq
         end
 
         def add_value(value)
@@ -19,7 +16,7 @@ describe Grape::Validations::Validators::ValuesValidator do
 
         def excepts
           @excepts ||= []
-          [DEFAULT_EXCEPTS + @excepts].flatten.uniq
+          [default_excepts + @excepts].flatten.uniq
         end
 
         def add_except(except)
@@ -34,16 +31,21 @@ describe Grape::Validations::Validators::ValuesValidator do
         def even?(value)
           value.to_i.even?
         end
+
+        private
+
+        def default_values
+          %w[valid-type1 valid-type2 valid-type3].freeze
+        end
+
+        def default_excepts
+          %w[invalid-type1 invalid-type2 invalid-type3].freeze
+        end
       end
     end
   end
 
-  before do
-    stub_const('ValuesModel', values_model)
-  end
-
-  let_it_be(:app) do
-    ValuesModel = values_model
+  let(:app) do
     Class.new(Grape::API) do
       default_format :json
 
@@ -271,6 +273,10 @@ describe Grape::Validations::Validators::ValuesValidator do
     end
   end
 
+  before do
+    stub_const('ValuesModel', values_model)
+  end
+
   context 'with a custom validation message' do
     it 'allows a valid value for a parameter' do
       get('/custom_message', type: 'valid-type1')
@@ -384,6 +390,7 @@ describe Grape::Validations::Validators::ValuesValidator do
   end
 
   it 'does not validate updated values without proc' do
+    app # Instantiate with the existing values.
     ValuesModel.add_value('valid-type4')
     get('/', type: 'valid-type4')
     expect(last_response.status).to eq 400

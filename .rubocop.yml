@@ -15,6 +15,10 @@ inherit_from: .rubocop_todo.yml
 Layout/LineLength:
   Max: 215
 
+Lint/EmptyBlock:
+  Exclude:
+    - spec/**/*_spec.rb
+
 Style/Documentation:
   Enabled: false
 
@@ -60,4 +64,22 @@ RSpec/ExampleLength:
   Max: 60
 
 RSpec/NestedGroups:
-  Max: 4
+  Max: 6
+
+RSpec/FilePath:
+  SpecSuffixOnly: true
+
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 11
+
+RSpec/ContextWording:
+  Enabled: false

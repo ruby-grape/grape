@@ -1,37 +1,41 @@
 # frozen_string_literal: true
 
 describe Grape::API do
-  def app
-    subject
-  end
-
   context 'when multiple classes defines the same rescue_from' do
-    class AnAPI < Grape::API
-      rescue_from ZeroDivisionError do
-        error!({ type: 'an-api-zero' }, 404)
-      end
+    let(:an_api) do
+      Class.new(Grape::API) do
+        rescue_from ZeroDivisionError do
+          error!({ type: 'an-api-zero' }, 404)
+        end
 
-      get '/an-api' do
-        { count: 1 / 0 }
+        get '/an-api' do
+          { count: 1 / 0 }
+        end
+      end
+    end
+    let(:another_api) do
+      Class.new(Grape::API) do
+        rescue_from ZeroDivisionError do
+          error!({ type: 'another-api-zero' }, 322)
+        end
+
+        get '/another-api' do
+          { count: 1 / 0 }
+        end
+      end
+    end
+    let(:other_main) do
+      context = self
+
+      Class.new(Grape::API) do
+        mount context.an_api
+        mount context.another_api
       end
     end
 
-    class AnotherAPI < Grape::API
-      rescue_from ZeroDivisionError do
-        error!({ type: 'another-api-zero' }, 322)
-      end
-
-      get '/another-api' do
-        { count: 1 / 0 }
-      end
+    def app
+      other_main
     end
-
-    class OtherMain < Grape::API
-      mount AnAPI
-      mount AnotherAPI
-    end
-
-    subject { OtherMain }
 
     it 'is rescued by the rescue_from ZeroDivisionError handler defined inside each of the classes' do
       get '/an-api'
@@ -46,19 +50,26 @@ describe Grape::API do
     end
 
     context 'when some class does not define a rescue_from but it was defined in a previous mounted endpoint' do
-      class AnAPIWithoutDefinedRescueFrom < Grape::API
-        get '/another-api-without-defined-rescue-from' do
-          { count: 1 / 0 }
+      let(:an_api_without_defined_rescue_from) do
+        Class.new(Grape::API) do
+          get '/another-api-without-defined-rescue-from' do
+            { count: 1 / 0 }
+          end
+        end
+      end
+      let(:other_main_with_not_defined_rescue_from) do
+        context = self
+
+        Class.new(Grape::API) do
+          mount context.an_api
+          mount context.another_api
+          mount context.an_api_without_defined_rescue_from
         end
       end
 
-      class OtherMainWithNotDefinedRescueFrom < Grape::API
-        mount AnAPI
-        mount AnotherAPI
-        mount AnAPIWithoutDefinedRescueFrom
+      def app
+        other_main_with_not_defined_rescue_from
       end
-
-      subject { OtherMainWithNotDefinedRescueFrom }
 
       it 'is not rescued by any of the previous defined rescue_from ZeroDivisionError handlers' do
         get '/an-api'

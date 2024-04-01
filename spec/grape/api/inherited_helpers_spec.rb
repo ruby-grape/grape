@@ -3,9 +3,8 @@
 describe Grape::API::Helpers do
   let(:user) { 'Miguel Caneo' }
   let(:id)   { '42' }
-
-  module InheritedHelpersSpec
-    class SuperClass < Grape::API
+  let(:api_super_class) do
+    Class.new(Grape::API) do
       helpers do
         params(:superclass_params) { requires :id, type: String }
 
@@ -14,8 +13,9 @@ describe Grape::API::Helpers do
         end
       end
     end
-
-    class OverriddenSubClass < SuperClass
+  end
+  let(:api_overridden_sub_class) do
+    Class.new(api_super_class) do
       params { use :superclass_params }
 
       helpers do
@@ -28,16 +28,18 @@ describe Grape::API::Helpers do
         "#{current_user}: #{params['id']}"
       end
     end
-
-    class SubClass < SuperClass
+  end
+  let(:api_sub_class) do
+    Class.new(api_super_class) do
       params { use :superclass_params }
 
       get 'resource' do
         "#{current_user}: #{params['id']}"
       end
     end
-
-    class Example < SubClass
+  end
+  let(:api_example) do
+    Class.new(api_sub_class) do
       params { use :superclass_params }
 
       get 'resource' do
@@ -47,7 +49,7 @@ describe Grape::API::Helpers do
   end
 
   context 'non overriding subclass' do
-    subject { InheritedHelpersSpec::SubClass }
+    subject { api_sub_class }
 
     def app
       subject
@@ -69,10 +71,8 @@ describe Grape::API::Helpers do
   end
 
   context 'overriding subclass' do
-    subject { InheritedHelpersSpec::OverriddenSubClass }
-
     def app
-      subject
+      api_overridden_sub_class
     end
 
     context 'given expected params' do
@@ -91,10 +91,8 @@ describe Grape::API::Helpers do
   end
 
   context 'example subclass' do
-    subject { InheritedHelpersSpec::Example }
-
     def app
-      subject
+      api_example
     end
 
     context 'given expected params' do

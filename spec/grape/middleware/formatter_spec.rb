@@ -257,13 +257,13 @@ describe Grape::Middleware::Formatter do
   context 'no content responses' do
     let(:no_content_response) { ->(status) { [status, {}, ['']] } }
 
-    STATUSES_WITHOUT_BODY = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
+    statuses_without_body = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
                               Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.keys
                             else
                               Rack::Utils::STATUS_WITH_NO_ENTITY_BODY
                             end
 
-    STATUSES_WITHOUT_BODY.each do |status|
+    statuses_without_body.each do |status|
       it "does not modify a #{status} response" do
         expected_response = no_content_response[status]
         allow(app).to receive(:call).and_return(expected_response)

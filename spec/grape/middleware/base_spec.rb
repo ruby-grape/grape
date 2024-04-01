@@ -139,8 +139,8 @@ describe Grape::Middleware::Base do
     end
 
     context 'defaults' do
-      module BaseSpec
-        class ExampleWare < Grape::Middleware::Base
+      let(:example_ware) do
+        Class.new(Grape::Middleware::Base) do
           def default_options
             { monkey: true }
           end
@@ -148,18 +148,18 @@ describe Grape::Middleware::Base do
       end
 
       it 'persists the default options' do
-        expect(BaseSpec::ExampleWare.new(blank_app).options[:monkey]).to be true
+        expect(example_ware.new(blank_app).options[:monkey]).to be true
       end
 
       it 'overrides default options when provided' do
-        expect(BaseSpec::ExampleWare.new(blank_app, monkey: false).options[:monkey]).to be false
+        expect(example_ware.new(blank_app, monkey: false).options[:monkey]).to be false
       end
     end
   end
 
   context 'header' do
-    module HeaderSpec
-      class ExampleWare < Grape::Middleware::Base
+    let(:example_ware) do
+      Class.new(Grape::Middleware::Base) do
         def before
           header 'X-Test-Before', 'Hi'
         end
@@ -172,8 +172,10 @@ describe Grape::Middleware::Base do
     end
 
     def app
+      context = self
+
       Rack::Builder.app do
-        use HeaderSpec::ExampleWare
+        use context.example_ware
         run ->(_) { [200, {}, ['Yeah']] }
       end
     end
@@ -186,8 +188,8 @@ describe Grape::Middleware::Base do
   end
 
   context 'header overwrite' do
-    module HeaderOverwritingSpec
-      class ExampleWare < Grape::Middleware::Base
+    let(:example_ware) do
+      Class.new(Grape::Middleware::Base) do
         def before
           header 'X-Test-Overwriting', 'Hi'
         end
@@ -197,8 +199,9 @@ describe Grape::Middleware::Base do
           nil
         end
       end
-
-      class API < Grape::API
+    end
+    let(:api) do
+      Class.new(Grape::API) do
         get('/') do
           header 'X-Test-Overwriting', 'Yeah'
           'Hello'
@@ -207,9 +210,11 @@ describe Grape::Middleware::Base do
     end
 
     def app
+      context = self
+
       Rack::Builder.app do
-        use HeaderOverwritingSpec::ExampleWare
-        run HeaderOverwritingSpec::API.new
+        use context.example_ware
+        run context.api.new
       end
     end
 
