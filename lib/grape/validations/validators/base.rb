@@ -58,6 +58,14 @@ module Grape
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
         end
 
+        def self.inherited(klass)
+          super
+          return if klass.name.blank?
+
+          short_validator_name = klass.name.demodulize.underscore.delete_suffix('_validator')
+          Validations.register_validator(short_validator_name, klass)
+        end
+
         def message(default_key = nil)
           options = instance_variable_get(:@option)
           options_key?(:message) ? options[:message] : default_key
