@@ -3,6 +3,7 @@
 module Grape
   module Validations
     module_function
+
     def validators
       @validators ||= {}
     end
