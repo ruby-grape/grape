@@ -2,7 +2,8 @@
 
 module Grape
   module Validations
-    def self.validators
+    module_function
+    def validators
       @validators ||= {}
     end
 
@@ -10,15 +11,15 @@ module Grape
     # @param short_name [String] all lower-case, no spaces
     # @param klass [Class] the validator class. Should inherit from
     #   Grape::Validations::Validators::Base.
-    def self.register_validator(short_name, klass)
+    def register_validator(short_name, klass)
       validators[short_name] = klass
     end
 
-    def self.deregister_validator(short_name)
+    def deregister_validator(short_name)
       validators.delete(short_name)
     end
 
-    def self.require_validator(short_name)
+    def require_validator(short_name)
       str_name = short_name.to_s
       validators.fetch(str_name) { Grape::Validations::Validators.const_get(:"#{str_name.camelize}Validator") }
     rescue NameError
