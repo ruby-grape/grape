@@ -11,8 +11,8 @@ module Grape
       subject { HeadersSpec::Dummy.new }
 
       let(:header_data) do
-        { 'First Key' => 'First Value',
-          'Second Key' => 'Second Value' }
+        { 'first key' => 'First Value',
+          'second key' => 'Second Value' }
       end
 
       context 'when headers are set' do
@@ -23,8 +23,8 @@ module Grape
 
           describe 'get' do
             it 'returns a specifc value' do
-              expect(subject.header['First Key']).to eq 'First Value'
-              expect(subject.header['Second Key']).to eq 'Second Value'
+              expect(subject.header['first key']).to eq 'First Value'
+              expect(subject.header['second key']).to eq 'Second Value'
             end
 
             it 'returns all set headers' do
@@ -35,15 +35,15 @@ module Grape
 
           describe 'set' do
             it 'returns value' do
-              expect(subject.header('Third Key', 'Third Value'))
-              expect(subject.header['Third Key']).to eq 'Third Value'
+              expect(subject.header('third key', 'Third Value'))
+              expect(subject.header['third key']).to eq 'Third Value'
             end
           end
 
           describe 'delete' do
             it 'deletes a header key-value pair' do
-              expect(subject.header('First Key')).to eq header_data['First Key']
-              expect(subject.header).not_to have_key('First Key')
+              expect(subject.header('first key')).to eq header_data['first key']
+              expect(subject.header).not_to have_key('first key')
             end
           end
         end
@@ -52,8 +52,8 @@ module Grape
       context 'when no headers are set' do
         describe '#header' do
           it 'returns nil' do
-            expect(subject.header['First Key']).to be_nil
-            expect(subject.header('First Key')).to be_nil
+            expect(subject.header['first key']).to be_nil
+            expect(subject.header('first key')).to be_nil
           end
         end
       end

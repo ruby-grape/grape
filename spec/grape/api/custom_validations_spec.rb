@@ -151,13 +151,13 @@ describe Grape::Validations do
         end
 
         def access_header
-          Grape::Http::Headers.lowercase? ? 'x-access-token' : 'X-Access-Token'
+          'x-access-token'
         end
       end
     end
 
     let(:app) { Rack::Builder.new(subject) }
-    let(:x_access_token_header) { Grape::Http::Headers.lowercase? ? 'x-access-token' : 'X-Access-Token' }
+    let(:x_access_token_header) { 'x-access-token' }
 
     before { stub_const('Grape::Validations::Validators::AdminValidator', admin_validator) }
 
