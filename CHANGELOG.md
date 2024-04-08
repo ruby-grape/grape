@@ -18,6 +18,7 @@
 * [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
 * [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
+* [#2426](https://github.com/ruby-grape/grape/pull/2426): Drop support for rack 1.x series - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

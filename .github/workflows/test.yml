@@ -28,8 +28,6 @@ jobs:
         integration: [false]
         include:
           - ruby: '2.7'
-            gemfile: rack_1_0
-          - ruby: '2.7'
             integration: multi_json
           - ruby: '2.7'
             integration: multi_xml
