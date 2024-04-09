@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'grape_entity'
+require 'rack/contrib/jsonp'
 
 describe Grape::Entity do
   subject { Class.new(Grape::API) }
