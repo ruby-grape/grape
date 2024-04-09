@@ -19,6 +19,7 @@
 * [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
 * [#2426](https://github.com/ruby-grape/grape/pull/2426): Drop support for rack 1.x series - [@ericproulx](https://github.com/ericproulx).
+* [#2427](https://github.com/ruby-grape/grape/pull/2427): Use `rack-contrib` jsonp instead of rack-jsonp - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
