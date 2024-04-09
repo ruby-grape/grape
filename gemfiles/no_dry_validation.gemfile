@@ -24,7 +24,7 @@ end
 
 group :test do
   gem 'grape-entity', '~> 0.6', require: false
-  gem 'rack-jsonp', require: 'rack/jsonp'
+  gem 'rack-contrib', require: 'rack/contrib/jsonp'
   gem 'rack-test', '< 2.1'
   gem 'rspec', '< 4'
   gem 'ruby-grape-danger', '~> 0.2.0', require: false
