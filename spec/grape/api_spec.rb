@@ -4333,12 +4333,12 @@ describe Grape::API do
 
     it 'returns an error when the id is bad' do
       get '/v1/orders/abc'
-      expect(last_response.body).to be_eql('id is invalid')
+      expect(last_response.body).to eql('id is invalid')
     end
 
     it 'returns the given id when it is valid' do
       get '/v1/orders/1-2'
-      expect(last_response.body).to be_eql('1-2')
+      expect(last_response.body).to eql('1-2')
     end
   end
 

@@ -387,7 +387,7 @@ describe Grape::API do
           root_api.mount a_remounted_api, with: { path: 'scores', required_param: 'param_key' }
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'uses the dynamic configuration on all routes' do
           get 'api/votes', param_key: 'a'
           expect(last_response.body).to eql '10 votes'
           get 'api/scores', param_key: 'a'
@@ -480,7 +480,7 @@ describe Grape::API do
           end
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'uses the dynamic configuration on all routes' do
           root_api.mount(a_remounted_api, with: { some_value: 'response value' })
 
           get '/location'
@@ -497,7 +497,7 @@ describe Grape::API do
           end
         end
 
-        it 'will use the dynamic configuration on all routes' do
+        it 'uses the dynamic configuration on all routes' do
           root_api.mount(a_remounted_api, with: { some_value: 'response value' })
 
           get '/location'

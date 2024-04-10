@@ -36,13 +36,13 @@ module Grape
 
           param_array = val.nil? ? [nil] : Array.wrap(val)
 
-          raise validation_exception(attr_name, except_message) \
+          raise validation_exception(attr_name, except_message) 
           unless check_excepts(param_array)
 
-          raise validation_exception(attr_name, message(:values)) \
+          raise validation_exception(attr_name, message(:values)) 
           unless check_values(param_array, attr_name)
 
-          raise validation_exception(attr_name, message(:values)) \
+          raise validation_exception(attr_name, message(:values)) 
             if @proc && !validate_proc(@proc, param_array)
         end
 

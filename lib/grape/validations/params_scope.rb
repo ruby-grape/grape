@@ -180,7 +180,7 @@ module Grape
         if lateral?
           @parent.push_declared_params(attrs, **opts)
         else
-          push_renamed_param(full_path + [attrs.first], opts[:as]) \
+          push_renamed_param(full_path + [attrs.first], opts[:as]) 
             if opts && opts[:as]
 
           @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
@@ -467,7 +467,7 @@ module Grape
         end
 
         return unless excepts && !excepts.is_a?(Proc)
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, excepts) \
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, excepts) 
           unless Array(default).none? { |def_val| excepts.include?(def_val) }
       end
 
