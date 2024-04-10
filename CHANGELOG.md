@@ -18,6 +18,8 @@
 * [#2408](https://github.com/ruby-grape/grape/pull/2408): Fix params method redefined warnings - [@ericproulx](https://github.com/ericproulx).
 * [#2410](https://github.com/ruby-grape/grape/pull/2410): Gem deprecations will raise a DeprecationWarning in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2389](https://github.com/ruby-grape/grape/pull/2389): Remove rack-accept dependency - [@ericproulx](https://github.com/ericproulx).
+* [#2426](https://github.com/ruby-grape/grape/pull/2426): Drop support for rack 1.x series - [@ericproulx](https://github.com/ericproulx).
+* [#2427](https://github.com/ruby-grape/grape/pull/2427): Use `rack-contrib` jsonp instead of rack-jsonp - [@ericproulx](https://github.com/ericproulx).
 * [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
@@ -31,6 +33,7 @@
 * [#2387](https://github.com/ruby-grape/grape/pull/2387): Fix rubygems version within workflows - [@ericproulx](https://github.com/ericproulx).
 * [#2405](https://github.com/ruby-grape/grape/pull/2405): Fix edge workflow - [@ericproulx](https://github.com/ericproulx).
 * [#2414](https://github.com/ruby-grape/grape/pull/2414): Fix Rack::Lint missing content-type - [@ericproulx](https://github.com/ericproulx).
+* [#2378](https://github.com/ruby-grape/grape/pull/2378): Do not overwrite `route_param` with a regular one if they share same name - [@arg](https://github.com/arg).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
