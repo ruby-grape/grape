@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dry-types'
-
 module DryTypes
   # Call +Dry.Types()+ to add all registered types to +DryTypes+ which is
   # a container in this case. Check documentation for more information
@@ -24,9 +22,7 @@ module Grape
           #    collection_coercer_for(Array)
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
-            collection_coercers.fetch(type) do
-              DryTypeCoercer.collection_coercers[type] = Grape::Validations::Types.const_get(:"#{type.name.camelize}Coercer")
-            end
+            Grape::Validations::Types.const_get(:"#{type.name.camelize}Coercer")
           end
 
           # Returns an instance of a coercer for a given type
@@ -36,12 +32,6 @@ module Grape
             # in case of a collection (Array[Integer]) the type is an instance of a collection,
             # so we need to figure out the actual type
             collection_coercer_for(type.class).new(type, strict)
-          end
-
-          protected
-
-          def collection_coercers
-            @collection_coercers ||= {}
           end
         end
 

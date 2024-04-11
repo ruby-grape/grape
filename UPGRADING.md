@@ -3,6 +3,13 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
+#### Zeitwerk
+
+Grape's autoloader has been updated and it's now based on [Zeitwerk](https://github.com/fxn/zeitwerk).
+If you MP (Monkey Patch) some files and you're not following the [file structure](https://github.com/fxn/zeitwerk?tab=readme-ov-file#file-structure), you might end up with a Zeitwerk error.
+
+See [#2363](https://github.com/ruby-grape/grape/pull/2363) for more information.
+
 #### Changes in rescue_from
 
 The `rack_response` method has been deprecated and the `error_response` method has been removed. Use `error!` instead.

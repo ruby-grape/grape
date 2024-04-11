@@ -146,7 +146,7 @@ describe Grape::Endpoint do
 
     it 'includes additional request headers' do
       get '/headers', nil, 'HTTP_X_GRAPE_CLIENT' => '1'
-      x_grape_client_header = Grape.lowercase_headers? ? 'x-grape-client' : 'X-Grape-Client'
+      x_grape_client_header = Grape::Http::Headers.lowercase? ? 'x-grape-client' : 'X-Grape-Client'
       expect(JSON.parse(last_response.body)[x_grape_client_header]).to eq('1')
     end
 
@@ -154,7 +154,7 @@ describe Grape::Endpoint do
       env = Rack::MockRequest.env_for('/headers')
       env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
       body = read_chunks(subject.call(env)[2]).join
-      symbol_header = Grape.lowercase_headers? ? 'symbol-header' : 'Symbol-Header'
+      symbol_header = Grape::Http::Headers.lowercase? ? 'symbol-header' : 'Symbol-Header'
       expect(JSON.parse(body)[symbol_header]).to eq('Goliath passes symbols')
     end
   end

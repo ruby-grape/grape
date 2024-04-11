@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/media_type'
-
 module Grape
   module Util
     class AcceptHeaderHandler

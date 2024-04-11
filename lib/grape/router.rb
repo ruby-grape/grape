@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/router/route'
-require 'grape/router/greedy_route'
-require 'grape/util/cache'
-
 module Grape
   class Router
     attr_reader :map, :compiled

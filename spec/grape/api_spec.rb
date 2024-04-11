@@ -998,11 +998,6 @@ describe Grape::API do
   end
 
   describe '.compile!' do
-    it 'requires the grape/eager_load file' do
-      expect(app).to receive(:require).with('grape/eager_load').and_return(nil)
-      app.compile!
-    end
-
     it 'compiles the instance for rack!' do
       stubbed_object = double(:instance_for_rack)
       allow(app).to receive(:instance_for_rack) { stubbed_object }

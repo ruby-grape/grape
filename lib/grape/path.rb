@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape/util/cache'
-
 module Grape
   # Represents a path to an endpoint.
   class Path

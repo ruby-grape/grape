@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require 'logger'
-require 'rack'
-require 'rack/builder'
-require 'rack/auth/basic'
-require 'set'
-require 'bigdecimal'
-require 'date'
 require 'active_support'
 require 'active_support/concern'
 require 'active_support/configurable'
@@ -26,278 +19,45 @@ require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/deep_dup'
 require 'active_support/core_ext/object/duplicable'
+require 'active_support/core_ext/string/output_safety'
 require 'active_support/core_ext/string/exclude'
-require 'active_support/dependencies/autoload'
 require 'active_support/deprecation'
 require 'active_support/inflector'
 require 'active_support/notifications'
-require 'i18n'
+
+require 'English'
+require 'bigdecimal'
+require 'date'
+require 'dry-types'
+require 'forwardable'
+require 'json'
+require 'logger'
+require 'mustermann/grape'
+require 'pathname'
+require 'rack'
+require 'rack/auth/basic'
+require 'rack/builder'
+require 'rack/head'
+require 'set'
+require 'singleton'
+require 'zeitwerk'
+
+loader = Zeitwerk::Loader.for_gem
+loader.inflector.inflect(
+  'api' => 'API',
+  'dsl' => 'DSL'
+)
+railtie = "#{__dir__}/grape/railtie.rb"
+loader.do_not_eager_load(railtie)
+loader.setup
 
 I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 
 module Grape
   include ActiveSupport::Configurable
-  extend ::ActiveSupport::Autoload
 
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
-  end
-
-  def self.lowercase_headers?
-    Rack::CONTENT_TYPE == 'content-type'
-  end
-
-  eager_autoload do
-    autoload :API
-    autoload :Endpoint
-
-    autoload :Namespace
-
-    autoload :Path
-    autoload :Cookies
-    autoload :Validations
-    autoload :ErrorFormatter
-    autoload :Formatter
-    autoload :Parser
-    autoload :Request
-    autoload :Env, 'grape/util/env'
-    autoload :Json, 'grape/util/json'
-    autoload :Xml, 'grape/util/xml'
-    autoload :DryTypes
-  end
-
-  module Http
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Headers
-    end
-  end
-
-  module Exceptions
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Base
-      autoload :Validation
-      autoload :ValidationArrayErrors
-      autoload :ValidationErrors
-      autoload :MissingVendorOption
-      autoload :MissingMimeType
-      autoload :MissingOption
-      autoload :InvalidFormatter
-      autoload :InvalidVersionerOption
-      autoload :UnknownValidator
-      autoload :UnknownOptions
-      autoload :UnknownParameter
-      autoload :InvalidWithOptionForRepresent
-      autoload :IncompatibleOptionValues
-      autoload :MissingGroupType
-      autoload :UnsupportedGroupType
-      autoload :InvalidMessageBody
-      autoload :InvalidAcceptHeader
-      autoload :InvalidVersionHeader
-      autoload :MethodNotAllowed
-      autoload :InvalidResponse
-      autoload :EmptyMessageBody
-      autoload :TooManyMultipartFiles
-      autoload :MissingGroupTypeError, 'grape/exceptions/missing_group_type'
-      autoload :UnsupportedGroupTypeError, 'grape/exceptions/unsupported_group_type'
-    end
-  end
-
-  module Extensions
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Hash
-    end
-    module ActiveSupport
-      extend ::ActiveSupport::Autoload
-      eager_autoload do
-        autoload :HashWithIndifferentAccess
-      end
-    end
-
-    module Hashie
-      extend ::ActiveSupport::Autoload
-      eager_autoload do
-        autoload :Mash
-      end
-    end
-  end
-
-  module Middleware
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Base
-      autoload :Versioner
-      autoload :Formatter
-      autoload :Error
-      autoload :Globals
-      autoload :Stack
-      autoload :Helpers
-    end
-
-    module Auth
-      extend ::ActiveSupport::Autoload
-      eager_autoload do
-        autoload :Base
-        autoload :DSL
-        autoload :StrategyInfo
-        autoload :Strategies
-      end
-    end
-
-    module Versioner
-      extend ::ActiveSupport::Autoload
-      eager_autoload do
-        autoload :Path
-        autoload :Header
-        autoload :Param
-        autoload :AcceptVersionHeader
-      end
-    end
-  end
-
-  module Util
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :InheritableValues
-      autoload :StackableValues
-      autoload :ReverseStackableValues
-      autoload :InheritableSetting
-      autoload :StrictHashConfiguration
-      autoload :Registrable
-    end
-  end
-
-  module ErrorFormatter
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Base
-      autoload :Json
-      autoload :Txt
-      autoload :Xml
-    end
-  end
-
-  module Formatter
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Json
-      autoload :SerializableHash
-      autoload :Txt
-      autoload :Xml
-    end
-  end
-
-  module Parser
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Json
-      autoload :Xml
-    end
-  end
-
-  module DSL
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :API
-      autoload :Callbacks
-      autoload :Settings
-      autoload :Configuration
-      autoload :InsideRoute
-      autoload :Helpers
-      autoload :Middleware
-      autoload :Parameters
-      autoload :RequestResponse
-      autoload :Routing
-      autoload :Validations
-      autoload :Logger
-      autoload :Desc
-    end
-  end
-
-  class API
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Helpers
-    end
-  end
-
-  module Presenters
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :Presenter
-    end
-  end
-
-  module ServeStream
-    extend ::ActiveSupport::Autoload
-    eager_autoload do
-      autoload :FileBody
-      autoload :SendfileResponse
-      autoload :StreamResponse
-    end
-  end
-
-  module Validations
-    extend ::ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :AttributesIterator
-      autoload :MultipleAttributesIterator
-      autoload :SingleAttributeIterator
-      autoload :Types
-      autoload :ParamsScope
-      autoload :ContractScope
-      autoload :ValidatorFactory
-      autoload :Base, 'grape/validations/validators/base'
-    end
-
-    module Types
-      extend ::ActiveSupport::Autoload
-
-      eager_autoload do
-        autoload :InvalidValue
-        autoload :DryTypeCoercer
-        autoload :ArrayCoercer
-        autoload :SetCoercer
-        autoload :PrimitiveCoercer
-        autoload :CustomTypeCoercer
-        autoload :CustomTypeCollectionCoercer
-        autoload :MultipleTypeCoercer
-        autoload :VariantCollectionCoercer
-      end
-    end
-
-    module Validators
-      extend ::ActiveSupport::Autoload
-
-      eager_autoload do
-        autoload :Base
-        autoload :MultipleParamsBase
-        autoload :AllOrNoneOfValidator
-        autoload :AllowBlankValidator
-        autoload :AsValidator
-        autoload :AtLeastOneOfValidator
-        autoload :CoerceValidator
-        autoload :DefaultValidator
-        autoload :ExactlyOneOfValidator
-        autoload :ExceptValuesValidator
-        autoload :MutualExclusionValidator
-        autoload :PresenceValidator
-        autoload :RegexpValidator
-        autoload :SameAsValidator
-        autoload :ValuesValidator
-      end
-    end
-  end
-
-  module Types
-    extend ::ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :InvalidValue
-    end
   end
 
   configure do |config|
@@ -306,13 +66,7 @@ module Grape
   end
 end
 
-require 'grape/content_types'
-
-require 'grape/util/lazy_value'
-require 'grape/util/lazy_block'
-require 'grape/util/endpoint_configuration'
-require 'grape/version'
-
 # https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html
 # adding Grape.deprecator to Rails App if any
 require 'grape/railtie' if defined?(Rails::Railtie) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
+loader.eager_load
