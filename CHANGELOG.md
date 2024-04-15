@@ -21,6 +21,7 @@
 * [#2426](https://github.com/ruby-grape/grape/pull/2426): Drop support for rack 1.x series - [@ericproulx](https://github.com/ericproulx).
 * [#2427](https://github.com/ruby-grape/grape/pull/2427): Use `rack-contrib` jsonp instead of rack-jsonp - [@ericproulx](https://github.com/ericproulx).
 * [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
+* [#2425](https://github.com/ruby-grape/grape/pull/2425): Replace `{}` with `Rack::Header` or `Rack::Utils::HeaderHash` - [@dhruvCW](https://github.com/dhruvCW).
 * Your contribution here.
 
 #### Fixes

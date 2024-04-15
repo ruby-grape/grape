@@ -238,7 +238,7 @@ module Grape
 
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
-        @header = {}
+        @header = Grape::Util::Header.new
         @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
         @params = @request.params
         @headers = @request.headers

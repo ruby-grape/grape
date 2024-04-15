@@ -35,7 +35,7 @@ module Grape
 
     def build_headers
       Grape::Util::Lazy::Object.new do
-        env.each_pair.with_object({}) do |(k, v), headers|
+        env.each_pair.with_object(Grape::Util::Header.new) do |(k, v), headers|
           next unless k.to_s.start_with? HTTP_PREFIX
 
           transformed_header = Grape::Http::Headers::HTTP_HEADERS[k] || transform_header(k)
@@ -44,14 +44,8 @@ module Grape
       end
     end
 
-    if Grape::Http::Headers.lowercase?
-      def transform_header(header)
-        -header[5..].tr('_', '-').downcase
-      end
-    else
-      def transform_header(header)
-        -header[5..].split('_').map(&:capitalize).join('-')
-      end
+    def transform_header(header)
+      -header[5..].tr('_', '-').downcase
     end
   end
 end
