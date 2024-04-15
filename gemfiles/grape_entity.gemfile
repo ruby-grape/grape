@@ -4,9 +4,10 @@
 
 source 'https://rubygems.org'
 
+gem 'grape-entity'
+
 group :development, :test do
   gem 'bundler'
-  gem 'hashie'
   gem 'rake'
   gem 'rubocop', '1.59.0', require: false
   gem 'rubocop-performance', '1.20.1', require: false
@@ -23,7 +24,6 @@ group :development do
 end
 
 group :test do
-  gem 'grape-entity', '~> 0.6', require: false
   gem 'rack-contrib', require: false
   gem 'rack-test', '< 2.1'
   gem 'rspec', '< 4'

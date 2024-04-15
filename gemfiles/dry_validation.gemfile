@@ -4,7 +4,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 7.0.0'
+gem 'dry-validation'
 
 group :development, :test do
   gem 'bundler'

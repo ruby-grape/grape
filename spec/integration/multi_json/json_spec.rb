@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-describe Grape::Json, if: defined?(::MultiJson) do
-  it 'uses multi_json' do
-    expect(described_class).to eq(::MultiJson)
-  end
+# grape_entity depends on multi-json and it breaks the test.
+describe Grape::Json, if: defined?(::MultiJson) && !defined?(Grape::Entity) do
+  subject { described_class }
+
+  it { is_expected.to eq(::MultiJson) }
 end

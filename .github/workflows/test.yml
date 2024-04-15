@@ -40,8 +40,14 @@ jobs:
             gemfile: gemfiles/rack_3_0.gemfile
             specs: 'spec/integration/rack_3_0'
           - ruby: '3.3'
-            gemfile: gemfiles/no_dry_validation.gemfile
-            specs: 'spec/integration/no_dry_validation'
+            gemfile: gemfiles/grape_entity.gemfile
+            specs: 'spec/integration/grape_entity'
+          - ruby: '3.3'
+            gemfile: gemfiles/hashie.gemfile
+            specs: 'spec/integration/hashie'
+          - ruby: '3.3'
+            gemfile: gemfiles/dry_validation.gemfile
+            specs: 'spec/integration/dry_validation'
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}

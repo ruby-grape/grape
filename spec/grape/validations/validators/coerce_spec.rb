@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::CoerceValidator do
-  subject do
-    Class.new(Grape::API)
-  end
+  subject { Class.new(Grape::API) }
 
-  def app
-    subject
-  end
+  let(:app) { subject }
 
   describe 'coerce' do
     let(:secure_uri_only) do
@@ -42,7 +38,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/single', age: '43a'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('年龄格式不正确')
       end
 
@@ -57,7 +53,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/single', age: '43a'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('age is invalid')
       end
     end
@@ -72,11 +68,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/single', int: '43a'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('int type cast is invalid')
 
         get '/single', int: '43'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('int works')
       end
 
@@ -102,19 +98,19 @@ describe Grape::Validations::Validators::CoerceValidator do
         it 'respects :coerce_with' do
           get '/', a: 'yup'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('TrueClass')
         end
 
         it 'still validates type' do
           get '/', a: 'false'
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('a type cast is invalid')
         end
 
         it 'performs no additional coercion' do
           get '/', a: 'true'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('String')
         end
       end
@@ -129,11 +125,11 @@ describe Grape::Validations::Validators::CoerceValidator do
       end
 
       get '/single', int: '43a'
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eq('int is invalid')
 
       get '/single', int: '43'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.body).to eq('int works')
     end
 
@@ -146,11 +142,11 @@ describe Grape::Validations::Validators::CoerceValidator do
       end
 
       get 'array', ids: %w[1 2 az]
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eq('ids is invalid')
 
       get 'array', ids: %w[1 2 890]
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.body).to eq('array int works')
     end
 
@@ -167,7 +163,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           post '/bigdecimal', { bigdecimal: 45.1 }.to_json, headers
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.body).to eq('BigDecimal 45.1')
         end
 
@@ -180,7 +176,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           post '/boolean', { boolean: 'true' }.to_json, headers
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.body).to eq('true')
         end
       end
@@ -194,7 +190,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/bigdecimal', bigdecimal: '45'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('BigDecimal')
       end
 
@@ -207,7 +203,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/int', int: '45'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq(integer_class_name)
       end
 
@@ -220,11 +216,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/string', string: 45
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('String')
 
         get '/string', string: nil
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('NilClass')
       end
 
@@ -240,12 +236,12 @@ describe Grape::Validations::Validators::CoerceValidator do
 
           get 'secure_uri', uri: 'https://www.example.com'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('URI::HTTPS')
 
           get 'secure_uri', uri: 'http://www.example.com'
 
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('uri is invalid')
         end
 
@@ -270,7 +266,7 @@ describe Grape::Validations::Validators::CoerceValidator do
 
             get 'whatever', name: 'Bob'
 
-            expect(last_response.status).to eq(400)
+            expect(last_response).to be_bad_request
             expect(last_response.body).to eq('name must be unique')
           end
         end
@@ -286,7 +282,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           get '/array', arry: %w[1 2 3]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq(integer_class_name)
         end
 
@@ -299,7 +295,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           get 'array', arry: [1, 0]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('TrueClass')
         end
 
@@ -311,7 +307,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             params[:uri][0].class
           end
           get 'uri_array', uri: ['http://www.google.com']
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('URI::HTTP')
         end
 
@@ -323,7 +319,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             "#{params[:uri].class},#{params[:uri].first.class},#{params[:uri].size}"
           end
           get 'uri_array', uri: Array.new(2) { 'http://www.example.com' }
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Set,URI::HTTP,1')
         end
 
@@ -336,10 +332,10 @@ describe Grape::Validations::Validators::CoerceValidator do
             params[:uri].first.class
           end
           get 'secure_uris', uri: ['https://www.example.com']
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('URI::HTTPS')
           get 'secure_uris', uri: ['https://www.example.com', 'http://www.example.com']
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('uri is invalid')
         end
       end
@@ -354,7 +350,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           get '/set', set: Set.new([1, 2, 3, 4]).to_a
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq(integer_class_name)
         end
 
@@ -367,7 +363,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           get '/set', set: Set.new([1, 0]).to_a
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('TrueClass')
         end
       end
@@ -381,7 +377,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/boolean', boolean: 1
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('TrueClass')
       end
 
@@ -398,11 +394,11 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           post '/upload', file: file
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.body).to eq(filename)
 
           post '/upload', file: 'not a file'
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('file is invalid')
         end
 
@@ -415,15 +411,15 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           post '/upload', file: file
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.body).to eq(filename)
 
           post '/upload', file: 'not a file'
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('file is invalid')
 
           post '/upload', file: { filename: 'fake file', tempfile: '/etc/passwd' }
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('file is invalid')
         end
 
@@ -436,7 +432,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           end
 
           post '/upload', files: [file]
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.body).to eq(filename)
         end
       end
@@ -452,7 +448,7 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/int', integers: { int: '45' }
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq(integer_class_name)
       end
 
@@ -468,7 +464,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/nil_value', param: nil
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -485,7 +481,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/nil_value', param: nil
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -502,7 +498,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/nil_value', param: nil
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -521,7 +517,7 @@ describe Grape::Validations::Validators::CoerceValidator do
                 end
 
                 get '/nil_value', param: nil
-                expect(last_response.status).to eq(200)
+                expect(last_response).to be_successful
                 expect(last_response.body).to eq('NilClass')
               end
             end
@@ -541,7 +537,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/empty_string', param: ''
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -555,7 +551,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             end
 
             get '/empty_string', param: ''
-            expect(last_response.status).to eq(200)
+            expect(last_response).to be_successful
             expect(last_response.body).to eq('String')
           end
         end
@@ -571,7 +567,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/empty_string', param: ''
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -588,7 +584,7 @@ describe Grape::Validations::Validators::CoerceValidator do
               end
 
               get '/empty_string', param: ''
-              expect(last_response.status).to eq(200)
+              expect(last_response).to be_successful
               expect(last_response.body).to eq('NilClass')
             end
           end
@@ -607,7 +603,7 @@ describe Grape::Validations::Validators::CoerceValidator do
                 end
 
                 get '/empty_string', param: ''
-                expect(last_response.status).to eq(200)
+                expect(last_response).to be_successful
                 expect(last_response.body).to eq('NilClass')
               end
             end
@@ -626,11 +622,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/ints', values: '1 2 3 4'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([1, 2, 3, 4])
 
         get '/ints', values: 'a b c d'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
       end
 
@@ -643,11 +639,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/strings', values: '1 2 3 4'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq(%w[1 2 3 4])
 
         get '/strings', values: 'a b c d'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq(%w[a b c d])
       end
 
@@ -660,19 +656,19 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         post '/coerce_nested_strings', ::Grape::Json.dump(values: 'a,b,c,d'), 'CONTENT_TYPE' => 'application/json'
-        expect(last_response.status).to eq(201)
+        expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([%w[a b c d]])
 
         post '/coerce_nested_strings', ::Grape::Json.dump(values: [%w[a c], %w[b]]), 'CONTENT_TYPE' => 'application/json'
-        expect(last_response.status).to eq(201)
+        expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([%w[a c], %w[b]])
 
         post '/coerce_nested_strings', ::Grape::Json.dump(values: [[]]), 'CONTENT_TYPE' => 'application/json'
-        expect(last_response.status).to eq(201)
+        expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([[]])
 
         post '/coerce_nested_strings', ::Grape::Json.dump(values: [['a', { bar: 0 }], ['b']]), 'CONTENT_TYPE' => 'application/json'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
       end
 
       it 'parses parameters with Array[Integer] type' do
@@ -684,11 +680,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/ints', values: '1 2 3 4'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([1, 2, 3, 4])
 
         get '/ints', values: 'a b c d'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([0, 0, 0, 0])
       end
 
@@ -701,11 +697,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/ints', values: [1, 2, 3, 4]
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([2, 3, 4, 5])
 
         get '/ints', values: %w[a b c d]
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(JSON.parse(last_response.body)).to eq([1, 1, 1, 1])
       end
 
@@ -728,21 +724,21 @@ describe Grape::Validations::Validators::CoerceValidator do
         it 'coerce nil value to array' do
           get '/', arr: nil
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Array')
         end
 
         it 'not coerce missing field' do
           get '/'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('NilClass')
         end
 
         it 'coerce array as array' do
           get '/', arr: []
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Array')
         end
       end
@@ -760,15 +756,15 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/ints', ints: [{ i: 1, j: '2' }]
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('ints is invalid')
 
         get '/ints', ints: '{"i":1,"j":"2"}'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('ints is invalid')
 
         get '/ints', ints: '[{"i":"1","j":"2"}]'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('coercion works')
       end
 
@@ -783,15 +779,15 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/ints', ints: '{"int":"3"}'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('ints[int] is invalid')
 
         get '/ints', ints: '{"int":"three"}'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('3')
 
         get '/ints', ints: '{"int":3}'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('3')
       end
 
@@ -814,21 +810,21 @@ describe Grape::Validations::Validators::CoerceValidator do
         it 'coerce nil value to integer' do
           get '/', int: nil
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Integer')
         end
 
         it 'not coerce missing field' do
           get '/'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('NilClass')
         end
 
         it 'coerce integer as integer' do
           get '/', int: 1
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Integer')
         end
       end
@@ -855,21 +851,21 @@ describe Grape::Validations::Validators::CoerceValidator do
         it 'accepts value that coerces to nil' do
           get '/', int: '0'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('NilClass')
         end
 
         it 'coerces to Integer' do
           get '/', int: '1'
 
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('Integer')
         end
 
         it 'returns invalid value if coercion returns a wrong type' do
           get '/', int: 'lol'
 
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('int is invalid')
         end
       end
@@ -903,35 +899,35 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/', splines: '{"x":1,"ints":[1,2,3],"obj":{"y":"woof"}}'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('woof')
 
         get '/', splines: { x: 1, ints: [1, 2, 3], obj: { y: 'woof' } }
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('woof')
 
         get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('arrays work')
 
         get '/', splines: [{ x: 2, ints: [5] }, { x: 3, ints: [4], obj: { y: 'quack' } }]
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('arrays work')
 
         get '/', splines: '{"x":4,"ints":[2]}'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
         get '/', splines: { x: 4, ints: [2] }
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
         get '/', splines: [{ x: 1, ints: [5] }, { x: 4, ints: [6] }]
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
 
@@ -954,19 +950,19 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/', splines: '{"x":1,"ints":[1,2,3],"obj":{"y":"woof"}}'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('woof')
 
         get '/', splines: '[{"x":2,"ints":[]},{"x":3,"ints":[4],"obj":{"y":"quack"}}]'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('arrays work')
 
         get '/', splines: '{"x":4,"ints":[2]}'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
         get '/', splines: '[{"x":1,"ints":[]},{"x":4,"ints":[]}]'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
 
@@ -984,19 +980,19 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/', splines: '{"x":"1","y":"woof"}'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq("#{integer_class_name}.String")
 
         get '/', splines: '[{"x":1,"y":2},{"x":1,"y":"quack"}]'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq("#{integer_class_name}.#{integer_class_name}")
 
         get '/', splines: '{"x":"4","y":"woof"}'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
 
         get '/', splines: '[{"x":"4","y":"woof"}]'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
 
@@ -1029,15 +1025,15 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/', a: 'true'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('TrueClass')
 
         get '/', a: '5'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq(integer_class_name)
 
         get '/', a: 'anything else'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('String')
       end
 
@@ -1050,11 +1046,11 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
 
         get '/', a: true
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('TrueClass')
 
         get '/', a: 'not good'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('a is invalid')
       end
 
@@ -1078,124 +1074,52 @@ describe Grape::Validations::Validators::CoerceValidator do
 
         it 'allows singular form declaration' do
           get '/', a: 'one way'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('"one way"')
 
           get '/', a: %w[the other]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('["the", "other"]')
 
           get '/', a: { a: 1, b: 2 }
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('a is invalid')
 
           get '/', a: [1, 2, 3]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('["1", "2", "3"]')
         end
 
         it 'allows multiple collection types' do
           get '/', b: [1, 2, 3]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('[1, 2, 3]')
 
           get '/', b: %w[1 2 3]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('[1, 2, 3]')
 
           get '/', b: [1, true, 'three']
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('["1", "true", "three"]')
         end
 
         it 'allows collections with multiple types' do
           get '/', c: [1, '2', true, 'three']
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('[1, 2, "true", "three"]')
 
           get '/', d: '1'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('1')
 
           get '/', d: 'one'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('"one"')
 
           get '/', d: %w[1 two]
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('#<Set: {1, "two"}>')
-        end
-      end
-
-      context 'when params is Hashie::Mash' do
-        context 'for primitive collections' do
-          before do
-            subject.params do
-              build_with Grape::Extensions::Hashie::Mash::ParamBuilder
-              optional :a, types: [String, Array[String]]
-              optional :b, types: [Array[Integer], Array[String]]
-              optional :c, type: Array[Integer, String]
-              optional :d, types: [Integer, String, Set[Integer, String]]
-            end
-            subject.get '/' do
-              (
-                params.a ||
-                params.b ||
-                params.c ||
-                params.d
-              ).inspect
-            end
-          end
-
-          it 'allows singular form declaration' do
-            get '/', a: 'one way'
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('"one way"')
-
-            get '/', a: %w[the other]
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array ["the", "other"]>')
-
-            get '/', a: { a: 1, b: 2 }
-            expect(last_response.status).to eq(400)
-            expect(last_response.body).to eq('a is invalid')
-
-            get '/', a: [1, 2, 3]
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array ["1", "2", "3"]>')
-          end
-
-          it 'allows multiple collection types' do
-            get '/', b: [1, 2, 3]
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
-
-            get '/', b: %w[1 2 3]
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array [1, 2, 3]>')
-
-            get '/', b: [1, true, 'three']
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array ["1", "true", "three"]>')
-          end
-
-          it 'allows collections with multiple types' do
-            get '/', c: [1, '2', true, 'three']
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Hashie::Array [1, 2, "true", "three"]>')
-
-            get '/', d: '1'
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('1')
-
-            get '/', d: 'one'
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('"one"')
-
-            get '/', d: %w[1 two]
-            expect(last_response.status).to eq(200)
-            expect(last_response.body).to eq('#<Set: {1, "two"}>')
-          end
         end
       end
 
@@ -1220,19 +1144,19 @@ describe Grape::Validations::Validators::CoerceValidator do
 
         it 'respects :coerce_with' do
           get '/', a: 'yup'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('TrueClass')
         end
 
         it 'still validates type' do
           get '/', a: 'false'
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eq('a is invalid')
         end
 
         it 'performs no additional coercion' do
           get '/', a: 'true'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eq('String')
         end
       end
