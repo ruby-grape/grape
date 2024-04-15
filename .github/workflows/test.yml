@@ -36,7 +36,11 @@ jobs:
           - ruby: '2.7'
             integration: rack_3_0
           - ruby: '3.3'
-            integration: no_dry_validation
+            integration: dry_validation
+          - ruby: '3.3'
+            integration: grape_entity
+          - ruby: '3.3'
+            integration: hashie
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.integration || matrix.gemfile }}.gemfile
