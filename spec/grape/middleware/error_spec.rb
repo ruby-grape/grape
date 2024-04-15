@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'grape-entity'
-
 describe Grape::Middleware::Error do
   let(:error_entity) do
     Class.new(Grape::Entity) do
@@ -26,12 +24,12 @@ describe Grape::Middleware::Error do
   end
   let(:options) { { default_message: 'Aww, hamburgers.' } }
 
-  def app
+  let(:app) do
     opts = options
     context = self
     Rack::Builder.app do
       use Spec::Support::EndpointFaker
-      use Grape::Middleware::Error, **opts
+      use Grape::Middleware::Error, **opts # rubocop:disable RSpec/DescribedClass
       run context.err_app
     end
   end
@@ -57,7 +55,7 @@ describe Grape::Middleware::Error do
   it 'defaults to a 500 status' do
     err_app.error = {}
     get '/'
-    expect(last_response.status).to eq(500)
+    expect(last_response).to be_server_error
   end
 
   it 'has a default message' do
@@ -74,14 +72,6 @@ describe Grape::Middleware::Error do
       get '/'
 
       expect(last_response.body).to eq({ code: 200 }.to_json)
-    end
-
-    it 'presents an error message' do
-      entity = error_entity
-      err_app.error = { message: { code: 200, with: entity } }
-      get '/'
-
-      expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)
     end
   end
 end

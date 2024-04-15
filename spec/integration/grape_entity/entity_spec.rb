@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 
-require 'grape_entity'
-require 'rack/contrib/jsonp'
-
-describe Grape::Entity do
-  subject { Class.new(Grape::API) }
-
-  def app
-    subject
-  end
-
+describe 'Grape::Entity', if: defined?(Grape::Entity) do
   describe '#present' do
+    subject { Class.new(Grape::API) }
+
+    let(:app) { subject }
+
+    before do
+      stub_const('TestObject', Class.new)
+      stub_const('FakeCollection', Class.new do
+        def first
+          TestObject.new
+        end
+      end)
+    end
+
     it 'sets the object as the body if no options are provided' do
       inner_body = nil
       subject.get '/example' do
@@ -21,18 +25,8 @@ describe Grape::Entity do
       expect(inner_body).to eql(abc: 'def')
     end
 
-    it 'calls through to the provided entity class if one is given' do
-      entity_mock = Object.new
-      allow(entity_mock).to receive(:represent)
-
-      subject.get '/example' do
-        present Object.new, with: entity_mock
-      end
-      get '/example'
-    end
-
     it 'pulls a representation from the class options if it exists' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       allow(entity).to receive(:represent).and_return('Hiya')
 
       subject.represent Object, with: entity
@@ -44,23 +38,16 @@ describe Grape::Entity do
     end
 
     it 'pulls a representation from the class options if the presented object is a collection of objects' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       allow(entity).to receive(:represent).and_return('Hiya')
 
-      test_object_class = Class.new
-      fake_collection_class = Class.new do
-        define_method(:first) do
-          test_object_class.new
-        end
-      end
-
-      subject.represent test_object_class, with: entity
+      subject.represent TestObject, with: entity
       subject.get '/example' do
-        present [test_object_class.new]
+        present [TestObject.new]
       end
 
       subject.get '/example2' do
-        present fake_collection_class.new
+        present FakeCollection.new
       end
 
       get '/example'
@@ -71,7 +58,7 @@ describe Grape::Entity do
     end
 
     it 'pulls a representation from the class ancestor if it exists' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       allow(entity).to receive(:represent).and_return('Hiya')
 
       subclass = Class.new(Object)
@@ -86,7 +73,7 @@ describe Grape::Entity do
 
     it 'automatically uses Klass::Entity if that exists' do
       some_model = Class.new
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       allow(entity).to receive(:represent).and_return('Auto-detect!')
 
       some_model.const_set :Entity, entity
@@ -100,7 +87,7 @@ describe Grape::Entity do
 
     it 'automatically uses Klass::Entity based on the first object in the collection being presented' do
       some_model = Class.new
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       allow(entity).to receive(:represent).and_return('Auto-detect!')
 
       some_model.const_set :Entity, entity
@@ -113,7 +100,7 @@ describe Grape::Entity do
     end
 
     it 'does not run autodetection for Entity when explicitly provided' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       some_array = []
 
       subject.get '/example' do
@@ -125,7 +112,7 @@ describe Grape::Entity do
     end
 
     it 'does not use #first method on ActiveRecord::Relation to prevent needless sql query' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       some_relation = Class.new
       some_model = Class.new
 
@@ -169,7 +156,7 @@ describe Grape::Entity do
 
     %i[json serializable_hash].each do |format|
       it "presents with #{format}" do
-        entity = Class.new(described_class)
+        entity = Class.new(Grape::Entity)
         entity.root 'examples', 'example'
         entity.expose :id
 
@@ -186,12 +173,12 @@ describe Grape::Entity do
         end
 
         get '/example'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('{"example":{"id":1}}')
       end
 
       it "presents with #{format} collection" do
-        entity = Class.new(described_class)
+        entity = Class.new(Grape::Entity)
         entity.root 'examples', 'example'
         entity.expose :id
 
@@ -209,13 +196,13 @@ describe Grape::Entity do
         end
 
         get '/examples'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('{"examples":[{"id":1},{"id":2}]}')
       end
     end
 
     it 'presents with xml' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       entity.root 'examples', 'example'
       entity.expose :name
 
@@ -232,7 +219,7 @@ describe Grape::Entity do
         present c.new(name: 'johnnyiller'), with: entity
       end
       get '/example'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.content_type).to eq('application/xml')
       expect(last_response.body).to eq <<~XML
         <?xml version="1.0" encoding="UTF-8"?>
@@ -245,7 +232,7 @@ describe Grape::Entity do
     end
 
     it 'presents with json' do
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       entity.root 'examples', 'example'
       entity.expose :name
 
@@ -262,16 +249,15 @@ describe Grape::Entity do
         present c.new(name: 'johnnyiller'), with: entity
       end
       get '/example'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.content_type).to eq('application/json')
       expect(last_response.body).to eq('{"example":{"name":"johnnyiller"}}')
     end
 
     it 'presents with jsonp utilising Rack::JSONP' do
-      # Include JSONP middleware
       subject.use Rack::JSONP
 
-      entity = Class.new(described_class)
+      entity = Class.new(Grape::Entity)
       entity.root 'examples', 'example'
       entity.expose :name
 
@@ -294,7 +280,7 @@ describe Grape::Entity do
       end
 
       get '/example?callback=abcDef'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.content_type).to eq('application/javascript')
       expect(last_response.body).to include 'abcDef({"example":{"name":"johnnyiller"}})'
     end
@@ -311,7 +297,7 @@ describe Grape::Entity do
         user1 = user.new(name: 'user1')
         user2 = user.new(name: 'user2')
 
-        entity = Class.new(described_class)
+        entity = Class.new(Grape::Entity)
         entity.expose :name
 
         subject.format :json
@@ -327,6 +313,106 @@ describe Grape::Entity do
           'user2' => { 'name' => 'user2' }
         }
         expect(JSON(last_response.body)).to eq(expect_response_json)
+      end
+    end
+  end
+
+  describe 'Grape::Middleware::Error' do
+    let(:error_entity) do
+      Class.new(Grape::Entity) do
+        expose :code
+        expose :static
+
+        def static
+          'static text'
+        end
+      end
+    end
+    let(:options) { { default_message: 'Aww, hamburgers.' } }
+
+    let(:error_app) do
+      Class.new do
+        class << self
+          attr_accessor :error, :format
+
+          def call(_env)
+            throw :error, error
+          end
+        end
+      end
+    end
+
+    let(:app) do
+      opts = options
+      Rack::Builder.app do
+        use Spec::Support::EndpointFaker
+        use Grape::Middleware::Error, **opts
+        run ErrApp
+      end
+    end
+
+    before do
+      stub_const('ErrApp', error_app)
+      stub_const('ErrorEntity', error_entity)
+    end
+
+    context 'with http code' do
+      it 'presents an error message' do
+        ErrApp.error = { message: { code: 200, with: ErrorEntity } }
+        get '/'
+
+        expect(last_response.body).to eq({ code: 200, static: 'static text' }.to_json)
+      end
+    end
+  end
+
+  describe 'error_presenter' do
+    subject { last_response }
+
+    let(:error_presenter) do
+      Class.new(Grape::Entity) do
+        expose :code
+        expose :static
+
+        def static
+          'some static text'
+        end
+      end
+    end
+
+    before do
+      stub_const('ErrorPresenter', error_presenter)
+      get '/exception'
+    end
+
+    context 'when using http_codes' do
+      let(:app) do
+        Class.new(Grape::API) do
+          desc 'some desc', http_codes: [[408, 'Unauthorized', ErrorPresenter]]
+          get '/exception' do
+            error!({ code: 408 }, 408)
+          end
+        end
+      end
+
+      it 'is used as presenter' do
+        expect(subject).to be_request_timeout
+        expect(subject.body).to eql({ code: 408, static: 'some static text' }.to_json)
+      end
+    end
+
+    context 'when using with' do
+      let(:app) do
+        Class.new(Grape::API) do
+          get '/exception' do
+            error!({ code: 408, with: ErrorPresenter }, 408)
+          end
+        end
+      end
+
+      it 'presented with' do
+        expect(subject).to be_request_timeout
+        expect(subject.body).to eql({ code: 408, static: 'some static text' }.to_json)
       end
     end
   end

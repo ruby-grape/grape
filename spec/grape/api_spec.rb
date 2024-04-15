@@ -1,16 +1,11 @@
 # frozen_string_literal: true
 
 require 'shared/versioning_examples'
-require 'grape-entity'
 
 describe Grape::API do
-  subject do
-    Class.new(described_class)
-  end
+  subject { Class.new(described_class) }
 
-  def app
-    subject
-  end
+  let(:app) { subject }
 
   describe '.prefix' do
     it 'routes root through with the prefix' do
@@ -20,7 +15,7 @@ describe Grape::API do
       end
 
       get 'awesome/sauce/'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eql 'Hello there.'
     end
 
@@ -34,7 +29,7 @@ describe Grape::API do
       expect(last_response.body).to eql 'Hello there.'
 
       get '/hello'
-      expect(last_response.status).to be 404
+      expect(last_response).to be_not_found
     end
 
     it 'supports OPTIONS' do
@@ -44,7 +39,7 @@ describe Grape::API do
       end
 
       options 'awesome/sauce'
-      expect(last_response.status).to be 204
+      expect(last_response).to be_no_content
       expect(last_response.body).to be_blank
     end
 
@@ -53,7 +48,7 @@ describe Grape::API do
       subject.get
 
       post 'awesome/sauce'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
     end
   end
 
@@ -241,9 +236,9 @@ describe Grape::API do
       end
 
       get '/users/michael'
-      expect(last_response.status).to eq(404)
+      expect(last_response).to be_not_found
       get '/users/23'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
     end
 
     context 'with param type definitions' do
@@ -388,13 +383,13 @@ describe Grape::API do
 
       it 'allows .json' do
         get '/abc.json'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eql 'abc' # json-encoded symbol
       end
 
       it 'allows .txt' do
         get '/abc.txt'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eql 'def' # raw text
       end
     end
@@ -567,7 +562,7 @@ describe Grape::API do
       end
 
       post '/example'
-      expect(last_response.status).to be 201
+      expect(last_response).to be_created
       expect(last_response.body).to eql 'Created'
     end
 
@@ -577,7 +572,7 @@ describe Grape::API do
         'example'
       end
       put '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
       expect(last_response.body).to eql '405 Not Allowed'
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
     end
@@ -595,7 +590,7 @@ describe Grape::API do
       end
 
       post '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
     end
 
@@ -613,7 +608,7 @@ describe Grape::API do
       end
 
       post '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
       expect(last_response.headers['X-Custom-Header']).to eql 'foo'
     end
 
@@ -630,7 +625,7 @@ describe Grape::API do
       end
 
       options '/example'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eql 'yup'
       expect(last_response.headers['Allow']).to be_nil
       expect(last_response.headers['X-Custom-Header-1']).to eql 'foo'
@@ -647,7 +642,7 @@ describe Grape::API do
         end
 
         put '/example'
-        expect(last_response.status).to be 405
+        expect(last_response).to be_method_not_allowed
         expect(last_response.body).to eq <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
           <error>
@@ -667,7 +662,7 @@ describe Grape::API do
           'example'
         end
         put '/example'
-        expect(last_response.status).to be 405
+        expect(last_response).to be_method_not_allowed
         expect(last_response.body).to eql '405 Not Allowed'
       end
     end
@@ -711,7 +706,7 @@ describe Grape::API do
       end
 
       it 'returns a 204' do
-        expect(last_response.status).to be 204
+        expect(last_response).to be_no_content
       end
 
       it 'has an empty body' do
@@ -775,7 +770,7 @@ describe Grape::API do
 
       describe 'it adds an OPTIONS route for namespaced endpoints that' do
         it 'returns a 204' do
-          expect(last_response.status).to be 204
+          expect(last_response).to be_no_content
         end
 
         it 'has an empty body' do
@@ -802,7 +797,7 @@ describe Grape::API do
       end
 
       it 'returns a 204' do
-        expect(last_response.status).to be 204
+        expect(last_response).to be_no_content
       end
 
       it 'has an empty body' do
@@ -840,7 +835,7 @@ describe Grape::API do
       end
 
       it 'returns a 405' do
-        expect(last_response.status).to be 405
+        expect(last_response).to be_method_not_allowed
       end
 
       it 'contains error message in body' do
@@ -879,7 +874,7 @@ describe Grape::API do
         let(:response) { delete('/example') }
 
         it 'responds with a 405 status' do
-          expect(response.status).to be 405
+          expect(response).to be_method_not_allowed
         end
       end
 
@@ -887,7 +882,7 @@ describe Grape::API do
         let(:response) { post('/example?secret=incorrect_password') }
 
         it 'responds with the defined error in the before hook' do
-          expect(response.status).to be 401
+          expect(response).to be_unauthorized
         end
       end
 
@@ -895,7 +890,7 @@ describe Grape::API do
         let(:response) { post('/example?secret=password&namespace_secret=wrong_namespace_password') }
 
         it 'ends up in the endpoint' do
-          expect(response.status).to be 401
+          expect(response).to be_unauthorized
         end
       end
 
@@ -903,7 +898,7 @@ describe Grape::API do
         let(:response) { post('/example?secret=password&namespace_secret=namespace_password') }
 
         it 'ends up in the endpoint' do
-          expect(response.status).to be 201
+          expect(response).to be_created
         end
       end
 
@@ -911,7 +906,7 @@ describe Grape::API do
         let(:response) { head('/example?id=504') }
 
         it 'responds with 401 because before expectations in before hooks are not met' do
-          expect(response.status).to be 401
+          expect(response).to be_unauthorized
         end
       end
 
@@ -919,7 +914,7 @@ describe Grape::API do
         let(:response) { head('/example?id=504&secret=password') }
 
         it 'responds with 200 because before hooks are not called' do
-          expect(response.status).to be 200
+          expect(response).to be_successful
         end
       end
     end
@@ -936,7 +931,7 @@ describe Grape::API do
       end
 
       it 'returns a 200' do
-        expect(last_response.status).to be 200
+        expect(last_response).to be_successful
       end
 
       it 'has an empty body' do
@@ -952,7 +947,7 @@ describe Grape::API do
         'example'
       end
       head '/example'
-      expect(last_response.status).to be 400
+      expect(last_response).to be_bad_request
     end
   end
 
@@ -966,14 +961,14 @@ describe Grape::API do
 
     it 'options does not contain HEAD' do
       options '/example'
-      expect(last_response.status).to be 204
+      expect(last_response).to be_no_content
       expect(last_response.body).to eql ''
       expect(last_response.headers['Allow']).to eql 'OPTIONS, GET'
     end
 
     it 'does not allow HEAD on a GET request' do
       head '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
     end
   end
 
@@ -987,12 +982,12 @@ describe Grape::API do
 
     it 'does not create an OPTIONS route' do
       options '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
     end
 
     it 'does not include OPTIONS in Allow header' do
       options '/example'
-      expect(last_response.status).to be 405
+      expect(last_response).to be_method_not_allowed
       expect(last_response.headers['Allow']).to eql 'GET, HEAD'
     end
   end
@@ -1118,7 +1113,7 @@ describe Grape::API do
       expect(d).to receive(:do_something!).once
 
       get '/123'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eql 'got it'
     end
 
@@ -1149,7 +1144,7 @@ describe Grape::API do
       expect(d).to receive(:do_something!).exactly(0).times
 
       get '/4'
-      expect(last_response.status).to be 400
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eql 'id does not have a valid value'
     end
 
@@ -1181,7 +1176,7 @@ describe Grape::API do
       expect(d).to receive(:here).with(4).once
 
       get '/123'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eql 'got it'
     end
   end
@@ -1272,7 +1267,7 @@ describe Grape::API do
       subject.format :json
       subject.get('/error') { error!('error in json', 500) }
       get '/error.json'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.content_type).to eql 'application/json'
     end
 
@@ -1280,7 +1275,7 @@ describe Grape::API do
       subject.format :xml
       subject.get('/error') { error!('error in xml', 500) }
       get '/error'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.content_type).to eql 'application/xml'
     end
 
@@ -1288,7 +1283,7 @@ describe Grape::API do
       subject.get(':id') { params[:format] }
 
       get '/baz.bar'
-      expect(last_response.status).to eq 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eq 'bar'
     end
 
@@ -1297,7 +1292,7 @@ describe Grape::API do
       subject.get(':id') { params }
 
       get '/baz.bar'
-      expect(last_response.status).to eq 404
+      expect(last_response).to be_not_found
     end
 
     context 'with a custom content_type' do
@@ -1339,7 +1334,7 @@ describe Grape::API do
           it "uploads and downloads a PNG file via #{url}" do
             image_filename = 'grape.png'
             post url, file: Rack::Test::UploadedFile.new(image_filename, content_type, true)
-            expect(last_response.status).to eq(201)
+            expect(last_response).to be_created
             expect(last_response.content_type).to eq(content_type)
             expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''grape.png")
             File.open(image_filename, 'rb') do |io|
@@ -1355,7 +1350,7 @@ describe Grape::API do
         it 'uploads and downloads a Ruby file' do
           filename = __FILE__
           post '/attachment.rb', file: Rack::Test::UploadedFile.new(filename, content_type, true)
-          expect(last_response.status).to eq(201)
+          expect(last_response).to be_created
           expect(last_response.content_type).to eq(content_type)
           expect(last_response.headers['Content-Disposition']).to eq("attachment; filename*=UTF-8''api_spec.rb")
           File.open(filename, 'rb') do |io|
@@ -1472,7 +1467,7 @@ describe Grape::API do
         subject.get '/' do
         end
         get '/'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('Caught in the Net')
       end
     end
@@ -1549,9 +1544,9 @@ describe Grape::API do
       end
       subject.get(:hello) { 'Hello, world.' }
       get '/hello'
-      expect(last_response.status).to be 401
+      expect(last_response).to be_unauthorized
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
     end
 
     it 'is scopable' do
@@ -1565,9 +1560,9 @@ describe Grape::API do
       end
 
       get '/hello'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       get '/admin/hello'
-      expect(last_response.status).to be 401
+      expect(last_response).to be_unauthorized
     end
 
     it 'is callable via .auth as well' do
@@ -1577,9 +1572,9 @@ describe Grape::API do
 
       subject.get(:hello) { 'Hello, world.' }
       get '/hello'
-      expect(last_response.status).to be 401
+      expect(last_response).to be_unauthorized
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
     end
 
     it 'has access to the current endpoint' do
@@ -1609,9 +1604,9 @@ describe Grape::API do
 
       subject.get(:hello) { 'Hello, world.' }
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('disallow', 'whatever')
-      expect(last_response.status).to be 401
+      expect(last_response).to be_unauthorized
     end
 
     it 'can set instance variables accessible to routes' do
@@ -1623,7 +1618,7 @@ describe Grape::API do
 
       subject.get(:hello) { @hello }
       get '/hello', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('allow', 'whatever')
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       expect(last_response.body).to eql 'Hello, world.'
     end
   end
@@ -1778,13 +1773,13 @@ describe Grape::API do
       end
 
       get '/new/abc'
-      expect(last_response.status).to be 404
+      expect(last_response).to be_not_found
       get '/legacy/abc'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
       get '/legacy/def'
-      expect(last_response.status).to be 404
+      expect(last_response).to be_not_found
       get '/new/def'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
     end
   end
 
@@ -2039,7 +2034,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq 'rain!'
     end
 
@@ -2051,7 +2046,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq({ error: 'rain!' }.to_json)
     end
 
@@ -2061,7 +2056,7 @@ describe Grape::API do
       subject.get('/unrescued') { raise 'beefcake' }
 
       get '/rescued'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
 
       expect { get '/unrescued' }.to raise_error(RuntimeError, 'beefcake')
     end
@@ -2083,7 +2078,7 @@ describe Grape::API do
       expect(last_response.status).to be 402
 
       get '/standard_error'
-      expect(last_response.status).to be 401
+      expect(last_response).to be_unauthorized
     end
 
     context 'CustomError subclass of Grape::Exceptions::Base' do
@@ -2106,7 +2101,7 @@ describe Grape::API do
         end
 
         get '/custom_error'
-        expect(last_response.status).to eq(400)
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq('New Error')
       end
     end
@@ -2122,7 +2117,7 @@ describe Grape::API do
       subject.get('/formatter_exception') { 'Hello world' }
 
       get '/formatter_exception'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq('Formatter Error')
     end
 
@@ -2132,7 +2127,7 @@ describe Grape::API do
 
       expect_any_instance_of(Grape::Middleware::Error).to receive(:default_rescue_handler).and_call_original
       get '/'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect(last_response.body).to eql 'Invalid response'
     end
   end
@@ -2146,7 +2141,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 202
+      expect(last_response).to be_accepted
       expect(last_response.body).to eq('rescued from rain!')
     end
 
@@ -2165,7 +2160,7 @@ describe Grape::API do
           raise ConnectionError
         end
         get '/exception'
-        expect(last_response.status).to be 500
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq('rescued from ConnectionError')
       end
 
@@ -2177,7 +2172,7 @@ describe Grape::API do
           raise ConnectionError
         end
         get '/exception'
-        expect(last_response.status).to be 500
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq('rescued from ConnectionError')
       end
 
@@ -2189,7 +2184,7 @@ describe Grape::API do
           raise ConnectionError
         end
         get '/exception'
-        expect(last_response.status).to be 500
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq('rescued from ConnectionError')
       end
 
@@ -2207,10 +2202,10 @@ describe Grape::API do
           raise DatabaseError
         end
         get '/connection'
-        expect(last_response.status).to be 500
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq('rescued from ConnectionError')
         get '/database'
-        expect(last_response.status).to be 500
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq('rescued from DatabaseError')
       end
 
@@ -2234,7 +2229,7 @@ describe Grape::API do
       subject.get('/rescue_lambda') { raise ArgumentError }
 
       get '/rescue_lambda'
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eq('rescued with a lambda')
     end
 
@@ -2245,7 +2240,7 @@ describe Grape::API do
       subject.get('/rescue_lambda') { raise ArgumentError, 'lambda takes an argument' }
 
       get '/rescue_lambda'
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eq('lambda takes an argument')
     end
   end
@@ -2267,11 +2262,11 @@ describe Grape::API do
       subject.get('/rescue_no_method_error') { raise NoMethodError }
 
       get '/rescue_arg_error'
-      expect(last_response.status).to eq(500)
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq('500 ArgumentError')
 
       get '/rescue_no_method_error'
-      expect(last_response.status).to eq(500)
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq('500 NoMethodError')
     end
 
@@ -2299,11 +2294,11 @@ describe Grape::API do
       subject.get('/another_error') { raise NoMethodError }
 
       get '/argument_error'
-      expect(last_response.status).to eq(500)
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq('500 ArgumentError')
 
       get '/another_error'
-      expect(last_response.status).to eq(500)
+      expect(last_response).to be_server_error
       expect(last_response.body).to eq('500 AnotherError')
     end
   end
@@ -2330,9 +2325,9 @@ describe Grape::API do
       end
 
       get '/caught_child'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       get '/caught_parent'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
       expect { get '/uncaught_parent' }.to raise_error(StandardError)
     end
 
@@ -2345,7 +2340,7 @@ describe Grape::API do
       end
 
       get '/caught_child'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
     end
 
     it 'does not rescue child errors if rescue_subclasses is false' do
@@ -2388,7 +2383,7 @@ describe Grape::API do
 
       get '/grape_exception'
 
-      expect(last_response.status).to eq(403)
+      expect(last_response).to be_forbidden
       expect(last_response.body).to eq('Redefined Error')
     end
   end
@@ -2545,7 +2540,7 @@ describe Grape::API do
         'some binary content'
       end
       get '/excel.json'
-      expect(last_response.status).to eq(406)
+      expect(last_response).to be_not_acceptable
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format 'txt' is not supported."))
     end
   end
@@ -2629,7 +2624,7 @@ describe Grape::API do
         { x: params[:x] }
       end
       post '/data', '{"x":42}', 'CONTENT_TYPE' => 'application/json'
-      expect(last_response.status).to eq(201)
+      expect(last_response).to be_created
       expect(last_response.body).to eq('{"x":42}')
     end
 
@@ -2646,7 +2641,7 @@ describe Grape::API do
       ['text/custom', 'text/custom; charset=UTF-8'].each do |content_type|
         it "uses parser for #{content_type}" do
           put '/simple', 'simple', 'CONTENT_TYPE' => content_type
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eql 'elpmis'
         end
       end
@@ -2672,7 +2667,7 @@ describe Grape::API do
 
       it 'uses custom parser' do
         put '/simple', 'simple', 'CONTENT_TYPE' => 'text/custom'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eql 'elpmis'
       end
     end
@@ -2684,7 +2679,7 @@ describe Grape::API do
             params[:tag]
           end
           put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
-          expect(last_response.status).to eq(400)
+          expect(last_response).to be_bad_request
           expect(last_response.body).to eql 'Disallowed type attribute: "symbol"'
         end
       end
@@ -2695,7 +2690,7 @@ describe Grape::API do
             params[:tag]
           end
           put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
-          expect(last_response.status).to eq(200)
+          expect(last_response).to be_successful
           expect(last_response.body).to eql '{"type"=>"symbol", "__content__"=>"a123"}'
         end
       end
@@ -2710,7 +2705,7 @@ describe Grape::API do
 
       it 'does not parse data' do
         put '/data', 'not valid json', 'CONTENT_TYPE' => 'application/json'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('body: not valid json')
       end
     end
@@ -2727,7 +2722,7 @@ describe Grape::API do
         { x: 42 }
       end
       get '/data'
-      expect(last_response.status).to eq(200)
+      expect(last_response).to be_successful
       expect(last_response.body).to eq('{"x":42}')
     end
 
@@ -2736,7 +2731,7 @@ describe Grape::API do
         { x: params[:x] }
       end
       post '/data', '{"x":42}', 'CONTENT_TYPE' => ''
-      expect(last_response.status).to eq(201)
+      expect(last_response).to be_created
       expect(last_response.body).to eq('{"x":42}')
     end
   end
@@ -2749,7 +2744,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 200
+      expect(last_response).to be_successful
     end
 
     it 'has a default error status' do
@@ -2758,7 +2753,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 500
+      expect(last_response).to be_server_error
     end
 
     it 'uses the default error status in error!' do
@@ -2768,45 +2763,7 @@ describe Grape::API do
         error! 'rain!'
       end
       get '/exception'
-      expect(last_response.status).to be 400
-    end
-  end
-
-  context 'http_codes' do
-    let(:error_presenter) do
-      Class.new(Grape::Entity) do
-        expose :code
-        expose :static
-
-        def static
-          'some static text'
-        end
-      end
-    end
-
-    it 'is used as presenter' do
-      subject.desc 'some desc', http_codes: [
-        [408, 'Unauthorized', error_presenter]
-      ]
-
-      subject.get '/exception' do
-        error!({ code: 408 }, 408)
-      end
-
-      get '/exception'
-      expect(last_response.status).to be 408
-      expect(last_response.body).to eql({ code: 408, static: 'some static text' }.to_json)
-    end
-
-    it 'presented with' do
-      error = { code: 408, with: error_presenter }.freeze
-      subject.get '/exception' do
-        error! error, 408
-      end
-
-      get '/exception'
-      expect(last_response.status).to be 408
-      expect(last_response.body).to eql({ code: 408, static: 'some static text' }.to_json)
+      expect(last_response).to be_bad_request
     end
   end
 
@@ -3359,7 +3316,7 @@ describe Grape::API do
           end
 
           get '/mounted/fail'
-          expect(last_response.status).to be 202
+          expect(last_response).to be_accepted
           expect(last_response.body).to eq('rescued from doh!')
         end
 
@@ -3442,7 +3399,7 @@ describe Grape::API do
           mount app => '/mounted'
         end
         get '/mounted/cool/awesome'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('sauce')
       end
 
@@ -3457,10 +3414,10 @@ describe Grape::API do
         app3.mount app1 => '/app1'
         app1.mount app2 => '/app2'
         get '/app1/app2/nice'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('play')
         options '/app1/app2/nice'
-        expect(last_response.status).to eq(204)
+        expect(last_response).to be_no_content
       end
 
       it 'responds to options' do
@@ -3478,15 +3435,15 @@ describe Grape::API do
         end
 
         get '/apples/colour'
-        expect(last_response.status).to be 200
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('red')
         options '/apples/colour'
-        expect(last_response.status).to be 204
+        expect(last_response).to be_no_content
         get '/apples/pears/colour'
-        expect(last_response.status).to be 200
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('green')
         options '/apples/pears/colour'
-        expect(last_response.status).to be 204
+        expect(last_response).to be_no_content
       end
 
       it 'responds to options with path versioning' do
@@ -3500,10 +3457,10 @@ describe Grape::API do
         end
 
         get '/v1/apples/colour'
-        expect(last_response.status).to be 200
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('red')
         options '/v1/apples/colour'
-        expect(last_response.status).to be 204
+        expect(last_response).to be_no_content
       end
 
       it 'mounts a versioned API with nested resources' do
@@ -3566,7 +3523,7 @@ describe Grape::API do
         subject.mount api
 
         get '/users'
-        expect(last_response.status).to eq(401)
+        expect(last_response).to be_unauthorized
 
         get '/users', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('username', 'password')
         expect(last_response.body).to eq({ users: true }.to_json)
@@ -3621,10 +3578,10 @@ describe Grape::API do
         subject.mount b => '/two'
 
         get '/one/v1/hello'
-        expect(last_response.status).to eq 200
+        expect(last_response).to be_successful
 
         get '/two/v1/world'
-        expect(last_response.status).to eq 200
+        expect(last_response).to be_successful
       end
 
       context 'when mounting class extends a subclass of Grape::API' do
@@ -3815,7 +3772,7 @@ describe Grape::API do
 
       it 'does not accept extensions other than specified' do
         get '/meaning_of_life.json'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
       end
 
       it 'forces txt from a non-accepting header' do
@@ -3921,7 +3878,7 @@ describe Grape::API do
           'example'
         end
         get '/example'
-        expect(last_response.status).to eq(500)
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
           <error>
@@ -3938,7 +3895,7 @@ describe Grape::API do
           }
         end
         get '/example'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
           <hash>
@@ -3953,7 +3910,7 @@ describe Grape::API do
           %w[example1 example2]
         end
         get '/example'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
           <strings type="array">
@@ -4044,19 +4001,19 @@ describe Grape::API do
           error!("Unrecognized request path: #{params[:path]} - #{env['PATH_INFO']}#{env['SCRIPT_NAME']}", 404)
         end
         get '/v1/hello'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('v1')
         get '/v2/hello'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq('v2')
         options '/v2/hello'
-        expect(last_response.status).to eq(204)
+        expect(last_response).to be_no_content
         expect(last_response.body).to be_blank
         head '/v2/hello'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to be_blank
         get '/foobar'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
         expect(last_response.body).to eq('Unrecognized request path: foobar - /foobar')
       end
     end
@@ -4067,14 +4024,14 @@ describe Grape::API do
       it 'cascades' do
         subject.version 'v1', using: :path, cascade: true
         get '/v1/hello'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
         expect(last_response.headers[Grape::Http::Headers::X_CASCADE]).to eq('pass')
       end
 
       it 'does not cascade' do
         subject.version 'v2', using: :path, cascade: false
         get '/v2/hello'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
         expect(last_response.headers.keys).not_to include Grape::Http::Headers::X_CASCADE
       end
     end
@@ -4083,14 +4040,14 @@ describe Grape::API do
       it 'cascades' do
         subject.cascade true
         get '/hello'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
         expect(last_response.headers[Grape::Http::Headers::X_CASCADE]).to eq('pass')
       end
 
       it 'does not cascade' do
         subject.cascade false
         get '/hello'
-        expect(last_response.status).to eq(404)
+        expect(last_response).to be_not_found
         expect(last_response.headers.keys).not_to include Grape::Http::Headers::X_CASCADE
       end
     end
@@ -4104,7 +4061,7 @@ describe Grape::API do
         'foo'
       end
       get '/something'
-      expect(last_response.status).to eq(406)
+      expect(last_response).to be_not_acceptable
       expect(last_response.body).to eq(Rack::Utils.escape_html({ error: "The requested format 'txt' is not supported." }.to_json))
     end
   end
@@ -4116,7 +4073,7 @@ describe Grape::API do
         'foo'
       end
       get '/something?format=<script>blah</script>'
-      expect(last_response.status).to eq(406)
+      expect(last_response).to be_not_acceptable
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format '<script>blah</script>' is not supported."))
     end
   end
@@ -4129,7 +4086,7 @@ describe Grape::API do
         'foo'
       end
       get '/something?format=%0A%0B%BF'
-      expect(last_response.status).to eq(406)
+      expect(last_response).to be_not_acceptable
       message = "The requested format '\n\u000b\357\277\275' is not supported."
       expect(last_response.body).to eq({ error: message }.to_json)
     end
@@ -4145,7 +4102,7 @@ describe Grape::API do
 
       it 'returns blank body' do
         get '/blank'
-        expect(last_response.status).to eq(204)
+        expect(last_response).to be_no_content
         expect(last_response.body).to be_blank
       end
     end
@@ -4161,7 +4118,7 @@ describe Grape::API do
 
       it 'returns blank body' do
         get '/text'
-        expect(last_response.status).to eq(200)
+        expect(last_response).to be_successful
         expect(last_response.body).to eq 'Hello World'
       end
     end
@@ -4370,7 +4327,7 @@ describe Grape::API do
         end
 
         get '/'
-        expect(last_response.status).to be 400
+        expect(last_response).to be_bad_request
         expect(last_response.body).to eq({ my_var: expected_instance_variable_value }.to_json)
       end
 
@@ -4405,7 +4362,7 @@ describe Grape::API do
           end
 
           get '/books/other'
-          expect(last_response.status).to be 404
+          expect(last_response).to be_not_found
         end
       end
     end
