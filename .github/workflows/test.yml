@@ -47,7 +47,7 @@ jobs:
             specs: 'spec/integration/hashie'
           - ruby: '3.3'
             gemfile: gemfiles/dry_validation.gemfile
-            specs: 'spec/integration/no_dry_validation'
+            specs: 'spec/integration/dry_validation'
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}

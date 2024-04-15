@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rack/contrib/jsonp'
+
 describe 'Grape::Entity', if: defined?(Grape::Entity) do
   describe '#present' do
     subject { Class.new(Grape::API) }
