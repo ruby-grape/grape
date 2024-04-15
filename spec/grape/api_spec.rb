@@ -2540,7 +2540,7 @@ describe Grape::API do
         'some binary content'
       end
       get '/excel.json'
-      expect(last_response).to be_not_acceptable
+      expect(last_response.status).to eq(406)
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format 'txt' is not supported."))
     end
   end
@@ -4061,7 +4061,7 @@ describe Grape::API do
         'foo'
       end
       get '/something'
-      expect(last_response).to be_not_acceptable
+      expect(last_response.status).to eq(406)
       expect(last_response.body).to eq(Rack::Utils.escape_html({ error: "The requested format 'txt' is not supported." }.to_json))
     end
   end
@@ -4073,7 +4073,7 @@ describe Grape::API do
         'foo'
       end
       get '/something?format=<script>blah</script>'
-      expect(last_response).to be_not_acceptable
+      expect(last_response.status).to eq(406)
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format '<script>blah</script>' is not supported."))
     end
   end
@@ -4086,7 +4086,7 @@ describe Grape::API do
         'foo'
       end
       get '/something?format=%0A%0B%BF'
-      expect(last_response).to be_not_acceptable
+      expect(last_response.status).to eq(406)
       message = "The requested format '\n\u000b\357\277\275' is not supported."
       expect(last_response.body).to eq({ error: message }.to_json)
     end
