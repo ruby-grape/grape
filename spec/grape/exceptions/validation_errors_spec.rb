@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'ostruct'
-
 describe Grape::Exceptions::ValidationErrors do
   let(:validation_message) { 'FooBar is invalid' }
   let(:validation_error) { instance_double Grape::Exceptions::Validation, params: [validation_message], message: '' }
@@ -80,7 +78,7 @@ describe Grape::Exceptions::ValidationErrors do
         'exactly_one_of works!'
       end
       get '/exactly_one_of', beer: 'string', wine: 'anotherstring'
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(JSON.parse(last_response.body)).to eq(
         [
           'params' => %w[beer wine],
