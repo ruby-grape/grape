@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-eval_gemfile '../Gemfile'
+gem 'multi_json'
 
-gem 'multi_json', require: 'multi_json'
+eval_gemfile '../Gemfile'

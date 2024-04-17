@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-eval_gemfile '../Gemfile'
+gem 'multi_xml'
 
-gem 'multi_xml', require: 'multi_xml'
+eval_gemfile '../Gemfile'

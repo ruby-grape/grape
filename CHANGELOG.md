@@ -23,6 +23,7 @@
 * [#2363](https://github.com/ruby-grape/grape/pull/2363): Replace autoload by zeitwerk - [@ericproulx](https://github.com/ericproulx).
 * [#2425](https://github.com/ruby-grape/grape/pull/2425): Replace `{}` with `Rack::Header` or `Rack::Utils::HeaderHash` - [@dhruvCW](https://github.com/dhruvCW).
 * [#2430](https://github.com/ruby-grape/grape/pull/2430): Isolate extensions within specific gemfile - [@ericproulx](https://github.com/ericproulx).
+* [#2431](https://github.com/ruby-grape/grape/pull/2431): Drop appraisals in favor of eval_gemfile - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -3,7 +3,7 @@
 module Chunks
   def read_chunks(body)
     buffer = []
-    body.each { |chunk| buffer << chunk } # rubocop:disable Style/MapIntoArray
+    body.each { |chunk| buffer << chunk }
 
     buffer
   end
