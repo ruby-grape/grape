@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2432](https://github.com/ruby-grape/grape/pull/2432): Deep merge for group parameter attributes - [@numbata](https://github.com/numbata).
 * [#2419](https://github.com/ruby-grape/grape/pull/2419): Add the `contract` DSL - [@dgutov](https://github.com/dgutov).
 * [#2371](https://github.com/ruby-grape/grape/pull/2371): Use a param value as the `default` value of other param - [@jcagarcia](https://github.com/jcagarcia).
 * [#2377](https://github.com/ruby-grape/grape/pull/2377): Allow to use instance variables values inside `rescue_from` - [@jcagarcia](https://github.com/jcagarcia).
