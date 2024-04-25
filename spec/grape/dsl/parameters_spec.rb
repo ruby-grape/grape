@@ -106,6 +106,13 @@ module Grape
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
           expect(subject.push_declared_params_reader).to eq([:id])
         end
+
+        it 'merges the group attributes' do
+          subject.with(documentation: { in: 'body' }) { subject.optional :vault, documentation: { default: 33 } }
+
+          expect(subject.validate_attributes_reader).to eq([[:vault], { documentation: { in: 'body', default: 33 } }])
+          expect(subject.push_declared_params_reader).to eq([:vault])
+        end
       end
 
       describe '#mutually_exclusive' do
