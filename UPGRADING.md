@@ -3,6 +3,33 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
+#### Deep Merging of Parameter Attributes
+
+Grape now uses `deep_merge` to combine parameter attributes within the `with` method. Previously, attributes defined at the parameter level would override those defined at the group level.
+With deep merge, attributes are now combined, allowing for more detailed and nuanced API specifications.
+
+For example:
+
+```ruby
+with(documentation: { in: 'body' }) do
+  optional :vault, documentation: { default: 33 }
+end
+```
+
+Before it was equivalent to:
+
+```ruby
+optional :vault, documentation: { default: 33 }
+```
+
+After it is an equivalent of:
+
+```ruby
+optional :vault, documentation: { in: 'body', default: 33 }
+```
+
+See [#2432](https://github.com/ruby-grape/grape/pull/2432) for more information.
+
 #### Zeitwerk
 
 Grape's autoloader has been updated and it's now based on [Zeitwerk](https://github.com/fxn/zeitwerk).
@@ -179,7 +206,7 @@ If you are using Rack 3 in your application then the headers will be set to:
 { "content-type" => "application/json", "secret-password" => "foo"}
 ```
 
-This means if you are checking for header values in your application, you would need to change your code to use downcased keys. 
+This means if you are checking for header values in your application, you would need to change your code to use downcased keys.
 
 ```ruby
 get do
