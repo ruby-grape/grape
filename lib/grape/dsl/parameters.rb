@@ -170,7 +170,8 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def with(*attrs, &block)
-        new_group_scope(attrs.clone, &block)
+        new_group_attrs = [@group, attrs.clone.first].compact.reduce(&:deep_merge)
+        new_group_scope([new_group_attrs], &block)
       end
 
       # Disallow the given parameters to be present in the same request.
