@@ -1542,13 +1542,16 @@ Note: param in `given` should be the renamed one. In the example, it should be `
 
 ### Group Options
 
-Parameters options can be grouped. It can be useful if you want to extract common validation or types for several parameters. The example below presents a typical case when parameters share common options.
+Parameters options can be grouped. It can be useful if you want to extract common validation or types for several parameters.
+Within these groups, individual parameters can extend or selectively override the common settings, allowing you to maintain the defaults at the group level while still applying parameter-specific rules where necessary.
+
+The example below presents a typical case when parameters share common options.
 
 ```ruby
 params do
-  requires :first_name, type: String, regexp: /w+/, desc: 'First name'
-  requires :middle_name, type: String, regexp: /w+/, desc: 'Middle name'
-  requires :last_name, type: String, regexp: /w+/, desc: 'Last name'
+  requires :first_name, type: String, regexp: /w+/, desc: 'First name', documentation: { in: 'body' }
+  optional :middle_name, type: String, regexp: /w+/, desc: 'Middle name', documentation: { in: 'body', x: { nullable: true } }
+  requires :last_name, type: String, regexp: /w+/, desc: 'Last name', documentation: { in: 'body' }
 end
 ```
 
@@ -1556,9 +1559,9 @@ Grape allows you to present the same logic through the `with` method in your par
 
 ```ruby
 params do
-  with(type: String, regexp: /w+/) do
+  with(type: String, regexp: /w+/, documentation: { in: 'body' }) do
     requires :first_name, desc: 'First name'
-    requires :middle_name, desc: 'Middle name'
+    optional :middle_name, desc: 'Middle name', documentation: { x: { nullable: true } }
     requires :last_name, desc: 'Last name'
   end
 end

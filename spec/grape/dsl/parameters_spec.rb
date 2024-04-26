@@ -7,8 +7,12 @@ module Grape
         include Grape::DSL::Parameters
         attr_accessor :api, :element, :parent
 
+        def initialize
+          @validate_attributes = []
+        end
+
         def validate_attributes(*args)
-          @validate_attributes = *args
+          @validate_attributes.push(*args)
         end
 
         def validate_attributes_reader
@@ -105,6 +109,65 @@ module Grape
 
           expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
           expect(subject.push_declared_params_reader).to eq([:id])
+        end
+
+        it 'merges the group attributes' do
+          subject.with(documentation: { in: 'body' }) { subject.optional :vault, documentation: { default: 33 } }
+
+          expect(subject.validate_attributes_reader).to eq([[:vault], { documentation: { in: 'body', default: 33 } }])
+          expect(subject.push_declared_params_reader).to eq([:vault])
+        end
+
+        it 'overrides the group attribute when values not mergable' do
+          subject.with(type: Integer, documentation: { in: 'body', default: 33 }) do
+            subject.optional :vault
+            subject.optional :allowed_vaults, type: [Integer], documentation: { default: [31, 32, 33], is_array: true }
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
+              [:allowed_vaults], { type: [Integer], documentation: { in: 'body', default: [31, 32, 33], is_array: true } }
+            ]
+          )
+        end
+
+        it 'allows a primitive type attribite to overwrite a complex type group attribute' do
+          subject.with(documentation: { x: { nullable: true } }) do
+            subject.optional :vault, type: Integer, documentation: { x: nil }
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:vault], { type: Integer, documentation: { x: nil } }
+            ]
+          )
+        end
+
+        it 'does not nest primitives inside existing complex types erroneously' do
+          subject.with(type: Hash, documentation: { default: { vault: '33' } }) do
+            subject.optional :info
+            subject.optional :role, type: String, documentation: { default: 'resident' }
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:info], { type: Hash, documentation: { default: { vault: '33' } } },
+              [:role], { type: String, documentation: { default: 'resident' } }
+            ]
+          )
+        end
+
+        it 'merges deeply nested attributes' do
+          subject.with(documentation: { details: { in: 'body', hidden: false } }) do
+            subject.optional :vault, documentation: { details: { desc: 'The vault number' } }
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:vault], { documentation: { details: { in: 'body', hidden: false, desc: 'The vault number' } } }
+            ]
+          )
         end
       end
 
