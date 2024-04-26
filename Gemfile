@@ -9,13 +9,12 @@ gemspec
 group :development, :test do
   gem 'bundler'
   gem 'rake'
-  gem 'rubocop', '1.59.0', require: false
-  gem 'rubocop-performance', '1.20.1', require: false
-  gem 'rubocop-rspec', '2.25.0', require: false
+  gem 'rubocop', '1.63.2', require: false
+  gem 'rubocop-performance', '1.21.0', require: false
+  gem 'rubocop-rspec', '2.29.1', require: false
 end
 
 group :development do
-  gem 'appraisal'
   gem 'benchmark-ips'
   gem 'benchmark-memory'
   gem 'guard'
@@ -25,11 +24,11 @@ end
 
 group :test do
   gem 'rack-contrib', require: false
-  gem 'rack-test', '< 2.1'
-  gem 'rspec', '< 4'
-  gem 'ruby-grape-danger', '~> 0.2.0', require: false
-  gem 'simplecov', '~> 0.21.2'
-  gem 'simplecov-lcov', '~> 0.8.0'
+  gem 'rack-test', '~> 2.1'
+  gem 'rspec', '~> 3.13'
+  gem 'ruby-grape-danger', '~> 0.2', require: false
+  gem 'simplecov', '~> 0.21'
+  gem 'simplecov-lcov', '~> 0.8'
   gem 'test-prof', require: false
 end
 

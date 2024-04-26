@@ -83,3 +83,6 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/ContextWording:
   Enabled: false
+
+RSpecRails/HaveHttpStatus:
+  Enabled: false

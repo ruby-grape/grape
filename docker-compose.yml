@@ -15,3 +15,5 @@ services:
     volumes:
       - .:/var/grape
       - gems:/usr/local/bundle
+    environment:
+      GEMFILE: multi_xml

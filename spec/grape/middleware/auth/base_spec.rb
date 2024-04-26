@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'base64'
-
 describe Grape::Middleware::Auth::Base do
   subject do
     Class.new(Grape::API) do
@@ -14,18 +12,16 @@ describe Grape::Middleware::Auth::Base do
     end
   end
 
-  def app
-    subject
-  end
+  let(:app) { subject }
 
   it 'authenticates if given valid creds' do
     get '/authorized', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('admin', 'admin')
-    expect(last_response.status).to eq(200)
+    expect(last_response).to be_successful
     expect(last_response.body).to eq('DONE')
   end
 
   it 'throws a 401 is wrong auth is given' do
     get '/authorized', {}, 'HTTP_AUTHORIZATION' => encode_basic_auth('admin', 'wrong')
-    expect(last_response.status).to eq(401)
+    expect(last_response).to be_unauthorized
   end
 end
