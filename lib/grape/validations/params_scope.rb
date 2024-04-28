@@ -264,6 +264,7 @@ module Grape
           parent: self,
           optional: optional,
           type: type || Array,
+          group: @group,
           &block
         )
       end

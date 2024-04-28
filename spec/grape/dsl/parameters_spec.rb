@@ -42,8 +42,10 @@ module Grape
         end
 
         def new_group_scope(args)
+          prev_group = @group
           @group = args.clone.first
           yield
+          @group = prev_group
         end
 
         def extract_message_option(attrs)
@@ -181,13 +183,21 @@ module Grape
             subject.optional :pipboy_id
             subject.with(documentation: { default: 33 }) do
               subject.optional :vault
+              subject.with(type: String) do
+                subject.with(documentation: { default: 'resident' }) do
+                  subject.optional :role
+                end
+              end
+              subject.optional :age, documentation: { default: 42 }
             end
           end
 
           expect(subject.validate_attributes_reader).to eq(
             [
               [:pipboy_id], { type: Integer, documentation: { in: 'body' } },
-              [:vault], { type: Integer, documentation: { in: 'body', default: 33 } }
+              [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
+              [:role], { type: String, documentation: { in: 'body', default: 'resident' } },
+              [:age], { type: Integer, documentation: { in: 'body', default: 42 } }
             ]
           )
         end
