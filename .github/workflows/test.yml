@@ -34,9 +34,6 @@ jobs:
             gemfile: gemfiles/multi_xml.gemfile
             specs: 'spec/integration/multi_xml'
           - ruby: '2.7'
-            gemfile: gemfiles/rack_2_0.gemfile
-            specs: 'spec/integration/rack_2_0'
-          - ruby: '2.7'
             gemfile: gemfiles/rack_3_0.gemfile
             specs: 'spec/integration/rack_3_0'
           - ruby: '3.3'
