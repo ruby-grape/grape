@@ -280,7 +280,6 @@ module Grape
       stack = Grape::Middleware::Stack.new
 
       stack.use Rack::Head
-      stack.use Rack::Lint
       stack.use Class.new(Grape::Middleware::Error),
                 helpers: helpers,
                 format: namespace_inheritable(:format),
