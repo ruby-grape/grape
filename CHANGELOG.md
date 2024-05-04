@@ -26,6 +26,7 @@
 * [#2430](https://github.com/ruby-grape/grape/pull/2430): Isolate extensions within specific gemfile - [@ericproulx](https://github.com/ericproulx).
 * [#2431](https://github.com/ruby-grape/grape/pull/2431): Drop appraisals in favor of eval_gemfile - [@ericproulx](https://github.com/ericproulx).
 * [#2435](https://github.com/ruby-grape/grape/pull/2435): Use rack constants - [@ericproulx](https://github.com/ericproulx).
+* [#2436](https://github.com/ruby-grape/grape/pull/2436): Update coverallsapp github-action - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
