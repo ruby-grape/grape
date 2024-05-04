@@ -71,7 +71,7 @@ describe Grape::Validations do
     let(:in_body_validator) do
       Class.new(Grape::Validations::Validators::PresenceValidator) do
         def validate(request)
-          validate!(request.env['api.request.body'])
+          validate!(request.env[Grape::Env::API_REQUEST_BODY])
         end
       end
     end

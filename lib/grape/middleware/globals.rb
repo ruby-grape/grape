@@ -7,7 +7,7 @@ module Grape
         request = Grape::Request.new(@env, build_params_with: @options[:build_params_with])
         @env[Grape::Env::GRAPE_REQUEST] = request
         @env[Grape::Env::GRAPE_REQUEST_HEADERS] = request.headers
-        @env[Grape::Env::GRAPE_REQUEST_PARAMS] = request.params if @env[Grape::Env::RACK_INPUT]
+        @env[Grape::Env::GRAPE_REQUEST_PARAMS] = request.params if @env[Rack::RACK_INPUT]
       end
     end
   end

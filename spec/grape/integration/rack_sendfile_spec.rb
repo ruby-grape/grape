@@ -16,7 +16,7 @@ describe Rack::Sendfile do
     end
 
     options = {
-      method: 'GET',
+      method: Rack::GET,
       'HTTP_X_SENDFILE_TYPE' => 'X-Accel-Redirect',
       'HTTP_X_ACCEL_MAPPING' => '/accel/mapping/=/replaced/'
     }

@@ -13,7 +13,7 @@ class API < Grape::API
 end
 
 options = {
-  method: 'GET'
+  method: Rack::GET
 }
 
 env = Rack::MockRequest.env_for('/api/v1', options)

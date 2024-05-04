@@ -11,11 +11,6 @@ module Grape
     API_VENDOR = 'api.vendor'
     API_FORMAT = 'api.format'
 
-    RACK_INPUT = 'rack.input'
-    RACK_REQUEST_QUERY_HASH = 'rack.request.query_hash'
-    RACK_REQUEST_FORM_HASH = 'rack.request.form_hash'
-    RACK_REQUEST_FORM_INPUT = 'rack.request.form_input'
-
     GRAPE_REQUEST = 'grape.request'
     GRAPE_REQUEST_HEADERS = 'grape.request.headers'
     GRAPE_REQUEST_PARAMS = 'grape.request.params'

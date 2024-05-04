@@ -128,49 +128,49 @@ module Grape
 
       describe '.get' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('GET', path, options)
+          expect(subject).to receive(:route).with(Rack::GET, path, options)
           subject.get path, options, &proc
         end
       end
 
       describe '.post' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('POST', path, options)
+          expect(subject).to receive(:route).with(Rack::POST, path, options)
           subject.post path, options, &proc
         end
       end
 
       describe '.put' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('PUT', path, options)
+          expect(subject).to receive(:route).with(Rack::PUT, path, options)
           subject.put path, options, &proc
         end
       end
 
       describe '.head' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('HEAD', path, options)
+          expect(subject).to receive(:route).with(Rack::HEAD, path, options)
           subject.head path, options, &proc
         end
       end
 
       describe '.delete' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('DELETE', path, options)
+          expect(subject).to receive(:route).with(Rack::DELETE, path, options)
           subject.delete path, options, &proc
         end
       end
 
       describe '.options' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('OPTIONS', path, options)
+          expect(subject).to receive(:route).with(Rack::OPTIONS, path, options)
           subject.options path, options, &proc
         end
       end
 
       describe '.patch' do
         it 'delegates to .route' do
-          expect(subject).to receive(:route).with('PATCH', path, options)
+          expect(subject).to receive(:route).with(Rack::PATCH, path, options)
           subject.patch path, options, &proc
         end
       end

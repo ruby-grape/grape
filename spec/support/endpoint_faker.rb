@@ -17,7 +17,7 @@ module Spec
           @request = Grape::Request.new(env.dup)
         end
 
-        @app.call(env.merge('api.endpoint' => @endpoint))
+        @app.call(env.merge(Grape::Env::API_ENDPOINT => @endpoint))
       end
     end
   end

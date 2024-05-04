@@ -151,7 +151,7 @@ module Grape
         reset_routes!
         routes.each do |route|
           methods = [route.request_method]
-          methods << Grape::Http::Headers::HEAD if !namespace_inheritable(:do_not_route_head) && route.request_method == Grape::Http::Headers::GET
+          methods << Rack::HEAD if !namespace_inheritable(:do_not_route_head) && route.request_method == Rack::GET
           methods.each do |method|
             route = Grape::Router::Route.new(method, route.origin, **route.attributes.to_h) unless route.request_method == method
             router.append(route.apply(self))
@@ -401,7 +401,7 @@ module Grape
 
     def options?
       options[:options_route_enabled] &&
-        env[Grape::Http::Headers::REQUEST_METHOD] == Grape::Http::Headers::OPTIONS
+        env[Rack::REQUEST_METHOD] == Rack::OPTIONS
     end
 
     def method_missing(name, *_args)

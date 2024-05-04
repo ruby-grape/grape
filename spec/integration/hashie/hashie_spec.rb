@@ -108,7 +108,7 @@ describe 'Hashie', if: defined?(Hashie) do
   end
 
   describe 'Grape::Request' do
-    let(:default_method) { 'GET' }
+    let(:default_method) { Rack::GET }
     let(:default_params) { {} }
     let(:default_options) do
       {

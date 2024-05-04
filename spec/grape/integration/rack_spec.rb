@@ -14,7 +14,7 @@ describe Rack do
       input.rewind
       options = {
         input: input,
-        method: 'POST',
+        method: Rack::POST,
         'CONTENT_TYPE' => 'application/json'
       }
       env = Rack::MockRequest.env_for('/', options)
