@@ -24,7 +24,7 @@ module Grape
         end
 
         def before
-          path = env[Grape::Http::Headers::PATH_INFO].dup
+          path = env[Rack::PATH_INFO].dup
           path.sub!(mount_path, '') if mounted_path?(path)
 
           if prefix && path.index(prefix) == 0 # rubocop:disable all

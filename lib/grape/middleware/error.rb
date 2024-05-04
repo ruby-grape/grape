@@ -40,7 +40,7 @@ module Grape
 
       def rack_response(status, headers, message)
         message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == TEXT_HTML
-        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), headers)
+        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
       end
 
       def format_message(message, backtrace, original_exception = nil)

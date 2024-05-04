@@ -3,44 +3,25 @@
 module Grape
   module Http
     module Headers
-      # https://github.com/rack/rack/blob/master/lib/rack.rb
-      HTTP_VERSION    = 'HTTP_VERSION'
-      PATH_INFO       = 'PATH_INFO'
-      REQUEST_METHOD  = 'REQUEST_METHOD'
-      QUERY_STRING    = 'QUERY_STRING'
-
-      def self.lowercase?
-        Rack::CONTENT_TYPE == 'content-type'
-      end
-
-      if lowercase?
-        ALLOW             = 'allow'
-        LOCATION          = 'location'
-        TRANSFER_ENCODING = 'transfer-encoding'
-        X_CASCADE         = 'x-cascade'
-      else
-        ALLOW             = 'Allow'
-        LOCATION          = 'Location'
-        TRANSFER_ENCODING = 'Transfer-Encoding'
-        X_CASCADE         = 'X-Cascade'
-      end
-
-      GET     = 'GET'
-      POST    = 'POST'
-      PUT     = 'PUT'
-      PATCH   = 'PATCH'
-      DELETE  = 'DELETE'
-      HEAD    = 'HEAD'
-      OPTIONS = 'OPTIONS'
-
-      SUPPORTED_METHODS = [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS].freeze
-      SUPPORTED_METHODS_WITHOUT_OPTIONS = Grape::Util::Lazy::Object.new { [GET, POST, PUT, PATCH, DELETE, HEAD].freeze }
-
-      HTTP_ACCEPT_VERSION    = 'HTTP_ACCEPT_VERSION'
+      HTTP_ACCEPT_VERSION = 'HTTP_ACCEPT_VERSION'
+      HTTP_ACCEPT = 'HTTP_ACCEPT'
       HTTP_TRANSFER_ENCODING = 'HTTP_TRANSFER_ENCODING'
-      HTTP_ACCEPT            = 'HTTP_ACCEPT'
 
-      FORMAT                 = 'format'
+      ALLOW = 'Allow'
+      LOCATION = 'Location'
+      X_CASCADE = 'X-Cascade'
+
+      SUPPORTED_METHODS = [
+        Rack::GET,
+        Rack::POST,
+        Rack::PUT,
+        Rack::PATCH,
+        Rack::DELETE,
+        Rack::HEAD,
+        Rack::OPTIONS
+      ].freeze
+
+      SUPPORTED_METHODS_WITHOUT_OPTIONS = (SUPPORTED_METHODS - [Rack::OPTIONS]).freeze
 
       HTTP_HEADERS = Grape::Util::Lazy::Object.new do
         common_http_headers = %w[

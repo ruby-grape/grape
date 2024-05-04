@@ -24,7 +24,7 @@ describe Grape::API::Instance do
     end
 
     context 'Params endpoint type' do
-      subject { app.new.router.map['POST'].first.options[:params]['message'][:type] }
+      subject { app.new.router.map[Rack::POST].first.options[:params]['message'][:type] }
 
       it 'params type is a boolean' do
         expect(subject).to eq 'Grape::API::Boolean'

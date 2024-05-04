@@ -5,7 +5,7 @@ require 'uri'
 module Rack
   class MockResponse
     def cookie_jar
-      @cookie_jar ||= Array(headers['Set-Cookie']).flat_map { |h| h.split("\n") }.map { |c| Cookie.new(c).to_h }
+      @cookie_jar ||= Array(headers[Rack::SET_COOKIE]).flat_map { |h| h.split("\n") }.map { |c| Cookie.new(c).to_h }
     end
 
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
