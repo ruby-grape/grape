@@ -96,7 +96,7 @@ module Grape
 
       # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #call_with_allow_headers.
-      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Grape::Http::Headers::OPTIONS && !cascade
+      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Rack::OPTIONS && !cascade
 
       route = match?(input, '*')
 
@@ -123,8 +123,8 @@ module Grape
     end
 
     def extract_input_and_method(env)
-      input = string_for(env[Grape::Http::Headers::PATH_INFO])
-      method = env[Grape::Http::Headers::REQUEST_METHOD]
+      input = string_for(env[Rack::PATH_INFO])
+      method = env[Rack::REQUEST_METHOD]
       [input, method]
     end
 

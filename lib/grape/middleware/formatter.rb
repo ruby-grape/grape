@@ -4,6 +4,7 @@ module Grape
   module Middleware
     class Formatter < Base
       CHUNKED = 'chunked'
+      FORMAT = 'format'
 
       def default_options
         {
@@ -80,7 +81,7 @@ module Grape
           !request.parseable_data? &&
           (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
 
-        return unless (input = env[Grape::Env::RACK_INPUT])
+        return unless (input = env[Rack::RACK_INPUT])
 
         input.rewind
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
@@ -101,12 +102,12 @@ module Grape
           begin
             body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
             if body.is_a?(Hash)
-              env[Grape::Env::RACK_REQUEST_FORM_HASH] = if env.key?(Grape::Env::RACK_REQUEST_FORM_HASH)
-                                                          env[Grape::Env::RACK_REQUEST_FORM_HASH].merge(body)
-                                                        else
-                                                          body
-                                                        end
-              env[Grape::Env::RACK_REQUEST_FORM_INPUT] = env[Grape::Env::RACK_INPUT]
+              env[Rack::RACK_REQUEST_FORM_HASH] = if env.key?(Rack::RACK_REQUEST_FORM_HASH)
+                                                    env[Rack::RACK_REQUEST_FORM_HASH].merge(body)
+                                                  else
+                                                    body
+                                                  end
+              env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
             end
           rescue Grape::Exceptions::Base => e
             raise e
@@ -139,7 +140,7 @@ module Grape
       end
 
       def format_from_params
-        fmt = Rack::Utils.parse_nested_query(env[Grape::Http::Headers::QUERY_STRING])[Grape::Http::Headers::FORMAT]
+        fmt = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[FORMAT]
         # avoid symbol memory leak on an unknown format
         return fmt.to_sym if content_type_for(fmt)
 

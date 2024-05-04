@@ -29,14 +29,14 @@ module Spec
           {}  # no-op
         when :header
           {
-            'HTTP_ACCEPT' => [
+            Grape::Http::Headers::HTTP_ACCEPT => [
               "application/vnd.#{options[:vendor]}-#{options[:version]}",
               options[:format]
             ].compact.join('+')
           }
         when :accept_version_header
           {
-            'HTTP_ACCEPT_VERSION' => options[:version].to_s
+            Grape::Http::Headers::HTTP_ACCEPT_VERSION => options[:version].to_s
           }
         else
           raise ArgumentError.new("unknown versioning strategy: #{options[:using]}")

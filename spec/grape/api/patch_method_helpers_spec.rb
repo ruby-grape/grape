@@ -49,12 +49,12 @@ describe Grape::API::Helpers do
 
   context 'patch' do
     it 'public' do
-      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-public-v1+json'
+      patch '/', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.grape-public-v1+json'
       expect(last_response.status).to eq 405
     end
 
     it 'private' do
-      patch '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-private-v1+json'
+      patch '/', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.grape-private-v1+json'
       expect(last_response.status).to eq 405
     end
 
@@ -66,13 +66,13 @@ describe Grape::API::Helpers do
 
   context 'default' do
     it 'public' do
-      get '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-public-v1+json'
+      get '/', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.grape-public-v1+json'
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq({ ok: 'public' }.to_json)
     end
 
     it 'private' do
-      get '/', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-private-v1+json'
+      get '/', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.grape-private-v1+json'
       expect(last_response.status).to eq 200
       expect(last_response.body).to eq({ ok: 'private' }.to_json)
     end

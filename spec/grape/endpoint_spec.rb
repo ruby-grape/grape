@@ -75,7 +75,7 @@ describe Grape::Endpoint do
   it 'sets itself in the env upon call' do
     subject.get('/') { 'Hello world.' }
     get '/'
-    expect(last_request.env['api.endpoint']).to be_a(described_class)
+    expect(last_request.env[Grape::Env::API_ENDPOINT]).to be_a(described_class)
   end
 
   describe '#status' do
@@ -136,15 +136,16 @@ describe Grape::Endpoint do
       end
     end
 
+    let(:headers) do
+      Grape::Util::Header.new.tap do |h|
+        h['Cookie'] = ''
+        h['Host'] = 'example.org'
+      end
+    end
+
     it 'includes request headers' do
       get '/headers'
-      cookie_header = Grape::Http::Headers.lowercase? ? 'cookie' : 'Cookie'
-      host_header = Grape::Http::Headers.lowercase? ? 'host' : 'Host'
-
-      expect(JSON.parse(last_response.body)).to include(
-        host_header => 'example.org',
-        cookie_header => ''
-      )
+      expect(JSON.parse(last_response.body)).to include(headers.to_h)
     end
 
     it 'includes additional request headers' do
@@ -969,12 +970,12 @@ describe Grape::Endpoint do
     end
 
     it 'result in a 406 response if they are invalid' do
-      get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json'
+      get '/test', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.ohanapi.v1+json'
       expect(last_response.status).to eq(406)
     end
 
     it 'result in a 406 response if they cannot be parsed' do
-      get '/test', {}, 'HTTP_ACCEPT' => 'application/vnd.ohanapi.v1+json; version=1'
+      get '/test', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.ohanapi.v1+json; version=1'
       expect(last_response.status).to eq(406)
     end
   end

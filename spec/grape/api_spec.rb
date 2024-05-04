@@ -436,7 +436,7 @@ describe Grape::API do
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
             subject.send(verb) do
-              env['api.request.body']
+              env[Grape::Env::API_REQUEST_BODY]
             end
             send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
@@ -447,7 +447,7 @@ describe Grape::API do
           it 'stores input in api.request.input' do
             subject.format :json
             subject.send(verb) do
-              env['api.request.input']
+              env[Grape::Env::API_REQUEST_INPUT]
             end
             send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
@@ -458,9 +458,9 @@ describe Grape::API do
             it 'stores input in api.request.input' do
               subject.format :json
               subject.send(verb) do
-                env['api.request.input']
+                env[Grape::Env::API_REQUEST_INPUT]
               end
-              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked', 'CONTENT_LENGTH' => nil
+              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked', 'CONTENT_LENGTH' => nil
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
               expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
             end
@@ -1247,12 +1247,12 @@ describe Grape::API do
 
       subject.use Gem::Version.new(Rack.release) < Gem::Version.new('3') ? Rack::Chunked : ChunkedResponse
       subject.get('/stream') { stream test_stream }
-      get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
+      get '/stream', {}, 'HTTP_VERSION' => 'HTTP/1.1', Rack::SERVER_PROTOCOL => 'HTTP/1.1'
 
       expect(last_response.content_type).to eq('text/plain')
       expect(last_response.content_length).to be_nil
       expect(last_response.headers[Rack::CACHE_CONTROL]).to eq('no-cache')
-      expect(last_response.headers[Grape::Http::Headers::TRANSFER_ENCODING]).to eq('chunked')
+      expect(last_response.headers[Rack::TRANSFER_ENCODING]).to eq('chunked')
 
       expect(last_response.body).to eq("c\r\nThis is some\r\nd\r\n file content\r\n0\r\n\r\n")
     end
@@ -1321,7 +1321,7 @@ describe Grape::API do
         subject.post 'attachment' do
           filename = params[:file][:filename]
           content_type ct
-          env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+          env[Grape::Env::API_FORMAT] = :binary # there's no formatter for :binary, data will be returned "as is"
           header 'Content-Disposition', "attachment; filename*=UTF-8''#{CGI.escape(filename)}"
           params[:file][:tempfile].read
         end
@@ -2582,7 +2582,7 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
+        get '/simple.custom', Grape::Http::Headers::HTTP_ACCEPT => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
@@ -2611,7 +2611,7 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
+        get '/simple.custom', Grape::Http::Headers::HTTP_ACCEPT => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
@@ -2699,7 +2699,7 @@ describe Grape::API do
       before do
         subject.parser :json, nil
         subject.put 'data' do
-          "body: #{env['api.request.body']}"
+          "body: #{env[Grape::Env::API_REQUEST_BODY]}"
         end
       end
 
@@ -2786,7 +2786,7 @@ describe Grape::API do
         route = subject.routes[0]
         expect(route.version).to be_nil
         expect(route.path).to eq('/ping(.:format)')
-        expect(route.request_method).to eq('GET')
+        expect(route.request_method).to eq(Rack::GET)
       end
     end
 
@@ -3247,7 +3247,7 @@ describe Grape::API do
       it 'is able to cascade' do
         subject.mount lambda { |env|
           headers = {}
-          headers[Grape::Http::Headers::X_CASCADE] == 'pass' if env['PATH_INFO'].exclude?('boo')
+          headers[Grape::Http::Headers::X_CASCADE] == 'pass' if env[Rack::PATH_INFO].exclude?('boo')
           [200, headers, ['Farfegnugen']]
         } => '/'
 
@@ -3747,7 +3747,7 @@ describe Grape::API do
       end
 
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
+        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/json'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
     end
@@ -3776,7 +3776,7 @@ describe Grape::API do
       end
 
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
+        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/json'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
     end
@@ -3801,7 +3801,7 @@ describe Grape::API do
       end
 
       it 'forces json from a non-accepting header' do
-        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'text/html'
+        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'text/html'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_json)
       end
 
@@ -3998,7 +3998,7 @@ describe Grape::API do
     [true, false].each do |anchor|
       it "anchor=#{anchor}" do
         subject.route :any, '*path', anchor: anchor do
-          error!("Unrecognized request path: #{params[:path]} - #{env['PATH_INFO']}#{env['SCRIPT_NAME']}", 404)
+          error!("Unrecognized request path: #{params[:path]} - #{env[Rack::PATH_INFO]}#{env[Rack::SCRIPT_NAME]}", 404)
         end
         get '/v1/hello'
         expect(last_response).to be_successful

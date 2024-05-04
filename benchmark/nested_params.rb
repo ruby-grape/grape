@@ -21,7 +21,7 @@ class API < Grape::API
 end
 
 options = {
-  method: 'POST',
+  method: Rack::POST,
   params: {
     address: {
       street: 'Alexis Pl.',

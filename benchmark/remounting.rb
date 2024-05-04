@@ -28,7 +28,7 @@ class CommentAPI < Grape::API
   mount VotingApi
 end
 
-env = Rack::MockRequest.env_for('/votes', method: 'GET')
+env = Rack::MockRequest.env_for('/votes', method: Rack::GET)
 
 Benchmark.memory do |api|
   calls = 1000

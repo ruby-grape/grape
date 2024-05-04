@@ -27,7 +27,7 @@ describe Grape::Endpoint do
     end
 
     it 'returns env[api.version]' do
-      subject.env['api.version'] = 'dummy'
+      subject.env[Grape::Env::API_VERSION] = 'dummy'
       expect(subject.version).to eq 'dummy'
     end
   end
@@ -96,27 +96,27 @@ describe Grape::Endpoint do
     %w[GET PUT OPTIONS].each do |method|
       it 'defaults to 200 on GET' do
         request = Grape::Request.new(Rack::MockRequest.env_for('/', method: method))
-        expect(subject).to receive(:request).and_return(request)
+        expect(subject).to receive(:request).and_return(request).twice
         expect(subject.status).to eq 200
       end
     end
 
     it 'defaults to 201 on POST' do
-      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'POST'))
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::POST))
       expect(subject).to receive(:request).and_return(request)
       expect(subject.status).to eq 201
     end
 
     it 'defaults to 204 on DELETE' do
-      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
-      expect(subject).to receive(:request).and_return(request)
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
+      expect(subject).to receive(:request).and_return(request).twice
       expect(subject.status).to eq 204
     end
 
     it 'defaults to 200 on DELETE with a body present' do
-      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
       subject.body 'content here'
-      expect(subject).to receive(:request).and_return(request)
+      expect(subject).to receive(:request).and_return(request).twice
       expect(subject.status).to eq 200
     end
 
@@ -247,7 +247,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
         end
 
         it 'sends no deprecation warnings' do
@@ -277,7 +277,7 @@ describe Grape::Endpoint do
         it 'does not change the Transfer-Encoding header' do
           subject.sendfile file_path
 
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to eq 'base64'
+          expect(subject.header[Rack::TRANSFER_ENCODING]).to eq 'base64'
         end
       end
 
@@ -308,7 +308,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -344,7 +344,7 @@ describe Grape::Endpoint do
         it 'sets Transfer-Encoding header to nil' do
           subject.stream file_path
 
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+          expect(subject.header[Rack::TRANSFER_ENCODING]).to be_nil
         end
       end
 
@@ -358,7 +358,7 @@ describe Grape::Endpoint do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header Rack::TRANSFER_ENCODING, 'base64'
         end
 
         it 'emits no deprecation warnings' do
@@ -388,7 +388,7 @@ describe Grape::Endpoint do
         it 'sets Transfer-Encoding header to nil' do
           subject.stream stream_object
 
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+          expect(subject.header[Rack::TRANSFER_ENCODING]).to be_nil
         end
       end
 
@@ -409,8 +409,8 @@ describe Grape::Endpoint do
 
   describe '#route' do
     before do
-      subject.env['grape.routing_args'] = {}
-      subject.env['grape.routing_args'][:route_info] = 'dummy'
+      subject.env[Grape::Env::GRAPE_ROUTING_ARGS] = {}
+      subject.env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info] = 'dummy'
     end
 
     it 'returns route_info' do

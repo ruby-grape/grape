@@ -84,7 +84,7 @@ RSpec.describe Grape::Util::AcceptHeaderHandler do
       context 'when allowed_methods present' do
         subject { instance.match_best_quality_media_type!(allowed_methods: allowed_methods) }
 
-        let(:allowed_methods) { ['OPTIONS'] }
+        let(:allowed_methods) { [Rack::OPTIONS] }
 
         it { is_expected.to match_array(allowed_methods) }
       end

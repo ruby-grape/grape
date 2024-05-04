@@ -233,7 +233,7 @@ end
 puts Grape::VERSION
 
 options = {
-  method: 'POST',
+  method: Rack::POST,
   params: JSON.parse(File.read('benchmark/resource/vrp_example.json'))
 }
 
