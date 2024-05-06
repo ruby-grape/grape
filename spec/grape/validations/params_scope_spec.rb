@@ -1381,6 +1381,96 @@ describe Grape::Validations::ParamsScope do
         end
       end
     end
+
+    context 'with many levels of nested groups' do
+      before do
+        subject.params do
+          requires :first_level, type: Hash do
+            with(type: Integer) do
+              requires :value
+              with(type: String) do
+                optional :second_level, type: Array do
+                  optional :name, type: String
+                  with(type: Integer) do
+                    optional :third_level, type: Array do
+                      requires :value, type: Integer
+                      optional :position
+                    end
+                  end
+                end
+              end
+              requires :id
+            end
+          end
+        end
+        subject.put('/nested') { declared(params).to_json }
+      end
+
+      context 'when data is valid' do
+        let(:request_params) do
+          {
+            first_level: {
+              value: '10',
+              second_level: [
+                {
+                  name: '13',
+                  third_level: [
+                    {
+                      value: '2',
+                      position: '1'
+                    }
+                  ]
+                }
+              ],
+              id: '20'
+            }
+          }
+        end
+
+        it 'validates and coerces correctly' do
+          put '/nested', request_params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+          expect(last_response.status).to eq(200)
+          expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+            first_level: {
+              value: 10,
+              second_level: [
+                { name: '13', third_level: [{ value: 2, position: 1 }] }
+              ],
+              id: 20
+            }
+          )
+        end
+      end
+
+      context 'when data is invalid' do
+        let(:request_params) do
+          {
+            first_level: {
+              value: 'wrong',
+              second_level: [
+                { name: 'name', third_level: [{ position: 'wrong' }] }
+              ]
+            }
+          }
+        end
+
+        it 'responds with HTTP error' do
+          put '/nested', request_params.to_json, 'CONTENT_TYPE' => 'application/json'
+          expect(last_response.status).to eq(400)
+        end
+
+        it 'responds with a validation error' do
+          put '/nested', request_params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+          expect(last_response.body)
+            .to include('first_level[value] is invalid')
+            .and include('first_level[id] is missing')
+            .and include('first_level[second_level][0][third_level][0][value] is missing')
+            .and include('first_level[second_level][0][third_level][0][position] is invalid')
+        end
+      end
+    end
   end
 
   context 'with exactly_one_of validation for optional parameters within an Hash param' do

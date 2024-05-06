@@ -1567,6 +1567,20 @@ params do
 end
 ```
 
+You can organize settings into layers using nested `with' blocks. Each layer can use, add to, or change the settings of the layer above it. This helps to keep complex parameters organized and consistent, while still allowing for specific customizations to be made.
+
+```ruby
+params do
+  with(documentation: { in: 'body' }) do  # Applies documentation to all nested parameters
+    with(type: String, regexp: /\w+/) do  # Applies type and validation to names
+      requires :first_name, desc: 'First name'
+      requires :last_name, desc: 'Last name'
+    end
+    optional :age, type: Integer, desc: 'Age', documentation: { x: { nullable: true } }  # Specific settings for 'age'
+  end
+end
+```
+
 ### Renaming
 
 You can rename parameters using `as`, which can be useful when refactoring existing APIs:

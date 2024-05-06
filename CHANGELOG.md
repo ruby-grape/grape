@@ -27,6 +27,7 @@
 * [#2431](https://github.com/ruby-grape/grape/pull/2431): Drop appraisals in favor of eval_gemfile - [@ericproulx](https://github.com/ericproulx).
 * [#2435](https://github.com/ruby-grape/grape/pull/2435): Use rack constants - [@ericproulx](https://github.com/ericproulx).
 * [#2436](https://github.com/ruby-grape/grape/pull/2436): Update coverallsapp github-action - [@ericproulx](https://github.com/ericproulx).
+* [#2434](https://github.com/ruby-grape/grape/pull/2434): Implement nested `with` support in parameter dsl - [@numbata](https://github.com/numbata).
 * Your contribution here.
 
 #### Fixes

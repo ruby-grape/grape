@@ -35,9 +35,17 @@ module Grape
           @validates
         end
 
+        def new_scope(args, _, &block)
+          nested_scope = self.class.new
+          nested_scope.new_group_scope(args, &block)
+          nested_scope
+        end
+
         def new_group_scope(args)
+          prev_group = @group
           @group = args.clone.first
           yield
+          @group = prev_group
         end
 
         def extract_message_option(attrs)
@@ -166,6 +174,45 @@ module Grape
           expect(subject.validate_attributes_reader).to eq(
             [
               [:vault], { documentation: { details: { in: 'body', hidden: false, desc: 'The vault number' } } }
+            ]
+          )
+        end
+
+        it "supports nested 'with' calls" do
+          subject.with(type: Integer, documentation: { in: 'body' }) do
+            subject.optional :pipboy_id
+            subject.with(documentation: { default: 33 }) do
+              subject.optional :vault
+              subject.with(type: String) do
+                subject.with(documentation: { default: 'resident' }) do
+                  subject.optional :role
+                end
+              end
+              subject.optional :age, documentation: { default: 42 }
+            end
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:pipboy_id], { type: Integer, documentation: { in: 'body' } },
+              [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
+              [:role], { type: String, documentation: { in: 'body', default: 'resident' } },
+              [:age], { type: Integer, documentation: { in: 'body', default: 42 } }
+            ]
+          )
+        end
+
+        it "supports Hash parameter inside the 'with' calls" do
+          subject.with(documentation: { in: 'body' }) do
+            subject.optional :info, type: Hash, documentation: { x: { nullable: true }, desc: 'The info' } do
+              subject.optional :vault, type: Integer, documentation: { default: 33, desc: 'The vault number' }
+            end
+          end
+
+          expect(subject.validate_attributes_reader).to eq(
+            [
+              [:info], { type: Hash, documentation: { in: 'body', desc: 'The info', x: { nullable: true } } },
+              [:vault], { type: Integer, documentation: { in: 'body', default: 33, desc: 'The vault number' } }
             ]
           )
         end
