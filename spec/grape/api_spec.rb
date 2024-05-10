@@ -460,7 +460,7 @@ describe Grape::API do
               subject.send(verb) do
                 env[Grape::Env::API_REQUEST_INPUT]
               end
-              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked', 'CONTENT_LENGTH' => nil
+              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
               expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
             end
@@ -1999,32 +1999,49 @@ describe Grape::API do
     end
 
     context 'with multiple apis' do
-      let(:a) { Class.new(described_class) }
-      let(:b) { Class.new(described_class) }
+      let(:a) do
+        Class.new(described_class) do
+          namespace :a do
+            helpers do
+              def foo
+                error!('foo', 401)
+              end
+            end
+
+            rescue_from(:all) { foo }
+
+            get { raise 'boo' }
+          end
+        end
+      end
+      let(:b) do
+        Class.new(described_class) do
+          namespace :b do
+            helpers do
+              def foo
+                error!('bar', 401)
+              end
+            end
+
+            rescue_from(:all) { foo }
+
+            get { raise 'boo' }
+          end
+        end
+      end
 
       before do
-        a.helpers do
-          def foo
-            error!('foo', 401)
-          end
-        end
-        a.rescue_from(:all) { foo }
-        a.get { raise 'boo' }
-        b.helpers do
-          def foo
-            error!('bar', 401)
-          end
-        end
-        b.rescue_from(:all) { foo }
-        b.get { raise 'boo' }
+        subject.mount a
+        subject.mount b
       end
 
       it 'avoids polluting global namespace' do
-        env = Rack::MockRequest.env_for('/')
-
-        expect(read_chunks(a.call(env)[2])).to eq(['foo'])
-        expect(read_chunks(b.call(env)[2])).to eq(['bar'])
-        expect(read_chunks(a.call(env)[2])).to eq(['foo'])
+        get '/a'
+        expect(last_response.body).to eq('foo')
+        get '/b'
+        expect(last_response.body).to eq('bar')
+        get '/a'
+        expect(last_response.body).to eq('foo')
       end
     end
 
@@ -3817,14 +3834,14 @@ describe Grape::API do
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, message: 'Unauthorized', status: 42
+            throw :error, message: 'Unauthorized', status: 500
           end
         end
         subject.use middleware
         subject.get do
         end
         get '/'
-        expect(last_response.status).to eq(42)
+        expect(last_response).to be_server_error
         expect(last_response.body).to eq({ error: 'Unauthorized' }.to_json)
       end
     end
@@ -3923,14 +3940,14 @@ describe Grape::API do
       it 'raised :error from middleware' do
         middleware = Class.new(Grape::Middleware::Base) do
           def before
-            throw :error, message: 'Unauthorized', status: 42
+            throw :error, message: 'Unauthorized', status: 500
           end
         end
         subject.use middleware
         subject.get do
         end
         get '/'
-        expect(last_response.status).to eq(42)
+        expect(last_response.status).to eq(500)
         expect(last_response.body).to eq <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
           <error>
@@ -4372,7 +4389,7 @@ describe Grape::API do
     let(:app) do
       Class.new(described_class) do
         rescue_from :all do
-          rack_response('deprecated', 500)
+          rack_response('deprecated', 500, 'Content-Type' => 'text/plain')
         end
 
         get 'test' do

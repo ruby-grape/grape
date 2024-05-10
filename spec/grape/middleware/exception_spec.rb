@@ -60,15 +60,18 @@ describe Grape::Middleware::Error do
   end
 
   let(:app) do
-    builder = Rack::Builder.new
-    builder.use Spec::Support::EndpointFaker
-    if options.any?
-      builder.use described_class, options
-    else
-      builder.use described_class
+    opts = options
+    app = running_app
+    Rack::Builder.app do
+      use Rack::Lint
+      use Spec::Support::EndpointFaker
+      if opts.any?
+        use Grape::Middleware::Error, opts
+      else
+        use Grape::Middleware::Error
+      end
+      run app
     end
-    builder.run running_app
-    builder.to_app
   end
 
   context 'with defaults' do

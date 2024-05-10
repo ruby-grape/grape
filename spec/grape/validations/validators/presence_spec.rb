@@ -70,18 +70,16 @@ describe Grape::Validations::Validators::PresenceValidator do
 
     it 'validates id' do
       post '/'
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
       expect(last_response.body).to eq('{"error":"id is missing"}')
 
-      io = StringIO.new('{"id" : "a56b"}')
-      post '/', {}, Rack::RACK_INPUT => io, 'CONTENT_TYPE' => 'application/json', 'CONTENT_LENGTH' => io.length
+      post '/', { id: 'a56b' }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.body).to eq('{"error":"id is invalid"}')
-      expect(last_response.status).to eq(400)
+      expect(last_response).to be_bad_request
 
-      io = StringIO.new('{"id" : 56}')
-      post '/', {}, Rack::RACK_INPUT => io, 'CONTENT_TYPE' => 'application/json', 'CONTENT_LENGTH' => io.length
+      post '/', { id: 56 }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.body).to eq('{"ret":56}')
-      expect(last_response.status).to eq(201)
+      expect(last_response).to be_created
     end
   end
 

@@ -33,7 +33,7 @@ describe Grape::Validations do
         end
       end
     end
-    let(:app) { Rack::Builder.new(subject) }
+    let(:app) { subject }
 
     before { stub_const('Grape::Validations::Validators::DefaultLengthValidator', default_length_validator) }
 
@@ -75,7 +75,7 @@ describe Grape::Validations do
         end
       end
     end
-    let(:app) { Rack::Builder.new(subject) }
+    let(:app) { subject }
 
     before { stub_const('Grape::Validations::Validators::InBodyValidator', in_body_validator) }
 
@@ -111,7 +111,7 @@ describe Grape::Validations do
         end
       end
     end
-    let(:app) { Rack::Builder.new(subject) }
+    let(:app) { subject }
 
     before { stub_const('Grape::Validations::Validators::WithMessageKeyValidator', message_key_validator) }
 
@@ -156,7 +156,7 @@ describe Grape::Validations do
       end
     end
 
-    let(:app) { Rack::Builder.new(subject) }
+    let(:app) { subject }
     let(:x_access_token_header) { 'x-access-token' }
 
     before { stub_const('Grape::Validations::Validators::AdminValidator', admin_validator) }

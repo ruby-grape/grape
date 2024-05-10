@@ -88,26 +88,33 @@ module Grape
 
     def transaction(env)
       input, method = *extract_input_and_method(env)
-      response = yield(input, method)
 
-      return response if response && !(cascade = cascade?(response))
+      # using a Proc is important since `return` is exit the enclosing function
+      cascade_or_return_response = proc do |response|
+        if response
+          cascade?(response).tap do |cascade|
+            return response unless cascade
 
+            # we need to close the body if possible before dismissing
+            response[2].close if response[2].respond_to?(:close)
+          end
+        end
+      end
+
+      last_response_cascade = cascade_or_return_response.call(yield(input, method))
       last_neighbor_route = greedy_match?(input)
 
       # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #call_with_allow_headers.
-      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Rack::OPTIONS && !cascade
+      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Rack::OPTIONS && !last_response_cascade
 
       route = match?(input, '*')
 
-      return last_neighbor_route.endpoint.call(env) if last_neighbor_route && cascade && route
+      return last_neighbor_route.endpoint.call(env) if last_neighbor_route && last_response_cascade && route
 
-      if route
-        response = process_route(route, env)
-        return response if response && !(cascade = cascade?(response))
-      end
+      last_response_cascade = cascade_or_return_response.call(process_route(route, env)) if route
 
-      return call_with_allow_headers(env, last_neighbor_route) if !cascade && last_neighbor_route
+      return call_with_allow_headers(env, last_neighbor_route) if !last_response_cascade && last_neighbor_route
 
       nil
     end
