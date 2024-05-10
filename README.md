@@ -56,6 +56,7 @@
     - [values](#values)
     - [except_values](#except_values)
     - [same_as](#same_as)
+    - [length](#length)
     - [regexp](#regexp)
     - [mutually_exclusive](#mutually_exclusive)
     - [exactly_one_of](#exactly_one_of)
@@ -69,6 +70,7 @@
   - [Custom Validation messages](#custom-validation-messages)
     - [presence, allow_blank, values, regexp](#presence-allow_blank-values-regexp)
     - [same_as](#same_as-1)
+    - [length](#length-1)
     - [all_or_none_of](#all_or_none_of-1)
     - [mutually_exclusive](#mutually_exclusive-1)
     - [exactly_one_of](#exactly_one_of-1)
@@ -1709,6 +1711,20 @@ params do
 end
 ```
 
+#### `length`
+
+Parameters can be restricted from having a specific length or size with the `:length` option.
+
+the validator accepts `:min` or `:max` or both options to validate that they parameter is within
+the given limits.
+
+```ruby
+params do
+  requires :str, length: { min: 3 }
+  requires :list, length: { min: 3, max: 5}
+end
+```
+
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value does not match the regular expression an error will be returned. Note that this is true for both `requires` and `optional` parameters.
@@ -2023,6 +2039,15 @@ end
 params do
   requires :password
   requires :password_confirmation, same_as: { value: :password, message: 'not match' }
+end
+```
+
+#### `length`
+
+```ruby
+params do
+  requires :str, length: { min: 5, message: 'str is expected to be atleast 5 characters long' }
+  requires :list, length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
 end
 ```
 

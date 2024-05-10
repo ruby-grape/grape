@@ -28,6 +28,9 @@ module Grape
         details[:documentation] = documentation if documentation
 
         details[:default] = validations[:default] if validations.key?(:default)
+
+        details[:min_length] = validations[:length][:min] if validations.key?(:length) && validations[:length].key?(:min)
+        details[:max_length] = validations[:length][:max] if validations.key?(:length) && validations[:length].key?(:max)
       end
 
       def document(attrs)
