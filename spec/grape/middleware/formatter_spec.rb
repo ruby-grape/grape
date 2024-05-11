@@ -10,14 +10,20 @@ describe Grape::Middleware::Formatter do
 
   context 'serialization' do
     let(:body) { { 'abc' => 'def' } }
+    let(:env) do
+      { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+    end
 
     it 'looks at the bodies for possibly serializable data' do
-      _, _, bodies = *subject.call(Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json')
-      bodies.each { |b| expect(b).to eq(::Grape::Json.dump(body)) } # rubocop:disable RSpec/IteratedExpectation
+      r = Rack::MockResponse[*subject.call(env)]
+      expect(r.body).to eq(::Grape::Json.dump(body))
     end
 
     context 'default format' do
       let(:body) { ['foo'] }
+      let(:env) do
+        { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+      end
 
       it 'calls #to_json since default format is json' do
         body.instance_eval do
@@ -25,13 +31,16 @@ describe Grape::Middleware::Formatter do
             '"bar"'
           end
         end
-
-        subject.call(Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json').to_a.last.each { |b| expect(b).to eq('"bar"') } # rubocop:disable RSpec/IteratedExpectation
+        r = Rack::MockResponse[*subject.call(env)]
+        expect(r.body).to eq('"bar"')
       end
     end
 
     context 'jsonapi' do
       let(:body) { { 'foos' => [{ 'bar' => 'baz' }] } }
+      let(:env) do
+        { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.api+json' }
+      end
 
       it 'calls #to_json if the content type is jsonapi' do
         body.instance_eval do
@@ -39,13 +48,16 @@ describe Grape::Middleware::Formatter do
             '{"foos":[{"bar":"baz"}] }'
           end
         end
-
-        subject.call(Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.api+json').to_a.last.each { |b| expect(b).to eq('{"foos":[{"bar":"baz"}] }') } # rubocop:disable RSpec/IteratedExpectation
+        r = Rack::MockResponse[*subject.call(env)]
+        expect(r.body).to eq(Grape::Json.dump(body))
       end
     end
 
     context 'xml' do
       let(:body) { +'string' }
+      let(:env) do
+        { Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+      end
 
       it 'calls #to_xml if the content type is xml' do
         body.instance_eval do
@@ -53,13 +65,17 @@ describe Grape::Middleware::Formatter do
             '<bar/>'
           end
         end
-        subject.call(Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json').to_a.last.each { |b| expect(b).to eq('<bar/>') } # rubocop:disable RSpec/IteratedExpectation
+        r = Rack::MockResponse[*subject.call(env)]
+        expect(r.body).to eq('<bar/>')
       end
     end
   end
 
   context 'error handling' do
     let(:formatter) { double(:formatter) }
+    let(:env) do
+      { Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+    end
 
     before do
       allow(Grape::Formatter).to receive(:formatter_for) { formatter }
@@ -69,7 +85,7 @@ describe Grape::Middleware::Formatter do
       allow(formatter).to receive(:call) { raise Grape::Exceptions::InvalidFormatter.new(String, 'xml') }
 
       expect do
-        catch(:error) { subject.call(Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json') }
+        catch(:error) { subject.call(env) }
       end.not_to raise_error
     end
 
@@ -177,8 +193,9 @@ describe Grape::Middleware::Formatter do
 
     context 'with custom vendored content types' do
       before do
-        subject.options[:content_types] = {}
-        subject.options[:content_types][:custom] = 'application/vnd.test+json'
+        subject.options[:content_types] = {}.tap do |ct|
+          ct[:custom] = 'application/vnd.test+json'
+        end
       end
 
       it 'uses the custom type' do
@@ -210,15 +227,17 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'is set for custom' do
-      subject.options[:content_types] = {}
-      subject.options[:content_types][:custom] = 'application/x-custom'
+      subject.options[:content_types] = {}.tap do |ct|
+        ct[:custom] = 'application/x-custom'
+      end
       _, headers, = subject.call(Rack::PATH_INFO => '/info.custom')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/x-custom')
     end
 
     it 'is set for vendored with registered type' do
-      subject.options[:content_types] = {}
-      subject.options[:content_types][:custom] = 'application/vnd.test+json'
+      subject.options[:content_types] = {}.tap do |ct|
+        ct[:custom] = 'application/vnd.test+json'
+      end
       _, headers, = subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/vnd.test+json')
     end
@@ -234,28 +253,28 @@ describe Grape::Middleware::Formatter do
       subject.options[:content_types] = {}
       subject.options[:content_types][:custom] = "don't care"
       subject.options[:formatters][:custom] = ->(_obj, _env) { 'CUSTOM FORMAT' }
-      _, _, body = subject.call(Rack::PATH_INFO => '/info.custom')
-      expect(read_chunks(body)).to eq(['CUSTOM FORMAT'])
+      r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.custom')]
+      expect(r.body).to eq('CUSTOM FORMAT')
     end
 
     context 'default' do
       let(:body) { ['blah'] }
 
       it 'uses default json formatter' do
-        _, _, body = subject.call(Rack::PATH_INFO => '/info.json')
-        expect(read_chunks(body)).to eq(['["blah"]'])
+        r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.json')]
+        expect(r.body).to eq(Grape::Json.dump(body))
       end
     end
 
     it 'uses custom json formatter' do
       subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
-      _, _, body = subject.call(Rack::PATH_INFO => '/info.json')
-      expect(read_chunks(body)).to eq(['CUSTOM JSON FORMAT'])
+      r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.json')]
+      expect(r.body).to eq('CUSTOM JSON FORMAT')
     end
   end
 
   context 'no content responses' do
-    let(:no_content_response) { ->(status) { [status, {}, ['']] } }
+    let(:no_content_response) { ->(status) { [status, {}, []] } }
 
     statuses_without_body = if Gem::Version.new(Rack.release) >= Gem::Version.new('2.1.0')
                               Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.keys
@@ -286,7 +305,7 @@ describe Grape::Middleware::Formatter do
               Rack::REQUEST_METHOD => method,
               'CONTENT_TYPE' => content_type,
               Rack::RACK_INPUT => io,
-              'CONTENT_LENGTH' => io.length
+              'CONTENT_LENGTH' => io.length.to_s
             )
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
@@ -304,7 +323,7 @@ describe Grape::Middleware::Formatter do
                 Rack::REQUEST_METHOD => method,
                 'CONTENT_TYPE' => content_type,
                 Rack::RACK_INPUT => io,
-                'CONTENT_LENGTH' => io.length
+                'CONTENT_LENGTH' => io.length.to_s
               )
             end
             expect(error[:status]).to eq(415)
@@ -327,7 +346,7 @@ describe Grape::Middleware::Formatter do
             Rack::REQUEST_METHOD => method,
             'CONTENT_TYPE' => 'application/json',
             Rack::RACK_INPUT => io,
-            'CONTENT_LENGTH' => 0
+            'CONTENT_LENGTH' => '0'
           )
         end
       end
@@ -360,7 +379,7 @@ describe Grape::Middleware::Formatter do
               Rack::REQUEST_METHOD => method,
               'CONTENT_TYPE' => content_type,
               Rack::RACK_INPUT => io,
-              'CONTENT_LENGTH' => io.length
+              'CONTENT_LENGTH' => io.length.to_s
             )
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
@@ -401,7 +420,7 @@ describe Grape::Middleware::Formatter do
           Rack::REQUEST_METHOD => method,
           'CONTENT_TYPE' => 'application/xml',
           Rack::RACK_INPUT => io,
-          'CONTENT_LENGTH' => io.length
+          'CONTENT_LENGTH' => io.length.to_s
         )
         if Object.const_defined? :MultiXml
           expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['thing']['name']).to eq('Test')
@@ -418,7 +437,7 @@ describe Grape::Middleware::Formatter do
             Rack::REQUEST_METHOD => method,
             'CONTENT_TYPE' => content_type,
             Rack::RACK_INPUT => io,
-            'CONTENT_LENGTH' => io.length
+            'CONTENT_LENGTH' => io.length.to_s
           )
           expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]).to be_nil
         end
@@ -430,14 +449,17 @@ describe Grape::Middleware::Formatter do
     let(:file) { double(File) }
     let(:file_body) { Grape::ServeStream::StreamResponse.new(file) }
     let(:app) { ->(_env) { [200, {}, file_body] } }
+    let(:body) { 'data' }
+    let(:env) do
+      { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+    end
 
     it 'returns a file response' do
-      expect(file).to receive(:each).and_yield('data')
-      env = { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
-      status, headers, body = subject.call(env)
-      expect(status).to eq 200
-      expect(headers).to eq({ Rack::CONTENT_TYPE => 'application/json' })
-      expect(read_chunks(body)).to eq ['data']
+      expect(file).to receive(:each).and_yield(body)
+      r = Rack::MockResponse[*subject.call(env)]
+      expect(r).to be_successful
+      expect(r.headers).to eq({ Rack::CONTENT_TYPE => 'application/json', Rack::CONTENT_LENGTH => body.bytesize.to_s })
+      expect(r.body).to eq('data')
     end
   end
 
@@ -451,6 +473,9 @@ describe Grape::Middleware::Formatter do
     end
 
     let(:app) { ->(_env) { [200, {}, ['']] } }
+    let(:env) do
+      { Rack::PATH_INFO => '/hello.invalid', Grape::Http::Headers::HTTP_ACCEPT => 'application/x-invalid' }
+    end
 
     before do
       Grape::Formatter.register :invalid, invalid_formatter
@@ -463,9 +488,8 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'returns response by invalid formatter' do
-      env = { Rack::PATH_INFO => '/hello.invalid', Grape::Http::Headers::HTTP_ACCEPT => 'application/x-invalid' }
-      _, _, body = *subject.call(env)
-      expect(read_chunks(body).join).to eq({ message: 'invalid' }.to_json)
+      r = Rack::MockResponse[*subject.call(env)]
+      expect(r.body).to eq(Grape::Json.dump('message' => 'invalid'))
     end
   end
 
@@ -483,7 +507,7 @@ describe Grape::Middleware::Formatter do
           Rack::REQUEST_METHOD => Rack::POST,
           'CONTENT_TYPE' => 'application/json',
           Rack::RACK_INPUT => io,
-          'CONTENT_LENGTH' => io.length
+          'CONTENT_LENGTH' => io.length.to_s
         )
       end
 

@@ -171,7 +171,7 @@ describe Grape::Middleware::Base do
       end
     end
 
-    def app
+    let(:app) do
       context = self
 
       Rack::Builder.app do
@@ -209,7 +209,7 @@ describe Grape::Middleware::Base do
       end
     end
 
-    def app
+    let(:app) do
       context = self
 
       Rack::Builder.app do

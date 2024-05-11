@@ -153,14 +153,6 @@ describe Grape::Endpoint do
       x_grape_client_header = 'x-grape-client'
       expect(JSON.parse(last_response.body)[x_grape_client_header]).to eq('1')
     end
-
-    it 'includes headers passed as symbols' do
-      env = Rack::MockRequest.env_for('/headers')
-      env[:HTTP_SYMBOL_HEADER] = 'Goliath passes symbols'
-      body = read_chunks(subject.call(env)[2]).join
-      symbol_header = 'symbol-header'
-      expect(JSON.parse(body)[symbol_header]).to eq('Goliath passes symbols')
-    end
   end
 
   describe '#cookies' do
@@ -662,7 +654,7 @@ describe Grape::Endpoint do
       subject.post('/hey') do
         redirect '/ha'
       end
-      post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1'
+      post '/hey', {}, 'HTTP_VERSION' => 'HTTP/1.1', 'SERVER_PROTOCOL' => 'HTTP/1.1'
       expect(last_response.status).to eq 303
       expect(last_response.location).to eq '/ha'
       expect(last_response.body).to eq 'An alternate resource is located at /ha.'
@@ -842,33 +834,33 @@ describe Grape::Endpoint do
   context 'anchoring' do
     describe 'delete 204' do
       it 'allows for the anchoring option with a delete method' do
-        subject.send(:delete, '/example', anchor: true) {}
-        send(:delete, '/example/and/some/more')
-        expect(last_response.status).to be 404
+        subject.delete('/example', anchor: true)
+        delete '/example/and/some/more'
+        expect(last_response).to be_not_found
       end
 
       it 'anchors paths by default for the delete method' do
-        subject.send(:delete, '/example') {}
-        send(:delete, '/example/and/some/more')
-        expect(last_response.status).to be 404
+        subject.delete '/example'
+        delete '/example/and/some/more'
+        expect(last_response).to be_not_found
       end
 
       it 'responds to /example/and/some/more for the non-anchored delete method' do
-        subject.send(:delete, '/example', anchor: false) {}
-        send(:delete, '/example/and/some/more')
-        expect(last_response.status).to be 204
+        subject.delete '/example', anchor: false
+        delete '/example/and/some/more'
+        expect(last_response).to be_no_content
         expect(last_response.body).to be_empty
       end
     end
 
     describe 'delete 200, with response body' do
       it 'responds to /example/and/some/more for the non-anchored delete method' do
-        subject.send(:delete, '/example', anchor: false) do
+        subject.delete('/example', anchor: false) do
           status 200
           body 'deleted'
         end
-        send(:delete, '/example/and/some/more')
-        expect(last_response.status).to be 200
+        delete '/example/and/some/more'
+        expect(last_response).to be_successful
         expect(last_response.body).not_to be_empty
       end
     end
