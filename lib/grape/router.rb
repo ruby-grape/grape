@@ -89,7 +89,7 @@ module Grape
     def transaction(env)
       input, method = *extract_input_and_method(env)
 
-      # using a Proc is important since `return` is exit the enclosing function
+      # using a Proc is important since `return` will exit the enclosing function
       cascade_or_return_response = proc do |response|
         if response
           cascade?(response).tap do |cascade|
