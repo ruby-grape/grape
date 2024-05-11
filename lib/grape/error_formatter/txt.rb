@@ -9,7 +9,7 @@ module Grape
         def call(message, backtrace, options = {}, env = nil, original_exception = nil)
           message = present(message, env)
 
-          result = message.is_a?(Hash) ? ::Grape::Json.dump(message) : message.to_s
+          result = message.is_a?(Hash) ? ::Grape::Json.dump(message) : message
           Array.wrap(result).tap do |final_result|
             rescue_options = options[:rescue_options] || {}
             if rescue_options[:backtrace] && backtrace.present?
