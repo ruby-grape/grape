@@ -188,21 +188,29 @@ describe Grape::Validations::Validators::LengthValidator do
   end
 
   describe '/type_is_not_array' do
-    context 'is no op' do
+    context 'raises an error' do
       it do
         expect do
           post 'type_is_not_array', list: 12
-        end.to raise_error(ArgumentError, 'parameter 12 has an unsupported type. Only strings and arrays are supported')
+        end.to raise_error(ArgumentError, 'parameter 12 does not support #length')
       end
     end
   end
 
   describe '/type_supports_length' do
-    context 'raises an error' do
+    context 'when length is within limits' do
       it do
-        expect do
-          post 'type_supports_length', list: { key: 'value' }
-        end.to raise_error(ArgumentError, 'parameter {"key"=>"value"} has an unsupported type. Only strings and arrays are supported')
+        post 'type_supports_length', list: { key: 'value' }
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq('')
+      end
+    end
+
+    context 'when length exceeds the limit' do
+      it do
+        post 'type_supports_length', list: { key: 'value', key1: 'value', key3: 'value', key4: 'value' }
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('list is expected to have length less than or equal to 3')
       end
     end
   end

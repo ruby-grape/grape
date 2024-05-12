@@ -1713,7 +1713,7 @@ end
 
 #### `length`
 
-Parameters of type `String` or `Array` can be restricted to have a specific length or size with the `:length` option.
+Parameters with types that support `#length` method can be restricted to have a specific length with the `:length` option.
 
 The validator accepts `:min` or `:max` or both options to validate that the value of the parameter is within the given limits.
 
@@ -1721,6 +1721,7 @@ The validator accepts `:min` or `:max` or both options to validate that the valu
 params do
   requires :str, type: String, length: { min: 3 }
   requires :list, type: [Integer], length: { min: 3, max: 5 }
+  requires :hash, type: Hash, length: { max: 5 }
 end
 ```
 
