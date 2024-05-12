@@ -154,7 +154,7 @@ describe Grape::Validations::Validators::LengthValidator do
   describe '/zero_min' do
     context 'when length is equal to the limit' do
       it do
-        post '/zero_min', list: []
+        post '/zero_min', list: '[]'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('')
       end
@@ -172,7 +172,7 @@ describe Grape::Validations::Validators::LengthValidator do
   describe '/zero_max' do
     context 'when length is within the limit' do
       it do
-        post '/zero_max', list: []
+        post '/zero_max', list: '[]'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('')
       end
