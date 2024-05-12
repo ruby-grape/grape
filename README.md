@@ -1713,15 +1713,14 @@ end
 
 #### `length`
 
-Parameters can be restricted from having a specific length or size with the `:length` option.
+Parameters of type `String` or `Array` can be restricted to have a specific length or size with the `:length` option.
 
-the validator accepts `:min` or `:max` or both options to validate that they parameter is within
-the given limits.
+The validator accepts `:min` or `:max` or both options to validate that the value of the parameter is within the given limits.
 
 ```ruby
 params do
-  requires :str, length: { min: 3 }
-  requires :list, length: { min: 3, max: 5}
+  requires :str, type: String, length: { min: 3 }
+  requires :list, type: [Integer], length: { min: 3, max: 5 }
 end
 ```
 

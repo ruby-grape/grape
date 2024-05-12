@@ -28,6 +28,36 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       params do
+        requires :list, type: Hash, length: { max: 3 }
+      end
+      post 'type_supports_length' do
+      end
+
+      params do
+        requires :list, type: [Integer], length: { min: -3 }
+      end
+      post 'negative_min' do
+      end
+
+      params do
+        requires :list, type: [Integer], length: { max: -3 }
+      end
+      post 'negative_max' do
+      end
+
+      params do
+        requires :list, type: [Integer], length: { min: 2.5 }
+      end
+      post 'float_min' do
+      end
+
+      params do
+        requires :list, type: [Integer], length: { max: 2.5 }
+      end
+      post 'float_max' do
+      end
+
+      params do
         requires :list, type: [Integer], length: { min: 15, max: 3 }
       end
       post 'min_greater_than_max' do
@@ -160,9 +190,51 @@ describe Grape::Validations::Validators::LengthValidator do
   describe '/type_is_not_array' do
     context 'is no op' do
       it do
-        post 'type_is_not_array', list: 12
-        expect(last_response.status).to eq(201)
-        expect(last_response.body).to eq('')
+        expect do
+          post 'type_is_not_array', list: 12
+        end.to raise_error(ArgumentError, 'parameter 12 has an unsupported type. Only strings & arrays are supported')
+      end
+    end
+  end
+
+  describe '/type_supports_length' do
+    context 'raises an error' do
+      it do
+        expect do
+          post 'type_supports_length', list: { key: 'value' }
+        end.to raise_error(ArgumentError, 'parameter {"key"=>"value"} has an unsupported type. Only strings & arrays are supported')
+      end
+    end
+  end
+
+  describe '/negative_min' do
+    context 'when min is negative' do
+      it do
+        expect { post 'negative_min', list: [12] }.to raise_error(ArgumentError, 'min must be an integer greater than or equal to zero')
+      end
+    end
+  end
+
+  describe '/negative_max' do
+    context 'it raises an error' do
+      it do
+        expect { post 'negative_max', list: [12] }.to raise_error(ArgumentError, 'max must be an integer greater than or equal to zero')
+      end
+    end
+  end
+
+  describe '/float_min' do
+    context 'when min is not an integer' do
+      it do
+        expect { post 'float_min', list: [12] }.to raise_error(ArgumentError, 'min must be an integer greater than or equal to zero')
+      end
+    end
+  end
+
+  describe '/float_max' do
+    context 'when max is not an integer' do
+      it do
+        expect { post 'float_max', list: [12] }.to raise_error(ArgumentError, 'max must be an integer greater than or equal to zero')
       end
     end
   end

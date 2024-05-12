@@ -10,6 +10,8 @@ module Grape
 
           super
 
+          raise ArgumentError, 'min must be an integer greater than or equal to zero' if !@min.nil? && (!@min.is_a?(Integer) || @min.negative?)
+          raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
         end
 
@@ -17,7 +19,8 @@ module Grape
           param = params[attr_name]
           param = param.compact if param.respond_to?(:compact)
 
-          return unless param.respond_to?(:length)
+          raise ArgumentError, "parameter #{param} has an unsupported type. Only strings & arrays are supported" unless params.is_a?(String) || param.is_a?(Array)
+
           return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max)
 
           raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: build_message)
