@@ -2045,8 +2045,8 @@ end
 
 ```ruby
 params do
-  requires :str, length: { min: 5, message: 'str is expected to be atleast 5 characters long' }
-  requires :list, length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
+  requires :str, type: String, length: { min: 5, message: 'str is expected to be atleast 5 characters long' }
+  requires :list, type: [Integer], length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
 end
 ```
 
