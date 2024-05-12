@@ -19,7 +19,7 @@ module Grape
           param = params[attr_name]
           param = param.compact if param.respond_to?(:compact)
 
-          raise ArgumentError, "parameter #{param} has an unsupported type. Only strings & arrays are supported" unless params.is_a?(String) || param.is_a?(Array)
+          raise ArgumentError, "parameter #{param} has an unsupported type. Only strings and arrays are supported" unless params.is_a?(String) || param.is_a?(Array)
 
           return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max)
 

@@ -192,7 +192,7 @@ describe Grape::Validations::Validators::LengthValidator do
       it do
         expect do
           post 'type_is_not_array', list: 12
-        end.to raise_error(ArgumentError, 'parameter 12 has an unsupported type. Only strings & arrays are supported')
+        end.to raise_error(ArgumentError, 'parameter 12 has an unsupported type. Only strings and arrays are supported')
       end
     end
   end
@@ -202,7 +202,7 @@ describe Grape::Validations::Validators::LengthValidator do
       it do
         expect do
           post 'type_supports_length', list: { key: 'value' }
-        end.to raise_error(ArgumentError, 'parameter {"key"=>"value"} has an unsupported type. Only strings & arrays are supported')
+        end.to raise_error(ArgumentError, 'parameter {"key"=>"value"} has an unsupported type. Only strings and arrays are supported')
       end
     end
   end
