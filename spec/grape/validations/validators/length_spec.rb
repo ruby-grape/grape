@@ -70,13 +70,13 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       params do
-        requires :list, type: [Integer], length: { min: 0 }
+        requires :list, type: [JSON], length: { min: 0 }
       end
       post 'zero_min' do
       end
 
       params do
-        requires :list, type: [Integer], length: { max: 0 }
+        requires :list, type: [JSON], length: { max: 0 }
       end
       post 'zero_max' do
       end
@@ -162,7 +162,7 @@ describe Grape::Validations::Validators::LengthValidator do
 
     context 'when length is greater than limit' do
       it do
-        post '/zero_min', list: [1]
+        post '/zero_min', list: [{ key: 'value' }]
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('')
       end
@@ -180,7 +180,7 @@ describe Grape::Validations::Validators::LengthValidator do
 
     context 'when length is greater than limit' do
       it do
-        post '/zero_max', list: [1]
+        post '/zero_max', list: [{ key: 'value' }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('list is expected to have length less than or equal to 0')
       end

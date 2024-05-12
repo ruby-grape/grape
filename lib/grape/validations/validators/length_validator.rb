@@ -17,7 +17,6 @@ module Grape
 
         def validate_param!(attr_name, params)
           param = params[attr_name]
-          param = param.compact if param.respond_to?(:compact)
 
           raise ArgumentError, "parameter #{param} has an unsupported type. Only strings and arrays are supported" unless params.is_a?(String) || param.is_a?(Array)
 
