@@ -7,17 +7,20 @@ module Grape
       Path.new(raw_path, namespace, settings)
     end
 
-    attr_reader :raw_path, :namespace, :settings, :root_prefix
+    attr_reader :raw_path, :namespace, :settings
 
     def initialize(raw_path, namespace, settings)
       @raw_path = raw_path
       @namespace = namespace
       @settings = settings
-      @root_prefix = settings[:root_prefix]&.to_s&.split('/')
     end
 
     def mount_path
       settings[:mount_path]
+    end
+
+    def root_prefix
+      split_setting(:root_prefix)
     end
 
     def uses_specific_format?

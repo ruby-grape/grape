@@ -30,7 +30,7 @@ module Grape
         routes = map[method]
         optimized_map = routes.map.with_index do |route, index|
           route.index = index
-          Regexp.new("(?<_#{index}>#{route.to_regexp})")
+          Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
         end
         @optimized_map[method] = Regexp.union(optimized_map)
       end
