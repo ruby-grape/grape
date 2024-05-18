@@ -3,7 +3,9 @@
 module Grape
   class Router
     class Pattern
-      attr_reader :origin, :path, :pattern, :to_regexp, :captures_default
+      DEFAULT_CAPTURES = %w[format version].freeze
+
+      attr_reader :origin, :path, :pattern, :to_regexp
 
       extend Forwardable
       def_delegators :pattern, :named_captures, :params
@@ -15,7 +17,12 @@ module Grape
         @path = build_path(pattern, anchor: options[:anchor], suffix: options[:suffix])
         @pattern = build_pattern(@path, options)
         @to_regexp = @pattern.to_regexp
-        @captures_default = regex_captures_default(@to_regexp)
+      end
+
+      def captures_default
+        to_regexp.names
+                 .delete_if { |n| DEFAULT_CAPTURES.include?(n) }
+                 .to_h { |k| [k, ''] }
       end
 
       private
@@ -41,11 +48,6 @@ module Grape
         return sliced_options if options[:requirements].blank?
 
         options[:requirements].merge(sliced_options)
-      end
-
-      def regex_captures_default(regex)
-        names = regex.names - %w[format version] # remove default format and version
-        names.to_h { |k| [k, ''] }
       end
 
       def build_path_from_pattern(pattern, anchor: false)

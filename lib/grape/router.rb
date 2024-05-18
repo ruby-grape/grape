@@ -12,10 +12,6 @@ module Grape
       path
     end
 
-    def self.supported_methods
-      @supported_methods ||= Grape::Http::Headers::SUPPORTED_METHODS + ['*']
-    end
-
     def initialize
       @neutral_map = []
       @neutral_regexes = []
@@ -28,13 +24,15 @@ module Grape
 
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
-      self.class.supported_methods.each do |method|
+      (Grape::Http::Headers::SUPPORTED_METHODS + ['*']).each do |method|
+        next unless map.key?(method)
+
         routes = map[method]
-        @optimized_map[method] = routes.map.with_index do |route, index|
+        optimized_map = routes.map.with_index do |route, index|
           route.index = index
-          Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
+          Regexp.new("(?<_#{index}>#{route.to_regexp})")
         end
-        @optimized_map[method] = Regexp.union(@optimized_map[method])
+        @optimized_map[method] = Regexp.union(optimized_map)
       end
       @compiled = true
     end

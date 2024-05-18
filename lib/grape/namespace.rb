@@ -31,13 +31,13 @@ module Grape
     # Join the namespaces from a list of settings to create a path prefix.
     # @param settings [Array] list of Grape::Util::InheritableSettings.
     def self.joined_space_path(settings)
-      Grape::Router.normalize_path(JoinedSpaceCache[joined_space(settings)])
+      JoinedSpaceCache[joined_space(settings)]
     end
 
     class JoinedSpaceCache < Grape::Util::Cache
       def initialize
         @cache = Hash.new do |h, joined_space|
-          h[joined_space] = -joined_space.join('/')
+          h[joined_space] = Grape::Router.normalize_path(joined_space.join('/'))
         end
       end
     end

@@ -7,20 +7,17 @@ module Grape
       Path.new(raw_path, namespace, settings)
     end
 
-    attr_reader :raw_path, :namespace, :settings
+    attr_reader :raw_path, :namespace, :settings, :root_prefix
 
     def initialize(raw_path, namespace, settings)
       @raw_path = raw_path
       @namespace = namespace
       @settings = settings
+      @root_prefix = settings[:root_prefix]&.to_s&.split('/')
     end
 
     def mount_path
       settings[:mount_path]
-    end
-
-    def root_prefix
-      split_setting(:root_prefix)
     end
 
     def uses_specific_format?
@@ -58,7 +55,7 @@ module Grape
     end
 
     def path
-      Grape::Router.normalize_path(PartsCache[parts])
+      PartsCache[parts]
     end
 
     def path_with_suffix
@@ -74,7 +71,7 @@ module Grape
     class PartsCache < Grape::Util::Cache
       def initialize
         @cache = Hash.new do |h, parts|
-          h[parts] = -parts.join('/')
+          h[parts] = Grape::Router.normalize_path(parts.join('/'))
         end
       end
     end
