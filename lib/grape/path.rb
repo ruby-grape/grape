@@ -20,7 +20,7 @@ module Grape
     end
 
     def root_prefix
-      split_setting(:root_prefix)
+      settings[:root_prefix]
     end
 
     def uses_specific_format?
@@ -58,7 +58,7 @@ module Grape
     end
 
     def path
-      PartsCache[parts]
+      PartsCache[joined_parts]
     end
 
     def path_with_suffix
@@ -73,24 +73,20 @@ module Grape
 
     class PartsCache < Grape::Util::Cache
       def initialize
-        @cache = Hash.new do |h, parts|
-          h[parts] = Grape::Router.normalize_path(parts.join('/'))
+        @cache = Hash.new do |h, joined_parts|
+          h[joined_parts] = Grape::Router.normalize_path(joined_parts)
         end
       end
     end
 
-    def parts
-      parts = [mount_path, root_prefix].compact
-      parts << ':version' if uses_path_versioning?
-      parts << namespace.to_s
-      parts << raw_path.to_s
-      parts.flatten.reject { |part| part == '/' }
-    end
-
-    def split_setting(key)
-      return if settings[key].nil?
-
-      settings[key].to_s.split('/')
+    def joined_parts
+      [].tap do |parts|
+        parts << mount_path
+        parts << root_prefix if root_prefix.present?
+        parts << ':version' if uses_path_versioning?
+        parts << namespace
+        parts << raw_path
+      end.join('/')
     end
   end
 end
