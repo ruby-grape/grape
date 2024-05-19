@@ -190,10 +190,11 @@ module Grape
     end
 
     def prepare_version
-      version = namespace_inheritable(:version) || []
+      version = namespace_inheritable(:version)
+      return unless version
       return if version.empty?
 
-      version.length == 1 ? version.first.to_s : version
+      version.length == 1 ? version.first : version
     end
 
     def merge_route_options(**default)
@@ -206,7 +207,7 @@ module Grape
 
     def prepare_path(path)
       path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
-      Path.prepare(path, namespace, path_settings)
+      Path.new(path, namespace, path_settings)
     end
 
     def namespace

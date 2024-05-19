@@ -3,10 +3,6 @@
 module Grape
   # Represents a path to an endpoint.
   class Path
-    def self.prepare(raw_path, namespace, settings)
-      Path.new(raw_path, namespace, settings)
-    end
-
     attr_reader :raw_path, :namespace, :settings
 
     def initialize(raw_path, namespace, settings)
@@ -24,27 +20,23 @@ module Grape
     end
 
     def uses_specific_format?
-      if settings.key?(:format) && settings.key?(:content_types)
-        settings[:format] && Array(settings[:content_types]).size == 1
-      else
-        false
-      end
+      return false unless settings.key?(:format) && settings.key?(:content_types)
+
+      settings[:format] && Array(settings[:content_types]).size == 1
     end
 
     def uses_path_versioning?
-      if settings.key?(:version) && settings[:version_options] && settings[:version_options].key?(:using)
-        settings[:version] && settings[:version_options][:using] == :path
-      else
-        false
-      end
+      return false unless settings.key?(:version) && settings[:version_options]&.key?(:using)
+
+      settings[:version] && settings[:version_options][:using] == :path
     end
 
     def namespace?
-      namespace&.match?(/^\S/) && namespace != '/'
+      namespace&.match?(/^\S/) && not_slash?(namespace)
     end
 
     def path?
-      raw_path&.match?(/^\S/) && raw_path != '/'
+      raw_path&.match?(/^\S/) && not_slash?(raw_path)
     end
 
     def suffix
@@ -58,7 +50,7 @@ module Grape
     end
 
     def path
-      PartsCache[joined_parts]
+      PartsCache[parts]
     end
 
     def path_with_suffix
@@ -73,20 +65,24 @@ module Grape
 
     class PartsCache < Grape::Util::Cache
       def initialize
-        @cache = Hash.new do |h, joined_parts|
-          h[joined_parts] = Grape::Router.normalize_path(joined_parts)
+        @cache = Hash.new do |h, parts|
+          h[parts] = Grape::Router.normalize_path(parts.join('/'))
         end
       end
     end
 
-    def joined_parts
+    def parts
       [].tap do |parts|
         parts << mount_path
         parts << root_prefix if root_prefix.present?
         parts << ':version' if uses_path_versioning?
         parts << namespace
         parts << raw_path
-      end.join('/')
+      end.keep_if { |p| not_slash?(p) }
+    end
+
+    def not_slash?(value)
+      value != '/'
     end
   end
 end
