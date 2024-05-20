@@ -685,12 +685,13 @@ describe Grape::Endpoint do
         if Gem::Version.new(RUBY_VERSION).release <= Gem::Version.new('3.2')
           %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint}
         else
-          %r{undefined local variable or method `undefined_helper' for}
+          /undefined local variable or method `undefined_helper' for/
         end
       end
+
       it 'raises NameError but stripping the internals of the Grape::Endpoint class and including the API route' do
         subject.get('/hey') { undefined_helper }
-        expect { get '/hey' } .to raise_error(NameError, error_message)
+        expect { get '/hey' }.to raise_error(NameError, error_message)
       end
     end
   end
