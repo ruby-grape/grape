@@ -2,20 +2,17 @@
 
 module Grape
   class Router
-    class Route
+    class Route < BaseRoute
       extend Forwardable
 
-      attr_reader :app, :pattern, :options, :attributes
-      attr_accessor :index
+      attr_reader :app, :request_method
 
       def_delegators :pattern, :path, :origin
-      # params must be handled in this class to avoid method redefined warning
-      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES - [:params] => :attributes
 
       def initialize(method, pattern, **options)
-        @options = options
+        @request_method = upcase_method(method)
         @pattern = Grape::Router::Pattern.new(pattern, **options)
-        @attributes = Grape::Router::AttributeTranslator.new(**options, request_method: upcase_method(method))
+        super(**options)
       end
 
       def exec(env)
@@ -30,7 +27,7 @@ module Grape
       def match?(input)
         return false if input.blank?
 
-        attributes.forward_match ? input.start_with?(pattern.origin) : pattern.match?(input)
+        options[:forward_match] ? input.start_with?(pattern.origin) : pattern.match?(input)
       end
 
       def params(input = nil)
@@ -50,7 +47,7 @@ module Grape
 
       def upcase_method(method)
         method_s = method.to_s
-        Grape::Http::Headers.find_supported_method(method_s) || method_s.upcase
+        Grape::Http::Headers::SUPPORTED_METHODS.detect { |m| m.casecmp(method_s).zero? } || method_s.upcase
       end
     end
   end

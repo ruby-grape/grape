@@ -49,7 +49,7 @@ module Grape
 
       it 'splits the mount path' do
         path = described_class.new(anything, anything, root_prefix: 'hello/world')
-        expect(path.root_prefix).to eql(%w[hello world])
+        expect(path.root_prefix).to eql('hello/world')
       end
     end
 

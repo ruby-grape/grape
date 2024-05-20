@@ -30,7 +30,7 @@ module Grape
           if args.any?
             options = args.extract_options!
             options = options.reverse_merge(using: :path)
-            requested_versions = args.flatten
+            requested_versions = args.flatten.map(&:to_s)
 
             raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
 
@@ -54,7 +54,7 @@ module Grape
 
         # Define a root URL prefix for your entire API.
         def prefix(prefix = nil)
-          namespace_inheritable(:root_prefix, prefix)
+          namespace_inheritable(:root_prefix, prefix&.to_s)
         end
 
         # Create a scope without affecting the URL.

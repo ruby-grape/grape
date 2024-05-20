@@ -44,6 +44,7 @@
 * [#2414](https://github.com/ruby-grape/grape/pull/2414): Fix Rack::Lint missing content-type - [@ericproulx](https://github.com/ericproulx).
 * [#2378](https://github.com/ruby-grape/grape/pull/2378): Do not overwrite `route_param` with a regular one if they share same name - [@arg](https://github.com/arg).
 * [#2444](https://github.com/ruby-grape/grape/pull/2444): Replace method_missing in endpoint - [@ericproulx](https://github.com/ericproulx).
+* [#2441](https://github.com/ruby-grape/grape/pull/2441): Optimize memory alloc and retained - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.0.0 (2023/11/11)
