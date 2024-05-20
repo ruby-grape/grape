@@ -13,7 +13,7 @@ module Grape
       alias attributes options
 
       def regexp_capture_index
-        "_#{index}"
+        CaptureIndexCache[index]
       end
 
       def pattern_regexp
@@ -23,6 +23,16 @@ module Grape
       def to_regexp(index)
         @index = index
         Regexp.new("(?<#{regexp_capture_index}>#{pattern_regexp})")
+      end
+
+      private
+
+      class CaptureIndexCache < Grape::Util::Cache
+        def initialize
+          @cache = Hash.new do |h, index|
+            h[index] = "_#{index}"
+          end
+        end
       end
     end
   end
