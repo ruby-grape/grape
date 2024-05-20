@@ -29,6 +29,7 @@
 * [#2436](https://github.com/ruby-grape/grape/pull/2436): Update coverallsapp github-action - [@ericproulx](https://github.com/ericproulx).
 * [#2434](https://github.com/ruby-grape/grape/pull/2434): Implement nested `with` support in parameter dsl - [@numbata](https://github.com/numbata).
 * [#2438](https://github.com/ruby-grape/grape/pull/2438): Fix some Rack::Lint - [@ericproulx](https://github.com/ericproulx).
+* [#2437](https://github.com/ruby-grape/grape/pull/2437): Add length validator - [@dhruvCW](https://github.com/dhruvCW).
 * Your contribution here.
 
 #### Fixes
@@ -42,6 +43,7 @@
 * [#2405](https://github.com/ruby-grape/grape/pull/2405): Fix edge workflow - [@ericproulx](https://github.com/ericproulx).
 * [#2414](https://github.com/ruby-grape/grape/pull/2414): Fix Rack::Lint missing content-type - [@ericproulx](https://github.com/ericproulx).
 * [#2378](https://github.com/ruby-grape/grape/pull/2378): Do not overwrite `route_param` with a regular one if they share same name - [@arg](https://github.com/arg).
+* [#2444](https://github.com/ruby-grape/grape/pull/2444): Replace method_missing in endpoint - [@ericproulx](https://github.com/ericproulx).
 * [#2441](https://github.com/ruby-grape/grape/pull/2441): Optimize memory alloc and retained - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

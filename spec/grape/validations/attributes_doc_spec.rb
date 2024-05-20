@@ -31,7 +31,8 @@ describe Grape::Validations::AttributesDoc do
       presence: true,
       desc: 'Age of...',
       documentation: 'Age is...',
-      default: 1
+      default: 1,
+      length: { min: 1, max: 13 }
     }
   end
 
@@ -77,7 +78,9 @@ describe Grape::Validations::AttributesDoc do
         documentation: validations[:documentation],
         default: validations[:default],
         type: 'Integer',
-        values: valid_values
+        values: valid_values,
+        min_length: validations[:length][:min],
+        max_length: validations[:length][:max]
       }
     end
 

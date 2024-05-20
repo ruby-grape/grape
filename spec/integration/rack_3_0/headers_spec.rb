@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Grape::Http::Headers, if: Gem::Version.new(Rack.release) >= Gem::Version.new('3') do
+describe Grape::Http::Headers do
   subject { last_response.headers }
 
   describe 'returned headers should all be in lowercase' do

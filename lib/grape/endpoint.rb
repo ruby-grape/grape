@@ -405,12 +405,8 @@ module Grape
         env[Rack::REQUEST_METHOD] == Rack::OPTIONS
     end
 
-    def method_missing(name, *_args)
-      raise NoMethodError.new("undefined method `#{name}' for #{self.class} in `#{route.origin}' endpoint")
-    end
-
-    def respond_to_missing?(method_name, include_private = false)
-      super
+    def inspect
+      "#{self.class} in `#{route.origin}' endpoint"
     end
   end
 end
