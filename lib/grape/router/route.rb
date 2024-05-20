@@ -15,8 +15,6 @@ module Grape
         super(**options)
       end
 
-      alias attributes options
-
       def exec(env)
         @app.call(env)
       end
