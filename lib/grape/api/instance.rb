@@ -220,7 +220,7 @@ module Grape
 
       def collect_route_config_per_pattern
         all_routes       = self.class.endpoints.map(&:routes).flatten
-        routes_by_regexp = all_routes.group_by { |route| route.pattern.to_regexp }
+        routes_by_regexp = all_routes.group_by(&:pattern_regexp)
 
         # Build the configuration based on the first endpoint and the collection of methods supported.
         routes_by_regexp.values.map do |routes|

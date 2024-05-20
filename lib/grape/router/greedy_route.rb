@@ -5,24 +5,16 @@
 
 module Grape
   class Router
-    class GreedyRoute
-      extend Forwardable
+    class GreedyRoute < BaseRoute
 
-      attr_reader :index, :pattern, :options, :attributes
-
-      # params must be handled in this class to avoid method redefined warning
-      delegate Grape::Router::AttributeTranslator::ROUTE_ATTRIBUTES - [:params] => :@attributes
-
-      def initialize(index:, pattern:, **options)
-        @index = index
+      def initialize(pattern:, **options)
         @pattern = pattern
-        @options = options
-        @attributes = Grape::Router::AttributeTranslator.new(**options)
+        super(**options)
       end
 
       # Grape::Router:Route defines params as a function
       def params(_input = nil)
-        @attributes.params || {}
+        options[:params] || {}
       end
     end
   end

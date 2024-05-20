@@ -3,11 +3,12 @@
 module Grape
   class Router
     class Pattern
+      extend Forwardable
+
       DEFAULT_CAPTURES = %w[format version].freeze
 
       attr_reader :origin, :path, :pattern, :to_regexp
 
-      extend Forwardable
       def_delegators :pattern, :named_captures, :params
       def_delegators :to_regexp, :===
       alias match? ===

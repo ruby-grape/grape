@@ -8,10 +8,7 @@ module Grape
       def concat_values(inherited_value, new_value)
         return inherited_value unless new_value
 
-        [].tap do |value|
-          value.concat(new_value)
-          value.concat(inherited_value)
-        end
+        new_value + inherited_value
       end
     end
   end

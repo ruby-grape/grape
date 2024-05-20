@@ -26,10 +26,10 @@ module Grape
 
       def keys
         if new_values.any?
-          combined = inherited_values.keys
-          combined.concat(new_values.keys)
-          combined.uniq!
-          combined
+          inherited_values.keys.tap do |combined|
+            combined.concat(new_values.keys)
+            combined.uniq!
+          end
         else
           inherited_values.keys
         end

@@ -28,10 +28,7 @@ module Grape
         next unless map.key?(method)
 
         routes = map[method]
-        optimized_map = routes.map.with_index do |route, index|
-          route.index = index
-          Regexp.new("(?<_#{index}>#{route.pattern.to_regexp})")
-        end
+        optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         @optimized_map[method] = Regexp.union(optimized_map)
       end
       @compiled = true
@@ -42,8 +39,10 @@ module Grape
     end
 
     def associate_routes(pattern, **options)
-      @neutral_regexes << Regexp.new("(?<_#{@neutral_map.length}>)#{pattern.to_regexp}")
-      @neutral_map << Grape::Router::GreedyRoute.new(pattern: pattern, index: @neutral_map.length, **options)
+      Grape::Router::GreedyRoute.new(pattern: pattern, **options).then do |greedy_route|
+        @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
+        @neutral_map << greedy_route
+      end
     end
 
     def call(env)
@@ -143,11 +142,11 @@ module Grape
     end
 
     def match?(input, method)
-      @optimized_map[method].match(input) { |m| @map[method].detect { |route| m["_#{route.index}"] } }
+      @optimized_map[method].match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_index] } }
     end
 
     def greedy_match?(input)
-      @union.match(input) { |m| @neutral_map.detect { |route| m["_#{route.index}"] } }
+      @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_index] } }
     end
 
     def call_with_allow_headers(env, route)

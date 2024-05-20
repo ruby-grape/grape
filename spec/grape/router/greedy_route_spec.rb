@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Grape::Router::GreedyRoute do
-  let(:instance) { described_class.new(index: index, pattern: pattern, **options) }
+  let(:instance) { described_class.new(pattern: pattern, **options) }
   let(:index) { 0 }
   let(:pattern) { :pattern }
   let(:params) do
@@ -9,12 +9,6 @@ RSpec.describe Grape::Router::GreedyRoute do
   end
   let(:options) do
     { params: params }.freeze
-  end
-
-  describe '#index' do
-    subject { instance.index }
-
-    it { is_expected.to eq(index) }
   end
 
   describe '#pattern' do
@@ -38,6 +32,6 @@ RSpec.describe Grape::Router::GreedyRoute do
   describe '#attributes' do
     subject { instance.attributes }
 
-    it { is_expected.to be_a(Grape::Router::AttributeTranslator) }
+    it { is_expected.to eq(options) }
   end
 end
