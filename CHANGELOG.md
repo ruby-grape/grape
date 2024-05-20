@@ -30,6 +30,7 @@
 * [#2434](https://github.com/ruby-grape/grape/pull/2434): Implement nested `with` support in parameter dsl - [@numbata](https://github.com/numbata).
 * [#2438](https://github.com/ruby-grape/grape/pull/2438): Fix some Rack::Lint - [@ericproulx](https://github.com/ericproulx).
 * [#2437](https://github.com/ruby-grape/grape/pull/2437): Add length validator - [@dhruvCW](https://github.com/dhruvCW).
+* [#2445](https://github.com/ruby-grape/grape/pull/2445): Remove builder as a dependency - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
