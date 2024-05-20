@@ -7,6 +7,7 @@ source('https://rubygems.org')
 gemspec
 
 group :development, :test do
+  gem 'builder', require: false
   gem 'bundler'
   gem 'rake'
   gem 'rubocop', '1.63.2', require: false

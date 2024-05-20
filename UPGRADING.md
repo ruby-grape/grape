@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
+#### Builder => XML
+
+From now on, if you want to generate XML, you'll need to add `builder` in your Gemfile.
+
 #### Deep Merging of Parameter Attributes
 
 Grape now uses `deep_merge` to combine parameter attributes within the `with` method. Previously, attributes defined at the parameter level would override those defined at the group level.
