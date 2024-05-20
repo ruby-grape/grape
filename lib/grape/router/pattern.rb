@@ -65,6 +65,7 @@ module Grape
 
       class PatternCache < Grape::Util::Cache
         def initialize
+          super
           @cache = Hash.new do |h, (pattern, suffix)|
             h[[pattern, suffix]] = -"#{pattern}#{suffix}"
           end

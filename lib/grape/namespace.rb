@@ -36,6 +36,7 @@ module Grape
 
     class JoinedSpaceCache < Grape::Util::Cache
       def initialize
+        super
         @cache = Hash.new do |h, joined_space|
           h[joined_space] = Grape::Router.normalize_path(joined_space.join('/'))
         end

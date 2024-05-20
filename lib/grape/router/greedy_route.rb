@@ -6,7 +6,6 @@
 module Grape
   class Router
     class GreedyRoute < BaseRoute
-
       def initialize(pattern:, **options)
         @pattern = pattern
         super(**options)

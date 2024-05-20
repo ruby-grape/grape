@@ -6,6 +6,7 @@ module Grape
       delegate_missing_to :@options
 
       attr_reader :index, :pattern, :options
+
       def initialize(**options)
         @options = ActiveSupport::OrderedOptions.new.update(options)
       end
@@ -25,10 +26,9 @@ module Grape
         Regexp.new("(?<#{regexp_capture_index}>#{pattern_regexp})")
       end
 
-      private
-
       class CaptureIndexCache < Grape::Util::Cache
         def initialize
+          super
           @cache = Hash.new do |h, index|
             h[index] = "_#{index}"
           end

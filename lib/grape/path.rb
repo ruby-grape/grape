@@ -65,6 +65,7 @@ module Grape
 
     class PartsCache < Grape::Util::Cache
       def initialize
+        super
         @cache = Hash.new do |h, parts|
           h[parts] = Grape::Router.normalize_path(parts.join('/'))
         end
@@ -73,12 +74,16 @@ module Grape
 
     def parts
       [].tap do |parts|
-        parts << mount_path
-        parts << root_prefix if root_prefix.present?
+        add_part(parts, mount_path)
+        add_part(parts, root_prefix)
         parts << ':version' if uses_path_versioning?
-        parts << namespace
-        parts << raw_path
-      end.keep_if { |p| not_slash?(p) }
+        add_part(parts, namespace)
+        add_part(parts, raw_path)
+      end
+    end
+
+    def add_part(parts, value)
+      parts << value if value && not_slash?(value)
     end
 
     def not_slash?(value)
