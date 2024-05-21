@@ -3,9 +3,11 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
-#### Builder => XML
+#### Optional Builder
 
-From now on, if you want to generate XML, you'll need to add `builder` in your Gemfile.
+The `builder` gem dependency has been made optional as it's only used when generating XML. If your code does, add `builder` to your `Gemfile`.
+
+See [#2445](https://github.com/ruby-grape/grape/pull/2445) for more information.
 
 #### Deep Merging of Parameter Attributes
 
