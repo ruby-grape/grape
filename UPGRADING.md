@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 2.1.0
 
+#### Optional Builder
+
+The `builder` gem dependency has been made optional as it's only used when generating XML. If your code does, add `builder` to your `Gemfile`.
+
+See [#2445](https://github.com/ruby-grape/grape/pull/2445) for more information.
+
 #### Deep Merging of Parameter Attributes
 
 Grape now uses `deep_merge` to combine parameter attributes within the `with` method. Previously, attributes defined at the parameter level would override those defined at the group level.
