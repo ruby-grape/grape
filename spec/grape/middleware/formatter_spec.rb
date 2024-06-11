@@ -453,12 +453,19 @@ describe Grape::Middleware::Formatter do
     let(:env) do
       { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
     end
+    let(:headers) do
+      if Gem::Version.new(Rack.release) < Gem::Version.new('3.1')
+        { Rack::CONTENT_TYPE => 'application/json', Rack::CONTENT_LENGTH => body.bytesize.to_s }
+      else
+        { Rack::CONTENT_TYPE => 'application/json' }
+      end
+    end
 
     it 'returns a file response' do
       expect(file).to receive(:each).and_yield(body)
       r = Rack::MockResponse[*subject.call(env)]
       expect(r).to be_successful
-      expect(r.headers).to eq({ Rack::CONTENT_TYPE => 'application/json', Rack::CONTENT_LENGTH => body.bytesize.to_s })
+      expect(r.headers).to eq(headers)
       expect(r.body).to eq('data')
     end
   end

@@ -10,6 +10,7 @@ module Grape
       ALLOW = 'Allow'
       LOCATION = 'Location'
       X_CASCADE = 'X-Cascade'
+      TRANSFER_ENCODING = 'Transfer-Encoding'
 
       SUPPORTED_METHODS = [
         Rack::GET,
