@@ -1252,7 +1252,7 @@ describe Grape::API do
       expect(last_response.content_type).to eq('text/plain')
       expect(last_response.content_length).to be_nil
       expect(last_response.headers[Rack::CACHE_CONTROL]).to eq('no-cache')
-      expect(last_response.headers[Rack::TRANSFER_ENCODING]).to eq('chunked')
+      expect(last_response.headers[Grape::Http::Headers::TRANSFER_ENCODING]).to eq('chunked')
 
       expect(last_response.body).to eq("c\r\nThis is some\r\nd\r\n file content\r\n0\r\n\r\n")
     end

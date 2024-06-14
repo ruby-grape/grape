@@ -58,9 +58,9 @@ class ChunkedResponse
 
     if !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.key?(status.to_i) &&
        !headers[Rack::CONTENT_LENGTH] &&
-       !headers[Rack::TRANSFER_ENCODING]
+       !headers[Grape::Http::Headers::TRANSFER_ENCODING]
 
-      headers[Rack::TRANSFER_ENCODING] = 'chunked'
+      headers[Grape::Http::Headers::TRANSFER_ENCODING] = 'chunked'
       response[2] = if headers['trailer']
                       TrailerBody.new(body)
                     else

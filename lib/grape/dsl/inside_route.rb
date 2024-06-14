@@ -350,7 +350,7 @@ module Grape
         return if value.nil? && @stream.nil?
 
         header Rack::CONTENT_LENGTH, nil
-        header Rack::TRANSFER_ENCODING, nil
+        header Grape::Http::Headers::TRANSFER_ENCODING, nil
         header Rack::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
         if value.is_a?(String)
           file_body = Grape::ServeStream::FileBody.new(value)
