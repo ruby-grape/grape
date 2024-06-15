@@ -1,4 +1,4 @@
-### 2.1.0 (Next)
+### 2.1.0 (2024/06/15)
 
 #### Features
 
@@ -31,7 +31,6 @@
 * [#2438](https://github.com/ruby-grape/grape/pull/2438): Fix some Rack::Lint - [@ericproulx](https://github.com/ericproulx).
 * [#2437](https://github.com/ruby-grape/grape/pull/2437): Add length validator - [@dhruvCW](https://github.com/dhruvCW).
 * [#2445](https://github.com/ruby-grape/grape/pull/2445): Remove builder as a dependency - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -47,7 +46,6 @@
 * [#2444](https://github.com/ruby-grape/grape/pull/2444): Replace method_missing in endpoint - [@ericproulx](https://github.com/ericproulx).
 * [#2441](https://github.com/ruby-grape/grape/pull/2441): Optimize memory alloc and retained - [@ericproulx](https://github.com/ericproulx).
 * [#2449](https://github.com/ruby-grape/grape/pull/2449): Rack 3.1 fixes - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 2.0.0 (2023/11/11)
 
