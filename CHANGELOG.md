@@ -2,7 +2,8 @@
 
 #### Features
 
-* [#2450](https://github.com/ruby-grape/grape/pull/2450): Update rubocop to 1.64.1 - [@ericproulx](https://github.com/ericproulx).
+* [#2450](https://github.com/ruby-grape/grape/pull/2450): Update RuboCop to 1.64.1 - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
 
 #### Fixes
 
