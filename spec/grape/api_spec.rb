@@ -4404,4 +4404,23 @@ describe Grape::API do
       expect(last_response.body).to eq('deprecated')
     end
   end
+
+  context 'rescue_from context' do
+    subject { last_response }
+
+    let(:api) do
+      Class.new(described_class) do
+        rescue_from :all do
+          error!(context.env, 400)
+        end
+        get { raise ArgumentError, 'Oops!' }
+      end
+    end
+
+    let(:app) { api }
+
+    before { get '/' }
+
+    it { is_expected.to be_bad_request }
+  end
 end
