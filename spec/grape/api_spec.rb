@@ -4417,7 +4417,7 @@ describe Grape::API do
       end
     end
 
-    let(:app) { api}
+    let(:app) { api }
 
     before { get '/' }
 
