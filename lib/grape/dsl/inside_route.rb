@@ -461,6 +461,10 @@ module Grape
       def http_version
         env['HTTP_VERSION'] || env[Rack::SERVER_PROTOCOL]
       end
+
+      def context
+        env[Grape::Env::API_ENDPOINT]
+      end
     end
   end
 end
