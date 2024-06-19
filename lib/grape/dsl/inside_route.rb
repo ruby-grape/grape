@@ -463,7 +463,7 @@ module Grape
       end
 
       def context
-        env[Grape::Env::API_ENDPOINT]
+        self
       end
     end
   end
