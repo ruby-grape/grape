@@ -12,7 +12,7 @@ describe 'Rails', if: defined?(Rails) do
 
       Class.new(Rails::Application) do
         config.eager_load = false
-        config.load_defaults 7.1
+        config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
         config.api_only = true
         config.consider_all_requests_local = true
         config.hosts << 'example.org'
