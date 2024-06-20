@@ -6,7 +6,8 @@ if defined?(Rails) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
       subject { test_app.deprecators[:grape] }
 
       let(:test_app) do
-
+        # https://github.com/rails/rails/issues/51784
+        # same error as described if not redefining the following
         ActiveSupport::Dependencies.autoload_paths = []
         ActiveSupport::Dependencies.autoload_once_paths = []
 

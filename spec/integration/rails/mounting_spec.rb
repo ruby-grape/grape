@@ -12,6 +12,8 @@ describe 'Rails', if: defined?(Rails) do
       require 'rails'
       require 'action_controller/railtie'
 
+      # https://github.com/rails/rails/issues/51784
+      # same error as described if not redefining the following
       ActiveSupport::Dependencies.autoload_paths = []
       ActiveSupport::Dependencies.autoload_once_paths = []
 
