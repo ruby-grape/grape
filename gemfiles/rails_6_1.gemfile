@@ -3,3 +3,4 @@
 eval_gemfile '../Gemfile'
 
 gem 'rails', '~> 6.1'
+gem 'tzinfo-data', require: false

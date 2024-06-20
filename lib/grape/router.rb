@@ -138,7 +138,8 @@ module Grape
     end
 
     def default_response
-      [404, { Grape::Http::Headers::X_CASCADE => 'pass' }, ['404 Not Found']]
+      headers = Grape::Util::Header.new.merge(Grape::Http::Headers::X_CASCADE => 'pass')
+      [404, headers, ['404 Not Found']]
     end
 
     def match?(input, method)

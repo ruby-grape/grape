@@ -45,6 +45,15 @@ jobs:
           - ruby: '3.3'
             gemfile: gemfiles/dry_validation.gemfile
             specs: 'spec/integration/dry_validation'
+          - ruby: '3.3'
+            gemfile: gemfiles/rails_6_1.gemfile
+            specs: 'spec/integration/rails'
+          - ruby: '3.3'
+            gemfile: gemfiles/rails_7_0.gemfile
+            specs: 'spec/integration/rails'
+          - ruby: '3.3'
+            gemfile: gemfiles/rails_7_1.gemfile
+            specs: 'spec/integration/rails'
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
