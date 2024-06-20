@@ -11,7 +11,7 @@ module Grape
       # There are a number of documentation options on entities that don't have
       # corresponding validators. Since there is nowhere that enumerates them all,
       # we maintain a list of them here and skip looking up validators for them.
-      RESERVED_DOCUMENTATION_KEYWORDS = %i[as required param_type is_array format example].freeze
+      RESERVED_DOCUMENTATION_KEYWORDS = %i[as required param_type is_array format example x].freeze
 
       class Attr
         attr_accessor :key, :scope
