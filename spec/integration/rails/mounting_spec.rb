@@ -39,7 +39,7 @@ describe 'Rails', if: defined?(Rails) do
       app.initialize!
     end
 
-    it 'responds' do
+    it 'cascades' do
       get '/test_grape'
       expect(last_response).to be_successful
       expect(last_response.body).to eq('rails mounted')
