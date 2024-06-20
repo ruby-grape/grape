@@ -8,7 +8,7 @@ if defined?(Rails) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
       let(:test_app) do
         Class.new(Rails::Application) do
           config.eager_load = false
-          config.load_defaults 7.1
+          config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
         end
       end
 
