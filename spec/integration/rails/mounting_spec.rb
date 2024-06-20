@@ -2,13 +2,15 @@
 
 describe 'Rails', if: defined?(Rails) do
   context 'rails mounted' do
+    let(:api) do
+      Class.new(Grape::API) do
+        get('/test_grape') { 'rails mounted' }
+      end
+    end
+
     let(:app) do
       require 'rails'
       require 'action_controller/railtie'
-
-      api = Class.new(Grape::API) do
-        get('/test_grape') { 'rails mounted' }
-      end
 
       Class.new(Rails::Application) do
         config.eager_load = false
@@ -18,7 +20,7 @@ describe 'Rails', if: defined?(Rails) do
         config.hosts << 'example.org'
 
         routes.append do
-          mount api => '/'
+          mount GrapeApi => '/'
 
           get 'up', to: lambda { |_env|
             ['200', {}, ['hello world']]
@@ -27,7 +29,10 @@ describe 'Rails', if: defined?(Rails) do
       end
     end
 
-    before { app.initialize! }
+    before do
+      stub_const('GrapeApi', api)
+      app.initialize!
+    end
 
     it 'responds' do
       get '/test_grape'
