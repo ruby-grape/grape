@@ -4,7 +4,7 @@ FROM ruby:$RUBY_VERSION-alpine
 ENV BUNDLE_PATH /usr/local/bundle/gems
 ENV LIB_PATH /var/grape
 
-RUN apk add --update --no-cache make gcc git libc-dev && \
+RUN apk add --update --no-cache make gcc git libc-dev gcompat && \
     gem update --system && gem install bundler
 
 WORKDIR $LIB_PATH

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-if defined?(Rails::Railtie) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
+if defined?(Rails) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
   describe Grape::Railtie do
     describe '.railtie' do
       subject { test_app.deprecators[:grape] }
