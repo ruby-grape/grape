@@ -6,6 +6,10 @@ if defined?(Rails) && ActiveSupport.gem_version >= Gem::Version.new('7.1')
       subject { test_app.deprecators[:grape] }
 
       let(:test_app) do
+
+        ActiveSupport::Dependencies.autoload_paths = []
+        ActiveSupport::Dependencies.autoload_once_paths = []
+
         Class.new(Rails::Application) do
           config.eager_load = false
           config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"

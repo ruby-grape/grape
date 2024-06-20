@@ -12,6 +12,9 @@ describe 'Rails', if: defined?(Rails) do
       require 'rails'
       require 'action_controller/railtie'
 
+      ActiveSupport::Dependencies.autoload_paths = []
+      ActiveSupport::Dependencies.autoload_once_paths = []
+
       Class.new(Rails::Application) do
         config.eager_load = false
         config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
