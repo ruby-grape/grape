@@ -80,3 +80,6 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/ContextWording:
   Enabled: false
+
+RSpec/MessageSpies:
+  EnforcedStyle: receive

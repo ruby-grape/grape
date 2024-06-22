@@ -74,7 +74,7 @@ module Grape
       end
 
       def mime_types
-        @mime_type ||= content_types.each_pair.with_object({}) do |(k, v), types_without_params|
+        @mime_types ||= content_types.each_pair.with_object({}) do |(k, v), types_without_params|
           types_without_params[v.split(';').first] = k
         end
       end

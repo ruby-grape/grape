@@ -57,8 +57,8 @@ module Grape
         middlewares.last
       end
 
-      def [](i)
-        middlewares[i]
+      def [](index)
+        middlewares[index]
       end
 
       def insert(index, *args, &block)

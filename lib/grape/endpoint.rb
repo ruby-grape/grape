@@ -231,8 +231,8 @@ module Grape
       options[:app].endpoints if options[:app].respond_to?(:endpoints)
     end
 
-    def equals?(e)
-      (options == e.options) && (inheritable_setting.to_hash == e.inheritable_setting.to_hash)
+    def equals?(endpoint)
+      (options == endpoint.options) && (inheritable_setting.to_hash == endpoint.inheritable_setting.to_hash)
     end
 
     protected

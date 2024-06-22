@@ -32,7 +32,7 @@ module Grape
       def inherited(api)
         super
 
-        api.initial_setup(Grape::API == self ? Grape::API::Instance : @base_instance)
+        api.initial_setup(self == Grape::API ? Grape::API::Instance : @base_instance)
         api.override_all_methods!
       end
 
@@ -108,7 +108,7 @@ module Grape
       end
 
       def respond_to?(method, include_private = false)
-        super(method, include_private) || base_instance.respond_to?(method, include_private)
+        super || base_instance.respond_to?(method, include_private)
       end
 
       def respond_to_missing?(method, include_private = false)
