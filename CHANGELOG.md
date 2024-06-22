@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#3458](https://github.com/ruby-grape/grape/pull/2458): Remove unused Grape::Util::Accept::Header - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.1.1 (2024-06-22)
