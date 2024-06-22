@@ -9,6 +9,7 @@
 
 * [#2453](https://github.com/ruby-grape/grape/pull/2453): Fix context in rescue_from - [@ericproulx](https://github.com/ericproulx).
 * [#2455](https://github.com/ruby-grape/grape/pull/2455): Fix default response headers to work with Rack 3 - [@ericproulx](https://github.com/ericproulx).
+* [#3458](https://github.com/ruby-grape/grape/pull/2458): Remove unused Grape::Util::Accept::Header - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.1.0 (2024/06/15)
