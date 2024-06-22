@@ -1,3 +1,13 @@
+### 2.2.0 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 2.1.1 (2024-06-22)
 
 #### Features
