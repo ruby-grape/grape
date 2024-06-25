@@ -93,9 +93,7 @@ module Grape
 
       def meets_dependency?(params, request_params)
         return true unless @dependent_on
-
         return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
-
         return params.any? { |param| meets_dependency?(param, request_params) } if params.is_a?(Array)
 
         meets_hash_dependency?(params)
@@ -103,7 +101,6 @@ module Grape
 
       def attr_meets_dependency?(params)
         return true unless @dependent_on
-
         return false if @parent.present? && !@parent.attr_meets_dependency?(params)
 
         meets_hash_dependency?(params)
@@ -301,12 +298,7 @@ module Grape
       #   `optional` invocation that opened this scope.
       # @yield parameter scope
       def new_group_scope(attrs, &block)
-        self.class.new(
-          api: @api,
-          parent: self,
-          group: attrs.first,
-          &block
-        )
+        self.class.new(api: @api, parent: self, group: attrs.first, &block)
       end
 
       # Pushes declared params to parent or settings
