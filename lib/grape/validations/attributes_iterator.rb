@@ -21,6 +21,7 @@ module Grape
       private
 
       def do_each(params_to_process, parent_indicies = [], &block)
+        @scope.reset_index # gets updated depending on the size of params_to_process
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indicies
