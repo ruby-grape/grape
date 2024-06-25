@@ -829,5 +829,31 @@ describe Grape::Endpoint do
         expect(JSON.parse(last_response.body)).to match({})
       end
     end
+
+    context 'with a renamed field inside `given` block nested in hashes' do
+      before do
+        subject.format :json
+        subject.params do
+          requires :a, type: Hash do
+            optional :c, type: String
+            given :c do
+              requires :b, type: Hash do
+                requires :input_field, as: :output_field
+              end
+            end
+          end
+        end
+        subject.post '/test' do
+          declared(params)
+        end
+      end
+
+      it 'renames parameter input_field to output_field' do
+        post '/test', { a: { b: { input_field: 'value' }, c: 'value2' } }
+
+        expect(JSON.parse(last_response.body)).to \
+          match('a' => { 'b' => { 'output_field' => 'value' }, 'c' => 'value2' })
+      end
+    end
   end
 end
