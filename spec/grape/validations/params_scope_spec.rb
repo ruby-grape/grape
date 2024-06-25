@@ -58,7 +58,7 @@ describe Grape::Validations::ParamsScope do
 
     it do
       subject.params do
-        requires :foo, as: :bar, type: String, coerce_with: ->(c) { c.strip }
+        requires :foo, as: :bar, type: String, coerce_with: lambda(&:strip)
       end
       subject.get('/renaming-coerced') { "#{params['bar']}-#{params['foo']}" }
       get '/renaming-coerced', foo: ' there we go '

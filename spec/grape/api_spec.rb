@@ -287,8 +287,10 @@ describe Grape::API do
         end
       end
 
-      after do
-        expect(last_response.body).to eql 'root'
+      shared_examples_for 'a root route' do
+        it 'returns root' do
+          expect(last_response.body).to eql 'root'
+        end
       end
 
       describe 'path versioned APIs' do
@@ -300,56 +302,104 @@ describe Grape::API do
         context 'when a single version provided' do
           let(:version) { 'v1' }
 
-          it 'without a format' do
-            versioned_get '/', 'v1', using: :path
+          context 'without a format' do
+            before do
+              versioned_get '/', 'v1', using: :path
+            end
+
+            it_behaves_like 'a root route'
           end
 
-          it 'with a format' do
-            get '/v1/.json'
+          context 'with a format' do
+            before do
+              get '/v1/.json'
+            end
+
+            it_behaves_like 'a root route'
           end
         end
 
         context 'when array of versions provided' do
           let(:version) { %w[v1 v2] }
 
-          it { versioned_get '/', 'v1', using: :path }
-          it { versioned_get '/', 'v2', using: :path }
+          context 'when v1' do
+            before do
+              versioned_get '/', 'v1', using: :path
+            end
+
+            it_behaves_like 'a root route'
+          end
+
+          context 'when v2' do
+            before do
+              versioned_get '/', 'v2', using: :path
+            end
+
+            it_behaves_like 'a root route'
+          end
         end
       end
 
-      it 'header versioned APIs' do
-        subject.version 'v1', using: :header, vendor: 'test'
-        subject.enable_root_route!
+      context 'when header versioned APIs' do
+        before do
+          subject.version 'v1', using: :header, vendor: 'test'
+          subject.enable_root_route!
+          versioned_get '/', 'v1', using: :header, vendor: 'test'
+        end
 
-        versioned_get '/', 'v1', using: :header, vendor: 'test'
+        it_behaves_like 'a root route'
       end
 
-      it 'header versioned APIs with multiple headers' do
-        subject.version %w[v1 v2], using: :header, vendor: 'test'
-        subject.enable_root_route!
+      context 'when header versioned APIs with multiple headers' do
+        before do
+          subject.version %w[v1 v2], using: :header, vendor: 'test'
+          subject.enable_root_route!
+        end
 
-        versioned_get '/', 'v1', using: :header, vendor: 'test'
-        versioned_get '/', 'v2', using: :header, vendor: 'test'
+        context 'when v1' do
+          before do
+            versioned_get '/', 'v1', using: :header, vendor: 'test'
+          end
+
+          it_behaves_like 'a root route'
+        end
+
+        context 'when v2' do
+          before do
+            versioned_get '/', 'v2', using: :header, vendor: 'test'
+          end
+
+          it_behaves_like 'a root route'
+        end
       end
 
-      it 'param versioned APIs' do
-        subject.version 'v1', using: :param
-        subject.enable_root_route!
+      context 'param versioned APIs' do
+        before do
+          subject.version 'v1', using: :param
+          subject.enable_root_route!
+          versioned_get '/', 'v1', using: :param
+        end
 
-        versioned_get '/', 'v1', using: :param
+        it_behaves_like 'a root route'
       end
 
-      it 'Accept-Version header versioned APIs' do
-        subject.version 'v1', using: :accept_version_header
-        subject.enable_root_route!
+      context 'when Accept-Version header versioned APIs' do
+        before do
+          subject.version 'v1', using: :accept_version_header
+          subject.enable_root_route!
+          versioned_get '/', 'v1', using: :accept_version_header
+        end
 
-        versioned_get '/', 'v1', using: :accept_version_header
+        it_behaves_like 'a root route'
       end
 
-      it 'unversioned APIs' do
-        subject.enable_root_route!
+      context 'unversioned APIss' do
+        before do
+          subject.enable_root_route!
+          get '/'
+        end
 
-        get '/'
+        it_behaves_like 'a root route'
       end
     end
 
@@ -438,9 +488,9 @@ describe Grape::API do
             subject.send(verb) do
               env[Grape::Env::API_REQUEST_BODY]
             end
-            send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql ::Grape::Json.dump(object)
+            expect(last_response.body).to eql Grape::Json.dump(object)
             expect(last_request.params).to eql({})
           end
 
@@ -449,9 +499,9 @@ describe Grape::API do
             subject.send(verb) do
               env[Grape::Env::API_REQUEST_INPUT]
             end
-            send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
-            expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
+            expect(last_response.body).to eql Grape::Json.dump(object).to_json
           end
 
           context 'chunked transfer encoding' do
@@ -460,9 +510,9 @@ describe Grape::API do
               subject.send(verb) do
                 env[Grape::Env::API_REQUEST_INPUT]
               end
-              send verb, '/', ::Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
+              send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
-              expect(last_response.body).to eql ::Grape::Json.dump(object).to_json
+              expect(last_response.body).to eql Grape::Json.dump(object).to_json
             end
           end
         end
@@ -993,9 +1043,14 @@ describe Grape::API do
   end
 
   describe '.compile!' do
-    it 'compiles the instance for rack!' do
-      stubbed_object = double(:instance_for_rack)
-      allow(app).to receive(:instance_for_rack) { stubbed_object }
+    let(:base_instance) { app.base_instance }
+
+    before do
+      allow(base_instance).to receive(:compile!).and_return(:compiled!)
+    end
+
+    it 'returns compiled!' do
+      expect(app.send(:compile!)).to eq(:compiled!)
     end
   end
 
@@ -1593,8 +1648,8 @@ describe Grape::API do
 
     it 'has access to helper methods' do
       subject.helpers do
-        def authorize(u, p)
-          u == 'allow' && p == 'whatever'
+        def authorize(user, password)
+          user == 'allow' && password == 'whatever'
         end
       end
 
@@ -1634,7 +1689,7 @@ describe Grape::API do
           def self.io
             @io ||= StringIO.new
           end
-          logger ::Logger.new(io)
+          logger Logger.new(io)
         end
       end
 
@@ -2496,7 +2551,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      json = ::Grape::Json.load(last_response.body)
+      json = Grape::Json.load(last_response.body)
       expect(json['error']).to eql 'rain!'
       expect(json['backtrace'].length).to be > 0
     end
@@ -2511,24 +2566,26 @@ describe Grape::API do
     end
 
     context 'with json format' do
-      before { subject.format :json }
+      shared_examples_for 'a json format api' do |error_message|
+        subject { JSON.parse(last_response.body) }
 
-      after do
-        get '/error'
-        expect(last_response.body).to eql('{"error":"failure"}')
+        before  { get '/error' }
+
+        let(:app) do
+          Class.new(Grape::API) do
+            format :json
+            get('/error') { error!(error_message, 401) }
+          end
+        end
+
+        context "when error! called with #{error_message.class.name}" do
+          it { is_expected.to eq('error' => 'failure') }
+        end
       end
 
-      it 'rescues error! called with a string and returns json' do
-        subject.get('/error') { error!(:failure, 401) }
-      end
-
-      it 'rescues error! called with a symbol and returns json' do
-        subject.get('/error') { error!(:failure, 401) }
-      end
-
-      it 'rescues error! called with a hash and returns json' do
-        subject.get('/error') { error!({ error: :failure }, 401) }
-      end
+      it_behaves_like 'a json format api', 'failure'
+      it_behaves_like 'a json format api', :failure
+      it_behaves_like 'a json format api', { error: :failure }
     end
   end
 
@@ -3083,13 +3140,13 @@ describe Grape::API do
         optional :param2
       end
       subject.namespace 'ns1' do
-        get { ; }
+        get {}
       end
       subject.params do
         optional :param2
       end
       subject.namespace 'ns2' do
-        get { ; }
+        get {}
       end
       routes_doc = subject.routes.map do |route|
         { description: route.description, params: route.params }
@@ -3216,6 +3273,12 @@ describe Grape::API do
           optional :bar
         end
       end
+      subject.get 'method'
+      expect(subject.routes.map do |route|
+        { description: route.description, params: route.params }
+      end).to eq [
+        { description: nil, params: { 'foo' => { required: true, type: 'Array' }, 'foo[bar]' => { required: false } } }
+      ]
     end
 
     it 'parses parameters when no description is given' do
@@ -3693,7 +3756,7 @@ describe Grape::API do
 
     it 'path' do
       get '/endpoint/options'
-      options = ::Grape::Json.load(last_response.body)
+      options = Grape::Json.load(last_response.body)
       expect(options['path']).to eq(['/endpoint/options'])
       expect(options['source_location'][0]).to include 'api_spec.rb'
       expect(options['source_location'][1].to_i).to be > 0

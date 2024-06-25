@@ -231,7 +231,7 @@ module Grape
 
       alias group requires
 
-      class EmptyOptionalValue; end
+      class EmptyOptionalValue; end # rubocop:disable Lint/EmptyClass
 
       def map_params(params, element, is_array = false)
         if params.is_a?(Array)

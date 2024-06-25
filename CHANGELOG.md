@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2459](https://github.com/ruby-grape/grape/pull/2459): Autocorrect cops - [@ericproulx](https://github.com/ericproulx).
 * [#3458](https://github.com/ruby-grape/grape/pull/2458): Remove unused Grape::Util::Accept::Header - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

@@ -259,7 +259,7 @@ module Grape
         it 'does not modify options parameter' do
           allow(subject).to receive(:namespace)
           expect { subject.route_param('foo', options, &proc {}) }
-            .not_to change { options }
+            .not_to(change { options })
         end
       end
 

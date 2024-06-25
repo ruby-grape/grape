@@ -74,8 +74,8 @@ module Grape
         rack_response(status, headers, format_message(message, backtrace, original_exception))
       end
 
-      def default_rescue_handler(e)
-        error_response(message: e.message, backtrace: e.backtrace, original_exception: e)
+      def default_rescue_handler(exception)
+        error_response(message: exception.message, backtrace: exception.backtrace, original_exception: exception)
       end
 
       def rescue_handler_for_base_only_class(klass)

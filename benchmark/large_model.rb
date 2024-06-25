@@ -140,7 +140,7 @@ class API < Grape::API
   def self.vrp_request_partition(this)
     this.requires(:method, type: String, values: %w[hierarchical_tree balanced_kmeans])
     this.optional(:metric, type: Symbol)
-    this.optional(:entity, type: Symbol, values: %i[vehicle work_day], coerce_with: ->(value) { value.to_sym })
+    this.optional(:entity, type: Symbol, values: %i[vehicle work_day], coerce_with: lambda(&:to_sym))
     this.optional(:threshold, type: Integer)
   end
 

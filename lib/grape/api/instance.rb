@@ -46,7 +46,7 @@ module Grape
         # Parses the API's definition and compiles it into an instance of
         # Grape::API.
         def compile
-          @instance ||= new
+          @instance ||= new # rubocop:disable Naming/MemoizedInstanceVariableName
         end
 
         # Wipe the compiled API so we can recompile after changes were made.

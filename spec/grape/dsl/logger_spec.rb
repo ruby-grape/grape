@@ -9,7 +9,7 @@ describe Grape::DSL::Logger do
     end
   end
 
-  let(:logger) { instance_double(::Logger) }
+  let(:logger) { instance_double(Logger) }
 
   describe '.logger' do
     it 'sets a logger' do
