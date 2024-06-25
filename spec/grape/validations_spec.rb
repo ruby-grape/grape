@@ -352,6 +352,49 @@ describe Grape::Validations do
       end
     end
 
+    # Ensure there is no leakage of indices between requests
+    context 'required with a hash inside an array' do
+      before do
+        subject.params do
+          requires :items, type: Array do
+            requires :item, type: Hash do
+              requires :name, type: String
+            end
+          end
+        end
+        subject.post '/required' do
+          'required works'
+        end
+      end
+
+      let(:valid_item) { { item: { name: 'foo' } } }
+
+      let(:params) do
+        {
+          items: [
+            valid_item,
+            valid_item,
+            {}
+          ]
+        }
+      end
+
+      it 'make sure the error message is independent of the previous request' do
+        post_with_json '/required', {}
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items is missing, items[item][name] is missing')
+
+        post_with_json '/required', params
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[2][item] is missing, items[2][item][name] is missing')
+
+        post_with_json '/required', {}
+        expect(last_response.status).to eq(400)
+        # actual 'items is missing, items[2][item][name] is missing'
+        expect(last_response.body).to eq('items is missing, items[item][name] is missing')
+      end
+    end
+
     context 'required with a Hash block' do
       before do
         subject.params do
