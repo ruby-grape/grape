@@ -8,7 +8,7 @@ module DeprecatedWarningHandler
   DEPRECATION_REGEX = /is deprecated/.freeze
 
   def warn(message)
-    return super(message) unless message.match?(DEPRECATION_REGEX)
+    return super unless message.match?(DEPRECATION_REGEX)
 
     exception = DeprecationWarning.new(message)
     exception.set_backtrace(caller)

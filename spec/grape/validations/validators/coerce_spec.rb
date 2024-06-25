@@ -655,19 +655,19 @@ describe Grape::Validations::Validators::CoerceValidator do
           params[:values]
         end
 
-        post '/coerce_nested_strings', ::Grape::Json.dump(values: 'a,b,c,d'), 'CONTENT_TYPE' => 'application/json'
+        post '/coerce_nested_strings', Grape::Json.dump(values: 'a,b,c,d'), 'CONTENT_TYPE' => 'application/json'
         expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([%w[a b c d]])
 
-        post '/coerce_nested_strings', ::Grape::Json.dump(values: [%w[a c], %w[b]]), 'CONTENT_TYPE' => 'application/json'
+        post '/coerce_nested_strings', Grape::Json.dump(values: [%w[a c], %w[b]]), 'CONTENT_TYPE' => 'application/json'
         expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([%w[a c], %w[b]])
 
-        post '/coerce_nested_strings', ::Grape::Json.dump(values: [[]]), 'CONTENT_TYPE' => 'application/json'
+        post '/coerce_nested_strings', Grape::Json.dump(values: [[]]), 'CONTENT_TYPE' => 'application/json'
         expect(last_response).to be_created
         expect(JSON.parse(last_response.body)).to eq([[]])
 
-        post '/coerce_nested_strings', ::Grape::Json.dump(values: [['a', { bar: 0 }], ['b']]), 'CONTENT_TYPE' => 'application/json'
+        post '/coerce_nested_strings', Grape::Json.dump(values: [['a', { bar: 0 }], ['b']]), 'CONTENT_TYPE' => 'application/json'
         expect(last_response).to be_bad_request
       end
 

@@ -4,7 +4,7 @@ module Grape
   module Exceptions
     class ValidationErrors < Grape::Exceptions::Base
       ERRORS_FORMAT_KEY = 'grape.errors.format'
-      DEFAULT_ERRORS_FORMAT = '%{attributes} %{message}'
+      DEFAULT_ERRORS_FORMAT = '%<attributes>s %<message>s'
 
       include Enumerable
 

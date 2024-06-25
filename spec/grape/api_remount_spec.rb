@@ -306,13 +306,15 @@ describe Grape::API do
               tags ['not_configurable_tag', configuration[:a_configurable_tag]]
             end
             get 'location' do
-              'success'
+              route.tags
             end
           end
         end
 
         it 'mounts the endpoint with the appropiate tags' do
           root_api.mount({ a_remounted_api => 'integer' }, with: { a_configurable_tag: 'a configured tag' })
+          get '/integer/location', param_key: 'a'
+          expect(JSON.parse(last_response.body)).to eq ['not_configurable_tag', 'a configured tag']
         end
       end
 

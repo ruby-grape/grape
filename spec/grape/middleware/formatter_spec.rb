@@ -16,7 +16,7 @@ describe Grape::Middleware::Formatter do
 
     it 'looks at the bodies for possibly serializable data' do
       r = Rack::MockResponse[*subject.call(env)]
-      expect(r.body).to eq(::Grape::Json.dump(body))
+      expect(r.body).to eq(Grape::Json.dump(body))
     end
 
     context 'default format' do
@@ -336,7 +336,7 @@ describe Grape::Middleware::Formatter do
         let(:io) { double }
 
         before do
-          allow(io).to receive_message_chain(:rewind, :read).and_return(nil)
+          allow(io).to receive_message_chain(rewind: nil, read: nil)
         end
 
         it 'does not read and parse the body' do
@@ -355,7 +355,7 @@ describe Grape::Middleware::Formatter do
         let(:io) { double }
 
         before do
-          allow(io).to receive_message_chain(:rewind, :read).and_return('')
+          allow(io).to receive_messages(rewind: nil, read: '')
         end
 
         it 'does not read and parse the body' do

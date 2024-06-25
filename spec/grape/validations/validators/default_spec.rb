@@ -382,8 +382,8 @@ describe Grape::Validations::Validators::DefaultValidator do
         [JSON, { test: 'non-empty-string' }.to_json],
         [Array[JSON], []],
         [Array[JSON], [{ test: 'non-empty-string' }.to_json]],
-        [::File, ''],
-        [::File, { test: 'non-empty-string' }.to_json],
+        [File, ''],
+        [File, { test: 'non-empty-string' }.to_json],
         [Rack::Multipart::UploadedFile, ''],
         [Rack::Multipart::UploadedFile, { test: 'non-empty-string' }.to_json]
       ].each do |type, default|

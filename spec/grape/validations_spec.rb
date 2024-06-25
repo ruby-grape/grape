@@ -4,11 +4,7 @@ describe Grape::Validations do
   subject { Class.new(Grape::API) }
 
   let(:app) { subject }
-  let(:declard_params) {}
-
-  def declared_params
-    subject.namespace_stackable(:declared_params).flatten
-  end
+  let(:declared_params) { subject.namespace_stackable(:declared_params).flatten }
 
   describe 'params' do
     context 'optional' do
@@ -1365,24 +1361,6 @@ describe Grape::Validations do
     end
 
     context 'named' do
-      context 'can be defined' do
-        it 'in helpers' do
-          subject.helpers do
-            params :pagination do
-            end
-          end
-        end
-
-        it 'in helper module which kind of Grape::DSL::Helpers::BaseHelper' do
-          shared_params = Module.new do
-            extend Grape::DSL::Helpers::BaseHelper
-            params :pagination do
-            end
-          end
-          subject.helpers shared_params
-        end
-      end
-
       context 'can be included in usual params' do
         before do
           shared_params = Module.new do

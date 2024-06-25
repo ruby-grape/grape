@@ -5,6 +5,7 @@ module Grape
     describe InheritableSetting do
       before do
         described_class.reset_global!
+        subject.inherit_from parent
       end
 
       let(:parent) do
@@ -26,10 +27,6 @@ module Grape
           settings.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :namespace_reverse_stackable_foo_bar_other
           settings.route[:route_thing] = :route_foo_bar_other
         end
-      end
-
-      before do
-        subject.inherit_from parent
       end
 
       describe '#global' do
