@@ -169,6 +169,10 @@ module Grape
         !@optional
       end
 
+      def reset_index
+        @index = nil
+      end
+
       protected
 
       # Adds a parameter declaration to our list of validations.
