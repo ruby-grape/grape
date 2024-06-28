@@ -1,15 +1,10 @@
-### 2.2.0 (Next)
-
-#### Features
-
-* Your contribution here.
+### 2.1.2 (2024-06-28)
 
 #### Fixes
 
 * [#2459](https://github.com/ruby-grape/grape/pull/2459): Autocorrect cops - [@ericproulx](https://github.com/ericproulx).
 * [#3458](https://github.com/ruby-grape/grape/pull/2458): Remove unused Grape::Util::Accept::Header - [@ericproulx](https://github.com/ericproulx).
 * [#2463](https://github.com/ruby-grape/grape/pull/2463): Fix error message indices - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 2.1.1 (2024-06-22)
 
