@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2467](https://github.com/ruby-grape/grape/pull/2467): Fix repo coverage - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.1.2 (2024-06-28)
