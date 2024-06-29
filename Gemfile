@@ -28,8 +28,8 @@ group :test do
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'
   gem 'ruby-grape-danger', '~> 0.2', require: false
-  gem 'simplecov', '~> 0.21'
-  gem 'simplecov-lcov', '~> 0.8'
+  gem 'simplecov', '~> 0.21', require: false
+  gem 'simplecov-lcov', '~> 0.8', require: false
   gem 'test-prof', require: false
 end
 
