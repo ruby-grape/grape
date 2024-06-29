@@ -1,14 +1,9 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
-
+require 'simplecov'
 require 'rubygems'
 require 'bundler'
 Bundler.require :default, :test
-
-require 'grape'
 
 Grape.deprecator.behavior = :raise
 
@@ -27,7 +22,6 @@ RSpec.configure do |config|
   config.include Spec::Support::Helpers
   config.raise_errors_for_deprecations!
   config.filter_run_when_matching :focus
-  config.warnings = true
 
   config.before(:all) { Grape::Util::InheritableSetting.reset_global! }
   config.before { Grape::Util::InheritableSetting.reset_global! }
@@ -35,13 +29,3 @@ RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
 end
-
-require 'simplecov'
-require 'simplecov-lcov'
-SimpleCov::Formatter::LcovFormatter.config do |c|
-  c.report_with_single_file = true
-  c.single_report_path = 'coverage/lcov.info'
-end
-
-SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
-SimpleCov.start
