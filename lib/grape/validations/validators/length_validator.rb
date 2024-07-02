@@ -18,6 +18,8 @@ module Grape
         def validate_param!(attr_name, params)
           param = params[attr_name]
 
+          return if param.nil?
+
           raise ArgumentError, "parameter #{param} does not support #length" unless param.respond_to?(:length)
 
           return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max)
