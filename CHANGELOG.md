@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2464](https://github.com/ruby-grape/grape/pull/2464): Length validator allow nil - [@OuYangJinTing](https://github.com/OuYangJinTing).
 * Your contribution here.
 
 #### Fixes

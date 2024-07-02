@@ -82,6 +82,12 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       params do
+        requires :list, type: [Integer], length: { min: 2 }
+      end
+      post '/nil_param' do
+      end
+
+      params do
         requires :list, type: [Integer], length: { min: 2, message: 'not match' }
       end
       post '/custom-message' do
@@ -183,6 +189,16 @@ describe Grape::Validations::Validators::LengthValidator do
         post '/zero_max', list: [{ key: 'value' }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('list is expected to have length less than or equal to 0')
+      end
+    end
+  end
+
+  describe '/nil_param' do
+    context 'no raises errors' do
+      it do
+        expect do
+          post '/nil_param', list: nil
+        end.not_to raise_error
       end
     end
   end

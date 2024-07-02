@@ -1713,6 +1713,7 @@ end
 #### `length`
 
 Parameters with types that support `#length` method can be restricted to have a specific length with the `:length` option.
+In addition, if the received parameter value is nil, the length validation will not be triggered. If you do not allow nil, you can use the `allow_blank: false` option.
 
 The validator accepts `:min` or `:max` or both options to validate that the value of the parameter is within the given limits.
 
