@@ -163,12 +163,14 @@ module Grape
       # end user with the specified message.
       #
       # @param message [String] The message to display.
-      # @param status [Integer] the HTTP Status Code. Defaults to default_error_status, 500 if not set.
+      # @param status [Integer] The HTTP Status Code. Defaults to default_error_status, 500 if not set.
       # @param additional_headers [Hash] Addtional headers for the response.
-      def error!(message, status = nil, additional_headers = nil)
+      # @param backtrace [Array<String>] The backtrace of the exception that caused the error.
+      # @param original_exception [Exception] The original exception that caused the error.
+      def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
         status = self.status(status || namespace_inheritable(:default_error_status))
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, message: message, status: status, headers: headers
+        throw :error, message: message, status: status, headers: headers, backtrace: backtrace, original_exception: original_exception
       end
 
       # Creates a Rack response based on the provided message, status, and headers.
