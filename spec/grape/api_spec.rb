@@ -2532,6 +2532,18 @@ describe Grape::API do
         get '/exception'
         expect(last_response.body).to eq('message: rain! @backtrace')
       end
+
+      it 'returns a modified error with a custom error format' do
+        subject.rescue_from :all, backtrace: true do |e|
+          error!('raining dogs and cats', 418, {}, e.backtrace, e)
+        end
+        subject.error_formatter :txt, with: custom_error_formatter
+        subject.get '/exception' do
+          raise 'rain!'
+        end
+        get '/exception'
+        expect(last_response.body).to eq('message: raining dogs and cats @backtrace')
+      end
     end
 
     it 'rescues all errors and return :json' do
