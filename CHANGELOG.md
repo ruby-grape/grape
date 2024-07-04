@@ -8,6 +8,7 @@
 
 * [#2467](https://github.com/ruby-grape/grape/pull/2467): Fix repo coverage - [@ericproulx](https://github.com/ericproulx).
 * [#2468](https://github.com/ruby-grape/grape/pull/2468): Align `error!` method signatures across different places - [@numbata](https://github.com/numbata).
+* [#2469](https://github.com/ruby-grape/grape/pull/2469): Fix full path building for lateral scopes - [@numbata](https://github.com/numbata).
 * Your contribution here.
 
 ### 2.1.2 (2024-06-28)
