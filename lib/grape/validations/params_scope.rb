@@ -190,7 +190,13 @@ module Grape
       #
       # @return [Array<Symbol>] the nesting/path of the current parameter scope
       def full_path
-        nested? ? @parent.full_path + [@element] : []
+        if nested?
+          (@parent.full_path + [@element])
+        elsif lateral?
+          @parent.full_path
+        else
+          []
+        end
       end
 
       private
