@@ -6,7 +6,7 @@
 
 #### Fixes
 
-* Your contribution here.
+* [#2471](https://github.com/ruby-grape/grape/pull/2471): Fix absence of original_exception and/or backtrace even if passed in error! - [@numbata](https://github.com/numbata).
 
 ### 2.1.3 (2024-07-13)
 

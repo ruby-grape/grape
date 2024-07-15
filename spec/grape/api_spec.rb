@@ -2599,6 +2599,150 @@ describe Grape::API do
       it_behaves_like 'a json format api', :failure
       it_behaves_like 'a json format api', { error: :failure }
     end
+
+    context 'when rescue_from enables backtrace without original exception' do
+      let(:app) do
+        response_type = response_format
+
+        Class.new(Grape::API) do
+          format response_type
+
+          rescue_from :all, backtrace: true, original_exception: false do |e|
+            error!('raining dogs and cats!', 418, {}, e.backtrace, e)
+          end
+
+          get '/exception' do
+            raise 'rain!'
+          end
+        end
+      end
+
+      before do
+        get '/exception'
+      end
+
+      context 'with json response type format' do
+        subject { JSON.parse(last_response.body) }
+
+        let(:response_format) { :json }
+
+        it { is_expected.to include('error' => a_kind_of(String), 'backtrace' => a_kind_of(Array)) }
+        it { is_expected.not_to include('original_exception') }
+      end
+
+      context 'with txt response type format' do
+        subject { last_response.body }
+
+        let(:response_format) { :txt }
+
+        it { is_expected.to include('backtrace') }
+        it { is_expected.not_to include('original_exception') }
+      end
+
+      context 'with xml response type format' do
+        subject { Grape::Xml.parse(last_response.body)['error'] }
+
+        let(:response_format) { :xml }
+
+        it { is_expected.to have_key('backtrace') }
+        it { is_expected.not_to have_key('original-exception') }
+      end
+    end
+
+    context 'when rescue_from enables original exception without backtrace' do
+      let(:app) do
+        response_type = response_format
+
+        Class.new(Grape::API) do
+          format response_type
+
+          rescue_from :all, backtrace: false, original_exception: true do |e|
+            error!('raining dogs and cats!', 418, {}, e.backtrace, e)
+          end
+
+          get '/exception' do
+            raise 'rain!'
+          end
+        end
+      end
+
+      before do
+        get '/exception'
+      end
+
+      context 'with json response type format' do
+        subject { JSON.parse(last_response.body) }
+
+        let(:response_format) { :json }
+
+        it { is_expected.to include('error' => a_kind_of(String), 'original_exception' => a_kind_of(String)) }
+        it { is_expected.not_to include('backtrace') }
+      end
+
+      context 'with txt response type format' do
+        subject { last_response.body }
+
+        let(:response_format) { :txt }
+
+        it { is_expected.to include('original exception') }
+        it { is_expected.not_to include('backtrace') }
+      end
+
+      context 'with xml response type format' do
+        subject { Grape::Xml.parse(last_response.body)['error'] }
+
+        let(:response_format) { :xml }
+
+        it { is_expected.to have_key('original-exception') }
+        it { is_expected.not_to have_key('backtrace') }
+      end
+    end
+
+    context 'when rescue_from include backtrace and original exception' do
+      let(:app) do
+        response_type = response_format
+
+        Class.new(Grape::API) do
+          format response_type
+
+          rescue_from :all, backtrace: true, original_exception: true do |e|
+            error!('raining dogs and cats!', 418, {}, e.backtrace, e)
+          end
+
+          get '/exception' do
+            raise 'rain!'
+          end
+        end
+      end
+
+      before do
+        get '/exception'
+      end
+
+      context 'with json response type format' do
+        subject { JSON.parse(last_response.body) }
+
+        let(:response_format) { :json }
+
+        it { is_expected.to include('error' => a_kind_of(String), 'backtrace' => a_kind_of(Array), 'original_exception' => a_kind_of(String)) }
+      end
+
+      context 'with txt response type format' do
+        subject { last_response.body }
+
+        let(:response_format) { :txt }
+
+        it { is_expected.to include('backtrace', 'original exception') }
+      end
+
+      context 'with xml response type format' do
+        subject { Grape::Xml.parse(last_response.body)['error'] }
+
+        let(:response_format) { :xml }
+
+        it { is_expected.to have_key('backtrace') & have_key('original-exception') }
+      end
+    end
   end
 
   describe '.content_type' do
