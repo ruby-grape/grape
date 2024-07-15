@@ -170,7 +170,12 @@ module Grape
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
         status = self.status(status || namespace_inheritable(:default_error_status))
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, message: message, status: status, headers: headers, backtrace: backtrace, original_exception: original_exception
+        throw :error,
+              message: message,
+              status: status,
+              headers: headers,
+              backtrace: backtrace,
+              original_exception: original_exception
       end
 
       # Creates a Rack response based on the provided message, status, and headers.

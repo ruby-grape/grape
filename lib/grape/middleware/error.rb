@@ -120,9 +120,9 @@ module Grape
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
         end
 
-        response = error!(response[:message], response[:status], response[:headers]) if error?(response)
-
-        if response.is_a?(Rack::Response)
+        if error?(response)
+          error_response(response)
+        elsif response.is_a?(Rack::Response)
           response
         else
           run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new, endpoint)
@@ -137,7 +137,9 @@ module Grape
       end
 
       def error?(response)
-        response.is_a?(Hash) && response[:message] && response[:status] && response[:headers]
+        return false unless response.is_a?(Hash)
+
+        response.key?(:message) && response.key?(:status) && response.key?(:headers)
       end
     end
   end
