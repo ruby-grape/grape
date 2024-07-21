@@ -192,11 +192,7 @@ describe Grape::Middleware::Formatter do
     end
 
     context 'with custom vendored content types' do
-      before do
-        subject.options[:content_types] = {}.tap do |ct|
-          ct[:custom] = 'application/vnd.test+json'
-        end
-      end
+      subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
 
       it 'uses the custom type' do
         subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
@@ -227,18 +223,14 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'is set for custom' do
-      subject.options[:content_types] = {}.tap do |ct|
-        ct[:custom] = 'application/x-custom'
-      end
-      _, headers, = subject.call(Rack::PATH_INFO => '/info.custom')
+      s = described_class.new(app, content_types: { custom: 'application/x-custom' })
+      _, headers, = s.call(Rack::PATH_INFO => '/info.custom')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/x-custom')
     end
 
     it 'is set for vendored with registered type' do
-      subject.options[:content_types] = {}.tap do |ct|
-        ct[:custom] = 'application/vnd.test+json'
-      end
-      _, headers, = subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
+      s = described_class.new(app, content_types: { custom: 'application/vnd.test+json' })
+      _, headers, = s.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/vnd.test+json')
     end
 
@@ -250,10 +242,8 @@ describe Grape::Middleware::Formatter do
 
   context 'format' do
     it 'uses custom formatter' do
-      subject.options[:content_types] = {}
-      subject.options[:content_types][:custom] = "don't care"
-      subject.options[:formatters][:custom] = ->(_obj, _env) { 'CUSTOM FORMAT' }
-      r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.custom')]
+      s = described_class.new(app, content_types: { custom: "don't care" }, formatters: { custom: ->(_obj, _env) { 'CUSTOM FORMAT' } })
+      r = Rack::MockResponse[*s.call(Rack::PATH_INFO => '/info.custom')]
       expect(r.body).to eq('CUSTOM FORMAT')
     end
 
@@ -471,6 +461,8 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'inheritable formatters' do
+    subject { described_class.new(app, formatters: { invalid: invalid_formatter }, content_types: { invalid: 'application/x-invalid' }) }
+
     let(:invalid_formatter) do
       Class.new do
         def self.call(_, _)
@@ -481,22 +473,12 @@ describe Grape::Middleware::Formatter do
 
     let(:app) { ->(_env) { [200, {}, ['']] } }
     let(:env) do
-      { Rack::PATH_INFO => '/hello.invalid', Grape::Http::Headers::HTTP_ACCEPT => 'application/x-invalid' }
-    end
-
-    before do
-      Grape::Formatter.register :invalid, invalid_formatter
-      Grape::ContentTypes.register :invalid, 'application/x-invalid'
-    end
-
-    after do
-      Grape::ContentTypes.default_elements.delete(:invalid)
-      Grape::Formatter.default_elements.delete(:invalid)
+      Rack::MockRequest.env_for('/hello.invalid', Grape::Http::Headers::HTTP_ACCEPT => 'application/x-invalid')
     end
 
     it 'returns response by invalid formatter' do
       r = Rack::MockResponse[*subject.call(env)]
-      expect(r.body).to eq(Grape::Json.dump('message' => 'invalid'))
+      expect(JSON.parse(r.body)).to eq('message' => 'invalid')
     end
   end
 

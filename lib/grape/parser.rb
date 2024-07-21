@@ -2,32 +2,16 @@
 
 module Grape
   module Parser
-    extend Util::Registrable
+    module_function
 
-    class << self
-      def builtin_parsers
-        @builtin_parsers ||= {
-          json: Grape::Parser::Json,
-          jsonapi: Grape::Parser::Json,
-          xml: Grape::Parser::Xml
-        }
-      end
+    DEFAULTS = {
+      json: Grape::Parser::Json,
+      jsonapi: Grape::Parser::Json,
+      xml: Grape::Parser::Xml
+    }.freeze
 
-      def parsers(**options)
-        builtin_parsers.merge(default_elements).merge!(options[:parsers] || {})
-      end
-
-      def parser_for(api_format, **options)
-        spec = parsers(**options)[api_format]
-        case spec
-        when nil
-          nil
-        when Symbol
-          method(spec)
-        else
-          spec
-        end
-      end
+    def parser_for(format, parsers = nil)
+      parsers&.key?(format) ? parsers[format] : DEFAULTS[format]
     end
   end
 end

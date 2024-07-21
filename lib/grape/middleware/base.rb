@@ -61,22 +61,20 @@ module Grape
         @app_response = Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
       end
 
-      def content_type_for(format)
-        HashWithIndifferentAccess.new(content_types)[format]
+      def content_types
+        @content_types ||= Grape::ContentTypes.content_types_for(options[:content_types])
       end
 
-      def content_types
-        ContentTypes.content_types_for(options[:content_types])
+      def mime_types
+        @mime_types ||= Grape::ContentTypes.mime_types_for(content_types)
+      end
+
+      def content_type_for(format)
+        content_types_indifferent_access[format]
       end
 
       def content_type
         content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || TEXT_HTML
-      end
-
-      def mime_types
-        @mime_types ||= content_types.each_pair.with_object({}) do |(k, v), types_without_params|
-          types_without_params[v.split(';').first] = k
-        end
       end
 
       private
@@ -88,6 +86,10 @@ module Grape
         when Rack::Response then response.headers.merge!(headers)
         when Array          then response[1].merge!(headers)
         end
+      end
+
+      def content_types_indifferent_access
+        @content_types_indifferent_access ||= content_types.with_indifferent_access
       end
     end
   end
