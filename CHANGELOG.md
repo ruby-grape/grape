@@ -2,11 +2,13 @@
 
 #### Features
 
+* [#2475](https://github.com/ruby-grape/grape/pull/2475): Remove Grape::Util::Registrable - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
 * [#2471](https://github.com/ruby-grape/grape/pull/2471): Fix absence of original_exception and/or backtrace even if passed in error! - [@numbata](https://github.com/numbata).
+* Your contribution here.
 
 ### 2.1.3 (2024-07-13)
 

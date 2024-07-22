@@ -45,7 +45,7 @@ module Grape
 
       def format_message(message, backtrace, original_exception = nil)
         format = env[Grape::Env::API_FORMAT] || options[:format]
-        formatter = Grape::ErrorFormatter.formatter_for(format, **options)
+        formatter = Grape::ErrorFormatter.formatter_for(format, options[:error_formatters], options[:default_error_formatter])
         return formatter.call(message, backtrace, options, env, original_exception) if formatter
 
         throw :error,

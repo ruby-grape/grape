@@ -13,7 +13,7 @@ module Grape
         @cascade = options.fetch(:cascade, true)
       end
 
-      def match_best_quality_media_type!(content_types: Grape::ContentTypes::CONTENT_TYPES, allowed_methods: nil)
+      def match_best_quality_media_type!(content_types: Grape::ContentTypes::DEFAULTS, allowed_methods: nil)
         return unless vendor
 
         strict_header_checks!

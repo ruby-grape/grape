@@ -17,18 +17,16 @@ module Grape
         # Specify the format for the API's serializers.
         # May be `:json`, `:xml`, `:txt`, etc.
         def format(new_format = nil)
-          if new_format
-            namespace_inheritable(:format, new_format.to_sym)
-            # define the default error formatters
-            namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter.formatter_for(new_format, **{}))
-            # define a single mime type
-            mime_type = content_types[new_format.to_sym]
-            raise Grape::Exceptions::MissingMimeType.new(new_format) unless mime_type
+          return namespace_inheritable(:format) unless new_format
 
-            namespace_stackable(:content_types, new_format.to_sym => mime_type)
-          else
-            namespace_inheritable(:format)
-          end
+          symbolic_new_format = new_format.to_sym
+          namespace_inheritable(:format, symbolic_new_format)
+          namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter.formatter_for(symbolic_new_format))
+
+          content_type = content_types[symbolic_new_format]
+          raise Grape::Exceptions::MissingMimeType.new(new_format) unless content_type
+
+          namespace_stackable(:content_types, symbolic_new_format => content_type)
         end
 
         # Specify a custom formatter for a content-type.
@@ -43,12 +41,10 @@ module Grape
 
         # Specify a default error formatter.
         def default_error_formatter(new_formatter_name = nil)
-          if new_formatter_name
-            new_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name, **{})
-            namespace_inheritable(:default_error_formatter, new_formatter)
-          else
-            namespace_inheritable(:default_error_formatter)
-          end
+          return namespace_inheritable(:default_error_formatter) unless new_formatter_name
+
+          new_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
+          namespace_inheritable(:default_error_formatter, new_formatter)
         end
 
         def error_formatter(format, options)
