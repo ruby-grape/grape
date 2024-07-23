@@ -2193,12 +2193,14 @@ describe Grape::API do
       expect(last_response.body).to eq('Formatter Error')
     end
 
-    it 'uses default_rescue_handler to handle invalid response from rescue_from' do
-      subject.rescue_from(:all) { 'error' }
-      subject.get('/') { raise }
-      get '/'
-      expect(last_response).to be_server_error
-      expect(last_response.body).to eql 'Invalid response'
+    context 'when block returns an invalid response' do
+      it 'returns a formatted response' do
+        subject.rescue_from(:all) { 'error' }
+        subject.get('/') { raise }
+        get '/'
+        expect(last_response).to be_server_error
+        expect(last_response.body).to eql 'Invalid response'
+      end
     end
   end
 
