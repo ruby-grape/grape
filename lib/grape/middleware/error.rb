@@ -125,7 +125,7 @@ module Grape
         elsif response.is_a?(Rack::Response)
           response
         else
-          run_rescue_handler(:default_rescue_handler, Grape::Exceptions::InvalidResponse.new, endpoint)
+          run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
         end
       end
 
