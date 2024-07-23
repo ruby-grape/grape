@@ -57,7 +57,7 @@ describe Grape::Middleware::Base do
     context 'with patched warnings' do
       before do
         @warnings = warnings = []
-        allow_any_instance_of(described_class).to receive(:warn) { |m| warnings << m }
+        allow(subject).to receive(:warn) { |m| warnings << m }
         allow(subject).to receive(:after).and_raise(StandardError)
       end
 
