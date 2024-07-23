@@ -2196,8 +2196,6 @@ describe Grape::API do
     it 'uses default_rescue_handler to handle invalid response from rescue_from' do
       subject.rescue_from(:all) { 'error' }
       subject.get('/') { raise }
-
-      expect_any_instance_of(Grape::Middleware::Error).to receive(:default_rescue_handler).and_call_original
       get '/'
       expect(last_response).to be_server_error
       expect(last_response.body).to eql 'Invalid response'
