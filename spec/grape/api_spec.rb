@@ -2193,7 +2193,7 @@ describe Grape::API do
       expect(last_response.body).to eq('Formatter Error')
     end
 
-    context 'when block returns an invalid response' do
+    context 'when rescue_from block returns an invalid response' do
       it 'returns a formatted response' do
         subject.rescue_from(:all) { 'error' }
         subject.get('/') { raise }
