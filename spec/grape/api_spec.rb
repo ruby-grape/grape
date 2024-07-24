@@ -2743,6 +2743,57 @@ describe Grape::API do
         it { is_expected.to have_key('backtrace') & have_key('original-exception') }
       end
     end
+
+    context 'when rescue validation errors include backtrace and original exception' do
+      let(:app) do
+        response_type = response_format
+
+        Class.new(Grape::API) do
+          format response_type
+
+          rescue_from Grape::Exceptions::ValidationErrors, backtrace: true, original_exception: true do |e|
+            error!(e, 418, {}, e.backtrace, e)
+          end
+
+          params do
+            requires :weather
+          end
+          get '/forecast' do
+            'sunny'
+          end
+        end
+      end
+
+      before do
+        get '/forecast'
+      end
+
+      context 'with json response type format' do
+        subject { JSON.parse(last_response.body) }
+
+        let(:response_format) { :json }
+
+        it 'does not include backtrace or original exception' do
+          expect(subject).to match([{ 'messages' => ['is missing'], 'params' => ['weather'] }])
+        end
+      end
+
+      context 'with txt response type format' do
+        subject { last_response.body }
+
+        let(:response_format) { :txt }
+
+        it { is_expected.to include('backtrace', 'original exception') }
+      end
+
+      context 'with xml response type format' do
+        subject { Grape::Xml.parse(last_response.body)['error'] }
+
+        let(:response_format) { :xml }
+
+        it { is_expected.to have_key('backtrace') & have_key('original-exception') }
+      end
+    end
   end
 
   describe '.content_type' do
