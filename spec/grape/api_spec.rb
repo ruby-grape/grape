@@ -4693,4 +4693,23 @@ describe Grape::API do
 
     it { is_expected.to be_bad_request }
   end
+
+  context "when rescue_from's block raises an error" do
+    subject { last_response.body }
+
+    let(:api) do
+      Class.new(described_class) do
+        rescue_from :all do
+          raise ArgumentError, 'This one!'
+        end
+        get { raise ArgumentError, 'Oops!' }
+      end
+    end
+
+    let(:app) { api }
+
+    before { get '/' }
+
+    it { is_expected.to eq('This one!') }
+  end
 end

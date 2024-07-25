@@ -116,8 +116,11 @@ module Grape
           handler = public_method(handler)
         end
 
+        handler_exception = nil
         response = catch(:error) do
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
+        rescue StandardError => e
+          handler_exception = e
         end
 
         if error?(response)
@@ -125,7 +128,7 @@ module Grape
         elsif response.is_a?(Rack::Response)
           response
         else
-          run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
+          run_rescue_handler(method(:default_rescue_handler), handler_exception || Grape::Exceptions::InvalidResponse.new, endpoint)
         end
       end
 
