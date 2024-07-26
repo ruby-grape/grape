@@ -3,6 +3,7 @@
 #### Features
 
 * [#2475](https://github.com/ruby-grape/grape/pull/2475): Remove Grape::Util::Registrable - [@ericproulx](https://github.com/ericproulx).
+* [#2484](https://github.com/ruby-grape/grape/pull/2484): Refactor versioner middlewares - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
