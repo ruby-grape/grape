@@ -17,44 +17,24 @@ module Grape
       #   env['api.version'] => 'v1'
       #
       class Path < Base
-        def default_options
-          {
-            pattern: /.*/i
-          }
-        end
+        include VersionerHelpers
 
         def before
-          path = env[Rack::PATH_INFO].dup
-          path.sub!(mount_path, '') if mounted_path?(path)
+          path_info = Grape::Router.normalize_path(env[Rack::PATH_INFO])
+          return if path_info == '/'
 
-          if prefix && path.index(prefix) == 0 # rubocop:disable all
-            path.sub!(prefix, '')
-            path = Grape::Router.normalize_path(path)
+          [mount_path, Grape::Router.normalize_path(prefix)].each do |path|
+            path_info.delete_prefix!(path) if path.present? && path != '/' && path_info.start_with?(path)
           end
 
-          pieces = path.split('/')
-          potential_version = pieces[1]
-          return unless potential_version&.match?(options[:pattern])
+          slash_position = path_info.index('/', 1) # omit the first one
+          return unless slash_position
 
-          throw :error, status: 404, message: '404 API Version Not Found' if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
+          potential_version = path_info[1..slash_position - 1]
+          return unless potential_version.match?(pattern)
+
+          throw_api_version_not_found unless potential_version_match?(potential_version)
           env[Grape::Env::API_VERSION] = potential_version
-        end
-
-        private
-
-        def mounted_path?(path)
-          return false unless mount_path && path.start_with?(mount_path)
-
-          rest = path.slice(mount_path.length..-1)
-          rest.start_with?('/') || rest.empty?
-        end
-
-        def mount_path
-          @mount_path ||= options[:mount_path] && options[:mount_path] != '/' ? options[:mount_path] : ''
-        end
-
-        def prefix
-          Grape::Router.normalize_path(options[:prefix].to_s) if options[:prefix]
         end
       end
     end

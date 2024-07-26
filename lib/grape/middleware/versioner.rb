@@ -13,21 +13,12 @@ module Grape
     module Versioner
       module_function
 
-      # @param strategy [Symbol] :path, :header or :param
+      # @param strategy [Symbol] :path, :header, :accept_version_header or :param
       # @return a middleware class based on strategy
       def using(strategy)
-        case strategy
-        when :path
-          Path
-        when :header
-          Header
-        when :param
-          Param
-        when :accept_version_header
-          AcceptVersionHeader
-        else
-          raise Grape::Exceptions::InvalidVersionerOption.new(strategy)
-        end
+        Grape::Middleware::Versioner.const_get(:"#{strategy.to_s.classify}")
+      rescue NameError
+        raise Grape::Exceptions::InvalidVersionerOption.new(strategy)
       end
     end
   end

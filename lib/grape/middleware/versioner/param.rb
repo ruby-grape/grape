@@ -19,31 +19,15 @@ module Grape
       #
       #   env['api.version'] => 'v1'
       class Param < Base
-        def default_options
-          {
-            version_options: {
-              parameter: 'apiver'
-            }
-          }
-        end
+        include VersionerHelpers
 
         def before
-          potential_version = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[paramkey]
-          return if potential_version.nil?
+          potential_version = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[parameter_key]
+          return if potential_version.blank?
 
-          throw :error, status: 404, message: '404 API Version Not Found', headers: { Grape::Http::Headers::X_CASCADE => 'pass' } if options[:versions] && !options[:versions].find { |v| v.to_s == potential_version }
+          throw_api_version_not_found unless potential_version_match?(potential_version)
           env[Grape::Env::API_VERSION] = potential_version
-          env[Rack::RACK_REQUEST_QUERY_HASH].delete(paramkey) if env.key? Rack::RACK_REQUEST_QUERY_HASH
-        end
-
-        private
-
-        def paramkey
-          version_options[:parameter] || default_options[:version_options][:parameter]
-        end
-
-        def version_options
-          options[:version_options]
+          env[Rack::RACK_REQUEST_QUERY_HASH].delete(parameter_key) if env.key? Rack::RACK_REQUEST_QUERY_HASH
         end
       end
     end

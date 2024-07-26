@@ -191,8 +191,7 @@ module Grape
 
     def prepare_version
       version = namespace_inheritable(:version)
-      return unless version
-      return if version.empty?
+      return if version.blank?
 
       version.length == 1 ? version.first : version
     end
@@ -298,9 +297,9 @@ module Grape
 
       stack.concat namespace_stackable(:middleware)
 
-      if namespace_inheritable(:version)
+      if namespace_inheritable(:version).present?
         stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-                  versions: namespace_inheritable(:version)&.flatten,
+                  versions: namespace_inheritable(:version).flatten,
                   version_options: namespace_inheritable(:version_options),
                   prefix: namespace_inheritable(:root_prefix),
                   mount_path: namespace_stackable(:mount_path).first
