@@ -10,6 +10,7 @@
 * [#2471](https://github.com/ruby-grape/grape/pull/2471): Fix absence of original_exception and/or backtrace even if passed in error! - [@numbata](https://github.com/numbata).
 * [#2478](https://github.com/ruby-grape/grape/pull/2478): Fix rescue_from with invalid response - [@ericproulx](https://github.com/ericproulx).
 * [#2480](https://github.com/ruby-grape/grape/pull/2480): Fix rescue_from ValidationErrors exception - [@numbata](https://github.com/numbata).
+* [#2485](https://github.com/ruby-grape/grape/pull/2485): Add exact param to length validator - [@dakad](https://github.com/dakad).
 * Your contribution here.
 
 ### 2.1.3 (2024-07-13)
