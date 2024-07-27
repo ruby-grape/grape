@@ -79,7 +79,6 @@ describe Grape::Validations::AttributesDoc do
         default: validations[:default],
         type: 'Integer',
         values: valid_values,
-        # exact_length: validations[:length][:exact],
         min_length: validations[:length][:min],
         max_length: validations[:length][:max]
       }
