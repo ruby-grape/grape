@@ -7,11 +7,14 @@ module Grape
         def initialize(attrs, options, required, scope, **opts)
           @min = options[:min]
           @max = options[:max]
+          @exact = options[:exact]
 
           super
 
           raise ArgumentError, 'min must be an integer greater than or equal to zero' if !@min.nil? && (!@min.is_a?(Integer) || @min.negative?)
           raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
+          raise ArgumentError, 'exact must be an integer greater than zero' if !@exact.nil? && (!@exact.is_a?(Integer) || !@exact.positive?)
+          raise ArgumentError, 'exact cannot be combined with min or max' if !@exact.nil? && (!@min.nil? || !@max.nil?)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
         end
 
@@ -20,7 +23,7 @@ module Grape
 
           raise ArgumentError, "parameter #{param} does not support #length" unless param.respond_to?(:length)
 
-          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max)
+          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@exact.nil? && param.length != @exact)
 
           raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: build_message)
         end
@@ -32,8 +35,10 @@ module Grape
             format I18n.t(:length, scope: 'grape.errors.messages'), min: @min, max: @max
           elsif @min
             format I18n.t(:length_min, scope: 'grape.errors.messages'), min: @min
-          else
+          elsif @max
             format I18n.t(:length_max, scope: 'grape.errors.messages'), max: @max
+          else
+            format I18n.t(:length_exact, scope: 'grape.errors.messages'), exact: @exact
           end
         end
       end

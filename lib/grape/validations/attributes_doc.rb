@@ -29,6 +29,7 @@ module Grape
 
         details[:default] = validations[:default] if validations.key?(:default)
 
+        details[:exact_length] = validations[:length][:exact] if validations.key?(:length) && validations[:length].key?(:exact)
         details[:min_length] = validations[:length][:min] if validations.key?(:length) && validations[:length].key?(:min)
         details[:max_length] = validations[:length][:max] if validations.key?(:length) && validations[:length].key?(:max)
       end
