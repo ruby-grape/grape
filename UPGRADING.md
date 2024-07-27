@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.2.0
+
+### `Length` validator
+
+After Grape 2.2.0, `length` validator will only take effect for parameters with types that support `#length` method, will not throw `ArgumentError` exception.
+
+See [#2464](https://github.com/ruby-grape/grape/pull/2464) for more information.
+
 ### Upgrading to >= 2.1.0
 
 #### Optional Builder
