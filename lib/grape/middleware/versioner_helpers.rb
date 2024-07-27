@@ -67,7 +67,7 @@ module Grape
         versions.blank? || versions.any? { |v| v.to_s == potential_version }
       end
 
-      def throw_api_version_not_found
+      def version_not_found!
         throw :error, status: 404, message: '404 API Version Not Found', headers: { Grape::Http::Headers::X_CASCADE => 'pass' }
       end
     end

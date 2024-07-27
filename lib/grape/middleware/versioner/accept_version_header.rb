@@ -21,17 +21,17 @@ module Grape
 
         def before
           potential_version = env[Grape::Http::Headers::HTTP_ACCEPT_VERSION]&.strip
-          throw_error_not_acceptable('Accept-Version header must be set.') if strict? && potential_version.blank?
+          not_acceptable!('Accept-Version header must be set.') if strict? && potential_version.blank?
 
           return if potential_version.blank?
 
-          throw_error_not_acceptable('The requested version is not supported.') unless potential_version_match?(potential_version)
+          not_acceptable!('The requested version is not supported.') unless potential_version_match?(potential_version)
           env[Grape::Env::API_VERSION] = potential_version
         end
 
         private
 
-        def throw_error_not_acceptable(message)
+        def not_acceptable!(message)
           throw :error, status: 406, headers: error_headers, message: message
         end
       end
