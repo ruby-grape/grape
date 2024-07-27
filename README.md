@@ -1714,10 +1714,11 @@ end
 
 Parameters with types that support `#length` method can be restricted to have a specific length with the `:length` option.
 
-The validator accepts `:min` or `:max` or both options to validate that the value of the parameter is within the given limits.
+The validator accepts `:min` or `:max` or both options or only `:exact` to validate that the value of the parameter is within the given limits.
 
 ```ruby
 params do
+  requires :code, type: String, length: { exact: 2 }
   requires :str, type: String, length: { min: 3 }
   requires :list, type: [Integer], length: { min: 3, max: 5 }
   requires :hash, type: Hash, length: { max: 5 }
@@ -2045,6 +2046,7 @@ end
 
 ```ruby
 params do
+  requires :code, type: String, length: { exact: 2, message: 'code is expected to be exactly 2 characters long' }
   requires :str, type: String, length: { min: 5, message: 'str is expected to be atleast 5 characters long' }
   requires :list, type: [Integer], length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
 end
