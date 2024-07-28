@@ -13,9 +13,11 @@ module Grape
 
           raise ArgumentError, 'min must be an integer greater than or equal to zero' if !@min.nil? && (!@min.is_a?(Integer) || @min.negative?)
           raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
-          raise ArgumentError, 'exact must be an integer greater than zero' if !@exact.nil? && (!@exact.is_a?(Integer) || !@exact.positive?)
-          raise ArgumentError, 'exact cannot be combined with min or max' if !@exact.nil? && (!@min.nil? || !@max.nil?)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
+
+          return if @exact.nil?
+          raise ArgumentError, 'exact must be an integer greater than zero' if !@exact.is_a?(Integer) || !@exact.positive?
+          raise ArgumentError, 'exact cannot be combined with min or max' if !@min.nil? || !@max.nil?
         end
 
         def validate_param!(attr_name, params)
