@@ -206,11 +206,11 @@ describe Grape::Validations::Validators::LengthValidator do
   end
 
   describe '/type_is_not_array' do
-    context 'raises an error' do
+    context 'does not raise an error' do
       it do
         expect do
           post 'type_is_not_array', list: 12
-        end.to raise_error(ArgumentError, 'parameter 12 does not support #length')
+        end.not_to raise_error
       end
     end
   end

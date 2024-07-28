@@ -3,6 +3,7 @@
 #### Features
 
 * [#2475](https://github.com/ruby-grape/grape/pull/2475): Remove Grape::Util::Registrable - [@ericproulx](https://github.com/ericproulx).
+* [#2484](https://github.com/ruby-grape/grape/pull/2484): Refactor versioner middlewares - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -10,6 +11,7 @@
 * [#2471](https://github.com/ruby-grape/grape/pull/2471): Fix absence of original_exception and/or backtrace even if passed in error! - [@numbata](https://github.com/numbata).
 * [#2478](https://github.com/ruby-grape/grape/pull/2478): Fix rescue_from with invalid response - [@ericproulx](https://github.com/ericproulx).
 * [#2480](https://github.com/ruby-grape/grape/pull/2480): Fix rescue_from ValidationErrors exception - [@numbata](https://github.com/numbata).
+* [#2464](https://github.com/ruby-grape/grape/pull/2464): The `length` validator only takes effect for parameters with types that support `#length` method - [@OuYangJinTing](https://github.com/OuYangJinTing).
 * [#2485](https://github.com/ruby-grape/grape/pull/2485): Add exact param to length validator - [@dakad](https://github.com/dakad).
 * Your contribution here.
 
