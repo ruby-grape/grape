@@ -88,21 +88,21 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       params do
-        requires :code, length: { exact: 2 }
+        requires :code, length: { is: 2 }
       end
-      post 'exact' do
-      end
-
-      params do
-        requires :code, length: { exact: -2 }
-      end
-      post 'negative_exact' do
+      post 'is' do
       end
 
       params do
-        requires :code, length: { exact: 2, max: 10 }
+        requires :code, length: { is: -2 }
       end
-      post 'exact_with_max' do
+      post 'negative_is' do
+      end
+
+      params do
+        requires :code, length: { is: 2, max: 10 }
+      end
+      post 'is_with_max' do
       end
     end
   end
@@ -317,10 +317,10 @@ describe Grape::Validations::Validators::LengthValidator do
     end
   end
 
-  describe '/exact' do
+  describe '/is' do
     context 'when length is exact' do
       it do
-        post 'exact', code: 'ZZ'
+        post 'is', code: 'ZZ'
         expect(last_response.status).to eq(201)
         expect(last_response.body).to eq('')
       end
@@ -328,7 +328,7 @@ describe Grape::Validations::Validators::LengthValidator do
 
     context 'when length exceeds the limit' do
       it do
-        post 'exact', code: 'aze'
+        post 'is', code: 'aze'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
       end
@@ -336,7 +336,7 @@ describe Grape::Validations::Validators::LengthValidator do
 
     context 'when length is less than the limit' do
       it do
-        post 'exact', code: 'a'
+        post 'is', code: 'a'
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
       end
@@ -344,25 +344,25 @@ describe Grape::Validations::Validators::LengthValidator do
 
     context 'when length is zero' do
       it do
-        post 'exact', code: ''
+        post 'is', code: ''
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
       end
     end
   end
 
-  describe '/negative_exact' do
-    context 'when exact is negative' do
+  describe '/negative_is' do
+    context 'when `is` is negative' do
       it do
-        expect { post 'negative_exact', code: 'ZZ' }.to raise_error(ArgumentError, 'exact must be an integer greater than zero')
+        expect { post 'negative_is', code: 'ZZ' }.to raise_error(ArgumentError, 'is must be an integer greater than zero')
       end
     end
   end
 
-  describe '/exact_with_max' do
-    context 'when exact is combined with max' do
+  describe '/is_with_max' do
+    context 'when `is` is combined with max' do
       it do
-        expect { post 'exact_with_max', code: 'ZZ' }.to raise_error(ArgumentError, 'exact cannot be combined with min or max')
+        expect { post 'is_with_max', code: 'ZZ' }.to raise_error(ArgumentError, 'is cannot be combined with min or max')
       end
     end
   end

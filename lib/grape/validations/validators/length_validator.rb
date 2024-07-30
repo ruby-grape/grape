@@ -7,7 +7,7 @@ module Grape
         def initialize(attrs, options, required, scope, **opts)
           @min = options[:min]
           @max = options[:max]
-          @exact = options[:exact]
+          @is = options[:is]
 
           super
 
@@ -15,9 +15,9 @@ module Grape
           raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
 
-          return if @exact.nil?
-          raise ArgumentError, 'exact must be an integer greater than zero' if !@exact.is_a?(Integer) || !@exact.positive?
-          raise ArgumentError, 'exact cannot be combined with min or max' if !@min.nil? || !@max.nil?
+          return if @is.nil?
+          raise ArgumentError, 'is must be an integer greater than zero' if !@is.is_a?(Integer) || !@is.positive?
+          raise ArgumentError, 'is cannot be combined with min or max' if !@min.nil? || !@max.nil?
         end
 
         def validate_param!(attr_name, params)
@@ -25,7 +25,7 @@ module Grape
 
           return unless param.respond_to?(:length)
 
-          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@exact.nil? && param.length != @exact)
+          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@is.nil? && param.length != @is)
 
           raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: build_message)
         end
@@ -40,7 +40,7 @@ module Grape
           elsif @max
             format I18n.t(:length_max, scope: 'grape.errors.messages'), max: @max
           else
-            format I18n.t(:length_exact, scope: 'grape.errors.messages'), exact: @exact
+            format I18n.t(:length_is, scope: 'grape.errors.messages'), is: @is
           end
         end
       end
