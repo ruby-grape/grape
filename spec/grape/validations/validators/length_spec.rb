@@ -86,6 +86,24 @@ describe Grape::Validations::Validators::LengthValidator do
       end
       post '/custom-message' do
       end
+
+      params do
+        requires :code, length: { is: 2 }
+      end
+      post 'is' do
+      end
+
+      params do
+        requires :code, length: { is: -2 }
+      end
+      post 'negative_is' do
+      end
+
+      params do
+        requires :code, length: { is: 2, max: 10 }
+      end
+      post 'is_with_max' do
+      end
     end
   end
 
@@ -295,6 +313,56 @@ describe Grape::Validations::Validators::LengthValidator do
         post '/custom-message', list: [1]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('list not match')
+      end
+    end
+  end
+
+  describe '/is' do
+    context 'when length is exact' do
+      it do
+        post 'is', code: 'ZZ'
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq('')
+      end
+    end
+
+    context 'when length exceeds the limit' do
+      it do
+        post 'is', code: 'aze'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
+      end
+    end
+
+    context 'when length is less than the limit' do
+      it do
+        post 'is', code: 'a'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
+      end
+    end
+
+    context 'when length is zero' do
+      it do
+        post 'is', code: ''
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('code is expected to have length exactly equal to 2')
+      end
+    end
+  end
+
+  describe '/negative_is' do
+    context 'when `is` is negative' do
+      it do
+        expect { post 'negative_is', code: 'ZZ' }.to raise_error(ArgumentError, 'is must be an integer greater than zero')
+      end
+    end
+  end
+
+  describe '/is_with_max' do
+    context 'when `is` is combined with max' do
+      it do
+        expect { post 'is_with_max', code: 'ZZ' }.to raise_error(ArgumentError, 'is cannot be combined with min or max')
       end
     end
   end

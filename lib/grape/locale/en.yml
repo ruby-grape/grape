@@ -11,6 +11,7 @@ en:
         except_values: 'has a value not allowed'
         same_as: 'is not the same as %{parameter}'
         length: 'is expected to have length within %{min} and %{max}'
+        length_is: 'is expected to have length exactly equal to %{is}'
         length_min: 'is expected to have length greater than or equal to %{min}'
         length_max: 'is expected to have length less than or equal to %{max}'
         missing_vendor_option:
