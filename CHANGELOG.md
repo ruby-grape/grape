@@ -4,6 +4,7 @@
 
 * [#2475](https://github.com/ruby-grape/grape/pull/2475): Remove Grape::Util::Registrable - [@ericproulx](https://github.com/ericproulx).
 * [#2484](https://github.com/ruby-grape/grape/pull/2484): Refactor versioner middlewares - [@ericproulx](https://github.com/ericproulx).
+* [#2489](https://github.com/ruby-grape/grape/pull/2489): Add Rails 7.2 in CI workflow - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
