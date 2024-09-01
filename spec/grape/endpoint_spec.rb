@@ -683,7 +683,7 @@ describe Grape::Endpoint do
     context 'when referencing an undefined local variable or method' do
       let(:error_message) do
         if Gem::Version.new(RUBY_VERSION).release <= Gem::Version.new('3.2')
-          %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint}
+          %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in '/hey' endpoint}
         else
           /undefined local variable or method `undefined_helper' for/
         end
