@@ -13,4 +13,4 @@ else
 fi
 
 # Keep gems in the latest possible state
-(bundle check || bundle install) && bundle update && bundle exec ${@}
+(bundle check || bundle install) && bundle update && exec bundle exec ${@}
