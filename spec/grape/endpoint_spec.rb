@@ -1089,7 +1089,7 @@ describe Grape::Endpoint do
     end
   end
 
-  context '#inspect' do
+  describe '#inspect' do
     subject { described_class.new(settings, options).inspect }
 
     let(:options) do
@@ -1105,7 +1105,7 @@ describe Grape::Endpoint do
     let(:settings) { Grape::Util::InheritableSetting.new }
 
     it 'does not raise an error' do
-      expect { subject }.to_not raise_error
+      expect { subject }.not_to raise_error
     end
   end
 end
