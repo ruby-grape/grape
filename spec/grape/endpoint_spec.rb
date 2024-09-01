@@ -1088,4 +1088,24 @@ describe Grape::Endpoint do
       )
     end
   end
+
+  context '#inspect' do
+    subject { described_class.new(settings, options).inspect }
+
+    let(:options) do
+      {
+        method: :path,
+        path: '/path',
+        app: {},
+        route_options: { anchor: false },
+        forward_match: true,
+        for: Class.new
+      }
+    end
+    let(:settings) { Grape::Util::InheritableSetting.new }
+
+    it 'does not raise an error' do
+      expect { subject }.to_not raise_error
+    end
+  end
 end
