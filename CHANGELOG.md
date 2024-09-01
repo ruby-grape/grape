@@ -13,6 +13,7 @@
 * [#2480](https://github.com/ruby-grape/grape/pull/2480): Fix rescue_from ValidationErrors exception - [@numbata](https://github.com/numbata).
 * [#2464](https://github.com/ruby-grape/grape/pull/2464): The `length` validator only takes effect for parameters with types that support `#length` method - [@OuYangJinTing](https://github.com/OuYangJinTing).
 * [#2485](https://github.com/ruby-grape/grape/pull/2485): Add `is:` param to length validator - [@dakad](https://github.com/dakad).
+* [#2492](https://github.com/ruby-grape/grape/pull/2492): Fix Grape::Endpoint's inspect method - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.1.3 (2024-07-13)
