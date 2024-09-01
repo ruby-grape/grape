@@ -17,7 +17,8 @@ Gem::Specification.new do |s|
     'bug_tracker_uri' => 'https://github.com/ruby-grape/grape/issues',
     'changelog_uri' => "https://github.com/ruby-grape/grape/blob/v#{s.version}/CHANGELOG.md",
     'documentation_uri' => "https://www.rubydoc.info/gems/grape/#{s.version}",
-    'source_code_uri' => "https://github.com/ruby-grape/grape/tree/v#{s.version}"
+    'source_code_uri' => "https://github.com/ruby-grape/grape/tree/v#{s.version}",
+    'rubygems_mfa_required' => 'true'
   }
 
   s.add_runtime_dependency 'activesupport', '>= 6'
