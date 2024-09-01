@@ -234,13 +234,13 @@ module Grape
       (options == endpoint.options) && (inheritable_setting.to_hash == endpoint.inheritable_setting.to_hash)
     end
 
-    # the purpose of this override is solely for stripping internals when an error occurs while calling
-    # an endpoint through an api. See #https://github.com/ruby-grape/grape/issues/2398
-    # Otherwise, it calls super
+    # The purpose of this override is solely for stripping internals when an error occurs while calling
+    # an endpoint through an api. See https://github.com/ruby-grape/grape/issues/2398
+    # Otherwise, it calls super.
     def inspect
       return super unless env
 
-      "#{self.class} in `#{route.origin}' endpoint"
+      "#{self.class} in '#{route.origin}' endpoint"
     end
 
     protected
