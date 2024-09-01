@@ -683,7 +683,7 @@ describe Grape::Endpoint do
     context 'when referencing an undefined local variable or method' do
       let(:error_message) do
         if Gem::Version.new(RUBY_VERSION).release <= Gem::Version.new('3.2')
-          %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in `/hey' endpoint}
+          %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in '/hey' endpoint}
         else
           /undefined local variable or method `undefined_helper' for/
         end
@@ -1086,6 +1086,26 @@ describe Grape::Endpoint do
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
                                                                   formatter: a_kind_of(Module) })
       )
+    end
+  end
+
+  describe '#inspect' do
+    subject { described_class.new(settings, options).inspect }
+
+    let(:options) do
+      {
+        method: :path,
+        path: '/path',
+        app: {},
+        route_options: { anchor: false },
+        forward_match: true,
+        for: Class.new
+      }
+    end
+    let(:settings) { Grape::Util::InheritableSetting.new }
+
+    it 'does not raise an error' do
+      expect { subject }.not_to raise_error
     end
   end
 end
