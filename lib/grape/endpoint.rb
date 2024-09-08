@@ -114,10 +114,10 @@ module Grape
     # Update our settings from a given set of stackable parameters. Used when
     # the endpoint's API is mounted under another one.
     def inherit_settings(namespace_stackable)
-      inheritable_setting.route[:saved_validations] += namespace_stackable[:validations]
+      inheritable_setting.route[:saved_validations].concat(namespace_stackable[:validations]) if namespace_stackable[:validations].any?
       parent_declared_params = namespace_stackable[:declared_params]
 
-      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params
+      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
 
       endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
     end
@@ -205,7 +205,8 @@ module Grape
     end
 
     def prepare_path(path)
-      path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
+      settings = inheritable_setting.to_hash
+      path_settings = settings[:namespace_stackable].merge!(settings[:namespace_inheritable])
       Path.new(path, namespace, path_settings)
     end
 
