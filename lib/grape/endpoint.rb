@@ -114,10 +114,10 @@ module Grape
     # Update our settings from a given set of stackable parameters. Used when
     # the endpoint's API is mounted under another one.
     def inherit_settings(namespace_stackable)
-      inheritable_setting.route[:saved_validations] += namespace_stackable[:validations]
+      parent_validations = namespace_stackable[:validations]
+      inheritable_setting.route[:saved_validations].concat(parent_validations) if parent_validations.any?
       parent_declared_params = namespace_stackable[:declared_params]
-
-      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params
+      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
 
       endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
     end
@@ -205,7 +205,9 @@ module Grape
     end
 
     def prepare_path(path)
-      path_settings = inheritable_setting.to_hash[:namespace_stackable].merge(inheritable_setting.to_hash[:namespace_inheritable])
+      namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
+      namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
+      path_settings = namespace_stackable_hash.merge!(namespace_inheritable_hash)
       Path.new(path, namespace, path_settings)
     end
 
@@ -288,19 +290,22 @@ module Grape
     def build_stack(helpers)
       stack = Grape::Middleware::Stack.new
 
+      content_types = namespace_stackable_with_hash(:content_types)
+      format = namespace_inheritable(:format)
+
       stack.use Rack::Head
       stack.use Class.new(Grape::Middleware::Error),
                 helpers: helpers,
-                format: namespace_inheritable(:format),
-                content_types: namespace_stackable_with_hash(:content_types),
+                format: format,
+                content_types: content_types,
                 default_status: namespace_inheritable(:default_error_status),
                 rescue_all: namespace_inheritable(:rescue_all),
                 rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
                 default_error_formatter: namespace_inheritable(:default_error_formatter),
                 error_formatters: namespace_stackable_with_hash(:error_formatters),
-                rescue_options: namespace_stackable_with_hash(:rescue_options) || {},
-                rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers) || {},
-                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers) || {},
+                rescue_options: namespace_stackable_with_hash(:rescue_options),
+                rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers),
+                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers),
                 all_rescue_handler: namespace_inheritable(:all_rescue_handler),
                 grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
 
@@ -315,9 +320,9 @@ module Grape
       end
 
       stack.use Grape::Middleware::Formatter,
-                format: namespace_inheritable(:format),
+                format: format,
                 default_format: namespace_inheritable(:default_format) || :txt,
-                content_types: namespace_stackable_with_hash(:content_types),
+                content_types: content_types,
                 formatters: namespace_stackable_with_hash(:formatters),
                 parsers: namespace_stackable_with_hash(:parsers)
 
@@ -328,7 +333,9 @@ module Grape
 
     def build_helpers
       helpers = namespace_stackable(:helpers)
-      Module.new { helpers&.each { |mod_to_include| include mod_to_include } }
+      return if helpers.empty?
+
+      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
     private :build_stack, :build_helpers
@@ -347,7 +354,7 @@ module Grape
       @lazy_initialize_lock.synchronize do
         return true if @lazy_initialized
 
-        @helpers = build_helpers.tap { |mod| self.class.send(:include, mod) }
+        @helpers = build_helpers&.tap { |mod| self.class.include mod }
         @app = options[:app] || build_stack(@helpers)
 
         @lazy_initialized = true

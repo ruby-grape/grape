@@ -28,7 +28,7 @@ describe 'Hashie', if: defined?(Hashie) do
 
     describe 'in an api' do
       before do
-        subject.send(:include, Grape::Extensions::Hashie::Mash::ParamBuilder)
+        subject.include Grape::Extensions::Hashie::Mash::ParamBuilder
       end
 
       describe '#params' do

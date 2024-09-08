@@ -29,7 +29,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
 
   describe 'in an api' do
     before do
-      subject.send(:include, Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder) # rubocop:disable RSpec/DescribedClass
+      subject.include Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder # rubocop:disable RSpec/DescribedClass
     end
 
     describe '#params' do
