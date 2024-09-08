@@ -26,7 +26,7 @@ module Grape
 
       def initialize(app, *options)
         super
-        self.class.send(:include, @options[:helpers]) if @options[:helpers]
+        self.class.include(@options[:helpers]) if @options[:helpers]
       end
 
       def call!(env)
@@ -79,7 +79,7 @@ module Grape
       end
 
       def rescue_handler_for_base_only_class(klass)
-        error, handler = options[:base_only_rescue_handlers].find { |err, _handler| klass == err }
+        error, handler = options[:base_only_rescue_handlers]&.find { |err, _handler| klass == err }
 
         return unless error
 
@@ -87,7 +87,7 @@ module Grape
       end
 
       def rescue_handler_for_class_or_its_ancestor(klass)
-        error, handler = options[:rescue_handlers].find { |err, _handler| klass <= err }
+        error, handler = options[:rescue_handlers]&.find { |err, _handler| klass <= err }
 
         return unless error
 

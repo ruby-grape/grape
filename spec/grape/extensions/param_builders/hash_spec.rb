@@ -29,7 +29,7 @@ describe Grape::Extensions::Hash::ParamBuilder do
 
   describe 'in an api' do
     before do
-      subject.send(:include, Grape::Extensions::Hash::ParamBuilder) # rubocop:disable RSpec/DescribedClass
+      subject.include Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
     end
 
     describe '#params' do
