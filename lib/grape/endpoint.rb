@@ -333,7 +333,7 @@ module Grape
 
     def build_helpers
       helpers = namespace_stackable(:helpers)
-      return unless helpers
+      return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
