@@ -1,4 +1,4 @@
-### 2.2.0 (Next)
+### 2.2.0 (2024-09-14)
 
 #### Features
 
@@ -6,7 +6,6 @@
 * [#2484](https://github.com/ruby-grape/grape/pull/2484): Refactor versioner middlewares - [@ericproulx](https://github.com/ericproulx).
 * [#2489](https://github.com/ruby-grape/grape/pull/2489): Add Rails 7.2 in CI workflow - [@ericproulx](https://github.com/ericproulx).
 * [#2493](https://github.com/ruby-grape/grape/pull/2493): MFA required when releasing - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -17,7 +16,6 @@
 * [#2485](https://github.com/ruby-grape/grape/pull/2485): Add `is:` param to length validator - [@dakad](https://github.com/dakad).
 * [#2492](https://github.com/ruby-grape/grape/pull/2492): Fix `Grape::Endpoint#inspect` method - [@ericproulx](https://github.com/ericproulx).
 * [#2496](https://github.com/ruby-grape/grape/pull/2496): Reduce object allocation when compiling - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 2.1.3 (2024-07-13)
 
