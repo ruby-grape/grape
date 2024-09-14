@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2497](https://github.com/ruby-grape/grape/pull/2497): Update Rubocop - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
