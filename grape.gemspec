@@ -21,11 +21,11 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true'
   }
 
-  s.add_runtime_dependency 'activesupport', '>= 6'
-  s.add_runtime_dependency 'dry-types', '>= 1.1'
-  s.add_runtime_dependency 'mustermann-grape', '~> 1.1.0'
-  s.add_runtime_dependency 'rack', '>= 2'
-  s.add_runtime_dependency 'zeitwerk'
+  s.add_dependency 'activesupport', '>= 6'
+  s.add_dependency 'dry-types', '>= 1.1'
+  s.add_dependency 'mustermann-grape', '~> 1.1.0'
+  s.add_dependency 'rack', '>= 2'
+  s.add_dependency 'zeitwerk'
 
   s.files = Dir['lib/**/*', 'CHANGELOG.md', 'CONTRIBUTING.md', 'README.md', 'grape.png', 'UPGRADING.md', 'LICENSE', 'grape.gemspec']
   s.require_paths = ['lib']
