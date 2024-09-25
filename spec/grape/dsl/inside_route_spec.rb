@@ -1,25 +1,21 @@
 # frozen_string_literal: true
 
-module Grape
-  module DSL
-    module InsideRouteSpec
-      class Dummy
-        include Grape::DSL::InsideRoute
+describe Grape::Endpoint do
+  subject { dummy_class.new }
 
-        attr_reader :env, :request, :new_settings
+  let(:dummy_class) do
+    Class.new do
+      include Grape::DSL::InsideRoute
 
-        def initialize
-          @env = {}
-          @header = {}
-          @new_settings = { namespace_inheritable: {}, namespace_stackable: {} }
-        end
+      attr_reader :env, :request, :new_settings
+
+      def initialize
+        @env = {}
+        @header = {}
+        @new_settings = { namespace_inheritable: {}, namespace_stackable: {} }
       end
     end
   end
-end
-
-describe Grape::Endpoint do
-  subject { Grape::DSL::InsideRouteSpec::Dummy.new }
 
   describe '#version' do
     it 'defaults to nil' do
