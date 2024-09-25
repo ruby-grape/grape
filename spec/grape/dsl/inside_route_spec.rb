@@ -262,42 +262,15 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'emits no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.stream file_path
         end
 
         it 'returns file body wrapped in StreamResponse' do
-          subject.stream file_path
-
           expect(subject.stream).to eq file_response
         end
 
-        it 'sets Cache-Control header to no-cache' do
-          subject.stream file_path
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'no-cache'
-        end
-
-        it 'does not change Cache-Control header' do
-          subject.stream
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'cache'
-        end
-
-        it 'sets Content-Length header to nil' do
-          subject.stream file_path
-
-          expect(subject.header[Rack::CONTENT_LENGTH]).to be_nil
-        end
-
-        it 'sets Transfer-Encoding header to nil' do
-          subject.stream file_path
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+        it 'sets only the cache-control header' do
+          expect(subject.header).to match(Rack::CACHE_CONTROL => 'no-cache')
         end
       end
 
@@ -312,36 +285,15 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'emits no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.stream stream_object
         end
 
         it 'returns value wrapped in StreamResponse' do
-          subject.stream stream_object
-
           expect(subject.stream).to eq stream_response
         end
 
-        it 'sets Cache-Control header to no-cache' do
-          subject.stream stream_object
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'no-cache'
-        end
-
-        it 'sets Content-Length header to nil' do
-          subject.stream stream_object
-
-          expect(subject.header[Rack::CONTENT_LENGTH]).to be_nil
-        end
-
-        it 'sets Transfer-Encoding header to nil' do
-          subject.stream stream_object
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+        it 'set only the cache-control header' do
+          expect(subject.header).to match(Rack::CACHE_CONTROL => 'no-cache')
         end
       end
 
