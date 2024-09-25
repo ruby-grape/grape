@@ -221,12 +221,11 @@ describe Grape::Endpoint do
 
         it 'set the correct headers' do
           expect(subject.header).to match(
-                                      Rack::CACHE_CONTROL => 'cache',
-                                      Rack::CONTENT_LENGTH => 123,
-                                      Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
-                                    )
+            Rack::CACHE_CONTROL => 'cache',
+            Rack::CONTENT_LENGTH => 123,
+            Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
+          )
         end
-
       end
 
       context 'as object' do
