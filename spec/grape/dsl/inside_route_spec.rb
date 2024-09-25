@@ -202,38 +202,6 @@ describe Grape::Endpoint do
     end
   end
 
-  describe '#file' do
-    describe 'set' do
-      context 'as file path' do
-        let(:file_path) { '/some/file/path' }
-
-        it 'emits a warning that this method is deprecated' do
-          expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-          expect(subject).to receive(:sendfile).with(file_path)
-          subject.file file_path
-        end
-      end
-
-      context 'as object (backward compatibility)' do
-        let(:file_object) { double('StreamerObject', each: nil) }
-
-        it 'emits a warning that this method is deprecated' do
-          expect(Grape.deprecator).to receive(:warn).with(/Use stream to use a Stream object/)
-          expect(subject).to receive(:stream).with(file_object)
-          subject.file file_object
-        end
-      end
-    end
-
-    describe 'get' do
-      it 'emits a warning that this method is deprecated' do
-        expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-        expect(subject).to receive(:sendfile)
-        subject.file
-      end
-    end
-  end
-
   describe '#sendfile' do
     describe 'set' do
       context 'as file path' do
@@ -248,29 +216,18 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'sends no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.sendfile file_path
         end
 
         it 'returns value wrapped in StreamResponse' do
-          subject.sendfile file_path
-
           expect(subject.sendfile).to eq file_response
         end
 
         it 'does not change the Cache-Control header' do
-          subject.sendfile file_path
-
           expect(subject.header[Rack::CACHE_CONTROL]).to eq 'cache'
         end
 
         it 'does not change the Content-Length header' do
-          subject.sendfile file_path
-
           expect(subject.header[Rack::CONTENT_LENGTH]).to eq 123
         end
 
