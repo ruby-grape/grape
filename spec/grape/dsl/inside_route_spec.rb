@@ -219,19 +219,14 @@ describe Grape::Endpoint do
           expect(subject.sendfile).to eq file_response
         end
 
-        it 'does not change the Cache-Control header' do
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'cache'
+        it 'set the correct headers' do
+          expect(subject.header).to match(
+                                      Rack::CACHE_CONTROL => 'cache',
+                                      Rack::CONTENT_LENGTH => 123,
+                                      Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
+                                    )
         end
 
-        it 'does not change the Content-Length header' do
-          expect(subject.header[Rack::CONTENT_LENGTH]).to eq 123
-        end
-
-        it 'does not change the Transfer-Encoding header' do
-          subject.sendfile file_path
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to eq 'base64'
-        end
       end
 
       context 'as object' do
@@ -308,7 +303,7 @@ describe Grape::Endpoint do
 
     it 'returns default' do
       expect(subject.stream).to be_nil
-      expect(subject.header[Rack::CACHE_CONTROL]).to be_nil
+      expect(subject.header).to be_empty
     end
   end
 
