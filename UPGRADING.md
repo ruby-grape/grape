@@ -3,11 +3,13 @@ Upgrading Grape
 
 ### Upgrading to >= 2.3.0
 
-#### Remove deprecated methods
+#### Remove deprecated methods and options
 
-Deprecated `file` method has been removed. Use `send_file` or `stream`.
-
+- Deprecated `file` method has been removed. Use `send_file` or `stream`.
 See [#2500](https://github.com/ruby-grape/grape/pull/2500)
+
+- `except` and `proc` options has been removed from the `values` validator. Use `except validator` or assign `proc` directly to `values`
+See [#2501](https://github.com/ruby-grape/grape/pull/2501)
 
 ### Upgrading to >= 2.2.0
 
