@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.3.0
+
+#### Remove deprecated methods
+
+Deprecated `file` method has been removed. Use `send_file` or `stream`.
+
+See [#2500](https://github.com/ruby-grape/grape/pull/2500)
+
 ### Upgrading to >= 2.2.0
 
 ### `Length` validator

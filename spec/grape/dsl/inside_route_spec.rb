@@ -1,25 +1,21 @@
 # frozen_string_literal: true
 
-module Grape
-  module DSL
-    module InsideRouteSpec
-      class Dummy
-        include Grape::DSL::InsideRoute
+describe Grape::Endpoint do
+  subject { dummy_class.new }
 
-        attr_reader :env, :request, :new_settings
+  let(:dummy_class) do
+    Class.new do
+      include Grape::DSL::InsideRoute
 
-        def initialize
-          @env = {}
-          @header = {}
-          @new_settings = { namespace_inheritable: {}, namespace_stackable: {} }
-        end
+      attr_reader :env, :request, :new_settings
+
+      def initialize
+        @env = {}
+        @header = {}
+        @new_settings = { namespace_inheritable: {}, namespace_stackable: {} }
       end
     end
   end
-end
-
-describe Grape::Endpoint do
-  subject { Grape::DSL::InsideRouteSpec::Dummy.new }
 
   describe '#version' do
     it 'defaults to nil' do
@@ -202,38 +198,6 @@ describe Grape::Endpoint do
     end
   end
 
-  describe '#file' do
-    describe 'set' do
-      context 'as file path' do
-        let(:file_path) { '/some/file/path' }
-
-        it 'emits a warning that this method is deprecated' do
-          expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-          expect(subject).to receive(:sendfile).with(file_path)
-          subject.file file_path
-        end
-      end
-
-      context 'as object (backward compatibility)' do
-        let(:file_object) { double('StreamerObject', each: nil) }
-
-        it 'emits a warning that this method is deprecated' do
-          expect(Grape.deprecator).to receive(:warn).with(/Use stream to use a Stream object/)
-          expect(subject).to receive(:stream).with(file_object)
-          subject.file file_object
-        end
-      end
-    end
-
-    describe 'get' do
-      it 'emits a warning that this method is deprecated' do
-        expect(Grape.deprecator).to receive(:warn).with(/Use sendfile or stream/)
-        expect(subject).to receive(:sendfile)
-        subject.file
-      end
-    end
-  end
-
   describe '#sendfile' do
     describe 'set' do
       context 'as file path' do
@@ -248,36 +212,19 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'sends no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.sendfile file_path
         end
 
         it 'returns value wrapped in StreamResponse' do
-          subject.sendfile file_path
-
           expect(subject.sendfile).to eq file_response
         end
 
-        it 'does not change the Cache-Control header' do
-          subject.sendfile file_path
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'cache'
-        end
-
-        it 'does not change the Content-Length header' do
-          subject.sendfile file_path
-
-          expect(subject.header[Rack::CONTENT_LENGTH]).to eq 123
-        end
-
-        it 'does not change the Transfer-Encoding header' do
-          subject.sendfile file_path
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to eq 'base64'
+        it 'set the correct headers' do
+          expect(subject.header).to match(
+            Rack::CACHE_CONTROL => 'cache',
+            Rack::CONTENT_LENGTH => 123,
+            Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
+          )
         end
       end
 
@@ -309,42 +256,15 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'emits no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.stream file_path
         end
 
         it 'returns file body wrapped in StreamResponse' do
-          subject.stream file_path
-
           expect(subject.stream).to eq file_response
         end
 
-        it 'sets Cache-Control header to no-cache' do
-          subject.stream file_path
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'no-cache'
-        end
-
-        it 'does not change Cache-Control header' do
-          subject.stream
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'cache'
-        end
-
-        it 'sets Content-Length header to nil' do
-          subject.stream file_path
-
-          expect(subject.header[Rack::CONTENT_LENGTH]).to be_nil
-        end
-
-        it 'sets Transfer-Encoding header to nil' do
-          subject.stream file_path
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+        it 'sets only the cache-control header' do
+          expect(subject.header).to match(Rack::CACHE_CONTROL => 'no-cache')
         end
       end
 
@@ -359,36 +279,15 @@ describe Grape::Endpoint do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
           subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
-        end
-
-        it 'emits no deprecation warnings' do
-          expect(Grape.deprecator).not_to receive(:warn)
-
           subject.stream stream_object
         end
 
         it 'returns value wrapped in StreamResponse' do
-          subject.stream stream_object
-
           expect(subject.stream).to eq stream_response
         end
 
-        it 'sets Cache-Control header to no-cache' do
-          subject.stream stream_object
-
-          expect(subject.header[Rack::CACHE_CONTROL]).to eq 'no-cache'
-        end
-
-        it 'sets Content-Length header to nil' do
-          subject.stream stream_object
-
-          expect(subject.header[Rack::CONTENT_LENGTH]).to be_nil
-        end
-
-        it 'sets Transfer-Encoding header to nil' do
-          subject.stream stream_object
-
-          expect(subject.header[Grape::Http::Headers::TRANSFER_ENCODING]).to be_nil
+        it 'set only the cache-control header' do
+          expect(subject.header).to match(Rack::CACHE_CONTROL => 'no-cache')
         end
       end
 
@@ -403,7 +302,7 @@ describe Grape::Endpoint do
 
     it 'returns default' do
       expect(subject.stream).to be_nil
-      expect(subject.header[Rack::CACHE_CONTROL]).to be_nil
+      expect(subject.header).to be_empty
     end
   end
 

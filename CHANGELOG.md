@@ -3,6 +3,7 @@
 #### Features
 
 * [#2497](https://github.com/ruby-grape/grape/pull/2497): Update RuboCop to 1.66.1 - [@ericproulx](https://github.com/ericproulx).
+* [#2500](https://github.com/ruby-grape/grape/pull/2500): Remove deprecated `file` method - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
