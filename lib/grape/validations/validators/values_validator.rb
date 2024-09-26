@@ -19,12 +19,12 @@ module Grape
           # don't forget that +false.blank?+ is true
           return if val != false && val.blank? && @allow_blank
 
-          unless check_values?(val, attr_name)
-            raise Grape::Exceptions::Validation.new(
-              params: [@scope.full_name(attr_name)],
-              message: message(:values)
-            )
-          end
+          return if check_values?(val, attr_name)
+
+          raise Grape::Exceptions::Validation.new(
+            params: [@scope.full_name(attr_name)],
+            message: message(:values)
+          )
         end
 
         private
