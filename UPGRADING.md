@@ -3,7 +3,7 @@ Upgrading Grape
 
 ### Upgrading to >= 2.3.0
 
-#### Remove Deprecated Methods and Pptions
+#### Remove Deprecated Methods and Options
 
 - Deprecated `file` method has been removed. Use `send_file` or `stream`.
 See [#2500](https://github.com/ruby-grape/grape/pull/2500) for more information
