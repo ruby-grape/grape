@@ -11,6 +11,9 @@ See [#2500](https://github.com/ruby-grape/grape/pull/2500) for more information.
 - The `except` and `proc` options have been removed from the `values` validator. Use `except_values` validator or assign `proc` directly to `values`.
 See [#2501](https://github.com/ruby-grape/grape/pull/2501) for more information.
 
+- `Passing an options hash and a block to 'desc'` deprecation has been removed. Move all hash options to block instead.
+See [#2502](https://github.com/ruby-grape/grape/pull/2502) for more information.
+
 ### Upgrading to >= 2.2.0
 
 ### `Length` validator
