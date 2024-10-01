@@ -70,33 +70,23 @@ module Grape
       #       # ...
       #     end
       #
-      def desc(description, options = {}, &config_block)
-        if config_block
-          endpoint_configuration = if defined?(configuration)
-                                     # When the instance is mounted - the configuration is executed on mount time
-                                     if configuration.respond_to?(:evaluate)
-                                       configuration.evaluate
-                                     # Within `given` or `mounted blocks` the configuration is already evaluated
-                                     elsif configuration.is_a?(Hash)
-                                       configuration
-                                     end
-                                   end
-          endpoint_configuration ||= {}
-          config_class = desc_container(endpoint_configuration)
+      def desc(description, options = nil, &config_block)
+        opts =
+          if config_block
+            desc_container(endpoint_configuration).then do |config_class|
+              config_class.configure do
+                description(description)
+              end
 
-          config_class.configure do
-            description description
+              config_class.configure(&config_block)
+              config_class.settings
+            end
+          else
+            options&.merge(description: description) || { description: description }
           end
 
-          config_class.configure(&config_block)
-          Grape.deprecator.warn('Passing a options hash and a block to `desc` is deprecated. Move all hash options to block.') if options.any?
-          options = config_class.settings
-        else
-          options = options.merge(description: description)
-        end
-
-        namespace_setting :description, options
-        route_setting :description, options
+        namespace_setting :description, opts
+        route_setting :description, opts
       end
 
       # Returns an object which configures itself via an instance-context DSL.
@@ -114,6 +104,19 @@ module Grape
           def config_context.failure(*args)
             http_codes(*args)
           end
+        end
+      end
+
+      private
+
+      def endpoint_configuration
+        return {} unless defined?(configuration)
+
+        if configuration.respond_to?(:evaluate)
+          configuration.evaluate
+          # Within `given` or `mounted blocks` the configuration is already evaluated
+        elsif configuration.is_a?(Hash)
+          configuration
         end
       end
     end
