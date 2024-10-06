@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::ExceptValuesValidator do
-
   describe 'IncompatibleOptionValues' do
     subject { api }
 

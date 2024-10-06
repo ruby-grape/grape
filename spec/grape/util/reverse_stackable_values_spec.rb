@@ -92,9 +92,9 @@ describe Grape::Util::ReverseStackableValues do
       subject[:some_thing] = %i[bar more]
       subject[:some_thing_more] = :foo_bar
       expect(subject.to_hash).to eq(
-                                   some_thing: [%i[bar more], :foo],
-                                   some_thing_more: [:foo_bar]
-                                 )
+        some_thing: [%i[bar more], :foo],
+        some_thing_more: [:foo_bar]
+      )
     end
   end
 
@@ -112,9 +112,9 @@ describe Grape::Util::ReverseStackableValues do
       grandchild[:some_thing_more] = :foo_bar
 
       expect(grandchild.clone.to_hash).to eq(
-                                            some_thing: [:grand_foo_bar, %i[bar more], :foo],
-                                            some_thing_more: [:foo_bar]
-                                          )
+        some_thing: [:grand_foo_bar, %i[bar more], :foo],
+        some_thing_more: [:foo_bar]
+      )
     end
 
     context 'complex (i.e. not primitive) data types (ex. middleware, please see bug #930)' do

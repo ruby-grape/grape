@@ -69,6 +69,7 @@ describe Grape::DSL::Helpers do
           end
         end
       end
+
       it 'sets Boolean as a Grape::API::Boolean' do
         subject.helpers boolean_helper
         expect(subject.first_mod::Boolean).to eq Grape::API::Boolean

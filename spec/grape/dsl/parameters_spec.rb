@@ -131,11 +131,11 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
-                                                        [:allowed_vaults], { type: [Integer], documentation: { in: 'body', default: [31, 32, 33], is_array: true } }
-                                                      ]
-                                                    )
+        [
+          [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
+          [:allowed_vaults], { type: [Integer], documentation: { in: 'body', default: [31, 32, 33], is_array: true } }
+        ]
+      )
     end
 
     it 'allows a primitive type attribite to overwrite a complex type group attribute' do
@@ -144,10 +144,10 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:vault], { type: Integer, documentation: { x: nil } }
-                                                      ]
-                                                    )
+        [
+          [:vault], { type: Integer, documentation: { x: nil } }
+        ]
+      )
     end
 
     it 'does not nest primitives inside existing complex types erroneously' do
@@ -157,11 +157,11 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:info], { type: Hash, documentation: { default: { vault: '33' } } },
-                                                        [:role], { type: String, documentation: { default: 'resident' } }
-                                                      ]
-                                                    )
+        [
+          [:info], { type: Hash, documentation: { default: { vault: '33' } } },
+          [:role], { type: String, documentation: { default: 'resident' } }
+        ]
+      )
     end
 
     it 'merges deeply nested attributes' do
@@ -170,10 +170,10 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:vault], { documentation: { details: { in: 'body', hidden: false, desc: 'The vault number' } } }
-                                                      ]
-                                                    )
+        [
+          [:vault], { documentation: { details: { in: 'body', hidden: false, desc: 'The vault number' } } }
+        ]
+      )
     end
 
     it "supports nested 'with' calls" do
@@ -191,13 +191,13 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:pipboy_id], { type: Integer, documentation: { in: 'body' } },
-                                                        [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
-                                                        [:role], { type: String, documentation: { in: 'body', default: 'resident' } },
-                                                        [:age], { type: Integer, documentation: { in: 'body', default: 42 } }
-                                                      ]
-                                                    )
+        [
+          [:pipboy_id], { type: Integer, documentation: { in: 'body' } },
+          [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
+          [:role], { type: String, documentation: { in: 'body', default: 'resident' } },
+          [:age], { type: Integer, documentation: { in: 'body', default: 42 } }
+        ]
+      )
     end
 
     it "supports Hash parameter inside the 'with' calls" do
@@ -208,11 +208,11 @@ describe Grape::DSL::Parameters do
       end
 
       expect(subject.validate_attributes_reader).to eq(
-                                                      [
-                                                        [:info], { type: Hash, documentation: { in: 'body', desc: 'The info', x: { nullable: true } } },
-                                                        [:vault], { type: Integer, documentation: { in: 'body', default: 33, desc: 'The vault number' } }
-                                                      ]
-                                                    )
+        [
+          [:info], { type: Hash, documentation: { in: 'body', desc: 'The info', x: { nullable: true } } },
+          [:vault], { type: Integer, documentation: { in: 'body', default: 33, desc: 'The vault number' } }
+        ]
+      )
     end
   end
 

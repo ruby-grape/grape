@@ -220,16 +220,17 @@ describe Grape::Util::InheritableSetting do
       subject.namespace_stackable[:namespace_stackable_thing] = [:namespace_stackable_foo_bar]
       subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = [:namespace_reverse_stackable_foo_bar]
       subject.route[:route_thing] = :route_foo_bar
-
-      expect(subject.to_hash).to include(global: { global_thing: :global_foo_bar })
-      expect(subject.to_hash).to include(namespace: { namespace_thing: :namespace_foo_bar })
-      expect(subject.to_hash).to include(namespace_inheritable: {
-        namespace_inheritable_thing: :namespace_inheritable_foo_bar
-      })
-      expect(subject.to_hash).to include(namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] })
-      expect(subject.to_hash).to include(namespace_reverse_stackable:
-                                           { namespace_reverse_stackable_thing: [[:namespace_reverse_stackable_foo_bar], :namespace_reverse_stackable_foo_bar] })
-      expect(subject.to_hash).to include(route: { route_thing: :route_foo_bar })
+      expect(subject.to_hash).to match(
+                                   global: { global_thing: :global_foo_bar },
+                                   namespace: { namespace_thing: :namespace_foo_bar },
+                                   namespace_inheritable: {
+                                     namespace_inheritable_thing: :namespace_inheritable_foo_bar
+                                   },
+                                   namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] },
+                                   namespace_reverse_stackable:
+                                     { namespace_reverse_stackable_thing: [[:namespace_reverse_stackable_foo_bar], :namespace_reverse_stackable_foo_bar] },
+                                   route: { route_thing: :route_foo_bar }
+                                 )
     end
   end
 end

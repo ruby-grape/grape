@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe 'Deep included options' do
+describe Grape::API do
   let(:app) do
     main_api = api
     Class.new(Grape::API) do
