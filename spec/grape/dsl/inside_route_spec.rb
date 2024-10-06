@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Grape::Endpoint do
+describe Grape::DSL::InsideRoute do
   subject { dummy_class.new }
 
   let(:dummy_class) do

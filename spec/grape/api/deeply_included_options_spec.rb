@@ -1,21 +1,17 @@
 # frozen_string_literal: true
 
-module DeeplyIncludedOptionsSpec
-  module Defaults
-    extend ActiveSupport::Concern
-    included do
-      format :json
+describe Grape::API do
+  let(:app) do
+    main_api = api
+    Class.new(Grape::API) do
+      mount main_api
     end
   end
 
-  module Admin
-    module Defaults
-      extend ActiveSupport::Concern
-      include DeeplyIncludedOptionsSpec::Defaults
-    end
-
-    class Users < Grape::API
-      include DeeplyIncludedOptionsSpec::Admin::Defaults
+  let(:api) do
+    deeply_included_options = options
+    Class.new(Grape::API) do
+      include deeply_included_options
 
       resource :users do
         get do
@@ -25,16 +21,21 @@ module DeeplyIncludedOptionsSpec
     end
   end
 
-  class Main < Grape::API
-    mount DeeplyIncludedOptionsSpec::Admin::Users
+  let(:options) do
+    deep_included_options_default = default
+    Module.new do
+      extend ActiveSupport::Concern
+      include deep_included_options_default
+    end
   end
-end
 
-describe Grape::API do
-  subject { DeeplyIncludedOptionsSpec::Main }
-
-  def app
-    subject
+  let(:default) do
+    Module.new do
+      extend ActiveSupport::Concern
+      included do
+        format :json
+      end
+    end
   end
 
   it 'works for unspecified format' do
