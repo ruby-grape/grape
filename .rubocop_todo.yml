@@ -22,17 +22,6 @@ Naming/VariableNumber:
     - 'spec/grape/exceptions/validation_errors_spec.rb'
     - 'spec/grape/validations_spec.rb'
 
-# Offense count: 1
-# Configuration parameters: IgnoredMetadata.
-RSpec/DescribeClass:
-  Exclude:
-    - '**/spec/features/**/*'
-    - '**/spec/requests/**/*'
-    - '**/spec/routing/**/*'
-    - '**/spec/system/**/*'
-    - '**/spec/views/**/*'
-    - 'spec/grape/named_api_spec.rb'
-
 # Offense count: 2
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: SkipBlocks, EnforcedStyle, OnlyStaticConstants.
