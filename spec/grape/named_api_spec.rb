@@ -11,7 +11,7 @@ describe Grape::API do
     end
   end
 
-  let(:name) { 'NamedAPI'}
+  let(:name) { 'NamedAPI' }
 
   before { stub_const(name, api) }
 
