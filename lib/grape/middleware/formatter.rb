@@ -53,7 +53,7 @@ module Grape
       end
 
       def fetch_formatter(headers, options)
-        api_format = mime_types[headers[Rack::CONTENT_TYPE]] || env[Grape::Env::API_FORMAT]
+        api_format = env[Grape::Env::API_FORMAT] || mime_types[headers[Rack::CONTENT_TYPE]]
         Grape::Formatter.formatter_for(api_format, options[:formatters])
       end
 
