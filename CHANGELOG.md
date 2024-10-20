@@ -11,6 +11,7 @@
 #### Fixes
 
 * [#2504](https://github.com/ruby-grape/grape/pull/2504): Fix leaky modules in specs - [@ericproulx](https://github.com/ericproulx).
+* [#2506](https://github.com/ruby-grape/grape/pull/2506): Fix fetch_formatter api_format - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)

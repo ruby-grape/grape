@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 2.3.0
 
+### `content_type` vs `api.format` inside API
+
+Before 2.3.0, `content_type` would have priority over `env['api.format']` when set in an API. The priority has been flipped and `env['api.format']` will be checked first.
+In addition, the function `api_format` has been added. Instead of setting `env['api.format']` directly, you can call `api_format`.
+See [#2506] (https://github.com/ruby-grape/grape/pull/2506) for more information.
+
 #### Remove Deprecated Methods and Options
 
 - Deprecated `file` method has been removed. Use `send_file` or `stream`.
