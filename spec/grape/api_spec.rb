@@ -4094,7 +4094,7 @@ describe Grape::API do
 
       it 'can be overwritten with an explicit api_format' do
         subject.get '/meaning_of_life_with_content_type' do
-          api_format 'text/plain'
+          api_format :txt
           { meaning_of_life: 42 }.to_s
         end
         get '/meaning_of_life_with_content_type'
