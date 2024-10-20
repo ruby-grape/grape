@@ -452,7 +452,11 @@ module Grape
       end
 
       def http_version
-        env['HTTP_VERSION'] || env[Rack::SERVER_PROTOCOL]
+        env.fetch(Grape::Http::Headers::HTTP_VERSION) { env[Rack::SERVER_PROTOCOL] }
+      end
+
+      def api_format(format)
+        env[Grape::Env::API_FORMAT] = format
       end
 
       def context

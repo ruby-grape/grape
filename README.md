@@ -3066,7 +3066,7 @@ end
 * `GET /hello.xls` with an `Accept: application/xml` header has an unrecognized extension, but the `Accept` header corresponds to a recognized format, so it will respond with XML.
 * `GET /hello.xls` with an `Accept: text/plain` header has an unrecognized extension *and* an unrecognized `Accept` header, so it will respond with JSON (the default format).
 
-You can override this process explicitly by specifying `env['api.format']` in the API itself.
+You can override this process explicitly by calling `api_format` in the API itself.
 For example, the following API will let you upload arbitrary files and return their contents as an attachment with the correct MIME type.
 
 ```ruby
@@ -3074,7 +3074,7 @@ class Twitter::API < Grape::API
   post 'attachment' do
     filename = params[:file][:filename]
     content_type MIME::Types.type_for(filename)[0].to_s
-    env['api.format'] = :binary # there's no formatter for :binary, data will be returned "as is"
+    api_format :binary # there's no formatter for :binary, data will be returned "as is"
     header 'Content-Disposition', "attachment; filename*=UTF-8''#{CGI.escape(filename)}"
     params[:file][:tempfile].read
   end
