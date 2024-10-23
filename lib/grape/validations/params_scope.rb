@@ -490,7 +490,7 @@ module Grape
       def validate_value_coercion(coerce_type, *values_list)
         return unless coerce_type
 
-        coerce_type = coerce_type.first if coerce_type.is_a?(Array)
+        coerce_type = coerce_type.first if coerce_type.is_a?(Enumerable)
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
 
