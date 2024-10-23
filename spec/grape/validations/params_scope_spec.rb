@@ -189,6 +189,24 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'a Set with coerce type explicitly given' do
+    context 'and the values are allowed' do
+      it 'does not raise an exception' do
+        expect do
+          subject.params { optional :numbers, type: Set[Integer], values: 0..2, default: 0..2 }
+        end.not_to raise_error
+      end
+    end
+
+    context 'and the values are not allowed' do
+      it 'raises exception' do
+        expect do
+          subject.params { optional :numbers, type: Set[Integer], values: %w[a b] }
+        end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+      end
+    end
+  end
+
   context 'with range values' do
     context "when left range endpoint isn't #kind_of? the type" do
       it 'raises exception' do
