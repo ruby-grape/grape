@@ -23,7 +23,6 @@ require 'active_support/core_ext/object/duplicable'
 require 'active_support/core_ext/string/output_safety'
 require 'active_support/core_ext/string/exclude'
 require 'active_support/deprecation'
-require 'active_support/inflector'
 require 'active_support/ordered_options'
 require 'active_support/notifications'
 
