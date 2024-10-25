@@ -10,8 +10,6 @@ module Grape
       raise Grape::Exceptions::UnknownValidator, short_name
     end
 
-    private
-
     class ValidatorsCache < Grape::Util::Cache
       def initialize
         super
