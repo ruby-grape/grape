@@ -2031,8 +2031,7 @@ describe Grape::Validations do
       let(:short_name) { :custom }
       let(:custom_validator) do
         Class.new(Grape::Validations::Validators::Base) do
-          def validate_param!(_attr_name, _params)
-          end
+          def validate_param!(_attr_name, _params); end
         end
       end
 
