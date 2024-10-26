@@ -208,7 +208,7 @@ module Grape
       namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
       namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
       path_settings = namespace_stackable_hash.merge!(namespace_inheritable_hash)
-      Path.new(path, namespace, path_settings)
+      Path.new(path, namespace, **path_settings)
     end
 
     def namespace
