@@ -9,7 +9,7 @@ module Grape
 
     attr_reader :path, :suffix
 
-    def initialize(raw_path, raw_namespace, **settings)
+    def initialize(raw_path, raw_namespace, settings)
       @path = PartsCache[build_parts(raw_path, raw_namespace, settings)]
       @suffix = build_suffix(raw_path, raw_namespace, settings)
     end
