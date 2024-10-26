@@ -2026,5 +2026,21 @@ describe Grape::Validations do
         expect { subject }.to raise_error(Grape::Exceptions::UnknownValidator)
       end
     end
+
+    context 'when custom' do
+      let(:short_name) { :custom }
+      let(:custom_validator) do
+        Class.new(Grape::Validations::Validators::Base) do
+          def validate_param!(_attr_name, _params)
+          end
+        end
+      end
+
+      before do
+        stub_const('Grape::Validations::Validators::CustomValidator', custom_validator)
+      end
+
+      it { is_expected.to be(Grape::Validations::Validators::CustomValidator) }
+    end
   end
 end

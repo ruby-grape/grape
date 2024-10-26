@@ -5,12 +5,12 @@ module Grape
     module_function
 
     def require_validator(short_name)
-      ValidatorsCache[short_name]
+      ValidatorsRegistry[short_name]
     rescue NameError
       raise Grape::Exceptions::UnknownValidator, short_name
     end
 
-    class ValidatorsCache < Grape::Util::Cache
+    class ValidatorsRegistry < Grape::Util::Cache
       def initialize
         super
         @cache = Hash.new do |h, name|
