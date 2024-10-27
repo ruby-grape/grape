@@ -62,12 +62,6 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
   end
 
   describe 'Grape::Validations::ContractScope' do
-    describe '.inherits' do
-      subject { described_class }
-
-      it { is_expected.to be < Grape::Validations::Validators::Base }
-    end
-
     let(:validated_params) { {} }
     let(:app) do
       vp = validated_params
@@ -77,6 +71,12 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
           vp.replace(params)
         end
       end
+    end
+
+    describe '.inherits' do
+      subject { described_class }
+
+      it { is_expected.to be < Grape::Validations::Validators::Base }
     end
 
     context 'with simple schema, pre-defined' do
