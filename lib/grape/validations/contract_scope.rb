@@ -24,17 +24,18 @@ module Grape
 
         validator_options = {
           validator_class: Validator,
-          opts: { schema: contract }
+          opts: { schema: contract, fail_fast: false }
         }
 
         api.namespace_stackable(:validations, validator_options)
       end
 
-      class Validator
+      class Validator < Grape::Validations::Validators::Base
         attr_reader :schema
 
-        def initialize(*_args, schema:)
-          @schema = schema
+        def initialize(_attrs, _options, _required, _scope, opts)
+          super
+          @schema = opts.fetch(:schema)
         end
 
         # Validates a given request.
@@ -49,21 +50,17 @@ module Grape
             return
           end
 
-          errors = []
-
-          res.errors.messages.each do |message|
-            full_name = message.path.first.to_s
-
-            full_name += "[#{message.path[1..].join('][')}]" if message.path.size > 1
-
-            errors << Grape::Exceptions::Validation.new(params: [full_name], message: message.text)
-          end
-
-          raise Grape::Exceptions::ValidationArrayErrors.new(errors)
+          raise Grape::Exceptions::ValidationArrayErrors.new(build_errors_from_messages(res.errors.messages))
         end
 
-        def fail_fast?
-          false
+        private
+
+        def build_errors_from_messages(messages)
+          messages.map do |message|
+            full_name = message.path.first.to_s
+            full_name << "[#{message.path[1..].join('][')}]" if message.path.size > 1
+            Grape::Exceptions::Validation.new(params: [full_name], message: message.text)
+          end
         end
       end
     end
