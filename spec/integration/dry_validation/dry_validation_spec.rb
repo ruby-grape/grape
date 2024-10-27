@@ -73,12 +73,6 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
       end
     end
 
-    describe '.inherits' do
-      subject { described_class }
-
-      it { is_expected.to be < Grape::Validations::Validators::Base }
-    end
-
     context 'with simple schema, pre-defined' do
       let(:contract) do
         Dry::Schema.Params do
@@ -240,6 +234,14 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
         expect(last_response).to be_bad_request
         expect(last_response.body).to eq('foo_id is not allowed')
       end
+    end
+  end
+
+  describe Grape::Validations::ContractScope::Validator do
+    describe '.inherits' do
+      subject { described_class }
+
+      it { is_expected.to be < Grape::Validations::Validators::Base }
     end
   end
 end
