@@ -15,6 +15,10 @@ module Grape
         super(options)
       end
 
+      def convert_to_head_request!
+        @request_method = Rack::HEAD
+      end
+
       def exec(env)
         @app.call(env)
       end

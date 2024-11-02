@@ -151,7 +151,8 @@ module Grape
       routes.each do |route|
         router.append(route.apply(self))
         if !namespace_inheritable(:do_not_route_head) && route.request_method == Rack::GET
-          Grape::Router::Route.new(Rack::HEAD, route.origin, route.attributes).then do |head_route|
+          route.dup.then do |head_route|
+            head_route.convert_to_head_request!
             router.append(head_route.apply(self))
           end
         end
