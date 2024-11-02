@@ -13,9 +13,9 @@ module Grape
       def_delegators :to_regexp, :===
       alias match? ===
 
-      def initialize(pattern, **options)
+      def initialize(pattern, options)
         @origin = pattern
-        @path = build_path(pattern, anchor: options[:anchor], suffix: options[:suffix])
+        @path = build_path(pattern, options)
         @pattern = build_pattern(@path, options)
         @to_regexp = @pattern.to_regexp
       end
@@ -33,15 +33,15 @@ module Grape
           path,
           uri_decode: true,
           params: options[:params],
-          capture: extract_capture(**options)
+          capture: extract_capture(options)
         )
       end
 
-      def build_path(pattern, anchor: false, suffix: nil)
-        PatternCache[[build_path_from_pattern(pattern, anchor: anchor), suffix]]
+      def build_path(pattern, options)
+        PatternCache[[build_path_from_pattern(pattern, options), options[:suffix]]]
       end
 
-      def extract_capture(**options)
+      def extract_capture(options)
         sliced_options = options
                          .slice(:format, :version)
                          .delete_if { |_k, v| v.blank? }
@@ -51,10 +51,10 @@ module Grape
         options[:requirements].merge(sliced_options)
       end
 
-      def build_path_from_pattern(pattern, anchor: false)
+      def build_path_from_pattern(pattern, options)
         if pattern.end_with?('*path')
           pattern.dup.insert(pattern.rindex('/') + 1, '?')
-        elsif anchor
+        elsif options[:anchor]
           pattern
         elsif pattern.end_with?('/')
           "#{pattern}?*path"

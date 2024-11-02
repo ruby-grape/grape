@@ -7,7 +7,7 @@ module Grape
 
       attr_reader :index, :pattern, :options
 
-      def initialize(**options)
+      def initialize(options)
         @options = ActiveSupport::OrderedOptions.new.update(options)
       end
 

@@ -179,7 +179,7 @@ describe Grape::DSL::Routing do
     it 'creates a new namespace with given name and options' do
       expect(subject).to receive(:within_namespace).and_yield
       expect(subject).to receive(:nest).and_yield
-      expect(Grape::Namespace).to receive(:new).with(:foo, foo: 'bar').and_return(new_namespace)
+      expect(Grape::Namespace).to receive(:new).with(:foo, { foo: 'bar' }).and_return(new_namespace)
       expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)
 
       subject.namespace :foo, foo: 'bar', &proc {}

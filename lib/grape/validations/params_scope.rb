@@ -174,16 +174,12 @@ module Grape
 
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
-      def push_declared_params(attrs, **opts)
-        opts = opts.merge(declared_params_scope: self) unless opts.key?(:declared_params_scope)
-        if lateral?
-          @parent.push_declared_params(attrs, **opts)
-        else
-          push_renamed_param(full_path + [attrs.first], opts[:as]) \
-            if opts && opts[:as]
+      def push_declared_params(attrs, opts = {})
+        opts[:declared_params_scope] = self unless opts.key?(:declared_params_scope)
+        return @parent.push_declared_params(attrs, opts) if lateral?
 
-          @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
-        end
+        push_renamed_param(full_path + [attrs.first], opts[:as]) if opts[:as]
+        @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
       end
 
       # Get the full path of the parameter scope in the hierarchy.

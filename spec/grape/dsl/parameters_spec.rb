@@ -20,7 +20,7 @@ describe Grape::DSL::Parameters do
         @validate_attributes
       end
 
-      def push_declared_params(args, **_opts)
+      def push_declared_params(args, _opts)
         @push_declared_params = args
       end
 

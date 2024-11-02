@@ -202,18 +202,16 @@ module Grape
         without_root_prefix do
           without_versioning do
             versioned_route_configs.each do |config|
-              next if config[:options][:matching_wildchar]
+              next if config.dig(:options, :matching_wildchar)
 
               allowed_methods = config[:methods].dup
-
               allowed_methods |= [Rack::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Rack::GET)
-
               allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Rack::OPTIONS] | allowed_methods)
 
               config[:endpoint].options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Rack::OPTIONS)
-
-              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
-              generate_not_allowed_method(config[:pattern], **attributes)
+              config[:allowed_methods] = allowed_methods
+              config[:allow_header] = allow_header
+              generate_not_allowed_method(config[:pattern], config)
             end
           end
         end
@@ -240,15 +238,15 @@ module Grape
 
       # Generate a route that returns an HTTP 405 response for a user defined
       # path on methods not specified
-      def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
+      def generate_not_allowed_method(pattern, options)
         supported_methods =
           if self.class.namespace_inheritable(:do_not_route_options)
             Grape::Http::Headers::SUPPORTED_METHODS
           else
             Grape::Http::Headers::SUPPORTED_METHODS_WITHOUT_OPTIONS
           end
-        not_allowed_methods = supported_methods - allowed_methods
-        @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
+        options[:not_allowed_methods] = supported_methods - options[:allowed_methods]
+        @router.associate_routes(pattern, options)
       end
 
       # Allows definition of endpoints that ignore the versioning configuration

@@ -38,8 +38,8 @@ module Grape
       map[route.request_method] << route
     end
 
-    def associate_routes(pattern, **options)
-      Grape::Router::GreedyRoute.new(pattern: pattern, **options).then do |greedy_route|
+    def associate_routes(pattern, options)
+      Grape::Router::GreedyRoute.new(pattern, options).then do |greedy_route|
         @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
         @neutral_map << greedy_route
       end

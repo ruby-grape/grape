@@ -12,7 +12,7 @@ module Grape
     # @option options :requirements [Hash] param-regex pairs, all of which must
     #   be met by a request's params for all endpoints in this namespace, or
     #   validation will fail and return a 422.
-    def initialize(space, **options)
+    def initialize(space, options)
       @space = space.to_s
       @options = options
     end

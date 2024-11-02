@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Grape::Router::GreedyRoute do
-  let(:instance) { described_class.new(pattern: pattern, **options) }
+  let(:instance) { described_class.new(pattern, options) }
   let(:index) { 0 }
   let(:pattern) { :pattern }
   let(:params) do

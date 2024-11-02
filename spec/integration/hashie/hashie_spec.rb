@@ -164,11 +164,9 @@ describe 'Hashie', if: defined?(Hashie) do
     end
 
     describe 'when the build_params_with is set to Hashie' do
-      subject(:request_params) { Grape::Request.new(env, **opts).params }
+      subject(:request_params) { Grape::Request.new(env, build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder).params }
 
       context 'when the API includes a specific param builder' do
-        let(:opts) { { build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder } }
-
         it { is_expected.to be_a(Hashie::Mash) }
       end
     end

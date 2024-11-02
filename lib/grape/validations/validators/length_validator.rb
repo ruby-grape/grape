@@ -4,7 +4,7 @@ module Grape
   module Validations
     module Validators
       class LengthValidator < Base
-        def initialize(attrs, options, required, scope, **opts)
+        def initialize(attrs, options, required, scope, opts)
           @min = options[:min]
           @max = options[:max]
           @is = options[:is]

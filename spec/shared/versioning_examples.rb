@@ -7,7 +7,7 @@ shared_examples_for 'versioning' do
     subject.get :hello do
       "Version: #{request.env[Grape::Env::API_VERSION]}"
     end
-    versioned_get '/hello', 'v1', **macro_options
+    versioned_get '/hello', 'v1', macro_options
     expect(last_response.body).to eql 'Version: v1'
   end
 
@@ -18,7 +18,7 @@ shared_examples_for 'versioning' do
     subject.get :hello do
       "Version: #{request.env[Grape::Env::API_VERSION]}"
     end
-    versioned_get '/hello', 'v1', **macro_options.merge(prefix: 'api')
+    versioned_get '/hello', 'v1', macro_options.merge(prefix: 'api')
     expect(last_response.body).to eql 'Version: v1'
   end
 
@@ -34,14 +34,14 @@ shared_examples_for 'versioning' do
       end
     end
 
-    versioned_get '/awesome', 'v1', **macro_options
+    versioned_get '/awesome', 'v1', macro_options
     expect(last_response.status).to be 404
 
-    versioned_get '/awesome', 'v2', **macro_options
+    versioned_get '/awesome', 'v2', macro_options
     expect(last_response.status).to be 200
-    versioned_get '/legacy', 'v1', **macro_options
+    versioned_get '/legacy', 'v1', macro_options
     expect(last_response.status).to be 200
-    versioned_get '/legacy', 'v2', **macro_options
+    versioned_get '/legacy', 'v2', macro_options
     expect(last_response.status).to be 404
   end
 
@@ -51,11 +51,11 @@ shared_examples_for 'versioning' do
       'I exist'
     end
 
-    versioned_get '/awesome', 'v1', **macro_options
+    versioned_get '/awesome', 'v1', macro_options
     expect(last_response.status).to be 200
-    versioned_get '/awesome', 'v2', **macro_options
+    versioned_get '/awesome', 'v2', macro_options
     expect(last_response.status).to be 200
-    versioned_get '/awesome', 'v3', **macro_options
+    versioned_get '/awesome', 'v3', macro_options
     expect(last_response.status).to be 404
   end
 
@@ -74,10 +74,10 @@ shared_examples_for 'versioning' do
           end
         end
 
-        versioned_get '/version', 'v2', **macro_options
+        versioned_get '/version', 'v2', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v2')
-        versioned_get '/version', 'v1', **macro_options
+        versioned_get '/version', 'v1', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('version v1')
       end
@@ -98,11 +98,11 @@ shared_examples_for 'versioning' do
           end
         end
 
-        versioned_get '/version', 'v1', **macro_options.merge(prefix: subject.prefix)
+        versioned_get '/version', 'v1', macro_options.merge(prefix: subject.prefix)
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('version v1')
 
-        versioned_get '/version', 'v2', **macro_options.merge(prefix: subject.prefix)
+        versioned_get '/version', 'v2', macro_options.merge(prefix: subject.prefix)
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v2')
       end
@@ -133,11 +133,11 @@ shared_examples_for 'versioning' do
         end
       end
 
-      versioned_get '/version', 'v1', **macro_options.merge(prefix: subject.prefix)
+      versioned_get '/version', 'v1', macro_options.merge(prefix: subject.prefix)
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('v1-version')
 
-      versioned_get '/version', 'v2', **macro_options.merge(prefix: subject.prefix)
+      versioned_get '/version', 'v2', macro_options.merge(prefix: subject.prefix)
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('v2-version')
     end
@@ -150,7 +150,7 @@ shared_examples_for 'versioning' do
     subject.get :api_version_with_version_param do
       params[:version]
     end
-    versioned_get '/api_version_with_version_param?version=1', 'v1', **macro_options
+    versioned_get '/api_version_with_version_param?version=1', 'v1', macro_options
     expect(last_response.body).to eql '1'
   end
 
@@ -186,13 +186,13 @@ shared_examples_for 'versioning' do
 
     context 'v1' do
       it 'finds endpoint' do
-        versioned_get '/version', 'v1', **macro_options
+        versioned_get '/version', 'v1', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v1')
       end
 
       it 'finds catch all' do
-        versioned_get '/whatever', 'v1', **macro_options
+        versioned_get '/whatever', 'v1', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to end_with 'whatever'
       end
@@ -200,13 +200,13 @@ shared_examples_for 'versioning' do
 
     context 'v2' do
       it 'finds endpoint' do
-        versioned_get '/version', 'v2', **macro_options
+        versioned_get '/version', 'v2', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('v2')
       end
 
       it 'finds catch all' do
-        versioned_get '/whatever', 'v2', **macro_options
+        versioned_get '/whatever', 'v2', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to end_with 'whatever'
       end
