@@ -255,9 +255,10 @@ module Grape
           run_filters befores, :before
 
           if (allowed_methods = env[Grape::Env::GRAPE_ALLOWED_METHODS])
-            raise Grape::Exceptions::MethodNotAllowed.new(header.merge('Allow' => allowed_methods)) unless options?
+            allow_header_value = allowed_methods.join(', ')
+            raise Grape::Exceptions::MethodNotAllowed.new(header.merge('Allow' => allow_header_value)) unless options?
 
-            header Grape::Http::Headers::ALLOW, allowed_methods
+            header Grape::Http::Headers::ALLOW, allow_header_value
             response_object = ''
             status 204
           else

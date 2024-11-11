@@ -46,12 +46,8 @@ module Grape
           if media_type
             yield media_type
           else
-            fail!(allowed_methods)
+            fail!
           end
-        end
-
-        def allowed_methods
-          env[Grape::Env::GRAPE_ALLOWED_METHODS]
         end
 
         def accept_header
@@ -93,8 +89,8 @@ module Grape
           raise Grape::Exceptions::InvalidVersionHeader.new(message, error_headers)
         end
 
-        def fail!(grape_allowed_methods)
-          return grape_allowed_methods if grape_allowed_methods.present?
+        def fail!
+          return if env[Grape::Env::GRAPE_ALLOWED_METHODS].present?
 
           media_types = q_values_mime_types.map { |mime_type| Grape::Util::MediaType.parse(mime_type) }
           vendor_not_found!(media_types) || version_not_found!(media_types)

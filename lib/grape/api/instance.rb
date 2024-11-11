@@ -150,7 +150,7 @@ module Grape
       # this API into a usable form.
       def initialize
         @router = Router.new
-        add_head_and_options_methods
+        add_head_not_allowed_methods_and_options_methods
         self.class.endpoints.each do |endpoint|
           endpoint.mount_in(@router)
         end
@@ -190,8 +190,10 @@ module Grape
       private
 
       # For every resource add a 'OPTIONS' route that returns an HTTP 204 response
-      # with a list of HTTP methods that can be called.
-      def add_head_and_options_methods
+      # with a list of HTTP methods that can be called. Also add a route that
+      # will return an HTTP 405 response for any HTTP method that the resource
+      # cannot handle.
+      def add_head_not_allowed_methods_and_options_methods
         # The paths we collected are prepared (cf. Path#prepare), so they
         # contain already versioning information when using path versioning.
         all_routes = self.class.endpoints.map(&:routes).flatten
@@ -217,7 +219,7 @@ module Grape
 
           @router.associate_routes(last_route.pattern, {
                                      endpoint: last_route.app,
-                                     allow_header: allow_header.join(', ').freeze
+                                     allow_header: allow_header
                                    })
         end
       end
