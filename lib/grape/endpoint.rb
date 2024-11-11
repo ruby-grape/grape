@@ -150,11 +150,11 @@ module Grape
       reset_routes!
       routes.each do |route|
         router.append(route.apply(self))
-        if !namespace_inheritable(:do_not_route_head) && route.request_method == Rack::GET
-          route.dup.then do |head_route|
-            head_route.convert_to_head_request!
-            router.append(head_route.apply(self))
-          end
+        next unless !namespace_inheritable(:do_not_route_head) && route.request_method == Rack::GET
+
+        route.dup.then do |head_route|
+          head_route.convert_to_head_request!
+          router.append(head_route.apply(self))
         end
       end
     end
@@ -283,59 +283,6 @@ module Grape
       end
     end
 
-    def build_stack(helpers)
-      stack = Grape::Middleware::Stack.new
-
-      content_types = namespace_stackable_with_hash(:content_types)
-      format = namespace_inheritable(:format)
-
-      stack.use Rack::Head
-      stack.use Class.new(Grape::Middleware::Error),
-                helpers: helpers,
-                format: format,
-                content_types: content_types,
-                default_status: namespace_inheritable(:default_error_status),
-                rescue_all: namespace_inheritable(:rescue_all),
-                rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
-                default_error_formatter: namespace_inheritable(:default_error_formatter),
-                error_formatters: namespace_stackable_with_hash(:error_formatters),
-                rescue_options: namespace_stackable_with_hash(:rescue_options),
-                rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers),
-                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers),
-                all_rescue_handler: namespace_inheritable(:all_rescue_handler),
-                grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
-
-      stack.concat namespace_stackable(:middleware)
-
-      if namespace_inheritable(:version).present?
-        stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-                  versions: namespace_inheritable(:version).flatten,
-                  version_options: namespace_inheritable(:version_options),
-                  prefix: namespace_inheritable(:root_prefix),
-                  mount_path: namespace_stackable(:mount_path).first
-      end
-
-      stack.use Grape::Middleware::Formatter,
-                format: format,
-                default_format: namespace_inheritable(:default_format) || :txt,
-                content_types: content_types,
-                formatters: namespace_stackable_with_hash(:formatters),
-                parsers: namespace_stackable_with_hash(:parsers)
-
-      builder = stack.build
-      builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
-      builder.to_app
-    end
-
-    def build_helpers
-      helpers = namespace_stackable(:helpers)
-      return if helpers.empty?
-
-      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
-    end
-
-    private :build_stack, :build_helpers
-
     def execute
       @block&.call(self)
     end
@@ -414,6 +361,59 @@ module Grape
     def options?
       options[:options_route_enabled] &&
         env[Rack::REQUEST_METHOD] == Rack::OPTIONS
+    end
+
+    private
+
+    def build_stack(helpers)
+      stack = Grape::Middleware::Stack.new
+
+      content_types = namespace_stackable_with_hash(:content_types)
+      format = namespace_inheritable(:format)
+
+      stack.use Rack::Head
+      stack.use Class.new(Grape::Middleware::Error),
+                helpers: helpers,
+                format: format,
+                content_types: content_types,
+                default_status: namespace_inheritable(:default_error_status),
+                rescue_all: namespace_inheritable(:rescue_all),
+                rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
+                default_error_formatter: namespace_inheritable(:default_error_formatter),
+                error_formatters: namespace_stackable_with_hash(:error_formatters),
+                rescue_options: namespace_stackable_with_hash(:rescue_options),
+                rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers),
+                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers),
+                all_rescue_handler: namespace_inheritable(:all_rescue_handler),
+                grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
+
+      stack.concat namespace_stackable(:middleware)
+
+      if namespace_inheritable(:version).present?
+        stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
+                  versions: namespace_inheritable(:version).flatten,
+                  version_options: namespace_inheritable(:version_options),
+                  prefix: namespace_inheritable(:root_prefix),
+                  mount_path: namespace_stackable(:mount_path).first
+      end
+
+      stack.use Grape::Middleware::Formatter,
+                format: format,
+                default_format: namespace_inheritable(:default_format) || :txt,
+                content_types: content_types,
+                formatters: namespace_stackable_with_hash(:formatters),
+                parsers: namespace_stackable_with_hash(:parsers)
+
+      builder = stack.build
+      builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
+      builder.to_app
+    end
+
+    def build_helpers
+      helpers = namespace_stackable(:helpers)
+      return if helpers.empty?
+
+      Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
   end
 end
