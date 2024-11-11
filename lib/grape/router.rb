@@ -152,7 +152,7 @@ module Grape
 
     def call_with_allow_headers(env, route)
       prepare_env_from_route(env, route)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.options[:allow_header].join(', ').freeze
       route.endpoint.call(env)
     end
 
