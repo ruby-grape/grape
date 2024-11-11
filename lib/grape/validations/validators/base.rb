@@ -14,7 +14,7 @@ module Grape
         # @param required [Boolean] attribute(s) are required or optional
         # @param scope [ParamsScope] parent scope for this Validator
         # @param opts [Hash] additional validation options
-        def initialize(attrs, options, required, scope, opts = {})
+        def initialize(attrs, options, required, scope, opts)
           @attrs = Array(attrs)
           @option = options
           @required = required
