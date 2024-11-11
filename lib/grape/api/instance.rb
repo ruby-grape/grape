@@ -216,7 +216,7 @@ module Grape
           last_route.app.options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Rack::OPTIONS)
 
           @router.associate_routes(last_route.pattern, {
-            endpoint: last_route.app,
+                                     endpoint: last_route.app,
                                      allow_header: allow_header.join(', ').freeze
                                    })
         end
