@@ -26,8 +26,8 @@ module Grape
       # has completed
       module PostBeforeFilter
         def declared(passed_params, options = {}, declared_params = nil, params_nested_path = [])
-          options = options.reverse_merge(include_missing: true, include_parent_namespaces: true, evaluate_given: false)
-          declared_params ||= optioned_declared_params(**options)
+          options.reverse_merge!(include_missing: true, include_parent_namespaces: true, evaluate_given: false)
+          declared_params ||= optioned_declared_params(options[:include_parent_namespaces])
 
           res = if passed_params.is_a?(Array)
                   declared_array(passed_params, options, declared_params, params_nested_path)
@@ -120,8 +120,8 @@ module Grape
           options[:stringify] ? declared_param.to_s : declared_param.to_sym
         end
 
-        def optioned_declared_params(**options)
-          declared_params = if options[:include_parent_namespaces]
+        def optioned_declared_params(include_parent_namespaces)
+          declared_params = if include_parent_namespaces
                               # Declared params including parent namespaces
                               route_setting(:declared_params)
                             else
@@ -199,10 +199,9 @@ module Grape
       # Redirect to a new url.
       #
       # @param url [String] The url to be redirect.
-      # @param options [Hash] The options used when redirect.
-      #                       :permanent, default false.
-      #                       :body, default a short message including the URL.
-      def redirect(url, permanent: false, body: nil, **_options)
+      # @param permanent [Boolean] default false.
+      # @param body default a short message including the URL.
+      def redirect(url, permanent: false, body: nil)
         body_message = body
         if permanent
           status 301

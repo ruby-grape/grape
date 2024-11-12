@@ -175,19 +175,12 @@ module Grape
         #       end
         #     end
         def namespace(space = nil, options = {}, &block)
-          @namespace_description = nil unless instance_variable_defined?(:@namespace_description) && @namespace_description
+          return Namespace.joined_space_path(namespace_stackable(:namespace)) unless space || block
 
-          if space || block
-            within_namespace do
-              previous_namespace_description = @namespace_description
-              @namespace_description = (@namespace_description || {}).deep_merge(namespace_setting(:description) || {})
-              nest(block) do
-                namespace_stackable(:namespace, Namespace.new(space, **options)) if space
-              end
-              @namespace_description = previous_namespace_description
+          within_namespace do
+            nest(block) do
+              namespace_stackable(:namespace, Namespace.new(space, options)) if space
             end
-          else
-            Namespace.joined_space_path(namespace_stackable(:namespace))
           end
         end
 

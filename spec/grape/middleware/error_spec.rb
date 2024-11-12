@@ -29,7 +29,7 @@ describe Grape::Middleware::Error do
     context = self
     Rack::Builder.app do
       use Spec::Support::EndpointFaker
-      use Grape::Middleware::Error, **opts # rubocop:disable RSpec/DescribedClass
+      use Grape::Middleware::Error, opts # rubocop:disable RSpec/DescribedClass
       run context.err_app
     end
   end

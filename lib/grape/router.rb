@@ -38,8 +38,8 @@ module Grape
       map[route.request_method] << route
     end
 
-    def associate_routes(pattern, **options)
-      Grape::Router::GreedyRoute.new(pattern: pattern, **options).then do |greedy_route|
+    def associate_routes(pattern, options)
+      Grape::Router::GreedyRoute.new(pattern, options).then do |greedy_route|
         @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
         @neutral_map << greedy_route
       end
@@ -107,7 +107,7 @@ module Grape
 
       route = match?(input, '*')
 
-      return last_neighbor_route.endpoint.call(env) if last_neighbor_route && last_response_cascade && route
+      return last_neighbor_route.options[:endpoint].call(env) if last_neighbor_route && last_response_cascade && route
 
       last_response_cascade = cascade_or_return_response.call(process_route(route, env)) if route
 
@@ -152,8 +152,8 @@ module Grape
 
     def call_with_allow_headers(env, route)
       prepare_env_from_route(env, route)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header.join(', ').freeze
-      route.endpoint.call(env)
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.options[:allow_header]
+      route.options[:endpoint].call(env)
     end
 
     def prepare_env_from_route(env, route)

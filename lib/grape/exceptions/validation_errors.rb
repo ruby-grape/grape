@@ -2,7 +2,7 @@
 
 module Grape
   module Exceptions
-    class ValidationErrors < Grape::Exceptions::Base
+    class ValidationErrors < Base
       ERRORS_FORMAT_KEY = 'grape.errors.format'
       DEFAULT_ERRORS_FORMAT = '%<attributes>s %<message>s'
 
@@ -10,7 +10,7 @@ module Grape
 
       attr_reader :errors
 
-      def initialize(errors: [], headers: {}, **_options)
+      def initialize(errors: [], headers: {})
         @errors = errors.group_by(&:params)
         super(message: full_messages.join(', '), status: 400, headers: headers)
       end

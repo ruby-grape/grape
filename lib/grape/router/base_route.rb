@@ -7,8 +7,8 @@ module Grape
 
       attr_reader :index, :pattern, :options
 
-      def initialize(**options)
-        @options = ActiveSupport::OrderedOptions.new.update(options)
+      def initialize(options)
+        @options = options.is_a?(ActiveSupport::OrderedOptions) ? options : ActiveSupport::OrderedOptions.new.update(options)
       end
 
       alias attributes options

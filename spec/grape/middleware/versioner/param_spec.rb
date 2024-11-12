@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe Grape::Middleware::Versioner::Param do
-  subject { described_class.new(app, **options) }
+  subject { described_class.new(app, options) }
 
   let(:app) { ->(env) { [200, env, env[Grape::Env::API_VERSION]] } }
   let(:options) { {} }
