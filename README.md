@@ -83,6 +83,7 @@
   - [Using dry-validation or dry-schema](#using-dry-validation-or-dry-schema)
 - [Headers](#headers)
   - [Request](#request)
+    - [Header Value Types](#header-value-types)
     - [Header Case Handling](#header-case-handling)
   - [Response](#response)
 - [Routes](#routes)
