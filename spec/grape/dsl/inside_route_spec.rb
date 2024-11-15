@@ -222,7 +222,7 @@ describe Grape::DSL::InsideRoute do
         it 'set the correct headers' do
           expect(subject.header).to match(
             Rack::CACHE_CONTROL => 'cache',
-            Rack::CONTENT_LENGTH => 123,
+            Rack::CONTENT_LENGTH => '123',
             Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
           )
         end

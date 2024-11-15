@@ -3,6 +3,11 @@ Upgrading Grape
 
 ### Upgrading to >= 2.3.0
 
+### Header values forced into string with warning in log
+Before 2.3.0 header values retained their type (e.g.: int, boolean, etc.)
+This functionality has been altered to log a warning message about that a value is not a string and then force the value into a string for the rest of the request.
+See [#2511](https://github.com/ruby-grape/grape/pull/2511) for more information.
+
 ### `content_type` vs `api.format` inside API
 
 Before 2.3.0, `content_type` had priority over `env['api.format']` when set in an API, which was incorrect. The priority has been flipped and `env['api.format']` will be checked first.
