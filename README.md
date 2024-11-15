@@ -2210,6 +2210,10 @@ get do
 end
 ```
 
+#### Header Value Types
+
+All header values are converted to strings to conform with the [rack specification](https://github.com/rack/rack/blob/main/SPEC.rdoc#the-headers-).
+
 #### Header Case Handling
 
 The above example may have been requested as follows:
