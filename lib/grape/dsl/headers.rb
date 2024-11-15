@@ -11,9 +11,7 @@ module Grape
       def header(key = nil, val = nil)
         if key
           if val
-            unless val.is_a?(String)
-              warn "Header value for '#{key}' is not a string. Converting to string."
-            end
+            warn "Header value for '#{key}' is not a string. Converting to string." unless val.is_a?(String)
             header[key.to_s] = val.to_s
           else
             header.delete(key.to_s)
