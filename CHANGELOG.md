@@ -6,6 +6,7 @@
 * [#2500](https://github.com/ruby-grape/grape/pull/2500): Remove deprecated `file` method - [@ericproulx](https://github.com/ericproulx).
 * [#2501](https://github.com/ruby-grape/grape/pull/2501): Remove deprecated `except` and `proc` options in values validator - [@ericproulx](https://github.com/ericproulx).
 * [#2502](https://github.com/ruby-grape/grape/pull/2502): Remove deprecation `options` in `desc` - [@ericproulx](https://github.com/ericproulx).
+* [#2512](https://github.com/ruby-grape/grape/pull/2512): Optimize hash alloc - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -13,6 +14,7 @@
 * [#2504](https://github.com/ruby-grape/grape/pull/2504): Fix leaky modules in specs - [@ericproulx](https://github.com/ericproulx).
 * [#2506](https://github.com/ruby-grape/grape/pull/2506): Fix fetch_formatter api_format - [@ericproulx](https://github.com/ericproulx).
 * [#2507](https://github.com/ruby-grape/grape/pull/2507): Fix type: Set with values - [@nikolai-b](https://github.com/nikolai-b).
+* [#2510](https://github.com/ruby-grape/grape/pull/2510): Fix ContractScope's validator inheritance - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)

@@ -9,10 +9,14 @@ module Grape
 
       def_delegators :pattern, :path, :origin
 
-      def initialize(method, pattern, **options)
+      def initialize(method, pattern, options)
         @request_method = upcase_method(method)
-        @pattern = Grape::Router::Pattern.new(pattern, **options)
-        super(**options)
+        @pattern = Grape::Router::Pattern.new(pattern, options)
+        super(options)
+      end
+
+      def convert_to_head_request!
+        @request_method = Rack::HEAD
       end
 
       def exec(env)

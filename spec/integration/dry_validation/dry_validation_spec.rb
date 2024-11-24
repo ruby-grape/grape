@@ -236,4 +236,12 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
       end
     end
   end
+
+  describe Grape::Validations::ContractScope::Validator do
+    describe '.inherits' do
+      subject { described_class }
+
+      it { is_expected.to be < Grape::Validations::Validators::Base }
+    end
+  end
 end

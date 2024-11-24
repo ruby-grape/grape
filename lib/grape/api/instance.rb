@@ -194,88 +194,52 @@ module Grape
       # will return an HTTP 405 response for any HTTP method that the resource
       # cannot handle.
       def add_head_not_allowed_methods_and_options_methods
-        versioned_route_configs = collect_route_config_per_pattern
         # The paths we collected are prepared (cf. Path#prepare), so they
         # contain already versioning information when using path versioning.
+        all_routes = self.class.endpoints.map(&:routes).flatten
+
         # Disable versioning so adding a route won't prepend versioning
         # informations again.
-        without_root_prefix do
-          without_versioning do
-            versioned_route_configs.each do |config|
-              next if config[:options][:matching_wildchar]
-
-              allowed_methods = config[:methods].dup
-
-              allowed_methods |= [Rack::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Rack::GET)
-
-              allow_header = (self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Rack::OPTIONS] | allowed_methods)
-
-              config[:endpoint].options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Rack::OPTIONS)
-
-              attributes = config.merge(allowed_methods: allowed_methods, allow_header: allow_header)
-              generate_not_allowed_method(config[:pattern], **attributes)
-            end
-          end
-        end
+        without_root_prefix_and_versioning { collect_route_config_per_pattern(all_routes) }
       end
 
-      def collect_route_config_per_pattern
-        all_routes       = self.class.endpoints.map(&:routes).flatten
+      def collect_route_config_per_pattern(all_routes)
         routes_by_regexp = all_routes.group_by(&:pattern_regexp)
 
         # Build the configuration based on the first endpoint and the collection of methods supported.
-        routes_by_regexp.values.map do |routes|
-          last_route        = routes.last # Most of the configuration is taken from the last endpoint
-          matching_wildchar = routes.any? { |route| route.request_method == '*' }
-          {
-            options: { matching_wildchar: matching_wildchar },
-            pattern: last_route.pattern,
-            requirements: last_route.requirements,
-            path: last_route.origin,
-            endpoint: last_route.app,
-            methods: matching_wildchar ? Grape::Http::Headers::SUPPORTED_METHODS : routes.map(&:request_method)
-          }
-        end
-      end
+        routes_by_regexp.each_value do |routes|
+          last_route = routes.last # Most of the configuration is taken from the last endpoint
+          next if routes.any? { |route| route.request_method == '*' }
 
-      # Generate a route that returns an HTTP 405 response for a user defined
-      # path on methods not specified
-      def generate_not_allowed_method(pattern, allowed_methods: [], **attributes)
-        supported_methods =
-          if self.class.namespace_inheritable(:do_not_route_options)
-            Grape::Http::Headers::SUPPORTED_METHODS
-          else
-            Grape::Http::Headers::SUPPORTED_METHODS_WITHOUT_OPTIONS
-          end
-        not_allowed_methods = supported_methods - allowed_methods
-        @router.associate_routes(pattern, not_allowed_methods: not_allowed_methods, **attributes)
+          allowed_methods = routes.map(&:request_method)
+          allowed_methods |= [Rack::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Rack::GET)
+
+          allow_header = self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Rack::OPTIONS] | allowed_methods
+          last_route.app.options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Rack::OPTIONS)
+
+          @router.associate_routes(last_route.pattern, {
+                                     endpoint: last_route.app,
+                                     allow_header: allow_header
+                                   })
+        end
       end
 
       # Allows definition of endpoints that ignore the versioning configuration
       # used by the rest of your API.
-      def without_versioning(&_block)
+      def without_root_prefix_and_versioning
         old_version = self.class.namespace_inheritable(:version)
         old_version_options = self.class.namespace_inheritable(:version_options)
+        old_root_prefix = self.class.namespace_inheritable(:root_prefix)
 
         self.class.namespace_inheritable_to_nil(:version)
         self.class.namespace_inheritable_to_nil(:version_options)
+        self.class.namespace_inheritable_to_nil(:root_prefix)
 
         yield
 
         self.class.namespace_inheritable(:version, old_version)
         self.class.namespace_inheritable(:version_options, old_version_options)
-      end
-
-      # Allows definition of endpoints that ignore the root prefix used by the
-      # rest of your API.
-      def without_root_prefix(&_block)
-        old_prefix = self.class.namespace_inheritable(:root_prefix)
-
-        self.class.namespace_inheritable_to_nil(:root_prefix)
-
-        yield
-
-        self.class.namespace_inheritable(:root_prefix, old_prefix)
+        self.class.namespace_inheritable(:root_prefix, old_root_prefix)
       end
     end
   end

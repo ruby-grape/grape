@@ -2,16 +2,17 @@
 
 module Grape
   module Exceptions
-    class Validation < Grape::Exceptions::Base
+    class Validation < Base
       attr_accessor :params, :message_key
 
-      def initialize(params:, message: nil, **args)
+      def initialize(params:, message: nil, status: nil, headers: nil)
         @params = params
         if message
           @message_key = message if message.is_a?(Symbol)
-          args[:message] = translate_message(message)
+          message = translate_message(message)
         end
-        super(**args)
+
+        super(status: status, message: message, headers: headers)
       end
 
       # Remove all the unnecessary stuff from Grape::Exceptions::Base like status

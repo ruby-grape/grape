@@ -6,9 +6,9 @@
 module Grape
   class Router
     class GreedyRoute < BaseRoute
-      def initialize(pattern:, **options)
+      def initialize(pattern, options)
         @pattern = pattern
-        super(**options)
+        super(options)
       end
 
       # Grape::Router:Route defines params as a function
