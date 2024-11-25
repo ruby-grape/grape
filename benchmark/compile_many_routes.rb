@@ -3,7 +3,6 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'grape'
 require 'benchmark/ips'
-require 'memory_profiler'
 
 class API < Grape::API
   prefix :api
@@ -16,6 +15,8 @@ class API < Grape::API
   end
 end
 
-MemoryProfiler.report(allow_files: 'grape') do
-  API.compile!
-end.pretty_print(to_file: 'optimize_path.txt')
+Benchmark.ips do |ips|
+  ips.report('Compiling 2000 routes') do
+    API.compile!
+  end
+end
