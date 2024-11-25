@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
 describe Grape::Path do
-  describe '#path' do
+  describe '#origin' do
     context 'mount_path' do
       it 'is not included when it is nil' do
         path = described_class.new(nil, nil, mount_path: '/foo/bar')
-        expect(path.path).to eql '/foo/bar'
+        expect(path.origin).to eql '/foo/bar'
       end
 
       it 'is included when it is not nil' do
         path = described_class.new(nil, nil, {})
-        expect(path.path).to eql('/')
+        expect(path.origin).to eql('/')
       end
     end
 
     context 'root_prefix' do
       it 'is not included when it is nil' do
         path = described_class.new(nil, nil, {})
-        expect(path.path).to eql('/')
+        expect(path.origin).to eql('/')
       end
 
       it 'is included after the mount path' do
@@ -28,7 +28,7 @@ describe Grape::Path do
           root_prefix: '/hello'
         )
 
-        expect(path.path).to eql('/foo/hello')
+        expect(path.origin).to eql('/foo/hello')
       end
     end
 
@@ -40,7 +40,7 @@ describe Grape::Path do
         root_prefix: '/hello'
       )
 
-      expect(path.path).to eql('/foo/hello/namespace')
+      expect(path.origin).to eql('/foo/hello/namespace')
     end
 
     it 'uses the raw path after the namespace' do
@@ -51,7 +51,7 @@ describe Grape::Path do
         root_prefix: '/hello'
       )
 
-      expect(path.path).to eql('/foo/hello/namespace/raw_path')
+      expect(path.origin).to eql('/foo/hello/namespace/raw_path')
     end
   end
 

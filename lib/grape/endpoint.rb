@@ -160,12 +160,13 @@ module Grape
     end
 
     def to_routes
-      route_options = prepare_default_route_attributes
-      map_routes do |method, path|
-        path = prepare_path(path)
-        route_options[:suffix] = path.suffix
-        params = options[:route_options].merge(route_options)
-        route = Grape::Router::Route.new(method, path.path, params)
+      default_route_options = prepare_default_route_attributes
+      default_path_settings = prepare_default_path_settings
+
+      map_routes do |method, raw_path|
+        prepared_path = Path.new(raw_path, namespace, default_path_settings)
+        params = options[:route_options].present? ? options[:route_options].merge(default_route_options) : default_route_options
+        route = Grape::Router::Route.new(method, prepared_path.origin, prepared_path.suffix, params)
         route.apply(self)
       end.flatten
     end
@@ -200,11 +201,10 @@ module Grape
       options[:method].map { |method| options[:path].map { |path| yield method, path } }
     end
 
-    def prepare_path(path)
+    def prepare_default_path_settings
       namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
       namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
-      path_settings = namespace_stackable_hash.merge!(namespace_inheritable_hash)
-      Path.new(path, namespace, path_settings)
+      namespace_stackable_hash.merge!(namespace_inheritable_hash)
     end
 
     def namespace

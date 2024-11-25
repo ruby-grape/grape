@@ -7,15 +7,15 @@ module Grape
     NO_VERSIONING_WITH_VALID_PATH_FORMAT_SEGMENT = '(.:format)'
     VERSION_SEGMENT = ':version'
 
-    attr_reader :path, :suffix
+    attr_reader :origin, :suffix
 
     def initialize(raw_path, raw_namespace, settings)
-      @path = PartsCache[build_parts(raw_path, raw_namespace, settings)]
+      @origin = PartsCache[build_parts(raw_path, raw_namespace, settings)]
       @suffix = build_suffix(raw_path, raw_namespace, settings)
     end
 
     def to_s
-      "#{path}#{suffix}"
+      "#{origin}#{suffix}"
     end
 
     private
