@@ -7,6 +7,7 @@
 * [#2501](https://github.com/ruby-grape/grape/pull/2501): Remove deprecated `except` and `proc` options in values validator - [@ericproulx](https://github.com/ericproulx).
 * [#2502](https://github.com/ruby-grape/grape/pull/2502): Remove deprecation `options` in `desc` - [@ericproulx](https://github.com/ericproulx).
 * [#2512](https://github.com/ruby-grape/grape/pull/2512): Optimize hash alloc - [@ericproulx](https://github.com/ericproulx).
+* [#2513](https://github.com/ruby-grape/grape/pull/2513): Optimize Grape::Path - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

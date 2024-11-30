@@ -9,14 +9,14 @@ module Grape
 
       attr_reader :origin, :path, :pattern, :to_regexp
 
-      def_delegators :pattern, :named_captures, :params
+      def_delegators :pattern, :params
       def_delegators :to_regexp, :===
       alias match? ===
 
-      def initialize(pattern, options)
-        @origin = pattern
-        @path = build_path(pattern, options)
-        @pattern = build_pattern(@path, options)
+      def initialize(origin, suffix, options)
+        @origin = origin
+        @path = build_path(origin, options[:anchor], suffix)
+        @pattern = build_pattern(@path, options[:params], options[:format], options[:version], options[:requirements])
         @to_regexp = @pattern.to_regexp
       end
 
@@ -28,39 +28,44 @@ module Grape
 
       private
 
-      def build_pattern(path, options)
+      def build_pattern(path, params, format, version, requirements)
         Mustermann::Grape.new(
           path,
           uri_decode: true,
-          params: options[:params],
-          capture: extract_capture(options)
+          params: params,
+          capture: extract_capture(format, version, requirements)
         )
       end
 
-      def build_path(pattern, options)
-        PatternCache[[build_path_from_pattern(pattern, options), options[:suffix]]]
+      def build_path(pattern, anchor, suffix)
+        PatternCache[[build_path_from_pattern(pattern, anchor), suffix]]
       end
 
-      def extract_capture(options)
-        sliced_options = options
-                         .slice(:format, :version)
-                         .delete_if { |_k, v| v.blank? }
-                         .transform_values { |v| Array.wrap(v).map(&:to_s) }
-        return sliced_options if options[:requirements].blank?
+      def extract_capture(format, version, requirements)
+        capture = {}.tap do |h|
+          h[:format] = map_str(format) if format.present?
+          h[:version] = map_str(version) if version.present?
+        end
 
-        options[:requirements].merge(sliced_options)
+        return capture if requirements.blank?
+
+        requirements.merge(capture)
       end
 
-      def build_path_from_pattern(pattern, options)
+      def build_path_from_pattern(pattern, anchor)
         if pattern.end_with?('*path')
           pattern.dup.insert(pattern.rindex('/') + 1, '?')
-        elsif options[:anchor]
+        elsif anchor
           pattern
         elsif pattern.end_with?('/')
           "#{pattern}?*path"
         else
           "#{pattern}/?*path"
         end
+      end
+
+      def map_str(value)
+        Array.wrap(value).map(&:to_s)
       end
 
       class PatternCache < Grape::Util::Cache
