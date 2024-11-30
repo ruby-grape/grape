@@ -57,11 +57,20 @@ jobs:
           - ruby: '3.3'
             gemfile: gemfiles/rails_7_2.gemfile
             specs: 'spec/integration/rails'
+          - ruby: '3.3'
+            gemfile: gemfiles/rails_8_0.gemfile
+            specs: 'spec/integration/rails'
         exclude:
           - ruby: '2.7'
             gemfile: gemfiles/rails_7_2.gemfile
           - ruby: '3.0'
             gemfile: gemfiles/rails_7_2.gemfile
+          - ruby: '2.7'
+            gemfile: gemfiles/rails_8_0.gemfile
+          - ruby: '3.0'
+            gemfile: gemfiles/rails_8_0.gemfile
+          - ruby: '3.1'
+            gemfile: gemfiles/rails_8_0.gemfile
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
