@@ -115,6 +115,26 @@ describe Grape::Endpoint do
       expect(memoized_status).to eq(201)
       expect(last_response.body).to eq('Hello')
     end
+
+    it 'is set as default to 204 for delete with no content' do
+      subject.delete('/home') do
+      end
+
+      delete '/home'
+      expect(last_response.status).to eq(204)
+      expect(last_response.body).to eq('')
+    end
+
+    it 'is set as default to 200 for delete with content' do
+      subject.format :json
+      subject.delete('/home') do
+        {}
+      end
+
+      delete '/home'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('{}')
+    end
   end
 
   describe '#header' do
