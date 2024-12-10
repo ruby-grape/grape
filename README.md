@@ -83,6 +83,7 @@
   - [Using dry-validation or dry-schema](#using-dry-validation-or-dry-schema)
 - [Headers](#headers)
   - [Request](#request)
+    - [Header Value Types](#header-value-types)
     - [Header Case Handling](#header-case-handling)
   - [Response](#response)
 - [Routes](#routes)
@@ -2209,6 +2210,10 @@ get do
   error!('Unauthorized', 401) unless env['HTTP_SECRET_PASSWORD'] == 'swordfish'
 end
 ```
+
+#### Header Value Types
+
+All header values are converted to strings to conform with the [rack specification](https://github.com/rack/rack/blob/main/SPEC.rdoc#the-headers-).
 
 #### Header Case Handling
 

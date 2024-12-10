@@ -56,4 +56,17 @@ describe Grape::DSL::Headers do
       end
     end
   end
+
+  context 'when non-string headers are set' do
+    describe '#header' do
+      it 'converts non-string header values to strings' do
+        subject.header('integer key', 123)
+        expect(subject.header['integer key']).to eq '123'
+      end
+
+      it 'emits a warning if the header value is not a string' do
+        expect { subject.header('integer key', 123) }.to output("Header value for 'integer key' is not a string. Converting to string.\n").to_stderr
+      end
+    end
+  end
 end
