@@ -78,15 +78,6 @@ module Grape
         instance_for_rack.call(...)
       end
 
-      # Alleviates problems with autoloading by tring to search for the constant
-      def const_missing(*args)
-        if base_instance.const_defined?(*args)
-          base_instance.const_get(*args)
-        else
-          super
-        end
-      end
-
       # The remountable class can have a configuration hash to provide some dynamic class-level variables.
       # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
