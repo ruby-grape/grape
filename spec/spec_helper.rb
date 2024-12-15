@@ -17,8 +17,6 @@ end
 # so it should be set to true here as well to reflect that.
 I18n.enforce_available_locales = true
 
-
-
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include Spec::Support::Helpers
@@ -27,7 +25,7 @@ RSpec.configure do |config|
 
   config.before(:all) do
     Grape::Util::InheritableSetting.reset_global!
-    Grape::Util::Registry.include(Deregister)
+    Grape::Validations.include(Deregister)
   end
   config.before { Grape::Util::InheritableSetting.reset_global! }
 
