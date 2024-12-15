@@ -17,6 +17,8 @@ end
 # so it should be set to true here as well to reflect that.
 I18n.enforce_available_locales = true
 
+Grape::Util::Registry.include(Deregister)
+
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include Spec::Support::Helpers
