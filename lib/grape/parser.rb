@@ -2,16 +2,14 @@
 
 module Grape
   module Parser
+    extend Grape::Util::Registry
+
     module_function
 
-    DEFAULTS = {
-      json: Grape::Parser::Json,
-      jsonapi: Grape::Parser::Json,
-      xml: Grape::Parser::Xml
-    }.freeze
-
     def parser_for(format, parsers = nil)
-      parsers&.key?(format) ? parsers[format] : DEFAULTS[format]
+      return parsers[format] if parsers&.key?(format)
+
+      registry[format]
     end
   end
 end
