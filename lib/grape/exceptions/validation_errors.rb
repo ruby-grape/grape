@@ -41,10 +41,9 @@ module Grape
           each do |attributes, error|
             messages <<
               I18n.t(ERRORS_FORMAT_KEY,
-                default: DEFAULT_ERRORS_FORMAT,
-                attributes: translate_attributes(attributes),
-                message: error.message
-              )
+                     default: DEFAULT_ERRORS_FORMAT,
+                     attributes: translate_attributes(attributes),
+                     message: error.message)
           end
           messages.uniq!
         end
