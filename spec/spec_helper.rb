@@ -17,7 +17,7 @@ end
 # so it should be set to true here as well to reflect that.
 I18n.enforce_available_locales = true
 
-Grape::Util::Registry.include(Deregister)
+
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
@@ -25,7 +25,10 @@ RSpec.configure do |config|
   config.raise_errors_for_deprecations!
   config.filter_run_when_matching :focus
 
-  config.before(:all) { Grape::Util::InheritableSetting.reset_global! }
+  config.before(:all) do
+    Grape::Util::InheritableSetting.reset_global!
+    Grape::Util::Registry.include(Deregister)
+  end
   config.before { Grape::Util::InheritableSetting.reset_global! }
 
   # Enable flags like --only-failures and --next-failure
