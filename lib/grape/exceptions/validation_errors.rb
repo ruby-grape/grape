@@ -6,8 +6,6 @@ module Grape
       ERRORS_FORMAT_KEY = 'grape.errors.format'
       DEFAULT_ERRORS_FORMAT = '%<attributes>s %<message>s'
 
-      include Enumerable
-
       attr_reader :errors
 
       def initialize(errors: [], headers: {})
@@ -16,6 +14,8 @@ module Grape
       end
 
       def each
+        return to_enum(:each) unless block_given?
+
         errors.each_pair do |attribute, errors|
           errors.each do |error|
             yield attribute, error
@@ -37,16 +37,17 @@ module Grape
       end
 
       def full_messages
-        messages = map do |attributes, error|
-          I18n.t(
-            ERRORS_FORMAT_KEY,
-            default: DEFAULT_ERRORS_FORMAT,
-            attributes: translate_attributes(attributes),
-            message: error.message
-          )
+        [].tap do |messages|
+          each do |attributes, error|
+            messages <<
+              I18n.t(ERRORS_FORMAT_KEY,
+                default: DEFAULT_ERRORS_FORMAT,
+                attributes: translate_attributes(attributes),
+                message: error.message
+              )
+          end
+          messages.uniq!
         end
-        messages.uniq!
-        messages
       end
     end
   end
