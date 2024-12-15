@@ -2,22 +2,14 @@
 
 module Grape
   module ErrorFormatter
+    extend Grape::Util::Registry
+
     module_function
 
-    DEFAULTS = {
-      serializable_hash: Grape::ErrorFormatter::Json,
-      json: Grape::ErrorFormatter::Json,
-      jsonapi: Grape::ErrorFormatter::Json,
-      txt: Grape::ErrorFormatter::Txt,
-      xml: Grape::ErrorFormatter::Xml
-    }.freeze
-
     def formatter_for(format, error_formatters = nil, default_error_formatter = nil)
-      select_formatter(error_formatters, format) || default_error_formatter || DEFAULTS[:txt]
-    end
+      return error_formatters[format] if error_formatters&.key?(format)
 
-    def select_formatter(error_formatters, format)
-      error_formatters&.key?(format) ? error_formatters[format] : DEFAULTS[format]
+      registry[format] || default_error_formatter || Grape::ErrorFormatter::Txt
     end
   end
 end
