@@ -176,9 +176,7 @@ module Grape
           # CustomTypeCoercer (above) already handles such types when an explicit coercion
           # method is supplied.
         elsif Types.collection_of_custom?(type)
-          Types::CustomTypeCollectionCoercer.new(
-            Types.map_special(type.first), type.is_a?(Set)
-          )
+          Types::CustomTypeCollectionCoercer.new(Types.map_special(type.first), type.is_a?(Set))
         else
           DryTypeCoercer.coercer_instance_for(type, strict)
         end
@@ -186,24 +184,19 @@ module Grape
 
       def cache_instance(type, method, strict, &_block)
         key = cache_key(type, method, strict)
-
         return @__cache[key] if @__cache.key?(key)
 
-        instance = yield
-
-        @__cache_write_lock.synchronize do
-          @__cache[key] = instance
+        yield.tap do |instance|
+          @__cache_write_lock.synchronize do
+            @__cache[key] = instance
+          end
         end
-
-        instance
       end
 
       def cache_key(type, method, strict)
-        [type, method, strict].each_with_object(+'_') do |val, memo|
-          next if val.nil?
-
-          memo << '_' << val.to_s
-        end
+        key = [type.to_s, strict]
+        key.insert(1, method) if method
+        key.join('_')
       end
 
       instance_variable_set(:@__cache,            {})
