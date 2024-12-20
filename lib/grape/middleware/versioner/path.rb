@@ -17,8 +17,6 @@ module Grape
       #   env['api.version'] => 'v1'
       #
       class Path < Base
-        include VersionerHelpers
-
         def before
           path_info = Grape::Router.normalize_path(env[Rack::PATH_INFO])
           return if path_info == '/'

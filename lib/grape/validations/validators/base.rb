@@ -62,7 +62,7 @@ module Grape
           return if klass.name.blank?
 
           short_validator_name = klass.name.demodulize.underscore.delete_suffix('_validator')
-          Validations.register_validator(short_validator_name, klass)
+          Validations.register(short_validator_name, klass)
         end
 
         def message(default_key = nil)

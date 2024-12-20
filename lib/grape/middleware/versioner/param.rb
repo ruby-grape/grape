@@ -19,8 +19,6 @@ module Grape
       #
       #   env['api.version'] => 'v1'
       class Param < Base
-        include VersionerHelpers
-
         def before
           potential_version = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[parameter_key]
           return if potential_version.blank?

@@ -35,7 +35,14 @@ describe Grape::Validations do
     end
     let(:app) { subject }
 
-    before { stub_const('Grape::Validations::Validators::DefaultLengthValidator', default_length_validator) }
+    before do
+      stub_const('DefaultLengthValidator', default_length_validator)
+      described_class.register(:default_length, DefaultLengthValidator)
+    end
+
+    after do
+      described_class.deregister(:default_length)
+    end
 
     it 'under 140 characters' do
       get '/', text: 'abc'
@@ -77,7 +84,14 @@ describe Grape::Validations do
     end
     let(:app) { subject }
 
-    before { stub_const('Grape::Validations::Validators::InBodyValidator', in_body_validator) }
+    before do
+      stub_const('InBodyValidator', in_body_validator)
+      described_class.register(:in_body, InBodyValidator)
+    end
+
+    after do
+      described_class.deregister(:in_body)
+    end
 
     it 'allows field in body' do
       get '/', text: 'abc'
@@ -113,7 +127,14 @@ describe Grape::Validations do
     end
     let(:app) { subject }
 
-    before { stub_const('Grape::Validations::Validators::WithMessageKeyValidator', message_key_validator) }
+    before do
+      stub_const('WithMessageKeyValidator', message_key_validator)
+      described_class.register(:with_message_key, WithMessageKeyValidator)
+    end
+
+    after do
+      described_class.deregister(:with_message_key)
+    end
 
     it 'fails with message' do
       get '/', text: 'foobar'
@@ -159,7 +180,14 @@ describe Grape::Validations do
     let(:app) { subject }
     let(:x_access_token_header) { 'x-access-token' }
 
-    before { stub_const('Grape::Validations::Validators::AdminValidator', admin_validator) }
+    before do
+      stub_const('AdminValidator', admin_validator)
+      described_class.register(:admin, AdminValidator)
+    end
+
+    after do
+      described_class.deregister(:admin)
+    end
 
     it 'fail when non-admin user sets an admin field' do
       get '/', admin_field: 'tester', non_admin_field: 'toaster'
@@ -218,7 +246,14 @@ describe Grape::Validations do
       end
     end
 
-    before { stub_const('Grape::Validations::Validators::InstanceValidatorValidator', validator_type) }
+    before do
+      stub_const('InstanceValidatorValidator', validator_type)
+      described_class.register(:instance_validator, InstanceValidatorValidator)
+    end
+
+    after do
+      described_class.deregister(:instance_validator)
+    end
 
     it 'passes validation every time' do
       expect(validator_type).to receive(:new).twice.and_call_original

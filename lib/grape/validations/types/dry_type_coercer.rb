@@ -22,16 +22,20 @@ module Grape
           #    collection_coercer_for(Array)
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
-            Grape::Validations::Types.const_get(:"#{type.name.camelize}Coercer")
+            case type
+            when Array
+              ArrayCoercer
+            when Set
+              SetCoercer
+            else
+              raise ArgumentError, "Unknown type: #{type}"
+            end
           end
 
           # Returns an instance of a coercer for a given type
           def coercer_instance_for(type, strict = false)
-            return PrimitiveCoercer.new(type, strict) if type.instance_of?(Class)
-
-            # in case of a collection (Array[Integer]) the type is an instance of a collection,
-            # so we need to figure out the actual type
-            collection_coercer_for(type.class).new(type, strict)
+            klass = type.instance_of?(Class) ? PrimitiveCoercer : collection_coercer_for(type)
+            klass.new(type, strict)
           end
         end
 
