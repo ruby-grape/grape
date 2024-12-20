@@ -3,6 +3,8 @@
 module Grape
   module Validations
     class AttributesIterator
+      include Enumerable
+
       attr_reader :scope
 
       def initialize(validator, scope, params)
@@ -13,8 +15,6 @@ module Grape
       end
 
       def each(&block)
-        return to_enum(:each) unless block
-
         do_each(@params, &block) # because we need recursion for nested arrays
       end
 
