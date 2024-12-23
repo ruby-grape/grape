@@ -9,10 +9,7 @@ module Grape
 
       def self.inherited(klass)
         super
-        return if klass.name.blank?
-
-        short_name = klass.name.demodulize.underscore
-        Parser.register(short_name, klass)
+        Parser.register(klass)
       end
     end
   end

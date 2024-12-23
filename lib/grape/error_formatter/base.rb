@@ -60,9 +60,7 @@ module Grape
 
         def inherited(klass)
           super
-          return if klass.name.blank?
-
-          ErrorFormatter.register(klass.name.demodulize.underscore, klass)
+          ErrorFormatter.register(klass)
         end
       end
     end

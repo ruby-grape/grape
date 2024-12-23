@@ -59,10 +59,7 @@ module Grape
 
         def self.inherited(klass)
           super
-          return if klass.name.blank?
-
-          short_validator_name = klass.name.demodulize.underscore.delete_suffix('_validator')
-          Validations.register(short_validator_name, klass)
+          Validations.register(klass)
         end
 
         def message(default_key = nil)

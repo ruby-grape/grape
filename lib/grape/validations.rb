@@ -11,5 +11,11 @@ module Grape
 
       registry[short_name]
     end
+
+    def build_short_name(klass)
+      return if klass.name.blank?
+
+      klass.name.demodulize.underscore.delete_suffix('_validator')
+    end
   end
 end

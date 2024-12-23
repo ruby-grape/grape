@@ -9,9 +9,7 @@ module Grape
 
       def self.inherited(klass)
         super
-        return if klass.name.blank?
-
-        Formatter.register(klass.name.demodulize.underscore, klass)
+        Formatter.register(klass)
       end
     end
   end

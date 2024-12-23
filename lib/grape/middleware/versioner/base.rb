@@ -9,10 +9,7 @@ module Grape
 
         def self.inherited(klass)
           super
-          return if klass.name.blank?
-
-          short_name = klass.name.demodulize.underscore
-          Versioner.register(short_name, klass)
+          Versioner.register(klass)
         end
 
         def default_options

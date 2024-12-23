@@ -37,7 +37,7 @@ describe Grape::Validations do
 
     before do
       stub_const('DefaultLengthValidator', default_length_validator)
-      described_class.register(:default_length, DefaultLengthValidator)
+      described_class.register(DefaultLengthValidator)
     end
 
     after do
@@ -86,7 +86,7 @@ describe Grape::Validations do
 
     before do
       stub_const('InBodyValidator', in_body_validator)
-      described_class.register(:in_body, InBodyValidator)
+      described_class.register(InBodyValidator)
     end
 
     after do
@@ -129,7 +129,7 @@ describe Grape::Validations do
 
     before do
       stub_const('WithMessageKeyValidator', message_key_validator)
-      described_class.register(:with_message_key, WithMessageKeyValidator)
+      described_class.register(WithMessageKeyValidator)
     end
 
     after do
@@ -182,7 +182,7 @@ describe Grape::Validations do
 
     before do
       stub_const('AdminValidator', admin_validator)
-      described_class.register(:admin, AdminValidator)
+      described_class.register(AdminValidator)
     end
 
     after do
@@ -248,7 +248,7 @@ describe Grape::Validations do
 
     before do
       stub_const('InstanceValidatorValidator', validator_type)
-      described_class.register(:instance_validator, InstanceValidatorValidator)
+      described_class.register(InstanceValidatorValidator)
     end
 
     after do
