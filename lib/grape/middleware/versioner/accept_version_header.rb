@@ -17,8 +17,6 @@ module Grape
       # X-Cascade header to alert Grape::Router to attempt the next matched
       # route.
       class AcceptVersionHeader < Base
-        include VersionerHelpers
-
         def before
           potential_version = env[Grape::Http::Headers::HTTP_ACCEPT_VERSION]&.strip
           not_acceptable!('Accept-Version header must be set.') if strict? && potential_version.blank?

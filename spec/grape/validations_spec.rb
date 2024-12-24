@@ -494,7 +494,8 @@ describe Grape::Validations do
       end
 
       before do
-        stub_const('Grape::Validations::Validators::DateRangeValidator', date_range_validator)
+        stub_const('DateRangeValidator', date_range_validator)
+        described_class.register(DateRangeValidator)
         subject.params do
           optional :date_range, date_range: true, type: Hash do
             requires :from, type: Integer
@@ -513,6 +514,10 @@ describe Grape::Validations do
         subject.get('/required') do
           'required works'
         end
+      end
+
+      after do
+        described_class.deregister(:date_range)
       end
 
       context 'which is optional' do
@@ -1186,7 +1191,14 @@ describe Grape::Validations do
         end
       end
 
-      before { stub_const('Grape::Validations::Validators::CustomvalidatorValidator', custom_validator) }
+      before do
+        stub_const('CustomvalidatorValidator', custom_validator)
+        described_class.register(CustomvalidatorValidator)
+      end
+
+      after do
+        described_class.deregister(:customvalidator)
+      end
 
       context 'when using optional with a custom validator' do
         before do
@@ -1338,14 +1350,18 @@ describe Grape::Validations do
         end
 
         before do
-          stub_const('Grape::Validations::Validators::CustomvalidatorWithOptionsValidator', custom_validator_with_options)
-
+          stub_const('CustomvalidatorWithOptionsValidator', custom_validator_with_options)
+          described_class.register(CustomvalidatorWithOptionsValidator)
           subject.params do
             optional :custom, customvalidator_with_options: { text: 'im custom with options', message: 'is not custom with options!' }
           end
           subject.get '/optional_custom' do
             'optional with custom works!'
           end
+        end
+
+        after do
+          described_class.deregister(:customvalidator_with_options)
         end
 
         it 'validates param with custom validator with options' do

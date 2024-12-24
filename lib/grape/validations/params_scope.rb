@@ -525,7 +525,7 @@ module Grape
       def validates_presence(validations, attrs, doc, opts)
         return unless validations.key?(:presence) && validations[:presence]
 
-        validate(:presence, validations.delete(:presence), attrs, doc, opts)
+        validate('presence', validations.delete(:presence), attrs, doc, opts)
         validations.delete(:message) if validations.key?(:message)
       end
     end

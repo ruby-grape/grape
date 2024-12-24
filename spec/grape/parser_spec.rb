@@ -3,20 +3,6 @@
 describe Grape::Parser do
   subject { described_class }
 
-  describe 'DEFAULTS' do
-    subject { described_class::DEFAULTS }
-
-    let(:expected_defaults) do
-      {
-        json: Grape::Parser::Json,
-        jsonapi: Grape::Parser::Json,
-        xml: Grape::Parser::Xml
-      }
-    end
-
-    it { is_expected.to eq(expected_defaults) }
-  end
-
   describe '.parser_for' do
     let(:options) { {} }
 

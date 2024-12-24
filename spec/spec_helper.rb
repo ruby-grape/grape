@@ -13,6 +13,10 @@ Grape.deprecator.behavior = :raise
   end
 end
 
+Grape::Util::Registry.include(Deregister)
+# issue with ruby 2.7 with ^. We need to extend it again
+Grape::Validations.extend(Grape::Util::Registry) if Gem::Version.new(RUBY_VERSION).release < Gem::Version.new('3.0')
+
 # The default value for this setting is true in a standard Rails app,
 # so it should be set to true here as well to reflect that.
 I18n.enforce_available_locales = true
