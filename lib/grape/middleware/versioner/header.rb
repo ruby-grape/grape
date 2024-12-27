@@ -22,8 +22,6 @@ module Grape
       # X-Cascade header to alert Grape::Router to attempt the next matched
       # route.
       class Header < Base
-        include VersionerHelpers
-
         def before
           match_best_quality_media_type! do |media_type|
             env.update(

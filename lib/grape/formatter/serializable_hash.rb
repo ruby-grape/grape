@@ -2,7 +2,7 @@
 
 module Grape
   module Formatter
-    module SerializableHash
+    class SerializableHash < Base
       class << self
         def call(object, _env)
           return object if object.is_a?(String)

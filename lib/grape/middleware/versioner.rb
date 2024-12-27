@@ -11,14 +11,16 @@
 module Grape
   module Middleware
     module Versioner
+      extend Grape::Util::Registry
+
       module_function
 
       # @param strategy [Symbol] :path, :header, :accept_version_header or :param
       # @return a middleware class based on strategy
       def using(strategy)
-        Grape::Middleware::Versioner.const_get(:"#{strategy.to_s.camelize}")
-      rescue NameError
-        raise Grape::Exceptions::InvalidVersionerOption, strategy
+        raise Grape::Exceptions::InvalidVersionerOption, strategy unless registry.key?(strategy)
+
+        registry[strategy]
       end
     end
   end
