@@ -391,14 +391,16 @@ describe Grape::Endpoint do
           expect(last_response.body).to eq('Bobby T.')
         end
       else
+        let(:body) { '<user>Bobby T.</user>' }
+
         it 'converts XML bodies to params' do
-          post '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-          expect(last_response.body).to eq('{"__content__"=>"Bobby T."}')
+          post '/request_body', body, 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq(Grape::Xml.parse(body)['user'].to_s)
         end
 
         it 'converts XML bodies to params' do
-          put '/request_body', '<user>Bobby T.</user>', 'CONTENT_TYPE' => 'application/xml'
-          expect(last_response.body).to eq('{"__content__"=>"Bobby T."}')
+          put '/request_body', body, 'CONTENT_TYPE' => 'application/xml'
+          expect(last_response.body).to eq(Grape::Xml.parse(body)['user'].to_s)
         end
       end
 
@@ -685,7 +687,8 @@ describe Grape::Endpoint do
         if Gem::Version.new(RUBY_VERSION).release <= Gem::Version.new('3.2')
           %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in '/hey' endpoint}
         else
-          /undefined local variable or method `undefined_helper' for/
+          opening_quote = Gem::Version.new(RUBY_VERSION).release >= Gem::Version.new('3.4') ? "'" : '`'
+          /undefined local variable or method #{opening_quote}undefined_helper' for/
         end
       end
 

@@ -220,7 +220,8 @@ describe Grape::Middleware::Error do
 
     it 'is possible to specify a custom formatter' do
       get '/'
-      expect(last_response.body).to eq('{:custom_formatter=&gt;&quot;rain!&quot;}')
+      response = Rack::Utils.escape_html({ custom_formatter: 'rain!' }.inspect)
+      expect(last_response.body).to eq(response)
     end
   end
 
