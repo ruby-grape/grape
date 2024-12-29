@@ -2970,9 +2970,10 @@ describe Grape::API do
           subject.put :yaml do
             params[:tag]
           end
-          put '/yaml', '<tag type="symbol">a123</tag>', 'CONTENT_TYPE' => 'application/xml'
+          body = '<tag type="symbol">a123</tag>'
+          put '/yaml', body, 'CONTENT_TYPE' => 'application/xml'
           expect(last_response).to be_successful
-          expect(last_response.body).to eql '{"type"=>"symbol", "__content__"=>"a123"}'
+          expect(last_response.body).to eq(Grape::Xml.parse(body)['tag'].to_s)
         end
       end
     end
