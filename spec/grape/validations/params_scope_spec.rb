@@ -630,6 +630,41 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq 'inner3[0][baz][0][baz_category] is missing'
     end
 
+    it 'test to demonstrait the validation issue' do
+      subject.params do
+
+        requires :items, type: Array, allow_blank: false do
+          requires :item_type, type: String, allow_blank: false
+
+          given item_type: ->(val) { val == 'type_a' } do
+            requires :inner_items, type: Array do
+              requires :prop_a, type: String
+            end
+          end
+
+          given item_type: ->(val) { val == 'type_b' } do
+            requires :inner_items, type: Array do
+              requires :prop_b, type: String
+            end
+          end
+        end
+      end
+      subject.post('/nested-dependency') { declared(params, evaluate_given: true).to_json }
+
+      test = {
+        items: [
+          { item_type: 'type_a', inner_items: [{ prop_a: 'value' }] },
+          { item_type: 'type_b', inner_items: [{ prop_b: 'value' }] }
+        ]
+      }
+
+      post '/nested-dependency', **test
+
+      p last_response.body
+      expect(last_response.status).to eq(200)
+      # expect(last_response.body).to eq ''
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 
