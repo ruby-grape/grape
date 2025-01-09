@@ -2046,7 +2046,7 @@ end
 ```ruby
 params do
   requires :code, type: String, length: { is: 2, message: 'code is expected to be exactly 2 characters long' }
-  requires :str, type: String, length: { min: 5, message: 'str is expected to be atleast 5 characters long' }
+  requires :str, type: String, length: { min: 5, message: 'str is expected to be at least 5 characters long' }
   requires :list, type: [Integer], length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
 end
 ```
@@ -3536,8 +3536,8 @@ Please use `Route#xyz` instead.
 
 Note that difference of `Route#options` and `Route#settings`.
 
-The `options` can be referred from your route, it should be set by specifing key and value on verb methods such as `get`, `post` and `put`.
-The `settings` can also be referred from your route, but it should be set by specifing key and value on `route_setting`.
+The `options` can be referred from your route, it should be set by specifying key and value on verb methods such as `get`, `post` and `put`.
+The `settings` can also be referred from your route, but it should be set by specifying key and value on `route_setting`.
 
 ## Current Route and Endpoint
 
