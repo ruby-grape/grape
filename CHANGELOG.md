@@ -19,6 +19,7 @@
 * [#2506](https://github.com/ruby-grape/grape/pull/2506): Fix fetch_formatter api_format - [@ericproulx](https://github.com/ericproulx).
 * [#2507](https://github.com/ruby-grape/grape/pull/2507): Fix type: Set with values - [@nikolai-b](https://github.com/nikolai-b).
 * [#2510](https://github.com/ruby-grape/grape/pull/2510): Fix ContractScope's validator inheritance - [@ericproulx](https://github.com/ericproulx).
+* [#2524](https://github.com/ruby-grape/grape/pull/2524): Fix validators bad encoding - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)

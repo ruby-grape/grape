@@ -283,7 +283,7 @@ describe Grape::Validations::Validators::ValuesValidator do
         default_format :json
 
         params do
-          requires :type, type: String, values: %w(a b)
+          requires :type, type: String, values: %w[a b]
         end
         get '/bad_encoding'
       end
@@ -326,7 +326,7 @@ describe Grape::Validations::Validators::ValuesValidator do
 
   context 'with a custom exclude validation message' do
     it 'does not allow an invalid value for a parameter' do
-      get('/custom_message/exclude/exclude_message', type: "invalid-type1")
+      get('/custom_message/exclude/exclude_message', type: 'invalid-type1')
       expect(last_response.status).to eq 400
       expect(last_response.body).to eq({ error: 'type value is on exclusions list' }.to_json)
     end

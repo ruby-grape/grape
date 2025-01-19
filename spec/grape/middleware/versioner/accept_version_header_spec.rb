@@ -15,18 +15,13 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
 
   describe '#bad encoding' do
     before do
-      @options[:versions] = %w(v1)
+      @options[:versions] = %w[v1]
     end
 
     it 'does not raise an error' do
       expect do
         subject.call(Grape::Http::Headers::HTTP_ACCEPT_VERSION => "\x80")
-      end.to throw_symbol(
-               :error,
-               status: 406,
-               headers: { Grape::Http::Headers::X_CASCADE => 'pass' },
-               message: 'The requested version is not supported.'
-             )
+      end.to throw_symbol(:error, status: 406, headers: { Grape::Http::Headers::X_CASCADE => 'pass' }, message: 'The requested version is not supported.')
     end
   end
 
