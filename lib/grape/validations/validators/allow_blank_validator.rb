@@ -8,7 +8,7 @@ module Grape
           return if (options_key?(:value) ? @option[:value] : @option) || !params.is_a?(Hash)
 
           value = params[attr_name]
-          value = value.strip if value.respond_to?(:strip)
+          value = value.scrub if value.respond_to?(:scrub)
 
           return if value == false || value.present?
 
