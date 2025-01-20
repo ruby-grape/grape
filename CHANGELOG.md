@@ -20,6 +20,7 @@
 * [#2507](https://github.com/ruby-grape/grape/pull/2507): Fix type: Set with values - [@nikolai-b](https://github.com/nikolai-b).
 * [#2510](https://github.com/ruby-grape/grape/pull/2510): Fix ContractScope's validator inheritance - [@ericproulx](https://github.com/ericproulx).
 * [#2521](https://github.com/ruby-grape/grape/pull/2521): Fixed typo in README - [@datpmt](https://github.com/datpmt).
+* [#2525](https://github.com/ruby-grape/grape/pull/2525): Require logger before active_support - [@ericproulx](https://github.com/ericproulx).
 * [#2524](https://github.com/ruby-grape/grape/pull/2524): Fix validators bad encoding - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
