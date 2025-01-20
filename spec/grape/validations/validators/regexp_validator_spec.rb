@@ -41,6 +41,25 @@ describe Grape::Validations::Validators::RegexpValidator do
     end
   end
 
+  describe '#bad encoding' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :name, regexp: { value: /^[a-z]+$/ }
+        end
+        get '/bad_encoding'
+      end
+    end
+
+    context 'when value as bad encoding' do
+      it 'does not raise an error' do
+        expect { get '/bad_encoding', name: "Hello \x80" }.not_to raise_error
+      end
+    end
+  end
+
   context 'custom validation message' do
     context 'with invalid input' do
       it 'refuses inapppopriate' do

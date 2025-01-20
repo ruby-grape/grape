@@ -21,6 +21,7 @@
 * [#2510](https://github.com/ruby-grape/grape/pull/2510): Fix ContractScope's validator inheritance - [@ericproulx](https://github.com/ericproulx).
 * [#2521](https://github.com/ruby-grape/grape/pull/2521): Fixed typo in README - [@datpmt](https://github.com/datpmt).
 * [#2525](https://github.com/ruby-grape/grape/pull/2525): Require logger before active_support - [@ericproulx](https://github.com/ericproulx).
+* [#2524](https://github.com/ruby-grape/grape/pull/2524): Fix validators bad encoding - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)
