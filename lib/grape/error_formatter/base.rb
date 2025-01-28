@@ -4,7 +4,7 @@ module Grape
   module ErrorFormatter
     class Base
       class << self
-        def call(message, backtrace, options = {}, env = nil, original_exception = nil)
+        def call(message, backtrace, options = {}, env = nil, original_exception = nil, _status = nil) # rubocop:disable Metrics/ParameterLists
           merge_backtrace = backtrace.present? && options.dig(:rescue_options, :backtrace)
           merge_original_exception = original_exception && options.dig(:rescue_options, :original_exception)
 

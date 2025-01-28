@@ -2509,8 +2509,8 @@ describe Grape::API do
     context 'class' do
       let(:custom_error_formatter) do
         Class.new do
-          def self.call(message, _backtrace, _options, _env, _original_exception)
-            "message: #{message} @backtrace"
+          def self.call(message, _backtrace, _options, _env, _original_exception, status) # rubocop:disable Metrics/ParameterLists
+            "message: #{message} status: #{status} @backtrace"
           end
         end
       end
@@ -2521,7 +2521,7 @@ describe Grape::API do
         subject.get('/exception') { raise 'rain!' }
 
         get '/exception'
-        expect(last_response.body).to eq('message: rain! @backtrace')
+        expect(last_response.body).to eq('message: rain! status: 500 @backtrace')
       end
 
       it 'returns a custom error format (using keyword :with)' do
@@ -2530,7 +2530,7 @@ describe Grape::API do
         subject.get('/exception') { raise 'rain!' }
 
         get '/exception'
-        expect(last_response.body).to eq('message: rain! @backtrace')
+        expect(last_response.body).to eq('message: rain! status: 500 @backtrace')
       end
 
       it 'returns a modified error with a custom error format' do
@@ -2542,7 +2542,7 @@ describe Grape::API do
           raise 'rain!'
         end
         get '/exception'
-        expect(last_response.body).to eq('message: raining dogs and cats @backtrace')
+        expect(last_response.body).to eq('message: raining dogs and cats status: 418 @backtrace')
       end
     end
 
