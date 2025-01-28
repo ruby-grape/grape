@@ -211,7 +211,7 @@ describe Grape::Middleware::Error do
         rescue_all: true,
         format: :custom,
         error_formatters: {
-          custom: lambda do |message, _backtrace, _options, _env, _original_exception|
+          custom: lambda do |message, _backtrace, _options, _env, _original_exception, _status|
             { custom_formatter: message }.inspect
           end
         }
