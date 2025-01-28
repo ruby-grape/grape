@@ -11,7 +11,7 @@
 * [#2514](https://github.com/ruby-grape/grape/pull/2514): Add rails 8.0 to CI - [@ericproulx](https://github.com/ericproulx).
 * [#2516](https://github.com/ruby-grape/grape/pull/2516): Dynamic registration for parsers, formatters, versioners - [@ericproulx](https://github.com/ericproulx).
 * [#2518](https://github.com/ruby-grape/grape/pull/2518): Add ruby 3.4 to CI - [@ericproulx](https://github.com/ericproulx).
-* [#2528](https://github.com/ruby-grape/grape/pull/2528): Passed status to ErrorFormatter - [@drewnichols](https://github.com/drewnichols).
+* [#2528](https://github.com/ruby-grape/grape/pull/2528): Pass `status` into `ErrorFormatter` - [@drewnichols](https://github.com/drewnichols).
 
 * Your contribution here.
 
