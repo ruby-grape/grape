@@ -2509,7 +2509,7 @@ describe Grape::API do
     context 'class' do
       let(:custom_error_formatter) do
         Class.new do
-          def self.call(message, _backtrace, _options, _env, _original_exception, status) # rubocop:disable Metrics/ParameterLists
+          def self.call(message, _backtrace, _options, _env, _original_exception, status)
             "message: #{message} status: #{status} @backtrace"
           end
         end
