@@ -65,6 +65,7 @@ module Grape
 
       def error_response(error = {})
         status = error[:status] || options[:default_status]
+        env[Grape::Env::API_ENDPOINT].status(status) # error! may not have been called
         message = error[:message] || options[:default_message]
         headers = { Rack::CONTENT_TYPE => content_type }.tap do |h|
           h.merge!(error[:headers]) if error[:headers].is_a?(Hash)
@@ -130,6 +131,7 @@ module Grape
       end
 
       def error!(message, status = options[:default_status], headers = {}, backtrace = [], original_exception = nil)
+        env[Grape::Env::API_ENDPOINT].status(status) # not error! inside route
         rack_response(
           status, headers.reverse_merge(Rack::CONTENT_TYPE => content_type),
           format_message(message, backtrace, original_exception)

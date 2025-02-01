@@ -115,6 +115,58 @@ describe Grape::Endpoint do
       expect(memoized_status).to eq(201)
       expect(last_response.body).to eq('Hello')
     end
+
+    context 'when rescue_from' do
+      subject { last_request.env[Grape::Env::API_ENDPOINT].status }
+
+      before do
+        post '/'
+      end
+
+      context 'when :all blockless' do
+        context 'when default_error_status is not set' do
+          let(:app) do
+            Class.new(Grape::API) do
+              rescue_from :all
+
+              post { raise StandardError }
+            end
+          end
+
+          it { is_expected.to eq(last_response.status) }
+        end
+
+        context 'when default_error_status is set' do
+          let(:app) do
+            Class.new(Grape::API) do
+              default_error_status 418
+              rescue_from :all
+
+              post { raise StandardError }
+            end
+          end
+
+          it { is_expected.to eq(last_response.status) }
+        end
+      end
+
+      context 'when :with' do
+        let(:app) do
+          Class.new(Grape::API) do
+            helpers do
+              def handle_argument_error
+                error!("I'm a teapot!", 418)
+              end
+            end
+            rescue_from ArgumentError, with: :handle_argument_error
+
+            post { raise ArgumentError }
+          end
+        end
+
+        it { is_expected.to eq(last_response.status) }
+      end
+    end
   end
 
   describe '#header' do
