@@ -506,7 +506,7 @@ describe Grape::API do
       end
     end
 
-    context 'with settings on defined routes' do
+    context 'with route settings' do
       before do
         a_remounted_api.desc 'Identical description'
         a_remounted_api.route_setting :custom, key: 'value'
