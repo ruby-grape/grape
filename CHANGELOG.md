@@ -11,7 +11,6 @@
 * [#2514](https://github.com/ruby-grape/grape/pull/2514): Add rails 8.0 to CI - [@ericproulx](https://github.com/ericproulx).
 * [#2516](https://github.com/ruby-grape/grape/pull/2516): Dynamic registration for parsers, formatters, versioners - [@ericproulx](https://github.com/ericproulx).
 * [#2518](https://github.com/ruby-grape/grape/pull/2518): Add ruby 3.4 to CI - [@ericproulx](https://github.com/ericproulx).
-* [#2529](https://github.com/ruby-grape/grape/pull/2529): Change Grape::API's `@setup` var to an array (from a set) - [@Haerezis](https://github.com/Haerezis).
 * Your contribution here.
 
 #### Fixes
@@ -23,6 +22,7 @@
 * [#2521](https://github.com/ruby-grape/grape/pull/2521): Fixed typo in README - [@datpmt](https://github.com/datpmt).
 * [#2525](https://github.com/ruby-grape/grape/pull/2525): Require logger before active_support - [@ericproulx](https://github.com/ericproulx).
 * [#2524](https://github.com/ruby-grape/grape/pull/2524): Fix validators bad encoding - [@ericproulx](https://github.com/ericproulx).
+* [#2529](https://github.com/ruby-grape/grape/pull/2529): Fix missing settings on mounted routes - [@Haerezis](https://github.com/Haerezis).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)
