@@ -505,5 +505,65 @@ describe Grape::API do
         end
       end
     end
+
+    context 'with route settings' do
+      before do
+        a_remounted_api.desc 'Identical description'
+        a_remounted_api.route_setting :custom, key: 'value'
+        a_remounted_api.route_setting :custom_diff, key: 'foo'
+        a_remounted_api.get '/api1' do
+          status 200
+        end
+
+        a_remounted_api.desc 'Identical description'
+        a_remounted_api.route_setting :custom, key: 'value'
+        a_remounted_api.route_setting :custom_diff, key: 'bar'
+        a_remounted_api.get '/api2' do
+          status 200
+        end
+      end
+
+      it 'has all the settings for both routes' do
+        expect(a_remounted_api.routes.count).to be(2)
+        expect(a_remounted_api.routes[0].settings).to include(
+          {
+            description: { description: 'Identical description' },
+            custom: { key: 'value' },
+            custom_diff: { key: 'foo' }
+          }
+        )
+        expect(a_remounted_api.routes[1].settings).to include(
+          {
+            description: { description: 'Identical description' },
+            custom: { key: 'value' },
+            custom_diff: { key: 'bar' }
+          }
+        )
+      end
+
+      context 'when mounting it' do
+        before do
+          root_api.mount a_remounted_api
+        end
+
+        it 'still has all the settings for both routes' do
+          expect(root_api.routes.count).to be(2)
+          expect(root_api.routes[0].settings).to include(
+            {
+              description: { description: 'Identical description' },
+              custom: { key: 'value' },
+              custom_diff: { key: 'foo' }
+            }
+          )
+          expect(root_api.routes[1].settings).to include(
+            {
+              description: { description: 'Identical description' },
+              custom: { key: 'value' },
+              custom_diff: { key: 'bar' }
+            }
+          )
+        end
+      end
+    end
   end
 end
