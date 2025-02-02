@@ -23,7 +23,7 @@
 * [#2525](https://github.com/ruby-grape/grape/pull/2525): Require logger before active_support - [@ericproulx](https://github.com/ericproulx).
 * [#2524](https://github.com/ruby-grape/grape/pull/2524): Fix validators bad encoding - [@ericproulx](https://github.com/ericproulx).
 * [#2530](https://github.com/ruby-grape/grape/pull/2530): Fix endpoint's status when rescue_from without a block - [@ericproulx](https://github.com/ericproulx).
-* [#2529](https://github.com/ruby-grape/grape/pull/2529): Fix missing settings on mounted routes - [@Haerezis](https://github.com/Haerezis).
+* [#2529](https://github.com/ruby-grape/grape/pull/2529): Fix missing settings on mounted routes (when settings are identical) - [@Haerezis](https://github.com/Haerezis).
 * Your contribution here.
 
 ### 2.2.0 (2024-09-14)
