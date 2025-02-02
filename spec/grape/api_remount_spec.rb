@@ -546,7 +546,7 @@ describe Grape::API do
           root_api.mount a_remounted_api
         end
 
-        it 'still has all the settings for both routes, even after mount' do
+        it 'still has all the settings for both routes' do
           expect(root_api.routes.count).to be(2)
           expect(root_api.routes[0].settings).to include(
             {
