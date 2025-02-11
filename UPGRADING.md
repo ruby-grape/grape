@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.4.0
+
+#### Custom Validators
+
+If you now receive an error of `'Grape::Validations.require_validator': unknown validator: your_custom_validation (Grape::Exceptions::UnknownValidator)` after upgrading to 2.4.0 then you will need to ensure that you require the `your_custom_validation` file before your Grape API code is loaded.
+
+See [2533](https://github.com/ruby-grape/grape/issues/2533) for more information.
+
 ### Upgrading to >= 2.3.0
 
 ### `content_type` vs `api.format` inside API
