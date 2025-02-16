@@ -172,12 +172,12 @@ module Grape
       end
 
       def any_lazy?(args)
-        args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
+        args.any? { |argument| argument.try(:lazy?) }
       end
 
       def evaluate_arguments(configuration, *args)
         args.map do |argument|
-          if argument.respond_to?(:lazy?) && argument.lazy?
+          if argument.try(:lazy?)
             argument.evaluate_from(configuration)
           elsif argument.is_a?(Hash)
             argument.transform_values { |value| evaluate_arguments(configuration, value).first }

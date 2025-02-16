@@ -30,7 +30,7 @@ module Grape
 
       def run_before_each(endpoint)
         superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each { |blk| blk.call(endpoint) if blk.respond_to?(:call) }
+        before_each.each { |blk| blk.try(:call, endpoint) }
       end
 
       # @api private
@@ -135,7 +135,7 @@ module Grape
     end
 
     def routes
-      @routes ||= endpoints ? endpoints.collect(&:routes).flatten : to_routes
+      @routes ||= endpoints&.collect(&:routes)&.flatten || to_routes
     end
 
     def reset_routes!
@@ -225,7 +225,7 @@ module Grape
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
-      options[:app].endpoints if options[:app].respond_to?(:endpoints)
+      @endpoints ||= options[:app].try(:endpoints)
     end
 
     def equals?(endpoint)

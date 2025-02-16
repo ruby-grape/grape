@@ -83,12 +83,12 @@ module Grape
 
         return unless (input = env[Rack::RACK_INPUT])
 
-        rewind_input input
+        input.try(:rewind)
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
           read_rack_input(body) if body && !body.empty?
         ensure
-          rewind_input input
+          input.try(:rewind)
         end
       end
 
@@ -172,10 +172,6 @@ module Grape
         accept.scan(accept_into_mime_and_quality)
               .sort_by { |_, quality_preference| -(quality_preference ? quality_preference.to_f : 1.0) }
               .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
-      end
-
-      def rewind_input(input)
-        input.rewind if input.respond_to?(:rewind)
       end
     end
   end
