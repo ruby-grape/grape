@@ -5,7 +5,7 @@ module Grape
     attr_reader :map, :compiled
 
     def self.normalize_path(path)
-      return '/'.dup unless path
+      return +'/' unless path
 
       # Fast path for the overwhelming majority of paths that don't need to be normalized
       return path.dup if path == '/' || (path.start_with?('/') && !path.end_with?('/') && !path.match?(%r{%|//}))
