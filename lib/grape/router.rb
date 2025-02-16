@@ -5,11 +5,22 @@ module Grape
     attr_reader :map, :compiled
 
     def self.normalize_path(path)
+      return '/'.dup unless path
+
+      # Fast path for the overwhelming majority of paths that don't need to be normalized
+      return path.dup if path == '/' || (path.start_with?('/') && !path.end_with?('/') && !path.match?(%r{%|//}))
+
+      # Slow path
+      encoding = path.encoding
       path = +"/#{path}"
       path.squeeze!('/')
-      path.sub!(%r{/+\Z}, '')
-      path = '/' if path == ''
-      path
+
+      unless path == '/'
+        path.delete_suffix!('/')
+        path.gsub!(/(%[a-f0-9]{2})/) { ::Regexp.last_match(1).upcase }
+      end
+
+      path.force_encoding(encoding)
     end
 
     def initialize
