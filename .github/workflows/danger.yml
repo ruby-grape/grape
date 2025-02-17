@@ -17,5 +17,6 @@ jobs:
     - name: Run Danger
       run: |
         # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok
+        #TOKENB=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
         TOKEN=$(echo -n Z2hwX2lYb0dPNXNyejYzOFJyaTV3QUxUdkNiS1dtblFwZTFuRXpmMwo= | base64 --decode)
         DANGER_GITHUB_API_TOKEN=$TOKEN bundle exec danger --verbose
