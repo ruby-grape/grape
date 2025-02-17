@@ -630,6 +630,59 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq 'inner3[0][baz][0][baz_category] is missing'
     end
 
+    context 'detect when json array' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: String
+            given a: ->(val) { val == 'a' } do
+              requires :json, type: Hash do
+                requires :b, type: String
+              end
+            end
+          end
+        end
+
+        subject.post '/nested_array' do
+          'nested array works!'
+        end
+      end
+
+      it 'succeeds' do
+        params = {
+          array: [
+            {
+              a: 'a',
+              json: { b: 'b' }
+            },
+            {
+              a: 'b'
+            }
+          ]
+        }
+        post '/nested_array', params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 'a',
+              json: { b: 'b' }
+            },
+            {
+              a: 'a'
+            }
+          ]
+        }
+        post '/nested_array', params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+      end
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 

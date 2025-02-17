@@ -259,6 +259,7 @@ describe Grape::DSL::Parameters do
       parent_params = { foo: 'bar' }
       subject.parent = Object.new
       allow(subject.parent).to receive(:params).and_return(parent_params)
+      allow(subject.parent).to receive(:params_meeting_dependency).and_return(nil)
       expect(subject.params({})).to eq parent_params
     end
 
