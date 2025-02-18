@@ -10,7 +10,7 @@ module Grape
         end
 
         def validate_param!(attr_name, params)
-          return unless params.respond_to?(:key?) && params.key?(attr_name)
+          return unless params.try(:key?, attr_name)
 
           excepts = @except.is_a?(Proc) ? @except.call : @except
           return if excepts.nil?
