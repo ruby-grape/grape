@@ -5,6 +5,7 @@
 * [#2532](https://github.com/ruby-grape/grape/pull/2532): Update RuboCop 1.71.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2535](https://github.com/ruby-grape/grape/pull/2535): Delegates calls to inner objects - [@ericproulx](https://github.com/ericproulx).
 * [#2537](https://github.com/ruby-grape/grape/pull/2537): Use activesupport `try` pattern - [@ericproulx](https://github.com/ericproulx).
+* [#2536](https://github.com/ruby-grape/grape/pull/2536): Update normalize_path like Rails - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
