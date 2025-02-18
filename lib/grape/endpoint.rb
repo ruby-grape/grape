@@ -6,11 +6,14 @@ module Grape
   # on the instance level of this class may be called
   # from inside a `get`, `post`, etc.
   class Endpoint
+    extend Forwardable
     include Grape::DSL::Settings
     include Grape::DSL::InsideRoute
 
     attr_accessor :block, :source, :options
-    attr_reader :env, :request, :headers, :params
+    attr_reader :env, :request
+
+    def_delegators :request, :params, :headers
 
     class << self
       def new(...)
@@ -30,7 +33,7 @@ module Grape
 
       def run_before_each(endpoint)
         superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each { |blk| blk.call(endpoint) if blk.respond_to?(:call) }
+        before_each.each { |blk| blk.try(:call, endpoint) }
       end
 
       # @api private
@@ -135,7 +138,7 @@ module Grape
     end
 
     def routes
-      @routes ||= endpoints ? endpoints.collect(&:routes).flatten : to_routes
+      @routes ||= endpoints&.collect(&:routes)&.flatten || to_routes
     end
 
     def reset_routes!
@@ -225,7 +228,7 @@ module Grape
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
-      options[:app].endpoints if options[:app].respond_to?(:endpoints)
+      @endpoints ||= options[:app].try(:endpoints)
     end
 
     def equals?(endpoint)
@@ -247,8 +250,6 @@ module Grape
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
         @header = Grape::Util::Header.new
         @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
-        @params = @request.params
-        @headers = @request.headers
         begin
           cookies.read(@request)
           self.class.run_before_each(self)

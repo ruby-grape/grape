@@ -104,7 +104,7 @@ module Grape
             return response unless cascade
 
             # we need to close the body if possible before dismissing
-            response[2].close if response[2].respond_to?(:close)
+            response[2].try(:close)
           end
         end
       end

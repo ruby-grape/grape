@@ -20,12 +20,18 @@ module Grape
     end
 
     class << self
+      extend Forwardable
       attr_accessor :base_instance, :instances
 
-      # Rather than initializing an object of type Grape::API, create an object of type Instance
-      def new(...)
-        base_instance.new(...)
-      end
+      delegate_missing_to :base_instance
+      def_delegators :base_instance, :new, :configuration
+
+      # This is the interface point between Rack and Grape; it accepts a request
+      # from Rack and ultimately returns an array of three values: the status,
+      # the headers, and the body. See [the rack specification]
+      # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
+      # NOTE: This will only be called on an API directly mounted on RACK
+      def_delegators :instance_for_rack, :call, :compile!
 
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
@@ -69,15 +75,6 @@ module Grape
         end
       end
 
-      # This is the interface point between Rack and Grape; it accepts a request
-      # from Rack and ultimately returns an array of three values: the status,
-      # the headers, and the body. See [the rack specification]
-      # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
-      # NOTE: This will only be called on an API directly mounted on RACK
-      def call(...)
-        instance_for_rack.call(...)
-      end
-
       # The remountable class can have a configuration hash to provide some dynamic class-level variables.
       # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
@@ -96,27 +93,6 @@ module Grape
         @setup.each do |setup_step|
           replay_step_on(instance, setup_step)
         end
-      end
-
-      def respond_to?(method, include_private = false)
-        super || base_instance.respond_to?(method, include_private)
-      end
-
-      def respond_to_missing?(method, include_private = false)
-        base_instance.respond_to?(method, include_private)
-      end
-
-      def method_missing(method, *args, &block)
-        # If there's a missing method, it may be defined on the base_instance instead.
-        if respond_to_missing?(method)
-          base_instance.send(method, *args, &block)
-        else
-          super
-        end
-      end
-
-      def compile!
-        instance_for_rack.compile! # See API::Instance.compile!
       end
 
       private
@@ -172,12 +148,12 @@ module Grape
       end
 
       def any_lazy?(args)
-        args.any? { |argument| argument.respond_to?(:lazy?) && argument.lazy? }
+        args.any? { |argument| argument.try(:lazy?) }
       end
 
       def evaluate_arguments(configuration, *args)
         args.map do |argument|
-          if argument.respond_to?(:lazy?) && argument.lazy?
+          if argument.try(:lazy?)
             argument.evaluate_from(configuration)
           elsif argument.is_a?(Hash)
             argument.transform_values { |value| evaluate_arguments(configuration, value).first }
