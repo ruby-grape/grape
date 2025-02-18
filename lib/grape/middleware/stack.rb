@@ -5,17 +5,18 @@ module Grape
     # Class to handle the stack of middlewares based on ActionDispatch::MiddlewareStack
     # It allows to insert and insert after
     class Stack
+      extend Forwardable
       class Middleware
+        extend Forwardable
+
         attr_reader :args, :block, :klass
+
+        def_delegators :klass, :name
 
         def initialize(klass, *args, &block)
           @klass = klass
           @args = args
           @block = block
-        end
-
-        def name
-          klass.name
         end
 
         def ==(other)
@@ -32,7 +33,7 @@ module Grape
         end
 
         def use_in(builder)
-          builder.use(@klass, *@args, &@block)
+          builder.use(klass, *args, &block)
         end
       end
 
@@ -40,25 +41,11 @@ module Grape
 
       attr_accessor :middlewares, :others
 
+      def_delegators :middlewares, :each, :size, :last, :[]
+
       def initialize
         @middlewares = []
         @others = []
-      end
-
-      def each(&block)
-        @middlewares.each(&block)
-      end
-
-      def size
-        middlewares.size
-      end
-
-      def last
-        middlewares.last
-      end
-
-      def [](index)
-        middlewares[index]
       end
 
       def insert(index, *args, &block)
