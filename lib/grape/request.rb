@@ -26,21 +26,16 @@ module Grape
     private
 
     def grape_routing_args
-      args = env[Grape::Env::GRAPE_ROUTING_ARGS].dup
       # preserve version from query string parameters
-      args.delete(:version)
-      args.delete(:route_info)
-      args
+      env[Grape::Env::GRAPE_ROUTING_ARGS].except(:version, :route_info)
     end
 
     def build_headers
-      Grape::Util::Lazy::Object.new do
-        env.each_pair.with_object(Grape::Util::Header.new) do |(k, v), headers|
-          next unless k.to_s.start_with? HTTP_PREFIX
+      each_header.with_object(Grape::Util::Header.new) do |(k, v), headers|
+        next unless k.start_with? HTTP_PREFIX
 
-          transformed_header = Grape::Http::Headers::HTTP_HEADERS[k] || transform_header(k)
-          headers[transformed_header] = v
-        end
+        transformed_header = Grape::Http::Headers::HTTP_HEADERS[k] || transform_header(k)
+        headers[transformed_header] = v
       end
     end
 
