@@ -680,6 +680,75 @@ describe Grape::Validations::ParamsScope do
         post '/nested_array', params.to_json, 'CONTENT_TYPE' => 'application/json'
 
         expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('array[1][json] is missing, array[1][json][b] is missing')
+      end
+    end
+
+    context 'array without given' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: Integer
+            requires :b, type: Integer
+          end
+        end
+
+        subject.post '/array_without_given'
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 1,
+              b: 2
+            },
+            {
+              a: 3
+            },
+            {
+              a: 5
+            }
+          ]
+        }
+        post '/array_without_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[1][b] is missing, array[2][b] is missing')
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'array with given' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: Integer
+            given a: lambda(&:odd?) do
+              requires :b, type: Integer
+            end
+          end
+        end
+
+        subject.post '/array_with_given'
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 1,
+              b: 2
+            },
+            {
+              a: 3
+            },
+            {
+              a: 5
+            }
+          ]
+        }
+        post '/array_with_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[1][b] is missing, array[2][b] is missing')
+        expect(last_response.status).to eq(400)
       end
     end
 

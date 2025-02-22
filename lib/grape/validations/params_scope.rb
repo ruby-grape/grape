@@ -132,7 +132,7 @@ module Grape
       def full_name(name, index: nil)
         if nested?
           # Find our containing element's name, and append ours.
-          "#{@parent.full_name(@element)}#{brackets(@index || index)}#{brackets(name)}"
+          "#{@parent.full_name(@element)}#{brackets(index || @index)}#{brackets(name)}"
         elsif lateral?
           # Find the name of the element as if it was at the same nesting level
           # as our parent. We need to forward our index upward to achieve this.
