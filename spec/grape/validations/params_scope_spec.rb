@@ -752,6 +752,55 @@ describe Grape::Validations::ParamsScope do
       end
     end
 
+    context 'nested json array with given' do
+      before do
+        subject.params do
+          requires :workflow_nodes, type: Array do
+            requires :steps, type: Array do
+              requires :id, type: String
+              optional :type, type: String, values: %w[send_messsge assign_user assign_team tag_conversation snooze close add_commit]
+              given type: ->(val) { val == 'send_messsge' } do
+                requires :message, type: Hash do
+                  requires :content, type: String
+                end
+              end
+            end
+          end
+        end
+
+        subject.post '/nested_json_array_with_given'
+      end
+
+      it 'passes' do
+        params = {
+          workflow_nodes: [
+            {
+              id: 'eqibmvEzPo8hQOSt',
+              title: 'Node 1',
+              is_start: true,
+              steps: [
+                {
+                  id: 'DvdSZaIm1hEd5XO5',
+                  type: 'send_messsge',
+                  message: {
+                    content: '打击好',
+                    menus: []
+                  }
+                },
+                {
+                  id: 'VY6MIwycBw0b51Ib',
+                  type: 'add_commit',
+                  comment_content: '初来乍到'
+                }
+              ]
+            }
+          ]
+        }
+        post '/nested_json_array_with_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+      end
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 

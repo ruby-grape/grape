@@ -97,7 +97,7 @@ module Grape
         return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
         if params.is_a?(Array)
-          @params_meeting_dependency = params.filter { |param| meets_dependency?(param, request_params) }
+          @params_meeting_dependency = params.flatten.filter { |param| meets_dependency?(param, request_params) }
           return @params_meeting_dependency.present?
         end
 
