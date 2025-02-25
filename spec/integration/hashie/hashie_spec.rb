@@ -15,11 +15,11 @@ describe 'Hashie', if: defined?(Hashie) do
         end
 
         let(:message) do
-          'This concern has has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
+          'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
         end
 
         it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with(message)
+          expect(Grape.deprecator).to receive(:warn).with(message).and_raise(ActiveSupport::DeprecationException, :deprecated)
           expect { subject }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
         end
       end
@@ -35,7 +35,7 @@ describe 'Hashie', if: defined?(Hashie) do
         end
 
         it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with("#{described_class} has been deprecated. Use short name :hash instead.").and_raise(ActiveSupport::DeprecationException, :deprecated)
+          expect(Grape.deprecator).to receive(:warn).with("Grape::Extensions::Hashie::Mash::ParamBuilder has been deprecated. Use short name :hashie_mash instead.").and_raise(ActiveSupport::DeprecationException, :deprecated)
           expect { get '/' }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
         end
       end
@@ -140,19 +140,6 @@ describe 'Hashie', if: defined?(Hashie) do
         get '/route_param/bar', foo: 'baz'
         expect(last_response).to be_successful
         expect(last_response.body).to eq('["bar", "bar"]')
-      end
-    end
-
-    describe 'deprecation' do
-      context 'when included' do
-        let(:message) do
-          'This concern has has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
-        end
-
-        it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with(message).and_raise(ActiveSupport::DeprecationException, :deprecated)
-          expect { subject.include described_class }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
-        end
       end
     end
   end
