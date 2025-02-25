@@ -35,7 +35,8 @@ describe 'Hashie', if: defined?(Hashie) do
         end
 
         it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with("Grape::Extensions::Hashie::Mash::ParamBuilder has been deprecated. Use short name :hashie_mash instead.").and_raise(ActiveSupport::DeprecationException, :deprecated)
+          expect(Grape.deprecator).to receive(:warn).with('Grape::Extensions::Hashie::Mash::ParamBuilder has been deprecated. Use short name :hashie_mash instead.').and_raise(ActiveSupport::DeprecationException,
+                                                                                                                                                                               :deprecated)
           expect { get '/' }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
         end
       end
