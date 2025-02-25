@@ -1,6 +1,12 @@
 Upgrading Grape
 ===============
 
+#### Params Builder
+
+- Passing a class to `build_with` has been deprecated in favor of a symbolized short_name. See `SHORTNAME_LOOKUP` in [params_builder](lib/grape/params_builder.rb)
+- Including Grape's extensions like `Grape::Extensions::Hashie::Mash::ParamBuilder` has been deprecated in favor of using `build_with` at the route level.
+- Grape.configure `param_builder` has been removed in favor using `build_with` at the route level.
+
 ### Upgrading to >= 2.4.0
 
 #### Custom Validators

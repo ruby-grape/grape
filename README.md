@@ -703,23 +703,12 @@ end
 ## Configuration
 
 Use `Grape.configure` to set up global settings at load time.
-Currently the configurable settings are:
-
-* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
 
 To change a setting value make sure that at some point during load time the following code runs
 
 ```ruby
 Grape.configure do |config|
   config.setting = value
-end
-```
-
-For example, for the `param_builder`, the following code could run in an initializer:
-
-```ruby
-Grape.configure do |config|
-  config.param_builder = Grape::Extensions::Hashie::Mash::ParamBuilder
 end
 ```
 
@@ -789,7 +778,7 @@ By default parameters are available as `ActiveSupport::HashWithIndifferentAccess
 
 ```ruby
 class API < Grape::API
-  include Grape::Extensions::Hashie::Mash::ParamBuilder
+  build_with :hashie_mash
 
   params do
     optional :color, type: String
@@ -803,16 +792,15 @@ The class can also be overridden on individual parameter blocks using `build_wit
 
 ```ruby
 params do
-  build_with Grape::Extensions::Hash::ParamBuilder
+  build_with :hash
   optional :color, type: String
 end
 ```
 
-Or globally with the [Configuration](#configuration) `Grape.configure.param_builder`.
-
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
-Available parameter builders are `Grape::Extensions::Hash::ParamBuilder`, `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder` and `Grape::Extensions::Hashie::Mash::ParamBuilder`.
+Available parameter builders are `:hash`, `:hash_with_indifferent_access`, and `:hashie_mash`.
+See [params_builder](lib/grape/params_builder)
 
 ### Declared
 

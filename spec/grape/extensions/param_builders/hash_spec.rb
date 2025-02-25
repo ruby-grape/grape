@@ -1,112 +1,38 @@
 # frozen_string_literal: true
 
 describe Grape::Extensions::Hash::ParamBuilder do
-  subject { Class.new(Grape::API) }
-
-  def app
-    subject
-  end
-
-  describe 'in an endpoint' do
-    describe '#params' do
-      before do
-        subject.params do
-          build_with Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
-        end
-
-        subject.get do
-          params.class
+  describe 'deprecation' do
+    context 'when included' do
+      subject do
+        Class.new(Grape::API) do
+          include Grape::Extensions::Hash::ParamBuilder
         end
       end
 
-      it 'is of type Hash' do
-        get '/'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hash')
-      end
-    end
-  end
-
-  describe 'in an api' do
-    before do
-      subject.include Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
-    end
-
-    describe '#params' do
-      before do
-        subject.get do
-          params.class
-        end
+      let(:message) do
+        'This concern has has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
       end
 
-      it 'is Hash' do
-        get '/'
-        expect(last_response.status).to eq(200)
-        expect(last_response.body).to eq('Hash')
+      it 'raises a deprecation' do
+        expect(Grape.deprecator).to receive(:warn).with(message).and_raise(ActiveSupport::DeprecationException, :deprecated)
+        expect { subject }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
       end
     end
 
-    it 'symbolizes params keys' do
-      subject.params do
-        optional :a, type: Hash do
-          optional :b, type: Hash do
-            optional :c, type: String
+    context 'when using class name' do
+      let(:app) do
+        Class.new(Grape::API) do
+          params do
+            build_with Grape::Extensions::Hash::ParamBuilder
           end
-          optional :d, type: Array
+          get
         end
       end
 
-      subject.get '/foo' do
-        [params[:a][:b][:c], params[:a][:d]]
+      it 'raises a deprecation' do
+        expect(Grape.deprecator).to receive(:warn).with("#{described_class} has been deprecated. Use short name :hash instead.").and_raise(ActiveSupport::DeprecationException, :deprecated)
+        expect { get '/' }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
       end
-
-      get '/foo', 'a' => { b: { c: 'bar' }, 'd' => ['foo'] }
-      expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('["bar", ["foo"]]')
-    end
-
-    it 'symbolizes the params' do
-      subject.params do
-        build_with Grape::Extensions::Hash::ParamBuilder # rubocop:disable RSpec/DescribedClass
-        requires :a, type: String
-      end
-
-      subject.get '/foo' do
-        [params[:a], params['a']]
-      end
-
-      get '/foo', a: 'bar'
-      expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('["bar", nil]')
-    end
-
-    it 'does not overwrite route_param with a regular param if they have same name' do
-      subject.namespace :route_param do
-        route_param :foo do
-          get { params.to_json }
-        end
-      end
-
-      get '/route_param/bar', foo: 'baz'
-      expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('{"foo":"bar"}')
-    end
-
-    it 'does not overwrite route_param with a defined regular param if they have same name' do
-      subject.namespace :route_param do
-        params do
-          requires :foo, type: String
-        end
-        route_param :foo do
-          get do
-            params[:foo]
-          end
-        end
-      end
-
-      get '/route_param/bar', foo: 'baz'
-      expect(last_response.status).to eq(200)
-      expect(last_response.body).to eq('bar')
     end
   end
 end

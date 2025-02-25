@@ -4694,4 +4694,25 @@ describe Grape::API do
 
     it { is_expected.to be_bad_request }
   end
+
+  describe '.build_with' do
+    let(:app) do
+      Class.new(described_class) do
+        build_with :unknown
+        params do
+          requires :a_param, type: Integer
+        end
+        get
+      end
+    end
+
+    before do
+      get '/'
+    end
+
+    it 'raises an UnknownParamsBuilder error' do
+      expect(last_response).to be_server_error
+      expect(last_response.body).to eq('unknown params_builder: unknown')
+    end
+  end
 end
