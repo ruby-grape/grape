@@ -34,8 +34,6 @@ module Grape
       raise Grape::Exceptions::EmptyMessageBody.new(content_type)
     rescue Rack::Multipart::MultipartPartLimitError
       raise Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit)
-    rescue Rack::QueryParser::ParameterTypeError, Rack::QueryParser::InvalidParameterError, Rack::QueryParser::ParamsTooDeepError
-      raise Grape::Exceptions::QueryParsing
     end
 
     def build_headers
