@@ -7,7 +7,7 @@ module Grape
         extend ::ActiveSupport::Concern
 
         included do
-          Grape.deprecator.warn 'This concern has has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
+          Grape.deprecator.warn 'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
           namespace_inheritable(:build_params_with, :hash)
         end
 

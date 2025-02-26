@@ -10,7 +10,7 @@ describe Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuild
       end
 
       let(:message) do
-        'This concern has has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
+        'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
       end
 
       it 'raises a deprecation' do
