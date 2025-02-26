@@ -63,7 +63,10 @@ module Grape
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
   end
 
-  configure(&:compile_methods!)
+  configure do |config|
+    config.param_builder = :hash_with_indifferent_access
+    config.compile_methods!
+  end
 end
 
 # https://api.rubyonrails.org/classes/ActiveSupport/Deprecation.html

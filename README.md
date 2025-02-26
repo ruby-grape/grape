@@ -703,6 +703,9 @@ end
 ## Configuration
 
 Use `Grape.configure` to set up global settings at load time.
+Currently the configurable settings are:
+
+* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
 
 To change a setting value make sure that at some point during load time the following code runs
 
@@ -711,6 +714,17 @@ Grape.configure do |config|
   config.setting = value
 end
 ```
+
+For example, for the `param_builder`, the following code could run in an initializer:
+
+```ruby
+Grape.configure do |config|
+  config.param_builder = :hashie_mash
+end
+```
+
+Available parameter builders are `:hash`, `:hash_with_indifferent_access`, and `:hashie_mash`.
+See [params_builder](lib/grape/params_builder)
 
 You can also configure a single API:
 
