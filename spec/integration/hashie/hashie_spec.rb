@@ -1,16 +1,54 @@
 # frozen_string_literal: true
 
 describe 'Hashie', if: defined?(Hashie) do
-  subject { Class.new(Grape::API) }
+  subject { app }
 
-  let(:app) { subject }
+  let(:app) { Class.new(Grape::API) }
 
   describe 'Grape::Extensions::Hashie::Mash::ParamBuilder' do
+    describe 'deprecation' do
+      context 'when included' do
+        subject do
+          Class.new(Grape::API) do
+            include Grape::Extensions::Hashie::Mash::ParamBuilder
+          end
+        end
+
+        let(:message) do
+          'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
+        end
+
+        it 'raises a deprecation' do
+          expect(Grape.deprecator).to receive(:warn).with(message).and_raise(ActiveSupport::DeprecationException, :deprecated)
+          expect { subject }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
+        end
+      end
+
+      context 'when using class name' do
+        let(:app) do
+          Class.new(Grape::API) do
+            params do
+              build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+            end
+            get
+          end
+        end
+
+        it 'raises a deprecation' do
+          expect(Grape.deprecator).to receive(:warn).with('Grape::Extensions::Hashie::Mash::ParamBuilder has been deprecated. Use short name :hashie_mash instead.').and_raise(ActiveSupport::DeprecationException,
+                                                                                                                                                                               :deprecated)
+          expect { get '/' }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
+        end
+      end
+    end
+  end
+
+  describe 'Grape::ParamsBuilder::HashieMash' do
     describe 'in an endpoint' do
       describe '#params' do
         before do
           subject.params do
-            build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+            build_with :hashie_mash
           end
 
           subject.get do
@@ -28,7 +66,7 @@ describe 'Hashie', if: defined?(Hashie) do
 
     describe 'in an api' do
       before do
-        subject.include Grape::Extensions::Hashie::Mash::ParamBuilder
+        subject.build_with :hashie_mash
       end
 
       describe '#params' do
@@ -63,7 +101,7 @@ describe 'Hashie', if: defined?(Hashie) do
 
       it 'is indifferent to key or symbol access' do
         subject.params do
-          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+          build_with :hashie_mash
           requires :a, type: String
         end
         subject.get '/foo' do
@@ -90,7 +128,7 @@ describe 'Hashie', if: defined?(Hashie) do
       it 'does not overwrite route_param with a defined regular param if they have same name' do
         subject.namespace :route_param do
           params do
-            build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+            build_with :hashie_mash
             requires :foo, type: String
           end
           route_param :foo do
@@ -138,7 +176,7 @@ describe 'Hashie', if: defined?(Hashie) do
       end
 
       context 'when build_params_with: Grape::Extensions::Hash::ParamBuilder is specified' do
-        let(:request) { Grape::Request.new(env, build_params_with: Grape::Extensions::Hash::ParamBuilder) }
+        let(:request) { Grape::Request.new(env, build_params_with: :hash) }
 
         it 'returns symbolized params' do
           expect(request.params).to eq(a: '123', b: 'xyz')
@@ -164,7 +202,7 @@ describe 'Hashie', if: defined?(Hashie) do
     end
 
     describe 'when the build_params_with is set to Hashie' do
-      subject(:request_params) { Grape::Request.new(env, build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder).params }
+      subject(:request_params) { Grape::Request.new(env, build_params_with: :hashie_mash).params }
 
       context 'when the API includes a specific param builder' do
         it { is_expected.to be_a(Hashie::Mash) }
@@ -177,7 +215,7 @@ describe 'Hashie', if: defined?(Hashie) do
       context 'for primitive collections' do
         before do
           subject.params do
-            build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+            build_with :hashie_mash
             optional :a, types: [String, Array[String]]
             optional :b, types: [Array[Integer], Array[String]]
             optional :c, type: Array[Integer, String]
@@ -287,7 +325,7 @@ describe 'Hashie', if: defined?(Hashie) do
     context 'when params are not built with default class' do
       it 'returns an object that corresponds with the params class - hashie mash' do
         subject.params do
-          build_with Grape::Extensions::Hashie::Mash::ParamBuilder
+          build_with :hashie_mash
         end
         subject.get '/declared' do
           d = declared(params, include_missing: true)

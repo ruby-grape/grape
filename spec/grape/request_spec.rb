@@ -35,7 +35,7 @@ describe Grape::Request do
 
     context 'when build_params_with: Grape::Extensions::Hash::ParamBuilder is specified' do
       let(:request) do
-        described_class.new(env, build_params_with: Grape::Extensions::Hash::ParamBuilder)
+        described_class.new(env, build_params_with: :hash)
       end
 
       it 'returns symbolized params' do

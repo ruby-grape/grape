@@ -6,12 +6,10 @@ module Grape
       module Mash
         module ParamBuilder
           extend ::ActiveSupport::Concern
-          included do
-            namespace_inheritable(:build_params_with, Grape::Extensions::Hashie::Mash::ParamBuilder)
-          end
 
-          def params_builder
-            Grape::Extensions::Hashie::Mash::ParamBuilder
+          included do
+            Grape.deprecator.warn 'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
+            namespace_inheritable(:build_params_with, :hashie_mash)
           end
 
           def build_params

@@ -67,6 +67,10 @@ module Grape
           end
         end
 
+        def build_with(build_with)
+          namespace_inheritable(:build_params_with, build_with)
+        end
+
         # Do not route HEAD requests to GET requests automatically.
         def do_not_route_head!
           namespace_inheritable(:do_not_route_head, true)

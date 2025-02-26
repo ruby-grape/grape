@@ -64,7 +64,7 @@ module Grape
   end
 
   configure do |config|
-    config.param_builder = Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder
+    config.param_builder = :hash_with_indifferent_access
     config.compile_methods!
   end
 end

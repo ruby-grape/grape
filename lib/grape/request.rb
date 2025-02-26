@@ -2,32 +2,38 @@
 
 module Grape
   class Request < Rack::Request
+    DEFAULT_PARAMS_BUILDER = :hash_with_indifferent_access
     HTTP_PREFIX = 'HTTP_'
 
     alias rack_params params
 
     def initialize(env, build_params_with: nil)
-      extend build_params_with || Grape.config.param_builder
       super(env)
+      @params_builder = Grape::ParamsBuilder.params_builder_for(build_params_with || Grape.config.param_builder)
     end
 
     def params
-      @params ||= build_params
-    rescue EOFError
-      raise Grape::Exceptions::EmptyMessageBody.new(content_type)
-    rescue Rack::Multipart::MultipartPartLimitError
-      raise Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit)
+      @params ||= make_params
     end
 
     def headers
       @headers ||= build_headers
     end
 
-    private
-
+    # needs to be public until extensions param_builder are removed
     def grape_routing_args
       # preserve version from query string parameters
-      env[Grape::Env::GRAPE_ROUTING_ARGS].except(:version, :route_info)
+      env[Grape::Env::GRAPE_ROUTING_ARGS]&.except(:version, :route_info) || {}
+    end
+
+    private
+
+    def make_params
+      @params_builder.call(rack_params).deep_merge!(grape_routing_args)
+    rescue EOFError
+      raise Grape::Exceptions::EmptyMessageBody.new(content_type)
+    rescue Rack::Multipart::MultipartPartLimitError
+      raise Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit)
     end
 
     def build_headers
