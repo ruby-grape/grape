@@ -630,6 +630,177 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq 'inner3[0][baz][0][baz_category] is missing'
     end
 
+    context 'detect when json array' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: String
+            given a: ->(val) { val == 'a' } do
+              requires :json, type: Hash do
+                requires :b, type: String
+              end
+            end
+          end
+        end
+
+        subject.post '/nested_array' do
+          'nested array works!'
+        end
+      end
+
+      it 'succeeds' do
+        params = {
+          array: [
+            {
+              a: 'a',
+              json: { b: 'b' }
+            },
+            {
+              a: 'b'
+            }
+          ]
+        }
+        post '/nested_array', params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 'a',
+              json: { b: 'b' }
+            },
+            {
+              a: 'a'
+            }
+          ]
+        }
+        post '/nested_array', params.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('array[1][json] is missing, array[1][json][b] is missing')
+      end
+    end
+
+    context 'array without given' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: Integer
+            requires :b, type: Integer
+          end
+        end
+
+        subject.post '/array_without_given'
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 1,
+              b: 2
+            },
+            {
+              a: 3
+            },
+            {
+              a: 5
+            }
+          ]
+        }
+        post '/array_without_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[1][b] is missing, array[2][b] is missing')
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'array with given' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: Integer
+            given a: lambda(&:odd?) do
+              requires :b, type: Integer
+            end
+          end
+        end
+
+        subject.post '/array_with_given'
+      end
+
+      it 'fails' do
+        params = {
+          array: [
+            {
+              a: 1,
+              b: 2
+            },
+            {
+              a: 3
+            },
+            {
+              a: 5
+            }
+          ]
+        }
+        post '/array_with_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[1][b] is missing, array[2][b] is missing')
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'nested json array with given' do
+      before do
+        subject.params do
+          requires :workflow_nodes, type: Array do
+            requires :steps, type: Array do
+              requires :id, type: String
+              optional :type, type: String, values: %w[send_messsge assign_user assign_team tag_conversation snooze close add_commit]
+              given type: ->(val) { val == 'send_messsge' } do
+                requires :message, type: Hash do
+                  requires :content, type: String
+                end
+              end
+            end
+          end
+        end
+
+        subject.post '/nested_json_array_with_given'
+      end
+
+      it 'passes' do
+        params = {
+          workflow_nodes: [
+            {
+              id: 'eqibmvEzPo8hQOSt',
+              title: 'Node 1',
+              is_start: true,
+              steps: [
+                {
+                  id: 'DvdSZaIm1hEd5XO5',
+                  type: 'send_messsge',
+                  message: {
+                    content: '打击好',
+                    menus: []
+                  }
+                },
+                {
+                  id: 'VY6MIwycBw0b51Ib',
+                  type: 'add_commit',
+                  comment_content: '初来乍到'
+                }
+              ]
+            }
+          ]
+        }
+        post '/nested_json_array_with_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+      end
+    end
+
     it 'includes the parameter within #declared(params)' do
       get '/test', a: true, b: true
 
