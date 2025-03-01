@@ -113,7 +113,7 @@ module Grape
           last_response = replay_step_on(instance, **step)
         end
 
-        refresh_mount_step(step) if step[:method] != :mount
+        refresh_mount_step if step[:method] != :mount
         last_response
       end
 
