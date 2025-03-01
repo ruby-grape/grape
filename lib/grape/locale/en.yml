@@ -33,6 +33,7 @@ en:
           problem: 'unknown :using for versioner: %{strategy}'
           resolution: 'available strategy for :using is :path, :header, :accept_version_header, :param'
         unknown_validator: 'unknown validator: %{validator_type}'
+        unknown_params_builder: 'unknown params_builder: %{params_builder_type}'
         unknown_options: 'unknown options: %{options}'
         unknown_parameter: 'unknown parameter: %{param}'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
@@ -57,3 +58,4 @@ en:
           problem: 'invalid version header'
           resolution: '%{message}'
         invalid_response: 'Invalid response'
+        query_parsing: 'query params are not parsable'
