@@ -58,4 +58,4 @@ en:
           problem: 'invalid version header'
           resolution: '%{message}'
         invalid_response: 'Invalid response'
-        query_parsing: "query params are not parsable."
+        query_parsing: 'query params are not parsable'

@@ -724,7 +724,7 @@ end
 ```
 
 Available parameter builders are `:hash`, `:hash_with_indifferent_access`, and `:hashie_mash`.
-See [params_builder](lib/grape/params_builder)
+See [params_builder](lib/grape/params_builder).
 
 You can also configure a single API:
 
@@ -814,7 +814,7 @@ end
 In the example above, `params["color"]` will return `nil` since `params` is a plain `Hash`.
 
 Available parameter builders are `:hash`, `:hash_with_indifferent_access`, and `:hashie_mash`.
-See [params_builder](lib/grape/params_builder)
+See [params_builder](lib/grape/params_builder).
 
 ### Declared
 
