@@ -55,7 +55,7 @@ module Grape
       def override_all_methods!
         (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, &block|
-            add_setup(method_override, *args, &block)
+            add_setup(method: method_override, args: args, block: block)
           end
         end
       end
@@ -79,23 +79,23 @@ module Grape
       # For instance, a description could be done using: `desc configuration[:description]` if it may vary
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
-      def mount_instance(opts = {})
-        instance = Class.new(@base_parent)
-        instance.configuration = Grape::Util::EndpointConfiguration.new(opts[:configuration] || {})
-        instance.base = self
-        replay_setup_on(instance)
-        instance
+      def mount_instance(configuration: nil)
+        Class.new(@base_parent).tap do |instance|
+          instance.configuration = Grape::Util::EndpointConfiguration.new(configuration || {})
+          instance.base = self
+          replay_setup_on(instance)
+        end
       end
+
+      private
 
       # Replays the set up to produce an API as defined in this class, can be called
       # on classes that inherit from Grape::API
       def replay_setup_on(instance)
         @setup.each do |setup_step|
-          replay_step_on(instance, setup_step)
+          replay_step_on(instance, **setup_step)
         end
       end
-
-      private
 
       def instance_for_rack
         if never_mounted?
@@ -106,34 +106,35 @@ module Grape
       end
 
       # Adds a new stage to the set up require to get a Grape::API up and running
-      def add_setup(method, *args, &block)
-        setup_step = { method: method, args: args, block: block }
-        @setup += [setup_step]
+      def add_setup(step)
+        @setup << step
         last_response = nil
         @instances.each do |instance|
-          last_response = replay_step_on(instance, setup_step)
+          last_response = replay_step_on(instance, **step)
         end
 
-        # Updating all previously mounted classes in the case that new methods have been executed.
-        if method != :mount && @setup.any?
-          previous_mount_steps = @setup.select { |step| step[:method] == :mount }
-          previous_mount_steps.each do |mount_step|
-            refresh_mount_step = mount_step.merge(method: :refresh_mounted_api)
-            @setup += [refresh_mount_step]
-            @instances.each do |instance|
-              replay_step_on(instance, refresh_mount_step)
-            end
-          end
-        end
-
+        refresh_mount_step(step) if step[:method] != :mount
         last_response
       end
 
-      def replay_step_on(instance, setup_step)
-        return if skip_immediate_run?(instance, setup_step[:args])
+      # Updating all previously mounted classes in the case that new methods have been executed.
+      def refresh_mount_step
+        @setup.each do |setup_step|
+          next if setup_step[:method] != :mount
 
-        args = evaluate_arguments(instance.configuration, *setup_step[:args])
-        response = instance.send(setup_step[:method], *args, &setup_step[:block])
+          refresh_mount_step = setup_step.merge(method: :refresh_mounted_api)
+          @setup << refresh_mount_step
+          @instances.each do |instance|
+            replay_step_on(instance, **refresh_mount_step)
+          end
+        end
+      end
+
+      def replay_step_on(instance, method:, args:, block:)
+        return if skip_immediate_run?(instance, args)
+
+        eval_args = evaluate_arguments(instance.configuration, *args)
+        response = instance.send(method, *eval_args, &block)
         if skip_immediate_run?(instance, [response])
           response
         else
