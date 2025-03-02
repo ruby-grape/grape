@@ -1699,11 +1699,6 @@ describe Grape::API do
         expect(subject.io.string).to include(message)
       end
     end
-
-    it 'does not unnecessarily retain duplicate setup blocks' do
-      subject.logger
-      expect { subject.logger }.not_to change(subject.instance_variable_get(:@setup), :size)
-    end
   end
 
   describe '.helpers' do

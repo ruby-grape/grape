@@ -12,6 +12,8 @@
 #### Fixes
 
 * [#2538](https://github.com/ruby-grape/grape/pull/2538): Fix validating nested json array params - [@mohammednasser-32](https://github.com/mohammednasser-32).
+* [#2543](https://github.com/ruby-grape/grape/pull/2543): Fix array allocation on mount - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
 
 ### 2.3.0 (2025-02-08)
 
