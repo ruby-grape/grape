@@ -1,11 +1,8 @@
 ![grape logo](grape.png)
 
 [![Gem Version](https://badge.fury.io/rb/grape.svg)](http://badge.fury.io/rb/grape)
-[![Build Status](https://github.com/ruby-grape/grape/workflows/test/badge.svg?branch=master)](https://github.com/ruby-grape/grape/actions)
-[![Code Climate](https://codeclimate.com/github/ruby-grape/grape.svg)](https://codeclimate.com/github/ruby-grape/grape)
+[![test](https://github.com/ruby-grape/grape/actions/workflows/test.yml/badge.svg)](https://github.com/ruby-grape/grape/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/ruby-grape/grape/badge.svg?branch=master)](https://coveralls.io/github/ruby-grape/grape?branch=master)
-[![Inline docs](https://inch-ci.org/github/ruby-grape/grape.svg)](https://inch-ci.org/github/ruby-grape/grape)
-[![Join the chat at https://gitter.im/ruby-grape/grape](https://badges.gitter.im/ruby-grape/grape.svg)](https://gitter.im/ruby-grape/grape?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Table of Contents
 
@@ -164,7 +161,7 @@ The current stable release is [2.3.0](https://github.com/ruby-grape/grape/blob/v
 
 * [Grape Website](http://www.ruby-grape.org)
 * [Documentation](http://www.rubydoc.info/gems/grape)
-* Need help? Try [Grape Google Group](http://groups.google.com/group/ruby-grape) or [Gitter](https://gitter.im/ruby-grape/grape)
+* Need help? [Open an Issue](https://github.com/ruby-grape/grape/issues)
 * [Follow us on Twitter](https://twitter.com/grapeframework)
 
 ## Grape for Enterprise

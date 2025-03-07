@@ -1,7 +1,7 @@
 Contributing to Grape
 =====================
 
-Grape is work of [hundreds of contributors](https://github.com/ruby-grape/grape/graphs/contributors). You're encouraged to submit [pull requests](https://github.com/ruby-grape/grape/pulls), [propose features and discuss issues](https://github.com/ruby-grape/grape/issues). When in doubt, ask a question in the [Grape Google Group](http://groups.google.com/group/ruby-grape).
+Grape is work of [hundreds of contributors](https://github.com/ruby-grape/grape/graphs/contributors). You're encouraged to submit [pull requests](https://github.com/ruby-grape/grape/pulls), [propose features and discuss issues](https://github.com/ruby-grape/grape/issues).
 
 #### Fork the Project
 
