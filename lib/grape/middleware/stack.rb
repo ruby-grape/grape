@@ -7,17 +7,15 @@ module Grape
     class Stack
       extend Forwardable
       class Middleware
-        extend Forwardable
-
         attr_reader :args, :block, :klass
 
-        def_delegators :klass, :name
-
-        def initialize(klass, *args, &block)
+        def initialize(klass, args, block)
           @klass = klass
           @args = args
           @block = block
         end
+
+        def name; klass.name; end # rubocop:disable Style/SingleLineMethods
 
         def ==(other)
           case other
@@ -32,7 +30,11 @@ module Grape
           klass.to_s
         end
 
-        def use_in(builder)
+        def build(builder)
+          # we need to force the ruby2_keywords_hash for middlewares that initialize contains keywords
+          # like ActionDispatch::RequestId since middleware arguments are serialized
+          # https://rubyapi.org/3.4/o/hash#method-c-ruby2_keywords_hash
+          args[-1] = Hash.ruby2_keywords_hash(args[-1]) if args.last.is_a?(Hash) && Hash.respond_to?(:ruby2_keywords_hash)
           builder.use(klass, *args, &block)
         end
       end
@@ -48,12 +50,10 @@ module Grape
         @others = []
       end
 
-      def insert(index, *args, &block)
+      def insert(index, klass, *args, &block)
         index = assert_index(index, :before)
-        middleware = self.class::Middleware.new(*args, &block)
-        middlewares.insert(index, middleware)
+        middlewares.insert(index, self.class::Middleware.new(klass, args, block))
       end
-      ruby2_keywords :insert if respond_to?(:ruby2_keywords, true)
 
       alias insert_before insert
 
@@ -61,38 +61,39 @@ module Grape
         index = assert_index(index, :after)
         insert(index + 1, *args, &block)
       end
-      ruby2_keywords :insert_after if respond_to?(:ruby2_keywords, true)
 
-      def use(...)
-        middleware = self.class::Middleware.new(...)
+      def use(klass, *args, &block)
+        middleware = self.class::Middleware.new(klass, args, block)
         middlewares.push(middleware)
       end
 
       def merge_with(middleware_specs)
-        middleware_specs.each do |operation, *args|
+        middleware_specs.each do |operation, klass, *args|
           if args.last.is_a?(Proc)
             last_proc = args.pop
-            public_send(operation, *args, &last_proc)
+            public_send(operation, klass, *args, &last_proc)
           else
-            public_send(operation, *args)
+            public_send(operation, klass, *args)
           end
         end
       end
 
       # @return [Rack::Builder] the builder object with our middlewares applied
-      def build(builder = Rack::Builder.new)
-        others.shift(others.size).each { |m| merge_with(m) }
-        middlewares.each do |m|
-          m.use_in(builder)
+      def build
+        Rack::Builder.new.tap do |builder|
+          others.shift(others.size).each { |m| merge_with(m) }
+          middlewares.each do |m|
+            m.build(builder)
+          end
         end
-        builder
       end
 
       # @description Add middlewares with :use operation to the stack. Store others with :insert_* operation for later
       # @param [Array] other_specs An array of middleware specifications (e.g. [[:use, klass], [:insert_before, *args]])
       def concat(other_specs)
-        @others << Array(other_specs).reject { |o| o.first == :use }
-        merge_with(Array(other_specs).select { |o| o.first == :use })
+        use, not_use = other_specs.partition { |o| o.first == :use }
+        others << not_use
+        merge_with(use)
       end
 
       protected
