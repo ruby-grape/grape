@@ -15,7 +15,9 @@ module Grape
           @block = block
         end
 
-        def name; klass.name; end # rubocop:disable Style/SingleLineMethods
+        def name
+          klass.name
+        end
 
         def ==(other)
           case other
