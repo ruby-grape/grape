@@ -1525,6 +1525,34 @@ describe Grape::API do
         expect(last_response).to be_bad_request
         expect(last_response.body).to eq('Caught in the Net')
       end
+
+      context 'when middleware initialize as keywords' do
+        let(:middleware_with_keywords) do
+          Class.new do
+            def initialize(app, keyword:)
+              @app = app
+              @keyword = keyword
+            end
+
+            def call(env)
+              env['middleware_with_keywords'] = @keyword
+              @app.call(env)
+            end
+          end
+        end
+
+        before do
+          subject.use middleware_with_keywords, keyword: 'hello'
+          subject.get '/' do
+            env['middleware_with_keywords']
+          end
+          get '/'
+        end
+
+        it 'returns the middleware value' do
+          expect(last_response.body).to eq('hello')
+        end
+      end
     end
 
     describe '.insert_before' do
