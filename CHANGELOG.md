@@ -14,6 +14,7 @@
 * [#2538](https://github.com/ruby-grape/grape/pull/2538): Fix validating nested json array params - [@mohammednasser-32](https://github.com/mohammednasser-32).
 * [#2543](https://github.com/ruby-grape/grape/pull/2543): Fix array allocation on mount - [@ericproulx](https://github.com/ericproulx).
 * [#2546](https://github.com/ruby-grape/grape/pull/2546): Fix middleware with keywords - [@ericproulx](https://github.com/ericproulx).
+* [#2547](https://github.com/ruby-grape/grape/pull/2547): Remove jsonapi related code - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.3.0 (2025-02-08)
