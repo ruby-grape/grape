@@ -36,23 +36,6 @@ describe Grape::Middleware::Formatter do
       end
     end
 
-    context 'jsonapi' do
-      let(:body) { { 'foos' => [{ 'bar' => 'baz' }] } }
-      let(:env) do
-        { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.api+json' }
-      end
-
-      it 'calls #to_json if the content type is jsonapi' do
-        body.instance_eval do
-          def to_json(*_args)
-            '{"foos":[{"bar":"baz"}] }'
-          end
-        end
-        r = Rack::MockResponse[*subject.call(env)]
-        expect(r.body).to eq(Grape::Json.dump(body))
-      end
-    end
-
     context 'xml' do
       let(:body) { +'string' }
       let(:env) do

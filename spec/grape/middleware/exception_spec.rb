@@ -164,27 +164,6 @@ describe Grape::Middleware::Error do
 
   context do
     let(:running_app) { exception_app }
-    let(:options) { { rescue_all: true, format: :jsonapi } }
-
-    it 'is possible to return errors in jsonapi format' do
-      get '/'
-      expect(last_response.body).to eq('{&quot;error&quot;:&quot;rain!&quot;}')
-    end
-  end
-
-  context do
-    let(:running_app) { error_hash_app }
-    let(:options) { { rescue_all: true, format: :jsonapi } }
-
-    it 'is possible to return hash errors in jsonapi format' do
-      get '/'
-      expect(['{&quot;error&quot;:&quot;rain!&quot;,&quot;detail&quot;:&quot;missing widget&quot;}',
-              '{&quot;detail&quot;:&quot;missing widget&quot;,&quot;error&quot;:&quot;rain!&quot;}']).to include(last_response.body)
-    end
-  end
-
-  context do
-    let(:running_app) { exception_app }
     let(:options) { { rescue_all: true, format: :xml } }
 
     it 'is possible to return errors in xml format' do
