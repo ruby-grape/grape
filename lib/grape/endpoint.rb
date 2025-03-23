@@ -13,7 +13,8 @@ module Grape
     attr_accessor :block, :source, :options
     attr_reader :env, :request
 
-    def_delegators :request, :params, :headers, :cookies
+    def_delegators :request, :params, :headers
+    def_delegators :cookies, :each_response_cookies
 
     class << self
       def new(...)
@@ -329,7 +330,7 @@ module Grape
       extend post_extension if post_extension
     end
 
-    %i(befores before_validations after_validations afters finallies).each do |method|
+    %i[befores before_validations after_validations afters finallies].each do |method|
       define_method method do
         namespace_stackable(method)
       end
@@ -402,7 +403,7 @@ module Grape
     end
 
     def build_response_cookies
-      cookies.each_response_cookies do |name, value|
+      each_response_cookies do |name, value|
         cookie_value = value.is_a?(Hash) ? value : { value: value }
         Rack::Utils.set_cookie_header! header, name, cookie_value
       end
