@@ -13,7 +13,7 @@ module Grape
     attr_accessor :block, :source, :options
     attr_reader :env, :request
 
-    def_delegators :request, :params, :headers
+    def_delegators :request, :params, :headers, :cookies
     def_delegators :cookies, :each_response_cookies
 
     class << self
