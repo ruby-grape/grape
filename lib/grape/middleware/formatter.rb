@@ -122,56 +122,31 @@ module Grape
       def negotiate_content_type
         fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
         if content_type_for(fmt)
-          env[Grape::Env::API_FORMAT] = fmt
+          env[Grape::Env::API_FORMAT] = fmt.to_sym
         else
           throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
         end
       end
 
       def format_from_extension
-        parts = request.path.split('.')
+        request_path = request.path.try(:scrub)
+        dot_pos = request_path.rindex('.')
+        return unless dot_pos
 
-        if parts.size > 1
-          extension = parts.last
-          # avoid symbol memory leak on an unknown format
-          return extension.to_sym if content_type_for(extension)
-        end
-        nil
+        extension = request_path[dot_pos + 1..-1]
+        extension if content_type_for(extension)
       end
 
       def format_from_params
-        fmt = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[FORMAT]
-        # avoid symbol memory leak on an unknown format
-        return fmt.to_sym if content_type_for(fmt)
-
-        fmt
+        Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[FORMAT]
       end
 
       def format_from_header
-        mime_array.each do |t|
-          return mime_types[t] if mime_types.key?(t)
-        end
-        nil
-      end
+        accept_header = env[Grape::Http::Headers::HTTP_ACCEPT].try(:scrub)
+        return if accept_header.blank?
 
-      def mime_array
-        accept = env[Grape::Http::Headers::HTTP_ACCEPT]
-        return [] unless accept
-
-        accept_into_mime_and_quality = %r{
-          (
-            \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
-          (?:
-           (?:;[^,]*?)?       # optionally multiple formats in a row
-           ;\s*q=([\w.]+)     # optional "quality" preference (eg q=0.5)
-          )?
-        }x
-
-        vendor_prefix_pattern = /vnd\.[^+]+\+/
-
-        accept.scan(accept_into_mime_and_quality)
-              .sort_by { |_, quality_preference| -(quality_preference ? quality_preference.to_f : 1.0) }
-              .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
+        media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
+        mime_types[media_type]
       end
     end
   end
