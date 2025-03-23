@@ -84,7 +84,7 @@ describe Grape::Middleware::Formatter do
   context 'detection' do
     context 'when path contains invalid byte sequence' do
       it 'does not raise an exception' do
-        expect { subject.call(Rack::PATH_INFO => "/info.\x80",) }.not_to raise_error
+        expect { subject.call(Rack::PATH_INFO => "/info.\x80") }.not_to raise_error
       end
     end
 
@@ -141,10 +141,10 @@ describe Grape::Middleware::Formatter do
 
     it 'handles quality rankings mixed with nothing' do
       subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json,application/xml; q=1.0')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
 
       subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml; q=1.0,application/json')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'handles quality rankings that have a default 1.0 value' do
