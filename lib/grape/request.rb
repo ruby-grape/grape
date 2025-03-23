@@ -6,6 +6,7 @@ module Grape
     HTTP_PREFIX = 'HTTP_'
 
     alias rack_params params
+    alias rack_cookies cookies
 
     def initialize(env, build_params_with: nil)
       super(env)
@@ -18,6 +19,10 @@ module Grape
 
     def headers
       @headers ||= build_headers
+    end
+
+    def cookies
+      @cookies ||= Grape::Cookies.new(-> { rack_cookies })
     end
 
     # needs to be public until extensions param_builder are removed
