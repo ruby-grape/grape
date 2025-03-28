@@ -12,12 +12,13 @@ module Grape
 
     def_delegators :cookies, :[], :each
 
-    def initialize(lazy_rack_cookies)
-      @lazy_cookies = lazy_rack_cookies
+    def initialize(rack_cookies)
+      @cookies = rack_cookies
+      @send_cookies = nil
     end
 
-    def each_response_cookies
-      return unless defined?(@send_cookies)
+    def response_cookies
+      return unless @send_cookies
 
       send_cookies.each do |name|
         yield name, cookies[name]
@@ -37,12 +38,9 @@ module Grape
     private
 
     def cookies
-      return @cookies if defined?(@cookies)
+      return @cookies unless @cookies.is_a?(Proc)
 
-      # we don't want read cookies from rack if it has never been called
-      @cookies = @lazy_cookies.call.with_indifferent_access
-      @lazy_cookies = nil
-      @cookies
+      @cookies = @cookies.call.with_indifferent_access
     end
 
     def send_cookies

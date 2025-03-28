@@ -14,7 +14,7 @@ module Grape
     attr_reader :env, :request
 
     def_delegators :request, :params, :headers, :cookies
-    def_delegators :cookies, :each_response_cookies
+    def_delegator :cookies, :response_cookies
 
     class << self
       def new(...)
@@ -403,7 +403,7 @@ module Grape
     end
 
     def build_response_cookies
-      each_response_cookies do |name, value|
+      response_cookies do |name, value|
         cookie_value = value.is_a?(Hash) ? value : { value: value }
         Rack::Utils.set_cookie_header! header, name, cookie_value
       end
