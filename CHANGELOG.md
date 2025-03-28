@@ -7,7 +7,8 @@
 * [#2537](https://github.com/ruby-grape/grape/pull/2537): Use activesupport `try` pattern - [@ericproulx](https://github.com/ericproulx).
 * [#2536](https://github.com/ruby-grape/grape/pull/2536): Update normalize_path like Rails - [@ericproulx](https://github.com/ericproulx).
 * [#2540](https://github.com/ruby-grape/grape/pull/2540): Introduce Params builder with symbolized short name - [@ericproulx](https://github.com/ericproulx).
-* [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to Grape::Request - [@ericproulx](https://github.com/ericproulx).
+* [#2550](https://github.com/ruby-grape/grape/pull/2550): Drop ActiveSupport 6.0 - [@ericproulx](https://github.com/ericproulx).
+* [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
