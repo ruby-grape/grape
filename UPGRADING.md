@@ -6,6 +6,25 @@ Upgrading Grape
 - Passing a class to `build_with` or `Grape.config.param_builder` has been deprecated in favor of a symbolized short_name. See `SHORTNAME_LOOKUP` in [params_builder](lib/grape/params_builder.rb).
 - Including Grape's extensions like `Grape::Extensions::Hashie::Mash::ParamBuilder` has been deprecated in favor of using `build_with` at the route level.
 
+#### Accept Header Negotiation Harmonized
+
+[Accept](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) header is now fully interpreted through `Rack::Utils.best_q_match` which is following [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1).
+Since [Grape 2.1.0](https://github.com/ruby-grape/grape/blob/master/CHANGELOG.md#210-20240615), the [header versionning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header) is using embracing it
+but `Grape::Middleware::Formatter` never did.
+
+Your API might act differently since it will strictly follow the [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1) when interpreting the `Accept` header.
+Here are the differences:
+
+###### Invalid or missing quality ranking
+The following will be interpreted that `application/json` is the preferred media type:
+- `application/json;q=invalid,application/xml;q=0.5`
+- `application/json,application/xml;q=1.0`
+
+###### Closest generic for custom vendored/versioned
+In a case where a custom vendored/versioned like `application/vnd.test+json` is provided and 
+your API is accepting `application/json`, Grape will not consider the last and default to `text/plain`.
+Use the [header versionning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header) or register it.
+
 ### Upgrading to >= 2.4.0
 
 #### Custom Validators

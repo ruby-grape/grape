@@ -146,7 +146,7 @@ module Grape
         return if accept_header.blank?
 
         media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
-        mime_types[media_type]
+        mime_types[media_type] if media_type
       end
     end
   end

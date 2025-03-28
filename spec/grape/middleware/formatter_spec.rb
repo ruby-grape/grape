@@ -167,11 +167,20 @@ describe Grape::Middleware::Formatter do
     end
 
     context 'with custom vendored content types' do
-      subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
+      context 'when registered' do
+        subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
 
-      it 'uses the custom type' do
-        subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
-        expect(subject.env[Grape::Env::API_FORMAT]).to eq(:custom)
+        it 'uses the custom type' do
+          subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
+          expect(subject.env[Grape::Env::API_FORMAT]).to eq(:custom)
+        end
+      end
+
+      context 'when unregistered' do
+        it 'returns the default content type text/plain' do
+          r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')]
+          expect(r.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+        end
       end
     end
 
