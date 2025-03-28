@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true'
   }
 
-  s.add_dependency 'activesupport', '>= 6'
+  s.add_dependency 'activesupport', '>= 6.1'
   s.add_dependency 'dry-types', '>= 1.1'
   s.add_dependency 'mustermann-grape', '~> 1.1.0'
   s.add_dependency 'rack', '>= 2'
