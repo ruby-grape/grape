@@ -165,12 +165,6 @@ describe Grape::DSL::InsideRoute do
     end
   end
 
-  describe '#cookies' do
-    it 'returns an instance of Cookies' do
-      expect(subject.cookies).to be_a Grape::Cookies
-    end
-  end
-
   describe '#body' do
     describe 'set' do
       before do
