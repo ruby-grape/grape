@@ -8,6 +8,7 @@ module Grape
   class Endpoint
     extend Forwardable
     include Grape::DSL::Settings
+    include Grape::DSL::Headers
     include Grape::DSL::InsideRoute
 
     attr_accessor :block, :source, :options

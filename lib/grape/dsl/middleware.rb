@@ -3,51 +3,33 @@
 module Grape
   module DSL
     module Middleware
-      extend ActiveSupport::Concern
+      # Apply a custom middleware to the API. Applies
+      # to the current namespace and any children, but
+      # not parents.
+      #
+      # @param middleware_class [Class] The class of the middleware you'd like
+      #   to inject.
+      def use(middleware_class, *args, &block)
+        arr = [:use, middleware_class, *args]
+        arr << block if block
 
-      include Grape::DSL::Configuration
+        namespace_stackable(:middleware, arr)
+      end
 
-      module ClassMethods
-        # Apply a custom middleware to the API. Applies
-        # to the current namespace and any children, but
-        # not parents.
-        #
-        # @param middleware_class [Class] The class of the middleware you'd like
-        #   to inject.
-        def use(middleware_class, *args, &block)
-          arr = [:use, middleware_class, *args]
+      %i[insert insert_before insert_after].each do |method_name|
+        define_method method_name do |*args, &block|
+          arr = [method_name, *args]
           arr << block if block
 
           namespace_stackable(:middleware, arr)
         end
+      end
 
-        def insert(*args, &block)
-          arr = [:insert, *args]
-          arr << block if block
-
-          namespace_stackable(:middleware, arr)
-        end
-
-        def insert_before(*args, &block)
-          arr = [:insert_before, *args]
-          arr << block if block
-
-          namespace_stackable(:middleware, arr)
-        end
-
-        def insert_after(*args, &block)
-          arr = [:insert_after, *args]
-          arr << block if block
-
-          namespace_stackable(:middleware, arr)
-        end
-
-        # Retrieve an array of the middleware classes
-        # and arguments that are currently applied to the
-        # application.
-        def middleware
-          namespace_stackable(:middleware) || []
-        end
+      # Retrieve an array of the middleware classes
+      # and arguments that are currently applied to the
+      # application.
+      def middleware
+        namespace_stackable(:middleware) || []
       end
     end
   end

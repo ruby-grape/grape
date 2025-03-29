@@ -5,7 +5,7 @@ describe Grape::DSL::Helpers do
 
   let(:dummy_class) do
     Class.new do
-      include Grape::DSL::Helpers
+      extend Grape::DSL::Helpers
 
       def self.mods
         namespace_stackable(:helpers)
@@ -13,6 +13,20 @@ describe Grape::DSL::Helpers do
 
       def self.first_mod
         mods.first
+      end
+
+      def self.namespace_stackable(key, value = nil)
+        if value
+          namespace_stackable_hash[key] << value
+        else
+          namespace_stackable_hash[key]
+        end
+      end
+
+      def self.namespace_stackable_hash
+        @namespace_stackable_hash ||= Hash.new do |hash, key|
+          hash[key] = []
+        end
       end
     end
   end
