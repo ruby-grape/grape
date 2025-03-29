@@ -18,6 +18,7 @@ The following used to yield `application/xml` and now will yield `application/js
 - `application/json,application/xml;q=1.0`
 
 For the invalid case, the value `invalid` was automatically `to_f` and `invalid.to_f` equals `0.0`. Now, since it doesn't match [Rack's regex](https://github.com/rack/rack/blob/3-1-stable/lib/rack/utils.rb#L138), its interpreted as non provided and its quality ranking equals 1.0.
+
 For the non provided case, 1.0 was automatically assigned and in a case of multiple best matches, the first was returned based on Ruby's sort_by `quality`. Now, 1.0 is still assigned, the last is returned in case of multiple best matches. See [Rack's implementation](https://github.com/rack/rack/blob/e8f47608668d507e0f231a932fa37c9ca551c0a5/lib/rack/utils.rb#L167) of the RFC.
 
 ###### Considering the closest generic when vendor tree
