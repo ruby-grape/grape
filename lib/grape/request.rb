@@ -3,11 +3,17 @@
 module Grape
   class Request < Rack::Request
     DEFAULT_PARAMS_BUILDER = :hash_with_indifferent_access
-    HTTP_PREFIX = 'HTTP_'
+    # Based on rack 3 KNOWN_HEADERS
+    # https://github.com/rack/rack/blob/4f15e7b814922af79605be4b02c5b7c3044ba206/lib/rack/headers.rb#L10
+
     KNOWN_HEADERS = %w[
+      Accept
       Accept-CH
+      Accept-Encoding
+      Accept-Language
       Accept-Patch
       Accept-Ranges
+      Accept-Version
       Access-Control-Allow-Credentials
       Access-Control-Allow-Headers
       Access-Control-Allow-Methods
@@ -17,7 +23,9 @@ module Grape
       Age
       Allow
       Alt-Svc
+      Authorization
       Cache-Control
+      Client-Ip
       Connection
       Content-Disposition
       Content-Encoding
@@ -29,12 +37,15 @@ module Grape
       Content-Security-Policy
       Content-Security-Policy-Report-Only
       Content-Type
+      Cookie
       Date
       Delta-Base
+      Dnt
       ETag
       Expect-CT
       Expires
       Feature-Policy
+      Host
       IM
       Last-Modified
       Link
@@ -46,10 +57,15 @@ module Grape
       Preference-Applied
       Proxy-Authenticate
       Public-Key-Pins
+      Referer
       Referrer-Policy
       Refresh
       Report-To
       Retry-After
+      Sec-Fetch-Dest
+      Sec-Fetch-Mode
+      Sec-Fetch-User
+      Sec-Fetch-Site
       Server
       Set-Cookie
       Status
@@ -59,30 +75,43 @@ module Grape
       Trailer
       Transfer-Encoding
       Upgrade
+      Upgrade-Insecure-Requests
+      User-Agent
       Vary
+      Version
       Via
       WWW-Authenticate
       Warning
+      X-Accel-Buffering
+      X-Accel-Charset
+      X-Accel-Limit-Rate
+      X-Accel-Expires
+      X-Accel-Mapping
+      X-Accel-Redirect
       X-Cascade
+      X-Client-Ip
       X-Content-Duration
       X-Content-Security-Policy
       X-Content-Type-Options
-      X-Correlation-ID
       X-Correlation-Id
       X-Download-Options
+      X-Forwarded-For
+      X-Forwarded-Host
+      X-Forwarded-Port
+      X-Forwarded-Proto
       X-Frame-Options
       X-Permitted-Cross-Domain-Policies
       X-Powered-By
       X-Redirect-By
-      X-Request-ID
       X-Request-Id
       X-Runtime
+      X-Sendfile
+      X-Sendfile-Type
       X-UA-Compatible
       X-WebKit-CS
       X-XSS-Protection
-      Version
     ].each_with_object({}) do |header, response|
-      response["#{HTTP_PREFIX}#{header.upcase.tr('-', '_')}"] = header
+      response["HTTP_#{header.upcase.tr('-', '_')}"] = header
     end.freeze
 
     alias rack_params params
@@ -123,7 +152,7 @@ module Grape
 
     def build_headers
       each_header.with_object(Grape::Util::Header.new) do |(k, v), headers|
-        next unless k.start_with? HTTP_PREFIX
+        next unless k.start_with? 'HTTP_'
 
         transformed_header = KNOWN_HEADERS.fetch(k) { -k[5..].tr('_', '-').downcase }
         headers[transformed_header] = v
