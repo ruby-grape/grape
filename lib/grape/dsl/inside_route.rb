@@ -3,10 +3,6 @@
 module Grape
   module DSL
     module InsideRoute
-      extend ActiveSupport::Concern
-      include Grape::DSL::Settings
-      include Grape::DSL::Headers
-
       # Denotes a situation where a DSL method has been invoked in a
       # filter which it should not yet be available in
       class MethodNotYetAvailable < StandardError; end

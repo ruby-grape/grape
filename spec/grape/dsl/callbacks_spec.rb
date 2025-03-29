@@ -5,7 +5,7 @@ describe Grape::DSL::Callbacks do
 
   let(:dummy_class) do
     Class.new do
-      include Grape::DSL::Callbacks
+      extend Grape::DSL::Callbacks
     end
   end
 

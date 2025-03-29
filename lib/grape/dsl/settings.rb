@@ -7,8 +7,6 @@ module Grape
     # matter where they're defined, and inheritable settings which apply only
     # in the current scope and scopes nested under it.
     module Settings
-      extend ActiveSupport::Concern
-
       attr_writer :inheritable_setting, :top_level_setting
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
@@ -42,56 +40,29 @@ module Grape
         end
       end
 
-      # @param key [Symbol]
-      # @param value [Object]
-      # @return (see #get_or_set)
-      def global_setting(key, value = nil)
-        get_or_set :global, key, value
+      %i[namespace_inheritable namespace_stackable].each do |method_name|
+        define_method method_name do |key, value = nil|
+          get_or_set method_name, key, value
+        end
+
+        define_method :"unset_#{method_name}" do |key|
+          unset method_name, key
+        end
       end
 
-      # @param key [Symbol]
-      def unset_global_setting(key)
-        unset :global, key
-      end
+      %i[global route namespace api_class].each do |method_name|
+        define_method :"#{method_name}_setting" do |key, value = nil|
+          get_or_set method_name, key, value
+        end
 
-      # (see #global_setting)
-      def route_setting(key, value = nil)
-        get_or_set :route, key, value
-      end
-
-      # (see #unset_global_setting)
-      def unset_route_setting(key)
-        unset :route, key
-      end
-
-      # (see #global_setting)
-      def namespace_setting(key, value = nil)
-        get_or_set :namespace, key, value
-      end
-
-      # (see #unset_global_setting)
-      def unset_namespace_setting(key)
-        unset :namespace, key
-      end
-
-      # (see #global_setting)
-      def namespace_inheritable(key, value = nil)
-        get_or_set :namespace_inheritable, key, value
-      end
-
-      # (see #unset_global_setting)
-      def unset_namespace_inheritable(key)
-        unset :namespace_inheritable, key
+        define_method :"unset_#{method_name}_setting" do |key|
+          unset method_name, key
+        end
       end
 
       # @param key [Symbol]
       def namespace_inheritable_to_nil(key)
         inheritable_setting.namespace_inheritable[key] = nil
-      end
-
-      # (see #global_setting)
-      def namespace_stackable(key, value = nil)
-        get_or_set :namespace_stackable, key, value
       end
 
       def namespace_reverse_stackable(key, value = nil)
@@ -112,21 +83,6 @@ module Grape
         settings.each_with_object({}) do |setting, result|
           result.merge!(setting) { |_k, s1, _s2| s1 }
         end
-      end
-
-      # (see #unset_global_setting)
-      def unset_namespace_stackable(key)
-        unset :namespace_stackable, key
-      end
-
-      # (see #global_setting)
-      def api_class_setting(key, value = nil)
-        get_or_set :api_class, key, value
-      end
-
-      # (see #unset_global_setting)
-      def unset_api_class_setting(key)
-        unset :api_class, key
       end
 
       # Fork our inheritable settings to a new instance, copied from our

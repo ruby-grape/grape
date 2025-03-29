@@ -5,7 +5,63 @@ describe Grape::DSL::Routing do
 
   let(:dummy_class) do
     Class.new do
-      include Grape::DSL::Routing
+      extend Grape::DSL::Routing
+
+      def self.namespace_stackable(key, value = nil)
+        if value
+          namespace_stackable_hash[key] << value
+        else
+          namespace_stackable_hash[key]
+        end
+      end
+
+      def self.namespace_stackable_with_hash(key, value = nil)
+        if value
+          namespace_stackable_with_hash_hash[key] = value
+        else
+          namespace_stackable_with_hash_hash[key]
+        end
+      end
+
+      def self.namespace_inheritable(key, value = nil)
+        if value
+          namespace_inheritable_hash[key] = value
+        else
+          namespace_inheritable_hash[key]
+        end
+      end
+
+      def self.route_setting(key, value = nil)
+        if value
+          route_setting_hash[key] = value
+        else
+          route_setting_hash[key]
+        end
+      end
+
+      def self.inheritable_setting
+        @inheritable_setting ||= Grape::Util::InheritableSetting.new
+      end
+
+      def self.namespace_stackable_hash
+        @namespace_stackable_hash ||= Hash.new do |hash, key|
+          hash[key] = []
+        end
+      end
+
+      def self.namespace_stackable_with_hash_hash
+        @namespace_stackable_with_hash_hash ||= Hash.new do |hash, key|
+          hash[key] = []
+        end
+      end
+
+      def self.namespace_inheritable_hash
+        @namespace_inheritable_hash ||= {}
+      end
+
+      def self.route_setting_hash
+        @route_setting_hash ||= {}
+      end
     end
   end
 

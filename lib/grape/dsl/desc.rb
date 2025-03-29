@@ -3,8 +3,6 @@
 module Grape
   module DSL
     module Desc
-      include Grape::DSL::Settings
-
       ROUTE_ATTRIBUTES = %i[
         body_name
         consumes
