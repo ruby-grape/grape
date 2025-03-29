@@ -79,7 +79,7 @@ module Grape
           (request.post? || request.put? || request.patch? || request.delete?) &&
           (!request.form_data? || !request.media_type) &&
           !request.parseable_data? &&
-          (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
+          (request.content_length.to_i.positive? || request.env['HTTP_TRANSFER_ENCODING'] == CHUNKED)
 
         return unless (input = env[Rack::RACK_INPUT])
 
@@ -155,7 +155,7 @@ module Grape
       end
 
       def mime_array
-        accept = env[Grape::Http::Headers::HTTP_ACCEPT]
+        accept = env['HTTP_ACCEPT']
         return [] unless accept
 
         accept_into_mime_and_quality = %r{
