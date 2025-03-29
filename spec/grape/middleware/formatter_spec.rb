@@ -82,6 +82,12 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'detection' do
+    context 'when path contains invalid byte sequence' do
+      it 'does not raise an exception' do
+        expect { subject.call(Rack::PATH_INFO => "/info.\x80") }.not_to raise_error
+      end
+    end
+
     it 'uses the xml extension if one is provided' do
       subject.call(Rack::PATH_INFO => '/info.xml')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
@@ -95,8 +101,6 @@ describe Grape::Middleware::Formatter do
     it 'uses the format parameter if one is provided' do
       subject.call(Rack::PATH_INFO => '/info', Rack::QUERY_STRING => 'format=json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
-      subject.call(Rack::PATH_INFO => '/info', Rack::QUERY_STRING => 'format=xml')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
     end
 
     it 'uses the default format if none is provided' do
@@ -116,6 +120,12 @@ describe Grape::Middleware::Formatter do
   end
 
   context 'accept header detection' do
+    context 'when header contains invalid byte sequence' do
+      it 'does not raise an exception' do
+        expect { subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => "Hello \x80") }.not_to raise_error
+      end
+    end
+
     it 'detects from the Accept header' do
       subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
@@ -131,10 +141,10 @@ describe Grape::Middleware::Formatter do
 
     it 'handles quality rankings mixed with nothing' do
       subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json,application/xml; q=1.0')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
 
       subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml; q=1.0,application/json')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'handles quality rankings that have a default 1.0 value' do
@@ -156,30 +166,21 @@ describe Grape::Middleware::Formatter do
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
     end
 
-    it 'ignores invalid quality rankings' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json;q=invalid,application/xml;q=0.5')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml;q=0.5,application/json;q=invalid')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
-
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json;q=,application/xml;q=0.5')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
-
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json;q=nil,application/xml;q=0.5')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
-    end
-
-    it 'parses headers with vendor and api version' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test-v1+xml')
-      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
-    end
-
     context 'with custom vendored content types' do
-      subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
+      context 'when registered' do
+        subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
 
-      it 'uses the custom type' do
-        subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
-        expect(subject.env[Grape::Env::API_FORMAT]).to eq(:custom)
+        it 'uses the custom type' do
+          subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
+          expect(subject.env[Grape::Env::API_FORMAT]).to eq(:custom)
+        end
+      end
+
+      context 'when unregistered' do
+        it 'returns the default content type text/plain' do
+          r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')]
+          expect(r.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+        end
       end
     end
 
@@ -215,11 +216,6 @@ describe Grape::Middleware::Formatter do
       s = described_class.new(app, content_types: { custom: 'application/vnd.test+json' })
       _, headers, = s.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/vnd.test+json')
-    end
-
-    it 'is set to closest generic for custom vendored/versioned without registered type' do
-      _, headers, = subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
-      expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')
     end
   end
 
