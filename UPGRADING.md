@@ -8,22 +8,21 @@ Upgrading Grape
 
 #### Accept Header Negotiation Harmonized
 
-[Accept](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) header is now fully interpreted through `Rack::Utils.best_q_match` which is following [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1).
-Since [Grape 2.1.0](https://github.com/ruby-grape/grape/blob/master/CHANGELOG.md#210-20240615), the [header versionning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header) is using embracing it
-but `Grape::Middleware::Formatter` never did.
+[Accept](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) header is now fully interpreted through `Rack::Utils.best_q_match` which is following [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1). Since [Grape 2.1.0](https://github.com/ruby-grape/grape/blob/master/CHANGELOG.md#210-20240615), the [header versioning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header) was adhering to it, but `Grape::Middleware::Formatter` never did.
 
-Your API might act differently since it will strictly follow the [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1) when interpreting the `Accept` header.
-Here are the differences:
+Your API might act differently since it will strictly follow the [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1) when interpreting the `Accept` header. Here are the differences:
 
 ###### Invalid or missing quality ranking
-The following will be interpreted that `application/json` is the preferred media type:
+The following used to yield `application/xml` and now will yield `application/json` as the preferred media type:
 - `application/json;q=invalid,application/xml;q=0.5`
 - `application/json,application/xml;q=1.0`
 
-###### Closest generic for custom vendored/versioned
-In a case where a custom vendored/versioned like `application/vnd.test+json` is provided and 
-your API is accepting `application/json`, Grape will not consider the last and default to `text/plain`.
-Use the [header versionning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header) or register it.
+For the invalid case, the value `invalid` was automatically `to_f` and `invalid.to_f` equals `0.0`. Now, since it doesn't match [Rack's regex](https://github.com/rack/rack/blob/3-1-stable/lib/rack/utils.rb#L138), its interpreted as non provided and its quality ranking equals 1.0.
+For the non provided case, 1.0 was automatically assigned and in a case of multiple best matches, the first was returned based on Ruby's sort_by `quality`. Now, 1.0 is still assigned, the last is returned in case of multiple best matches. See [Rack's implementation](https://github.com/rack/rack/blob/e8f47608668d507e0f231a932fa37c9ca551c0a5/lib/rack/utils.rb#L167) of the RFC.
+
+###### Considering the closest generic when vendor tree
+Excluding the [header versioning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header), whenever a media type with the [vendor tree](https://datatracker.ietf.org/doc/html/rfc6838#section-3.2) leading facet `vnd.` like `application/vnd.api+json` was provided, Grape would also consider its closest generic when negotiating. In that case, `application/json` was added to the negotiation. Now, it will just consider the provided media types without considering any closest generics, and you'll need to [register](https://github.com/ruby-grape/grape?tab=readme-ov-file#api-formats) it.
+You can find the official vendor tree registrations on [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml)
 
 ### Upgrading to >= 2.4.0
 
