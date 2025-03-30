@@ -6,9 +6,7 @@ module Grape
       include Helpers
       include Grape::DSL::Headers
 
-      attr_reader :app, :env, :options
-
-      TEXT_HTML = 'text/html'
+      attr_reader :app, :env, :options, :rack_request
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
@@ -54,6 +52,10 @@ module Grape
       # @return [Response, nil] a Rack SPEC response or nil to call the application afterwards.
       def after; end
 
+      def rack_request
+        @rack_request ||= Rack::Request.new(env)
+      end
+
       def response
         return @app_response if @app_response.is_a?(Rack::Response)
 
@@ -73,7 +75,15 @@ module Grape
       end
 
       def content_type
-        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || TEXT_HTML
+        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || 'text/html'
+      end
+
+      def query_params
+        @rack_request.GET
+      rescue Rack::QueryParser::ParamsTooDeepError
+        raise Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit)
+      rescue Rack::Utils::ParameterTypeError
+        raise Grape::Exceptions::ConflictingTypes
       end
 
       private

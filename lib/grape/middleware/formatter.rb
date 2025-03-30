@@ -3,8 +3,6 @@
 module Grape
   module Middleware
     class Formatter < Base
-      CHUNKED = 'chunked'
-      FORMAT = 'format'
 
       def default_options
         {
@@ -69,34 +67,27 @@ module Grape
         end
       end
 
-      def request
-        @request ||= Rack::Request.new(env)
-      end
-
-      # store read input in env['api.request.input']
       def read_body_input
-        return unless
-          (request.post? || request.put? || request.patch? || request.delete?) &&
-          (!request.form_data? || !request.media_type) &&
-          !request.parseable_data? &&
-          (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
-
-        return unless (input = env[Rack::RACK_INPUT])
+        input = rack_request.body # reads RACK_INPUT
+        return if input.nil?
+        return unless read_body_input?
 
         input.try(:rewind)
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
-          read_rack_input(body) if body && !body.empty?
+          read_rack_input(body)
         ensure
           input.try(:rewind)
         end
       end
 
-      # store parsed input in env['api.request.body']
       def read_rack_input(body)
-        fmt = request.media_type ? mime_types[request.media_type] : options[:default_format]
+        return if body.empty?
 
-        throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported." unless content_type_for(fmt)
+        media_type = rack_request.media_type
+        fmt = media_type ? mime_types[media_type] : options[:default_format]
+
+        throw :error, status: 415, message: "The provided content-type '#{media_type}' is not supported." unless content_type_for(fmt)
         parser = Grape::Parser.parser_for fmt, options[:parsers]
         if parser
           begin
@@ -119,8 +110,21 @@ module Grape
         end
       end
 
+      # this middleware will not try to format the following content-types since Rack already handles them
+      # when calling Rack's `params` function
+      # - application/x-www-form-urlencoded
+      # - multipart/form-data
+      # - multipart/related
+      # - multipart/mixed
+      def read_body_input?
+        (rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?) &&
+          !(rack_request.form_data? && rack_request.content_type) &&
+          !rack_request.parseable_data? &&
+          (rack_request.content_length.to_i.positive? || rack_request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == 'chunked')
+      end
+
       def negotiate_content_type
-        fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
+        fmt = format_from_extension || query_params['format'] || options[:format] || format_from_header || options[:default_format]
         if content_type_for(fmt)
           env[Grape::Env::API_FORMAT] = fmt.to_sym
         else
@@ -129,16 +133,12 @@ module Grape
       end
 
       def format_from_extension
-        request_path = request.path.try(:scrub)
+        request_path = rack_request.path.try(:scrub)
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
         extension = request_path[dot_pos + 1..]
         extension if content_type_for(extension)
-      end
-
-      def format_from_params
-        Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[FORMAT]
       end
 
       def format_from_header
