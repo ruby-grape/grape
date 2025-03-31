@@ -79,7 +79,7 @@ module Grape
       end
 
       def query_params
-        @rack_request.GET
+        rack_request.GET
       rescue Rack::QueryParser::ParamsTooDeepError
         raise Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit)
       rescue Rack::Utils::ParameterTypeError
