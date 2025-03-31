@@ -45,7 +45,10 @@ module Grape
       Expect-CT
       Expires
       Feature-Policy
+      Forwarded
       Host
+      If-None-Match
+      If-Modified-Since
       IM
       Last-Modified
       Link
@@ -57,6 +60,7 @@ module Grape
       Preference-Applied
       Proxy-Authenticate
       Public-Key-Pins
+      Range
       Referer
       Referrer-Policy
       Refresh
@@ -99,11 +103,15 @@ module Grape
       X-Forwarded-Host
       X-Forwarded-Port
       X-Forwarded-Proto
+      X-Forwarded-Scheme
+      X-Forwarded-Ssl
       X-Frame-Options
+      X-HTTP-Method-Override
       X-Permitted-Cross-Domain-Policies
       X-Powered-By
       X-Redirect-By
       X-Request-Id
+      X-Requested-With
       X-Runtime
       X-Sendfile
       X-Sendfile-Type
