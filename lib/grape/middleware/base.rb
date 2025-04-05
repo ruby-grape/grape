@@ -6,7 +6,7 @@ module Grape
       include Helpers
       include Grape::DSL::Headers
 
-      attr_reader :app, :env, :options, :rack_request
+      attr_reader :app, :env, :options
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.

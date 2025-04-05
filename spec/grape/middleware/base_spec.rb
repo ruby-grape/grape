@@ -243,15 +243,15 @@ describe Grape::Middleware::Base do
 
     context 'when query params are conflicting' do
       it 'raises an ConflictingTypes error' do
-        expect { get '/?x[y]=1&x[y]z=2' } .to raise_error(Grape::Exceptions::ConflictingTypes)
+        expect { get '/?x[y]=1&x[y]z=2' }.to raise_error(Grape::Exceptions::ConflictingTypes)
       end
     end
 
     context 'when query params is over the specified limit' do
-      let(:query_params) { "foo#{"[a]" * Rack::Utils.param_depth_limit}=bar" }
+      let(:query_params) { "foo#{'[a]' * Rack::Utils.param_depth_limit}=bar" }
 
       it 'raises an ConflictingTypes error' do
-        expect { get "/?foo#{"[a]" * Rack::Utils.param_depth_limit}=bar" } .to raise_error(Grape::Exceptions::TooDeepParameters)
+        expect { get "/?foo#{'[a]' * Rack::Utils.param_depth_limit}=bar" }.to raise_error(Grape::Exceptions::TooDeepParameters)
       end
     end
   end

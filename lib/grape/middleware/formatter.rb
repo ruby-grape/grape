@@ -3,7 +3,6 @@
 module Grape
   module Middleware
     class Formatter < Base
-
       def default_options
         {
           default_format: :txt,
