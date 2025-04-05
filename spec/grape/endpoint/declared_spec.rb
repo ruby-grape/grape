@@ -856,4 +856,26 @@ describe Grape::Endpoint do
       end
     end
   end
+
+  describe 'optional_array' do
+    subject { last_response }
+
+    let(:app) do
+      Class.new(Grape::API) do
+        params do
+          requires :z, type: Array do
+            optional :a, type: Integer
+          end
+        end
+
+        post do
+          declared(params, include_missing: false)
+        end
+      end
+    end
+
+    before { post '/', { z: [] } }
+
+    it { is_expected.to be_successful }
+  end
 end
