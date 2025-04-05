@@ -874,8 +874,7 @@ describe Grape::Endpoint do
       end
     end
 
-    before {  post '/', { "z": [] } }
-
+    before { post '/', { z: [] } }
 
     it { is_expected.to be_successful }
   end
