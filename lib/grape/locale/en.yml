@@ -58,4 +58,6 @@ en:
           problem: 'invalid version header'
           resolution: '%{message}'
         invalid_response: 'Invalid response'
-        query_parsing: 'query params are not parsable'
+        conflicting_types: 'query params contains conflicting types'
+        invalid_parameters: 'query params contains invalid format or byte sequence'
+        too_deep_parameters: 'query params are recursively nested over the specified limit (%{limit})'

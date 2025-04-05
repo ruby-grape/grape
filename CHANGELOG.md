@@ -18,6 +18,7 @@
 * [#2546](https://github.com/ruby-grape/grape/pull/2546): Fix middleware with keywords - [@ericproulx](https://github.com/ericproulx).
 * [#2547](https://github.com/ruby-grape/grape/pull/2547): Remove jsonapi related code - [@ericproulx](https://github.com/ericproulx).
 * [#2548](https://github.com/ruby-grape/grape/pull/2548): Formatting from header acts like versioning from header - [@ericproulx](https://github.com/ericproulx).
+* [#2553](https://github.com/ruby-grape/grape/pull/2553): Less query params parsing - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.3.0 (2025-02-08)
