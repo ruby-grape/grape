@@ -158,7 +158,7 @@ module Grape
           reset_validations!
         end
 
-        Grape::Http::Headers::SUPPORTED_METHODS.each do |supported_method|
+        Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
           define_method supported_method.downcase do |*args, &block|
             options = args.extract_options!
             paths = args.first || ['/']

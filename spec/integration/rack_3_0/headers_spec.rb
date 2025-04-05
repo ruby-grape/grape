@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-describe Grape::Http::Headers do
+describe Grape::API do
   subject { last_response.headers }
 
   describe 'returned headers should all be in lowercase' do
     context 'when setting an header in an API' do
       let(:app) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           get do
             header['GRAPE'] = '1'
             return_no_content
@@ -21,7 +21,7 @@ describe Grape::Http::Headers do
 
     context 'when error!' do
       let(:app) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           rescue_from ArgumentError do
             error!('error!', 500, { 'GRAPE' => '1' })
           end
@@ -37,7 +37,7 @@ describe Grape::Http::Headers do
 
     context 'when redirect' do
       let(:app) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           get do
             redirect 'https://www.ruby-grape.org/'
           end
@@ -51,7 +51,7 @@ describe Grape::Http::Headers do
 
     context 'when options' do
       let(:app) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           get { return_no_content }
         end
       end
@@ -63,7 +63,7 @@ describe Grape::Http::Headers do
 
     context 'when cascade' do
       let(:app) do
-        Class.new(Grape::API) do
+        Class.new(described_class) do
           version 'v0', using: :path, cascade: true
           get { return_no_content }
         end

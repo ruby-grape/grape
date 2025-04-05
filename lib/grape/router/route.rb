@@ -55,7 +55,7 @@ module Grape
 
       def upcase_method(method)
         method_s = method.to_s
-        Grape::Http::Headers::SUPPORTED_METHODS.detect { |m| m.casecmp(method_s).zero? } || method_s.upcase
+        Grape::HTTP_SUPPORTED_METHODS.detect { |m| m.casecmp(method_s).zero? } || method_s.upcase
       end
     end
   end

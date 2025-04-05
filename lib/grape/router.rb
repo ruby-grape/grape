@@ -42,7 +42,7 @@ module Grape
 
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
-      (Grape::Http::Headers::SUPPORTED_METHODS + ['*']).each do |method|
+      (Grape::HTTP_SUPPORTED_METHODS + ['*']).each do |method|
         next unless map.key?(method)
 
         routes = map[method]
@@ -156,7 +156,7 @@ module Grape
     end
 
     def default_response
-      headers = Grape::Util::Header.new.merge(Grape::Http::Headers::X_CASCADE => 'pass')
+      headers = Grape::Util::Header.new.merge('X-Cascade' => 'pass')
       [404, headers, ['404 Not Found']]
     end
 
@@ -180,7 +180,7 @@ module Grape
     end
 
     def cascade?(response)
-      response && response[1][Grape::Http::Headers::X_CASCADE] == 'pass'
+      response && response[1]['X-Cascade'] == 'pass'
     end
 
     def string_for(input)

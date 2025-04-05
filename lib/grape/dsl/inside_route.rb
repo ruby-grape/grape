@@ -213,7 +213,7 @@ module Grape
           status 302
           body_message ||= "This resource has been moved temporarily to #{url}."
         end
-        header Grape::Http::Headers::LOCATION, url
+        header 'Location', url
         content_type 'text/plain'
         body body_message
       end
@@ -330,7 +330,7 @@ module Grape
         return if value.nil? && @stream.nil?
 
         header Rack::CONTENT_LENGTH, nil
-        header Grape::Http::Headers::TRANSFER_ENCODING, nil
+        header 'Transfer-Encoding', nil
         header Rack::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
         if value.is_a?(String)
           file_body = Grape::ServeStream::FileBody.new(value)
@@ -439,7 +439,7 @@ module Grape
       end
 
       def http_version
-        env.fetch(Grape::Http::Headers::HTTP_VERSION) { env[Rack::SERVER_PROTOCOL] }
+        env.fetch('HTTP_VERSION') { env[Rack::SERVER_PROTOCOL] }
       end
 
       def api_format(format)

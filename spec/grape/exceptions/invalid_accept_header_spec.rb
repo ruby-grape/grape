@@ -19,7 +19,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
   shared_examples_for 'a not-cascaded request' do
     it 'does not include the X-Cascade=pass header' do
-      expect(last_response.headers).not_to have_key(Grape::Http::Headers::X_CASCADE)
+      expect(last_response.headers).not_to have_key('X-Cascade')
     end
 
     it 'does not accept the request' do
@@ -29,7 +29,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
   shared_examples_for 'a rescued request' do
     it 'does not include the X-Cascade=pass header' do
-      expect(last_response.headers[Grape::Http::Headers::X_CASCADE]).to be_nil
+      expect(last_response.headers['X-Cascade']).to be_nil
     end
 
     it 'does show rescue handler processing' do
@@ -56,7 +56,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
@@ -64,7 +64,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     context 'that receives' do
       context 'an invalid vendor in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -88,20 +88,20 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
 
         it_behaves_like 'a not-cascaded request'
       end
 
       context 'an invalid vendor in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
 
         it_behaves_like 'a not-cascaded request'
       end
@@ -131,7 +131,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
@@ -139,7 +139,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     context 'that receives' do
       context 'an invalid vendor in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -168,20 +168,20 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
 
         it_behaves_like 'a not-cascaded request'
       end
 
       context 'an invalid vendor in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
 
         it_behaves_like 'a not-cascaded request'
       end
@@ -206,7 +206,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
@@ -214,7 +214,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     context 'that receives' do
       context 'an invalid version in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -223,7 +223,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
       context 'an invalid vendor in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -247,20 +247,20 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
 
         it_behaves_like 'a cascaded request'
       end
 
       context 'an invalid vendor in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
 
         it_behaves_like 'a cascaded request'
       end
@@ -290,7 +290,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
@@ -298,7 +298,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     context 'that receives' do
       context 'an invalid version in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -307,7 +307,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
 
       context 'an invalid vendor in the request' do
         before do
-          get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99',
+          get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99',
                            'CONTENT_TYPE' => 'application/json'
         end
 
@@ -336,20 +336,20 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     end
 
     context 'that received a request with correct vendor and version' do
-      before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v99' }
+      before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v99' }
 
       it_behaves_like 'a valid request'
     end
 
     context 'that receives' do
       context 'an invalid version in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.vendorname-v77' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.vendorname-v77' }
 
         it_behaves_like 'a cascaded request'
       end
 
       context 'an invalid vendor in the request' do
-        before { get '/beer', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.invalidvendor-v99' }
+        before { get '/beer', {}, 'HTTP_ACCEPT' => 'application/vnd.invalidvendor-v99' }
 
         it_behaves_like 'a cascaded request'
       end

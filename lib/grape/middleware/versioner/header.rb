@@ -49,7 +49,7 @@ module Grape
         end
 
         def accept_header
-          env[Grape::Http::Headers::HTTP_ACCEPT]
+          env['HTTP_ACCEPT']
         end
 
         def strict_header_checks!

@@ -10,7 +10,7 @@ module Grape
       # 4. Delete a specifc header key-value pair
       def header(key = nil, val = nil)
         if key
-          val ? header[key.to_s] = val : header.delete(key.to_s)
+          val ? header[key] = val : header.delete(key)
         else
           @header ||= Grape::Util::Header.new
         end

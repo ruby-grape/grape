@@ -59,6 +59,16 @@ I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 module Grape
   include ActiveSupport::Configurable
 
+  HTTP_SUPPORTED_METHODS = [
+    Rack::GET,
+    Rack::POST,
+    Rack::PUT,
+    Rack::PATCH,
+    Rack::DELETE,
+    Rack::HEAD,
+    Rack::OPTIONS
+  ].freeze
+
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
   end
