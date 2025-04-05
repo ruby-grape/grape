@@ -225,6 +225,22 @@ describe Grape::Middleware::Base do
   end
 
   describe 'query_params' do
+    let(:dummy_middleware) do
+      Class.new(Grape::Middleware::Base) do
+        def before
+          query_params
+        end
+      end
+    end
+
+    let(:app) do
+      context = self
+      Rack::Builder.app do
+        use context.dummy_middleware
+        run ->(_) { [200, {}, ['Yeah']] }
+      end
+    end
+
     context 'when query params are conflicting' do
       it 'raises an ConflictingTypes error' do
         expect { get '/?x[y]=1&x[y]z=2' } .to raise_error(Grape::Exceptions::ConflictingTypes)
