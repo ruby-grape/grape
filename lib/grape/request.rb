@@ -47,8 +47,8 @@ module Grape
       Feature-Policy
       Forwarded
       Host
-      If-None-Match
       If-Modified-Since
+      If-None-Match
       IM
       Last-Modified
       Link
@@ -68,8 +68,8 @@ module Grape
       Retry-After
       Sec-Fetch-Dest
       Sec-Fetch-Mode
-      Sec-Fetch-User
       Sec-Fetch-Site
+      Sec-Fetch-User
       Server
       Set-Cookie
       Status
@@ -84,14 +84,21 @@ module Grape
       Vary
       Version
       Via
-      WWW-Authenticate
       Warning
+      WWW-Authenticate
       X-Accel-Buffering
       X-Accel-Charset
-      X-Accel-Limit-Rate
       X-Accel-Expires
+      X-Accel-Limit-Rate
       X-Accel-Mapping
       X-Accel-Redirect
+      X-Auth-Request-Access-Token
+      X-Auth-Request-Email
+      X-Auth-Request-Groups
+      X-Auth-Request-Preferred-Username
+      X-Auth-Request-Redirect
+      X-Auth-Request-Token
+      X-Auth-Request-User
       X-Cascade
       X-Client-Ip
       X-Content-Duration
@@ -99,16 +106,23 @@ module Grape
       X-Content-Type-Options
       X-Correlation-Id
       X-Download-Options
+      X-Forwarded-Access-Token
+      X-Forwarded-Email
       X-Forwarded-For
+      X-Forwarded-Groups
       X-Forwarded-Host
       X-Forwarded-Port
+      X-Forwarded-Preferred-Username
       X-Forwarded-Proto
       X-Forwarded-Scheme
       X-Forwarded-Ssl
+      X-Forwarded-Uri
+      X-Forwarded-User
       X-Frame-Options
       X-HTTP-Method-Override
       X-Permitted-Cross-Domain-Policies
       X-Powered-By
+      X-Real-IP
       X-Redirect-By
       X-Request-Id
       X-Requested-With
