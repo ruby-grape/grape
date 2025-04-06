@@ -92,6 +92,7 @@ module Grape
       X-Accel-Limit-Rate
       X-Accel-Mapping
       X-Accel-Redirect
+      X-Access-Token
       X-Auth-Request-Access-Token
       X-Auth-Request-Email
       X-Auth-Request-Groups

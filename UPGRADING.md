@@ -1,6 +1,18 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 2.4.0
+
+#### Grape::Http::Headers, Grape::Util::Lazy::Object
+
+Both have been removed. See [2554](https://github.com/ruby-grape/grape/pull/2554).
+Here are the notable changes:
+
+- Constants like `HTTP_ACCEPT` have been replaced by their literal value.
+- `SUPPORTED_METHODS` has been moved to `Grape` module.
+- `HTTP_HEADERS` has been moved to `Grape::Request` and renamed `KNOWN_HEADERS`. The last has been refreshed with new headers, and it's not lazy anymore.
+- `SUPPORTED_METHODS_WITHOUT_OPTIONS` and `find_supported_method` have been removed.
+
 #### Params Builder
 
 - Passing a class to `build_with` or `Grape.config.param_builder` has been deprecated in favor of a symbolized short_name. See `SHORTNAME_LOOKUP` in [params_builder](lib/grape/params_builder.rb).
@@ -24,8 +36,6 @@ For the non provided case, 1.0 was automatically assigned and in a case of multi
 ###### Considering the closest generic when vendor tree
 Excluding the [header versioning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header), whenever a media type with the [vendor tree](https://datatracker.ietf.org/doc/html/rfc6838#section-3.2) leading facet `vnd.` like `application/vnd.api+json` was provided, Grape would also consider its closest generic when negotiating. In that case, `application/json` was added to the negotiation. Now, it will just consider the provided media types without considering any closest generics, and you'll need to [register](https://github.com/ruby-grape/grape?tab=readme-ov-file#api-formats) it.
 You can find the official vendor tree registrations on [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml)
-
-### Upgrading to >= 2.4.0
 
 #### Custom Validators
 

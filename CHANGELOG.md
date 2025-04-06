@@ -9,7 +9,7 @@
 * [#2540](https://github.com/ruby-grape/grape/pull/2540): Introduce Params builder with symbolized short name - [@ericproulx](https://github.com/ericproulx).
 * [#2550](https://github.com/ruby-grape/grape/pull/2550): Drop ActiveSupport 6.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
-* [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove Grape::Http::Headers - [@ericproulx](https://github.com/ericproulx).
+* [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove `Grape::Http::Headers` and `Grape::Util::Lazy::Object` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
