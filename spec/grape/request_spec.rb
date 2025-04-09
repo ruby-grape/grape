@@ -59,6 +59,78 @@ describe Grape::Request do
         expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc'))
       end
     end
+
+    context 'when rack_params raises an EOF error' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(EOFError)
+      end
+
+      let(:message) { Grape::Exceptions::EmptyMessageBody.new(nil).to_s }
+
+      it 'raises an Grape::Exceptions::EmptyMessageBody' do
+        expect { request.params }.to raise_error(Grape::Exceptions::EmptyMessageBody, message)
+      end
+    end
+
+    context 'when rack_params raises a Rack::Multipart::MultipartPartLimitError' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartPartLimitError)
+      end
+
+      let(:message) { Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit).to_s }
+
+      it 'raises an Rack::Multipart::MultipartPartLimitError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::TooManyMultipartFiles, message)
+      end
+    end
+
+    context 'when rack_params raises a Rack::Multipart::MultipartTotalPartLimitError' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartTotalPartLimitError)
+      end
+
+      let(:message) { Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit).to_s }
+
+      it 'raises an Rack::Multipart::MultipartPartLimitError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::TooManyMultipartFiles, message)
+      end
+    end
+
+    context 'when rack_params raises a Rack::QueryParser::ParamsTooDeepError' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(Rack::QueryParser::ParamsTooDeepError)
+      end
+
+      let(:message) { Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit).to_s }
+
+      it 'raises a Grape::Exceptions::TooDeepParameters' do
+        expect { request.params }.to raise_error(Grape::Exceptions::TooDeepParameters, message)
+      end
+    end
+
+    context 'when rack_params raises a Rack::Utils::ParameterTypeError' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(Rack::Utils::ParameterTypeError)
+      end
+
+      let(:message) { Grape::Exceptions::ConflictingTypes.new.to_s }
+
+      it 'raises a Grape::Exceptions::ConflictingTypes' do
+        expect { request.params }.to raise_error(Grape::Exceptions::ConflictingTypes, message)
+      end
+    end
+
+    context 'when rack_params raises a Rack::Utils::InvalidParameterError' do
+      before do
+        allow(request).to receive(:rack_params).and_raise(Rack::Utils::InvalidParameterError)
+      end
+
+      let(:message) { Grape::Exceptions::InvalidParameters.new.to_s }
+
+      it 'raises an Rack::Multipart::MultipartPartLimitError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::InvalidParameters, message)
+      end
+    end
   end
 
   describe '#headers' do

@@ -1,6 +1,11 @@
 Upgrading Grape
 ===============
 
+### Grape::Middleware::Base
+
+- Constant `TEXT_HTML` has been removed in favor of using literal string 'text/html'.
+- `rack_request` and `query_params` have been added. Feel free to call these in your middlewares.
+
 #### Params Builder
 
 - Passing a class to `build_with` or `Grape.config.param_builder` has been deprecated in favor of a symbolized short_name. See `SHORTNAME_LOOKUP` in [params_builder](lib/grape/params_builder.rb).
