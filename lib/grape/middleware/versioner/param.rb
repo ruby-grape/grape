@@ -20,12 +20,11 @@ module Grape
       #   env['api.version'] => 'v1'
       class Param < Base
         def before
-          potential_version = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[parameter_key]
+          potential_version = query_params[parameter_key]
           return if potential_version.blank?
 
           version_not_found! unless potential_version_match?(potential_version)
-          env[Grape::Env::API_VERSION] = potential_version
-          env[Rack::RACK_REQUEST_QUERY_HASH].delete(parameter_key) if env.key? Rack::RACK_REQUEST_QUERY_HASH
+          env[Grape::Env::API_VERSION] = env[Rack::RACK_REQUEST_QUERY_HASH].delete(parameter_key)
         end
       end
     end

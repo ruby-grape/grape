@@ -13,6 +13,11 @@ Here are the notable changes:
 - `HTTP_HEADERS` has been moved to `Grape::Request` and renamed `KNOWN_HEADERS`. The last has been refreshed with new headers, and it's not lazy anymore.
 - `SUPPORTED_METHODS_WITHOUT_OPTIONS` and `find_supported_method` have been removed.
 
+### Grape::Middleware::Base
+
+- Constant `TEXT_HTML` has been removed in favor of using literal string 'text/html'.
+- `rack_request` and `query_params` have been added. Feel free to call these in your middlewares.
+
 #### Params Builder
 
 - Passing a class to `build_with` or `Grape.config.param_builder` has been deprecated in favor of a symbolized short_name. See `SHORTNAME_LOOKUP` in [params_builder](lib/grape/params_builder.rb).

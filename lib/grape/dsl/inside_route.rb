@@ -79,7 +79,7 @@ module Grape
           else
             # If it is not a Hash then it does not have children.
             # Find its value or set it to nil.
-            return unless options[:include_missing] || passed_params.key?(declared_param)
+            return unless options[:include_missing] || passed_params.try(:key?, declared_param)
 
             rename_path = params_nested_path + [declared_param.to_s]
             renamed_param_name = renamed_params[rename_path]
