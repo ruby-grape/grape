@@ -2,7 +2,6 @@
 
 module Grape
   class Request < Rack::Request
-    DEFAULT_PARAMS_BUILDER = :hash_with_indifferent_access
     # Based on rack 3 KNOWN_HEADERS
     # https://github.com/rack/rack/blob/4f15e7b814922af79605be4b02c5b7c3044ba206/lib/rack/headers.rb#L10
 
