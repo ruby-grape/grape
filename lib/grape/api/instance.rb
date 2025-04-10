@@ -164,7 +164,7 @@ module Grape
         status, headers, response = @router.call(env)
         unless cascade?
           headers = Grape::Util::Header.new.merge(headers)
-          headers.delete(Grape::Http::Headers::X_CASCADE)
+          headers.delete('X-Cascade')
         end
 
         [status, headers, response]

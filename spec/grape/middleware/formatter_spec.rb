@@ -11,7 +11,7 @@ describe Grape::Middleware::Formatter do
   context 'serialization' do
     let(:body) { { 'abc' => 'def' } }
     let(:env) do
-      { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+      { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
     end
 
     it 'looks at the bodies for possibly serializable data' do
@@ -22,7 +22,7 @@ describe Grape::Middleware::Formatter do
     context 'default format' do
       let(:body) { ['foo'] }
       let(:env) do
-        { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+        { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
       end
 
       it 'calls #to_json since default format is json' do
@@ -39,7 +39,7 @@ describe Grape::Middleware::Formatter do
     context 'xml' do
       let(:body) { +'string' }
       let(:env) do
-        { Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+        { Rack::PATH_INFO => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json' }
       end
 
       it 'calls #to_xml if the content type is xml' do
@@ -57,7 +57,7 @@ describe Grape::Middleware::Formatter do
   context 'error handling' do
     let(:formatter) { double(:formatter) }
     let(:env) do
-      { Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+      { Rack::PATH_INFO => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json' }
     end
 
     before do
@@ -76,7 +76,7 @@ describe Grape::Middleware::Formatter do
       allow(formatter).to receive(:call) { raise StandardError }
 
       expect do
-        catch(:error) { subject.call(Rack::PATH_INFO => '/somewhere.xml', Grape::Http::Headers::HTTP_ACCEPT => 'application/json') }
+        catch(:error) { subject.call(Rack::PATH_INFO => '/somewhere.xml', 'HTTP_ACCEPT' => 'application/json') }
       end.to raise_error(StandardError)
     end
   end
@@ -109,12 +109,12 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'uses the requested format if provided in headers' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'uses the file extension format if provided before headers' do
-      subject.call(Rack::PATH_INFO => '/info.txt', Grape::Http::Headers::HTTP_ACCEPT => 'application/json')
+      subject.call(Rack::PATH_INFO => '/info.txt', 'HTTP_ACCEPT' => 'application/json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:txt)
     end
   end
@@ -122,47 +122,47 @@ describe Grape::Middleware::Formatter do
   context 'accept header detection' do
     context 'when header contains invalid byte sequence' do
       it 'does not raise an exception' do
-        expect { subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => "Hello \x80") }.not_to raise_error
+        expect { subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => "Hello \x80") }.not_to raise_error
       end
     end
 
     it 'detects from the Accept header' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/xml')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
     end
 
     it 'uses quality rankings to determine formats' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json; q=0.3,application/xml; q=1.0')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json; q=0.3,application/xml; q=1.0')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
 
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json; q=1.0,application/xml; q=0.3')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json; q=1.0,application/xml; q=0.3')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'handles quality rankings mixed with nothing' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json,application/xml; q=1.0')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml; q=1.0')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
 
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml; q=1.0,application/json')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/xml; q=1.0,application/json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'handles quality rankings that have a default 1.0 value' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json,application/xml;q=0.5')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json,application/xml;q=0.5')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml;q=0.5,application/json')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/xml;q=0.5,application/json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'parses headers with other attributes' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json; abc=2.3; q=1.0,application/xml; q=0.7')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
     it 'ensures that a quality of 0 is less preferred than any other content type' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/json;q=0.0,application/xml')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/json;q=0.0,application/xml')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml,application/json;q=0.0')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/xml,application/json;q=0.0')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:xml)
     end
 
@@ -171,21 +171,21 @@ describe Grape::Middleware::Formatter do
         subject { described_class.new(app, content_types: { custom: 'application/vnd.test+json' }) }
 
         it 'uses the custom type' do
-          subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
+          subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
           expect(subject.env[Grape::Env::API_FORMAT]).to eq(:custom)
         end
       end
 
       context 'when unregistered' do
         it 'returns the default content type text/plain' do
-          r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')]
+          r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')]
           expect(r.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
         end
       end
     end
 
     it 'parses headers with symbols as hash keys' do
-      subject.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/xml', system_time: '091293')
+      subject.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/xml', system_time: '091293')
       expect(subject.env[:system_time]).to eq('091293')
     end
   end
@@ -214,7 +214,7 @@ describe Grape::Middleware::Formatter do
 
     it 'is set for vendored with registered type' do
       s = described_class.new(app, content_types: { custom: 'application/vnd.test+json' })
-      _, headers, = s.call(Rack::PATH_INFO => '/info', Grape::Http::Headers::HTTP_ACCEPT => 'application/vnd.test+json')
+      _, headers, = s.call(Rack::PATH_INFO => '/info', 'HTTP_ACCEPT' => 'application/vnd.test+json')
       expect(headers[Rack::CONTENT_TYPE]).to eq('application/vnd.test+json')
     end
   end
@@ -362,7 +362,7 @@ describe Grape::Middleware::Formatter do
           Rack::REQUEST_METHOD => method,
           'CONTENT_TYPE' => 'application/json',
           Rack::RACK_INPUT => io,
-          Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
+          'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
         expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
         expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
@@ -376,7 +376,7 @@ describe Grape::Middleware::Formatter do
           Rack::REQUEST_METHOD => method,
           'CONTENT_TYPE' => 'application/json',
           Rack::RACK_INPUT => io,
-          Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
+          'HTTP_TRANSFER_ENCODING' => 'chunked'
         )
         expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
         expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
@@ -420,7 +420,7 @@ describe Grape::Middleware::Formatter do
     let(:app) { ->(_env) { [200, {}, file_body] } }
     let(:body) { 'data' }
     let(:env) do
-      { Rack::PATH_INFO => '/somewhere', Grape::Http::Headers::HTTP_ACCEPT => 'application/json' }
+      { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
     end
     let(:headers) do
       if Gem::Version.new(Rack.release) < Gem::Version.new('3.1')
@@ -452,7 +452,7 @@ describe Grape::Middleware::Formatter do
 
     let(:app) { ->(_env) { [200, {}, ['']] } }
     let(:env) do
-      Rack::MockRequest.env_for('/hello.invalid', Grape::Http::Headers::HTTP_ACCEPT => 'application/x-invalid')
+      Rack::MockRequest.env_for('/hello.invalid', 'HTTP_ACCEPT' => 'application/x-invalid')
     end
 
     it 'returns response by invalid formatter' do

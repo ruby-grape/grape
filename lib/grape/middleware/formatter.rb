@@ -119,7 +119,7 @@ module Grape
         (rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?) &&
           !(rack_request.form_data? && rack_request.content_type) &&
           !rack_request.parseable_data? &&
-          (rack_request.content_length.to_i.positive? || rack_request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == 'chunked')
+          (rack_request.content_length.to_i.positive? || rack_request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
       end
 
       def negotiate_content_type
@@ -141,7 +141,7 @@ module Grape
       end
 
       def format_from_header
-        accept_header = env[Grape::Http::Headers::HTTP_ACCEPT].try(:scrub)
+        accept_header = env['HTTP_ACCEPT'].try(:scrub)
         return if accept_header.blank?
 
         media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
