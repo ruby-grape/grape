@@ -10,6 +10,7 @@
 * [#2550](https://github.com/ruby-grape/grape/pull/2550): Drop ActiveSupport 6.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
 * [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove `Grape::Http::Headers` and `Grape::Util::Lazy::Object` - [@ericproulx](https://github.com/ericproulx).
+* [#2556](https://github.com/ruby-grape/grape/pull/2556): Remove unused `Grape::Request::DEFAULT_PARAMS_BUILDER` constant - [@eriklovmo](https://github.com/eriklovmo).
 * Your contribution here.
 
 #### Fixes
