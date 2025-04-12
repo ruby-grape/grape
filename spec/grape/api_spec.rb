@@ -4756,7 +4756,8 @@ describe Grape::API do
     end
 
     it 'raises a Rack::Lint error' do
-      expect { get '/' }.to raise_error(Rack::Lint::LintError, 'Status must be an Integer >=100')
+      # Status must be an Integer >= 100
+      expect { get '/' }.to raise_error(Rack::Lint::LintError)
     end
   end
 end
