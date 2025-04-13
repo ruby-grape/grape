@@ -13,6 +13,7 @@ Grape.deprecator.behavior = :raise
   end
 end
 
+Grape.config.lint = true # lint all apis by default
 Grape::Util::Registry.include(Deregister)
 # issue with ruby 2.7 with ^. We need to extend it again
 Grape::Validations.extend(Grape::Util::Registry) if Gem::Version.new(RUBY_VERSION).release < Gem::Version.new('3.0')

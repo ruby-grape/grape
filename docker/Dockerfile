@@ -7,7 +7,7 @@ ENV RUBYOPT --enable-frozen-string-literal --yjit
 ENV LD_PRELOAD libjemalloc.so.2
 ENV MALLOC_CONF dirty_decay_ms:1000,narenas:2,background_thread:true
 
-RUN apk add --update --no-cache make gcc git libc-dev gcompat jemalloc && \
+RUN apk add --update --no-cache make gcc git libc-dev yaml-dev gcompat jemalloc && \
     gem update --system && gem install bundler
 
 WORKDIR $LIB_PATH

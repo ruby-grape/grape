@@ -17,7 +17,7 @@ describe 'Rails', if: defined?(Rails) do
       ActiveSupport::Dependencies.autoload_paths = []
       ActiveSupport::Dependencies.autoload_once_paths = []
 
-      Class.new(Rails::Application) do
+      app = Class.new(Rails::Application) do
         config.eager_load = false
         config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
         config.api_only = true
@@ -28,15 +28,16 @@ describe 'Rails', if: defined?(Rails) do
           mount GrapeApi => '/'
 
           get 'up', to: lambda { |_env|
-            ['200', {}, ['hello world']]
+            [200, {}, ['hello world']]
           }
         end
       end
+      app.initialize!
+      Rack::Lint.new(app)
     end
 
     before do
       stub_const('GrapeApi', api)
-      app.initialize!
     end
 
     it 'cascades' do

@@ -75,6 +75,7 @@ module Grape
 
   configure do |config|
     config.param_builder = :hash_with_indifferent_access
+    config.lint = false
     config.compile_methods!
   end
 end

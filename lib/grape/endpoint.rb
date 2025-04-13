@@ -358,6 +358,7 @@ module Grape
       format = namespace_inheritable(:format)
 
       stack.use Rack::Head
+      stack.use Rack::Lint if lint?
       stack.use Class.new(Grape::Middleware::Error),
                 helpers: helpers,
                 format: format,
@@ -407,6 +408,10 @@ module Grape
         cookie_value = value.is_a?(Hash) ? value : { value: value }
         Rack::Utils.set_cookie_header! header, name, cookie_value
       end
+    end
+
+    def lint?
+      namespace_inheritable(:lint) || Grape.config.lint
     end
   end
 end
