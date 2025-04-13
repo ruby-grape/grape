@@ -358,7 +358,7 @@ module Grape
       format = namespace_inheritable(:format)
 
       stack.use Rack::Head
-      stack.use Rack::Lint if lint_api?
+      stack.use Rack::Lint if lint?
       stack.use Class.new(Grape::Middleware::Error),
                 helpers: helpers,
                 format: format,
@@ -410,8 +410,8 @@ module Grape
       end
     end
 
-    def lint_api?
-      namespace_inheritable(:lint_api) || Grape.config.lint_api
+    def lint?
+      namespace_inheritable(:lint) || Grape.config.lint
     end
   end
 end

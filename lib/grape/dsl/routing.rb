@@ -81,8 +81,8 @@ module Grape
           namespace_inheritable(:do_not_route_options, true)
         end
 
-        def lint_api!
-          namespace_inheritable(:lint_api, true)
+        def lint!
+          namespace_inheritable(:lint, true)
         end
 
         def do_not_document!

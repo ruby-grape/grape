@@ -4739,10 +4739,10 @@ describe Grape::API do
     end
   end
 
-  describe '.lint_api!' do
+  describe '.lint!' do
     let(:app) do
       Class.new(described_class) do
-        lint_api!
+        lint!
         get '/' do
           status 42
         end
@@ -4750,9 +4750,9 @@ describe Grape::API do
     end
 
     around do |example|
-      Grape.config.lint_api = false
+      Grape.config.lint = false
       example.run
-      Grape.config.lint_api = true
+      Grape.config.lint = true
     end
 
     it 'raises a Rack::Lint error' do
