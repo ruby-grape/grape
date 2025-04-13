@@ -36,51 +36,6 @@ jobs:
           - ruby: '2.7'
             gemfile: gemfiles/rack_3_0.gemfile
             specs: 'spec/integration/rack_3_0'
-          - ruby: '3.1'
-            gemfile: gemfiles/grape_entity.gemfile
-            specs: 'spec/integration/grape_entity'
-          - ruby: '3.1'
-            gemfile: gemfiles/hashie.gemfile
-            specs: 'spec/integration/hashie'
-          - ruby: '3.1'
-            gemfile: gemfiles/dry_validation.gemfile
-            specs: 'spec/integration/dry_validation'
-          - ruby: '3.1'
-            gemfile: gemfiles/rails_6_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.1'
-            gemfile: gemfiles/rails_7_0.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.1'
-            gemfile: gemfiles/rails_7_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.1'
-            gemfile: gemfiles/rails_7_2.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.2'
-            gemfile: gemfiles/grape_entity.gemfile
-            specs: 'spec/integration/grape_entity'
-          - ruby: '3.2'
-            gemfile: gemfiles/hashie.gemfile
-            specs: 'spec/integration/hashie'
-          - ruby: '3.2'
-            gemfile: gemfiles/dry_validation.gemfile
-            specs: 'spec/integration/dry_validation'
-          - ruby: '3.2'
-            gemfile: gemfiles/rails_6_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.2'
-            gemfile: gemfiles/rails_7_0.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.2'
-            gemfile: gemfiles/rails_7_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.2'
-            gemfile: gemfiles/rails_7_2.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.2'
-            gemfile: gemfiles/rails_8_0.gemfile
-            specs: 'spec/integration/rails'
           - ruby: '3.3'
             gemfile: gemfiles/grape_entity.gemfile
             specs: 'spec/integration/grape_entity'
@@ -103,30 +58,6 @@ jobs:
             gemfile: gemfiles/rails_7_2.gemfile
             specs: 'spec/integration/rails'
           - ruby: '3.3'
-            gemfile: gemfiles/rails_8_0.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.4'
-            gemfile: gemfiles/grape_entity.gemfile
-            specs: 'spec/integration/grape_entity'
-          - ruby: '3.4'
-            gemfile: gemfiles/hashie.gemfile
-            specs: 'spec/integration/hashie'
-          - ruby: '3.4'
-            gemfile: gemfiles/dry_validation.gemfile
-            specs: 'spec/integration/dry_validation'
-          - ruby: '3.4'
-            gemfile: gemfiles/rails_6_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.4'
-            gemfile: gemfiles/rails_7_0.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.4'
-            gemfile: gemfiles/rails_7_1.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.4'
-            gemfile: gemfiles/rails_7_2.gemfile
-            specs: 'spec/integration/rails'
-          - ruby: '3.4'
             gemfile: gemfiles/rails_8_0.gemfile
             specs: 'spec/integration/rails'
         exclude:
