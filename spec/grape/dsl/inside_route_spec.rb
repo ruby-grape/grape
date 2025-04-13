@@ -115,7 +115,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       it 'sets location header' do
-        expect(subject.header[Grape::Http::Headers::LOCATION]).to eq '/'
+        expect(subject.header['Location']).to eq '/'
       end
     end
 
@@ -129,7 +129,7 @@ describe Grape::DSL::InsideRoute do
       end
 
       it 'sets location header' do
-        expect(subject.header[Grape::Http::Headers::LOCATION]).to eq '/'
+        expect(subject.header['Location']).to eq '/'
       end
     end
   end
@@ -251,7 +251,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header 'Transfer-Encoding', 'base64'
           subject.sendfile file_path
         end
 
@@ -263,7 +263,7 @@ describe Grape::DSL::InsideRoute do
           expect(subject.header).to match(
             Rack::CACHE_CONTROL => 'cache',
             Rack::CONTENT_LENGTH => 123,
-            Grape::Http::Headers::TRANSFER_ENCODING => 'base64'
+            'Transfer-Encoding' => 'base64'
           )
         end
       end
@@ -295,7 +295,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header 'Transfer-Encoding', 'base64'
           subject.stream file_path
         end
 
@@ -318,7 +318,7 @@ describe Grape::DSL::InsideRoute do
         before do
           subject.header Rack::CACHE_CONTROL, 'cache'
           subject.header Rack::CONTENT_LENGTH, 123
-          subject.header Grape::Http::Headers::TRANSFER_ENCODING, 'base64'
+          subject.header 'Transfer-Encoding', 'base64'
           subject.stream stream_object
         end
 

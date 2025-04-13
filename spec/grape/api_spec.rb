@@ -510,7 +510,7 @@ describe Grape::API do
               subject.send(verb) do
                 env[Grape::Env::API_REQUEST_INPUT]
               end
-              send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', Grape::Http::Headers::HTTP_TRANSFER_ENCODING => 'chunked'
+              send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked'
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
               expect(last_response.body).to eql Grape::Json.dump(object).to_json
             end
@@ -1307,7 +1307,7 @@ describe Grape::API do
       expect(last_response.content_type).to eq('text/plain')
       expect(last_response.content_length).to be_nil
       expect(last_response.headers[Rack::CACHE_CONTROL]).to eq('no-cache')
-      expect(last_response.headers[Grape::Http::Headers::TRANSFER_ENCODING]).to eq('chunked')
+      expect(last_response.headers['Transfer-Encoding']).to eq('chunked')
 
       expect(last_response.body).to eq("c\r\nThis is some\r\nd\r\n file content\r\n0\r\n\r\n")
     end
@@ -2886,7 +2886,7 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', Grape::Http::Headers::HTTP_ACCEPT => 'application/custom'
+        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
@@ -2915,7 +2915,7 @@ describe Grape::API do
       end
 
       it 'uses custom formatter' do
-        get '/simple.custom', Grape::Http::Headers::HTTP_ACCEPT => 'application/custom'
+        get '/simple.custom', 'HTTP_ACCEPT' => 'application/custom'
         expect(last_response.body).to eql '{"custom_formatter":"hash"}'
       end
     end
@@ -3558,7 +3558,7 @@ describe Grape::API do
       it 'is able to cascade' do
         subject.mount lambda { |env|
           headers = {}
-          headers[Grape::Http::Headers::X_CASCADE] == 'pass' if env[Rack::PATH_INFO].exclude?('boo')
+          headers['X-Cascade'] == 'pass' if env[Rack::PATH_INFO].exclude?('boo')
           [200, headers, ['Farfegnugen']]
         } => '/'
 
@@ -4058,7 +4058,7 @@ describe Grape::API do
       end
 
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/json'
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
     end
@@ -4087,7 +4087,7 @@ describe Grape::API do
       end
 
       it 'forces txt from a non-accepting header' do
-        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'application/json'
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'application/json'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_s)
       end
     end
@@ -4112,7 +4112,7 @@ describe Grape::API do
       end
 
       it 'forces json from a non-accepting header' do
-        get '/meaning_of_life', {}, Grape::Http::Headers::HTTP_ACCEPT => 'text/html'
+        get '/meaning_of_life', {}, 'HTTP_ACCEPT' => 'text/html'
         expect(last_response.body).to eq({ meaning_of_life: 42 }.to_json)
       end
 
@@ -4336,14 +4336,14 @@ describe Grape::API do
         subject.version 'v1', using: :path, cascade: true
         get '/v1/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers[Grape::Http::Headers::X_CASCADE]).to eq('pass')
+        expect(last_response.headers['X-Cascade']).to eq('pass')
       end
 
       it 'does not cascade' do
         subject.version 'v2', using: :path, cascade: false
         get '/v2/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers.keys).not_to include Grape::Http::Headers::X_CASCADE
+        expect(last_response.headers.keys).not_to include 'X-Cascade'
       end
     end
 
@@ -4352,14 +4352,14 @@ describe Grape::API do
         subject.cascade true
         get '/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers[Grape::Http::Headers::X_CASCADE]).to eq('pass')
+        expect(last_response.headers['X-Cascade']).to eq('pass')
       end
 
       it 'does not cascade' do
         subject.cascade false
         get '/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers.keys).not_to include Grape::Http::Headers::X_CASCADE
+        expect(last_response.headers.keys).not_to include 'X-Cascade'
       end
     end
   end

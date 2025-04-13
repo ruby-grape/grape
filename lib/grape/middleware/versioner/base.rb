@@ -66,7 +66,7 @@ module Grape
         end
 
         def error_headers
-          cascade? ? { Grape::Http::Headers::X_CASCADE => 'pass' } : {}
+          cascade? ? { 'X-Cascade' => 'pass' } : {}
         end
 
         def potential_version_match?(potential_version)
@@ -74,7 +74,7 @@ module Grape
         end
 
         def version_not_found!
-          throw :error, status: 404, message: '404 API Version Not Found', headers: { Grape::Http::Headers::X_CASCADE => 'pass' }
+          throw :error, status: 404, message: '404 API Version Not Found', headers: { 'X-Cascade' => 'pass' }
         end
       end
     end

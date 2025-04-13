@@ -154,13 +154,13 @@ module Grape
         reset_validations!
       end
 
-      Grape::Http::Headers::SUPPORTED_METHODS.each do |supported_method|
-        define_method supported_method.downcase do |*args, &block|
-          options = args.extract_options!
-          paths = args.first || ['/']
-          route(supported_method, paths, options, &block)
+        Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
+          define_method supported_method.downcase do |*args, &block|
+            options = args.extract_options!
+            paths = args.first || ['/']
+            route(supported_method, paths, options, &block)
+          end
         end
-      end
 
       # Declare a "namespace", which prefixes all subordinate routes with its
       # name. Any endpoints within a namespace, group, resource or segment,

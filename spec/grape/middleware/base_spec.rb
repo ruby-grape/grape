@@ -223,4 +223,36 @@ describe Grape::Middleware::Base do
       expect(last_response.headers['X-Test-Overwriting']).to eq('Bye')
     end
   end
+
+  describe 'query_params' do
+    let(:dummy_middleware) do
+      Class.new(Grape::Middleware::Base) do
+        def before
+          query_params
+        end
+      end
+    end
+
+    let(:app) do
+      context = self
+      Rack::Builder.app do
+        use context.dummy_middleware
+        run ->(_) { [200, {}, ['Yeah']] }
+      end
+    end
+
+    context 'when query params are conflicting' do
+      it 'raises an ConflictingTypes error' do
+        expect { get '/?x[y]=1&x[y]z=2' }.to raise_error(Grape::Exceptions::ConflictingTypes)
+      end
+    end
+
+    context 'when query params is over the specified limit' do
+      let(:query_params) { "foo#{'[a]' * Rack::Utils.param_depth_limit}=bar" }
+
+      it 'raises an ConflictingTypes error' do
+        expect { get "/?foo#{'[a]' * Rack::Utils.param_depth_limit}=bar" }.to raise_error(Grape::Exceptions::TooDeepParameters)
+      end
+    end
+  end
 end

@@ -258,7 +258,7 @@ module Grape
             header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
             raise Grape::Exceptions::MethodNotAllowed.new(header) unless options?
 
-            header Grape::Http::Headers::ALLOW, header['Allow']
+            header 'Allow', header['Allow']
             response_object = ''
             status 204
           else

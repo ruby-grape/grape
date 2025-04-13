@@ -9,6 +9,8 @@
 * [#2540](https://github.com/ruby-grape/grape/pull/2540): Introduce Params builder with symbolized short name - [@ericproulx](https://github.com/ericproulx).
 * [#2550](https://github.com/ruby-grape/grape/pull/2550): Drop ActiveSupport 6.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
+* [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove `Grape::Http::Headers` and `Grape::Util::Lazy::Object` - [@ericproulx](https://github.com/ericproulx).
+* [#2556](https://github.com/ruby-grape/grape/pull/2556): Remove unused `Grape::Request::DEFAULT_PARAMS_BUILDER` constant - [@eriklovmo](https://github.com/eriklovmo).
 * Your contribution here.
 
 #### Fixes
@@ -17,6 +19,9 @@
 * [#2543](https://github.com/ruby-grape/grape/pull/2543): Fix array allocation on mount - [@ericproulx](https://github.com/ericproulx).
 * [#2546](https://github.com/ruby-grape/grape/pull/2546): Fix middleware with keywords - [@ericproulx](https://github.com/ericproulx).
 * [#2547](https://github.com/ruby-grape/grape/pull/2547): Remove jsonapi related code - [@ericproulx](https://github.com/ericproulx).
+* [#2548](https://github.com/ruby-grape/grape/pull/2548): Formatting from header acts like versioning from header - [@ericproulx](https://github.com/ericproulx).
+* [#2552](https://github.com/ruby-grape/grape/pull/2552): Fix declared params optional array - [@ericproulx](https://github.com/ericproulx).
+* [#2553](https://github.com/ruby-grape/grape/pull/2553): Improve performance of query params parsing - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.3.0 (2025-02-08)

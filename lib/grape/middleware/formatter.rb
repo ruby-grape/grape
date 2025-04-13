@@ -3,9 +3,6 @@
 module Grape
   module Middleware
     class Formatter < Base
-      CHUNKED = 'chunked'
-      FORMAT = 'format'
-
       def default_options
         {
           default_format: :txt,
@@ -69,34 +66,27 @@ module Grape
         end
       end
 
-      def request
-        @request ||= Rack::Request.new(env)
-      end
-
-      # store read input in env['api.request.input']
       def read_body_input
-        return unless
-          (request.post? || request.put? || request.patch? || request.delete?) &&
-          (!request.form_data? || !request.media_type) &&
-          !request.parseable_data? &&
-          (request.content_length.to_i.positive? || request.env[Grape::Http::Headers::HTTP_TRANSFER_ENCODING] == CHUNKED)
-
-        return unless (input = env[Rack::RACK_INPUT])
+        input = rack_request.body # reads RACK_INPUT
+        return if input.nil?
+        return unless read_body_input?
 
         input.try(:rewind)
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
-          read_rack_input(body) if body && !body.empty?
+          read_rack_input(body)
         ensure
           input.try(:rewind)
         end
       end
 
-      # store parsed input in env['api.request.body']
       def read_rack_input(body)
-        fmt = request.media_type ? mime_types[request.media_type] : options[:default_format]
+        return if body.empty?
 
-        throw :error, status: 415, message: "The provided content-type '#{request.media_type}' is not supported." unless content_type_for(fmt)
+        media_type = rack_request.media_type
+        fmt = media_type ? mime_types[media_type] : options[:default_format]
+
+        throw :error, status: 415, message: "The provided content-type '#{media_type}' is not supported." unless content_type_for(fmt)
         parser = Grape::Parser.parser_for fmt, options[:parsers]
         if parser
           begin
@@ -119,59 +109,43 @@ module Grape
         end
       end
 
+      # this middleware will not try to format the following content-types since Rack already handles them
+      # when calling Rack's `params` function
+      # - application/x-www-form-urlencoded
+      # - multipart/form-data
+      # - multipart/related
+      # - multipart/mixed
+      def read_body_input?
+        (rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?) &&
+          !(rack_request.form_data? && rack_request.content_type) &&
+          !rack_request.parseable_data? &&
+          (rack_request.content_length.to_i.positive? || rack_request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
+      end
+
       def negotiate_content_type
-        fmt = format_from_extension || format_from_params || options[:format] || format_from_header || options[:default_format]
+        fmt = format_from_extension || query_params['format'] || options[:format] || format_from_header || options[:default_format]
         if content_type_for(fmt)
-          env[Grape::Env::API_FORMAT] = fmt
+          env[Grape::Env::API_FORMAT] = fmt.to_sym
         else
           throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
         end
       end
 
       def format_from_extension
-        parts = request.path.split('.')
+        request_path = rack_request.path.try(:scrub)
+        dot_pos = request_path.rindex('.')
+        return unless dot_pos
 
-        if parts.size > 1
-          extension = parts.last
-          # avoid symbol memory leak on an unknown format
-          return extension.to_sym if content_type_for(extension)
-        end
-        nil
-      end
-
-      def format_from_params
-        fmt = Rack::Utils.parse_nested_query(env[Rack::QUERY_STRING])[FORMAT]
-        # avoid symbol memory leak on an unknown format
-        return fmt.to_sym if content_type_for(fmt)
-
-        fmt
+        extension = request_path[dot_pos + 1..]
+        extension if content_type_for(extension)
       end
 
       def format_from_header
-        mime_array.each do |t|
-          return mime_types[t] if mime_types.key?(t)
-        end
-        nil
-      end
+        accept_header = env['HTTP_ACCEPT'].try(:scrub)
+        return if accept_header.blank?
 
-      def mime_array
-        accept = env[Grape::Http::Headers::HTTP_ACCEPT]
-        return [] unless accept
-
-        accept_into_mime_and_quality = %r{
-          (
-            \w+/[\w+.-]+)     # eg application/vnd.example.myformat+xml
-          (?:
-           (?:;[^,]*?)?       # optionally multiple formats in a row
-           ;\s*q=([\w.]+)     # optional "quality" preference (eg q=0.5)
-          )?
-        }x
-
-        vendor_prefix_pattern = /vnd\.[^+]+\+/
-
-        accept.scan(accept_into_mime_and_quality)
-              .sort_by { |_, quality_preference| -(quality_preference ? quality_preference.to_f : 1.0) }
-              .flat_map { |mime, _| [mime, mime.sub(vendor_prefix_pattern, '')] }
+        media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
+        mime_types[media_type] if media_type
       end
     end
   end
