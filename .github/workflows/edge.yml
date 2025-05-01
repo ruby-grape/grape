@@ -27,7 +27,7 @@ jobs:
         bundler-cache: true
 
     - name: Run tests
-      run: "RUBYOPT='--enable=frozen-string-literal --debug=frozen-string-literal' bundle exec rspec"
+      run: "RUBYOPT='--enable=frozen-string-literal' bundle exec rspec"
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
