@@ -4,26 +4,18 @@ module Grape
   module Middleware
     module Versioner
       class Base < Grape::Middleware::Base
-        DEFAULT_PATTERN = /.*/i.freeze
-        DEFAULT_PARAMETER = 'apiver'
+        DEFAULT_OPTIONS = {
+          pattern: /.*/i.freeze,
+          version_options: {
+            strict: false,
+            cascade: true,
+            parameter: 'apiver'
+          }.freeze
+        }.freeze
 
         def self.inherited(klass)
           super
           Versioner.register(klass)
-        end
-
-        def default_options
-          {
-            versions: nil,
-            prefix: nil,
-            mount_path: nil,
-            pattern: DEFAULT_PATTERN,
-            version_options: {
-              strict: false,
-              cascade: true,
-              parameter: DEFAULT_PARAMETER
-            }
-          }
         end
 
         def versions

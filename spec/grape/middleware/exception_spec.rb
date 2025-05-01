@@ -66,7 +66,7 @@ describe Grape::Middleware::Error do
       use Rack::Lint
       use Spec::Support::EndpointFaker
       if opts.any?
-        use Grape::Middleware::Error, opts
+        use Grape::Middleware::Error, **opts
       else
         use Grape::Middleware::Error
       end
