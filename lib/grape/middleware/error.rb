@@ -18,7 +18,7 @@ module Grape
 
       def initialize(app, **options)
         super
-        self.class.include(options.delete(:helpers)) if options[:helpers]
+        self.class.include(options[:helpers]) if options[:helpers]
       end
 
       def call!(env)
