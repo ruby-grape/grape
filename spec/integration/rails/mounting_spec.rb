@@ -4,6 +4,7 @@ describe 'Rails', if: defined?(Rails) do
   context 'rails mounted' do
     let(:api) do
       Class.new(Grape::API) do
+        lint!
         get('/test_grape') { 'rails mounted' }
       end
     end
@@ -17,7 +18,7 @@ describe 'Rails', if: defined?(Rails) do
       ActiveSupport::Dependencies.autoload_paths = []
       ActiveSupport::Dependencies.autoload_once_paths = []
 
-      app = Class.new(Rails::Application) do
+      Class.new(Rails::Application) do
         config.eager_load = false
         config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
         config.api_only = true
@@ -32,12 +33,11 @@ describe 'Rails', if: defined?(Rails) do
           }
         end
       end
-      app.initialize!
-      Rack::Lint.new(app)
     end
 
     before do
       stub_const('GrapeApi', api)
+      app.initialize!
     end
 
     it 'cascades' do
