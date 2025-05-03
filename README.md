@@ -654,17 +654,19 @@ version 'v1', using: :param, parameter: 'v'
 
 ## Linting
 
-You can check if your API is in conformance with [Rack's specification](https://github.com/rack/rack/blob/main/SPEC.rdoc) by calling `lint!` at the API level or through [configuration](#configuration):
+You can check whether your API is in conformance with the [Rack's specification](https://github.com/rack/rack/blob/main/SPEC.rdoc) by calling `lint!` at the API level or through [configuration](#configuration).
+
 ```ruby
-# API Level
 class Api < Grape::API
   lint!
 end
-# OR through configuration
+```
+```ruby
 Grape.configure do |config|
   config.lint = true
 end
-# OR
+```
+```ruby
 Grape.config.lint = true
 ```
 
