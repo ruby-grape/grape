@@ -84,7 +84,7 @@ jobs:
         bundler-cache: true
 
     - name: Run Tests (${{ matrix.specs }})
-      run: bundle exec rspec ${{ matrix.specs }}
+      run: "RUBYOPT='--enable=frozen-string-literal' bundle exec rspec ${{ matrix.specs }}"
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
