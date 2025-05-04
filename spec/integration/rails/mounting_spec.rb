@@ -4,6 +4,7 @@ describe 'Rails', if: defined?(Rails) do
   context 'rails mounted' do
     let(:api) do
       Class.new(Grape::API) do
+        lint!
         get('/test_grape') { 'rails mounted' }
       end
     end
@@ -28,7 +29,7 @@ describe 'Rails', if: defined?(Rails) do
           mount GrapeApi => '/'
 
           get 'up', to: lambda { |_env|
-            ['200', {}, ['hello world']]
+            [200, {}, ['hello world']]
           }
         end
       end

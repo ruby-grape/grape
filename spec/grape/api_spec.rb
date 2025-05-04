@@ -4738,4 +4738,28 @@ describe Grape::API do
       expect(last_response.body).to eq('unknown params_builder: unknown')
     end
   end
+
+  describe '.lint!' do
+    let(:app) do
+      Class.new(described_class) do
+        lint!
+        get '/' do
+          status 42
+        end
+      end
+    end
+
+    around do |example|
+      @lint = Grape.config.lint
+      Grape.config.lint = false
+      example.run
+    ensure
+      Grape.config.lint = @lint
+    end
+
+    it 'raises a Rack::Lint error' do
+      # Status must be an Integer >= 100
+      expect { get '/' }.to raise_error(Rack::Lint::LintError)
+    end
+  end
 end

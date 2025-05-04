@@ -135,7 +135,7 @@ When using together with `Grape::Extensions::Hash::ParamBuilder`, `route_param` 
 This was a regression introduced by [#2326](https://github.com/ruby-grape/grape/pull/2326) in Grape v1.8.0.
 
 ```ruby
-grape.configure do |config|
+Grape.configure do |config|
   config.param_builder = Grape::Extensions::Hash::ParamBuilder
 end
 
