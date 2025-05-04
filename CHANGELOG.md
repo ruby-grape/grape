@@ -12,6 +12,7 @@
 * [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove `Grape::Http::Headers` and `Grape::Util::Lazy::Object` - [@ericproulx](https://github.com/ericproulx).
 * [#2556](https://github.com/ruby-grape/grape/pull/2556): Remove unused `Grape::Request::DEFAULT_PARAMS_BUILDER` constant - [@eriklovmo](https://github.com/eriklovmo).
 * [#2558](https://github.com/ruby-grape/grape/pull/2558): Add Ruby's option `enable_frozen_string_literal` in CI - [@ericproulx](https://github.com/ericproulx).
+* [#2557](https://github.com/ruby-grape/grape/pull/2557): Add lint! - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -28,6 +28,8 @@
     - [Header](#header)
     - [Accept-Version Header](#accept-version-header)
     - [Param](#param)
+- [Linting](#linting)
+  - [Bug in Rack::ETag under Rack 3.X](#bug-in-racketag-under-rack-3x)
 - [Describing Methods](#describing-methods)
 - [Configuration](#configuration)
 - [Parameters](#parameters)
@@ -649,6 +651,27 @@ version 'v1', using: :param, parameter: 'v'
 
     curl http://localhost:9292/statuses/public_timeline?v=v1
 
+
+## Linting
+
+You can check whether your API is in conformance with the [Rack's specification](https://github.com/rack/rack/blob/main/SPEC.rdoc) by calling `lint!` at the API level or through [configuration](#configuration).
+
+```ruby
+class Api < Grape::API
+  lint!
+end
+```
+```ruby
+Grape.configure do |config|
+  config.lint = true
+end
+```
+```ruby
+Grape.config.lint = true
+```
+
+### Bug in Rack::ETag under Rack 3.X
+If you're using Rack 3.X and the `Rack::Etag` middleware (used by [Rails](https://guides.rubyonrails.org/rails_on_rack.html#inspecting-middleware-stack)), a [bug](https://github.com/rack/rack/pull/2324) related to linting has been fixed in [3.1.13](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3113---2025-04-13) and [3.0.15](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3015---2025-04-13) respectively.
 
 ## Describing Methods
 
