@@ -141,9 +141,7 @@ describe Grape::Middleware::Base do
     context 'defaults' do
       let(:example_ware) do
         Class.new(Grape::Middleware::Base) do
-          def default_options
-            { monkey: true }
-          end
+          const_set(:DEFAULT_OPTIONS, { monkey: true }.freeze)
         end
       end
 

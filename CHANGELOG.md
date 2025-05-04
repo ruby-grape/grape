@@ -3,16 +3,17 @@
 #### Features
 
 * [#2532](https://github.com/ruby-grape/grape/pull/2532): Update RuboCop 1.71.2 - [@ericproulx](https://github.com/ericproulx).
-* [#2535](https://github.com/ruby-grape/grape/pull/2535): Delegates calls to inner objects - [@ericproulx](https://github.com/ericproulx).
+* [#2535](https://github.com/ruby-grape/grape/pull/2535): Delegate calls to inner objects - [@ericproulx](https://github.com/ericproulx).
 * [#2537](https://github.com/ruby-grape/grape/pull/2537): Use activesupport `try` pattern - [@ericproulx](https://github.com/ericproulx).
 * [#2536](https://github.com/ruby-grape/grape/pull/2536): Update normalize_path like Rails - [@ericproulx](https://github.com/ericproulx).
-* [#2540](https://github.com/ruby-grape/grape/pull/2540): Introduce Params builder with symbolized short name - [@ericproulx](https://github.com/ericproulx).
+* [#2540](https://github.com/ruby-grape/grape/pull/2540): Introduce params builder with symbolized short name - [@ericproulx](https://github.com/ericproulx).
 * [#2550](https://github.com/ruby-grape/grape/pull/2550): Drop ActiveSupport 6.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2549](https://github.com/ruby-grape/grape/pull/2549): Delegate cookies management to `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
 * [#2554](https://github.com/ruby-grape/grape/pull/2554): Remove `Grape::Http::Headers` and `Grape::Util::Lazy::Object` - [@ericproulx](https://github.com/ericproulx).
 * [#2556](https://github.com/ruby-grape/grape/pull/2556): Remove unused `Grape::Request::DEFAULT_PARAMS_BUILDER` constant - [@eriklovmo](https://github.com/eriklovmo).
 * [#2558](https://github.com/ruby-grape/grape/pull/2558): Add Ruby's option `enable_frozen_string_literal` in CI - [@ericproulx](https://github.com/ericproulx).
-* [#2557](https://github.com/ruby-grape/grape/pull/2557): Add lint! - [@ericproulx](https://github.com/ericproulx).
+* [#2557](https://github.com/ruby-grape/grape/pull/2557): Add `lint!` - [@ericproulx](https://github.com/ericproulx).
+* [#2561](https://github.com/ruby-grape/grape/pull/2561): Optimize hash alloc for middleware's default options - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -3,6 +3,11 @@ Upgrading Grape
 
 ### Upgrading to >= 2.4.0
 
+#### Grape::Middleware::Base
+
+- Second argument `options` is now a double splat (**) instead of single splat (*). If you're redefining `initialize` in your middleware and/or calling `super` in it, you might have to adapt the signature and the `super` call. Also, you might have to remove `{}` if you're pass `options` as a literal `Hash` or add `**` if you're using a variable.
+- `Grape::Middleware::Helpers` has been removed. The equivalent method `context` is now part of `Grape::Middleware::Base`.
+
 #### Grape::Http::Headers, Grape::Util::Lazy::Object
 
 Both have been removed. See [2554](https://github.com/ruby-grape/grape/pull/2554).

@@ -236,7 +236,7 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'uses custom json formatter' do
-      subject.options[:formatters][:json] = ->(_obj, _env) { 'CUSTOM JSON FORMAT' }
+      subject.options[:formatters] = { json: ->(_obj, _env) { 'CUSTOM JSON FORMAT' } }
       r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.json')]
       expect(r.body).to eq('CUSTOM JSON FORMAT')
     end

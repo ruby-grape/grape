@@ -348,7 +348,7 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       opts = options
       Rack::Builder.app do
         use Spec::Support::EndpointFaker
-        use Grape::Middleware::Error, opts
+        use Grape::Middleware::Error, **opts
         run ErrApp
       end
     end

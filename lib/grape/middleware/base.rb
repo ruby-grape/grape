@@ -3,21 +3,16 @@
 module Grape
   module Middleware
     class Base
-      include Helpers
       include Grape::DSL::Headers
 
       attr_reader :app, :env, :options
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options A hash of options, simply stored for use by subclasses.
-      def initialize(app, *options)
+      def initialize(app, **options)
         @app = app
-        @options = options.any? ? default_options.deep_merge(options.shift) : default_options
+        @options = merge_default_options(options)
         @app_response = nil
-      end
-
-      def default_options
-        {}
       end
 
       def call(env)
@@ -56,10 +51,14 @@ module Grape
         @rack_request ||= Rack::Request.new(env)
       end
 
+      def context
+        env[Grape::Env::API_ENDPOINT]
+      end
+
       def response
         return @app_response if @app_response.is_a?(Rack::Response)
 
-        @app_response = Rack::Response.new(@app_response[2], @app_response[0], @app_response[1])
+        @app_response = Rack::Response[*@app_response]
       end
 
       def content_types
@@ -99,6 +98,16 @@ module Grape
 
       def content_types_indifferent_access
         @content_types_indifferent_access ||= content_types.with_indifferent_access
+      end
+
+      def merge_default_options(options)
+        if respond_to?(:default_options)
+          default_options.deep_merge(options)
+        elsif self.class.const_defined?(:DEFAULT_OPTIONS)
+          self.class::DEFAULT_OPTIONS.deep_merge(options)
+        else
+          options
+        end
       end
     end
   end

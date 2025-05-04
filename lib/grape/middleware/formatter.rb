@@ -3,13 +3,9 @@
 module Grape
   module Middleware
     class Formatter < Base
-      def default_options
-        {
-          default_format: :txt,
-          formatters: {},
-          parsers: {}
-        }
-      end
+      DEFAULT_OPTIONS = {
+        default_format: :txt
+      }.freeze
 
       def before
         negotiate_content_type
