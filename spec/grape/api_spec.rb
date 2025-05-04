@@ -4750,9 +4750,11 @@ describe Grape::API do
     end
 
     around do |example|
+      @lint = Grape.config.lint
       Grape.config.lint = false
       example.run
-      Grape.config.lint = true
+    ensure
+      Grape.config.lint = @lint
     end
 
     it 'raises a Rack::Lint error' do
