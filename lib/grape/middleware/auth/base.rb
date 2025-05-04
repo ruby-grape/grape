@@ -3,27 +3,18 @@
 module Grape
   module Middleware
     module Auth
-      class Base
-        attr_accessor :options, :app, :env
-
+      class Base < Grape::Middleware::Base
         def initialize(app, **options)
-          @app = app
-          @options = options
+          super
+          @auth_strategy = Grape::Middleware::Auth::Strategies[options[:type]].tap do |auth_strategy|
+            raise Grape::Exceptions::UnknownAuthStrategy.new(strategy: options[:type]) unless auth_strategy
+          end
         end
 
-        def call(env)
-          dup._call(env)
-        end
-
-        def _call(env)
-          self.env = env
-          return app.call(env) unless options.key?(:type)
-
-          strategy_info = Grape::Middleware::Auth::Strategies[options[:type]]
-          throw :error, status: 401, message: 'API Authorization Failed.' if strategy_info.blank?
-
-          strategy_info.create(@app, options) do |*args|
-            env[Grape::Env::API_ENDPOINT].instance_exec(*args, &options[:proc])
+        def call!(env)
+          @env = env
+          @auth_strategy.create(app, options) do |*args|
+            context.instance_exec(*args, &options[:proc])
           end.call(env)
         end
       end

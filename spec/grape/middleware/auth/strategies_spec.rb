@@ -27,4 +27,19 @@ describe Grape::Middleware::Auth::Strategies do
       expect(last_response).to be_unauthorized
     end
   end
+
+  describe 'Unknown Auth' do
+    context 'when type is not register' do
+      let(:app) do
+        Class.new(Grape::API) do
+          use Grape::Middleware::Auth::Base, type: :unknown
+          get('/whatever') { 'Hello there.' }
+        end
+      end
+
+      it 'throws a 401' do
+        expect { get '/whatever' }.to raise_error(Grape::Exceptions::UnknownAuthStrategy, 'unknown auth strategy: unknown')
+      end
+    end
+  end
 end
