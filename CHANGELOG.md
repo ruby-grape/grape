@@ -14,6 +14,7 @@
 * [#2558](https://github.com/ruby-grape/grape/pull/2558): Add Ruby's option `enable_frozen_string_literal` in CI - [@ericproulx](https://github.com/ericproulx).
 * [#2557](https://github.com/ruby-grape/grape/pull/2557): Add `lint!` - [@ericproulx](https://github.com/ericproulx).
 * [#2561](https://github.com/ruby-grape/grape/pull/2561): Optimize hash alloc for middleware's default options - [@ericproulx](https://github.com/ericproulx).
+* [#2563](https://github.com/ruby-grape/grape/pull/2563): Update `Grape::Middleware::Auth::Base` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

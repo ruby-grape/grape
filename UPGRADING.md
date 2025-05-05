@@ -3,6 +3,9 @@ Upgrading Grape
 
 ### Upgrading to >= 2.4.0
 
+#### Grape::Middleware::Auth::Base
+`type` is now validated at compile time and will raise a `Grape::Exceptions::UnknownAuthStrategy` if unknown.
+
 #### Grape::Middleware::Base
 
 - Second argument `options` is now a double splat (**) instead of single splat (*). If you're redefining `initialize` in your middleware and/or calling `super` in it, you might have to adapt the signature and the `super` call. Also, you might have to remove `{}` if you're pass `options` as a literal `Hash` or add `**` if you're using a variable.
@@ -18,7 +21,7 @@ Here are the notable changes:
 - `HTTP_HEADERS` has been moved to `Grape::Request` and renamed `KNOWN_HEADERS`. The last has been refreshed with new headers, and it's not lazy anymore.
 - `SUPPORTED_METHODS_WITHOUT_OPTIONS` and `find_supported_method` have been removed.
 
-### Grape::Middleware::Base
+#### Grape::Middleware::Base
 
 - Constant `TEXT_HTML` has been removed in favor of using literal string 'text/html'.
 - `rack_request` and `query_params` have been added. Feel free to call these in your middlewares.
@@ -34,7 +37,7 @@ Here are the notable changes:
 
 Your API might act differently since it will strictly follow the [RFC2616 14.1](https://datatracker.ietf.org/doc/html/rfc2616#section-14.1) when interpreting the `Accept` header. Here are the differences:
 
-###### Invalid or missing quality ranking
+##### Invalid or missing quality ranking
 The following used to yield `application/xml` and now will yield `application/json` as the preferred media type:
 - `application/json;q=invalid,application/xml;q=0.5`
 - `application/json,application/xml;q=1.0`
@@ -43,7 +46,7 @@ For the invalid case, the value `invalid` was automatically `to_f` and `invalid.
 
 For the non provided case, 1.0 was automatically assigned and in a case of multiple best matches, the first was returned based on Ruby's sort_by `quality`. Now, 1.0 is still assigned and the last is returned in case of multiple best matches. See [Rack's implementation](https://github.com/rack/rack/blob/e8f47608668d507e0f231a932fa37c9ca551c0a5/lib/rack/utils.rb#L167) of the RFC.
 
-###### Considering the closest generic when vendor tree
+##### Considering the closest generic when vendor tree
 Excluding the [header versioning strategy](https://github.com/ruby-grape/grape?tab=readme-ov-file#header), whenever a media type with the [vendor tree](https://datatracker.ietf.org/doc/html/rfc6838#section-3.2) leading facet `vnd.` like `application/vnd.api+json` was provided, Grape would also consider its closest generic when negotiating. In that case, `application/json` was added to the negotiation. Now, it will just consider the provided media types without considering any closest generics, and you'll need to [register](https://github.com/ruby-grape/grape?tab=readme-ov-file#api-formats) it.
 You can find the official vendor tree registrations on [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml)
 

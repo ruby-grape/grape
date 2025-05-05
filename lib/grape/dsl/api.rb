@@ -5,8 +5,6 @@ module Grape
     module API
       extend ActiveSupport::Concern
 
-      include Grape::Middleware::Auth::DSL
-
       include Grape::DSL::Validations
       include Grape::DSL::Callbacks
       include Grape::DSL::Configuration
