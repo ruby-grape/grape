@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
 require 'uri'
-
-module Rack
-  class MockResponse
-    def cookie_jar
-      @cookie_jar ||= Array(headers[Rack::SET_COOKIE]).flat_map { |h| h.split("\n") }.map { |c| Cookie.new(c).to_h }
-    end
-
+module Spec
+  module Support
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    class Cookie
+    class CookieJar
       attr_reader :attributes
 
       def initialize(raw)
@@ -49,6 +44,14 @@ module Rack
           unescape(value)
         end
       end
+    end
+  end
+end
+
+module Rack
+  class MockResponse
+    def cookie_jar
+      @cookie_jar ||= Array(headers[Rack::SET_COOKIE]).flat_map { |h| h.split("\n") }.map { |c| Spec::Support::CookieJar.new(c).to_h }
     end
   end
 end
