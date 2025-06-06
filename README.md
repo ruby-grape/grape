@@ -1739,8 +1739,6 @@ The validator accepts `:min` or `:max` or both options or only `:is` to validate
 
 ```ruby
 params do
-  requires :code, type: String, length: { is: 2 }
-  requires :str, type: String, length: { min: 3 }
   requires :list, type: [Integer], length: { min: 3, max: 5 }
   requires :hash, type: Hash, length: { max: 5 }
 end
@@ -2067,8 +2065,6 @@ end
 
 ```ruby
 params do
-  requires :code, type: String, length: { is: 2, message: 'code is expected to be exactly 2 characters long' }
-  requires :str, type: String, length: { min: 5, message: 'str is expected to be at least 5 characters long' }
   requires :list, type: [Integer], length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
 end
 ```

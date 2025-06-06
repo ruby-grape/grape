@@ -26,6 +26,7 @@
 * [#2548](https://github.com/ruby-grape/grape/pull/2548): Formatting from header acts like versioning from header - [@ericproulx](https://github.com/ericproulx).
 * [#2552](https://github.com/ruby-grape/grape/pull/2552): Fix declared params optional array - [@ericproulx](https://github.com/ericproulx).
 * [#2553](https://github.com/ruby-grape/grape/pull/2553): Improve performance of query params parsing - [@ericproulx](https://github.com/ericproulx).
+* [#2567](https://github.com/ruby-grape/grape/pull/2567): Remove string length examples from docs - [@pieterocp](https://github.com/pieterocp).
 * Your contribution here.
 
 ### 2.3.0 (2025-02-08)
