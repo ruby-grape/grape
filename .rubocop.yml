@@ -7,8 +7,10 @@ AllCops:
     - bin/**/*
 
 require:
-  - rubocop-performance
   - rubocop-rspec
+
+plugins:
+  - rubocop-performance
 
 inherit_from: .rubocop_todo.yml
 

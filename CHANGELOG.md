@@ -15,6 +15,7 @@
 * [#2557](https://github.com/ruby-grape/grape/pull/2557): Add `lint!` - [@ericproulx](https://github.com/ericproulx).
 * [#2561](https://github.com/ruby-grape/grape/pull/2561): Optimize hash alloc for middleware's default options - [@ericproulx](https://github.com/ericproulx).
 * [#2563](https://github.com/ruby-grape/grape/pull/2563): Update `Grape::Middleware::Auth::Base` - [@ericproulx](https://github.com/ericproulx).
+* [#2571](https://github.com/ruby-grape/grape/pull/2571): Update RuboCop 1.75.8 - [@pieterocp](https://github.com/pieterocp).
 * Your contribution here.
 
 #### Fixes
