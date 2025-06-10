@@ -1422,7 +1422,7 @@ describe Grape::API do
         def initialize(app, *args)
           @args = args
           @app = app
-          @block = block_given? ? true : nil
+          @block = block_given? || nil
         end
 
         def call(env)
@@ -4536,8 +4536,8 @@ describe Grape::API do
 
     let(:shared_api_module) do
       Module.new do
-        # rubocop:disable Style/ExplicitBlockArgument because this causes
-        #   the underlying issue in this form
+        # rubocop:disable Style/ExplicitBlockArgument -- because
+        # this causes the underlying issue in this form
         def uniqe_id_route
           params do
             use :unique_id
