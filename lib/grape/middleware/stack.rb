@@ -59,9 +59,9 @@ module Grape
 
       alias insert_before insert
 
-      def insert_after(index, *args, &block)
+      def insert_after(index, ...)
         index = assert_index(index, :after)
-        insert(index + 1, *args, &block)
+        insert(index + 1, ...)
       end
 
       def use(klass, *args, &block)

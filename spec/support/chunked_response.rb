@@ -5,7 +5,7 @@
 class ChunkedResponse
   class Body
     TERM = "\r\n"
-    TAIL = "0#{TERM}"
+    TAIL = "0#{TERM}".freeze
 
     # Store the response body to be chunked.
     def initialize(body)

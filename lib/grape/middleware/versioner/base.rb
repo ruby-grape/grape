@@ -5,7 +5,7 @@ module Grape
     module Versioner
       class Base < Grape::Middleware::Base
         DEFAULT_OPTIONS = {
-          pattern: /.*/i.freeze,
+          pattern: /.*/i,
           version_options: {
             strict: false,
             cascade: true,

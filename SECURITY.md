@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Version 1.2.0 or newer is currently supported.
+Version 2.2 or newer is currently supported.
 
 ## Reporting a Vulnerability
 

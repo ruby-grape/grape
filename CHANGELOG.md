@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2572](https://github.com/ruby-grape/grape/pull/2572): Drop support ruby 2.7 and active_support 6.1 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
