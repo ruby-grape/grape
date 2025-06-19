@@ -1,7 +1,0 @@
-# frozen_string_literal: true
-
-eval_gemfile '../Gemfile'
-
-gem 'mutex_m'
-gem 'rails', '~> 6.1'
-gem 'tzinfo-data', require: false

@@ -132,7 +132,7 @@ module Grape
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
-        extension = request_path[dot_pos + 1..]
+        extension = request_path[(dot_pos + 1)..]
         extension if content_type_for(extension)
       end
 

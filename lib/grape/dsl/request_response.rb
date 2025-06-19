@@ -11,7 +11,7 @@ module Grape
         # Specify the default format for the API's serializers.
         # May be `:json` or `:txt` (default).
         def default_format(new_format = nil)
-          namespace_inheritable(:default_format, new_format.nil? ? nil : new_format.to_sym)
+          namespace_inheritable(:default_format, new_format&.to_sym)
         end
 
         # Specify the format for the API's serializers.

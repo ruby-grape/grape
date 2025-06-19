@@ -1090,7 +1090,7 @@ describe Grape::API do
 
     it 'adds a before filter to current and child namespaces only' do
       subject.get '/' do
-        "root - #{instance_variable_defined?(:@foo) ? @foo : nil}"
+        "root - #{@foo if instance_variable_defined?(:@foo)}"
       end
       subject.namespace :blah do
         before { @foo = 'foo' }
@@ -1676,13 +1676,13 @@ describe Grape::API do
 
     it 'has access to helper methods' do
       subject.helpers do
-        def authorize(user, password)
+        def authorize?(user, password)
           user == 'allow' && password == 'whatever'
         end
       end
 
       subject.http_basic do |u, p|
-        authorize(u, p)
+        authorize?(u, p)
       end
 
       subject.get(:hello) { 'Hello, world.' }

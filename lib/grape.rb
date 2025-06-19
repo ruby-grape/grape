@@ -5,7 +5,7 @@ require 'active_support'
 require 'active_support/concern'
 require 'active_support/configurable'
 require 'active_support/version'
-require 'active_support/isolated_execution_state' if ActiveSupport::VERSION::MAJOR > 6
+require 'active_support/isolated_execution_state'
 require 'active_support/core_ext/array/conversions'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/array/wrap'

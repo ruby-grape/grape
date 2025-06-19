@@ -7,7 +7,7 @@ module Grape
 
       # based on the HTTP Accept header with the pattern:
       # application/vnd.:vendor-:version+:format
-      VENDOR_VERSION_HEADER_REGEX = /\Avnd\.(?<vendor>[a-z0-9.\-_!^]+?)(?:-(?<version>[a-z0-9*.]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/.freeze
+      VENDOR_VERSION_HEADER_REGEX = /\Avnd\.(?<vendor>[a-z0-9.\-_!^]+?)(?:-(?<version>[a-z0-9*.]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/
 
       def initialize(type:, subtype:)
         @type = type

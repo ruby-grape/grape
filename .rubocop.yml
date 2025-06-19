@@ -1,16 +1,14 @@
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.0
   SuggestExtensions: false
   Exclude:
     - vendor/**/*
     - bin/**/*
 
-require:
-  - rubocop-rspec
-
 plugins:
   - rubocop-performance
+  - rubocop-rspec
 
 inherit_from: .rubocop_todo.yml
 

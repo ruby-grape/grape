@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# when changing this file, run appraisal install ; rubocop -a gemfiles/*.gemfile
-
 source('https://rubygems.org')
 
 gemspec
@@ -10,9 +8,9 @@ group :development, :test do
   gem 'builder', require: false
   gem 'bundler'
   gem 'rake'
-  gem 'rubocop', '1.75.8', require: false
+  gem 'rubocop', '1.76.2', require: false
   gem 'rubocop-performance', '1.25.0', require: false
-  gem 'rubocop-rspec', '3.4.0', require: false
+  gem 'rubocop-rspec', '3.6.0', require: false
 end
 
 group :development do

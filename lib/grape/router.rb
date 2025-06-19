@@ -19,7 +19,7 @@ module Grape
 
       # Slow path
       encoding = path.encoding
-      path = +"/#{path}"
+      path = "/#{path}"
       path.squeeze!('/')
 
       unless path == '/'
