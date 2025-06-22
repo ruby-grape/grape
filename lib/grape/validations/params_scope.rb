@@ -331,30 +331,23 @@ module Grape
         doc.type = coerce_type
 
         default = validations[:default]
-
-        if (values_hash = validations[:values]).is_a? Hash
-          values = values_hash[:value]
-          # NB: excepts is deprecated
-          excepts = values_hash[:except]
-        else
-          values = validations[:values]
-        end
+        values = validations[:values].is_a?(Hash) ? validations.dig(:values, :value) : validations[:values]
 
         doc.values = values
 
-        except_values = options_key?(:except_values, :value, validations) ? validations[:except_values][:value] : validations[:except_values]
+        except_values = validations[:except_values].is_a?(Hash) ? validations.dig(:except_values, :value) : validations[:except_values]
 
         # NB. values and excepts should be nil, Proc, Array, or Range.
         # Specifically, values should NOT be a Hash
 
         # use values or excepts to guess coerce type when stated type is Array
-        coerce_type = guess_coerce_type(coerce_type, values, except_values, excepts)
+        coerce_type = guess_coerce_type(coerce_type, values, except_values)
 
         # default value should be present in values array, if both exist and are not procs
-        check_incompatible_option_values(default, values, except_values, excepts)
+        check_incompatible_option_values(default, values, except_values)
 
         # type should be compatible with values array, if both exist
-        validate_value_coercion(coerce_type, values, except_values, excepts)
+        validate_value_coercion(coerce_type, values, except_values)
 
         doc.document attrs
 
@@ -462,18 +455,14 @@ module Grape
         coerce_type
       end
 
-      def check_incompatible_option_values(default, values, except_values, excepts)
+      def check_incompatible_option_values(default, values, except_values)
         return unless default && !default.is_a?(Proc)
 
         raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && !Array(default).all? { |def_val| values.include?(def_val) }
 
-        if except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
-        end
+        return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
 
-        return unless excepts && !excepts.is_a?(Proc)
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, excepts) \
-          unless Array(default).none? { |def_val| excepts.include?(def_val) }
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
       end
 
       def validate(type, options, attrs, doc, opts)

@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
-require 'shared/deprecated_class_examples'
-
 describe Grape::Validations do
-  describe 'Grape::Validations::Base' do
-    let(:deprecated_class) do
-      Class.new(Grape::Validations::Base)
-    end
-
-    it_behaves_like 'deprecated class'
-  end
-
   describe 'using a custom length validator' do
     subject do
       Class.new(Grape::API) do

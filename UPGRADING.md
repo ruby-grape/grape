@@ -1,6 +1,16 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 3.0.0
+
+#### Old Deprecations Clean Up
+
+- `rack_response` has been removed in favor of using `error!`.
+- `Grape::Exceptions::MissingGroupType` and `Grape::Exceptions::UnsupportedGroupType` aliases `MissingGroupTypeError and `UnsupportedGroupType` have been removed.
+- `Grape::Validations::Base` has been removed in favor of `Grape::Validations::Validators::Base`.
+
+See [2573](https://github.com/ruby-grape/grape/pull/2573) for more information.
+
 ### Upgrading to >= 2.4.0
 
 #### Grape::Middleware::Auth::Base
