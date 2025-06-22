@@ -28,7 +28,7 @@ module Grape
           slash_position = path_info.index('/', 1) # omit the first one
           return unless slash_position
 
-          potential_version = path_info[1..slash_position - 1]
+          potential_version = path_info[1..(slash_position - 1)]
           return unless potential_version.match?(pattern)
 
           version_not_found! unless potential_version_match?(potential_version)

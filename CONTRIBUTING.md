@@ -48,7 +48,7 @@ Here are some examples:
 - running rspec on a specific file `docker-compose run --rm --build grape rspec spec/:file_path`
 - running task `docker-compose run --rm --build grape rake <task_name>`
 - running rubocop `docker-compose run --rm --build grape rubocop`
-- running all specs on a specific ruby version (e.g 2.7.7) `RUBY_VERSION=2.7.7 docker-compose run --rm --build grape rspec`
+- running all specs on a specific ruby version (e.g 3.0) `RUBY_VERSION=3.0 docker-compose run --rm --build grape rspec`
 - running specs on a specific gemfile (e.g rails_7_0.gemfile) `docker-compose run -e GEMFILE=rails_7_0 --rm --build grape rspec`
 
 #### Bundle Install and Test
@@ -58,14 +58,6 @@ Ensure that you can build the project and run tests.
 ```
 bundle install
 bundle exec rake
-```
-
-Run tests against all supported versions of Rails.
-
-```
-gem install appraisal
-appraisal install
-appraisal rake spec
 ```
 
 #### Write Tests
