@@ -5,7 +5,21 @@ describe Grape::DSL::Middleware do
 
   let(:dummy_class) do
     Class.new do
-      include Grape::DSL::Middleware
+      extend Grape::DSL::Middleware
+
+      def self.namespace_stackable(key, value = nil)
+        if value
+          namespace_stackable_hash[key] << value
+        else
+          namespace_stackable_hash[key]
+        end
+      end
+
+      def self.namespace_stackable_hash
+        @namespace_stackable_hash ||= Hash.new do |hash, key|
+          hash[key] = []
+        end
+      end
     end
   end
 

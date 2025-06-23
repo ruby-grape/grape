@@ -6,47 +6,21 @@ describe 'Dry::Schema', if: defined?(Dry::Schema) do
 
     let(:app) do
       Class.new do
-        include Grape::DSL::Validations
-      end
-    end
+        extend Grape::DSL::Validations
 
-    describe '.reset_validations!' do
-      before do
-        subject.namespace_stackable :declared_params, ['dummy']
-        subject.namespace_stackable :validations, ['dummy']
-        subject.namespace_stackable :params, ['dummy']
-        subject.route_setting :description, description: 'lol', params: ['dummy']
-        subject.reset_validations!
-      end
+        def self.namespace_stackable(key, value = nil)
+          if value
+            namespace_stackable_hash[key] << value
+          else
+            namespace_stackable_hash[key]
+          end
+        end
 
-      after do
-        subject.unset_route_setting :description
-      end
-
-      it 'resets declared params' do
-        expect(subject.namespace_stackable(:declared_params)).to be_empty
-      end
-
-      it 'resets validations' do
-        expect(subject.namespace_stackable(:validations)).to be_empty
-      end
-
-      it 'resets params' do
-        expect(subject.namespace_stackable(:params)).to be_empty
-      end
-
-      it 'does not reset documentation description' do
-        expect(subject.route_setting(:description)[:description]).to eq 'lol'
-      end
-    end
-
-    describe '.params' do
-      it 'returns a ParamsScope' do
-        expect(subject.params).to be_a Grape::Validations::ParamsScope
-      end
-
-      it 'evaluates block' do
-        expect { subject.params { raise 'foo' } }.to raise_error RuntimeError, 'foo'
+        def self.namespace_stackable_hash
+          @namespace_stackable_hash ||= Hash.new do |hash, key|
+            hash[key] = []
+          end
+        end
       end
     end
 

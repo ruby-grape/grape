@@ -5,8 +5,18 @@ module Grape
     # The API Instance class, is the engine behind Grape::API. Each class that inherits
     # from this will represent a different API instance
     class Instance
+      extend Grape::DSL::Settings
+      extend Grape::DSL::Desc
+      extend Grape::DSL::Validations
+      extend Grape::DSL::Callbacks
+      extend Grape::DSL::Logger
+      extend Grape::DSL::Middleware
+      extend Grape::DSL::RequestResponse
+      extend Grape::DSL::Routing
+      extend Grape::DSL::Helpers
       extend Grape::Middleware::Auth::DSL
-      include Grape::DSL::API
+
+      Boolean = Grape::API::Boolean
 
       class << self
         attr_reader :instance, :base
@@ -128,7 +138,7 @@ module Grape
         def inherited(subclass)
           super
           subclass.reset!
-          subclass.logger = logger.clone
+          subclass.logger logger.clone
         end
 
         def inherit_settings(other_settings)

@@ -6,8 +6,6 @@ module Grape
     # and describe the parameters accepted by an endpoint, or all endpoints
     # within a namespace.
     module Parameters
-      extend ActiveSupport::Concern
-
       # Set the module used to build the request.params.
       #
       # @param build_with the ParamBuilder module to use when building request.params

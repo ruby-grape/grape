@@ -7,16 +7,14 @@ module Grape
     # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path].freeze
 
+    Helpers = Grape::DSL::Helpers::BaseHelper
+
     class Boolean
       def self.build(val)
         return nil if val != true && val != false
 
         new
       end
-    end
-
-    class Instance
-      Boolean = Grape::API::Boolean
     end
 
     class << self

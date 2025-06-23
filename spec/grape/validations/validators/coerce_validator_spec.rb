@@ -249,7 +249,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           let(:custom_type) do
             Class.new do
               def self.parse(_val)
-                Grape::Types::InvalidValue.new('must be unique')
+                Grape::Validations::Types::InvalidValue.new('must be unique')
               end
             end
           end
