@@ -9,5 +9,3 @@ module Grape
     end
   end
 end
-
-Grape::Exceptions::MissingGroupTypeError = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('Grape::Exceptions::MissingGroupTypeError', 'Grape::Exceptions::MissingGroupType', Grape.deprecator)

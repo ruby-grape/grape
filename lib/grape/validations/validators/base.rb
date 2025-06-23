@@ -79,10 +79,3 @@ module Grape
     end
   end
 end
-
-Grape::Validations::Base = Class.new(Grape::Validations::Validators::Base) do
-  def self.inherited(*)
-    Grape.deprecator.warn 'Grape::Validations::Base is deprecated! Use Grape::Validations::Validators::Base instead.'
-    super
-  end
-end

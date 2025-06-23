@@ -4679,26 +4679,6 @@ describe Grape::API do
     end
   end
 
-  context 'rack_response deprecated' do
-    let(:app) do
-      Class.new(described_class) do
-        rescue_from :all do
-          rack_response('deprecated', 500, 'Content-Type' => 'text/plain')
-        end
-
-        get 'test' do
-          raise ArgumentError
-        end
-      end
-    end
-
-    it 'raises a deprecation' do
-      expect(Grape.deprecator).to receive(:warn).with('The rack_response method has been deprecated, use error! instead.')
-      get 'test'
-      expect(last_response.body).to eq('deprecated')
-    end
-  end
-
   context 'rescue_from context' do
     subject { last_response }
 
