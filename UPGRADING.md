@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 3.0.0
 
+### Endpoint execution simplified and `return` deprecated
+
+Executing a endpoint's block has been simplified and calling `return` in it has been deprecated.
+
 #### Old Deprecations Clean Up
 
 - `rack_response` has been removed in favor of using `error!`.
