@@ -5,6 +5,7 @@
 * [#2572](https://github.com/ruby-grape/grape/pull/2572): Drop support ruby 2.7 and active_support 6.1 - [@ericproulx](https://github.com/ericproulx).
 * [#2573](https://github.com/ruby-grape/grape/pull/2573): Clean up deprecated code - [@ericproulx](https://github.com/ericproulx).
 * [#2575](https://github.com/ruby-grape/grape/pull/2575): Refactor Api description class - [@ericproulx](https://github.com/ericproulx).
+* [#2577](https://github.com/ruby-grape/grape/pull/2577): Deprecate `return` in endpoint execution - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -785,27 +785,11 @@ describe Grape::Endpoint do
       return 'Hello'
     end
 
+    expect(Grape.deprecator).to receive(:warn).with('Using `return` in an endpoint has been deprecated.')
+
     get '/home'
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq('Hello')
-  end
-
-  describe '.generate_api_method' do
-    it 'raises NameError if the method name is already in use' do
-      expect do
-        described_class.generate_api_method('version', &proc {})
-      end.to raise_error(NameError)
-    end
-
-    it 'raises ArgumentError if a block is not given' do
-      expect do
-        described_class.generate_api_method('GET without a block method')
-      end.to raise_error(ArgumentError)
-    end
-
-    it 'returns a Proc' do
-      expect(described_class.generate_api_method('GET test for a proc', &proc {})).to be_a Proc
-    end
   end
 
   context 'filters' do
