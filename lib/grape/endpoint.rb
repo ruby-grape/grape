@@ -37,33 +37,6 @@ module Grape
         superclass.run_before_each(endpoint) unless self == Endpoint
         before_each.each { |blk| blk.try(:call, endpoint) }
       end
-
-      # @api private
-      #
-      # Create an UnboundMethod that is appropriate for executing an endpoint
-      # route.
-      #
-      # The unbound method allows explicit calls to +return+ without raising a
-      # +LocalJumpError+. The method will be removed, but a +Proc+ reference to
-      # it will be returned. The returned +Proc+ expects a single argument: the
-      # instance of +Endpoint+ to bind to the method during the call.
-      #
-      # @param [String, Symbol] method_name
-      # @return [Proc]
-      # @raise [NameError] an instance method with the same name already exists
-      def generate_api_method(method_name, &block)
-        raise NameError.new("method #{method_name.inspect} already exists and cannot be used as an unbound method name") if method_defined?(method_name)
-
-        define_method(method_name, &block)
-        method = instance_method(method_name)
-        remove_method(method_name)
-
-        proc do |endpoint_instance|
-          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
-            method.bind_call(endpoint_instance)
-          end
-        end
-      end
     end
 
     # Create a new endpoint.
@@ -108,12 +81,18 @@ module Grape
       @status = nil
       @stream = nil
       @body = nil
-      @proc = nil
 
       return unless block
 
       @source = block
-      @block = self.class.generate_api_method(method_name, &block)
+      @block = lambda do |endpoint_instance|
+        ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
+          endpoint_instance.instance_exec(&block)
+        rescue LocalJumpError => e
+          Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated.'
+          return e.exit_value
+        end
+      end
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -129,14 +108,6 @@ module Grape
 
     def require_option(options, key)
       raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
-    end
-
-    def method_name
-      [options[:method],
-       Namespace.joined_space(namespace_stackable(:namespace)),
-       (namespace_stackable(:mount_path) || []).join('/'),
-       options[:path].join('/')]
-        .join(' ')
     end
 
     def routes
