@@ -7,6 +7,8 @@ Upgrading Grape
 
 Executing a endpoint's block has been simplified and calling `return` in it has been deprecated.
 
+See [#2577](https://github.com/ruby-grape/grape/pull/2577) for more information.
+
 #### Old Deprecations Clean Up
 
 - `rack_response` has been removed in favor of using `error!`.
