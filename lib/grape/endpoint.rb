@@ -11,17 +11,12 @@ module Grape
     include Grape::DSL::Headers
     include Grape::DSL::InsideRoute
 
-    attr_accessor :block, :source, :options
-    attr_reader :env, :request
+    attr_reader :env, :request, :source, :options
 
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
 
     class << self
-      def new(...)
-        self == Endpoint ? Class.new(Endpoint).new(...) : super
-      end
-
       def before_each(new_setup = false, &block)
         @before_each ||= []
         if new_setup == false
@@ -82,17 +77,19 @@ module Grape
       @stream = nil
       @body = nil
 
-      return unless block
-
-      @source = block
-      @block = lambda do |endpoint_instance|
-        ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
-          endpoint_instance.instance_exec(&block)
-        rescue LocalJumpError => e
-          Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated.'
-          return e.exit_value
+      if block
+        @source = block
+        @block = lambda do |endpoint_instance|
+          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
+            endpoint_instance.instance_exec(&block)
+          rescue LocalJumpError => e
+            Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated.'
+            return e.exit_value
+          end
         end
       end
+
+      @helpers = build_helpers
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -194,6 +191,8 @@ module Grape
     def call!(env)
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
+      # this adds the helpers only to the instance
+      singleton_class.include(@helpers) if @helpers
       @app.call(env)
     end
 
@@ -259,19 +258,13 @@ module Grape
       @block&.call(self)
     end
 
-    def helpers
-      lazy_initialize! && @helpers
-    end
-
     def lazy_initialize!
       return true if @lazy_initialized
 
       @lazy_initialize_lock.synchronize do
         return true if @lazy_initialized
 
-        @helpers = build_helpers&.tap { |mod| self.class.include mod }
-        @app = options[:app] || build_stack(@helpers)
-
+        @app = options[:app] || build_stack
         @lazy_initialized = true
       end
     end
@@ -323,7 +316,7 @@ module Grape
 
     private
 
-    def build_stack(helpers)
+    def build_stack
       stack = Grape::Middleware::Stack.new
 
       content_types = namespace_stackable_with_hash(:content_types)
@@ -331,8 +324,7 @@ module Grape
 
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
-      stack.use Class.new(Grape::Middleware::Error),
-                helpers: helpers,
+      stack.use Grape::Middleware::Error,
                 format: format,
                 content_types: content_types,
                 default_status: namespace_inheritable(:default_error_status),

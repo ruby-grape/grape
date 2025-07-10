@@ -735,18 +735,9 @@ describe Grape::Endpoint do
 
   describe 'NameError' do
     context 'when referencing an undefined local variable or method' do
-      let(:error_message) do
-        if Gem::Version.new(RUBY_VERSION).release <= Gem::Version.new('3.2')
-          %r{undefined local variable or method `undefined_helper' for #<Class:0x[0-9a-fA-F]+> in '/hey' endpoint}
-        else
-          opening_quote = Gem::Version.new(RUBY_VERSION).release >= Gem::Version.new('3.4') ? "'" : '`'
-          /undefined local variable or method #{opening_quote}undefined_helper' for/
-        end
-      end
-
       it 'raises NameError but stripping the internals of the Grape::Endpoint class and including the API route' do
         subject.get('/hey') { undefined_helper }
-        expect { get '/hey' }.to raise_error(NameError, error_message)
+        expect { get '/hey' }.to raise_error(NameError, /^undefined local variable or method ['`]undefined_helper' for/)
       end
     end
   end

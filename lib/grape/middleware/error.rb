@@ -16,11 +16,6 @@ module Grape
         }.freeze
       }.freeze
 
-      def initialize(app, **options)
-        super
-        self.class.include(options[:helpers]) if options[:helpers]
-      end
-
       def call!(env)
         @env = env
         error_response(catch(:error) { return @app.call(@env) })
@@ -103,12 +98,7 @@ module Grape
       end
 
       def run_rescue_handler(handler, error, endpoint)
-        if handler.instance_of?(Symbol)
-          raise NoMethodError, "undefined method '#{handler}'" unless respond_to?(handler)
-
-          handler = public_method(handler)
-        end
-
+        handler = endpoint.public_method(handler) if handler.instance_of?(Symbol)
         response = catch(:error) do
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
         end
