@@ -7,6 +7,7 @@
 * [#2575](https://github.com/ruby-grape/grape/pull/2575): Refactor Api description class - [@ericproulx](https://github.com/ericproulx).
 * [#2577](https://github.com/ruby-grape/grape/pull/2577): Deprecate `return` in endpoint execution - [@ericproulx](https://github.com/ericproulx).
 * [#2580](https://github.com/ruby-grape/grape/pull/2580): Refactor endpoint helpers and error middleware integration - [@ericproulx](https://github.com/ericproulx).
+* [#2581](https://github.com/ruby-grape/grape/pull/2581): Delegate `to_s` in Grape::API::Instance - [@ericproulx](https://github.com/ericproulx).
 * [#2582](https://github.com/ruby-grape/grape/pull/2582): Fix leaky slash when normalizing - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
