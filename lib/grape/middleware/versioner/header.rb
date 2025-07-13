@@ -53,7 +53,7 @@ module Grape
         end
 
         def strict_header_checks!
-          return unless strict?
+          return unless strict
 
           accept_header_check!
           version_and_vendor_check!

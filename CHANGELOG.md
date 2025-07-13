@@ -7,6 +7,7 @@
 * [#2575](https://github.com/ruby-grape/grape/pull/2575): Refactor Api description class - [@ericproulx](https://github.com/ericproulx).
 * [#2577](https://github.com/ruby-grape/grape/pull/2577): Deprecate `return` in endpoint execution - [@ericproulx](https://github.com/ericproulx).
 * [#13](https://github.com/ericproulx/grape/pull/13): Refactor endpoint helpers and error middleware integration - [@ericproulx](https://github.com/ericproulx).
+* [#2584](https://github.com/ruby-grape/grape/pull/2584): Small refactor versioner middlewares - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
