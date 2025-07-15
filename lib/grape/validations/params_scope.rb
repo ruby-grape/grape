@@ -7,6 +7,7 @@ module Grape
       attr_reader :type, :params_meeting_dependency
 
       include Grape::DSL::Parameters
+      include Grape::Validations::ParamsDocumentation
 
       # There are a number of documentation options on entities that don't have
       # corresponding validators. Since there is nowhere that enumerates them all,
@@ -323,23 +324,14 @@ module Grape
       end
 
       def validates(attrs, validations)
-        doc = AttributesDoc.new @api, self
-        doc.extract_details validations
-
         coerce_type = infer_coercion(validations)
-
-        doc.type = coerce_type
-
+        required = validations.key?(:presence)
         default = validations[:default]
         values = validations[:values].is_a?(Hash) ? validations.dig(:values, :value) : validations[:values]
-
-        doc.values = values
-
         except_values = validations[:except_values].is_a?(Hash) ? validations.dig(:except_values, :value) : validations[:except_values]
 
         # NB. values and excepts should be nil, Proc, Array, or Range.
         # Specifically, values should NOT be a Hash
-
         # use values or excepts to guess coerce type when stated type is Array
         coerce_type = guess_coerce_type(coerce_type, values, except_values)
 
@@ -349,23 +341,23 @@ module Grape
         # type should be compatible with values array, if both exist
         validate_value_coercion(coerce_type, values, except_values)
 
-        doc.document attrs
+        document_params attrs, validations, coerce_type, values, except_values
 
         opts = derive_validator_options(validations)
 
         # Validate for presence before any other validators
-        validates_presence(validations, attrs, doc, opts)
+        validates_presence(validations, attrs, opts)
 
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, doc, opts
+        coerce_type validations, attrs, required, opts
 
         validations.each do |type, options|
           # Don't try to look up validators for documentation params that don't have one.
           next if RESERVED_DOCUMENTATION_KEYWORDS.include?(type)
 
-          validate(type, options, attrs, doc, opts)
+          validate(type, options, attrs, required, opts)
         end
       end
 
@@ -429,7 +421,7 @@ module Grape
       # composited from more than one +requires+/+optional+
       # parameter, and needs to be run before most other
       # validations.
-      def coerce_type(validations, attrs, doc, opts)
+      def coerce_type(validations, attrs, required, opts)
         check_coerce_with(validations)
 
         return unless validations.key?(:coerce)
@@ -439,7 +431,7 @@ module Grape
           method: validations[:coerce_with],
           message: validations[:coerce_message]
         }
-        validate('coerce', coerce_options, attrs, doc, opts)
+        validate('coerce', coerce_options, attrs, required, opts)
         validations.delete(:coerce_with)
         validations.delete(:coerce)
         validations.delete(:coerce_message)
@@ -465,11 +457,11 @@ module Grape
         raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
       end
 
-      def validate(type, options, attrs, doc, opts)
+      def validate(type, options, attrs, required, opts)
         validator_options = {
           attributes: attrs,
           options: options,
-          required: doc.required,
+          required: required,
           params_scope: self,
           opts: opts,
           validator_class: Validations.require_validator(type)
@@ -516,10 +508,10 @@ module Grape
         }
       end
 
-      def validates_presence(validations, attrs, doc, opts)
+      def validates_presence(validations, attrs, opts)
         return unless validations.key?(:presence) && validations[:presence]
 
-        validate('presence', validations.delete(:presence), attrs, doc, opts)
+        validate('presence', validations.delete(:presence), attrs, true, opts)
         validations.delete(:message) if validations.key?(:message)
       end
     end

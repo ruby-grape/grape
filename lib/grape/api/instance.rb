@@ -19,11 +19,16 @@ module Grape
       Boolean = Grape::API::Boolean
 
       class << self
+        extend Forwardable
         attr_reader :instance, :base
         attr_accessor :configuration
 
+        def_delegators :base, :to_s
+
         def given(conditional_option, &block)
-          evaluate_as_instance_with_configuration(block, lazy: true) if conditional_option && block
+          return unless conditional_option
+
+          mounted(&block)
         end
 
         def mounted(&block)
@@ -33,10 +38,6 @@ module Grape
         def base=(grape_api)
           @base = grape_api
           grape_api.instances << self
-        end
-
-        def to_s
-          base&.to_s || super
         end
 
         def base_instance?

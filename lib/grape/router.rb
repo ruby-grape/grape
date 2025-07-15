@@ -12,10 +12,11 @@ module Grape
     #     normalize_path("/%ab")  # => "/%AB"
     # https://github.com/rails/rails/blob/00cc4ff0259c0185fe08baadaa40e63ea2534f6e/actionpack/lib/action_dispatch/journey/router/utils.rb#L19
     def self.normalize_path(path)
-      return +'/' unless path
+      return '/' unless path
+      return path if path == '/'
 
       # Fast path for the overwhelming majority of paths that don't need to be normalized
-      return path.dup if path == '/' || (path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//})))
+      return path.dup if path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//}))
 
       # Slow path
       encoding = path.encoding
