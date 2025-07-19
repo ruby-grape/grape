@@ -5,7 +5,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path].freeze
+    NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path to_s].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
@@ -51,7 +51,7 @@ module Grape
 
       # Redefines all methods so that are forwarded to add_setup and be recorded
       def override_all_methods!
-        (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
+        (base_instance.singleton_methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, &block|
             add_setup(method: method_override, args: args, block: block)
           end
