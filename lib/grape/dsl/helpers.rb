@@ -34,7 +34,7 @@ module Grape
         include_all_in_scope if !block && new_modules.empty?
       end
 
-      protected
+      private
 
       def include_new_modules(modules)
         return if modules.empty?
