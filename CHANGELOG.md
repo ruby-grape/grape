@@ -10,6 +10,8 @@
 * [#2581](https://github.com/ruby-grape/grape/pull/2581): Delegate `to_s` in Grape::API::Instance - [@ericproulx](https://github.com/ericproulx).
 * [#2582](https://github.com/ruby-grape/grape/pull/2582): Fix leaky slash when normalizing - [@ericproulx](https://github.com/ericproulx).
 * [#2583](https://github.com/ruby-grape/grape/pull/2583): Optimize api parameter documentation and memory usage - [@ericproulx](https://github.com/ericproulx).
+* [#2587](https://github.com/ruby-grape/grape/pull/2587): Delete request should respond with an 200 status code when a empty array/hash - [@elvinra](https://github.com/Elvinra).
+
 * Your contribution here.
 
 #### Fixes

@@ -162,6 +162,20 @@ describe Grape::DSL::InsideRoute do
       expect(subject.status).to eq 200
     end
 
+    it 'defaults to 200 on DELETE with empty array is present' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
+      subject.body []
+      expect(subject).to receive(:request).and_return(request).twice
+      expect(subject.status).to eq 200
+    end
+
+    it 'defaults to 200 on DELETE with empty hash is present' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
+      subject.body({})
+      expect(subject).to receive(:request).and_return(request).twice
+      expect(subject.status).to eq 200
+    end
+
     it 'returns status set' do
       subject.status 501
       expect(subject.status).to eq 501

@@ -213,7 +213,7 @@ module Grape
           if request.post?
             201
           elsif request.delete?
-            if instance_variable_defined?(:@body) && @body.present?
+            if instance_variable_defined?(:@body) && (@body.respond_to?(:each) || @body.present?)
               200
             else
               204
