@@ -18,7 +18,7 @@ describe Grape::Exceptions::Base do
   end
 
   describe '#compose_message' do
-    subject { described_class.new.send(:compose_message, key, **attributes) }
+    subject { described_class.new.__send__(:compose_message, key, **attributes) }
 
     let(:key) { :invalid_formatter }
     let(:attributes) { { klass: String, to_format: 'xml' } }

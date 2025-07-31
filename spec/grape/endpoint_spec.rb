@@ -929,26 +929,26 @@ describe Grape::Endpoint do
     describe 'all other' do
       %w[post get head put options patch].each do |verb|
         it "allows for the anchoring option with a #{verb.upcase} method" do
-          subject.send(verb, '/example', anchor: true) do
+          subject.__send__(verb, '/example', anchor: true) do
             verb
           end
-          send(verb, '/example/and/some/more')
+          __send__(verb, '/example/and/some/more')
           expect(last_response.status).to be 404
         end
 
         it "anchors paths by default for the #{verb.upcase} method" do
-          subject.send(verb, '/example') do
+          subject.__send__(verb, '/example') do
             verb
           end
-          send(verb, '/example/and/some/more')
+          __send__(verb, '/example/and/some/more')
           expect(last_response.status).to be 404
         end
 
         it "responds to /example/and/some/more for the non-anchored #{verb.upcase} method" do
-          subject.send(verb, '/example', anchor: false) do
+          subject.__send__(verb, '/example', anchor: false) do
             verb
           end
-          send(verb, '/example/and/some/more')
+          __send__(verb, '/example/and/some/more')
           expect(last_response.status).to eql verb == 'post' ? 201 : 200
           expect(last_response.body).to eql verb == 'head' ? '' : verb
         end

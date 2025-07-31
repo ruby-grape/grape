@@ -33,7 +33,7 @@ module Grape
       # @param type [Symbol]
       # @param key [Symbol]
       def unset(type, key)
-        setting = inheritable_setting.send(type)
+        setting = inheritable_setting.__send__(type)
         setting.delete key
       end
 
@@ -42,7 +42,7 @@ module Grape
       # @param value [Object] will be stored if the value is currently empty
       # @return either the old value, if it wasn't nil, or the given value
       def get_or_set(type, key, value)
-        setting = inheritable_setting.send(type)
+        setting = inheritable_setting.__send__(type)
         if value.nil?
           setting[key]
         else
