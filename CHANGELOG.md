@@ -14,6 +14,7 @@
 
 #### Fixes
 
+* [#2588](https://github.com/ruby-grape/grape/pull/2588): Fix defaut format regression on */* - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.4.0 (2025-06-18)

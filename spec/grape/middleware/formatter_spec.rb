@@ -22,10 +22,14 @@ describe Grape::Middleware::Formatter do
     context 'default format' do
       let(:body) { ['foo'] }
       let(:env) do
-        { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => 'application/json' }
+        { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => '*/*' }
       end
 
-      it 'calls #to_json since default format is json' do
+      before do
+        subject.options[:default_format] = :json
+      end
+
+      it 'returns JSON' do
         body.instance_eval do
           def to_json(*_args)
             '"bar"'

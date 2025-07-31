@@ -7,6 +7,8 @@ module Grape
         default_format: :txt
       }.freeze
 
+      ALL_MEDIA_TYPES = '*/*'
+
       def before
         negotiate_content_type
         read_body_input
@@ -138,7 +140,7 @@ module Grape
 
       def format_from_header
         accept_header = env['HTTP_ACCEPT'].try(:scrub)
-        return if accept_header.blank?
+        return if accept_header.blank? || accept_header == ALL_MEDIA_TYPES
 
         media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
         mime_types[media_type] if media_type
