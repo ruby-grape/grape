@@ -19,6 +19,7 @@ group :development do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
+  gem 'irb'
 end
 
 group :test do
