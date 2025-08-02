@@ -7,7 +7,7 @@ module Spec
         define_method :"#{method}_with_json" do |uri, params = {}, env = {}, &block|
           params = params.to_json
           env['CONTENT_TYPE'] ||= 'application/json'
-          send(method, uri, params, env, &block)
+          __send__(method, uri, params, env, &block)
         end
       end
     end

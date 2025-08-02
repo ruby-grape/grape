@@ -10,11 +10,13 @@
 * [#2581](https://github.com/ruby-grape/grape/pull/2581): Delegate `to_s` in Grape::API::Instance - [@ericproulx](https://github.com/ericproulx).
 * [#2582](https://github.com/ruby-grape/grape/pull/2582): Fix leaky slash when normalizing - [@ericproulx](https://github.com/ericproulx).
 * [#2583](https://github.com/ruby-grape/grape/pull/2583): Optimize api parameter documentation and memory usage - [@ericproulx](https://github.com/ericproulx).
+* [#2589](https://github.com/ruby-grape/grape/pull/2589): Replace `send` by `__send__` in codebase - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
 * [#2586](https://github.com/ruby-grape/grape/pull/2586): Limit helpers DSL public scope - [@ericproulx](https://github.com/ericproulx).
+* [#2588](https://github.com/ruby-grape/grape/pull/2588): Fix defaut format regression on */* - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.4.0 (2025-06-18)

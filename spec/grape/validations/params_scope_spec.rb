@@ -1249,7 +1249,7 @@ describe Grape::Validations::ParamsScope do
         before do
           # puts "a_decl: #{a_decl}, a_opts: #{a_opts}, b_opts: #{b_opts}"
           subject.params do
-            send a_decl, :a, **a_opts
+            __send__ a_decl, :a, **a_opts
             given(a: ->(val) { val == 'x' }) { requires :b, **b_opts }
             given(a: ->(val) { val == 'y' }) { requires :c, **b_opts }
           end

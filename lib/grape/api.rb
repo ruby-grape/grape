@@ -132,7 +132,7 @@ module Grape
         return if skip_immediate_run?(instance, args)
 
         eval_args = evaluate_arguments(instance.configuration, *args)
-        response = instance.send(method, *eval_args, &block)
+        response = instance.__send__(method, *eval_args, &block)
         if skip_immediate_run?(instance, [response])
           response
         else

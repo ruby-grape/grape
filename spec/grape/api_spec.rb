@@ -195,7 +195,7 @@ describe Grape::API do
     %w[group resource resources segment].each do |als|
       it "`.#{als}` is an alias" do
         inner_namespace = nil
-        subject.send(als, :awesome) do
+        subject.__send__(als, :awesome) do
           inner_namespace = namespace
         end
         expect(inner_namespace).to eq '/awesome'
@@ -485,10 +485,10 @@ describe Grape::API do
         objects.each do |object|
           it "allows a(n) #{object.class} json object in params" do
             subject.format :json
-            subject.send(verb) do
+            subject.__send__(verb) do
               env[Grape::Env::API_REQUEST_BODY]
             end
-            send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            __send__ verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
             expect(last_response.body).to eql Grape::Json.dump(object)
             expect(last_request.params).to eql({})
@@ -496,10 +496,10 @@ describe Grape::API do
 
           it 'stores input in api.request.input' do
             subject.format :json
-            subject.send(verb) do
+            subject.__send__(verb) do
               env[Grape::Env::API_REQUEST_INPUT]
             end
-            send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
+            __send__ verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json'
             expect(last_response.status).to eq(verb == :post ? 201 : 200)
             expect(last_response.body).to eql Grape::Json.dump(object).to_json
           end
@@ -507,10 +507,10 @@ describe Grape::API do
           context 'chunked transfer encoding' do
             it 'stores input in api.request.input' do
               subject.format :json
-              subject.send(verb) do
+              subject.__send__(verb) do
                 env[Grape::Env::API_REQUEST_INPUT]
               end
-              send verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked'
+              __send__ verb, '/', Grape::Json.dump(object), 'CONTENT_TYPE' => 'application/json', 'HTTP_TRANSFER_ENCODING' => 'chunked'
               expect(last_response.status).to eq(verb == :post ? 201 : 200)
               expect(last_response.body).to eql Grape::Json.dump(object).to_json
             end
@@ -549,7 +549,7 @@ describe Grape::API do
       end
 
       %w[get post put delete options patch].each do |m|
-        send(m, '/abc')
+        __send__(m, '/abc')
         expect(last_response.body).to eql 'lol'
       end
     end
@@ -588,14 +588,14 @@ describe Grape::API do
     verbs = %w[post get head delete put options patch]
     verbs.each do |verb|
       it "allows and properly constrain a #{verb.upcase} method" do
-        subject.send(verb, '/example') do
+        subject.__send__(verb, '/example') do
           verb
         end
-        send(verb, '/example')
+        __send__(verb, '/example')
         expect(last_response.body).to eql verb == 'head' ? '' : verb
         # Call it with all methods other than the properly constrained one.
         (verbs - [verb]).each do |other_verb|
-          send(other_verb, '/example')
+          __send__(other_verb, '/example')
           expected_rc = if other_verb == 'options' then 204
                         elsif other_verb == 'head' && verb == 'get' then 200
                         else
@@ -1050,7 +1050,7 @@ describe Grape::API do
     end
 
     it 'returns compiled!' do
-      expect(app.send(:compile!)).to eq(:compiled!)
+      expect(app.__send__(:compile!)).to eq(:compiled!)
     end
   end
 
@@ -1059,7 +1059,7 @@ describe Grape::API do
   describe 'instance_for_rack' do
     context 'when the app was not mounted' do
       it 'returns the base_instance' do
-        expect(app.send(:instance_for_rack)).to eq app.base_instance
+        expect(app.__send__(:instance_for_rack)).to eq app.base_instance
       end
     end
 
@@ -1071,7 +1071,7 @@ describe Grape::API do
             mount mounted_app
           end
         end
-        expect(app.send(:instance_for_rack)).to eq app.send(:mounted_instances).first
+        expect(app.__send__(:instance_for_rack)).to eq app.__send__(:mounted_instances).first
       end
     end
   end

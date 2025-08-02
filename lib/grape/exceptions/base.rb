@@ -17,7 +17,7 @@ module Grape
       end
 
       def [](index)
-        send index
+        __send__ index
       end
 
       protected
