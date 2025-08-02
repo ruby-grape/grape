@@ -113,5 +113,11 @@ describe Grape::DSL::Helpers do
         expect { api_class }.not_to raise_exception
       end
     end
+
+    context 'public scope' do
+      it 'returns helpers only' do
+        expect(Class.new { extend Grape::DSL::Helpers }.singleton_methods - Class.methods).to contain_exactly(:helpers)
+      end
+    end
   end
 end
