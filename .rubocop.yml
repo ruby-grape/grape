@@ -31,6 +31,9 @@ Style/RaiseArgs:
 Style/RedundantArrayConstructor:
   Enabled: false  # doesn't work well with params definition
 
+Style/Send:
+  Enabled: true
+
 Metrics/AbcSize:
   Max: 45
 
