@@ -7,7 +7,7 @@ module Grape
         short_name = build_short_name(klass)
         return if short_name.nil?
 
-        warn "#{short_name} is already registered with class #{klass}" if registry.key?(short_name)
+        warn "#{short_name} is already registered with class #{registry[short_name]}. It will be overridden globally with the following: #{klass.name}" if registry.key?(short_name)
         registry[short_name] = klass
       end
 
