@@ -103,10 +103,6 @@ module Grape
 
         protected
 
-        def prepare_routes
-          endpoints.map(&:routes).flatten
-        end
-
         # Execute first the provided block, then each of the
         # block passed in. Allows for simple 'before' setups
         # of settings stack pushes.

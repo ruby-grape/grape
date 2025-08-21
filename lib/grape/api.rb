@@ -5,7 +5,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path].freeze
+    NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path routes].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 

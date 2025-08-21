@@ -18,6 +18,7 @@
 * [#2586](https://github.com/ruby-grape/grape/pull/2586): Limit helpers DSL public scope - [@ericproulx](https://github.com/ericproulx).
 * [#2588](https://github.com/ruby-grape/grape/pull/2588): Fix defaut format regression on */* - [@ericproulx](https://github.com/ericproulx).
 * [#2593](https://github.com/ruby-grape/grape/pull/2593): Fix warning message when overriding global registry key - [@ericproulx](https://github.com/ericproulx).
+* [#2594](https://github.com/ruby-grape/grape/pull/2594): Fix routes memoization - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.4.0 (2025-06-18)
