@@ -7,6 +7,10 @@ describe Grape::DSL::Settings do
     Class.new do
       include Grape::DSL::Settings
 
+      def with_namespace(&block)
+        within_namespace(&block)
+      end
+
       def reset_validations!; end
     end
   end
@@ -50,7 +54,7 @@ describe Grape::DSL::Settings do
       subject.route_setting :some_thing, :foo_bar
       expect(subject.route_setting(:some_thing)).to eq :foo_bar
 
-      subject.route_end
+      subject.inheritable_setting.route_end
 
       expect(subject.route_setting(:some_thing)).to be_nil
     end
@@ -63,31 +67,22 @@ describe Grape::DSL::Settings do
     end
 
     it 'sets a value until the end of a namespace' do
-      subject.namespace_start
-
-      subject.namespace_setting :some_thing, :foo_bar
-      expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
-
-      subject.namespace_end
-
+      subject.with_namespace do
+        subject.namespace_setting :some_thing, :foo_bar
+        expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
+      end
       expect(subject.namespace_setting(:some_thing)).to be_nil
     end
 
     it 'resets values after leaving nested namespaces' do
-      subject.namespace_start
-
-      subject.namespace_setting :some_thing, :foo_bar
-      expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
-
-      subject.namespace_start
-
-      expect(subject.namespace_setting(:some_thing)).to be_nil
-
-      subject.namespace_end
-      expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
-
-      subject.namespace_end
-
+      subject.with_namespace do
+        subject.namespace_setting :some_thing, :foo_bar
+        expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
+        subject.with_namespace do
+          expect(subject.namespace_setting(:some_thing)).to be_nil
+        end
+        expect(subject.namespace_setting(:some_thing)).to eq :foo_bar
+      end
       expect(subject.namespace_setting(:some_thing)).to be_nil
     end
   end
@@ -99,22 +94,16 @@ describe Grape::DSL::Settings do
     end
 
     it 'inherits values from surrounding namespace' do
-      subject.namespace_start
-
-      subject.namespace_inheritable(:some_thing, :foo_bar)
-      expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
-
-      subject.namespace_start
-
-      expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
-
-      subject.namespace_inheritable(:some_thing, :foo_bar_2)
-
-      expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar_2
-
-      subject.namespace_end
-      expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
-      subject.namespace_end
+      subject.with_namespace do
+        subject.namespace_inheritable(:some_thing, :foo_bar)
+        expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
+        subject.with_namespace do
+          expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
+          subject.namespace_inheritable(:some_thing, :foo_bar_2)
+          expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar_2
+        end
+        expect(subject.namespace_inheritable(:some_thing)).to eq :foo_bar
+      end
     end
   end
 
@@ -125,22 +114,15 @@ describe Grape::DSL::Settings do
     end
 
     it 'stacks values from surrounding namespace' do
-      subject.namespace_start
-
-      subject.namespace_stackable(:some_thing, :foo_bar)
-      expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
-
-      subject.namespace_start
-
-      expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
-
-      subject.namespace_stackable(:some_thing, :foo_bar_2)
-
-      expect(subject.namespace_stackable(:some_thing)).to eq %i[foo_bar foo_bar_2]
-
-      subject.namespace_end
-      expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
-      subject.namespace_end
+      subject.with_namespace do
+        subject.namespace_stackable(:some_thing, :foo_bar)
+        expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
+        subject.with_namespace do
+          subject.namespace_stackable(:some_thing, :foo_bar_2)
+          expect(subject.namespace_stackable(:some_thing)).to eq %i[foo_bar foo_bar_2]
+        end
+        expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
+      end
     end
   end
 
@@ -148,24 +130,6 @@ describe Grape::DSL::Settings do
     it 'delegates to unset' do
       expect(subject).to receive(:unset).with(:namespace_stackable, :dummy)
       subject.unset_namespace_stackable(:dummy)
-    end
-  end
-
-  describe '#within_namespace' do
-    it 'calls start and end for a namespace' do
-      expect(subject).to receive :namespace_start
-      expect(subject).to receive :namespace_end
-
-      subject.within_namespace do
-      end
-    end
-
-    it 'returns the last result' do
-      result = subject.within_namespace do
-        1
-      end
-
-      expect(result).to eq 1
     end
   end
 
@@ -179,7 +143,7 @@ describe Grape::DSL::Settings do
       obj2_copy = nil
       obj3_copy = nil
 
-      obj1.within_namespace do
+      obj1.with_namespace do
         obj1.namespace_stackable(:some_thing, :obj1)
         expect(obj1.namespace_stackable(:some_thing)).to eq [:obj1]
         obj1_copy = obj1.inheritable_setting.point_in_time_copy
@@ -188,7 +152,7 @@ describe Grape::DSL::Settings do
       expect(obj1.namespace_stackable(:some_thing)).to eq []
       expect(obj1_copy.namespace_stackable[:some_thing]).to eq [:obj1]
 
-      obj2.within_namespace do
+      obj2.with_namespace do
         obj2.namespace_stackable(:some_thing, :obj2)
         expect(obj2.namespace_stackable(:some_thing)).to eq [:obj2]
         obj2_copy = obj2.inheritable_setting.point_in_time_copy
@@ -197,7 +161,7 @@ describe Grape::DSL::Settings do
       expect(obj2.namespace_stackable(:some_thing)).to eq []
       expect(obj2_copy.namespace_stackable[:some_thing]).to eq [:obj2]
 
-      obj3.within_namespace do
+      obj3.with_namespace do
         obj3.namespace_stackable(:some_thing, :obj3)
         expect(obj3.namespace_stackable(:some_thing)).to eq [:obj3]
         obj3_copy = obj3.inheritable_setting.point_in_time_copy

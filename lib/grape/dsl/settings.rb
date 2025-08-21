@@ -7,11 +7,7 @@ module Grape
     # matter where they're defined, and inheritable settings which apply only
     # in the current scope and scopes nested under it.
     module Settings
-      extend Forwardable
-
       attr_writer :inheritable_setting, :top_level_setting
-
-      def_delegators :inheritable_setting, :route_end
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting
@@ -102,27 +98,20 @@ module Grape
         end
       end
 
-      # Fork our inheritable settings to a new instance, copied from our
-      # parent's, but separate so we won't modify it. Every call to this
-      # method should have an answering call to #namespace_end.
-      def namespace_start
-        @inheritable_setting = Grape::Util::InheritableSetting.new.tap { |new_settings| new_settings.inherit_from inheritable_setting }
-      end
-
-      # Set the inheritable settings pointer back up by one level.
-      def namespace_end
-        route_end
-        @inheritable_setting = inheritable_setting.parent
-      end
+      private
 
       # Execute the block within a context where our inheritable settings are forked
       # to a new copy (see #namespace_start).
-      def within_namespace(&block)
-        namespace_start
+      def within_namespace
+        new_inheritable_settings = Grape::Util::InheritableSetting.new
+        new_inheritable_settings.inherit_from inheritable_setting
 
-        result = yield if block
+        @inheritable_setting = new_inheritable_settings
 
-        namespace_end
+        result = yield
+
+        inheritable_setting.route_end
+        @inheritable_setting = inheritable_setting.parent
         reset_validations!
 
         result

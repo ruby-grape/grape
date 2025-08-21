@@ -6,62 +6,8 @@ describe Grape::DSL::Routing do
   let(:dummy_class) do
     Class.new do
       extend Grape::DSL::Routing
-
-      def self.namespace_stackable(key, value = nil)
-        if value
-          namespace_stackable_hash[key] << value
-        else
-          namespace_stackable_hash[key]
-        end
-      end
-
-      def self.namespace_stackable_with_hash(key, value = nil)
-        if value
-          namespace_stackable_with_hash_hash[key] = value
-        else
-          namespace_stackable_with_hash_hash[key]
-        end
-      end
-
-      def self.namespace_inheritable(key, value = nil)
-        if value
-          namespace_inheritable_hash[key] = value
-        else
-          namespace_inheritable_hash[key]
-        end
-      end
-
-      def self.route_setting(key, value = nil)
-        if value
-          route_setting_hash[key] = value
-        else
-          route_setting_hash[key]
-        end
-      end
-
-      def self.inheritable_setting
-        @inheritable_setting ||= Grape::Util::InheritableSetting.new
-      end
-
-      def self.namespace_stackable_hash
-        @namespace_stackable_hash ||= Hash.new do |hash, key|
-          hash[key] = []
-        end
-      end
-
-      def self.namespace_stackable_with_hash_hash
-        @namespace_stackable_with_hash_hash ||= Hash.new do |hash, key|
-          hash[key] = []
-        end
-      end
-
-      def self.namespace_inheritable_hash
-        @namespace_inheritable_hash ||= {}
-      end
-
-      def self.route_setting_hash
-        @route_setting_hash ||= {}
-      end
+      extend Grape::DSL::Settings
+      extend Grape::DSL::Validations
     end
   end
 
@@ -87,9 +33,20 @@ describe Grape::DSL::Routing do
   end
 
   describe '.scope' do
+    let(:root_app) do
+      Class.new(Grape::API) do
+        scope :my_scope do
+          get :my_endpoint do
+            return_no_content
+          end
+        end
+      end
+    end
+
     it 'create a scope without affecting the URL' do
-      expect(subject).to receive(:within_namespace)
-      subject.scope {}
+      env = Rack::MockRequest.env_for('/my_endpoint', method: Rack::GET)
+      response = Rack::MockResponse[*root_app.call(env)]
+      expect(response).to be_no_content
     end
   end
 
@@ -140,12 +97,12 @@ describe Grape::DSL::Routing do
   describe '.route' do
     before do
       allow(subject).to receive(:endpoints).and_return([])
-      allow(subject).to receive(:route_end)
+      allow(subject.inheritable_setting).to receive(:route_end)
       allow(subject).to receive(:reset_validations!)
     end
 
     it 'marks end of the route' do
-      expect(subject).to receive(:route_end)
+      expect(subject.inheritable_setting).to receive(:route_end)
       subject.route(:any)
     end
 
@@ -233,7 +190,6 @@ describe Grape::DSL::Routing do
     let(:new_namespace) { Object.new }
 
     it 'creates a new namespace with given name and options' do
-      expect(subject).to receive(:within_namespace).and_yield
       expect(subject).to receive(:nest).and_yield
       expect(Grape::Namespace).to receive(:new).with(:foo, { foo: 'bar' }).and_return(new_namespace)
       expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)

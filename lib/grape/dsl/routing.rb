@@ -154,7 +154,7 @@ module Grape
         new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
         endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
-        route_end
+        inheritable_setting.route_end
         reset_validations!
       end
 
