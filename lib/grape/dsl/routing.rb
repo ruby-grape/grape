@@ -195,7 +195,7 @@ module Grape
 
       # An array of API routes.
       def routes
-        @routes ||= prepare_routes
+        @routes ||= endpoints.map(&:routes).flatten
       end
 
       # Remove all defined routes.

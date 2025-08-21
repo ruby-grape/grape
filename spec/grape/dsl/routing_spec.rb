@@ -274,22 +274,23 @@ describe Grape::DSL::Routing do
   end
 
   describe '.routes' do
-    let(:routes) { Object.new }
+    let(:main_app) { Class.new(Grape::API) }
+    let(:first_app) { Class.new(Grape::API) }
+    let(:second_app) { Class.new(Grape::API) }
 
-    it 'returns value received from #prepare_routes' do
-      expect(subject).to receive(:prepare_routes).and_return(routes)
-      expect(subject.routes).to eq routes
+    before do
+      main_app.mount(first_app => '/first_app', second_app => '/second_app')
+    end
+
+    it 'returns flatten endpoints routes' do
+      expect(main_app.endpoints).not_to be_empty
+      expect(main_app.routes).to eq(main_app.endpoints.map(&:routes).flatten)
     end
 
     context 'when #routes was already called once' do
-      before do
-        allow(subject).to receive(:prepare_routes).and_return(routes)
-        subject.routes
-      end
-
-      it 'does not call prepare_routes again' do
-        expect(subject).not_to receive(:prepare_routes)
-        expect(subject.routes).to eq routes
+      it 'memoizes' do
+        object_id = main_app.routes.object_id
+        expect(main_app.routes.object_id).to eq(object_id)
       end
     end
   end
