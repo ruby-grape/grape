@@ -89,15 +89,6 @@ module Grape
         settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
-      def namespace_reverse_stackable_with_hash(key)
-        settings = get_or_set :namespace_reverse_stackable, key, nil
-        return if settings.blank?
-
-        settings.each_with_object({}) do |setting, result|
-          result.merge!(setting) { |_k, s1, _s2| s1 }
-        end
-      end
-
       private
 
       # Execute the block within a context where our inheritable settings are forked

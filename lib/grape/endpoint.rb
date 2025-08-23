@@ -333,7 +333,7 @@ module Grape
                 default_error_formatter: namespace_inheritable(:default_error_formatter),
                 error_formatters: namespace_stackable_with_hash(:error_formatters),
                 rescue_options: namespace_stackable_with_hash(:rescue_options),
-                rescue_handlers: namespace_reverse_stackable_with_hash(:rescue_handlers),
+                rescue_handlers: rescue_handlers,
                 base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers),
                 all_rescue_handler: namespace_inheritable(:all_rescue_handler),
                 grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
@@ -376,6 +376,15 @@ module Grape
 
     def lint?
       namespace_inheritable(:lint) || Grape.config.lint
+    end
+
+    def rescue_handlers
+      rescue_handlers = inheritable_setting.namespace_reverse_stackable[:rescue_handlers]
+      return if rescue_handlers.blank?
+
+      rescue_handlers.each_with_object({}) do |rescue_handler, result|
+        result.merge!(rescue_handler) { |_k, s1, _s2| s1 }
+      end
     end
   end
 end
