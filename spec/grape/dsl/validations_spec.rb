@@ -5,17 +5,23 @@ describe Grape::DSL::Validations do
 
   let(:dummy_class) do
     Class.new do
+      extend Grape::DSL::Settings
       extend Grape::DSL::Validations
-      def self.unset_namespace_stackable(*_keys); end
     end
   end
 
   describe '.reset_validations' do
     subject { dummy_class.reset_validations! }
 
+    before do
+      %i[declared_params params validations other].each do |key|
+        dummy_class.inheritable_setting.namespace_stackable[key] = key
+      end
+    end
+
     it 'calls unset_namespace_stackable properly' do
-      expect(dummy_class).to receive(:unset_namespace_stackable).with(:declared_params, :params, :validations)
       subject
+      expect(dummy_class.inheritable_setting.namespace_stackable.to_hash).to eq(other: [:other])
     end
   end
 

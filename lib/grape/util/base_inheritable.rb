@@ -14,8 +14,11 @@ module Grape
         @new_values = {}
       end
 
-      def delete(key)
-        new_values.delete key
+      def delete(*keys)
+        keys.map do |key|
+          # since delete returns the deleted value, seems natural to `map` the result
+          new_values.delete key
+        end
       end
 
       def initialize_copy(other)

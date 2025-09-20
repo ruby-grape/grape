@@ -11,6 +11,7 @@
 * [#2582](https://github.com/ruby-grape/grape/pull/2582): Fix leaky slash when normalizing - [@ericproulx](https://github.com/ericproulx).
 * [#2583](https://github.com/ruby-grape/grape/pull/2583): Optimize api parameter documentation and memory usage - [@ericproulx](https://github.com/ericproulx).
 * [#2589](https://github.com/ruby-grape/grape/pull/2589): Replace `send` by `__send__` in codebase - [@ericproulx](https://github.com/ericproulx).
+* [#2598](https://github.com/ruby-grape/grape/pull/2598): Refactor settings DSL to use explicit methods instead of dynamic generation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
