@@ -46,10 +46,6 @@ module Grape
         get_or_set(inheritable_setting.namespace, key, value)
       end
 
-      def namespace_reverse_stackable(key, value = nil)
-        get_or_set(inheritable_setting.namespace_reverse_stackable, key, value)
-      end
-
       def namespace_stackable_with_hash(key)
         settings = namespace_stackable(key)
         return if settings.blank?

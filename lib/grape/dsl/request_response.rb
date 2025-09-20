@@ -117,7 +117,7 @@ module Grape
               :base_only_rescue_handlers
             end
 
-          namespace_reverse_stackable(handler_type, args.to_h { |arg| [arg, handler] })
+          inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |arg| [arg, handler] }
         end
 
         namespace_stackable(:rescue_options, options)
