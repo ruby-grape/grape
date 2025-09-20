@@ -16,6 +16,7 @@
 * [#2600](https://github.com/ruby-grape/grape/pull/2600): Refactor versioner middleware: simplify base class and improve consistency - [@ericproulx](https://github.com/ericproulx).
 * [#2601](https://github.com/ruby-grape/grape/pull/2601): Refactor route_setting internal usage to use inheritable_setting.route for improved consistency and performance - [@ericproulx](https://github.com/ericproulx).
 * [#2602](https://github.com/ruby-grape/grape/pull/2602): Remove `namespace_reverse_stackable` from public DSL interface and use direct inheritable_setting access - [@ericproulx](https://github.com/ericproulx).
+* [#2603](https://github.com/ruby-grape/grape/pull/2603): Remove `namespace_stackable_with_hash` from public interface and move to internal InheritableSetting - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

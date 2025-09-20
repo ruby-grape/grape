@@ -142,14 +142,17 @@ module Grape
       #   end
       def route(methods, paths = ['/'], route_options = {}, &block)
         method = methods == :any ? '*' : methods
-        description = inheritable_setting.route[:description] || {}
+        endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
+        endpoint_description = inheritable_setting.route[:description]
+        all_route_options = { params: endpoint_params }
+        all_route_options.deep_merge!(endpoint_description) if endpoint_description
+        all_route_options.deep_merge!(route_options) if route_options&.any?
+
         endpoint_options = {
           method: method,
           path: paths,
           for: self,
-          route_options: {
-            params: namespace_stackable_with_hash(:params) || {}
-          }.deep_merge(description).deep_merge(route_options || {})
+          route_options: all_route_options
         }
 
         new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
