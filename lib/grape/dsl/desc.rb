@@ -57,7 +57,7 @@ module Grape
           else
             options.merge(description: description)
           end
-        namespace_setting :description, settings
+        inheritable_setting.namespace[:description] = settings
         inheritable_setting.route[:description] = settings
       end
     end

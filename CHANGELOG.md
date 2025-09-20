@@ -15,6 +15,7 @@
 * [#2599](https://github.com/ruby-grape/grape/pull/2599): Simplify settings DSL get_or_set method and optimize logger implementation - [@ericproulx](https://github.com/ericproulx).
 * [#2600](https://github.com/ruby-grape/grape/pull/2600): Refactor versioner middleware: simplify base class and improve consistency - [@ericproulx](https://github.com/ericproulx).
 * [#2601](https://github.com/ruby-grape/grape/pull/2601): Refactor route_setting internal usage to use inheritable_setting.route for improved consistency and performance - [@ericproulx](https://github.com/ericproulx).
+* [#2602](https://github.com/ruby-grape/grape/pull/2602): Remove `namespace_reverse_stackable` from public DSL interface and use direct inheritable_setting access - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
