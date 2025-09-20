@@ -116,9 +116,10 @@ describe Grape::API do
     end
 
     it 'adds the association to the :representations setting' do
-      klass = Class.new
-      subject.represent Object, with: klass
-      expect(subject.namespace_stackable_with_hash(:representations)[Object]).to eq(klass)
+      dummy_presenter_klass = Class.new
+      represent_object = Class.new
+      subject.represent represent_object, with: dummy_presenter_klass
+      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([represent_object => dummy_presenter_klass])
     end
   end
 

@@ -321,7 +321,7 @@ module Grape
     def build_stack
       stack = Grape::Middleware::Stack.new
 
-      content_types = namespace_stackable_with_hash(:content_types)
+      content_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
       format = namespace_inheritable(:format)
 
       stack.use Rack::Head
@@ -333,10 +333,10 @@ module Grape
                 rescue_all: namespace_inheritable(:rescue_all),
                 rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
                 default_error_formatter: namespace_inheritable(:default_error_formatter),
-                error_formatters: namespace_stackable_with_hash(:error_formatters),
-                rescue_options: namespace_stackable_with_hash(:rescue_options),
+                error_formatters: inheritable_setting.namespace_stackable_with_hash(:error_formatters),
+                rescue_options: inheritable_setting.namespace_stackable_with_hash(:rescue_options),
                 rescue_handlers: rescue_handlers,
-                base_only_rescue_handlers: namespace_stackable_with_hash(:base_only_rescue_handlers),
+                base_only_rescue_handlers: inheritable_setting.namespace_stackable_with_hash(:base_only_rescue_handlers),
                 all_rescue_handler: namespace_inheritable(:all_rescue_handler),
                 grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
 
@@ -354,8 +354,8 @@ module Grape
                 format: format,
                 default_format: namespace_inheritable(:default_format) || :txt,
                 content_types: content_types,
-                formatters: namespace_stackable_with_hash(:formatters),
-                parsers: namespace_stackable_with_hash(:parsers)
+                formatters: inheritable_setting.namespace_stackable_with_hash(:formatters),
+                parsers: inheritable_setting.namespace_stackable_with_hash(:parsers)
 
       builder = stack.build
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
