@@ -95,6 +95,13 @@ module Grape
           namespace_reverse_stackable: namespace_reverse_stackable.to_hash
         }
       end
+
+      def namespace_stackable_with_hash(key)
+        data = namespace_stackable[key]
+        return if data.blank?
+
+        data.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
     end
   end
 end

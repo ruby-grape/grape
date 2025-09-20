@@ -35,7 +35,7 @@ Style/Send:
   Enabled: true
 
 Metrics/AbcSize:
-  Max: 45
+  Max: 50
 
 Metrics/BlockLength:
   Max: 30

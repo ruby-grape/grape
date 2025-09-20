@@ -389,22 +389,22 @@ module Grape
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object, options)
         entity_class = options.delete(:with)
+        return entity_class if entity_class
 
-        if entity_class.nil?
-          # entity class not explicitly defined, auto-detect from relation#klass or first object in the collection
-          object_class = if object.respond_to?(:klass)
-                           object.klass
-                         else
-                           object.respond_to?(:first) ? object.first.class : object.class
-                         end
+        # entity class not explicitly defined, auto-detect from relation#klass or first object in the collection
+        object_class = if object.respond_to?(:klass)
+                         object.klass
+                       else
+                         object.respond_to?(:first) ? object.first.class : object.class
+                       end
 
-          object_class.ancestors.each do |potential|
-            entity_class ||= (namespace_stackable_with_hash(:representations) || {})[potential]
-          end
-
-          entity_class ||= object_class.const_get(:Entity) if object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)
+        representations = inheritable_setting.namespace_stackable_with_hash(:representations)
+        if representations
+          potential = object_class.ancestors.detect { |potential| representations.key?(potential) }
+          entity_class = representations[potential] if potential
         end
 
+        entity_class = object_class.const_get(:Entity) if !entity_class && object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)
         entity_class
       end
 

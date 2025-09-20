@@ -6,37 +6,14 @@ describe Grape::DSL::InsideRoute do
   let(:dummy_class) do
     Class.new do
       include Grape::DSL::InsideRoute
+      include Grape::DSL::Settings
 
       attr_reader :env, :request, :new_settings
 
       def initialize
         @env = {}
         @header = {}
-        @new_settings = { namespace_inheritable: namespace_inheritable_hash, namespace_stackable: namespace_stackable_hash }
-      end
-
-      def namespace_inheritable(key, value = nil)
-        if value
-          namespace_inheritable_hash[key] = value
-        else
-          namespace_inheritable_hash[key]
-        end
-      end
-
-      def self.namespace_stackable(key, value = nil)
-        if value
-          namespace_stackable_hash[key] << value
-        else
-          namespace_stackable_hash[key]
-        end
-      end
-
-      def namespace_stackable_with_hash(key, value = nil)
-        if value
-          namespace_stackable_with_hash_hash[key] = value
-        else
-          namespace_stackable_with_hash_hash[key]
-        end
+        @new_settings = { namespace_inheritable: inheritable_setting.namespace_inheritable, namespace_stackable: inheritable_setting.namespace_stackable }
       end
 
       def header(key = nil, val = nil)
@@ -45,20 +22,6 @@ describe Grape::DSL::InsideRoute do
         else
           @header ||= Grape::Util::Header.new
         end
-      end
-
-      private
-
-      def namespace_inheritable_hash
-        @namespace_inheritable_hash ||= {}
-      end
-
-      def namespace_stackable_hash
-        @namespace_stackable_hash ||= Hash.new { [] }
-      end
-
-      def namespace_stackable_with_hash_hash
-        @namespace_stackable_with_hash_hash ||= {}
       end
     end
   end
