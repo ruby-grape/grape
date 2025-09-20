@@ -211,9 +211,10 @@ module Grape
       # @param new_name [String, Symbol] the new name of the parameter (the
       #   renamed name, with the +as: ...+ semantic)
       def push_renamed_param(path, new_name)
-        base = @api.route_setting(:renamed_params) || {}
+        api_route_setting = @api.inheritable_setting.route
+        base = api_route_setting[:renamed_params] || {}
         base[Array(path).map(&:to_s)] = new_name.to_s
-        @api.route_setting(:renamed_params, base)
+        api_route_setting[:renamed_params] = base
       end
 
       def require_required_and_optional_fields(context, opts)
