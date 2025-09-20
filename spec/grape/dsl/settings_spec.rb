@@ -15,47 +15,29 @@ describe Grape::DSL::Settings do
     end
   end
 
-  describe '#get_or_set' do
-    it 'sets a values' do
-      subject.get_or_set :namespace, :dummy, 1
-      expect(subject.namespace_setting(:dummy)).to eq 1
-    end
-
-    it 'returns a value when nil is new value is provided' do
-      subject.get_or_set :namespace, :dummy, 1
-      expect(subject.get_or_set(:namespace, :dummy, nil)).to eq 1
-    end
-  end
-
   describe '#global_setting' do
-    it 'delegates to get_or_set' do
-      expect(subject).to receive(:get_or_set).with(:global, :dummy, 1)
-      subject.global_setting(:dummy, 1)
+    it 'sets a value globally' do
+      subject.global_setting :some_thing, :foo_bar
+      expect(subject.global_setting(:some_thing)).to eq :foo_bar
+      subject.with_namespace do
+        subject.global_setting :some_thing, :foo_bar_baz
+        expect(subject.global_setting(:some_thing)).to eq :foo_bar_baz
+      end
+      expect(subject.global_setting(:some_thing)).to eq(:foo_bar_baz)
     end
   end
 
   describe '#route_setting' do
-    it 'delegates to get_or_set' do
-      expect(subject).to receive(:get_or_set).with(:route, :dummy, 1)
-      subject.route_setting(:dummy, 1)
-    end
-
-    it 'sets a value until the next route' do
-      subject.route_setting :some_thing, :foo_bar
-      expect(subject.route_setting(:some_thing)).to eq :foo_bar
-
-      subject.inheritable_setting.route_end
-
+    it 'sets a value until the end of a namespace' do
+      subject.with_namespace do
+        subject.route_setting :some_thing, :foo_bar
+        expect(subject.route_setting(:some_thing)).to eq :foo_bar
+      end
       expect(subject.route_setting(:some_thing)).to be_nil
     end
   end
 
   describe '#namespace_setting' do
-    it 'delegates to get_or_set' do
-      expect(subject).to receive(:get_or_set).with(:namespace, :dummy, 1)
-      subject.namespace_setting(:dummy, 1)
-    end
-
     it 'sets a value until the end of a namespace' do
       subject.with_namespace do
         subject.namespace_setting :some_thing, :foo_bar
@@ -78,11 +60,6 @@ describe Grape::DSL::Settings do
   end
 
   describe '#namespace_inheritable' do
-    it 'delegates to get_or_set' do
-      expect(subject).to receive(:get_or_set).with(:namespace_inheritable, :dummy, 1)
-      subject.namespace_inheritable(:dummy, 1)
-    end
-
     it 'inherits values from surrounding namespace' do
       subject.with_namespace do
         subject.namespace_inheritable(:some_thing, :foo_bar)
@@ -98,11 +75,6 @@ describe Grape::DSL::Settings do
   end
 
   describe '#namespace_stackable' do
-    it 'delegates to get_or_set' do
-      expect(subject).to receive(:get_or_set).with(:namespace_stackable, :dummy, 1)
-      subject.namespace_stackable(:dummy, 1)
-    end
-
     it 'stacks values from surrounding namespace' do
       subject.with_namespace do
         subject.namespace_stackable(:some_thing, :foo_bar)
