@@ -26,46 +26,32 @@ module Grape
         @inheritable_setting ||= Grape::Util::InheritableSetting.new.tap { |new_settings| new_settings.inherit_from top_level_setting }
       end
 
-      # @param type [Symbol]
-      # @param key [Symbol]
-      # @param value [Object] will be stored if the value is currently empty
-      # @return either the old value, if it wasn't nil, or the given value
-      def get_or_set(type, key, value)
-        setting = inheritable_setting.__send__(type)
-        if value.nil?
-          setting[key]
-        else
-          setting[key] = value
-        end
+      def namespace_inheritable(key, value = nil)
+        get_or_set(inheritable_setting.namespace_inheritable, key, value)
       end
 
-      # defines the following methods:
-      # - namespace_inheritable
-      # - namespace_stackable
-
-      %i[namespace_inheritable namespace_stackable].each do |method_name|
-        define_method method_name do |key, value = nil|
-          get_or_set method_name, key, value
-        end
+      def namespace_stackable(key, value = nil)
+        get_or_set(inheritable_setting.namespace_stackable, key, value)
       end
 
-      # defines the following methods:
-      # - global_setting
-      # - route_setting
-      # - namespace_setting
+      def global_setting(key, value = nil)
+        get_or_set(inheritable_setting.global, key, value)
+      end
 
-      %i[global route namespace].each do |method_name|
-        define_method :"#{method_name}_setting" do |key, value = nil|
-          get_or_set method_name, key, value
-        end
+      def route_setting(key, value = nil)
+        get_or_set(inheritable_setting.route, key, value)
+      end
+
+      def namespace_setting(key, value = nil)
+        get_or_set(inheritable_setting.namespace, key, value)
       end
 
       def namespace_reverse_stackable(key, value = nil)
-        get_or_set :namespace_reverse_stackable, key, value
+        get_or_set(inheritable_setting.namespace_reverse_stackable, key, value)
       end
 
       def namespace_stackable_with_hash(key)
-        settings = get_or_set :namespace_stackable, key, nil
+        settings = namespace_stackable(key)
         return if settings.blank?
 
         settings.each_with_object({}) { |value, result| result.deep_merge!(value) }
@@ -88,6 +74,12 @@ module Grape
         reset_validations!
 
         result
+      end
+
+      def get_or_set(setting, key, value)
+        return setting[key] if value.nil?
+
+        setting[key] = value
       end
     end
   end

@@ -4,17 +4,7 @@ describe Grape::DSL::Logger do
   let(:dummy_logger) do
     Class.new do
       extend Grape::DSL::Logger
-      def self.global_setting(key, value = nil)
-        if value
-          global_setting_hash[key] = value
-        else
-          global_setting_hash[key]
-        end
-      end
-
-      def self.global_setting_hash
-        @global_setting_hash ||= {}
-      end
+      extend Grape::DSL::Settings
     end
   end
 

@@ -7,10 +7,11 @@ module Grape
       # method will create a new one, logging to stdout.
       # @param logger [Object] the new logger to use
       def logger(logger = nil)
+        global_settings = inheritable_setting.global
         if logger
-          global_setting(:logger, logger)
+          global_settings[:logger] = logger
         else
-          global_setting(:logger) || global_setting(:logger, ::Logger.new($stdout))
+          global_settings[:logger] || global_settings[:logger] = ::Logger.new($stdout)
         end
       end
     end
