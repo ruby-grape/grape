@@ -28,13 +28,6 @@ module Grape
 
       # @param type [Symbol]
       # @param key [Symbol]
-      def unset(type, key)
-        setting = inheritable_setting.__send__(type)
-        setting.delete key
-      end
-
-      # @param type [Symbol]
-      # @param key [Symbol]
       # @param value [Object] will be stored if the value is currently empty
       # @return either the old value, if it wasn't nil, or the given value
       def get_or_set(type, key, value)
@@ -56,12 +49,6 @@ module Grape
         end
       end
 
-      def unset_namespace_stackable(*keys)
-        keys.each do |key|
-          unset :namespace_stackable, key
-        end
-      end
-
       # defines the following methods:
       # - global_setting
       # - route_setting
@@ -71,11 +58,6 @@ module Grape
         define_method :"#{method_name}_setting" do |key, value = nil|
           get_or_set method_name, key, value
         end
-      end
-
-      # @param key [Symbol]
-      def namespace_inheritable_to_nil(key)
-        inheritable_setting.namespace_inheritable[key] = nil
       end
 
       def namespace_reverse_stackable(key, value = nil)

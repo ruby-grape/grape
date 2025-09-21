@@ -15,16 +15,6 @@ describe Grape::DSL::Settings do
     end
   end
 
-  describe '#unset' do
-    it 'deletes a key from settings' do
-      subject.namespace_setting :dummy, 1
-      expect(subject.inheritable_setting.namespace.keys).to include(:dummy)
-
-      subject.unset :namespace, :dummy
-      expect(subject.inheritable_setting.namespace.keys).not_to include(:dummy)
-    end
-  end
-
   describe '#get_or_set' do
     it 'sets a values' do
       subject.get_or_set :namespace, :dummy, 1
@@ -123,13 +113,6 @@ describe Grape::DSL::Settings do
         end
         expect(subject.namespace_stackable(:some_thing)).to eq [:foo_bar]
       end
-    end
-  end
-
-  describe '#unset_namespace_stackable' do
-    it 'delegates to unset' do
-      expect(subject).to receive(:unset).with(:namespace_stackable, :dummy)
-      subject.unset_namespace_stackable(:dummy)
     end
   end
 

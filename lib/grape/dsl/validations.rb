@@ -22,7 +22,7 @@ module Grape
       #      # whatever
       #    end
       def reset_validations!
-        unset_namespace_stackable :declared_params, :params, :validations
+        inheritable_setting.namespace_stackable.delete(:declared_params, :params, :validations)
       end
 
       # Opens a root-level ParamsScope, defining parameter coercions and
