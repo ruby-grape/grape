@@ -55,7 +55,7 @@ module Grape
         end
 
         def declared_hash_attr(passed_params, options, declared_param, params_nested_path, memo)
-          renamed_params = route_setting(:renamed_params) || {}
+          renamed_params = inheritable_setting.route[:renamed_params] || {}
           if declared_param.is_a?(Hash)
             declared_param.each_pair do |declared_parent_param, declared_children_params|
               params_nested_path_dup = params_nested_path.dup
@@ -119,7 +119,7 @@ module Grape
         def optioned_declared_params(include_parent_namespaces)
           declared_params = if include_parent_namespaces
                               # Declared params including parent namespaces
-                              route_setting(:declared_params)
+                              inheritable_setting.route[:declared_params]
                             else
                               # Declared params at current namespace
                               namespace_stackable(:declared_params).last || []

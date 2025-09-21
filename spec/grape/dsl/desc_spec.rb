@@ -6,30 +6,7 @@ describe Grape::DSL::Desc do
   let(:dummy_class) do
     Class.new do
       extend Grape::DSL::Desc
-
-      def self.namespace_setting(key, value = nil)
-        if value
-          namespace_setting_hash[key] = value
-        else
-          namespace_setting_hash[key]
-        end
-      end
-
-      def self.route_setting(key, value = nil)
-        if value
-          route_setting_hash[key] = value
-        else
-          route_setting_hash[key]
-        end
-      end
-
-      def self.namespace_setting_hash
-        @namespace_setting_hash ||= {}
-      end
-
-      def self.route_setting_hash
-        @route_setting_hash ||= {}
-      end
+      extend Grape::DSL::Settings
     end
   end
 

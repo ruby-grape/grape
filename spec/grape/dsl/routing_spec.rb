@@ -123,8 +123,8 @@ describe Grape::DSL::Routing do
     end
 
     it 'generates correct endpoint options' do
-      allow(subject).to receive(:route_setting).with(:description).and_return(fiz: 'baz')
-      allow(subject).to receive(:namespace_stackable_with_hash).and_return(nuz: 'naz')
+      subject.inheritable_setting.route[:description] = { fiz: 'baz' }
+      subject.inheritable_setting.namespace_stackable[:params] = { nuz: 'naz' }
 
       expect(Grape::Endpoint).to receive(:new) do |_inheritable_setting, endpoint_options|
         expect(endpoint_options[:method]).to eq :get

@@ -55,8 +55,8 @@ module Grape
       # now +namespace_stackable(:declared_params)+ contains all params defined for
       # this endpoint and its parents, but later it will be cleaned up,
       # see +reset_validations!+ in lib/grape/dsl/validations.rb
-      route_setting(:declared_params, namespace_stackable(:declared_params).flatten)
-      route_setting(:saved_validations, namespace_stackable(:validations))
+      inheritable_setting.route[:declared_params] = namespace_stackable(:declared_params).flatten
+      inheritable_setting.route[:saved_validations] = namespace_stackable(:validations)
 
       namespace_stackable(:representations, []) unless namespace_stackable(:representations)
       namespace_inheritable(:default_error_status, 500) unless namespace_inheritable(:default_error_status)
@@ -302,9 +302,11 @@ module Grape
     end
 
     def validations
+      saved_validations = inheritable_setting.route[:saved_validations]
+      return if saved_validations.nil?
       return enum_for(:validations) unless block_given?
 
-      route_setting(:saved_validations)&.each do |saved_validation|
+      saved_validations.each do |saved_validation|
         yield Grape::Validations::ValidatorFactory.create_validator(saved_validation)
       end
     end
