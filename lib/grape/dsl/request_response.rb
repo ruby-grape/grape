@@ -60,7 +60,7 @@ module Grape
 
       # All available content types.
       def content_types
-        c_types = namespace_stackable_with_hash(:content_types)
+        c_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
         Grape::ContentTypes.content_types_for c_types
       end
 
@@ -117,7 +117,7 @@ module Grape
               :base_only_rescue_handlers
             end
 
-          namespace_reverse_stackable(handler_type, args.to_h { |arg| [arg, handler] })
+          inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |arg| [arg, handler] }
         end
 
         namespace_stackable(:rescue_options, options)

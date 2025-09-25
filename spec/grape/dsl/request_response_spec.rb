@@ -6,36 +6,7 @@ describe Grape::DSL::RequestResponse do
   let(:dummy_class) do
     Class.new do
       extend Grape::DSL::RequestResponse
-
-      def self.namespace_stackable_with_hash(_key)
-        {}
-      end
-
-      def self.namespace_stackable(key, value = nil)
-        if value
-          namespace_stackable_hash[key] << value
-        else
-          namespace_stackable_hash[key]
-        end
-      end
-
-      def self.namespace_inheritable(key, value = nil)
-        if value
-          namespace_inheritable_hash[key] = value
-        else
-          namespace_inheritable_hash[key]
-        end
-      end
-
-      def self.namespace_stackable_hash
-        @namespace_stackable_hash ||= Hash.new do |hash, key|
-          hash[key] = []
-        end
-      end
-
-      def self.namespace_inheritable_hash
-        @namespace_inheritable_hash ||= {}
-      end
+      extend Grape::DSL::Settings
     end
   end
 
@@ -147,7 +118,7 @@ describe Grape::DSL::RequestResponse do
       it 'sets a rescue handler declared through :with option' do
         with_block = -> { 'hello' }
         expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
-        expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, an_instance_of(Proc))
+        expect(subject).to receive(:namespace_inheritable).with(:all_rescue_handler, with_block)
         subject.rescue_from :all, with: with_block
       end
 
@@ -192,43 +163,43 @@ describe Grape::DSL::RequestResponse do
         with_block = -> { 'hello' }
         expect(subject).to receive(:namespace_inheritable).with(:rescue_all, true)
         expect(subject).to receive(:namespace_inheritable).with(:rescue_grape_exceptions, true)
-        expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, an_instance_of(Proc))
+        expect(subject).to receive(:namespace_inheritable).with(:grape_exceptions_rescue_handler, with_block)
         subject.rescue_from :grape_exceptions, with: with_block
       end
     end
 
     describe 'list of exceptions is passed' do
       it 'sets hash of exceptions as rescue handlers' do
-        expect(subject).to receive(:namespace_reverse_stackable).with(:rescue_handlers, { StandardError => nil })
         expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
         subject.rescue_from StandardError
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => nil])
       end
 
       it 'rescues only base handlers if rescue_subclasses: false option is passed' do
-        expect(subject).to receive(:namespace_reverse_stackable).with(:base_only_rescue_handlers, { StandardError => nil })
         expect(subject).to receive(:namespace_stackable).with(:rescue_options, { rescue_subclasses: false })
         subject.rescue_from StandardError, rescue_subclasses: false
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:base_only_rescue_handlers]).to eq([StandardError => nil])
       end
 
       it 'sets given proc as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
-        expect(subject).to receive(:namespace_reverse_stackable).with(:rescue_handlers, { StandardError => rescue_handler_proc })
         expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
         subject.rescue_from StandardError, rescue_handler_proc
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => rescue_handler_proc])
       end
 
       it 'sets given block as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
-        expect(subject).to receive(:namespace_reverse_stackable).with(:rescue_handlers, { StandardError => rescue_handler_proc })
         expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
         subject.rescue_from StandardError, &rescue_handler_proc
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => rescue_handler_proc])
       end
 
       it 'sets a rescue handler declared through :with option for each key in hash' do
         with_block = -> { 'hello' }
-        expect(subject).to receive(:namespace_reverse_stackable).with(:rescue_handlers, { StandardError => an_instance_of(Proc) })
         expect(subject).to receive(:namespace_stackable).with(:rescue_options, {})
         subject.rescue_from StandardError, with: with_block
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => with_block])
       end
     end
   end

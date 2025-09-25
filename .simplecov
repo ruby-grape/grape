@@ -11,5 +11,6 @@ if ENV['GITHUB_USER'] # only when running CI
 end
 
 SimpleCov.start do
+  enable_coverage :branch
   add_filter '/spec/'
 end
