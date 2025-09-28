@@ -8,6 +8,11 @@ describe Grape::DSL::Routing do
       extend Grape::DSL::Routing
       extend Grape::DSL::Settings
       extend Grape::DSL::Validations
+
+      class << self
+        attr_reader :instance, :base
+        attr_accessor :configuration
+      end
     end
   end
 
@@ -18,17 +23,17 @@ describe Grape::DSL::Routing do
   describe '.version' do
     it 'sets a version for route' do
       version = 'v1'
-      expect(subject).to receive(:namespace_inheritable).with(:version, [version])
-      expect(subject).to receive(:namespace_inheritable).with(:version_options, { using: :path })
       expect(subject.version(version)).to eq(version)
+      expect(subject.inheritable_setting.namespace_inheritable[:version]).to eq([version])
+      expect(subject.inheritable_setting.namespace_inheritable[:version_options]).to eq(using: :path)
     end
   end
 
   describe '.prefix' do
     it 'sets a prefix for route' do
       prefix = '/api'
-      expect(subject).to receive(:namespace_inheritable).with(:root_prefix, prefix)
       subject.prefix prefix
+      expect(subject.inheritable_setting.namespace_inheritable[:root_prefix]).to eq(prefix)
     end
   end
 
@@ -52,15 +57,15 @@ describe Grape::DSL::Routing do
 
   describe '.do_not_route_head!' do
     it 'sets do not route head option' do
-      expect(subject).to receive(:namespace_inheritable).with(:do_not_route_head, true)
       subject.do_not_route_head!
+      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_head]).to be(true)
     end
   end
 
   describe '.do_not_route_options!' do
     it 'sets do not route options option' do
-      expect(subject).to receive(:namespace_inheritable).with(:do_not_route_options, true)
       subject.do_not_route_options!
+      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_options]).to be(true)
     end
   end
 
@@ -187,21 +192,17 @@ describe Grape::DSL::Routing do
   end
 
   describe '.namespace' do
-    let(:new_namespace) { Object.new }
-
     it 'creates a new namespace with given name and options' do
-      expect(subject).to receive(:nest).and_yield
-      expect(Grape::Namespace).to receive(:new).with(:foo, { foo: 'bar' }).and_return(new_namespace)
-      expect(subject).to receive(:namespace_stackable).with(:namespace, new_namespace)
-
-      subject.namespace :foo, foo: 'bar', &proc {}
+      subject.namespace(:foo, foo: 'bar') {}
+      expect(subject.namespace(:foo, foo: 'bar')).to eq(Grape::Namespace.new(:foo, foo: 'bar'))
     end
 
     it 'calls #joined_space_path on Namespace' do
-      result_of_namspace_stackable = Object.new
-      allow(subject).to receive(:namespace_stackable).and_return(result_of_namspace_stackable)
-      expect(Grape::Namespace).to receive(:joined_space_path).with(result_of_namspace_stackable)
-      subject.namespace
+      inside_namespace = nil
+      subject.namespace(:foo, foo: 'bar') do
+        inside_namespace = namespace
+      end
+      expect(inside_namespace).to eq('/foo')
     end
   end
 

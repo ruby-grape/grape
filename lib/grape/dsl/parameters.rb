@@ -29,7 +29,7 @@ module Grape
       #       end
       #     end
       def build_with(build_with)
-        @api.namespace_inheritable(:build_params_with, build_with)
+        @api.inheritable_setting.namespace_inheritable[:build_params_with] = build_with
       end
 
       # Include reusable params rules among current.

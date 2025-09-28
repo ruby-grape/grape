@@ -45,12 +45,6 @@ describe Grape::API::Instance do
     end
   end
 
-  context 'top level setting' do
-    it 'does not inherit settings from the superclass (Grape::API::Instance)' do
-      expect(an_instance.top_level_setting.parent).to be_nil
-    end
-  end
-
   context 'with multiple moutes' do
     let(:first) do
       Class.new(Grape::API::Instance) do

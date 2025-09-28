@@ -4,7 +4,7 @@ describe Grape::Validations do
   subject { Class.new(Grape::API) }
 
   let(:app) { subject }
-  let(:declared_params) { subject.namespace_stackable(:declared_params).flatten }
+  let(:declared_params) { subject.inheritable_setting.namespace_stackable[:declared_params].flatten }
 
   describe 'params' do
     context 'optional' do

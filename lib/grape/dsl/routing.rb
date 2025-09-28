@@ -34,14 +34,14 @@ module Grape
 
           if block
             within_namespace do
-              namespace_inheritable(:version, requested_versions)
-              namespace_inheritable(:version_options, options)
+              inheritable_setting.namespace_inheritable[:version] = requested_versions
+              inheritable_setting.namespace_inheritable[:version_options] = options
 
               instance_eval(&block)
             end
           else
-            namespace_inheritable(:version, requested_versions)
-            namespace_inheritable(:version_options, options)
+            inheritable_setting.namespace_inheritable[:version] = requested_versions
+            inheritable_setting.namespace_inheritable[:version_options] = options
           end
         end
 
@@ -50,7 +50,9 @@ module Grape
 
       # Define a root URL prefix for your entire API.
       def prefix(prefix = nil)
-        namespace_inheritable(:root_prefix, prefix&.to_s)
+        return inheritable_setting.namespace_inheritable[:root_prefix] if prefix.nil?
+
+        inheritable_setting.namespace_inheritable[:root_prefix] = prefix.to_s
       end
 
       # Create a scope without affecting the URL.
@@ -64,25 +66,25 @@ module Grape
       end
 
       def build_with(build_with)
-        namespace_inheritable(:build_params_with, build_with)
+        inheritable_setting.namespace_inheritable[:build_params_with] = build_with
       end
 
       # Do not route HEAD requests to GET requests automatically.
       def do_not_route_head!
-        namespace_inheritable(:do_not_route_head, true)
+        inheritable_setting.namespace_inheritable[:do_not_route_head] = true
       end
 
       # Do not automatically route OPTIONS.
       def do_not_route_options!
-        namespace_inheritable(:do_not_route_options, true)
+        inheritable_setting.namespace_inheritable[:do_not_route_options] = true
       end
 
       def lint!
-        namespace_inheritable(:lint, true)
+        inheritable_setting.namespace_inheritable[:lint] = true
       end
 
       def do_not_document!
-        namespace_inheritable(:do_not_document, true)
+        inheritable_setting.namespace_inheritable[:do_not_document] = true
       end
 
       def mount(mounts, *opts)
@@ -183,11 +185,11 @@ module Grape
       #       end
       #     end
       def namespace(space = nil, options = {}, &block)
-        return Namespace.joined_space_path(namespace_stackable(:namespace)) unless space || block
+        return Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace]) unless space || block
 
         within_namespace do
           nest(block) do
-            namespace_stackable(:namespace, Namespace.new(space, options)) if space
+            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, options) if space
           end
         end
       end
@@ -241,6 +243,35 @@ module Grape
       def refresh_mounted_api(mounts, *opts)
         opts << { refresh_already_mounted: true }
         mount(mounts, *opts)
+      end
+
+      # Execute first the provided block, then each of the
+      # block passed in. Allows for simple 'before' setups
+      # of settings stack pushes.
+      def nest(*blocks, &block)
+        blocks.compact!
+        if blocks.any?
+          evaluate_as_instance_with_configuration(block) if block
+          blocks.each { |b| evaluate_as_instance_with_configuration(b) }
+          reset_validations!
+        else
+          instance_eval(&block)
+        end
+      end
+
+      def evaluate_as_instance_with_configuration(block, lazy: false)
+        lazy_block = Grape::Util::Lazy::Block.new do |configuration|
+          value_for_configuration = configuration
+          self.configuration = value_for_configuration.evaluate if value_for_configuration.try(:lazy?)
+          response = instance_eval(&block)
+          self.configuration = value_for_configuration
+          response
+        end
+        if base && base_instance? && lazy
+          lazy_block
+        else
+          lazy_block.evaluate_from(configuration)
+        end
       end
     end
   end

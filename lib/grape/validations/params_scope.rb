@@ -317,7 +317,7 @@ module Grape
         if nested?
           @parent.push_declared_params [element => @declared_params]
         else
-          @api.namespace_stackable(:declared_params, @declared_params)
+          @api.inheritable_setting.namespace_stackable[:declared_params] = @declared_params
         end
 
         # params were stored in settings, it can be cleaned from the params scope
@@ -467,7 +467,7 @@ module Grape
           opts: opts,
           validator_class: Validations.require_validator(type)
         }
-        @api.namespace_stackable(:validations, validator_options)
+        @api.inheritable_setting.namespace_stackable[:validations] = validator_options
       end
 
       def validate_value_coercion(coerce_type, *values_list)

@@ -54,7 +54,7 @@ describe Grape::DSL::InsideRoute do
 
     describe 'default_error_status' do
       before do
-        subject.namespace_inheritable(:default_error_status, 500)
+        subject.inheritable_setting.namespace_inheritable[:default_error_status] = 500
         catch(:error) { subject.error! 'Unknown' }
       end
 
