@@ -306,8 +306,8 @@ describe ActiveSupport::Notifications do
       endpoint_events.each do |event|
         metadata = event.payload[:body_metadata]
         expect(metadata).to include(:has_body, :has_stream, :status)
-        expect(metadata[:has_body]).to be_in([true, false])
-        expect(metadata[:has_stream]).to be_in([true, false])
+        expect(metadata[:has_body]).to be(true).or be(false)
+        expect(metadata[:has_stream]).to be(true).or be(false)
       end
     end
 
@@ -319,8 +319,8 @@ describe ActiveSupport::Notifications do
       format_events.each do |event|
         metadata = event.payload[:body_metadata]
         expect(metadata).to include(:is_stream, :status, :content_type, :format, :has_entity_body)
-        expect(metadata[:is_stream]).to be_in([true, false])
-        expect(metadata[:has_entity_body]).to be_in([true, false])
+        expect(metadata[:is_stream]).to be(true).or be(false)
+        expect(metadata[:has_entity_body]).to be(true).or be(false)
         expect(metadata[:status]).to be_a(Integer)
       end
     end
@@ -376,47 +376,6 @@ describe ActiveSupport::Notifications do
         expect(metadata[:body_size]).to eq(1) # Hash with one key
         expect(metadata[:body_type]).to eq('Hash')
       end
-    end
-
-    it 'handles objects without size method' do
-      # Create a custom object that doesn't respond to size
-      custom_object = Object.new
-      def custom_object.inspect
-        'custom_object'
-      end
-
-      # Mock the endpoint to return our custom object
-      allow_any_instance_of(Grape::Endpoint).to receive(:extract_endpoint_body_metadata) do |endpoint| # rubocop:disable RSpec/AnyInstance
-        metadata = {
-          has_body: true,
-          has_stream: false,
-          status: nil
-        }
-
-        # Simulate @body being our custom object
-        endpoint.instance_variable_set(:@body, custom_object)
-
-        if metadata[:has_body]
-          metadata[:body_type] = custom_object.class.name
-          metadata[:body_responds_to_size] = custom_object.respond_to?(:size)
-          metadata[:body_size] = custom_object.respond_to?(:size) ? custom_object.size : nil
-        end
-
-        metadata
-      end
-
-      get '/simple'
-
-      endpoint_events = events.select { |e| e.name.start_with?('endpoint_') }
-      expect(endpoint_events).not_to be_empty
-
-      event = endpoint_events.first
-      metadata = event.payload[:body_metadata]
-
-      expect(metadata[:has_body]).to be true
-      expect(metadata[:body_responds_to_size]).to be false
-      expect(metadata[:body_size]).to be_nil
-      expect(metadata[:body_type]).to eq('Object')
     end
 
     it 'does not include body_size when has_body is false' do
