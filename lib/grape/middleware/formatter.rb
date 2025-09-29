@@ -38,7 +38,10 @@ module Grape
         else
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers, options)
-          bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter: formatter, env: env) do
+          bodymap = ActiveSupport::Notifications.instrument('format_response.grape',
+                                                           formatter: formatter,
+                                                           env: env,
+                                                           body_metadata: extract_body_metadata(bodies, status, headers)) do
             bodies.collect { |body| formatter.call(body, env) }
           end
           Rack::Response.new(bodymap, status, headers)
@@ -144,6 +147,30 @@ module Grape
 
         media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
         mime_types[media_type] if media_type
+      end
+
+      def extract_body_metadata(bodies, status, headers)
+        metadata = {
+          is_stream: bodies.is_a?(Grape::ServeStream::StreamResponse),
+          status: status,
+          content_type: headers[Rack::CONTENT_TYPE] || content_type_for(env[Grape::Env::API_FORMAT]),
+          format: env[Grape::Env::API_FORMAT],
+          has_entity_body: !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+        }
+
+        if bodies.is_a?(Grape::ServeStream::StreamResponse)
+          metadata[:stream_type] = bodies.stream.class.name
+          # For file streams, we can get the path without reading content
+          if bodies.stream.respond_to?(:to_path)
+            metadata[:file_path] = bodies.stream.to_path
+          end
+        else
+          # For regular bodies (Array), provide count and types without reading content
+          metadata[:body_count] = bodies.respond_to?(:size) ? bodies.size : 1
+          metadata[:body_types] = bodies.respond_to?(:map) ? bodies.map(&:class).map(&:name) : [bodies.class.name]
+        end
+
+        metadata
       end
     end
   end

@@ -80,7 +80,7 @@ module Grape
       if block
         @source = block
         @block = lambda do |endpoint_instance|
-          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
+          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance, body_metadata: endpoint_instance.extract_endpoint_body_metadata) do
             endpoint_instance.instance_exec(&block)
           rescue LocalJumpError => e
             Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated.'
@@ -206,6 +206,39 @@ module Grape
       (options == endpoint.options) && (inheritable_setting.to_hash == endpoint.inheritable_setting.to_hash)
     end
 
+    # Extract body metadata for endpoint notifications
+    # This provides information about the response body without reading its content
+    def extract_endpoint_body_metadata
+      metadata = {
+        has_body: instance_variable_defined?(:@body) && !@body.nil?,
+        has_stream: instance_variable_defined?(:@stream) && !@stream.nil?,
+        status: instance_variable_defined?(:@status) ? @status : nil
+      }
+
+      if metadata[:has_body]
+        metadata[:body_type] = @body.class.name
+        metadata[:body_responds_to_size] = @body.respond_to?(:size)
+        metadata[:body_size] = @body.respond_to?(:size) ? @body.size : nil
+      end
+
+      if metadata[:has_stream]
+        metadata[:stream_type] = @stream.class.name
+        if @stream.respond_to?(:stream)
+          metadata[:stream_inner_type] = @stream.stream.class.name
+          if @stream.stream.respond_to?(:to_path)
+            metadata[:stream_file_path] = @stream.stream.to_path
+          end
+        end
+      end
+
+      if env
+        metadata[:api_format] = env[Grape::Env::API_FORMAT]
+        metadata[:content_type] = env['CONTENT_TYPE']
+      end
+
+      metadata
+    end
+
     # The purpose of this override is solely for stripping internals when an error occurs while calling
     # an endpoint through an api. See https://github.com/ruby-grape/grape/issues/2398
     # Otherwise, it calls super.
@@ -218,7 +251,7 @@ module Grape
     protected
 
     def run
-      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
+      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env, body_metadata: extract_endpoint_body_metadata) do
         @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
         begin
           self.class.run_before_each(self)
@@ -272,7 +305,7 @@ module Grape
     def run_validators(validators, request)
       validation_errors = []
 
-      ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
+      ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request, body_metadata: extract_endpoint_body_metadata) do
         validators.each do |validator|
           validator.validate(request)
         rescue Grape::Exceptions::Validation => e
@@ -288,7 +321,7 @@ module Grape
     end
 
     def run_filters(filters, type = :other)
-      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
+      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type, body_metadata: extract_endpoint_body_metadata) do
         filters&.each { |filter| instance_eval(&filter) }
       end
       post_extension = DSL::InsideRoute.post_filter_methods(type)
