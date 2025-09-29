@@ -82,11 +82,9 @@ module Grape
 
         # (see #cascade?)
         def cascade(value = nil)
-          if value.nil?
-            inheritable_setting.namespace_inheritable.key?(:cascade) ? !namespace_inheritable(:cascade).nil? : true
-          else
-            namespace_inheritable(:cascade, value)
-          end
+          return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable(:cascade).nil? : true if value.nil?
+
+          inheritable_setting.namespace_inheritable[:cascade] = value
         end
 
         def compile!
@@ -102,35 +100,6 @@ module Grape
         end
 
         protected
-
-        # Execute first the provided block, then each of the
-        # block passed in. Allows for simple 'before' setups
-        # of settings stack pushes.
-        def nest(*blocks, &block)
-          blocks.compact!
-          if blocks.any?
-            evaluate_as_instance_with_configuration(block) if block
-            blocks.each { |b| evaluate_as_instance_with_configuration(b) }
-            reset_validations!
-          else
-            instance_eval(&block)
-          end
-        end
-
-        def evaluate_as_instance_with_configuration(block, lazy: false)
-          lazy_block = Grape::Util::Lazy::Block.new do |configuration|
-            value_for_configuration = configuration
-            self.configuration = value_for_configuration.evaluate if value_for_configuration.try(:lazy?)
-            response = instance_eval(&block)
-            self.configuration = value_for_configuration
-            response
-          end
-          if base && base_instance? && lazy
-            lazy_block
-          else
-            lazy_block.evaluate_from(configuration)
-          end
-        end
 
         def inherited(subclass)
           super
@@ -187,8 +156,9 @@ module Grape
       # errors from reaching upstream. This is effectivelly done by unsetting
       # X-Cascade. Default :cascade is true.
       def cascade?
-        return self.class.namespace_inheritable(:cascade) if self.class.inheritable_setting.namespace_inheritable.key?(:cascade)
-        return self.class.namespace_inheritable(:version_options)[:cascade] if self.class.namespace_inheritable(:version_options)&.key?(:cascade)
+        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
+        return namespace_inheritable[:cascade] if namespace_inheritable.key?(:cascade)
+        return namespace_inheritable[:version_options][:cascade] if namespace_inheritable[:version_options]&.key?(:cascade)
 
         true
       end
@@ -219,11 +189,12 @@ module Grape
           last_route = routes.last # Most of the configuration is taken from the last endpoint
           next if routes.any? { |route| route.request_method == '*' }
 
+          namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
           allowed_methods = routes.map(&:request_method)
-          allowed_methods |= [Rack::HEAD] if !self.class.namespace_inheritable(:do_not_route_head) && allowed_methods.include?(Rack::GET)
+          allowed_methods |= [Rack::HEAD] if !namespace_inheritable[:do_not_route_head] && allowed_methods.include?(Rack::GET)
 
-          allow_header = self.class.namespace_inheritable(:do_not_route_options) ? allowed_methods : [Rack::OPTIONS] | allowed_methods
-          last_route.app.options[:options_route_enabled] = true unless self.class.namespace_inheritable(:do_not_route_options) || allowed_methods.include?(Rack::OPTIONS)
+          allow_header = namespace_inheritable[:do_not_route_options] ? allowed_methods : [Rack::OPTIONS] | allowed_methods
+          last_route.app.options[:options_route_enabled] = true unless namespace_inheritable[:do_not_route_options] || allowed_methods.include?(Rack::OPTIONS)
 
           @router.associate_routes(last_route.pattern, {
                                      endpoint: last_route.app,

@@ -6,27 +6,14 @@ describe Grape::DSL::Helpers do
   let(:dummy_class) do
     Class.new do
       extend Grape::DSL::Helpers
+      extend Grape::DSL::Settings
 
       def self.mods
-        namespace_stackable(:helpers)
+        inheritable_setting.namespace_stackable[:helpers]
       end
 
       def self.first_mod
         mods.first
-      end
-
-      def self.namespace_stackable(key, value = nil)
-        if value
-          namespace_stackable_hash[key] << value
-        else
-          namespace_stackable_hash[key]
-        end
-      end
-
-      def self.namespace_stackable_hash
-        @namespace_stackable_hash ||= Hash.new do |hash, key|
-          hash[key] = []
-        end
       end
     end
   end
@@ -41,20 +28,13 @@ describe Grape::DSL::Helpers do
 
   describe '.helpers' do
     it 'adds a module with the given block' do
-      expect(subject).to receive(:namespace_stackable).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original
-      expect(subject).to receive(:namespace_stackable).with(:helpers).and_call_original
       subject.helpers(&proc)
-
       expect(subject.first_mod.instance_methods).to include(:test)
     end
 
     it 'uses provided modules' do
       mod = Module.new
-
-      expect(subject).to receive(:namespace_stackable).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original.twice
-      expect(subject).to receive(:namespace_stackable).with(:helpers).and_call_original
       subject.helpers(mod, &proc)
-
       expect(subject.first_mod).to eq mod
     end
 
@@ -63,14 +43,8 @@ describe Grape::DSL::Helpers do
       mod2 = Module.new
       mod3 = Module.new
 
-      expect(subject).to receive(:namespace_stackable).with(:helpers, kind_of(Grape::DSL::Helpers::BaseHelper)).and_call_original.exactly(4).times
-      expect(subject).to receive(:namespace_stackable).with(:helpers).and_call_original.exactly(3).times
-
       subject.helpers(mod, mod2, mod3, &proc)
-
-      expect(subject.mods).to include(mod)
-      expect(subject.mods).to include(mod2)
-      expect(subject.mods).to include(mod3)
+      expect(subject.mods).to include(mod, mod2, mod3)
     end
 
     context 'with an external file' do

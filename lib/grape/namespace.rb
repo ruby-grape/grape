@@ -28,6 +28,17 @@ module Grape
       settings&.map(&:space)
     end
 
+    def eql?(other)
+      other.class == self.class &&
+        other.space == space &&
+        other.options == options
+    end
+    alias == eql?
+
+    def hash
+      [self.class, space, options].hash
+    end
+
     # Join the namespaces from a list of settings to create a path prefix.
     # @param settings [Array] list of Grape::Util::InheritableSettings.
     def self.joined_space_path(settings)

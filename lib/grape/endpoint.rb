@@ -55,11 +55,11 @@ module Grape
       # now +namespace_stackable(:declared_params)+ contains all params defined for
       # this endpoint and its parents, but later it will be cleaned up,
       # see +reset_validations!+ in lib/grape/dsl/validations.rb
-      inheritable_setting.route[:declared_params] = namespace_stackable(:declared_params).flatten
-      inheritable_setting.route[:saved_validations] = namespace_stackable(:validations)
+      inheritable_setting.route[:declared_params] = inheritable_setting.namespace_stackable[:declared_params].flatten
+      inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations]
 
-      namespace_stackable(:representations, []) unless namespace_stackable(:representations)
-      namespace_inheritable(:default_error_status, 500) unless namespace_inheritable(:default_error_status)
+      inheritable_setting.namespace_stackable[:representations] = [] unless inheritable_setting.namespace_stackable[:representations]
+      inheritable_setting.namespace_inheritable[:default_error_status] = 500 unless inheritable_setting.namespace_inheritable[:default_error_status]
 
       @options = options
 
@@ -123,7 +123,7 @@ module Grape
       reset_routes!
       routes.each do |route|
         router.append(route.apply(self))
-        next unless !namespace_inheritable(:do_not_route_head) && route.request_method == Rack::GET
+        next unless !inheritable_setting.namespace_inheritable[:do_not_route_head] && route.request_method == Rack::GET
 
         route.dup.then do |head_route|
           head_route.convert_to_head_request!
@@ -144,7 +144,7 @@ module Grape
     end
 
     def prepare_routes_requirements
-      {}.merge!(*namespace_stackable(:namespace).map(&:requirements)).tap do |requirements|
+      {}.merge!(*inheritable_setting.namespace_stackable[:namespace].map(&:requirements)).tap do |requirements|
         endpoint_requirements = options.dig(:route_options, :requirements)
         requirements.merge!(endpoint_requirements) if endpoint_requirements
       end
@@ -155,7 +155,7 @@ module Grape
         namespace: namespace,
         version: prepare_version,
         requirements: prepare_routes_requirements,
-        prefix: namespace_inheritable(:root_prefix),
+        prefix: inheritable_setting.namespace_inheritable[:root_prefix],
         anchor: options[:route_options].fetch(:anchor, true),
         settings: inheritable_setting.route.except(:declared_params, :saved_validations),
         forward_match: options[:forward_match]
@@ -163,7 +163,7 @@ module Grape
     end
 
     def prepare_version
-      version = namespace_inheritable(:version)
+      version = inheritable_setting.namespace_inheritable[:version]
       return if version.blank?
 
       version.length == 1 ? version.first : version
@@ -180,7 +180,7 @@ module Grape
     end
 
     def namespace
-      @namespace ||= Namespace.joined_space_path(namespace_stackable(:namespace))
+      @namespace ||= Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace])
     end
 
     def call(env)
@@ -219,7 +219,7 @@ module Grape
 
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
-        @request = Grape::Request.new(env, build_params_with: namespace_inheritable(:build_params_with))
+        @request = Grape::Request.new(env, build_params_with: inheritable_setting.namespace_inheritable[:build_params_with])
         begin
           self.class.run_before_each(self)
           run_filters befores, :before
@@ -297,7 +297,7 @@ module Grape
 
     %i[befores before_validations after_validations afters finallies].each do |method|
       define_method method do
-        namespace_stackable(method)
+        inheritable_setting.namespace_stackable[method]
       end
     end
 
@@ -322,37 +322,37 @@ module Grape
       stack = Grape::Middleware::Stack.new
 
       content_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
-      format = namespace_inheritable(:format)
+      format = inheritable_setting.namespace_inheritable[:format]
 
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
       stack.use Grape::Middleware::Error,
                 format: format,
                 content_types: content_types,
-                default_status: namespace_inheritable(:default_error_status),
-                rescue_all: namespace_inheritable(:rescue_all),
-                rescue_grape_exceptions: namespace_inheritable(:rescue_grape_exceptions),
-                default_error_formatter: namespace_inheritable(:default_error_formatter),
+                default_status: inheritable_setting.namespace_inheritable[:default_error_status],
+                rescue_all: inheritable_setting.namespace_inheritable[:rescue_all],
+                rescue_grape_exceptions: inheritable_setting.namespace_inheritable[:rescue_grape_exceptions],
+                default_error_formatter: inheritable_setting.namespace_inheritable[:default_error_formatter],
                 error_formatters: inheritable_setting.namespace_stackable_with_hash(:error_formatters),
                 rescue_options: inheritable_setting.namespace_stackable_with_hash(:rescue_options),
                 rescue_handlers: rescue_handlers,
                 base_only_rescue_handlers: inheritable_setting.namespace_stackable_with_hash(:base_only_rescue_handlers),
-                all_rescue_handler: namespace_inheritable(:all_rescue_handler),
-                grape_exceptions_rescue_handler: namespace_inheritable(:grape_exceptions_rescue_handler)
+                all_rescue_handler: inheritable_setting.namespace_inheritable[:all_rescue_handler],
+                grape_exceptions_rescue_handler: inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler]
 
-      stack.concat namespace_stackable(:middleware)
+      stack.concat inheritable_setting.namespace_stackable[:middleware]
 
-      if namespace_inheritable(:version).present?
-        stack.use Grape::Middleware::Versioner.using(namespace_inheritable(:version_options)[:using]),
-                  versions: namespace_inheritable(:version).flatten,
-                  version_options: namespace_inheritable(:version_options),
-                  prefix: namespace_inheritable(:root_prefix),
-                  mount_path: namespace_stackable(:mount_path).first
+      if inheritable_setting.namespace_inheritable[:version].present?
+        stack.use Grape::Middleware::Versioner.using(inheritable_setting.namespace_inheritable[:version_options][:using]),
+                  versions: inheritable_setting.namespace_inheritable[:version].flatten,
+                  version_options: inheritable_setting.namespace_inheritable[:version_options],
+                  prefix: inheritable_setting.namespace_inheritable[:root_prefix],
+                  mount_path: inheritable_setting.namespace_stackable[:mount_path].first
       end
 
       stack.use Grape::Middleware::Formatter,
                 format: format,
-                default_format: namespace_inheritable(:default_format) || :txt,
+                default_format: inheritable_setting.namespace_inheritable[:default_format] || :txt,
                 content_types: content_types,
                 formatters: inheritable_setting.namespace_stackable_with_hash(:formatters),
                 parsers: inheritable_setting.namespace_stackable_with_hash(:parsers)
@@ -363,7 +363,7 @@ module Grape
     end
 
     def build_helpers
-      helpers = namespace_stackable(:helpers)
+      helpers = inheritable_setting.namespace_stackable[:helpers]
       return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
@@ -377,7 +377,7 @@ module Grape
     end
 
     def lint?
-      namespace_inheritable(:lint) || Grape.config.lint
+      inheritable_setting.namespace_inheritable[:lint] || Grape.config.lint
     end
 
     def rescue_handlers

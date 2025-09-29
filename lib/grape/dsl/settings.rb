@@ -26,14 +26,6 @@ module Grape
         @inheritable_setting ||= Grape::Util::InheritableSetting.new.tap { |new_settings| new_settings.inherit_from top_level_setting }
       end
 
-      def namespace_inheritable(key, value = nil)
-        get_or_set(inheritable_setting.namespace_inheritable, key, value)
-      end
-
-      def namespace_stackable(key, value = nil)
-        get_or_set(inheritable_setting.namespace_stackable, key, value)
-      end
-
       def global_setting(key, value = nil)
         get_or_set(inheritable_setting.global, key, value)
       end

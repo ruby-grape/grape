@@ -35,7 +35,7 @@ Style/Send:
   Enabled: true
 
 Metrics/AbcSize:
-  Max: 50
+  Max: 80 # TODO: revert to 50 once the refactor of public api is done.
 
 Metrics/BlockLength:
   Max: 30

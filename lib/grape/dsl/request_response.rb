@@ -6,40 +6,42 @@ module Grape
       # Specify the default format for the API's serializers.
       # May be `:json` or `:txt` (default).
       def default_format(new_format = nil)
-        namespace_inheritable(:default_format, new_format&.to_sym)
+        return inheritable_setting.namespace_inheritable[:default_format] if new_format.nil?
+
+        inheritable_setting.namespace_inheritable[:default_format] = new_format.to_sym
       end
 
       # Specify the format for the API's serializers.
       # May be `:json`, `:xml`, `:txt`, etc.
       def format(new_format = nil)
-        return namespace_inheritable(:format) unless new_format
+        return inheritable_setting.namespace_inheritable[:format] if new_format.nil?
 
         symbolic_new_format = new_format.to_sym
-        namespace_inheritable(:format, symbolic_new_format)
-        namespace_inheritable(:default_error_formatter, Grape::ErrorFormatter.formatter_for(symbolic_new_format))
+        inheritable_setting.namespace_inheritable[:format] = symbolic_new_format
+        inheritable_setting.namespace_inheritable[:default_error_formatter] = Grape::ErrorFormatter.formatter_for(symbolic_new_format)
 
         content_type = content_types[symbolic_new_format]
         raise Grape::Exceptions::MissingMimeType.new(new_format) unless content_type
 
-        namespace_stackable(:content_types, symbolic_new_format => content_type)
+        inheritable_setting.namespace_stackable[:content_types] = { symbolic_new_format => content_type }
       end
 
       # Specify a custom formatter for a content-type.
       def formatter(content_type, new_formatter)
-        namespace_stackable(:formatters, content_type.to_sym => new_formatter)
+        inheritable_setting.namespace_stackable[:formatters] = { content_type.to_sym => new_formatter }
       end
 
       # Specify a custom parser for a content-type.
       def parser(content_type, new_parser)
-        namespace_stackable(:parsers, content_type.to_sym => new_parser)
+        inheritable_setting.namespace_stackable[:parsers] = { content_type.to_sym => new_parser }
       end
 
       # Specify a default error formatter.
       def default_error_formatter(new_formatter_name = nil)
-        return namespace_inheritable(:default_error_formatter) unless new_formatter_name
+        return inheritable_setting.namespace_inheritable[:default_error_formatter] if new_formatter_name.nil?
 
         new_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
-        namespace_inheritable(:default_error_formatter, new_formatter)
+        inheritable_setting.namespace_inheritable[:default_error_formatter] = new_formatter
       end
 
       def error_formatter(format, options)
@@ -49,13 +51,13 @@ module Grape
                       options
                     end
 
-        namespace_stackable(:error_formatters, format.to_sym => formatter)
+        inheritable_setting.namespace_stackable[:error_formatters] = { format.to_sym => formatter }
       end
 
       # Specify additional content-types, e.g.:
       #   content_type :xls, 'application/vnd.ms-excel'
       def content_type(key, val)
-        namespace_stackable(:content_types, key.to_sym => val)
+        inheritable_setting.namespace_stackable[:content_types] = { key.to_sym => val }
       end
 
       # All available content types.
@@ -66,7 +68,9 @@ module Grape
 
       # Specify the default status code for errors.
       def default_error_status(new_status = nil)
-        namespace_inheritable(:default_error_status, new_status)
+        return inheritable_setting.namespace_inheritable[:default_error_status] if new_status.nil?
+
+        inheritable_setting.namespace_inheritable[:default_error_status] = new_status
       end
 
       # Allows you to rescue certain exceptions that occur to return
@@ -102,12 +106,12 @@ module Grape
         handler ||= extract_with(options)
 
         if args.include?(:all)
-          namespace_inheritable(:rescue_all, true)
-          namespace_inheritable(:all_rescue_handler, handler)
+          inheritable_setting.namespace_inheritable[:rescue_all] = true
+          inheritable_setting.namespace_inheritable[:all_rescue_handler] = handler
         elsif args.include?(:grape_exceptions)
-          namespace_inheritable(:rescue_all, true)
-          namespace_inheritable(:rescue_grape_exceptions, true)
-          namespace_inheritable(:grape_exceptions_rescue_handler, handler)
+          inheritable_setting.namespace_inheritable[:rescue_all] = true
+          inheritable_setting.namespace_inheritable[:rescue_grape_exceptions] = true
+          inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler] = handler
         else
           handler_type =
             case options[:rescue_subclasses]
@@ -120,7 +124,7 @@ module Grape
           inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |arg| [arg, handler] }
         end
 
-        namespace_stackable(:rescue_options, options)
+        inheritable_setting.namespace_stackable[:rescue_options] = options
       end
 
       # Allows you to specify a default representation entity for a
@@ -146,7 +150,7 @@ module Grape
       def represent(model_class, options)
         raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with].is_a?(Class)
 
-        namespace_stackable(:representations, model_class => options[:with])
+        inheritable_setting.namespace_stackable[:representations] = { model_class => options[:with] }
       end
 
       private

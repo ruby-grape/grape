@@ -19,6 +19,7 @@
 * [#2603](https://github.com/ruby-grape/grape/pull/2603): Remove `namespace_stackable_with_hash` from public interface and move to internal InheritableSetting - [@ericproulx](https://github.com/ericproulx).
 * [#2604](https://github.com/ruby-grape/grape/pull/2604): Enable branch coverage  - [@ericproulx](https://github.com/ericproulx).
 * [#2605](https://github.com/ruby-grape/grape/pull/2605): Add Rack 3.2 support with new gemfile and CI integration - [@ericproulx](https://github.com/ericproulx).
+* [#2607](https://github.com/ruby-grape/grape/pull/2607): Remove namespace_stackable and namespace_inheritable from public API - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

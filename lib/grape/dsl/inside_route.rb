@@ -31,7 +31,7 @@ module Grape
                   declared_hash(passed_params, options, declared_params, params_nested_path)
                 end
 
-          if (key_maps = namespace_stackable(:contract_key_map))
+          if (key_maps = inheritable_setting.namespace_stackable[:contract_key_map])
             key_maps.each { |key_map| key_map.write(passed_params, res) }
           end
 
@@ -122,7 +122,7 @@ module Grape
                               inheritable_setting.route[:declared_params]
                             else
                               # Declared params at current namespace
-                              namespace_stackable(:declared_params).last || []
+                              inheritable_setting.namespace_stackable[:declared_params].last || []
                             end
 
           raise ArgumentError, 'Tried to filter for declared parameters but none exist.' unless declared_params
@@ -164,7 +164,7 @@ module Grape
       # @param backtrace [Array<String>] The backtrace of the exception that caused the error.
       # @param original_exception [Exception] The original exception that caused the error.
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
-        status = self.status(status || namespace_inheritable(:default_error_status))
+        status = self.status(status || inheritable_setting.namespace_inheritable[:default_error_status])
         headers = additional_headers.present? ? header.merge(additional_headers) : header
         throw :error,
               message: message,

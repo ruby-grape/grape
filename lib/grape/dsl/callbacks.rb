@@ -11,7 +11,7 @@ module Grape
 
       %w[before before_validation after_validation after finally].each do |callback_method|
         define_method callback_method.to_sym do |&block|
-          namespace_stackable(callback_method.pluralize.to_sym, block)
+          inheritable_setting.namespace_stackable[callback_method.pluralize.to_sym] = block
         end
       end
     end
