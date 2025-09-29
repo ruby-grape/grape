@@ -1060,7 +1060,7 @@ describe Grape::Endpoint do
       ActiveSupport::Notifications.unsubscribe(@subscriber)
     end
 
-    it 'notifies AS::N' do
+    it 'notifies AS::N' do # rubocop:disable RSpec/ExampleLength
       get '/'
 
       # In order that the events finalized (time each block ended)

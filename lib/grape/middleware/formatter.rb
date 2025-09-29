@@ -39,9 +39,9 @@ module Grape
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers, options)
           bodymap = ActiveSupport::Notifications.instrument('format_response.grape',
-                                                           formatter: formatter,
-                                                           env: env,
-                                                           body_metadata: extract_body_metadata(bodies, status, headers)) do
+                                                            formatter: formatter,
+                                                            env: env,
+                                                            body_metadata: extract_body_metadata(bodies, status, headers)) do
             bodies.collect { |body| formatter.call(body, env) }
           end
           Rack::Response.new(bodymap, status, headers)
@@ -161,13 +161,11 @@ module Grape
         if bodies.is_a?(Grape::ServeStream::StreamResponse)
           metadata[:stream_type] = bodies.stream.class.name
           # For file streams, we can get the path without reading content
-          if bodies.stream.respond_to?(:to_path)
-            metadata[:file_path] = bodies.stream.to_path
-          end
+          metadata[:file_path] = bodies.stream.to_path if bodies.stream.respond_to?(:to_path)
         else
           # For regular bodies (Array), provide count and types without reading content
           metadata[:body_count] = bodies.respond_to?(:size) ? bodies.size : 1
-          metadata[:body_types] = bodies.respond_to?(:map) ? bodies.map(&:class).map(&:name) : [bodies.class.name]
+          metadata[:body_types] = bodies.respond_to?(:map) ? bodies.map { |x| x.class.name } : [bodies.class.name]
         end
 
         metadata

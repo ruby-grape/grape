@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Body metadata in ActiveSupport::Notifications' do
+describe ActiveSupport::Notifications do
   let(:app) do
     Class.new(Grape::API) do
       format :json
@@ -47,7 +47,7 @@ describe 'Body metadata in ActiveSupport::Notifications' do
 
   let(:events) { [] }
   let(:subscriber) do
-    ActiveSupport::Notifications.subscribe(/grape/) do |*args|
+    described_class.subscribe(/grape/) do |*args|
       events << ActiveSupport::Notifications::Event.new(*args)
     end
   end
@@ -58,7 +58,7 @@ describe 'Body metadata in ActiveSupport::Notifications' do
   end
 
   after do
-    ActiveSupport::Notifications.unsubscribe(subscriber)
+    described_class.unsubscribe(subscriber)
   end
 
   describe 'endpoint_run.grape notification' do
@@ -279,9 +279,9 @@ describe 'Body metadata in ActiveSupport::Notifications' do
 
       grape_events.each do |event|
         expect(event.payload).to have_key(:body_metadata),
-          "Event #{event.name} should include body_metadata"
+                                 "Event #{event.name} should include body_metadata"
         expect(event.payload[:body_metadata]).to be_a(Hash),
-          "Event #{event.name} body_metadata should be a Hash"
+                                                 "Event #{event.name} body_metadata should be a Hash"
       end
     end
 
@@ -291,7 +291,7 @@ describe 'Body metadata in ActiveSupport::Notifications' do
       grape_events = events.select { |e| e.name.include?('grape') }
 
       # All events should have the same api_format
-      api_formats = grape_events.map { |e| e.payload[:body_metadata][:api_format] }.compact.uniq
+      api_formats = grape_events.filter_map { |e| e.payload[:body_metadata][:api_format] }.uniq
       expect(api_formats.size).to eq(1)
       expect(api_formats.first).to eq(:json)
     end
@@ -306,8 +306,8 @@ describe 'Body metadata in ActiveSupport::Notifications' do
       endpoint_events.each do |event|
         metadata = event.payload[:body_metadata]
         expect(metadata).to include(:has_body, :has_stream, :status)
-        expect([true, false]).to include(metadata[:has_body])
-        expect([true, false]).to include(metadata[:has_stream])
+        expect(metadata[:has_body]).to be_in([true, false])
+        expect(metadata[:has_stream]).to be_in([true, false])
       end
     end
 
@@ -319,8 +319,8 @@ describe 'Body metadata in ActiveSupport::Notifications' do
       format_events.each do |event|
         metadata = event.payload[:body_metadata]
         expect(metadata).to include(:is_stream, :status, :content_type, :format, :has_entity_body)
-        expect([true, false]).to include(metadata[:is_stream])
-        expect([true, false]).to include(metadata[:has_entity_body])
+        expect(metadata[:is_stream]).to be_in([true, false])
+        expect(metadata[:has_entity_body]).to be_in([true, false])
         expect(metadata[:status]).to be_a(Integer)
       end
     end
@@ -386,7 +386,7 @@ describe 'Body metadata in ActiveSupport::Notifications' do
       end
 
       # Mock the endpoint to return our custom object
-      allow_any_instance_of(Grape::Endpoint).to receive(:extract_endpoint_body_metadata) do |endpoint|
+      allow_any_instance_of(Grape::Endpoint).to receive(:extract_endpoint_body_metadata) do |endpoint| # rubocop:disable RSpec/AnyInstance
         metadata = {
           has_body: true,
           has_stream: false,
@@ -440,10 +440,10 @@ describe 'Body metadata in ActiveSupport::Notifications' do
       endpoint_events = events.select { |e| e.name.start_with?('endpoint_') }
       expect(endpoint_events).not_to be_empty
 
-      body_sizes = endpoint_events.map { |e| e.payload[:body_metadata][:body_size] }.compact.uniq
+      body_sizes = endpoint_events.filter_map { |e| e.payload[:body_metadata][:body_size] }.uniq
 
       if body_sizes.any?
-        expect(body_sizes.size).to eq(1), "All endpoint notifications should have the same body_size"
+        expect(body_sizes.size).to eq(1), 'All endpoint notifications should have the same body_size'
         expect(body_sizes.first).to eq(5)
       end
     end

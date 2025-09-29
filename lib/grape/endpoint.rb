@@ -225,9 +225,7 @@ module Grape
         metadata[:stream_type] = @stream.class.name
         if @stream.respond_to?(:stream)
           metadata[:stream_inner_type] = @stream.stream.class.name
-          if @stream.stream.respond_to?(:to_path)
-            metadata[:stream_file_path] = @stream.stream.to_path
-          end
+          metadata[:stream_file_path] = @stream.stream.to_path if @stream.stream.respond_to?(:to_path)
         end
       end
 
