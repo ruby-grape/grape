@@ -145,7 +145,7 @@
       - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
       - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
       - [format_response.grape](#format_responsegrape)
-    - [Subscribe to hooks](#subscribe-to-hooks)
+    - [Subscribe to Hooks](#subscribe-to-hooks)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [Security](#security)
@@ -4165,11 +4165,11 @@ Serialization or template rendering.
 
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
-#### Subscribe to hooks
+#### Subscribe to Hooks
 
 Once subscribed to the instrumentation, you can intercept the events reported above.
 
-```
+```ruby
 ActiveSupport::Notifications.subscribe(/<api_path>/) do |name, start, finish, id, payload|
   # your code to intercept the notification
 end
@@ -4179,12 +4179,12 @@ The request data, the API’s internal data, and the response can be retrieved f
 
 You can use `payload.fetch(:endpoint)` or directly `payload[:endpoint]`.
 
-The `:endpoint` contains the data currently being processed.
+The `:endpoint` contains the data currently being processed, and access to attributes such as `body`, `request`, ...
 
 The endpoint provides access to the following attributes:
 `body`, `request`, `params`, `headers`, `cookies`, `response_cookies`
 
-For example, `payload[:endpoint].body` provides the current state of the response
+For example, `payload[:endpoint].body` provides the current state of the response.
 
 ### Monitoring Products
 
@@ -4192,11 +4192,11 @@ Grape integrates with following third-party tools:
 
 * **New Relic** - [built-in support](https://docs.newrelic.com/docs/agents/ruby-agent/frameworks/grape-instrumentation) from v3.10.0 of the official [newrelic_rpm](https://github.com/newrelic/rpm) gem, also [newrelic-grape](https://github.com/xinminlabs/newrelic-grape) gem
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
+* **Rails Performance** - [rails_performance](https://github.com/igorkasyanchuk/rails_performance) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 * **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
 * **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
 * **[Datadog APM](https://docs.datadoghq.com/tracing/)** - [ddtrace](https://github.com/datadog/dd-trace-rb) gem, [documentation](https://docs.datadoghq.com/tracing/setup_overview/setup/ruby/#grape)
-* **Rails Performance** - **[rails_performance](https://github.com/igorkasyanchuk/rails_performance) gem
 
 ## Contributing to Grape
 
