@@ -4186,6 +4186,19 @@ The endpoint provides access to the following attributes:
 
 For example, `payload[:endpoint].body` provides the current state of the response.
 
+```ruby
+ActiveSupport::Notifications.subscribe(/v1/) do |name, start, finish, id, payload|
+  hook_record = {
+    hook: name
+    status: payload[:env]&.dig("api.endpoint")&.status
+    format: payload[:env]&.dig("api.format")
+    body: payload[:endpoint]&.body
+    duration: (finish - start) * 1000
+  }
+  # your code to save the notification
+end
+```
+
 ### Monitoring Products
 
 Grape integrates with following third-party tools:
