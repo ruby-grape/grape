@@ -139,11 +139,13 @@
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
-    - [endpoint_run.grape](#endpoint_rungrape)
-    - [endpoint_render.grape](#endpoint_rendergrape)
-    - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
-    - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
-    - [format_response.grape](#format_responsegrape)
+    - [Hook Points](#hook-points)
+      - [endpoint_run.grape](#endpoint_rungrape)
+      - [endpoint_render.grape](#endpoint_rendergrape)
+      - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
+      - [endpoint_run_validators.grape](#endpoint_run_validatorsgrape)
+      - [format_response.grape](#format_responsegrape)
+    - [Subscribe to Hooks](#subscribe-to-hooks)
   - [Monitoring Products](#monitoring-products)
 - [Contributing to Grape](#contributing-to-grape)
 - [Security](#security)
@@ -4125,27 +4127,30 @@ See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-
 
 Grape has built-in support for [ActiveSupport::Notifications](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) which provides simple hook points to instrument key parts of your application.
 
-The following are currently supported:
 
-#### endpoint_run.grape
+#### Hook Points
+
+The following hook points are currently supported:
+
+##### endpoint_run.grape
 
 The main execution of an endpoint, includes filters and rendering.
 
 * *endpoint* - The endpoint instance
 
-#### endpoint_render.grape
+##### endpoint_render.grape
 
 The execution of the main content block of the endpoint.
 
 * *endpoint* - The endpoint instance
 
-#### endpoint_run_filters.grape
+##### endpoint_run_filters.grape
 
 * *endpoint* - The endpoint instance
 * *filters* - The filters being executed
 * *type* - The type of filters (before, before_validation, after_validation, after)
 
-#### endpoint_run_validators.grape
+##### endpoint_run_validators.grape
 
 The execution of validators.
 
@@ -4153,7 +4158,7 @@ The execution of validators.
 * *validators* - The validators being executed
 * *request* - The request being validated
 
-#### format_response.grape
+##### format_response.grape
 
 Serialization or template rendering.
 
@@ -4162,12 +4167,44 @@ Serialization or template rendering.
 
 See the [ActiveSupport::Notifications documentation](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) for information on how to subscribe to these events.
 
+#### Subscribe to Hooks
+
+Once subscribed to the instrumentation, you can intercept the events reported above.
+
+```ruby
+ActiveSupport::Notifications.subscribe(/<api_path>/) do |name, start, finish, id, payload|
+  # your code to intercept the notification
+end
+```
+
+The request data, the API’s internal data, and the response can be retrieved from the payload.
+
+You can use `payload.fetch(:endpoint)` or directly `payload[:endpoint]`.
+
+The `:endpoint` contains the data currently being processed, and access to attributes such as `body`, `request`, `params`, `headers`, `cookies` and `response_cookies`
+
+For example, `payload[:endpoint].body` provides the current state of the response.
+
+```ruby
+ActiveSupport::Notifications.subscribe(/v1/) do |name, start, finish, id, payload|
+  hook_record = {
+    hook: name
+    status: payload[:env]&.dig("api.endpoint")&.status
+    format: payload[:env]&.dig("api.format")
+    body: payload[:endpoint]&.body
+    duration: (finish - start) * 1000
+  }
+  # your code to save the notification
+end
+```
+
 ### Monitoring Products
 
 Grape integrates with following third-party tools:
 
 * **New Relic** - [built-in support](https://docs.newrelic.com/docs/agents/ruby-agent/frameworks/grape-instrumentation) from v3.10.0 of the official [newrelic_rpm](https://github.com/newrelic/rpm) gem, also [newrelic-grape](https://github.com/xinminlabs/newrelic-grape) gem
 * **Librato Metrics** - [grape-librato](https://github.com/seanmoon/grape-librato) gem
+* **Rails Performance** - [rails_performance](https://github.com/igorkasyanchuk/rails_performance) gem
 * **[Skylight](https://www.skylight.io/)** - [skylight](https://github.com/skylightio/skylight-ruby) gem, [documentation](https://docs.skylight.io/grape/)
 * **[AppSignal](https://www.appsignal.com)** - [appsignal-ruby](https://github.com/appsignal/appsignal-ruby) gem, [documentation](http://docs.appsignal.com/getting-started/supported-frameworks.html#grape)
 * **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
