@@ -139,7 +139,7 @@
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
-    - [Hook points](#hook-points)
+    - [Hook Points](#hook-points)
       - [endpoint_run.grape](#endpoint_rungrape)
       - [endpoint_render.grape](#endpoint_rendergrape)
       - [endpoint_run_filters.grape](#endpoint_run_filtersgrape)
@@ -4128,8 +4128,10 @@ See [StackOverflow #3282655](http://stackoverflow.com/questions/3282655/ruby-on-
 Grape has built-in support for [ActiveSupport::Notifications](http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) which provides simple hook points to instrument key parts of your application.
 
 
-#### Hook points
+#### Hook Points
+
 The following hook points are currently supported:
+
 ##### endpoint_run.grape
 
 The main execution of an endpoint, includes filters and rendering.
@@ -4179,10 +4181,7 @@ The request data, the API’s internal data, and the response can be retrieved f
 
 You can use `payload.fetch(:endpoint)` or directly `payload[:endpoint]`.
 
-The `:endpoint` contains the data currently being processed, and access to attributes such as `body`, `request`, ...
-
-The endpoint provides access to the following attributes:
-`body`, `request`, `params`, `headers`, `cookies`, `response_cookies`
+The `:endpoint` contains the data currently being processed, and access to attributes such as `body`, `request`, `params`, `headers`, `cookies` and `response_cookies`
 
 For example, `payload[:endpoint].body` provides the current state of the response.
 
