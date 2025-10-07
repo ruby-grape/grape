@@ -99,14 +99,33 @@ describe Grape::DSL::Parameters do
       expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
       expect(subject.push_declared_params_reader).to eq([:id])
     end
-  end
 
+    it 'preserves original attrs array when calling new_scope' do
+      attrs = [:id, type: Array, desc: 'Identity.']
+      original_attrs = attrs.dup
+
+      expect(subject).to receive(:new_scope).with(attrs)
+      subject.requires(*attrs) {[]}
+
+      expect(attrs).to eq(original_attrs)
+    end
+  end
   describe '#optional' do
     it 'adds an optional parameter' do
       subject.optional :id, type: Integer, desc: 'Identity.'
 
       expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
       expect(subject.push_declared_params_reader).to eq([:id])
+    end
+
+    it 'preserves original attrs array when calling new_scope' do
+      attrs = [:id, { type: Array, desc: 'Identity.' }]
+      original_attrs = attrs.dup
+
+      expect(subject).to receive(:new_scope).with(attrs, true)
+      subject.optional(*attrs) {[]}
+
+      expect(attrs).to eq(original_attrs)
     end
   end
 
