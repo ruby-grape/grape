@@ -101,15 +101,16 @@ describe Grape::DSL::Parameters do
     end
 
     it 'preserves original attrs array when calling new_scope' do
-      attrs = [:id, type: Array, desc: 'Identity.']
+      attrs = [:id, { type: Array, desc: 'Identity.' }]
       original_attrs = attrs.dup
 
       expect(subject).to receive(:new_scope).with(attrs)
-      subject.requires(*attrs) {[]}
+      subject.requires(*attrs) { [] }
 
       expect(attrs).to eq(original_attrs)
     end
   end
+
   describe '#optional' do
     it 'adds an optional parameter' do
       subject.optional :id, type: Integer, desc: 'Identity.'
@@ -123,7 +124,7 @@ describe Grape::DSL::Parameters do
       original_attrs = attrs.dup
 
       expect(subject).to receive(:new_scope).with(attrs, true)
-      subject.optional(*attrs) {[]}
+      subject.optional(*attrs) { [] }
 
       expect(attrs).to eq(original_attrs)
     end
