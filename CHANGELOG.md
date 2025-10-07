@@ -30,7 +30,7 @@
 * [#2594](https://github.com/ruby-grape/grape/pull/2594): Fix routes memoization - [@ericproulx](https://github.com/ericproulx).
 * [#2595](https://github.com/ruby-grape/grape/pull/2595): Keep `within_namespace` as part of our internal api - [@ericproulx](https://github.com/ericproulx).
 * [#2596](https://github.com/ruby-grape/grape/pull/2596): Remove `namespace_reverse_stackable_with_hash` from public scope - [@ericproulx](https://github.com/ericproulx).
-* [#2611](https://github.com/ruby-grape/grape/pull/2611): Reduce objection allocations from requires and optional dsl - [@nvh0412](https://github.com/nvh0412)
+* [#2611](https://github.com/ruby-grape/grape/pull/2611): Reduce objection allocations from requires and optional dsl - [@nvh0412](https://github.com/nvh0412).
 * Your contribution here.
 
 ### 2.4.0 (2025-06-18)
