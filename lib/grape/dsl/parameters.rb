@@ -124,17 +124,17 @@ module Grape
       #       end
       #     end
       def requires(*attrs, &block)
-        orig_attrs = attrs.clone
-
-        opts = attrs.extract_options!.clone
+        # Extract options without mutating the original attrs array
+        attrs_clean, opts = extract_options_non_mutating(attrs)
+        opts = opts.clone
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
 
         if opts[:using]
-          require_required_and_optional_fields(attrs.first, opts)
+          require_required_and_optional_fields(attrs_clean.first, opts)
         else
-          validate_attributes(attrs, opts, &block)
-          block ? new_scope(orig_attrs, &block) : push_declared_params(attrs, opts.slice(:as))
+          validate_attributes(attrs_clean, opts, &block)
+          block ? new_scope(attrs, &block) : push_declared_params(attrs_clean, opts.slice(:as))
         end
       end
 
@@ -143,24 +143,23 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def optional(*attrs, &block)
-        orig_attrs = attrs.clone
-
-        opts = attrs.extract_options!.clone
+        # Extract options without mutating the original attrs array
+        attrs_clean, opts = extract_options_non_mutating(attrs)
         type = opts[:type]
         opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
 
         # check type for optional parameter group
-        if attrs && block
+        if attrs_clean && block
           raise Grape::Exceptions::MissingGroupType if type.nil?
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
         if opts[:using]
-          require_optional_fields(attrs.first, opts)
+          require_optional_fields(attrs_clean.first, opts)
         else
-          validate_attributes(attrs, opts, &block)
+          validate_attributes(attrs_clean, opts, &block)
 
-          block ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, opts.slice(:as))
+          block ? new_scope(attrs, true, &block) : push_declared_params(attrs_clean, opts.slice(:as))
         end
       end
 
@@ -255,6 +254,18 @@ module Grape
       end
 
       private
+
+      # Extract options from an array without mutating the original array.
+      # This is more memory-efficient than cloning the array and then using extract_options!
+      # @param attrs [Array] the attributes array that may contain a hash as the last element
+      # @return [Array] a tuple of [clean_attrs, options_hash]
+      def extract_options_non_mutating(attrs)
+        if attrs.last.is_a?(Hash)
+          [attrs[0...-1], attrs.last]
+        else
+          [attrs, {}]
+        end
+      end
 
       def first_hash_key_or_param(parameter)
         parameter.is_a?(Hash) ? parameter.keys.first : parameter
