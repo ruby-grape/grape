@@ -137,6 +137,8 @@
 - [Reloading API Changes in Development](#reloading-api-changes-in-development)
   - [Reloading in Rack Applications](#reloading-in-rack-applications)
   - [Reloading in Rails Applications](#reloading-in-rails-applications)
+    - [Rails 7+ (Zeitwerk)](#rails-7-zeitwerk)
+    - [Rails 6 and Earlier](#rails-6-and-earlier)
 - [Performance Monitoring](#performance-monitoring)
   - [Active Support Instrumentation](#active-support-instrumentation)
     - [Hook Points](#hook-points)
@@ -4079,6 +4081,25 @@ Use [grape-reload](https://github.com/AlexYankee/grape-reload).
 
 ### Reloading in Rails Applications
 
+#### Rails 7+ (Zeitwerk)
+
+Rails 7+ uses [Zeitwerk](https://github.com/fxn/zeitwerk) as the default autoloader, which automatically handles reloading of code in development mode without any additional configuration.
+
+If your API files are in `app/api`, Zeitwerk will automatically autoload and reload them. No additional configuration is needed.
+
+If you encounter issues with reloading, ensure that:
+
+1. Your API files follow Zeitwerk naming conventions (file names should match class names).
+2. The `config.enable_reloading` is set to `true` in `config/environments/development.rb` (this is the default).
+
+For troubleshooting autoloading issues, have a look at the [Rails documentation](https://guides.rubyonrails.org/autoloading_and_reloading_constants.html#troubleshooting).
+
+See the [Rails Autoloading and Reloading Constants guide](https://guides.rubyonrails.org/autoloading_and_reloading_constants.html) for more information.
+
+#### Rails 6 and Earlier
+
+For Rails versions before 7, you need to configure reloading manually.
+
 Add API paths to `config/application.rb`.
 
 ```ruby
@@ -4097,25 +4118,9 @@ if Rails.env.development?
   api_reloader = ActiveSupport::FileUpdateChecker.new(api_files) do
     Rails.application.reload_routes!
   end
-  ActionDispatch::Callbacks.to_prepare do
+  ActiveSupport::Reloader.to_prepare do
     api_reloader.execute_if_updated
   end
-end
-```
-
-For Rails >= 5.1.4, change this:
-
-```ruby
-ActionDispatch::Callbacks.to_prepare do
-  api_reloader.execute_if_updated
-end
-```
-
-to this:
-
-```ruby
-ActiveSupport::Reloader.to_prepare do
-  api_reloader.execute_if_updated
 end
 ```
 
