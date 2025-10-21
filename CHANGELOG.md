@@ -21,6 +21,7 @@
 * [#2605](https://github.com/ruby-grape/grape/pull/2605): Add Rack 3.2 support with new gemfile and CI integration - [@ericproulx](https://github.com/ericproulx).
 * [#2607](https://github.com/ruby-grape/grape/pull/2607): Remove namespace_stackable and namespace_inheritable from public API - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
+* [#2612](https://github.com/ruby-grape/grape/pull/2612): Avoid multiple mount pollution - [@alexanderadam](https://github.com/alexanderadam).
 
 #### Fixes
 

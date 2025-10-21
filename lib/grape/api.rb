@@ -22,14 +22,13 @@ module Grape
       attr_accessor :base_instance, :instances
 
       delegate_missing_to :base_instance
-      def_delegators :base_instance, :new, :configuration
 
       # This is the interface point between Rack and Grape; it accepts a request
       # from Rack and ultimately returns an array of three values: the status,
       # the headers, and the body. See [the rack specification]
-      # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
+      # (https://github.com/rack/rack/blob/main/SPEC.rdoc) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def_delegators :instance_for_rack, :call, :compile!
+      def_delegators :base_instance, :new, :configuration, :call, :compile!
 
       # When inherited, will create a list of all instances (times the API was mounted)
       # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
@@ -92,14 +91,6 @@ module Grape
       def replay_setup_on(instance)
         @setup.each do |setup_step|
           replay_step_on(instance, **setup_step)
-        end
-      end
-
-      def instance_for_rack
-        if never_mounted?
-          base_instance
-        else
-          mounted_instances.first
         end
       end
 
