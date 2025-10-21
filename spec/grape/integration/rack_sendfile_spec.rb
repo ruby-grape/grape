@@ -4,7 +4,7 @@ describe Rack::Sendfile do
   subject do
     content_object = file_object
     app = Class.new(Grape::API) do
-      use Rack::Sendfile
+      use Rack::Sendfile, 'X-Accel-Redirect'
       format :json
       get do
         if content_object.is_a?(String)
@@ -17,7 +17,6 @@ describe Rack::Sendfile do
 
     options = {
       method: Rack::GET,
-      'HTTP_X_SENDFILE_TYPE' => 'X-Accel-Redirect',
       'HTTP_X_ACCEL_MAPPING' => '/accel/mapping/=/replaced/'
     }
     env = Rack::MockRequest.env_for('/', options)
