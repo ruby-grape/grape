@@ -22,6 +22,7 @@
 * [#2607](https://github.com/ruby-grape/grape/pull/2607): Remove namespace_stackable and namespace_inheritable from public API - [@ericproulx](https://github.com/ericproulx).
 * [#2615](https://github.com/ruby-grape/grape/pull/2615): Remove manual toc and tod danger check - [@alexanderadam](https://github.com/alexanderadam).
 * Your contribution here.
+* [#2612](https://github.com/ruby-grape/grape/pull/2612): Avoid multiple mount pollution - [@alexanderadam](https://github.com/alexanderadam).
 
 #### Fixes
 

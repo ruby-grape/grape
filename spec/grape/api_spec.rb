@@ -1055,28 +1055,6 @@ describe Grape::API do
     end
   end
 
-  # NOTE: this method is required to preserve the ability of pre-mounting
-  # the root API into a namespace, it may be deprecated in the future.
-  describe 'instance_for_rack' do
-    context 'when the app was not mounted' do
-      it 'returns the base_instance' do
-        expect(app.__send__(:instance_for_rack)).to eq app.base_instance
-      end
-    end
-
-    context 'when the app was mounted' do
-      it 'returns the first mounted instance' do
-        mounted_app = app
-        Class.new(described_class) do
-          namespace 'new_namespace' do
-            mount mounted_app
-          end
-        end
-        expect(app.__send__(:instance_for_rack)).to eq app.__send__(:mounted_instances).first
-      end
-    end
-  end
-
   describe 'filters' do
     it 'adds a before filter' do
       subject.before { @foo = 'first'  }
