@@ -3,7 +3,13 @@ Upgrading Grape
 
 ### Upgrading to >= 3.0.0
 
-### Endpoint execution simplified and `return` deprecated
+#### Configuration API Migration from ActiveSupport::Configurable to Dry::Configurable
+
+Grape has migrated from `ActiveSupport::Configurable` to `Dry::Configurable` for its configuration system since its [deprecated](https://github.com/rails/rails/blob/1cdd190a25e483b65f1f25bbd0f13a25d696b461/activesupport/lib/active_support/configurable.rb#L3-L7).
+
+See [#2617](https://github.com/ruby-grape/grape/pull/2617) for more information.
+
+#### Endpoint execution simplified and `return` deprecated
 
 Executing a endpoint's block has been simplified and calling `return` in it has been deprecated.
 

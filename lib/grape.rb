@@ -3,7 +3,6 @@
 require 'logger'
 require 'active_support'
 require 'active_support/concern'
-require 'active_support/configurable'
 require 'active_support/version'
 require 'active_support/isolated_execution_state'
 require 'active_support/core_ext/array/conversions'
@@ -28,6 +27,7 @@ require 'active_support/deprecation'
 require 'active_support/inflector'
 require 'active_support/ordered_options'
 require 'active_support/notifications'
+require 'dry-configurable'
 
 require 'English'
 require 'bigdecimal'
@@ -57,7 +57,10 @@ loader.setup
 I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 
 module Grape
-  include ActiveSupport::Configurable
+  extend Dry::Configurable
+
+  setting :param_builder, default: :hash_with_indifferent_access
+  setting :lint, default: false
 
   HTTP_SUPPORTED_METHODS = [
     Rack::GET,
@@ -71,12 +74,6 @@ module Grape
 
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
-  end
-
-  configure do |config|
-    config.param_builder = :hash_with_indifferent_access
-    config.lint = false
-    config.compile_methods!
   end
 end
 
