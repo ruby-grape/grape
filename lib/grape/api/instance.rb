@@ -61,11 +61,6 @@ module Grape
           @instance ||= new # rubocop:disable Naming/MemoizedInstanceVariableName
         end
 
-        # Wipe the compiled API so we can recompile after changes were made.
-        def change!
-          @instance = nil
-        end
-
         # This is the interface point between Rack and Grape; it accepts a request
         # from Rack and ultimately returns an array of three values: the status,
         # the headers, and the body. See [the rack specification]
@@ -101,12 +96,6 @@ module Grape
 
         protected
 
-        def inherited(subclass)
-          super
-          subclass.reset!
-          subclass.logger logger.clone
-        end
-
         def inherit_settings(other_settings)
           top_level_setting.inherit_from other_settings.point_in_time_copy
 
@@ -118,6 +107,19 @@ module Grape
           end
 
           reset_routes!
+        end
+
+        # Wipe the compiled API so we can recompile after changes were made.
+        def change!
+          @instance = nil
+        end
+
+        private
+
+        def inherited(subclass)
+          super
+          subclass.reset!
+          subclass.logger logger.clone
         end
       end
 

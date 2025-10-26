@@ -145,49 +145,49 @@ describe Grape::DSL::Routing do
   describe '.get' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::GET, path, options)
-      subject.get path, options, &proc
+      subject.get path, **options, &proc
     end
   end
 
   describe '.post' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::POST, path, options)
-      subject.post path, options, &proc
+      subject.post path, **options, &proc
     end
   end
 
   describe '.put' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::PUT, path, options)
-      subject.put path, options, &proc
+      subject.put path, **options, &proc
     end
   end
 
   describe '.head' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::HEAD, path, options)
-      subject.head path, options, &proc
+      subject.head path, **options, &proc
     end
   end
 
   describe '.delete' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::DELETE, path, options)
-      subject.delete path, options, &proc
+      subject.delete path, **options, &proc
     end
   end
 
   describe '.options' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::OPTIONS, path, options)
-      subject.options path, options, &proc
+      subject.options path, **options, &proc
     end
   end
 
   describe '.patch' do
     it 'delegates to .route' do
       expect(subject).to receive(:route).with(Rack::PATCH, path, options)
-      subject.patch path, options, &proc
+      subject.patch path, **options, &proc
     end
   end
 

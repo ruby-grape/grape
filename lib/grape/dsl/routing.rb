@@ -22,9 +22,8 @@ module Grape
       #     end
       #   end
       #
-      def version(*args, &block)
+      def version(*args, **options, &block)
         if args.any?
-          options = args.extract_options!
           options = options.reverse_merge(using: :path)
           requested_versions = args.flatten.map(&:to_s)
 
@@ -165,8 +164,7 @@ module Grape
       end
 
       Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
-        define_method supported_method.downcase do |*args, &block|
-          options = args.extract_options!
+        define_method supported_method.downcase do |*args, **options, &block|
           paths = args.first || ['/']
           route(supported_method, paths, options, &block)
         end

@@ -30,15 +30,6 @@ module Grape
       # NOTE: This will only be called on an API directly mounted on RACK
       def_delegators :base_instance, :new, :configuration, :call, :compile!
 
-      # When inherited, will create a list of all instances (times the API was mounted)
-      # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
-      def inherited(api)
-        super
-
-        api.initial_setup(self == Grape::API ? Grape::API::Instance : @base_instance)
-        api.override_all_methods!
-      end
-
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
       def initial_setup(base_instance_parent)
@@ -51,8 +42,8 @@ module Grape
       # Redefines all methods so that are forwarded to add_setup and be recorded
       def override_all_methods!
         (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
-          define_singleton_method(method_override) do |*args, &block|
-            add_setup(method: method_override, args: args, block: block)
+          define_singleton_method(method_override) do |*args, **kwargs, &block|
+            add_setup(method: method_override, args: args, kwargs: kwargs, block: block)
           end
         end
       end
@@ -86,6 +77,15 @@ module Grape
 
       private
 
+      # When inherited, will create a list of all instances (times the API was mounted)
+      # It will listen to the setup required to mount that endpoint, and replicate it on any new instance
+      def inherited(api)
+        super
+
+        api.initial_setup(self == Grape::API ? Grape::API::Instance : @base_instance)
+        api.override_all_methods!
+      end
+
       # Replays the set up to produce an API as defined in this class, can be called
       # on classes that inherit from Grape::API
       def replay_setup_on(instance)
@@ -95,7 +95,7 @@ module Grape
       end
 
       # Adds a new stage to the set up require to get a Grape::API up and running
-      def add_setup(step)
+      def add_setup(**step)
         @setup << step
         last_response = nil
         @instances.each do |instance|
@@ -119,12 +119,13 @@ module Grape
         end
       end
 
-      def replay_step_on(instance, method:, args:, block:)
-        return if skip_immediate_run?(instance, args)
+      def replay_step_on(instance, method:, args:, kwargs:, block:)
+        return if skip_immediate_run?(instance, args, kwargs)
 
         eval_args = evaluate_arguments(instance.configuration, *args)
-        response = instance.__send__(method, *eval_args, &block)
-        if skip_immediate_run?(instance, [response])
+        eval_kwargs = kwargs.deep_transform_values { |v| evaluate_arguments(instance.configuration, v).first }
+        response = instance.__send__(method, *eval_args, **eval_kwargs, &block)
+        if skip_immediate_run?(instance, [response], kwargs)
           response
         else
           evaluate_arguments(instance.configuration, response).first
@@ -132,9 +133,9 @@ module Grape
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
-      def skip_immediate_run?(instance, args)
+      def skip_immediate_run?(instance, args, kwargs)
         instance.base_instance? &&
-          (any_lazy?(args) || args.any? { |arg| arg.is_a?(Hash) && any_lazy?(arg.values) })
+          (any_lazy?(args) || args.any? { |arg| arg.is_a?(Hash) && any_lazy?(arg.values) } || any_lazy?(kwargs.values))
       end
 
       def any_lazy?(args)

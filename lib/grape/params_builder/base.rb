@@ -8,6 +8,8 @@ module Grape
           raise NotImplementedError
         end
 
+        private
+
         def inherited(klass)
           super
           ParamsBuilder.register(klass)

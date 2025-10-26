@@ -3,7 +3,7 @@
 shared_examples_for 'versioning' do
   it 'sets the API version' do
     subject.format :txt
-    subject.version 'v1', macro_options
+    subject.version 'v1', **macro_options
     subject.get :hello do
       "Version: #{request.env[Grape::Env::API_VERSION]}"
     end
@@ -14,7 +14,7 @@ shared_examples_for 'versioning' do
   it 'adds the prefix before the API version' do
     subject.format :txt
     subject.prefix 'api'
-    subject.version 'v1', macro_options
+    subject.version 'v1', **macro_options
     subject.get :hello do
       "Version: #{request.env[Grape::Env::API_VERSION]}"
     end
@@ -23,12 +23,12 @@ shared_examples_for 'versioning' do
   end
 
   it 'is able to specify version as a nesting' do
-    subject.version 'v2', macro_options
+    subject.version 'v2', **macro_options
     subject.get '/awesome' do
       'Radical'
     end
 
-    subject.version 'v1', macro_options do
+    subject.version 'v1', **macro_options do
       get '/legacy' do
         'Totally'
       end
@@ -46,7 +46,7 @@ shared_examples_for 'versioning' do
   end
 
   it 'is able to specify multiple versions' do
-    subject.version 'v1', 'v2', macro_options
+    subject.version 'v1', 'v2', **macro_options
     subject.get 'awesome' do
       'I exist'
     end
@@ -63,12 +63,12 @@ shared_examples_for 'versioning' do
     context 'without a prefix' do
       it 'allows the same endpoint to be implemented' do
         subject.format :txt
-        subject.version 'v2', macro_options
+        subject.version 'v2', **macro_options
         subject.get 'version' do
           request.env[Grape::Env::API_VERSION]
         end
 
-        subject.version 'v1', macro_options do
+        subject.version 'v1', **macro_options do
           get 'version' do
             "version #{request.env[Grape::Env::API_VERSION]}"
           end
@@ -87,12 +87,12 @@ shared_examples_for 'versioning' do
       it 'allows the same endpoint to be implemented' do
         subject.format :txt
         subject.prefix 'api'
-        subject.version 'v2', macro_options
+        subject.version 'v2', **macro_options
         subject.get 'version' do
           request.env[Grape::Env::API_VERSION]
         end
 
-        subject.version 'v1', macro_options do
+        subject.version 'v1', **macro_options do
           get 'version' do
             "version #{request.env[Grape::Env::API_VERSION]}"
           end
@@ -113,7 +113,7 @@ shared_examples_for 'versioning' do
     it 'calls before block that is defined within the version block' do
       subject.format :txt
       subject.prefix 'api'
-      subject.version 'v2', macro_options do
+      subject.version 'v2', **macro_options do
         before do
           @output ||= 'v2-'
         end
@@ -123,7 +123,7 @@ shared_examples_for 'versioning' do
         end
       end
 
-      subject.version 'v1', macro_options do
+      subject.version 'v1', **macro_options do
         before do
           @output ||= 'v1-'
         end
@@ -145,7 +145,7 @@ shared_examples_for 'versioning' do
 
   it 'does not overwrite version parameter with API version' do
     subject.format :txt
-    subject.version 'v1', macro_options
+    subject.version 'v1', **macro_options
     subject.params { requires :version }
     subject.get :api_version_with_version_param do
       params[:version]
@@ -158,7 +158,7 @@ shared_examples_for 'versioning' do
     let(:options) { macro_options }
     let(:v1) do
       klass = Class.new(Grape::API)
-      klass.version 'v1', options
+      klass.version 'v1', **options
       klass.get 'version' do
         'v1'
       end
@@ -166,7 +166,7 @@ shared_examples_for 'versioning' do
     end
     let(:v2) do
       klass = Class.new(Grape::API)
-      klass.version 'v2', options
+      klass.version 'v2', **options
       klass.get 'version' do
         'v2'
       end

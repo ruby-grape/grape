@@ -218,22 +218,25 @@ module Grape
       end
 
       def require_required_and_optional_fields(context, opts)
+        except_fields = Array.wrap(opts[:except])
+        using_fields = opts[:using].keys.delete_if { |f| except_fields.include?(f) }
+
         if context == :all
-          optional_fields = Array.wrap(opts[:except])
-          required_fields = opts[:using].keys.delete_if { |f| optional_fields.include?(f) }
+          optional_fields = except_fields
+          required_fields = using_fields
         else # context == :none
-          required_fields = Array.wrap(opts[:except])
-          optional_fields = opts[:using].keys.delete_if { |f| required_fields.include?(f) }
+          required_fields = except_fields
+          optional_fields = using_fields
         end
         required_fields.each do |field|
           field_opts = opts[:using][field]
           raise ArgumentError, "required field not exist: #{field}" unless field_opts
 
-          requires(field, field_opts)
+          requires(field, **field_opts)
         end
         optional_fields.each do |field|
           field_opts = opts[:using][field]
-          optional(field, field_opts) if field_opts
+          optional(field, **field_opts) if field_opts
         end
       end
 
@@ -245,7 +248,7 @@ module Grape
         end
         optional_fields.each do |field|
           field_opts = opts[:using][field]
-          optional(field, field_opts) if field_opts
+          optional(field, **field_opts) if field_opts
         end
       end
 
@@ -262,9 +265,9 @@ module Grape
       # @param optional [Boolean] whether the parameter this are nested under
       #   is optional or not (and hence, whether this block's params will be).
       # @yield parameter scope
-      def new_scope(attrs, optional = false, &block)
+      def new_scope(attrs, opts, optional = false, &block)
         # if required params are grouped and no type or unsupported type is provided, raise an error
-        type = attrs[1] ? attrs[1][:type] : nil
+        type = opts[:type]
         if attrs.first && !optional
           raise Grape::Exceptions::MissingGroupType if type.nil?
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
@@ -273,7 +276,7 @@ module Grape
         self.class.new(
           api: @api,
           element: attrs.first,
-          element_renamed: attrs[1][:as],
+          element_renamed: opts[:as],
           parent: self,
           optional: optional,
           type: type || Array,

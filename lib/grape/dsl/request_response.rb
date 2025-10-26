@@ -93,14 +93,13 @@ module Grape
       #   @option options [Boolean] :rescue_subclasses Also rescue subclasses of exception classes
       #   @param [Proc] handler Execution proc to handle the given exception as an
       #     alternative to passing a block.
-      def rescue_from(*args, &block)
+      def rescue_from(*args, **options, &block)
         if args.last.is_a?(Proc)
           handler = args.pop
         elsif block
           handler = block
         end
 
-        options = args.extract_options!
         raise ArgumentError, 'both :with option and block cannot be passed' if block && options.key?(:with)
 
         handler ||= extract_with(options)

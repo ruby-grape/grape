@@ -20,7 +20,7 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
     it 'sets the object as the body if no options are provided' do
       inner_body = nil
       subject.get '/example' do
-        present(abc: 'def')
+        present({ abc: 'def' })
         inner_body = body
       end
       get '/example'
