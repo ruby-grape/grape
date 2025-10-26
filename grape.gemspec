@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   }
 
   s.add_dependency 'activesupport', '>= 7.0'
+  s.add_dependency 'dry-configurable'
   s.add_dependency 'dry-types', '>= 1.1'
   s.add_dependency 'mustermann-grape', '~> 1.1.0'
   s.add_dependency 'rack', '>= 2'
