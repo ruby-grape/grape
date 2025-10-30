@@ -36,7 +36,7 @@ describe Grape::DSL::Parameters do
         @validates
       end
 
-      def new_scope(args, _, &block)
+      def new_scope(args, _opts, _, &block)
         nested_scope = self.class.new
         nested_scope.new_group_scope(args, &block)
         nested_scope
@@ -71,7 +71,7 @@ describe Grape::DSL::Parameters do
       subject.api = Class.new { include Grape::DSL::Settings }.new
       subject.api.inheritable_setting.namespace_stackable[:named_params] = named_params
       expect(subject).to receive(:instance_exec).with(options).and_yield
-      subject.use :params_group, options
+      subject.use :params_group, **options
     end
 
     it 'raises error when non-existent named param is called' do

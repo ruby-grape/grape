@@ -3,6 +3,18 @@ Upgrading Grape
 
 ### Upgrading to >= 3.0.0
 
+#### Ruby 3+ Argument Delegation Modernization
+
+Grape has been modernized to use Ruby 3+'s preferred argument delegation patterns. This change replaces `args.extract_options!` with explicit `**kwargs` parameters throughout the codebase.
+
+- All DSL methods now use explicit keyword arguments (`**kwargs`) instead of extracting options from mixed argument lists
+- Method signatures are now more explicit and follow Ruby 3+ best practices
+- The `active_support/core_ext/array/extract_options` dependency has been removed
+
+This is a modernization effort that improves code quality while maintaining full backward compatibility.
+
+See [#2618](https://github.com/ruby-grape/grape/pull/2618) for more information.
+
 #### Configuration API Migration from ActiveSupport::Configurable to Dry::Configurable
 
 Grape has migrated from `ActiveSupport::Configurable` to `Dry::Configurable` for its configuration system since its [deprecated](https://github.com/rails/rails/blob/1cdd190a25e483b65f1f25bbd0f13a25d696b461/activesupport/lib/active_support/configurable.rb#L3-L7).

@@ -58,6 +58,8 @@ module Grape
           raise NotImplementedError
         end
 
+        private
+
         def inherited(klass)
           super
           ErrorFormatter.register(klass)

@@ -23,6 +23,7 @@
 * [#2615](https://github.com/ruby-grape/grape/pull/2615): Remove manual toc and tod danger check - [@alexanderadam](https://github.com/alexanderadam).
 * [#2612](https://github.com/ruby-grape/grape/pull/2612): Avoid multiple mount pollution - [@alexanderadam](https://github.com/alexanderadam).
 * [#2617](https://github.com/ruby-grape/grape/pull/2617): Migrate from `ActiveSupport::Configurable` to `Dry::Configurable` - [@ericproulx](https://github.com/ericproulx).
+* [#2618](https://github.com/ruby-grape/grape/pull/2618): Modernize argument delegation for Ruby 3+ compatibility - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

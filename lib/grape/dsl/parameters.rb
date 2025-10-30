@@ -53,9 +53,8 @@ module Grape
       #         Collection.page(params[:page]).per(params[:per_page])
       #       end
       #     end
-      def use(*names)
+      def use(*names, **options)
         named_params = @api.inheritable_setting.namespace_stackable_with_hash(:named_params) || {}
-        options = names.extract_options!
         names.each do |name|
           params_block = named_params.fetch(name) do
             raise "Params :#{name} not found!"
@@ -123,10 +122,7 @@ module Grape
       #         requires :name, type: String
       #       end
       #     end
-      def requires(*attrs, &block)
-        orig_attrs = attrs.clone
-
-        opts = attrs.extract_options!.clone
+      def requires(*attrs, **opts, &block)
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
 
@@ -134,7 +130,7 @@ module Grape
           require_required_and_optional_fields(attrs.first, opts)
         else
           validate_attributes(attrs, opts, &block)
-          block ? new_scope(orig_attrs, &block) : push_declared_params(attrs, opts.slice(:as))
+          block ? new_scope(attrs, opts, &block) : push_declared_params(attrs, opts.slice(:as))
         end
       end
 
@@ -142,10 +138,7 @@ module Grape
       #   endpoint.
       # @param (see #requires)
       # @option (see #requires)
-      def optional(*attrs, &block)
-        orig_attrs = attrs.clone
-
-        opts = attrs.extract_options!.clone
+      def optional(*attrs, **opts, &block)
         type = opts[:type]
         opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
 
@@ -160,7 +153,7 @@ module Grape
         else
           validate_attributes(attrs, opts, &block)
 
-          block ? new_scope(orig_attrs, true, &block) : push_declared_params(attrs, opts.slice(:as))
+          block ? new_scope(attrs, opts, true, &block) : push_declared_params(attrs, opts.slice(:as))
         end
       end
 

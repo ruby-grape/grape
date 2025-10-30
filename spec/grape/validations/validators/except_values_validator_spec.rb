@@ -165,8 +165,8 @@ describe Grape::Validations::Validators::ExceptValuesValidator do
           Class.new(Grape::API) do
             default_format :json
             params do
-              requires :type, param_def[:requires] if param_def.key? :requires
-              optional :type, param_def[:optional] if param_def.key? :optional
+              requires :type, **param_def[:requires] if param_def.key? :requires
+              optional :type, **param_def[:optional] if param_def.key? :optional
             end
             get path do
               { type: params[:type] }

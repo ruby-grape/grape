@@ -337,8 +337,7 @@ module Grape
       #       with: API::Entities::User,
       #       admin: current_user.admin?
       #   end
-      def present(*args)
-        options = args.count > 1 ? args.extract_options! : {}
+      def present(*args, **options)
         key, object = if args.count == 2 && args.first.is_a?(Symbol)
                         args
                       else
