@@ -786,7 +786,7 @@ describe Grape::Endpoint do
   end
 
   context 'when `next`' do
-    it 'calls deprecatator' do
+    it 'does not call deprecator' do
       subject.get('/home') do
         next 'Hello'
       end
