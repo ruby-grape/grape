@@ -34,6 +34,7 @@
 * [#2594](https://github.com/ruby-grape/grape/pull/2594): Fix routes memoization - [@ericproulx](https://github.com/ericproulx).
 * [#2595](https://github.com/ruby-grape/grape/pull/2595): Keep `within_namespace` as part of our internal api - [@ericproulx](https://github.com/ericproulx).
 * [#2596](https://github.com/ruby-grape/grape/pull/2596): Remove `namespace_reverse_stackable_with_hash` from public scope - [@ericproulx](https://github.com/ericproulx).
+* [#2621](https://github.com/ruby-grape/grape/pull/2621): Update upgrading notes regarding `return` usage and simplify endpoint execution - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 2.4.0 (2025-06-18)

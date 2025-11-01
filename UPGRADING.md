@@ -23,7 +23,7 @@ See [#2617](https://github.com/ruby-grape/grape/pull/2617) for more information.
 
 #### Endpoint execution simplified and `return` deprecated
 
-Executing a endpoint's block has been simplified and calling `return` in it has been deprecated.
+Executing a endpoint's block has been simplified and calling `return` in it has been deprecated. Use `next` instead.
 
 See [#2577](https://github.com/ruby-grape/grape/pull/2577) for more information.
 

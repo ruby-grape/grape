@@ -71,24 +71,10 @@ module Grape
 
       @lazy_initialize_lock = Mutex.new
       @lazy_initialized = nil
-      @block = nil
-
       @status = nil
       @stream = nil
       @body = nil
-
-      if block
-        @source = block
-        @block = lambda do |endpoint_instance|
-          ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: endpoint_instance) do
-            endpoint_instance.instance_exec(&block)
-          rescue LocalJumpError => e
-            Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated.'
-            return e.exit_value
-          end
-        end
-      end
-
+      @source = block
       @helpers = build_helpers
     end
 
@@ -255,7 +241,14 @@ module Grape
     end
 
     def execute
-      @block&.call(self)
+      return unless @source
+
+      ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self) do
+        instance_exec(&@source)
+      rescue LocalJumpError => e
+        Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated. Use `next` instead.'
+        return e.exit_value
+      end
     end
 
     def lazy_initialize!
