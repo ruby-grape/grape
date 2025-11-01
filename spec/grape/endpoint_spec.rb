@@ -772,7 +772,7 @@ describe Grape::Endpoint do
   end
 
   context 'when `return`' do
-    it 'calls deprecatator' do
+    it 'calls deprecator' do
       subject.get('/home') do
         return 'Hello'
       end
