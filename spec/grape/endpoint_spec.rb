@@ -771,16 +771,32 @@ describe Grape::Endpoint do
     expect(last_response.body).to eq('yo')
   end
 
-  it 'allows explicit return calls' do
-    subject.get('/home') do
-      return 'Hello'
+  context 'when `return`' do
+    it 'calls deprecator' do
+      subject.get('/home') do
+        return 'Hello'
+      end
+
+      expect(Grape.deprecator).to receive(:warn).with('Using `return` in an endpoint has been deprecated. Use `next` instead.')
+
+      get '/home'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello')
     end
+  end
 
-    expect(Grape.deprecator).to receive(:warn).with('Using `return` in an endpoint has been deprecated.')
+  context 'when `next`' do
+    it 'does not call deprecator' do
+      subject.get('/home') do
+        next 'Hello'
+      end
 
-    get '/home'
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq('Hello')
+      expect(Grape.deprecator).not_to receive(:warn)
+
+      get '/home'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Hello')
+    end
   end
 
   context 'filters' do
