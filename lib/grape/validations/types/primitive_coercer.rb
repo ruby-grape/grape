@@ -7,37 +7,10 @@ module Grape
       # initialization. When +strict+ is true, it doesn't coerce a value but check
       # that it has the proper type.
       class PrimitiveCoercer < DryTypeCoercer
-        MAPPING = {
-          Grape::API::Boolean => DryTypes::Params::Bool,
-          BigDecimal => DryTypes::Params::Decimal,
-          Numeric => DryTypes::Params::Integer | DryTypes::Params::Float | DryTypes::Params::Decimal,
-          TrueClass => DryTypes::Params::Bool.constrained(eql: true),
-          FalseClass => DryTypes::Params::Bool.constrained(eql: false),
-
-          # unfortunately, a +Params+ scope doesn't contain String
-          String => DryTypes::Coercible::String
-        }.freeze
-
-        STRICT_MAPPING = {
-          Grape::API::Boolean => DryTypes::Strict::Bool,
-          BigDecimal => DryTypes::Strict::Decimal,
-          Numeric => DryTypes::Strict::Integer | DryTypes::Strict::Float | DryTypes::Strict::Decimal,
-          TrueClass => DryTypes::Strict::Bool.constrained(eql: true),
-          FalseClass => DryTypes::Strict::Bool.constrained(eql: false)
-        }.freeze
-
         def initialize(type, strict = false)
           super
 
-          @type = type
-
-          @coercer = (strict ? STRICT_MAPPING : MAPPING).fetch(type) do
-            scope.const_get(type.name, false)
-          rescue NameError
-            raise ArgumentError, "type #{type} should support coercion via `[]`" unless type.respond_to?(:[])
-
-            type
-          end
+          @coercer = cache_coercer[type]
         end
 
         def call(val)

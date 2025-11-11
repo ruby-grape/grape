@@ -7,15 +7,14 @@ module Grape
       # an array of arrays of integers.
       #
       # It could've been possible to use an +of+
-      # method (https://dry-rb.org/gems/dry-types/1.2/array-with-member/)
+      # method (https://dry-rb.org/gems/dry-types/main/array-with-member/)
       # provided by dry-types. Unfortunately, it doesn't work for Grape because of
       # behavior of Virtus which was used earlier, a `Grape::Validations::Types::PrimitiveCoercer`
       # maintains Virtus behavior in coercing.
       class ArrayCoercer < DryTypeCoercer
         def initialize(type, strict = false)
           super
-
-          @coercer = scope::Array
+          @coercer = strict ? DryTypes::Strict::Array : DryTypes::Params::Array
           @subtype = type.first
         end
 

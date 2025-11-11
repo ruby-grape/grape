@@ -92,21 +92,10 @@ describe Grape::Validations::Types do
   end
 
   describe '::build_coercer' do
-    it 'has internal cache variables' do
-      expect(described_class.instance_variable_get(:@__cache)).to be_a(Hash)
-      expect(described_class.instance_variable_get(:@__cache_write_lock)).to be_a(Mutex)
-    end
-
     it 'caches the result of the build_coercer method' do
-      original_cache = described_class.instance_variable_get(:@__cache)
-      described_class.instance_variable_set(:@__cache, {})
-
       a_coercer = described_class.build_coercer(Array[String])
       b_coercer = described_class.build_coercer(Array[String])
-
       expect(a_coercer.object_id).to eq(b_coercer.object_id)
-
-      described_class.instance_variable_set(:@__cache, original_cache)
     end
   end
 end
