@@ -155,9 +155,10 @@ module Grape
       # @return [Object] object to be used
       #   for coercion and type validation
       def build_coercer(type, method: nil, strict: false)
-        cache_instance(type, method, strict) do
-          create_coercer_instance(type, method, strict)
-        end
+        # no cache since unique
+        return create_coercer_instance(type, method, strict) if method.respond_to?(:call)
+
+        CoercerCache[[type, method, strict]]
       end
 
       def create_coercer_instance(type, method, strict)
@@ -184,30 +185,14 @@ module Grape
         end
       end
 
-      def cache_instance(type, method, strict, &_block)
-        key = cache_key(type, method, strict)
-
-        return @__cache[key] if @__cache.key?(key)
-
-        instance = yield
-
-        @__cache_write_lock.synchronize do
-          @__cache[key] = instance
-        end
-
-        instance
-      end
-
-      def cache_key(type, method, strict)
-        [type, method, strict].each_with_object(+'_') do |val, memo|
-          next if val.nil?
-
-          memo << '_' << val.to_s
+      class CoercerCache < Grape::Util::Cache
+        def initialize
+          super
+          @cache = Hash.new do |h, (type, method, strict)|
+            h[[type, method, strict]] = Grape::Validations::Types.create_coercer_instance(type, method, strict)
+          end
         end
       end
-
-      instance_variable_set(:@__cache,            {})
-      instance_variable_set(:@__cache_write_lock, Mutex.new)
     end
   end
 end
