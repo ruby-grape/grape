@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ['3.0', '3.1', '3.2', '3.3', '3.4']
-        gemfile: [Gemfile, gemfiles/rack_2_0.gemfile, gemfiles/rack_3_0.gemfile, gemfiles/rack_3_1.gemfile, gemfiles/rack_3_2.gemfile, gemfiles/rails_7_0.gemfile, gemfiles/rails_7_1.gemfile, gemfiles/rails_7_2.gemfile, gemfiles/rails_8_0.gemfile]
+        gemfile: [Gemfile, gemfiles/rack_2_0.gemfile, gemfiles/rack_3_0.gemfile, gemfiles/rack_3_1.gemfile, gemfiles/rack_3_2.gemfile, gemfiles/rails_7_0.gemfile, gemfiles/rails_7_1.gemfile, gemfiles/rails_7_2.gemfile, gemfiles/rails_8_0.gemfile, gemfiles/rails_8_1.gemfile]
         specs: ['spec --exclude-pattern=spec/integration/**/*_spec.rb']
         include:
           - ruby: '3.3'
@@ -53,8 +53,12 @@ jobs:
             gemfile: gemfiles/rails_7_2.gemfile
           - ruby: '3.0'
             gemfile: gemfiles/rails_8_0.gemfile
+          - ruby: '3.0'
+            gemfile: gemfiles/rails_8_1.gemfile
           - ruby: '3.1'
             gemfile: gemfiles/rails_8_0.gemfile
+          - ruby: '3.1'
+            gemfile: gemfiles/rails_8_1.gemfile
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
