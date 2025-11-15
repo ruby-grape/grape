@@ -1381,6 +1381,7 @@ describe Grape::Validations do
         before do
           shared_params = Module.new do
             extend Grape::DSL::Helpers::BaseHelper
+
             params :period do
               optional :start_date
               optional :end_date

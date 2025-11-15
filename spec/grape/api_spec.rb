@@ -3909,6 +3909,7 @@ describe Grape::API do
           v1 = Class.new(described_class) do
             version :v1, using: :path
             include module_to_include
+
             my_method
           end
           v2 = Class.new(described_class) do

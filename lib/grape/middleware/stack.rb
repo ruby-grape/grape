@@ -6,6 +6,7 @@ module Grape
     # It allows to insert and insert after
     class Stack
       extend Forwardable
+
       class Middleware
         attr_reader :args, :block, :klass
 

@@ -1242,9 +1242,7 @@ describe Grape::Validations::ParamsScope do
     a_options = [{}, { values: %w[x y z] }]
     b_options = [{}, { type: String }, { allow_blank: false }, { type: String, allow_blank: false }]
     combinations = a_decls.product(a_options, b_options)
-    combinations.each_with_index do |combination, i|
-      a_decl, a_opts, b_opts = combination
-
+    combinations.each_with_index do |(a_decl, a_opts, b_opts), i|
       context "(case #{i})" do
         before do
           # puts "a_decl: #{a_decl}, a_opts: #{a_opts}, b_opts: #{b_opts}"

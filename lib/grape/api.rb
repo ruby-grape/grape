@@ -19,6 +19,7 @@ module Grape
 
     class << self
       extend Forwardable
+
       attr_accessor :base_instance, :instances
 
       delegate_missing_to :base_instance

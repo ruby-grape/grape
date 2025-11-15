@@ -12,6 +12,7 @@ describe Grape::Validations::ParamsDocumentation do
   let(:klass) do
     Class.new do
       include Grape::Validations::ParamsDocumentation
+
       attr_accessor :api
 
       def initialize(api)

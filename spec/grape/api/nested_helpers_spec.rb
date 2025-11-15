@@ -4,6 +4,7 @@ describe Grape::API::Helpers do
   let(:helper_methods) do
     Module.new do
       extend Grape::API::Helpers
+
       def current_user
         @current_user ||= params[:current_user]
       end
