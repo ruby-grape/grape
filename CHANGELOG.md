@@ -1,4 +1,4 @@
-### 3.0.0 (Next)
+### 3.0.0 (2025-11-15)
 
 #### Features
 
@@ -25,7 +25,6 @@
 * [#2617](https://github.com/ruby-grape/grape/pull/2617): Migrate from `ActiveSupport::Configurable` to `Dry::Configurable` - [@ericproulx](https://github.com/ericproulx).
 * [#2618](https://github.com/ruby-grape/grape/pull/2618): Modernize argument delegation for Ruby 3+ compatibility - [@ericproulx](https://github.com/ericproulx).
 * [#2623](https://github.com/ruby-grape/grape/pull/2623): Refactor coercer caching to use `Grape::Util::Cache` - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -37,7 +36,6 @@
 * [#2596](https://github.com/ruby-grape/grape/pull/2596): Remove `namespace_reverse_stackable_with_hash` from public scope - [@ericproulx](https://github.com/ericproulx).
 * [#2621](https://github.com/ruby-grape/grape/pull/2621): Update upgrading notes regarding `return` usage and simplify endpoint execution - [@ericproulx](https://github.com/ericproulx).
 * [#2622](https://github.com/ruby-grape/grape/pull/2622): Use `require_relative` instead of `$LOAD_PATH` in gemspec - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 2.4.0 (2025-06-18)
 
