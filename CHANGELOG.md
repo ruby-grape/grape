@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2625](https://github.com/ruby-grape/grape/pull/2625): Update rubocop to 1.81.7 and fix style offenses - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

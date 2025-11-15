@@ -9,6 +9,7 @@ module Grape
 
       class << self
         extend Forwardable
+
         def_delegators :cache, :[]
         def_delegators :instance, :cache
       end

@@ -32,6 +32,7 @@ describe Grape::API do
   let(:default) do
     Module.new do
       extend ActiveSupport::Concern
+
       included do
         format :json
       end

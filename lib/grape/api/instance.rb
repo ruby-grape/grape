@@ -20,6 +20,7 @@ module Grape
 
       class << self
         extend Forwardable
+
         attr_reader :instance, :base
         attr_accessor :configuration
 

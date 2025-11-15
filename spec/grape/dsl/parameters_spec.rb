@@ -6,6 +6,7 @@ describe Grape::DSL::Parameters do
   let(:dummy_class) do
     Class.new do
       include Grape::DSL::Parameters
+
       attr_accessor :api, :element, :parent
 
       def initialize
