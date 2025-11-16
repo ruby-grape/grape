@@ -49,7 +49,7 @@ module Grape
       #       # ...
       #     end
       #
-      def desc(description, options = {}, &config_block)
+      def desc(description, **options, &config_block)
         settings =
           if config_block
             endpoint_config = defined?(configuration) ? configuration : nil

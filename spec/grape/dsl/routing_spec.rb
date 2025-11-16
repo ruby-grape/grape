@@ -138,7 +138,7 @@ describe Grape::DSL::Routing do
         expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
       end.and_yield
 
-      subject.route(:get, '/foo', { foo: 'bar' }, &proc {})
+      subject.route(:get, '/foo', foo: 'bar', &proc {})
     end
   end
 
@@ -257,20 +257,20 @@ describe Grape::DSL::Routing do
     let(:regex) { /(.*)/ }
 
     it 'calls #namespace with given params' do
-      expect(subject).to receive(:namespace).with(':foo', {}).and_yield
-      subject.route_param('foo', {}, &proc {})
+      expect(subject).to receive(:namespace).with(':foo').and_yield
+      subject.route_param('foo', &proc {})
     end
 
     it 'nests requirements option under param name' do
       expect(subject).to receive(:namespace) do |_param, options|
         expect(options[:requirements][:foo]).to eq regex
       end
-      subject.route_param('foo', options, &proc {})
+      subject.route_param('foo', **options, &proc {})
     end
 
     it 'does not modify options parameter' do
       allow(subject).to receive(:namespace)
-      expect { subject.route_param('foo', options, &proc {}) }
+      expect { subject.route_param('foo', **options, &proc {}) }
         .not_to(change { options })
     end
   end

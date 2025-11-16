@@ -141,7 +141,7 @@ module Grape
       #       {hello: 'world'}
       #     end
       #   end
-      def route(methods, paths = ['/'], route_options = {}, &block)
+      def route(methods, paths = ['/'], **route_options, &block)
         method = methods == :any ? '*' : methods
         endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
         endpoint_description = inheritable_setting.route[:description]
@@ -156,7 +156,7 @@ module Grape
           route_options: all_route_options
         }
 
-        new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
+        new_endpoint = Grape::Endpoint.new(inheritable_setting, **endpoint_options, &block)
         endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
         inheritable_setting.route_end
@@ -166,7 +166,7 @@ module Grape
       Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
         define_method supported_method.downcase do |*args, **options, &block|
           paths = args.first || ['/']
-          route(supported_method, paths, options, &block)
+          route(supported_method, paths, **options, &block)
         end
       end
 
@@ -182,7 +182,7 @@ module Grape
       #         # defines the endpoint: GET /foo/bar
       #       end
       #     end
-      def namespace(space = nil, options = {}, &block)
+      def namespace(space = nil, **options, &block)
         return Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace]) unless space || block
 
         within_namespace do
@@ -217,9 +217,7 @@ module Grape
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
-      def route_param(param, options = {}, &block)
-        options = options.dup
-
+      def route_param(param, **options, &block)
         options[:requirements] = {
           param.to_sym => options[:requirements]
         } if options[:requirements].is_a?(Regexp)
@@ -228,7 +226,7 @@ module Grape
           requires param, type: options[:type]
         end if options.key?(:type)
 
-        namespace(":#{param}", options, &block)
+        namespace(":#{param}", **options, &block)
       end
 
       # @return array of defined versions

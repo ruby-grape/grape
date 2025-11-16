@@ -14,7 +14,7 @@ describe Grape::DSL::Desc do
     it 'sets a description' do
       desc_text = 'The description'
       options = { message: 'none' }
-      subject.desc desc_text, options
+      subject.desc desc_text, **options
       expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
       expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
     end

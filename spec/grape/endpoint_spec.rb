@@ -64,10 +64,7 @@ describe Grape::Endpoint do
     it 'takes a settings stack, options, and a block' do
       p = proc {}
       expect do
-        described_class.new(Grape::Util::InheritableSetting.new, {
-                              path: '/',
-                              method: :get
-                            }, &p)
+        described_class.new(Grape::Util::InheritableSetting.new, path: '/', method: :get, &p)
       end.not_to raise_error
     end
   end
@@ -1136,7 +1133,7 @@ describe Grape::Endpoint do
   end
 
   describe '#inspect' do
-    subject { described_class.new(settings, options).inspect }
+    subject { described_class.new(settings, **options).inspect }
 
     let(:options) do
       {

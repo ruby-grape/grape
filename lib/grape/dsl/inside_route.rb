@@ -152,6 +152,7 @@ module Grape
       end
 
       def configuration
+        pp options[:for].configuration
         options[:for].configuration.evaluate
       end
 

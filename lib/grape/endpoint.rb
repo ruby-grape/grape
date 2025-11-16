@@ -46,10 +46,7 @@ module Grape
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, options = {}, &block)
-      require_option(options, :path)
-      require_option(options, :method)
-
+    def initialize(new_settings, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -61,12 +58,11 @@ module Grape
       inheritable_setting.namespace_stackable[:representations] = [] unless inheritable_setting.namespace_stackable[:representations]
       inheritable_setting.namespace_inheritable[:default_error_status] = 500 unless inheritable_setting.namespace_inheritable[:default_error_status]
 
-      @options = options
+      @options = options.dup
+      @options[:path] = Array(@options[:path])
+      @options[:path] << '/' if @options[:path].empty?
 
-      @options[:path] = Array(options[:path])
-      @options[:path] << '/' if options[:path].empty?
-
-      @options[:method] = Array(options[:method])
+      @options[:method] = Array(@options[:method])
       @options[:route_options] ||= {}
 
       @lazy_initialize_lock = Mutex.new
@@ -87,10 +83,6 @@ module Grape
       inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
 
       endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
-    end
-
-    def require_option(options, key)
-      raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
     end
 
     def routes
