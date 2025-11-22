@@ -75,7 +75,6 @@ module Grape
       @stream = nil
       @body = nil
       @source = block
-      @helpers = build_helpers
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -258,6 +257,7 @@ module Grape
         return true if @lazy_initialized
 
         @app = options[:app] || build_stack
+        @helpers = build_helpers
         @lazy_initialized = true
       end
     end

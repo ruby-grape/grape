@@ -8,6 +8,7 @@
 
 #### Fixes
 
+* [#2628](https://github.com/ruby-grape/grape/pull/2628): Fix helpers inheritance - [@giorni](https://github.com/giorni).
 * Your contribution here.
 
 ### 3.0.0 (2025-11-15)
