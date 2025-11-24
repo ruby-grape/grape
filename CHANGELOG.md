@@ -1,15 +1,13 @@
-### 3.1.0 (Next)
+### 3.0.1 (2025-11-24)
 
 #### Features
 
 * [#2625](https://github.com/ruby-grape/grape/pull/2625): Update rubocop to 1.81.7 and fix style offenses - [@ericproulx](https://github.com/ericproulx).
 * [#2626](https://github.com/ruby-grape/grape/pull/2626): Add rails 8.1 to CI test matrix - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
 * [#2628](https://github.com/ruby-grape/grape/pull/2628): Fix helpers inheritance - [@giorni](https://github.com/giorni).
-* Your contribution here.
 
 ### 3.0.0 (2025-11-15)
 
