@@ -46,10 +46,7 @@ module Grape
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, options = {}, &block)
-      require_option(options, :path)
-      require_option(options, :method)
-
+    def initialize(new_settings, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -67,7 +64,6 @@ module Grape
       @options[:path] << '/' if options[:path].empty?
 
       @options[:method] = Array(options[:method])
-      @options[:route_options] ||= {}
 
       @lazy_initialize_lock = Mutex.new
       @lazy_initialized = nil
@@ -86,10 +82,6 @@ module Grape
       inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
 
       endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
-    end
-
-    def require_option(options, key)
-      raise Grape::Exceptions::MissingOption.new(key) unless options.key?(key)
     end
 
     def routes
@@ -115,53 +107,6 @@ module Grape
           router.append(head_route.apply(self))
         end
       end
-    end
-
-    def to_routes
-      default_route_options = prepare_default_route_attributes
-
-      map_routes do |method, raw_path|
-        prepared_path = Path.new(raw_path, namespace, prepare_default_path_settings)
-        params = options[:route_options].present? ? options[:route_options].merge(default_route_options) : default_route_options
-        route = Grape::Router::Route.new(method, prepared_path.origin, prepared_path.suffix, params)
-        route.apply(self)
-      end.flatten
-    end
-
-    def prepare_routes_requirements
-      {}.merge!(*inheritable_setting.namespace_stackable[:namespace].map(&:requirements)).tap do |requirements|
-        endpoint_requirements = options.dig(:route_options, :requirements)
-        requirements.merge!(endpoint_requirements) if endpoint_requirements
-      end
-    end
-
-    def prepare_default_route_attributes
-      {
-        namespace: namespace,
-        version: prepare_version,
-        requirements: prepare_routes_requirements,
-        prefix: inheritable_setting.namespace_inheritable[:root_prefix],
-        anchor: options[:route_options].fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
-        forward_match: options[:forward_match]
-      }
-    end
-
-    def prepare_version
-      version = inheritable_setting.namespace_inheritable[:version]
-      return if version.blank?
-
-      version.length == 1 ? version.first : version
-    end
-
-    def map_routes
-      options[:method].map { |method| options[:path].map { |path| yield method, path } }
-    end
-
-    def prepare_default_path_settings
-      namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
-      namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
-      namespace_stackable_hash.merge!(namespace_inheritable_hash)
     end
 
     def namespace
@@ -310,6 +255,59 @@ module Grape
     end
 
     private
+
+    def to_routes
+      route_options = options[:route_options]
+      default_route_options = prepare_default_route_attributes(route_options)
+      complete_route_options = route_options.merge(default_route_options)
+      path_settings = prepare_default_path_settings
+
+      options[:method].flat_map do |method|
+        options[:path].map do |path|
+          prepared_path = Path.new(path, default_route_options[:namespace], path_settings)
+          pattern = Grape::Router::Pattern.new(
+            origin: prepared_path.origin,
+            suffix: prepared_path.suffix,
+            anchor: default_route_options[:anchor],
+            params: route_options[:params],
+            format: options[:format],
+            version: default_route_options[:version],
+            requirements: default_route_options[:requirements]
+          )
+          Grape::Router::Route.new(self, method, pattern, complete_route_options)
+        end
+      end
+    end
+
+    def prepare_default_route_attributes(route_options)
+      {
+        namespace: namespace,
+        version: prepare_version(inheritable_setting.namespace_inheritable[:version]),
+        requirements: prepare_routes_requirements(route_options[:requirements]),
+        prefix: inheritable_setting.namespace_inheritable[:root_prefix],
+        anchor: route_options.fetch(:anchor, true),
+        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
+        forward_match: options[:forward_match]
+      }
+    end
+
+    def prepare_default_path_settings
+      namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
+      namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
+      namespace_stackable_hash.merge!(namespace_inheritable_hash)
+    end
+
+    def prepare_routes_requirements(route_options_requirements)
+      namespace_requirements = inheritable_setting.namespace_stackable[:namespace].filter_map(&:requirements)
+      namespace_requirements << route_options_requirements if route_options_requirements.present?
+      namespace_requirements.reduce({}, :merge)
+    end
+
+    def prepare_version(namespace_inheritable_version)
+      return if namespace_inheritable_version.blank?
+
+      namespace_inheritable_version.length == 1 ? namespace_inheritable_version.first : namespace_inheritable_version
+    end
 
     def build_stack
       stack = Grape::Middleware::Stack.new

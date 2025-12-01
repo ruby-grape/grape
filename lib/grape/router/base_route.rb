@@ -3,22 +3,31 @@
 module Grape
   class Router
     class BaseRoute
+      extend Forwardable
+
       delegate_missing_to :@options
 
-      attr_reader :index, :pattern, :options
+      attr_reader :index, :options, :pattern
 
-      def initialize(options)
+      def_delegators :@pattern, :path, :origin
+      def_delegators :@options, :description, :version, :requirements, :prefix, :anchor, :settings, :forward_match, *Grape::Util::ApiDescription::DSL_METHODS
+
+      def initialize(pattern, options = {})
+        @pattern = pattern
         @options = options.is_a?(ActiveSupport::OrderedOptions) ? options : ActiveSupport::OrderedOptions.new.update(options)
       end
 
-      alias attributes options
+      # see https://github.com/ruby-grape/grape/issues/1348
+      def namespace
+        @options[:namespace]
+      end
 
       def regexp_capture_index
         CaptureIndexCache[index]
       end
 
       def pattern_regexp
-        pattern.to_regexp
+        @pattern.to_regexp
       end
 
       def to_regexp(index)
