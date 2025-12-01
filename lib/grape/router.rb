@@ -57,11 +57,9 @@ module Grape
       map[route.request_method] << route
     end
 
-    def associate_routes(pattern, options)
-      Grape::Router::GreedyRoute.new(pattern, options).then do |greedy_route|
-        @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
-        @neutral_map << greedy_route
-      end
+    def associate_routes(greedy_route)
+      @neutral_regexes << greedy_route.to_regexp(@neutral_map.length)
+      @neutral_map << greedy_route
     end
 
     def call(env)
@@ -91,7 +89,7 @@ module Grape
 
     def rotation(env, exact_route = nil)
       response = nil
-      input, method = *extract_input_and_method(env)
+      input, method = extract_input_and_method(env)
       map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
@@ -103,7 +101,7 @@ module Grape
     end
 
     def transaction(env)
-      input, method = *extract_input_and_method(env)
+      input, method = extract_input_and_method(env)
 
       # using a Proc is important since `return` will exit the enclosing function
       cascade_or_return_response = proc do |response|
@@ -126,7 +124,7 @@ module Grape
 
       route = match?(input, '*')
 
-      return last_neighbor_route.options[:endpoint].call(env) if last_neighbor_route && last_response_cascade && route
+      return last_neighbor_route.call(env) if last_neighbor_route && last_response_cascade && route
 
       last_response_cascade = cascade_or_return_response.call(process_route(route, env)) if route
 
@@ -142,7 +140,8 @@ module Grape
 
     def make_routing_args(default_args, route, input)
       args = default_args || { route_info: route }
-      args.merge(route.params(input))
+      route_params = route.params(input)
+      route_params ? args.merge(route_params) : args
     end
 
     def extract_input_and_method(env)
@@ -171,12 +170,12 @@ module Grape
 
     def call_with_allow_headers(env, route)
       prepare_env_from_route(env, route)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.options[:allow_header]
-      route.options[:endpoint].call(env)
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header
+      route.call(env)
     end
 
     def prepare_env_from_route(env, route)
-      input, = *extract_input_and_method(env)
+      input, = extract_input_and_method(env)
       env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Env::GRAPE_ROUTING_ARGS], route, input)
     end
 

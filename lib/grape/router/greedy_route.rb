@@ -6,14 +6,20 @@
 module Grape
   class Router
     class GreedyRoute < BaseRoute
-      def initialize(pattern, options)
-        @pattern = pattern
-        super(options)
+      extend Forwardable
+
+      def_delegators :@endpoint, :call
+
+      attr_reader :endpoint, :allow_header
+
+      def initialize(pattern, endpoint:, allow_header:)
+        super(pattern)
+        @endpoint = endpoint
+        @allow_header = allow_header
       end
 
-      # Grape::Router:Route defines params as a function
       def params(_input = nil)
-        options[:params] || {}
+        nil
       end
     end
   end

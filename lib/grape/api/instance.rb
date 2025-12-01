@@ -177,7 +177,7 @@ module Grape
       def add_head_not_allowed_methods_and_options_methods
         # The paths we collected are prepared (cf. Path#prepare), so they
         # contain already versioning information when using path versioning.
-        all_routes = self.class.endpoints.map(&:routes).flatten
+        all_routes = self.class.endpoints.flat_map(&:routes)
 
         # Disable versioning so adding a route won't prepend versioning
         # informations again.
@@ -186,23 +186,21 @@ module Grape
 
       def collect_route_config_per_pattern(all_routes)
         routes_by_regexp = all_routes.group_by(&:pattern_regexp)
+        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
 
         # Build the configuration based on the first endpoint and the collection of methods supported.
         routes_by_regexp.each_value do |routes|
-          last_route = routes.last # Most of the configuration is taken from the last endpoint
           next if routes.any? { |route| route.request_method == '*' }
 
-          namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
+          last_route = routes.last # Most of the configuration is taken from the last endpoint
           allowed_methods = routes.map(&:request_method)
           allowed_methods |= [Rack::HEAD] if !namespace_inheritable[:do_not_route_head] && allowed_methods.include?(Rack::GET)
 
           allow_header = namespace_inheritable[:do_not_route_options] ? allowed_methods : [Rack::OPTIONS] | allowed_methods
           last_route.app.options[:options_route_enabled] = true unless namespace_inheritable[:do_not_route_options] || allowed_methods.include?(Rack::OPTIONS)
 
-          @router.associate_routes(last_route.pattern, {
-                                     endpoint: last_route.app,
-                                     allow_header: allow_header
-                                   })
+          greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header: allow_header)
+          @router.associate_routes(greedy_route)
         end
       end
 

@@ -149,14 +149,14 @@ module Grape
         all_route_options.deep_merge!(endpoint_description) if endpoint_description
         all_route_options.deep_merge!(route_options) if route_options&.any?
 
-        endpoint_options = {
+        new_endpoint = Grape::Endpoint.new(
+          inheritable_setting,
           method: method,
           path: paths,
           for: self,
-          route_options: all_route_options
-        }
-
-        new_endpoint = Grape::Endpoint.new(inheritable_setting, endpoint_options, &block)
+          route_options: all_route_options,
+          &block
+        )
         endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
         inheritable_setting.route_end
@@ -217,7 +217,7 @@ module Grape
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
-      def route_param(param, options = {}, &block)
+      def route_param(param, **options, &block)
         options = options.dup
 
         options[:requirements] = {

@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Grape::Router::GreedyRoute do
-  let(:instance) { described_class.new(pattern, options) }
-  let(:index) { 0 }
+  let(:instance) { described_class.new(pattern, endpoint: endpoint, allow_header: allow_header) }
   let(:pattern) { :pattern }
-  let(:params) do
-    { a_param: 1 }.freeze
-  end
-  let(:options) do
-    { params: params }.freeze
+  let(:endpoint) { instance_double(Grape::Endpoint) }
+  let(:allow_header) { false }
+
+  describe 'inheritance' do
+    subject { instance }
+
+    it { is_expected.to be_a(Grape::Router::BaseRoute) }
   end
 
   describe '#pattern' do
@@ -17,21 +18,21 @@ RSpec.describe Grape::Router::GreedyRoute do
     it { is_expected.to eq(pattern) }
   end
 
-  describe '#options' do
-    subject { instance.options }
+  describe '#endpoint' do
+    subject { instance.endpoint }
 
-    it { is_expected.to eq(options) }
+    it { is_expected.to eq(endpoint) }
+  end
+
+  describe '#allow_header' do
+    subject { instance.allow_header }
+
+    it { is_expected.to eq(allow_header) }
   end
 
   describe '#params' do
     subject { instance.params }
 
-    it { is_expected.to eq(params) }
-  end
-
-  describe '#attributes' do
-    subject { instance.attributes }
-
-    it { is_expected.to eq(options) }
+    it { is_expected.to be_nil }
   end
 end

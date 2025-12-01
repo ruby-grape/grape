@@ -13,10 +13,10 @@ module Grape
       def_delegators :to_regexp, :===
       alias match? ===
 
-      def initialize(origin, suffix, options)
+      def initialize(origin:, suffix:, anchor:, params:, format:, version:, requirements:)
         @origin = origin
-        @path = build_path(origin, options[:anchor], suffix)
-        @pattern = build_pattern(@path, options[:params], options[:format], options[:version], options[:requirements])
+        @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
+        @pattern = Mustermann::Grape.new(@path, uri_decode: true, params: params, capture: extract_capture(format, version, requirements))
         @to_regexp = @pattern.to_regexp
       end
 
@@ -28,24 +28,10 @@ module Grape
 
       private
 
-      def build_pattern(path, params, format, version, requirements)
-        Mustermann::Grape.new(
-          path,
-          uri_decode: true,
-          params: params,
-          capture: extract_capture(format, version, requirements)
-        )
-      end
-
-      def build_path(pattern, anchor, suffix)
-        PatternCache[[build_path_from_pattern(pattern, anchor), suffix]]
-      end
-
       def extract_capture(format, version, requirements)
-        capture = {}.tap do |h|
-          h[:format] = map_str(format) if format.present?
-          h[:version] = map_str(version) if version.present?
-        end
+        capture = {}
+        capture[:format] = map_str(format) if format.present?
+        capture[:version] = map_str(version) if version.present?
 
         return capture if requirements.blank?
 

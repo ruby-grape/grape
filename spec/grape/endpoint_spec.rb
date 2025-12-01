@@ -60,18 +60,6 @@ describe Grape::Endpoint do
     end
   end
 
-  describe '#initialize' do
-    it 'takes a settings stack, options, and a block' do
-      p = proc {}
-      expect do
-        described_class.new(Grape::Util::InheritableSetting.new, {
-                              path: '/',
-                              method: :get
-                            }, &p)
-      end.not_to raise_error
-    end
-  end
-
   it 'sets itself in the env upon call' do
     subject.get('/') { 'Hello world.' }
     get '/'
@@ -610,6 +598,9 @@ describe Grape::Endpoint do
     end
 
     it 'accepts a code' do
+      subject.desc 'patate' do
+        http_codes [[401, 'Unauthorized']]
+      end
       subject.get('/hey') do
         error! 'Unauthorized.', 401
       end
@@ -1136,7 +1127,7 @@ describe Grape::Endpoint do
   end
 
   describe '#inspect' do
-    subject { described_class.new(settings, options).inspect }
+    subject { described_class.new(settings, **options).inspect }
 
     let(:options) do
       {
