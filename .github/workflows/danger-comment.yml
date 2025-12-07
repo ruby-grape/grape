@@ -1,0 +1,89 @@
+---
+name: danger-comment
+on:
+  workflow_run:
+    workflows: [danger]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.pull_requests[0]
+    steps:
+    - name: Download Danger report
+      uses: actions/download-artifact@v6
+      with:
+        name: danger-report
+        github-token: ${{ github.token }}
+        run-id: ${{ github.event.workflow_run.id }}
+    - name: Post or update PR comment
+      uses: actions/github-script@v8
+      with:
+        script: |
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('danger_report.json', 'utf8'));
+
+          let body = '## Danger Report\n\n';
+
+          if (report.errors && report.errors.length > 0) {
+            body += '### Errors\n';
+            report.errors.forEach(e => body += `- :no_entry_sign: ${e}\n`);
+            body += '\n';
+          }
+
+          if (report.warnings && report.warnings.length > 0) {
+            body += '### Warnings\n';
+            report.warnings.forEach(w => body += `- :warning: ${w}\n`);
+            body += '\n';
+          }
+
+          if (report.messages && report.messages.length > 0) {
+            body += '### Messages\n';
+            report.messages.forEach(m => body += `- :book: ${m}\n`);
+            body += '\n';
+          }
+
+          if ((!report.errors || report.errors.length === 0) &&
+              (!report.warnings || report.warnings.length === 0) &&
+              (!report.messages || report.messages.length === 0)) {
+            body += ':white_check_mark: All checks passed!';
+          }
+
+          const prNumber = ${{ github.event.workflow_run.pull_requests[0].number }};
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: prNumber
+          });
+
+          const botComment = comments.find(c =>
+            c.user.login === 'github-actions[bot]' &&
+            c.body.includes('## Danger Report')
+          );
+
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: body
+            });
+          }
+
+          // Fail if there are errors
+          if (report.errors && report.errors.length > 0) {
+            core.setFailed('Danger found errors');
+          }
