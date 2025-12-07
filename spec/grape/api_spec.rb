@@ -4715,4 +4715,16 @@ describe Grape::API do
       expect { get '/' }.to raise_error(Rack::Lint::LintError)
     end
   end
+
+  describe '.cascade' do
+    subject { api.cascade }
+
+    let(:api) do
+      Class.new(Grape::API) do
+        cascade true
+      end
+    end
+
+    it { is_expected.to be(true) }
+  end
 end
