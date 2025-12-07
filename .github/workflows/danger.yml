@@ -18,6 +18,7 @@ jobs:
       env:
         BASE_SHA: ${{ github.event.pull_request.base.sha }}
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         DANGER_REPORT_PATH: danger_report.json
       run: bundle exec danger dry_run --base=$BASE_SHA --head=$HEAD_SHA --verbose
     - name: Upload Danger report

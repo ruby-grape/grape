@@ -31,6 +31,7 @@ if ENV['DANGER_REPORT_PATH']
   require 'json'
 
   report = {
+    pr_number: ENV['PR_NUMBER']&.to_i,
     errors: violation_report[:errors].map(&:message),
     warnings: violation_report[:warnings].map(&:message),
     messages: violation_report[:messages].map(&:message)
