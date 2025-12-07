@@ -2,8 +2,8 @@
 
 # Inline checks from ruby-grape-danger (avoids plugins requiring GitHub API token)
 
-has_app_changes = !git.modified_files.grep(/lib/).empty?
-has_spec_changes = !git.modified_files.grep(/spec/).empty?
+has_app_changes = !git.modified_files.grep(%r{^lib/}).empty?
+has_spec_changes = !git.modified_files.grep(%r{^spec/}).empty?
 
 warn("There're library changes, but not tests. That's OK as long as you're refactoring existing code.", sticky: false) if has_app_changes && !has_spec_changes
 
@@ -20,8 +20,8 @@ warn('Please update CHANGELOG.md with a description of your changes.', sticky: f
   contents = File.read(file)
   # rubocop:disable Style/SignalException -- `fail` is Danger's DSL method, not Kernel#fail
   if file.start_with?('spec')
-    fail("`xit` or `fit` left in tests (#{file})") if /^\w*[xf]it/.match?(contents)
-    fail("`fdescribe` left in tests (#{file})") if /^\w*fdescribe/.match?(contents)
+    fail("`xit` or `fit` left in tests (#{file})") if /^\s*[xf]it\b/.match?(contents)
+    fail("`fdescribe` left in tests (#{file})") if /^\s*fdescribe\b/.match?(contents)
   end
   # rubocop:enable Style/SignalException
 end

@@ -6,8 +6,9 @@ on:
     types: [completed]
 
 permissions:
-  contents: read
-  pull-requests: write
+  actions: read       # Required to download the artifact
+  contents: read      # Standard safe default
+  issues: write       # Required to post comments (PRs are Issues in the API)
 
 jobs:
   comment:

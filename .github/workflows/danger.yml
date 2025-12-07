@@ -1,6 +1,8 @@
 ---
 name: danger
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   danger:
@@ -26,3 +28,4 @@ jobs:
       with:
         name: danger-report
         path: danger_report.json
+        retention-days: 1
