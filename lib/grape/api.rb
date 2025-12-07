@@ -5,7 +5,7 @@ module Grape
   # should subclass this class in order to build an API.
   class API
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %i[call call! configuration compile! inherited recognize_path routes].freeze
+    NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting= top_level_setting].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
@@ -29,7 +29,7 @@ module Grape
       # the headers, and the body. See [the rack specification]
       # (https://github.com/rack/rack/blob/main/SPEC.rdoc) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def_delegators :base_instance, :new, :configuration, :call, :compile!
+      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted

@@ -7,7 +7,7 @@ module Grape
     # matter where they're defined, and inheritable settings which apply only
     # in the current scope and scopes nested under it.
     module Settings
-      attr_writer :inheritable_setting, :top_level_setting
+      attr_writer :inheritable_setting
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting

@@ -3938,19 +3938,12 @@ describe Grape::API do
     end
   end
 
-  describe '.compile' do
-    it 'sets the instance' do
-      expect(subject.instance).to be_nil
-      subject.compile
-      expect(subject.instance).to be_a(subject.base_instance)
-    end
-  end
-
   describe '.change!' do
     it 'invalidates any compiled instance' do
-      subject.compile
+      expect(Grape::API::Instance.singleton_class::LOCK).to receive(:synchronize).and_call_original.twice
+      subject.compile!
       subject.change!
-      expect(subject.instance).to be_nil
+      subject.compile!
     end
   end
 
