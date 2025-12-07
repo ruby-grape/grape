@@ -5,29 +5,25 @@
 has_app_changes = !git.modified_files.grep(/lib/).empty?
 has_spec_changes = !git.modified_files.grep(/spec/).empty?
 
-if has_app_changes && !has_spec_changes
-  warn("There're library changes, but not tests. That's OK as long as you're refactoring existing code.", sticky: false)
-end
+warn("There're library changes, but not tests. That's OK as long as you're refactoring existing code.", sticky: false) if has_app_changes && !has_spec_changes
 
-if !has_app_changes && has_spec_changes
-  message('We really appreciate pull requests that demonstrate issues, even without a fix. That said, the next step is to try and fix the failing tests!', sticky: false)
-end
+message('We really appreciate pull requests that demonstrate issues, even without a fix. That said, the next step is to try and fix the failing tests!', sticky: false) if !has_app_changes && has_spec_changes
 
 # Simplified changelog check (replaces danger-changelog plugin which requires github.* methods)
 # Note: toc.check! from danger-toc plugin removed (not essential for CI)
 has_changelog_changes = git.modified_files.include?('CHANGELOG.md') || git.added_files.include?('CHANGELOG.md')
-if has_app_changes && !has_changelog_changes
-  warn('Please update CHANGELOG.md with a description of your changes.', sticky: false)
-end
+warn('Please update CHANGELOG.md with a description of your changes.', sticky: false) if has_app_changes && !has_changelog_changes
 
 (git.modified_files + git.added_files - %w[Dangerfile]).each do |file|
   next unless File.file?(file)
 
   contents = File.read(file)
+  # rubocop:disable Style/SignalException -- `fail` is Danger's DSL method, not Kernel#fail
   if file.start_with?('spec')
-    fail("`xit` or `fit` left in tests (#{file})") if contents =~ /^\w*[xf]it/
-    fail("`fdescribe` left in tests (#{file})") if contents =~ /^\w*fdescribe/
+    fail("`xit` or `fit` left in tests (#{file})") if /^\w*[xf]it/.match?(contents)
+    fail("`fdescribe` left in tests (#{file})") if /^\w*fdescribe/.match?(contents)
   end
+  # rubocop:enable Style/SignalException
 end
 
 # Output JSON report for GitHub Actions workflow_run to post as PR comment
