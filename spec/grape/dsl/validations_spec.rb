@@ -10,21 +10,6 @@ describe Grape::DSL::Validations do
     end
   end
 
-  describe '.reset_validations' do
-    subject { dummy_class.reset_validations! }
-
-    before do
-      %i[declared_params params validations other].each do |key|
-        dummy_class.inheritable_setting.namespace_stackable[key] = key
-      end
-    end
-
-    it 'calls unset_namespace_stackable properly' do
-      subject
-      expect(dummy_class.inheritable_setting.namespace_stackable.to_hash).to eq(other: [:other])
-    end
-  end
-
   describe '.params' do
     subject { dummy_class.params { :my_block } }
 

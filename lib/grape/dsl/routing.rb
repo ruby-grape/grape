@@ -5,6 +5,22 @@ module Grape
     module Routing
       attr_reader :endpoints
 
+      def given(conditional_option, &block)
+        return unless conditional_option
+
+        mounted(&block)
+      end
+
+      def mounted(&block)
+        evaluate_as_instance_with_configuration(block, lazy: true)
+      end
+
+      def cascade(value = nil)
+        return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable(:cascade).nil? : true if value.nil?
+
+        inheritable_setting.namespace_inheritable[:cascade] = value
+      end
+
       # Specify an API version.
       #
       # @example API with legacy support.
@@ -202,16 +218,6 @@ module Grape
         @routes ||= endpoints.map(&:routes).flatten
       end
 
-      # Remove all defined routes.
-      def reset_routes!
-        endpoints.each(&:reset_routes!)
-        @routes = nil
-      end
-
-      def reset_endpoints!
-        @endpoints = []
-      end
-
       # This method allows you to quickly define a parameter route segment
       # in your API.
       #
@@ -237,6 +243,16 @@ module Grape
       end
 
       private
+
+      # Remove all defined routes.
+      def reset_routes!
+        endpoints.each(&:reset_routes!)
+        @routes = nil
+      end
+
+      def reset_endpoints!
+        @endpoints = []
+      end
 
       def refresh_mounted_api(mounts, *opts)
         opts << { refresh_already_mounted: true }
@@ -265,7 +281,7 @@ module Grape
           self.configuration = value_for_configuration
           response
         end
-        if base && base_instance? && lazy
+        if @base && base_instance? && lazy
           lazy_block
         else
           lazy_block.evaluate_from(configuration)

@@ -4,7 +4,6 @@ describe Grape::Validations do
   subject { Class.new(Grape::API) }
 
   let(:app) { subject }
-  let(:declared_params) { subject.inheritable_setting.namespace_stackable[:declared_params].flatten }
 
   describe 'params' do
     context 'optional' do
@@ -38,7 +37,13 @@ describe Grape::Validations do
         subject.params do
           optional :some_param
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([:some_param])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET)
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('some_param' => nil)
       end
     end
 
@@ -58,7 +63,13 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_optional_using
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[field_a field_b])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { field_a: 'field_a', field_b: 'field_b' })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('field_a' => 'field_a', 'field_b' => 'field_b')
       end
 
       it 'works when field_a and field_b are not present' do
@@ -105,7 +116,13 @@ describe Grape::Validations do
         subject.params do
           requires :some_param
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([:some_param])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { some_param: 'some_param' })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('some_param' => 'some_param')
       end
 
       it 'works when required field is present but nil' do
@@ -191,7 +208,13 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_all
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[required_field optional_field optional_array_field])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { required_field: 'required_field', optional_field: 'optional_field', optional_array_field: ['optional_array_field'] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('required_field' => 'required_field', 'optional_field' => 'optional_field', 'optional_array_field' => ['optional_array_field'])
       end
 
       it 'errors when required_field is not present' do
@@ -226,7 +249,13 @@ describe Grape::Validations do
 
       it 'adds entity documentation to declared params' do
         define_requires_none
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[required_field optional_field])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { required_field: 'required_field', optional_field: 1 })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('required_field' => 'required_field', 'optional_field' => 1)
       end
 
       it 'errors when required_field is not present' do
@@ -256,7 +285,13 @@ describe Grape::Validations do
 
         it 'adds only the entity documentation to declared params, nothing more' do
           define_requires_all
-          expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq(%i[required_field optional_field])
+          subject.format :json
+          subject.get('/') do
+            declared(params)
+          end
+          env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { required_field: 'required_field', optional_field: 'optional_field' })
+          response = Rack::MockResponse[*subject.call(env)]
+          expect(JSON.parse(response.body)).to eq('required_field' => 'required_field', 'optional_field' => 'optional_field')
         end
       end
 
@@ -317,12 +352,18 @@ describe Grape::Validations do
       end
 
       it 'adds to declared parameters' do
+        subject.format :json
         subject.params do
           requires :items, type: Array do
             requires :key
           end
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([items: [:key]])
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: 'my_key'] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
       end
     end
 
@@ -394,7 +435,13 @@ describe Grape::Validations do
             requires :key
           end
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([items: [:key]])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
       end
     end
 
@@ -452,12 +499,18 @@ describe Grape::Validations do
       end
 
       it 'adds to declared parameters' do
+        subject.format :json
         subject.params do
           group :items, type: Array do
             requires :key
           end
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([items: [:key]])
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
       end
     end
 
@@ -811,12 +864,18 @@ describe Grape::Validations do
       end
 
       it 'adds to declared parameters' do
+        subject.format :json
         subject.params do
           optional :items, type: Array do
             requires :key
           end
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([items: [:key]])
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
       end
     end
 
@@ -880,7 +939,13 @@ describe Grape::Validations do
             requires(:required_subitems, type: Array) { requires :value }
           end
         end
-        expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq([items: [:key, { optional_subitems: [:value] }, { required_subitems: [:value] }]])
+        subject.format :json
+        subject.get('/') do
+          declared(params)
+        end
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key, required_subitems: [value: 'my_value'] }] })
+        response = Rack::MockResponse[*subject.call(env)]
+        expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key', 'optional_subitems' => [], 'required_subitems' => [{ 'value' => 'my_value' }] }])
       end
 
       context <<~DESC do
@@ -1399,17 +1464,29 @@ describe Grape::Validations do
         end
 
         it 'by #use' do
+          subject.format :json
           subject.params do
             use :pagination
           end
-          expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq %i[page per_page]
+          subject.get('/') do
+            declared(params)
+          end
+          env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { page: 1, per_page: 10 })
+          response = Rack::MockResponse[*subject.call(env)]
+          expect(JSON.parse(response.body)).to eq('page' => 1, 'per_page' => 10)
         end
 
         it 'by #use with multiple params' do
+          subject.format :json
           subject.params do
             use :pagination, :period
           end
-          expect(Grape::Validations::ParamsScope::Attr.attrs_keys(declared_params)).to eq %i[page per_page start_date end_date]
+          subject.get('/') do
+            declared(params)
+          end
+          env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { page: 1, per_page: 10, start_date: '2025-01-01', end_date: '2026-01-01' })
+          response = Rack::MockResponse[*subject.call(env)]
+          expect(JSON.parse(response.body)).to eq('page' => 1, 'per_page' => 10, 'start_date' => '2025-01-01', 'end_date' => '2026-01-01')
         end
       end
 

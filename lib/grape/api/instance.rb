@@ -21,20 +21,9 @@ module Grape
       class << self
         extend Forwardable
 
-        attr_reader :instance, :base
         attr_accessor :configuration
 
-        def_delegators :base, :to_s
-
-        def given(conditional_option, &block)
-          return unless conditional_option
-
-          mounted(&block)
-        end
-
-        def mounted(&block)
-          evaluate_as_instance_with_configuration(block, lazy: true)
-        end
+        def_delegators :@base, :to_s
 
         def base=(grape_api)
           @base = grape_api
@@ -42,7 +31,7 @@ module Grape
         end
 
         def base_instance?
-          self == base.base_instance
+          self == @base.base_instance
         end
 
         # A class-level lock to ensure the API is not compiled by multiple
@@ -56,43 +45,30 @@ module Grape
           reset_validations!
         end
 
-        # Parses the API's definition and compiles it into an instance of
-        # Grape::API.
-        def compile
-          @instance ||= new # rubocop:disable Naming/MemoizedInstanceVariableName
-        end
-
         # This is the interface point between Rack and Grape; it accepts a request
         # from Rack and ultimately returns an array of three values: the status,
         # the headers, and the body. See [the rack specification]
         # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
         def call(env)
           compile!
-          call!(env)
-        end
-
-        # A non-synchronized version of ::call.
-        def call!(env)
-          instance.call(env)
-        end
-
-        # (see #cascade?)
-        def cascade(value = nil)
-          return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable(:cascade).nil? : true if value.nil?
-
-          inheritable_setting.namespace_inheritable[:cascade] = value
+          @instance.call(env)
         end
 
         def compile!
-          return if instance
+          return if @instance
 
-          LOCK.synchronize { compile unless instance }
+          LOCK.synchronize { @instance ||= new }
         end
 
         # see Grape::Router#recognize_path
         def recognize_path(path)
           compile!
-          instance.router.recognize_path(path)
+          @instance.router.recognize_path(path)
+        end
+
+        # Wipe the compiled API so we can recompile after changes were made.
+        def change!
+          @instance = nil
         end
 
         protected
@@ -108,11 +84,6 @@ module Grape
           end
 
           reset_routes!
-        end
-
-        # Wipe the compiled API so we can recompile after changes were made.
-        def change!
-          @instance = nil
         end
 
         private
