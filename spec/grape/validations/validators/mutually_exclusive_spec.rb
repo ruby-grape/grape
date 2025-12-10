@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Grape::Validations::Validators::MutualExclusionValidator do
+describe Grape::Validations::Validators::MutuallyExclusiveValidator do
   let_it_be(:app) do
     Class.new(Grape::API) do
       rescue_from Grape::Exceptions::ValidationErrors do |e|
