@@ -222,7 +222,7 @@ describe Grape::DSL::Parameters do
     it 'adds an mutally exclusive parameter validation' do
       subject.mutually_exclusive :media, :audio
 
-      expect(subject.validates_reader).to eq([%i[media audio], { mutual_exclusion: { value: true, message: nil } }])
+      expect(subject.validates_reader).to eq([%i[media audio], { mutually_exclusive: { value: true, message: nil } }])
     end
   end
 

@@ -3,7 +3,7 @@
 module Grape
   module Validations
     module Validators
-      class MutualExclusionValidator < MultipleParamsBase
+      class MutuallyExclusiveValidator < MultipleParamsBase
         def validate_params!(params)
           keys = keys_in_common(params)
           return if keys.length <= 1

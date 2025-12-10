@@ -165,28 +165,10 @@ module Grape
         new_group_scope([new_group_attrs], &block)
       end
 
-      # Disallow the given parameters to be present in the same request.
-      # @param attrs [*Symbol] parameters to validate
-      def mutually_exclusive(*attrs)
-        validates(attrs, mutual_exclusion: { value: true, message: extract_message_option(attrs) })
-      end
-
-      # Require exactly one of the given parameters to be present.
-      # @param (see #mutually_exclusive)
-      def exactly_one_of(*attrs)
-        validates(attrs, exactly_one_of: { value: true, message: extract_message_option(attrs) })
-      end
-
-      # Require at least one of the given parameters to be present.
-      # @param (see #mutually_exclusive)
-      def at_least_one_of(*attrs)
-        validates(attrs, at_least_one_of: { value: true, message: extract_message_option(attrs) })
-      end
-
-      # Require that either all given params are present, or none are.
-      # @param (see #mutually_exclusive)
-      def all_or_none_of(*attrs)
-        validates(attrs, all_or_none_of: { value: true, message: extract_message_option(attrs) })
+      %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
+        define_method validator do |*attrs, message: nil|
+          validates(attrs, validator => { value: true, message: message })
+        end
       end
 
       # Define a block of validations which should be applied if and only if
