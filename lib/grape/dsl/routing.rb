@@ -16,7 +16,7 @@ module Grape
       end
 
       def cascade(value = nil)
-        return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable(:cascade).nil? : true if value.nil?
+        return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable[:cascade].nil? : true if value.nil?
 
         inheritable_setting.namespace_inheritable[:cascade] = value
       end

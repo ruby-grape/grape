@@ -9,6 +9,7 @@
 
 #### Fixes
     
+* [#2633](https://github.com/ruby-grape/grape/pull/2633): Fix cascade reading - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.0.1 (2025-11-24)
