@@ -4,6 +4,7 @@
 
 * [#2629](https://github.com/ruby-grape/grape/pull/2629): Refactor Router Architecture - [@ericproulx](https://github.com/ericproulx).
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Refactor API::Instance and reorganize DSL modules - [@ericproulx](https://github.com/ericproulx).
+* [#2636](https://github.com/ruby-grape/grape/pull/2636): Refactor router to simplify method signatures and reduce duplication - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
