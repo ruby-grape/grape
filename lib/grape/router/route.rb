@@ -3,10 +3,14 @@
 module Grape
   class Router
     class Route < BaseRoute
+      extend Forwardable
+
       FORWARD_MATCH_METHOD = ->(input, pattern) { input.start_with?(pattern.origin) }
       NON_FORWARD_MATCH_METHOD = ->(input, pattern) { pattern.match?(input) }
 
       attr_reader :app, :request_method, :index
+
+      def_delegators :@app, :call
 
       def initialize(endpoint, method, pattern, options)
         super(pattern, options)
@@ -17,10 +21,6 @@ module Grape
 
       def convert_to_head_request!
         @request_method = Rack::HEAD
-      end
-
-      def exec(env)
-        @app.call(env)
       end
 
       def apply(app)

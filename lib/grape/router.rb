@@ -64,8 +64,10 @@ module Grape
 
     def call(env)
       with_optimization do
-        response, route = identity(env)
-        response || rotation(env, route)
+        input = Router.normalize_path(env[Rack::PATH_INFO])
+        method = env[Rack::REQUEST_METHOD]
+        response, route = identity(input, method, env)
+        response || rotation(input, method, env, route)
       end
     end
 
@@ -78,31 +80,28 @@ module Grape
 
     private
 
-    def identity(env)
+    def identity(input, method, env)
       route = nil
-      response = transaction(env) do |input, method|
+      response = transaction(input, method, env) do
         route = match?(input, method)
-        process_route(route, env) if route
+        process_route(route, input, env) if route
       end
       [response, route]
     end
 
-    def rotation(env, exact_route = nil)
+    def rotation(input, method, env, exact_route)
       response = nil
-      input, method = extract_input_and_method(env)
       map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
-        response = process_route(route, env)
+        response = process_route(route, input, env)
         break unless cascade?(response)
       end
       response
     end
 
-    def transaction(env)
-      input, method = extract_input_and_method(env)
-
+    def transaction(input, method, env)
       # using a Proc is important since `return` will exit the enclosing function
       cascade_or_return_response = proc do |response|
         if response
@@ -115,39 +114,32 @@ module Grape
         end
       end
 
-      last_response_cascade = cascade_or_return_response.call(yield(input, method))
+      response = yield
+      last_response_cascade = cascade_or_return_response.call(response)
       last_neighbor_route = greedy_match?(input)
 
       # If last_neighbor_route exists and request method is OPTIONS,
-      # return response by using #call_with_allow_headers.
-      return call_with_allow_headers(env, last_neighbor_route) if last_neighbor_route && method == Rack::OPTIONS && !last_response_cascade
+      # return response by using #include_allow_header.
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !last_response_cascade && method == Rack::OPTIONS && last_neighbor_route
 
       route = match?(input, '*')
 
       return last_neighbor_route.call(env) if last_neighbor_route && last_response_cascade && route
 
-      last_response_cascade = cascade_or_return_response.call(process_route(route, env)) if route
+      last_response_cascade = cascade_or_return_response.call(process_route(route, input, env)) if route
 
-      return call_with_allow_headers(env, last_neighbor_route) if !last_response_cascade && last_neighbor_route
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !last_response_cascade && last_neighbor_route
 
       nil
     end
 
-    def process_route(route, env)
-      prepare_env_from_route(env, route)
-      route.exec(env)
-    end
-
-    def make_routing_args(default_args, route, input)
-      args = default_args || { route_info: route }
+    def process_route(route, input, env, include_allow_header: false)
+      args = env[Grape::Env::GRAPE_ROUTING_ARGS] || { route_info: route }
       route_params = route.params(input)
-      route_params ? args.merge(route_params) : args
-    end
-
-    def extract_input_and_method(env)
-      input = string_for(env[Rack::PATH_INFO])
-      method = env[Rack::REQUEST_METHOD]
-      [input, method]
+      routing_args = args.merge(route_params || {})
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
+      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
+      route.call(env)
     end
 
     def with_optimization
@@ -168,23 +160,8 @@ module Grape
       @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_index] } }
     end
 
-    def call_with_allow_headers(env, route)
-      prepare_env_from_route(env, route)
-      env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header
-      route.call(env)
-    end
-
-    def prepare_env_from_route(env, route)
-      input, = extract_input_and_method(env)
-      env[Grape::Env::GRAPE_ROUTING_ARGS] = make_routing_args(env[Grape::Env::GRAPE_ROUTING_ARGS], route, input)
-    end
-
     def cascade?(response)
       response && response[1]['X-Cascade'] == 'pass'
-    end
-
-    def string_for(input)
-      self.class.normalize_path(input)
     end
   end
 end
