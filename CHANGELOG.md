@@ -5,6 +5,7 @@
 * [#2629](https://github.com/ruby-grape/grape/pull/2629): Refactor Router Architecture - [@ericproulx](https://github.com/ericproulx).
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Refactor API::Instance and reorganize DSL modules - [@ericproulx](https://github.com/ericproulx).
 * [#2636](https://github.com/ruby-grape/grape/pull/2636): Refactor router to simplify method signatures and reduce duplication - [@ericproulx](https://github.com/ericproulx).
+* [#2640](https://github.com/ruby-grape/grape/pull/2640): Compute available_media_types once - [@ericproulx](https://github.com/ericproulx).
 * [#2639](https://github.com/ruby-grape/grape/pull/2639): Refactor mime_types_for - [@ericproulx](https://github.com/ericproulx).
 * [#2638](https://github.com/ruby-grape/grape/pull/2638): Remove unnecessary path string duplication - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.

@@ -35,12 +35,13 @@ module Grape
           Versioner.register(klass)
         end
 
-        attr_reader :error_headers, :versions
+        attr_reader :error_headers, :versions, :available_media_types
 
         def initialize(app, **options)
           super
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @versions = options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          build_vendor_available_media_types
         end
 
         def potential_version_match?(potential_version)
@@ -49,6 +50,26 @@ module Grape
 
         def version_not_found!
           throw :error, status: 404, message: '404 API Version Not Found', headers: CASCADE_PASS_HEADER
+        end
+
+        private
+
+        def build_vendor_available_media_types
+          return unless vendor
+
+          @available_media_types = []
+          base_media_type = "application/vnd.#{vendor}"
+          content_types.each_key do |extension|
+            versions&.reverse_each do |version|
+              @available_media_types << "#{base_media_type}-#{version}+#{extension}"
+              @available_media_types << "#{base_media_type}-#{version}"
+            end
+            @available_media_types << "#{base_media_type}+#{extension}"
+          end
+
+          @available_media_types << base_media_type
+          @available_media_types.concat(content_types.values.flatten)
+          @available_media_types
         end
       end
     end
