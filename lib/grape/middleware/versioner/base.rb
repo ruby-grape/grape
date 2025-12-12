@@ -50,6 +50,26 @@ module Grape
         def version_not_found!
           throw :error, status: 404, message: '404 API Version Not Found', headers: CASCADE_PASS_HEADER
         end
+
+        private
+
+        def available_media_types
+          @available_media_types ||= begin
+            media_types = []
+            base_media_type = "application/vnd.#{vendor}"
+            content_types.each_key do |extension|
+              versions&.reverse_each do |version|
+                media_types << "#{base_media_type}-#{version}+#{extension}"
+                media_types << "#{base_media_type}-#{version}"
+              end
+              media_types << "#{base_media_type}+#{extension}"
+            end
+
+            media_types << base_media_type
+            media_types.concat(content_types.values.flatten)
+            media_types
+          end
+        end
       end
     end
   end
