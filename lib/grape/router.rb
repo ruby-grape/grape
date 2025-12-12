@@ -16,7 +16,7 @@ module Grape
       return path if path == '/'
 
       # Fast path for the overwhelming majority of paths that don't need to be normalized
-      return path.dup if path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//}))
+      return path if path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//}))
 
       # Slow path
       encoding = path.encoding
