@@ -22,10 +22,7 @@ module Grape
     def mime_types_for(from_settings)
       return MIME_TYPES if from_settings == Grape::ContentTypes::DEFAULTS
 
-      from_settings.each_with_object({}) do |(k, v), types_without_params|
-        # remove optional parameter
-        types_without_params[v.split(';', 2).first] = k
-      end
+      from_settings.invert.transform_keys! { |k| k.include?(';') ? k.split(';', 2).first : k }
     end
   end
 end
