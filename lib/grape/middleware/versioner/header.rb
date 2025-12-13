@@ -105,22 +105,6 @@ module Grape
 
           invalid_version_header!('API version not found.')
         end
-
-        def available_media_types
-          [].tap do |available_media_types|
-            base_media_type = "application/vnd.#{vendor}"
-            content_types.each_key do |extension|
-              versions&.reverse_each do |version|
-                available_media_types << "#{base_media_type}-#{version}+#{extension}"
-                available_media_types << "#{base_media_type}-#{version}"
-              end
-              available_media_types << "#{base_media_type}+#{extension}"
-            end
-
-            available_media_types << base_media_type
-            available_media_types.concat(content_types.values.flatten)
-          end
-        end
       end
     end
   end
