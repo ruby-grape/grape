@@ -404,7 +404,17 @@ describe Grape::DSL::InsideRoute do
   end
 
   describe '#declared' do
-    # see endpoint_spec.rb#declared for spec coverage
+    let(:dummy_class) do
+      Class.new do
+        include Grape::DSL::Declared
+
+        attr_reader :before_filter_passed
+
+        def initialize
+          @before_filter_passed = false
+        end
+      end
+    end
 
     it 'is not available by default' do
       expect { subject.declared({}) }.to raise_error(
