@@ -22,7 +22,7 @@ module Grape
           return if path_info == '/'
 
           [mount_path, Grape::Router.normalize_path(prefix)].each do |path|
-            path_info.delete_prefix!(path) if path.present? && path != '/' && path_info.start_with?(path)
+            path_info = path_info.delete_prefix(path) if path.present? && path != '/' && path_info.start_with?(path)
           end
 
           slash_position = path_info.index('/', 1) # omit the first one
