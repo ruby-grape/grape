@@ -12,6 +12,7 @@
 #### Fixes
     
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Fix cascade reading - [@ericproulx](https://github.com/ericproulx).
+* [#2641](https://github.com/ruby-grape/grape/pull/2641): Revert PR #2577 - Restore support for `return` in endpoint blocks - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.0.1 (2025-11-24)

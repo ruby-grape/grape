@@ -32,6 +32,13 @@ module Grape
         superclass.run_before_each(endpoint) unless self == Endpoint
         before_each.each { |blk| blk.try(:call, endpoint) }
       end
+
+      def block_to_unbound_method(block)
+        define_method :temp_unbound_method, block
+        method = instance_method(:temp_unbound_method)
+        remove_method :temp_unbound_method
+        method
+      end
     end
 
     # Create a new endpoint.
@@ -70,7 +77,7 @@ module Grape
       @status = nil
       @stream = nil
       @body = nil
-      @source = block
+      @source = self.class.block_to_unbound_method(block) if block
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -188,10 +195,7 @@ module Grape
       return unless @source
 
       ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self) do
-        instance_exec(&@source)
-      rescue LocalJumpError => e
-        Grape.deprecator.warn 'Using `return` in an endpoint has been deprecated. Use `next` instead.'
-        return e.exit_value
+        @source.bind_call(self)
       end
     end
 
