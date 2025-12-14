@@ -71,6 +71,7 @@ module Grape
       @stream = nil
       @body = nil
       @source = block
+      @before_filter_passed = false
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -153,6 +154,7 @@ module Grape
         begin
           self.class.run_before_each(self)
           run_filters befores, :before
+          @before_filter_passed = true
 
           if env.key?(Grape::Env::GRAPE_ALLOWED_METHODS)
             header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
@@ -229,8 +231,6 @@ module Grape
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
         filters&.each { |filter| instance_eval(&filter) }
       end
-      post_extension = DSL::InsideRoute.post_filter_methods(type)
-      extend post_extension if post_extension
     end
 
     %i[befores before_validations after_validations afters finallies].each do |method|
@@ -255,6 +255,8 @@ module Grape
     end
 
     private
+
+    attr_reader :before_filter_passed
 
     def to_routes
       route_options = options[:route_options]
