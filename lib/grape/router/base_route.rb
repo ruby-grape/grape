@@ -7,7 +7,7 @@ module Grape
 
       delegate_missing_to :@options
 
-      attr_reader :index, :options, :pattern
+      attr_reader :options, :pattern
 
       def_delegators :@pattern, :path, :origin
       def_delegators :@options, :description, :version, :requirements, :prefix, :anchor, :settings, :forward_match, *Grape::Util::ApiDescription::DSL_METHODS
@@ -19,11 +19,11 @@ module Grape
 
       # see https://github.com/ruby-grape/grape/issues/1348
       def namespace
-        @options[:namespace]
+        @namespace ||= @options[:namespace]
       end
 
       def regexp_capture_index
-        CaptureIndexCache[index]
+        @regexp_capture_index ||= CaptureIndexCache[@index]
       end
 
       def pattern_regexp
