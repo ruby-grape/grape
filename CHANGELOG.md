@@ -14,6 +14,7 @@
 #### Fixes
     
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Fix cascade reading - [@ericproulx](https://github.com/ericproulx).
+* [#2641](https://github.com/ruby-grape/grape/pull/2641): Restore support for `return` in endpoint blocks - [@ericproulx](https://github.com/ericproulx).
 * [#2642](https://github.com/ruby-grape/grape/pull/2642): Fix array allocation in base_route.rb - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
