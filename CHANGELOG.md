@@ -12,6 +12,8 @@
 * [#2643](https://github.com/ruby-grape/grape/pull/2638): Remove `try` method in codebase - [@ericproulx](https://github.com/ericproulx).
 * [#2646](https://github.com/ruby-grape/grape/pull/2646): Call `valid_encoding?` before scrub - [@ericproulx](https://github.com/ericproulx).
 * [#2644](https://github.com/ruby-grape/grape/pull/2644): Clean useless/not valuable dependencies - [@ericproulx](https://github.com/ericproulx).
+* [#2645](https://github.com/ruby-grape/grape/pull/2645): Endpoints are compiled when API is compiled - [@ericproulx](https://github.com/ericproulx).
+
 * Your contribution here.
 
 #### Fixes

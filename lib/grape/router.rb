@@ -2,8 +2,6 @@
 
 module Grape
   class Router
-    attr_reader :map, :compiled
-
     # Taken from Rails
     #     normalize_path("/foo")  # => "/foo"
     #     normalize_path("/foo/") # => "/foo"
@@ -39,14 +37,14 @@ module Grape
     end
 
     def compile!
-      return if compiled
+      return if @compiled
 
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
       (Grape::HTTP_SUPPORTED_METHODS + ['*']).each do |method|
-        next unless map.key?(method)
+        next unless @map.key?(method)
 
-        routes = map[method]
+        routes = @map[method]
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         @optimized_map[method] = Regexp.union(optimized_map)
       end
@@ -54,7 +52,7 @@ module Grape
     end
 
     def append(route)
-      map[route.request_method] << route
+      @map[route.request_method] << route
     end
 
     def associate_routes(greedy_route)
@@ -91,7 +89,7 @@ module Grape
 
     def rotation(input, method, env, exact_route)
       response = nil
-      map[method].each do |route|
+      @map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
@@ -143,7 +141,7 @@ module Grape
     end
 
     def with_optimization
-      compile! unless compiled
+      compile!
       yield || default_response
     end
 
