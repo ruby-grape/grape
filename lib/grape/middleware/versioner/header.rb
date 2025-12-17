@@ -101,7 +101,7 @@ module Grape
         end
 
         def version_not_found!(media_types)
-          return unless media_types.all? { |media_type| media_type&.version && versions&.exclude?(media_type.version) }
+          return unless media_types.all? { |media_type| media_type&.version && versions && !versions.include?(media_type.version) }
 
           invalid_version_header!('API version not found.')
         end
