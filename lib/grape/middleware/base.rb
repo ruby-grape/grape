@@ -111,7 +111,7 @@ module Grape
       end
 
       def try_scrub(obj)
-        (obj.respond_to?(:scrub) && obj.scrub) || obj
+        obj.respond_to?(:valid_encoding?) && !obj.valid_encoding? ? obj.scrub : obj
       end
     end
   end
