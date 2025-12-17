@@ -9,6 +9,7 @@
 * [#2637](https://github.com/ruby-grape/grape/pull/2637): Refactor declared method - [@ericproulx](https://github.com/ericproulx).
 * [#2639](https://github.com/ruby-grape/grape/pull/2639): Refactor mime_types_for - [@ericproulx](https://github.com/ericproulx).
 * [#2638](https://github.com/ruby-grape/grape/pull/2638): Remove unnecessary path string duplication - [@ericproulx](https://github.com/ericproulx).
+* [#2643](https://github.com/ruby-grape/grape/pull/2638): Remove `try` method in codebase - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

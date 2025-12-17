@@ -140,12 +140,12 @@ module Grape
       end
 
       def any_lazy?(args)
-        args.any? { |argument| argument.try(:lazy?) }
+        args.any? { |argument| argument_lazy?(argument) }
       end
 
       def evaluate_arguments(configuration, *args)
         args.map do |argument|
-          if argument.try(:lazy?)
+          if argument_lazy?(argument)
             argument.evaluate_from(configuration)
           elsif argument.is_a?(Hash)
             argument.transform_values { |value| evaluate_arguments(configuration, value).first }
@@ -157,12 +157,8 @@ module Grape
         end
       end
 
-      def never_mounted?
-        mounted_instances.empty?
-      end
-
-      def mounted_instances
-        instances - [base_instance]
+      def argument_lazy?(argument)
+        argument.respond_to?(:lazy?) && argument.lazy?
       end
     end
   end
