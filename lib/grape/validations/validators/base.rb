@@ -49,7 +49,7 @@ module Grape
             next if !@scope.required? && empty_val
             next unless @scope.meets_dependency?(val, params)
 
-            validate_param!(attr_name, val) if @required || val.try(:key?, attr_name)
+            validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
             array_errors << e
           end
@@ -69,7 +69,7 @@ module Grape
 
         def options_key?(key, options = nil)
           options = instance_variable_get(:@option) if options.nil?
-          options.try(:key?, key) && !options[key].nil?
+          options.respond_to?(:key?) && options.key?(key) && !options[key].nil?
         end
 
         def fail_fast?

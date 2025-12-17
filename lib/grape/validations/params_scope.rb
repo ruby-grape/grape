@@ -78,7 +78,7 @@ module Grape
       end
 
       def configuration
-        @api.configuration.respond_to?(:evaluate) ? @api.configuration.evaluate : @api.configuration
+        (@api.configuration.respond_to?(:evaluate) && @api.configuration.evaluate) || @api.configuration
       end
 
       # @return [Boolean] whether or not this entire scope needs to be
@@ -120,8 +120,8 @@ module Grape
           if dependency.is_a?(Hash)
             dependency_key = dependency.keys[0]
             proc = dependency.values[0]
-            return false unless proc.call(params.try(:[], dependency_key))
-          elsif params.respond_to?(:key?) && params.try(:[], dependency).blank?
+            return false unless proc.call(params[dependency_key])
+          elsif params[dependency].blank?
             return false
           end
         end

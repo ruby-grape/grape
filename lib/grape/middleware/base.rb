@@ -109,6 +109,10 @@ module Grape
           options
         end
       end
+
+      def try_scrub(obj)
+        (obj.respond_to?(:scrub) && obj.scrub) || obj
+      end
     end
   end
 end

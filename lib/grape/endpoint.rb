@@ -30,7 +30,7 @@ module Grape
 
       def run_before_each(endpoint)
         superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each { |blk| blk.try(:call, endpoint) }
+        before_each.each { |blk| blk.call(endpoint) }
       end
 
       def block_to_unbound_method(block)
@@ -139,7 +139,7 @@ module Grape
     # Return the collection of endpoints within this endpoint.
     # This is the case when an Grape::API mounts another Grape::API.
     def endpoints
-      @endpoints ||= options[:app].try(:endpoints)
+      @endpoints ||= options[:app].respond_to?(:endpoints) ? options[:app].endpoints : nil
     end
 
     def equals?(endpoint)
@@ -234,8 +234,10 @@ module Grape
     end
 
     def run_filters(filters, type = :other)
+      return unless filters
+
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
-        filters&.each { |filter| instance_eval(&filter) }
+        filters.each { |filter| instance_eval(&filter) }
       end
     end
 

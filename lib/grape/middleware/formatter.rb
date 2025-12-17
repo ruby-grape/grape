@@ -69,12 +69,14 @@ module Grape
         return if input.nil?
         return unless read_body_input?
 
-        input.try(:rewind)
+        rewind = input.respond_to?(:rewind)
+
+        input.rewind if rewind
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
           read_rack_input(body)
         ensure
-          input.try(:rewind)
+          input.rewind if rewind
         end
       end
 
@@ -130,7 +132,7 @@ module Grape
       end
 
       def format_from_extension
-        request_path = rack_request.path.try(:scrub)
+        request_path = try_scrub(rack_request.path)
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
@@ -139,7 +141,7 @@ module Grape
       end
 
       def format_from_header
-        accept_header = env['HTTP_ACCEPT'].try(:scrub)
+        accept_header = try_scrub(env['HTTP_ACCEPT'])
         return if accept_header.blank? || accept_header == ALL_MEDIA_TYPES
 
         media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)

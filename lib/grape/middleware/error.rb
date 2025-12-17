@@ -58,7 +58,7 @@ module Grape
           h.merge!(error[:headers]) if error[:headers].is_a?(Hash)
         end
         backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
-        original_exception = error.is_a?(Exception) ? error : error[:original_exception] || nil
+        original_exception = error.is_a?(Exception) ? error : error[:original_exception]
         rack_response(status, headers, format_message(message, backtrace, original_exception))
       end
 

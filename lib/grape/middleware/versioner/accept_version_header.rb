@@ -18,7 +18,7 @@ module Grape
       # route.
       class AcceptVersionHeader < Base
         def before
-          potential_version = env['HTTP_ACCEPT_VERSION'].try(:scrub)
+          potential_version = try_scrub(env['HTTP_ACCEPT_VERSION'])
           not_acceptable!('Accept-Version header must be set.') if strict && potential_version.blank?
 
           return if potential_version.blank?

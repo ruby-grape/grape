@@ -29,7 +29,7 @@ class ChunkedResponse
 
     # Close the response body if the response body supports it.
     def close
-      @body.try(:close)
+      @body.close if @body.respond_to?(:close)
     end
 
     private
