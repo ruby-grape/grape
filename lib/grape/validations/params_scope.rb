@@ -14,6 +14,8 @@ module Grape
       # we maintain a list of them here and skip looking up validators for them.
       RESERVED_DOCUMENTATION_KEYWORDS = %i[as required param_type is_array format example].freeze
 
+      SPECIAL_JSON = [JSON, Array[JSON]].freeze
+
       class Attr
         attr_accessor :key, :scope
 
@@ -414,7 +416,7 @@ module Grape
 
         # but not special JSON types, which
         # already imply coercion method
-        return if [JSON, Array[JSON]].exclude? validations[:coerce]
+        return unless SPECIAL_JSON.include?(validations[:coerce])
 
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
