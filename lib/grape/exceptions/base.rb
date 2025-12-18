@@ -65,7 +65,7 @@ module Grape
       end
 
       def fallback_message(key, options)
-        if ::I18n.enforce_available_locales && ::I18n.available_locales.exclude?(FALLBACK_LOCALE)
+        if ::I18n.enforce_available_locales && !::I18n.available_locales.include?(FALLBACK_LOCALE)
           key
         else
           ::I18n.translate(key, locale: FALLBACK_LOCALE, **options)
