@@ -1,6 +1,13 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 3.1
+
+#### ParamsBuilder Grape::Extensions
+
+Deprecated [ParamsBuilder's extensions](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#params-builder) has been removed from the code base.
+
+
 ### Upgrading to >= 3.0.0
 
 #### Ruby 3+ Argument Delegation Modernization
