@@ -16,12 +16,12 @@ module Grape
         #
         # @param [Hash] options A hash of options.
         # @option options [String] :realm "API Authorization" The HTTP Basic realm.
-        def http_basic(options = {}, &block)
+        def http_basic(options = {}, &)
           options[:realm] ||= 'API Authorization'
-          auth :http_basic, options, &block
+          auth(:http_basic, options, &)
         end
 
-        def http_digest(options = {}, &block)
+        def http_digest(options = {}, &)
           options[:realm] ||= 'API Authorization'
 
           if options[:realm].respond_to?(:values_at)
@@ -30,7 +30,7 @@ module Grape
             options[:opaque] ||= 'secret'
           end
 
-          auth :http_digest, options, &block
+          auth(:http_digest, options, &)
         end
       end
     end

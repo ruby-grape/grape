@@ -160,9 +160,9 @@ module Grape
       # Define common settings for one or more parameters
       # @param (see #requires)
       # @option (see #requires)
-      def with(*attrs, &block)
+      def with(*attrs, &)
         new_group_attrs = [@group, attrs.clone.first].compact.reduce(&:deep_merge)
-        new_group_scope([new_group_attrs], &block)
+        new_group_scope([new_group_attrs], &)
       end
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
@@ -178,12 +178,12 @@ module Grape
       # @raise Grape::Exceptions::UnknownParameter if `attr` has not been
       #   defined in this scope yet
       # @yield a parameter definition DSL
-      def given(*attrs, &block)
+      def given(*attrs, &)
         attrs.each do |attr|
           proxy_attr = first_hash_key_or_param(attr)
           raise Grape::Exceptions::UnknownParameter.new(proxy_attr) unless declared_param?(proxy_attr)
         end
-        new_lateral_scope(dependent_on: attrs, &block)
+        new_lateral_scope(dependent_on: attrs, &)
       end
 
       # Test for whether a certain parameter has been defined in this params

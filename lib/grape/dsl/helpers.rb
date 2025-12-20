@@ -50,9 +50,9 @@ module Grape
         end
       end
 
-      def make_inclusion(mod, &block)
+      def make_inclusion(mod, &)
         define_boolean_in_mod(mod)
-        inject_api_helpers_to_mod(mod, &block)
+        inject_api_helpers_to_mod(mod, &)
         inheritable_setting.namespace_stackable[:helpers] = mod
       end
 

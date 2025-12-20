@@ -5,10 +5,10 @@ module Grape
     module Routing
       attr_reader :endpoints
 
-      def given(conditional_option, &block)
+      def given(conditional_option, &)
         return unless conditional_option
 
-        mounted(&block)
+        mounted(&)
       end
 
       def mounted(&block)
@@ -157,7 +157,7 @@ module Grape
       #       {hello: 'world'}
       #     end
       #   end
-      def route(methods, paths = ['/'], route_options = {}, &block)
+      def route(methods, paths = ['/'], route_options = {}, &)
         method = methods == :any ? '*' : methods
         endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
         endpoint_description = inheritable_setting.route[:description]
@@ -171,7 +171,7 @@ module Grape
           path: paths,
           for: self,
           route_options: all_route_options,
-          &block
+          &
         )
         endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
 
@@ -223,7 +223,7 @@ module Grape
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
-      def route_param(param, **options, &block)
+      def route_param(param, **options, &)
         options = options.dup
 
         options[:requirements] = {
@@ -234,7 +234,7 @@ module Grape
           requires param, type: options[:type]
         end if options.key?(:type)
 
-        namespace(":#{param}", options, &block)
+        namespace(":#{param}", options, &)
       end
 
       # @return array of defined versions
