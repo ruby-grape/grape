@@ -5,8 +5,13 @@ Upgrading Grape
 
 #### ParamsBuilder Grape::Extensions
 
-Deprecated [ParamsBuilder's extensions](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#params-builder) has been removed from the code base.
+Deprecated [ParamsBuilder's extensions](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#params-builder) have been removed.
 
+### Upgrading to >= 3.1.0
+
+#### Enhanced API compile!
+
+Endpoints are now "compiled" instead of lazy loaded. Historically, when calling `YourAPI.compile!` in `config.ru` (or just receiving the first API call), only routing was compiled see [Grape::Router#compile!](https://github.com/ruby-grape/grape/blob/bf90e95c3b17c415c944363b1c07eb9727089ee7/lib/grape/router.rb#L41-L54) and endpoints were lazy loaded. Now, it's part of the API compilation. See [#2645](https://github.com/ruby-grape/grape/pull/2645) for more information.
 
 ### Upgrading to >= 3.0.0
 

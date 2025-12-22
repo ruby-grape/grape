@@ -71,11 +71,8 @@ module Grape
 
       @options[:path] = Array(options[:path])
       @options[:path] << '/' if options[:path].empty?
-
       @options[:method] = Array(options[:method])
 
-      @lazy_initialize_lock = Mutex.new
-      @lazy_initialized = nil
       @status = nil
       @stream = nil
       @body = nil
@@ -105,9 +102,13 @@ module Grape
     end
 
     def mount_in(router)
-      return endpoints.each { |e| e.mount_in(router) } if endpoints
+      if endpoints
+        compile!
+        return endpoints.each { |e| e.mount_in(router) }
+      end
 
       reset_routes!
+      compile!
       routes.each do |route|
         router.append(route.apply(self))
         next unless !inheritable_setting.namespace_inheritable[:do_not_route_head] && route.request_method == Rack::GET
@@ -124,7 +125,6 @@ module Grape
     end
 
     def call(env)
-      lazy_initialize!
       dup.call!(env)
     end
 
@@ -203,18 +203,6 @@ module Grape
       end
     end
 
-    def lazy_initialize!
-      return true if @lazy_initialized
-
-      @lazy_initialize_lock.synchronize do
-        return true if @lazy_initialized
-
-        @app = options[:app] || build_stack
-        @helpers = build_helpers
-        @lazy_initialized = true
-      end
-    end
-
     def run_validators(validators, request)
       validation_errors = []
 
@@ -265,6 +253,11 @@ module Grape
     private
 
     attr_reader :before_filter_passed
+
+    def compile!
+      @app = options[:app] || build_stack
+      @helpers = build_helpers
+    end
 
     def to_routes
       route_options = options[:route_options]
