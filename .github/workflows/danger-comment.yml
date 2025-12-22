@@ -1,0 +1,30 @@
+name: Danger Comment
+on:
+  workflow_run:
+    workflows: [Danger]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Download Danger Report
+        uses: actions/download-artifact@v4
+        with:
+          name: danger-report
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Post or Update PR Comment
+        uses: actions/github-script@v7
+        with:
+          script-file: .github/scripts/post-danger-comment.js
