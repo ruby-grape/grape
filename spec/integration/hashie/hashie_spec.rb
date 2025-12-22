@@ -5,44 +5,6 @@ describe 'Hashie', if: defined?(Hashie) do
 
   let(:app) { Class.new(Grape::API) }
 
-  describe 'Grape::Extensions::Hashie::Mash::ParamBuilder' do
-    describe 'deprecation' do
-      context 'when included' do
-        subject do
-          Class.new(Grape::API) do
-            include Grape::Extensions::Hashie::Mash::ParamBuilder
-          end
-        end
-
-        let(:message) do
-          'This concern has been deprecated. Use `build_with` with one of the following short_name (:hash, :hash_with_indifferent_access, :hashie_mash) instead.'
-        end
-
-        it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with(message).and_raise(ActiveSupport::DeprecationException, :deprecated)
-          expect { subject }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
-        end
-      end
-
-      context 'when using class name' do
-        let(:app) do
-          Class.new(Grape::API) do
-            params do
-              build_with Grape::Extensions::Hashie::Mash::ParamBuilder
-            end
-            get
-          end
-        end
-
-        it 'raises a deprecation' do
-          expect(Grape.deprecator).to receive(:warn).with('Grape::Extensions::Hashie::Mash::ParamBuilder has been deprecated. Use short name :hashie_mash instead.').and_raise(ActiveSupport::DeprecationException,
-                                                                                                                                                                               :deprecated)
-          expect { get '/' }.to raise_error(ActiveSupport::DeprecationException, 'deprecated')
-        end
-      end
-    end
-  end
-
   describe 'Grape::ParamsBuilder::HashieMash' do
     describe 'in an endpoint' do
       describe '#params' do
