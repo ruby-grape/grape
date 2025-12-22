@@ -6,8 +6,8 @@ module Grape
       # Opens a root-level ParamsScope, defining parameter coercions and
       # validations for the endpoint.
       # @yield instance context of the new scope
-      def params(&block)
-        Grape::Validations::ParamsScope.new(api: self, type: Hash, &block)
+      def params(&)
+        Grape::Validations::ParamsScope.new(api: self, type: Hash, &)
       end
 
       # Declare the contract to be used for the endpoint's parameters.

@@ -14,7 +14,7 @@ class ChunkedResponse
 
     # For each element yielded by the response body, yield
     # the element in chunked encoding.
-    def each(&block)
+    def each(&)
       term = TERM
       @body.each do |chunk|
         size = chunk.bytesize
@@ -23,7 +23,7 @@ class ChunkedResponse
         yield [size.to_s(16), term, chunk.b, term].join
       end
       yield TAIL
-      yield_trailers(&block)
+      yield_trailers(&)
       yield term
     end
 

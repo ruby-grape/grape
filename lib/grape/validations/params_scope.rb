@@ -267,7 +267,7 @@ module Grape
       # @param optional [Boolean] whether the parameter this are nested under
       #   is optional or not (and hence, whether this block's params will be).
       # @yield parameter scope
-      def new_scope(attrs, opts, optional = false, &block)
+      def new_scope(attrs, opts, optional = false, &)
         # if required params are grouped and no type or unsupported type is provided, raise an error
         type = opts[:type]
         if attrs.first && !optional
@@ -283,7 +283,7 @@ module Grape
           optional: optional,
           type: type || Array,
           group: @group,
-          &block
+          &
         )
       end
 
@@ -294,7 +294,7 @@ module Grape
       #   scope should only validate if this parameter from the above scope is
       #   present
       # @yield parameter scope
-      def new_lateral_scope(options, &block)
+      def new_lateral_scope(options, &)
         self.class.new(
           api: @api,
           element: nil,
@@ -302,7 +302,7 @@ module Grape
           options: @optional,
           type: type == Array ? Array : Hash,
           dependent_on: options[:dependent_on],
-          &block
+          &
         )
       end
 
@@ -311,8 +311,8 @@ module Grape
       # @param attrs [Array] the attributes passed to the `requires` or
       #   `optional` invocation that opened this scope.
       # @yield parameter scope
-      def new_group_scope(attrs, &block)
-        self.class.new(api: @api, parent: self, group: attrs.first, &block)
+      def new_group_scope(attrs, &)
+        self.class.new(api: @api, parent: self, group: attrs.first, &)
       end
 
       # Pushes declared params to parent or settings

@@ -23,10 +23,10 @@ module Grape
         tags
       ].freeze
 
-      def initialize(description, endpoint_configuration, &block)
+      def initialize(description, endpoint_configuration, &)
         @endpoint_configuration = endpoint_configuration
         @attributes = { description: description }
-        instance_eval(&block)
+        instance_eval(&)
       end
 
       DSL_METHODS.each do |attribute|

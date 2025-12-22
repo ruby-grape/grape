@@ -14,8 +14,8 @@ module Grape
         @params = Array.wrap(@original_params)
       end
 
-      def each(&block)
-        do_each(@params, &block) # because we need recursion for nested arrays
+      def each(&)
+        do_each(@params, &) # because we need recursion for nested arrays
       end
 
       private
