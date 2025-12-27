@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        - RUBY_VERSION=${RUBY_VERSION:-3}
+        - RUBY_VERSION=${RUBY_VERSION:-4.0}
     stdin_open: true
     tty: true
     volumes:

@@ -196,12 +196,13 @@ describe Grape::Endpoint do
       it 'sets objects with type=Set to be a set' do
         get '/declared?first=present'
         expect(last_response).to be_successful
+        json_empty_set = JSON.parse(Set.new.to_json)
 
         body = JSON.parse(last_response.body)
-        expect(['#<Set: {}>', []]).to include(body['empty_set'])
-        expect(['#<Set: {}>', []]).to include(body['empty_typed_set'])
-        expect(['#<Set: {}>', []]).to include(body['nested']['empty_set'])
-        expect(['#<Set: {}>', []]).to include(body['nested']['empty_typed_set'])
+        expect(body['empty_set']).to eq(json_empty_set)
+        expect(body['empty_typed_set']).to eq(json_empty_set)
+        expect(body['nested']['empty_set']).to eq(json_empty_set)
+        expect(body['nested']['empty_typed_set']).to eq(json_empty_set)
       end
 
       it 'sets objects with type=Array to be an array' do

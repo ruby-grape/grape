@@ -240,7 +240,8 @@ describe 'Hashie', if: defined?(Hashie) do
 
           get '/', d: %w[1 two]
           expect(last_response).to be_successful
-          expect(last_response.body).to eq('#<Set: {1, "two"}>')
+          json_set = JSON.parse([1, 'two'].to_set.to_json)
+          expect(last_response.body).to eq(json_set)
         end
       end
     end
