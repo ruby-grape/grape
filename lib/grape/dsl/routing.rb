@@ -198,12 +198,12 @@ module Grape
       #         # defines the endpoint: GET /foo/bar
       #       end
       #     end
-      def namespace(space = nil, options = {}, &block)
+      def namespace(space = nil, requirements: nil, **options, &block)
         return Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace]) unless space || block
 
         within_namespace do
           nest(block) do
-            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, options) if space
+            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, requirements: requirements, **options) if space
           end
         end
       end
@@ -223,18 +223,14 @@ module Grape
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
-      def route_param(param, **options, &)
-        options = options.dup
-
-        options[:requirements] = {
-          param.to_sym => options[:requirements]
-        } if options[:requirements].is_a?(Regexp)
+      def route_param(param, requirements: nil, type: nil, **options, &)
+        requirements = { param.to_sym => requirements } if requirements.is_a?(Regexp)
 
         Grape::Validations::ParamsScope.new(api: self) do
-          requires param, type: options[:type]
-        end if options.key?(:type)
+          requires param, type: type
+        end if type
 
-        namespace(":#{param}", options, &)
+        namespace(":#{param}", requirements: requirements, **options, &)
       end
 
       # @return array of defined versions

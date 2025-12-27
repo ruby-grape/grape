@@ -15,7 +15,7 @@
 * [#2649](https://github.com/ruby-grape/grape/pull/2644): Drop support Ruby 3.0 and ActiveSupport 7.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2648](https://github.com/ruby-grape/grape/pull/2648): Remove deprecated ParamsBuilders extensions - [@ericproulx](https://github.com/ericproulx).
 * [#2645](https://github.com/ruby-grape/grape/pull/2645): Endpoints are compiled when API is compiled - [@ericproulx](https://github.com/ericproulx).
-
+* [#2647](https://github.com/ruby-grape/grape/pull/2647): Explicit kwargs for `namespace` and `route_param` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

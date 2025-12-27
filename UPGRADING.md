@@ -3,11 +3,13 @@ Upgrading Grape
 
 ### Upgrading to >= 3.1
 
+#### Explicit kwargs for `namespace` and `route_param`
+
+The `API#namespace` and `route_param` methods are now defined with `**options` instead of `options = {}`. In addtion, `requirements` in explicitly defined so it's not in `options` anymore. You can still call `requirements` like before but `options[:requirements]` will be empty. For `route_param`, `type` is also an explicit parameter so it's not in `options` anymore. See [#2647](https://github.com/ruby-grape/grape/pull/2647) for more information.
+
 #### ParamsBuilder Grape::Extensions
 
 Deprecated [ParamsBuilder's extensions](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#params-builder) have been removed.
-
-### Upgrading to >= 3.1.0
 
 #### Enhanced API compile!
 

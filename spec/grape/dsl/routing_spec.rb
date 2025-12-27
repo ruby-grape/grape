@@ -280,7 +280,7 @@ describe Grape::DSL::Routing do
     let(:regex) { /(.*)/ }
 
     it 'calls #namespace with given params' do
-      expect(subject).to receive(:namespace).with(':foo', {}).and_yield
+      expect(subject).to receive(:namespace).with(':foo', requirements: nil).and_yield
       subject.route_param('foo', &proc {})
     end
 
