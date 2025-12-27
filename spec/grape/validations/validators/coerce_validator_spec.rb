@@ -1119,7 +1119,7 @@ describe Grape::Validations::Validators::CoerceValidator do
 
           get '/', d: %w[1 two]
           expect(last_response).to be_successful
-          expect(last_response.body).to eq('#<Set: {1, "two"}>')
+          expect(last_response.body).to eq([1, 'two'].to_set.to_s)
         end
       end
 

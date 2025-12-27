@@ -2,4 +2,4 @@
 
 eval_gemfile '../Gemfile'
 
-gem 'rack', '~> 3.1'
+gem 'rack', '~> 3.1.0'

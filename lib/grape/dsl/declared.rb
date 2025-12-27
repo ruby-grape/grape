@@ -105,7 +105,7 @@ module Grape
           {}
         elsif type == 'Array' || (type&.start_with?('[') && !type.include?(','))
           []
-        elsif type == 'Set' || type&.start_with?('#<Set')
+        elsif type == 'Set' || type&.start_with?('#<Set', 'Set')
           Set.new
         else
           yield
