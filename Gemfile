@@ -23,10 +23,13 @@ group :development do
 end
 
 group :test do
+  gem 'danger', require: false
+  gem 'danger-changelog', require: false
+  gem 'danger-pr-comment', require: false
+  gem 'danger-toc', require: false
   gem 'rack-contrib', require: false
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'
-  gem 'ruby-grape-danger', '~> 0.2', require: false
   gem 'simplecov', '~> 0.21', require: false
   gem 'simplecov-lcov', '~> 0.8', require: false
   gem 'test-prof', require: false

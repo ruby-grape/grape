@@ -1,0 +1,11 @@
+name: Danger Comment
+
+on:
+  workflow_run:
+    workflows: [Danger]
+    types: [completed]
+
+jobs:
+  comment:
+    uses: numbata/danger-pr-comment/.github/workflows/danger-comment.yml@v0.1.0
+    secrets: inherit
