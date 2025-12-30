@@ -1,21 +1,30 @@
----
-name: danger
-on: pull_request
-
+name: Danger
+on:
+  pull_request:
+    types: [ opened, reopened, edited, synchronize ]
 jobs:
   danger:
+    name: Danger
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 100    
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.4
-        bundler-cache: true
-    - name: Run Danger
-      run: |
-        # the token is public, has public_repo scope and belongs to the grape-bot user owned by @dblock, this is ok
-        TOKEN=$(echo -n Z2hwX2lYb0dPNXNyejYzOFJyaTV3QUxUdkNiS1dtblFwZTFuRXpmMwo= | base64 --decode)
-        DANGER_GITHUB_API_TOKEN=$TOKEN bundle exec danger --verbose
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+          bundler-cache: true
+      - name: Run Danger
+        run: bundle exec danger dry_run --verbose
+        env:
+          DANGER_REPORT_PATH: danger_report.json
+      - name: Upload Danger Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: danger-report
+          path: danger_report.json
+          retention-days: 1
+          if-no-files-found: ignore
