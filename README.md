@@ -1702,14 +1702,6 @@ end
 
 While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
 
-Note that [allow_blank](#allow_blank) validator applies while using `:values`. In the following example the absence of `:allow_blank` does not prevent `:state` from receiving blank values because `:allow_blank` defaults to `true`.
-
-```ruby
-params do
-  requires :state, type: Symbol, values: [:active, :inactive]
-end
-```
-
 #### `except_values`
 
 Parameters can be restricted from having a specific set of values with the `:except_values` option.
