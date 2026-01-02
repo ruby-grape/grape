@@ -16,6 +16,7 @@
 * [#2648](https://github.com/ruby-grape/grape/pull/2648): Remove deprecated ParamsBuilders extensions - [@ericproulx](https://github.com/ericproulx).
 * [#2645](https://github.com/ruby-grape/grape/pull/2645): Endpoints are compiled when API is compiled - [@ericproulx](https://github.com/ericproulx).
 * [#2647](https://github.com/ruby-grape/grape/pull/2647): Explicit kwargs for `namespace` and `route_param` - [@ericproulx](https://github.com/ericproulx).
+* [#2651](https://github.com/ruby-grape/grape/pull/2651): Migrate Danger to use danger-pr-comment workflow - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
