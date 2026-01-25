@@ -215,10 +215,10 @@ describe Grape::Middleware::Versioner::Header do
     it 'fails with 406 Not Acceptable if header is application/xml' do
       expect { subject.call('HTTP_ACCEPT' => 'application/xml').last }
         .to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql({})
-        expect(exception.status).to be 406
-        expect(exception.message).to include('API vendor or version not found.')
+          expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+          expect(exception.headers).to eql({})
+          expect(exception.status).to be 406
+          expect(exception.message).to include('API vendor or version not found.')
       end
     end
 
@@ -234,10 +234,10 @@ describe Grape::Middleware::Versioner::Header do
     it 'fails with 406 Not Acceptable if header contains a single invalid accept' do
       expect { subject.call('HTTP_ACCEPT' => 'application/json;application/vnd.vendor-v1+json').first }
         .to raise_exception do |exception|
-        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
-        expect(exception.headers).to eql({})
-        expect(exception.status).to be 406
-        expect(exception.message).to include('API vendor or version not found.')
+          expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+          expect(exception.headers).to eql({})
+          expect(exception.status).to be 406
+          expect(exception.message).to include('API vendor or version not found.')
       end
     end
 

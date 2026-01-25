@@ -2,7 +2,7 @@
 
 #### Features
 
-* Your contribution here.
+* Update minimum Ruby version to 3.2 and bump dependencies - [@ericproulx](https://github.com/ericproulx).
 
 #### Fixes
 
