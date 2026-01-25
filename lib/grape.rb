@@ -33,7 +33,6 @@ require 'rack'
 require 'rack/auth/basic'
 require 'rack/builder'
 require 'rack/head'
-require 'set'
 require 'singleton'
 require 'zeitwerk'
 
