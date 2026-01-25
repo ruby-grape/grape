@@ -1,4 +1,4 @@
-### 3.1.0 (Next)
+### 3.1.0 (2026-01-25)
 
 #### Features
 
@@ -17,14 +17,12 @@
 * [#2645](https://github.com/ruby-grape/grape/pull/2645): Endpoints are compiled when API is compiled - [@ericproulx](https://github.com/ericproulx).
 * [#2647](https://github.com/ruby-grape/grape/pull/2647): Explicit kwargs for `namespace` and `route_param` - [@ericproulx](https://github.com/ericproulx).
 * [#2651](https://github.com/ruby-grape/grape/pull/2651): Migrate Danger to use danger-pr-comment workflow - [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 #### Fixes
     
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Fix cascade reading - [@ericproulx](https://github.com/ericproulx).
 * [#2641](https://github.com/ruby-grape/grape/pull/2641): Restore support for `return` in endpoint blocks - [@ericproulx](https://github.com/ericproulx).
 * [#2642](https://github.com/ruby-grape/grape/pull/2642): Fix array allocation in base_route.rb - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.0.1 (2025-11-24)
 
