@@ -30,7 +30,7 @@ module Grape
 
       def run_before_each(endpoint)
         superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each { |blk| blk.call(endpoint) }
+        before_each.each { |blk| blk&.call(endpoint) }
       end
 
       def block_to_unbound_method(block)
