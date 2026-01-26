@@ -58,6 +58,17 @@ describe Grape::Endpoint do
       described_class.before_each(nil)
       expect { get '/' }.to raise_error(NameError)
     end
+
+    it 'is resettable with nil' do
+      subject.get('/') { 'Hello world.' }
+
+      described_class.before_each do |endpoint|
+        allow(endpoint).to receive(:current_user).and_return('Bob')
+      end
+
+      described_class.before_each nil
+      expect { get '/' }.not_to raise_error
+    end
   end
 
   it 'sets itself in the env upon call' do
