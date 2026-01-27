@@ -23,8 +23,10 @@ module Grape
           return @before_each unless block
 
           @before_each << block
-        else
+        elsif new_setup
           @before_each = [new_setup]
+        else
+          @before_each.clear
         end
       end
 
