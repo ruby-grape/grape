@@ -24,7 +24,7 @@ describe Grape::Endpoint do
 
     it 'is able to override a helper' do
       subject.get('/') { current_user }
-      expect { get '/' }.to raise_error(NameError)
+      expect { get '/' }.to raise_error(NameError, /undefined local variable or method [`']current_user'/)
 
       described_class.before_each do |endpoint|
         allow(endpoint).to receive(:current_user).and_return('Bob')
@@ -34,7 +34,7 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('Bob')
 
       described_class.before_each(nil)
-      expect { get '/' }.to raise_error(NameError)
+      expect { get '/' }.to raise_error(NameError, /undefined local variable or method [`']current_user'/)
     end
 
     it 'is able to stack helper' do
@@ -42,7 +42,7 @@ describe Grape::Endpoint do
         authenticate_user!
         current_user
       end
-      expect { get '/' }.to raise_error(NameError)
+      expect { get '/' }.to raise_error(NoMethodError, /undefined method [`']authenticate_user!' for/)
 
       described_class.before_each do |endpoint|
         allow(endpoint).to receive(:current_user).and_return('Bob')
@@ -56,7 +56,7 @@ describe Grape::Endpoint do
       expect(last_response.body).to eq('Bob')
 
       described_class.before_each(nil)
-      expect { get '/' }.to raise_error(NameError)
+      expect { get '/' }.to raise_error(NoMethodError, /undefined method [`']authenticate_user!' for/)
     end
 
     it 'is resettable with nil' do
