@@ -7,6 +7,7 @@
 #### Fixes
 
 * Your contribution here.
+* [#2654](https://github.com/ruby-grape/grape/pull/2654): Fix `NoMethodError` when `before_each` is reset with nil - [@heromoon9218](https://github.com/heromoon9218).
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
 
 ### 3.1.0 (2026-01-25)
