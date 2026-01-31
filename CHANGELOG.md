@@ -1,12 +1,7 @@
-### 3.2.0 (Next)
-
-#### Features
-
-* Your contribution here.
+### 3.1.1 (2026-01-31)
 
 #### Fixes
 
-* Your contribution here.
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
 
 ### 3.1.0 (2026-01-25)
