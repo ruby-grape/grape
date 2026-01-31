@@ -1,3 +1,13 @@
+### 3.2.0 (Next)
+
+#### Fixes
+
+* Your contribution here
+
+#### Features
+
+* Your contribution here
+
 ### 3.1.1 (2026-01-31)
 
 #### Fixes
