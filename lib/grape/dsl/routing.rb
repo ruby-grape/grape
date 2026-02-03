@@ -223,14 +223,14 @@ module Grape
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
-      def route_param(param, requirements: nil, type: nil, **options, &)
+      def route_param(param, requirements: nil, type: nil, **, &)
         requirements = { param.to_sym => requirements } if requirements.is_a?(Regexp)
 
         Grape::Validations::ParamsScope.new(api: self) do
           requires param, type: type
         end if type
 
-        namespace(":#{param}", requirements: requirements, **options, &)
+        namespace(":#{param}", requirements: requirements, **, &)
       end
 
       # @return array of defined versions

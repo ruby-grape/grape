@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true'
   }
 
-  s.add_dependency 'activesupport', '>= 7.1'
+  s.add_dependency 'activesupport', '>= 7.2'
   s.add_dependency 'dry-configurable'
   s.add_dependency 'dry-types', '>= 1.1'
   s.add_dependency 'mustermann-grape', '~> 1.1.0'
@@ -29,5 +29,5 @@ Gem::Specification.new do |s|
 
   s.files = Dir['lib/**/*', 'CHANGELOG.md', 'CONTRIBUTING.md', 'README.md', 'grape.png', 'UPGRADING.md', 'LICENSE', 'grape.gemspec']
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 3.1'
+  s.required_ruby_version = '>= 3.2'
 end
