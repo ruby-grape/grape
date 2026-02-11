@@ -124,7 +124,7 @@ module Grape
       #     end
       def requires(*attrs, **opts, &block)
         opts[:presence] = { value: true, message: opts[:message] }
-        opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
+        opts = @group.deep_merge(opts) if @group
 
         if opts[:using]
           require_required_and_optional_fields(attrs.first, opts)
@@ -140,7 +140,7 @@ module Grape
       # @option (see #requires)
       def optional(*attrs, **opts, &block)
         type = opts[:type]
-        opts = @group.deep_merge(opts) if instance_variable_defined?(:@group) && @group
+        opts = @group.deep_merge(opts) if @group
 
         # check type for optional parameter group
         if attrs && block
@@ -224,8 +224,8 @@ module Grape
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
-        params = @parent.params_meeting_dependency.presence || @parent.params(params) if instance_variable_defined?(:@parent) && @parent
-        params = map_params(params, @element) if instance_variable_defined?(:@element) && @element
+        params = @parent.params_meeting_dependency.presence || @parent.params(params) if @parent
+        params = map_params(params, @element) if @element
         params
       end
 
