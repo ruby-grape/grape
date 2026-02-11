@@ -60,7 +60,7 @@ module Grape
           end
         end
 
-        @versions.last if instance_variable_defined?(:@versions) && @versions
+        @versions&.last
       end
 
       # Define a root URL prefix for your entire API.

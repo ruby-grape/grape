@@ -70,12 +70,12 @@ module Grape
         when Integer
           @status = status
         when nil
-          return @status if instance_variable_defined?(:@status) && @status
+          return @status if @status
 
           if request.post?
             201
           elsif request.delete?
-            if instance_variable_defined?(:@body) && @body.present?
+            if @body.present?
               200
             else
               204
@@ -114,7 +114,7 @@ module Grape
           @body = ''
           status 204
         else
-          instance_variable_defined?(:@body) ? @body : nil
+          @body
         end
       end
 

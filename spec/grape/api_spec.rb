@@ -1069,7 +1069,7 @@ describe Grape::API do
 
     it 'adds a before filter to current and child namespaces only' do
       subject.get '/' do
-        "root - #{@foo if instance_variable_defined?(:@foo)}"
+        "root - #{@foo if @foo}"
       end
       subject.namespace :blah do
         before { @foo = 'foo' }

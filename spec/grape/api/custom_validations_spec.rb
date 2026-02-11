@@ -216,7 +216,7 @@ describe Grape::Validations do
     let(:validator_type) do
       Class.new(Grape::Validations::Validators::Base) do
         def validate_param!(_attr_name, _params)
-          if instance_variable_defined?(:@instance_variable) && @instance_variable
+          if @instance_variable
             raise Grape::Exceptions::Validation.new(params: ['params'],
                                                     message: 'This should never happen')
           end
