@@ -1,191 +1,270 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::DefaultValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
-      default_format :json
+  describe '/' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
 
-      params do
-        optional :id
-        optional :type, default: 'default-type'
-      end
-      get '/' do
-        { id: params[:id], type: params[:type] }
-      end
-
-      params do
-        optional :type1, default: 'default-type1'
-        optional :type2, default: 'default-type2'
-      end
-      get '/user' do
-        { type1: params[:type1], type2: params[:type2] }
-      end
-
-      params do
-        requires :id
-        optional :type1, default: 'default-type1'
-        optional :type2, default: 'default-type2'
-      end
-
-      get '/message' do
-        { id: params[:id], type1: params[:type1], type2: params[:type2] }
-      end
-
-      params do
-        optional :random, default: -> { Random.rand }
-        optional :not_random, default: Random.rand
-      end
-      get '/numbers' do
-        { random_number: params[:random], non_random_number: params[:non_random_number] }
-      end
-
-      params do
-        optional :array, type: Array do
-          requires :name
-          optional :with_default, default: 'default'
+        params do
+          optional :id
+          optional :type, default: 'default-type'
+        end
+        get '/' do
+          { id: params[:id], type: params[:type] }
         end
       end
-      get '/array' do
-        { array: params[:array] }
-      end
+    end
 
-      params do
-        requires :thing1
-        optional :more_things, type: Array do
-          requires :nested_thing
-          requires :other_thing, default: 1
-        end
-      end
-      get '/optional_array' do
-        { thing1: params[:thing1] }
-      end
-
-      params do
-        requires :root, type: Hash do
-          optional :some_things, type: Array do
-            requires :foo
-            optional :options, type: Array do
-              requires :name, type: String
-              requires :value, type: String
-            end
-          end
-        end
-      end
-      get '/nested_optional_array' do
-        { root: params[:root] }
-      end
-
-      params do
-        requires :root, type: Hash do
-          optional :some_things, type: Array do
-            requires :foo
-            optional :options, type: Array do
-              optional :name, type: String
-              optional :value, type: String
-            end
-          end
-        end
-      end
-      get '/another_nested_optional_array' do
-        { root: params[:root] }
-      end
-
-      params do
-        requires :foo
-        optional :bar, default: ->(params) { params[:foo] }
-        optional :qux, default: ->(params) { params[:bar] }
-      end
-      get '/default_values_from_other_params' do
-        {
-          foo: params[:foo],
-          bar: params[:bar],
-          qux: params[:qux]
-        }
-      end
+    it 'set default value for optional param' do
+      get('/')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ id: nil, type: 'default-type' }.to_json)
     end
   end
 
-  it 'lets you leave required values nested inside an optional blank' do
-    get '/optional_array', thing1: 'stuff'
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ thing1: 'stuff' }.to_json)
+  describe '/user' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          optional :type1, default: 'default-type1'
+          optional :type2, default: 'default-type2'
+        end
+        get '/user' do
+          { type1: params[:type1], type2: params[:type2] }
+        end
+      end
+    end
+
+    it 'set default values for optional params' do
+      get('/user')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ type1: 'default-type1', type2: 'default-type2' }.to_json)
+    end
+
+    it 'set default values for missing params in the request' do
+      get('/user?type2=value2')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ type1: 'default-type1', type2: 'value2' }.to_json)
+    end
   end
 
-  it 'allows optional arrays to be omitted' do
-    params = { some_things:
-                [{ foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
-                 { foo: 'two' },
-                 { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }] }
-    get '/nested_optional_array', root: params
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ root: params }.to_json)
+  describe '/message' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :id
+          optional :type1, default: 'default-type1'
+          optional :type2, default: 'default-type2'
+        end
+
+        get '/message' do
+          { id: params[:id], type1: params[:type1], type2: params[:type2] }
+        end
+      end
+    end
+
+    it 'set default values for optional params and allow to use required fields in the same time' do
+      get('/message?id=1')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ id: '1', type1: 'default-type1', type2: 'default-type2' }.to_json)
+    end
   end
 
-  it 'does not allows faulty optional arrays' do
-    params = { some_things:
-                 [
-                   { foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
-                   { foo: 'two', options: [{ name: 'wat' }] },
-                   { foo: 'three' }
-                 ] }
-    error = { error: 'root[some_things][1][options][0][value] is missing' }
-    get '/nested_optional_array', root: params
-    expect(last_response.status).to eq(400)
-    expect(last_response.body).to eq(error.to_json)
+  describe '/numbers' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          optional :random, default: -> { Random.rand }
+          optional :not_random, default: Random.rand
+        end
+        get '/numbers' do
+          { random_number: params[:random], non_random_number: params[:non_random_number] }
+        end
+      end
+    end
+
+    it 'sets lambda based defaults at the time of call' do
+      get('/numbers')
+      expect(last_response.status).to eq(200)
+      before = JSON.parse(last_response.body)
+      get('/numbers')
+      expect(last_response.status).to eq(200)
+      after = JSON.parse(last_response.body)
+
+      expect(before['non_random_number']).to eq(after['non_random_number'])
+      expect(before['random_number']).not_to eq(after['random_number'])
+    end
   end
 
-  it 'allows optional arrays with optional params' do
-    params = { some_things:
-                 [
-                   { foo: 'one', options: [{ value: 'nope' }] },
-                   { foo: 'two', options: [{ name: 'wat' }] },
-                   { foo: 'three' }
-                 ] }
-    get '/another_nested_optional_array', root: params
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ root: params }.to_json)
+  describe '/array' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          optional :array, type: Array do
+            requires :name
+            optional :with_default, default: 'default'
+          end
+        end
+        get '/array' do
+          { array: params[:array] }
+        end
+      end
+    end
+
+    it 'sets default values for grouped arrays' do
+      get('/array?array[][name]=name&array[][name]=name2&array[][with_default]=bar2')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ array: [{ name: 'name', with_default: 'default' }, { name: 'name2', with_default: 'bar2' }] }.to_json)
+    end
   end
 
-  it 'set default value for optional param' do
-    get('/')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ id: nil, type: 'default-type' }.to_json)
+  describe '/optional_array' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :thing1
+          optional :more_things, type: Array do
+            requires :nested_thing
+            requires :other_thing, default: 1
+          end
+        end
+        get '/optional_array' do
+          { thing1: params[:thing1] }
+        end
+      end
+    end
+
+    it 'lets you leave required values nested inside an optional blank' do
+      get '/optional_array', thing1: 'stuff'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ thing1: 'stuff' }.to_json)
+    end
   end
 
-  it 'set default values for optional params' do
-    get('/user')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ type1: 'default-type1', type2: 'default-type2' }.to_json)
+  describe '/nested_optional_array' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :root, type: Hash do
+            optional :some_things, type: Array do
+              requires :foo
+              optional :options, type: Array do
+                requires :name, type: String
+                requires :value, type: String
+              end
+            end
+          end
+        end
+        get '/nested_optional_array' do
+          { root: params[:root] }
+        end
+      end
+    end
+
+    it 'allows optional arrays to be omitted' do
+      params = { some_things:
+                  [{ foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
+                   { foo: 'two' },
+                   { foo: 'three', options: [{ name: 'wooop', value: 'yap' }] }] }
+      get '/nested_optional_array', root: params
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ root: params }.to_json)
+    end
+
+    it 'does not allows faulty optional arrays' do
+      params = { some_things:
+                   [
+                     { foo: 'one', options: [{ name: 'wat', value: 'nope' }] },
+                     { foo: 'two', options: [{ name: 'wat' }] },
+                     { foo: 'three' }
+                   ] }
+      error = { error: 'root[some_things][1][options][0][value] is missing' }
+      get '/nested_optional_array', root: params
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq(error.to_json)
+    end
   end
 
-  it 'set default values for missing params in the request' do
-    get('/user?type2=value2')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ type1: 'default-type1', type2: 'value2' }.to_json)
+  describe '/another_nested_optional_array' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :root, type: Hash do
+            optional :some_things, type: Array do
+              requires :foo
+              optional :options, type: Array do
+                optional :name, type: String
+                optional :value, type: String
+              end
+            end
+          end
+        end
+        get '/another_nested_optional_array' do
+          { root: params[:root] }
+        end
+      end
+    end
+
+    it 'allows optional arrays with optional params' do
+      params = { some_things:
+                   [
+                     { foo: 'one', options: [{ value: 'nope' }] },
+                     { foo: 'two', options: [{ name: 'wat' }] },
+                     { foo: 'three' }
+                   ] }
+      get '/another_nested_optional_array', root: params
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ root: params }.to_json)
+    end
   end
 
-  it 'set default values for optional params and allow to use required fields in the same time' do
-    get('/message?id=1')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ id: '1', type1: 'default-type1', type2: 'default-type2' }.to_json)
-  end
+  describe '/default_values_from_other_params' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
 
-  it 'sets lambda based defaults at the time of call' do
-    get('/numbers')
-    expect(last_response.status).to eq(200)
-    before = JSON.parse(last_response.body)
-    get('/numbers')
-    expect(last_response.status).to eq(200)
-    after = JSON.parse(last_response.body)
+        params do
+          requires :foo
+          optional :bar, default: ->(params) { params[:foo] }
+          optional :qux, default: ->(params) { params[:bar] }
+        end
+        get '/default_values_from_other_params' do
+          {
+            foo: params[:foo],
+            bar: params[:bar],
+            qux: params[:qux]
+          }
+        end
+      end
+    end
 
-    expect(before['non_random_number']).to eq(after['non_random_number'])
-    expect(before['random_number']).not_to eq(after['random_number'])
-  end
+    it 'sets default value for optional params using other params values' do
+      expected_foo_value = 'foo-value'
 
-  it 'sets default values for grouped arrays' do
-    get('/array?array[][name]=name&array[][name]=name2&array[][with_default]=bar2')
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({ array: [{ name: 'name', with_default: 'default' }, { name: 'name2', with_default: 'bar2' }] }.to_json)
+      get("/default_values_from_other_params?foo=#{expected_foo_value}")
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({
+        foo: expected_foo_value,
+        bar: expected_foo_value,
+        qux: expected_foo_value
+      }.to_json)
+    end
   end
 
   context 'optional group with defaults' do
@@ -472,18 +551,5 @@ describe Grape::Validations::Validators::DefaultValidator do
       expect(last_response.status).to eq(201)
       expect(JSON.parse(last_response.body)).to eq(expected)
     end
-  end
-
-  it 'sets default value for optional params using other params values' do
-    expected_foo_value = 'foo-value'
-
-    get("/default_values_from_other_params?foo=#{expected_foo_value}")
-
-    expect(last_response.status).to eq(200)
-    expect(last_response.body).to eq({
-      foo: expected_foo_value,
-      bar: expected_foo_value,
-      qux: expected_foo_value
-    }.to_json)
   end
 end

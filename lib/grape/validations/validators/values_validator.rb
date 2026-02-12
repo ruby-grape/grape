@@ -5,34 +5,37 @@ module Grape
     module Validators
       class ValuesValidator < Base
         def initialize(attrs, options, required, scope, opts)
-          @values = options.is_a?(Hash) ? options[:value] : options
           super
+          values = option_value
+          raise ArgumentError, 'values Proc must have arity of zero or one' if values.is_a?(Proc) && values.arity > 1
+
+          # Zero-arity procs (e.g. -> { User.pluck(:role) }) must be called per-request,
+          # not at definition time, so they are stored directly and deferred until validation.
+          @values_call =
+            if values.is_a?(Proc) && values.arity.zero?
+              values
+            else
+              -> { values }
+            end
+          @exception_message = message(:values)
         end
 
         def validate_param!(attr_name, params)
-          return unless params.is_a?(Hash)
+          return unless hash_like?(params)
 
-          val = params[attr_name]
+          val = scrub(params[attr_name])
 
           return if val.nil? && !required_for_root_scope?
-
-          val = val.scrub if val.respond_to?(:valid_encoding?) && !val.valid_encoding?
-
-          # don't forget that +false.blank?+ is true
           return if val != false && val.blank? && @allow_blank
-
           return if check_values?(val, attr_name)
 
-          raise Grape::Exceptions::Validation.new(
-            params: [@scope.full_name(attr_name)],
-            message: message(:values)
-          )
+          raise Grape::Exceptions::Validation.new(params: @scope.full_name(attr_name), message: @exception_message)
         end
 
         private
 
         def check_values?(val, attr_name)
-          values = @values.is_a?(Proc) && @values.arity.zero? ? @values.call : @values
+          values = @values_call.call
           return true if values.nil?
 
           param_array = val.nil? ? [nil] : Array.wrap(val)

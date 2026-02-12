@@ -5,19 +5,11 @@ module Grape
     module Validators
       class LengthValidator < Base
         def initialize(attrs, options, required, scope, opts)
-          @min = options[:min]
-          @max = options[:max]
-          @is = options[:is]
-
           super
 
-          raise ArgumentError, 'min must be an integer greater than or equal to zero' if !@min.nil? && (!@min.is_a?(Integer) || @min.negative?)
-          raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
-          raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
-
-          return if @is.nil?
-          raise ArgumentError, 'is must be an integer greater than zero' if !@is.is_a?(Integer) || !@is.positive?
-          raise ArgumentError, 'is cannot be combined with min or max' if !@min.nil? || !@max.nil?
+          @min, @max, @is = @option.values_at(:min, :max, :is)
+          validate_length_options!
+          @exception_message = message { build_exception_message }
         end
 
         def validate_param!(attr_name, params)
@@ -25,22 +17,42 @@ module Grape
 
           return unless param.respond_to?(:length)
 
-          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@is.nil? && param.length != @is)
+          return unless (@min && param.length < @min) || (@max && param.length > @max) || (@is && param.length != @is)
 
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: build_message)
+          raise Grape::Exceptions::Validation.new(params: @scope.full_name(attr_name), message: @exception_message)
         end
 
-        def build_message
-          if options_key?(:message)
-            @option[:message]
-          elsif @min && @max
-            format I18n.t(:length, scope: 'grape.errors.messages'), min: @min, max: @max
+        private
+
+        def validate_length_options!
+          raise ArgumentError, 'at least one of :min, :max, or :is must be specified' if [@min, @max, @is].none?
+
+          validate_min_max!
+          validate_is!
+        end
+
+        def validate_min_max!
+          raise ArgumentError, 'min must be an integer greater than or equal to zero' if @min && (!@min.is_a?(Integer) || @min.negative?)
+          raise ArgumentError, 'max must be an integer greater than or equal to zero' if @max && (!@max.is_a?(Integer) || @max.negative?)
+          raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if @min && @max && @min > @max
+        end
+
+        def validate_is!
+          return unless @is
+
+          raise ArgumentError, 'is must be an integer greater than zero' unless @is.is_a?(Integer) && @is.positive?
+          raise ArgumentError, 'is cannot be combined with min or max' if @min || @max
+        end
+
+        def build_exception_message
+          if @min && @max
+            { key: :length, min: @min, max: @max }.freeze
           elsif @min
-            format I18n.t(:length_min, scope: 'grape.errors.messages'), min: @min
+            { key: :length_min, min: @min }.freeze
           elsif @max
-            format I18n.t(:length_max, scope: 'grape.errors.messages'), max: @max
+            { key: :length_max, max: @max }.freeze
           else
-            format I18n.t(:length_is, scope: 'grape.errors.messages'), is: @is
+            { key: :length_is, is: @is }.freeze
           end
         end
       end

@@ -176,7 +176,7 @@ module Grape
             status 204
           else
             run_filters before_validations, :before_validation
-            run_validators validations, request
+            run_validators request: request
             run_filters after_validations, :after_validation
             response_object = execute
           end
@@ -205,22 +205,27 @@ module Grape
       end
     end
 
-    def run_validators(validators, request)
+    def run_validators(request:)
+      validators = inheritable_setting.route[:saved_validations]
+      return if validators.blank?
+
       validation_errors = []
 
-      ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request: request) do
-        validators.each do |validator|
-          validator.validate(request)
-        rescue Grape::Exceptions::Validation => e
-          validation_errors << e
-          break if validator.fail_fast?
-        rescue Grape::Exceptions::ValidationArrayErrors => e
-          validation_errors.concat e.errors
-          break if validator.fail_fast?
+      Grape::Validations::ScopeTracker.track do
+        ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request:) do
+          validators.each do |validator|
+            validator.validate(request)
+          rescue Grape::Exceptions::Validation => e
+            validation_errors << e
+            break if validator.fail_fast?
+          rescue Grape::Exceptions::ValidationArrayErrors => e
+            validation_errors.concat e.errors
+            break if validator.fail_fast?
+          end
         end
       end
 
-      validation_errors.any? && raise(Grape::Exceptions::ValidationErrors.new(errors: validation_errors, headers: header))
+      raise(Grape::Exceptions::ValidationErrors.new(errors: validation_errors, headers: header)) if validation_errors.any?
     end
 
     def run_filters(filters, type = :other)
@@ -234,16 +239,6 @@ module Grape
     %i[befores before_validations after_validations afters finallies].each do |method|
       define_method method do
         inheritable_setting.namespace_stackable[method]
-      end
-    end
-
-    def validations
-      saved_validations = inheritable_setting.route[:saved_validations]
-      return if saved_validations.nil?
-      return enum_for(:validations) unless block_given?
-
-      saved_validations.each do |saved_validation|
-        yield Grape::Validations::ValidatorFactory.create_validator(saved_validation)
       end
     end
 

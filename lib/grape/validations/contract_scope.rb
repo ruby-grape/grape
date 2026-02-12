@@ -21,13 +21,7 @@ module Grape
         end
 
         api.inheritable_setting.namespace_stackable[:contract_key_map] = key_map
-
-        validator_options = {
-          validator_class: Grape::Validations.require_validator(:contract_scope),
-          opts: { schema: contract, fail_fast: false }
-        }
-
-        api.inheritable_setting.namespace_stackable[:validations] = validator_options
+        api.inheritable_setting.namespace_stackable[:validations] = Validators::ContractScopeValidator.new(schema: contract)
       end
     end
   end

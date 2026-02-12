@@ -3,8 +3,11 @@
 module Grape
   module Validations
     class ParamsScope
-      attr_accessor :element, :parent, :index
-      attr_reader :type, :params_meeting_dependency
+      attr_reader :element, :parent, :type
+
+      def qualifying_params
+        ScopeTracker.current&.qualifying_params(self) || ScopeTracker::EMPTY_PARAMS
+      end
 
       include Grape::DSL::Parameters
       include Grape::Validations::ParamsDocumentation
@@ -70,13 +73,12 @@ module Grape
         @type             = opts[:type]
         @group            = opts[:group]
         @dependent_on     = opts[:dependent_on]
-        @params_meeting_dependency = []
         @declared_params = []
-        @index = nil
 
         instance_eval(&block) if block
 
         configure_declared_params
+        freeze
       end
 
       def configuration
@@ -100,8 +102,9 @@ module Grape
         return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
         if params.is_a?(Array)
-          @params_meeting_dependency = params.flatten.filter { |param| meets_dependency?(param, request_params) }
-          return @params_meeting_dependency.present?
+          filtered = params.flatten.filter { |param| meets_dependency?(param, request_params) }
+          ScopeTracker.current&.store_qualifying_params(self, filtered)
+          return filtered.present?
         end
 
         meets_hash_dependency?(params)
@@ -133,13 +136,15 @@ module Grape
 
       # @return [String] the proper attribute name, with nesting considered.
       def full_name(name, index: nil)
+        tracker = ScopeTracker.current
         if nested?
           # Find our containing element's name, and append ours.
-          "#{@parent.full_name(@element)}#{brackets(index || @index)}#{brackets(name)}"
+          resolved_index = index || tracker&.index_for(self)
+          "#{@parent.full_name(@element)}#{brackets(resolved_index)}#{brackets(name)}"
         elsif lateral?
           # Find the name of the element as if it was at the same nesting level
           # as our parent. We need to forward our index upward to achieve this.
-          @parent.full_name(name, index: @index)
+          @parent.full_name(name, index: tracker&.index_for(self))
         else
           # We must be the root scope, so no prefix needed.
           name.to_s
@@ -172,10 +177,6 @@ module Grape
       #   be blank
       def required?
         !@optional
-      end
-
-      def reset_index
-        @index = nil
       end
 
       protected
@@ -357,7 +358,7 @@ module Grape
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, required, opts
+        coerce_type validations.extract!(:coerce, :coerce_with, :coerce_message), attrs, required, opts
 
         validations.each do |type, options|
           # Don't try to look up validators for documentation params that don't have one.
@@ -430,7 +431,7 @@ module Grape
       def coerce_type(validations, attrs, required, opts)
         check_coerce_with(validations)
 
-        return unless validations.key?(:coerce)
+        return unless validations[:coerce]
 
         coerce_options = {
           type: validations[:coerce],
@@ -438,9 +439,6 @@ module Grape
           message: validations[:coerce_message]
         }
         validate('coerce', coerce_options, attrs, required, opts)
-        validations.delete(:coerce_with)
-        validations.delete(:coerce)
-        validations.delete(:coerce_message)
       end
 
       def guess_coerce_type(coerce_type, *values_list)
@@ -464,15 +462,15 @@ module Grape
       end
 
       def validate(type, options, attrs, required, opts)
-        validator_options = {
-          attributes: attrs,
-          options: options,
-          required: required,
-          params_scope: self,
-          opts: opts,
-          validator_class: Validations.require_validator(type)
-        }
-        @api.inheritable_setting.namespace_stackable[:validations] = validator_options
+        validator_class = Validations.require_validator(type)
+        validator_instance = validator_class.new(
+          attrs,
+          options,
+          required,
+          self,
+          opts
+        )
+        @api.inheritable_setting.namespace_stackable[:validations] = validator_instance
       end
 
       def validate_value_coercion(coerce_type, *values_list)

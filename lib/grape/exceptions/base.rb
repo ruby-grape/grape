@@ -3,9 +3,9 @@
 module Grape
   module Exceptions
     class Base < StandardError
-      BASE_MESSAGES_KEY = 'grape.errors.messages'
-      BASE_ATTRIBUTES_KEY = 'grape.errors.attributes'
-      FALLBACK_LOCALE = :en
+      include Grape::Util::Translation
+
+      MESSAGE_STEPS = %w[problem summary resolution].to_h { |s| [s, s.capitalize] }.freeze
 
       attr_reader :status, :headers
 
@@ -20,55 +20,37 @@ module Grape
         __send__ index
       end
 
-      protected
+      private
 
       # TODO: translate attribute first
       # if BASE_ATTRIBUTES_KEY.key respond to a string message, then short_message is returned
       # if BASE_ATTRIBUTES_KEY.key respond to a Hash, means it may have problem , summary and resolution
-      def compose_message(key, **attributes)
-        short_message = translate_message(key, attributes)
+      def compose_message(key, **)
+        short_message = translate_message(key, **)
         return short_message unless short_message.is_a?(Hash)
 
-        each_steps(key, attributes).with_object(+'') do |detail_array, message|
-          message << "\n#{detail_array[0]}:\n  #{detail_array[1]}" unless detail_array[1].blank?
-        end
+        MESSAGE_STEPS.filter_map do |step, label|
+          detail = translate_message(:"#{key}.#{step}", **)
+          "\n#{label}:\n  #{detail}" if detail.present?
+        end.join
       end
 
-      def each_steps(key, attributes)
-        return enum_for(:each_steps, key, attributes) unless block_given?
-
-        yield 'Problem', translate_message(:"#{key}.problem", attributes)
-        yield 'Summary', translate_message(:"#{key}.summary", attributes)
-        yield 'Resolution', translate_message(:"#{key}.resolution", attributes)
-      end
-
-      def translate_attributes(keys, options = {})
+      def translate_attributes(keys, **)
         keys.map do |key|
-          translate("#{BASE_ATTRIBUTES_KEY}.#{key}", options.merge(default: key.to_s))
+          translate(key, scope: 'grape.errors.attributes', default: key.to_s, **)
         end.join(', ')
       end
 
-      def translate_message(key, options = {})
-        case key
+      def translate_message(translation_key, **)
+        case translation_key
         when Symbol
-          translate("#{BASE_MESSAGES_KEY}.#{key}", options.merge(default: ''))
+          translate(translation_key, scope: 'grape.errors.messages', **)
+        when Hash
+          translate(translation_key[:key], scope: 'grape.errors.messages', **translation_key.except(:key))
         when Proc
-          key.call
+          translation_key.call
         else
-          key
-        end
-      end
-
-      def translate(key, options)
-        message = ::I18n.translate(key, **options)
-        message.presence || fallback_message(key, options)
-      end
-
-      def fallback_message(key, options)
-        if ::I18n.enforce_available_locales && !::I18n.available_locales.include?(FALLBACK_LOCALE)
-          key
-        else
-          ::I18n.translate(key, locale: FALLBACK_LOCALE, **options)
+          translation_key
         end
       end
     end

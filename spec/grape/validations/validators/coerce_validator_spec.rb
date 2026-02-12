@@ -20,9 +20,11 @@ describe Grape::Validations::Validators::CoerceValidator do
 
     context 'i18n' do
       after do
+        I18n.load_path.delete(File.expand_path('zh-CN.yml', __dir__))
         I18n.available_locales = %i[en]
         I18n.locale = :en
         I18n.default_locale = :en
+        I18n.reload!
       end
 
       it 'i18n error on malformed input' do

@@ -260,7 +260,7 @@ describe Grape::DSL::Parameters do
     it 'inherits params from parent' do
       parent_params = { foo: 'bar' }
       subject.parent = Object.new
-      allow(subject.parent).to receive_messages(params: parent_params, params_meeting_dependency: nil)
+      allow(subject.parent).to receive_messages(params: parent_params, qualifying_params: nil)
       expect(subject.params({})).to eq parent_params
     end
 

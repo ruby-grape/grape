@@ -5,7 +5,7 @@ module Grape
     module Validators
       class MultipleParamsBase < Base
         def validate!(params)
-          attributes = MultipleAttributesIterator.new(self, @scope, params)
+          attributes = MultipleAttributesIterator.new(@attrs, @scope, params)
           array_errors = []
 
           attributes.each do |resource_params|
@@ -26,7 +26,7 @@ module Grape
         end
 
         def all_keys
-          attrs.map { |attr| @scope.full_name(attr) }
+          @attrs.map { |attr| @scope.full_name(attr) }
         end
       end
     end

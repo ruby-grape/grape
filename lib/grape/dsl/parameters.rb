@@ -224,7 +224,7 @@ module Grape
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
-        params = @parent.params_meeting_dependency.presence || @parent.params(params) if @parent
+        params = @parent.qualifying_params.presence || @parent.params(params) if @parent
         params = map_params(params, @element) if @element
         params
       end

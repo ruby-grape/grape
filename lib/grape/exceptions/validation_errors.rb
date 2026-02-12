@@ -3,9 +3,6 @@
 module Grape
   module Exceptions
     class ValidationErrors < Base
-      ERRORS_FORMAT_KEY = 'grape.errors.format'
-      DEFAULT_ERRORS_FORMAT = '%<attributes>s %<message>s'
-
       include Enumerable
 
       attr_reader :errors
@@ -38,9 +35,10 @@ module Grape
 
       def full_messages
         messages = map do |attributes, error|
-          I18n.t(
-            ERRORS_FORMAT_KEY,
-            default: DEFAULT_ERRORS_FORMAT,
+          translate(
+            :format,
+            scope: 'grape.errors',
+            default: '%<attributes>s %<message>s',
             attributes: translate_attributes(attributes),
             message: error.message
           )
