@@ -8,3 +8,4 @@ zh-CN:
         coerce: '格式不正确'
         presence: '请填写'
         regexp: '格式不正确'
+        same_as: '与%{parameter}不一致'

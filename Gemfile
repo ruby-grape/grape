@@ -32,7 +32,6 @@ group :test do
   gem 'rspec', '~> 3.13'
   gem 'simplecov', '~> 0.21', require: false
   gem 'simplecov-lcov', '~> 0.8', require: false
-  gem 'test-prof', require: false
 end
 
 platforms :jruby do

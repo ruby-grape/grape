@@ -4,6 +4,8 @@ module Grape
   module Validations
     module Validators
       class Base
+        include Grape::Util::Translation
+
         attr_reader :attrs
 
         # Creates a new Validator from options specified
@@ -19,8 +21,7 @@ module Grape
           @option = options
           @required = required
           @scope = scope
-          @fail_fast = opts[:fail_fast]
-          @allow_blank = opts[:allow_blank]
+          @fail_fast, @allow_blank = opts.values_at(:fail_fast, :allow_blank)
         end
 
         # Validates a given request.
@@ -33,6 +34,17 @@ module Grape
 
           validate!(request.params)
         end
+
+        def self.inherited(klass)
+          super
+          Validations.register(klass)
+        end
+
+        def fail_fast?
+          @fail_fast
+        end
+
+        private
 
         # Validates a given parameter hash.
         # @note Override #validate if you need to access the entire request.
@@ -49,7 +61,7 @@ module Grape
             next if !@scope.required? && empty_val
             next unless @scope.meets_dependency?(val, params)
 
-            validate_param!(attr_name, val) if @required || (val.respond_to?(:key?) && val.key?(attr_name))
+            validate_param!(attr_name, val) if @required || (hash_like?(val) && val.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
             array_errors << e
           end
@@ -57,23 +69,33 @@ module Grape
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
         end
 
-        def self.inherited(klass)
-          super
-          Validations.register(klass)
+        def hash_like?(obj)
+          obj.respond_to?(:key?)
+        end
+
+        def options_key?(key)
+          hash_like?(@option) && @option.key?(key) && !@option[key].nil?
         end
 
         def message(default_key = nil)
-          options = instance_variable_get(:@option)
-          options_key?(:message) ? options[:message] : default_key
+          key = options_key?(:message) ? @option[:message] : default_key
+          return key if key
+
+          yield if block_given?
         end
 
-        def options_key?(key, options = nil)
-          options = instance_variable_get(:@option) if options.nil?
-          options.respond_to?(:key?) && options.key?(key) && !options[key].nil?
+        def option_value
+          options_key?(:value) ? @option[:value] : @option
         end
 
-        def fail_fast?
-          @fail_fast
+        def translate_message(key, **)
+          translate(key, scope: 'grape.errors.messages', **)
+        end
+
+        def scrub(value)
+          return value unless value.respond_to?(:valid_encoding?) && !value.valid_encoding?
+
+          value.scrub
         end
       end
     end
