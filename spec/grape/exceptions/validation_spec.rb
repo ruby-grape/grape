@@ -16,4 +16,10 @@ describe Grape::Exceptions::Validation do
       expect(described_class.new(params: ['id'], message: 'presence').message_key).to be_nil
     end
   end
+
+  context 'when message is a Hash' do
+    it 'stores the :key entry as message_key' do
+      expect(described_class.new(params: ['size'], message: { key: :length, min: 2, max: 10 }).message_key).to eq(:length)
+    end
+  end
 end

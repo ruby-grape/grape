@@ -3,6 +3,7 @@
 #### Features
 
 * [#2656](https://github.com/ruby-grape/grape/pull/2656): Remove useless instance_variable_defined? checks - [@ericproulx](https://github.com/ericproulx).
+* [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at compile time - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
