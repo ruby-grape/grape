@@ -470,7 +470,7 @@ module Grape
           required: required,
           params_scope: self,
           opts: opts,
-          validator_class: Validations.require_validator(type)
+          validator_class: Validations.require_validator(type, scope: @api)
         }
         @api.inheritable_setting.namespace_stackable[:validations] = validator_options
       end

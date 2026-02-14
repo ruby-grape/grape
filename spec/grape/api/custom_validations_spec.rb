@@ -251,4 +251,67 @@ describe Grape::Validations do
       expect(last_response.status).to eq 200
     end
   end
+
+  describe 'find_custom_validator_in_scope' do
+    it 'resolves validator when scope has @base in namespace with Validators::Uuid' do
+      # Define a named module with eval so constant names and module_parent resolve correctly
+      eval(<<~RUBY, binding, __FILE__, __LINE__ + 1)
+        module CustomValidatorScopeForUuidSpec
+          module Validators
+            class Uuid < Grape::Validations::Validators::Base
+              def validate_param!(_attr_name, _params); end
+            end
+          end
+          class Jobs < Grape::API
+          end
+        end
+      RUBY
+
+      fake_scope = Object.new
+      fake_scope.instance_variable_set(:@base, CustomValidatorScopeForUuidSpec::Jobs)
+
+      expect(described_class.require_validator(:uuid, scope: fake_scope)).to eq(CustomValidatorScopeForUuidSpec::Validators::Uuid)
+    end
+  end
+
+  describe 'custom validator resolved from API namespace without global registration' do
+    before do
+      # Define a named module so the API class has a name when params run (required for
+      # resolving the custom validator from the API namespace).
+      eval(<<~RUBY, binding, __FILE__, __LINE__ + 1)
+        module CustomValidatorScope
+          module Validators
+            class Uuid < Grape::Validations::Validators::Base
+              def validate_param!(attr_name, params)
+                return if params[attr_name].to_s.match?(/\\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\z/i)
+                raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: 'must be a valid UUID')
+              end
+            end
+          end
+          class Jobs < Grape::API
+            params do
+              requires :id, type: String, uuid: true
+            end
+            get ':id' do
+              body 'ok'
+            end
+          end
+        end
+      RUBY
+    end
+
+    let(:app) { CustomValidatorScope::Jobs }
+
+    it 'accepts a valid UUID' do
+      get '/550e8400-e29b-41d4-a716-446655440000'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'ok'
+    end
+
+    it 'rejects an invalid UUID' do
+      get '/not-a-uuid'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to include 'must be a valid UUID'
+    end
+  end
 end

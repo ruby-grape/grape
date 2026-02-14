@@ -3,6 +3,7 @@
 #### Features
 
 * [#2656](https://github.com/ruby-grape/grape/pull/2656): Remove useless instance_variable_defined? checks - [@ericproulx](https://github.com/ericproulx).
+* Resolve custom validators from API namespace (e.g. `Api::V2::Validators::Uuid` for `uuid: true`) without manual require or global registration - [@contributor](https://github.com/contributor).
 * Your contribution here.
 
 #### Fixes
