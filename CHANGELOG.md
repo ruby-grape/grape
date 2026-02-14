@@ -3,12 +3,12 @@
 #### Features
 
 * [#2656](https://github.com/ruby-grape/grape/pull/2656): Remove useless instance_variable_defined? checks - [@ericproulx](https://github.com/ericproulx).
-* Resolve custom validators from API namespace (e.g. `Api::V2::Validators::Uuid` for `uuid: true`) without manual require or global registration - [@contributor](https://github.com/contributor).
 * Your contribution here.
 
 #### Fixes
 
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
+* [#2658](https://github.com/ruby-grape/grape/pull/XXXX): Custom validators resolved from API namespace without explicit require (fixes #1178) - [@GulfGulfinson](https://github.com/GulfGulfinson).
 * Your contribution here.
 
 ### 3.1.0 (2026-01-25)

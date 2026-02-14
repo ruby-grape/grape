@@ -464,13 +464,15 @@ module Grape
       end
 
       def validate(type, options, attrs, required, opts)
+        api_class = @api.is_a?(Module) ? @api : @api.class
+        api_class = api_class.base if api_class.respond_to?(:base) && api_class.base
         validator_options = {
           attributes: attrs,
           options: options,
           required: required,
           params_scope: self,
           opts: opts,
-          validator_class: Validations.require_validator(type, scope: @api)
+          validator_class: Validations.require_validator(type, api_class: api_class)
         }
         @api.inheritable_setting.namespace_stackable[:validations] = validator_options
       end
