@@ -251,4 +251,74 @@ describe Grape::Validations do
       expect(last_response.status).to eq 200
     end
   end
+
+  describe 'custom validator namespace lookup' do
+    let(:uuid_validator) do
+      regex = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/
+      Class.new(Grape::Validations::Validators::Base) do
+        define_singleton_method(:regex) { regex }
+        def validate_param!(attr_name, params)
+          return if params[attr_name].to_s.match?(self.class.regex)
+
+          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: 'must be a valid UUID')
+        end
+      end
+    end
+
+    context 'when constants are set up' do
+      before do
+        described_class.deregister(:uuid)
+        stub_const('Api', Module.new)
+        stub_const('Api::V2', Module.new)
+        stub_const('Api::V2::Validators', Module.new)
+        Api::V2::Validators.const_set(:Uuid, uuid_validator)
+        Api::V2.const_set(:Jobs, Class.new(Grape::API))
+      end
+
+      after do
+        described_class.deregister(:uuid)
+      end
+
+      it 'finds validator via require_validator with api_class' do
+        expect(described_class.require_validator(:uuid, api_class: Api::V2::Jobs)).to eq Api::V2::Validators::Uuid
+      end
+    end
+
+    context 'when API uses uuid param' do
+      before do
+        described_class.deregister(:uuid)
+        stub_const('Api', Module.new)
+        stub_const('Api::V2', Module.new)
+        stub_const('Api::V2::Validators', Module.new)
+        Api::V2::Validators.const_set(:Uuid, uuid_validator)
+        Api::V2.const_set(:Jobs, Class.new(Grape::API))
+        Api::V2::Jobs.class_eval do
+          params do
+            requires :id, type: String, uuid: true
+          end
+          get ':id' do
+            'ok'
+          end
+        end
+      end
+
+      after do
+        described_class.deregister(:uuid)
+      end
+
+      let(:app) { Api::V2::Jobs }
+
+      it 'finds validator in API namespace without explicit require' do
+        get '/550e8400-e29b-41d4-a716-446655440000'
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq 'ok'
+      end
+
+      it 'validates with namespace validator and returns 400 for invalid UUID' do
+        get '/not-a-uuid'
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to include 'must be a valid UUID'
+      end
+    end
+  end
 end
