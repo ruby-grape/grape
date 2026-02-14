@@ -4,15 +4,20 @@ module Grape
   module Validations
     module Validators
       class AllowBlankValidator < Base
+        def initialize(attrs, options, required, scope, opts)
+          super
+
+          @value = option_value
+          @exception_message = message(:blank)
+        end
+
         def validate_param!(attr_name, params)
-          return if (options_key?(:value) ? @option[:value] : @option) || !params.is_a?(Hash)
+          return if @value || !hash_like?(params)
 
-          value = params[attr_name]
-          value = value.scrub if value.respond_to?(:valid_encoding?) && !value.valid_encoding?
-
+          value = scrub(params[attr_name])
           return if value == false || value.present?
 
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:blank))
+          raise Grape::Exceptions::Validation.new(params: @scope.full_name(attr_name), message: @exception_message)
         end
       end
     end

@@ -1,25 +1,18 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::SameAsValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
-      params do
-        requires :password
-        requires :password_confirmation, same_as: :password
-      end
-      post do
-      end
-
-      params do
-        requires :password
-        requires :password_confirmation, same_as: { value: :password, message: 'not match' }
-      end
-      post '/custom-message' do
+  describe '/' do
+    let(:app) do
+      Class.new(Grape::API) do
+        params do
+          requires :password
+          requires :password_confirmation, same_as: :password
+        end
+        post do
+        end
       end
     end
-  end
 
-  describe '/' do
     context 'is the same' do
       it do
         post '/', password: '987654', password_confirmation: '987654'
@@ -38,6 +31,17 @@ describe Grape::Validations::Validators::SameAsValidator do
   end
 
   describe '/custom-message' do
+    let(:app) do
+      Class.new(Grape::API) do
+        params do
+          requires :password
+          requires :password_confirmation, same_as: { value: :password, message: 'not match' }
+        end
+        post '/custom-message' do
+        end
+      end
+    end
+
     context 'is the same' do
       it do
         post '/custom-message', password: '987654', password_confirmation: '987654'

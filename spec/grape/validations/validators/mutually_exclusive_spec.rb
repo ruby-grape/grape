@@ -1,104 +1,30 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Validators::MutuallyExclusiveValidator do
-  let_it_be(:app) do
-    Class.new(Grape::API) do
-      rescue_from Grape::Exceptions::ValidationErrors do |e|
-        error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
-      end
-
-      params do
-        optional :beer
-        optional :wine
-        optional :grapefruit
-        mutually_exclusive :beer, :wine, :grapefruit
-      end
-      post do
-      end
-
-      params do
-        optional :beer
-        optional :wine
-        optional :grapefruit
-        optional :other
-        mutually_exclusive :beer, :wine, :grapefruit
-      end
-      post 'mixed-params' do
-      end
-
-      params do
-        optional :beer
-        optional :wine
-        optional :grapefruit
-        mutually_exclusive :beer, :wine, :grapefruit, message: 'you should not mix beer and wine'
-      end
-      post '/custom-message' do
-      end
-
-      params do
-        requires :item, type: Hash do
-          optional :beer
-          optional :wine
-          optional :grapefruit
-          mutually_exclusive :beer, :wine, :grapefruit
-        end
-      end
-      post '/nested-hash' do
-      end
-
-      params do
-        optional :item, type: Hash do
-          optional :beer
-          optional :wine
-          optional :grapefruit
-          mutually_exclusive :beer, :wine, :grapefruit
-        end
-      end
-      post '/nested-optional-hash' do
-      end
-
-      params do
-        requires :items, type: Array do
-          optional :beer
-          optional :wine
-          optional :grapefruit
-          mutually_exclusive :beer, :wine, :grapefruit
-        end
-      end
-      post '/nested-array' do
-      end
-
-      params do
-        requires :items, type: Array do
-          requires :nested_items, type: Array do
-            optional :beer, :wine, :grapefruit, type: Grape::API::Boolean
-            mutually_exclusive :beer, :wine, :grapefruit
-          end
-        end
-      end
-      post '/deeply-nested-array' do
-      end
-    end
-  end
-
   describe '#validate!' do
     subject(:validate) { post path, params }
 
-    context 'when all mutually exclusive params are present' do
-      let(:path) { '/' }
-      let(:params) { { beer: true, wine: true, grapefruit: true } }
+    describe '/' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
 
-      it 'returns a validation error' do
-        validate
-        expect(last_response.status).to eq 400
-        expect(JSON.parse(last_response.body)).to eq(
-          'beer,wine,grapefruit' => ['are mutually exclusive']
-        )
+          params do
+            optional :beer
+            optional :wine
+            optional :grapefruit
+            mutually_exclusive :beer, :wine, :grapefruit
+          end
+          post do
+          end
+        end
       end
 
-      context 'mixed with other params' do
-        let(:path) { '/mixed-params' }
-        let(:params) { { beer: true, wine: true, grapefruit: true, other: true } }
+      context 'when all mutually exclusive params are present' do
+        let(:path) { '/' }
+        let(:params) { { beer: true, wine: true, grapefruit: true } }
 
         it 'returns a validation error' do
           validate
@@ -108,22 +34,80 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
           )
         end
       end
+
+      context 'when a subset of mutually exclusive params are present' do
+        let(:path) { '/' }
+        let(:params) { { beer: true, grapefruit: true } }
+
+        it 'returns a validation error' do
+          validate
+          expect(last_response.status).to eq 400
+          expect(JSON.parse(last_response.body)).to eq(
+            'beer,grapefruit' => ['are mutually exclusive']
+          )
+        end
+      end
+
+      context 'when no mutually exclusive params are present' do
+        let(:path) { '/' }
+        let(:params) { { beer: true, somethingelse: true } }
+
+        it 'does not return a validation error' do
+          validate
+          expect(last_response.status).to eq 201
+        end
+      end
     end
 
-    context 'when a subset of mutually exclusive params are present' do
-      let(:path) { '/' }
-      let(:params) { { beer: true, grapefruit: true } }
+    describe '/mixed-params' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            optional :grapefruit
+            optional :other
+            mutually_exclusive :beer, :wine, :grapefruit
+          end
+          post 'mixed-params' do
+          end
+        end
+      end
+
+      let(:path) { '/mixed-params' }
+      let(:params) { { beer: true, wine: true, grapefruit: true, other: true } }
 
       it 'returns a validation error' do
         validate
         expect(last_response.status).to eq 400
         expect(JSON.parse(last_response.body)).to eq(
-          'beer,grapefruit' => ['are mutually exclusive']
+          'beer,wine,grapefruit' => ['are mutually exclusive']
         )
       end
     end
 
-    context 'when custom message is specified' do
+    describe '/custom-message' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            optional :grapefruit
+            mutually_exclusive :beer, :wine, :grapefruit, message: 'you should not mix beer and wine'
+          end
+          post '/custom-message' do
+          end
+        end
+      end
+
       let(:path) { '/custom-message' }
       let(:params) { { beer: true, wine: true } }
 
@@ -136,17 +120,26 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
       end
     end
 
-    context 'when no mutually exclusive params are present' do
-      let(:path) { '/' }
-      let(:params) { { beer: true, somethingelse: true } }
+    describe '/nested-hash' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
 
-      it 'does not return a validation error' do
-        validate
-        expect(last_response.status).to eq 201
+          params do
+            requires :item, type: Hash do
+              optional :beer
+              optional :wine
+              optional :grapefruit
+              mutually_exclusive :beer, :wine, :grapefruit
+            end
+          end
+          post '/nested-hash' do
+          end
+        end
       end
-    end
 
-    context 'when mutually exclusive params are nested inside required hash' do
       let(:path) { '/nested-hash' }
       let(:params) { { item: { beer: true, wine: true } } }
 
@@ -159,7 +152,26 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
       end
     end
 
-    context 'when mutually exclusive params are nested inside optional hash' do
+    describe '/nested-optional-hash' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :item, type: Hash do
+              optional :beer
+              optional :wine
+              optional :grapefruit
+              mutually_exclusive :beer, :wine, :grapefruit
+            end
+          end
+          post '/nested-optional-hash' do
+          end
+        end
+      end
+
       let(:path) { '/nested-optional-hash' }
 
       context 'when params are passed' do
@@ -184,7 +196,26 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
       end
     end
 
-    context 'when mutually exclusive params are nested inside array' do
+    describe '/nested-array' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            requires :items, type: Array do
+              optional :beer
+              optional :wine
+              optional :grapefruit
+              mutually_exclusive :beer, :wine, :grapefruit
+            end
+          end
+          post '/nested-array' do
+          end
+        end
+      end
+
       let(:path) { '/nested-array' }
       let(:params) { { items: [{ beer: true, wine: true }, { wine: true, grapefruit: true }] } }
 
@@ -198,7 +229,26 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
       end
     end
 
-    context 'when mutually exclusive params are deeply nested' do
+    describe '/deeply-nested-array' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            requires :items, type: Array do
+              requires :nested_items, type: Array do
+                optional :beer, :wine, :grapefruit, type: Grape::API::Boolean
+                mutually_exclusive :beer, :wine, :grapefruit
+              end
+            end
+          end
+          post '/deeply-nested-array' do
+          end
+        end
+      end
+
       let(:path) { '/deeply-nested-array' }
       let(:params) { { items: [{ nested_items: [{ beer: true, wine: true }] }] } }
 

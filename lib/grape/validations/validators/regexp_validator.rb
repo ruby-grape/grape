@@ -4,21 +4,18 @@ module Grape
   module Validations
     module Validators
       class RegexpValidator < Base
-        def validate_param!(attr_name, params)
-          return unless params.respond_to?(:key) && params.key?(attr_name)
-
-          value = options_key?(:value) ? @option[:value] : @option
-          return if Array.wrap(params[attr_name]).all? { |param| param.nil? || scrub(param.to_s).match?(value) }
-
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:regexp))
+        def initialize(attrs, options, required, scope, opts)
+          super
+          @value = option_value
+          @exception_message = message(:regexp)
         end
 
-        private
+        def validate_param!(attr_name, params)
+          return unless hash_like?(params) && params.key?(attr_name)
 
-        def scrub(param)
-          return param if param.valid_encoding?
+          return if Array.wrap(params[attr_name]).all? { |param| param.nil? || scrub(param.to_s).match?(@value) }
 
-          param.scrub
+          raise Grape::Exceptions::Validation.new(params: @scope.full_name(attr_name), message: @exception_message)
         end
       end
     end

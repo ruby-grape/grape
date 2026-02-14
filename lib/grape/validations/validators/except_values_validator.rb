@@ -5,18 +5,31 @@ module Grape
     module Validators
       class ExceptValuesValidator < Base
         def initialize(attrs, options, required, scope, opts)
-          @except = options.is_a?(Hash) ? options[:value] : options
           super
+          except = option_value
+          raise ArgumentError, 'except_values Proc must have arity of zero' if except.is_a?(Proc) && !except.arity.zero?
+
+          # important! lazy call at runtime
+          @excepts_call =
+            if except.is_a?(Proc)
+              -> { except.call }
+            else
+              -> { except }
+            end
+          @exception_message = message(:except_values)
         end
 
         def validate_param!(attr_name, params)
-          return unless params.respond_to?(:key?) && params.key?(attr_name)
+          return unless hash_like?(params) && params.key?(attr_name)
 
-          excepts = @except.is_a?(Proc) ? @except.call : @except
+          excepts = @excepts_call.call
           return if excepts.nil?
 
           param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message(:except_values)) if param_array.any? { |param| excepts.include?(param) }
+          raise Grape::Exceptions::Validation.new(
+            params: @scope.full_name(attr_name),
+            message: @exception_message
+          ) if param_array.any? { |param| excepts.include?(param) }
         end
       end
     end
