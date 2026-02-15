@@ -26,7 +26,6 @@ group :test do
   gem 'danger', require: false
   gem 'danger-changelog', require: false
   gem 'danger-pr-comment', require: false
-  gem 'danger-toc', require: false
   gem 'rack-contrib', require: false
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'

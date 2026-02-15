@@ -3,6 +3,7 @@
 #### Features
 
 * [#2656](https://github.com/ruby-grape/grape/pull/2656): Remove useless instance_variable_defined? checks - [@ericproulx](https://github.com/ericproulx).
+* [#2619](https://github.com/ruby-grape/grape/pull/2619): Remove TOC from README.md and danger-toc check - [@alexanderadam](https://github.com/alexanderadam).
 * Your contribution here.
 
 #### Fixes
