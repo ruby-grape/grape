@@ -355,6 +355,60 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'nested structures within hashes' do
+    it 'allows nesting of optional arrays within hashes' do
+      subject.params do
+        optional :data, type: Hash do
+          optional :array, type: Array do
+            optional :name, type: String
+          end
+        end
+      end
+      subject.post('/nesty') { declared(params).to_json }
+
+      post '/nesty', { data: {} }
+      expect(last_response.status).to eq 201
+      # {"data"=>{"array"=>{"name"=>nil}}}
+      expect(JSON.parse(last_response.body)['data']['array']).not_to be_a Hash
+    end
+
+    it 'allows nesting of optional arrays within hashes, JSON-style' do
+      subject.format :json
+      subject.params do
+        optional :data, type: JSON do
+          optional :array, type: Array[JSON] do
+            optional :name, type: String
+          end
+        end
+      end
+      subject.post('/nesty') { declared(params) }
+
+      body = { data: { } }.to_json
+      post '/nesty', body, "CONTENT_TYPE" => "application/json"
+
+      expect(last_response.status).to eq 201
+      # {"data"=>{"array"=>{"name"=>nil}}}
+      expect(JSON.parse(last_response.body)['data']['array']).not_to be_a Hash
+    end
+
+    it "doesn't try to add deeply nested optional hashes" do
+      # this may be working as intended?
+      subject.params do
+        optional :data, type: JSON do
+          optional :json, type: JSON do
+            optional :name, type: String
+          end
+        end
+      end
+      subject.post('/nesty') { declared(params).to_json }
+
+      post '/nesty', { data: { } }
+      expect(last_response.status).to eq 201
+      # {"data"=>{"json"=>{"name"=>nil}}}
+      expect(JSON.parse(last_response.body)['data']['json']).not_to be_a Hash
+    end
+  end
+
   context 'when validations are dependent on a parameter' do
     before do
       subject.params do
