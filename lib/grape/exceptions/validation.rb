@@ -3,12 +3,12 @@
 module Grape
   module Exceptions
     class Validation < Base
-      attr_accessor :params, :message_key
+      attr_reader :params, :message_key
 
       def initialize(params:, message: nil, status: nil, headers: nil)
-        @params = params
+        @params = params.is_a?(Array) ? params : [params]
         if message
-          @message_key = message if message.is_a?(Symbol)
+          @message_key = message.is_a?(Hash) ? message[:key] : (message if message.is_a?(Symbol))
           message = translate_message(message)
         end
 

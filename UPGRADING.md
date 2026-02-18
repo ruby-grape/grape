@@ -1,6 +1,102 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 3.2
+
+#### Validators Instantiated at Definition Time
+
+Previously, validators were instantiated at request time but they are now instantiated at definition time. This reduces object allocations since instances are reused across requests.
+
+#### `Grape::Util::Translation` Module
+
+I18n translation logic (translate with fallback locale) has been extracted into `Grape::Util::Translation`, included by both `Grape::Exceptions::Base` and `Grape::Validations::Validators::Base`. The `FALLBACK_LOCALE` constant has moved from `Grape::Exceptions::Base` to `Grape::Util::Translation`.
+
+When `I18n.enforce_available_locales` is `true` and `:en` is not in `I18n.available_locales`, the fallback now returns the bare key as a string (e.g. `"presence"`) instead of the full scope path (e.g. `"grape.errors.messages.presence"`).
+
+#### `Grape::Exceptions::Base#translate_message` Supports Hash Messages
+
+`translate_message` now accepts a Hash with a `:key` and interpolation parameters for deferred I18n translation:
+
+```ruby
+# Symbol (unchanged)
+translate_message(:presence)
+
+# Hash (new) — key + interpolation params, translated at error-raise time
+translate_message({ key: :length, min: 2, max: 5 })
+```
+
+This is used by validators that need locale-sensitive messages with interpolation (e.g. `LengthValidator`, `SameAsValidator`).
+
+#### `Grape::Exceptions::Validation` Changes
+
+**`params` and `message_key` are now read-only.** `attr_accessor` has been changed to `attr_reader`. If you were assigning to these after initialization, set them via the constructor keyword arguments instead.
+
+**`params` is now always coerced to an array.** You can now pass a single string instead of wrapping it in an array:
+
+```ruby
+# Before
+Grape::Exceptions::Validation.new(params: ['my_param'], message: 'is invalid')
+
+# After (both work, single string is now accepted)
+Grape::Exceptions::Validation.new(params: 'my_param', message: 'is invalid')
+Grape::Exceptions::Validation.new(params: ['my_param'], message: 'is invalid')
+```
+
+#### `Validators::Base` Method Visibility Changes
+
+The following methods on `Grape::Validations::Validators::Base` are now **private**: `validate!`, `message`, `options_key?`. If your custom validator subclass calls these via `super` from a private method, no change is needed. If you were calling them from outside the class, you'll need to adjust.
+
+New private helpers have been added:
+- `hash_like?(obj)` — returns `obj.respond_to?(:key?)`
+- `option_value` — returns `@option[:value]` if present, otherwise `@option`
+- `scrub(value)` — scrubs invalid-encoding strings
+- `translate_message(key, **)` — translates a message key using the `grape.errors.messages` I18n scope with fallback locale support
+
+`validate_param!` now has a base implementation that raises `NotImplementedError`. Custom validators that override `validate!` directly are unaffected, but any subclass that relies on `validate_param!` being absent (e.g. calling `super` expecting no-op behaviour) will now receive a `NotImplementedError`.
+
+#### `Validators::Base#message` Now Accepts a Block
+
+`message` now accepts an optional block for lazy default message generation. When no custom `:message` option is set and no `default_key` is provided, the block is called:
+
+```ruby
+# Before
+def message(default_key = nil)
+  options_key?(:message) ? @option[:message] : default_key
+end
+
+# After
+def message(default_key = nil)
+  key = options_key?(:message) ? @option[:message] : default_key
+  return key if key
+
+  yield if block_given?
+end
+```
+
+If your custom validator overrides `message` or passes a `default_key`, the behavior is unchanged. If you relied on `message` returning `nil` when no custom message and no default key were set, it now yields to the block instead.
+
+#### `ContractScopeValidator` No Longer Inherits from `Base`
+
+`ContractScopeValidator` is now a standalone class that no longer inherits from `Grape::Validations::Validators::Base`. Its constructor takes a single `schema:` keyword argument instead of the standard 5-argument validator signature:
+
+```ruby
+# Before
+ContractScopeValidator.new(attrs, options, required, scope, opts)
+
+# After
+ContractScopeValidator.new(schema: contract)
+```
+
+Because it no longer inherits from `Base`, it is not registered via `Validations.register` and will not appear in `Grape::Validations.validators`.
+
+#### `endpoint_run_validators.grape` Notification No Longer Fires Without Validators
+
+The `endpoint_run_validators.grape` ActiveSupport notification is no longer emitted for routes that have no validators. Previously it fired unconditionally (with an empty `validators` array); now the instrumentation block is skipped entirely via an early return. If your observability or tracing code subscribes to this notification and expects it for every request, you will need to handle its absence for validator-free routes.
+
+#### Validator Constructor Caching
+
+All built-in validators now eagerly compute and cache values in their constructors (exception messages, option values, lambdas for proc-based defaults/values). This is transparent to API consumers but relevant if you subclass built-in validators and override `initialize` — ensure you call `super` so caching is properly set up.
+
 ### Upgrading to >= 3.1
 
 #### Explicit kwargs for `namespace` and `route_param`

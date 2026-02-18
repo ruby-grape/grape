@@ -52,8 +52,8 @@ describe Grape::Exceptions::Base do
           I18n.default_locale = :de
         end
 
-        it 'returns the translation string' do
-          expect(subject).to eq("grape.errors.messages.#{key}")
+        it 'returns the translation key as a string' do
+          expect(subject).to eq(key.to_s)
         end
       end
     end

@@ -5,34 +5,36 @@ module Grape
     module Validators
       class ValuesValidator < Base
         def initialize(attrs, options, required, scope, opts)
-          @values = options.is_a?(Hash) ? options[:value] : options
           super
+          values = option_value
+          raise ArgumentError, 'values Proc must have arity of zero or one' if values.is_a?(Proc) && values.arity > 1
+
+          # important! lazy call at runtime
+          @values_call =
+            if values.is_a?(Proc) && values.arity.zero?
+              -> { values.call }
+            else
+              -> { values }
+            end
+          @exception_message = message(:values)
         end
 
         def validate_param!(attr_name, params)
-          return unless params.is_a?(Hash)
+          return unless hash_like?(params)
 
-          val = params[attr_name]
+          val = scrub(params[attr_name])
 
           return if val.nil? && !required_for_root_scope?
-
-          val = val.scrub if val.respond_to?(:valid_encoding?) && !val.valid_encoding?
-
-          # don't forget that +false.blank?+ is true
           return if val != false && val.blank? && @allow_blank
-
           return if check_values?(val, attr_name)
 
-          raise Grape::Exceptions::Validation.new(
-            params: [@scope.full_name(attr_name)],
-            message: message(:values)
-          )
+          raise Grape::Exceptions::Validation.new(params: @scope.full_name(attr_name), message: @exception_message)
         end
 
         private
 
         def check_values?(val, attr_name)
-          values = @values.is_a?(Proc) && @values.arity.zero? ? @values.call : @values
+          values = @values_call.call
           return true if values.nil?
 
           param_array = val.nil? ? [nil] : Array.wrap(val)
