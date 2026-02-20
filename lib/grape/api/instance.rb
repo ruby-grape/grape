@@ -22,6 +22,7 @@ module Grape
         extend Forwardable
 
         attr_accessor :configuration
+        attr_reader :base
 
         def_delegators :@base, :to_s
 
