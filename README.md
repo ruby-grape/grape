@@ -1357,6 +1357,62 @@ end
 client.get('/', status_codes: %w(1 two)) # => [1, "two"]
 ```
 
+#### Multiple Hash Schemas
+
+When you need to accept different hash structures for the same parameter (e.g., for polymorphic data), you can use `hash_schema` with the `types` option. Each schema defines a different valid structure:
+
+```ruby
+params do
+  requires :value, types: [
+    hash_schema { requires :fixed_price, type: Float },
+    hash_schema { requires :time_unit, type: String; requires :rate, type: Float }
+  ]
+end
+post '/pricing' do
+  # params[:value] will be validated against each schema until one matches
+  params[:value]
+end
+```
+
+**Valid Requests:**
+
+```ruby
+# Matches first schema
+{ value: { fixed_price: 100.0 } }
+
+# Matches second schema
+{ value: { time_unit: 'hour', rate: 50.0 } }
+```
+
+**Nested Hash Schemas:**
+
+Hash schemas also support nested structures with multiple required fields. When validation fails with multiple errors, all errors are reported together:
+
+```ruby
+params do
+  requires :options, types: [
+    hash_schema {
+      requires :form, type: Hash do
+        requires :colour, type: String
+        requires :font, type: String
+      end
+    },
+    hash_schema {
+      requires :api, type: Hash do
+        requires :authenticated, type: Grape::API::Boolean
+      end
+    }
+  ]
+end
+
+# Valid request matching first schema
+{ options: { form: { colour: 'red', font: 'Arial' } } }
+
+# Invalid request with multiple missing fields - all errors reported at once
+{ options: { form: {} } }
+# => { "error": "options[form][colour] is missing, options[form][font] is missing" }
+```
+
 ### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.

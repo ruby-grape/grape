@@ -78,6 +78,14 @@ module Grape
         (type.is_a?(Array) || type.is_a?(Set)) && type.size > 1
       end
 
+      # Does the type list contain HashSchema instances?
+      #
+      # @param types [Array] type list to check
+      # @return [Boolean] +true+ if the list contains HashSchema instances
+      def multiple_hash_schemas?(types)
+        types.is_a?(Array) && types.any?(Grape::Validations::Types::HashSchema)
+      end
+
       # Does Grape provide special coercion and validation
       # routines for the given class? This does not include
       # automatic handling for primitives, structures and
