@@ -6,11 +6,31 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
+# Offense count: 2
+# Configuration parameters: CountComments, Max, CountAsOne, AllowedMethods, AllowedPatterns.
+Metrics/ClassLength:
+  Exclude:
+    - 'lib/grape/validations/params_scope.rb'
+
 # Offense count: 1
+# Configuration parameters: CountComments, Max, CountAsOne, AllowedMethods, AllowedPatterns.
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/grape/validations/types/hash_schema.rb'
+
+# Offense count: 2
 # Configuration parameters: CountComments, Max, CountAsOne, AllowedMethods, AllowedPatterns.
 Metrics/MethodLength:
   Exclude:
     - 'lib/grape/endpoint.rb'
+    - 'lib/grape/validations/types/hash_schema.rb'
+
+# Offense count: 2
+# Configuration parameters: CountComments, Max, CountAsOne, AllowedMethods, AllowedPatterns.
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'lib/grape/validations/params_scope.rb'
+    - 'lib/grape/validations/types/hash_schema.rb'
 
 # Offense count: 18
 # Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.

@@ -24,15 +24,18 @@ module Grape
 
           # Try to validate against each schema and collect results
           results = []
-          @schemas.each do |schema|
+          valid_schema = @schemas.any? do |schema|
             result = schema.validate_hash(value, attr_name, @api, @scope)
             if result.valid?
-              # Validation succeeded for this schema
-              return
+              true
+            else
+              results << result
+              false
             end
-
-            results << result
           end
+
+          # Validation succeeded for one of the schemas
+          return if valid_schema
 
           # None of the schemas matched - determine best error message
           raise_best_error(attr_name, results)
