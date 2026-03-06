@@ -11,6 +11,7 @@
 * [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2667](https://github.com/ruby-grape/grape/pull/2667): Skip instrumentation in run_validators when no validators present - [@ericproulx](https://github.com/ericproulx).
 * [#](https://github.com/ruby-grape/grape/pull/xxx): Param with multiple acceptable Hash Types - [@jcagarcia](https://github.com/jcagarcia).
+* [#2661](https://github.com/ruby-grape/grape/pull/2661): Param with multiple acceptable Hash Types - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 #### Fixes
