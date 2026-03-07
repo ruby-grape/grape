@@ -21,6 +21,31 @@ with({ type: String }) { ... }
 
 See [#2663](https://github.com/ruby-grape/grape/pull/2663) for more information.
 
+#### Custom validators: use `translate` instead of `I18n` directly
+
+`Grape::Util::Translation` is now included in `Grape::Validations::Validators::Base`. Custom validators that previously called `I18n.t` or `I18n.translate` directly should switch to the `translate`, which provides the same `:en` fallback logic used by all built-in validators.
+
+Key points:
+- `scope` defaults to `'grape.errors.messages'` — no need to specify it for standard error message keys.
+- Interpolation variables are passed directly to I18n.
+- `format` is no longer needed — `translate` returns the fully interpolated string.
+
+```ruby
+# Before
+raise Grape::Exceptions::Validation.new(
+  params: [@scope.full_name(attr_name)],
+  message: format(I18n.t(:my_key, scope: 'grape.errors.messages'), min: 2, max: 10)
+)
+
+# After
+raise Grape::Exceptions::Validation.new(
+  params: [@scope.full_name(attr_name)],
+  message: translate(:my_key, min: 2, max: 10)
+)
+```
+
+See [#2662](https://github.com/ruby-grape/grape/pull/2662) for more information.
+
 ### Upgrading to >= 3.1
 
 #### Explicit kwargs for `namespace` and `route_param`

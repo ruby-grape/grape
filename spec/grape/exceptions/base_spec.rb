@@ -23,21 +23,15 @@ describe Grape::Exceptions::Base do
     let(:key) { :invalid_formatter }
     let(:attributes) { { klass: String, to_format: 'xml' } }
 
-    after do
-      I18n.enforce_available_locales = true
-      I18n.available_locales = %i[en]
-      I18n.locale = :en
-      I18n.default_locale = :en
-      I18n.reload!
-    end
+    after { I18n.reload! }
 
     context 'when I18n enforces available locales' do
-      before { I18n.enforce_available_locales = true }
-
       context 'when the fallback locale is available' do
-        before do
+        around do |example|
           I18n.available_locales = %i[de en]
-          I18n.default_locale = :de
+          I18n.with_locale(:de) { example.run }
+        ensure
+          I18n.available_locales = %i[en]
         end
 
         it 'returns the translated message' do
@@ -46,23 +40,36 @@ describe Grape::Exceptions::Base do
       end
 
       context 'when the fallback locale is not available' do
-        before do
+        around do |example|
           I18n.available_locales = %i[de jp]
-          I18n.locale = :de
-          I18n.default_locale = :de
+          I18n.with_locale(:de) do
+            example.run
+          ensure
+            I18n.available_locales = %i[en]
+          end
         end
 
-        it 'returns the translation string' do
+        it 'returns the scoped translation key as a string' do
           expect(subject).to eq("grape.errors.messages.#{key}")
         end
       end
     end
 
     context 'when I18n does not enforce available locales' do
-      before { I18n.enforce_available_locales = false }
+      around do |example|
+        I18n.enforce_available_locales = false
+        example.run
+      ensure
+        I18n.enforce_available_locales = true
+      end
 
       context 'when the fallback locale is available' do
-        before { I18n.available_locales = %i[de en] }
+        around do |example|
+          I18n.available_locales = %i[de en]
+          I18n.with_locale(:de) { example.run }
+        ensure
+          I18n.available_locales = %i[en]
+        end
 
         it 'returns the translated message' do
           expect(subject).to eq('cannot convert String to xml')
@@ -70,7 +77,12 @@ describe Grape::Exceptions::Base do
       end
 
       context 'when the fallback locale is not available' do
-        before { I18n.available_locales = %i[de jp] }
+        around do |example|
+          I18n.available_locales = %i[de jp]
+          I18n.with_locale(:de) { example.run }
+        ensure
+          I18n.available_locales = %i[en]
+        end
 
         it 'returns the translated message' do
           expect(subject).to eq('cannot convert String to xml')

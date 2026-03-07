@@ -34,13 +34,13 @@ module Grape
           if options_key?(:message)
             @option[:message]
           elsif @min && @max
-            format I18n.t(:length, scope: 'grape.errors.messages'), min: @min, max: @max
+            translate(:length, min: @min, max: @max)
           elsif @min
-            format I18n.t(:length_min, scope: 'grape.errors.messages'), min: @min
+            translate(:length_min, min: @min)
           elsif @max
-            format I18n.t(:length_max, scope: 'grape.errors.messages'), max: @max
+            translate(:length_max, max: @max)
           else
-            format I18n.t(:length_is, scope: 'grape.errors.messages'), is: @is
+            translate(:length_is, is: @is)
           end
         end
       end
