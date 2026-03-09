@@ -51,29 +51,31 @@ module Grape
 
       # Open up a new ParamsScope, allowing parameter definitions per
       #   Grape::DSL::Params.
-      # @param opts [Hash] options for this scope
-      # @option opts :element [Symbol] the element that contains this scope; for
-      #   this to be relevant, @parent must be set
-      # @option opts :element_renamed [Symbol, nil] whenever this scope should
+      # @param api [API] the API endpoint to modify
+      # @param element [Symbol] the element that contains this scope; for
+      #   this to be relevant, parent must be set
+      # @param element_renamed [Symbol, nil] whenever this scope should
       #   be renamed and to what, given +nil+ no renaming is done
-      # @option opts :parent [ParamsScope] the scope containing this scope
-      # @option opts :api [API] the API endpoint to modify
-      # @option opts :optional [Boolean] whether or not this scope needs to have
+      # @param parent [ParamsScope] the scope containing this scope
+      # @param optional [Boolean] whether or not this scope needs to have
       #   any parameters set or not
-      # @option opts :type [Class] a type meant to govern this scope (deprecated)
-      # @option opts :type [Hash] group options for this scope
-      # @option opts :dependent_on [Symbol] if present, this scope should only
+      # @param type [Class] a type meant to govern this scope (deprecated)
+      # @param type [Hash] group options for this scope
+      # @param dependent_on [Symbol] if present, this scope should only
       #   validate if this param is present in the parent scope
       # @yield the instance context, open for parameter definitions
-      def initialize(opts, &block)
-        @element          = opts[:element]
-        @element_renamed  = opts[:element_renamed]
-        @parent           = opts[:parent]
-        @api              = opts[:api]
-        @optional         = opts[:optional] || false
-        @type             = opts[:type]
-        @group            = opts[:group]
-        @dependent_on     = opts[:dependent_on]
+      def initialize(api:, element: nil, element_renamed: nil, parent: nil, optional: false, type: nil, group: nil, dependent_on: nil, &block)
+        @element          = element
+        @element_renamed  = element_renamed
+        @parent           = parent
+        @api              = api
+        @optional         = optional
+        @type             = type
+        @group            = group
+        @dependent_on     = dependent_on
+        # Must be an ivar: push_declared_params is dispatched on self during
+        # instance_eval, so local variables from initialize are unreachable.
+        # configure_declared_params consumes it and clears @declared_params to nil.
         @declared_params = []
 
         instance_eval(&block) if block
@@ -184,9 +186,9 @@ module Grape
 
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
-      def push_declared_params(attrs, opts = {})
+      def push_declared_params(attrs, **opts)
         opts[:declared_params_scope] = self unless opts.key?(:declared_params_scope)
-        return @parent.push_declared_params(attrs, opts) if lateral?
+        return @parent.push_declared_params(attrs, **opts) if lateral?
 
         push_renamed_param(full_path + [attrs.first], opts[:as]) if opts[:as]
         @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
@@ -221,9 +223,9 @@ module Grape
         api_route_setting[:renamed_params] = base
       end
 
-      def require_required_and_optional_fields(context, opts)
-        except_fields = Array.wrap(opts[:except])
-        using_fields = opts[:using].keys.delete_if { |f| except_fields.include?(f) }
+      def require_required_and_optional_fields(context, using:, except: nil)
+        except_fields = Array.wrap(except)
+        using_fields = using.keys.delete_if { |f| except_fields.include?(f) }
 
         if context == :all
           optional_fields = except_fields
@@ -233,54 +235,53 @@ module Grape
           optional_fields = using_fields
         end
         required_fields.each do |field|
-          field_opts = opts[:using][field]
+          field_opts = using[field]
           raise ArgumentError, "required field not exist: #{field}" unless field_opts
 
           requires(field, **field_opts)
         end
         optional_fields.each do |field|
-          field_opts = opts[:using][field]
+          field_opts = using[field]
           optional(field, **field_opts) if field_opts
         end
       end
 
-      def require_optional_fields(context, opts)
-        optional_fields = opts[:using].keys
+      def require_optional_fields(context, using:, except: nil)
+        optional_fields = using.keys
         unless context == :all
-          except_fields = Array.wrap(opts[:except])
+          except_fields = Array.wrap(except)
           optional_fields.delete_if { |f| except_fields.include?(f) }
         end
         optional_fields.each do |field|
-          field_opts = opts[:using][field]
+          field_opts = using[field]
           optional(field, **field_opts) if field_opts
         end
       end
 
-      def validate_attributes(attrs, opts, &block)
-        validations = opts.clone
-        validations[:type] ||= Array if block
-        validates(attrs, validations)
+      def validate_attributes(attrs, **opts, &block)
+        opts[:type] ||= Array if block
+        validates(attrs, opts)
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
-      # under the parameter corresponding to `attrs.first`.
-      # @param attrs [Array] the attributes passed to the `requires` or
-      #   `optional` invocation that opened this scope.
-      # @param optional [Boolean] whether the parameter this are nested under
+      # under the given element.
+      # @param element [Symbol] the parameter name under which this scope is nested
+      # @param type [Class] the type governing this scope
+      # @param as [Symbol, nil] optional renamed name for the element
+      # @param optional [Boolean] whether the parameter this scope is nested under
       #   is optional or not (and hence, whether this block's params will be).
       # @yield parameter scope
-      def new_scope(attrs, opts, optional = false, &)
+      def new_scope(element, type:, as:, optional: false, &)
         # if required params are grouped and no type or unsupported type is provided, raise an error
-        type = opts[:type]
-        if attrs.first && !optional
+        if element && !optional
           raise Grape::Exceptions::MissingGroupType if type.nil?
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
         self.class.new(
           api: @api,
-          element: attrs.first,
-          element_renamed: opts[:as],
+          element: element,
+          element_renamed: as,
           parent: self,
           optional: optional,
           type: type || Array,
@@ -291,30 +292,26 @@ module Grape
 
       # Returns a new parameter scope, not nested under any current-level param
       # but instead at the same level as the current scope.
-      # @param options [Hash] options to control how this new scope behaves
-      # @option options :dependent_on [Symbol] if given, specifies that this
-      #   scope should only validate if this parameter from the above scope is
-      #   present
+      # @param dependent_on [Symbol] if given, specifies that this scope should
+      #   only validate if this parameter from the above scope is present
       # @yield parameter scope
-      def new_lateral_scope(options, &)
+      def new_lateral_scope(dependent_on:, &)
         self.class.new(
           api: @api,
-          element: nil,
           parent: self,
-          options: @optional,
+          optional: @optional,
           type: type == Array ? Array : Hash,
-          dependent_on: options[:dependent_on],
+          dependent_on:,
           &
         )
       end
 
-      # Returns a new parameter scope, subordinate to the current one and nested
-      # under the parameter corresponding to `attrs.first`.
-      # @param attrs [Array] the attributes passed to the `requires` or
-      #   `optional` invocation that opened this scope.
+      # Returns a new parameter scope, subordinate to the current one, sharing
+      # the given group options with all parameters defined within.
+      # @param group [Hash] common options to merge into each parameter in the scope
       # @yield parameter scope
-      def new_group_scope(attrs, &)
-        self.class.new(api: @api, parent: self, group: attrs.first, &)
+      def new_group_scope(group, &)
+        self.class.new(api: @api, parent: self, group: group, &)
       end
 
       # Pushes declared params to parent or settings

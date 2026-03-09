@@ -37,15 +37,15 @@ describe Grape::DSL::Parameters do
         @validates
       end
 
-      def new_scope(args, _opts, _, &block)
+      def new_scope(element, **_opts, &block)
         nested_scope = self.class.new
-        nested_scope.new_group_scope(args, &block)
+        nested_scope.new_group_scope(element, &block)
         nested_scope
       end
 
-      def new_group_scope(args)
+      def new_group_scope(group)
         prev_group = @group
-        @group = args.clone.first
+        @group = group
         yield
         @group = prev_group
       end

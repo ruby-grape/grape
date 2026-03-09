@@ -1,6 +1,26 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 3.2
+
+#### `with` now uses keyword arguments
+
+The `with` DSL method now uses `**opts` instead of a positional hash. Calls using bare keyword syntax are unaffected:
+
+```ruby
+# still works
+with(type: String, documentation: { in: 'body' }) { ... }
+```
+
+However, passing an explicit hash literal will now raise an `ArgumentError`:
+
+```ruby
+# raises ArgumentError
+with({ type: String }) { ... }
+```
+
+See [#2663](https://github.com/ruby-grape/grape/pull/2663) for more information.
+
 ### Upgrading to >= 3.1
 
 #### Explicit kwargs for `namespace` and `route_param`

@@ -127,10 +127,10 @@ module Grape
         opts = @group.deep_merge(opts) if @group
 
         if opts[:using]
-          require_required_and_optional_fields(attrs.first, opts)
+          require_required_and_optional_fields(attrs.first, using: opts[:using], except: opts[:except])
         else
-          validate_attributes(attrs, opts, &block)
-          block ? new_scope(attrs, opts, &block) : push_declared_params(attrs, opts.slice(:as))
+          validate_attributes(attrs, **opts, &block)
+          block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], &block) : push_declared_params(attrs, as: opts[:as])
         end
       end
 
@@ -149,20 +149,20 @@ module Grape
         end
 
         if opts[:using]
-          require_optional_fields(attrs.first, opts)
+          require_optional_fields(attrs.first, using: opts[:using], except: opts[:except])
         else
-          validate_attributes(attrs, opts, &block)
+          validate_attributes(attrs, **opts, &block)
 
-          block ? new_scope(attrs, opts, true, &block) : push_declared_params(attrs, opts.slice(:as))
+          block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], optional: true, &block) : push_declared_params(attrs, as: opts[:as])
         end
       end
 
       # Define common settings for one or more parameters
       # @param (see #requires)
       # @option (see #requires)
-      def with(*attrs, &)
-        new_group_attrs = [@group, attrs.clone.first].compact.reduce(&:deep_merge)
-        new_group_scope([new_group_attrs], &)
+      def with(**opts, &)
+        new_group_attrs = [@group, opts].compact.reduce(&:deep_merge)
+        new_group_scope(new_group_attrs, &)
       end
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
