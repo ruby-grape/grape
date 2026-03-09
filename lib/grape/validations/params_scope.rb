@@ -3,8 +3,7 @@
 module Grape
   module Validations
     class ParamsScope
-      attr_accessor :element, :parent
-      attr_reader :type, :nearest_array_ancestor
+      attr_reader :parent, :type, :nearest_array_ancestor, :full_path
 
       def qualifying_params
         ParamScopeTracker.current&.qualifying_params(self)
@@ -21,7 +20,7 @@ module Grape
       SPECIAL_JSON = [JSON, Array[JSON]].freeze
 
       class Attr
-        attr_accessor :key, :scope
+        attr_reader :key, :scope
 
         # Open up a new ParamsScope::Attr
         # @param key [Hash, Symbol] key of attr
@@ -77,11 +76,13 @@ module Grape
         # instance_eval, so local variables from initialize are unreachable.
         # configure_declared_params consumes it and clears @declared_params to nil.
         @declared_params = []
+        @full_path = build_full_path
 
         instance_eval(&block) if block
 
         configure_declared_params
         @nearest_array_ancestor = find_nearest_array_ancestor
+        freeze
       end
 
       def configuration
@@ -95,9 +96,9 @@ module Grape
 
         return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
         return false unless meets_dependency?(scoped_params, parameters)
-        return true if parent.nil?
+        return true if @parent.nil?
 
-        parent.should_validate?(parameters)
+        @parent.should_validate?(parameters)
       end
 
       def meets_dependency?(params, request_params)
@@ -124,17 +125,14 @@ module Grape
         # params might be anything what looks like a hash, so it must implement a `key?` method
         return false unless params.respond_to?(:key?)
 
-        @dependent_on.each do |dependency|
+        @dependent_on.all? do |dependency|
           if dependency.is_a?(Hash)
-            dependency_key = dependency.keys[0]
-            proc = dependency.values[0]
-            return false unless proc.call(params[dependency_key])
-          elsif params[dependency].blank?
-            return false
+            key, callable = dependency.first
+            callable.call(params[key])
+          else
+            params[dependency].present?
           end
         end
-
-        true
       end
 
       # @return [String] the proper attribute name, with nesting considered.
@@ -194,20 +192,17 @@ module Grape
         @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
       end
 
-      # Get the full path of the parameter scope in the hierarchy.
-      #
-      # @return [Array<Symbol>] the nesting/path of the current parameter scope
-      def full_path
+      private
+
+      def build_full_path
         if nested?
-          (@parent.full_path + [@element])
+          @parent.full_path + [@element]
         elsif lateral?
           @parent.full_path
         else
           []
         end
       end
-
-      private
 
       # Add a new parameter which should be renamed when using the +#declared+
       # method.
@@ -314,17 +309,19 @@ module Grape
         self.class.new(api: @api, parent: self, group: group, &)
       end
 
-      # Pushes declared params to parent or settings
+      # Pushes declared params to parent or settings, then clears @declared_params.
+      # Clearing here (rather than in initialize) keeps the lifecycle ownership in
+      # one place: this method both consumes and invalidates the ivar so that
+      # push_declared_params cannot be called on the frozen scope later.
       def configure_declared_params
         push_renamed_param(full_path, @element_renamed) if @element_renamed
 
         if nested?
-          @parent.push_declared_params [element => @declared_params]
+          @parent.push_declared_params [@element => @declared_params]
         else
           @api.inheritable_setting.namespace_stackable[:declared_params] = @declared_params
         end
-
-        # params were stored in settings, it can be cleaned from the params scope
+      ensure
         @declared_params = nil
       end
 
@@ -354,7 +351,7 @@ module Grape
 
         document_params attrs, validations, coerce_type, values, except_values
 
-        opts = derive_validator_options(validations)
+        opts = derive_validator_options(validations).freeze
 
         # Validate for presence before any other validators
         validates_presence(validations, attrs, opts)
@@ -362,7 +359,7 @@ module Grape
         # Before we run the rest of the validators, let's handle
         # whatever coercion so that we are working with correctly
         # type casted values
-        coerce_type validations, attrs, required, opts
+        coerce_type validations.extract!(:coerce, :coerce_with, :coerce_message), attrs, required, opts
 
         validations.each do |type, options|
           # Don't try to look up validators for documentation params that don't have one.
@@ -435,7 +432,12 @@ module Grape
       def coerce_type(validations, attrs, required, opts)
         check_coerce_with(validations)
 
-        return unless validations.key?(:coerce)
+        # Falsy check (not key?) is intentional: when a remountable API is first
+        # evaluated on its base instance (no configuration supplied yet),
+        # configuration[:some_type] evaluates to nil. Skipping instantiation
+        # here is correct — the real mounted instance will replay this step with
+        # the actual type value.
+        return unless validations[:coerce]
 
         coerce_options = {
           type: validations[:coerce],
@@ -443,9 +445,6 @@ module Grape
           message: validations[:coerce_message]
         }
         validate('coerce', coerce_options, attrs, required, opts)
-        validations.delete(:coerce_with)
-        validations.delete(:coerce)
-        validations.delete(:coerce_message)
       end
 
       def guess_coerce_type(coerce_type, *values_list)
@@ -469,15 +468,15 @@ module Grape
       end
 
       def validate(type, options, attrs, required, opts)
-        validator_options = {
-          attributes: attrs,
-          options: options,
-          required: required,
-          params_scope: self,
-          opts: opts,
-          validator_class: Validations.require_validator(type)
-        }
-        @api.inheritable_setting.namespace_stackable[:validations] = validator_options
+        validator_class = Validations.require_validator(type)
+        validator_instance = validator_class.new(
+          attrs,
+          options,
+          required,
+          self,
+          opts
+        )
+        @api.inheritable_setting.namespace_stackable[:validations] = validator_instance
       end
 
       def validate_value_coercion(coerce_type, *values_list)

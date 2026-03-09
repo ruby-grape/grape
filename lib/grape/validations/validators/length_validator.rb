@@ -5,12 +5,9 @@ module Grape
     module Validators
       class LengthValidator < Base
         def initialize(attrs, options, required, scope, opts)
-          @min = options[:min]
-          @max = options[:max]
-          @is = options[:is]
-
           super
 
+          @min, @max, @is = @option.values_at(:min, :max, :is)
           raise ArgumentError, 'min must be an integer greater than or equal to zero' if !@min.nil? && (!@min.is_a?(Integer) || @min.negative?)
           raise ArgumentError, 'max must be an integer greater than or equal to zero' if !@max.nil? && (!@max.is_a?(Integer) || @max.negative?)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if !@min.nil? && !@max.nil? && @min > @max
@@ -27,8 +24,10 @@ module Grape
 
           return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@is.nil? && param.length != @is)
 
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: build_message)
+          validation_error!(attr_name, build_message)
         end
+
+        private
 
         def build_message
           if options_key?(:message)
