@@ -7,6 +7,7 @@
 * [#2619](https://github.com/ruby-grape/grape/pull/2619): Remove TOC from README.md and danger-toc check - [@alexanderadam](https://github.com/alexanderadam).
 * [#2663](https://github.com/ruby-grape/grape/pull/2663): Refactor `ParamsScope` and `Parameters` DSL to use named kwargs - [@ericproulx](https://github.com/ericproulx).
 * [#2664](https://github.com/ruby-grape/grape/pull/2664): Drop `test-prof` dependency - [@ericproulx](https://github.com/ericproulx).
+* [#2665](https://github.com/ruby-grape/grape/pull/2665): Pass `attrs` directly to `AttributesIterator` instead of `validator` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

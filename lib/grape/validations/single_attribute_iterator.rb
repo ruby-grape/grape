@@ -5,10 +5,10 @@ module Grape
     class SingleAttributeIterator < AttributesIterator
       private
 
-      def yield_attributes(val, attrs)
+      def yield_attributes(val)
         return if skip?(val)
 
-        attrs.each do |attr_name|
+        @attrs.each do |attr_name|
           yield val, attr_name, empty?(val)
         end
       end
