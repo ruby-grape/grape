@@ -204,6 +204,24 @@ module Grape
 
       alias group requires
 
+      # Define a hash schema for use with multiple hash type variants.
+      # Used with the +types+ option to allow a parameter to accept one of several
+      # different hash structures.
+      #
+      # @param block [Proc] the validation block defining the Hash schema
+      # @return [Grape::Validations::Types::HashSchema]
+      # @example
+      #
+      #     params do
+      #       requires :value, types: [
+      #         hash_schema { requires :fixed_price, type: Float },
+      #         hash_schema { requires :time_unit, type: String; requires :rate, type: Float }
+      #       ]
+      #     end
+      def hash_schema(&)
+        Grape::Validations::Types::HashSchema.new(&)
+      end
+
       class EmptyOptionalValue; end # rubocop:disable Lint/EmptyClass
 
       def map_params(params, element, is_array = false)

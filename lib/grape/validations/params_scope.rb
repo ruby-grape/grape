@@ -364,6 +364,12 @@ module Grape
         # type casted values
         coerce_type validations, attrs, required, opts
 
+        # If we have hash schemas, validate against them
+        if validations.key?(:hash_schemas)
+          validate('multiple_hash_schema', validations[:hash_schemas], attrs, required, opts)
+          validations.delete(:hash_schemas)
+        end
+
         validations.each do |type, options|
           # Don't try to look up validators for documentation params that don't have one.
           next if RESERVED_DOCUMENTATION_KEYWORDS.include?(type)
@@ -397,9 +403,15 @@ module Grape
 
         coerce_type = validations[:coerce]
 
+        # Special case - when the types array contains HashSchema instances
+        if Types.multiple_hash_schemas?(coerce_type)
+          # Store schemas for validation
+          validations[:hash_schemas] = coerce_type
+          # Set coerce to Hash so we validate it's a Hash type, but don't try to coerce the schemas
+          validations[:coerce] = Hash
         # Special case - when the argument is a single type that is a
         # variant-type collection.
-        if Types.multiple?(coerce_type) && validations.key?(:type)
+        elsif Types.multiple?(coerce_type) && validations.key?(:type)
           validations[:coerce] = Types::VariantCollectionCoercer.new(
             coerce_type,
             validations.delete(:coerce_with)

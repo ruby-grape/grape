@@ -5,6 +5,7 @@
 * [#2656](https://github.com/ruby-grape/grape/pull/2656): Remove useless instance_variable_defined? checks - [@ericproulx](https://github.com/ericproulx).
 * [#2619](https://github.com/ruby-grape/grape/pull/2619): Remove TOC from README.md and danger-toc check - [@alexanderadam](https://github.com/alexanderadam).
 * [#2663](https://github.com/ruby-grape/grape/pull/2663): Refactor `ParamsScope` and `Parameters` DSL to use named kwargs - [@ericproulx](https://github.com/ericproulx).
+* [#2661](https://github.com/ruby-grape/grape/pull/2661): Param with multiple acceptable Hash Types - [@jcagarcia](https://github.com/jcagarcia).
 * Your contribution here.
 
 #### Fixes
