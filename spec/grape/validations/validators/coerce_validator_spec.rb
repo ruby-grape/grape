@@ -19,17 +19,20 @@ describe Grape::Validations::Validators::CoerceValidator do
     end
 
     context 'i18n' do
+      before do
+        I18n.available_locales = %i[en zh-CN]
+        zh_cn = { grape: { errors: { format: '%<attributes>s%<message>s',
+                                     attributes: { age: '年龄' },
+                                     messages: { coerce: '格式不正确' } } } }
+        I18n.backend.store_translations(:'zh-CN', zh_cn)
+      end
+
       after do
         I18n.available_locales = %i[en]
-        I18n.locale = :en
-        I18n.default_locale = :en
+        I18n.reload!
       end
 
       it 'i18n error on malformed input' do
-        I18n.available_locales = %i[en zh-CN]
-        I18n.load_path << File.expand_path('zh-CN.yml', __dir__)
-        I18n.reload!
-        I18n.locale = :'zh-CN'
         subject.params do
           requires :age, type: Integer
         end
@@ -37,24 +40,26 @@ describe Grape::Validations::Validators::CoerceValidator do
           'int works'
         end
 
-        get '/single', age: '43a'
+        I18n.with_locale(:'zh-CN') { get '/single', age: '43a' }
         expect(last_response).to be_bad_request
         expect(last_response.body).to eq('年龄格式不正确')
       end
 
-      it 'gives an english fallback error when default locale message is blank' do
-        I18n.available_locales = %i[en pt-BR]
-        I18n.locale = :'pt-BR'
-        subject.params do
-          requires :age, type: Integer
-        end
-        subject.get '/single' do
-          'int works'
-        end
+      context 'when the locale has no translation for the message' do
+        before { I18n.available_locales = %i[en pt-BR] }
 
-        get '/single', age: '43a'
-        expect(last_response).to be_bad_request
-        expect(last_response.body).to eq('age is invalid')
+        it 'gives an english fallback error' do
+          subject.params do
+            requires :age, type: Integer
+          end
+          subject.get '/single' do
+            'int works'
+          end
+
+          I18n.with_locale(:'pt-BR') { get '/single', age: '43a' }
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('age is invalid')
+        end
       end
     end
 

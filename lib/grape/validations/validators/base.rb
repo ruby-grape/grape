@@ -4,6 +4,8 @@ module Grape
   module Validations
     module Validators
       class Base
+        include Grape::Util::Translation
+
         attr_reader :attrs
 
         # Creates a new Validator from options specified

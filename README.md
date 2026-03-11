@@ -1896,6 +1896,31 @@ Grape supports I18n for parameter-related error messages, but will fallback to E
 
 In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
 
+Custom validators that inherit from `Grape::Validations::Validators::Base` have access to a `translate` helper (see `Grape::Util::Translation`) and should use it instead of calling `I18n` directly. It applies the same `:en` fallback as built-in validators, defaults `scope` to `'grape.errors.messages'`, and handles interpolation without needing `format`:
+
+```ruby
+# Good — scope defaults to 'grape.errors.messages', interpolation forwarded automatically
+translate(:special, min: 2, max: 10)
+
+# Bad — format is unnecessary and risks conflicting with I18n reserved keys
+format I18n.t(:special, scope: 'grape.errors.messages'), min: 2, max: 10
+```
+
+Example custom validator:
+
+```ruby
+class SpecialValidator < Grape::Validations::Validators::Base
+  def validate_param!(attr_name, params)
+    return if valid?(params[attr_name])
+
+    raise Grape::Exceptions::Validation.new(
+      params: [@scope.full_name(attr_name)],
+      message: translate(:special, min: 2, max: 10)
+    )
+  end
+end
+```
+
 ### Custom Validation messages
 
 Grape supports custom validation messages for parameter-related and coerce-related error messages.

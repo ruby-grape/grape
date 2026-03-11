@@ -20,7 +20,7 @@ module Grape
           if options_key?(:message)
             @option[:message]
           else
-            format I18n.t(:same_as, scope: 'grape.errors.messages'), parameter: @option
+            translate(:same_as, parameter: @option)
           end
         end
       end
