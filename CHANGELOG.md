@@ -13,7 +13,7 @@
 #### Fixes
 
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
-* [#2657](https://github.com/ruby-grape/grape/pull/2657): Fix thread safety: move mutable `ParamsScope` state (`index`, `params_meeting_dependency`) into a per-request `ParamScopeTracker` stored in `Fiber[]` - [@ericproulx](https://github.com/ericproulx).
+* [#2660](https://github.com/ruby-grape/grape/pull/2660): Fix thread safety: move mutable `ParamsScope` state (`index`, `params_meeting_dependency`) into a per-request `ParamScopeTracker` stored in `Fiber[]` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.1.0 (2026-01-25)
