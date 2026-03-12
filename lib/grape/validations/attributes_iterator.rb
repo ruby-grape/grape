@@ -7,9 +7,9 @@ module Grape
 
       attr_reader :scope
 
-      def initialize(validator, scope, params)
+      def initialize(attrs, scope, params)
+        @attrs = attrs
         @scope = scope
-        @attrs = validator.attrs
         @original_params = scope.params(params)
         @params = Array.wrap(@original_params)
       end
@@ -41,7 +41,7 @@ module Grape
             store_indices(target, index, parent_indices) if target
           end
 
-          yield_attributes(resource_params, @attrs, &block)
+          yield_attributes(resource_params, &block)
         end
       end
 
@@ -61,7 +61,7 @@ module Grape
         tracker.store_index(target_scope, index)
       end
 
-      def yield_attributes(_resource_params, _attrs)
+      def yield_attributes(_resource_params)
         raise NotImplementedError
       end
 

@@ -2,10 +2,9 @@
 
 describe Grape::Validations::SingleAttributeIterator do
   describe '#each' do
-    subject(:iterator) { described_class.new(validator, scope, params) }
+    subject(:iterator) { described_class.new(%i[first second], scope, params) }
 
     let(:scope) { Grape::Validations::ParamsScope.new(api: Class.new(Grape::API)) }
-    let(:validator) { double(attrs: %i[first second]) }
 
     context 'when params is a hash' do
       let(:params) do

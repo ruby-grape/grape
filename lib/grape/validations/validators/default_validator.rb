@@ -24,7 +24,7 @@ module Grape
         end
 
         def validate!(params)
-          attrs = SingleAttributeIterator.new(self, @scope, params)
+          attrs = SingleAttributeIterator.new(@attrs, @scope, params)
           attrs.each do |resource_params, attr_name|
             next unless @scope.meets_dependency?(resource_params, params)
 

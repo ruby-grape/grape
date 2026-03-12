@@ -5,7 +5,7 @@ module Grape
     class MultipleAttributesIterator < AttributesIterator
       private
 
-      def yield_attributes(resource_params, _attrs)
+      def yield_attributes(resource_params)
         yield resource_params unless skip?(resource_params)
       end
     end
