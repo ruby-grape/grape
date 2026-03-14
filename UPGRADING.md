@@ -3,6 +3,30 @@ Upgrading Grape
 
 ### Upgrading to >= 3.2
 
+#### Custom validators must not mutate instance variables at request time
+
+Validator instances are now instantiated once at route definition time and frozen. Any custom validator that assigns or mutates instance variables inside `validate_param!` or `validate!` will raise `FrozenError` at request time.
+
+```ruby
+# Before — broken in >= 3.2
+def validate_param!(attr_name, params)
+  @computed = expensive_computation(params[attr_name]) # FrozenError
+  raise Grape::Exceptions::Validation.new(...) unless @computed.valid?
+end
+
+# After — compute in initialize, read at request time
+def initialize(attrs, options, required, scope, opts)
+  super
+  @computed = expensive_computation(@option)
+end
+
+def validate_param!(attr_name, params)
+  raise Grape::Exceptions::Validation.new(...) unless @computed.valid_for?(params[attr_name])
+end
+```
+
+See [#2657](https://github.com/ruby-grape/grape/pull/2657) for more information.
+
 #### `with` now uses keyword arguments
 
 The `with` DSL method now uses `**opts` instead of a positional hash. Calls using bare keyword syntax are unaffected:

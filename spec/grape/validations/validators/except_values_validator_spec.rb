@@ -191,4 +191,42 @@ describe Grape::Validations::Validators::ExceptValuesValidator do
       end
     end
   end
+
+  describe 'lazy evaluation with proc' do
+    let(:excepts_model) do
+      Class.new do
+        class << self
+          def excepts
+            @excepts ||= %w[invalid-type1 invalid-type2 invalid-type3]
+          end
+
+          def add_except(value)
+            excepts << value
+          end
+        end
+      end
+    end
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :type, except_values: -> { ExceptsModel.excepts }
+        end
+        get '/except_lambda' do
+          { type: params[:type] }
+        end
+      end
+    end
+
+    before { stub_const('ExceptsModel', excepts_model) }
+
+    it 'evaluates the proc per-request, not at definition time (e.g. for DB-backed values)' do
+      app # instantiate at definition time, before the new except is added
+      ExceptsModel.add_except('invalid-type4')
+      get('/except_lambda', type: 'invalid-type4')
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
+    end
+  end
 end

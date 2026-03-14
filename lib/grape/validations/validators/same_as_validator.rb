@@ -8,10 +8,7 @@ module Grape
           confirmation = options_key?(:value) ? @option[:value] : @option
           return if params[attr_name] == params[confirmation]
 
-          raise Grape::Exceptions::Validation.new(
-            params: [@scope.full_name(attr_name)],
-            message: build_message
-          )
+          validation_error!(attr_name, build_message)
         end
 
         private
@@ -20,7 +17,7 @@ module Grape
           if options_key?(:message)
             @option[:message]
           else
-            translate(:same_as, parameter: @option)
+            translate(:same_as, parameter: option_value)
           end
         end
       end
