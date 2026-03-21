@@ -4,11 +4,14 @@ module Grape
   module Validations
     module Validators
       class AllOrNoneOfValidator < MultipleParamsBase
-        def validate_params!(params)
-          keys = keys_in_common(params)
-          return if keys.empty? || keys.length == all_keys.length
+        default_message_key :all_or_none
 
-          raise Grape::Exceptions::Validation.new(params: all_keys, message: message(:all_or_none))
+        def validate_params!(params)
+          known_keys = all_keys
+          keys = keys_in_common(params, known_keys)
+          return if keys.empty? || keys.length == @attrs.length
+
+          validation_error!(known_keys)
         end
       end
     end

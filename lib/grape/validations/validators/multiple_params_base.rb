@@ -19,10 +19,10 @@ module Grape
 
         private
 
-        def keys_in_common(resource_params)
-          return [] unless resource_params.is_a?(Hash)
+        def keys_in_common(resource_params, known_keys = all_keys)
+          return [] unless hash_like?(resource_params)
 
-          all_keys & resource_params.keys.map! { |attr| @scope.full_name(attr) }
+          known_keys & resource_params.keys.map! { |attr| @scope.full_name(attr) }
         end
 
         def all_keys

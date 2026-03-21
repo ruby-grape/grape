@@ -4,11 +4,13 @@ module Grape
   module Validations
     module Validators
       class MutuallyExclusiveValidator < MultipleParamsBase
+        default_message_key :mutual_exclusion
+
         def validate_params!(params)
           keys = keys_in_common(params)
           return if keys.length <= 1
 
-          raise Grape::Exceptions::Validation.new(params: keys, message: message(:mutual_exclusion))
+          validation_error!(keys)
         end
       end
     end

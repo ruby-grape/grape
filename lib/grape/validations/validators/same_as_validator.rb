@@ -4,24 +4,15 @@ module Grape
   module Validations
     module Validators
       class SameAsValidator < Base
-        def validate_param!(attr_name, params)
-          confirmation = options_key?(:value) ? @option[:value] : @option
-          return if params[attr_name] == params[confirmation]
-
-          raise Grape::Exceptions::Validation.new(
-            params: [@scope.full_name(attr_name)],
-            message: build_message
-          )
+        def initialize(attrs, options, required, scope, opts)
+          super
+          @value = option_value
         end
 
-        private
+        def validate_param!(attr_name, params)
+          return if params[attr_name] == params[@value]
 
-        def build_message
-          if options_key?(:message)
-            @option[:message]
-          else
-            translate(:same_as, parameter: @option)
-          end
+          validation_error!(attr_name, message { translate(:same_as, parameter: @value) })
         end
       end
     end

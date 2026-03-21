@@ -4,10 +4,13 @@ module Grape
   module Validations
     module Validators
       class AtLeastOneOfValidator < MultipleParamsBase
-        def validate_params!(params)
-          return unless keys_in_common(params).empty?
+        default_message_key :at_least_one
 
-          raise Grape::Exceptions::Validation.new(params: all_keys, message: message(:at_least_one))
+        def validate_params!(params)
+          known_keys = all_keys
+          return if hash_like?(params) && known_keys.intersect?(params.keys.map { |attr| @scope.full_name(attr) })
+
+          validation_error!(known_keys)
         end
       end
     end
