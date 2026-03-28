@@ -16,10 +16,10 @@ describe Grape::Validations do
     let(:default_length_validator) do
       Class.new(Grape::Validations::Validators::Base) do
         def validate_param!(attr_name, params)
-          @option = params[:max].to_i if params.key?(:max)
-          return if params[attr_name].length <= @option
+          max = params.key?(:max) ? params[:max].to_i : @option
+          return if params[attr_name].length <= max
 
-          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long")
+          raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{max} characters long")
         end
       end
     end
@@ -215,13 +215,7 @@ describe Grape::Validations do
   describe 'using a custom validator with instance variable' do
     let(:validator_type) do
       Class.new(Grape::Validations::Validators::Base) do
-        def validate_param!(_attr_name, _params)
-          if @instance_variable
-            raise Grape::Exceptions::Validation.new(params: ['params'],
-                                                    message: 'This should never happen')
-          end
-          @instance_variable = true
-        end
+        def validate_param!(_attr_name, _params); end
       end
     end
     let(:app) do
@@ -245,8 +239,12 @@ describe Grape::Validations do
       described_class.deregister(:instance_validator)
     end
 
-    it 'passes validation every time' do
+    it 'creates one instance per param at definition time, not per request' do
       expect(validator_type).to receive(:new).twice.and_call_original
+      app # trigger definition-time instantiation
+
+      # no additional instantiation on subsequent requests
+      expect(validator_type).not_to receive(:new)
       get '/', param_to_validate: 'value', another_param_to_validate: 'value'
       expect(last_response.status).to eq 200
     end

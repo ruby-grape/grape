@@ -1774,9 +1774,9 @@ end
 ```ruby
 class AlphaNumeric < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
-    unless params[attr_name] =~ /\A[[:alnum:]]+\z/
-      raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: 'must consist of alpha-numeric characters'
-    end
+    return if params[attr_name].match?(/\A[[:alnum:]]+\z/)
+
+    validation_error!(attr_name, 'must consist of alpha-numeric characters')
   end
 end
 ```
@@ -1792,9 +1792,9 @@ You can also create custom classes that take parameters.
 ```ruby
 class Length < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
-    unless params[attr_name].length <= @option
-      raise Grape::Exceptions::Validation.new params: [@scope.full_name(attr_name)], message: "must be at the most #{@option} characters long"
-    end
+    return if params[attr_name].length <= @options
+
+    validation_error!(attr_name, "must be at the most #{@options} characters long")
   end
 end
 ```
@@ -1816,10 +1816,10 @@ class Admin < Grape::Validations::Validators::Base
     # @attrs being [:admin_field] and once with @attrs being [:admin_false_field]
     return unless request.params.key?(@attrs.first)
     # check if admin flag is set to true
-    return unless @option
+    return unless @options
     # check if user is admin or not
     # as an example get a token from request and check if it's admin or not
-    raise Grape::Exceptions::Validation.new params: @attrs, message: 'Can not set admin-only field.' unless request.headers['X-Access-Token'] == 'admin'
+    validation_error!(@attrs, 'Can not set admin-only field.') unless request.headers['X-Access-Token'] == 'admin'
   end
 end
 ```
@@ -1834,7 +1834,50 @@ params do
 end
 ```
 
-Every validation will have its own instance of the validator, which means that the validator can have a state.
+Each validator is instantiated once at route definition time and frozen. Any setup (option parsing, message building) should happen in `initialize`, not in `validate_param!` or `validate`.
+
+#### Available helpers
+
+The following protected/private helpers are available in any `Grape::Validations::Validators::Base` subclass:
+
+| Helper | Description |
+|---|---|
+| `default_message_key(key)` | Class-level macro. Declares the default I18n key for `validation_error!`. A per-option `:message` override still takes precedence. |
+| `validation_error!(attr_name_or_params, message = @exception_message)` | Raises `Grape::Exceptions::Validation`. Accepts a single attribute name or a pre-computed array of full param names. |
+| `@options` | The validator option value, deep-frozen at initialization. |
+| `@attrs` | Frozen array of attribute names this validator applies to. |
+| `@scope` | The `ParamsScope` — use `@scope.full_name(attr_name)` for the fully-qualified param name. |
+| `option_value` | Returns `@options[:value]` if present, otherwise `@options`. |
+| `options_key?(key)` | Returns true if `@options` is a hash with a non-nil `key`. |
+| `hash_like?(obj)` | Returns true if `obj` responds to `key?`. |
+| `scrub(value)` | Returns `value` with invalid byte sequences scrubbed. |
+| `translate(key, **opts)` | I18n lookup with `:en` fallback and `grape.errors.messages` scope. Called at request time to respect per-request locale. |
+
+Use `default_message_key` for a fixed I18n key. The message is resolved once at route definition time via `message`, so a per-option `:message` override still wins:
+
+```ruby
+class SpecialValidator < Grape::Validations::Validators::Base
+  default_message_key :special
+
+  def validate_param!(attr_name, params)
+    return if valid?(params[attr_name])
+
+    validation_error!(attr_name)
+  end
+end
+```
+
+For interpolated messages that must respect per-request locale, call `translate` directly inside `validate_param!`:
+
+```ruby
+class SpecialValidator < Grape::Validations::Validators::Base
+  def validate_param!(attr_name, params)
+    return if valid?(params[attr_name])
+
+    validation_error!(attr_name, translate(:special, min: 2, max: 10))
+  end
+end
+```
 
 ### Validation Errors
 
@@ -1906,17 +1949,14 @@ translate(:special, min: 2, max: 10)
 format I18n.t(:special, scope: 'grape.errors.messages'), min: 2, max: 10
 ```
 
-Example custom validator:
+Example custom validator using an interpolated i18n message:
 
 ```ruby
 class SpecialValidator < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     return if valid?(params[attr_name])
 
-    raise Grape::Exceptions::Validation.new(
-      params: [@scope.full_name(attr_name)],
-      message: translate(:special, min: 2, max: 10)
-    )
+    validation_error!(attr_name, translate(:special, min: 2, max: 10))
   end
 end
 ```

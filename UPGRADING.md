@@ -3,6 +3,45 @@ Upgrading Grape
 
 ### Upgrading to >= 3.2
 
+#### Custom validators: use `default_message_key` and `validation_error!`
+
+Validators are now instantiated once at definition time and frozen. Any setup should happen in `initialize`, not in `validate_param!`.
+
+If your custom validator did work in `validate_param!` that only depends on the validator's options (not the param value), move it to `initialize`. A common case is compiling a value derived from options — for example, building a `Regexp`. Previously this may have been cached back into `@options`, which now raises `FrozenError` since `@options` and its nested values are deep-frozen by the base class:
+
+**Before:**
+```ruby
+class MyValidator < Grape::Validations::Validators::Base
+  def validate_param!(attr_name, params)
+    # raises FrozenError: @options is frozen, cannot store compiled pattern back into it
+    @options[:compiled] ||= Regexp.new(@options[:pattern])
+    validation_error!(attr_name) unless params[attr_name].match?(@options[:compiled])
+  end
+end
+```
+
+**After:**
+```ruby
+class MyValidator < Grape::Validations::Validators::Base
+  def initialize(attrs, options, required, scope, opts)
+    super
+    @pattern = Regexp.new(@options[:pattern]).freeze
+  end
+
+  def validate_param!(attr_name, params)
+    validation_error!(attr_name) unless params[attr_name].match?(@pattern)
+  end
+end
+```
+
+Any Array or Hash derived from options and stored in an ivar should be frozen, since the validator instance is shared across requests. `@options` itself (and any nested Hash/Array/String values within it) is deep-frozen by the base class, so mutations like `@options[:values] << 'extra'` will also raise a `FrozenError`.
+
+#### Custom validators: rename `@option` to `@options`
+
+The instance variable holding the validator's option value has been renamed from `@option` to `@options`. `@option` remains as an alias for backwards compatibility but will be removed in the next major release. Update any custom validators to use `@options` instead.
+
+Several new helpers are available — see [Available helpers](README.md#available-helpers) in the README for full documentation and examples.
+
 #### `with` now uses keyword arguments
 
 The `with` DSL method now uses `**opts` instead of a positional hash. Calls using bare keyword syntax are unaffected:
