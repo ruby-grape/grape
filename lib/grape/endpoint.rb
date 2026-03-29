@@ -11,7 +11,7 @@ module Grape
     include Grape::DSL::Headers
     include Grape::DSL::InsideRoute
 
-    attr_reader :env, :request, :source, :options
+    attr_reader :env, :request, :source, :options, :endpoints
 
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
@@ -66,20 +66,21 @@ module Grape
       inheritable_setting.route[:declared_params] = inheritable_setting.namespace_stackable[:declared_params].flatten
       inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations]
 
-      inheritable_setting.namespace_stackable[:representations] = [] unless inheritable_setting.namespace_stackable[:representations]
-      inheritable_setting.namespace_inheritable[:default_error_status] = 500 unless inheritable_setting.namespace_inheritable[:default_error_status]
+      inheritable_setting.namespace_stackable[:representations] ||= []
+      inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
 
-      @options[:path] = Array(options[:path])
-      @options[:path] << '/' if options[:path].empty?
-      @options[:method] = Array(options[:method])
+      @options[:path] = Array(@options[:path])
+      @options[:path] << '/' if @options[:path].empty?
+      @options[:method] = Array(@options[:method])
 
       @status = nil
       @stream = nil
       @body = nil
       @source = self.class.block_to_unbound_method(block)
       @before_filter_passed = false
+      @endpoints = @options[:app].endpoints if @options[:app].respond_to?(:endpoints)
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -94,7 +95,7 @@ module Grape
     end
 
     def routes
-      @routes ||= endpoints&.collect(&:routes)&.flatten || to_routes
+      @routes ||= endpoints&.flat_map(&:routes) || to_routes
     end
 
     def reset_routes!
@@ -113,7 +114,7 @@ module Grape
       compile!
       routes.each do |route|
         router.append(route.apply(self))
-        next unless !inheritable_setting.namespace_inheritable[:do_not_route_head] && route.request_method == Rack::GET
+        next if inheritable_setting.namespace_inheritable[:do_not_route_head] || route.request_method != Rack::GET
 
         route.dup.then do |head_route|
           head_route.convert_to_head_request!
@@ -138,15 +139,12 @@ module Grape
       @app.call(env)
     end
 
-    # Return the collection of endpoints within this endpoint.
-    # This is the case when an Grape::API mounts another Grape::API.
-    def endpoints
-      @endpoints ||= options[:app].respond_to?(:endpoints) ? options[:app].endpoints : nil
+    def ==(other)
+      other.is_a?(self.class) &&
+        options == other.options &&
+        inheritable_setting.to_hash == other.inheritable_setting.to_hash
     end
-
-    def equals?(endpoint)
-      (options == endpoint.options) && (inheritable_setting.to_hash == endpoint.inheritable_setting.to_hash)
-    end
+    alias eql? ==
 
     # The purpose of this override is solely for stripping internals when an error occurs while calling
     # an endpoint through an api. See https://github.com/ruby-grape/grape/issues/2398
@@ -198,10 +196,10 @@ module Grape
     end
 
     def execute
-      return unless @source
+      return unless source
 
       ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self) do
-        @source.bind_call(self)
+        source.bind_call(self)
       end
     end
 
