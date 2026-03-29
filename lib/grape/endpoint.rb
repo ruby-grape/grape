@@ -207,6 +207,8 @@ module Grape
 
     def run_validators(request:)
       validators = inheritable_setting.route[:saved_validations]
+      return if validators.empty?
+
       validation_errors = []
 
       Grape::Validations::ParamScopeTracker.track do
