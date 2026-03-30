@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 3.2
 
+#### `endpoint_run_validators.grape` notification no longer fired when there are no validators
+
+`ActiveSupport::Notifications` subscribers listening to `endpoint_run_validators.grape` will no longer receive an event for endpoints that have no validators. If you rely on this notification to measure every request, subscribe to `endpoint_run.grape` instead, which always fires.
+
 #### Custom validators: use `default_message_key` and `validation_error!`
 
 Validators are now instantiated once at definition time and frozen. Any setup should happen in `initialize`, not in `validate_param!`.

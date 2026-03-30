@@ -9,6 +9,7 @@
 * [#2664](https://github.com/ruby-grape/grape/pull/2664): Drop `test-prof` dependency - [@ericproulx](https://github.com/ericproulx).
 * [#2665](https://github.com/ruby-grape/grape/pull/2665): Pass `attrs` directly to `AttributesIterator` instead of `validator` - [@ericproulx](https://github.com/ericproulx).
 * [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at definition time - [@ericproulx](https://github.com/ericproulx).
+* [#2667](https://github.com/ruby-grape/grape/pull/2667): Skip instrumentation in run_validators when no validators present - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
