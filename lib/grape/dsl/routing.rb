@@ -173,7 +173,7 @@ module Grape
           route_options: all_route_options,
           &
         )
-        endpoints << new_endpoint unless endpoints.any? { |e| e.equals?(new_endpoint) }
+        endpoints << new_endpoint unless endpoints.include?(new_endpoint)
 
         inheritable_setting.route_end
         reset_validations!
