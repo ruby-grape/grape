@@ -29,11 +29,11 @@ module Grape
         status = self.status(status || inheritable_setting.namespace_inheritable[:default_error_status])
         headers = additional_headers.present? ? header.merge(additional_headers) : header
         throw :error,
-              message: message,
-              status: status,
-              headers: headers,
-              backtrace: backtrace,
-              original_exception: original_exception
+              message:,
+              status:,
+              headers:,
+              backtrace:,
+              original_exception:
       end
 
       # Redirect to a new url.
@@ -272,7 +272,7 @@ module Grape
       # @return the representation of the given object as done through
       #   the given entity_class.
       def entity_representation_for(entity_class, object, options)
-        embeds = { env: env }
+        embeds = { env: }
         embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
         entity_class.represent(object, **embeds, **options)
       end

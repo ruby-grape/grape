@@ -6,7 +6,7 @@ describe Grape::Exceptions::ValidationErrors do
 
   context 'initialize' do
     subject do
-      described_class.new(errors: [validation_error], headers: headers)
+      described_class.new(errors: [validation_error], headers:)
     end
 
     let(:headers) do

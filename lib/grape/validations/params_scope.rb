@@ -275,10 +275,10 @@ module Grape
 
         self.class.new(
           api: @api,
-          element: element,
+          element:,
           element_renamed: as,
           parent: self,
-          optional: optional,
+          optional:,
           type: type || Array,
           group: @group,
           &
@@ -306,7 +306,7 @@ module Grape
       # @param group [Hash] common options to merge into each parameter in the scope
       # @yield parameter scope
       def new_group_scope(group, &)
-        self.class.new(api: @api, parent: self, group: group, &)
+        self.class.new(api: @api, parent: self, group:, &)
       end
 
       # Pushes declared params to parent or settings, then clears @declared_params.

@@ -15,7 +15,7 @@ module Grape
           message = translate_message(message)
         end
 
-        super(status: status, message: message, headers: headers)
+        super(status:, message:, headers:)
       end
 
       # Remove all the unnecessary stuff from Grape::Exceptions::Base like status

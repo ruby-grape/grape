@@ -40,7 +40,7 @@ module Grape
           end
 
           if presenter
-            embeds = { env: env }
+            embeds = { env: }
             embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
             presented_message = presenter.represent(presented_message, embeds).serializable_hash
           end
@@ -51,7 +51,7 @@ module Grape
         def wrap_message(message)
           return message if message.is_a?(Hash)
 
-          { message: message }
+          { message: }
         end
 
         def format_structured_message(_structured_message)

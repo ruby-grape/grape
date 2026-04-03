@@ -44,7 +44,7 @@ module Grape
       def override_all_methods!
         (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, **kwargs, &block|
-            add_setup(method: method_override, args: args, kwargs: kwargs, block: block)
+            add_setup(method: method_override, args:, kwargs:, block:)
           end
         end
       end

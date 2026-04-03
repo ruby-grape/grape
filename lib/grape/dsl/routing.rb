@@ -136,8 +136,8 @@ module Grape
           endpoints << Grape::Endpoint.new(
             in_setting,
             method: :any,
-            path: path,
-            app: app,
+            path:,
+            app:,
             route_options: { anchor: false },
             forward_match: !app.respond_to?(:inheritable_setting),
             for: self
@@ -167,7 +167,7 @@ module Grape
 
         new_endpoint = Grape::Endpoint.new(
           inheritable_setting,
-          method: method,
+          method:,
           path: paths,
           for: self,
           route_options: all_route_options,
@@ -203,7 +203,7 @@ module Grape
 
         within_namespace do
           nest(block) do
-            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, requirements: requirements, **options) if space
+            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, requirements:, **options) if space
           end
         end
       end
@@ -230,7 +230,7 @@ module Grape
           requires param, type: type
         end if type
 
-        namespace(":#{param}", requirements: requirements, **, &)
+        namespace(":#{param}", requirements:, **, &)
       end
 
       # @return array of defined versions

@@ -35,7 +35,7 @@ describe Grape::Middleware::Error do
     Class.new do
       class << self
         def error!(message, status)
-          throw :error, message: { error: message, detail: 'missing widget' }, status: status
+          throw :error, message: { error: message, detail: 'missing widget' }, status:
         end
 
         def call(_env)
@@ -49,7 +49,7 @@ describe Grape::Middleware::Error do
     Class.new do
       class << self
         def error!(message, status)
-          throw :error, message: message, status: status
+          throw :error, message:, status:
         end
 
         def call(_env)

@@ -2,7 +2,7 @@
 
 describe Grape::Exceptions::Base do
   describe '#to_s' do
-    subject { described_class.new(message: message).to_s }
+    subject { described_class.new(message:).to_s }
 
     let(:message) { 'a_message' }
 
@@ -10,7 +10,7 @@ describe Grape::Exceptions::Base do
   end
 
   describe '#message' do
-    subject { described_class.new(message: message).message }
+    subject { described_class.new(message:).message }
 
     let(:message) { 'a_message' }
 

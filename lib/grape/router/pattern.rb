@@ -16,7 +16,7 @@ module Grape
       def initialize(origin:, suffix:, anchor:, params:, format:, version:, requirements:)
         @origin = origin
         @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
-        @pattern = Mustermann::Grape.new(@path, uri_decode: true, params: params, capture: extract_capture(format, version, requirements))
+        @pattern = Mustermann::Grape.new(@path, uri_decode: true, params:, capture: extract_capture(format, version, requirements))
         @to_regexp = @pattern.to_regexp
       end
 

@@ -11,6 +11,7 @@
 * [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2667](https://github.com/ruby-grape/grape/pull/2667): Skip instrumentation in run_validators when no validators present - [@ericproulx](https://github.com/ericproulx).
 * [#2670](https://github.com/ruby-grape/grape/pull/2670): Added support for Rack 3.2.6 and better handling to rack exceptions - [@ericproulx](https://github.com/ericproulx).
+* [#2671](https://github.com/ruby-grape/grape/pull/2671): Use ruby 3.1 shorthand kwargs syntax - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

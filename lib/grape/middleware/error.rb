@@ -38,8 +38,8 @@ module Grape
         throw :error,
               status: 406,
               message: "The requested format '#{format}' is not supported.",
-              backtrace: backtrace,
-              original_exception: original_exception
+              backtrace:,
+              original_exception:
       end
 
       def find_handler(klass)
