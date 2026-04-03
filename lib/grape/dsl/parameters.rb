@@ -161,7 +161,7 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def with(**opts, &)
-        new_group_attrs = [@group, opts].compact.reduce(&:deep_merge)
+        new_group_attrs = @group&.deep_merge(opts) || opts
         new_group_scope(new_group_attrs, &)
       end
 

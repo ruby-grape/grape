@@ -76,6 +76,9 @@ module Grape
       any.endpoint
     end
 
+    DEFAULT_RESPONSE_HEADERS = Grape::Util::Header.new.merge('X-Cascade' => 'pass').freeze
+    DEFAULT_RESPONSE_BODY = ['404 Not Found'].freeze
+
     private
 
     def identity(input, method, env)
@@ -146,8 +149,7 @@ module Grape
     end
 
     def default_response
-      headers = Grape::Util::Header.new.merge('X-Cascade' => 'pass')
-      [404, headers, ['404 Not Found']]
+      [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY.dup]
     end
 
     def match?(input, method)
