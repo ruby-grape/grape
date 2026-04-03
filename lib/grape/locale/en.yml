@@ -8,8 +8,6 @@ en:
         at_least_one: 'are missing, at least one parameter must be provided'
         blank: 'is empty'
         coerce: 'is invalid'
-        conflicting_types: 'query params contains conflicting types'
-        empty_message_body: 'empty message body supplied with %{body_format} content-type'
         exactly_one: 'are missing, exactly one parameter must be provided'
         except_values: 'has a value not allowed'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
@@ -20,7 +18,6 @@ en:
         invalid_message_body:
           problem: 'message body does not match declared format'
           resolution: 'when specifying %{body_format} as content-type, you must pass valid %{body_format} in the request''s ''body'' '
-        invalid_parameters: 'query params contains invalid format or byte sequence'
         invalid_response: 'Invalid response'
         invalid_version_header:
           problem: 'invalid version header'
@@ -48,8 +45,6 @@ en:
         presence: 'is missing'
         regexp: 'is invalid'
         same_as: 'is not the same as %{parameter}'
-        too_deep_parameters: 'query params are recursively nested over the specified limit (%{limit})'
-        too_many_multipart_files: 'the number of uploaded files exceeded the system''s configured limit (%{limit})'
         unknown_auth_strategy: 'unknown auth strategy: %{strategy}'
         unknown_options: 'unknown options: %{options}'
         unknown_parameter: 'unknown parameter: %{param}'

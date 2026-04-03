@@ -3,6 +3,24 @@ Upgrading Grape
 
 ### Upgrading to >= 3.2
 
+#### Rack parameter parsing errors now raise `Grape::Exceptions::RequestError`
+
+Rack errors raised during parameter parsing (malformed multipart, parameter type conflicts, encoding issues, etc.) are now wrapped in `Grape::Exceptions::RequestError` instead of their previous specific exception classes (`Grape::Exceptions::EmptyMessageBody`, `Grape::Exceptions::TooManyMultipartFiles`, `Grape::Exceptions::TooDeepParameters`, `Grape::Exceptions::ConflictingTypes`, `Grape::Exceptions::InvalidParameters`). Those classes have been removed.
+
+If you rescue any of these specific exceptions, update your rescue clauses to use `Grape::Exceptions::RequestError`:
+
+```ruby
+# Before
+rescue Grape::Exceptions::ConflictingTypes, Grape::Exceptions::TooDeepParameters => e
+  # ...
+
+# After
+rescue Grape::Exceptions::RequestError => e
+  # ...
+```
+
+The error message is now forwarded directly from Rack rather than translated through Grape's locale system. On Rack 3, all Rack bad-request errors share the `Rack::BadRequest` marker module and are covered by a single rescue.
+
 #### `endpoint_run_validators.grape` notification no longer fired when there are no validators
 
 `ActiveSupport::Notifications` subscribers listening to `endpoint_run_validators.grape` will no longer receive an event for endpoints that have no validators. If you rely on this notification to measure every request, subscribe to `endpoint_run.grape` instead, which always fires.

@@ -79,10 +79,8 @@ module Grape
 
       def query_params
         rack_request.GET
-      rescue Rack::QueryParser::ParamsTooDeepError
-        raise Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit)
-      rescue Rack::Utils::ParameterTypeError
-        raise Grape::Exceptions::ConflictingTypes
+      rescue *Grape::RACK_ERRORS
+        raise Grape::Exceptions::RequestError
       end
 
       private

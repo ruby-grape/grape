@@ -60,75 +60,68 @@ describe Grape::Request do
       end
     end
 
-    context 'when rack_params raises an EOF error' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(EOFError)
-      end
+    context 'when rack_params raises an EOFError' do
+      before { allow(request).to receive(:rack_params).and_raise(EOFError) }
 
-      let(:message) { Grape::Exceptions::EmptyMessageBody.new(nil).to_s }
-
-      it 'raises an Grape::Exceptions::EmptyMessageBody' do
-        expect { request.params }.to raise_error(Grape::Exceptions::EmptyMessageBody, message)
+      it 'raises a Grape::Exceptions::RequestError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
       end
     end
 
-    context 'when rack_params raises a Rack::Multipart::MultipartPartLimitError' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartPartLimitError)
+    # Rack 3 introduced Rack::BadRequest as a marker module included by all bad request
+    # exception classes, so a single `rescue Rack::BadRequest` covers them all.
+    # On Rack 2, there is no such module and each exception class must be tested individually.
+    if defined?(Rack::BadRequest)
+      context 'when rack_params raises a custom error that includes Rack::BadRequest' do
+        let(:custom_rack_error) do
+          Class.new(StandardError) { include Rack::BadRequest }
+        end
+
+        before { allow(request).to receive(:rack_params).and_raise(custom_rack_error) }
+
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
+      end
+    else
+      context 'when rack_params raises a Rack::Multipart::MultipartPartLimitError' do
+        before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartPartLimitError) }
+
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
       end
 
-      let(:message) { Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit).to_s }
+      context 'when rack_params raises a Rack::Multipart::MultipartTotalPartLimitError' do
+        before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartTotalPartLimitError) }
 
-      it 'raises an Rack::Multipart::MultipartPartLimitError' do
-        expect { request.params }.to raise_error(Grape::Exceptions::TooManyMultipartFiles, message)
-      end
-    end
-
-    context 'when rack_params raises a Rack::Multipart::MultipartTotalPartLimitError' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartTotalPartLimitError)
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
       end
 
-      let(:message) { Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit).to_s }
+      context 'when rack_params raises a Rack::Utils::ParameterTypeError' do
+        before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::ParameterTypeError) }
 
-      it 'raises an Rack::Multipart::MultipartPartLimitError' do
-        expect { request.params }.to raise_error(Grape::Exceptions::TooManyMultipartFiles, message)
-      end
-    end
-
-    context 'when rack_params raises a Rack::QueryParser::ParamsTooDeepError' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(Rack::QueryParser::ParamsTooDeepError)
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
       end
 
-      let(:message) { Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit).to_s }
+      context 'when rack_params raises a Rack::Utils::InvalidParameterError' do
+        before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::InvalidParameterError) }
 
-      it 'raises a Grape::Exceptions::TooDeepParameters' do
-        expect { request.params }.to raise_error(Grape::Exceptions::TooDeepParameters, message)
-      end
-    end
-
-    context 'when rack_params raises a Rack::Utils::ParameterTypeError' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(Rack::Utils::ParameterTypeError)
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
       end
 
-      let(:message) { Grape::Exceptions::ConflictingTypes.new.to_s }
+      context 'when rack_params raises a Rack::QueryParser::ParamsTooDeepError' do
+        before { allow(request).to receive(:rack_params).and_raise(Rack::QueryParser::ParamsTooDeepError) }
 
-      it 'raises a Grape::Exceptions::ConflictingTypes' do
-        expect { request.params }.to raise_error(Grape::Exceptions::ConflictingTypes, message)
-      end
-    end
-
-    context 'when rack_params raises a Rack::Utils::InvalidParameterError' do
-      before do
-        allow(request).to receive(:rack_params).and_raise(Rack::Utils::InvalidParameterError)
-      end
-
-      let(:message) { Grape::Exceptions::InvalidParameters.new.to_s }
-
-      it 'raises an Rack::Multipart::MultipartPartLimitError' do
-        expect { request.params }.to raise_error(Grape::Exceptions::InvalidParameters, message)
+        it 'raises a Grape::Exceptions::RequestError' do
+          expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+        end
       end
     end
   end

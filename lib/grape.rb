@@ -63,6 +63,24 @@ module Grape
     Rack::OPTIONS
   ].freeze
 
+  # Rack errors that should be rescued and wrapped as Grape::Exceptions::RequestError.
+  # Rack 3.1.0 introduced Rack::BadRequest as a marker module included by all bad request
+  # exception classes, allowing a single rescue entry to cover them all.
+  # Before, these errors are raised as individual exception classes.
+  RACK_ERRORS =
+    if Gem::Version.new(Rack.release) >= Gem::Version.new('3.1.0')
+      [EOFError, Rack::BadRequest]
+    else
+      [
+        EOFError,
+        Rack::Multipart::MultipartPartLimitError,
+        Rack::Multipart::MultipartTotalPartLimitError,
+        Rack::Utils::ParameterTypeError,
+        Rack::Utils::InvalidParameterError,
+        Rack::QueryParser::ParamsTooDeepError
+      ]
+    end.freeze
+
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
   end
