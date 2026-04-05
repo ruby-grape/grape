@@ -15,6 +15,7 @@
 
 #### Fixes
 
+* [#2670](https://github.com/ruby-grape/grape/pull/2670): Fix `UnknownAuthStrategy` raised when custom auth strategy class inherits from `Grape::Middleware::Auth::Base` - [@dblock](https://github.com/dblock).
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
 * [#2660](https://github.com/ruby-grape/grape/pull/2660): Fix thread safety: move mutable `ParamsScope` state (`index`, `params_meeting_dependency`) into a per-request `ParamScopeTracker` stored in `Fiber[]` - [@ericproulx](https://github.com/ericproulx).
 * [#2666](https://github.com/ruby-grape/grape/pull/2666): Endpoint cleanup and minor optimizations - [@ericproulx](https://github.com/ericproulx).

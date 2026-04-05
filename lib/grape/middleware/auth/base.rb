@@ -6,6 +6,8 @@ module Grape
       class Base < Grape::Middleware::Base
         def initialize(app, **options)
           super
+          return unless options.key?(:type)
+
           @auth_strategy = Grape::Middleware::Auth::Strategies[options[:type]].tap do |auth_strategy|
             raise Grape::Exceptions::UnknownAuthStrategy.new(strategy: options[:type]) unless auth_strategy
           end
