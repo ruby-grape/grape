@@ -11,6 +11,7 @@
 * [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2667](https://github.com/ruby-grape/grape/pull/2667): Skip instrumentation in run_validators when no validators present - [@ericproulx](https://github.com/ericproulx).
 * [#2670](https://github.com/ruby-grape/grape/pull/2670): Added support for Rack 3.2.6 and better handling to rack exceptions - [@ericproulx](https://github.com/ericproulx).
+* [#2675](https://github.com/ruby-grape/grape/pull/2675): Add `AGENTS.md` to please our future A.I. overlords - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
