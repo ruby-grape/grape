@@ -166,16 +166,8 @@ module Grape
 
     def make_params
       @params_builder.call(rack_params).deep_merge!(grape_routing_args)
-    rescue EOFError
-      raise Grape::Exceptions::EmptyMessageBody.new(content_type)
-    rescue Rack::Multipart::MultipartPartLimitError, Rack::Multipart::MultipartTotalPartLimitError
-      raise Grape::Exceptions::TooManyMultipartFiles.new(Rack::Utils.multipart_part_limit)
-    rescue Rack::QueryParser::ParamsTooDeepError
-      raise Grape::Exceptions::TooDeepParameters.new(Rack::Utils.param_depth_limit)
-    rescue Rack::Utils::ParameterTypeError
-      raise Grape::Exceptions::ConflictingTypes
-    rescue Rack::Utils::InvalidParameterError
-      raise Grape::Exceptions::InvalidParameters
+    rescue *Grape::RACK_ERRORS
+      raise Grape::Exceptions::RequestError
     end
 
     def build_headers
