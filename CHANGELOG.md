@@ -13,6 +13,7 @@
 * [#2670](https://github.com/ruby-grape/grape/pull/2670): Added support for Rack 3.2.6 and better handling to rack exceptions - [@ericproulx](https://github.com/ericproulx).
 * [#2671](https://github.com/ruby-grape/grape/pull/2671): Use ruby 3.1 shorthand kwargs syntax - [@ericproulx](https://github.com/ericproulx).
 * [#2672](https://github.com/ruby-grape/grape/pull/2672): Minor ruby optimizations - [@ericproulx](https://github.com/ericproulx).
+* [#2675](https://github.com/ruby-grape/grape/pull/2675): Add `AGENTS.md` to please our future A.I. overlords - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
