@@ -55,7 +55,7 @@ module Grape
         namespace_reverse_stackable.inherited_values = parent.namespace_reverse_stackable
         self.route = parent.route.merge(route)
 
-        point_in_time_copies.map { |cloned_one| cloned_one.inherit_from parent }
+        point_in_time_copies.each { |cloned_one| cloned_one.inherit_from parent }
       end
 
       # Create a point-in-time copy of this settings instance, with clones of
