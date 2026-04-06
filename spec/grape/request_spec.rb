@@ -5,8 +5,8 @@ describe Grape::Request do
   let(:default_params) { {} }
   let(:default_options) do
     {
-      method: method,
-      params: params
+      method:,
+      params:
     }
   end
   let(:default_env) do

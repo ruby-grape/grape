@@ -1409,7 +1409,7 @@ describe Grape::Validations do
             def validate_param!(attr_name, params)
               return if params[attr_name] == @option[:text]
 
-              raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: message)
+              raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message:)
             end
           end
         end

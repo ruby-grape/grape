@@ -158,7 +158,7 @@ module Grape
     protected
 
     def run
-      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env: env) do
+      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:) do
         @request = Grape::Request.new(env, build_params_with: inheritable_setting.namespace_inheritable[:build_params_with])
         begin
           self.class.run_before_each(self)
@@ -174,7 +174,7 @@ module Grape
             status 204
           else
             run_filters before_validations, :before_validation
-            run_validators request: request
+            run_validators(request:)
             run_filters after_validations, :after_validation
             response_object = execute
           end
@@ -210,7 +210,7 @@ module Grape
       validation_errors = []
 
       Grape::Validations::ParamScopeTracker.track do
-        ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators: validators, request:) do
+        ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators:, request:) do
           validators.each do |validator|
             validator.validate(request)
           rescue Grape::Exceptions::Validation => e
@@ -229,7 +229,7 @@ module Grape
     def run_filters(filters, type = :other)
       return unless filters
 
-      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters: filters, type: type) do
+      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters:, type:) do
         filters.each { |filter| instance_eval(&filter) }
       end
     end
@@ -279,7 +279,7 @@ module Grape
 
     def prepare_default_route_attributes(route_options)
       {
-        namespace: namespace,
+        namespace:,
         version: prepare_version(inheritable_setting.namespace_inheritable[:version]),
         requirements: prepare_routes_requirements(route_options[:requirements]),
         prefix: inheritable_setting.namespace_inheritable[:root_prefix],
@@ -316,15 +316,15 @@ module Grape
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
       stack.use Grape::Middleware::Error,
-                format: format,
-                content_types: content_types,
+                format:,
+                content_types:,
                 default_status: inheritable_setting.namespace_inheritable[:default_error_status],
                 rescue_all: inheritable_setting.namespace_inheritable[:rescue_all],
                 rescue_grape_exceptions: inheritable_setting.namespace_inheritable[:rescue_grape_exceptions],
                 default_error_formatter: inheritable_setting.namespace_inheritable[:default_error_formatter],
                 error_formatters: inheritable_setting.namespace_stackable_with_hash(:error_formatters),
                 rescue_options: inheritable_setting.namespace_stackable_with_hash(:rescue_options),
-                rescue_handlers: rescue_handlers,
+                rescue_handlers:,
                 base_only_rescue_handlers: inheritable_setting.namespace_stackable_with_hash(:base_only_rescue_handlers),
                 all_rescue_handler: inheritable_setting.namespace_inheritable[:all_rescue_handler],
                 grape_exceptions_rescue_handler: inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler]
@@ -340,9 +340,9 @@ module Grape
       end
 
       stack.use Grape::Middleware::Formatter,
-                format: format,
+                format:,
                 default_format: inheritable_setting.namespace_inheritable[:default_format] || :txt,
-                content_types: content_types,
+                content_types:,
                 formatters: inheritable_setting.namespace_stackable_with_hash(:formatters),
                 parsers: inheritable_setting.namespace_stackable_with_hash(:parsers)
 
@@ -360,7 +360,7 @@ module Grape
 
     def build_response_cookies
       response_cookies do |name, value|
-        cookie_value = value.is_a?(Hash) ? value : { value: value }
+        cookie_value = value.is_a?(Hash) ? value : { value: }
         Rack::Utils.set_cookie_header! header, name, cookie_value
       end
     end

@@ -47,7 +47,7 @@ module Grape
           type, subtype = media_type.split('/', 2)
           return if type.blank? || subtype.blank?
 
-          new(type: type, subtype: subtype)
+          new(type:, subtype:)
         end
 
         def match?(media_type)

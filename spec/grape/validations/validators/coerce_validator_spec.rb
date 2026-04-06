@@ -263,7 +263,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             type = custom_type
 
             subject.params do
-              requires :name, type: type
+              requires :name, type:
             end
             subject.get '/whatever' do
               params[:name].class
@@ -398,7 +398,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             params[:file][:filename]
           end
 
-          post '/upload', file: file
+          post('/upload', file:)
           expect(last_response).to be_created
           expect(last_response.body).to eq(filename)
 
@@ -415,7 +415,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             params[:file][:filename]
           end
 
-          post '/upload', file: file
+          post('/upload', file:)
           expect(last_response).to be_created
           expect(last_response.body).to eq(filename)
 
@@ -462,7 +462,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           Grape::Validations::Types::PRIMITIVES.each do |type|
             it 'respects the nil value' do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/nil_value' do
                 params[:param].class
@@ -479,7 +479,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           Grape::Validations::Types::STRUCTURES.each do |type|
             it 'respects the nil value' do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/nil_value' do
                 params[:param].class
@@ -496,7 +496,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           Grape::Validations::Types::SPECIAL.each_key do |type|
             it 'respects the nil value' do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/nil_value' do
                 params[:param].class
@@ -515,7 +515,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             ].each do |type|
               it 'respects the nil value' do
                 subject.params do
-                  requires :param, type: type
+                  requires :param, type:
                 end
                 subject.get '/nil_value' do
                   params[:param].class
@@ -535,7 +535,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           (Grape::Validations::Types::PRIMITIVES - [String]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/empty_string' do
                 params[:param].class
@@ -565,7 +565,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           (Grape::Validations::Types::STRUCTURES - [Hash]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/empty_string' do
                 params[:param].class
@@ -582,7 +582,7 @@ describe Grape::Validations::Validators::CoerceValidator do
           (Grape::Validations::Types::SPECIAL.keys - [File, Rack::Multipart::UploadedFile]).each do |type|
             it "is coerced to nil for type #{type}" do
               subject.params do
-                requires :param, type: type
+                requires :param, type:
               end
               subject.get '/empty_string' do
                 params[:param].class
@@ -601,7 +601,7 @@ describe Grape::Validations::Validators::CoerceValidator do
             ].each do |type|
               it "is coerced to nil for type #{type}" do
                 subject.params do
-                  requires :param, type: type
+                  requires :param, type:
                 end
                 subject.get '/empty_string' do
                   params[:param].class

@@ -6,7 +6,7 @@ describe Grape::Middleware::Auth::Strategies do
       proc = ->(u, p) { u && p && u == p }
       Rack::Builder.app do
         use Grape::Middleware::Error
-        use(Grape::Middleware::Auth::Base, type: :http_basic, proc: proc)
+        use(Grape::Middleware::Auth::Base, type: :http_basic, proc:)
         run ->(_env) { [200, {}, ['Hello there.']] }
       end
     end

@@ -417,7 +417,7 @@ describe Grape::Validations::Validators::DefaultValidator do
       ].each do |type, default|
         it 'respects the default value' do
           subject.params do
-            optional :param, type: type, default: default
+            optional :param, type:, default:
           end
           subject.get '/default_value' do
             params[:param]
@@ -442,7 +442,7 @@ describe Grape::Validations::Validators::DefaultValidator do
       ].each do |type, default|
         it 'respects the default value' do
           subject.params do
-            optional :param, type: type, default: default
+            optional :param, type:, default:
           end
           subject.get '/default_value' do
             params[:param]
@@ -468,7 +468,7 @@ describe Grape::Validations::Validators::DefaultValidator do
       ].each do |type, default|
         it 'respects the default value' do
           subject.params do
-            optional :param, type: type, default: default
+            optional :param, type:, default:
           end
           subject.get '/default_value' do
             params[:param]
@@ -490,7 +490,7 @@ describe Grape::Validations::Validators::DefaultValidator do
       ].each do |type, default|
         it 'respects the default value' do
           subject.params do
-            optional :param, type: type, default: default
+            optional :param, type:, default:
           end
           subject.get '/default_value' do
             params[:param]

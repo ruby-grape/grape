@@ -23,7 +23,7 @@ module Grape
         raise MethodNotYetAvailable unless before_filter_passed
 
         contract_key_map = inheritable_setting.namespace_stackable[:contract_key_map]
-        handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map: contract_key_map)
+        handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map:)
         declared_params = include_parent_namespaces ? inheritable_setting.route[:declared_params] : (inheritable_setting.namespace_stackable[:declared_params].last || [])
         renamed_params = inheritable_setting.route[:renamed_params] || {}
         route_params = options.dig(:route_options, :params) || {} # options = endpoint's option

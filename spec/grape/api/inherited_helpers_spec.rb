@@ -57,7 +57,7 @@ describe Grape::API::Helpers do
 
     context 'given expected params' do
       it 'inherits helpers from a superclass' do
-        get '/resource', id: id, user: user
+        get('/resource', id:, user:)
         expect(last_response.body).to eq("#{user}: #{id}")
       end
     end
@@ -77,7 +77,7 @@ describe Grape::API::Helpers do
 
     context 'given expected params' do
       it 'overrides helpers from a superclass' do
-        get '/resource', id: id, user: user
+        get('/resource', id:, user:)
         expect(last_response.body).to eq("#{user} with id: #{id}")
       end
     end
@@ -97,7 +97,7 @@ describe Grape::API::Helpers do
 
     context 'given expected params' do
       it 'inherits helpers from a superclass' do
-        get '/resource', id: id, user: user
+        get('/resource', id:, user:)
         expect(last_response.body).to eq("#{user}: #{id}")
       end
     end

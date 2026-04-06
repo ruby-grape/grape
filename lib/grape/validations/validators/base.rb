@@ -117,7 +117,7 @@ module Grape
 
         def validation_error!(attr_name_or_params, message = @exception_message)
           params = attr_name_or_params.is_a?(Array) ? attr_name_or_params : @scope.full_name(attr_name_or_params)
-          raise Grape::Exceptions::Validation.new(params: params, message: message)
+          raise Grape::Exceptions::Validation.new(params:, message:)
         end
 
         def hash_like?(obj)

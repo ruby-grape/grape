@@ -4281,7 +4281,7 @@ describe Grape::API do
 
     [true, false].each do |anchor|
       it "anchor=#{anchor}" do
-        subject.route :any, '*path', anchor: anchor do
+        subject.route(:any, '*path', anchor:) do
           error!("Unrecognized request path: #{params[:path]} - #{env[Rack::PATH_INFO]}#{env[Rack::SCRIPT_NAME]}", 404)
         end
         get '/v1/hello'

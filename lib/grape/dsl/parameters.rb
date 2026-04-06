@@ -167,7 +167,7 @@ module Grape
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
         define_method validator do |*attrs, message: nil|
-          validates(attrs, validator => { value: true, message: message })
+          validates(attrs, validator => { value: true, message: })
         end
       end
 
