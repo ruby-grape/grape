@@ -11,11 +11,14 @@
 * [#2657](https://github.com/ruby-grape/grape/pull/2657): Instantiate validators at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2667](https://github.com/ruby-grape/grape/pull/2667): Skip instrumentation in run_validators when no validators present - [@ericproulx](https://github.com/ericproulx).
 * [#2670](https://github.com/ruby-grape/grape/pull/2670): Added support for Rack 3.2.6 and better handling to rack exceptions - [@ericproulx](https://github.com/ericproulx).
+* [#2671](https://github.com/ruby-grape/grape/pull/2671): Use ruby 3.1 shorthand kwargs syntax - [@ericproulx](https://github.com/ericproulx).
+* [#2672](https://github.com/ruby-grape/grape/pull/2672): Minor ruby optimizations - [@ericproulx](https://github.com/ericproulx).
 * [#2675](https://github.com/ruby-grape/grape/pull/2675): Add `AGENTS.md` to please our future A.I. overlords - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
 
+* [#2670](https://github.com/ruby-grape/grape/pull/2670): Fix `UnknownAuthStrategy` raised when custom auth strategy class inherits from `Grape::Middleware::Auth::Base` - [@dblock](https://github.com/dblock).
 * [#2655](https://github.com/ruby-grape/grape/pull/2655): Fix `before_each` method to handle `nil` parameter correctly - [@ericproulx](https://github.com/ericproulx).
 * [#2660](https://github.com/ruby-grape/grape/pull/2660): Fix thread safety: move mutable `ParamsScope` state (`index`, `params_meeting_dependency`) into a per-request `ParamScopeTracker` stored in `Fiber[]` - [@ericproulx](https://github.com/ericproulx).
 * [#2666](https://github.com/ruby-grape/grape/pull/2666): Endpoint cleanup and minor optimizations - [@ericproulx](https://github.com/ericproulx).

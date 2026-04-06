@@ -21,7 +21,7 @@ describe Grape::API do
       documentation = { example: 'Joe' }
 
       subject.params do
-        requires 'first_name', documentation: documentation
+        requires 'first_name', documentation:
       end
       subject.get '/'
 

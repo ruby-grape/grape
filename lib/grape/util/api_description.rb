@@ -25,7 +25,7 @@ module Grape
 
       def initialize(description, endpoint_configuration, &)
         @endpoint_configuration = endpoint_configuration
-        @attributes = { description: description }
+        @attributes = { description: }
         instance_eval(&)
       end
 

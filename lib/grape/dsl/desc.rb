@@ -55,7 +55,7 @@ module Grape
             endpoint_config = defined?(configuration) ? configuration : nil
             Grape::Util::ApiDescription.new(description, endpoint_config, &config_block).settings
           else
-            options.merge(description: description)
+            options.merge(description:)
           end
         inheritable_setting.namespace[:description] = settings
         inheritable_setting.route[:description] = settings

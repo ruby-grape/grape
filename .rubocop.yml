@@ -22,6 +22,9 @@ Lint/EmptyBlock:
 Style/Documentation:
   Enabled: false
 
+Style/HashSyntax:
+  EnforcedShorthandSyntax: always
+
 Style/MultilineIfModifier:
   Enabled: false
 

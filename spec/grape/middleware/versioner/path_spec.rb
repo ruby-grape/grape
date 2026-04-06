@@ -32,7 +32,7 @@ describe Grape::Middleware::Versioner::Path do
 
   [%w[v1 v2], %i[v1 v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
     context "with specified versions as #{versions}" do
-      let(:options) { { versions: versions } }
+      let(:options) { { versions: } }
 
       it 'throws an error if a non-allowed version is specified' do
         expect(catch(:error) { subject.call(Rack::PATH_INFO => '/v3/awesome') }[:status]).to eq(404)

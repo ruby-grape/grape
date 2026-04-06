@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Grape::Router::GreedyRoute do
-  let(:instance) { described_class.new(pattern, endpoint: endpoint, allow_header: allow_header) }
+  let(:instance) { described_class.new(pattern, endpoint:, allow_header:) }
   let(:pattern) { :pattern }
   let(:endpoint) { instance_double(Grape::Endpoint) }
   let(:allow_header) { false }

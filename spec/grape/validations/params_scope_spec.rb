@@ -865,7 +865,7 @@ describe Grape::Validations::ParamsScope do
                 optional :b
               end
             end
-            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given:).to_json }
           end
         end
 
@@ -898,7 +898,7 @@ describe Grape::Validations::ParamsScope do
                 optional :f
               end
             end
-            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given:).to_json }
           end
         end
 
@@ -947,7 +947,7 @@ describe Grape::Validations::ParamsScope do
                 end
               end
             end
-            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given: evaluate_given).to_json }
+            subject.get("/evaluate_given_#{evaluate_given}") { declared(params, evaluate_given:).to_json }
           end
         end
 
@@ -992,7 +992,7 @@ describe Grape::Validations::ParamsScope do
               end
             end
             subject.post("/evaluate_given_#{evaluate_given}") do
-              declared(params, evaluate_given: evaluate_given).to_json
+              declared(params, evaluate_given:).to_json
             end
           end
         end
@@ -1021,7 +1021,7 @@ describe Grape::Validations::ParamsScope do
               end
             end
             subject.post("/evaluate_given_#{evaluate_given}") do
-              declared(params, evaluate_given: evaluate_given).to_json
+              declared(params, evaluate_given:).to_json
             end
           end
         end
@@ -1064,7 +1064,7 @@ describe Grape::Validations::ParamsScope do
               end
             end
             subject.post("/evaluate_given_#{evaluate_given}") do
-              declared(params, evaluate_given: evaluate_given).to_json
+              declared(params, evaluate_given:).to_json
             end
           end
         end
@@ -1113,7 +1113,7 @@ describe Grape::Validations::ParamsScope do
               end
             end
             subject.post("/evaluate_given_#{evaluate_given}") do
-              declared(params, evaluate_given: evaluate_given).to_json
+              declared(params, evaluate_given:).to_json
             end
           end
         end

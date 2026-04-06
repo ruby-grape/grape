@@ -161,13 +161,13 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def with(**opts, &)
-        new_group_attrs = [@group, opts].compact.reduce(&:deep_merge)
+        new_group_attrs = @group&.deep_merge(opts) || opts
         new_group_scope(new_group_attrs, &)
       end
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
         define_method validator do |*attrs, message: nil|
-          validates(attrs, validator => { value: true, message: message })
+          validates(attrs, validator => { value: true, message: })
         end
       end
 

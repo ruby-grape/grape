@@ -439,7 +439,7 @@ describe Grape::Endpoint do
         route_param :y do
           get do
             {
-              params: params,
+              params:,
               declared_params: declared(params)
             }
           end
@@ -492,7 +492,7 @@ describe Grape::Endpoint do
           namespace 'foo' do
             get do
               {
-                params: params,
+                params:,
                 declared_params: declared(params),
                 declared_params_no_parent: declared(params, include_parent_namespaces: false)
               }
@@ -686,7 +686,7 @@ describe Grape::Endpoint do
           before = params.to_h
           declared(params, include_missing: false)
           after = params.to_h
-          { before: before, after: after }
+          { before:, after: }
         end
       end
 

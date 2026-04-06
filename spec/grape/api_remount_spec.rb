@@ -210,7 +210,7 @@ describe Grape::API do
         it 'mounts the API and obtains the description and headers definition' do
           root_api.mount a_remounted_api, with: {
             description: endpoint_description,
-            headers: headers,
+            headers:,
             endpoint: api_endpoint,
             response: api_response
           }

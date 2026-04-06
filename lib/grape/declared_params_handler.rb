@@ -12,9 +12,9 @@ module Grape
     def call(passed_params, declared_params, route_params, renamed_params)
       recursive_declared(
         passed_params,
-        declared_params: declared_params,
-        route_params: route_params,
-        renamed_params: renamed_params
+        declared_params:,
+        route_params:,
+        renamed_params:
       )
     end
 
