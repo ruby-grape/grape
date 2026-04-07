@@ -23,6 +23,7 @@
 * [#2660](https://github.com/ruby-grape/grape/pull/2660): Fix thread safety: move mutable `ParamsScope` state (`index`, `params_meeting_dependency`) into a per-request `ParamScopeTracker` stored in `Fiber[]` - [@ericproulx](https://github.com/ericproulx).
 * [#2666](https://github.com/ruby-grape/grape/pull/2666): Endpoint cleanup and minor optimizations - [@ericproulx](https://github.com/ericproulx).
 * [#2676](https://github.com/ruby-grape/grape/pull/2676): Exclude ruby 3.2 for rails_edge - [@ericproulx](https://github.com/ericproulx).
+* [#2677](https://github.com/ruby-grape/grape/pull/2677): Update actions/checkout to v6 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.1.0 (2026-01-25)
