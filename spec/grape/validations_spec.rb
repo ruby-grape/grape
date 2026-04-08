@@ -361,9 +361,9 @@ describe Grape::Validations do
         subject.get('/') do
           declared(params)
         end
-        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: 'my_key'] })
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: 'my_key' }] })
         response = Rack::MockResponse[*subject.call(env)]
-        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
+        expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key' }])
       end
     end
 
@@ -439,9 +439,9 @@ describe Grape::Validations do
         subject.get('/') do
           declared(params)
         end
-        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key }] })
         response = Rack::MockResponse[*subject.call(env)]
-        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
+        expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key' }])
       end
     end
 
@@ -493,7 +493,7 @@ describe Grape::Validations do
       end
 
       it "doesn't throw a missing param when param is present" do
-        get '/required', items: [key: 'hello']
+        get '/required', items: [{ key: 'hello' }]
         expect(last_response.status).to eq(200)
         expect(last_response.body).to eq('required works')
       end
@@ -508,9 +508,9 @@ describe Grape::Validations do
         subject.get('/') do
           declared(params)
         end
-        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key }] })
         response = Rack::MockResponse[*subject.call(env)]
-        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
+        expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key' }])
       end
     end
 
@@ -669,7 +669,7 @@ describe Grape::Validations do
           'children[0][parents][0][name] is empty'
         )
 
-        get '/within_array', children: [name: 'Jay']
+        get '/within_array', children: [{ name: 'Jay' }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing, children[0][parents][0][name] is empty')
       end
@@ -683,7 +683,7 @@ describe Grape::Validations do
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children is invalid')
 
-        get '/within_array', children: [name: 'Jay', parents: { name: 'Fred' }]
+        get '/within_array', children: [{ name: 'Jay', parents: { name: 'Fred' } }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children[0][parents] is invalid')
       end
@@ -817,7 +817,7 @@ describe Grape::Validations do
       it 'safely handles empty arrays and blank parameters' do
         put_with_json '/within_array', children: []
         expect(last_response.status).to eq(200)
-        put_with_json '/within_array', children: [name: 'Jay']
+        put_with_json '/within_array', children: [{ name: 'Jay' }]
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('children[0][parents] is missing, children[0][parents][0][name] is missing')
       end
@@ -873,9 +873,9 @@ describe Grape::Validations do
         subject.get('/') do
           declared(params)
         end
-        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [key: :my_key] })
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key }] })
         response = Rack::MockResponse[*subject.call(env)]
-        expect(JSON.parse(response.body)).to eq('items' => ['key' => 'my_key'])
+        expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key' }])
       end
     end
 
@@ -943,7 +943,7 @@ describe Grape::Validations do
         subject.get('/') do
           declared(params)
         end
-        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key, required_subitems: [value: 'my_value'] }] })
+        env = Rack::MockRequest.env_for('/', method: Rack::GET, params: { items: [{ key: :my_key, required_subitems: [{ value: 'my_value' }] }] })
         response = Rack::MockResponse[*subject.call(env)]
         expect(JSON.parse(response.body)).to eq('items' => [{ 'key' => 'my_key', 'optional_subitems' => [], 'required_subitems' => [{ 'value' => 'my_value' }] }])
       end

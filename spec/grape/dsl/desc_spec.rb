@@ -19,68 +19,76 @@ describe Grape::DSL::Desc do
       expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
     end
 
-    it 'can be set with a block' do
-      expected_options = {
-        summary: 'summary',
-        description: 'The description',
-        detail: 'more details',
-        params: { first: :param },
-        entity: Object,
-        default: { code: 400, message: 'Invalid' },
-        http_codes: [[401, 'Unauthorized', 'Entities::Error']],
-        named: 'My named route',
-        body_name: 'My body name',
-        headers: [
-          XAuthToken: {
-            description: 'Valdates your identity',
-            required: true
-          },
-          XOptionalHeader: {
-            description: 'Not really needed',
-            required: false
-          }
-        ],
-        hidden: false,
-        deprecated: false,
-        is_array: true,
-        nickname: 'nickname',
-        produces: %w[array of mime_types],
-        consumes: %w[array of mime_types],
-        tags: %w[tag1 tag2],
-        security: %w[array of security schemes]
-      }
-
-      subject.desc 'The description' do
-        summary 'summary'
-        detail 'more details'
-        params(first: :param)
-        success Object
-        default code: 400, message: 'Invalid'
-        failure [[401, 'Unauthorized', 'Entities::Error']]
-        named 'My named route'
-        body_name 'My body name'
-        headers [
-          XAuthToken: {
-            description: 'Valdates your identity',
-            required: true
-          },
-          XOptionalHeader: {
-            description: 'Not really needed',
-            required: false
-          }
-        ]
-        hidden false
-        deprecated false
-        is_array true
-        nickname 'nickname'
-        produces %w[array of mime_types]
-        consumes %w[array of mime_types]
-        tags %w[tag1 tag2]
-        security %w[array of security schemes]
+    context 'when a block is passed' do
+      let(:expected_options) do
+        {
+          summary: 'summary',
+          description: 'The description',
+          detail: 'more details',
+          params: { first: :param },
+          entity: Object,
+          default: { code: 400, message: 'Invalid' },
+          http_codes: [[401, 'Unauthorized', 'Entities::Error']],
+          named: 'My named route',
+          body_name: 'My body name',
+          headers: [
+            {
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            }
+          ],
+          hidden: false,
+          deprecated: false,
+          is_array: true,
+          nickname: 'nickname',
+          produces: %w[array of mime_types],
+          consumes: %w[array of mime_types],
+          tags: %w[tag1 tag2],
+          security: %w[array of security schemes]
+        }
       end
 
-      expect(subject.namespace_setting(:description)).to eq(expected_options)
-      expect(subject.route_setting(:description)).to eq(expected_options)
+      it 'can be set with a block' do
+        subject.desc 'The description' do
+          summary 'summary'
+          detail 'more details'
+          params(first: :param)
+          success Object
+          default code: 400, message: 'Invalid'
+          failure [[401, 'Unauthorized', 'Entities::Error']]
+          named 'My named route'
+          body_name 'My body name'
+          headers [
+            {
+              XAuthToken: {
+                description: 'Valdates your identity',
+                required: true
+              },
+              XOptionalHeader: {
+                description: 'Not really needed',
+                required: false
+              }
+            }
+          ]
+          hidden false
+          deprecated false
+          is_array true
+          nickname 'nickname'
+          produces %w[array of mime_types]
+          consumes %w[array of mime_types]
+          tags %w[tag1 tag2]
+          security %w[array of security schemes]
+        end
+
+        expect(subject.namespace_setting(:description)).to eq(expected_options)
+        expect(subject.route_setting(:description)).to eq(expected_options)
+      end
     end
   end
 end

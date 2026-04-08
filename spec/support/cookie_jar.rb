@@ -45,13 +45,13 @@ module Spec
         end
       end
     end
-  end
-end
 
-module Rack
-  class MockResponse
-    def cookie_jar
-      @cookie_jar ||= Array(headers[Rack::SET_COOKIE]).flat_map { |h| h.split("\n") }.map { |c| Spec::Support::CookieJar.new(c).to_h }
+    module MockResponseCookieJar
+      def cookie_jar
+        @cookie_jar ||= Array(headers[Rack::SET_COOKIE]).flat_map { |h| h.split("\n") }.map { |c| Spec::Support::CookieJar.new(c).to_h }
+      end
     end
   end
 end
+
+Rack::MockResponse.prepend(Spec::Support::MockResponseCookieJar)

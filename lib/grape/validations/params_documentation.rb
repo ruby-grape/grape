@@ -9,8 +9,8 @@ module Grape
       def document_params(attrs, validations, type = nil, values = nil, except_values = nil)
         return validations.except!(:desc, :description, :documentation) if @api.inheritable_setting.namespace_inheritable[:do_not_document]
 
-        documented_attrs = attrs.each_with_object({}) do |name, memo|
-          memo[full_name(name)] = extract_details(validations, type, values, except_values)
+        documented_attrs = attrs.to_h do |name|
+          [full_name(name), extract_details(validations, type, values, except_values)]
         end
         @api.inheritable_setting.namespace_stackable[:params] = documented_attrs
       end

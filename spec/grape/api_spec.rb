@@ -119,7 +119,7 @@ describe Grape::API do
       dummy_presenter_klass = Class.new
       represent_object = Class.new
       subject.represent represent_object, with: dummy_presenter_klass
-      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([represent_object => dummy_presenter_klass])
+      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([{ represent_object => dummy_presenter_klass }])
     end
   end
 

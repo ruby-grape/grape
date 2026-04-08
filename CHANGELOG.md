@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2678](https://github.com/ruby-grape/grape/pull/2678): Update rubocop to 1.86.0 and autocorrect offenses - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.2.0 (2026-04-08)
