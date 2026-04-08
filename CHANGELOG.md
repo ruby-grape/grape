@@ -14,7 +14,6 @@
 * [#2671](https://github.com/ruby-grape/grape/pull/2671): Use ruby 3.1 shorthand kwargs syntax - [@ericproulx](https://github.com/ericproulx).
 * [#2672](https://github.com/ruby-grape/grape/pull/2672): Minor ruby optimizations - [@ericproulx](https://github.com/ericproulx).
 * [#2675](https://github.com/ruby-grape/grape/pull/2675): Add `AGENTS.md` to please our future A.I. overlords - [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 #### Fixes
 
@@ -24,7 +23,6 @@
 * [#2666](https://github.com/ruby-grape/grape/pull/2666): Endpoint cleanup and minor optimizations - [@ericproulx](https://github.com/ericproulx).
 * [#2676](https://github.com/ruby-grape/grape/pull/2676): Exclude ruby 3.2 for rails_edge - [@ericproulx](https://github.com/ericproulx).
 * [#2677](https://github.com/ruby-grape/grape/pull/2677): Update actions/checkout to v6 - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.1.0 (2026-01-25)
 
