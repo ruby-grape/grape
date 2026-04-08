@@ -492,13 +492,6 @@ module Grape
         end
       end
 
-      def extract_message_option(attrs)
-        return nil unless attrs.is_a?(Array)
-
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
-        opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
-      end
-
       def options_key?(type, key, validations)
         validations[type].respond_to?(:key?) && validations[type].key?(key) && !validations[type][key].nil?
       end

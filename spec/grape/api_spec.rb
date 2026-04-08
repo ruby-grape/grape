@@ -112,7 +112,7 @@ describe Grape::API do
 
   describe '.represent' do
     it 'requires a :with option' do
-      expect { subject.represent Object, {} }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
+      expect { subject.represent Object, with: 1 }.to raise_error(Grape::Exceptions::InvalidWithOptionForRepresent)
     end
 
     it 'adds the association to the :representations setting' do

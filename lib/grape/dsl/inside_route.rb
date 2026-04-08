@@ -4,6 +4,7 @@ module Grape
   module DSL
     module InsideRoute
       include Declared
+      include Entity
 
       # Backward compatibility: alias exception class to previous location
       MethodNotYetAvailable = Declared::MethodNotYetAvailable
@@ -184,50 +185,6 @@ module Grape
         end
       end
 
-      # Allows you to make use of Grape Entities by setting
-      # the response body to the serializable hash of the
-      # entity provided in the `:with` option. This has the
-      # added benefit of automatically passing along environment
-      # and version information to the serialization, making it
-      # very easy to do conditional exposures. See Entity docs
-      # for more info.
-      #
-      # @example
-      #
-      #   get '/users/:id' do
-      #     present User.find(params[:id]),
-      #       with: API::Entities::User,
-      #       admin: current_user.admin?
-      #   end
-      def present(*args, **options)
-        key, object = if args.count == 2 && args.first.is_a?(Symbol)
-                        args
-                      else
-                        [nil, args.first]
-                      end
-        entity_class = entity_class_for_obj(object, options)
-
-        root = options.delete(:root)
-
-        representation = if entity_class
-                           entity_representation_for(entity_class, object, options)
-                         else
-                           object
-                         end
-
-        representation = { root => representation } if root
-
-        if key
-          representation = (body || {}).merge(key => representation)
-        elsif entity_class.present? && body
-          raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
-
-          representation = body.merge(representation)
-        end
-
-        body representation
-      end
-
       # Returns route information for the current request.
       #
       # @example
@@ -238,43 +195,6 @@ module Grape
       #   end
       def route
         env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info]
-      end
-
-      # Attempt to locate the Entity class for a given object, if not given
-      # explicitly. This is done by looking for the presence of Klass::Entity,
-      # where Klass is the class of the `object` parameter, or one of its
-      # ancestors.
-      # @param object [Object] the object to locate the Entity class for
-      # @param options [Hash]
-      # @option options :with [Class] the explicit entity class to use
-      # @return [Class] the located Entity class, or nil if none is found
-      def entity_class_for_obj(object, options)
-        entity_class = options.delete(:with)
-        return entity_class if entity_class
-
-        # entity class not explicitly defined, auto-detect from relation#klass or first object in the collection
-        object_class = if object.respond_to?(:klass)
-                         object.klass
-                       else
-                         object.respond_to?(:first) ? object.first.class : object.class
-                       end
-
-        representations = inheritable_setting.namespace_stackable_with_hash(:representations)
-        if representations
-          potential = object_class.ancestors.detect { |potential| representations.key?(potential) }
-          entity_class = representations[potential] if potential
-        end
-
-        entity_class = object_class.const_get(:Entity) if !entity_class && object_class.const_defined?(:Entity) && object_class.const_get(:Entity).respond_to?(:represent)
-        entity_class
-      end
-
-      # @return the representation of the given object as done through
-      #   the given entity_class.
-      def entity_representation_for(entity_class, object, options)
-        embeds = { env: }
-        embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
-        entity_class.represent(object, **embeds, **options)
       end
 
       def http_version
