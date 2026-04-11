@@ -132,8 +132,8 @@ module Grape
       X-UA-Compatible
       X-WebKit-CS
       X-XSS-Protection
-    ].each_with_object({}) do |header, response|
-      response["HTTP_#{header.upcase.tr('-', '_')}"] = header
+    ].to_h do |header|
+      ["HTTP_#{header.upcase.tr('-', '_')}", header]
     end.freeze
 
     alias rack_params params

@@ -36,14 +36,14 @@ describe Grape::DSL::RequestResponse do
   describe '.formatter' do
     it 'sets the formatter for a content type' do
       subject.formatter c_type, :formatter
-      expect(subject.inheritable_setting.namespace_stackable[:formatters]).to eq([c_type.to_sym => :formatter])
+      expect(subject.inheritable_setting.namespace_stackable[:formatters]).to eq([{ c_type.to_sym => :formatter }])
     end
   end
 
   describe '.parser' do
     it 'sets a parser for a content type' do
       subject.parser c_type, :parser
-      expect(subject.inheritable_setting.namespace_stackable[:parsers]).to eq([c_type.to_sym => :parser])
+      expect(subject.inheritable_setting.namespace_stackable[:parsers]).to eq([{ c_type.to_sym => :parser }])
     end
   end
 
@@ -70,7 +70,7 @@ describe Grape::DSL::RequestResponse do
   describe '.content_type' do
     it 'sets a content type for a format' do
       subject.content_type format, c_type
-      expect(subject.inheritable_setting.namespace_stackable[:content_types]).to eq([format.to_sym => c_type])
+      expect(subject.inheritable_setting.namespace_stackable[:content_types]).to eq([{ format.to_sym => c_type }])
     end
   end
 
@@ -201,34 +201,34 @@ describe Grape::DSL::RequestResponse do
     describe 'list of exceptions is passed' do
       it 'sets hash of exceptions as rescue handlers' do
         subject.rescue_from StandardError
-        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => nil])
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([{ StandardError => nil }])
         expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([{}])
       end
 
       it 'rescues only base handlers if rescue_subclasses: false option is passed' do
         subject.rescue_from StandardError, rescue_subclasses: false
-        expect(subject.inheritable_setting.namespace_reverse_stackable[:base_only_rescue_handlers]).to eq([StandardError => nil])
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([rescue_subclasses: false])
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:base_only_rescue_handlers]).to eq([{ StandardError => nil }])
+        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([{ rescue_subclasses: false }])
       end
 
       it 'sets given proc as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
         subject.rescue_from StandardError, rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => rescue_handler_proc])
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([{ StandardError => rescue_handler_proc }])
         expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([{}])
       end
 
       it 'sets given block as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
         subject.rescue_from StandardError, &rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => rescue_handler_proc])
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([{ StandardError => rescue_handler_proc }])
         expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([{}])
       end
 
       it 'sets a rescue handler declared through :with option for each key in hash' do
         with_block = -> { 'hello' }
         subject.rescue_from StandardError, with: with_block
-        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([StandardError => with_block])
+        expect(subject.inheritable_setting.namespace_reverse_stackable[:rescue_handlers]).to eq([{ StandardError => with_block }])
         expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq([{}])
       end
     end
@@ -238,7 +238,7 @@ describe Grape::DSL::RequestResponse do
     it 'sets a presenter for a class' do
       presenter = Class.new
       subject.represent :ThisClass, with: presenter
-      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([ThisClass: presenter])
+      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([{ ThisClass: presenter }])
     end
   end
 end

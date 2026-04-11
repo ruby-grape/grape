@@ -5,6 +5,7 @@ AllCops:
   Exclude:
     - vendor/**/*
     - bin/**/*
+    - benchmark/**/*
 
 plugins:
   - rubocop-performance

@@ -19,8 +19,8 @@ module Grape
       end
 
       def to_hash
-        keys.each_with_object({}) do |key, result|
-          result[key] = self[key]
+        keys.to_h do |key|
+          [key, self[key]]
         end
       end
 
