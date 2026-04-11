@@ -49,13 +49,6 @@ describe Grape::DSL::Parameters do
         yield
         @group = prev_group
       end
-
-      def extract_message_option(attrs)
-        return nil unless attrs.is_a?(Array)
-
-        opts = attrs.last.is_a?(Hash) ? attrs.pop : {}
-        opts.key?(:message) && !opts[:message].nil? ? opts.delete(:message) : nil
-      end
     end
   end
 

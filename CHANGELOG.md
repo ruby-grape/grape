@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2679](https://github.com/ruby-grape/grape/pull/2679): Extract entity dsl and refactor :with to keyword argument - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

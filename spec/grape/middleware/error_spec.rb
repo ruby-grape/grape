@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
 describe Grape::Middleware::Error do
-  let(:error_entity) do
-    Class.new(Grape::Entity) do
-      expose :code
-      expose :static
-
-      def static
-        'static text'
-      end
-    end
-  end
   let(:err_app) do
     Class.new do
       class << self

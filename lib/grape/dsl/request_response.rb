@@ -44,13 +44,8 @@ module Grape
         inheritable_setting.namespace_inheritable[:default_error_formatter] = new_formatter
       end
 
-      def error_formatter(format, options)
-        formatter = if options.is_a?(Hash) && options.key?(:with)
-                      options[:with]
-                    else
-                      options
-                    end
-
+      def error_formatter(format, options = nil, with: nil)
+        formatter = with || options
         inheritable_setting.namespace_stackable[:error_formatters] = { format.to_sym => formatter }
       end
 
@@ -93,16 +88,8 @@ module Grape
       #   @option options [Boolean] :rescue_subclasses Also rescue subclasses of exception classes
       #   @param [Proc] handler Execution proc to handle the given exception as an
       #     alternative to passing a block.
-      def rescue_from(*args, **options, &block)
-        if args.last.is_a?(Proc)
-          handler = args.pop
-        elsif block
-          handler = block
-        end
-
-        raise ArgumentError, 'both :with option and block cannot be passed' if block && options.key?(:with)
-
-        handler ||= extract_with(options)
+      def rescue_from(*args, with: nil, **options, &block)
+        handler = extract_handler(args, with:, block:)
 
         if args.include?(:all)
           inheritable_setting.namespace_inheritable[:rescue_all] = true
@@ -146,22 +133,23 @@ module Grape
       #
       # @param model_class [Class] The model class that will be represented.
       # @option options [Class] :with The entity class that will represent the model.
-      def represent(model_class, options)
-        raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless options[:with].is_a?(Class)
+      def represent(model_class, with:)
+        raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless with.is_a?(Class)
 
-        inheritable_setting.namespace_stackable[:representations] = { model_class => options[:with] }
+        inheritable_setting.namespace_stackable[:representations] = { model_class => with }
       end
 
       private
 
-      def extract_with(options)
-        return unless options.key?(:with)
+      def extract_handler(args, with:, block:)
+        raise ArgumentError, 'both :with option and block cannot be passed' if block && with
 
-        with_option = options.delete(:with)
-        return with_option if with_option.instance_of?(Proc)
-        return with_option.to_sym if with_option.instance_of?(Symbol) || with_option.instance_of?(String)
+        return args.pop if args.last.is_a?(Proc)
+        return block if block
+        return with if with.instance_of?(Proc) || with.instance_of?(Symbol)
+        return with.to_sym if with.instance_of?(String)
 
-        raise ArgumentError, "with: #{with_option.class}, expected Symbol, String or Proc"
+        raise ArgumentError, "with: #{with.class}, expected Symbol, String or Proc" if with
       end
     end
   end
