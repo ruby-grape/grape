@@ -4,6 +4,8 @@ module Grape
   module Validations
     module Validators
       class ContractScopeValidator
+        attr_reader :schema
+
         def initialize(schema:)
           @schema = schema
           freeze
@@ -14,7 +16,7 @@ module Grape
         # @raise [Grape::Exceptions::ValidationArrayErrors] if validation failed
         # @return [void]
         def validate(request)
-          res = @schema.call(request.params)
+          res = schema.call(request.params)
 
           if res.success?
             request.params.deep_merge!(res.to_h)
