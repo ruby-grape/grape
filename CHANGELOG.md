@@ -8,8 +8,12 @@
 #### Fixes
 
 * [#2678](https://github.com/ruby-grape/grape/pull/2678): Update rubocop to 1.86.0 and autocorrect offenses - [@ericproulx](https://github.com/ericproulx).
-* [#2680](https://github.com/ruby-grape/grape/pull/2680): Restore public `schema` reader on ContractScope validator - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
+
+### 3.2.1 (2026-04-16)
+
+#### Fixes
+* [#2680](https://github.com/ruby-grape/grape/pull/2680): Restore public `schema` reader on ContractScope validator - [@ericproulx](https://github.com/ericproulx).
 
 ### 3.2.0 (2026-04-08)
 
