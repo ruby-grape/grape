@@ -26,13 +26,13 @@ module Grape
           end
 
           # Returns an instance of a coercer for a given type
-          def coercer_instance_for(type, strict = false)
+          def coercer_instance_for(type, strict: false)
             klass = type.instance_of?(Class) ? PrimitiveCoercer : collection_coercer_for(type)
-            klass.new(type, strict)
+            klass.new(type, strict:)
           end
         end
 
-        def initialize(type, strict = false)
+        def initialize(type, strict: false)
           @type = type
           @strict = strict
           @cache_coercer = strict ? DryTypes::StrictCache : DryTypes::ParamsCache

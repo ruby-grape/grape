@@ -29,7 +29,7 @@ module Grape
         # @param set [Boolean]
         #   when true, a +Set+ will be returned by {#call} instead
         #   of an +Array+ and duplicate items will be discarded.
-        def initialize(type, set = false)
+        def initialize(type, set: false)
           super(type)
           @set = set
         end

@@ -6,7 +6,7 @@ module Grape
       # Takes the given array and converts it to a set. Every element of the set
       # is also coerced.
       class SetCoercer < ArrayCoercer
-        def initialize(type, strict = false)
+        def initialize(type, strict: false)
           super
 
           @coercer = nil

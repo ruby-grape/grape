@@ -178,10 +178,10 @@ module Grape
           # method is supplied.
         elsif Types.collection_of_custom?(type)
           Types::CustomTypeCollectionCoercer.new(
-            Types.map_special(type.first), type.is_a?(Set)
+            Types.map_special(type.first), set: type.is_a?(Set)
           )
         else
-          DryTypeCoercer.coercer_instance_for(type, strict)
+          DryTypeCoercer.coercer_instance_for(type, strict:)
         end
       end
 
