@@ -7,59 +7,6 @@ describe Grape::Endpoint do
     subject
   end
 
-  describe '.before_each' do
-    after { described_class.before_each.clear }
-
-    it 'is settable via block' do
-      block = ->(_endpoint) { 'noop' }
-      described_class.before_each(&block)
-      expect(described_class.before_each.first).to eq(block)
-    end
-
-    it 'is settable via reference' do
-      block = ->(_endpoint) { 'noop' }
-      described_class.before_each block
-      expect(described_class.before_each.first).to eq(block)
-    end
-
-    it 'is able to override a helper' do
-      subject.get('/') { current_user }
-      expect { get '/' }.to raise_error(NameError, /undefined local variable or method [`']current_user'/)
-
-      described_class.before_each do |endpoint|
-        allow(endpoint).to receive(:current_user).and_return('Bob')
-      end
-
-      get '/'
-      expect(last_response.body).to eq('Bob')
-
-      described_class.before_each(nil)
-      expect { get '/' }.to raise_error(NameError, /undefined local variable or method [`']current_user'/)
-    end
-
-    it 'is able to stack helper' do
-      subject.get('/') do
-        authenticate_user!
-        current_user
-      end
-      expect { get '/' }.to raise_error(NoMethodError, /undefined method [`']authenticate_user!' for/)
-
-      described_class.before_each do |endpoint|
-        allow(endpoint).to receive(:current_user).and_return('Bob')
-      end
-
-      described_class.before_each do |endpoint|
-        allow(endpoint).to receive(:authenticate_user!).and_return(true)
-      end
-
-      get '/'
-      expect(last_response.body).to eq('Bob')
-
-      described_class.before_each(nil)
-      expect { get '/' }.to raise_error(NoMethodError, /undefined method [`']authenticate_user!' for/)
-    end
-  end
-
   it 'sets itself in the env upon call' do
     subject.get('/') { 'Hello world.' }
     get '/'

@@ -1,6 +1,28 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 3.3
+
+#### `Grape::Endpoint.before_each` moved to `Grape::Testing`
+
+`Grape::Endpoint.before_each` and `Grape::Endpoint.reset_before_each` are now only available after requiring `grape/testing`. This module is intended for test environments only and is not loaded by default.
+
+Add the following to your test helper:
+
+```ruby
+require 'grape/testing'
+```
+
+The `before_each` method now always requires a block — calling it without one raises `ArgumentError`. To clear registered hooks, use the new dedicated `reset_before_each` method:
+
+```ruby
+# Before
+after { Grape::Endpoint.before_each nil }
+
+# After
+after { Grape::Endpoint.reset_before_each }
+```
+
 ### Upgrading to >= 3.2
 
 #### Rack parameter parsing errors now raise `Grape::Exceptions::RequestError`
