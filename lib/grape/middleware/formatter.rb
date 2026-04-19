@@ -3,6 +3,8 @@
 module Grape
   module Middleware
     class Formatter < Base
+      include PrecomputedContentTypes
+
       DEFAULT_OPTIONS = {
         default_format: :txt
       }.freeze

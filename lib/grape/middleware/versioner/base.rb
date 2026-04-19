@@ -4,6 +4,8 @@ module Grape
   module Middleware
     module Versioner
       class Base < Grape::Middleware::Base
+        include Grape::Middleware::PrecomputedContentTypes
+
         DEFAULT_OPTIONS = {
           pattern: /.*/i,
           prefix: nil,
@@ -41,6 +43,7 @@ module Grape
           super
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @versions = options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          available_media_types # warm on parent instance so per-request dups inherit it
         end
 
         def potential_version_match?(potential_version)

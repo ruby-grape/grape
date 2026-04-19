@@ -85,17 +85,17 @@ module Grape
 
       private
 
-      def merge_headers(response)
-        return unless headers.is_a?(Hash)
-
-        case response
-        when Rack::Response then response.headers.merge!(headers)
-        when Array          then response[1].merge!(headers)
-        end
-      end
-
       def content_types_indifferent_access
         @content_types_indifferent_access ||= content_types.with_indifferent_access
+      end
+
+      def merge_headers(response)
+        return if @header.blank?
+
+        case response
+        when Rack::Response then response.headers.merge!(@header)
+        when Array          then response[1].merge!(@header)
+        end
       end
 
       def merge_default_options(options)
