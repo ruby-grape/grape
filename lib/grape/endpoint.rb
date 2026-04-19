@@ -17,24 +17,6 @@ module Grape
     def_delegator :cookies, :response_cookies
 
     class << self
-      def before_each(new_setup = false, &block)
-        @before_each ||= []
-        if new_setup == false
-          return @before_each unless block
-
-          @before_each << block
-        elsif new_setup
-          @before_each = [new_setup]
-        else
-          @before_each.clear
-        end
-      end
-
-      def run_before_each(endpoint)
-        superclass.run_before_each(endpoint) unless self == Endpoint
-        before_each.each { |blk| blk.call(endpoint) }
-      end
-
       def block_to_unbound_method(block)
         return unless block
 
@@ -161,7 +143,6 @@ module Grape
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:) do
         @request = Grape::Request.new(env, build_params_with: inheritable_setting.namespace_inheritable[:build_params_with])
         begin
-          self.class.run_before_each(self)
           run_filters befores, :before
           @before_filter_passed = true
 

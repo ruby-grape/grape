@@ -3968,7 +3968,15 @@ end
 
 ### Stubbing Helpers
 
-Because helpers are mixed in based on the context when an endpoint is defined, it can be difficult to stub or mock them for testing. The `Grape::Endpoint.before_each` method can help by allowing you to define behavior on the endpoint that will run before every request.
+Because helpers are mixed in based on the context when an endpoint is defined, it can be difficult to stub or mock them for testing. `Grape::Endpoint.before_each` allows you to define behavior on the endpoint that will run before every request.
+
+This feature is provided by `Grape::Testing`, a standalone module intended for test environments only. Add it to your test helper:
+
+```ruby
+require 'grape/testing'
+```
+
+Then use it in your tests:
 
 ```ruby
 describe 'an endpoint that needs helpers stubbed' do
@@ -3979,7 +3987,7 @@ describe 'an endpoint that needs helpers stubbed' do
   end
 
   after do
-    Grape::Endpoint.before_each nil
+    Grape::Endpoint.reset_before_each
   end
 
   it 'stubs the helper' do

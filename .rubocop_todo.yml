@@ -147,7 +147,6 @@ Style/CombinableLoops:
 Style/OptionalBooleanParameter:
   Exclude:
     - 'lib/grape/dsl/parameters.rb'
-    - 'lib/grape/endpoint.rb'
     - 'lib/grape/serve_stream/sendfile_response.rb'
     - 'lib/grape/validations/types/array_coercer.rb'
     - 'lib/grape/validations/types/custom_type_collection_coercer.rb'
