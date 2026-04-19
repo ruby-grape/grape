@@ -75,7 +75,7 @@ module Grape
       # @return [Boolean] +true+ if the given value will be treated as
       #   a list of types.
       def multiple?(type)
-        (type.is_a?(Array) || type.is_a?(Set)) && type.size > 1
+        array_or_set?(type) && type.size > 1
       end
 
       # Does Grape provide special coercion and validation
@@ -98,17 +98,18 @@ module Grape
         GROUPS.include? type
       end
 
+      def array_or_set?(type)
+        type.is_a?(Array) || type.is_a?(Set)
+      end
+
       # A valid custom type must implement a class-level `parse` method, taking
       # one String argument and returning the parsed value in its correct type.
       #
       # @param type [Class] type to check
       # @return [Boolean] whether or not the type can be used as a custom type
       def custom?(type)
-        !primitive?(type) &&
-          !structure?(type) &&
-          !multiple?(type) &&
-          type.respond_to?(:parse) &&
-          type.method(:parse).arity == 1
+        !(primitive?(type) || structure?(type) || multiple?(type)) &&
+          type.respond_to?(:parse) && type.method(:parse).arity == 1
       end
 
       # Is the declared type an +Array+ or +Set+ of a {#custom?} type?
@@ -117,9 +118,7 @@ module Grape
       # @return [Boolean] true if +type+ is a collection of a type that implements
       #   its own +#parse+ method.
       def collection_of_custom?(type)
-        (type.is_a?(Array) || type.is_a?(Set)) &&
-          type.length == 1 &&
-          (custom?(type.first) || special?(type.first))
+        array_or_set?(type) && type.length == 1 && (custom?(type.first) || special?(type.first))
       end
 
       def map_special(type)
@@ -162,27 +161,21 @@ module Grape
       end
 
       def create_coercer_instance(type, method, strict)
-        # Maps a custom type provided by Grape, it doesn't map types wrapped by collections!!!
-        type = Types.map_special(type)
+        # map_special doesn't recurse into collections — applied only to the top-level type here.
+        type = map_special(type)
 
-        # Use a special coercer for multiply-typed parameters.
-        if Types.multiple?(type)
-          MultipleTypeCoercer.new(type, method)
+        # Multiply-typed parameters, e.g. types: [Integer, String].
+        return MultipleTypeCoercer.new(type, method) if multiple?(type)
 
-          # Use a special coercer for custom types and coercion methods.
-        elsif method || Types.custom?(type)
-          CustomTypeCoercer.new(type, method)
+        # User-supplied coercion method, or a custom type with its own #parse.
+        return CustomTypeCoercer.new(type, method) if method || custom?(type)
 
-          # Special coercer for collections of types that implement a parse method.
-          # CustomTypeCoercer (above) already handles such types when an explicit coercion
-          # method is supplied.
-        elsif Types.collection_of_custom?(type)
-          Types::CustomTypeCollectionCoercer.new(
-            Types.map_special(type.first), set: type.is_a?(Set)
-          )
-        else
-          DryTypeCoercer.coercer_instance_for(type, strict:)
-        end
+        # Array/Set of a custom type — CustomTypeCoercer already handles single
+        # custom types when an explicit coercion method is supplied.
+        return CustomTypeCollectionCoercer.new(map_special(type.first), set: type.is_a?(Set)) if collection_of_custom?(type)
+
+        # Fallback: let dry-types handle primitives, structures, and known specials.
+        DryTypeCoercer.coercer_instance_for(type, strict:)
       end
 
       class CoercerCache < Grape::Util::Cache

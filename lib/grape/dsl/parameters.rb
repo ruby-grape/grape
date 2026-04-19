@@ -204,21 +204,7 @@ module Grape
 
       alias group requires
 
-      class EmptyOptionalValue; end # rubocop:disable Lint/EmptyClass
-
-      def map_params(params, element, is_array: false)
-        if params.is_a?(Array)
-          params.map do |el|
-            map_params(el, element, is_array: true)
-          end
-        elsif params.is_a?(Hash)
-          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
-        elsif params == EmptyOptionalValue
-          EmptyOptionalValue
-        else
-          {}
-        end
-      end
+      EmptyOptionalValue = Object.new.freeze
 
       # @param params [Hash] initial hash of parameters
       # @return hash of parameters relevant for the current scope
@@ -233,6 +219,21 @@ module Grape
 
       def first_hash_key_or_param(parameter)
         parameter.is_a?(Hash) ? parameter.keys.first : parameter
+      end
+
+      def map_params(params, element, is_array: false)
+        case params
+        when Array
+          params.map do |el|
+            map_params(el, element, is_array: true)
+          end
+        when Hash
+          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
+        when EmptyOptionalValue
+          EmptyOptionalValue
+        else
+          {}
+        end
       end
     end
   end

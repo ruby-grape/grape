@@ -142,14 +142,12 @@ module Grape
       #
       #   GET /file # => "contents of file"
       def sendfile(value = nil)
-        if value.is_a?(String)
-          file_body = Grape::ServeStream::FileBody.new(value)
-          @stream = Grape::ServeStream::StreamResponse.new(file_body)
-        elsif !value.is_a?(NilClass)
-          raise ArgumentError, 'Argument must be a file path'
-        else
-          stream
-        end
+        return stream if value.nil?
+
+        raise ArgumentError, 'Argument must be a file path' unless value.is_a?(String)
+
+        file_body = Grape::ServeStream::FileBody.new(value)
+        @stream = Grape::ServeStream::StreamResponse.new(file_body)
       end
 
       # Allows you to define the response as a streamable object.
@@ -173,16 +171,19 @@ module Grape
         header Rack::CONTENT_LENGTH, nil
         header 'Transfer-Encoding', nil
         header Rack::CACHE_CONTROL, 'no-cache' # Skips ETag generation (reading the response up front)
-        if value.is_a?(String)
-          file_body = Grape::ServeStream::FileBody.new(value)
-          @stream = Grape::ServeStream::StreamResponse.new(file_body)
-        elsif value.respond_to?(:each)
-          @stream = Grape::ServeStream::StreamResponse.new(value)
-        elsif !value.is_a?(NilClass)
-          raise ArgumentError, 'Stream object must respond to :each.'
-        else
-          @stream
-        end
+
+        return @stream if value.nil?
+
+        stream_body =
+          if value.is_a?(String)
+            Grape::ServeStream::FileBody.new(value)
+          elsif value.respond_to?(:each)
+            value
+          else
+            raise ArgumentError, 'Stream object must respond to :each.'
+          end
+
+        @stream = Grape::ServeStream::StreamResponse.new(stream_body)
       end
 
       # Returns route information for the current request.
