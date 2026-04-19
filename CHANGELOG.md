@@ -8,6 +8,7 @@
 * [#2683](https://github.com/ruby-grape/grape/pull/2683): Introduce `Grape::Util::Lazy::Base` for unified lazy-type dispatch - [@ericproulx](https://github.com/ericproulx).
 * [#2685](https://github.com/ruby-grape/grape/pull/2685): Skip `run_filters` and `endpoint_run_filters.grape` instrumentation when the filter list is empty - [@ericproulx](https://github.com/ericproulx).
 * [#2684](https://github.com/ruby-grape/grape/pull/2684): Readability refactors: case/when, guard clauses, small cleanups - [@ericproulx](https://github.com/ericproulx).
+* [#2687](https://github.com/ruby-grape/grape/pull/2687): Skip backtrace capture on internal validation exceptions - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
