@@ -7,7 +7,7 @@ module Grape
       # initialization. When +strict+ is true, it doesn't coerce a value but check
       # that it has the proper type.
       class PrimitiveCoercer < DryTypeCoercer
-        def initialize(type, strict = false)
+        def initialize(type, strict: false)
           super
 
           @coercer = cache_coercer[type]

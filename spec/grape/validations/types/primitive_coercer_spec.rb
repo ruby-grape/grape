@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe Grape::Validations::Types::PrimitiveCoercer do
-  subject { described_class.new(type, strict) }
+  subject { described_class.new(type, strict:) }
 
   let(:strict) { false }
 

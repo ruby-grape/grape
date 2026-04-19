@@ -206,10 +206,10 @@ module Grape
 
       class EmptyOptionalValue; end # rubocop:disable Lint/EmptyClass
 
-      def map_params(params, element, is_array = false)
+      def map_params(params, element, is_array: false)
         if params.is_a?(Array)
           params.map do |el|
-            map_params(el, element, true)
+            map_params(el, element, is_array: true)
           end
         elsif params.is_a?(Hash)
           params[element] || (@optional && is_array ? EmptyOptionalValue : {})

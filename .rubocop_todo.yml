@@ -140,16 +140,3 @@ RSpec/VoidExpect:
 Style/CombinableLoops:
   Exclude:
     - 'spec/grape/endpoint_spec.rb'
-
-# Offense count: 9
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: respond_to_missing?
-Style/OptionalBooleanParameter:
-  Exclude:
-    - 'lib/grape/dsl/parameters.rb'
-    - 'lib/grape/serve_stream/sendfile_response.rb'
-    - 'lib/grape/validations/types/array_coercer.rb'
-    - 'lib/grape/validations/types/custom_type_collection_coercer.rb'
-    - 'lib/grape/validations/types/dry_type_coercer.rb'
-    - 'lib/grape/validations/types/primitive_coercer.rb'
-    - 'lib/grape/validations/types/set_coercer.rb'

@@ -35,6 +35,11 @@ Style/RaiseArgs:
 Style/RedundantArrayConstructor:
   Enabled: false  # doesn't work well with params definition
 
+Style/OptionalBooleanParameter:
+  AllowedMethods:
+    - respond_to_missing?
+    - respond_to?
+
 Style/Send:
   Enabled: true
 

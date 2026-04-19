@@ -12,7 +12,7 @@ module Grape
       # behavior of Virtus which was used earlier, a `Grape::Validations::Types::PrimitiveCoercer`
       # maintains Virtus behavior in coercing.
       class ArrayCoercer < DryTypeCoercer
-        def initialize(type, strict = false)
+        def initialize(type, strict: false)
           super
           @coercer = strict ? DryTypes::Strict::Array : DryTypes::Params::Array
           @subtype = type.first
@@ -52,7 +52,7 @@ module Grape
         end
 
         def elem_coercer
-          @elem_coercer ||= DryTypeCoercer.coercer_instance_for(subtype, strict)
+          @elem_coercer ||= DryTypeCoercer.coercer_instance_for(subtype, strict:)
         end
       end
     end
