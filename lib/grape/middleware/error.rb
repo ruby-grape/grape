@@ -3,6 +3,8 @@
 module Grape
   module Middleware
     class Error < Base
+      include PrecomputedContentTypes
+
       DEFAULT_OPTIONS = {
         default_status: 500,
         default_message: '',

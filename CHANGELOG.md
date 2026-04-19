@@ -4,6 +4,7 @@
 
 * [#2679](https://github.com/ruby-grape/grape/pull/2679): Extract entity dsl and refactor :with to keyword argument - [@ericproulx](https://github.com/ericproulx).
 * [#2681](https://github.com/ruby-grape/grape/pull/2681): Extract `Grape::Endpoint.before_each` into `Grape::Testing` - [@ericproulx](https://github.com/ericproulx).
+* [#2686](https://github.com/ruby-grape/grape/pull/2686): Add `Grape::Middleware::PrecomputedContentTypes` to warm content-type caches on the parent middleware instance (opt-in via `include`); short-circuit `Middleware::Base#merge_headers` when no headers were set - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
