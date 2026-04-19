@@ -126,11 +126,10 @@ module Grape
         eval_args = evaluate_arguments(instance.configuration, *args)
         eval_kwargs = kwargs.deep_transform_values { |v| evaluate_arguments(instance.configuration, v).first }
         response = instance.__send__(method, *eval_args, **eval_kwargs, &block)
-        if skip_immediate_run?(instance, [response], kwargs)
-          response
-        else
-          evaluate_arguments(instance.configuration, response).first
-        end
+
+        return response if skip_immediate_run?(instance, [response], kwargs)
+
+        evaluate_arguments(instance.configuration, response).first
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
@@ -140,25 +139,22 @@ module Grape
       end
 
       def any_lazy?(args)
-        args.any? { |argument| argument_lazy?(argument) }
+        args.any?(Grape::Util::Lazy::Base)
       end
 
       def evaluate_arguments(configuration, *args)
         args.map do |argument|
-          if argument_lazy?(argument)
+          case argument
+          when Grape::Util::Lazy::Base
             argument.evaluate_from(configuration)
-          elsif argument.is_a?(Hash)
+          when Hash
             argument.transform_values { |value| evaluate_arguments(configuration, value).first }
-          elsif argument.is_a?(Array)
+          when Array
             evaluate_arguments(configuration, *argument)
           else
             argument
           end
         end
-      end
-
-      def argument_lazy?(argument)
-        argument.respond_to?(:lazy?) && argument.lazy?
       end
     end
   end

@@ -3,10 +3,11 @@
 module Grape
   module Util
     module Lazy
-      class Value
+      class Value < Base
         attr_reader :access_keys
 
         def initialize(value, access_keys = [])
+          super()
           @value = value
           @access_keys = access_keys
         end
@@ -20,17 +21,9 @@ module Grape
           @value
         end
 
-        def lazy?
-          true
-        end
-
         def reached_by(parent_access_keys, access_key)
           @access_keys = parent_access_keys + [access_key]
           self
-        end
-
-        def to_s
-          evaluate.to_s
         end
       end
     end

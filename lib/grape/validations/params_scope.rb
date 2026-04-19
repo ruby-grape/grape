@@ -38,9 +38,10 @@ module Grape
         end
 
         def self.attr_key(declared_param_attr)
-          return attr_key(declared_param_attr.key) if declared_param_attr.is_a?(self)
-
-          if declared_param_attr.is_a?(Hash)
+          case declared_param_attr
+          when self
+            attr_key(declared_param_attr.key)
+          when Hash
             declared_param_attr.transform_values { |value| attrs_keys(value) }
           else
             declared_param_attr
@@ -86,7 +87,8 @@ module Grape
       end
 
       def configuration
-        (@api.configuration.respond_to?(:evaluate) && @api.configuration.evaluate) || @api.configuration
+        config = @api.configuration
+        config.is_a?(Grape::Util::Lazy::Base) ? config.evaluate : config
       end
 
       # @return [Boolean] whether or not this entire scope needs to be

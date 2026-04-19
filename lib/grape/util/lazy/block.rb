@@ -3,8 +3,9 @@
 module Grape
   module Util
     module Lazy
-      class Block
+      class Block < Base
         def initialize(&new_block)
+          super()
           @block = new_block
         end
 
@@ -14,14 +15,6 @@ module Grape
 
         def evaluate
           @block.call({})
-        end
-
-        def lazy?
-          true
-        end
-
-        def to_s
-          evaluate.to_s
         end
       end
     end
