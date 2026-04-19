@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `endpoint_run_filters.grape` notification no longer fired for empty filter lists
+
+`ActiveSupport::Notifications` subscribers listening to `endpoint_run_filters.grape` will no longer receive an event when the filter list for a given phase (`:before`, `:before_validation`, `:after_validation`, `:after`, `:finally`) is empty. Previously every phase emitted an event on every request regardless of whether any filters were registered. If you relied on these events to infer per-phase timing, subscribe to `endpoint_run.grape` (which always fires once per request) or register a no-op filter to keep the phase instrumented.
+
 #### `Grape::Endpoint.before_each` moved to `Grape::Testing`
 
 `Grape::Endpoint.before_each` and `Grape::Endpoint.reset_before_each` are now only available after requiring `grape/testing`. This module is intended for test environments only and is not loaded by default.
