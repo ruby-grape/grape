@@ -17,12 +17,17 @@ module Grape
       #   env['api.version'] => 'v1'
       #
       class Path < Base
+        def initialize(app, **options)
+          super
+          @prefixes = [mount_path, Grape::Router.normalize_path(prefix)].select { |p| p.present? && p != '/' }.freeze
+        end
+
         def before
           path_info = Grape::Router.normalize_path(env[Rack::PATH_INFO])
           return if path_info == '/'
 
-          [mount_path, Grape::Router.normalize_path(prefix)].each do |path|
-            path_info = path_info.delete_prefix(path) if path.present? && path != '/' && path_info.start_with?(path)
+          path_info = @prefixes.reduce(path_info) do |pi, path|
+            pi.start_with?(path) ? pi.delete_prefix(path) : pi
           end
 
           slash_position = path_info.index('/', 1) # omit the first one
