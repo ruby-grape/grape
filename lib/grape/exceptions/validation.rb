@@ -3,6 +3,8 @@
 module Grape
   module Exceptions
     class Validation < Base
+      EMPTY_BACKTRACE = [].freeze
+
       attr_reader :params, :message_key
 
       def initialize(params:, message: nil, status: nil, headers: nil)
@@ -16,6 +18,10 @@ module Grape
         end
 
         super(status:, message:, headers:)
+        # Pre-seed the backtrace so Ruby's raise skips capture. Validation errors are
+        # a hot path (raised per bad attribute) and end up as 400 Bad Request responses;
+        # backtraces here point into Grape internals and have no diagnostic value.
+        set_backtrace(EMPTY_BACKTRACE)
       end
 
       # Remove all the unnecessary stuff from Grape::Exceptions::Base like status
