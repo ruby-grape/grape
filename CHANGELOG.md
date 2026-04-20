@@ -7,6 +7,7 @@
 * [#2686](https://github.com/ruby-grape/grape/pull/2686): Add `Grape::Middleware::PrecomputedContentTypes` to warm content-type caches on the parent middleware instance (opt-in via `include`); short-circuit `Middleware::Base#merge_headers` when no headers were set - [@ericproulx](https://github.com/ericproulx).
 * [#2683](https://github.com/ruby-grape/grape/pull/2683): Introduce `Grape::Util::Lazy::Base` for unified lazy-type dispatch - [@ericproulx](https://github.com/ericproulx).
 * [#2685](https://github.com/ruby-grape/grape/pull/2685): Skip `run_filters` and `endpoint_run_filters.grape` instrumentation when the filter list is empty - [@ericproulx](https://github.com/ericproulx).
+* [#2684](https://github.com/ruby-grape/grape/pull/2684): Readability refactors: case/when, guard clauses, small cleanups - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

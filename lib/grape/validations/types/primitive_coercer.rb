@@ -29,9 +29,14 @@ module Grape
         # but Virtus wouldn't accept it. So, this method only exists to not introduce
         # breaking changes.
         def reject?(val)
-          (val.is_a?(Array) && type == String) ||
-            (val.is_a?(String) && type == Hash) ||
-            (val.is_a?(Hash) && type == String)
+          case val
+          when Array, Hash
+            type == String
+          when String
+            type == Hash
+          else
+            false
+          end
         end
 
         # Dry-Types treats an empty string as invalid. However, Grape considers an empty string as

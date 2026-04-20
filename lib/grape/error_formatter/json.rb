@@ -11,10 +11,14 @@ module Grape
         private
 
         def wrap_message(message)
-          return message if message.is_a?(Hash)
-          return message.as_json if message.is_a?(Exceptions::ValidationErrors)
-
-          { error: ensure_utf8(message) }
+          case message
+          when Hash
+            message
+          when Exceptions::ValidationErrors
+            message.as_json
+          else
+            { error: ensure_utf8(message) }
+          end
         end
 
         def ensure_utf8(message)

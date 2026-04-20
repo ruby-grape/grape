@@ -41,7 +41,7 @@ module Grape
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers, options)
           bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:) do
-            bodies.collect { |body| formatter.call(body, env) }
+            bodies.map { |body| formatter.call(body, env) }
           end
           Rack::Response.new(bodymap, status, headers)
         end
@@ -59,11 +59,9 @@ module Grape
       # @param headers [Hash]
       # @return [Hash]
       def ensure_content_type(headers)
-        if headers[Rack::CONTENT_TYPE]
-          headers
-        else
-          headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
-        end
+        return headers if headers[Rack::CONTENT_TYPE]
+
+        headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
       end
 
       def read_body_input
@@ -90,24 +88,22 @@ module Grape
 
         throw :error, status: 415, message: "The provided content-type '#{media_type}' is not supported." unless content_type_for(fmt)
         parser = Grape::Parser.parser_for fmt, options[:parsers]
-        if parser
-          begin
-            body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
-            if body.is_a?(Hash)
-              env[Rack::RACK_REQUEST_FORM_HASH] = if env.key?(Rack::RACK_REQUEST_FORM_HASH)
-                                                    env[Rack::RACK_REQUEST_FORM_HASH].merge(body)
-                                                  else
-                                                    body
-                                                  end
-              env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
-            end
-          rescue Grape::Exceptions::Base => e
-            raise e
-          rescue StandardError => e
-            throw :error, status: 400, message: e.message, backtrace: e.backtrace, original_exception: e
+        return env[Grape::Env::API_REQUEST_BODY] = body unless parser
+
+        begin
+          body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
+          if body.is_a?(Hash)
+            env[Rack::RACK_REQUEST_FORM_HASH] = if env.key?(Rack::RACK_REQUEST_FORM_HASH)
+                                                  env[Rack::RACK_REQUEST_FORM_HASH].merge(body)
+                                                else
+                                                  body
+                                                end
+            env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
           end
-        else
-          env[Grape::Env::API_REQUEST_BODY] = body
+        rescue Grape::Exceptions::Base => e
+          raise e
+        rescue StandardError => e
+          throw :error, status: 400, message: e.message, backtrace: e.backtrace, original_exception: e
         end
       end
 
