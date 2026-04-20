@@ -46,7 +46,7 @@ module Grape
       # this endpoint and its parents, but later it will be cleaned up,
       # see +reset_validations!+ in lib/grape/dsl/validations.rb
       inheritable_setting.route[:declared_params] = inheritable_setting.namespace_stackable[:declared_params].flatten
-      inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations]
+      inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations].dup
 
       inheritable_setting.namespace_stackable[:representations] ||= []
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
