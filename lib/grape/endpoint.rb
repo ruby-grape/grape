@@ -208,7 +208,7 @@ module Grape
     end
 
     def run_filters(filters, type = :other)
-      return unless filters
+      return if filters.blank?
 
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters:, type:) do
         filters.each { |filter| instance_eval(&filter) }
