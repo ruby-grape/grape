@@ -13,6 +13,7 @@
 * [#2689](https://github.com/ruby-grape/grape/pull/2689): Avoid empty-hash merges on request hot paths - [@ericproulx](https://github.com/ericproulx).
 * [#2690](https://github.com/ruby-grape/grape/pull/2690): Avoid allocating an empty array on every `StackableValues#[]` miss - [@ericproulx](https://github.com/ericproulx).
 * [#2691](https://github.com/ruby-grape/grape/pull/2691): Precompute the prefix list in `Middleware::Versioner::Path` - [@ericproulx](https://github.com/ericproulx).
+* [#2692](https://github.com/ruby-grape/grape/pull/2692): Replace per-request `Proc` allocation in `Router#transaction` with a `halt?` helper - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
