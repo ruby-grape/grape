@@ -45,8 +45,7 @@ module Grape
       end
 
       def find_handler(klass)
-        rescue_handler_for_base_only_class(klass) ||
-          rescue_handler_for_class_or_its_ancestor(klass) ||
+        registered_rescue_handler(klass) ||
           rescue_handler_for_grape_exception(klass) ||
           rescue_handler_for_any_class(klass) ||
           raise
@@ -68,16 +67,13 @@ module Grape
         error_response(message: exception.message, backtrace: exception.backtrace, original_exception: exception)
       end
 
-      def rescue_handler_for_base_only_class(klass)
-        error, handler = options[:base_only_rescue_handlers]&.find { |err, _handler| klass == err }
-
-        return unless error
-
-        handler || method(:default_rescue_handler)
+      def registered_rescue_handler(klass)
+        rescue_handler_from(:base_only_rescue_handlers) { |err| klass == err } ||
+          rescue_handler_from(:rescue_handlers) { |err| klass <= err }
       end
 
-      def rescue_handler_for_class_or_its_ancestor(klass)
-        error, handler = options[:rescue_handlers]&.find { |err, _handler| klass <= err }
+      def rescue_handler_from(key)
+        error, handler = options[key]&.find { |err, _handler| yield(err) }
 
         return unless error
 
