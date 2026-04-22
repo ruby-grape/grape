@@ -10,6 +10,7 @@
 * [#2684](https://github.com/ruby-grape/grape/pull/2684): Readability refactors: case/when, guard clauses, small cleanups - [@ericproulx](https://github.com/ericproulx).
 * [#2687](https://github.com/ruby-grape/grape/pull/2687): Skip backtrace capture on internal validation exceptions - [@ericproulx](https://github.com/ericproulx).
 * [#2688](https://github.com/ruby-grape/grape/pull/2688): Consolidate user-registered rescue handler lookup into `Middleware::Error#registered_rescue_handler` backed by a shared `rescue_handler_from` primitive - [@ericproulx](https://github.com/ericproulx).
+* [#2689](https://github.com/ruby-grape/grape/pull/2689): Avoid empty-hash merges on request hot paths - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

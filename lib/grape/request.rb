@@ -156,16 +156,12 @@ module Grape
       @cookies ||= Grape::Cookies.new(-> { rack_cookies })
     end
 
-    # needs to be public until extensions param_builder are removed
-    def grape_routing_args
-      # preserve version from query string parameters
-      env[Grape::Env::GRAPE_ROUTING_ARGS]&.except(:version, :route_info) || {}
-    end
-
     private
 
     def make_params
-      @params_builder.call(rack_params).deep_merge!(grape_routing_args)
+      params = @params_builder.call(rack_params)
+      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]&.except(:version, :route_info)&.presence
+      routing_args ? params.deep_merge!(routing_args) : params
     rescue *Grape::RACK_ERRORS
       raise Grape::Exceptions::RequestError
     end

@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `Grape::Request#grape_routing_args` has been removed
+
+`grape_routing_args` was previously public to support third-party `params_builder` extensions, which have since been removed. With no remaining callers, the method has been removed. If you were calling it externally, read `env[Grape::Env::GRAPE_ROUTING_ARGS]` directly.
+
 #### `endpoint_run_filters.grape` notification no longer fired for empty filter lists
 
 `ActiveSupport::Notifications` subscribers listening to `endpoint_run_filters.grape` will no longer receive an event when the filter list for a given phase (`:before`, `:before_validation`, `:after_validation`, `:after`, `:finally`) is empty. Previously every phase emitted an event on every request regardless of whether any filters were registered. If you relied on these events to infer per-phase timing, subscribe to `endpoint_run.grape` (which always fires once per request) or register a no-op filter to keep the phase instrumented.
