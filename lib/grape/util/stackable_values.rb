@@ -3,12 +3,14 @@
 module Grape
   module Util
     class StackableValues < BaseInheritable
-      # Even if there is no value, an empty array will be returned.
+      EMPTY = [].freeze
+
+      # Even if there is no value, an empty (frozen) array will be returned.
       def [](name)
         inherited_value = inherited_values[name]
         new_value = new_values[name]
 
-        return new_value || [] unless inherited_value
+        return new_value || EMPTY unless inherited_value
 
         concat_values(inherited_value, new_value)
       end
