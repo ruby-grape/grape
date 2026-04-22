@@ -37,13 +37,13 @@ module Grape
           Versioner.register(klass)
         end
 
-        attr_reader :error_headers, :versions
+        attr_reader :error_headers, :versions, :available_media_types
 
         def initialize(app, **options)
           super
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @versions = options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
-          available_media_types # warm on parent instance so per-request dups inherit it
+          @available_media_types = build_available_media_types
         end
 
         def potential_version_match?(potential_version)
@@ -56,22 +56,20 @@ module Grape
 
         private
 
-        def available_media_types
-          @available_media_types ||= begin
-            media_types = []
-            base_media_type = "application/vnd.#{vendor}"
-            content_types.each_key do |extension|
-              versions&.reverse_each do |version|
-                media_types << "#{base_media_type}-#{version}+#{extension}"
-                media_types << "#{base_media_type}-#{version}"
-              end
-              media_types << "#{base_media_type}+#{extension}"
+        def build_available_media_types
+          media_types = []
+          base_media_type = "application/vnd.#{vendor}"
+          content_types.each_key do |extension|
+            versions&.reverse_each do |version|
+              media_types << "#{base_media_type}-#{version}+#{extension}"
+              media_types << "#{base_media_type}-#{version}"
             end
-
-            media_types << base_media_type
-            media_types.concat(content_types.values.flatten)
-            media_types
+            media_types << "#{base_media_type}+#{extension}"
           end
+
+          media_types << base_media_type
+          media_types.concat(content_types.values.flatten)
+          media_types
         end
       end
     end

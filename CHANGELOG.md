@@ -14,6 +14,7 @@
 * [#2690](https://github.com/ruby-grape/grape/pull/2690): Avoid allocating an empty array on every `StackableValues#[]` miss - [@ericproulx](https://github.com/ericproulx).
 * [#2691](https://github.com/ruby-grape/grape/pull/2691): Precompute the prefix list in `Middleware::Versioner::Path` - [@ericproulx](https://github.com/ericproulx).
 * [#2692](https://github.com/ruby-grape/grape/pull/2692): Replace per-request `Proc` allocation in `Router#transaction` with a `halt?` helper - [@ericproulx](https://github.com/ericproulx).
+* [#2694](https://github.com/ruby-grape/grape/pull/2694): Split `Versioner::Base#available_media_types` into an `attr_reader` plus `build_available_media_types` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
