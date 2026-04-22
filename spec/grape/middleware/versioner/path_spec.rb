@@ -35,7 +35,7 @@ describe Grape::Middleware::Versioner::Path do
       let(:options) { { versions: } }
 
       it 'throws an error if a non-allowed version is specified' do
-        expect(catch(:error) { subject.call(Rack::PATH_INFO => '/v3/awesome') }[:status]).to eq(404)
+        expect(catch(:error) { subject.call(Rack::PATH_INFO => '/v3/awesome') }.status).to eq(404)
       end
 
       it 'allows versions that have been specified' do

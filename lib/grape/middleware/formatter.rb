@@ -60,7 +60,7 @@ module Grape
           Rack::Response.new(bodymap, status, headers)
         end
       rescue Grape::Exceptions::InvalidFormatter => e
-        throw :error, status: 500, message: e.message, backtrace: e.backtrace, original_exception: e
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
       end
 
       def fetch_formatter(headers)
@@ -100,8 +100,8 @@ module Grape
         media_type = rack_request.media_type
         fmt = media_type ? mime_types[media_type] : default_format
 
-        throw :error, status: 415, message: "The provided content-type '#{media_type}' is not supported." unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, parsers
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
+        parser = Grape::Parser.parser_for fmt, options[:parsers]
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
@@ -117,7 +117,7 @@ module Grape
         rescue Grape::Exceptions::Base => e
           raise e
         rescue StandardError => e
-          throw :error, status: 400, message: e.message, backtrace: e.backtrace, original_exception: e
+          throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: e.message, backtrace: e.backtrace, original_exception: e)
         end
       end
 
@@ -139,7 +139,7 @@ module Grape
         if content_type_for(fmt)
           env[Grape::Env::API_FORMAT] = fmt.to_sym
         else
-          throw :error, status: 406, message: "The requested format '#{fmt}' is not supported."
+          throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
         end
       end
 
