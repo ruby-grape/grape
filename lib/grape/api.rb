@@ -56,12 +56,10 @@ module Grape
       # `configuration` as normal.
       def configure
         config = @base_instance.configuration
-        if block_given?
-          yield config
-          self
-        else
-          config
-        end
+        return config unless block_given?
+
+        yield config
+        self
       end
 
       # The remountable class can have a configuration hash to provide some dynamic class-level variables.

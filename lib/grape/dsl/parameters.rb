@@ -126,12 +126,10 @@ module Grape
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if @group
 
-        if opts[:using]
-          require_required_and_optional_fields(attrs.first, using: opts[:using], except: opts[:except])
-        else
-          validate_attributes(attrs, **opts, &block)
-          block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], &block) : push_declared_params(attrs, as: opts[:as])
-        end
+        return require_required_and_optional_fields(attrs.first, using: opts[:using], except: opts[:except]) if opts[:using]
+
+        validate_attributes(attrs, **opts, &block)
+        block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], &block) : push_declared_params(attrs, as: opts[:as])
       end
 
       # Allow, but don't require, one or more parameters for the current
@@ -148,13 +146,10 @@ module Grape
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
-        if opts[:using]
-          require_optional_fields(attrs.first, using: opts[:using], except: opts[:except])
-        else
-          validate_attributes(attrs, **opts, &block)
+        return require_optional_fields(attrs.first, using: opts[:using], except: opts[:except]) if opts[:using]
 
-          block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], optional: true, &block) : push_declared_params(attrs, as: opts[:as])
-        end
+        validate_attributes(attrs, **opts, &block)
+        block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], optional: true, &block) : push_declared_params(attrs, as: opts[:as])
       end
 
       # Define common settings for one or more parameters
@@ -190,15 +185,13 @@ module Grape
       # block yet.
       # @return [Boolean] whether the parameter has been defined
       def declared_param?(param)
-        if lateral?
-          # Elements of @declared_params of lateral scope are pushed in @parent. So check them in @parent.
-          @parent.declared_param?(param)
-        else
-          # @declared_params also includes hashes of options and such, but those
-          # won't be flattened out.
-          @declared_params.flatten.any? do |declared_param_attr|
-            first_hash_key_or_param(declared_param_attr.key) == param
-          end
+        # Elements of @declared_params of lateral scope are pushed in @parent. So check them in @parent.
+        return @parent.declared_param?(param) if lateral?
+
+        # @declared_params also includes hashes of options and such, but those
+        # won't be flattened out.
+        @declared_params.flatten.any? do |declared_param_attr|
+          first_hash_key_or_param(declared_param_attr.key) == param
         end
       end
 
