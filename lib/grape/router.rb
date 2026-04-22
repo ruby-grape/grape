@@ -103,20 +103,10 @@ module Grape
     end
 
     def transaction(input, method, env)
-      # using a Proc is important since `return` will exit the enclosing function
-      cascade_or_return_response = proc do |response|
-        if response
-          cascade?(response).tap do |cascade|
-            return response unless cascade
-
-            # we need to close the body if possible before dismissing
-            response[2].close if response[2].respond_to?(:close)
-          end
-        end
-      end
-
       response = yield
-      last_response_cascade = cascade_or_return_response.call(response)
+      return response if halt?(response)
+
+      last_response_cascade = !response.nil?
       last_neighbor_route = greedy_match?(input)
 
       # If last_neighbor_route exists and request method is OPTIONS,
@@ -127,11 +117,27 @@ module Grape
 
       return last_neighbor_route.call(env) if last_neighbor_route && last_response_cascade && route
 
-      last_response_cascade = cascade_or_return_response.call(process_route(route, input, env)) if route
+      if route
+        route_response = process_route(route, input, env)
+        return route_response if halt?(route_response)
+
+        last_response_cascade = !route_response.nil?
+      end
 
       return process_route(last_neighbor_route, input, env, include_allow_header: true) if !last_response_cascade && last_neighbor_route
 
       nil
+    end
+
+    # Returns true if `response` should be returned as-is from the enclosing
+    # transaction. Closes the body as a side effect when the response is
+    # cascading so callers can safely try the next match.
+    def halt?(response)
+      return false unless response
+
+      cascade = cascade?(response)
+      response[2].close if cascade && response[2].respond_to?(:close)
+      !cascade
     end
 
     def process_route(route, input, env, include_allow_header: false)
