@@ -68,7 +68,7 @@ module Grape
       def initialize
         super
         @cache = Hash.new do |h, parts|
-          h[parts] = Grape::Router.normalize_path(parts.join('/'))
+          h[parts] = Grape::Util::PathNormalizer.call(parts.join('/'))
         end
       end
     end
