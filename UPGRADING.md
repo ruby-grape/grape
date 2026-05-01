@@ -3,6 +3,32 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `Grape::Middleware::Base#options` is now frozen
+
+`@options` is frozen at the end of `Grape::Middleware::Base#initialize` (after `merge_default_options`). The hash is initialized once and treated as immutable for the lifetime of the middleware. Custom middleware that mutates `options[...]` at runtime will now raise `FrozenError`.
+
+If your custom middleware was patching its own options on the fly:
+
+```ruby
+# Before
+class MyMiddleware < Grape::Middleware::Base
+  def before
+    options[:flag] = compute_flag
+    # ...
+  end
+end
+
+# After — store mutable runtime state on a dedicated ivar
+class MyMiddleware < Grape::Middleware::Base
+  def before
+    @flag = compute_flag
+    # ...
+  end
+end
+```
+
+Reading `options[...]` is unchanged.
+
 #### `Grape::Request#grape_routing_args` has been removed
 
 `grape_routing_args` was previously public to support third-party `params_builder` extensions, which have since been removed. With no remaining callers, the method has been removed. If you were calling it externally, read `env[Grape::Env::GRAPE_ROUTING_ARGS]` directly.
