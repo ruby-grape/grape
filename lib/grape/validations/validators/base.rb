@@ -88,7 +88,7 @@ module Grape
           attributes = SingleAttributeIterator.new(@attrs, @scope, params)
           # we collect errors inside array because
           # there may be more than one error per field
-          array_errors = []
+          array_errors = nil
 
           attributes.each do |val, attr_name, empty_val|
             next if !@scope.required? && empty_val
@@ -96,10 +96,10 @@ module Grape
 
             validate_param!(attr_name, val) if @required || (hash_like?(val) && val.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
-            array_errors << e
+            (array_errors ||= []) << e
           end
 
-          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
+          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
         end
 
         protected

@@ -160,8 +160,10 @@ module Grape
 
     def make_params
       params = @params_builder.call(rack_params)
-      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]&.except(:version, :route_info)&.presence
-      routing_args ? params.deep_merge!(routing_args) : params
+      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]
+      return params unless routing_args&.any? { |k, _| k != :version && k != :route_info }
+
+      params.deep_merge!(routing_args.except(:version, :route_info))
     rescue *Grape::RACK_ERRORS
       raise Grape::Exceptions::RequestError
     end

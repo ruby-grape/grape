@@ -5,13 +5,10 @@ module Grape
     class Base
       class << self
         def call(message, backtrace, options = {}, env = nil, original_exception = nil)
-          merge_backtrace = backtrace.present? && options.dig(:rescue_options, :backtrace)
-          merge_original_exception = original_exception && options.dig(:rescue_options, :original_exception)
-
           wrapped_message = wrap_message(present(message, env))
           if wrapped_message.is_a?(Hash)
-            wrapped_message[:backtrace] = backtrace if merge_backtrace
-            wrapped_message[:original_exception] = original_exception.inspect if merge_original_exception
+            wrapped_message[:backtrace] = backtrace if backtrace.present? && options.dig(:rescue_options, :backtrace)
+            wrapped_message[:original_exception] = original_exception.inspect if original_exception && options.dig(:rescue_options, :original_exception)
           end
 
           format_structured_message(wrapped_message)

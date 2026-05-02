@@ -141,7 +141,7 @@ module Grape
 
     def run
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:) do
-        @request = Grape::Request.new(env, build_params_with: inheritable_setting.namespace_inheritable[:build_params_with])
+        @request = Grape::Request.new(env, build_params_with: @build_params_with)
         begin
           run_filters befores, :before
           @before_filter_passed = true
@@ -150,7 +150,6 @@ module Grape
             header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
             raise Grape::Exceptions::MethodNotAllowed.new(header) unless options?
 
-            header 'Allow', header['Allow']
             response_object = ''
             status 204
           else
@@ -215,11 +214,7 @@ module Grape
       end
     end
 
-    %i[befores before_validations after_validations afters finallies].each do |method|
-      define_method method do
-        inheritable_setting.namespace_stackable[method]
-      end
-    end
+    attr_reader :befores, :before_validations, :after_validations, :afters, :finallies
 
     def options?
       options[:options_route_enabled] &&
@@ -233,6 +228,13 @@ module Grape
     def compile!
       @app = options[:app] || build_stack
       @helpers = build_helpers
+      stackable = inheritable_setting.namespace_stackable
+      @befores            = stackable[:befores]
+      @before_validations = stackable[:before_validations]
+      @after_validations  = stackable[:after_validations]
+      @afters             = stackable[:afters]
+      @finallies          = stackable[:finallies]
+      @build_params_with  = inheritable_setting.namespace_inheritable[:build_params_with]
     end
 
     def to_routes

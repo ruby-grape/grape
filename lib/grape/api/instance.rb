@@ -175,18 +175,18 @@ module Grape
         end
       end
 
-      ROOT_PREFIX_VERSIONING_KEY = %i[version version_options root_prefix].freeze
-      private_constant :ROOT_PREFIX_VERSIONING_KEY
+      ROOT_PREFIX_VERSIONING_KEYS = %i[version version_options root_prefix].freeze
+      private_constant :ROOT_PREFIX_VERSIONING_KEYS
 
       # Allows definition of endpoints that ignore the versioning configuration
       # used by the rest of your API.
       def without_root_prefix_and_versioning
         inheritable_setting = self.class.inheritable_setting
-        deleted_values = inheritable_setting.namespace_inheritable.delete(*ROOT_PREFIX_VERSIONING_KEY)
+        deleted_values = inheritable_setting.namespace_inheritable.delete(*ROOT_PREFIX_VERSIONING_KEYS)
         yield
       ensure
-        ROOT_PREFIX_VERSIONING_KEY.each_with_index do |key, index|
-          inheritable_setting.namespace_inheritable[key] = deleted_values[index]
+        ROOT_PREFIX_VERSIONING_KEYS.zip(deleted_values) do |key, value|
+          inheritable_setting.namespace_inheritable[key] = value
         end
       end
     end
