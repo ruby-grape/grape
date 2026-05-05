@@ -146,10 +146,13 @@ module Grape
 
         return args.pop if args.last.is_a?(Proc)
         return block if block
-        return with if with.instance_of?(Proc) || with.instance_of?(Symbol)
-        return with.to_sym if with.instance_of?(String)
+        return unless with
 
-        raise ArgumentError, "with: #{with.class}, expected Symbol, String or Proc" if with
+        case with
+        when Proc, Symbol then with
+        when String       then with.to_sym
+        else raise ArgumentError, "with: #{with.class}, expected Symbol, String or Proc"
+        end
       end
     end
   end
