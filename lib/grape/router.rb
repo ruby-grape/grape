@@ -2,31 +2,12 @@
 
 module Grape
   class Router
-    # Taken from Rails
-    #     normalize_path("/foo")  # => "/foo"
-    #     normalize_path("/foo/") # => "/foo"
-    #     normalize_path("foo")   # => "/foo"
-    #     normalize_path("")      # => "/"
-    #     normalize_path("/%ab")  # => "/%AB"
-    # https://github.com/rails/rails/blob/00cc4ff0259c0185fe08baadaa40e63ea2534f6e/actionpack/lib/action_dispatch/journey/router/utils.rb#L19
+    # @deprecated Use {Grape::Util::PathNormalizer.call} instead.
     def self.normalize_path(path)
-      return '/' unless path
-      return path if path == '/'
-
-      # Fast path for the overwhelming majority of paths that don't need to be normalized
-      return path if path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//}))
-
-      # Slow path
-      encoding = path.encoding
-      path = "/#{path}"
-      path.squeeze!('/')
-
-      unless path == '/'
-        path.delete_suffix!('/')
-        path.gsub!(/(%[a-f0-9]{2})/) { ::Regexp.last_match(1).upcase }
-      end
-
-      path.force_encoding(encoding)
+      Grape.deprecator.warn(
+        '`Grape::Router.normalize_path` is deprecated. Use `Grape::Util::PathNormalizer.call` instead.'
+      )
+      Grape::Util::PathNormalizer.call(path)
     end
 
     def initialize
@@ -62,7 +43,7 @@ module Grape
 
     def call(env)
       with_optimization do
-        input = Router.normalize_path(env[Rack::PATH_INFO])
+        input = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
         method = env[Rack::REQUEST_METHOD]
         response, route = identity(input, method, env)
         response || rotation(input, method, env, route)
