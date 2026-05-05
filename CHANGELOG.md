@@ -17,6 +17,7 @@
 * [#2694](https://github.com/ruby-grape/grape/pull/2694): Split `Versioner::Base#available_media_types` into an `attr_reader` plus `build_available_media_types` - [@ericproulx](https://github.com/ericproulx).
 * [#2695](https://github.com/ruby-grape/grape/pull/2695): Lift trailing `if/else` into guard clauses - [@ericproulx](https://github.com/ericproulx).
 * [#2698](https://github.com/ruby-grape/grape/pull/2698): Collapse `DSL::RequestResponse#extract_handler` type-dispatch into a `case`/`when` - [@ericproulx](https://github.com/ericproulx).
+* [#2696](https://github.com/ruby-grape/grape/pull/2696): Reduce per-request allocations on the request hot path; migrate middleware options to `attr_reader` and freeze `@options` post-init - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -6,10 +6,24 @@ module Grape
       include PrecomputedContentTypes
 
       DEFAULT_OPTIONS = {
-        default_format: :txt
+        content_types: nil,
+        default_format: :txt,
+        format: nil,
+        formatters: nil,
+        parsers: nil
       }.freeze
 
       ALL_MEDIA_TYPES = '*/*'
+
+      attr_reader :default_format, :format, :formatters, :parsers
+
+      def initialize(app, **options)
+        super
+        @default_format = @options[:default_format]
+        @format = @options[:format]
+        @formatters = @options[:formatters]
+        @parsers = @options[:parsers]
+      end
 
       def before
         negotiate_content_type
@@ -39,7 +53,7 @@ module Grape
           end
         else
           # Allow content-type to be explicitly overwritten
-          formatter = fetch_formatter(headers, options)
+          formatter = fetch_formatter(headers)
           bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:) do
             bodies.map { |body| formatter.call(body, env) }
           end
@@ -49,9 +63,9 @@ module Grape
         throw :error, status: 500, message: e.message, backtrace: e.backtrace, original_exception: e
       end
 
-      def fetch_formatter(headers, options)
+      def fetch_formatter(headers)
         api_format = env.fetch(Grape::Env::API_FORMAT) { mime_types[headers[Rack::CONTENT_TYPE]] }
-        Grape::Formatter.formatter_for(api_format, options[:formatters])
+        Grape::Formatter.formatter_for(api_format, formatters)
       end
 
       # Set the content type header for the API format if it is not already present.
@@ -84,10 +98,10 @@ module Grape
         return if body.empty?
 
         media_type = rack_request.media_type
-        fmt = media_type ? mime_types[media_type] : options[:default_format]
+        fmt = media_type ? mime_types[media_type] : default_format
 
         throw :error, status: 415, message: "The provided content-type '#{media_type}' is not supported." unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, options[:parsers]
+        parser = Grape::Parser.parser_for fmt, parsers
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
@@ -121,7 +135,7 @@ module Grape
       end
 
       def negotiate_content_type
-        fmt = format_from_extension || query_params['format'] || options[:format] || format_from_header || options[:default_format]
+        fmt = format_from_extension || query_params['format'] || format || format_from_header || default_format
         if content_type_for(fmt)
           env[Grape::Env::API_FORMAT] = fmt.to_sym
         else

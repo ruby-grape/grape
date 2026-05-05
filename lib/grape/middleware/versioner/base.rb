@@ -7,42 +7,39 @@ module Grape
         include Grape::Middleware::PrecomputedContentTypes
 
         DEFAULT_OPTIONS = {
+          mount_path: nil,
           pattern: /.*/i,
           prefix: nil,
-          mount_path: nil,
           version_options: {
-            strict: false,
             cascade: true,
             parameter: 'apiver',
+            strict: false,
             vendor: nil
           }.freeze
         }.freeze
 
         CASCADE_PASS_HEADER = { 'X-Cascade' => 'pass' }.freeze
 
-        DEFAULT_OPTIONS.each_key do |key|
-          define_method key do
-            options[key]
-          end
-        end
-
-        DEFAULT_OPTIONS[:version_options].each_key do |key|
-          define_method key do
-            options[:version_options][key]
-          end
-        end
-
         def self.inherited(klass)
           super
           Versioner.register(klass)
         end
 
-        attr_reader :error_headers, :versions, :available_media_types
+        attr_reader :available_media_types, :cascade, :error_headers, :mount_path, :parameter,
+                    :pattern, :prefix, :strict, :vendor, :versions
 
         def initialize(app, **options)
           super
-          @error_headers = cascade ? CASCADE_PASS_HEADER : {}
-          @versions = options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          version_options = @options[:version_options]
+          @cascade = version_options[:cascade]
+          @mount_path = @options[:mount_path]
+          @parameter = version_options[:parameter]
+          @pattern = @options[:pattern]
+          @prefix = @options[:prefix]
+          @strict = version_options[:strict]
+          @vendor = version_options[:vendor]
+          @versions = @options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          @error_headers = @cascade ? CASCADE_PASS_HEADER : {}
           @available_media_types = build_available_media_types
         end
 
