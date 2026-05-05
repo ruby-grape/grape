@@ -4,7 +4,7 @@ module Grape
   module Util
     class InheritableValues < BaseInheritable
       def [](name)
-        values[name]
+        @new_values.fetch(name) { @inherited_values[name] }
       end
 
       def []=(name, value)

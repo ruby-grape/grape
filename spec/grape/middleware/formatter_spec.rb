@@ -20,13 +20,11 @@ describe Grape::Middleware::Formatter do
     end
 
     context 'default format' do
+      subject { described_class.new(app, default_format: :json) }
+
       let(:body) { ['foo'] }
       let(:env) do
         { Rack::PATH_INFO => '/somewhere', 'HTTP_ACCEPT' => '*/*' }
-      end
-
-      before do
-        subject.options[:default_format] = :json
       end
 
       it 'returns JSON' do
@@ -240,8 +238,8 @@ describe Grape::Middleware::Formatter do
     end
 
     it 'uses custom json formatter' do
-      subject.options[:formatters] = { json: ->(_obj, _env) { 'CUSTOM JSON FORMAT' } }
-      r = Rack::MockResponse[*subject.call(Rack::PATH_INFO => '/info.json')]
+      s = described_class.new(app, formatters: { json: ->(_obj, _env) { 'CUSTOM JSON FORMAT' } })
+      r = Rack::MockResponse[*s.call(Rack::PATH_INFO => '/info.json')]
       expect(r.body).to eq('CUSTOM JSON FORMAT')
     end
   end

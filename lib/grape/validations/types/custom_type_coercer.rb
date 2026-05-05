@@ -73,17 +73,10 @@ module Grape
         # @param method see #new
         # @return [#call] coercion method
         def infer_coercion_method(type, method)
-          if method
-            if method.respond_to? :parse
-              method.method :parse
-            else
-              method
-            end
-          else
-            # Try to use parse() declared on the target type.
-            # This may raise an exception, but we are out of ideas anyway.
-            type.method :parse
-          end
+          return type.method(:parse) unless method
+          return method unless method.respond_to?(:parse)
+
+          method.method(:parse)
         end
 
         # Determine how the type validity of a coerced
