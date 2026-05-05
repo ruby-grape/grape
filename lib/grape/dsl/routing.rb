@@ -113,7 +113,7 @@ module Grape
           in_setting = inheritable_setting
 
           if app.respond_to?(:inheritable_setting, true)
-            mount_path = Grape::Router.normalize_path(path)
+            mount_path = Grape::Util::PathNormalizer.call(path)
             app.top_level_setting.namespace_stackable[:mount_path] = mount_path
 
             app.inherit_settings(inheritable_setting)

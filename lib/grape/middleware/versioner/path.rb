@@ -19,11 +19,11 @@ module Grape
       class Path < Base
         def initialize(app, **options)
           super
-          @prefixes = [mount_path, Grape::Router.normalize_path(prefix)].select { |p| p.present? && p != '/' }.freeze
+          @prefixes = [mount_path, Grape::Util::PathNormalizer.call(prefix)].select { |p| p.present? && p != '/' }.freeze
         end
 
         def before
-          path_info = Grape::Router.normalize_path(env[Rack::PATH_INFO])
+          path_info = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
           return if path_info == '/'
 
           path_info = @prefixes.reduce(path_info) do |pi, path|
