@@ -62,11 +62,12 @@ module Grape
         formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters, default_error_formatter)
         return formatter.call(message, backtrace, options, env, original_exception) if formatter
 
-        throw :error,
-              status: 406,
-              message: "The requested format '#{current_format}' is not supported.",
-              backtrace:,
-              original_exception:
+        throw :error, Grape::Exceptions::ErrorResponse.new(
+          status: 406,
+          message: "The requested format '#{current_format}' is not supported.",
+          backtrace:,
+          original_exception:
+        )
       end
 
       def find_handler(klass)
@@ -76,20 +77,26 @@ module Grape
           raise
       end
 
-      def error_response(error = {})
-        status = error[:status] || default_status
+      def error_response(error = nil)
+        payload = Grape::Exceptions::ErrorResponse.coerce(error)
+
+        status = payload.status || options[:default_status]
         env[Grape::Env::API_ENDPOINT].status(status) # error! may not have been called
-        message = error[:message] || default_message
-        headers = { Rack::CONTENT_TYPE => content_type }.tap do |h|
-          h.merge!(error[:headers]) if error[:headers].is_a?(Hash)
-        end
-        backtrace = error[:backtrace] || error[:original_exception]&.backtrace || []
-        original_exception = error.is_a?(Exception) ? error : error[:original_exception]
-        rack_response(status, headers, format_message(message, backtrace, original_exception))
+        message = payload.message || options[:default_message]
+        headers = { Rack::CONTENT_TYPE => content_type }
+        headers.merge!(payload.headers) if payload.headers.is_a?(Hash)
+        backtrace = payload.backtrace || payload.original_exception&.backtrace || []
+        rack_response(status, headers, format_message(message, backtrace, payload.original_exception))
       end
 
       def default_rescue_handler(exception)
-        error_response(message: exception.message, backtrace: exception.backtrace, original_exception: exception)
+        error_response(
+          Grape::Exceptions::ErrorResponse.new(
+            message: exception.message,
+            backtrace: exception.backtrace,
+            original_exception: exception
+          )
+        )
       end
 
       def registered_rescue_handler(klass)
@@ -144,9 +151,20 @@ module Grape
       end
 
       def error?(response)
-        return false unless response.is_a?(Hash)
+        case response
+        when Grape::Exceptions::ErrorResponse
+          true
+        when Hash
+          return false unless response.key?(:message) && response.key?(:status) && response.key?(:headers)
 
-        response.key?(:message) && response.key?(:status) && response.key?(:headers)
+          Grape.deprecator.warn(
+            'Returning or throwing a Hash from a rescue handler is deprecated. ' \
+            'Use `error!(...)` or a `Grape::Exceptions::ErrorResponse` instead.'
+          )
+          true
+        else
+          false
+        end
       end
     end
   end

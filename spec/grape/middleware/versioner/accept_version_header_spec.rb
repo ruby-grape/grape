@@ -19,9 +19,11 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'does not raise an error' do
-      expect do
-        subject.call('HTTP_ACCEPT_VERSION' => "\x80")
-      end.to throw_symbol(:error, status: 406, headers: { 'X-Cascade' => 'pass' }, message: 'The requested version is not supported.')
+      payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => "\x80") }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.message).to eq('The requested version is not supported.')
     end
   end
 
@@ -43,14 +45,11 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if version is not supported' do
-      expect do
-        subject.call('HTTP_ACCEPT_VERSION' => 'v2').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'The requested version is not supported.'
-      )
+      payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => 'v2').last }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.message).to eq('The requested version is not supported.')
     end
   end
 
@@ -72,25 +71,19 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect do
-        subject.call({}).last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept-Version header must be set.'
-      )
+      payload = catch(:error) { subject.call({}).last }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect do
-        subject.call('HTTP_ACCEPT_VERSION' => '').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: { 'X-Cascade' => 'pass' },
-        message: 'Accept-Version header must be set.'
-      )
+      payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => '').last }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq('X-Cascade' => 'pass')
+      expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
     it 'succeeds if proper header is set' do
@@ -106,25 +99,19 @@ describe Grape::Middleware::Versioner::AcceptVersionHeader do
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
-      expect do
-        subject.call({}).last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept-Version header must be set.'
-      )
+      payload = catch(:error) { subject.call({}).last }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq({})
+      expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
     it 'fails with 406 Not Acceptable if header is empty' do
-      expect do
-        subject.call('HTTP_ACCEPT_VERSION' => '').last
-      end.to throw_symbol(
-        :error,
-        status: 406,
-        headers: {},
-        message: 'Accept-Version header must be set.'
-      )
+      payload = catch(:error) { subject.call('HTTP_ACCEPT_VERSION' => '').last }
+      expect(payload).to be_a(Grape::Exceptions::ErrorResponse)
+      expect(payload.status).to eq(406)
+      expect(payload.headers).to eq({})
+      expect(payload.message).to eq('Accept-Version header must be set.')
     end
 
     it 'succeeds if proper header is set' do

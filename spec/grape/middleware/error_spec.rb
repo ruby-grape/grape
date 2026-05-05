@@ -64,4 +64,38 @@ describe Grape::Middleware::Error do
       expect(last_response.body).to eq({ code: 200 }.to_json)
     end
   end
+
+  context 'when a rescue handler returns a Hash with :message, :status, :headers' do
+    let(:raising_app) do
+      Class.new do
+        def self.call(_env)
+          raise StandardError, 'boom'
+        end
+      end
+    end
+
+    let(:options) do
+      {
+        rescue_handlers: {
+          StandardError => -> { { message: 'oops', status: 500, headers: {} } }
+        }
+      }
+    end
+
+    let(:app) do
+      opts = options
+      context = self
+      Rack::Builder.app do
+        use Spec::Support::EndpointFaker
+        use Grape::Middleware::Error, **opts # rubocop:disable RSpec/DescribedClass
+        run context.raising_app
+      end
+    end
+
+    it 'emits a deprecation warning' do
+      expect { get '/' }.to raise_error(
+        ActiveSupport::DeprecationException, /rescue handler is deprecated/
+      )
+    end
+  end
 end

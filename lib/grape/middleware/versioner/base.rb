@@ -48,7 +48,7 @@ module Grape
         end
 
         def version_not_found!
-          throw :error, status: 404, message: '404 API Version Not Found', headers: CASCADE_PASS_HEADER
+          throw :error, Grape::Exceptions::ErrorResponse.new(status: 404, message: '404 API Version Not Found', headers: CASCADE_PASS_HEADER)
         end
 
         private

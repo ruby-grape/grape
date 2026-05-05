@@ -29,6 +29,12 @@ end
 
 Reading `options[...]` is unchanged.
 
+#### Throw `:error` payloads are now `Grape::Exceptions::ErrorResponse`
+
+The payload thrown via `throw :error, ...` is now a `Grape::Exceptions::ErrorResponse` value object instead of a `Hash`. If you `catch(:error)` and inspect the payload, switch from `payload[:status]` to `payload.status` (or `payload[:message]` to `payload.message`, etc.). User-defined `throw :error, hash` calls continue to work — `Middleware::Error#error_response` coerces Hashes, exceptions, and `ErrorResponse` instances at the boundary.
+
+Returning or throwing a `Hash` with `:message`, `:status`, and `:headers` from a `rescue_from` handler is now deprecated and will be removed in a future release. Use `error!(...)` or return/throw a `Grape::Exceptions::ErrorResponse` instead.
+
 #### `Grape::Request#grape_routing_args` has been removed
 
 `grape_routing_args` was previously public to support third-party `params_builder` extensions, which have since been removed. With no remaining callers, the method has been removed. If you were calling it externally, read `env[Grape::Env::GRAPE_ROUTING_ARGS]` directly.

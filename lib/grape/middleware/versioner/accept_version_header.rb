@@ -30,7 +30,7 @@ module Grape
         private
 
         def not_acceptable!(message)
-          throw :error, status: 406, headers: error_headers, message:
+          throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, headers: error_headers, message:)
         end
       end
     end

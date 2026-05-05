@@ -297,8 +297,8 @@ describe Grape::Middleware::Formatter do
                 'CONTENT_LENGTH' => io.length.to_s
               )
             end
-            expect(error[:status]).to eq(415)
-            expect(error[:message]).to eq("The provided content-type 'application/atom+xml' is not supported.")
+            expect(error.status).to eq(415)
+            expect(error.message).to eq("The provided content-type 'application/atom+xml' is not supported.")
           end
         end
       end
@@ -481,9 +481,9 @@ describe Grape::Middleware::Formatter do
         )
       end
 
-      expect(error[:message]).to eq 'fail'
-      expect(error[:backtrace].size).to be >= 1
-      expect(error[:original_exception].class).to eq StandardError
+      expect(error.message).to eq 'fail'
+      expect(error.backtrace.size).to be >= 1
+      expect(error.original_exception.class).to eq StandardError
     end
   end
 end

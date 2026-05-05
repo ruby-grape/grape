@@ -17,6 +17,26 @@ describe Grape::Exceptions::Base do
     it { is_expected.to eq(message) }
   end
 
+  describe '#[]' do
+    subject(:exception) { described_class.new(status: 418, message: 'a_message', headers: { 'X-Foo' => 'bar' }) }
+
+    it 'reads status via symbol index' do
+      expect(exception[:status]).to eq(418)
+    end
+
+    it 'reads message via symbol index' do
+      expect(exception[:message]).to eq('a_message')
+    end
+
+    it 'reads headers via symbol index' do
+      expect(exception[:headers]).to eq('X-Foo' => 'bar')
+    end
+
+    it 'raises NoMethodError for an unknown index' do
+      expect { exception[:unknown] }.to raise_error(NoMethodError)
+    end
+  end
+
   describe '#compose_message' do
     subject { described_class.new.__send__(:compose_message, key, **attributes) }
 

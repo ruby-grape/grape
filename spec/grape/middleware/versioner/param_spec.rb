@@ -42,7 +42,7 @@ describe Grape::Middleware::Versioner::Param do
 
     it 'throws an error if a non-allowed version is specified' do
       env = Rack::MockRequest.env_for('/awesome', params: { 'apiver' => 'v3' })
-      expect(catch(:error) { subject.call(env) }[:status]).to eq(404)
+      expect(catch(:error) { subject.call(env) }.status).to eq(404)
     end
 
     it 'allows versions that have been specified' do
