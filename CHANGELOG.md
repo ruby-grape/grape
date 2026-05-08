@@ -26,6 +26,7 @@
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Refactor `ParamsScope#validates` and `ParamsDocumentation` around a frozen `Grape::Validations::ValidationsSpec` value object; the validations hash supplied by the DSL is no longer mutated and the helper chain becomes pure - [@ericproulx](https://github.com/ericproulx).
 * [#2707](https://github.com/ruby-grape/grape/pull/2707): Tighten six guard conditions in `lib/` via De Morgan and `blank?`/`present?`/`include?` rewrites; no behaviour change - [@ericproulx](https://github.com/ericproulx).
 * [#2709](https://github.com/ruby-grape/grape/pull/2709): Lift trailing `if/else` into guard clauses; tighten `Util::Lazy::ValueEnumerable` - [@ericproulx](https://github.com/ericproulx).
+* [#2702](https://github.com/ruby-grape/grape/pull/2702): Add `oneof:` option for `requires`/`optional` to accept a Hash parameter matching one of several variant schemas (resolves [#2385](https://github.com/ruby-grape/grape/issues/2385)) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

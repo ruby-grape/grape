@@ -1335,6 +1335,56 @@ end
 client.get('/', status_codes: %w(1 two)) # => [1, "two"]
 ```
 
+### Multiple Hash Schemas with `oneof`
+
+A Hash parameter that may take one of several different shapes can be declared with the `oneof:` option. Each variant is a `Proc` that uses the normal `params` DSL — so the full validator surface (`requires`, `optional`, `regexp:`, `values:`, `allow_blank:`, nested `Hash`/`Array`, etc.) is available inside.
+
+```ruby
+params do
+  requires :value, type: Hash, oneof: [
+    proc { requires :fixed_price, type: Float },
+    proc do
+      requires :time_unit, type: String
+      requires :rate, type: Float
+    end
+  ]
+end
+post '/pricing' do
+  params[:value]
+end
+```
+
+Both of these requests succeed:
+
+```bash
+curl -d '{"value":{"fixed_price":100.0}}' -H 'Content-Type: application/json' /pricing
+curl -d '{"value":{"time_unit":"hour","rate":50.0}}' -H 'Content-Type: application/json' /pricing
+```
+
+A request that doesn't match any variant returns `400` with `value does not match any of the allowed schemas`.
+
+Variants are tried in declaration order; the first variant that validates without errors wins, and any coercions it performed (e.g. `"150.5"` → `150.5`) are applied to the request params. Nested hash structures inside variants work the same as elsewhere in Grape:
+
+```ruby
+params do
+  requires :options, type: Hash, oneof: [
+    proc do
+      requires :form, type: Hash do
+        requires :colour, type: String
+        optional :size, type: Integer
+      end
+    end,
+    proc do
+      requires :api, type: Hash do
+        requires :authenticated, type: Grape::API::Boolean
+      end
+    end
+  ]
+end
+```
+
+`oneof:` requires `type: Hash`. The variants array must be non-empty and each entry must be a `Proc`; violating either raises an `ArgumentError` at definition time.
+
 ### Validation of Nested Parameters
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
