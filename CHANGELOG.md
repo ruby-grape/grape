@@ -26,6 +26,7 @@
 
 * [#2678](https://github.com/ruby-grape/grape/pull/2678): Update rubocop to 1.86.0 and autocorrect offenses - [@ericproulx](https://github.com/ericproulx).
 * [#2682](https://github.com/ruby-grape/grape/pull/2682): Fix `Style/OptionalBooleanParameter` offenses - [@ericproulx](https://github.com/ericproulx).
+* [#2699](https://github.com/ruby-grape/grape/pull/2699): Fix `Grape::Validations::Types::CustomTypeCoercer` dropping symbolized hash keys for `Array`/`Set` types; refactor the class for readability - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.2.1 (2026-04-16)
