@@ -83,12 +83,10 @@ module Grape
 
       # @return [Rack::Builder] the builder object with our middlewares applied
       def build
-        Rack::Builder.new.tap do |builder|
-          others.shift(others.size).each { |m| merge_with(m) }
-          middlewares.each do |m|
-            m.build(builder)
-          end
-        end
+        builder = Rack::Builder.new
+        others.shift(others.size).each { |m| merge_with(m) }
+        middlewares.each { |m| m.build(builder) }
+        builder
       end
 
       # @description Add middlewares with :use operation to the stack. Store others with :insert_* operation for later

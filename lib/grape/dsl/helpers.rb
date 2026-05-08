@@ -45,9 +45,8 @@ module Grape
       def include_block(block)
         return unless block
 
-        Module.new.tap do |mod|
-          make_inclusion(mod) { mod.class_eval(&block) }
-        end
+        mod = Module.new
+        make_inclusion(mod) { mod.class_eval(&block) }
       end
 
       def make_inclusion(mod, &)
@@ -57,10 +56,10 @@ module Grape
       end
 
       def include_all_in_scope
-        Module.new.tap do |mod|
-          namespace_stackable(:helpers).each { |mod_to_include| mod.include mod_to_include }
-          change!
-        end
+        mod = Module.new
+        namespace_stackable(:helpers).each { |mod_to_include| mod.include mod_to_include }
+        change!
+        mod
       end
 
       def define_boolean_in_mod(mod)

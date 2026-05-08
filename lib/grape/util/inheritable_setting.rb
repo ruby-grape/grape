@@ -63,19 +63,19 @@ module Grape
       # changed via #inherit_from, it will copy that inheritence to any copies
       # which were made.
       def point_in_time_copy
-        self.class.new.tap do |new_setting|
-          point_in_time_copies << new_setting
-          new_setting.point_in_time_copies = []
+        new_setting = self.class.new
+        point_in_time_copies << new_setting
+        new_setting.point_in_time_copies = []
 
-          new_setting.namespace = namespace.clone
-          new_setting.namespace_inheritable = namespace_inheritable.clone
-          new_setting.namespace_stackable = namespace_stackable.clone
-          new_setting.namespace_reverse_stackable = namespace_reverse_stackable.clone
-          new_setting.route = route.clone
-          new_setting.api_class = api_class
+        new_setting.namespace = namespace.clone
+        new_setting.namespace_inheritable = namespace_inheritable.clone
+        new_setting.namespace_stackable = namespace_stackable.clone
+        new_setting.namespace_reverse_stackable = namespace_reverse_stackable.clone
+        new_setting.route = route.clone
+        new_setting.api_class = api_class
 
-          new_setting.inherit_from(parent)
-        end
+        new_setting.inherit_from(parent)
+        new_setting
       end
 
       # Resets the instance store of per-route settings.

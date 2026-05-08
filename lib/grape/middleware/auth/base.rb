@@ -8,9 +8,8 @@ module Grape
           super
           return unless options.key?(:type)
 
-          @auth_strategy = Grape::Middleware::Auth::Strategies[options[:type]].tap do |auth_strategy|
-            raise Grape::Exceptions::UnknownAuthStrategy.new(strategy: options[:type]) unless auth_strategy
-          end
+          @auth_strategy = Grape::Middleware::Auth::Strategies[options[:type]]
+          raise Grape::Exceptions::UnknownAuthStrategy.new(strategy: options[:type]) unless @auth_strategy
         end
 
         def call!(env)

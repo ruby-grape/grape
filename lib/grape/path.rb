@@ -31,13 +31,13 @@ module Grape
     end
 
     def build_parts(raw_path, raw_namespace, settings)
-      [].tap do |parts|
-        add_part(parts, settings[:mount_path])
-        add_part(parts, settings[:root_prefix])
-        parts << VERSION_SEGMENT if uses_path_versioning?(settings)
-        add_part(parts, raw_namespace)
-        add_part(parts, raw_path)
-      end
+      parts = []
+      add_part(parts, settings[:mount_path])
+      add_part(parts, settings[:root_prefix])
+      parts << VERSION_SEGMENT if uses_path_versioning?(settings)
+      add_part(parts, raw_namespace)
+      add_part(parts, raw_path)
+      parts
     end
 
     def add_part(parts, value)

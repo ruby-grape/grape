@@ -128,7 +128,7 @@ module Grape
       end
 
       def run_rescue_handler(handler, error, endpoint)
-        handler = endpoint.public_method(handler) if handler.instance_of?(Symbol)
+        handler = endpoint.public_method(handler) if handler.is_a?(Symbol)
         response = catch(:error) do
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
         end
