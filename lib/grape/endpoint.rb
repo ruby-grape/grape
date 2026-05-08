@@ -16,6 +16,13 @@ module Grape
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
 
+    # The logger configured on the API this endpoint belongs to. Available
+    # inside route handlers, +before+/+after+/+after_validation+/+finally+
+    # filters, and +rescue_from+ blocks.
+    def logger
+      options[:for].logger
+    end
+
     class << self
       def block_to_unbound_method(block)
         return unless block
