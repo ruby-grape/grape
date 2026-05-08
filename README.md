@@ -312,7 +312,7 @@ mount ::Some::Api => '/some/api', with: { condition: true }
 
 You can access `configuration` on the class (to use as dynamic attributes), inside blocks (like namespace)
 
-If you want logic happening given on an `configuration`, you can use the helper `given`.
+If you want logic happening based on a `configuration`, you can use the helper `given`.
 
 ```ruby
 class ConditionalEndpoint::API < Grape::API
@@ -463,7 +463,7 @@ vnd.vendor-and-or-resource-v1234+format
 
 Basically all tokens between the final `-` and the `+` will be interpreted as the version.
 
-Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` head.
+Using this versioning strategy, clients should pass the desired version in the HTTP `Accept` header.
 
     curl -H Accept:application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
@@ -485,7 +485,7 @@ Using this versioning strategy, clients should pass the desired version in the H
 
     curl -H "Accept-Version:v1" http://localhost:9292/statuses/public_timeline
 
-By default, the first matching version is used when no `Accept-Version` header is supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error is returned when no correct `Accept` header is supplied and the `:cascade` option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
+By default, the first matching version is used when no `Accept-Version` header is supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error is returned when no correct `Accept-Version` header is supplied and the `:cascade` option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
 
 #### Param
 
@@ -525,13 +525,13 @@ Grape.config.lint = true
 ```
 
 ### Bug in Rack::ETag under Rack 3.X
-If you're using Rack 3.X and the `Rack::Etag` middleware (used by [Rails](https://guides.rubyonrails.org/rails_on_rack.html#inspecting-middleware-stack)), a [bug](https://github.com/rack/rack/pull/2324) related to linting has been fixed in [3.1.13](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3113---2025-04-13) and [3.0.15](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3015---2025-04-13) respectively.
+If you're using Rack 3.X and the `Rack::ETag` middleware (used by [Rails](https://guides.rubyonrails.org/rails_on_rack.html#inspecting-middleware-stack)), a [bug](https://github.com/rack/rack/pull/2324) related to linting has been fixed in [3.1.13](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3113---2025-04-13) and [3.0.15](https://github.com/rack/rack/blob/v3.1.13/CHANGELOG.md#3015---2025-04-13) respectively.
 
 ## Describing Methods
 
 You can add a description to API methods and namespaces. The description would be used by [grape-swagger][grape-swagger] to generate swagger compliant documentation.
 
-Note: Description block is only for documentation and won't affects API behavior.
+Note: Description block is only for documentation and won't affect API behavior.
 
 ```ruby
 desc 'Returns your public timeline.' do
@@ -1183,28 +1183,6 @@ The following are all valid types, supported out of the box by Grape:
 * Rack::Multipart::UploadedFile (alias `File`)
 * JSON
 
-### Integer/Fixnum and Coercions
-
-Please be aware that the behavior differs between Ruby 2.4 and earlier versions.
-In Ruby 2.4, values consisting of numbers are converted to Integer, but in earlier versions it will be treated as Fixnum.
-
-```ruby
-params do
-  requires :integers, type: Hash do
-    requires :int, coerce: Integer
-  end
-end
-get '/int' do
-  params[:integers][:int].class
-end
-
-...
-
-get '/int' integers: { int: '45' }
-  #=> Integer in ruby 2.4
-  #=> Fixnum in earlier ruby versions
-```
-
 ### Custom Types and Coercions
 
 Aside from the default set of supported types listed above, any class can be used as a type as long as an explicit coercion method is supplied. If the type implements a class-level `parse` method, Grape will use it automatically. This method must take one string argument and return an instance of the correct type, or return an instance of `Grape::Types::InvalidValue` which optionally accepts a message to be returned in the response.
@@ -1443,7 +1421,7 @@ params do
 end
 ```
 
-You can organize settings into layers using nested `with' blocks. Each layer can use, add to, or change the settings of the layer above it. This helps to keep complex parameters organized and consistent, while still allowing for specific customizations to be made.
+You can organize settings into layers using nested `with` blocks. Each layer can use, add to, or change the settings of the layer above it. This helps to keep complex parameters organized and consistent, while still allowing for specific customizations to be made.
 
 ```ruby
 params do
@@ -1552,13 +1530,15 @@ end
 
 While Procs are convenient for single cases, consider using [Custom Validators](#custom-validators) in cases where a validation is used more than once.
 
-Note that [allow_blank](#allow_blank) validator applies while using `:values`. In the following example the absence of `:allow_blank` does not prevent `:state` from receiving blank values because `:allow_blank` defaults to `true`.
+When using `optional` together with `:values`, a missing key, a `nil` value, and any value that coerces to `nil` (such as `""` for `type: Symbol`) all pass validation — `optional` collapses "key may be absent" with "value may be nil". To reject blank values while still allowing the key to be absent, add `allow_blank: false`:
 
 ```ruby
 params do
-  requires :state, type: Symbol, values: [:active, :inactive]
+  optional :state, type: Symbol, values: [:active, :inactive], allow_blank: false
 end
 ```
+
+With `requires`, blank values are already rejected: `requires` enforces presence and `:values` rejects `nil`.
 
 #### `except_values`
 
@@ -1920,8 +1900,8 @@ To skip all subsequent validation checks when a specific param is found invalid,
 The following example will not check if `:wine` is present unless it finds `:beer`.
 ```ruby
 params do
-  required :beer, fail_fast: true
-  required :wine
+  requires :beer, fail_fast: true
+  requires :wine
 end
 ```
 The result of empty params would be a single `Grape::Exceptions::ValidationErrors` error.
@@ -1929,7 +1909,7 @@ The result of empty params would be a single `Grape::Exceptions::ValidationError
 Similarly, no regular expression test will be performed if `:blah` is blank in the following example.
 ```ruby
 params do
-  required :blah, allow_blank: false, regexp: /blah/, fail_fast: true
+  requires :blah, allow_blank: false, regexp: /blah/, fail_fast: true
 end
 ```
 
@@ -2598,7 +2578,7 @@ You can set additional headers for the response. They will be merged with header
 error!('Something went wrong', 500, 'X-Error-Detail' => 'Invalid token.')
 ```
 
-You can present documented errors with a Grape entity using the the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
+You can present documented errors with a Grape entity using the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
 
 ```ruby
 module API
