@@ -11,19 +11,25 @@ module Grape
 
       # Fetch our top-level settings, which apply to all endpoints in the API.
       def top_level_setting
-        @top_level_setting ||= Grape::Util::InheritableSetting.new.tap do |setting|
-          # Doesn't try to inherit settings from +Grape::API::Instance+ which also responds to
-          # +inheritable_setting+, however, it doesn't contain any user-defined settings.
-          # Otherwise, it would lead to an extra instance of +Grape::Util::InheritableSetting+
-          # in the chain for every endpoint.
-          setting.inherit_from superclass.inheritable_setting if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API::Instance
-        end
+        return @top_level_setting if @top_level_setting
+
+        @top_level_setting = Grape::Util::InheritableSetting.new
+        # Doesn't try to inherit settings from +Grape::API::Instance+ which also responds to
+        # +inheritable_setting+, however, it doesn't contain any user-defined settings.
+        # Otherwise, it would lead to an extra instance of +Grape::Util::InheritableSetting+
+        # in the chain for every endpoint.
+        @top_level_setting.inherit_from superclass.inheritable_setting if defined?(superclass) && superclass.respond_to?(:inheritable_setting) && superclass != Grape::API::Instance
+        @top_level_setting
       end
 
       # Fetch our current inheritable settings, which are inherited by
       # nested scopes but not shared across siblings.
       def inheritable_setting
-        @inheritable_setting ||= Grape::Util::InheritableSetting.new.tap { |new_settings| new_settings.inherit_from top_level_setting }
+        return @inheritable_setting if @inheritable_setting
+
+        @inheritable_setting = Grape::Util::InheritableSetting.new
+        @inheritable_setting.inherit_from top_level_setting
+        @inheritable_setting
       end
 
       def global_setting(key, value = nil)

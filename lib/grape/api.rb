@@ -67,11 +67,11 @@ module Grape
       # depending on where the endpoint is mounted. Use with care, if you find yourself using configuration
       # too much, you may actually want to provide a new API rather than remount it.
       def mount_instance(configuration: nil)
-        Class.new(@base_parent).tap do |instance|
-          instance.configuration = Grape::Util::EndpointConfiguration.new(configuration || {})
-          instance.base = self
-          replay_setup_on(instance)
-        end
+        instance = Class.new(@base_parent)
+        instance.configuration = Grape::Util::EndpointConfiguration.new(configuration || {})
+        instance.base = self
+        replay_setup_on(instance)
+        instance
       end
 
       private

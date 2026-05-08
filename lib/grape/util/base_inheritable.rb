@@ -28,14 +28,9 @@ module Grape
       end
 
       def keys
-        if new_values.any?
-          inherited_values.keys.tap do |combined|
-            combined.concat(new_values.keys)
-            combined.uniq!
-          end
-        else
-          inherited_values.keys
-        end
+        return inherited_values.keys if new_values.empty?
+
+        (inherited_values.keys + new_values.keys).uniq
       end
 
       def key?(name)
