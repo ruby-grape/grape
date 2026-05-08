@@ -11,6 +11,7 @@ en:
         exactly_one: 'are missing, exactly one parameter must be provided'
         except_values: 'has a value not allowed'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
+        internal_server_error: 'Internal Server Error'
         invalid_accept_header:
           problem: 'invalid accept header'
           resolution: '%{message}'

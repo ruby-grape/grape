@@ -2734,6 +2734,41 @@ class Twitter::API < Grape::API
 end
 ```
 
+#### Re-raising from inside a `rescue_from` block
+
+A `rescue_from` block can re-raise an exception to invoke a different handler. This is useful for translating one exception class into another:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from Grape::Exceptions::ValidationErrors do |e|
+    raise Api::Exceptions::InvalidValueError, e.full_messages
+  end
+
+  rescue_from Api::Exceptions::InvalidValueError do |e|
+    error!({ errors: e.message }, 422)
+  end
+end
+```
+
+The first handler re-raises; the second handler runs against the new exception.
+
+If the re-raised exception has no registered `rescue_from` and is a `Grape::Exceptions::Base` subclass, it is rendered through the default Grape error path (using its own `status` and `message`). Anything else — typos, `NoMethodError`, an unrelated `StandardError` — is treated as an internal error: it is exposed on `env['grape.exception']` for upstream Rack middleware to observe, and rendered to the API consumer as a generic `500 Internal Server Error`. This avoids leaking internal detail in the response body.
+
+You can take control of the internal-error path by opting in with `rescue_from :internal_grape_exceptions`:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :internal_grape_exceptions do |e|
+    Sentry.capture_exception(e)
+    error!({ message: 'Something went wrong' }, 500)
+  end
+end
+```
+
+When this handler is registered the framework hands the original exception to you, and you own the response shape and any logging. The framework deliberately does not log internal errors itself — it has no way to know your preferred format or destination.
+
+A second raise inside the redispatched handler is not redispatched again — it goes straight to the framework's generic 500. This bounds the chain at one redispatch and prevents loops.
+
 You can also rescue all exceptions with a code block and handle the Rack response at the lowest level.
 
 ```ruby

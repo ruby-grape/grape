@@ -98,6 +98,8 @@ module Grape
           inheritable_setting.namespace_inheritable[:rescue_all] = true
           inheritable_setting.namespace_inheritable[:rescue_grape_exceptions] = true
           inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler] = handler
+        elsif args.include?(:internal_grape_exceptions)
+          inheritable_setting.namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
         else
           handler_type =
             case options[:rescue_subclasses]

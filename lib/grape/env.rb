@@ -16,5 +16,6 @@ module Grape
     GRAPE_REQUEST_PARAMS = 'grape.request.params'
     GRAPE_ROUTING_ARGS = 'grape.routing_args'
     GRAPE_ALLOWED_METHODS = 'grape.allowed_methods'
+    GRAPE_EXCEPTION = 'grape.exception'
   end
 end

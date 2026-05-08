@@ -14,6 +14,7 @@ module Grape
         error_formatters: nil,
         format: :txt,
         grape_exceptions_rescue_handler: nil,
+        internal_grape_exceptions_rescue_handler: nil,
         rescue_all: false,
         rescue_grape_exceptions: false,
         rescue_handlers: nil,
@@ -25,8 +26,8 @@ module Grape
 
       attr_reader :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
                   :default_message, :default_status, :error_formatters, :format,
-                  :grape_exceptions_rescue_handler, :rescue_all, :rescue_grape_exceptions,
-                  :rescue_handlers
+                  :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
+                  :rescue_all, :rescue_grape_exceptions, :rescue_handlers
 
       def initialize(app, **options)
         super
@@ -38,6 +39,7 @@ module Grape
         @error_formatters = @options[:error_formatters]
         @format = @options[:format]
         @grape_exceptions_rescue_handler = @options[:grape_exceptions_rescue_handler]
+        @internal_grape_exceptions_rescue_handler = @options[:internal_grape_exceptions_rescue_handler]
         @rescue_all = @options[:rescue_all]
         @rescue_grape_exceptions = @options[:rescue_grape_exceptions]
         @rescue_handlers = @options[:rescue_handlers]
@@ -127,10 +129,12 @@ module Grape
         all_rescue_handler || method(:default_rescue_handler)
       end
 
-      def run_rescue_handler(handler, error, endpoint)
+      def run_rescue_handler(handler, error, endpoint, redispatched: false)
         handler = endpoint.public_method(handler) if handler.is_a?(Symbol)
         response = catch(:error) do
           handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
+        rescue StandardError => e
+          return redispatch(e, endpoint, redispatched)
         end
 
         if error?(response)
@@ -140,6 +144,49 @@ module Grape
         else
           run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
         end
+      end
+
+      # Route an exception raised inside a +rescue_from+ block.
+      #
+      # * If we have already redispatched once (the redispatched handler
+      #   itself raised), go straight to {#framework_default} — bounds the
+      #   chain at one redispatch.
+      # * Else if the exception has a registered +rescue_from+ handler,
+      #   run it.
+      # * Else if it's a +Grape::Exceptions::Base+ subclass, render it
+      #   through +error_response+ with its own +status+ and +message+.
+      # * Else fall through to {#safe_default}, which lets the user opt
+      #   in via +rescue_from :internal_grape_exceptions+ or, failing
+      #   that, applies the framework default.
+      def redispatch(error, endpoint, already_redispatched)
+        return framework_default(endpoint) if already_redispatched
+
+        if (registered = registered_rescue_handler(error.class))
+          run_rescue_handler(registered, error, endpoint, redispatched: true)
+        elsif error.is_a?(Grape::Exceptions::Base)
+          run_rescue_handler(method(:error_response), error, endpoint, redispatched: true)
+        else
+          safe_default(error, endpoint)
+        end
+      end
+
+      # The unrecognised-error path. Exposes the original exception on
+      # the rack env so upstream Rack middleware (loggers, error
+      # trackers) can observe it. If the user registered a
+      # +rescue_from :internal_grape_exceptions+ handler, that handler
+      # runs and owns the response. Otherwise the framework renders the
+      # generic +InternalServerError+ — never the original exception's
+      # message. The framework deliberately does no logging of its own
+      # here; that's the application's call.
+      def safe_default(error, endpoint)
+        env[Grape::Env::GRAPE_EXCEPTION] = error
+        return run_rescue_handler(internal_grape_exceptions_rescue_handler, error, endpoint, redispatched: true) if internal_grape_exceptions_rescue_handler
+
+        framework_default(endpoint)
+      end
+
+      def framework_default(endpoint)
+        run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InternalServerError.new, endpoint)
       end
 
       def error!(message, status = default_status, headers = {}, backtrace = [], original_exception = nil)
