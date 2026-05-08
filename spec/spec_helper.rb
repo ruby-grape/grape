@@ -14,6 +14,10 @@ Grape.deprecator.behavior = :raise
 end
 
 Grape.config.lint = true # lint all apis by default
+# Enabled in CI so that future test additions which accidentally mask
+# Grape::Endpoint instance methods via helpers surface as warnings.
+# Specs that need to toggle it explicitly should restore it to +true+ in their +after+.
+Grape.config.warn_on_helper_overrides = true
 Grape::Util::Registry.include(Deregister)
 
 # The default value for this setting is true in a standard Rails app,

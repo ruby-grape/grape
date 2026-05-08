@@ -93,5 +93,93 @@ describe Grape::DSL::Helpers do
         expect(Class.new { extend Grape::DSL::Helpers }.singleton_methods - Class.methods).to contain_exactly(:helpers)
       end
     end
+
+    context 'with Grape.config.warn_on_helper_overrides enabled' do
+      it 'warns when a helper masks a Grape::Endpoint instance method' do
+        expect do
+          Class.new(Grape::API) do
+            helpers do
+              def params
+                'overridden'
+              end
+            end
+          end
+        end.to output(/helper method `params` overrides Grape::Endpoint#params/).to_stderr
+      end
+
+      it 'warns for each masking method in the same helpers block' do
+        output = capture_stderr do
+          Class.new(Grape::API) do
+            helpers do
+              def params
+                :p
+              end
+
+              def headers
+                :h
+              end
+
+              def my_unique_helper
+                :ok
+              end
+            end
+          end
+        end
+
+        expect(output).to include('overrides Grape::Endpoint#params')
+        expect(output).to include('overrides Grape::Endpoint#headers')
+        expect(output).not_to include('my_unique_helper')
+      end
+
+      it 'warns for an external helper module too' do
+        external = Module.new do
+          def params
+            :overridden
+          end
+        end
+
+        expect do
+          Class.new(Grape::API) { helpers external }
+        end.to output(/helper method `params` overrides Grape::Endpoint#params/).to_stderr
+      end
+
+      it 'does not warn for helpers that do not mask any Endpoint method' do
+        expect do
+          Class.new(Grape::API) do
+            helpers do
+              def my_unique_helper
+                :ok
+              end
+            end
+          end
+        end.not_to output.to_stderr
+      end
+    end
+
+    context 'with Grape.config.warn_on_helper_overrides disabled' do
+      before { Grape.config.warn_on_helper_overrides = false }
+      after  { Grape.config.warn_on_helper_overrides = true }
+
+      it 'does not warn even when a helper masks an Endpoint method' do
+        expect do
+          Class.new(Grape::API) do
+            helpers do
+              def params
+                'overridden'
+              end
+            end
+          end
+        end.not_to output.to_stderr
+      end
+    end
+  end
+
+  def capture_stderr
+    original = $stderr
+    $stderr = StringIO.new
+    yield
+    $stderr.string
+  ensure
+    $stderr = original
   end
 end

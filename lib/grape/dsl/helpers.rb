@@ -71,7 +71,28 @@ module Grape
       def inject_api_helpers_to_mod(mod, &block)
         mod.extend(BaseHelper) unless mod.is_a?(BaseHelper)
         yield if block
+        warn_on_endpoint_overrides(mod) if Grape.config.warn_on_helper_overrides
         mod.api_changed(self)
+      end
+
+      # When +Grape.config.warn_on_helper_overrides+ is enabled, emit a
+      # warning to +$stderr+ for any helper method that masks an instance
+      # method on +Grape::Endpoint+. Helpers are mixed into the endpoint's
+      # singleton class and therefore take precedence over +Endpoint+
+      # instance methods — usually intentional, but a common source of
+      # surprise when the framework gains a method that already collides
+      # with an existing helper name.
+      def warn_on_endpoint_overrides(mod)
+        overridden = mod.instance_methods(false).select { |m| Grape::Endpoint.method_defined?(m) }
+        return if overridden.empty?
+
+        overridden.each do |name|
+          warn(
+            "Grape: helper method `#{name}` overrides Grape::Endpoint##{name}. " \
+            'The helper takes precedence. To use the framework implementation, remove the helper. ' \
+            'Silence this warning by setting Grape.config.warn_on_helper_overrides = false.'
+          )
+        end
       end
 
       # This module extends user defined helpers
