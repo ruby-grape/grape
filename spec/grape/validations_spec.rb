@@ -45,6 +45,19 @@ describe Grape::Validations do
         response = Rack::MockResponse[*subject.call(env)]
         expect(JSON.parse(response.body)).to eq('some_param' => nil)
       end
+
+      # Regression for https://github.com/ruby-grape/grape/issues/2517 —
+      # `optional :foo, message: 'oops'` used to raise UnknownValidator
+      # because `:message` survived dispatch when `:presence` was absent.
+      it 'accepts a :message option without raising' do
+        subject.params do
+          optional :foo, message: 'is required'
+        end
+        subject.get('/with_message') { 'ok' }
+        get '/with_message'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('ok')
+      end
     end
 
     context 'optional using Grape::Entity documentation' do

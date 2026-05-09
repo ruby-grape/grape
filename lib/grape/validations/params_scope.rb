@@ -334,129 +334,52 @@ module Grape
       end
 
       def validates(attrs, validations)
-        coerce_type = infer_coercion(validations)
-        required = validations.key?(:presence)
-        default = validations[:default]
-        values = validations[:values].is_a?(Hash) ? validations.dig(:values, :value) : validations[:values]
-        except_values = validations[:except_values].is_a?(Hash) ? validations.dig(:except_values, :value) : validations[:except_values]
+        spec = ValidationsSpec.from(validations)
 
-        # NB. values and excepts should be nil, Proc, Array, or Range.
-        # Specifically, values should NOT be a Hash
-        # use values or excepts to guess coerce type when stated type is Array
-        coerce_type = guess_coerce_type(coerce_type, values, except_values)
+        check_incompatible_option_values(spec.default, spec.values, spec.except_values)
+        validate_value_coercion(spec.coerce_type, spec.values, spec.except_values)
+        document_params(attrs, spec)
 
-        # default value should be present in values array, if both exist and are not procs
-        check_incompatible_option_values(default, values, except_values)
+        # Presence runs first — `required` is forwarded to every subsequent
+        # validator (some short-circuit on it).
+        validate_presence(spec, attrs)
 
-        # type should be compatible with values array, if both exist
-        validate_value_coercion(coerce_type, values, except_values)
+        # Coerce runs second — later validators see the typed value.
+        validate_coerce(spec, attrs)
 
-        document_params attrs, validations, coerce_type, values, except_values
-
-        opts = derive_validator_options(validations).freeze
-
-        # Validate for presence before any other validators
-        validates_presence(validations, attrs, opts)
-
-        # Before we run the rest of the validators, let's handle
-        # whatever coercion so that we are working with correctly
-        # type casted values
-        coerce_type validations.extract!(:coerce, :coerce_with, :coerce_message), attrs, required, opts
-
-        validations.each do |type, options|
-          # Don't try to look up validators for documentation params that don't have one.
-          next if RESERVED_DOCUMENTATION_KEYWORDS.include?(type)
-
-          validate(type, options, attrs, required, opts)
+        spec.validator_entries.each do |type, options|
+          validate(type, options, attrs, spec.required?, spec.shared_opts)
         end
       end
 
-      # Validate and comprehend the +:type+, +:types+, and +:coerce_with+
-      # options that have been supplied to the parameter declaration.
-      # The +:type+ and +:types+ options will be removed from the
-      # validations list, replaced appropriately with +:coerce+ and
-      # +:coerce_with+ options that will later be passed to
-      # {Validators::CoerceValidator}. The type that is returned may be
-      # used for documentation and further validation of parameter
-      # options.
-      #
-      # @param validations [Hash] list of validations supplied to the
-      #   parameter declaration
-      # @return [class-like] type to which the parameter will be coerced
-      # @raise [ArgumentError] if the given type options are invalid
-      def infer_coercion(validations)
-        raise ArgumentError, ':type may not be supplied with :types' if validations.key?(:type) && validations.key?(:types)
-
-        validations[:coerce] = (options_key?(:type, :value, validations) ? validations[:type][:value] : validations[:type]) if validations.key?(:type)
-        validations[:coerce_message] = (options_key?(:type, :message, validations) ? validations[:type][:message] : nil) if validations.key?(:type)
-        validations[:coerce] = (options_key?(:types, :value, validations) ? validations[:types][:value] : validations[:types]) if validations.key?(:types)
-        validations[:coerce_message] = (options_key?(:types, :message, validations) ? validations[:types][:message] : nil) if validations.key?(:types)
-
-        validations.delete(:types) if validations.key?(:types)
-
-        coerce_type = validations[:coerce]
-
-        # Special case - when the argument is a single type that is a
-        # variant-type collection.
-        if Types.multiple?(coerce_type) && validations.key?(:type)
-          validations[:coerce] = Types::VariantCollectionCoercer.new(
-            coerce_type,
-            validations.delete(:coerce_with)
-          )
-        end
-        validations.delete(:type)
-
-        coerce_type
-      end
-
-      # Enforce correct usage of :coerce_with parameter.
-      # We do not allow coercion without a type, nor with
-      # +JSON+ as a type since this defines its own coercion
-      # method.
-      def check_coerce_with(validations)
-        return unless validations.key?(:coerce_with)
-        # type must be supplied for coerce_with..
-        raise ArgumentError, 'must supply type for coerce_with' unless validations.key?(:coerce)
-
-        # but not special JSON types, which
-        # already imply coercion method
-        return unless SPECIAL_JSON.include?(validations[:coerce])
+      # Enforce correct usage of :coerce_with on a coerce_options hash.
+      # We do not allow coercion without a type, nor with +JSON+ as a type
+      # since that defines its own coercion method.
+      def check_coerce_with(coerce_options)
+        return unless coerce_options[:method]
+        raise ArgumentError, 'must supply type for coerce_with' unless coerce_options[:type]
+        return unless SPECIAL_JSON.include?(coerce_options[:type])
 
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
 
-      # Add type coercion validation to this scope,
-      # if any has been specified.
-      # This validation has special handling since it is
-      # composited from more than one +requires+/+optional+
-      # parameter, and needs to be run before most other
-      # validations.
-      def coerce_type(validations, attrs, required, opts)
-        check_coerce_with(validations)
+      def validate_presence(spec, attrs)
+        return unless spec.required?
 
-        # Falsy check (not key?) is intentional: when a remountable API is first
-        # evaluated on its base instance (no configuration supplied yet),
-        # configuration[:some_type] evaluates to nil. Skipping instantiation
-        # here is correct — the real mounted instance will replay this step with
-        # the actual type value.
-        return unless validations[:coerce]
-
-        coerce_options = {
-          type: validations[:coerce],
-          method: validations[:coerce_with],
-          message: validations[:coerce_message]
-        }
-        validate('coerce', coerce_options, attrs, required, opts)
+        validate('presence', spec.presence_options, attrs, true, spec.shared_opts)
       end
 
-      def guess_coerce_type(coerce_type, *values_list)
-        return coerce_type unless coerce_type == Array
+      def validate_coerce(spec, attrs)
+        coerce_options = spec.coerce_options
+        check_coerce_with(coerce_options)
+        # Falsy check is intentional: when a remountable API is first evaluated
+        # on its base instance (no configuration supplied yet),
+        # configuration[:some_type] evaluates to nil. Skipping instantiation
+        # here is correct — the real mounted instance will replay this step
+        # with the actual type value.
+        return unless coerce_options[:type]
 
-        values_list.each do |values|
-          next if !values || values.is_a?(Proc)
-          return values.first.class if values.is_a?(Range) || !values.empty?
-        end
-        coerce_type
+        validate('coerce', coerce_options, attrs, spec.required?, spec.shared_opts)
       end
 
       def check_incompatible_option_values(default, values, except_values)
@@ -494,30 +417,8 @@ module Grape
         end
       end
 
-      def options_key?(type, key, validations)
-        validations[type].respond_to?(:key?) && validations[type].key?(key) && !validations[type][key].nil?
-      end
-
       def all_element_blank?(scoped_params)
         scoped_params.respond_to?(:all?) && scoped_params.all?(&:blank?)
-      end
-
-      # Validators don't have access to each other and they don't need, however,
-      # some validators might influence others, so their options should be shared
-      def derive_validator_options(validations)
-        allow_blank = validations[:allow_blank]
-
-        {
-          allow_blank: allow_blank.is_a?(Hash) ? allow_blank[:value] : allow_blank,
-          fail_fast: validations.delete(:fail_fast) || false
-        }
-      end
-
-      def validates_presence(validations, attrs, opts)
-        return unless validations.key?(:presence) && validations[:presence]
-
-        validate('presence', validations.delete(:presence), attrs, true, opts)
-        validations.delete(:message) if validations.key?(:message)
       end
     end
   end
