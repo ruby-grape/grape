@@ -21,6 +21,7 @@
 * [#2696](https://github.com/ruby-grape/grape/pull/2696): Reduce per-request allocations on the request hot path; migrate middleware options to `attr_reader` and freeze `@options` post-init - [@ericproulx](https://github.com/ericproulx).
 * [#2693](https://github.com/ruby-grape/grape/pull/2693): Introduce `Grape::Exceptions::ErrorResponse` value object to replace the implicit-schema Hash thrown via `throw` - [@ericproulx](https://github.com/ericproulx).
 * [#2701](https://github.com/ruby-grape/grape/pull/2701): Replace `.tap` usages in `lib/` with explicit local variables - [@ericproulx](https://github.com/ericproulx).
+* [#2704](https://github.com/ruby-grape/grape/pull/2704): Add `Grape::Endpoint#logger` so the API's configured logger is reachable inside route handlers, filters, and `rescue_from` blocks without a helper - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -63,6 +63,35 @@ after { Grape::Endpoint.before_each nil }
 after { Grape::Endpoint.reset_before_each }
 ```
 
+#### `Grape::Endpoint#logger` now returns the API's configured logger
+
+Calling `logger` inside a route handler, filter (`before` / `before_validation` / `after_validation` / `after` / `finally`), or `rescue_from` block previously raised `NoMethodError` unless the application defined a helper:
+
+```ruby
+class MyAPI < Grape::API
+  logger Logger.new($stdout)
+
+  helpers do
+    def logger
+      MyAPI.logger
+    end
+  end
+end
+```
+
+`Grape::Endpoint` now exposes `#logger` directly, so the helper is no longer necessary:
+
+```ruby
+class MyAPI < Grape::API
+  logger Logger.new($stdout)
+  # logger is now reachable inside route handlers, filters, and rescue_from blocks
+end
+```
+
+**Helper override still wins.** Helpers are mixed into the endpoint's singleton class via `singleton_class.include(@helpers)`, and singleton-class methods take precedence over instance methods on `Grape::Endpoint`. If your application already defines `logger` in a `helpers` block (or a module included via `helpers`), that definition continues to override `Endpoint#logger`. You can safely keep the helper or remove it — both paths produce the same result for the canonical `MyAPI.logger` case above.
+
+**Behaviour change for code that didn't define a helper.** If your code references `logger` inside an endpoint context *without* a corresponding `helpers` definition, that call previously raised `NoMethodError` and now returns the API's configured logger. This is almost always the intended behaviour, but if you were relying on the `NoMethodError` (for instance to short-circuit logging in test environments via `rescue NoMethodError`), update your code to check `respond_to?(:logger)` or to gate logging on a feature flag.
+
 ### Upgrading to >= 3.2
 
 #### Rack parameter parsing errors now raise `Grape::Exceptions::RequestError`
