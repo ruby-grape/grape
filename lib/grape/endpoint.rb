@@ -305,19 +305,7 @@ module Grape
 
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
-      stack.use Grape::Middleware::Error,
-                format:,
-                content_types:,
-                default_status: inheritable_setting.namespace_inheritable[:default_error_status],
-                rescue_all: inheritable_setting.namespace_inheritable[:rescue_all],
-                rescue_grape_exceptions: inheritable_setting.namespace_inheritable[:rescue_grape_exceptions],
-                default_error_formatter: inheritable_setting.namespace_inheritable[:default_error_formatter],
-                error_formatters: inheritable_setting.namespace_stackable_with_hash(:error_formatters),
-                rescue_options: inheritable_setting.namespace_stackable_with_hash(:rescue_options),
-                rescue_handlers:,
-                base_only_rescue_handlers: inheritable_setting.namespace_stackable_with_hash(:base_only_rescue_handlers),
-                all_rescue_handler: inheritable_setting.namespace_inheritable[:all_rescue_handler],
-                grape_exceptions_rescue_handler: inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler]
+      stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
 
       stack.concat inheritable_setting.namespace_stackable[:middleware]
 
@@ -339,6 +327,26 @@ module Grape
       builder = stack.build
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
       builder.to_app
+    end
+
+    def error_middleware_options(format, content_types)
+      ns_inh = inheritable_setting.namespace_inheritable
+      ns_stack = inheritable_setting
+      {
+        format:,
+        content_types:,
+        default_status: ns_inh[:default_error_status],
+        rescue_all: ns_inh[:rescue_all],
+        rescue_grape_exceptions: ns_inh[:rescue_grape_exceptions],
+        default_error_formatter: ns_inh[:default_error_formatter],
+        error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
+        rescue_options: ns_stack.namespace_stackable_with_hash(:rescue_options),
+        rescue_handlers:,
+        base_only_rescue_handlers: ns_stack.namespace_stackable_with_hash(:base_only_rescue_handlers),
+        all_rescue_handler: ns_inh[:all_rescue_handler],
+        grape_exceptions_rescue_handler: ns_inh[:grape_exceptions_rescue_handler],
+        internal_grape_exceptions_rescue_handler: ns_inh[:internal_grape_exceptions_rescue_handler]
+      }
     end
 
     def build_helpers

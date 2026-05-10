@@ -92,6 +92,36 @@ end
 
 **Behaviour change for code that didn't define a helper.** If your code references `logger` inside an endpoint context *without* a corresponding `helpers` definition, that call previously raised `NoMethodError` and now returns the API's configured logger. This is almost always the intended behaviour, but if you were relying on the `NoMethodError` (for instance to short-circuit logging in test environments via `rescue NoMethodError`), update your code to check `respond_to?(:logger)` or to gate logging on a feature flag.
 
+#### Exceptions raised inside `rescue_from` blocks are now caught
+
+Previously, an exception raised inside a `rescue_from` block was uncaught and bubbled up to Rack, producing the Rack default 500 page. The framework now catches and routes it:
+
+1. If the re-raised exception's class has a registered `rescue_from` handler, that handler runs (one redispatch only — a second raise stops the chain).
+2. If the re-raised exception is a `Grape::Exceptions::Base` subclass, it is rendered via the default Grape error path with its own `status` and `message`.
+3. Otherwise, the original exception is exposed on `env['grape.exception']` for upstream Rack middleware to observe, and the response is a generic `Grape::Exceptions::InternalServerError` (`500 Internal Server Error`) — the original exception's message is **not** rendered to the API consumer.
+
+This means deliberate re-raises in a `rescue_from` block (e.g. translating one exception class into another) now compose with the rest of your `rescue_from` configuration, and accidental crashes (typos, `NoMethodError`, …) no longer leak internal detail to API consumers.
+
+The framework deliberately does **not** log unhandled internal exceptions itself — formatting and destination are application concerns. To log, forward to an error tracker, or customize the response shape for these errors, register a `rescue_from :internal_grape_exceptions` handler:
+
+```ruby
+rescue_from :internal_grape_exceptions do |e|
+  Sentry.capture_exception(e)
+  error!({ message: 'Something went wrong' }, 500)
+end
+```
+
+When this handler is registered, the framework hands the original exception to you and you own the response shape entirely.
+
+If you relied on the old behaviour and want raw exception messages exposed in development, register a catch-all handler:
+
+```ruby
+rescue_from StandardError do |e|
+  error!({ message: e.message, class: e.class.name }, 500)
+end
+```
+
+
 ### Upgrading to >= 3.2
 
 #### Rack parameter parsing errors now raise `Grape::Exceptions::RequestError`

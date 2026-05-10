@@ -30,6 +30,7 @@
 * [#2682](https://github.com/ruby-grape/grape/pull/2682): Fix `Style/OptionalBooleanParameter` offenses - [@ericproulx](https://github.com/ericproulx).
 * [#2699](https://github.com/ruby-grape/grape/pull/2699): Fix `Grape::Validations::Types::CustomTypeCoercer` dropping symbolized hash keys for `Array`/`Set` types; refactor the class for readability - [@ericproulx](https://github.com/ericproulx).
 * [#2700](https://github.com/ruby-grape/grape/pull/2700): Fix README typos, remove obsolete Ruby 2.4 / Fixnum section, and replace incorrect `requires + values + allow_blank` note with a correct one covering `optional + values` semantics (closes #2631) - [@ericproulx](https://github.com/ericproulx).
+* [#2703](https://github.com/ruby-grape/grape/pull/2703): Catch exceptions raised inside `rescue_from` blocks; new `rescue_from :internal_grape_exceptions` opt-in for unrecognised internal errors (resolves [#2482](https://github.com/ruby-grape/grape/issues/2482)) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.2.1 (2026-04-16)
