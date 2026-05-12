@@ -180,9 +180,8 @@ module Grape
       end
 
       Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
-        define_method supported_method.downcase do |*args, **options, &block|
-          paths = args.first || ['/']
-          route(supported_method, paths, options, &block)
+        define_method supported_method.downcase do |path = '/', **options, &block|
+          route(supported_method, path, options, &block)
         end
       end
 
