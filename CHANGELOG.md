@@ -24,6 +24,7 @@
 * [#2704](https://github.com/ruby-grape/grape/pull/2704): Add `Grape::Endpoint#logger` so the API's configured logger is reachable inside route handlers, filters, and `rescue_from` blocks without a helper - [@ericproulx](https://github.com/ericproulx).
 * [#2705](https://github.com/ruby-grape/grape/pull/2705): Add `Grape.config.warn_on_helper_overrides` (off by default) to emit a warning when a helper method masks a `Grape::Endpoint` instance method - [@ericproulx](https://github.com/ericproulx).
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Refactor `ParamsScope#validates` and `ParamsDocumentation` around a frozen `Grape::Validations::ValidationsSpec` value object; the validations hash supplied by the DSL is no longer mutated and the helper chain becomes pure - [@ericproulx](https://github.com/ericproulx).
+* [#2707](https://github.com/ruby-grape/grape/pull/2707): Tighten six guard conditions in `lib/` via De Morgan and `blank?`/`present?`/`include?` rewrites; no behaviour change - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

@@ -383,9 +383,9 @@ module Grape
       end
 
       def check_incompatible_option_values(default, values, except_values)
-        return unless default && !default.is_a?(Proc)
+        return if default.nil? || default.is_a?(Proc)
 
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && !Array(default).all? { |def_val| values.include?(def_val) }
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && Array(default).any? { |def_val| !values.include?(def_val) }
 
         return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
 
