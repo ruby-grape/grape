@@ -26,6 +26,7 @@
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Refactor `ParamsScope#validates` and `ParamsDocumentation` around a frozen `Grape::Validations::ValidationsSpec` value object; the validations hash supplied by the DSL is no longer mutated and the helper chain becomes pure - [@ericproulx](https://github.com/ericproulx).
 * [#2707](https://github.com/ruby-grape/grape/pull/2707): Tighten six guard conditions in `lib/` via De Morgan and `blank?`/`present?`/`include?` rewrites; no behaviour change - [@ericproulx](https://github.com/ericproulx).
 * [#2709](https://github.com/ruby-grape/grape/pull/2709): Lift trailing `if/else` into guard clauses; tighten `Util::Lazy::ValueEnumerable` - [@ericproulx](https://github.com/ericproulx).
+* [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
