@@ -2,37 +2,38 @@
 
 module Grape
   module Validations
-    # Documents parameters of an endpoint. If documentation isn't needed (for instance, it is an
-    # internal API), the class only cleans up attributes to avoid junk in RAM.
-
+    # Documents parameters of an endpoint. Reads from a frozen
+    # +ValidationsSpec+; never mutates the user's validations hash.
     module ParamsDocumentation
-      def document_params(attrs, validations, type = nil, values = nil, except_values = nil)
-        return validations.except!(:desc, :description, :documentation) if @api.inheritable_setting.namespace_inheritable[:do_not_document]
+      def document_params(attrs, spec)
+        return if @api.inheritable_setting.namespace_inheritable[:do_not_document]
 
         documented_attrs = attrs.to_h do |name|
-          [full_name(name), extract_details(validations, type, values, except_values)]
+          [full_name(name), extract_details(spec)]
         end
         @api.inheritable_setting.namespace_stackable[:params] = documented_attrs
       end
 
       private
 
-      def extract_details(validations, type, values, except_values)
+      def extract_details(spec)
         details = {}
-        details[:required] = validations.key?(:presence)
-        details[:type] = TypeCache[type] if type
-        details[:values] = values if values
-        details[:except_values] = except_values if except_values
-        details[:default] = validations[:default] if validations.key?(:default)
-        if validations.key?(:length)
-          details[:min_length] = validations[:length][:min] if validations[:length].key?(:min)
-          details[:max_length] = validations[:length][:max] if validations[:length].key?(:max)
+        details[:required] = spec.required?
+        details[:type] = TypeCache[spec.coerce_type] if spec.coerce_type
+        details[:values] = spec.values if spec.values
+        details[:except_values] = spec.except_values if spec.except_values
+        details[:default] = spec.default unless spec.default.nil?
+
+        length = spec.raw[:length]
+        if length.is_a?(Hash)
+          details[:min_length] = length[:min] if length.key?(:min)
+          details[:max_length] = length[:max] if length.key?(:max)
         end
 
-        desc = validations.delete(:desc) || validations.delete(:description)
+        desc = spec.raw[:desc] || spec.raw[:description]
         details[:desc] = desc if desc
 
-        documentation = validations.delete(:documentation)
+        documentation = spec.raw[:documentation]
         details[:documentation] = documentation if documentation
 
         details
