@@ -23,6 +23,7 @@
 * [#2701](https://github.com/ruby-grape/grape/pull/2701): Replace `.tap` usages in `lib/` with explicit local variables - [@ericproulx](https://github.com/ericproulx).
 * [#2704](https://github.com/ruby-grape/grape/pull/2704): Add `Grape::Endpoint#logger` so the API's configured logger is reachable inside route handlers, filters, and `rescue_from` blocks without a helper - [@ericproulx](https://github.com/ericproulx).
 * [#2705](https://github.com/ruby-grape/grape/pull/2705): Add `Grape.config.warn_on_helper_overrides` (off by default) to emit a warning when a helper method masks a `Grape::Endpoint` instance method - [@ericproulx](https://github.com/ericproulx).
+* [#2707](https://github.com/ruby-grape/grape/pull/2707): Tighten six guard conditions in `lib/` via De Morgan and `blank?`/`present?`/`include?` rewrites; no behaviour change - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

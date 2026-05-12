@@ -10,8 +10,11 @@ module Grape
     Helpers = Grape::DSL::Helpers::BaseHelper
 
     class Boolean
+      VALUES = [true, false].freeze
+      private_constant :VALUES
+
       def self.build(val)
-        return nil if val != true && val != false
+        return nil unless VALUES.include?(val)
 
         new
       end

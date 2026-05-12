@@ -148,7 +148,7 @@ module Grape
         end
 
         def scrub(value)
-          return value unless value.respond_to?(:valid_encoding?) && !value.valid_encoding?
+          return value if !value.respond_to?(:valid_encoding?) || value.valid_encoding?
 
           value.scrub
         end
