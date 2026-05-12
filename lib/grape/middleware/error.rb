@@ -137,13 +137,10 @@ module Grape
           return redispatch(e, endpoint, redispatched)
         end
 
-        if error?(response)
-          error_response(response)
-        elsif response.is_a?(Rack::Response)
-          response
-        else
-          run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
-        end
+        return error_response(response) if error?(response)
+        return response if response.is_a?(Rack::Response)
+
+        run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
       end
 
       # Route an exception raised inside a +rescue_from+ block.

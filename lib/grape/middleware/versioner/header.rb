@@ -41,11 +41,9 @@ module Grape
 
           strict_header_checks!
           media_type = Grape::Util::MediaType.best_quality(accept_header, available_media_types)
-          if media_type
-            yield media_type
-          else
-            fail!
-          end
+          return yield media_type if media_type
+
+          fail!
         end
 
         def accept_header

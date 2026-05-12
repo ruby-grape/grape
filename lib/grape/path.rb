@@ -21,13 +21,10 @@ module Grape
     private
 
     def build_suffix(raw_path, raw_namespace, settings)
-      if uses_specific_format?(settings)
-        "(.#{settings[:format]})"
-      elsif !uses_path_versioning?(settings) || (valid_part?(raw_namespace) || valid_part?(raw_path))
-        NO_VERSIONING_WITH_VALID_PATH_FORMAT_SEGMENT
-      else
-        DEFAULT_FORMAT_SEGMENT
-      end
+      return "(.#{settings[:format]})" if uses_specific_format?(settings)
+      return NO_VERSIONING_WITH_VALID_PATH_FORMAT_SEGMENT if !uses_path_versioning?(settings) || valid_part?(raw_namespace) || valid_part?(raw_path)
+
+      DEFAULT_FORMAT_SEGMENT
     end
 
     def build_parts(raw_path, raw_namespace, settings)
