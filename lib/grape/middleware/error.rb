@@ -3,6 +3,7 @@
 module Grape
   module Middleware
     class Error < Base
+      extend Forwardable
       include PrecomputedContentTypes
 
       DEFAULT_OPTIONS = {
@@ -18,16 +19,19 @@ module Grape
         rescue_all: false,
         rescue_grape_exceptions: false,
         rescue_handlers: nil,
-        rescue_options: {
-          backtrace: false,
-          original_exception: false
-        }.freeze
+        rescue_options: Grape::DSL::RescueOptions.new
       }.freeze
 
       attr_reader :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
                   :default_message, :default_status, :error_formatters, :format,
                   :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
-                  :rescue_all, :rescue_grape_exceptions, :rescue_handlers
+                  :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
+
+      # +:backtrace+ / +:original_exception+ on the rescue options become
+      # +#include_backtrace+ / +#include_original_exception+ on the middleware,
+      # which is what the formatter call site reads.
+      def_delegator :rescue_options, :backtrace, :include_backtrace
+      def_delegator :rescue_options, :original_exception, :include_original_exception
 
       def initialize(app, **options)
         super
@@ -43,6 +47,7 @@ module Grape
         @rescue_all = @options[:rescue_all]
         @rescue_grape_exceptions = @options[:rescue_grape_exceptions]
         @rescue_handlers = @options[:rescue_handlers]
+        @rescue_options = @options[:rescue_options] || Grape::DSL::RescueOptions.new
       end
 
       def call!(env)
@@ -59,16 +64,16 @@ module Grape
         Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
       end
 
-      def format_message(message, backtrace, original_exception = nil)
+      def format_message(error)
         current_format = env[Grape::Env::API_FORMAT] || format
         formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters, default_error_formatter)
-        return formatter.call(message, backtrace, options, env, original_exception) if formatter
+        return formatter.call(error:, env:, include_backtrace:, include_original_exception:) if formatter
 
         throw :error, Grape::Exceptions::ErrorResponse.new(
           status: 406,
           message: "The requested format '#{current_format}' is not supported.",
-          backtrace:,
-          original_exception:
+          backtrace: error.backtrace,
+          original_exception: error.original_exception
         )
       end
 
@@ -80,15 +85,17 @@ module Grape
       end
 
       def error_response(error = nil)
-        payload = Grape::Exceptions::ErrorResponse.coerce(error)
-
-        status = payload.status || options[:default_status]
-        env[Grape::Env::API_ENDPOINT].status(status) # error! may not have been called
-        message = payload.message || options[:default_message]
+        raw = Grape::Exceptions::ErrorResponse.coerce(error)
         headers = { Rack::CONTENT_TYPE => content_type }
-        headers.merge!(payload.headers) if payload.headers.is_a?(Hash)
-        backtrace = payload.backtrace || payload.original_exception&.backtrace || []
-        rack_response(status, headers, format_message(message, backtrace, payload.original_exception))
+        headers.merge!(raw.headers) if raw.headers.is_a?(Hash)
+        payload = raw.with(
+          status: raw.status || default_status,
+          message: raw.message || default_message,
+          headers:,
+          backtrace: raw.backtrace || raw.original_exception&.backtrace || []
+        )
+        env[Grape::Env::API_ENDPOINT].status(payload.status) # error! may not have been called
+        rack_response(payload.status, payload.headers, format_message(payload))
       end
 
       def default_rescue_handler(exception)
@@ -188,10 +195,11 @@ module Grape
 
       def error!(message, status = default_status, headers = {}, backtrace = [], original_exception = nil)
         env[Grape::Env::API_ENDPOINT].status(status) # not error! inside route
-        rack_response(
-          status, headers.reverse_merge(Rack::CONTENT_TYPE => content_type),
-          format_message(message, backtrace, original_exception)
+        merged_headers = headers.reverse_merge(Rack::CONTENT_TYPE => content_type)
+        error = Grape::Exceptions::ErrorResponse.new(
+          status:, message:, headers: merged_headers, backtrace:, original_exception:
         )
+        rack_response(status, merged_headers, format_message(error))
       end
 
       def error?(response)

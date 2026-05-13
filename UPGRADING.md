@@ -25,6 +25,55 @@ end
 
 The original implementation is preserved in git history at [`6b4111b3:lib/grape/middleware/globals.rb`](https://github.com/ruby-grape/grape/blob/6b4111b3/lib/grape/middleware/globals.rb).
 
+#### `error_formatter` now receives a `Grape::Exceptions::ErrorResponse` value object
+
+Custom error formatters now receive a frozen `Grape::Exceptions::ErrorResponse` as the `error:` keyword argument, alongside three request-time context kwargs. The new signature:
+
+```ruby
+def call(error:, env: nil, include_backtrace: false, include_original_exception: false)
+```
+
+`error` is the same value object the middleware uses internally, with `status` / `message` / `headers` / `backtrace` / `original_exception` accessors. The two `include_*` booleans are forwarded from the matching `rescue_from` options (previously buried inside `options[:rescue_options]`).
+
+Existing positional formatters break and need to be updated:
+
+```ruby
+# Before
+error_formatter :txt, ->(message, backtrace, options, env, original_exception) { ... }
+
+module CustomFormatter
+  def self.call(message, backtrace, options, env, original_exception)
+    ...
+  end
+end
+
+# After — pick fields off `error`
+error_formatter :txt, ->(error:, **) { "[#{error.status}] #{error.message}" }
+
+module CustomFormatter
+  def self.call(error:, **)
+    { status: error.status, message: error.message, backtrace: error.backtrace }
+  end
+end
+```
+
+Migration:
+
+| Old positional arg | New |
+| --- | --- |
+| `message` | `error.message` |
+| `backtrace` | `error.backtrace` |
+| `original_exception` | `error.original_exception` |
+| `options[:rescue_options][:backtrace]` | `include_backtrace` (kwarg) |
+| `options[:rescue_options][:original_exception]` | `include_original_exception` (kwarg) |
+| `env` | `env` (kwarg, still passed) |
+| HTTP status | `error.status` (newly exposed) |
+| Response headers | `error.headers` (newly exposed) |
+
+The remaining middleware-options keys (`default_status`, `format`, `rescue_handlers`, …) were framework-internal and have never been part of the documented contract.
+
+The change resolves [#2527](https://github.com/ruby-grape/grape/issues/2527): the HTTP `status` and the response `headers` are now part of the formatter contract, so JSON:API–style error bodies (which embed the status code) and header-aware formatters can be written without reaching into `env[Grape::Env::API_ENDPOINT]`.
+
 #### `Grape::Middleware::Base#options` is now frozen
 
 `@options` is frozen at the end of `Grape::Middleware::Base#initialize` (after `merge_default_options`). The hash is initialized once and treated as immutable for the lifetime of the middleware. Custom middleware that mutates `options[...]` at runtime will now raise `FrozenError`.
