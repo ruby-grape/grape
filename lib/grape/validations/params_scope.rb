@@ -331,6 +331,7 @@ module Grape
       end
 
       def validates(attrs, validations)
+        process_oneof!(validations) if validations.key?(:oneof)
         spec = ValidationsSpec.from(validations)
 
         check_incompatible_option_values(spec.default, spec.values, spec.except_values)
@@ -387,6 +388,22 @@ module Grape
         return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
 
         raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
+      end
+
+      # Translate a `oneof: [proc, proc, ...]` declaration into a list of
+      # captured validator arrays — one array per variant. Each variant's
+      # block is evaluated in its own +ParamsScope+ backed by an
+      # {OneofCollector} so the full params DSL is available inside variants
+      # and the resulting validators are kept out of the real API's
+      # registration list.
+      def process_oneof!(validations)
+        raise ArgumentError, 'oneof: requires type: Hash' unless validations[:type] == Hash
+
+        variants = validations[:oneof]
+        raise ArgumentError, 'oneof: must be a non-empty Array of blocks' unless variants.is_a?(Array) && variants.any?
+        raise ArgumentError, 'oneof: each variant must be a Proc' unless variants.all?(Proc)
+
+        validations[:oneof] = variants.map { |block| OneofCollector.collect(block) }
       end
 
       def validate(type, options, attrs, required, opts)

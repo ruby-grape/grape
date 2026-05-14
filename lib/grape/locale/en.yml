@@ -43,6 +43,7 @@ en:
           resolution: 'eg: version ''v1'', using: :header, vendor: ''twitter'''
           summary: 'when version using header, you must specify :vendor option'
         mutual_exclusion: 'are mutually exclusive'
+        oneof: 'does not match any of the allowed schemas'
         presence: 'is missing'
         regexp: 'is invalid'
         same_as: 'is not the same as %{parameter}'
