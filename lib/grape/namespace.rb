@@ -23,13 +23,13 @@ module Grape
       settings&.map(&:space)
     end
 
-    def eql?(other)
+    def ==(other)
       other.class == self.class &&
         other.space == space &&
         other.requirements == requirements &&
         other.options == options
     end
-    alias == eql?
+    alias eql? ==
 
     def hash
       [self.class, space, requirements, options].hash

@@ -22,10 +22,6 @@ module Grape
       end
 
       def ==(other)
-        eql?(other)
-      end
-
-      def eql?(other)
         self.class == other.class &&
           other.status == status &&
           other.message == message &&
@@ -33,6 +29,7 @@ module Grape
           other.backtrace == backtrace &&
           other.original_exception == original_exception
       end
+      alias eql? ==
 
       def hash
         [self.class, status, message, headers, backtrace, original_exception].hash

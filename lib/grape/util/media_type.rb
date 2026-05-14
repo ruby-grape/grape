@@ -20,10 +20,6 @@ module Grape
       end
 
       def ==(other)
-        eql?(other)
-      end
-
-      def eql?(other)
         self.class == other.class &&
           other.type == type &&
           other.subtype == subtype &&
@@ -31,6 +27,7 @@ module Grape
           other.version == version &&
           other.format == format
       end
+      alias eql? ==
 
       def hash
         [self.class, type, subtype, vendor, version, format].hash

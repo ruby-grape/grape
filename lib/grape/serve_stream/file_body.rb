@@ -31,6 +31,7 @@ module Grape
       def ==(other)
         path == other.path
       end
+      alias eql? ==
     end
   end
 end

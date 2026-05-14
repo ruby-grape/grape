@@ -131,7 +131,7 @@ module Grape
     def ==(other)
       other.is_a?(self.class) &&
         options == other.options &&
-        inheritable_setting.to_hash == other.inheritable_setting.to_hash
+        inheritable_setting == other.inheritable_setting
     end
     alias eql? ==
 

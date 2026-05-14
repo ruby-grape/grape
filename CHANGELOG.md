@@ -27,6 +27,7 @@
 * [#2707](https://github.com/ruby-grape/grape/pull/2707): Tighten six guard conditions in `lib/` via De Morgan and `blank?`/`present?`/`include?` rewrites; no behaviour change - [@ericproulx](https://github.com/ericproulx).
 * [#2708](https://github.com/ruby-grape/grape/pull/2708): Tighten dynamic `define_method` in `DSL::Callbacks` and `DSL::Routing` - [@ericproulx](https://github.com/ericproulx).
 * [#2709](https://github.com/ruby-grape/grape/pull/2709): Lift trailing `if/else` into guard clauses; tighten `Util::Lazy::ValueEnumerable` - [@ericproulx](https://github.com/ericproulx).
+* [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
