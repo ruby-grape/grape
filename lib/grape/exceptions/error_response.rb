@@ -6,33 +6,13 @@ module Grape
     # and consumed by `Middleware::Error#error_response`. Replaces the
     # implicit-schema Hash that previously circulated between throw sites
     # and the error middleware.
-    class ErrorResponse
-      attr_reader :status, :message, :headers, :backtrace, :original_exception
-
+    ErrorResponse = Data.define(:status, :message, :headers, :backtrace, :original_exception) do
       def initialize(status: nil, message: nil, headers: nil, backtrace: nil, original_exception: nil)
-        @status = status
-        @message = message
-        @headers = headers
-        @backtrace = backtrace
-        @original_exception = original_exception
+        super
       end
 
       def to_s
         "#<#{self.class.name} status=#{status.inspect} message=#{message.inspect} headers=#{headers.inspect}>"
-      end
-
-      def ==(other)
-        self.class == other.class &&
-          other.status == status &&
-          other.message == message &&
-          other.headers == headers &&
-          other.backtrace == backtrace &&
-          other.original_exception == original_exception
-      end
-      alias eql? ==
-
-      def hash
-        [self.class, status, message, headers, backtrace, original_exception].hash
       end
 
       def self.from_exception(exception)

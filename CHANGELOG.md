@@ -31,6 +31,7 @@
 * [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
+* [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
