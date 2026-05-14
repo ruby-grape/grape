@@ -3,27 +3,20 @@
 module Grape
   module Middleware
     class Formatter < Base
+      extend Forwardable
       include PrecomputedContentTypes
 
-      DEFAULT_OPTIONS = {
-        content_types: nil,
-        default_format: :txt,
-        format: nil,
-        formatters: nil,
-        parsers: nil
-      }.freeze
+      Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
+        include Grape::Middleware::OptionsCompat
+
+        def initialize(content_types: nil, default_format: :txt, format: nil, formatters: nil, parsers: nil)
+          super
+        end
+      end
 
       ALL_MEDIA_TYPES = '*/*'
 
-      attr_reader :default_format, :format, :formatters, :parsers
-
-      def initialize(app, **options)
-        super
-        @default_format = @options[:default_format]
-        @format = @options[:format]
-        @formatters = @options[:formatters]
-        @parsers = @options[:parsers]
-      end
+      def_delegators :options, :default_format, :format, :formatters, :parsers
 
       def before
         negotiate_content_type

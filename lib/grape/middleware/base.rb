@@ -8,10 +8,14 @@ module Grape
       attr_reader :app, :env, :options
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
-      # @param [Hash] options A hash of options, simply stored for use by subclasses.
+      # @param [Hash] options Options forwarded to the subclass. When the
+      #   subclass declares an `Options` Data class (recommended; see
+      #   `Grape::Middleware::OptionsCompat`), the kwargs are routed through
+      #   it. Otherwise they are deep-merged with the subclass's
+      #   `DEFAULT_OPTIONS` Hash (legacy path) and frozen.
       def initialize(app, **options)
         @app = app
-        @options = merge_default_options(options).freeze
+        @options = build_options(options)
         @app_response = nil
       end
 
@@ -76,6 +80,12 @@ module Grape
         when Rack::Response then response.headers.merge!(@header)
         when Array          then response[1].merge!(@header)
         end
+      end
+
+      def build_options(options)
+        return self.class::Options.new(**options) if self.class.const_defined?(:Options, false)
+
+        merge_default_options(options).freeze
       end
 
       def merge_default_options(options)
