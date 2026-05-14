@@ -815,7 +815,7 @@ class Api < Grape::API
      params[:my_param]
   end
   get '/example', params: { my_param: nil }
-  # 1.3.1 = []
+  # 1.3.3 = []
   # 1.3.2 = nil
 end
 ```
