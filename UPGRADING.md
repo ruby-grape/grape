@@ -3,6 +3,28 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `Grape::Middleware::Globals` removed
+
+`Grape::Middleware::Globals` and the three env constants it set (`Grape::Env::GRAPE_REQUEST`, `Grape::Env::GRAPE_REQUEST_HEADERS`, `Grape::Env::GRAPE_REQUEST_PARAMS`) have been deleted. The middleware was introduced in 2013 (commit `9987090b`) but never mounted by Grape's own stack — the `Grape::Request` it built is now constructed directly inside `Grape::Endpoint`. Nothing in `lib/` read those env keys.
+
+If you mounted `Grape::Middleware::Globals` in your own Rack stack to populate `env['grape.request']` for downstream middleware, replicate it locally:
+
+```ruby
+class MyGlobals
+  def initialize(app); @app = app; end
+
+  def call(env)
+    request = Grape::Request.new(env)
+    env['grape.request'] = request
+    env['grape.request.headers'] = request.headers
+    env['grape.request.params'] = request.params if env['rack.input']
+    @app.call(env)
+  end
+end
+```
+
+The original implementation is preserved in git history at [`6b4111b3:lib/grape/middleware/globals.rb`](https://github.com/ruby-grape/grape/blob/6b4111b3/lib/grape/middleware/globals.rb).
+
 #### `Grape::Middleware::Base#options` is now frozen
 
 `@options` is frozen at the end of `Grape::Middleware::Base#initialize` (after `merge_default_options`). The hash is initialized once and treated as immutable for the lifetime of the middleware. Custom middleware that mutates `options[...]` at runtime will now raise `FrozenError`.
