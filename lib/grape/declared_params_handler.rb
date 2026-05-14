@@ -50,69 +50,67 @@ module Grape
     end
 
     def declared_hash_attr(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:)
-      if declared_param.is_a?(Hash)
-        declared_param.each_pair do |declared_parent_param, declared_children_params|
-          next unless @include_missing || passed_params.key?(declared_parent_param)
+      return declare_leaf(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:) unless declared_param.is_a?(Hash)
 
-          memo_key = build_memo_key(params_nested_path, declared_parent_param, renamed_params)
-          passed_children_params = passed_params[declared_parent_param] || passed_params.class.new
+      declared_param.each_pair do |parent, children|
+        declare_nested(passed_params, parent:, children:, params_nested_path:, memo:, renamed_params:, route_params:)
+      end
+    end
 
-          params_nested_path_dup = params_nested_path.dup
-          params_nested_path_dup << declared_parent_param.to_s
+    def declare_nested(passed_params, parent:, children:, params_nested_path:, memo:, renamed_params:, route_params:)
+      return unless @include_missing || passed_params.key?(parent)
 
-          memo[memo_key] = handle_passed_param(params_nested_path_dup, route_params:, has_passed_children: passed_children_params.any?) do
-            recursive_declared(
-              passed_children_params,
-              declared_params: declared_children_params,
-              params_nested_path: params_nested_path_dup,
-              renamed_params:,
-              route_params:
-            )
-          end
-        end
-      else
-        # If it is not a Hash then it does not have children.
-        # Find its value or set it to nil.
-        return unless @include_missing || (passed_params.respond_to?(:key?) && passed_params.key?(declared_param))
+      memo_key = build_memo_key(params_nested_path, parent, renamed_params)
+      passed_children = passed_params[parent] || passed_params.class.new
+      nested_path = nested_path_for(params_nested_path, parent)
 
-        memo_key = build_memo_key(params_nested_path, declared_param, renamed_params)
-        passed_param = passed_params[declared_param]
+      memo[memo_key] = handle_passed_param(nested_path, route_params:, has_passed_children: passed_children.any?) do
+        recursive_declared(
+          passed_children,
+          declared_params: children,
+          params_nested_path: nested_path,
+          renamed_params:,
+          route_params:
+        )
+      end
+    end
 
-        params_nested_path_dup = params_nested_path.dup
-        params_nested_path_dup << declared_param.to_s
+    # The declared param has no children. Find its value or set it to nil.
+    def declare_leaf(passed_params, declared_param:, params_nested_path:, memo:, renamed_params:, route_params:)
+      return unless @include_missing || (passed_params.respond_to?(:key?) && passed_params.key?(declared_param))
 
-        memo[memo_key] = passed_param || handle_passed_param(params_nested_path_dup, route_params:) do
-          passed_param
-        end
+      memo_key = build_memo_key(params_nested_path, declared_param, renamed_params)
+      passed_param = passed_params[declared_param]
+
+      memo[memo_key] = passed_param || handle_passed_param(nested_path_for(params_nested_path, declared_param), route_params:) do
+        passed_param
       end
     end
 
     def build_memo_key(params_nested_path, declared_param, renamed_params)
-      rename_path = params_nested_path + [declared_param.to_s]
-      renamed_param_name = renamed_params[rename_path]
-
+      renamed_param_name = renamed_params[nested_path_for(params_nested_path, declared_param)]
       param = renamed_param_name || declared_param
       @stringify ? param.to_s : param.to_sym
     end
 
-    def handle_passed_param(params_nested_path, route_params:, has_passed_children: false, &_block)
+    def nested_path_for(parent_path, key)
+      parent_path + [key.to_s]
+    end
+
+    def handle_passed_param(params_nested_path, route_params:, has_passed_children: false)
       return yield if has_passed_children
 
-      key = params_nested_path[0]
+      key = params_nested_path.first
       key += "[#{params_nested_path[1..].join('][')}]" if params_nested_path.size > 1
 
       type = route_params.dig(key, :type)
-      has_children = route_params.keys.any? { |k| k != key && k.start_with?("#{key}[") }
+      return yield if type.nil?
 
-      if type == 'Hash' && !has_children
-        {}
-      elsif type == 'Array' || (type&.start_with?('[') && !type.include?(','))
-        []
-      elsif type == 'Set' || type&.start_with?('#<Set', 'Set')
-        Set.new
-      else
-        yield
-      end
+      return {} if type == 'Hash' && route_params.keys.none? { |k| k != key && k.start_with?("#{key}[") }
+      return [] if type == 'Array' || (type.start_with?('[') && !type.include?(','))
+      return Set.new if type == 'Set' || type.start_with?('#<Set', 'Set')
+
+      yield
     end
   end
 end
