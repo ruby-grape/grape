@@ -28,6 +28,7 @@ module Grape
             klass == other || (name.nil? && klass.superclass == other)
           end
         end
+        alias eql? ==
 
         def inspect
           klass.to_s

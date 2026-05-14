@@ -28,6 +28,7 @@
 * [#2708](https://github.com/ruby-grape/grape/pull/2708): Tighten dynamic `define_method` in `DSL::Callbacks` and `DSL::Routing` - [@ericproulx](https://github.com/ericproulx).
 * [#2709](https://github.com/ruby-grape/grape/pull/2709): Lift trailing `if/else` into guard clauses; tighten `Util::Lazy::ValueEnumerable` - [@ericproulx](https://github.com/ericproulx).
 * [#2702](https://github.com/ruby-grape/grape/pull/2702): Add `oneof:` option for `requires`/`optional` to accept a Hash parameter matching one of several variant schemas (resolves [#2385](https://github.com/ruby-grape/grape/issues/2385)) - [@ericproulx](https://github.com/ericproulx).
+* [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
