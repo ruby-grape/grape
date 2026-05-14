@@ -11,9 +11,6 @@ module Grape
     API_VENDOR = 'api.vendor'
     API_FORMAT = 'api.format'
 
-    GRAPE_REQUEST = 'grape.request'
-    GRAPE_REQUEST_HEADERS = 'grape.request.headers'
-    GRAPE_REQUEST_PARAMS = 'grape.request.params'
     GRAPE_ROUTING_ARGS = 'grape.routing_args'
     GRAPE_ALLOWED_METHODS = 'grape.allowed_methods'
     GRAPE_EXCEPTION = 'grape.exception'
