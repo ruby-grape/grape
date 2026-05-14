@@ -65,7 +65,7 @@ describe Grape::Path do
 
     context 'when path versioning is used' do
       it "includes a '/'" do
-        path = described_class.new(nil, nil, version: :v1, version_options: { using: :path })
+        path = described_class.new(nil, nil, version: :v1, version_options: Grape::DSL::VersionOptions.new)
         expect(path.suffix).to eql('(/.:format)')
       end
     end
@@ -77,12 +77,12 @@ describe Grape::Path do
       end
 
       it "does not include a '/' when the path has a path" do
-        path = described_class.new('/path', nil, version: :v1, version_options: { using: :path })
+        path = described_class.new('/path', nil, version: :v1, version_options: Grape::DSL::VersionOptions.new)
         expect(path.suffix).to eql('(.:format)')
       end
 
       it "includes a '/' otherwise" do
-        path = described_class.new(nil, nil, version: :v1, version_options: { using: :path })
+        path = described_class.new(nil, nil, version: :v1, version_options: Grape::DSL::VersionOptions.new)
         expect(path.suffix).to eql('(/.:format)')
       end
     end

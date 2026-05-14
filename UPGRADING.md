@@ -74,6 +74,26 @@ The remaining middleware-options keys (`default_status`, `format`, `rescue_handl
 
 The change resolves [#2527](https://github.com/ruby-grape/grape/issues/2527): the HTTP `status` and the response `headers` are now part of the formatter contract, so JSON:API–style error bodies (which embed the status code) and header-aware formatters can be written without reaching into `env[Grape::Env::API_ENDPOINT]`.
 
+#### `version` now takes explicit keyword arguments
+
+`version` previously accepted `**options` and silently ignored any keys it didn't use. It now declares its options explicitly:
+
+```ruby
+def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
+```
+
+Passing an unrecognised keyword now raises `ArgumentError` instead of being swallowed. The most common offender is `format:` — it was never a `version` option (response format is set with `format`/`default_format`, and header-versioned requests carry the format in their `Accept` header), but the old splat let `version 'v1', using: :header, vendor: 'x', format: :json` through as a no-op.
+
+```ruby
+# Before — `format:` silently ignored
+version 'v1', using: :header, vendor: 'x', format: :json
+
+# After
+version 'v1', using: :header, vendor: 'x'   # set responses with `format :json` / `default_format :json`
+```
+
+Recognized keys are `using:`, `cascade:`, `parameter:`, `strict:`, `vendor:`. Calls using only those are unaffected.
+
 #### `Grape::Middleware::Base#options` is now frozen
 
 `@options` is frozen at the end of `Grape::Middleware::Base#initialize` (after `merge_default_options`). The hash is initialized once and treated as immutable for the lifetime of the middleware. Custom middleware that mutates `options[...]` at runtime will now raise `FrozenError`.

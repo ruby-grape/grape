@@ -132,7 +132,7 @@ module Grape
       def cascade?
         namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
         return namespace_inheritable[:cascade] if namespace_inheritable.key?(:cascade)
-        return namespace_inheritable[:version_options][:cascade] if namespace_inheritable[:version_options]&.key?(:cascade)
+        return namespace_inheritable[:version_options].cascade if namespace_inheritable[:version_options]
 
         true
       end
