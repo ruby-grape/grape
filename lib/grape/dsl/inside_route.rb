@@ -73,11 +73,7 @@ module Grape
           if request.post?
             201
           elsif request.delete?
-            if @body.present?
-              200
-            else
-              204
-            end
+            @body.present? ? 200 : 204
           else
             200
           end
@@ -88,11 +84,9 @@ module Grape
 
       # Set response content-type
       def content_type(val = nil)
-        if val
-          header(Rack::CONTENT_TYPE, val)
-        else
-          header[Rack::CONTENT_TYPE]
-        end
+        return header(Rack::CONTENT_TYPE, val) if val
+
+        header[Rack::CONTENT_TYPE]
       end
 
       # Allows you to define the response body as something other than the

@@ -197,13 +197,10 @@ module Grape
       private
 
       def build_full_path
-        if nested?
-          @parent.full_path + [@element]
-        elsif lateral?
-          @parent.full_path
-        else
-          []
-        end
+        return @parent.full_path + [@element] if nested?
+        return @parent.full_path if lateral?
+
+        []
       end
 
       # Add a new parameter which should be renamed when using the +#declared+

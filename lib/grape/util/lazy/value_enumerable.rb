@@ -5,28 +5,25 @@ module Grape
     module Lazy
       class ValueEnumerable < Value
         def [](key)
-          if @value_hash[key].nil?
-            Value.new(nil).reached_by(access_keys, key)
-          else
-            @value_hash[key].reached_by(access_keys, key)
-          end
+          return Value.new(nil).reached_by(access_keys, key) if @value_hash[key].nil?
+
+          @value_hash[key].reached_by(access_keys, key)
         end
 
         def fetch(access_keys)
-          fetched_keys = access_keys.dup
-          value = self[fetched_keys.shift]
-          fetched_keys.any? ? value.fetch(fetched_keys) : value
+          access_keys.reduce(self) { |node, key| node[key] }
         end
 
         def []=(key, value)
-          @value_hash[key] = case value
-                             when Hash
-                               ValueHash.new(value)
-                             when Array
-                               ValueArray.new(value)
-                             else
-                               Value.new(value)
-                             end
+          value_class = case value
+                        when Hash
+                          ValueHash
+                        when Array
+                          ValueArray
+                        else
+                          Value
+                        end
+          @value_hash[key] = value_class.new(value)
         end
       end
     end
