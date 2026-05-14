@@ -5,7 +5,7 @@ module Grape
     # A branchable, inheritable settings object which can store both stackable
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
-      attr_accessor :route, :api_class, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent, :point_in_time_copies
+      attr_reader :route, :api_class, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent, :point_in_time_copies
 
       # Retrieve global settings.
       def self.global
@@ -23,17 +23,15 @@ module Grape
       # instance can then be set to inherit from an existing instance (see
       # #inherit_from).
       def initialize
-        self.route = {}
-        self.api_class = {}
-        self.namespace = InheritableValues.new # only inheritable from a parent when
+        @route = {}
+        @api_class = {}
+        @namespace = InheritableValues.new # only inheritable from a parent when
         # used with a mount, or should every API::Class be a separate namespace by default?
-        self.namespace_inheritable = InheritableValues.new
-        self.namespace_stackable = StackableValues.new
-        self.namespace_reverse_stackable = ReverseStackableValues.new
-
-        self.point_in_time_copies = []
-
-        self.parent = nil
+        @namespace_inheritable = InheritableValues.new
+        @namespace_stackable = StackableValues.new
+        @namespace_reverse_stackable = ReverseStackableValues.new
+        @point_in_time_copies = []
+        @parent = nil
       end
 
       # Return the class-level global properties.
@@ -48,12 +46,12 @@ module Grape
       def inherit_from(parent)
         return if parent.nil?
 
-        self.parent = parent
+        @parent = parent
 
         namespace_inheritable.inherited_values = parent.namespace_inheritable
         namespace_stackable.inherited_values = parent.namespace_stackable
         namespace_reverse_stackable.inherited_values = parent.namespace_reverse_stackable
-        self.route = parent.route.merge(route)
+        @route = parent.route.merge(route)
 
         point_in_time_copies.each { |cloned_one| cloned_one.inherit_from parent }
       end
@@ -65,15 +63,7 @@ module Grape
       def point_in_time_copy
         new_setting = self.class.new
         point_in_time_copies << new_setting
-        new_setting.point_in_time_copies = []
-
-        new_setting.namespace = namespace.clone
-        new_setting.namespace_inheritable = namespace_inheritable.clone
-        new_setting.namespace_stackable = namespace_stackable.clone
-        new_setting.namespace_reverse_stackable = namespace_reverse_stackable.clone
-        new_setting.route = route.clone
-        new_setting.api_class = api_class
-
+        new_setting.copy_state_from(self)
         new_setting.inherit_from(parent)
         new_setting
       end
@@ -96,11 +86,29 @@ module Grape
         }
       end
 
+      def ==(other)
+        other.is_a?(self.class) && to_hash == other.to_hash
+      end
+      alias eql? ==
+
       def namespace_stackable_with_hash(key)
         data = namespace_stackable[key]
         return if data.blank?
 
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
+
+      protected
+
+      # Used by +point_in_time_copy+ to populate a freshly-built instance
+      # with cloned state from another instance of the same class.
+      def copy_state_from(source)
+        @namespace = source.namespace.clone
+        @namespace_inheritable = source.namespace_inheritable.clone
+        @namespace_stackable = source.namespace_stackable.clone
+        @namespace_reverse_stackable = source.namespace_reverse_stackable.clone
+        @route = source.route.clone
+        @api_class = source.api_class
       end
     end
   end

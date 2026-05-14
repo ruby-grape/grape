@@ -18,6 +18,7 @@ module Grape
       def ==(other)
         stream == other.stream
       end
+      alias eql? ==
     end
   end
 end
