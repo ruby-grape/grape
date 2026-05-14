@@ -7,8 +7,6 @@ module Grape
       include PrecomputedContentTypes
 
       Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
-        include Grape::Middleware::OptionsCompat
-
         def initialize(content_types: nil, default_format: :txt, format: nil, formatters: nil, parsers: nil)
           super
         end
@@ -94,7 +92,7 @@ module Grape
         fmt = media_type ? mime_types[media_type] : default_format
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, options[:parsers]
+        parser = Grape::Parser.parser_for fmt, parsers
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin

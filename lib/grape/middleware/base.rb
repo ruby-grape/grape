@@ -9,9 +9,8 @@ module Grape
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
       # @param [Hash] options Options forwarded to the subclass. When the
-      #   subclass declares an `Options` Data class (recommended; see
-      #   `Grape::Middleware::OptionsCompat`), the kwargs are routed through
-      #   it. Otherwise they are deep-merged with the subclass's
+      #   subclass declares an `Options` Data class, the kwargs are routed
+      #   through it. Otherwise they are deep-merged with the subclass's
       #   `DEFAULT_OPTIONS` Hash (legacy path) and frozen.
       def initialize(app, **options)
         @app = app
@@ -83,7 +82,9 @@ module Grape
       end
 
       def build_options(options)
-        return self.class::Options.new(**options) if self.class.const_defined?(:Options, false)
+        # Search ancestors so subclasses (e.g. Versioner::Path → Versioner::Base)
+        # inherit their parent's Options Data class without redeclaring it.
+        return self.class::Options.new(**options) if self.class.const_defined?(:Options)
 
         merge_default_options(options).freeze
       end
