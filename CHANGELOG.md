@@ -29,6 +29,7 @@
 * [#2709](https://github.com/ruby-grape/grape/pull/2709): Lift trailing `if/else` into guard clauses; tighten `Util::Lazy::ValueEnumerable` - [@ericproulx](https://github.com/ericproulx).
 * [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
+* [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
