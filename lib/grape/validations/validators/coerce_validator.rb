@@ -9,13 +9,18 @@ module Grape
         def initialize(attrs, options, required, scope, opts)
           super
 
-          raw_type = @options[:type]
+          # +@options+ is a Grape::Validations::CoerceOptions. +Base#message+
+          # can't see a custom message off a Data (it probes Hash-like
+          # +key?+), so restore it here to preserve `type: { value:, message: }`.
+          @exception_message = @options.message unless @options.message.nil?
+
+          raw_type = @options.type
           type = hash_like?(raw_type) ? raw_type[:value] : raw_type
           @converter =
             if type.is_a?(Grape::Validations::Types::VariantCollectionCoercer)
               type
             else
-              Types.build_coercer(type, method: @options[:method])
+              Types.build_coercer(type, method: @options.coerce_method)
             end
         end
 
