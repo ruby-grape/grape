@@ -32,6 +32,7 @@
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
 * [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
+* [#2723](https://github.com/ruby-grape/grape/pull/2723): Deprecate passing a positional options Hash to `Grape::DSL::Desc#desc`; pass options as keyword arguments. Add a grape-swagger integration spec - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

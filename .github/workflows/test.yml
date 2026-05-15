@@ -33,11 +33,14 @@ jobs:
           - gemfiles/rails_7_2.gemfile
           - gemfiles/rails_8_0.gemfile
           - gemfiles/rails_8_1.gemfile
-        specs: ['spec --exclude-pattern=spec/integration/{grape_entity,hashie,dry_validation,multi_*}/*_spec.rb']
+        specs: ['spec --exclude-pattern=spec/integration/{grape_entity,grape_swagger,hashie,dry_validation,multi_*}/*_spec.rb']
         include:
           - ruby: '4.0'
             gemfile: gemfiles/grape_entity.gemfile
             specs: 'spec/integration/grape_entity'
+          - ruby: '4.0'
+            gemfile: gemfiles/grape_swagger.gemfile
+            specs: 'spec/integration/grape_swagger'
           - ruby: '4.0'
             gemfile: gemfiles/hashie.gemfile
             specs: 'spec/integration/hashie'
