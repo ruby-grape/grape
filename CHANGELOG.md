@@ -36,6 +36,7 @@
 * [#2721](https://github.com/ruby-grape/grape/pull/2721): Use an internal `Grape::Validations::SharedOptions` value object in `Validators::Base` (public `opts` Hash contract unchanged) - [@ericproulx](https://github.com/ericproulx).
 * [#2719](https://github.com/ruby-grape/grape/pull/2719): Move content-type helpers from `Middleware::Base` into `PrecomputedContentTypes` - [@ericproulx](https://github.com/ericproulx).
 * [#2716](https://github.com/ruby-grape/grape/pull/2716): Refactor `DSL::Routing#version`: guard clause, explicit kwargs in place of `**options`, and a `Grape::DSL::VersionOptions` value object stored internally - [@ericproulx](https://github.com/ericproulx).
+* [#2720](https://github.com/ruby-grape/grape/pull/2720): Move declaration-coherence checks into `Grape::Validations::ValidationsSpec` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
