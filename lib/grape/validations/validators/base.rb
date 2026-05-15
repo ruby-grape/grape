@@ -12,9 +12,16 @@ module Grape
       # from them are frozen by construction. Lazy ivar assignment
       # (e.g. +memoize+, <tt>||=</tt>) will raise +FrozenError+ at request time.
       class Base
+        extend Forwardable
         include Grape::Util::Translation
 
         attr_reader :attrs
+
+        # +allow_blank+ / +fail_fast+ are read straight off the internal
+        # {Grape::Validations::SharedOptions} value object; no per-validator
+        # ivars. The object is built from the +opts+ Hash in #initialize, so
+        # the public 5th-argument contract stays a plain Hash.
+        def_delegators :@opts, :allow_blank, :fail_fast
 
         class << self
           # Declares the default I18n message key used by +validation_error!+.
@@ -52,14 +59,15 @@ module Grape
         # @param options [Object] implementation-dependent Validator options; deep-frozen on assignment
         # @param required [Boolean] attribute(s) are required or optional
         # @param scope [ParamsScope] parent scope for this Validator
-        # @param opts [Hash] additional validation options
+        # @param opts [Hash] shared validator options; only +:allow_blank+ and
+        #   +:fail_fast+ are consulted (other keys ignored, as before)
         def initialize(attrs, options, required, scope, opts)
           @attrs = Array(attrs).freeze
           @options = Grape::Util::DeepFreeze.deep_freeze(options)
           @option = @options # TODO: remove in next major release
           @required = required
           @scope = scope
-          @fail_fast, @allow_blank = opts.values_at(:fail_fast, :allow_blank)
+          @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
         end
 
@@ -75,7 +83,7 @@ module Grape
         end
 
         def fail_fast?
-          @fail_fast
+          fail_fast
         end
 
         # Validates a given parameter hash.
