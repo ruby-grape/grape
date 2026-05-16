@@ -33,6 +33,7 @@
 * [#2712](https://github.com/ruby-grape/grape/pull/2712): Pass a `Grape::Exceptions::ErrorResponse` value object to `error_formatter#call` instead of separate kwargs - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
 * [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
+* [#2719](https://github.com/ruby-grape/grape/pull/2719): Move content-type helpers from `Middleware::Base` into `PrecomputedContentTypes` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
