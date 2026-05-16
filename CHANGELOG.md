@@ -30,9 +30,17 @@
 * [#2702](https://github.com/ruby-grape/grape/pull/2702): Add `oneof:` option for `requires`/`optional` to accept a Hash parameter matching one of several variant schemas (resolves [#2385](https://github.com/ruby-grape/grape/issues/2385)) - [@ericproulx](https://github.com/ericproulx).
 * [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
+* [#2712](https://github.com/ruby-grape/grape/pull/2712): Pass a `Grape::Exceptions::ErrorResponse` value object to `error_formatter#call` instead of separate kwargs - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
 * [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
 * [#2723](https://github.com/ruby-grape/grape/pull/2723): Deprecate passing a positional options Hash to `Grape::DSL::Desc#desc`; pass options as keyword arguments. Add a grape-swagger integration spec - [@ericproulx](https://github.com/ericproulx).
+* [#2722](https://github.com/ruby-grape/grape/pull/2722): Introduce `Grape::Validations::CoerceOptions` value object for the internal coerce options - [@ericproulx](https://github.com/ericproulx).
+* [#2721](https://github.com/ruby-grape/grape/pull/2721): Use an internal `Grape::Validations::SharedOptions` value object in `Validators::Base` (public `opts` Hash contract unchanged) - [@ericproulx](https://github.com/ericproulx).
+* [#2719](https://github.com/ruby-grape/grape/pull/2719): Move content-type helpers from `Middleware::Base` into `PrecomputedContentTypes` - [@ericproulx](https://github.com/ericproulx).
+* [#2716](https://github.com/ruby-grape/grape/pull/2716): Refactor `DSL::Routing#version`: guard clause, explicit kwargs in place of `**options`, and a `Grape::DSL::VersionOptions` value object stored internally - [@ericproulx](https://github.com/ericproulx).
+* [#2720](https://github.com/ruby-grape/grape/pull/2720): Move declaration-coherence checks into `Grape::Validations::ValidationsSpec` - [@ericproulx](https://github.com/ericproulx).
+* [#2725](https://github.com/ruby-grape/grape/pull/2725): Encapsulate `Grape::Validations::Validators::Base` state behind readers; add `required?`/`allow_blank?` predicates - [@ericproulx](https://github.com/ericproulx).
+* [#2726](https://github.com/ruby-grape/grape/pull/2726): Reuse one `AttributesIterator` per validator and drop the unused `Enumerable` mixin - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

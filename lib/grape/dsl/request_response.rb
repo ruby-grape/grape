@@ -83,12 +83,15 @@ module Grape
       #   @param [Array] exception_classes A list of classes that you want to rescue, or
       #     the symbol :all to rescue from all exceptions.
       #   @param [Block] block Execution block to handle the given exception.
-      #   @param [Hash] options Options for the rescue usage.
-      #   @option options [Boolean] :backtrace Include a backtrace in the rescue response.
-      #   @option options [Boolean] :rescue_subclasses Also rescue subclasses of exception classes
-      #   @param [Proc] handler Execution proc to handle the given exception as an
-      #     alternative to passing a block.
-      def rescue_from(*args, with: nil, **options, &block)
+      #   @param [Proc] with Execution proc to handle the given exception as an alternative
+      #     to passing a block.
+      #   @param [Boolean] rescue_subclasses Also rescue subclasses of exception classes;
+      #     defaults to +true+.
+      #   @param [Boolean] backtrace Include the rescued exception's backtrace in the
+      #     rescue response body.
+      #   @param [Boolean] original_exception Include +inspect+ of the rescued exception
+      #     in the rescue response body.
+      def rescue_from(*args, with: nil, rescue_subclasses: true, backtrace: false, original_exception: false, &block)
         handler = extract_handler(args, with:, block:)
 
         if args.include?(:all)
@@ -101,18 +104,11 @@ module Grape
         elsif args.include?(:internal_grape_exceptions)
           inheritable_setting.namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
         else
-          handler_type =
-            case options[:rescue_subclasses]
-            when nil, true
-              :rescue_handlers
-            else
-              :base_only_rescue_handlers
-            end
-
+          handler_type = rescue_subclasses ? :rescue_handlers : :base_only_rescue_handlers
           inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |arg| [arg, handler] }
         end
 
-        inheritable_setting.namespace_stackable[:rescue_options] = options
+        inheritable_setting.namespace_stackable[:rescue_options] = RescueOptions.new(backtrace:, original_exception:)
       end
 
       # Allows you to specify a default representation entity for a

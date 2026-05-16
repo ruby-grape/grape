@@ -25,7 +25,7 @@ describe Grape::DSL::Routing do
       version = 'v1'
       expect(subject.version(version)).to eq(version)
       expect(subject.inheritable_setting.namespace_inheritable[:version]).to eq([version])
-      expect(subject.inheritable_setting.namespace_inheritable[:version_options]).to eq(using: :path)
+      expect(subject.inheritable_setting.namespace_inheritable[:version_options]).to eq(Grape::DSL::VersionOptions.new)
     end
   end
 

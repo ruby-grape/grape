@@ -9,7 +9,7 @@ module Grape
         def validate_params!(params)
           known_keys = all_keys
           keys = keys_in_common(params, known_keys)
-          return if keys.empty? || keys.length == @attrs.length
+          return if keys.empty? || keys.length == attrs.length
 
           validation_error!(known_keys)
         end

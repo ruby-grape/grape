@@ -7,10 +7,7 @@ describe Grape::Middleware::Versioner::Header do
 
   before do
     @options = {
-      version_options: {
-        using: :header,
-        vendor: 'vendor'
-      }
+      version_options: Grape::DSL::VersionOptions.new(using: :header, vendor: 'vendor')
     }
   end
 
@@ -156,13 +153,13 @@ describe Grape::Middleware::Versioner::Header do
   end
 
   it 'succeeds if :strict is set to false' do
-    @options[:version_options][:strict] = false
+    @options[:version_options] = @options[:version_options].with(strict: false)
     expect(subject.call('HTTP_ACCEPT' => '').first).to eq(200)
     expect(subject.call({}).first).to eq(200)
   end
 
   it 'succeeds if :strict is set to false and given an invalid header' do
-    @options[:version_options][:strict] = false
+    @options[:version_options] = @options[:version_options].with(strict: false)
     expect(subject.call('HTTP_ACCEPT' => 'yaml').first).to eq(200)
     expect(subject.call({}).first).to eq(200)
   end
@@ -170,7 +167,7 @@ describe Grape::Middleware::Versioner::Header do
   context 'when :strict is set' do
     before do
       @options[:versions] = ['v1']
-      @options[:version_options][:strict] = true
+      @options[:version_options] = @options[:version_options].with(strict: true)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do
@@ -199,8 +196,7 @@ describe Grape::Middleware::Versioner::Header do
   context 'when :strict and cascade: false' do
     before do
       @options[:versions] = ['v1']
-      @options[:version_options][:strict] = true
-      @options[:version_options][:cascade] = false
+      @options[:version_options] = @options[:version_options].with(strict: true, cascade: false)
     end
 
     it 'fails with 406 Not Acceptable if header is not set' do

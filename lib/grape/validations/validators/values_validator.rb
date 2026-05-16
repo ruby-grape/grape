@@ -28,7 +28,7 @@ module Grape
           val = scrub(params[attr_name])
 
           return if val.nil? && !required_for_root_scope?
-          return if val != false && val.blank? && @allow_blank
+          return if val != false && val.blank? && allow_blank?
           return if check_values?(val, attr_name)
 
           validation_error!(attr_name)
@@ -55,12 +55,12 @@ module Grape
         end
 
         def required_for_root_scope?
-          return false unless @required
+          return false unless required?
 
-          scope = @scope
-          scope = scope.parent while scope.lateral?
+          current_scope = scope
+          current_scope = current_scope.parent while current_scope.lateral?
 
-          scope.root?
+          current_scope.root?
         end
       end
     end

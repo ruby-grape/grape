@@ -334,8 +334,6 @@ module Grape
         process_oneof!(validations) if validations.key?(:oneof)
         spec = ValidationsSpec.from(validations)
 
-        check_incompatible_option_values(spec.default, spec.values, spec.except_values)
-        validate_value_coercion(spec.coerce_type, spec.values, spec.except_values)
         document_params(attrs, spec)
 
         # Presence runs first — `required` is forwarded to every subsequent
@@ -350,13 +348,13 @@ module Grape
         end
       end
 
-      # Enforce correct usage of :coerce_with on a coerce_options hash.
+      # Enforce correct usage of :coerce_with on a CoerceOptions.
       # We do not allow coercion without a type, nor with +JSON+ as a type
       # since that defines its own coercion method.
       def check_coerce_with(coerce_options)
-        return unless coerce_options[:method]
-        raise ArgumentError, 'must supply type for coerce_with' unless coerce_options[:type]
-        return unless SPECIAL_JSON.include?(coerce_options[:type])
+        return unless coerce_options.coerce_method
+        raise ArgumentError, 'must supply type for coerce_with' unless coerce_options.type
+        return unless SPECIAL_JSON.include?(coerce_options.type)
 
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
@@ -375,19 +373,9 @@ module Grape
         # configuration[:some_type] evaluates to nil. Skipping instantiation
         # here is correct — the real mounted instance will replay this step
         # with the actual type value.
-        return unless coerce_options[:type]
+        return unless coerce_options.type
 
         validate('coerce', coerce_options, attrs, spec.required?, spec.shared_opts)
-      end
-
-      def check_incompatible_option_values(default, values, except_values)
-        return if default.nil? || default.is_a?(Proc)
-
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && Array(default).any? { |def_val| !values.include?(def_val) }
-
-        return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
-
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
       end
 
       # Translate a `oneof: [proc, proc, ...]` declaration into a list of
@@ -416,19 +404,6 @@ module Grape
           opts
         )
         @api.inheritable_setting.namespace_stackable[:validations] = validator_instance
-      end
-
-      def validate_value_coercion(coerce_type, *values_list)
-        return unless coerce_type
-
-        coerce_type = coerce_type.first if coerce_type.is_a?(Enumerable)
-        values_list.each do |values|
-          next if !values || values.is_a?(Proc)
-
-          value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
-          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if coerce_type == Grape::API::Boolean
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values) unless value_types.all?(coerce_type)
-        end
       end
 
       def all_element_blank?(scoped_params)

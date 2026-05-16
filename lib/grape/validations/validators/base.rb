@@ -12,9 +12,19 @@ module Grape
       # from them are frozen by construction. Lazy ivar assignment
       # (e.g. +memoize+, <tt>||=</tt>) will raise +FrozenError+ at request time.
       class Base
+        extend Forwardable
         include Grape::Util::Translation
 
         attr_reader :attrs
+
+        # +allow_blank+ / +fail_fast+ are read straight off the internal
+        # {Grape::Validations::SharedOptions} value object; no per-validator
+        # ivars. The object is built from the +opts+ Hash in #initialize, so
+        # the public 5th-argument contract stays a plain Hash.
+        def_delegators :@opts, :allow_blank, :fail_fast
+
+        alias fail_fast? fail_fast
+        alias allow_blank? allow_blank
 
         class << self
           # Declares the default I18n message key used by +validation_error!+.
@@ -52,15 +62,17 @@ module Grape
         # @param options [Object] implementation-dependent Validator options; deep-frozen on assignment
         # @param required [Boolean] attribute(s) are required or optional
         # @param scope [ParamsScope] parent scope for this Validator
-        # @param opts [Hash] additional validation options
+        # @param opts [Hash] shared validator options; only +:allow_blank+ and
+        #   +:fail_fast+ are consulted (other keys ignored, as before)
         def initialize(attrs, options, required, scope, opts)
           @attrs = Array(attrs).freeze
           @options = Grape::Util::DeepFreeze.deep_freeze(options)
           @option = @options # TODO: remove in next major release
           @required = required
           @scope = scope
-          @fail_fast, @allow_blank = opts.values_at(:fail_fast, :allow_blank)
+          @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
+          @iterator = iterator_class.new(@attrs, @scope).freeze
         end
 
         # Validates a given request.
@@ -69,13 +81,9 @@ module Grape
         # @raise [Grape::Exceptions::Validation] if validation failed
         # @return [void]
         def validate(request)
-          return unless @scope.should_validate?(request.params)
+          return unless scope.should_validate?(request.params)
 
           validate!(request.params)
-        end
-
-        def fail_fast?
-          @fail_fast
         end
 
         # Validates a given parameter hash.
@@ -85,16 +93,15 @@ module Grape
         # @raise [Grape::Exceptions::Validation] if validation failed
         # @return [void]
         def validate!(params)
-          attributes = SingleAttributeIterator.new(@attrs, @scope, params)
           # we collect errors inside array because
           # there may be more than one error per field
           array_errors = nil
 
-          attributes.each do |val, attr_name, empty_val|
-            next if !@scope.required? && empty_val
-            next unless @scope.meets_dependency?(val, params)
+          @iterator.each(params) do |val, attr_name, empty_val|
+            next if !scope.required? && empty_val
+            next unless scope.meets_dependency?(val, params)
 
-            validate_param!(attr_name, val) if @required || (hash_like?(val) && val.key?(attr_name))
+            validate_param!(attr_name, val) if required? || (hash_like?(val) && val.key?(attr_name))
           rescue Grape::Exceptions::Validation => e
             (array_errors ||= []) << e
           end
@@ -115,8 +122,18 @@ module Grape
 
         private
 
-        def validation_error!(attr_name_or_params, message = @exception_message)
-          params = attr_name_or_params.is_a?(Array) ? attr_name_or_params : @scope.full_name(attr_name_or_params)
+        attr_reader :options, :scope, :required, :exception_message
+
+        alias required? required
+
+        # The AttributesIterator subclass used to walk this validator's
+        # attributes. Built once in #initialize and reused across requests.
+        def iterator_class
+          SingleAttributeIterator
+        end
+
+        def validation_error!(attr_name_or_params, message = exception_message)
+          params = attr_name_or_params.is_a?(Array) ? attr_name_or_params : scope.full_name(attr_name_or_params)
           raise Grape::Exceptions::Validation.new(params:, message:)
         end
 
@@ -124,8 +141,8 @@ module Grape
           obj.respond_to?(:key?)
         end
 
-        def options_key?(key, options = nil)
-          current_options = options || @options
+        def options_key?(key, given_options = nil)
+          current_options = given_options || options
           hash_like?(current_options) && current_options.key?(key) && !current_options[key].nil?
         end
 
@@ -137,14 +154,14 @@ module Grape
         #   @exception_message = message(:presence)             # symbol key or custom message
         #   @exception_message = message { build_hash_message } # computed fallback
         def message(default_key = nil)
-          key = options_key?(:message) ? @options[:message] : default_key
+          key = options_key?(:message) ? options[:message] : default_key
           return key unless key.nil?
 
           yield if block_given?
         end
 
         def option_value
-          options_key?(:value) ? @options[:value] : @options
+          options_key?(:value) ? options[:value] : options
         end
 
         def scrub(value)

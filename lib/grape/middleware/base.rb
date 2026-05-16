@@ -61,22 +61,6 @@ module Grape
         @app_response = Rack::Response[*@app_response]
       end
 
-      def content_types
-        @content_types ||= Grape::ContentTypes.content_types_for(options[:content_types])
-      end
-
-      def mime_types
-        @mime_types ||= Grape::ContentTypes.mime_types_for(content_types)
-      end
-
-      def content_type_for(format)
-        content_types_indifferent_access[format]
-      end
-
-      def content_type
-        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || 'text/html'
-      end
-
       def query_params
         rack_request.GET
       rescue *Grape::RACK_ERRORS
@@ -84,10 +68,6 @@ module Grape
       end
 
       private
-
-      def content_types_indifferent_access
-        @content_types_indifferent_access ||= content_types.with_indifferent_access
-      end
 
       def merge_headers(response)
         return if @header.blank?

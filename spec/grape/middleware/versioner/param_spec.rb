@@ -24,7 +24,9 @@ describe Grape::Middleware::Versioner::Param do
   end
 
   context 'with specified parameter name' do
-    let(:options) { { version_options: { parameter: 'v' } } }
+    let(:options) do
+      { version_options: Grape::DSL::VersionOptions.new(using: :param, parameter: 'v') }
+    end
 
     it 'sets the API version based on the custom parameter name' do
       env = Rack::MockRequest.env_for('/awesome', params: { 'v' => 'v1' })
@@ -55,7 +57,7 @@ describe Grape::Middleware::Versioner::Param do
     let(:options) do
       {
         versions: ['v1'],
-        version_options: { using: :header }
+        version_options: Grape::DSL::VersionOptions.new(using: :header)
       }
     end
 
