@@ -7,7 +7,7 @@ module Grape
         def initialize(attrs, options, required, scope, opts)
           super
 
-          @min, @max, @is = @options.values_at(:min, :max, :is)
+          @min, @max, @is = options.values_at(:min, :max, :is)
           validate_boundary!(:min, @min)
           validate_boundary!(:max, @max)
           raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if @min && @max && @min > @max

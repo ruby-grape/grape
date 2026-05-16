@@ -19,7 +19,7 @@ module Grape
 
         def validate_param!(attr_name, params)
           value = params[attr_name]
-          return if value.nil? && !@required
+          return if value.nil? && !required?
 
           winning_candidate = nil
           @variants.each do |variant_validators|
