@@ -4,11 +4,18 @@ module Grape
   module ErrorFormatter
     class Base
       class << self
-        def call(message, backtrace, options = {}, env = nil, original_exception = nil)
-          wrapped_message = wrap_message(present(message, env))
+        # Custom error formatters override +call+. The +error+ is a frozen
+        # {Grape::Exceptions::ErrorResponse} carrying +status+/+message+/
+        # +headers+/+backtrace+/+original_exception+. +env+ is the Rack env
+        # (needed by entity-presenter resolution). +include_backtrace+ and
+        # +include_original_exception+ are the request-time toggles set by
+        # +rescue_from+; the base implementation embeds the corresponding
+        # fields in the response body when they are true.
+        def call(error:, env: nil, include_backtrace: false, include_original_exception: false)
+          wrapped_message = wrap_message(present(error.message, env))
           if wrapped_message.is_a?(Hash)
-            wrapped_message[:backtrace] = backtrace if backtrace.present? && options.dig(:rescue_options, :backtrace)
-            wrapped_message[:original_exception] = original_exception.inspect if original_exception && options.dig(:rescue_options, :original_exception)
+            wrapped_message[:backtrace] = error.backtrace if include_backtrace && error.backtrace.present?
+            wrapped_message[:original_exception] = error.original_exception.inspect if include_original_exception && error.original_exception
           end
 
           format_structured_message(wrapped_message)

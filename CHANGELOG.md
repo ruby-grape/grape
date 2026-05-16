@@ -30,9 +30,11 @@
 * [#2702](https://github.com/ruby-grape/grape/pull/2702): Add `oneof:` option for `requires`/`optional` to accept a Hash parameter matching one of several variant schemas (resolves [#2385](https://github.com/ruby-grape/grape/issues/2385)) - [@ericproulx](https://github.com/ericproulx).
 * [#2715](https://github.com/ruby-grape/grape/pull/2715): Normalize `==` / `eql?` aliasing across value-like classes - [@ericproulx](https://github.com/ericproulx).
 * [#2710](https://github.com/ruby-grape/grape/pull/2710): Tidy up `Grape::DeclaredParamsHandler` - [@ericproulx](https://github.com/ericproulx).
+* [#2712](https://github.com/ruby-grape/grape/pull/2712): Pass a `Grape::Exceptions::ErrorResponse` value object to `error_formatter#call` instead of separate kwargs - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
 * [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
 * [#2721](https://github.com/ruby-grape/grape/pull/2721): Use an internal `Grape::Validations::SharedOptions` value object in `Validators::Base` (public `opts` Hash contract unchanged) - [@ericproulx](https://github.com/ericproulx).
+* [#2719](https://github.com/ruby-grape/grape/pull/2719): Move content-type helpers from `Middleware::Base` into `PrecomputedContentTypes` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

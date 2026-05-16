@@ -340,7 +340,7 @@ module Grape
         rescue_grape_exceptions: ns_inh[:rescue_grape_exceptions],
         default_error_formatter: ns_inh[:default_error_formatter],
         error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
-        rescue_options: ns_stack.namespace_stackable_with_hash(:rescue_options),
+        rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
         rescue_handlers:,
         base_only_rescue_handlers: ns_stack.namespace_stackable_with_hash(:base_only_rescue_handlers),
         all_rescue_handler: ns_inh[:all_rescue_handler],
