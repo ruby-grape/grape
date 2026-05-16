@@ -348,13 +348,13 @@ module Grape
         end
       end
 
-      # Enforce correct usage of :coerce_with on a coerce_options hash.
+      # Enforce correct usage of :coerce_with on a CoerceOptions.
       # We do not allow coercion without a type, nor with +JSON+ as a type
       # since that defines its own coercion method.
       def check_coerce_with(coerce_options)
-        return unless coerce_options[:method]
-        raise ArgumentError, 'must supply type for coerce_with' unless coerce_options[:type]
-        return unless SPECIAL_JSON.include?(coerce_options[:type])
+        return unless coerce_options.coerce_method
+        raise ArgumentError, 'must supply type for coerce_with' unless coerce_options.type
+        return unless SPECIAL_JSON.include?(coerce_options.type)
 
         raise ArgumentError, 'coerce_with disallowed for type: JSON'
       end
@@ -373,7 +373,7 @@ module Grape
         # configuration[:some_type] evaluates to nil. Skipping instantiation
         # here is correct — the real mounted instance will replay this step
         # with the actual type value.
-        return unless coerce_options[:type]
+        return unless coerce_options.type
 
         validate('coerce', coerce_options, attrs, spec.required?, spec.shared_opts)
       end

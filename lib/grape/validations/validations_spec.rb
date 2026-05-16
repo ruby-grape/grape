@@ -65,7 +65,7 @@ module Grape
       end
 
       def coerce_options
-        { type: @coerce_type, method: @coerce_method, message: @coerce_message }
+        CoerceOptions.new(type: @coerce_type, coerce_method: @coerce_method, message: @coerce_message)
       end
 
       private
