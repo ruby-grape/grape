@@ -18,8 +18,7 @@ module Grape
         end
 
         def validate!(params)
-          attributes = SingleAttributeIterator.new(attrs, scope, params)
-          attributes.each do |resource_params, attr_name|
+          @iterator.each(params) do |resource_params, attr_name|
             next unless scope.meets_dependency?(resource_params, params)
 
             resource_params[attr_name] = @default_call.call(resource_params) if hash_like?(resource_params) && resource_params[attr_name].nil?
