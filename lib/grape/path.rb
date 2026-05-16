@@ -52,9 +52,9 @@ module Grape
     end
 
     def uses_path_versioning?(settings)
-      return false unless settings.key?(:version) && settings[:version_options]&.key?(:using)
+      return false unless settings.key?(:version) && settings[:version_options]
 
-      settings[:version] && settings[:version_options][:using] == :path
+      settings[:version] && settings[:version_options].using == :path
     end
 
     def valid_part?(part)

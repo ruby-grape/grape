@@ -42,7 +42,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: false
       subject.rescue_from :all do |e|
         error! 'message was processed', 400, e.headers
       end
@@ -77,7 +77,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: false
       subject.get '/beer' do
         'beer received'
       end
@@ -112,7 +112,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: false
       subject.rescue_from :all do |e|
         error! 'message was processed', 400, e.headers
       end
@@ -152,7 +152,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: false
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: false
       subject.desc 'Get beer' do
         failure [[400, 'Bad Request'], [401, 'Unauthorized'], [403, 'Forbidden'],
                  [404, 'Resource not found'], [406, 'API vendor or version not found'],
@@ -192,7 +192,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: true
       subject.rescue_from :all do |e|
         error! 'message was processed', 400, e.headers
       end
@@ -236,7 +236,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: true
       subject.get '/beer' do
         'beer received'
       end
@@ -271,7 +271,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: true
       subject.rescue_from :all do |e|
         error! 'message was processed', 400, e.headers
       end
@@ -320,7 +320,7 @@ describe Grape::Exceptions::InvalidAcceptHeader do
     subject { Class.new(Grape::API) }
 
     before do
-      subject.version 'v99', using: :header, vendor: 'vendorname', format: :json, cascade: true
+      subject.version 'v99', using: :header, vendor: 'vendorname', cascade: true
       subject.desc 'Get beer' do
         failure [[400, 'Bad Request'], [401, 'Unauthorized'], [403, 'Forbidden'],
                  [404, 'Resource not found'], [406, 'API vendor or version not found'],

@@ -310,9 +310,10 @@ module Grape
       stack.concat inheritable_setting.namespace_stackable[:middleware]
 
       if inheritable_setting.namespace_inheritable[:version].present?
-        stack.use Grape::Middleware::Versioner.using(inheritable_setting.namespace_inheritable[:version_options][:using]),
+        version_options = inheritable_setting.namespace_inheritable[:version_options]
+        stack.use Grape::Middleware::Versioner.using(version_options.using),
                   versions: inheritable_setting.namespace_inheritable[:version].flatten,
-                  version_options: inheritable_setting.namespace_inheritable[:version_options],
+                  version_options:,
                   prefix: inheritable_setting.namespace_inheritable[:root_prefix],
                   mount_path: inheritable_setting.namespace_stackable[:mount_path].first
       end

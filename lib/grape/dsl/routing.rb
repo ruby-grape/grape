@@ -23,6 +23,12 @@ module Grape
 
       # Specify an API version.
       #
+      # Called without arguments, returns the most recently declared version
+      # (or +nil+). Called with one or more version strings, registers them
+      # and stores a {Grape::DSL::VersionOptions} value object on the
+      # inheritable settings; when given a block, the registration applies
+      # within a nested namespace.
+      #
       # @example API with legacy support.
       #   class MyAPI < Grape::API
       #     version 'v2'
@@ -38,26 +44,41 @@ module Grape
       #     end
       #   end
       #
-      def version(*args, **options, &block)
-        if args.any?
-          options = options.reverse_merge(using: :path)
-          requested_versions = args.flatten.map(&:to_s)
+      # @param args [Array<String, Symbol>] one or more version identifiers.
+      # @param using [Symbol] versioning strategy — one of +:path+ (default),
+      #   +:header+, +:param+, or +:accept_version_header+.
+      # @param cascade [Boolean] forward to subsequent routes via the
+      #   +X-Cascade+ header on version mismatch. Defaults to +true+.
+      # @param parameter [String] name of the query/body parameter that
+      #   carries the version when +using: :param+. Defaults to +'apiver'+.
+      # @param strict [Boolean] reject requests that don't supply a usable
+      #   version (header strategies). Defaults to +false+.
+      # @param vendor [String, nil] vendor segment for the +:header+
+      #   strategy (+application/vnd.<vendor>-<version>+); required when
+      #   +using: :header+.
+      # @yield optional block to scope routes under this version.
+      # @return [String, nil] the most recently declared version.
+      # @raise [Grape::Exceptions::MissingVendorOption] when +using: :header+
+      #   is supplied without a +:vendor+.
+      def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
+        return @versions&.last if args.empty?
 
-          raise Grape::Exceptions::MissingVendorOption.new if options[:using] == :header && !options.key?(:vendor)
+        raise Grape::Exceptions::MissingVendorOption.new if using == :header && vendor.nil?
 
-          @versions = versions | requested_versions
+        requested_versions = args.flatten.map(&:to_s)
+        options = VersionOptions.new(using:, cascade:, parameter:, strict:, vendor:)
 
-          if block
-            within_namespace do
-              inheritable_setting.namespace_inheritable[:version] = requested_versions
-              inheritable_setting.namespace_inheritable[:version_options] = options
+        @versions = versions | requested_versions
 
-              instance_eval(&block)
-            end
-          else
+        if block
+          within_namespace do
             inheritable_setting.namespace_inheritable[:version] = requested_versions
             inheritable_setting.namespace_inheritable[:version_options] = options
+            instance_eval(&block)
           end
+        else
+          inheritable_setting.namespace_inheritable[:version] = requested_versions
+          inheritable_setting.namespace_inheritable[:version_options] = options
         end
 
         @versions&.last
