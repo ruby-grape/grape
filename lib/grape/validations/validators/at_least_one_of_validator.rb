@@ -8,7 +8,7 @@ module Grape
 
         def validate_params!(params)
           known_keys = all_keys
-          return if hash_like?(params) && known_keys.intersect?(params.keys.map { |attr| @scope.full_name(attr) })
+          return if hash_like?(params) && known_keys.intersect?(params.keys.map { |attr| scope.full_name(attr) })
 
           validation_error!(known_keys)
         end

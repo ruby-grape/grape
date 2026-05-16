@@ -5,7 +5,7 @@ module Grape
     module Validators
       class MultipleParamsBase < Base
         def validate!(params)
-          attributes = MultipleAttributesIterator.new(@attrs, @scope, params)
+          attributes = MultipleAttributesIterator.new(attrs, scope, params)
           array_errors = []
 
           attributes.each do |resource_params|
@@ -22,11 +22,11 @@ module Grape
         def keys_in_common(resource_params, known_keys = all_keys)
           return [] unless hash_like?(resource_params)
 
-          known_keys & resource_params.keys.map! { |attr| @scope.full_name(attr) }
+          known_keys & resource_params.keys.map! { |attr| scope.full_name(attr) }
         end
 
         def all_keys
-          @attrs.map { |attr| @scope.full_name(attr) }
+          attrs.map { |attr| scope.full_name(attr) }
         end
       end
     end

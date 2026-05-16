@@ -9,18 +9,15 @@ module Grape
         def initialize(attrs, options, required, scope, opts)
           super
 
-          # +@options+ is a Grape::Validations::CoerceOptions. +Base#message+
-          # can't see a custom message off a Data (it probes Hash-like
-          # +key?+), so restore it here to preserve `type: { value:, message: }`.
-          @exception_message = @options.message unless @options.message.nil?
+          @exception_message = options.message if options.message
 
-          raw_type = @options.type
+          raw_type = options.type
           type = hash_like?(raw_type) ? raw_type[:value] : raw_type
           @converter =
             if type.is_a?(Grape::Validations::Types::VariantCollectionCoercer)
               type
             else
-              Types.build_coercer(type, method: @options.coerce_method)
+              Types.build_coercer(type, method: options.coerce_method)
             end
         end
 
@@ -29,7 +26,7 @@ module Grape
 
           new_value = coerce_value(params[attr_name])
 
-          validation_error!(attr_name, new_value.message || @exception_message) if new_value.is_a?(Types::InvalidValue)
+          validation_error!(attr_name, new_value.message || exception_message) if new_value.is_a?(Types::InvalidValue)
 
           # Don't assign a value if it is identical. It fixes a problem with Hashie::Mash
           # which looses wrappers for hashes and arrays after reassigning values
