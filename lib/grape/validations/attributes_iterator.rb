@@ -3,37 +3,37 @@
 module Grape
   module Validations
     class AttributesIterator
-      # +attrs+ and +scope+ are static per validator; only +params+ varies
-      # per request, so an instance can be built once and reused (it keeps
-      # no request-derived state). Reused instances are shared across
-      # threads, so +each+ must stay free of mutable instance state.
-      def initialize(attrs, scope)
+      include Enumerable
+
+      attr_reader :scope
+
+      def initialize(attrs, scope, params)
         @attrs = attrs
         @scope = scope
+        @original_params = scope.params(params)
+        @params = Array.wrap(@original_params)
       end
 
-      def each(params, &)
-        original_params = @scope.params(params)
-        # because we need recursion for nested arrays
-        do_each(Array.wrap(original_params), original_params, &)
+      def each(&)
+        do_each(@params, &) # because we need recursion for nested arrays
       end
 
       private
 
-      def do_each(params_to_process, original_params, parent_indices = [], &block)
+      def do_each(params_to_process, parent_indices = [], &block)
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indices
           if resource_params.is_a?(Array)
-            do_each(resource_params, original_params, [index] + parent_indices, &block)
+            do_each(resource_params, [index] + parent_indices, &block)
             next
           end
 
           if @scope.type == Array
-            next unless original_params.is_a?(Array) # do not validate content of array if it isn't array
+            next unless @original_params.is_a?(Array) # do not validate content of array if it isn't array
 
             store_indices(@scope, index, parent_indices)
-          elsif original_params.is_a?(Array)
+          elsif @original_params.is_a?(Array)
             # Lateral scope (no @element) whose params resolved to an array —
             # delegate index tracking to the nearest array-typed ancestor so
             # that full_name produces the correct bracketed index.

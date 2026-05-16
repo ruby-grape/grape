@@ -5,22 +5,19 @@ module Grape
     module Validators
       class MultipleParamsBase < Base
         def validate!(params)
-          array_errors = nil
+          attributes = MultipleAttributesIterator.new(attrs, scope, params)
+          array_errors = []
 
-          @iterator.each(params) do |resource_params|
+          attributes.each do |resource_params|
             validate_params!(resource_params)
           rescue Grape::Exceptions::Validation => e
-            (array_errors ||= []) << e
+            array_errors << e
           end
 
-          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
+          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors.any?
         end
 
         private
-
-        def iterator_class
-          MultipleAttributesIterator
-        end
 
         def keys_in_common(resource_params, known_keys = all_keys)
           return [] unless hash_like?(resource_params)

@@ -2,7 +2,7 @@
 
 describe Grape::Validations::MultipleAttributesIterator do
   describe '#each' do
-    subject(:iterator) { described_class.new(validator, scope) }
+    subject(:iterator) { described_class.new(validator, scope, params) }
 
     let(:scope) { Grape::Validations::ParamsScope.new(api: Class.new(Grape::API)) }
     let(:validator) { double(attrs: %i[first second third]) }
@@ -13,7 +13,7 @@ describe Grape::Validations::MultipleAttributesIterator do
       end
 
       it 'yields the whole params hash without the list of attrs' do
-        expect { |b| iterator.each(params, &b) }.to yield_with_args(params)
+        expect { |b| iterator.each(&b) }.to yield_with_args(params)
       end
     end
 
@@ -23,7 +23,7 @@ describe Grape::Validations::MultipleAttributesIterator do
       end
 
       it 'yields each element of the array without the list of attrs' do
-        expect { |b| iterator.each(params, &b) }.to yield_successive_args(params[0], params[1])
+        expect { |b| iterator.each(&b) }.to yield_successive_args(params[0], params[1])
       end
     end
 
@@ -31,7 +31,7 @@ describe Grape::Validations::MultipleAttributesIterator do
       let(:params) { [Grape::DSL::Parameters::EmptyOptionalValue] }
 
       it 'does not yield it' do
-        expect { |b| iterator.each(params, &b) }.to yield_successive_args
+        expect { |b| iterator.each(&b) }.to yield_successive_args
       end
     end
   end

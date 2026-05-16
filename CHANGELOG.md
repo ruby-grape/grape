@@ -39,7 +39,6 @@
 * [#2716](https://github.com/ruby-grape/grape/pull/2716): Refactor `DSL::Routing#version`: guard clause, explicit kwargs in place of `**options`, and a `Grape::DSL::VersionOptions` value object stored internally - [@ericproulx](https://github.com/ericproulx).
 * [#2720](https://github.com/ruby-grape/grape/pull/2720): Move declaration-coherence checks into `Grape::Validations::ValidationsSpec` - [@ericproulx](https://github.com/ericproulx).
 * [#2725](https://github.com/ruby-grape/grape/pull/2725): Encapsulate `Grape::Validations::Validators::Base` state behind readers; add `required?`/`allow_blank?` predicates - [@ericproulx](https://github.com/ericproulx).
-* [#2726](https://github.com/ruby-grape/grape/pull/2726): Reuse one `AttributesIterator` per validator and drop the unused `Enumerable` mixin - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
