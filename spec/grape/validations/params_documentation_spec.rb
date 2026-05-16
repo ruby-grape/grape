@@ -35,7 +35,7 @@ describe Grape::Validations::ParamsDocumentation do
       validations = {
         presence: true,
         type: Integer,
-        default: 42,
+        default: 1,
         length: { min: 1, max: 10 },
         desc: 'A foo',
         documentation: { note: 'doc' },
@@ -50,7 +50,7 @@ describe Grape::Validations::ParamsDocumentation do
         type: 'Integer',
         values: [1, 2, 3],
         except_values: [4, 5, 6],
-        default: 42,
+        default: 1,
         min_length: 1,
         max_length: 10,
         desc: 'A foo',
