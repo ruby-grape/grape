@@ -2511,8 +2511,8 @@ describe Grape::API do
     context 'class' do
       let(:custom_error_formatter) do
         Class.new do
-          def self.call(message, _backtrace, _options, _env, _original_exception)
-            "message: #{message} @backtrace"
+          def self.call(error:, **)
+            "message: #{error.message} @backtrace"
           end
         end
       end
@@ -2545,6 +2545,21 @@ describe Grape::API do
         end
         get '/exception'
         expect(last_response.body).to eq('message: raining dogs and cats @backtrace')
+      end
+    end
+
+    context 'with status and headers exposed (issue 2527)' do
+      it 'passes the HTTP status and headers into a custom error formatter' do
+        subject.format :txt
+        subject.error_formatter :txt, ->(error:, **) { "[#{error.status}] #{error.message} (#{error.headers['x-marker']})" }
+        subject.rescue_from :all do
+          error!('boom', 418, 'x-marker' => 'hit')
+        end
+        subject.get('/exception') { raise 'rain!' }
+
+        get '/exception'
+        expect(last_response.status).to eq(418)
+        expect(last_response.body).to eq('[418] boom (hit)')
       end
     end
 

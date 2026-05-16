@@ -190,9 +190,7 @@ describe Grape::Middleware::Error do
         rescue_all: true,
         format: :custom,
         error_formatters: {
-          custom: lambda do |message, _backtrace, _options, _env, _original_exception|
-            { custom_formatter: message }.inspect
-          end
+          custom: ->(error:, **) { { custom_formatter: error.message }.inspect }
         }
       }
     end
@@ -231,7 +229,7 @@ describe Grape::Middleware::Error do
       {
         rescue_all: true,
         format: :json,
-        rescue_options: { backtrace: true, original_exception: true }
+        rescue_options: Grape::DSL::RescueOptions.new(backtrace: true, original_exception: true)
       }
     end
 
@@ -247,7 +245,7 @@ describe Grape::Middleware::Error do
       {
         rescue_all: true,
         format: :xml,
-        rescue_options: { backtrace: true, original_exception: true }
+        rescue_options: Grape::DSL::RescueOptions.new(backtrace: true, original_exception: true)
       }
     end
 
@@ -263,7 +261,7 @@ describe Grape::Middleware::Error do
       {
         rescue_all: true,
         format: :txt,
-        rescue_options: { backtrace: true, original_exception: true }
+        rescue_options: Grape::DSL::RescueOptions.new(backtrace: true, original_exception: true)
       }
     end
 
