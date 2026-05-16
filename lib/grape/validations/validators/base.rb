@@ -72,6 +72,7 @@ module Grape
           @scope = scope
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
+          @iterator = iterator_class.new(@attrs, @scope).freeze
         end
 
         # Validates a given request.
@@ -92,12 +93,11 @@ module Grape
         # @raise [Grape::Exceptions::Validation] if validation failed
         # @return [void]
         def validate!(params)
-          attributes = SingleAttributeIterator.new(attrs, scope, params)
           # we collect errors inside array because
           # there may be more than one error per field
           array_errors = nil
 
-          attributes.each do |val, attr_name, empty_val|
+          @iterator.each(params) do |val, attr_name, empty_val|
             next if !scope.required? && empty_val
             next unless scope.meets_dependency?(val, params)
 
@@ -125,6 +125,12 @@ module Grape
         attr_reader :options, :scope, :required, :exception_message
 
         alias required? required
+
+        # The AttributesIterator subclass used to walk this validator's
+        # attributes. Built once in #initialize and reused across requests.
+        def iterator_class
+          SingleAttributeIterator
+        end
 
         def validation_error!(attr_name_or_params, message = exception_message)
           params = attr_name_or_params.is_a?(Array) ? attr_name_or_params : scope.full_name(attr_name_or_params)
