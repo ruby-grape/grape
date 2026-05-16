@@ -310,9 +310,10 @@ module Grape
       stack.concat inheritable_setting.namespace_stackable[:middleware]
 
       if inheritable_setting.namespace_inheritable[:version].present?
-        stack.use Grape::Middleware::Versioner.using(inheritable_setting.namespace_inheritable[:version_options][:using]),
+        version_options = inheritable_setting.namespace_inheritable[:version_options]
+        stack.use Grape::Middleware::Versioner.using(version_options.using),
                   versions: inheritable_setting.namespace_inheritable[:version].flatten,
-                  version_options: inheritable_setting.namespace_inheritable[:version_options],
+                  version_options:,
                   prefix: inheritable_setting.namespace_inheritable[:root_prefix],
                   mount_path: inheritable_setting.namespace_stackable[:mount_path].first
       end
@@ -340,7 +341,7 @@ module Grape
         rescue_grape_exceptions: ns_inh[:rescue_grape_exceptions],
         default_error_formatter: ns_inh[:default_error_formatter],
         error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
-        rescue_options: ns_stack.namespace_stackable_with_hash(:rescue_options),
+        rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
         rescue_handlers:,
         base_only_rescue_handlers: ns_stack.namespace_stackable_with_hash(:base_only_rescue_handlers),
         all_rescue_handler: ns_inh[:all_rescue_handler],

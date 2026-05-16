@@ -55,6 +55,8 @@ module Grape
         @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
         @validator_entries = build_validator_entries(raw)
 
+        validate!
+
         freeze
       end
 
@@ -67,6 +69,38 @@ module Grape
       end
 
       private
+
+      # Cross-field consistency checks on the parsed declaration. Run at
+      # construction so an incoherent spec (e.g. a +default+ outside +values+,
+      # or +values+ whose elements don't match +type+) can never exist —
+      # callers no longer have to remember to invoke these separately.
+      def validate!
+        check_incompatible_option_values(@default, @values, @except_values)
+        validate_value_coercion(@coerce_type, @values, @except_values)
+      end
+
+      def check_incompatible_option_values(default, values, except_values)
+        return if default.nil? || default.is_a?(Proc)
+
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && Array(default).any? { |def_val| !values.include?(def_val) }
+
+        return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
+
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
+      end
+
+      def validate_value_coercion(coerce_type, *values_list)
+        return unless coerce_type
+
+        coerce_type = coerce_type.first if coerce_type.is_a?(Enumerable)
+        values_list.each do |values|
+          next if !values || values.is_a?(Proc)
+
+          value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
+          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if coerce_type == Grape::API::Boolean
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values) unless value_types.all?(coerce_type)
+        end
+      end
 
       def build_validator_entries(raw)
         raw.reject do |k, _|

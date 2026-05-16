@@ -2739,12 +2739,12 @@ end
 
 The error format will match the request format. See "Content-Types" below.
 
-Custom error formatters for existing and additional types can be defined with a proc.
+Custom error formatters for existing and additional types can be defined with a proc. The formatter receives a `Grape::Exceptions::ErrorResponse` value object as `error:` plus three context kwargs — `env:`, `include_backtrace:`, `include_original_exception:`. Pull just the keys you need with `**` to ignore the rest:
 
 ```ruby
 class Twitter::API < Grape::API
-  error_formatter :txt, ->(message, backtrace, options, env, original_exception) {
-    "error: #{message} from #{backtrace}"
+  error_formatter :txt, ->(error:, **) {
+    "error #{error.status}: #{error.message} from #{error.backtrace}"
   }
 end
 ```
@@ -2753,8 +2753,8 @@ You can also use a module or class.
 
 ```ruby
 module CustomFormatter
-  def self.call(message, backtrace, options, env, original_exception)
-    { message: message, backtrace: backtrace }
+  def self.call(error:, **)
+    { status: error.status, message: error.message, backtrace: error.backtrace }
   end
 end
 

@@ -28,7 +28,7 @@ module Grape
           val = scrub(params[attr_name])
 
           return if val.nil? && !required_for_root_scope?
-          return if val != false && val.blank? && @allow_blank
+          return if val != false && val.blank? && allow_blank
           return if check_values?(val, attr_name)
 
           validation_error!(attr_name)
