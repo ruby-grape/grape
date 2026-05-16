@@ -9,7 +9,8 @@ module Grape
       # @param description [String] descriptive string for this endpoint
       #   or namespace
       # @param options [Hash] other properties you can set to describe the
-      #   endpoint or namespace. Optional.
+      #   endpoint or namespace. Optional. Pass these as keyword arguments;
+      #   passing a positional options Hash is deprecated.
       # @option options :detail [String] additional detail about this endpoint
       # @option options :summary [String] summary for this endpoint
       # @option options :params [Hash] param types and info. normally, you set
@@ -49,7 +50,12 @@ module Grape
       #       # ...
       #     end
       #
-      def desc(description, options = {}, &config_block)
+      def desc(description, *legacy_options, **options, &config_block)
+        if legacy_options.any?
+          Grape.deprecator.warn('Passing a positional options Hash to `desc` is deprecated. Pass keyword arguments instead.')
+          options = legacy_options.first.merge(options)
+        end
+
         settings =
           if config_block
             endpoint_config = defined?(configuration) ? configuration : nil

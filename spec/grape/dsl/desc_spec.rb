@@ -14,9 +14,26 @@ describe Grape::DSL::Desc do
     it 'sets a description' do
       desc_text = 'The description'
       options = { message: 'none' }
-      subject.desc desc_text, options
+      subject.desc desc_text, **options
       expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
       expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
+    end
+
+    context 'when a positional options Hash is passed' do
+      let(:desc_text) { 'The description' }
+      let(:options) { { message: 'none' } }
+
+      it 'is deprecated' do
+        expect { subject.desc desc_text, options }.to raise_error(ActiveSupport::DeprecationException)
+      end
+
+      it 'still sets the description when deprecations are silenced' do
+        Grape.deprecator.silence do
+          subject.desc desc_text, options
+        end
+        expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
+        expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
+      end
     end
 
     context 'when a block is passed' do

@@ -33,6 +33,7 @@
 * [#2712](https://github.com/ruby-grape/grape/pull/2712): Pass a `Grape::Exceptions::ErrorResponse` value object to `error_formatter#call` instead of separate kwargs - [@ericproulx](https://github.com/ericproulx).
 * [#2714](https://github.com/ruby-grape/grape/pull/2714): Drop unused `Grape::Middleware::Globals` and its `grape.request*` env constants - [@ericproulx](https://github.com/ericproulx).
 * [#2717](https://github.com/ruby-grape/grape/pull/2717): Convert `Grape::Exceptions::ErrorResponse` to a `Data` value object - [@ericproulx](https://github.com/ericproulx).
+* [#2723](https://github.com/ruby-grape/grape/pull/2723): Deprecate passing a positional options Hash to `Grape::DSL::Desc#desc`; pass options as keyword arguments. Add a grape-swagger integration spec - [@ericproulx](https://github.com/ericproulx).
 * [#2722](https://github.com/ruby-grape/grape/pull/2722): Introduce `Grape::Validations::CoerceOptions` value object for the internal coerce options - [@ericproulx](https://github.com/ericproulx).
 * [#2721](https://github.com/ruby-grape/grape/pull/2721): Use an internal `Grape::Validations::SharedOptions` value object in `Validators::Base` (public `opts` Hash contract unchanged) - [@ericproulx](https://github.com/ericproulx).
 * [#2719](https://github.com/ruby-grape/grape/pull/2719): Move content-type helpers from `Middleware::Base` into `PrecomputedContentTypes` - [@ericproulx](https://github.com/ericproulx).
