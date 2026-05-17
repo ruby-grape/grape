@@ -3,6 +3,30 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `auth`, `http_basic` and `http_digest` now take keyword arguments
+
+`Grape::Middleware::Auth::DSL#auth`, `#http_basic` and `#http_digest` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:
+
+```ruby
+http_basic realm: 'API' do |u, p|
+  # ...
+end
+
+auth :http_digest, realm: 'API', opaque: 'secret', &proc
+```
+
+Passing a positional options `Hash` still works but is deprecated and will be removed in a future release:
+
+```ruby
+# deprecated
+http_basic({ realm: 'API' })
+auth :http_digest, { realm: 'API', opaque: 'secret' }
+
+# preferred
+http_basic(realm: 'API')
+auth :http_digest, realm: 'API', opaque: 'secret'
+```
+
 #### `Grape::Middleware::Globals` removed
 
 `Grape::Middleware::Globals` and the three env constants it set (`Grape::Env::GRAPE_REQUEST`, `Grape::Env::GRAPE_REQUEST_HEADERS`, `Grape::Env::GRAPE_REQUEST_PARAMS`) have been deleted. The middleware was introduced in 2013 (commit `9987090b`) but never mounted by Grape's own stack — the `Grape::Request` it built is now constructed directly inside `Grape::Endpoint`. Nothing in `lib/` read those env keys.
