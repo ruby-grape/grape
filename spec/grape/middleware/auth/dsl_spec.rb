@@ -57,4 +57,30 @@ describe Grape::Middleware::Auth::DSL do
       end
     end
   end
+
+  describe 'deprecated positional options Hash' do
+    it 'deprecates a positional Hash for `auth` but still works when silenced' do
+      expect { subject.auth :http_digest, { realm: 'r', opaque: 'o' }, &block }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `auth`/)
+
+      Grape.deprecator.silence { subject.auth :http_digest, { realm: 'r', opaque: 'o' }, &block }
+      expect(subject.auth).to eq(realm: 'r', opaque: 'o', type: :http_digest, proc: block)
+    end
+
+    it 'deprecates a positional Hash for `http_basic` but still works when silenced' do
+      expect { subject.http_basic({ realm: 'my_realm' }, &block) }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `http_basic`/)
+
+      Grape.deprecator.silence { subject.http_basic({ realm: 'my_realm' }, &block) }
+      expect(subject.auth).to eq(realm: 'my_realm', type: :http_basic, proc: block)
+    end
+
+    it 'deprecates a positional Hash for `http_digest` but still works when silenced' do
+      expect { subject.http_digest({ realm: 'my_realm' }, &block) }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `http_digest`/)
+
+      Grape.deprecator.silence { subject.http_digest({ realm: 'my_realm' }, &block) }
+      expect(subject.auth).to eq(realm: 'my_realm', opaque: 'secret', type: :http_digest, proc: block)
+    end
+  end
 end
