@@ -135,7 +135,7 @@ module Grape
     end
 
     def default_response
-      [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY.dup]
+      [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY]
     end
 
     def match?(input, method)
