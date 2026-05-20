@@ -7,12 +7,16 @@ module Grape
         extend Forwardable
         include Grape::Middleware::PrecomputedContentTypes
 
-        DEFAULT_OPTIONS = {
-          mount_path: nil,
-          pattern: /.*/i,
-          prefix: nil,
-          version_options: Grape::DSL::VersionOptions.new
-        }.freeze
+        Options = Data.define(
+          :content_types, :format, :mount_path, :pattern, :prefix, :version_options, :versions
+        ) do
+          def initialize(
+            content_types: nil, format: nil, mount_path: nil, pattern: /.*/i, prefix: nil,
+            version_options: Grape::DSL::VersionOptions.new, versions: nil
+          )
+            super
+          end
+        end
 
         CASCADE_PASS_HEADER = { 'X-Cascade' => 'pass' }.freeze
 
@@ -21,18 +25,14 @@ module Grape
           Versioner.register(klass)
         end
 
-        attr_reader :available_media_types, :error_headers, :mount_path, :pattern,
-                    :prefix, :version_options, :versions
+        attr_reader :available_media_types, :error_headers, :versions
 
+        def_delegators :options, :mount_path, :pattern, :prefix, :version_options
         def_delegators :version_options, :cascade, :parameter, :strict, :vendor
 
         def initialize(app, **options)
           super
-          @version_options = @options[:version_options]
-          @mount_path = @options[:mount_path]
-          @pattern = @options[:pattern]
-          @prefix = @options[:prefix]
-          @versions = @options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          @versions = self.options.versions&.map(&:to_s) # making sure versions are strings to ease potential match
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @available_media_types = build_available_media_types
         end

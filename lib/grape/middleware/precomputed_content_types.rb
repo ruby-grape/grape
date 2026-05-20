@@ -4,9 +4,10 @@ module Grape
   module Middleware
     # Include in a middleware subclass that needs content-type negotiation.
     # Provides +content_types+ / +mime_types+ / +content_type_for+ /
-    # +content_type+ resolved from +options[:content_types]+ and
-    # +options[:format]+, and warms those caches on the parent instance at
-    # initialization so per-request +dup+s inherit them (avoiding
+    # +content_type+ resolved from +options.content_types+ and
+    # +options.format+ — so the consuming middleware's +Options+ Data class
+    # must declare both fields. Warms those caches on the parent instance
+    # at initialization so per-request +dup+s inherit them (avoiding
     # ~1 µs/request of +with_indifferent_access+ recomputation).
     #
     # Opt-in: plain +Grape::Middleware::Base+ subclasses that don't need
@@ -20,7 +21,7 @@ module Grape
       end
 
       def content_types
-        @content_types ||= Grape::ContentTypes.content_types_for(options[:content_types])
+        @content_types ||= Grape::ContentTypes.content_types_for(options.content_types)
       end
 
       def mime_types
@@ -32,7 +33,7 @@ module Grape
       end
 
       def content_type
-        content_type_for(env[Grape::Env::API_FORMAT] || options[:format]) || 'text/html'
+        content_type_for(env[Grape::Env::API_FORMAT] || options.format) || 'text/html'
       end
 
       private

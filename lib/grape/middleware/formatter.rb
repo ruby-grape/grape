@@ -3,27 +3,18 @@
 module Grape
   module Middleware
     class Formatter < Base
+      extend Forwardable
       include PrecomputedContentTypes
 
-      DEFAULT_OPTIONS = {
-        content_types: nil,
-        default_format: :txt,
-        format: nil,
-        formatters: nil,
-        parsers: nil
-      }.freeze
+      Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
+        def initialize(content_types: nil, default_format: :txt, format: nil, formatters: nil, parsers: nil)
+          super
+        end
+      end
 
       ALL_MEDIA_TYPES = '*/*'
 
-      attr_reader :default_format, :format, :formatters, :parsers
-
-      def initialize(app, **options)
-        super
-        @default_format = @options[:default_format]
-        @format = @options[:format]
-        @formatters = @options[:formatters]
-        @parsers = @options[:parsers]
-      end
+      def_delegators :options, :default_format, :format, :formatters, :parsers
 
       def before
         negotiate_content_type
@@ -101,7 +92,7 @@ module Grape
         fmt = media_type ? mime_types[media_type] : default_format
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, options[:parsers]
+        parser = Grape::Parser.parser_for fmt, parsers
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
