@@ -10,7 +10,7 @@ require 'active_support/core_ext/hash/conversions' # to_xml
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/deep_transform_values'
 require 'active_support/core_ext/hash/indifferent_access'
-require 'active_support/core_ext/hash/reverse_merge'
+require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/module/delegation' # delegate_missing_to
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/deep_dup'
