@@ -9,7 +9,7 @@ module Grape
           return namespace_inheritable[:auth] unless type
 
           options = merge_legacy_auth_options(:auth, legacy_options, options)
-          namespace_inheritable[:auth] = options.reverse_merge(type: type.to_sym, proc: block)
+          namespace_inheritable[:auth] = { type: type.to_sym, proc: block }.merge!(options)
           use Grape::Middleware::Auth::Base, namespace_inheritable[:auth]
         end
 

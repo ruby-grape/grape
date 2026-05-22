@@ -40,7 +40,7 @@ module Grape
     def cookies
       return @cookies unless @cookies.is_a?(Proc)
 
-      @cookies = @cookies.call.with_indifferent_access
+      @cookies = ActiveSupport::HashWithIndifferentAccess.new(@cookies.call)
     end
 
     def send_cookies

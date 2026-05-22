@@ -20,7 +20,7 @@ module Grape
       end
 
       def registry
-        @registry ||= {}.with_indifferent_access
+        @registry ||= ActiveSupport::HashWithIndifferentAccess.new
       end
     end
   end

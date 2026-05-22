@@ -195,7 +195,7 @@ module Grape
 
       def error!(message, status = default_status, headers = {}, backtrace = [], original_exception = nil)
         env[Grape::Env::API_ENDPOINT].status(status) # not error! inside route
-        merged_headers = headers.reverse_merge(Rack::CONTENT_TYPE => content_type)
+        merged_headers = { Rack::CONTENT_TYPE => content_type }.merge!(headers)
         error = Grape::Exceptions::ErrorResponse.new(
           status:, message:, headers: merged_headers, backtrace:, original_exception:
         )

@@ -4,7 +4,7 @@ module Grape
   module ParamsBuilder
     class HashWithIndifferentAccess < Base
       def self.call(params)
-        params.with_indifferent_access
+        ActiveSupport::HashWithIndifferentAccess.new(params)
       end
     end
   end

@@ -38,7 +38,7 @@ module Grape
       private
 
       def content_types_indifferent_access
-        @content_types_indifferent_access ||= content_types.with_indifferent_access
+        @content_types_indifferent_access ||= ActiveSupport::HashWithIndifferentAccess.new(content_types)
       end
     end
   end
