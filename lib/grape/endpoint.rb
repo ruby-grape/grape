@@ -12,6 +12,7 @@ module Grape
     include Grape::DSL::InsideRoute
 
     attr_reader :env, :request, :source, :options, :endpoints
+    attr_accessor :options_route_enabled
 
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
@@ -69,6 +70,7 @@ module Grape
       @body = nil
       @source = self.class.block_to_unbound_method(block)
       @before_filter_passed = false
+      @options_route_enabled = false
       @endpoints = @options[:app].endpoints if @options[:app].respond_to?(:endpoints)
     end
 
@@ -224,8 +226,7 @@ module Grape
     attr_reader :befores, :before_validations, :after_validations, :afters, :finallies
 
     def options?
-      options[:options_route_enabled] &&
-        env[Rack::REQUEST_METHOD] == Rack::OPTIONS
+      options_route_enabled && env[Rack::REQUEST_METHOD] == Rack::OPTIONS
     end
 
     private

@@ -168,7 +168,7 @@ module Grape
           allowed_methods |= [Rack::HEAD] if !namespace_inheritable[:do_not_route_head] && allowed_methods.include?(Rack::GET)
 
           allow_header = namespace_inheritable[:do_not_route_options] ? allowed_methods : [Rack::OPTIONS] | allowed_methods
-          last_route.app.options[:options_route_enabled] = true unless namespace_inheritable[:do_not_route_options] || allowed_methods.include?(Rack::OPTIONS)
+          last_route.app.options_route_enabled = true unless namespace_inheritable[:do_not_route_options] || allowed_methods.include?(Rack::OPTIONS)
 
           greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
           @router.associate_routes(greedy_route)
