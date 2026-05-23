@@ -141,7 +141,7 @@ module Grape
         opts = @group.deep_merge(opts) if @group
 
         # check type for optional parameter group
-        if attrs && block
+        if block
           raise Grape::Exceptions::MissingGroupType if type.nil?
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
