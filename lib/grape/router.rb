@@ -122,9 +122,13 @@ module Grape
     end
 
     def process_route(route, input, env, include_allow_header: false)
-      args = env[Grape::Env::GRAPE_ROUTING_ARGS] || { route_info: route }
       route_params = route.params(input)
-      env[Grape::Env::GRAPE_ROUTING_ARGS] = route_params.blank? ? args : args.merge(route_params)
+      if route_params.present?
+        args = env[Grape::Env::GRAPE_ROUTING_ARGS] || { route_info: route }
+        env[Grape::Env::GRAPE_ROUTING_ARGS] = args.merge(route_params)
+      else
+        env[Grape::Env::GRAPE_ROUTING_ARGS] ||= { route_info: route }
+      end
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
       route.call(env)
     end
