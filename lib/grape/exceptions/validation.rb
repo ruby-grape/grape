@@ -29,6 +29,14 @@ module Grape
       def as_json(*_args)
         to_s
       end
+
+      # Returns +self+ so callers (e.g. +ValidationErrors#initialize+) can treat
+      # a single +Validation+ and a +ValidationArrayErrors+ wrapper uniformly via
+      # +flat_map(&:errors)+ — Array returns flatten in, non-Array returns
+      # (i.e. this +self+) append as one element.
+      def errors
+        self
+      end
     end
   end
 end

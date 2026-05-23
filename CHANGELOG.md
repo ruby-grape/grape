@@ -43,6 +43,7 @@
 * [#2726](https://github.com/ruby-grape/grape/pull/2726): Reuse one `AttributesIterator` per validator and drop the unused `Enumerable` mixin - [@ericproulx](https://github.com/ericproulx).
 * [#2728](https://github.com/ruby-grape/grape/pull/2728): Deprecate passing a positional options Hash to `auth`/`http_basic`/`http_digest`; pass keyword arguments instead - [@ericproulx](https://github.com/ericproulx).
 * [#2733](https://github.com/ruby-grape/grape/pull/2733): Drop the dead `active_support/core_ext/hash/reverse_merge` require; call `ActiveSupport::HashWithIndifferentAccess.new(...)` directly at call sites - [@ericproulx](https://github.com/ericproulx).
+* [#2736](https://github.com/ruby-grape/grape/pull/2736): Collapse `Endpoint#run_validators` rescue branches via `ValidationErrors` flatten; `ValidationErrors#initialize` keyword renamed `errors:` → `exceptions:` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
