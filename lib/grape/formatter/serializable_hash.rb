@@ -19,15 +19,11 @@ module Grape
         end
 
         def serialize(object)
-          if object.respond_to? :serializable_hash
-            object.serializable_hash
-          elsif array_serializable?(object)
-            object.map(&:serializable_hash)
-          elsif object.is_a?(Hash)
-            object.transform_values { |v| serialize(v) }
-          else
-            object
-          end
+          return object.serializable_hash if object.respond_to?(:serializable_hash)
+          return object.map(&:serializable_hash) if array_serializable?(object)
+          return object.transform_values { |v| serialize(v) } if object.is_a?(Hash)
+
+          object
         end
 
         def array_serializable?(object)

@@ -79,13 +79,10 @@ module Grape
       end
 
       def merge_default_options(options)
-        if respond_to?(:default_options)
-          default_options.deep_merge(options)
-        elsif self.class.const_defined?(:DEFAULT_OPTIONS)
-          self.class::DEFAULT_OPTIONS.deep_merge(options)
-        else
-          options
-        end
+        return default_options.deep_merge(options) if respond_to?(:default_options)
+        return self.class::DEFAULT_OPTIONS.deep_merge(options) if self.class.const_defined?(:DEFAULT_OPTIONS)
+
+        options
       end
 
       def try_scrub(obj)

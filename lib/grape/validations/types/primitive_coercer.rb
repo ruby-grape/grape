@@ -15,7 +15,7 @@ module Grape
 
         def call(val)
           return InvalidValue.new if reject?(val)
-          return nil if val.nil? || treat_as_nil?(val)
+          return if val.nil? || treat_as_nil?(val)
 
           super
         end

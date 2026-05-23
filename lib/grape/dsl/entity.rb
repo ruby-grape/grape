@@ -49,28 +49,31 @@ module Grape
       # @param object [Object] the object to locate the Entity class for
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object)
-        object_class =
-          if object.respond_to?(:klass)
-            object.klass
-          elsif object.respond_to?(:first)
-            object.first.class
-          else
-            object.class
-          end
+        klass = object_class(object)
 
         representations = inheritable_setting.namespace_stackable_with_hash(:representations)
         if representations
-          potential = object_class.ancestors.detect { |potential| representations.key?(potential) }
+          potential = klass.ancestors.detect { |potential| representations.key?(potential) }
           return representations[potential] if potential && representations[potential]
         end
 
-        return unless object_class.const_defined?(:Entity)
+        return unless klass.const_defined?(:Entity)
 
-        entity = object_class.const_get(:Entity)
+        entity = klass.const_get(:Entity)
         entity if entity.respond_to?(:represent)
       end
 
       private
+
+      # Resolves the class used to look up the Entity for +object+.
+      # @param object [Object] the object to represent.
+      # @return [Class] the object's collection element class, wrapped class, or its own class.
+      def object_class(object)
+        return object.klass if object.respond_to?(:klass)
+        return object.first.class if object.respond_to?(:first)
+
+        object.class
+      end
 
       # @param entity_class [Class] the entity class to use for representation.
       # @param object [Object] the object to represent.

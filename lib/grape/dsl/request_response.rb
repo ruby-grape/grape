@@ -148,7 +148,7 @@ module Grape
 
         case with
         when Proc, Symbol then with
-        when String       then with.to_sym
+        when String then with.to_sym
         else raise ArgumentError, "with: #{with.class}, expected Symbol, String or Proc"
         end
       end
