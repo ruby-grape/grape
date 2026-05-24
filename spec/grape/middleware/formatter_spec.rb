@@ -467,7 +467,6 @@ describe Grape::Middleware::Formatter do
     it 'adds the backtrace and original_exception to the error output' do
       subject = described_class.new(
         app,
-        rescue_options: { backtrace: true, original_exception: true },
         parsers: { json: ->(_object, _env) { raise StandardError, 'fail' } }
       )
       io = StringIO.new('{invalid}')
