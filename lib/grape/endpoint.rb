@@ -194,25 +194,22 @@ module Grape
 
     def run_validators(request:)
       validators = inheritable_setting.route[:saved_validations]
-      return if validators.empty?
+      return if validators.blank?
 
-      validation_errors = []
+      validation_exceptions = nil
 
       Grape::Validations::ParamScopeTracker.track do
         ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators:, request:) do
           validators.each do |validator|
             validator.validate(request)
-          rescue Grape::Exceptions::Validation => e
-            validation_errors << e
-            break if validator.fail_fast?
-          rescue Grape::Exceptions::ValidationArrayErrors => e
-            validation_errors.concat e.errors
+          rescue Grape::Exceptions::Validation, Grape::Exceptions::ValidationArrayErrors => e
+            (validation_exceptions ||= []) << e
             break if validator.fail_fast?
           end
         end
       end
 
-      raise(Grape::Exceptions::ValidationErrors.new(errors: validation_errors, headers: header)) if validation_errors.any?
+      raise Grape::Exceptions::ValidationErrors.new(exceptions: validation_exceptions, headers: header) if validation_exceptions
     end
 
     def run_filters(filters, type = :other)
