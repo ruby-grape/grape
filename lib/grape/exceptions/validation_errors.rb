@@ -7,8 +7,8 @@ module Grape
 
       attr_reader :errors
 
-      def initialize(errors: [], headers: {})
-        @errors = errors.group_by(&:params)
+      def initialize(exceptions: [], headers: {})
+        @errors = exceptions.flat_map(&:errors).group_by(&:params)
         super(message: full_messages.join(', '), status: 400, headers:)
       end
 

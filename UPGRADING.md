@@ -3,6 +3,18 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### `Grape::Exceptions::ValidationErrors.new` keyword renamed `errors:` → `exceptions:`
+
+`Grape::Exceptions::ValidationErrors#initialize` now takes its input array under the `exceptions:` keyword instead of `errors:`. The kwarg accepts a mix of `Grape::Exceptions::Validation` and `Grape::Exceptions::ValidationArrayErrors` instances; `ValidationArrayErrors` wrappers are flattened internally via `flat_map(&:errors)`. The `errors` reader on the constructed instance (the grouped `{params => [Validation, ...]}` Hash) is unchanged.
+
+```ruby
+# before
+Grape::Exceptions::ValidationErrors.new(errors: [validation, validation_array_errors], headers:)
+
+# after
+Grape::Exceptions::ValidationErrors.new(exceptions: [validation, validation_array_errors], headers:)
+```
+
 #### `auth`, `http_basic` and `http_digest` now take keyword arguments
 
 `Grape::Middleware::Auth::DSL#auth`, `#http_basic` and `#http_digest` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:

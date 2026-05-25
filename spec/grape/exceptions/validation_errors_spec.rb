@@ -2,11 +2,15 @@
 
 describe Grape::Exceptions::ValidationErrors do
   let(:validation_message) { 'FooBar is invalid' }
-  let(:validation_error) { instance_double Grape::Exceptions::Validation, params: [validation_message], message: '' }
+  let(:validation_error) do
+    instance_double(Grape::Exceptions::Validation, params: [validation_message], message: '').tap do |dbl|
+      allow(dbl).to receive(:errors).and_return(dbl)
+    end
+  end
 
   context 'initialize' do
     subject do
-      described_class.new(errors: [validation_error], headers:)
+      described_class.new(exceptions: [validation_error], headers:)
     end
 
     let(:headers) do
@@ -25,7 +29,7 @@ describe Grape::Exceptions::ValidationErrors do
       subject(:message) { error.message.split(',').map(&:strip) }
 
       let(:error) do
-        described_class.new(errors: [validation_error, validation_error])
+        described_class.new(exceptions: [validation_error, validation_error])
       end
 
       it { expect(message).to include validation_message }
@@ -35,7 +39,7 @@ describe Grape::Exceptions::ValidationErrors do
 
   describe '#full_messages' do
     context 'with errors' do
-      subject { described_class.new(errors: [validation_error_1, validation_error_2]).full_messages }
+      subject { described_class.new(exceptions: [validation_error_1, validation_error_2]).full_messages }
 
       let(:validation_error_1) { Grape::Exceptions::Validation.new(params: ['id'], message: :presence) }
       let(:validation_error_2) { Grape::Exceptions::Validation.new(params: ['name'], message: :presence) }
@@ -46,7 +50,7 @@ describe Grape::Exceptions::ValidationErrors do
     end
 
     context 'when attributes is an array of symbols' do
-      subject { described_class.new(errors: [validation_error]).full_messages }
+      subject { described_class.new(exceptions: [validation_error]).full_messages }
 
       let(:validation_error) { Grape::Exceptions::Validation.new(params: [:admin_field], message: 'Can not set admin-only field') }
 
