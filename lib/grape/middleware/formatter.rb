@@ -32,11 +32,9 @@ module Grape
 
         status, headers, bodies = *@app_response
 
-        if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
-          [status, headers, []]
-        else
-          build_formatted_response(status, headers, bodies)
-        end
+        return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+
+        build_formatted_response(status, headers, bodies)
       end
 
       private
@@ -133,11 +131,9 @@ module Grape
 
       def negotiate_content_type
         fmt = format_from_extension || query_params['format'] || format || format_from_header || default_format
-        if content_type_for(fmt)
-          env[Grape::Env::API_FORMAT] = fmt.to_sym
-        else
-          throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
-        end
+        return env[Grape::Env::API_FORMAT] = fmt.to_sym if content_type_for(fmt)
+
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
       end
 
       def format_from_extension

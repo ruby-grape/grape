@@ -198,6 +198,23 @@ describe Grape::DSL::RequestResponse do
       end
     end
 
+    describe 'meta selector mixed with exception classes' do
+      it 'raises ArgumentError for :all + exception class' do
+        expect { subject.rescue_from :all, StandardError }
+          .to raise_error(ArgumentError, 'rescue_from :all does not accept additional arguments')
+      end
+
+      it 'raises ArgumentError for :grape_exceptions + exception class' do
+        expect { subject.rescue_from :grape_exceptions, StandardError }
+          .to raise_error(ArgumentError, 'rescue_from :grape_exceptions does not accept additional arguments')
+      end
+
+      it 'raises ArgumentError for :internal_grape_exceptions + exception class' do
+        expect { subject.rescue_from :internal_grape_exceptions, StandardError }
+          .to raise_error(ArgumentError, 'rescue_from :internal_grape_exceptions does not accept additional arguments')
+      end
+    end
+
     describe 'list of exceptions is passed' do
       let(:default_rescue_options) { [Grape::DSL::RescueOptions.new] }
 

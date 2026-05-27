@@ -39,15 +39,11 @@ module Grape
       end
 
       def build_path_from_pattern(pattern, anchor)
-        if pattern.end_with?('*path')
-          pattern.dup.insert(pattern.rindex('/') + 1, '?')
-        elsif anchor
-          pattern
-        elsif pattern.end_with?('/')
-          "#{pattern}?*path"
-        else
-          "#{pattern}/?*path"
-        end
+        return pattern.dup.insert(pattern.rindex('/') + 1, '?') if pattern.end_with?('*path')
+        return pattern if anchor
+        return "#{pattern}?*path" if pattern.end_with?('/')
+
+        "#{pattern}/?*path"
       end
 
       def map_str(value)

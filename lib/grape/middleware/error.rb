@@ -163,13 +163,12 @@ module Grape
       def redispatch(error, endpoint, already_redispatched)
         return framework_default(endpoint) if already_redispatched
 
-        if (registered = registered_rescue_handler(error.class))
-          run_rescue_handler(registered, error, endpoint, redispatched: true)
-        elsif error.is_a?(Grape::Exceptions::Base)
-          run_rescue_handler(method(:error_response), error, endpoint, redispatched: true)
-        else
-          safe_default(error, endpoint)
-        end
+        registered = registered_rescue_handler(error.class)
+
+        return run_rescue_handler(registered, error, endpoint, redispatched: true) if registered
+        return run_rescue_handler(method(:error_response), error, endpoint, redispatched: true) if error.is_a?(Grape::Exceptions::Base)
+
+        safe_default(error, endpoint)
       end
 
       # The unrecognised-error path. Exposes the original exception on

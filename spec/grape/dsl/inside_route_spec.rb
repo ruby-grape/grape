@@ -137,7 +137,7 @@ describe Grape::DSL::InsideRoute do
 
     it 'raises error if unknow symbol is passed' do
       expect { subject.status :foo_bar }
-        .to raise_error(ArgumentError, 'Status code :foo_bar is invalid.')
+        .to raise_error(ArgumentError, 'Unrecognized status code :foo_bar')
     end
 
     it 'accepts unknown Integer status codes' do

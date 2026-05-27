@@ -2,21 +2,20 @@
 
 require 'logger'
 require 'active_support'
-require 'active_support/version'
 require 'active_support/isolated_execution_state'
 require 'active_support/core_ext/array/conversions' # to_xml
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/hash/conversions' # to_xml
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/deep_transform_values'
-require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/hash/indifferent_access' # nested_under_indifferent_access, required by HashWithIndifferentAccess.new
 require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/module/delegation' # delegate_missing_to
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/deep_dup'
 require 'active_support/core_ext/object/duplicable'
+require 'active_support/core_ext/string/inflections' # demodulize, underscore
 require 'active_support/deprecation'
-require 'active_support/inflector'
 require 'active_support/ordered_options'
 require 'active_support/notifications'
 
@@ -28,7 +27,6 @@ require 'dry-configurable'
 require 'forwardable'
 require 'json'
 require 'mustermann/grape'
-require 'pathname'
 require 'rack'
 require 'rack/auth/basic'
 require 'rack/builder'
