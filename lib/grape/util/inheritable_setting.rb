@@ -5,7 +5,17 @@ module Grape
     # A branchable, inheritable settings object which can store both stackable
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
-      attr_reader :route, :api_class, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent, :point_in_time_copies
+      attr_reader :route, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent
+
+      # Lazy-allocated; +api_class+ and +point_in_time_copies+ are rarely
+      # written on most settings layers, so don't pay for a Hash/Array each.
+      def api_class
+        @api_class ||= {}
+      end
+
+      def point_in_time_copies
+        @point_in_time_copies ||= []
+      end
 
       # Retrieve global settings.
       def self.global
@@ -24,14 +34,13 @@ module Grape
       # #inherit_from).
       def initialize
         @route = {}
-        @api_class = {}
         @namespace = InheritableValues.new # only inheritable from a parent when
         # used with a mount, or should every API::Class be a separate namespace by default?
         @namespace_inheritable = InheritableValues.new
         @namespace_stackable = StackableValues.new
         @namespace_reverse_stackable = ReverseStackableValues.new
-        @point_in_time_copies = []
         @parent = nil
+        # @api_class and @point_in_time_copies stay nil until first access.
       end
 
       # Return the class-level global properties.
@@ -53,7 +62,7 @@ module Grape
         namespace_reverse_stackable.inherited_values = parent.namespace_reverse_stackable
         @route = parent.route.merge(route)
 
-        point_in_time_copies.each { |cloned_one| cloned_one.inherit_from parent }
+        @point_in_time_copies&.each { |cloned_one| cloned_one.inherit_from parent }
       end
 
       # Create a point-in-time copy of this settings instance, with clones of
