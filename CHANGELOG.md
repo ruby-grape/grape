@@ -45,6 +45,7 @@
 * [#2733](https://github.com/ruby-grape/grape/pull/2733): Drop the dead `active_support/core_ext/hash/reverse_merge` require; call `ActiveSupport::HashWithIndifferentAccess.new(...)` directly at call sites - [@ericproulx](https://github.com/ericproulx).
 * [#2734](https://github.com/ruby-grape/grape/pull/2734): Extract `options_route_enabled` from the Endpoint options Hash into a dedicated `attr_accessor` - [@ericproulx](https://github.com/ericproulx).
 * [#2736](https://github.com/ruby-grape/grape/pull/2736): Collapse `Endpoint#run_validators` rescue branches via `ValidationErrors` flatten; `ValidationErrors#initialize` keyword renamed `errors:` → `exceptions:` - [@ericproulx](https://github.com/ericproulx).
+* [#2735](https://github.com/ruby-grape/grape/pull/2735): Normalize `Grape::Endpoint#options` into an immutable `Grape::Endpoint::Options` `Data` value object; Hash-style `[]` reads kept for back-compat - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
