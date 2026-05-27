@@ -50,14 +50,12 @@ module Grape
         def build_available_media_types
           media_types = []
           base_media_type = "application/vnd.#{vendor}"
-          content_types.each_key do |extension|
-            versions&.reverse_each do |version|
-              media_types << "#{base_media_type}-#{version}+#{extension}"
-              media_types << "#{base_media_type}-#{version}"
-            end
-            media_types << "#{base_media_type}+#{extension}"
+          versions&.reverse_each do |version|
+            versioned_base = "#{base_media_type}-#{version}"
+            content_types.each_key { |extension| media_types << "#{versioned_base}+#{extension}" }
+            media_types << versioned_base
           end
-
+          content_types.each_key { |extension| media_types << "#{base_media_type}+#{extension}" }
           media_types << base_media_type
           media_types.concat(content_types.values.flatten)
           media_types
