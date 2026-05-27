@@ -14,7 +14,7 @@ module Grape
       private_constant :VALUES
 
       def self.build(val)
-        return nil unless VALUES.include?(val)
+        return unless VALUES.include?(val)
 
         new
       end
