@@ -79,9 +79,14 @@ module Grape
       #       rescue_from CustomError
       #     end
       #
+      META_RESCUE_SELECTORS = %i[all grape_exceptions internal_grape_exceptions].freeze
+      private_constant :META_RESCUE_SELECTORS
+
       # @overload rescue_from(*exception_classes, **options)
       #   @param [Array] exception_classes A list of classes that you want to rescue, or
-      #     the symbol :all to rescue from all exceptions.
+      #     one of the meta selectors +:all+, +:grape_exceptions+,
+      #     +:internal_grape_exceptions+. Meta selectors must be used alone;
+      #     mixing with exception classes raises +ArgumentError+.
       #   @param [Block] block Execution block to handle the given exception.
       #   @param [Proc] with Execution proc to handle the given exception as an alternative
       #     to passing a block.
@@ -93,19 +98,30 @@ module Grape
       #     in the rescue response body.
       def rescue_from(*args, with: nil, rescue_subclasses: true, backtrace: false, original_exception: false, &block)
         handler = extract_handler(args, with:, block:)
+        meta_selector = (args & META_RESCUE_SELECTORS).first
+        raise ArgumentError, "rescue_from #{meta_selector.inspect} does not accept additional arguments" if meta_selector && args.size > 1
 
-        if args.include?(:all)
-          inheritable_setting.namespace_inheritable[:rescue_all] = true
-          inheritable_setting.namespace_inheritable[:all_rescue_handler] = handler
-        elsif args.include?(:grape_exceptions)
-          inheritable_setting.namespace_inheritable[:rescue_all] = true
-          inheritable_setting.namespace_inheritable[:rescue_grape_exceptions] = true
-          inheritable_setting.namespace_inheritable[:grape_exceptions_rescue_handler] = handler
-        elsif args.include?(:internal_grape_exceptions)
-          inheritable_setting.namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
+        namespace_inheritable = nil
+        arg = nil
+
+        if args.one?
+          arg = args.first
+          namespace_inheritable = inheritable_setting.namespace_inheritable
+        end
+
+        case arg
+        when :all
+          namespace_inheritable[:rescue_all] = true
+          namespace_inheritable[:all_rescue_handler] = handler
+        when :grape_exceptions
+          namespace_inheritable[:rescue_all] = true
+          namespace_inheritable[:rescue_grape_exceptions] = true
+          namespace_inheritable[:grape_exceptions_rescue_handler] = handler
+        when :internal_grape_exceptions
+          namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
         else
           handler_type = rescue_subclasses ? :rescue_handlers : :base_only_rescue_handlers
-          inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |arg| [arg, handler] }
+          inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |klass| [klass, handler] }
         end
 
         inheritable_setting.namespace_stackable[:rescue_options] = RescueOptions.new(backtrace:, original_exception:)

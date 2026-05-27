@@ -15,7 +15,7 @@ module Grape
       end
 
       def configuration
-        options[:for].configuration.evaluate
+        config.for.configuration.evaluate
       end
 
       # End the request and display an error to the
