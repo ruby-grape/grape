@@ -15,6 +15,22 @@ Grape::Exceptions::ValidationErrors.new(errors: [validation, validation_array_er
 Grape::Exceptions::ValidationErrors.new(exceptions: [validation, validation_array_errors], headers:)
 ```
 
+#### `rescue_from` rejects meta selectors mixed with exception classes
+
+`rescue_from` used to silently drop additional exception classes when its first argument was a meta selector (`:all`, `:grape_exceptions`, `:internal_grape_exceptions`). It now raises `ArgumentError` so the misuse is caught at definition time:
+
+```ruby
+# previously: MyError was silently dropped — only :all took effect
+rescue_from :all, MyError, with: :handler
+
+# now: ArgumentError ("rescue_from :all does not accept additional arguments")
+# split into two declarations instead:
+rescue_from :all, with: :handler
+rescue_from MyError, with: :other_handler
+```
+
+Calls that only use one meta selector or only use exception classes (the documented forms) are unaffected.
+
 #### `auth`, `http_basic` and `http_digest` now take keyword arguments
 
 `Grape::Middleware::Auth::DSL#auth`, `#http_basic` and `#http_digest` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:

@@ -7,8 +7,8 @@ module Grape
 
       # Even if there is no value, an empty (frozen) array will be returned.
       def [](name)
-        inherited_value = inherited_values[name]
-        new_value = new_values[name]
+        inherited_value = @inherited_values[name]
+        new_value = @new_values && @new_values[name]
 
         return new_value || EMPTY unless inherited_value
 
@@ -16,8 +16,9 @@ module Grape
       end
 
       def []=(name, value)
-        new_values[name] ||= []
-        new_values[name].push value
+        @new_values ||= {}
+        @new_values[name] ||= []
+        @new_values[name].push value
       end
 
       def to_hash
