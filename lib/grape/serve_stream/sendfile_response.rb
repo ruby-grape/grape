@@ -6,11 +6,9 @@ module Grape
     # for using Rack::SendFile middleware
     class SendfileResponse < Rack::Response
       def respond_to?(method_name, include_all = false)
-        if method_name == :to_path
-          @body.respond_to?(:to_path, include_all)
-        else
-          super
-        end
+        return @body.respond_to?(:to_path, include_all) if method_name == :to_path
+
+        super
       end
 
       def to_path
