@@ -46,6 +46,12 @@
 * [#2734](https://github.com/ruby-grape/grape/pull/2734): Extract `options_route_enabled` from the Endpoint options Hash into a dedicated `attr_accessor` - [@ericproulx](https://github.com/ericproulx).
 * [#2736](https://github.com/ruby-grape/grape/pull/2736): Collapse `Endpoint#run_validators` rescue branches via `ValidationErrors` flatten; `ValidationErrors#initialize` keyword renamed `errors:` → `exceptions:` - [@ericproulx](https://github.com/ericproulx).
 * [#2746](https://github.com/ruby-grape/grape/pull/2746): Hoist `using:` / `except:` from `**opts` to explicit kwargs on `DSL::Parameters#requires` and `#optional` - [@ericproulx](https://github.com/ericproulx).
+* [#2742](https://github.com/ruby-grape/grape/pull/2742): Prune unused requires in `lib/grape.rb`; narrow `active_support/inflector` to `core_ext/string/inflections` - [@ericproulx](https://github.com/ericproulx).
+* [#2741](https://github.com/ruby-grape/grape/pull/2741): Readability pass: guard clauses and small extractions across `lib/` - [@ericproulx](https://github.com/ericproulx).
+* [#2740](https://github.com/ruby-grape/grape/pull/2740): Lazy-allocate `@api_class` and `@point_in_time_copies` on `Grape::Util::InheritableSetting` so unused settings layers don't carry an empty Hash and empty Array each - [@ericproulx](https://github.com/ericproulx).
+* [#2739](https://github.com/ruby-grape/grape/pull/2739): Lazy-allocate `@new_values` in `Grape::Util::BaseInheritable` so settings layers that only inherit never carry an empty Hash; readers in `InheritableValues`/`StackableValues` handle nil - [@ericproulx](https://github.com/ericproulx).
+* [#2737](https://github.com/ruby-grape/grape/pull/2737): `rescue_from` raises `ArgumentError` when a meta selector (`:all`, `:grape_exceptions`, `:internal_grape_exceptions`) is mixed with exception classes instead of silently dropping the classes - [@ericproulx](https://github.com/ericproulx).
+* [#2735](https://github.com/ruby-grape/grape/pull/2735): Normalize `Grape::Endpoint#options` into an immutable `Grape::Endpoint::Options` `Data` value object; Hash-style `[]` reads kept for back-compat - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
