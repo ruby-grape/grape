@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', '4.0']
+        ruby: ['3.3', '3.4', '4.0']
         gemfile:
           - Gemfile
           - gemfiles/rack_2_2.gemfile
