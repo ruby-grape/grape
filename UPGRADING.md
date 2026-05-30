@@ -17,6 +17,24 @@ Grape::Exceptions::ValidationErrors.new(errors: [validation, validation_array_er
 
 # after
 Grape::Exceptions::ValidationErrors.new(exceptions: [validation, validation_array_errors], headers:)
+#### `Grape::Exceptions::ValidationErrors` no longer mixes in `Enumerable`
+
+`Grape::Exceptions::ValidationErrors` no longer includes `Enumerable` and no longer defines a public `#each`. The Enumerable surface (`#each`, `#map`, `#select`, `#to_a`, etc.) was undocumented and untested; the documented accessors — `#errors`, `#full_messages`, `#message`, `#as_json` — are unchanged.
+
+If a `rescue_from` block iterated over the exception instance, switch to `#errors`:
+
+```ruby
+# before
+rescue_from Grape::Exceptions::ValidationErrors do |e|
+  e.each { |attribute, error| ... }
+end
+
+# after
+rescue_from Grape::Exceptions::ValidationErrors do |e|
+  e.errors.each do |attributes, errs|
+    errs.each { |error| ... }
+  end
+end
 ```
 
 #### `rescue_from` rejects meta selectors mixed with exception classes
