@@ -3,27 +3,24 @@
 module Grape
   module Middleware
     class Formatter < Base
+      extend Forwardable
       include PrecomputedContentTypes
 
-      DEFAULT_OPTIONS = {
-        content_types: nil,
-        default_format: :txt,
-        format: nil,
-        formatters: nil,
-        parsers: nil
-      }.freeze
+      Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
+        include Grape::Middleware::DeprecatedOptionsHashAccess
+
+        def initialize(content_types: nil, default_format: :txt, format: nil, formatters: nil, parsers: nil)
+          super
+        end
+      end
+
+      # @deprecated Kept as a frozen Hash representation of the {Options}
+      #   defaults for back-compat. Will be removed in a future release.
+      DEFAULT_OPTIONS = Options.new.to_h.freeze
 
       ALL_MEDIA_TYPES = '*/*'
 
-      attr_reader :default_format, :format, :formatters, :parsers
-
-      def initialize(app, **options)
-        super
-        @default_format = @options[:default_format]
-        @format = @options[:format]
-        @formatters = @options[:formatters]
-        @parsers = @options[:parsers]
-      end
+      def_delegators :config, :default_format, :format, :formatters, :parsers
 
       def before
         negotiate_content_type
@@ -33,13 +30,11 @@ module Grape
       def after
         return unless @app_response
 
-        status, headers, bodies = *@app_response
+        status, headers, bodies = @app_response
 
-        if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
-          [status, headers, []]
-        else
-          build_formatted_response(status, headers, bodies)
-        end
+        return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+
+        build_formatted_response(status, headers, bodies)
       end
 
       private
@@ -75,7 +70,8 @@ module Grape
       def ensure_content_type(headers)
         return headers if headers[Rack::CONTENT_TYPE]
 
-        headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
+        headers[Rack::CONTENT_TYPE] = content_type_for(env[Grape::Env::API_FORMAT])
+        headers
       end
 
       def read_body_input
@@ -101,17 +97,17 @@ module Grape
         fmt = media_type ? mime_types[media_type] : default_format
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, options[:parsers]
+        parser = Grape::Parser.parser_for fmt, parsers
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
           body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
           if body.is_a?(Hash)
-            env[Rack::RACK_REQUEST_FORM_HASH] = if env.key?(Rack::RACK_REQUEST_FORM_HASH)
-                                                  env[Rack::RACK_REQUEST_FORM_HASH].merge(body)
-                                                else
-                                                  body
-                                                end
+            if (form_hash = env[Rack::RACK_REQUEST_FORM_HASH])
+              form_hash.merge!(body)
+            else
+              env[Rack::RACK_REQUEST_FORM_HASH] = body
+            end
             env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
           end
         rescue Grape::Exceptions::Base => e
@@ -128,19 +124,18 @@ module Grape
       # - multipart/related
       # - multipart/mixed
       def read_body_input?
-        (rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?) &&
-          !(rack_request.form_data? && rack_request.content_type) &&
-          !rack_request.parseable_data? &&
-          (rack_request.content_length.to_i.positive? || rack_request.env['HTTP_TRANSFER_ENCODING'] == 'chunked')
+        return false unless rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?
+        return false if rack_request.form_data? && rack_request.content_type
+        return false if rack_request.parseable_data?
+
+        rack_request.content_length.to_i.positive? || rack_request.env['HTTP_TRANSFER_ENCODING'] == 'chunked'
       end
 
       def negotiate_content_type
         fmt = format_from_extension || query_params['format'] || format || format_from_header || default_format
-        if content_type_for(fmt)
-          env[Grape::Env::API_FORMAT] = fmt.to_sym
-        else
-          throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
-        end
+        return env[Grape::Env::API_FORMAT] = fmt.to_sym if content_type_for(fmt)
+
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
       end
 
       def format_from_extension

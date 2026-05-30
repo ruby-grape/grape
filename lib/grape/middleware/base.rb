@@ -5,13 +5,25 @@ module Grape
     class Base
       include Grape::DSL::Headers
 
-      attr_reader :app, :env, :options
+      attr_reader :app, :env, :options, :config
 
       # @param [Rack Application] app The standard argument for a Rack middleware.
-      # @param [Hash] options A hash of options, simply stored for use by subclasses.
+      # @param [Hash] options Options forwarded to the subclass. When the
+      #   subclass declares an `Options` Data class, the kwargs are routed
+      #   through it and exposed via {#config}; {#options} keeps returning a
+      #   frozen Hash representation for back-compat with subclasses that read
+      #   `options[:key]`. Otherwise the kwargs are deep-merged with the
+      #   subclass's `DEFAULT_OPTIONS` Hash (legacy path) and frozen.
       def initialize(app, **options)
         @app = app
-        @options = merge_default_options(options).freeze
+        if self.class.const_defined?(:Options)
+          # Search ancestors so subclasses (e.g. Versioner::Path → Versioner::Base)
+          # inherit their parent's Options Data class without redeclaring it.
+          @config = self.class::Options.new(**options)
+          @options = @config.to_h.freeze
+        else
+          @options = merge_default_options(options).freeze
+        end
         @app_response = nil
       end
 
@@ -79,13 +91,10 @@ module Grape
       end
 
       def merge_default_options(options)
-        if respond_to?(:default_options)
-          default_options.deep_merge(options)
-        elsif self.class.const_defined?(:DEFAULT_OPTIONS)
-          self.class::DEFAULT_OPTIONS.deep_merge(options)
-        else
-          options
-        end
+        return default_options.deep_merge(options) if respond_to?(:default_options)
+        return self.class::DEFAULT_OPTIONS.deep_merge(options) if self.class.const_defined?(:DEFAULT_OPTIONS)
+
+        options
       end
 
       def try_scrub(obj)

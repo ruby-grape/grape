@@ -15,7 +15,7 @@ module Grape
       end
 
       def configuration
-        options[:for].configuration.evaluate
+        config.for.configuration.evaluate
       end
 
       # End the request and display an error to the
@@ -60,23 +60,11 @@ module Grape
       #
       # @param status [Integer] The HTTP Status Code to return for this request.
       def status(status = nil)
+        return @status || default_status if status.nil?
+
         case status
-        when Symbol
-          raise ArgumentError, "Status code :#{status} is invalid." unless Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(status)
-
+        when Symbol, Integer
           @status = Rack::Utils.status_code(status)
-        when Integer
-          @status = status
-        when nil
-          return @status if @status
-
-          if request.post?
-            201
-          elsif request.delete?
-            @body.present? ? 200 : 204
-          else
-            200
-          end
         else
           raise ArgumentError, 'Status code must be Integer or Symbol.'
         end
@@ -120,7 +108,6 @@ module Grape
       #
       #   DELETE /12 # => 204 No Content, ""
       def return_no_content
-        status 204
         body false
       end
 
@@ -165,16 +152,7 @@ module Grape
 
         return @stream if value.nil?
 
-        stream_body =
-          if value.is_a?(String)
-            Grape::ServeStream::FileBody.new(value)
-          elsif value.respond_to?(:each)
-            value
-          else
-            raise ArgumentError, 'Stream object must respond to :each.'
-          end
-
-        @stream = Grape::ServeStream::StreamResponse.new(stream_body)
+        @stream = Grape::ServeStream::StreamResponse.new(stream_body(value))
       end
 
       # Returns route information for the current request.
@@ -199,6 +177,25 @@ module Grape
 
       def context
         self
+      end
+
+      private
+
+      # Wraps a stream +value+ into a body that responds to +:each+.
+      def stream_body(value)
+        return Grape::ServeStream::FileBody.new(value) if value.is_a?(String)
+
+        raise ArgumentError, 'Stream object must respond to :each.' unless value.respond_to?(:each)
+
+        value
+      end
+
+      # The default HTTP status when none has been set explicitly.
+      def default_status
+        return 201 if request.post?
+        return 204 if request.delete? && @body.blank?
+
+        200
       end
     end
   end

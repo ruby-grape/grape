@@ -30,10 +30,14 @@ module Grape
       # own middleware or `rescue_from` handlers.
       def self.coerce(input)
         case input
-        when ErrorResponse           then input
-        when Grape::Exceptions::Base then from_exception(input)
-        when Hash                    then new(**input.slice(:status, :message, :headers, :backtrace, :original_exception))
-        else                              new
+        when ErrorResponse
+          input
+        when Grape::Exceptions::Base
+          from_exception(input)
+        when Hash
+          new(**input.slice(:status, :message, :headers, :backtrace, :original_exception))
+        else
+          new
         end
       end
     end

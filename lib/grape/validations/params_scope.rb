@@ -314,12 +314,9 @@ module Grape
       # push_declared_params cannot be called on the frozen scope later.
       def configure_declared_params
         push_renamed_param(full_path, @element_renamed) if @element_renamed
+        return @parent.push_declared_params [{ @element => @declared_params }] if nested?
 
-        if nested?
-          @parent.push_declared_params [{ @element => @declared_params }]
-        else
-          @api.inheritable_setting.namespace_stackable[:declared_params] = @declared_params
-        end
+        @api.inheritable_setting.namespace_stackable[:declared_params] = @declared_params
       ensure
         @declared_params = nil
       end

@@ -7,12 +7,22 @@ module Grape
         extend Forwardable
         include Grape::Middleware::PrecomputedContentTypes
 
-        DEFAULT_OPTIONS = {
-          mount_path: nil,
-          pattern: /.*/i,
-          prefix: nil,
-          version_options: Grape::DSL::VersionOptions.new
-        }.freeze
+        Options = Data.define(
+          :content_types, :format, :mount_path, :pattern, :prefix, :version_options, :versions
+        ) do
+          include Grape::Middleware::DeprecatedOptionsHashAccess
+
+          def initialize(
+            content_types: nil, format: nil, mount_path: nil, pattern: /.*/i, prefix: nil,
+            version_options: Grape::DSL::VersionOptions.new, versions: nil
+          )
+            super
+          end
+        end
+
+        # @deprecated Kept as a frozen Hash representation of the {Options}
+        #   defaults for back-compat. Will be removed in a future release.
+        DEFAULT_OPTIONS = Options.new.to_h.freeze
 
         CASCADE_PASS_HEADER = { 'X-Cascade' => 'pass' }.freeze
 
@@ -21,18 +31,14 @@ module Grape
           Versioner.register(klass)
         end
 
-        attr_reader :available_media_types, :error_headers, :mount_path, :pattern,
-                    :prefix, :version_options, :versions
+        attr_reader :available_media_types, :error_headers, :versions
 
+        def_delegators :config, :mount_path, :pattern, :prefix, :version_options
         def_delegators :version_options, :cascade, :parameter, :strict, :vendor
 
         def initialize(app, **options)
           super
-          @version_options = @options[:version_options]
-          @mount_path = @options[:mount_path]
-          @pattern = @options[:pattern]
-          @prefix = @options[:prefix]
-          @versions = @options[:versions]&.map(&:to_s) # making sure versions are strings to ease potential match
+          @versions = config.versions&.map(&:to_s) # making sure versions are strings to ease potential match
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @available_media_types = build_available_media_types
         end
@@ -50,14 +56,12 @@ module Grape
         def build_available_media_types
           media_types = []
           base_media_type = "application/vnd.#{vendor}"
-          content_types.each_key do |extension|
-            versions&.reverse_each do |version|
-              media_types << "#{base_media_type}-#{version}+#{extension}"
-              media_types << "#{base_media_type}-#{version}"
-            end
-            media_types << "#{base_media_type}+#{extension}"
+          versions&.reverse_each do |version|
+            versioned_base = "#{base_media_type}-#{version}"
+            content_types.each_key { |extension| media_types << "#{versioned_base}+#{extension}" }
+            media_types << versioned_base
           end
-
+          content_types.each_key { |extension| media_types << "#{base_media_type}+#{extension}" }
           media_types << base_media_type
           media_types.concat(content_types.values.flatten)
           media_types

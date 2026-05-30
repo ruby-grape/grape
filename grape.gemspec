@@ -29,5 +29,5 @@ Gem::Specification.new do |s|
 
   s.files = Dir['lib/**/*', 'CHANGELOG.md', 'CONTRIBUTING.md', 'README.md', 'grape.png', 'UPGRADING.md', 'LICENSE', 'grape.gemspec']
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 3.2'
+  s.required_ruby_version = '>= 3.3'
 end

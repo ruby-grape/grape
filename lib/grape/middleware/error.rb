@@ -6,49 +6,47 @@ module Grape
       extend Forwardable
       include PrecomputedContentTypes
 
-      DEFAULT_OPTIONS = {
-        all_rescue_handler: nil,
-        base_only_rescue_handlers: nil,
-        default_error_formatter: nil,
-        default_message: '',
-        default_status: 500,
-        error_formatters: nil,
-        format: :txt,
-        grape_exceptions_rescue_handler: nil,
-        internal_grape_exceptions_rescue_handler: nil,
-        rescue_all: false,
-        rescue_grape_exceptions: false,
-        rescue_handlers: nil,
-        rescue_options: Grape::DSL::RescueOptions.new
-      }.freeze
+      Options = Data.define(
+        :all_rescue_handler, :base_only_rescue_handlers, :content_types,
+        :default_error_formatter, :default_message, :default_status,
+        :error_formatters, :format,
+        :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
+        :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
+      ) do
+        include Grape::Middleware::DeprecatedOptionsHashAccess
 
-      attr_reader :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
-                  :default_message, :default_status, :error_formatters, :format,
-                  :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
-                  :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
+        def initialize(
+          all_rescue_handler: nil, base_only_rescue_handlers: nil, content_types: nil,
+          default_error_formatter: nil, default_message: '', default_status: 500,
+          error_formatters: nil, format: :txt,
+          grape_exceptions_rescue_handler: nil, internal_grape_exceptions_rescue_handler: nil,
+          rescue_all: false, rescue_grape_exceptions: false, rescue_handlers: nil,
+          rescue_options: nil
+        )
+          # `rescue_options:` arrives nil from `Endpoint#error_middleware_options`
+          # when no `rescue_from` has been called — fall back to the documented
+          # defaults rather than letting nil propagate to `def_delegator
+          # :rescue_options, :backtrace`.
+          rescue_options ||= Grape::DSL::RescueOptions.new
+          super
+        end
+      end
+
+      # @deprecated Kept as a frozen Hash representation of the {Options}
+      #   defaults for back-compat. Will be removed in a future release.
+      DEFAULT_OPTIONS = Options.new.to_h.freeze
+
+      def_delegators :config,
+                     :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
+                     :default_message, :default_status, :error_formatters, :format,
+                     :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
+                     :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
 
       # +:backtrace+ / +:original_exception+ on the rescue options become
       # +#include_backtrace+ / +#include_original_exception+ on the middleware,
       # which is what the formatter call site reads.
       def_delegator :rescue_options, :backtrace, :include_backtrace
       def_delegator :rescue_options, :original_exception, :include_original_exception
-
-      def initialize(app, **options)
-        super
-        @all_rescue_handler = @options[:all_rescue_handler]
-        @base_only_rescue_handlers = @options[:base_only_rescue_handlers]
-        @default_error_formatter = @options[:default_error_formatter]
-        @default_message = @options[:default_message]
-        @default_status = @options[:default_status]
-        @error_formatters = @options[:error_formatters]
-        @format = @options[:format]
-        @grape_exceptions_rescue_handler = @options[:grape_exceptions_rescue_handler]
-        @internal_grape_exceptions_rescue_handler = @options[:internal_grape_exceptions_rescue_handler]
-        @rescue_all = @options[:rescue_all]
-        @rescue_grape_exceptions = @options[:rescue_grape_exceptions]
-        @rescue_handlers = @options[:rescue_handlers]
-        @rescue_options = @options[:rescue_options] || Grape::DSL::RescueOptions.new
-      end
 
       def call!(env)
         @env = env
@@ -165,13 +163,12 @@ module Grape
       def redispatch(error, endpoint, already_redispatched)
         return framework_default(endpoint) if already_redispatched
 
-        if (registered = registered_rescue_handler(error.class))
-          run_rescue_handler(registered, error, endpoint, redispatched: true)
-        elsif error.is_a?(Grape::Exceptions::Base)
-          run_rescue_handler(method(:error_response), error, endpoint, redispatched: true)
-        else
-          safe_default(error, endpoint)
-        end
+        registered = registered_rescue_handler(error.class)
+
+        return run_rescue_handler(registered, error, endpoint, redispatched: true) if registered
+        return run_rescue_handler(method(:error_response), error, endpoint, redispatched: true) if error.is_a?(Grape::Exceptions::Base)
+
+        safe_default(error, endpoint)
       end
 
       # The unrecognised-error path. Exposes the original exception on

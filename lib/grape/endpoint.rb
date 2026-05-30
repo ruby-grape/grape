@@ -21,7 +21,7 @@ module Grape
     # inside route handlers, +before+/+after+/+after_validation+/+finally+
     # filters, and +rescue_from+ blocks.
     def logger
-      options[:for].logger
+      config.for.logger
     end
 
     class << self
@@ -38,7 +38,8 @@ module Grape
     # Create a new endpoint.
     # @param new_settings [InheritableSetting] settings to determine the params,
     #   validations, and other properties from.
-    # @param options [Hash] attributes of this endpoint
+    # @param options [Hash] attributes of this endpoint, normalized into a
+    #   +Grape::Endpoint::Options+ value object.
     # @option options path [String or Array] the path to this endpoint, within
     #   the current scope.
     # @option options method [String or Array] which HTTP method(s) can be used
@@ -60,10 +61,10 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-
       @options[:path] = Array(@options[:path])
       @options[:path] << '/' if @options[:path].empty?
       @options[:method] = Array(@options[:method])
+      @config = Options.new(**options)
 
       @status = nil
       @stream = nil
@@ -71,7 +72,7 @@ module Grape
       @source = self.class.block_to_unbound_method(block)
       @before_filter_passed = false
       @options_route_enabled = false
-      @endpoints = @options[:app].endpoints if @options[:app].respond_to?(:endpoints)
+      @endpoints = @config.app.endpoints if @config.app.respond_to?(:endpoints)
     end
 
     # Update our settings from a given set of stackable parameters. Used when
@@ -132,7 +133,7 @@ module Grape
 
     def ==(other)
       other.is_a?(self.class) &&
-        options == other.options &&
+        config == other.config &&
         inheritable_setting == other.inheritable_setting
     end
     alias eql? ==
@@ -220,7 +221,7 @@ module Grape
       end
     end
 
-    attr_reader :befores, :before_validations, :after_validations, :afters, :finallies
+    attr_reader :befores, :before_validations, :after_validations, :afters, :finallies, :config
 
     def options?
       options_route_enabled && env[Rack::REQUEST_METHOD] == Rack::OPTIONS
@@ -231,7 +232,7 @@ module Grape
     attr_reader :before_filter_passed
 
     def compile!
-      @app = options[:app] || build_stack
+      @app = config.app || build_stack
       @helpers = build_helpers
       stackable = inheritable_setting.namespace_stackable
       @befores            = stackable[:befores]
@@ -243,20 +244,20 @@ module Grape
     end
 
     def to_routes
-      route_options = options[:route_options]
+      route_options = config.route_options
       default_route_options = prepare_default_route_attributes(route_options)
       complete_route_options = route_options.merge(default_route_options)
       path_settings = prepare_default_path_settings
 
-      options[:method].flat_map do |method|
-        options[:path].map do |path|
+      config.http_methods.flat_map do |method|
+        config.path.map do |path|
           prepared_path = Path.new(path, default_route_options[:namespace], path_settings)
           pattern = Grape::Router::Pattern.new(
             origin: prepared_path.origin,
             suffix: prepared_path.suffix,
             anchor: default_route_options[:anchor],
             params: route_options[:params],
-            format: options[:format],
+            format: config.format,
             version: default_route_options[:version],
             requirements: default_route_options[:requirements]
           )
@@ -273,7 +274,7 @@ module Grape
         prefix: inheritable_setting.namespace_inheritable[:root_prefix],
         anchor: route_options.fetch(:anchor, true),
         settings: inheritable_setting.route.except(:declared_params, :saved_validations),
-        forward_match: options[:forward_match]
+        forward_match: config.forward_match
       }
     end
 

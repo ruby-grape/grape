@@ -122,11 +122,11 @@ module Grape
       #         requires :name, type: String
       #       end
       #     end
-      def requires(*attrs, **opts, &block)
+      def requires(*attrs, using: nil, except: nil, **opts, &block)
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if @group
 
-        return require_required_and_optional_fields(attrs.first, using: opts[:using], except: opts[:except]) if opts[:using]
+        return require_required_and_optional_fields(attrs.first, using:, except:) if using
 
         validate_attributes(attrs, **opts, &block)
         block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], &block) : push_declared_params(attrs, as: opts[:as])
@@ -136,7 +136,7 @@ module Grape
       #   endpoint.
       # @param (see #requires)
       # @option (see #requires)
-      def optional(*attrs, **opts, &block)
+      def optional(*attrs, using: nil, except: nil, **opts, &block)
         type = opts[:type]
         opts = @group.deep_merge(opts) if @group
 
@@ -146,7 +146,7 @@ module Grape
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
-        return require_optional_fields(attrs.first, using: opts[:using], except: opts[:except]) if opts[:using]
+        return require_optional_fields(attrs.first, using:, except:) if using
 
         validate_attributes(attrs, **opts, &block)
         block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], optional: true, &block) : push_declared_params(attrs, as: opts[:as])
