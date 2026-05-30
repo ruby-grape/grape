@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 3.3
 
+#### Minimum required Ruby is now 3.3
+
+Grape no longer supports Ruby 3.2; 3.3 is now the minimum (`required_ruby_version = '>= 3.3'`). Upgrade your runtime to Ruby 3.3 or newer before bumping Grape.
+
 #### `Grape::Exceptions::ValidationErrors.new` keyword renamed `errors:` → `exceptions:`
 
 `Grape::Exceptions::ValidationErrors#initialize` now takes its input array under the `exceptions:` keyword instead of `errors:`. The kwarg accepts a mix of `Grape::Exceptions::Validation` and `Grape::Exceptions::ValidationArrayErrors` instances; `ValidationArrayErrors` wrappers are flattened internally via `flat_map(&:errors)`. The `errors` reader on the constructed instance (the grouped `{params => [Validation, ...]}` Hash) is unchanged.
@@ -54,6 +58,45 @@ auth :http_digest, { realm: 'API', opaque: 'secret' }
 http_basic(realm: 'API')
 auth :http_digest, realm: 'API', opaque: 'secret'
 ```
+
+#### Middleware options now route through per-class `Options` `Data` value objects
+
+`Grape::Middleware::Error`, `Grape::Middleware::Formatter`, and `Grape::Middleware::Versioner::Base` each declare an `Options` `Data.define` and route their `**options` kwargs through it on `initialize`. This means **unknown kwargs now raise `ArgumentError`** instead of being silently swallowed:
+
+```ruby
+# previously: silently swallowed (Formatter doesn't actually read :rescue_options)
+Grape::Middleware::Formatter.new(app, rescue_options: { backtrace: true })
+
+# now: ArgumentError (unknown keyword: :rescue_options)
+```
+
+Each `Options` class accepts exactly the kwargs the middleware actually reads. The supported sets:
+
+- `Middleware::Error::Options`: `all_rescue_handler`, `base_only_rescue_handlers`, `content_types`, `default_error_formatter`, `default_message`, `default_status`, `error_formatters`, `format`, `grape_exceptions_rescue_handler`, `internal_grape_exceptions_rescue_handler`, `rescue_all`, `rescue_grape_exceptions`, `rescue_handlers`, `rescue_options`.
+- `Middleware::Formatter::Options`: `content_types`, `default_format`, `format`, `formatters`, `parsers`.
+- `Middleware::Versioner::Base::Options`: `content_types`, `format`, `mount_path`, `pattern`, `prefix`, `version_options`, `versions`.
+
+The `Hash`-based `options` reader on `Grape::Middleware::Base` continues to return a frozen Hash representation of the Data (`config.to_h.freeze`) for back-compat with subclasses that read `options[:key]`. A new `config` reader exposes the typed Data instance — prefer the named accessors going forward:
+
+```ruby
+# back-compat (still works)
+options[:format]
+
+# preferred
+config.format
+# or, on converted middlewares, just `format` (provided via def_delegators)
+```
+
+`Options#[]` is defined as a Hash-style shim with a deprecation warning so legacy `data[:key]` callers get a migration nudge:
+
+```ruby
+# emits Grape.deprecator warning
+Grape::Middleware::Error::Options.new[:format]
+```
+
+#### `DEFAULT_OPTIONS` constants on converted middlewares are deprecated
+
+`Grape::Middleware::Error::DEFAULT_OPTIONS`, `Grape::Middleware::Formatter::DEFAULT_OPTIONS`, and `Grape::Middleware::Versioner::Base::DEFAULT_OPTIONS` still exist as a frozen `Hash` representation of the `Options` defaults (`Options.new.to_h.freeze`), for back-compat with any code that referenced these constants directly. They will be removed in a future release; introspect the `Options` `Data` class itself instead.
 
 #### `Grape::Middleware::Globals` removed
 
