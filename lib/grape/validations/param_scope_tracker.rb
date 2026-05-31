@@ -29,28 +29,33 @@ module Grape
         Fiber[FIBER_KEY]
       end
 
-      def initialize
-        @index_tracker = {}.compare_by_identity
-        @qualifying_params_tracker = {}.compare_by_identity
-      end
-
       def store_index(scope, index)
-        @index_tracker.store(scope, index)
+        index_tracker.store(scope, index)
       end
 
       def index_for(scope)
-        @index_tracker[scope]
+        index_tracker[scope]
       end
 
       # Returns qualifying params for +scope+, or EMPTY_PARAMS if none were stored.
       # Note: an explicitly stored empty array and "never stored" are treated identically
       # by callers (both yield a blank result that falls through to the parent params).
       def qualifying_params(scope)
-        @qualifying_params_tracker.fetch(scope, EMPTY_PARAMS)
+        qualifying_params_tracker.fetch(scope, EMPTY_PARAMS)
       end
 
       def store_qualifying_params(scope, params)
-        @qualifying_params_tracker.store(scope, params)
+        qualifying_params_tracker.store(scope, params)
+      end
+
+      private
+
+      def index_tracker
+        @index_tracker ||= {}.compare_by_identity
+      end
+
+      def qualifying_params_tracker
+        @qualifying_params_tracker ||= {}.compare_by_identity
       end
     end
   end
