@@ -5,7 +5,7 @@ module Grape
     class Base < StandardError
       include Grape::Util::Translation
 
-      MESSAGE_STEPS = %w[problem summary resolution].to_h { |s| [s, s.capitalize] }.freeze
+      MESSAGE_STEPS = %w[problem summary resolution].to_h { |s| [s.to_sym, s.capitalize] }.freeze
 
       attr_reader :status, :headers
 
@@ -27,6 +27,8 @@ module Grape
         return short_message unless short_message.is_a?(Hash)
 
         MESSAGE_STEPS.filter_map do |step, label|
+          next unless short_message.key?(step)
+
           detail = translate_message(:"#{key}.#{step}", **)
           "\n#{label}:\n  #{detail}" if detail.present?
         end.join
