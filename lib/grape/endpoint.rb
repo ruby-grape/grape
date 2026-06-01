@@ -150,7 +150,7 @@ module Grape
     protected
 
     def run
-      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:) do
+      instrument_run do
         @request = Grape::Request.new(env, build_params_with: @build_params_with)
         begin
           run_filters befores, :before
@@ -188,7 +188,7 @@ module Grape
     def execute
       return unless source
 
-      ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self) do
+      instrument_render do
         source.bind_call(self)
       end
     end
@@ -200,7 +200,7 @@ module Grape
       validation_exceptions = nil
 
       Grape::Validations::ParamScopeTracker.track do
-        ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators:, request:) do
+        instrument_run_validators(validators, request) do
           validators.each do |validator|
             validator.validate(request)
           rescue Grape::Exceptions::Validation, Grape::Exceptions::ValidationArrayErrors => e
@@ -216,7 +216,7 @@ module Grape
     def run_filters(filters, type = :other)
       return if filters.blank?
 
-      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters:, type:) do
+      instrument_run_filters(filters, type) do
         filters.each { |filter| instance_eval(&filter) }
       end
     end
@@ -230,6 +230,34 @@ module Grape
     private
 
     attr_reader :before_filter_passed
+
+    # Instrument helpers. Each guards on +listening?+ so that with no subscriber
+    # the payload Hash and notification machinery are skipped and the block runs
+    # directly (no added allocations); the block is forwarded anonymously so
+    # nothing is allocated unless a subscriber is present.
+    def instrument_run(&)
+      return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run.grape')
+
+      ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:, &)
+    end
+
+    def instrument_render(&)
+      return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_render.grape')
+
+      ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self, &)
+    end
+
+    def instrument_run_validators(validators, request, &)
+      return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run_validators.grape')
+
+      ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators:, request:, &)
+    end
+
+    def instrument_run_filters(filters, type, &)
+      return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run_filters.grape')
+
+      ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters:, type:, &)
+    end
 
     def compile!
       @app = config.app || build_stack

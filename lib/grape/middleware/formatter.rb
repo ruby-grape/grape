@@ -49,13 +49,22 @@ module Grape
         else
           # Allow content-type to be explicitly overwritten
           formatter = fetch_formatter(headers)
-          bodymap = ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:) do
+          bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
           Rack::Response.new(bodymap, status, headers)
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
+      end
+
+      # Guards on +listening?+ so that with no subscriber the payload Hash and
+      # notification machinery are skipped and the block runs directly (no added
+      # allocations); the block is forwarded anonymously.
+      def instrument_format_response(formatter, &)
+        return yield unless ActiveSupport::Notifications.notifier.listening?('format_response.grape')
+
+        ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:, &)
       end
 
       def fetch_formatter(headers)
