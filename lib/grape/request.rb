@@ -153,7 +153,15 @@ module Grape
     end
 
     def cookies
-      @cookies ||= Grape::Cookies.new(-> { rack_cookies })
+      @cookies ||= Grape::Cookies.new(rack_cookies)
+    end
+
+    # True once the cookie jar has been materialized (a cookie was read or
+    # written this request). Lets the endpoint skip response-cookie flushing,
+    # and the Grape::Cookies allocation it triggers, when no cookie was
+    # touched on the request.
+    def cookies?
+      !@cookies.nil?
     end
 
     private
