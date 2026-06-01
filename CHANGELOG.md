@@ -45,6 +45,7 @@
 * [#2733](https://github.com/ruby-grape/grape/pull/2733): Drop the dead `active_support/core_ext/hash/reverse_merge` require; call `ActiveSupport::HashWithIndifferentAccess.new(...)` directly at call sites - [@ericproulx](https://github.com/ericproulx).
 * [#2734](https://github.com/ruby-grape/grape/pull/2734): Extract `options_route_enabled` from the Endpoint options Hash into a dedicated `attr_accessor` - [@ericproulx](https://github.com/ericproulx).
 * [#2736](https://github.com/ruby-grape/grape/pull/2736): Collapse `Endpoint#run_validators` rescue branches via `ValidationErrors` flatten; `ValidationErrors#initialize` keyword renamed `errors:` → `exceptions:` - [@ericproulx](https://github.com/ericproulx).
+* [#2747](https://github.com/ruby-grape/grape/pull/2747): Drop `Enumerable` from `Grape::Exceptions::ValidationErrors` and remove its public `#each`; rewrite `#full_messages` to walk `#errors` directly - [@ericproulx](https://github.com/ericproulx).
 * [#2749](https://github.com/ruby-grape/grape/pull/2749): Middleware tidy-up — dedupe `Versioner::Base#build_available_media_types` (was emitting `application/vnd.<vendor>-<version>` once per content_type) and assorted `Formatter` cleanups (guard clauses, in-place merges, drop a no-op splat) - [@ericproulx](https://github.com/ericproulx).
 * [#2718](https://github.com/ruby-grape/grape/pull/2718): Generalize middleware options to per-class `Options` `Data` value objects (`Middleware::Error`, `::Formatter`, `::Versioner::Base`); expose them via a new `config` reader, keep `options` Hash for back-compat, deprecate `Options#[]` Hash-style access - [@ericproulx](https://github.com/ericproulx).
 * [#2746](https://github.com/ruby-grape/grape/pull/2746): Hoist `using:` / `except:` from `**opts` to explicit kwargs on `DSL::Parameters#requires` and `#optional` - [@ericproulx](https://github.com/ericproulx).
@@ -56,6 +57,7 @@
 * [#2737](https://github.com/ruby-grape/grape/pull/2737): `rescue_from` raises `ArgumentError` when a meta selector (`:all`, `:grape_exceptions`, `:internal_grape_exceptions`) is mixed with exception classes instead of silently dropping the classes - [@ericproulx](https://github.com/ericproulx).
 * [#2735](https://github.com/ruby-grape/grape/pull/2735): Normalize `Grape::Endpoint#options` into an immutable `Grape::Endpoint::Options` `Data` value object; Hash-style `[]` reads kept for back-compat - [@ericproulx](https://github.com/ericproulx).
 * [#2754](https://github.com/ruby-grape/grape/pull/2754): Merge routing args in place in `Router#process_route` instead of allocating a new Hash via `merge` - [@ericproulx](https://github.com/ericproulx).
+* [#2752](https://github.com/ruby-grape/grape/pull/2752): Skip per-request `ActiveSupport::Notifications` payload and dispatch when no subscriber is listening, via private `instrument_<event>` guards on `Endpoint`/`Middleware::Formatter` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -66,6 +68,7 @@
 * [#2700](https://github.com/ruby-grape/grape/pull/2700): Fix README typos, remove obsolete Ruby 2.4 / Fixnum section, and replace incorrect `requires + values + allow_blank` note with a correct one covering `optional + values` semantics (closes #2631) - [@ericproulx](https://github.com/ericproulx).
 * [#2703](https://github.com/ruby-grape/grape/pull/2703): Catch exceptions raised inside `rescue_from` blocks; new `rescue_from :internal_grape_exceptions` opt-in for unrecognised internal errors (resolves [#2482](https://github.com/ruby-grape/grape/issues/2482)) - [@ericproulx](https://github.com/ericproulx).
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Fix `optional :foo, message: 'oops'` raising `UnknownValidator` - [@ericproulx](https://github.com/ericproulx).
+* [#2751](https://github.com/ruby-grape/grape/pull/2751): Fix structured error messages leaking the raw i18n key for an undefined optional step such as `summary` (closes #2748) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.2.1 (2026-04-16)
