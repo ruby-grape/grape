@@ -55,6 +55,7 @@
 * [#2739](https://github.com/ruby-grape/grape/pull/2739): Lazy-allocate `@new_values` in `Grape::Util::BaseInheritable` so settings layers that only inherit never carry an empty Hash; readers in `InheritableValues`/`StackableValues` handle nil - [@ericproulx](https://github.com/ericproulx).
 * [#2737](https://github.com/ruby-grape/grape/pull/2737): `rescue_from` raises `ArgumentError` when a meta selector (`:all`, `:grape_exceptions`, `:internal_grape_exceptions`) is mixed with exception classes instead of silently dropping the classes - [@ericproulx](https://github.com/ericproulx).
 * [#2735](https://github.com/ruby-grape/grape/pull/2735): Normalize `Grape::Endpoint#options` into an immutable `Grape::Endpoint::Options` `Data` value object; Hash-style `[]` reads kept for back-compat - [@ericproulx](https://github.com/ericproulx).
+* [#2754](https://github.com/ruby-grape/grape/pull/2754): Merge routing args in place in `Router#process_route` instead of allocating a new Hash via `merge` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
