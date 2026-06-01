@@ -3,21 +3,11 @@
 module Grape
   module Exceptions
     class ValidationErrors < Base
-      include Enumerable
-
       attr_reader :errors
 
       def initialize(exceptions: [], headers: {})
         @errors = exceptions.flat_map(&:errors).group_by(&:params)
         super(message: full_messages.join(', '), status: 400, headers:)
-      end
-
-      def each
-        errors.each_pair do |attribute, errors|
-          errors.each do |error|
-            yield attribute, error
-          end
-        end
       end
 
       def as_json(**_opts)
@@ -34,14 +24,16 @@ module Grape
       end
 
       def full_messages
-        messages = map do |attributes, error|
-          translate(
-            :format,
-            scope: 'grape.errors',
-            default: '%<attributes>s %<message>s',
-            attributes: translate_attributes(attributes),
-            message: error.message
-          )
+        messages = errors.flat_map do |attributes, errs|
+          errs.map do |error|
+            translate(
+              :format,
+              scope: 'grape.errors',
+              default: '%<attributes>s %<message>s',
+              attributes: translate_attributes(attributes),
+              message: error.message
+            )
+          end
         end
         messages.uniq!
         messages

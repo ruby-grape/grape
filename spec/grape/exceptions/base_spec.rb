@@ -109,5 +109,31 @@ describe Grape::Exceptions::Base do
         end
       end
     end
+
+    context 'when the message defines an optional step' do
+      let(:key) { :missing_vendor_option }
+      let(:attributes) { {} }
+
+      it 'renders every step, including the optional summary' do
+        expect(subject).to include('Problem:', 'Summary:', 'Resolution:')
+      end
+    end
+
+    context 'when the message omits an optional step' do
+      let(:key) { :invalid_message_body }
+      let(:attributes) { { body_format: 'application/json' } }
+
+      it 'does not leak the missing step i18n key into the message' do
+        expect(subject).not_to include('grape.errors.messages')
+      end
+
+      it 'omits the missing step label' do
+        expect(subject).not_to include('Summary:')
+      end
+
+      it 'still renders the steps that are present' do
+        expect(subject).to include('Problem:', 'Resolution:')
+      end
+    end
   end
 end
