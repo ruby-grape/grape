@@ -66,6 +66,7 @@
 * [#2678](https://github.com/ruby-grape/grape/pull/2678): Update rubocop to 1.86.0 and autocorrect offenses - [@ericproulx](https://github.com/ericproulx).
 * [#2682](https://github.com/ruby-grape/grape/pull/2682): Fix `Style/OptionalBooleanParameter` offenses - [@ericproulx](https://github.com/ericproulx).
 * [#2699](https://github.com/ruby-grape/grape/pull/2699): Fix `Grape::Validations::Types::CustomTypeCoercer` dropping symbolized hash keys for `Array`/`Set` types; refactor the class for readability - [@ericproulx](https://github.com/ericproulx).
+* [#2758](https://github.com/ruby-grape/grape/pull/2758): Fix `VariantCollectionCoercer#to_s` to return `"Array[Type, ...]"` notation instead of a raw object string - [@bogdan](https://github.com/bogdan).
 * [#2700](https://github.com/ruby-grape/grape/pull/2700): Fix README typos, remove obsolete Ruby 2.4 / Fixnum section, and replace incorrect `requires + values + allow_blank` note with a correct one covering `optional + values` semantics (closes #2631) - [@ericproulx](https://github.com/ericproulx).
 * [#2703](https://github.com/ruby-grape/grape/pull/2703): Catch exceptions raised inside `rescue_from` blocks; new `rescue_from :internal_grape_exceptions` opt-in for unrecognised internal errors (resolves [#2482](https://github.com/ruby-grape/grape/issues/2482)) - [@ericproulx](https://github.com/ericproulx).
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Fix `optional :foo, message: 'oops'` raising `UnknownValidator` - [@ericproulx](https://github.com/ericproulx).
