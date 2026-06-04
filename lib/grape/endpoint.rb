@@ -385,6 +385,8 @@ module Grape
     end
 
     def build_response_cookies
+      return unless request.cookies?
+
       response_cookies do |name, value|
         cookie_value = value.is_a?(Hash) ? value : { value: }
         Rack::Utils.set_cookie_header! header, name, cookie_value
