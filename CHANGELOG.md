@@ -60,6 +60,8 @@
 * [#2753](https://github.com/ruby-grape/grape/pull/2753): Lazy-allocate `Grape::Validations::ParamScopeTracker`'s identity-keyed hashes so validating requests that never use the index / qualifying-params trackers allocate no hash - [@ericproulx](https://github.com/ericproulx).
 * [#2752](https://github.com/ruby-grape/grape/pull/2752): Skip per-request `ActiveSupport::Notifications` payload and dispatch when no subscriber is listening, via private `instrument_<event>` guards on `Endpoint`/`Middleware::Formatter` - [@ericproulx](https://github.com/ericproulx).
 * [#2755](https://github.com/ruby-grape/grape/pull/2755): Inline `mustermann-grape` into `Grape::Router::MustermannPattern` and depend on `mustermann` directly - [@ericproulx](https://github.com/ericproulx).
+* [#2757](https://github.com/ruby-grape/grape/pull/2757): Build the `Grape::Cookies` jar only when a cookie is read or written (via a new `Grape::Request#cookies?` predicate gating response-cookie flushing), and drop the jar's now-redundant lazy-parse `Proc` - [@ericproulx](https://github.com/ericproulx).
+* [#2756](https://github.com/ruby-grape/grape/pull/2756): Tighten dependency lower bounds to their compatibility floors (`rack >= 2.2.4`, `zeitwerk >= 2.6`, `dry-configurable >= 1.0`) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

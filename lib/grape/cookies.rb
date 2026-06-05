@@ -13,7 +13,7 @@ module Grape
     def_delegators :cookies, :[], :each
 
     def initialize(rack_cookies)
-      @cookies = rack_cookies
+      @cookies = ActiveSupport::HashWithIndifferentAccess.new(rack_cookies)
       @send_cookies = nil
     end
 
@@ -37,11 +37,7 @@ module Grape
 
     private
 
-    def cookies
-      return @cookies unless @cookies.is_a?(Proc)
-
-      @cookies = ActiveSupport::HashWithIndifferentAccess.new(@cookies.call)
-    end
+    attr_reader :cookies
 
     def send_cookies
       @send_cookies ||= Set.new
