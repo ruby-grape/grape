@@ -4,7 +4,16 @@ module Grape
   if defined?(::MultiJson)
     Json = ::MultiJson
   else
-    Json = ::JSON
-    Json::ParseError = Json::ParserError
+    module Json
+      ParseError = ::JSON::ParserError
+
+      def self.load(str)
+        ::JSON.load(str, nil, create_additions: false)
+      end
+
+      def self.dump(obj, *)
+        ::JSON.dump(obj, *)
+      end
+    end
   end
 end
