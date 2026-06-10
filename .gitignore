@@ -26,13 +26,11 @@ coverage
 doc
 pkg
 .rvmrc
-.ruby-version
 .ruby-gemset
 .rspec_status
 .bundle
 .byebug_history
 dist
-Gemfile.lock
 gemfiles/*.lock
 tmp
 .yardoc

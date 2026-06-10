@@ -33,7 +33,7 @@ Style/RaiseArgs:
   Enabled: false
 
 Style/RedundantArrayConstructor:
-  Enabled: false  # doesn't work well with params definition
+  Enabled: false # doesn't work well with params definition
 
 Style/OptionalBooleanParameter:
   AllowedMethods:
