@@ -73,6 +73,7 @@
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Fix `optional :foo, message: 'oops'` raising `UnknownValidator` - [@ericproulx](https://github.com/ericproulx).
 * [#2751](https://github.com/ruby-grape/grape/pull/2751): Fix structured error messages leaking the raw i18n key for an undefined optional step such as `summary` (closes #2748) - [@ericproulx](https://github.com/ericproulx).
 * [#2759](https://github.com/ruby-grape/grape/pull/2759): Use `create_additions: false` in `Grape::Json.load` to prevent object instantiation via the `json_class` key when using the stdlib JSON fallback - [@dblock](https://github.com/dblock).
+* [#2761](https://github.com/ruby-grape/grape/pull/2761): Replace `JSON.load` with `JSON.parse` in the stdlib `Grape::Json` fallback - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 ### 3.2.1 (2026-04-16)

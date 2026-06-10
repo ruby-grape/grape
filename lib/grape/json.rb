@@ -8,7 +8,7 @@ module Grape
       ParseError = ::JSON::ParserError
 
       def self.load(str)
-        ::JSON.load(str, nil, create_additions: false)
+        ::JSON.parse(str)
       end
 
       def self.dump(obj, *)
