@@ -14,7 +14,8 @@ describe Grape::Parser::Json, if: !defined?(MultiJson) do
   end
 
   # Verify that json_class payloads are treated as plain data and do not
-  # trigger Ruby object instantiation via JSON.load's create_additions mechanism.
+  # trigger Ruby object instantiation. JSON.parse never honours the json_class
+  # additions mechanism (unlike JSON.load), so the named class is never built.
   context 'when the request body contains a json_class key' do
     let(:triggered) { [] }
 
