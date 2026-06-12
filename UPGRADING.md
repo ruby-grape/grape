@@ -7,6 +7,16 @@ Upgrading Grape
 
 Grape no longer supports Ruby 3.2; 3.3 is now the minimum (`required_ruby_version = '>= 3.3'`). Upgrade your runtime to Ruby 3.3 or newer before bumping Grape.
 
+#### `mustermann-grape` is no longer a dependency
+
+Grape's path-pattern grammar (previously the `mustermann-grape` gem) now lives in Grape itself as `Grape::Router::MustermannPattern`, and Grape depends on `mustermann` directly. This is transparent for normal Grape usage.
+
+The inlined class is no longer registered as a Mustermann type, so if your app called `Mustermann.new(pattern, type: :grape)` and relied on Grape loading `mustermann-grape` for you, add it to your Gemfile explicitly:
+
+```ruby
+gem 'mustermann-grape'
+```
+
 #### `Grape::Exceptions::ValidationErrors.new` keyword renamed `errors:` → `exceptions:`
 
 `Grape::Exceptions::ValidationErrors#initialize` now takes its input array under the `exceptions:` keyword instead of `errors:`. The kwarg accepts a mix of `Grape::Exceptions::Validation` and `Grape::Exceptions::ValidationArrayErrors` instances; `ValidationArrayErrors` wrappers are flattened internally via `flat_map(&:errors)`. The `errors` reader on the constructed instance (the grouped `{params => [Validation, ...]}` Hash) is unchanged.
