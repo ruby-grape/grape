@@ -2580,7 +2580,7 @@ describe Grape::API do
         raise 'rain!'
       end
       get '/exception'
-      json = Grape::Json.load(last_response.body)
+      json = Grape::Json.parse(last_response.body)
       expect(json['error']).to eql 'rain!'
       expect(json['backtrace'].length).to be > 0
     end
@@ -3975,7 +3975,7 @@ describe Grape::API do
 
     it 'path' do
       get '/endpoint/options'
-      options = Grape::Json.load(last_response.body)
+      options = Grape::Json.parse(last_response.body)
       expect(options['path']).to eq(['/endpoint/options'])
       expect(options['source_location'][0]).to include 'api_spec.rb'
       expect(options['source_location'][1].to_i).to be > 0
