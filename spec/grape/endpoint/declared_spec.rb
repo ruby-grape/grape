@@ -40,6 +40,7 @@ describe Grape::Endpoint do
         optional :empty_hash_two, type: Hash
         optional :empty_set, type: Set
         optional :empty_typed_set, type: Set[String]
+        optional :empty_variant_set, type: Set[Integer, String]
       end
     end
 
@@ -108,7 +109,7 @@ describe Grape::Endpoint do
       end
       get '/declared?first=present'
       expect(last_response).to be_successful
-      expect(JSON.parse(last_response.body).keys.size).to eq(12)
+      expect(JSON.parse(last_response.body).keys.size).to eq(13)
     end
 
     it 'has a optional param with default value all the time' do
@@ -203,6 +204,14 @@ describe Grape::Endpoint do
         expect(body['empty_typed_set']).to eq(json_empty_set)
         expect(body['nested']['empty_set']).to eq(json_empty_set)
         expect(body['nested']['empty_typed_set']).to eq(json_empty_set)
+      end
+
+      it 'sets objects with type=Set[Integer, String] (variant collection) to be a set' do
+        get '/declared?first=present'
+        expect(last_response).to be_successful
+
+        body = JSON.parse(last_response.body)
+        expect(body['empty_variant_set']).to eq(JSON.parse(Set.new.to_json))
       end
 
       it 'sets objects with type=Array to be an array' do
