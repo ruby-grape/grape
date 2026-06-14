@@ -36,12 +36,21 @@ describe Grape::Validations::ValidationsSpec do
     it 'wraps a multiple type from :type in a VariantCollectionCoercer' do
       multi_spec = described_class.from(type: [Integer, String])
       expect(multi_spec.coerce_type).to be_a(Grape::Validations::Types::VariantCollectionCoercer)
+      expect(multi_spec.coerce_type.to_s).to eq('Array[Integer, String]')
+      expect(multi_spec.coerce_method).to be_nil
+    end
+
+    it 'wraps a Set multiple type from :type in a VariantCollectionCoercer' do
+      multi_spec = described_class.from(type: Set[Integer, String])
+      expect(multi_spec.coerce_type).to be_a(Grape::Validations::Types::VariantCollectionCoercer)
+      expect(multi_spec.coerce_type.to_s).to eq('Set[Integer, String]')
       expect(multi_spec.coerce_method).to be_nil
     end
 
     it 'extracts :types as a plain coerce list' do
       spec = described_class.from(types: [Integer, String])
       expect(spec.coerce_type).to eq([Integer, String])
+      expect(spec.coerce_type.to_s).to eq('[Integer, String]')
     end
   end
 

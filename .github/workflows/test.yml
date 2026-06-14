@@ -51,6 +51,9 @@ jobs:
             gemfile: gemfiles/multi_json.gemfile
             specs: 'spec/integration/multi_json'
           - ruby: '4.0'
+            gemfile: gemfiles/multi_json_1_20.gemfile
+            specs: 'spec/integration/multi_json'
+          - ruby: '4.0'
             gemfile: gemfiles/multi_xml.gemfile
             specs: 'spec/integration/multi_xml'
           - ruby: '4.0'

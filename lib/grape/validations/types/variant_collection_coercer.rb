@@ -26,6 +26,14 @@ module Grape
           @member_coercer = MultipleTypeCoercer.new types, method
         end
 
+        # Returns the Grape DSL notation for this coercer, e.g. "Array[Integer, String]".
+        # Distinct from the plain-array string "[Integer, String]" produced by the
+        # +types:+ keyword, which lets documentation tools tell the two apart.
+        def to_s
+          container = @types.is_a?(Set) ? 'Set' : 'Array'
+          "#{container}[#{@types.join(', ')}]"
+        end
+
         # Coerce the given value.
         #
         # @param value [Array<String>] collection of values to be coerced

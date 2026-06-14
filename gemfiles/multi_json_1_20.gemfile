@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-gem 'multi_json', '>= 1.21'
+gem 'multi_json', '< 1.21'
 
 eval_gemfile '../Gemfile'
