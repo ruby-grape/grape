@@ -76,6 +76,7 @@
 * [#2706](https://github.com/ruby-grape/grape/pull/2706): Fix `optional :foo, message: 'oops'` raising `UnknownValidator` - [@ericproulx](https://github.com/ericproulx).
 * [#2751](https://github.com/ruby-grape/grape/pull/2751): Fix structured error messages leaking the raw i18n key for an undefined optional step such as `summary` (closes #2748) - [@ericproulx](https://github.com/ericproulx).
 * [#2759](https://github.com/ruby-grape/grape/pull/2759): Use `create_additions: false` in `Grape::Json.load` to prevent object instantiation via the `json_class` key when using the stdlib JSON fallback - [@dblock](https://github.com/dblock).
+* [#2765](https://github.com/ruby-grape/grape/pull/2765): Detect the `MultiXML` constant to avoid the multi_xml 0.9 `MultiXml` deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2764](https://github.com/ruby-grape/grape/pull/2764): Route `Grape::Json` through the non-deprecated `MultiJSON` API - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

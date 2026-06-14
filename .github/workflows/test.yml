@@ -56,6 +56,9 @@ jobs:
           - ruby: '4.0'
             gemfile: gemfiles/multi_xml.gemfile
             specs: 'spec/integration/multi_xml'
+          - ruby: '4.0'
+            gemfile: gemfiles/multi_xml_0_8.gemfile
+            specs: 'spec/integration/multi_xml'
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
