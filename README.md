@@ -10,8 +10,7 @@ Grape is a REST-like API framework for Ruby. It's designed to run on Rack or com
 
 ## Stable Release
 
-You're reading the documentation for the next release of Grape, which should be 3.3.0.
-The current stable release is [3.2.0](https://github.com/ruby-grape/grape/blob/v3.2.0/README.md).
+You're reading the documentation for the stable release of Grape, 3.3.0.
 
 ## Project Resources
 

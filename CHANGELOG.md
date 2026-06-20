@@ -1,4 +1,4 @@
-### 3.3.0 (Next)
+### 3.3.0 (2026-06-20)
 
 #### Features
 
@@ -63,7 +63,6 @@
 * [#2757](https://github.com/ruby-grape/grape/pull/2757): Build the `Grape::Cookies` jar only when a cookie is read or written (via a new `Grape::Request#cookies?` predicate gating response-cookie flushing), and drop the jar's now-redundant lazy-parse `Proc` - [@ericproulx](https://github.com/ericproulx).
 * [#2756](https://github.com/ruby-grape/grape/pull/2756): Tighten dependency lower bounds to their compatibility floors (`rack >= 2.2.4`, `zeitwerk >= 2.6`, `dry-configurable >= 1.0`) - [@ericproulx](https://github.com/ericproulx).
 * [#2762](https://github.com/ruby-grape/grape/pull/2762): Parse request bodies with `JSON.parse` in the stdlib JSON fallback, dropping the `create_additions: false` wrapper from #2759 (`JSON.parse` never honours `json_class`) - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 #### Fixes
 
@@ -78,7 +77,6 @@
 * [#2759](https://github.com/ruby-grape/grape/pull/2759): Use `create_additions: false` in `Grape::Json.load` to prevent object instantiation via the `json_class` key when using the stdlib JSON fallback - [@dblock](https://github.com/dblock).
 * [#2765](https://github.com/ruby-grape/grape/pull/2765): Detect the `MultiXML` constant to avoid the multi_xml 0.9 `MultiXml` deprecation - [@ericproulx](https://github.com/ericproulx).
 * [#2764](https://github.com/ruby-grape/grape/pull/2764): Route `Grape::Json` through the non-deprecated `MultiJSON` API - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.2.1 (2026-04-16)
 
