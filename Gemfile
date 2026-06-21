@@ -16,9 +16,6 @@ end
 group :development do
   gem 'benchmark-ips'
   gem 'benchmark-memory'
-  gem 'guard'
-  gem 'guard-rspec'
-  gem 'guard-rubocop'
   gem 'irb'
 end
 

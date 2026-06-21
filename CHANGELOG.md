@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
