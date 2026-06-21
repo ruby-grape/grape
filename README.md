@@ -3160,7 +3160,7 @@ end
 
 Built-in formatters are the following.
 
-* `:json`: use object's `to_json` when available, otherwise call `MultiJson.dump`
+* `:json`: serializes the object via Grape's JSON back-end (`JSON` by default, or `multi_json` when available)
 * `:xml`: use object's `to_xml` when available, usually via `MultiXml`
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`

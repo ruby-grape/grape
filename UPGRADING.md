@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 4.0
+
+#### The `:json` and `:serializable_hash` formatters no longer call `to_json`
+
+`Grape::Formatter::Json` and `Grape::Formatter::SerializableHash` previously short-circuited to `object.to_json` whenever the object responded to it. Since virtually every object responds to `to_json`, this meant `Grape::Json.dump` was effectively never reached and a configured `multi_json` back-end (e.g. `oj`) was bypassed during formatting. Both formatters now always serialize through `Grape::Json.dump`, so the JSON back-end is honored consistently (matching `Grape::ErrorFormatter::Json` and `Grape::Parser::Json`).
+
+If you relied on a custom `to_json` for response formatting, either register your own formatter or make `Oj.mimic_JSON` (or your serializer of choice) the active back-end.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

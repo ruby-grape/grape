@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#2769](https://github.com/ruby-grape/grape/pull/2769): Always format JSON via `Grape::Json.dump` so a configured `multi_json` back-end is honored - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.0 (2026-06-20)
