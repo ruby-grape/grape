@@ -1253,8 +1253,8 @@ describe Grape::Validations do
       it 'throws the validation errors' do
         get '/two_required'
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to match(/yolo is missing/)
-        expect(last_response.body).to match(/swag is missing/)
+        expect(last_response.body).to include('yolo is missing')
+        expect(last_response.body).to include('swag is missing')
       end
     end
 

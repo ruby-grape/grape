@@ -3691,8 +3691,8 @@ describe Grape::API do
           mount app
         end
         expect(subject.routes.size).to eq(2)
-        expect(subject.routes.first.path).to match(%r{/cool/awesome})
-        expect(subject.routes.last.path).to match(%r{/cool/sauce})
+        expect(subject.routes.first.path).to include('/cool/awesome')
+        expect(subject.routes.last.path).to include('/cool/sauce')
       end
 
       it 'mounts on a path' do
