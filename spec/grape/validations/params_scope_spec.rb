@@ -39,7 +39,7 @@ describe Grape::Validations::ParamsScope do
 
       get '/types', foo: 'invalid'
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to match(/foo is invalid/)
+      expect(last_response.body).to include('foo is invalid')
     end
   end
 

@@ -85,19 +85,19 @@ describe Grape::Validations::Validators::OneofValidator do
     it 'rejects values that do not match any variant' do
       post '/pricing', { value: { time_unit: 'hour', rate: 'not-a-number' } }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)['error']).to match(/does not match any of the allowed schemas/)
+      expect(JSON.parse(last_response.body)['error']).to include('does not match any of the allowed schemas')
     end
 
     it 'rejects values with no matching keys' do
       post '/pricing', { value: { something_else: 1 } }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)['error']).to match(/does not match any of the allowed schemas/)
+      expect(JSON.parse(last_response.body)['error']).to include('does not match any of the allowed schemas')
     end
 
     it 'rejects when the value key is missing entirely' do
       post '/pricing', '{}', 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)
-      expect(JSON.parse(last_response.body)['error']).to match(/value is missing/)
+      expect(JSON.parse(last_response.body)['error']).to include('value is missing')
     end
   end
 
