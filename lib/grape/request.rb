@@ -177,13 +177,19 @@ module Grape
       raise Grape::Exceptions::RequestError
     end
 
+    # Uses a plain `each_header` block instead of `each_header.with_object`:
+    # `with_object` can only pass the block one value plus the memo, so the
+    # `k, v` pair would be boxed into a throwaway Array on every header. A
+    # two-arg block receives `k`/`v` directly and allocates nothing extra.
     def build_headers
-      each_header.with_object(Grape::Util::Header.new) do |(k, v), headers|
+      headers = Grape::Util::Header.new
+      each_header do |k, v|
         next unless k.start_with? 'HTTP_'
 
         transformed_header = KNOWN_HEADERS.fetch(k) { -k[5..].tr('_', '-').downcase }
         headers[transformed_header] = v
       end
+      headers
     end
   end
 end
