@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2770](https://github.com/ruby-grape/grape/pull/2770): Avoid per-entry array allocation in `Request#build_headers` by replacing `each_header.with_object` with a plain block - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
