@@ -11,14 +11,16 @@ module Grape
         private
 
         def wrap_message(message)
-          case message
-          when Hash
-            message
-          when Exceptions::ValidationErrors
-            message.as_json
-          else
-            { error: ensure_utf8(message) }
-          end
+          # Use +is_a?+ rather than +case/when+ here. +case/when Hash+ matches via
+          # +Module#===+, a C-level real-class check that ignores delegation, so a
+          # +SimpleDelegator+ wrapping a Hash (e.g. the +OutputBuilder+ returned by
+          # +Grape::Entity#serializable_hash+ when an error is presented via an entity)
+          # would fall through and be wrapped in a spurious +{ error: ... }+ envelope.
+          # +is_a?+ is forwarded by the delegator to the wrapped Hash, so it matches.
+          return message if message.is_a?(Hash)
+          return message.as_json if message.is_a?(Exceptions::ValidationErrors)
+
+          { error: ensure_utf8(message) }
         end
 
         def ensure_utf8(message)
