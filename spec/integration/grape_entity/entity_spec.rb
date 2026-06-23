@@ -417,5 +417,27 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
         expect(subject.body).to eql({ code: 408, static: 'some static text' }.to_json)
       end
     end
+
+    context 'when the format is :json' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :json
+
+          desc 'some desc', http_codes: [[408, 'Unauthorized', ErrorPresenter]]
+          get '/exception' do
+            error!({ code: 408 }, 408)
+          end
+        end
+      end
+
+      # Regression: a presented error hash must not be wrapped in an extra
+      # `{ "error": ... }` envelope. `Grape::Entity#serializable_hash` returns a
+      # `SimpleDelegator` around a Hash, which `Json#wrap_message`'s `case/when Hash`
+      # (via `Module#===`) fails to match, so it falls through to the `else` branch.
+      it 'is presented without an extra error envelope' do
+        expect(subject).to be_request_timeout
+        expect(JSON(subject.body)).to eql('code' => 408, 'static' => 'some static text')
+      end
+    end
   end
 end
