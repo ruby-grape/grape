@@ -1,16 +1,9 @@
-### 4.0.0 (Next)
-
-#### Features
-
-* [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
+### 3.3.1 (2026-06-28)
 
 #### Fixes
 
-* [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2770](https://github.com/ruby-grape/grape/pull/2770): Avoid per-entry array allocation in `Request#build_headers` - [@ericproulx](https://github.com/ericproulx).
 * [#2771](https://github.com/ruby-grape/grape/pull/2771): Fix double wrap on json errors - [@MattHall](https://github.com/MattHall).
-* Your contribution here.
 
 ### 3.3.0 (2026-06-20)
 
