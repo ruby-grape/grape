@@ -16,10 +16,8 @@ module Grape
       #   subclass's `DEFAULT_OPTIONS` Hash (legacy path) and frozen.
       def initialize(app, **options)
         @app = app
-        if self.class.const_defined?(:Options)
-          # Search ancestors so subclasses (e.g. Versioner::Path → Versioner::Base)
-          # inherit their parent's Options Data class without redeclaring it.
-          @config = self.class::Options.new(**options)
+        if (config_class = options_data_class)
+          @config = config_class.new(**options)
           @options = @config.to_h.freeze
         else
           @options = merge_default_options(options).freeze
@@ -92,9 +90,25 @@ module Grape
 
       def merge_default_options(options)
         return default_options.deep_merge(options) if respond_to?(:default_options)
-        return self.class::DEFAULT_OPTIONS.deep_merge(options) if self.class.const_defined?(:DEFAULT_OPTIONS)
 
-        options
+        default_options_constant&.deep_merge(options) || options
+      end
+
+      # self.class::Options honours middleware inheritance (e.g. Versioner::Path
+      # → Versioner::Base) and, unlike const_defined?, never resolves a
+      # top-level ::Options on Object. Absent an own/inherited Options class,
+      # the lookup raises NameError and we fall back to the legacy path.
+      def options_data_class
+        self.class::Options
+      rescue NameError
+        nil
+      end
+
+      # Same idea as {#options_data_class} for the legacy DEFAULT_OPTIONS Hash.
+      def default_options_constant
+        self.class::DEFAULT_OPTIONS
+      rescue NameError
+        nil
       end
 
       def try_scrub(obj)
