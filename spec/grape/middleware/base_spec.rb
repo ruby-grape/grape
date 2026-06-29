@@ -153,6 +153,74 @@ describe Grape::Middleware::Base do
         expect(example_ware.new(blank_app, monkey: false).options[:monkey]).to be false
       end
     end
+
+    context 'when an unrelated top-level ::Options constant is in scope' do
+      # The `options` gem (a transitive dep of e.g. progress_bar) defines a
+      # global ::Options. const_defined?(:Options) reaches it through Object,
+      # but `self.class::Options` does not, so the naive guard raised NameError.
+      before { stub_const('Options', Module.new) }
+
+      let(:example_ware) do
+        Class.new(Grape::Middleware::Base) do
+          const_set(:DEFAULT_OPTIONS, { monkey: true }.freeze)
+        end
+      end
+
+      it 'builds without resolving the global ::Options' do
+        expect { example_ware.new(blank_app) }.not_to raise_error
+      end
+
+      it 'falls back to the legacy DEFAULT_OPTIONS path' do
+        expect(example_ware.new(blank_app).options[:monkey]).to be true
+      end
+
+      it 'does not expose a config object' do
+        expect(example_ware.new(blank_app).config).to be_nil
+      end
+    end
+
+    context 'when an unrelated top-level ::DEFAULT_OPTIONS constant is in scope' do
+      before { stub_const('DEFAULT_OPTIONS', { monkey: true }.freeze) }
+
+      let(:example_ware) { Class.new(described_class) }
+
+      it 'ignores the global ::DEFAULT_OPTIONS' do
+        expect(example_ware.new(blank_app).options).not_to have_key(:monkey)
+      end
+    end
+
+    context 'when a middleware declares its own Options Data class' do
+      let(:example_ware) do
+        Class.new(Grape::Middleware::Base) do
+          self::Options = Data.define(:monkey)
+        end
+      end
+
+      it 'routes options through the Options value object' do
+        instance = example_ware.new(blank_app, monkey: true)
+        expect(instance.config.monkey).to be true
+        expect(instance.options[:monkey]).to be true
+      end
+
+      it 'still resolves its own Options when a global ::Options is in scope' do
+        stub_const('Options', Module.new)
+        expect(example_ware.new(blank_app, monkey: true).config.monkey).to be true
+      end
+    end
+
+    context 'when a middleware inherits its parent Options Data class' do
+      let(:parent_ware) do
+        Class.new(Grape::Middleware::Base) do
+          self::Options = Data.define(:monkey)
+        end
+      end
+
+      let(:child_ware) { Class.new(parent_ware) }
+
+      it 'inherits the ancestor Options without redeclaring it' do
+        expect(child_ware.new(blank_app, monkey: true).config.monkey).to be true
+      end
+    end
   end
 
   context 'header' do
