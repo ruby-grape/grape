@@ -8,6 +8,7 @@
 * [#2776](https://github.com/ruby-grape/grape/pull/2776): Pass `path` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
 * [#2777](https://github.com/ruby-grape/grape/pull/2777): Add `Grape::Endpoint#mounted_app` reader and `app:` keyword - [@ericproulx](https://github.com/ericproulx).
 * [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
+* [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

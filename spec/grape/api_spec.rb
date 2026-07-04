@@ -3133,6 +3133,14 @@ describe Grape::API do
       it 'sets prefix' do
         expect(subject.routes[1].prefix).to eq('p')
       end
+
+      it 'does not carry computed attributes in the route options Hash' do
+        route = subject.routes[1]
+        expect(route.options).not_to have_key(:version)
+        expect(route.options).not_to have_key(:namespace)
+        expect(route.options).not_to have_key(:prefix)
+        expect(route.options).not_to have_key(:settings)
+      end
     end
 
     describe 'api structure with additional parameters' do

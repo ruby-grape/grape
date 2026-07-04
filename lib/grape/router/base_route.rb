@@ -7,19 +7,20 @@ module Grape
 
       delegate_missing_to :@options
 
-      attr_reader :options, :pattern
+      attr_reader :options, :pattern, :version, :prefix, :requirements, :anchor, :settings, :namespace
 
       def_delegators :@pattern, :path, :origin
-      def_delegators :@options, :description, :version, :requirements, :prefix, :anchor, :settings, *Grape::Util::ApiDescription::DSL_METHODS
+      def_delegators :@options, :description, *Grape::Util::ApiDescription::DSL_METHODS
 
-      def initialize(pattern, options = {})
+      def initialize(pattern, options = {}, version: nil, namespace: nil, prefix: nil, requirements: nil, anchor: nil, settings: nil)
         @pattern = pattern
         @options = options.is_a?(ActiveSupport::OrderedOptions) ? options : ActiveSupport::OrderedOptions.new.update(options)
-      end
-
-      # see https://github.com/ruby-grape/grape/issues/1348
-      def namespace
-        @namespace ||= @options[:namespace]
+        @version = version
+        @namespace = namespace
+        @prefix = prefix
+        @requirements = requirements
+        @anchor = anchor
+        @settings = settings
       end
 
       def regexp_capture_index
