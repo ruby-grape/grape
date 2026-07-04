@@ -10,7 +10,7 @@ module Grape
       attr_reader :options, :pattern
 
       def_delegators :@pattern, :path, :origin
-      def_delegators :@options, :description, :version, :requirements, :prefix, :anchor, :settings, :forward_match, *Grape::Util::ApiDescription::DSL_METHODS
+      def_delegators :@options, :description, :version, :requirements, :prefix, :anchor, :settings, *Grape::Util::ApiDescription::DSL_METHODS
 
       def initialize(pattern, options = {})
         @pattern = pattern

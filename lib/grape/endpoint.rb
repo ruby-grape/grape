@@ -276,6 +276,7 @@ module Grape
       default_route_options = prepare_default_route_attributes(route_options)
       complete_route_options = route_options.merge(default_route_options)
       path_settings = prepare_default_path_settings
+      forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
@@ -289,7 +290,7 @@ module Grape
             version: default_route_options[:version],
             requirements: default_route_options[:requirements]
           )
-          Grape::Router::Route.new(self, method, pattern, complete_route_options)
+          Grape::Router::Route.new(self, method, pattern, complete_route_options, forward_match:)
         end
       end
     end
@@ -301,8 +302,7 @@ module Grape
         requirements: prepare_routes_requirements(route_options[:requirements]),
         prefix: inheritable_setting.namespace_inheritable[:root_prefix],
         anchor: route_options.fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:declared_params, :saved_validations),
-        forward_match: config.forward_match
+        settings: inheritable_setting.route.except(:declared_params, :saved_validations)
       }
     end
 

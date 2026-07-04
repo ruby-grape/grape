@@ -1,6 +1,14 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 4.0.0
+
+#### `forward_match` is no longer exposed on routes
+
+`forward_match` is an internal, construction-time detail that decides how a route matches incoming paths (a prefix match for mounted Rack apps, the compiled pattern otherwise). It is now passed to `Grape::Router::Route` as a keyword argument and derived from the mounted app instead of being carried in the route's options.
+
+As a result it is no longer readable through `route.options[:forward_match]` or the `route.forward_match` reader — both previously returned the flag. Nothing in Grape consumed either, so this only affects code that introspected routes directly; there is no replacement, as the value is now purely internal.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

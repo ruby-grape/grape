@@ -3,6 +3,7 @@
 #### Features
 
 * [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
+* [#2774](https://github.com/ruby-grape/grape/pull/2774): Make `forward_match` an internal kwarg instead of a route option - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
