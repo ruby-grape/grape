@@ -157,7 +157,7 @@ describe Grape::DSL::Routing do
       expect(Grape::Endpoint).to receive(:new) do |_inheritable_setting, endpoint_options|
         expect(endpoint_options[:http_methods]).to eq :get
         expect(endpoint_options[:path]).to eq '/foo'
-        expect(endpoint_options[:for]).to eq subject
+        expect(endpoint_options[:api]).to eq subject
         expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
       end.and_yield
 

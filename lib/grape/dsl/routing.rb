@@ -160,7 +160,7 @@ module Grape
             path:,
             app:,
             route_options: { anchor: false },
-            for: self
+            api: self
           )
         end
       end
@@ -189,7 +189,7 @@ module Grape
           inheritable_setting,
           http_methods:,
           path: paths,
-          for: self,
+          api: self,
           route_options: all_route_options,
           &
         )

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe Grape::API do
-  subject(:api_name) { NamedAPI.endpoints.last.options[:for].to_s }
+  subject(:api_name) { NamedAPI.endpoints.last.api.to_s }
 
   let(:api) do
     Class.new(Grape::API) do

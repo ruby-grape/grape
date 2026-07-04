@@ -17,12 +17,13 @@ module Grape
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
 
+    # The API (a +Grape::API+ instance) this endpoint belongs to.
+    def_delegator :@config, :api
+
     # The logger configured on the API this endpoint belongs to. Available
     # inside route handlers, +before+/+after+/+after_validation+/+finally+
     # filters, and +rescue_from+ blocks.
-    def logger
-      config.for.logger
-    end
+    def_delegator :api, :logger
 
     # The Rack app or Grape API mounted at this endpoint, or +nil+ for a plain
     # block endpoint. Prefer this over +options[:app]+, which is retained only
@@ -49,6 +50,8 @@ module Grape
     #   reach this endpoint.
     # @param path [String or Array] the path to this endpoint, within the
     #   current scope.
+    # @param api [Grape::API] the API this endpoint belongs to. Exposed as
+    #   {#api}.
     # @param app [#call, nil] the Rack app or Grape API mounted at this
     #   endpoint; +nil+ for a plain block endpoint. Exposed as {#mounted_app}.
     # @param options [Hash] attributes of this endpoint, normalized into a
@@ -57,7 +60,7 @@ module Grape
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, http_methods:, path:, app: nil, **options, &block)
+    def initialize(new_settings, http_methods:, path:, api:, app: nil, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -70,7 +73,7 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @config = Options.new(http_methods:, path:, app:, **options)
+      @config = Options.new(http_methods:, path:, api:, app:, **options)
       # +:app+ is still surfaced on the public options Hash for backwards
       # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
       @options[:app] = app if app

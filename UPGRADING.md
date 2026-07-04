@@ -23,6 +23,20 @@ Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: self)
 
 Relatedly, an endpoint's public `options` Hash no longer carries `:method` or `:path`. Nothing in Grape read `:method`, and the only reader of `:path` was an internal test; both values are available from the route instead — `route.request_method` for the verb and `route.path` for the (compiled) path, which is what grape-swagger and other introspection already use. The raw definition-time path array is no longer exposed on the endpoint.
 
+#### `Grape::Endpoint.new` takes `api:` instead of `for:`
+
+The keyword identifying the API an endpoint belongs to has been renamed from `for:` — a reserved word whose value can't be referenced as a local — to `api:`:
+
+```ruby
+# before
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: my_api)
+
+# after
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', api: my_api)
+```
+
+The owning API is no longer carried on the endpoint's public `options` Hash — `endpoint.options[:for]` is gone. Use the new `endpoint.api` reader instead.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
