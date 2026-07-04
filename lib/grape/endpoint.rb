@@ -24,6 +24,13 @@ module Grape
       config.for.logger
     end
 
+    # The Rack app or Grape API mounted at this endpoint, or +nil+ for a plain
+    # block endpoint. Prefer this over +options[:app]+, which is retained only
+    # for backwards compatibility.
+    def mounted_app
+      config.app
+    end
+
     class << self
       def block_to_unbound_method(block)
         return unless block
@@ -42,13 +49,15 @@ module Grape
     #   reach this endpoint.
     # @param path [String or Array] the path to this endpoint, within the
     #   current scope.
+    # @param app [#call, nil] the Rack app or Grape API mounted at this
+    #   endpoint; +nil+ for a plain block endpoint. Exposed as {#mounted_app}.
     # @param options [Hash] attributes of this endpoint, normalized into a
     #   +Grape::Endpoint::Options+ value object.
     # @option options route_options [Hash]
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, http_methods:, path:, **options, &block)
+    def initialize(new_settings, http_methods:, path:, app: nil, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -61,7 +70,10 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @config = Options.new(http_methods:, path:, **options)
+      @config = Options.new(http_methods:, path:, app:, **options)
+      # +:app+ is still surfaced on the public options Hash for backwards
+      # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
+      @options[:app] = app if app
 
       @status = nil
       @stream = nil

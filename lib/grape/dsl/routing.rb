@@ -150,7 +150,7 @@ module Grape
           refresh_already_mounted = opts.any? ? opts.first[:refresh_already_mounted] : false
           if refresh_already_mounted && !endpoints.empty?
             endpoints.delete_if do |endpoint|
-              endpoint.options[:app].to_s == app.to_s
+              endpoint.mounted_app.to_s == app.to_s
             end
           end
 
