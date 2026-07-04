@@ -21,7 +21,7 @@ Grape::Endpoint.new(settings, method: :get, path: '/foo', for: self)
 Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: self)
 ```
 
-Relatedly, an endpoint's public `options` Hash no longer carries `:method` (`endpoint.options[:method]`). Nothing in Grape read it, and downstream gems such as grape-swagger already read the verb from `route.request_method`, which is unchanged.
+Relatedly, an endpoint's public `options` Hash no longer carries `:method` or `:path`. Nothing in Grape read `:method`, and the only reader of `:path` was an internal test; both values are available from the route instead — `route.request_method` for the verb and `route.path` for the (compiled) path, which is what grape-swagger and other introspection already use. The raw definition-time path array is no longer exposed on the endpoint.
 
 ### Upgrading to >= 3.3
 

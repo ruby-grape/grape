@@ -40,15 +40,15 @@ module Grape
     #   validations, and other properties from.
     # @param http_methods [String or Array] which HTTP method(s) can be used to
     #   reach this endpoint.
+    # @param path [String or Array] the path to this endpoint, within the
+    #   current scope.
     # @param options [Hash] attributes of this endpoint, normalized into a
     #   +Grape::Endpoint::Options+ value object.
-    # @option options path [String or Array] the path to this endpoint, within
-    #   the current scope.
     # @option options route_options [Hash]
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, http_methods:, **options, &block)
+    def initialize(new_settings, http_methods:, path:, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -61,9 +61,7 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @options[:path] = Array(@options[:path])
-      @options[:path] << '/' if @options[:path].empty?
-      @config = Options.new(http_methods:, **options)
+      @config = Options.new(http_methods:, path:, **options)
 
       @status = nil
       @stream = nil
