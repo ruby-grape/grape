@@ -9,6 +9,20 @@ Upgrading Grape
 
 As a result it is no longer readable through `route.options[:forward_match]` or the `route.forward_match` reader — both previously returned the flag. Nothing in Grape consumed either, so this only affects code that introspected routes directly; there is no replacement, as the value is now purely internal.
 
+#### `Grape::Endpoint.new` takes `http_methods:` instead of `method:`
+
+`Grape::Endpoint.new` now receives the HTTP verb(s) under the `http_methods:` keyword instead of `method:`, matching the name used everywhere else. If you build endpoints directly (uncommon — this is an internal API normally driven by the routing DSL), rename the keyword:
+
+```ruby
+# before
+Grape::Endpoint.new(settings, method: :get, path: '/foo', for: self)
+
+# after
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: self)
+```
+
+Relatedly, an endpoint's public `options` Hash no longer carries `:method` (`endpoint.options[:method]`). Nothing in Grape read it, and downstream gems such as grape-swagger already read the verb from `route.request_method`, which is unchanged.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

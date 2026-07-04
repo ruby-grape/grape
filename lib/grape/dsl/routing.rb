@@ -156,7 +156,7 @@ module Grape
 
           endpoints << Grape::Endpoint.new(
             in_setting,
-            method: :any,
+            http_methods: :any,
             path:,
             app:,
             route_options: { anchor: false },
@@ -178,7 +178,7 @@ module Grape
       #     end
       #   end
       def route(methods, paths = ['/'], route_options = {}, &)
-        method = methods == :any ? '*' : methods
+        http_methods = methods == :any ? '*' : methods
         endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
         endpoint_description = inheritable_setting.route[:description]
         all_route_options = { params: endpoint_params }
@@ -187,7 +187,7 @@ module Grape
 
         new_endpoint = Grape::Endpoint.new(
           inheritable_setting,
-          method:,
+          http_methods:,
           path: paths,
           for: self,
           route_options: all_route_options,
