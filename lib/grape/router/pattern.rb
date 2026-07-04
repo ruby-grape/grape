@@ -13,7 +13,7 @@ module Grape
       def_delegators :to_regexp, :===
       alias match? ===
 
-      def initialize(origin:, suffix:, anchor:, params:, format:, version:, requirements:)
+      def initialize(origin:, suffix:, anchor:, params:, version:, requirements:, format: nil)
         @origin = origin
         @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
         @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(format, version, requirements))

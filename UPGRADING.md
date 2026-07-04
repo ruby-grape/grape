@@ -37,6 +37,23 @@ Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', api: my_api)
 
 The owning API is no longer carried on the endpoint's public `options` Hash — `endpoint.options[:for]` is gone. Use the new `endpoint.api` reader instead.
 
+#### Route metadata is exposed through readers, not the `options` Hash
+
+A route's computed metadata — `version`, `namespace`, `prefix`, `requirements`, `anchor` and `settings` — is now passed to `Grape::Router::Route` as explicit keyword arguments and exposed as plain readers, instead of being merged into the route's `options` Hash.
+
+The readers are unchanged — keep using them:
+
+```ruby
+route.version       # => 'v1'
+route.namespace     # => '/things'
+route.prefix        # => 'api'
+route.requirements  # => {}
+route.anchor        # => true
+route.settings      # => { ... }
+```
+
+What changed is the raw bag. `route.options` now holds only what was declared for the route, so it no longer carries the *computed* values for these keys — `route.options[:version]`, `[:namespace]`, `[:prefix]` and `[:settings]` return `nil`. Nothing in Grape or grape-swagger read them that way (grape-swagger uses the `route.prefix` and `route.settings` readers). For `requirements` and `anchor`, which can be supplied as route options (e.g. a mount's `anchor: false`), any explicitly declared value still appears in `route.options`; the effective value always comes from the reader.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

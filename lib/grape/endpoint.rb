@@ -285,37 +285,28 @@ module Grape
 
     def to_routes
       route_options = config.route_options
-      default_route_options = prepare_default_route_attributes(route_options)
-      complete_route_options = route_options.merge(default_route_options)
       path_settings = prepare_default_path_settings
       forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
+      version = prepare_version(inheritable_setting.namespace_inheritable[:version])
+      prefix = inheritable_setting.namespace_inheritable[:root_prefix]
+      requirements = prepare_routes_requirements(route_options[:requirements])
+      anchor = route_options.fetch(:anchor, true)
+      settings = inheritable_setting.route.except(:declared_params, :saved_validations)
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
-          prepared_path = Path.new(path, default_route_options[:namespace], path_settings)
+          prepared_path = Path.new(path, namespace, path_settings)
           pattern = Grape::Router::Pattern.new(
             origin: prepared_path.origin,
             suffix: prepared_path.suffix,
-            anchor: default_route_options[:anchor],
+            anchor:,
             params: route_options[:params],
-            format: config.format,
-            version: default_route_options[:version],
-            requirements: default_route_options[:requirements]
+            version:,
+            requirements:
           )
-          Grape::Router::Route.new(self, method, pattern, complete_route_options, forward_match:)
+          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, version:, namespace:, prefix:, requirements:, anchor:, settings:)
         end
       end
-    end
-
-    def prepare_default_route_attributes(route_options)
-      {
-        namespace:,
-        version: prepare_version(inheritable_setting.namespace_inheritable[:version]),
-        requirements: prepare_routes_requirements(route_options[:requirements]),
-        prefix: inheritable_setting.namespace_inheritable[:root_prefix],
-        anchor: route_options.fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:declared_params, :saved_validations)
-      }
     end
 
     def prepare_default_path_settings
