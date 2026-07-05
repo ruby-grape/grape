@@ -10,6 +10,7 @@
 * [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
 * [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments, and drop the unused `Grape::Endpoint::Options` `format` member - [@ericproulx](https://github.com/ericproulx).
 * [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
+* [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
