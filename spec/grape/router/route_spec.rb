@@ -10,7 +10,6 @@ RSpec.describe Grape::Router::Route do
       suffix: '',
       anchor: true,
       params: {},
-      format: nil,
       version: nil,
       requirements: {}
     )
