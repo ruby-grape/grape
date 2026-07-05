@@ -58,7 +58,7 @@ What changed is the raw bag. `route.options` now holds only what was declared fo
 
 The `:format` member was removed from the endpoint's internal `Options`. Nothing ever passed `format:` to `Grape::Endpoint.new` — `config.format` was always `nil` — so this has no runtime effect (the `(.:format)`/`(.json)` route suffix comes from `Grape::Path`, not from this value). But `Grape::Endpoint.new(..., format: …)` now raises `unknown keyword: :format` instead of silently ignoring it.
 
-`Grape::Router::Pattern#initialize` still accepts `format:` — it remains a valid capture constraint — but it is now optional (`format: nil`).
+`Grape::Router::Pattern#initialize` no longer accepts `format:` either. It was never given a non-`nil` value — a route's `:format` capture comes from the path suffix built by `Grape::Path`, not from the pattern — so the keyword was dead. `Grape::Router::Pattern.new(..., format: …)` now raises `unknown keyword: :format`.
 
 ### Upgrading to >= 3.3
 
