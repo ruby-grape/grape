@@ -120,10 +120,7 @@ module Grape
         router.append(route.apply(self))
         next if inheritable_setting.namespace_inheritable[:do_not_route_head] || route.request_method != Rack::GET
 
-        route.dup.then do |head_route|
-          head_route.convert_to_head_request!
-          router.append(head_route.apply(self))
-        end
+        router.append(route.to_head.apply(self))
       end
     end
 

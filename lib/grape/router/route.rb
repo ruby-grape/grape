@@ -19,8 +19,10 @@ module Grape
         @match_function = forward_match ? FORWARD_MATCH_METHOD : NON_FORWARD_MATCH_METHOD
       end
 
-      def convert_to_head_request!
-        @request_method = Rack::HEAD
+      def to_head
+        head = dup
+        head.convert_to_head_request!
+        head
       end
 
       def apply(app)
@@ -41,6 +43,12 @@ module Grape
         return unless parsed
 
         parsed.compact.symbolize_keys
+      end
+
+      protected
+
+      def convert_to_head_request!
+        @request_method = Rack::HEAD
       end
 
       private
