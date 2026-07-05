@@ -1030,11 +1030,11 @@ describe Grape::Endpoint do
 
     let(:options) do
       {
-        method: :path,
+        http_methods: :path,
         path: '/path',
         app: {},
         route_options: { anchor: false },
-        for: Class.new
+        api: Class.new
       }
     end
     let(:settings) { Grape::Util::InheritableSetting.new }

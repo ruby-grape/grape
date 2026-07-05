@@ -9,6 +9,51 @@ Upgrading Grape
 
 As a result it is no longer readable through `route.options[:forward_match]` or the `route.forward_match` reader — both previously returned the flag. Nothing in Grape consumed either, so this only affects code that introspected routes directly; there is no replacement, as the value is now purely internal.
 
+#### `Grape::Endpoint.new` takes `http_methods:` instead of `method:`
+
+`Grape::Endpoint.new` now receives the HTTP verb(s) under the `http_methods:` keyword instead of `method:`, matching the name used everywhere else. If you build endpoints directly (uncommon — this is an internal API normally driven by the routing DSL), rename the keyword:
+
+```ruby
+# before
+Grape::Endpoint.new(settings, method: :get, path: '/foo', for: self)
+
+# after
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: self)
+```
+
+Relatedly, an endpoint's public `options` Hash no longer carries `:method` or `:path`. Nothing in Grape read `:method`, and the only reader of `:path` was an internal test; both values are available from the route instead — `route.request_method` for the verb and `route.path` for the (compiled) path, which is what grape-swagger and other introspection already use. The raw definition-time path array is no longer exposed on the endpoint.
+
+#### `Grape::Endpoint.new` takes `api:` instead of `for:`
+
+The keyword identifying the API an endpoint belongs to has been renamed from `for:` — a reserved word whose value can't be referenced as a local — to `api:`:
+
+```ruby
+# before
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', for: my_api)
+
+# after
+Grape::Endpoint.new(settings, http_methods: :get, path: '/foo', api: my_api)
+```
+
+The owning API is no longer carried on the endpoint's public `options` Hash — `endpoint.options[:for]` is gone. Use the new `endpoint.api` reader instead.
+
+#### Route metadata is exposed through readers, not the `options` Hash
+
+A route's computed metadata — `version`, `namespace`, `prefix`, `requirements`, `anchor` and `settings` — is now passed to `Grape::Router::Route` as explicit keyword arguments and exposed as plain readers, instead of being merged into the route's `options` Hash.
+
+The readers are unchanged — keep using them:
+
+```ruby
+route.version       # => 'v1'
+route.namespace     # => '/things'
+route.prefix        # => 'api'
+route.requirements  # => {}
+route.anchor        # => true
+route.settings      # => { ... }
+```
+
+What changed is the raw bag. `route.options` now holds only what was declared for the route, so it no longer carries the *computed* values for these keys — `route.options[:version]`, `[:namespace]`, `[:prefix]` and `[:settings]` return `nil`. Nothing in Grape or grape-swagger read them that way (grape-swagger uses the `route.prefix` and `route.settings` readers). For `requirements` and `anchor`, which can be supplied as route options (e.g. a mount's `anchor: false`), any explicitly declared value still appears in `route.options`; the effective value always comes from the reader.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

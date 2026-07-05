@@ -17,11 +17,19 @@ module Grape
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
 
+    # The API (a +Grape::API+ instance) this endpoint belongs to.
+    def_delegator :@config, :api
+
     # The logger configured on the API this endpoint belongs to. Available
     # inside route handlers, +before+/+after+/+after_validation+/+finally+
     # filters, and +rescue_from+ blocks.
-    def logger
-      config.for.logger
+    def_delegator :api, :logger
+
+    # The Rack app or Grape API mounted at this endpoint, or +nil+ for a plain
+    # block endpoint. Prefer this over +options[:app]+, which is retained only
+    # for backwards compatibility.
+    def mounted_app
+      config.app
     end
 
     class << self
@@ -38,17 +46,21 @@ module Grape
     # Create a new endpoint.
     # @param new_settings [InheritableSetting] settings to determine the params,
     #   validations, and other properties from.
+    # @param http_methods [String or Array] which HTTP method(s) can be used to
+    #   reach this endpoint.
+    # @param path [String or Array] the path to this endpoint, within the
+    #   current scope.
+    # @param api [Grape::API] the API this endpoint belongs to. Exposed as
+    #   {#api}.
+    # @param app [#call, nil] the Rack app or Grape API mounted at this
+    #   endpoint; +nil+ for a plain block endpoint. Exposed as {#mounted_app}.
     # @param options [Hash] attributes of this endpoint, normalized into a
     #   +Grape::Endpoint::Options+ value object.
-    # @option options path [String or Array] the path to this endpoint, within
-    #   the current scope.
-    # @option options method [String or Array] which HTTP method(s) can be used
-    #   to reach this endpoint.
     # @option options route_options [Hash]
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, **options, &block)
+    def initialize(new_settings, http_methods:, path:, api:, app: nil, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -61,10 +73,10 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @options[:path] = Array(@options[:path])
-      @options[:path] << '/' if @options[:path].empty?
-      @options[:method] = Array(@options[:method])
-      @config = Options.new(**options)
+      @config = Options.new(http_methods:, path:, api:, app:, **options)
+      # +:app+ is still surfaced on the public options Hash for backwards
+      # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
+      @options[:app] = app if app
 
       @status = nil
       @stream = nil
@@ -273,37 +285,28 @@ module Grape
 
     def to_routes
       route_options = config.route_options
-      default_route_options = prepare_default_route_attributes(route_options)
-      complete_route_options = route_options.merge(default_route_options)
       path_settings = prepare_default_path_settings
       forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
+      version = prepare_version(inheritable_setting.namespace_inheritable[:version])
+      prefix = inheritable_setting.namespace_inheritable[:root_prefix]
+      requirements = prepare_routes_requirements(route_options[:requirements])
+      anchor = route_options.fetch(:anchor, true)
+      settings = inheritable_setting.route.except(:declared_params, :saved_validations)
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
-          prepared_path = Path.new(path, default_route_options[:namespace], path_settings)
+          prepared_path = Path.new(path, namespace, path_settings)
           pattern = Grape::Router::Pattern.new(
             origin: prepared_path.origin,
             suffix: prepared_path.suffix,
-            anchor: default_route_options[:anchor],
+            anchor:,
             params: route_options[:params],
-            format: config.format,
-            version: default_route_options[:version],
-            requirements: default_route_options[:requirements]
+            version:,
+            requirements:
           )
-          Grape::Router::Route.new(self, method, pattern, complete_route_options, forward_match:)
+          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, version:, namespace:, prefix:, requirements:, anchor:, settings:)
         end
       end
-    end
-
-    def prepare_default_route_attributes(route_options)
-      {
-        namespace:,
-        version: prepare_version(inheritable_setting.namespace_inheritable[:version]),
-        requirements: prepare_routes_requirements(route_options[:requirements]),
-        prefix: inheritable_setting.namespace_inheritable[:root_prefix],
-        anchor: route_options.fetch(:anchor, true),
-        settings: inheritable_setting.route.except(:declared_params, :saved_validations)
-      }
     end
 
     def prepare_default_path_settings

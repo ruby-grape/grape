@@ -4,6 +4,11 @@
 
 * [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
 * [#2774](https://github.com/ruby-grape/grape/pull/2774): Make `forward_match` an internal kwarg instead of a route option - [@ericproulx](https://github.com/ericproulx).
+* [#2775](https://github.com/ruby-grape/grape/pull/2775): Pass `http_methods` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2776](https://github.com/ruby-grape/grape/pull/2776): Pass `path` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2777](https://github.com/ruby-grape/grape/pull/2777): Add `Grape::Endpoint#mounted_app` reader and `app:` keyword - [@ericproulx](https://github.com/ericproulx).
+* [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
+* [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

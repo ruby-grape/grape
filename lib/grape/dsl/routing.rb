@@ -150,17 +150,17 @@ module Grape
           refresh_already_mounted = opts.any? ? opts.first[:refresh_already_mounted] : false
           if refresh_already_mounted && !endpoints.empty?
             endpoints.delete_if do |endpoint|
-              endpoint.options[:app].to_s == app.to_s
+              endpoint.mounted_app.to_s == app.to_s
             end
           end
 
           endpoints << Grape::Endpoint.new(
             in_setting,
-            method: :any,
+            http_methods: :any,
             path:,
             app:,
             route_options: { anchor: false },
-            for: self
+            api: self
           )
         end
       end
@@ -178,7 +178,7 @@ module Grape
       #     end
       #   end
       def route(methods, paths = ['/'], route_options = {}, &)
-        method = methods == :any ? '*' : methods
+        http_methods = methods == :any ? '*' : methods
         endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
         endpoint_description = inheritable_setting.route[:description]
         all_route_options = { params: endpoint_params }
@@ -187,9 +187,9 @@ module Grape
 
         new_endpoint = Grape::Endpoint.new(
           inheritable_setting,
-          method:,
+          http_methods:,
           path: paths,
-          for: self,
+          api: self,
           route_options: all_route_options,
           &
         )

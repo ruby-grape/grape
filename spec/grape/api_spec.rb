@@ -3133,6 +3133,14 @@ describe Grape::API do
       it 'sets prefix' do
         expect(subject.routes[1].prefix).to eq('p')
       end
+
+      it 'does not carry computed attributes in the route options Hash' do
+        route = subject.routes[1]
+        expect(route.options).not_to have_key(:version)
+        expect(route.options).not_to have_key(:namespace)
+        expect(route.options).not_to have_key(:prefix)
+        expect(route.options).not_to have_key(:settings)
+      end
     end
 
     describe 'api structure with additional parameters' do
@@ -3571,6 +3579,39 @@ describe Grape::API do
       end
     end
 
+    describe 'the mounted endpoint' do
+      it 'exposes the mounted app through #mounted_app' do
+        subject.mount mounted_app => '/mounty'
+        expect(subject.endpoints.last.mounted_app).to be(mounted_app)
+      end
+
+      it 'reports nil #mounted_app for a plain block endpoint' do
+        subject.get('/plain') { 'hi' }
+        expect(subject.endpoints.last.mounted_app).to be_nil
+      end
+
+      it 'still surfaces the mounted app on the options Hash' do
+        subject.mount mounted_app => '/mounty'
+        expect(subject.endpoints.last.options[:app]).to be(mounted_app)
+      end
+    end
+
+    context 'with refresh_already_mounted' do
+      let(:app) { Class.new(described_class) { get('/x') { 'x' } } }
+
+      it 'replaces a previously mounted app instead of duplicating it' do
+        subject.mount app => '/thing'
+        expect { subject.mount({ app => '/thing' }, refresh_already_mounted: true) }
+          .not_to(change { subject.endpoints.count })
+      end
+
+      it 'duplicates the endpoint without the flag' do
+        subject.mount app => '/thing'
+        expect { subject.mount app => '/thing' }
+          .to change { subject.endpoints.count }.by(1)
+      end
+    end
+
     context 'mounting an API' do
       it 'applies the settings of the mounting api' do
         subject.version 'v1', using: :path
@@ -3982,7 +4023,7 @@ describe Grape::API do
       subject.format :json
       subject.get '/endpoint/options' do
         {
-          path: options[:path],
+          path: route.path,
           source_location: source.source_location
         }
       end
@@ -3991,7 +4032,7 @@ describe Grape::API do
     it 'path' do
       get '/endpoint/options'
       options = Grape::Json.parse(last_response.body)
-      expect(options['path']).to eq(['/endpoint/options'])
+      expect(options['path']).to eq('/endpoint/options(.json)')
       expect(options['source_location'][0]).to include 'api_spec.rb'
       expect(options['source_location'][1].to_i).to be > 0
     end
