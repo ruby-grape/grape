@@ -54,6 +54,12 @@ route.settings      # => { ... }
 
 What changed is the raw bag. `route.options` now holds only what was declared for the route, so it no longer carries the *computed* values for these keys — `route.options[:version]`, `[:namespace]`, `[:prefix]` and `[:settings]` return `nil`. Nothing in Grape or grape-swagger read them that way (grape-swagger uses the `route.prefix` and `route.settings` readers). For `requirements` and `anchor`, which can be supplied as route options (e.g. a mount's `anchor: false`), any explicitly declared value still appears in `route.options`; the effective value always comes from the reader.
 
+#### `Grape::Endpoint` no longer accepts a `format:` keyword
+
+The `:format` member was removed from the endpoint's internal `Options`. Nothing ever passed `format:` to `Grape::Endpoint.new` — `config.format` was always `nil` — so this has no runtime effect (the `(.:format)`/`(.json)` route suffix comes from `Grape::Path`, not from this value). But `Grape::Endpoint.new(..., format: …)` now raises `unknown keyword: :format` instead of silently ignoring it.
+
+`Grape::Router::Pattern#initialize` still accepts `format:` — it remains a valid capture constraint — but it is now optional (`format: nil`).
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
