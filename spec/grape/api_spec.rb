@@ -3708,6 +3708,21 @@ describe Grape::API do
         expect(last_response.body).to eq('sauce')
       end
 
+      it 'does not forward unknown subpaths to a mounted API' do
+        subject.namespace :cool do
+          app = Class.new(Grape::API) # rubocop:disable RSpec/DescribedClass
+          app.get('/awesome') { 'sauce' }
+          mount app
+        end
+
+        get '/cool/awesome'
+        expect(last_response).to be_successful
+        get '/cool/awesome/subpath'
+        expect(last_response).to be_not_found
+        get '/cool/unknown'
+        expect(last_response).to be_not_found
+      end
+
       it 'mounts on a nested path' do
         app1 = Class.new(described_class)
         app2 = Class.new(described_class)

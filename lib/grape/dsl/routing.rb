@@ -160,7 +160,6 @@ module Grape
             path:,
             app:,
             route_options: { anchor: false },
-            forward_match: !app.respond_to?(:inheritable_setting),
             for: self
           )
         end

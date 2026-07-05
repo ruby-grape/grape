@@ -1034,7 +1034,6 @@ describe Grape::Endpoint do
         path: '/path',
         app: {},
         route_options: { anchor: false },
-        forward_match: true,
         for: Class.new
       }
     end

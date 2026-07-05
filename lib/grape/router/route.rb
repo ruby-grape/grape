@@ -12,11 +12,11 @@ module Grape
 
       def_delegators :@app, :call
 
-      def initialize(endpoint, method, pattern, options)
+      def initialize(endpoint, method, pattern, options, forward_match:)
         super(pattern, options)
         @app = endpoint
         @request_method = upcase_method(method)
-        @match_function = options[:forward_match] ? FORWARD_MATCH_METHOD : NON_FORWARD_MATCH_METHOD
+        @match_function = forward_match ? FORWARD_MATCH_METHOD : NON_FORWARD_MATCH_METHOD
       end
 
       def convert_to_head_request!
