@@ -7,19 +7,18 @@ module Grape
 
       delegate_missing_to :@options
 
-      attr_reader :options, :pattern, :version, :prefix, :requirements, :anchor, :settings, :namespace
+      attr_reader :options, :pattern, :prefix, :settings, :namespace
 
-      def_delegators :@pattern, :path, :origin
+      # +version+, +anchor+ and +requirements+ shape the matcher, so they are
+      # read from the pattern rather than stored again on the route.
+      def_delegators :@pattern, :path, :origin, :version, :anchor, :requirements
       def_delegators :@options, :description, *Grape::Util::ApiDescription::DSL_METHODS
 
-      def initialize(pattern, options = {}, version: nil, namespace: nil, prefix: nil, requirements: nil, anchor: nil, settings: nil)
+      def initialize(pattern, options = {}, namespace: nil, prefix: nil, settings: nil)
         @pattern = pattern
         @options = options.is_a?(ActiveSupport::OrderedOptions) ? options : ActiveSupport::OrderedOptions.new.update(options)
-        @version = version
         @namespace = namespace
         @prefix = prefix
-        @requirements = requirements
-        @anchor = anchor
         @settings = settings
       end
 

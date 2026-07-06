@@ -301,7 +301,7 @@ module Grape
             version:,
             requirements:
           )
-          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, version:, namespace:, prefix:, requirements:, anchor:, settings:)
+          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, namespace:, prefix:, settings:)
         end
       end
     end

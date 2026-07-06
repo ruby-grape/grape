@@ -7,7 +7,7 @@ module Grape
 
       DEFAULT_CAPTURES = %w[format version].freeze
 
-      attr_reader :origin, :path, :pattern, :to_regexp
+      attr_reader :origin, :path, :pattern, :to_regexp, :anchor, :version, :requirements
 
       def_delegators :pattern, :params
       def_delegators :to_regexp, :===
@@ -15,6 +15,9 @@ module Grape
 
       def initialize(origin:, suffix:, anchor:, params:, version:, requirements:)
         @origin = origin
+        @anchor = anchor
+        @version = version
+        @requirements = requirements
         @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
         @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(version, requirements))
         @to_regexp = @pattern.to_regexp
@@ -29,12 +32,9 @@ module Grape
       private
 
       def extract_capture(version, requirements)
-        capture = {}
-        capture[:version] = map_str(version) if version.present?
+        return requirements if version.blank?
 
-        return capture if requirements.blank?
-
-        requirements.merge(capture)
+        requirements.merge(version: map_str(version))
       end
 
       def build_path_from_pattern(pattern, anchor)

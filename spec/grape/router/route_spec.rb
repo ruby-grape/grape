@@ -21,24 +21,20 @@ RSpec.describe Grape::Router::Route do
     it { is_expected.to be_a(Grape::Router::BaseRoute) }
   end
 
-  describe 'route attributes' do
+  describe 'metadata attributes (namespace, prefix, settings)' do
     subject(:route) do
       described_class.new(endpoint, :get, pattern, options, forward_match: false,
-                                                            version: 'v1', namespace: '/things', prefix: '/api',
-                                                            requirements: { id: /\d+/ }, anchor: false, settings: { a: 1 })
+                                                            namespace: '/things', prefix: '/api', settings: { a: 1 })
     end
 
     it 'exposes them as readers' do
-      expect(route.version).to eq('v1')
       expect(route.namespace).to eq('/things')
       expect(route.prefix).to eq('/api')
-      expect(route.requirements).to eq(id: /\d+/)
-      expect(route.anchor).to be(false)
       expect(route.settings).to eq(a: 1)
     end
 
     it 'does not leak them into the options Hash' do
-      %i[version namespace prefix requirements anchor settings].each do |key|
+      %i[namespace prefix settings].each do |key|
         expect(route.options).not_to have_key(key)
       end
     end
@@ -47,13 +43,24 @@ RSpec.describe Grape::Router::Route do
       subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
 
       it 'defaults to nil' do
-        expect(route.version).to be_nil
         expect(route.namespace).to be_nil
         expect(route.prefix).to be_nil
-        expect(route.requirements).to be_nil
-        expect(route.anchor).to be_nil
         expect(route.settings).to be_nil
       end
+    end
+  end
+
+  describe 'match parameters delegated to the pattern (version, anchor, requirements)' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    let(:pattern) do
+      Grape::Router::Pattern.new(origin: '/mounty', suffix: '', anchor: false, params: {}, version: 'v1', requirements: { id: /\d+/ })
+    end
+
+    it 'reads them from the pattern' do
+      expect(route.version).to eq('v1')
+      expect(route.anchor).to be(false)
+      expect(route.requirements).to eq(id: /\d+/)
     end
   end
 
