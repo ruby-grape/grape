@@ -63,7 +63,9 @@ module Grape
           else
             options.merge(description:)
           end
-        inheritable_setting.namespace[:description] = settings
+        # Only the route scope is consumed downstream (by +route+ and the
+        # route's readers, e.g. +http_codes+); the namespace scope was
+        # write-only, so it is no longer populated.
         inheritable_setting.route[:description] = settings
       end
     end

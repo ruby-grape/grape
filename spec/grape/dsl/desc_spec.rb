@@ -15,8 +15,8 @@ describe Grape::DSL::Desc do
       desc_text = 'The description'
       options = { message: 'none' }
       subject.desc desc_text, **options
-      expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
       expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
+      expect(subject.namespace_setting(:description)).to be_nil
     end
 
     context 'when a positional options Hash is passed' do
@@ -31,8 +31,8 @@ describe Grape::DSL::Desc do
         Grape.deprecator.silence do
           subject.desc desc_text, options
         end
-        expect(subject.namespace_setting(:description)).to eq(options.merge(description: desc_text))
         expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
+        expect(subject.namespace_setting(:description)).to be_nil
       end
     end
 
@@ -103,8 +103,8 @@ describe Grape::DSL::Desc do
           security %w[array of security schemes]
         end
 
-        expect(subject.namespace_setting(:description)).to eq(expected_options)
         expect(subject.route_setting(:description)).to eq(expected_options)
+        expect(subject.namespace_setting(:description)).to be_nil
       end
     end
   end
