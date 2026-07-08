@@ -3665,6 +3665,18 @@ describe Grape::API do
         expect { subject.mount app => '/thing' }
           .to change { subject.endpoints.count }.by(1)
       end
+
+      it 'does not confuse two distinct apps that share a name' do
+        other = Class.new(described_class) { get('/y') { 'y' } }
+        # Force a #to_s collision to prove the refresh keys off the base API
+        # identity rather than the string representation.
+        allow(app).to receive(:to_s).and_return('SameName')
+        allow(other).to receive(:to_s).and_return('SameName')
+
+        subject.mount app => '/thing'
+        expect { subject.mount({ other => '/thing' }, refresh_already_mounted: true) }
+          .to change { subject.endpoints.count }.by(1)
+      end
     end
 
     context 'mounting an API' do

@@ -17,6 +17,7 @@
 * [#2792](https://github.com/ruby-grape/grape/pull/2792): Move `Grape::Path` to `Grape::Router::Pattern::Path` and add a `Grape::Router::Pattern.build` factory (`Grape::Path` kept as a deprecated constant) - [@ericproulx](https://github.com/ericproulx).
 * [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
 * [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
+* [#2788](https://github.com/ruby-grape/grape/pull/2788): Compare the base API instead of `to_s` when refreshing a mounted app - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
