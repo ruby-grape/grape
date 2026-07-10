@@ -152,14 +152,19 @@ module Grape
         # contain already versioning information when using path versioning.
         all_routes = self.class.endpoints.flat_map(&:routes)
 
-        # Disable versioning so adding a route won't prepend versioning
-        # informations again.
-        without_root_prefix_and_versioning { collect_route_config_per_pattern(all_routes) }
+        # Read the settings the helper routes need from a *copy* with the
+        # root-prefix/versioning keys stripped, so adding these routes won't
+        # prepend versioning information again. This used to delete those keys
+        # from the shared class-level settings and restore them in an ensure;
+        # a request served concurrently on another instance during a runtime
+        # recompile could observe the missing keys (e.g. via #cascade?). A
+        # local copy keeps that mutation off the shared object.
+        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable.to_hash.except(*ROOT_PREFIX_VERSIONING_KEYS)
+        collect_route_config_per_pattern(all_routes, namespace_inheritable)
       end
 
-      def collect_route_config_per_pattern(all_routes)
+      def collect_route_config_per_pattern(all_routes, namespace_inheritable)
         routes_by_regexp = all_routes.group_by(&:pattern_regexp)
-        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
 
         # Build the configuration based on the first endpoint and the collection of methods supported.
         routes_by_regexp.each_value do |routes|
@@ -179,18 +184,6 @@ module Grape
 
       ROOT_PREFIX_VERSIONING_KEYS = %i[version version_options root_prefix].freeze
       private_constant :ROOT_PREFIX_VERSIONING_KEYS
-
-      # Allows definition of endpoints that ignore the versioning configuration
-      # used by the rest of your API.
-      def without_root_prefix_and_versioning
-        inheritable_setting = self.class.inheritable_setting
-        deleted_values = inheritable_setting.namespace_inheritable.delete(*ROOT_PREFIX_VERSIONING_KEYS)
-        yield
-      ensure
-        ROOT_PREFIX_VERSIONING_KEYS.zip(deleted_values) do |key, value|
-          inheritable_setting.namespace_inheritable[key] = value
-        end
-      end
     end
   end
 end

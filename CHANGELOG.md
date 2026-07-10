@@ -21,6 +21,7 @@
 * [#2794](https://github.com/ruby-grape/grape/pull/2794): Fix `rescue_from Klass, rescue_subclasses: false` never rescuing — base-only handlers were written to and read from different settings stores - [@ericproulx](https://github.com/ericproulx).
 * [#2789](https://github.com/ruby-grape/grape/pull/2789): Escape error messages served with a parameterized `text/html` content-type (e.g. `text/html; charset=utf-8`) and warn when a bare Rack app is mounted under authentication - [@ericproulx](https://github.com/ericproulx).
 * [#2790](https://github.com/ruby-grape/grape/pull/2790): Stop mutating `Grape::Router`'s internal maps at request time for HTTP methods with no routes (data race on JRuby/TruffleRuby and unbounded growth) - [@ericproulx](https://github.com/ericproulx).
+* [#2791](https://github.com/ruby-grape/grape/pull/2791): Build HEAD/OPTIONS/405 helper routes from a copy of the inheritable settings instead of temporarily mutating the shared class-level settings during compilation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.2 (2026-07-05)
