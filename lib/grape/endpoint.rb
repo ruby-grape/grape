@@ -261,6 +261,7 @@ module Grape
 
     def compile!
       @app = config.app || build_stack
+      warn_unauthenticated_mounted_app
       @helpers = build_helpers
       stackable = inheritable_setting.namespace_stackable
       @befores            = stackable[:befores]
@@ -389,6 +390,19 @@ module Grape
       return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
+    end
+
+    # A bare Rack app mounted with +mount+ is called directly (see +compile!+):
+    # it does not go through +build_stack+, so the API's authentication
+    # middleware never runs and the mount is reachable unauthenticated. Mounted
+    # Grape APIs are unaffected because they rebuild their own stack from the
+    # inherited settings. Warn so this bypass isn't silent.
+    def warn_unauthenticated_mounted_app
+      return unless bare_rack_app?
+      return unless inheritable_setting.namespace_inheritable[:auth]
+
+      warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
+           'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'
     end
 
     def build_response_cookies

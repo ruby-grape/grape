@@ -19,6 +19,7 @@
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2794](https://github.com/ruby-grape/grape/pull/2794): Fix `rescue_from Klass, rescue_subclasses: false` never rescuing — base-only handlers were written to and read from different settings stores - [@ericproulx](https://github.com/ericproulx).
+* [#2789](https://github.com/ruby-grape/grape/pull/2789): Escape error messages served with a parameterized `text/html` content-type (e.g. `text/html; charset=utf-8`) and warn when a bare Rack app is mounted under authentication - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.2 (2026-07-05)
