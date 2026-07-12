@@ -283,7 +283,7 @@ module Grape
     def to_routes
       route_options = config.route_options
       path_settings = prepare_default_path_settings
-      forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
+      forward_match = bare_rack_app?
       version = prepare_version(inheritable_setting.namespace_inheritable[:version])
       prefix = inheritable_setting.namespace_inheritable[:root_prefix]
       requirements = prepare_routes_requirements(route_options[:requirements])
@@ -304,6 +304,13 @@ module Grape
           Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, namespace:, prefix:, settings:)
         end
       end
+    end
+
+    # True when a bare Rack app (anything that isn't a Grape app) is mounted at
+    # this endpoint. Such an app is called directly and matched by path prefix
+    # rather than an anchored route.
+    def bare_rack_app?
+      config.app && !config.app.is_a?(Grape::Mountable)
     end
 
     def prepare_default_path_settings
