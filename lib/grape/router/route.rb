@@ -12,11 +12,12 @@ module Grape
 
       def_delegators :@app, :call
 
-      def initialize(endpoint, method, pattern, options, forward_match:, **route_attributes)
+      def initialize(endpoint, method, pattern, options, forward_match:, params: {}, **route_attributes)
         super(pattern, options, **route_attributes)
         @app = endpoint
         @request_method = upcase_method(method)
         @match_function = forward_match ? FORWARD_MATCH_METHOD : NON_FORWARD_MATCH_METHOD
+        @declared_params = params
       end
 
       def to_head
@@ -36,9 +37,15 @@ module Grape
         @match_function.call(input, pattern)
       end
 
-      def params(input = nil)
-        return params_without_input if input.blank?
+      # The route's declared params keyed by name — path captures plus any
+      # declared body/query params, as their definitions. Used for documentation
+      # (e.g. grape-swagger), not for extracting request values.
+      def params
+        @params ||= pattern.captures_default.merge(@declared_params)
+      end
 
+      # Extract param values from a matched request path. Used by the router.
+      def params_for(input)
         parsed = pattern.params(input)
         return unless parsed
 
@@ -52,10 +59,6 @@ module Grape
       end
 
       private
-
-      def params_without_input
-        @params_without_input ||= pattern.captures_default.merge(options[:params])
-      end
 
       def upcase_method(method)
         method_s = method.to_s
