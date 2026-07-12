@@ -276,6 +276,7 @@ module Grape
 
     def compile!
       @app = config.app || build_stack
+      warn_unauthenticated_mounted_app
       @helpers = build_helpers
       stackable = inheritable_setting.namespace_stackable
       @befores            = stackable[:befores]
@@ -290,7 +291,7 @@ module Grape
       route_options = config.route_options
       params = config.params
       path_settings = prepare_default_path_settings
-      forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
+      forward_match = bare_rack_app?
       version = prepare_version(inheritable_setting.namespace_inheritable[:version])
       prefix = inheritable_setting.namespace_inheritable[:root_prefix]
       requirements = prepare_routes_requirements(config.requirements)
@@ -311,6 +312,13 @@ module Grape
           Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, params:, namespace:, prefix:, settings:)
         end
       end
+    end
+
+    # True when a bare Rack app (anything that isn't a Grape app) is mounted at
+    # this endpoint. Such an app is called directly and matched by path prefix
+    # rather than an anchored route.
+    def bare_rack_app?
+      config.app && !config.app.is_a?(Grape::Mountable)
     end
 
     def prepare_default_path_settings
@@ -389,6 +397,19 @@ module Grape
       return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
+    end
+
+    # A bare Rack app mounted with +mount+ is called directly (see +compile!+):
+    # it does not go through +build_stack+, so the API's authentication
+    # middleware never runs and the mount is reachable unauthenticated. Mounted
+    # Grape APIs are unaffected because they rebuild their own stack from the
+    # inherited settings. Warn so this bypass isn't silent.
+    def warn_unauthenticated_mounted_app
+      return unless bare_rack_app?
+      return unless inheritable_setting.namespace_inheritable[:auth]
+
+      warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
+           'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'
     end
 
     def build_response_cookies

@@ -3600,6 +3600,27 @@ describe Grape::API do
       end
     end
 
+    context 'with a bare rack app mounted under authentication' do
+      it 'warns that the mount is not covered by the auth middleware' do
+        subject.http_basic { |_u, _p| false }
+        subject.mount mounted_app => '/mounty'
+        expect { get '/mounty' }.to output(/not authenticated by Grape/).to_stderr
+        expect(last_response.body).to eq('MOUNTED')
+      end
+
+      it 'does not warn for a bare rack app mounted without authentication' do
+        subject.mount mounted_app => '/mounty'
+        expect { get '/mounty' }.not_to output.to_stderr
+      end
+
+      it 'does not warn for a mounted Grape API under authentication' do
+        inner = Class.new(described_class) { get('/inner') { 'inner' } }
+        subject.http_basic { |_u, _p| false }
+        subject.mount inner => '/sub'
+        expect { get '/sub/inner' }.not_to output.to_stderr
+      end
+    end
+
     describe 'the mounted endpoint' do
       it 'exposes the mounted app through #mounted_app' do
         subject.mount mounted_app => '/mounty'
@@ -4451,6 +4472,40 @@ describe Grape::API do
       get '/something?format=<script>blah</script>'
       expect(last_response.status).to eq(406)
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format '<script>blah</script>' is not supported."))
+    end
+  end
+
+  context 'when an HTML error content-type carries a charset parameter' do
+    it 'still escapes the reflected message' do
+      subject.content_type :html, 'text/html; charset=utf-8'
+      subject.format :html
+      subject.formatter :html, ->(object, _env) { object.to_s }
+      subject.rescue_from(:all) { |e| error!(e.message, 400) }
+      subject.get('/echo') { raise params[:q] }
+      get '/echo', q: '<script>alert(1)</script>'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq(Rack::Utils.escape_html('<script>alert(1)</script>'))
+    end
+
+    it 'escapes when the charset content-type is set by error! rather than registered' do
+      subject.format :json
+      subject.rescue_from(:all) { |e| error!(e.message, 400, 'Content-Type' => 'text/html; charset=utf-8') }
+      subject.get('/echo') { raise params[:q] }
+      get '/echo', q: '<script>alert(1)</script>'
+      expect(last_response.status).to eq(400)
+      expect(last_response.headers['content-type']).to eq('text/html; charset=utf-8')
+      expect(last_response.body).not_to include('<script>')
+      expect(last_response.body).to include('&lt;script&gt;')
+    end
+
+    it 'escapes regardless of the media type casing' do
+      subject.format :json
+      subject.rescue_from(:all) { |e| error!(e.message, 400, 'Content-Type' => 'Text/HTML; charset=utf-8') }
+      subject.get('/echo') { raise params[:q] }
+      get '/echo', q: '<script>alert(1)</script>'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).not_to include('<script>')
+      expect(last_response.body).to include('&lt;script&gt;')
     end
   end
 

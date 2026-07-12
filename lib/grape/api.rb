@@ -4,6 +4,9 @@ module Grape
   # The API class is the primary entry point for creating Grape APIs. Users
   # should subclass this class in order to build an API.
   class API
+    # Marks this and every subclass as a mountable Grape app (see Grape::Mountable).
+    extend Grape::Mountable
+
     # Class methods that we want to call on the API rather than on the API object
     NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting= top_level_setting].freeze
 

@@ -133,7 +133,9 @@ module Grape
           end
           in_setting = inheritable_setting
 
-          if app.respond_to?(:inheritable_setting, true)
+          # Past the mount_instance branch above, a Grape app here is an already
+          # instantiated Grape::API::Instance (vs. a bare Rack app).
+          if app.is_a?(Grape::Mountable)
             mount_path = Grape::Util::PathNormalizer.call(path)
             app.top_level_setting.namespace_stackable[:mount_path] = mount_path
 
