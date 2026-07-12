@@ -158,7 +158,8 @@ describe Grape::DSL::Routing do
         expect(endpoint_options[:http_methods]).to eq :get
         expect(endpoint_options[:path]).to eq '/foo'
         expect(endpoint_options[:api]).to eq subject
-        expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz', params: { nuz: 'naz' })
+        expect(endpoint_options[:params]).to eq(nuz: 'naz')
+        expect(endpoint_options[:route_options]).to eq(foo: 'bar', fiz: 'baz')
       end.and_yield
 
       subject.route(:get, '/foo', { foo: 'bar' }, &proc {})

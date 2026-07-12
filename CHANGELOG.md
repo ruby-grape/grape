@@ -12,6 +12,7 @@
 * [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
 * [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
+* [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

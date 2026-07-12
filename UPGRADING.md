@@ -60,6 +60,21 @@ The `:format` member was removed from the endpoint's internal `Options`. Nothing
 
 `Grape::Router::Pattern#initialize` no longer accepts `format:` either. It was never given a non-`nil` value — a route's `:format` capture comes from the path suffix built by `Grape::Path`, not from the pattern — so the keyword was dead. `Grape::Router::Pattern.new(..., format: …)` now raises `unknown keyword: :format`.
 
+#### `Grape::Router::Route#params` no longer takes an argument
+
+`Route#params` used to do two jobs depending on its argument: `route.params(input)` extracted param values from a matched request path, while `route.params` (no argument) returned the route's declared param definitions. These are now separate methods:
+
+```ruby
+route.params            # declared param definitions, keyed by name (unchanged)
+route.params_for(input) # values extracted from a matched path (was route.params(input))
+```
+
+The no-argument form is unchanged — grape-swagger and other documentation consumers keep using `route.params`. Only the value-extraction form moved, and it is internal to the router; if you called `route.params(input)` directly, switch to `route.params_for(input)`.
+
+#### `params` is a first-class endpoint input, no longer in `route.options`
+
+A route's declared params were previously carried inside the `route_options` bag and reachable as `route.options[:params]`. They are now composed into their own endpoint input (`Grape::Endpoint::Options` gains a `:params` member and `Grape::Endpoint.new` a `params:` keyword) and exposed only through `route.params`. `route.options[:params]` now returns `nil`. Nothing in Grape or grape-swagger read it that way — grape-swagger uses the `route.params` method — so this only affects code that reached into the options Hash for params directly.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
