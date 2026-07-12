@@ -13,6 +13,7 @@
 * [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
 * [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
+* [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
