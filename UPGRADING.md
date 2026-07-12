@@ -39,7 +39,7 @@ The owning API is no longer carried on the endpoint's public `options` Hash — 
 
 #### Route metadata is exposed through readers, not the `options` Hash
 
-A route's computed metadata — `version`, `namespace`, `prefix`, `requirements`, `anchor` and `settings` — is now passed to `Grape::Router::Route` as explicit keyword arguments and exposed as plain readers, instead of being merged into the route's `options` Hash.
+A route's computed metadata — `version`, `namespace`, `prefix`, `requirements`, `anchor` and `settings` — is now exposed through plain readers instead of being merged into the route's `options` Hash. `namespace`, `prefix` and `settings` are passed to `Grape::Router::Route` as explicit keyword arguments; `version`, `anchor` and `requirements` are read from the route's pattern (they shape how it matches).
 
 The readers are unchanged — keep using them:
 
@@ -52,13 +52,32 @@ route.anchor        # => true
 route.settings      # => { ... }
 ```
 
-What changed is the raw bag. `route.options` now holds only what was declared for the route, so it no longer carries the *computed* values for these keys — `route.options[:version]`, `[:namespace]`, `[:prefix]` and `[:settings]` return `nil`. Nothing in Grape or grape-swagger read them that way (grape-swagger uses the `route.prefix` and `route.settings` readers). For `requirements` and `anchor`, which can be supplied as route options (e.g. a mount's `anchor: false`), any explicitly declared value still appears in `route.options`; the effective value always comes from the reader.
+What changed is the raw bag. `route.options` now holds only what was declared for the route, so it no longer carries the *computed* values for these keys — `route.options[:version]`, `[:namespace]`, `[:prefix]` and `[:settings]` return `nil`. Nothing in Grape or grape-swagger read them that way (grape-swagger uses the `route.prefix` and `route.settings` readers). `requirements` and `anchor` — which can be supplied as route options (e.g. a mount's `anchor: false`) — are covered separately below: they too are now first-class endpoint inputs and likewise no longer appear in `route.options`. The effective value always comes from the reader.
 
 #### `Grape::Endpoint` no longer accepts a `format:` keyword
 
 The `:format` member was removed from the endpoint's internal `Options`. Nothing ever passed `format:` to `Grape::Endpoint.new` — `config.format` was always `nil` — so this has no runtime effect (the `(.:format)`/`(.json)` route suffix comes from `Grape::Path`, not from this value). But `Grape::Endpoint.new(..., format: …)` now raises `unknown keyword: :format` instead of silently ignoring it.
 
 `Grape::Router::Pattern#initialize` no longer accepts `format:` either. It was never given a non-`nil` value — a route's `:format` capture comes from the path suffix built by `Grape::Path`, not from the pattern — so the keyword was dead. `Grape::Router::Pattern.new(..., format: …)` now raises `unknown keyword: :format`.
+
+#### `Grape::Router::Route#params` no longer takes an argument
+
+`Route#params` used to do two jobs depending on its argument: `route.params(input)` extracted param values from a matched request path, while `route.params` (no argument) returned the route's declared param definitions. These are now separate methods:
+
+```ruby
+route.params            # declared param definitions, keyed by name (unchanged)
+route.params_for(input) # values extracted from a matched path (was route.params(input))
+```
+
+The no-argument form is unchanged — grape-swagger and other documentation consumers keep using `route.params`. Only the value-extraction form moved, and it is internal to the router; if you called `route.params(input)` directly, switch to `route.params_for(input)`.
+
+#### `params` is a first-class endpoint input, no longer in `route.options`
+
+A route's declared params were previously carried inside the `route_options` bag and reachable as `route.options[:params]`. They are now composed into their own endpoint input (`Grape::Endpoint::Options` gains a `:params` member and `Grape::Endpoint.new` a `params:` keyword) and exposed only through `route.params`. `route.options[:params]` now returns `nil`. Nothing in Grape or grape-swagger read it that way — grape-swagger uses the `route.params` method — so this only affects code that reached into the options Hash for params directly.
+
+#### `requirements` and `anchor` are first-class endpoint inputs, no longer in `route.options`
+
+Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
 ### Upgrading to >= 3.3
 

@@ -12,12 +12,15 @@
 * [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
 * [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
+* [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
+* [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2790](https://github.com/ruby-grape/grape/pull/2790): Stop mutating `Grape::Router`'s internal maps at request time for HTTP methods with no routes (data race on JRuby/TruffleRuby and unbounded growth) - [@ericproulx](https://github.com/ericproulx).
+* [#2791](https://github.com/ruby-grape/grape/pull/2791): Build HEAD/OPTIONS/405 helper routes from a copy of the inheritable settings instead of temporarily mutating the shared class-level settings during compilation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.2 (2026-07-05)

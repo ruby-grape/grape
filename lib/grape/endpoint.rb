@@ -54,13 +54,19 @@ module Grape
     #   {#api}.
     # @param app [#call, nil] the Rack app or Grape API mounted at this
     #   endpoint; +nil+ for a plain block endpoint. Exposed as {#mounted_app}.
+    # @param params [Hash] the declared params for this endpoint, keyed by name.
+    #   Kept out of +route_options+ and read via +config.params+.
+    # @param requirements [Hash, nil] regular-expression constraints for named
+    #   path params. Read via +config.requirements+.
+    # @param anchor [Boolean] whether the route anchors to the whole path
+    #   (default +true+). Read via +config.anchor+.
     # @param options [Hash] attributes of this endpoint, normalized into a
     #   +Grape::Endpoint::Options+ value object.
     # @option options route_options [Hash]
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, http_methods:, path:, api:, app: nil, **options, &block)
+    def initialize(new_settings, http_methods:, path:, api:, app: nil, params: {}, requirements: nil, anchor: true, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -73,7 +79,7 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @config = Options.new(http_methods:, path:, api:, app:, **options)
+      @config = Options.new(http_methods:, path:, api:, app:, params:, requirements:, anchor:, **options)
       # +:app+ is still surfaced on the public options Hash for backwards
       # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
       @options[:app] = app if app
@@ -282,12 +288,13 @@ module Grape
 
     def to_routes
       route_options = config.route_options
+      params = config.params
       path_settings = prepare_default_path_settings
       forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
       version = prepare_version(inheritable_setting.namespace_inheritable[:version])
       prefix = inheritable_setting.namespace_inheritable[:root_prefix]
-      requirements = prepare_routes_requirements(route_options[:requirements])
-      anchor = route_options.fetch(:anchor, true)
+      requirements = prepare_routes_requirements(config.requirements)
+      anchor = config.anchor
       settings = inheritable_setting.route.except(:declared_params, :saved_validations)
 
       config.http_methods.flat_map do |method|
@@ -297,11 +304,11 @@ module Grape
             origin: prepared_path.origin,
             suffix: prepared_path.suffix,
             anchor:,
-            params: route_options[:params],
+            params:,
             version:,
             requirements:
           )
-          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, namespace:, prefix:, settings:)
+          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, params:, namespace:, prefix:, settings:)
         end
       end
     end
