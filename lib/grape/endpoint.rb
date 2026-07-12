@@ -299,10 +299,10 @@ module Grape
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
-          prepared_path = Path.new(path, namespace, path_settings)
-          pattern = Grape::Router::Pattern.new(
-            origin: prepared_path.origin,
-            suffix: prepared_path.suffix,
+          pattern = Grape::Router::Pattern.build(
+            path:,
+            namespace:,
+            settings: path_settings,
             anchor:,
             params:,
             version:,
