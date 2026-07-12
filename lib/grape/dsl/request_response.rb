@@ -120,8 +120,7 @@ module Grape
         when :internal_grape_exceptions
           namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
         else
-          handler_type = rescue_subclasses ? :rescue_handlers : :base_only_rescue_handlers
-          inheritable_setting.namespace_reverse_stackable[handler_type] = args.to_h { |klass| [klass, handler] }
+          inheritable_setting.add_rescue_handlers(args.to_h { |klass| [klass, handler] }, subclasses: rescue_subclasses)
         end
 
         inheritable_setting.namespace_stackable[:rescue_options] = RescueOptions.new(backtrace:, original_exception:)
