@@ -7,6 +7,27 @@ describe Grape::API do
 
   let(:app) { subject }
 
+  describe 'thread-safe (re)compilation' do
+    # Regression: building the HEAD/OPTIONS/405 helper routes used to delete the
+    # root-prefix/versioning keys from the shared class-level settings and
+    # restore them in an ensure. A request served concurrently on another
+    # instance during a runtime recompile could observe the missing keys (e.g.
+    # via #cascade?). Compilation must not mutate the shared settings.
+    it 'does not mutate the shared inheritable settings while (re)compiling' do
+      subject.version 'v1', using: :path, cascade: false
+      subject.get('/x') { 'x' }
+      subject.compile!
+
+      shared = subject.base_instance.inheritable_setting.namespace_inheritable
+      expect(shared).not_to receive(:delete)
+
+      subject.change!
+      subject.compile!
+
+      expect(shared[:version_options]).to be_present
+    end
+  end
+
   describe '.prefix' do
     it 'routes root through with the prefix' do
       subject.prefix 'awesome/sauce'

@@ -159,7 +159,7 @@ module Grape
             http_methods: :any,
             path:,
             app:,
-            route_options: { anchor: false },
+            anchor: false,
             api: self
           )
         end
@@ -170,6 +170,9 @@ module Grape
       #
       # @param methods [HTTP Verb] One or more HTTP verbs that are accepted by this route. Set to `:any` if you want any verb to be accepted.
       # @param paths [String] One or more strings representing the URL segment(s) for this route.
+      # @param requirements [Hash] Regular-expression constraints for named path params; the route matches only when every requirement is satisfied.
+      # @param anchor [Boolean] Whether the route is anchored to the whole path. Defaults to `true`; pass `false` for catch-all routes (e.g. `'/(*:path)'`).
+      # @param route_options [Hash] Any additional custom options, carried through to `route.options`.
       #
       # @example Defining a basic route.
       #   class MyAPI < Grape::API
@@ -177,12 +180,15 @@ module Grape
       #       {hello: 'world'}
       #     end
       #   end
-      def route(methods, paths = ['/'], route_options = {}, &)
+      def route(methods, paths = ['/'], requirements: nil, anchor: true, **route_options, &)
         http_methods = methods == :any ? '*' : methods
-        endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
-        endpoint_description = inheritable_setting.route[:description]
-        all_route_options = { params: endpoint_params }
-        all_route_options.deep_merge!(endpoint_description) if endpoint_description
+        endpoint_description = inheritable_setting.route[:description] || {}
+
+        # +params+, +requirements+ and +anchor+ each travel as their own endpoint
+        # input; the route-options bag keeps the description's other keys
+        # (+success+, +tags+, …) plus any custom options.
+        params = prepare_params(endpoint_description[:params])
+        all_route_options = endpoint_description.except(:params)
         all_route_options.deep_merge!(route_options) if route_options.present?
 
         new_endpoint = Grape::Endpoint.new(
@@ -190,6 +196,9 @@ module Grape
           http_methods:,
           path: paths,
           api: self,
+          params:,
+          requirements:,
+          anchor:,
           route_options: all_route_options,
           &
         )
@@ -201,7 +210,7 @@ module Grape
 
       Grape::HTTP_SUPPORTED_METHODS.each do |supported_method|
         define_method supported_method.downcase do |path = '/', **options, &block|
-          route(supported_method, path, options, &block)
+          route(supported_method, path, **options, &block)
         end
       end
 
@@ -258,6 +267,15 @@ module Grape
       end
 
       private
+
+      # Compose a route's params: the declared params (+params do … end+) deep-merged
+      # with any documented alongside +desc ..., params:+ (+description_params+).
+      def prepare_params(description_params)
+        endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
+        return endpoint_params if description_params.blank?
+
+        endpoint_params.deep_merge(description_params)
+      end
 
       # Remove all defined routes.
       def reset_routes!
