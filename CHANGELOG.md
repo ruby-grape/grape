@@ -1,3 +1,25 @@
+### 4.0.0 (Next)
+
+#### Features
+
+* [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
+* [#2774](https://github.com/ruby-grape/grape/pull/2774): Make `forward_match` an internal kwarg instead of a route option - [@ericproulx](https://github.com/ericproulx).
+* [#2775](https://github.com/ruby-grape/grape/pull/2775): Pass `http_methods` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2776](https://github.com/ruby-grape/grape/pull/2776): Pass `path` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2777](https://github.com/ruby-grape/grape/pull/2777): Add `Grape::Endpoint#mounted_app` reader and `app:` keyword - [@ericproulx](https://github.com/ericproulx).
+* [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
+* [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments, and drop the unused `Grape::Endpoint::Options` `format` member - [@ericproulx](https://github.com/ericproulx).
+* [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
+* [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
+* [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
+
+#### Fixes
+
+* [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2794](https://github.com/ruby-grape/grape/pull/2794): Fix `rescue_from Klass, rescue_subclasses: false` never rescuing — base-only handlers were written to and read from different settings stores - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
+
 ### 3.3.2 (2026-07-05)
 
 #### Fixes
