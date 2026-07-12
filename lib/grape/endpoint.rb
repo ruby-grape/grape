@@ -370,7 +370,7 @@ module Grape
         error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
         rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
         rescue_handlers:,
-        base_only_rescue_handlers: ns_stack.namespace_stackable_with_hash(:base_only_rescue_handlers),
+        base_only_rescue_handlers:,
         all_rescue_handler: ns_inh[:all_rescue_handler],
         grape_exceptions_rescue_handler: ns_inh[:grape_exceptions_rescue_handler],
         internal_grape_exceptions_rescue_handler: ns_inh[:internal_grape_exceptions_rescue_handler]
@@ -398,11 +398,23 @@ module Grape
     end
 
     def rescue_handlers
-      rescue_handlers = inheritable_setting.namespace_reverse_stackable[:rescue_handlers]
-      return if rescue_handlers.blank?
+      merged_reverse_stackable(:rescue_handlers)
+    end
 
-      rescue_handlers.each_with_object({}) do |rescue_handler, result|
-        result.merge!(rescue_handler) { |_k, s1, _s2| s1 }
+    def base_only_rescue_handlers
+      merged_reverse_stackable(:base_only_rescue_handlers)
+    end
+
+    # Merge a reverse-stackable handler map (as written by +rescue_from+) into a
+    # single Hash. The reverse store lists child-scope handlers before inherited
+    # ones, and the first-wins merge keeps the child's handler for a given
+    # class, so a nested +rescue_from+ overrides an outer one.
+    def merged_reverse_stackable(key)
+      handlers = inheritable_setting.namespace_reverse_stackable[key]
+      return if handlers.blank?
+
+      handlers.each_with_object({}) do |handler, result|
+        result.merge!(handler) { |_k, s1, _s2| s1 }
       end
     end
   end

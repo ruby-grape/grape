@@ -2417,6 +2417,19 @@ describe Grape::API do
       expect(last_response).to be_server_error
     end
 
+    it 'rescues the exact error class if rescue_subclasses is false' do
+      subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: false do |e|
+        error!("rescued from #{e.class.name}", 500)
+      end
+      subject.get '/caught_parent' do
+        raise ApiSpec::APIErrors::ParentError
+      end
+
+      get '/caught_parent'
+      expect(last_response).to be_server_error
+      expect(last_response.body).to eq('rescued from ApiSpec::APIErrors::ParentError')
+    end
+
     it 'does not rescue child errors if rescue_subclasses is false' do
       subject.rescue_from ApiSpec::APIErrors::ParentError, rescue_subclasses: false do |e|
         error!("rescued from #{e.class.name}", 500)
