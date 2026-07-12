@@ -19,6 +19,7 @@
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2790](https://github.com/ruby-grape/grape/pull/2790): Stop mutating `Grape::Router`'s internal maps at request time for HTTP methods with no routes (data race on JRuby/TruffleRuby and unbounded growth) - [@ericproulx](https://github.com/ericproulx).
 * [#2791](https://github.com/ruby-grape/grape/pull/2791): Build HEAD/OPTIONS/405 helper routes from a copy of the inheritable settings instead of temporarily mutating the shared class-level settings during compilation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
