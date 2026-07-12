@@ -5,6 +5,8 @@ module Grape
     # The API Instance class, is the engine behind Grape::API. Each class that inherits
     # from this will represent a different API instance
     class Instance
+      # Marks this and every mounted instance as a mountable Grape app (see Grape::Mountable).
+      extend Grape::Mountable
       extend Grape::DSL::Settings
       extend Grape::DSL::Desc
       extend Grape::DSL::Validations

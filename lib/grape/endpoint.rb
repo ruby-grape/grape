@@ -294,6 +294,13 @@ module Grape
       end
     end
 
+    # True when a bare Rack app (anything that isn't a Grape app) is mounted at
+    # this endpoint. Such an app is called directly and matched by path prefix
+    # rather than an anchored route.
+    def bare_rack_app?
+      config.app && !config.app.is_a?(Grape::Mountable)
+    end
+
     def prepare_default_route_attributes(route_options)
       {
         namespace:,
