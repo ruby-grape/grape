@@ -26,7 +26,7 @@ module Grape
         handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map:)
         declared_params = include_parent_namespaces ? inheritable_setting.route[:declared_params] : (inheritable_setting.namespace_stackable[:declared_params].last || [])
         renamed_params = inheritable_setting.route[:renamed_params] || {}
-        route_params = options.dig(:route_options, :params) || {} # options = endpoint's option
+        route_params = config.params
 
         handler.call(passed_params, declared_params, route_params, renamed_params)
       end
