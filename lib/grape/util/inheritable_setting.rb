@@ -38,9 +38,8 @@ module Grape
         # used with a mount, or should every API::Class be a separate namespace by default?
         @namespace_inheritable = InheritableValues.new
         @namespace_stackable = StackableValues.new
-        @namespace_reverse_stackable = ReverseStackableValues.new
         @parent = nil
-        # @api_class and @point_in_time_copies stay nil until first access.
+        # @api_class, @point_in_time_copies and @rescue_handler_maps stay nil until first access.
       end
 
       # Return the class-level global properties.
@@ -59,7 +58,6 @@ module Grape
 
         namespace_inheritable.inherited_values = parent.namespace_inheritable
         namespace_stackable.inherited_values = parent.namespace_stackable
-        namespace_reverse_stackable.inherited_values = parent.namespace_reverse_stackable
         @route = parent.route.merge(route)
 
         @point_in_time_copies&.each { |cloned_one| cloned_one.inherit_from parent }
@@ -91,7 +89,8 @@ module Grape
           namespace: namespace.to_hash,
           namespace_inheritable: namespace_inheritable.to_hash,
           namespace_stackable: namespace_stackable.to_hash,
-          namespace_reverse_stackable: namespace_reverse_stackable.to_hash
+          rescue_handlers:,
+          base_only_rescue_handlers:
         }
       end
 
@@ -118,16 +117,30 @@ module Grape
         merged_rescue_handlers(:base_only_rescue_handlers)
       end
 
+      # An exception class registered twice in the same scope keeps its first
+      # handler, and keeps the position it was first registered at.
       def add_rescue_handlers(mapping, subclasses:)
-        namespace_reverse_stackable[subclasses ? :rescue_handlers : :base_only_rescue_handlers] = mapping
+        @rescue_handler_maps ||= {}
+        own = (@rescue_handler_maps[subclasses ? :rescue_handlers : :base_only_rescue_handlers] ||= {})
+        own.merge!(mapping) { |_klass, registered, _new| registered }
       end
 
       protected
 
-      # Reverse-stackable so a child scope's rescue handlers precede inherited
-      # ones. Reached only through #rescue_handlers / #base_only_rescue_handlers
-      # / #add_rescue_handlers, and #inherit_from / #copy_state_from.
-      attr_reader :namespace_reverse_stackable
+      # This scope's own +rescue_from+ registrations, before inheritance:
+      # {rescue_handlers: {klass => handler}, base_only_rescue_handlers: {...}}.
+      attr_reader :rescue_handler_maps
+
+      # Nearest scope's handlers first: Middleware::Error scans with +find+,
+      # so a nested scope's registrations must precede inherited ones even
+      # when an outer scope registered a more specific class.
+      def merged_rescue_handlers(key)
+        inherited = parent&.merged_rescue_handlers(key)
+        own = @rescue_handler_maps&.[](key)
+        return inherited unless own
+
+        own.merge(inherited || {}) { |_klass, nearer, _inherited| nearer }
+      end
 
       # Used by +point_in_time_copy+ to populate a freshly-built instance
       # with cloned state from another instance of the same class.
@@ -135,18 +148,9 @@ module Grape
         @namespace = source.namespace.clone
         @namespace_inheritable = source.namespace_inheritable.clone
         @namespace_stackable = source.namespace_stackable.clone
-        @namespace_reverse_stackable = source.namespace_reverse_stackable.clone
+        @rescue_handler_maps = source.rescue_handler_maps&.dup
         @route = source.route.clone
         @api_class = source.api_class
-      end
-
-      private
-
-      def merged_rescue_handlers(key)
-        handlers = namespace_reverse_stackable[key]
-        return if handlers.blank?
-
-        handlers.each_with_object({}) { |handler, result| result.merge!(handler) { |_k, s1, _s2| s1 } }
       end
     end
   end

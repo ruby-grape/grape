@@ -228,7 +228,8 @@ describe Grape::Util::InheritableSetting do
           namespace_inheritable_thing: :namespace_inheritable_foo_bar
         },
         namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] },
-        namespace_reverse_stackable: { rescue_handlers: [{ StandardError => :handler }] },
+        rescue_handlers: { StandardError => :handler },
+        base_only_rescue_handlers: nil,
         route: { route_thing: :route_foo_bar }
       )
     end
