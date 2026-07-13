@@ -12,7 +12,6 @@ describe Grape::Util::InheritableSetting do
       settings.namespace[:namespace_thing] = :namespace_foo_bar
       settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
       settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar
-      settings.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :namespace_reverse_stackable_foo_bar
       settings.route[:route_thing] = :route_foo_bar
     end
   end
@@ -22,7 +21,6 @@ describe Grape::Util::InheritableSetting do
       settings.namespace[:namespace_thing] = :namespace_foo_bar_other
       settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar_other
       settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar_other
-      settings.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :namespace_reverse_stackable_foo_bar_other
       settings.route[:route_thing] = :route_foo_bar_other
     end
   end
@@ -116,13 +114,24 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
-  describe '#namespace_reverse_stackable' do
-    it 'works with reverse stackable values' do
-      expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
+  describe '#rescue_handlers / #add_rescue_handlers' do
+    it 'records subclass-matching handlers under rescue_handlers' do
+      subject.add_rescue_handlers({ StandardError => :handler }, subclasses: true)
+      expect(subject.rescue_handlers).to eq(StandardError => :handler)
+      expect(subject.base_only_rescue_handlers).to be_nil
+    end
 
-      subject.inherit_from other_parent
+    it 'records exact-match handlers under base_only_rescue_handlers' do
+      subject.add_rescue_handlers({ StandardError => :handler }, subclasses: false)
+      expect(subject.base_only_rescue_handlers).to eq(StandardError => :handler)
+      expect(subject.rescue_handlers).to be_nil
+    end
 
-      expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar_other]
+    it 'lets a nested scope override an inherited handler for the same class' do
+      parent = described_class.new.tap { |s| s.add_rescue_handlers({ StandardError => :parent }, subclasses: true) }
+      subject.inherit_from parent
+      subject.add_rescue_handlers({ StandardError => :child }, subclasses: true)
+      expect(subject.rescue_handlers).to eq(StandardError => :child)
     end
   end
 
@@ -192,14 +201,6 @@ describe Grape::Util::InheritableSetting do
       expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
     end
 
-    it 'decouples namespace reverse stackable values' do
-      expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
-
-      subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = :other_thing
-      expect(subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq %i[other_thing namespace_reverse_stackable_foo_bar]
-      expect(cloned_obj.namespace_reverse_stackable[:namespace_reverse_stackable_thing]).to eq [:namespace_reverse_stackable_foo_bar]
-    end
-
     it 'decouples route values' do
       expect(cloned_obj.route[:route_thing]).to eq :route_foo_bar
 
@@ -218,7 +219,7 @@ describe Grape::Util::InheritableSetting do
       subject.namespace[:namespace_thing] = :namespace_foo_bar
       subject.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
       subject.namespace_stackable[:namespace_stackable_thing] = [:namespace_stackable_foo_bar]
-      subject.namespace_reverse_stackable[:namespace_reverse_stackable_thing] = [:namespace_reverse_stackable_foo_bar]
+      subject.add_rescue_handlers({ StandardError => :handler }, subclasses: true)
       subject.route[:route_thing] = :route_foo_bar
       expect(subject.to_hash).to match(
         global: { global_thing: :global_foo_bar },
@@ -227,8 +228,7 @@ describe Grape::Util::InheritableSetting do
           namespace_inheritable_thing: :namespace_inheritable_foo_bar
         },
         namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] },
-        namespace_reverse_stackable:
-          { namespace_reverse_stackable_thing: [[:namespace_reverse_stackable_foo_bar], :namespace_reverse_stackable_foo_bar] },
+        namespace_reverse_stackable: { rescue_handlers: [{ StandardError => :handler }] },
         route: { route_thing: :route_foo_bar }
       )
     end

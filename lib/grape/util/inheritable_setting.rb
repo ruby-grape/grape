@@ -5,7 +5,7 @@ module Grape
     # A branchable, inheritable settings object which can store both stackable
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
-      attr_reader :route, :namespace, :namespace_inheritable, :namespace_stackable, :namespace_reverse_stackable, :parent
+      attr_reader :route, :namespace, :namespace_inheritable, :namespace_stackable, :parent
 
       # Lazy-allocated; +api_class+ and +point_in_time_copies+ are rarely
       # written on most settings layers, so don't pay for a Hash/Array each.
@@ -107,7 +107,27 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # Rescue-handler maps registered by +rescue_from+, keyed by exception
+      # class and merged so a nested scope's handler wins. Record them with
+      # #add_rescue_handlers; the backing store is an internal detail.
+      def rescue_handlers
+        merged_rescue_handlers(:rescue_handlers)
+      end
+
+      def base_only_rescue_handlers
+        merged_rescue_handlers(:base_only_rescue_handlers)
+      end
+
+      def add_rescue_handlers(mapping, subclasses:)
+        namespace_reverse_stackable[subclasses ? :rescue_handlers : :base_only_rescue_handlers] = mapping
+      end
+
       protected
+
+      # Reverse-stackable so a child scope's rescue handlers precede inherited
+      # ones. Reached only through #rescue_handlers / #base_only_rescue_handlers
+      # / #add_rescue_handlers, and #inherit_from / #copy_state_from.
+      attr_reader :namespace_reverse_stackable
 
       # Used by +point_in_time_copy+ to populate a freshly-built instance
       # with cloned state from another instance of the same class.
@@ -118,6 +138,15 @@ module Grape
         @namespace_reverse_stackable = source.namespace_reverse_stackable.clone
         @route = source.route.clone
         @api_class = source.api_class
+      end
+
+      private
+
+      def merged_rescue_handlers(key)
+        handlers = namespace_reverse_stackable[key]
+        return if handlers.blank?
+
+        handlers.each_with_object({}) { |handler, result| result.merge!(handler) { |_k, s1, _s2| s1 } }
       end
     end
   end
