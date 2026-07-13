@@ -58,8 +58,19 @@ module Grape
       private
 
       def rack_response(status, headers, message)
-        message = Rack::Utils.escape_html(message) if headers[Rack::CONTENT_TYPE] == 'text/html'
+        message = Rack::Utils.escape_html(message) if html_content_type?(headers[Rack::CONTENT_TYPE])
         Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
+      end
+
+      # Escaping must key off the media type only, case-insensitively. Comparing
+      # the raw header against 'text/html' would let a parameterized value such
+      # as 'text/html; charset=utf-8' (or a differently-cased 'Text/HTML', which
+      # browsers still treat as HTML) skip escaping and reflect an unescaped
+      # message into an HTML response. Such a header can be set from several
+      # places (a registered content type, or a custom Content-Type passed to
+      # error!/rescue_from), but they all render here.
+      def html_content_type?(content_type)
+        Grape::ContentTypes.media_type(content_type).to_s.casecmp?('text/html')
       end
 
       def format_message(error)

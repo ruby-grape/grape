@@ -13,8 +13,11 @@ module Grape
     def initialize
       @neutral_map = []
       @neutral_regexes = []
-      @map = Hash.new { |hash, key| hash[key] = [] }
-      @optimized_map = Hash.new { |hash, key| hash[key] = // }
+      # Plain hashes with no auto-vivifying default: a lookup for an HTTP method
+      # that has no routes must not insert a key. `compile!` freezes both maps,
+      # so request-time reads never mutate shared state (see #match? / #rotation).
+      @map = {}
+      @optimized_map = {}
     end
 
     def compile!
@@ -29,11 +32,13 @@ module Grape
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         @optimized_map[method] = Regexp.union(optimized_map)
       end
+      @map.freeze
+      @optimized_map.freeze
       @compiled = true
     end
 
     def append(route)
-      @map[route.request_method] << route
+      (@map[route.request_method] ||= []) << route
     end
 
     def associate_routes(greedy_route)
@@ -73,7 +78,7 @@ module Grape
 
     def rotation(input, method, env, exact_route)
       response = nil
-      @map[method].each do |route|
+      @map[method]&.each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
@@ -122,7 +127,7 @@ module Grape
     end
 
     def process_route(route, input, env, include_allow_header: false)
-      route_params = route.params(input)
+      route_params = route.params_for(input)
       env[Grape::Env::GRAPE_ROUTING_ARGS] ||= { route_info: route }
       env[Grape::Env::GRAPE_ROUTING_ARGS].merge!(route_params) if route_params.present?
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
@@ -139,7 +144,7 @@ module Grape
     end
 
     def match?(input, method)
-      @optimized_map[method].match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_index] } }
+      @optimized_map[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_index] } }
     end
 
     def greedy_match?(input)

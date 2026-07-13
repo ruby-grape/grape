@@ -75,4 +75,32 @@ describe Grape::ContentTypes do
       it { is_expected.to eq('application/xml' => :xml) }
     end
   end
+
+  describe '.media_type' do
+    subject { described_class.media_type(content_type) }
+
+    context 'with a bare media type' do
+      let(:content_type) { 'text/html' }
+
+      it { is_expected.to eq('text/html') }
+    end
+
+    context 'with parameters' do
+      let(:content_type) { 'text/html; charset=utf-8' }
+
+      it { is_expected.to eq('text/html') }
+    end
+
+    context 'with surrounding whitespace before the parameter separator' do
+      let(:content_type) { 'text/html ; charset=utf-8' }
+
+      it { is_expected.to eq('text/html') }
+    end
+
+    context 'when nil' do
+      let(:content_type) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
 end

@@ -64,6 +64,42 @@ RSpec.describe Grape::Router::Route do
     end
   end
 
+  describe 'params' do
+    let(:pattern) do
+      Grape::Router::Pattern.new(origin: '/users/:id', suffix: '', anchor: true,
+                                 params: { 'id' => { type: 'Integer' } }, version: nil, requirements: {})
+    end
+
+    describe '#params (declared definitions, no input)' do
+      subject(:route) do
+        described_class.new(endpoint, :get, pattern, options, forward_match: false,
+                                                              params: { 'id' => { required: true, type: 'Integer' } })
+      end
+
+      it 'merges the declared definitions over the path capture defaults' do
+        expect(route.params).to eq('id' => { required: true, type: 'Integer' })
+      end
+
+      it 'reads the params keyword, not the options Hash' do
+        route = described_class.new(endpoint, :get, pattern, { params: { 'ignored' => {} } },
+                                    forward_match: false, params: { 'id' => { required: true } })
+        expect(route.params).to eq('id' => { required: true })
+      end
+    end
+
+    describe '#params_for (extracted values, with input)' do
+      subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+      it 'extracts param values from a matched input path' do
+        expect(route.params_for('/users/7')).to eq(id: '7')
+      end
+
+      it 'returns nil when the input does not match' do
+        expect(route.params_for('/nope')).to be_nil
+      end
+    end
+  end
+
   describe '#match?' do
     subject { instance.match?(input) }
 

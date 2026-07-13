@@ -54,13 +54,19 @@ module Grape
     #   {#api}.
     # @param app [#call, nil] the Rack app or Grape API mounted at this
     #   endpoint; +nil+ for a plain block endpoint. Exposed as {#mounted_app}.
+    # @param params [Hash] the declared params for this endpoint, keyed by name.
+    #   Kept out of +route_options+ and read via +config.params+.
+    # @param requirements [Hash, nil] regular-expression constraints for named
+    #   path params. Read via +config.requirements+.
+    # @param anchor [Boolean] whether the route anchors to the whole path
+    #   (default +true+). Read via +config.anchor+.
     # @param options [Hash] attributes of this endpoint, normalized into a
     #   +Grape::Endpoint::Options+ value object.
     # @option options route_options [Hash]
     # @note This happens at the time of API definition, so in this context the
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
-    def initialize(new_settings, http_methods:, path:, api:, app: nil, **options, &block)
+    def initialize(new_settings, http_methods:, path:, api:, app: nil, params: {}, requirements: nil, anchor: true, **options, &block)
       self.inheritable_setting = new_settings.point_in_time_copy
 
       # now +namespace_stackable(:declared_params)+ contains all params defined for
@@ -73,7 +79,7 @@ module Grape
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
-      @config = Options.new(http_methods:, path:, api:, app:, **options)
+      @config = Options.new(http_methods:, path:, api:, app:, params:, requirements:, anchor:, **options)
       # +:app+ is still surfaced on the public options Hash for backwards
       # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
       @options[:app] = app if app
@@ -270,6 +276,7 @@ module Grape
 
     def compile!
       @app = config.app || build_stack
+      warn_unauthenticated_mounted_app
       @helpers = build_helpers
       stackable = inheritable_setting.namespace_stackable
       @befores            = stackable[:befores]
@@ -282,28 +289,36 @@ module Grape
 
     def to_routes
       route_options = config.route_options
+      params = config.params
       path_settings = prepare_default_path_settings
-      forward_match = config.app && !config.app.respond_to?(:inheritable_setting)
+      forward_match = bare_rack_app?
       version = prepare_version(inheritable_setting.namespace_inheritable[:version])
       prefix = inheritable_setting.namespace_inheritable[:root_prefix]
-      requirements = prepare_routes_requirements(route_options[:requirements])
-      anchor = route_options.fetch(:anchor, true)
+      requirements = prepare_routes_requirements(config.requirements)
+      anchor = config.anchor
       settings = inheritable_setting.route.except(:declared_params, :saved_validations)
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
-          prepared_path = Path.new(path, namespace, path_settings)
-          pattern = Grape::Router::Pattern.new(
-            origin: prepared_path.origin,
-            suffix: prepared_path.suffix,
+          pattern = Grape::Router::Pattern.build(
+            path:,
+            namespace:,
+            settings: path_settings,
             anchor:,
-            params: route_options[:params],
+            params:,
             version:,
             requirements:
           )
-          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, namespace:, prefix:, settings:)
+          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, params:, namespace:, prefix:, settings:)
         end
       end
+    end
+
+    # True when a bare Rack app (anything that isn't a Grape app) is mounted at
+    # this endpoint. Such an app is called directly and matched by path prefix
+    # rather than an anchored route.
+    def bare_rack_app?
+      config.app && !config.app.is_a?(Grape::Mountable)
     end
 
     def prepare_default_path_settings
@@ -369,8 +384,8 @@ module Grape
         default_error_formatter: ns_inh[:default_error_formatter],
         error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
         rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
-        rescue_handlers:,
-        base_only_rescue_handlers: ns_stack.namespace_stackable_with_hash(:base_only_rescue_handlers),
+        rescue_handlers: ns_stack.rescue_handlers,
+        base_only_rescue_handlers: ns_stack.base_only_rescue_handlers,
         all_rescue_handler: ns_inh[:all_rescue_handler],
         grape_exceptions_rescue_handler: ns_inh[:grape_exceptions_rescue_handler],
         internal_grape_exceptions_rescue_handler: ns_inh[:internal_grape_exceptions_rescue_handler]
@@ -384,6 +399,19 @@ module Grape
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
     end
 
+    # A bare Rack app mounted with +mount+ is called directly (see +compile!+):
+    # it does not go through +build_stack+, so the API's authentication
+    # middleware never runs and the mount is reachable unauthenticated. Mounted
+    # Grape APIs are unaffected because they rebuild their own stack from the
+    # inherited settings. Warn so this bypass isn't silent.
+    def warn_unauthenticated_mounted_app
+      return unless bare_rack_app?
+      return unless inheritable_setting.namespace_inheritable[:auth]
+
+      warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
+           'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'
+    end
+
     def build_response_cookies
       return unless request.cookies?
 
@@ -395,15 +423,6 @@ module Grape
 
     def lint?
       inheritable_setting.namespace_inheritable[:lint] || Grape.config.lint
-    end
-
-    def rescue_handlers
-      rescue_handlers = inheritable_setting.namespace_reverse_stackable[:rescue_handlers]
-      return if rescue_handlers.blank?
-
-      rescue_handlers.each_with_object({}) do |rescue_handler, result|
-        result.merge!(rescue_handler) { |_k, s1, _s2| s1 }
-      end
     end
   end
 end

@@ -13,11 +13,20 @@
 * [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
 * [#2787](https://github.com/ruby-grape/grape/pull/2787): Stop populating the write-only `namespace_setting(:description)` in `desc` - [@ericproulx](https://github.com/ericproulx).
+* [#2795](https://github.com/ruby-grape/grape/pull/2795): Make `Grape::Util::InheritableSetting#namespace_reverse_stackable` internal, exposing `rescue_handlers` / `base_only_rescue_handlers` / `add_rescue_handlers` instead - [@ericproulx](https://github.com/ericproulx).
+* [#2793](https://github.com/ruby-grape/grape/pull/2793): Add a `Grape::Mountable` marker to identify a Grape app instead of duck-typing on `respond_to?(:inheritable_setting)` - [@ericproulx](https://github.com/ericproulx).
+* [#2792](https://github.com/ruby-grape/grape/pull/2792): Move `Grape::Path` to `Grape::Router::Pattern::Path` and add a `Grape::Router::Pattern.build` factory (`Grape::Path` kept as a deprecated constant) - [@ericproulx](https://github.com/ericproulx).
+* [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
+* [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2794](https://github.com/ruby-grape/grape/pull/2794): Fix `rescue_from Klass, rescue_subclasses: false` never rescuing — base-only handlers were written to and read from different settings stores - [@ericproulx](https://github.com/ericproulx).
+* [#2789](https://github.com/ruby-grape/grape/pull/2789): Escape error messages served with a parameterized `text/html` content-type (e.g. `text/html; charset=utf-8`) and warn when a bare Rack app is mounted under authentication - [@ericproulx](https://github.com/ericproulx).
+* [#2790](https://github.com/ruby-grape/grape/pull/2790): Stop mutating `Grape::Router`'s internal maps at request time for HTTP methods with no routes (data race on JRuby/TruffleRuby and unbounded growth) - [@ericproulx](https://github.com/ericproulx).
+* [#2791](https://github.com/ruby-grape/grape/pull/2791): Build HEAD/OPTIONS/405 helper routes from a copy of the inheritable settings instead of temporarily mutating the shared class-level settings during compilation - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.2 (2026-07-05)
