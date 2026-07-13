@@ -152,7 +152,7 @@ module Grape
           refresh_already_mounted = opts.any? ? opts.first[:refresh_already_mounted] : false
           if refresh_already_mounted && !endpoints.empty?
             endpoints.delete_if do |endpoint|
-              endpoint.mounted_app.to_s == app.to_s
+              same_mounted_app?(endpoint.mounted_app, app)
             end
           end
 
@@ -292,6 +292,18 @@ module Grape
       def refresh_mounted_api(mounts, *opts)
         opts << { refresh_already_mounted: true }
         mount(mounts, *opts)
+      end
+
+      # Two mounts refer to the same app when they share the same base Grape
+      # API. +mount+ turns every mounted Grape API into a throwaway
+      # +mount_instance+ (a fresh +Class.new+ per mount), so object identity
+      # never holds across mounts; comparing the base is the real signal.
+      # Plain Rack apps have no base and are mounted as-is, so they fall back
+      # to object identity.
+      def same_mounted_app?(mounted, app)
+        return mounted.base.equal?(app.base) if mounted.respond_to?(:base) && app.respond_to?(:base)
+
+        mounted.equal?(app)
       end
 
       # Execute first the provided block, then each of the

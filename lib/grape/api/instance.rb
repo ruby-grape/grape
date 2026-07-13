@@ -27,6 +27,8 @@ module Grape
 
         def_delegators :@base, :to_s
 
+        attr_reader :base
+
         def base=(grape_api)
           @base = grape_api
           grape_api.instances << self
