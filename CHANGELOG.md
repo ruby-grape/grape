@@ -12,6 +12,7 @@
 * [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
 * [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
 * [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
+* [#2787](https://github.com/ruby-grape/grape/pull/2787): Stop populating the write-only `namespace_setting(:description)` in `desc` - [@ericproulx](https://github.com/ericproulx).
 * [#2795](https://github.com/ruby-grape/grape/pull/2795): Make `Grape::Util::InheritableSetting#namespace_reverse_stackable` internal, exposing `rescue_handlers` / `base_only_rescue_handlers` / `add_rescue_handlers` instead - [@ericproulx](https://github.com/ericproulx).
 * [#2793](https://github.com/ruby-grape/grape/pull/2793): Add a `Grape::Mountable` marker to identify a Grape app instead of duck-typing on `respond_to?(:inheritable_setting)` - [@ericproulx](https://github.com/ericproulx).
 * [#2792](https://github.com/ruby-grape/grape/pull/2792): Move `Grape::Path` to `Grape::Router::Pattern::Path` and add a `Grape::Router::Pattern.build` factory (`Grape::Path` kept as a deprecated constant) - [@ericproulx](https://github.com/ericproulx).

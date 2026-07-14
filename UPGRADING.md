@@ -60,6 +60,9 @@ The `:format` member was removed from the endpoint's internal `Options`. Nothing
 
 `Grape::Router::Pattern#initialize` no longer accepts `format:` either. It was never given a non-`nil` value — a route's `:format` capture comes from the path suffix built by `Grape::Path`, not from the pattern — so the keyword was dead. `Grape::Router::Pattern.new(..., format: …)` now raises `unknown keyword: :format`.
 
+#### `desc` no longer populates `namespace_setting(:description)`
+
+`desc` used to store its settings under both the route scope (`route_setting(:description)`) and the namespace scope (`namespace_setting(:description)`). The namespace copy was write-only — the namespace scope isn't wired for inheritance and nothing in Grape or grape-swagger ever read it — so `desc` now writes only the route scope. `namespace_setting(:description)` returns `nil`; read a route's description through `route_setting(:description)` or the `route.description` reader.
 #### `Grape::Router::Route#params` no longer takes an argument
 
 `Route#params` used to do two jobs depending on its argument: `route.params(input)` extracted param values from a matched request path, while `route.params` (no argument) returned the route's declared param definitions. These are now separate methods:
