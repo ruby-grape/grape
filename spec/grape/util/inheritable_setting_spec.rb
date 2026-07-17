@@ -52,16 +52,6 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
-  describe '#api_class' do
-    it 'is specific to the class' do
-      subject.api_class[:some_thing] = :foo_bar
-      parent.api_class[:some_thing] = :some_thing
-
-      expect(subject.api_class[:some_thing]).to eq :foo_bar
-      expect(parent.api_class[:some_thing]).to eq :some_thing
-    end
-  end
-
   describe '#namespace' do
     it 'sets a value until the end of a namespace' do
       subject.namespace[:some_thing] = :foo_bar
@@ -150,13 +140,6 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
-  describe '#api_class' do
-    it 'is specific to the class' do
-      subject.api_class[:some_thing] = :foo_bar
-      expect(subject.api_class[:some_thing]).to eq :foo_bar
-    end
-  end
-
   describe '#inherit_from' do
     it 'notifies clones' do
       new_settings = subject.point_in_time_copy
@@ -169,8 +152,8 @@ describe Grape::Util::InheritableSetting do
   describe '#point_in_time_copy' do
     let!(:cloned_obj) { subject.point_in_time_copy }
 
-    it 'resets point_in_time_copies' do
-      expect(cloned_obj.point_in_time_copies).to be_empty
+    it 'does not carry over the list of registered clones' do
+      expect(cloned_obj.instance_variable_get(:@point_in_time_copies)).to be_nil
     end
 
     it 'decouples namespace values' do
@@ -209,7 +192,7 @@ describe Grape::Util::InheritableSetting do
     end
 
     it 'adds itself to original as clone' do
-      expect(subject.point_in_time_copies).to include(cloned_obj)
+      expect(subject.instance_variable_get(:@point_in_time_copies)).to include(cloned_obj)
     end
   end
 

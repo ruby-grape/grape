@@ -83,7 +83,7 @@ module Grape
           # Propagate any inherited params down to our endpoints, and reset any
           # compiled routes.
           endpoints.each do |e|
-            e.inherit_settings(top_level_setting.namespace_stackable)
+            e.inherit_settings(top_level_setting)
             e.reset_routes!
           end
 

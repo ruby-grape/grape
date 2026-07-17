@@ -152,7 +152,7 @@ describe Grape::DSL::Routing do
 
     it 'generates correct endpoint options' do
       subject.inheritable_setting.route[:description] = { fiz: 'baz' }
-      subject.inheritable_setting.namespace_stackable[:params] = { nuz: 'naz' }
+      subject.inheritable_setting.add_params_documentation({ nuz: 'naz' })
 
       expect(Grape::Endpoint).to receive(:new) do |_inheritable_setting, endpoint_options|
         expect(endpoint_options[:http_methods]).to eq :get

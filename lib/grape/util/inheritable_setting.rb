@@ -7,16 +7,6 @@ module Grape
     class InheritableSetting
       attr_reader :route, :namespace, :namespace_inheritable, :namespace_stackable, :parent
 
-      # Lazy-allocated; +api_class+ and +point_in_time_copies+ are rarely
-      # written on most settings layers, so don't pay for a Hash/Array each.
-      def api_class
-        @api_class ||= {}
-      end
-
-      def point_in_time_copies
-        @point_in_time_copies ||= []
-      end
-
       # Retrieve global settings.
       def self.global
         @global ||= {}
@@ -39,7 +29,7 @@ module Grape
         @namespace_inheritable = InheritableValues.new
         @namespace_stackable = StackableValues.new
         @parent = nil
-        # @api_class, @point_in_time_copies and @rescue_handler_maps stay nil until first access.
+        @point_in_time_copies = nil
       end
 
       # Return the class-level global properties.
@@ -69,10 +59,23 @@ module Grape
       # which were made.
       def point_in_time_copy
         new_setting = self.class.new
-        point_in_time_copies << new_setting
+        (@point_in_time_copies ||= []) << new_setting
         new_setting.copy_state_from(self)
         new_setting.inherit_from(parent)
         new_setting
+      end
+
+      # Fork a point-in-time copy prepared for a freshly-built endpoint: the
+      # declared params and validations accumulated by the surrounding scopes
+      # are snapshotted into the copy's per-route settings, since the
+      # namespace stacks are wiped between routes (see #reset_validations!),
+      # and request-serving defaults are applied.
+      def point_in_time_copy_for_endpoint
+        copy = point_in_time_copy
+        copy.route[:declared_params] = copy.declared_params.flatten
+        copy.route[:validations] = copy.validations.dup
+        copy.namespace_inheritable[:default_error_status] ||= 500
+        copy
       end
 
       # Resets the instance store of per-route settings.
@@ -104,6 +107,60 @@ module Grape
         return if data.blank?
 
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
+
+      # Validator instances registered by +params+ and +contract+ blocks,
+      # outermost scope first. Record them with #add_validation; the backing
+      # store is an internal detail.
+      def validations
+        namespace_stackable[:validations]
+      end
+
+      def add_validation(validator)
+        namespace_stackable[:validations] = validator
+      end
+
+      # Declared-params entries registered by +params+ blocks, one Array per
+      # scope, outermost scope first. Record them with #add_declared_params;
+      # the backing store is an internal detail.
+      def declared_params
+        namespace_stackable[:declared_params]
+      end
+
+      def add_declared_params(params)
+        namespace_stackable[:declared_params] = params
+      end
+
+      # Param documentation recorded by +params+ blocks (see
+      # Validations::ParamsDocumentation) as one attribute-name => details
+      # Hash per scope, deep-merged on read; nil when nothing is documented.
+      # Record entries with #add_params_documentation; the backing store is
+      # an internal detail.
+      def params_documentation
+        namespace_stackable_with_hash(:params)
+      end
+
+      def add_params_documentation(documented_attrs)
+        namespace_stackable[:params] = documented_attrs
+      end
+
+      # Drops this scope's own validations, declared params and params
+      # documentation once an endpoint has consumed them (see
+      # +reset_validations!+ in DSL::Validations). Inherited entries are kept.
+      def reset_validations!
+        namespace_stackable.delete(:declared_params, :params, :validations)
+      end
+
+      # Reusable +params :name do ... end+ blocks defined in helpers, as one
+      # name => block Hash per scope, deep-merged on read; nil when none are
+      # defined. Consumed by +use+. Record entries with #add_named_params;
+      # the backing store is an internal detail.
+      def named_params
+        namespace_stackable_with_hash(:named_params)
+      end
+
+      def add_named_params(named_params)
+        namespace_stackable[:named_params] = named_params
       end
 
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
@@ -150,7 +207,6 @@ module Grape
         @namespace_stackable = source.namespace_stackable.clone
         @rescue_handler_maps = source.rescue_handler_maps&.dup
         @route = source.route.clone
-        @api_class = source.api_class
       end
     end
   end

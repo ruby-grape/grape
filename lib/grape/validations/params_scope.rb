@@ -316,7 +316,7 @@ module Grape
         push_renamed_param(full_path, @element_renamed) if @element_renamed
         return @parent.push_declared_params [{ @element => @declared_params }] if nested?
 
-        @api.inheritable_setting.namespace_stackable[:declared_params] = @declared_params
+        @api.inheritable_setting.add_declared_params(@declared_params)
       ensure
         @declared_params = nil
       end
@@ -400,7 +400,7 @@ module Grape
           self,
           opts
         )
-        @api.inheritable_setting.namespace_stackable[:validations] = validator_instance
+        @api.inheritable_setting.add_validation(validator_instance)
       end
 
       def all_element_blank?(scoped_params)

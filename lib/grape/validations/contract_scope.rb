@@ -21,7 +21,7 @@ module Grape
         end
 
         api.inheritable_setting.namespace_stackable[:contract_key_map] = key_map
-        api.inheritable_setting.namespace_stackable[:validations] = Validators::ContractScopeValidator.new(schema: contract)
+        api.inheritable_setting.add_validation(Validators::ContractScopeValidator.new(schema: contract))
       end
     end
   end

@@ -273,7 +273,7 @@ module Grape
       # Compose a route's params: the declared params (+params do … end+) deep-merged
       # with any documented alongside +desc ..., params:+ (+description_params+).
       def prepare_params(description_params)
-        endpoint_params = inheritable_setting.namespace_stackable_with_hash(:params) || {}
+        endpoint_params = inheritable_setting.params_documentation || {}
         return endpoint_params if description_params.blank?
 
         endpoint_params.deep_merge(description_params)

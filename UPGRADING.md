@@ -82,6 +82,16 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Params state is recorded through `InheritableSetting` accessors
+
+The state accumulated by `params` / `contract` blocks — validator instances, declared params, param documentation and reusable named params — is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`validations` / `add_validation`, `declared_params` / `add_declared_params`, `params_documentation` / `add_params_documentation`, `named_params` / `add_named_params`, `reset_validations!`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:validations]` and friends still return the same values, but they should be considered internal.
+
+Related contract changes, none with known external consumers:
+
+* `Grape::Endpoint#inherit_settings` now takes the parent `Grape::Util::InheritableSetting` instead of that setting's raw `namespace_stackable` store.
+* The endpoint's request-time validator snapshot moved from `route_setting(:saved_validations)` to `route_setting(:validations)`, symmetric with `route_setting(:declared_params)`. The vestigial `saved_` prefix dated back to the 2014 settings refactor. Neither key appears in `route.settings`, as before.
+* `Grape::Util::InheritableSetting#api_class` (a Hash nothing in Grape ever wrote to) and `#point_in_time_copies` (only ever used internally) are removed.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

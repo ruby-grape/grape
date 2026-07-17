@@ -11,7 +11,7 @@ module Grape
         documented_attrs = attrs.to_h do |name|
           [full_name(name), extract_details(spec)]
         end
-        @api.inheritable_setting.namespace_stackable[:params] = documented_attrs
+        @api.inheritable_setting.add_params_documentation(documented_attrs)
       end
 
       private

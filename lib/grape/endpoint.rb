@@ -67,16 +67,7 @@ module Grape
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
     def initialize(new_settings, http_methods:, path:, api:, app: nil, params: {}, requirements: nil, anchor: true, **options, &block)
-      self.inheritable_setting = new_settings.point_in_time_copy
-
-      # now +namespace_stackable(:declared_params)+ contains all params defined for
-      # this endpoint and its parents, but later it will be cleaned up,
-      # see +reset_validations!+ in lib/grape/dsl/validations.rb
-      inheritable_setting.route[:declared_params] = inheritable_setting.namespace_stackable[:declared_params].flatten
-      inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations].dup
-
-      inheritable_setting.namespace_stackable[:representations] ||= []
-      inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
+      self.inheritable_setting = new_settings.point_in_time_copy_for_endpoint
 
       @options = options
       @config = Options.new(http_methods:, path:, api:, app:, params:, requirements:, anchor:, **options)
@@ -93,15 +84,16 @@ module Grape
       @endpoints = @config.app.endpoints if @config.app.respond_to?(:endpoints)
     end
 
-    # Update our settings from a given set of stackable parameters. Used when
+    # Update our settings from a given parent settings instance. Used when
     # the endpoint's API is mounted under another one.
-    def inherit_settings(namespace_stackable)
-      parent_validations = namespace_stackable[:validations]
-      inheritable_setting.route[:saved_validations].concat(parent_validations) if parent_validations.any?
-      parent_declared_params = namespace_stackable[:declared_params]
+    # @param settings [Grape::Util::InheritableSetting]
+    def inherit_settings(settings)
+      parent_validations = settings.validations
+      inheritable_setting.route[:validations].concat(parent_validations) if parent_validations.any?
+      parent_declared_params = settings.declared_params
       inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
 
-      endpoints&.each { |e| e.inherit_settings(namespace_stackable) }
+      endpoints&.each { |e| e.inherit_settings(settings) }
     end
 
     def routes
@@ -209,7 +201,7 @@ module Grape
     end
 
     def run_validators(request:)
-      validators = inheritable_setting.route[:saved_validations]
+      validators = inheritable_setting.route[:validations]
       return if validators.blank?
 
       validation_exceptions = nil
@@ -296,7 +288,7 @@ module Grape
       prefix = inheritable_setting.namespace_inheritable[:root_prefix]
       requirements = prepare_routes_requirements(config.requirements)
       anchor = config.anchor
-      settings = inheritable_setting.route.except(:declared_params, :saved_validations)
+      settings = inheritable_setting.route.except(:declared_params, :validations)
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|
