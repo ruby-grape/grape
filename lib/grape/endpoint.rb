@@ -377,8 +377,8 @@ module Grape
         default_error_formatter: ns_inh[:default_error_formatter],
         error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
         rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
-        rescue_handlers:,
-        base_only_rescue_handlers:,
+        rescue_handlers: merged_reverse_stackable(:rescue_handlers),
+        base_only_rescue_handlers: merged_reverse_stackable(:base_only_rescue_handlers),
         all_rescue_handler: ns_inh[:all_rescue_handler],
         grape_exceptions_rescue_handler: ns_inh[:grape_exceptions_rescue_handler],
         internal_grape_exceptions_rescue_handler: ns_inh[:internal_grape_exceptions_rescue_handler]
@@ -416,14 +416,6 @@ module Grape
 
     def lint?
       inheritable_setting.namespace_inheritable[:lint] || Grape.config.lint
-    end
-
-    def rescue_handlers
-      merged_reverse_stackable(:rescue_handlers)
-    end
-
-    def base_only_rescue_handlers
-      merged_reverse_stackable(:base_only_rescue_handlers)
     end
 
     # Merge a reverse-stackable handler map (as written by +rescue_from+) into a

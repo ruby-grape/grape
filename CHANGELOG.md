@@ -1,35 +1,17 @@
-### 4.0.0 (Next)
-
-#### Features
-
-* [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
-* [#2774](https://github.com/ruby-grape/grape/pull/2774): Make `forward_match` an internal kwarg instead of a route option - [@ericproulx](https://github.com/ericproulx).
-* [#2775](https://github.com/ruby-grape/grape/pull/2775): Pass `http_methods` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
-* [#2776](https://github.com/ruby-grape/grape/pull/2776): Pass `path` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
-* [#2777](https://github.com/ruby-grape/grape/pull/2777): Add `Grape::Endpoint#mounted_app` reader and `app:` keyword - [@ericproulx](https://github.com/ericproulx).
-* [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
-* [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments, and drop the unused `Grape::Endpoint::Options` `format` member - [@ericproulx](https://github.com/ericproulx).
-* [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
-* [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
-* [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
-* [#2793](https://github.com/ruby-grape/grape/pull/2793): Add a `Grape::Mountable` marker to identify a Grape app instead of duck-typing on `respond_to?(:inheritable_setting)` - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
+### 3.3.3 (2026-07-17)
 
 #### Fixes
 
-* [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2794](https://github.com/ruby-grape/grape/pull/2794): Fix `rescue_from Klass, rescue_subclasses: false` never rescuing — base-only handlers were written to and read from different settings stores - [@ericproulx](https://github.com/ericproulx).
 * [#2789](https://github.com/ruby-grape/grape/pull/2789): Escape error messages served with a parameterized `text/html` content-type (e.g. `text/html; charset=utf-8`) and warn when a bare Rack app is mounted under authentication - [@ericproulx](https://github.com/ericproulx).
 * [#2790](https://github.com/ruby-grape/grape/pull/2790): Stop mutating `Grape::Router`'s internal maps at request time for HTTP methods with no routes (data race on JRuby/TruffleRuby and unbounded growth) - [@ericproulx](https://github.com/ericproulx).
 * [#2791](https://github.com/ruby-grape/grape/pull/2791): Build HEAD/OPTIONS/405 helper routes from a copy of the inheritable settings instead of temporarily mutating the shared class-level settings during compilation - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.3.2 (2026-07-05)
 
 #### Fixes
 
 * [#2773](https://github.com/ruby-grape/grape/pull/2773): Fix middleware build crash when a top-level `::Options` constant is in scope - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.3.1 (2026-06-28)
 

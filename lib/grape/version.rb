@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
 module Grape
-  # The current version of Grape.
-  VERSION = '3.3.2'
+  VERSION = '3.3.3'
 end
