@@ -58,14 +58,14 @@ describe Grape::DSL::Routing do
   describe '.do_not_route_head!' do
     it 'sets do not route head option' do
       subject.do_not_route_head!
-      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_head]).to be(true)
+      expect(subject.inheritable_setting.do_not_route_head?).to be(true)
     end
   end
 
   describe '.do_not_route_options!' do
     it 'sets do not route options option' do
       subject.do_not_route_options!
-      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_options]).to be(true)
+      expect(subject.inheritable_setting.do_not_route_options?).to be(true)
     end
   end
 

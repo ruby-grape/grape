@@ -107,20 +107,20 @@ module Grape
 
       # Do not route HEAD requests to GET requests automatically.
       def do_not_route_head!
-        inheritable_setting.namespace_inheritable[:do_not_route_head] = true
+        inheritable_setting.do_not_route_head!
       end
 
       # Do not automatically route OPTIONS.
       def do_not_route_options!
-        inheritable_setting.namespace_inheritable[:do_not_route_options] = true
+        inheritable_setting.do_not_route_options!
       end
 
       def lint!
-        inheritable_setting.namespace_inheritable[:lint] = true
+        inheritable_setting.lint!
       end
 
       def do_not_document!
-        inheritable_setting.namespace_inheritable[:do_not_document] = true
+        inheritable_setting.do_not_document!
       end
 
       def mount(mounts, *opts)

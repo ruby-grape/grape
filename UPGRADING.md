@@ -134,6 +134,9 @@ The nearest-wins scalars written by the `format`, `default_format`, `default_err
 #### Versioning state is recorded through `InheritableSetting` accessors
 
 The nearest-wins scalars written by the `version`, `prefix` and `cascade` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`version` / `version=`, `version_options` / `version_options=`, `root_prefix` / `root_prefix=`, `cascade` / `cascade=`) instead of raw `namespace_inheritable` keys. `cascade` is presence-sensitive — an explicit `nil` is distinct from never-set — so the accessor family includes `cascade_defined?`, absorbing the `namespace_inheritable.key?(:cascade)` checks previously spelled out in `DSL::Routing#cascade` and `Grape::API::Instance#cascade?`. The keys' storage is unchanged for now, so `namespace_inheritable[:version]` and friends still return the same values, but they should be considered internal.
+#### Routing scope flags are recorded through `InheritableSetting` accessors
+
+The flags flipped by `do_not_route_head!`, `do_not_route_options!`, `do_not_document!` and `lint!` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`!` writers, `?` readers) instead of raw `namespace_inheritable` keys. The `?` readers return `false` (rather than `nil`) when never set; every consumer only used them in boolean context, so behavior is unchanged. The keys' storage is unchanged for now, so `namespace_inheritable[:do_not_route_head]` and friends still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 

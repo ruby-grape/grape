@@ -455,6 +455,43 @@ module Grape
         namespace_inheritable.key?(:cascade)
       end
 
+      # Scope flags flipped by the routing DSL's bang methods (see
+      # DSL::Routing#do_not_route_head! and friends; Validations::OneofCollector
+      # also flips +do_not_document!+): once set in a scope they apply to it
+      # and everything nested under it. Readers return false when never set;
+      # the backing store is an internal detail.
+      def do_not_route_head!
+        namespace_inheritable[:do_not_route_head] = true
+      end
+
+      def do_not_route_head?
+        namespace_inheritable[:do_not_route_head] == true
+      end
+
+      def do_not_route_options!
+        namespace_inheritable[:do_not_route_options] = true
+      end
+
+      def do_not_route_options?
+        namespace_inheritable[:do_not_route_options] == true
+      end
+
+      def do_not_document!
+        namespace_inheritable[:do_not_document] = true
+      end
+
+      def do_not_document?
+        namespace_inheritable[:do_not_document] == true
+      end
+
+      def lint!
+        namespace_inheritable[:lint] = true
+      end
+
+      def lint?
+        namespace_inheritable[:lint] == true
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

@@ -30,6 +30,7 @@
 * [#2804](https://github.com/ruby-grape/grape/pull/2804): Internalize contract key maps behind `Grape::Util::InheritableSetting` accessors (`contract_key_maps` / `add_contract_key_map`) - [@ericproulx](https://github.com/ericproulx).
 * [#2805](https://github.com/ruby-grape/grape/pull/2805): Internalize format and error-response defaults behind `Grape::Util::InheritableSetting` accessors (`format`, `default_format`, `default_error_formatter`, `default_error_status`) - [@ericproulx](https://github.com/ericproulx).
 * [#2806](https://github.com/ruby-grape/grape/pull/2806): Internalize versioning state behind `Grape::Util::InheritableSetting` accessors (`version`, `version_options`, `root_prefix`, `cascade` / `cascade_defined?`) - [@ericproulx](https://github.com/ericproulx).
+* [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
