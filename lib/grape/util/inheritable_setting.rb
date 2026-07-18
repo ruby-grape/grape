@@ -106,6 +106,32 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # The params-builder strategy set by +build_with+ (both the
+      # API-level DSL::Routing#build_with and the params-block
+      # DSL::Parameters#build_with write it), consumed when the endpoint
+      # builds its Grape::Request. Nearest-wins scalar; nil when never set;
+      # the backing store is an internal detail.
+      def build_params_with
+        namespace_inheritable[:build_params_with]
+      end
+
+      def build_params_with=(strategy)
+        namespace_inheritable[:build_params_with] = strategy
+      end
+
+      # The authentication configuration Hash recorded by the +auth+ DSL
+      # (see Middleware::Auth::DSL): {type:, proc:, **options}. Nearest-wins
+      # scalar; nil when no authenticator is declared — Endpoint uses that
+      # to warn about unauthenticated bare Rack mounts; the backing store is
+      # an internal detail.
+      def auth
+        namespace_inheritable[:auth]
+      end
+
+      def auth=(auth_options)
+        namespace_inheritable[:auth] = auth_options
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

@@ -284,7 +284,7 @@ module Grape
       @after_validations  = stackable[:after_validations]
       @afters             = stackable[:afters]
       @finallies          = stackable[:finallies]
-      @build_params_with  = inheritable_setting.namespace_inheritable[:build_params_with]
+      @build_params_with  = inheritable_setting.build_params_with
     end
 
     def to_routes
@@ -406,7 +406,7 @@ module Grape
     # inherited settings. Warn so this bypass isn't silent.
     def warn_unauthenticated_mounted_app
       return unless bare_rack_app?
-      return unless inheritable_setting.namespace_inheritable[:auth]
+      return unless inheritable_setting.auth
 
       warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
            'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'
