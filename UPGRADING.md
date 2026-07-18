@@ -111,6 +111,11 @@ The state written by the `content_type`, `format`, `formatter`, `parser` and `er
 The model-class => entity-class registrations written by `represent` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`representations` / `add_representation(model_class, entity_class)`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged Hash (nearest scope wins) or `nil` when nothing is registered. The key's storage is unchanged for now, so `namespace_stackable[:representations]` still returns the same values, but it should be considered internal.
 
 Also removed: the `namespace_stackable[:representations] ||= []` line in `Grape::Endpoint#initialize`. It was provably inert — `Grape::Util::StackableValues#[]` always returns an array (a frozen empty one for never-written keys), which is truthy, so the `||=` assignment could never execute. No settings state changes as a result.
+#### Middleware and helper registrations are recorded through `InheritableSetting` accessors
+
+The state written by the middleware DSL (`use`, `insert`, `insert_before`, `insert_after`) and by `helpers` is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`middleware` / `add_middleware`, `helpers` / `add_helper`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:middleware]` and `namespace_stackable[:helpers]` still return the same values, but they should be considered internal.
+
+One micro-change: the `middleware` DSL reader dropped its `|| []` fallback — `Grape::Util::StackableValues#[]` never returns `nil`, so the fallback was dead code. When no middleware is registered the reader now returns the shared frozen empty array instead of a fresh mutable one; no caller in Grape or grape-swagger mutates the returned array.
 
 ### Upgrading to >= 3.3
 

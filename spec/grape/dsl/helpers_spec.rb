@@ -9,7 +9,7 @@ describe Grape::DSL::Helpers do
       extend Grape::DSL::Settings
 
       def self.mods
-        inheritable_setting.namespace_stackable[:helpers]
+        inheritable_setting.helpers
       end
 
       def self.first_mod

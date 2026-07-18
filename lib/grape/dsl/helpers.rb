@@ -52,12 +52,12 @@ module Grape
       def make_inclusion(mod, &)
         define_boolean_in_mod(mod)
         inject_api_helpers_to_mod(mod, &)
-        inheritable_setting.namespace_stackable[:helpers] = mod
+        inheritable_setting.add_helper(mod)
       end
 
       def include_all_in_scope
         mod = Module.new
-        namespace_stackable(:helpers).each { |mod_to_include| mod.include mod_to_include }
+        inheritable_setting.helpers.each { |mod_to_include| mod.include mod_to_include }
         change!
         mod
       end

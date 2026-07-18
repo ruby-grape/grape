@@ -25,6 +25,7 @@
 * [#2799](https://github.com/ruby-grape/grape/pull/2799): Internalize the remaining rescue configuration (`rescue_options`, meta-selector handlers and flags) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * [#2800](https://github.com/ruby-grape/grape/pull/2800): Internalize content negotiation state (content types, formatters, parsers, error formatters) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * [#2801](https://github.com/ruby-grape/grape/pull/2801): Internalize `represent` registrations behind `Grape::Util::InheritableSetting` accessors (`representations` / `add_representation`), and remove the inert `:representations` seeding in `Grape::Endpoint#initialize` - [@ericproulx](https://github.com/ericproulx).
+* [#2802](https://github.com/ruby-grape/grape/pull/2802): Internalize middleware and helper registrations behind `Grape::Util::InheritableSetting` accessors (`middleware` / `add_middleware`, `helpers` / `add_helper`) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

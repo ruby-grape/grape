@@ -292,6 +292,30 @@ module Grape
         namespace_stackable[:representations] = { model_class => entity_class }
       end
 
+      # Middleware specs recorded by the middleware DSL (+use+, +insert+,
+      # +insert_before+, +insert_after+; see DSL::Middleware), one
+      # [operation, *arguments] Array per registration, outermost scope
+      # first. Record them with #add_middleware; the backing store is an
+      # internal detail.
+      def middleware
+        namespace_stackable[:middleware]
+      end
+
+      def add_middleware(operation_with_arguments)
+        namespace_stackable[:middleware] = operation_with_arguments
+      end
+
+      # Helper modules registered by +helpers+ blocks and modules (see
+      # DSL::Helpers), outermost scope first. Record them with #add_helper;
+      # the backing store is an internal detail.
+      def helpers
+        namespace_stackable[:helpers]
+      end
+
+      def add_helper(mod)
+        namespace_stackable[:helpers] = mod
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.
