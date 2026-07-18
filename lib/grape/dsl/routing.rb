@@ -16,9 +16,9 @@ module Grape
       end
 
       def cascade(value = nil)
-        return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable[:cascade].nil? : true if value.nil?
+        return inheritable_setting.cascade_defined? ? !inheritable_setting.cascade.nil? : true if value.nil?
 
-        inheritable_setting.namespace_inheritable[:cascade] = value
+        inheritable_setting.cascade = value
       end
 
       # Specify an API version.
@@ -72,13 +72,13 @@ module Grape
 
         if block
           within_namespace do
-            inheritable_setting.namespace_inheritable[:version] = requested_versions
-            inheritable_setting.namespace_inheritable[:version_options] = options
+            inheritable_setting.version = requested_versions
+            inheritable_setting.version_options = options
             instance_eval(&block)
           end
         else
-          inheritable_setting.namespace_inheritable[:version] = requested_versions
-          inheritable_setting.namespace_inheritable[:version_options] = options
+          inheritable_setting.version = requested_versions
+          inheritable_setting.version_options = options
         end
 
         @versions&.last
@@ -86,9 +86,9 @@ module Grape
 
       # Define a root URL prefix for your entire API.
       def prefix(prefix = nil)
-        return inheritable_setting.namespace_inheritable[:root_prefix] if prefix.nil?
+        return inheritable_setting.root_prefix if prefix.nil?
 
-        inheritable_setting.namespace_inheritable[:root_prefix] = prefix.to_s
+        inheritable_setting.root_prefix = prefix.to_s
       end
 
       # Create a scope without affecting the URL.

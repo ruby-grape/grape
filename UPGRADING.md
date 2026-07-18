@@ -131,6 +131,9 @@ The Dry::Schema key maps registered by `contract` blocks are now recorded and re
 #### Format and error-response defaults are recorded through `InheritableSetting` accessors
 
 The nearest-wins scalars written by the `format`, `default_format`, `default_error_formatter` and `default_error_status` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`format` / `format=`, `default_format` / `default_format=`, `default_error_formatter` / `default_error_formatter=`, `default_error_status` / `default_error_status=`) instead of raw `namespace_inheritable` keys — the first batch of the `namespace_inheritable` cleanup, following the pattern used for `namespace_stackable`. Since these are overriding assignments rather than stacking registrations, the writers use plain `=` instead of the `add_*` naming. The keys' storage is unchanged for now, so `namespace_inheritable[:format]` and friends still return the same values, but they should be considered internal.
+#### Versioning state is recorded through `InheritableSetting` accessors
+
+The nearest-wins scalars written by the `version`, `prefix` and `cascade` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`version` / `version=`, `version_options` / `version_options=`, `root_prefix` / `root_prefix=`, `cascade` / `cascade=`) instead of raw `namespace_inheritable` keys. `cascade` is presence-sensitive — an explicit `nil` is distinct from never-set — so the accessor family includes `cascade_defined?`, absorbing the `namespace_inheritable.key?(:cascade)` checks previously spelled out in `DSL::Routing#cascade` and `Grape::API::Instance#cascade?`. The keys' storage is unchanged for now, so `namespace_inheritable[:version]` and friends still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 
