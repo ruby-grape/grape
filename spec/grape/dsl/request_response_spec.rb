@@ -36,14 +36,14 @@ describe Grape::DSL::RequestResponse do
   describe '.formatter' do
     it 'sets the formatter for a content type' do
       subject.formatter c_type, :formatter
-      expect(subject.inheritable_setting.namespace_stackable[:formatters]).to eq([{ c_type.to_sym => :formatter }])
+      expect(subject.inheritable_setting.formatters).to eq(c_type.to_sym => :formatter)
     end
   end
 
   describe '.parser' do
     it 'sets a parser for a content type' do
       subject.parser c_type, :parser
-      expect(subject.inheritable_setting.namespace_stackable[:parsers]).to eq([{ c_type.to_sym => :parser }])
+      expect(subject.inheritable_setting.parsers).to eq(c_type.to_sym => :parser)
     end
   end
 
@@ -58,19 +58,19 @@ describe Grape::DSL::RequestResponse do
     it 'sets a error_formatter' do
       format = 'txt'
       subject.error_formatter format, :error_formatter
-      expect(subject.inheritable_setting.namespace_stackable[:error_formatters]).to eq([{ format.to_sym => :error_formatter }])
+      expect(subject.inheritable_setting.error_formatters).to eq(format.to_sym => :error_formatter)
     end
 
     it 'understands syntactic sugar' do
       subject.error_formatter format, with: :error_formatter
-      expect(subject.inheritable_setting.namespace_stackable[:error_formatters]).to eq([{ format.to_sym => :error_formatter }])
+      expect(subject.inheritable_setting.error_formatters).to eq(format.to_sym => :error_formatter)
     end
   end
 
   describe '.content_type' do
     it 'sets a content type for a format' do
       subject.content_type format, c_type
-      expect(subject.inheritable_setting.namespace_stackable[:content_types]).to eq([{ format.to_sym => c_type }])
+      expect(subject.inheritable_setting.content_types).to eq(format.to_sym => c_type)
     end
   end
 

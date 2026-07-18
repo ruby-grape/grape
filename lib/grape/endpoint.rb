@@ -342,7 +342,7 @@ module Grape
     def build_stack
       stack = Grape::Middleware::Stack.new
 
-      content_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
+      content_types = inheritable_setting.content_types
       format = inheritable_setting.namespace_inheritable[:format]
 
       stack.use Rack::Head
@@ -364,8 +364,8 @@ module Grape
                 format:,
                 default_format: inheritable_setting.namespace_inheritable[:default_format] || :txt,
                 content_types:,
-                formatters: inheritable_setting.namespace_stackable_with_hash(:formatters),
-                parsers: inheritable_setting.namespace_stackable_with_hash(:parsers)
+                formatters: inheritable_setting.formatters,
+                parsers: inheritable_setting.parsers
 
       builder = stack.build
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
@@ -382,7 +382,7 @@ module Grape
         rescue_all: ns_inh[:rescue_all],
         rescue_grape_exceptions: ns_inh[:rescue_grape_exceptions],
         default_error_formatter: ns_inh[:default_error_formatter],
-        error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
+        error_formatters: ns_stack.error_formatters,
         rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
         rescue_handlers: ns_stack.rescue_handlers,
         base_only_rescue_handlers: ns_stack.base_only_rescue_handlers,
