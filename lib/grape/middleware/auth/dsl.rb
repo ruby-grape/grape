@@ -5,12 +5,11 @@ module Grape
     module Auth
       module DSL
         def auth(type = nil, *legacy_options, **options, &block)
-          namespace_inheritable = inheritable_setting.namespace_inheritable
-          return namespace_inheritable[:auth] unless type
+          return inheritable_setting.auth unless type
 
           options = merge_legacy_auth_options(:auth, legacy_options, options)
-          namespace_inheritable[:auth] = { type: type.to_sym, proc: block }.merge!(options)
-          use Grape::Middleware::Auth::Base, namespace_inheritable[:auth]
+          inheritable_setting.auth = { type: type.to_sym, proc: block }.merge!(options)
+          use Grape::Middleware::Auth::Base, inheritable_setting.auth
         end
 
         # Add HTTP Basic authorization to the API.

@@ -102,7 +102,7 @@ module Grape
       end
 
       def build_with(build_with)
-        inheritable_setting.namespace_inheritable[:build_params_with] = build_with
+        inheritable_setting.build_params_with = build_with
       end
 
       # Do not route HEAD requests to GET requests automatically.

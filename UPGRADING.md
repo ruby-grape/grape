@@ -137,6 +137,9 @@ The nearest-wins scalars written by the `version`, `prefix` and `cascade` DSL me
 #### Routing scope flags are recorded through `InheritableSetting` accessors
 
 The flags flipped by `do_not_route_head!`, `do_not_route_options!`, `do_not_document!` and `lint!` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`!` writers, `?` readers) instead of raw `namespace_inheritable` keys. The `?` readers return `false` (rather than `nil`) when never set; every consumer only used them in boolean context, so behavior is unchanged. The keys' storage is unchanged for now, so `namespace_inheritable[:do_not_route_head]` and friends still return the same values, but they should be considered internal.
+#### `build_params_with` and `auth` are recorded through `InheritableSetting` accessors
+
+The params-builder strategy written by `build_with` (both the API-level and the params-block DSL) and the authentication configuration written by the `auth` DSL are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`build_params_with` / `build_params_with=`, `auth` / `auth=`) instead of raw `namespace_inheritable` keys, completing the per-key `namespace_inheritable` cleanup. The keys' storage is unchanged for now, so `namespace_inheritable[:build_params_with]` and `namespace_inheritable[:auth]` still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 
