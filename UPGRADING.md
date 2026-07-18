@@ -128,6 +128,9 @@ The keys' storage is unchanged for now, so `namespace_stackable[:namespace]` and
 #### Contract key maps are recorded through `InheritableSetting` accessors
 
 The Dry::Schema key maps registered by `contract` blocks are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`contract_key_maps` / `add_contract_key_map(key_map)`) instead of the raw `namespace_stackable[:contract_key_map]` key, following the same move made for rescue handlers. The key's storage is unchanged for now, so `namespace_stackable[:contract_key_map]` still returns the same values, but it should be considered internal.
+#### Format and error-response defaults are recorded through `InheritableSetting` accessors
+
+The nearest-wins scalars written by the `format`, `default_format`, `default_error_formatter` and `default_error_status` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`format` / `format=`, `default_format` / `default_format=`, `default_error_formatter` / `default_error_formatter=`, `default_error_status` / `default_error_status=`) instead of raw `namespace_inheritable` keys — the first batch of the `namespace_inheritable` cleanup, following the pattern used for `namespace_stackable`. Since these are overriding assignments rather than stacking registrations, the writers use plain `=` instead of the `add_*` naming. The keys' storage is unchanged for now, so `namespace_inheritable[:format]` and friends still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 

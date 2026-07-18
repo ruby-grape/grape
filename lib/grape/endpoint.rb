@@ -335,7 +335,7 @@ module Grape
       stack = Grape::Middleware::Stack.new
 
       content_types = inheritable_setting.content_types
-      format = inheritable_setting.namespace_inheritable[:format]
+      format = inheritable_setting.format
 
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
@@ -354,7 +354,7 @@ module Grape
 
       stack.use Grape::Middleware::Formatter,
                 format:,
-                default_format: inheritable_setting.namespace_inheritable[:default_format] || :txt,
+                default_format: inheritable_setting.default_format || :txt,
                 content_types:,
                 formatters: inheritable_setting.formatters,
                 parsers: inheritable_setting.parsers
@@ -366,14 +366,13 @@ module Grape
 
     def error_middleware_options(format, content_types)
       setting = inheritable_setting
-      ns_inh = setting.namespace_inheritable
       {
         format:,
         content_types:,
-        default_status: ns_inh[:default_error_status],
+        default_status: setting.default_error_status,
         rescue_all: setting.rescue_all?,
         rescue_grape_exceptions: setting.rescue_grape_exceptions?,
-        default_error_formatter: ns_inh[:default_error_formatter],
+        default_error_formatter: setting.default_error_formatter,
         error_formatters: setting.error_formatters,
         rescue_options: setting.rescue_options,
         rescue_handlers: setting.rescue_handlers,

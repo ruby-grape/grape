@@ -84,7 +84,7 @@ module Grape
         copy = point_in_time_copy
         copy.route[:declared_params] = copy.declared_params.flatten
         copy.route[:validations] = copy.validations.dup
-        copy.namespace_inheritable[:default_error_status] ||= 500
+        copy.default_error_status ||= 500
         copy
       end
 
@@ -364,6 +364,48 @@ module Grape
 
       def add_contract_key_map(key_map)
         namespace_stackable[:contract_key_map] = key_map
+      end
+
+      # Serialization and error-response defaults recorded by the
+      # request/response DSL's get-or-set methods (see DSL::RequestResponse):
+      # +format+ is the enforced API format, +default_format+ the fallback
+      # used when a request doesn't specify one, and
+      # +default_error_formatter+ / +default_error_status+ shape error
+      # responses. Nearest-wins scalars — a nested scope's assignment
+      # overrides an inherited one, hence plain +=+ writers rather than the
+      # +add_*+ writers used for stackable registrations. Readers return nil
+      # when never set (Endpoint applies the request-serving fallbacks); the
+      # backing store is an internal detail.
+      def format
+        namespace_inheritable[:format]
+      end
+
+      def format=(format)
+        namespace_inheritable[:format] = format
+      end
+
+      def default_format
+        namespace_inheritable[:default_format]
+      end
+
+      def default_format=(default_format)
+        namespace_inheritable[:default_format] = default_format
+      end
+
+      def default_error_formatter
+        namespace_inheritable[:default_error_formatter]
+      end
+
+      def default_error_formatter=(formatter)
+        namespace_inheritable[:default_error_formatter] = formatter
+      end
+
+      def default_error_status
+        namespace_inheritable[:default_error_status]
+      end
+
+      def default_error_status=(status)
+        namespace_inheritable[:default_error_status] = status
       end
 
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
