@@ -125,6 +125,9 @@ The `Grape::Namespace` objects registered by the `namespace` DSL (and its `group
 * `mount_path` / `add_mount_path(path)` replace `namespace_stackable[:mount_path]`; the reader absorbs the outermost-wins convention (previously the `.first` at the read site in `Endpoint#build_stack`).
 
 The keys' storage is unchanged for now, so `namespace_stackable[:namespace]` and `namespace_stackable[:mount_path]` still return the same values, but they should be considered internal.
+#### Contract key maps are recorded through `InheritableSetting` accessors
+
+The Dry::Schema key maps registered by `contract` blocks are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`contract_key_maps` / `add_contract_key_map(key_map)`) instead of the raw `namespace_stackable[:contract_key_map]` key, following the same move made for rescue handlers. The key's storage is unchanged for now, so `namespace_stackable[:contract_key_map]` still returns the same values, but it should be considered internal.
 
 ### Upgrading to >= 3.3
 

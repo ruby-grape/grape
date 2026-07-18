@@ -27,6 +27,7 @@
 * [#2801](https://github.com/ruby-grape/grape/pull/2801): Internalize `represent` registrations behind `Grape::Util::InheritableSetting` accessors (`representations` / `add_representation`), and remove the inert `:representations` seeding in `Grape::Endpoint#initialize` - [@ericproulx](https://github.com/ericproulx).
 * [#2802](https://github.com/ruby-grape/grape/pull/2802): Internalize middleware and helper registrations behind `Grape::Util::InheritableSetting` accessors (`middleware` / `add_middleware`, `helpers` / `add_helper`) - [@ericproulx](https://github.com/ericproulx).
 * [#2803](https://github.com/ruby-grape/grape/pull/2803): Internalize namespace and mount-path registrations behind `Grape::Util::InheritableSetting` accessors (`namespaces` / `add_namespace` / `namespace_path` / `namespace_requirements`, `mount_path` / `add_mount_path`) - [@ericproulx](https://github.com/ericproulx).
+* [#2804](https://github.com/ruby-grape/grape/pull/2804): Internalize contract key maps behind `Grape::Util::InheritableSetting` accessors (`contract_key_maps` / `add_contract_key_map`) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

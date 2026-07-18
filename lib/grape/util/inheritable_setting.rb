@@ -353,6 +353,19 @@ module Grape
         namespace_stackable[:mount_path] = mount_path
       end
 
+      # Dry::Schema key maps registered by +contract+ blocks (see
+      # Validations::ContractScope), one per contract, outermost scope first;
+      # +declared+ uses them to write coerced params back under their
+      # declared keys. Record them with #add_contract_key_map; the backing
+      # store is an internal detail.
+      def contract_key_maps
+        namespace_stackable[:contract_key_map]
+      end
+
+      def add_contract_key_map(key_map)
+        namespace_stackable[:contract_key_map] = key_map
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.
