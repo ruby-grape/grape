@@ -9,15 +9,9 @@ module Grape
       # after: execute the given block after the endpoint code has run except in unsuccessful
       # finally: execute the given block after the endpoint code even if unsuccessful
 
-      {
-        before: :befores,
-        before_validation: :before_validations,
-        after_validation: :after_validations,
-        after: :afters,
-        finally: :finallies
-      }.each do |method_name, plural_key|
-        define_method method_name do |&block|
-          inheritable_setting.namespace_stackable[plural_key] = block
+      %i[before before_validation after_validation after finally].each do |callback_name|
+        define_method callback_name do |&block|
+          inheritable_setting.add_callback(callback_name, block)
         end
       end
     end

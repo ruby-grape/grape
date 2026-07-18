@@ -5,6 +5,16 @@ module Grape
     # A branchable, inheritable settings object which can store both stackable
     # and inheritable values (see InheritableValues and StackableValues).
     class InheritableSetting
+      # Maps the callbacks DSL method names to their pluralized
+      # namespace-stackable storage keys (see #callbacks / #add_callback).
+      CALLBACK_STORE_KEYS = {
+        before: :befores,
+        before_validation: :before_validations,
+        after_validation: :after_validations,
+        after: :afters,
+        finally: :finallies
+      }.freeze
+
       attr_reader :route, :namespace, :namespace_inheritable, :namespace_stackable, :parent
 
       # Lazy-allocated; +api_class+ and +point_in_time_copies+ are rarely
@@ -104,6 +114,19 @@ module Grape
         return if data.blank?
 
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
+      end
+
+      # Filter blocks registered by the callbacks DSL (see DSL::Callbacks),
+      # as a callback-name => blocks Array Hash keyed by the DSL method names
+      # (+:before+, +:before_validation+, +:after_validation+, +:after+,
+      # +:finally+), outermost scope first. Record them with #add_callback;
+      # the backing store is an internal detail.
+      def callbacks
+        CALLBACK_STORE_KEYS.transform_values { |store_key| namespace_stackable[store_key] }
+      end
+
+      def add_callback(callback_name, block)
+        namespace_stackable[CALLBACK_STORE_KEYS.fetch(callback_name)] = block
       end
 
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
