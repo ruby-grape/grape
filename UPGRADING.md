@@ -82,6 +82,16 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Namespace and mount-path registrations are recorded through `InheritableSetting` accessors
+
+The `Grape::Namespace` objects registered by the `namespace` DSL (and its `group` / `resource` / `resources` / `segment` aliases) and the mount path recorded by `mount` are now written and read through dedicated accessors on `Grape::Util::InheritableSetting` instead of raw `namespace_stackable` keys, following the same move made for rescue handlers:
+
+* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the `InheritableValues` store).
+* `namespace_path` returns the normalized joined path prefix, absorbing the `Grape::Namespace.joined_space_path(...)` call previously spelled out at the read sites, and `namespace_requirements` returns the requirements declared by registered namespaces, absorbing the `filter_map(&:requirements)`.
+* `mount_path` / `add_mount_path(path)` replace `namespace_stackable[:mount_path]`; the reader absorbs the outermost-wins convention (previously the `.first` at the read site in `Endpoint#build_stack`).
+
+The keys' storage is unchanged for now, so `namespace_stackable[:namespace]` and `namespace_stackable[:mount_path]` still return the same values, but they should be considered internal.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
