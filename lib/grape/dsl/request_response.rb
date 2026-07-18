@@ -149,7 +149,7 @@ module Grape
       def represent(model_class, with:)
         raise Grape::Exceptions::InvalidWithOptionForRepresent.new unless with.is_a?(Class)
 
-        inheritable_setting.namespace_stackable[:representations] = { model_class => with }
+        inheritable_setting.add_representation(model_class, with)
       end
 
       private

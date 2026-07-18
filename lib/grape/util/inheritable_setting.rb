@@ -106,6 +106,19 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # Model-class => entity-class registrations from +represent+ (see
+      # DSL::RequestResponse), one single-entry Hash per registration,
+      # deep-merged on read so a nested scope's registration wins; nil when
+      # none are registered. Record them with #add_representation; the
+      # backing store is an internal detail.
+      def representations
+        namespace_stackable_with_hash(:representations)
+      end
+
+      def add_representation(model_class, entity_class)
+        namespace_stackable[:representations] = { model_class => entity_class }
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

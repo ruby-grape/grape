@@ -20,6 +20,7 @@
 * [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
 * [#2788](https://github.com/ruby-grape/grape/pull/2788): Compare the base API instead of `to_s` when refreshing a mounted app - [@ericproulx](https://github.com/ericproulx).
 * [#2796](https://github.com/ruby-grape/grape/pull/2796): Remove `Grape::Util::ReverseStackableValues`, storing rescue handlers in plain per-scope hashes merged over `InheritableSetting#parent` - [@ericproulx](https://github.com/ericproulx).
+* [#2801](https://github.com/ruby-grape/grape/pull/2801): Internalize `represent` registrations behind `Grape::Util::InheritableSetting` accessors (`representations` / `add_representation`), and remove the inert `:representations` seeding in `Grape::Endpoint#initialize` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

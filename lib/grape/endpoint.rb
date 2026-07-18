@@ -75,7 +75,6 @@ module Grape
       inheritable_setting.route[:declared_params] = inheritable_setting.namespace_stackable[:declared_params].flatten
       inheritable_setting.route[:saved_validations] = inheritable_setting.namespace_stackable[:validations].dup
 
-      inheritable_setting.namespace_stackable[:representations] ||= []
       inheritable_setting.namespace_inheritable[:default_error_status] ||= 500
 
       @options = options
