@@ -124,7 +124,7 @@ module Grape
       compile!
       routes.each do |route|
         router.append(route.apply(self))
-        next if inheritable_setting.namespace_inheritable[:do_not_route_head] || route.request_method != Rack::GET
+        next if inheritable_setting.do_not_route_head? || route.request_method != Rack::GET
 
         router.append(route.to_head.apply(self))
       end
@@ -422,7 +422,7 @@ module Grape
     end
 
     def lint?
-      inheritable_setting.namespace_inheritable[:lint] || Grape.config.lint
+      inheritable_setting.lint? || Grape.config.lint
     end
   end
 end

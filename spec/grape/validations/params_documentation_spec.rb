@@ -64,7 +64,7 @@ describe Grape::Validations::ParamsDocumentation do
       end
 
       before do
-        api_double.inheritable_setting.namespace_inheritable[:do_not_document] = true
+        api_double.inheritable_setting.do_not_document!
       end
 
       it 'does not store any documented params' do

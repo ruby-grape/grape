@@ -12,7 +12,7 @@ module Grape
 
       def initialize
         @inheritable_setting = Grape::Util::InheritableSetting.new
-        @inheritable_setting.namespace_inheritable[:do_not_document] = true
+        @inheritable_setting.do_not_document!
       end
 
       def configuration

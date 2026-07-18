@@ -82,6 +82,10 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Routing scope flags are recorded through `InheritableSetting` accessors
+
+The flags flipped by `do_not_route_head!`, `do_not_route_options!`, `do_not_document!` and `lint!` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`!` writers, `?` readers) instead of raw `namespace_inheritable` keys. The `?` readers return `false` (rather than `nil`) when never set; every consumer only used them in boolean context, so behavior is unchanged. The keys' storage is unchanged for now, so `namespace_inheritable[:do_not_route_head]` and friends still return the same values, but they should be considered internal.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
