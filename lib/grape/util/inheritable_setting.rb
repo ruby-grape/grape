@@ -240,6 +240,45 @@ module Grape
         namespace_inheritable[:internal_grape_exceptions_rescue_handler]
       end
 
+      # Content negotiation registries recorded by the request/response DSL
+      # (see DSL::RequestResponse): the content-type registry (+content_type+
+      # and +format+), and the formatter, parser and error-formatter handler
+      # maps. Each registration stacks one single-entry Hash, deep-merged on
+      # read so a nested scope's registration wins; readers return nil when
+      # nothing is registered. Record entries with the corresponding +add_*+
+      # writer; the backing store is an internal detail.
+      def content_types
+        namespace_stackable_with_hash(:content_types)
+      end
+
+      def add_content_type(format, content_type)
+        namespace_stackable[:content_types] = { format => content_type }
+      end
+
+      def formatters
+        namespace_stackable_with_hash(:formatters)
+      end
+
+      def add_formatter(content_type, formatter)
+        namespace_stackable[:formatters] = { content_type => formatter }
+      end
+
+      def parsers
+        namespace_stackable_with_hash(:parsers)
+      end
+
+      def add_parser(content_type, parser)
+        namespace_stackable[:parsers] = { content_type => parser }
+      end
+
+      def error_formatters
+        namespace_stackable_with_hash(:error_formatters)
+      end
+
+      def add_error_formatter(format, formatter)
+        namespace_stackable[:error_formatters] = { format => formatter }
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

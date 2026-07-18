@@ -103,6 +103,9 @@ The remaining rescue state written by `rescue_from` is now recorded and read thr
 * `rescue_all?`, `rescue_grape_exceptions?`, `all_rescue_handler`, `grape_exceptions_rescue_handler` and `internal_grape_exceptions_rescue_handler` replace the corresponding `namespace_inheritable` reads. The two `?` readers return `false` (rather than `nil`) when never set; `Grape::Middleware::Error` only ever used them in boolean context, so behavior is unchanged.
 
 The keys' storage is unchanged for now, so `namespace_stackable[:rescue_options]` and the `namespace_inheritable` keys still return the same values, but they should be considered internal.
+#### Content negotiation state is recorded through `InheritableSetting` accessors
+
+The state written by the `content_type`, `format`, `formatter`, `parser` and `error_formatter` DSL methods is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`content_types` / `add_content_type`, `formatters` / `add_formatter`, `parsers` / `add_parser`, `error_formatters` / `add_error_formatter`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. Each writer records one single-entry Hash per registration and each reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged name => value Hash (nearest scope wins) or `nil` when nothing is registered. The keys' storage is unchanged for now, so `namespace_stackable[:content_types]` and friends still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 

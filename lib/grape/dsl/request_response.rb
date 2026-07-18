@@ -23,17 +23,17 @@ module Grape
         content_type = content_types[symbolic_new_format]
         raise Grape::Exceptions::MissingMimeType.new(new_format) unless content_type
 
-        inheritable_setting.namespace_stackable[:content_types] = { symbolic_new_format => content_type }
+        inheritable_setting.add_content_type(symbolic_new_format, content_type)
       end
 
       # Specify a custom formatter for a content-type.
       def formatter(content_type, new_formatter)
-        inheritable_setting.namespace_stackable[:formatters] = { content_type.to_sym => new_formatter }
+        inheritable_setting.add_formatter(content_type.to_sym, new_formatter)
       end
 
       # Specify a custom parser for a content-type.
       def parser(content_type, new_parser)
-        inheritable_setting.namespace_stackable[:parsers] = { content_type.to_sym => new_parser }
+        inheritable_setting.add_parser(content_type.to_sym, new_parser)
       end
 
       # Specify a default error formatter.
@@ -46,19 +46,18 @@ module Grape
 
       def error_formatter(format, options = nil, with: nil)
         formatter = with || options
-        inheritable_setting.namespace_stackable[:error_formatters] = { format.to_sym => formatter }
+        inheritable_setting.add_error_formatter(format.to_sym, formatter)
       end
 
       # Specify additional content-types, e.g.:
       #   content_type :xls, 'application/vnd.ms-excel'
       def content_type(key, val)
-        inheritable_setting.namespace_stackable[:content_types] = { key.to_sym => val }
+        inheritable_setting.add_content_type(key.to_sym, val)
       end
 
       # All available content types.
       def content_types
-        c_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
-        Grape::ContentTypes.content_types_for c_types
+        Grape::ContentTypes.content_types_for(inheritable_setting.content_types)
       end
 
       # Specify the default status code for errors.
