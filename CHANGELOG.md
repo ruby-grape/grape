@@ -22,6 +22,7 @@
 * [#2796](https://github.com/ruby-grape/grape/pull/2796): Remove `Grape::Util::ReverseStackableValues`, storing rescue handlers in plain per-scope hashes merged over `InheritableSetting#parent` - [@ericproulx](https://github.com/ericproulx).
 * [#2797](https://github.com/ruby-grape/grape/pull/2797): Internalize params state (validations, declared params, param documentation, named params) behind `Grape::Util::InheritableSetting` accessors, and remove the unused `api_class` / `point_in_time_copies` readers - [@ericproulx](https://github.com/ericproulx).
 * [#2798](https://github.com/ruby-grape/grape/pull/2798): Internalize callback filters behind `Grape::Util::InheritableSetting` accessors (`callbacks` / `add_callback`) - [@ericproulx](https://github.com/ericproulx).
+* [#2799](https://github.com/ruby-grape/grape/pull/2799): Internalize the remaining rescue configuration (`rescue_options`, meta-selector handlers and flags) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

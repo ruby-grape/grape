@@ -94,6 +94,15 @@ Related contract changes, none with known external consumers:
 #### Callback filters are recorded through `InheritableSetting` accessors
 
 The filter blocks registered by `before`, `before_validation`, `after_validation`, `after` and `finally` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` — `add_callback(name, block)` to record, and `callbacks` returning a Hash keyed by the DSL method names (`callbacks[:before]`, `callbacks[:finally]`, …) — instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:befores]` and friends still return the same values, but the pluralized keys should be considered internal.
+#### Rescue configuration is recorded through `InheritableSetting` accessors
+
+The remaining rescue state written by `rescue_from` is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting`, completing the encapsulation started with `rescue_handlers` / `add_rescue_handlers`:
+
+* `rescue_options` / `add_rescue_options(options)` replace `namespace_stackable[:rescue_options]`. The reader absorbs the nearest-scope-wins convention (previously the `&.last` at the read site) and returns a single `Grape::DSL::RescueOptions` or `nil`, not the raw stack.
+* `add_all_rescue_handler(handler)`, `add_grape_exceptions_rescue_handler(handler)` and `add_internal_grape_exceptions_rescue_handler(handler)` replace the direct `namespace_inheritable` writes for the `rescue_from :all` / `:grape_exceptions` / `:internal_grape_exceptions` meta selectors; each records its handler and flips the associated flags.
+* `rescue_all?`, `rescue_grape_exceptions?`, `all_rescue_handler`, `grape_exceptions_rescue_handler` and `internal_grape_exceptions_rescue_handler` replace the corresponding `namespace_inheritable` reads. The two `?` readers return `false` (rather than `nil`) when never set; `Grape::Middleware::Error` only ever used them in boolean context, so behavior is unchanged.
+
+The keys' storage is unchanged for now, so `namespace_stackable[:rescue_options]` and the `namespace_inheritable` keys still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 
