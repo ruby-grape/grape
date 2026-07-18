@@ -82,6 +82,12 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Middleware and helper registrations are recorded through `InheritableSetting` accessors
+
+The state written by the middleware DSL (`use`, `insert`, `insert_before`, `insert_after`) and by `helpers` is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`middleware` / `add_middleware`, `helpers` / `add_helper`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:middleware]` and `namespace_stackable[:helpers]` still return the same values, but they should be considered internal.
+
+One micro-change: the `middleware` DSL reader dropped its `|| []` fallback — `Grape::Util::StackableValues#[]` never returns `nil`, so the fallback was dead code. When no middleware is registered the reader now returns the shared frozen empty array instead of a fresh mutable one; no caller in Grape or grape-swagger mutates the returned array.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

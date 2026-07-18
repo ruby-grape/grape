@@ -349,7 +349,7 @@ module Grape
       stack.use Rack::Lint if lint?
       stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
 
-      stack.concat inheritable_setting.namespace_stackable[:middleware]
+      stack.concat inheritable_setting.middleware
 
       if inheritable_setting.namespace_inheritable[:version].present?
         version_options = inheritable_setting.namespace_inheritable[:version_options]
@@ -393,7 +393,7 @@ module Grape
     end
 
     def build_helpers
-      helpers = inheritable_setting.namespace_stackable[:helpers]
+      helpers = inheritable_setting.helpers
       return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }

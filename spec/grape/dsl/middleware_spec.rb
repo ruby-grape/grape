@@ -17,28 +17,28 @@ describe Grape::DSL::Middleware do
   describe '.use' do
     it 'adds a middleware with the right operation' do
       subject.use foo_middleware, :arg1, &proc
-      expect(subject.inheritable_setting.namespace_stackable[:middleware]).to eq([[:use, foo_middleware, :arg1, proc]])
+      expect(subject.inheritable_setting.middleware).to eq([[:use, foo_middleware, :arg1, proc]])
     end
   end
 
   describe '.insert' do
     it 'adds a middleware with the right operation' do
       subject.insert 0, :arg1, &proc
-      expect(subject.inheritable_setting.namespace_stackable[:middleware]).to eq([[:insert, 0, :arg1, proc]])
+      expect(subject.inheritable_setting.middleware).to eq([[:insert, 0, :arg1, proc]])
     end
   end
 
   describe '.insert_before' do
     it 'adds a middleware with the right operation' do
       subject.insert_before foo_middleware, :arg1, &proc
-      expect(subject.inheritable_setting.namespace_stackable[:middleware]).to eq([[:insert_before, foo_middleware, :arg1, proc]])
+      expect(subject.inheritable_setting.middleware).to eq([[:insert_before, foo_middleware, :arg1, proc]])
     end
   end
 
   describe '.insert_after' do
     it 'adds a middleware with the right operation' do
       subject.insert_after foo_middleware, :arg1, &proc
-      expect(subject.inheritable_setting.namespace_stackable[:middleware]).to eq([[:insert_after, foo_middleware, :arg1, proc]])
+      expect(subject.inheritable_setting.middleware).to eq([[:insert_after, foo_middleware, :arg1, proc]])
     end
   end
 
