@@ -21,6 +21,7 @@
 * [#2788](https://github.com/ruby-grape/grape/pull/2788): Compare the base API instead of `to_s` when refreshing a mounted app - [@ericproulx](https://github.com/ericproulx).
 * [#2796](https://github.com/ruby-grape/grape/pull/2796): Remove `Grape::Util::ReverseStackableValues`, storing rescue handlers in plain per-scope hashes merged over `InheritableSetting#parent` - [@ericproulx](https://github.com/ericproulx).
 * [#2797](https://github.com/ruby-grape/grape/pull/2797): Internalize params state (validations, declared params, param documentation, named params) behind `Grape::Util::InheritableSetting` accessors, and remove the unused `api_class` / `point_in_time_copies` readers - [@ericproulx](https://github.com/ericproulx).
+* [#2798](https://github.com/ruby-grape/grape/pull/2798): Internalize callback filters behind `Grape::Util::InheritableSetting` accessors (`callbacks` / `add_callback`) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

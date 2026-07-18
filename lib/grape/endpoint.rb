@@ -270,12 +270,12 @@ module Grape
       @app = config.app || build_stack
       warn_unauthenticated_mounted_app
       @helpers = build_helpers
-      stackable = inheritable_setting.namespace_stackable
-      @befores            = stackable[:befores]
-      @before_validations = stackable[:before_validations]
-      @after_validations  = stackable[:after_validations]
-      @afters             = stackable[:afters]
-      @finallies          = stackable[:finallies]
+      callbacks = inheritable_setting.callbacks
+      @befores            = callbacks.fetch(:before)
+      @before_validations = callbacks.fetch(:before_validation)
+      @after_validations  = callbacks.fetch(:after_validation)
+      @afters             = callbacks.fetch(:after)
+      @finallies          = callbacks.fetch(:finally)
       @build_params_with  = inheritable_setting.namespace_inheritable[:build_params_with]
     end
 

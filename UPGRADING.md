@@ -91,6 +91,9 @@ Related contract changes, none with known external consumers:
 * `Grape::Endpoint#inherit_settings` now takes the parent `Grape::Util::InheritableSetting` instead of that setting's raw `namespace_stackable` store.
 * The endpoint's request-time validator snapshot moved from `route_setting(:saved_validations)` to `route_setting(:validations)`, symmetric with `route_setting(:declared_params)`. The vestigial `saved_` prefix dated back to the 2014 settings refactor. Neither key appears in `route.settings`, as before.
 * `Grape::Util::InheritableSetting#api_class` (a Hash nothing in Grape ever wrote to) and `#point_in_time_copies` (only ever used internally) are removed.
+#### Callback filters are recorded through `InheritableSetting` accessors
+
+The filter blocks registered by `before`, `before_validation`, `after_validation`, `after` and `finally` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` — `add_callback(name, block)` to record, and `callbacks` returning a Hash keyed by the DSL method names (`callbacks[:before]`, `callbacks[:finally]`, …) — instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:befores]` and friends still return the same values, but the pluralized keys should be considered internal.
 
 ### Upgrading to >= 3.3
 
