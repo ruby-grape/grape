@@ -82,6 +82,10 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Contract key maps are recorded through `InheritableSetting` accessors
+
+The Dry::Schema key maps registered by `contract` blocks are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`contract_key_maps` / `add_contract_key_map(key_map)`) instead of the raw `namespace_stackable[:contract_key_map]` key, following the same move made for rescue handlers. The key's storage is unchanged for now, so `namespace_stackable[:contract_key_map]` still returns the same values, but it should be considered internal.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
