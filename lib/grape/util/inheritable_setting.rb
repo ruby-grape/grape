@@ -106,6 +106,60 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # Response-shaping options recorded by +rescue_from+ (see
+      # DSL::RescueOptions): every +rescue_from+ stacks one entry and the
+      # nearest scope's latest registration wins on read; nil when
+      # +rescue_from+ was never called. Record them with #add_rescue_options;
+      # the backing store is an internal detail.
+      def rescue_options
+        namespace_stackable[:rescue_options].last
+      end
+
+      def add_rescue_options(options)
+        namespace_stackable[:rescue_options] = options
+      end
+
+      # Meta-selector registrations from +rescue_from :all+,
+      # +:grape_exceptions+ and +:internal_grape_exceptions+ (see
+      # DSL::RequestResponse#rescue_from): each records its handler (nil to
+      # use the built-in one) and flips the flags the error middleware reads
+      # through #rescue_all? / #rescue_grape_exceptions?; the backing store
+      # is an internal detail.
+      def add_all_rescue_handler(handler)
+        namespace_inheritable[:rescue_all] = true
+        namespace_inheritable[:all_rescue_handler] = handler
+      end
+
+      def add_grape_exceptions_rescue_handler(handler)
+        namespace_inheritable[:rescue_all] = true
+        namespace_inheritable[:rescue_grape_exceptions] = true
+        namespace_inheritable[:grape_exceptions_rescue_handler] = handler
+      end
+
+      def add_internal_grape_exceptions_rescue_handler(handler)
+        namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
+      end
+
+      def rescue_all?
+        namespace_inheritable[:rescue_all] == true
+      end
+
+      def rescue_grape_exceptions?
+        namespace_inheritable[:rescue_grape_exceptions] == true
+      end
+
+      def all_rescue_handler
+        namespace_inheritable[:all_rescue_handler]
+      end
+
+      def grape_exceptions_rescue_handler
+        namespace_inheritable[:grape_exceptions_rescue_handler]
+      end
+
+      def internal_grape_exceptions_rescue_handler
+        namespace_inheritable[:internal_grape_exceptions_rescue_handler]
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

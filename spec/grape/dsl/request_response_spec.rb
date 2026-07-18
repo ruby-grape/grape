@@ -95,45 +95,29 @@ describe Grape::DSL::RequestResponse do
     describe ':all' do
       it 'sets rescue all to true' do
         subject.rescue_from :all
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            all_rescue_handler: nil
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.all_rescue_handler).to be_nil
       end
 
       it 'sets given proc as rescue handler' do
         rescue_handler_proc = proc {}
         subject.rescue_from :all, rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            all_rescue_handler: rescue_handler_proc
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.all_rescue_handler).to eq(rescue_handler_proc)
       end
 
       it 'sets given block as rescue handler' do
         rescue_handler_proc = proc {}
         subject.rescue_from :all, &rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            all_rescue_handler: rescue_handler_proc
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.all_rescue_handler).to eq(rescue_handler_proc)
       end
 
       it 'sets a rescue handler declared through :with option' do
         with_block = -> { 'hello' }
         subject.rescue_from :all, with: with_block
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            all_rescue_handler: with_block
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.all_rescue_handler).to eq(with_block)
       end
 
       it 'abort if :with option value is not Symbol, String or Proc' do
@@ -152,49 +136,42 @@ describe Grape::DSL::RequestResponse do
     describe ':grape_exceptions' do
       it 'sets rescue all to true' do
         subject.rescue_from :grape_exceptions
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            rescue_grape_exceptions: true,
-            grape_exceptions_rescue_handler: nil
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.rescue_grape_exceptions?).to be(true)
+        expect(subject.inheritable_setting.grape_exceptions_rescue_handler).to be_nil
       end
 
       it 'sets given proc as rescue handler' do
         rescue_handler_proc = proc {}
         subject.rescue_from :grape_exceptions, rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            rescue_grape_exceptions: true,
-            grape_exceptions_rescue_handler: rescue_handler_proc
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.rescue_grape_exceptions?).to be(true)
+        expect(subject.inheritable_setting.grape_exceptions_rescue_handler).to eq(rescue_handler_proc)
       end
 
       it 'sets given block as rescue handler' do
         rescue_handler_proc = proc {}
         subject.rescue_from :grape_exceptions, &rescue_handler_proc
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            rescue_grape_exceptions: true,
-            grape_exceptions_rescue_handler: rescue_handler_proc
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.rescue_grape_exceptions?).to be(true)
+        expect(subject.inheritable_setting.grape_exceptions_rescue_handler).to eq(rescue_handler_proc)
       end
 
       it 'sets a rescue handler declared through :with option' do
         with_block = -> { 'hello' }
         subject.rescue_from :grape_exceptions, with: with_block
-        expect(subject.inheritable_setting.namespace_inheritable.to_hash).to eq(
-          {
-            rescue_all: true,
-            rescue_grape_exceptions: true,
-            grape_exceptions_rescue_handler: with_block
-          }
-        )
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.rescue_grape_exceptions?).to be(true)
+        expect(subject.inheritable_setting.grape_exceptions_rescue_handler).to eq(with_block)
+      end
+    end
+
+    describe ':internal_grape_exceptions' do
+      it 'sets given proc as rescue handler without rescuing all' do
+        rescue_handler_proc = proc {}
+        subject.rescue_from :internal_grape_exceptions, rescue_handler_proc
+        expect(subject.inheritable_setting.internal_grape_exceptions_rescue_handler).to eq(rescue_handler_proc)
+        expect(subject.inheritable_setting.rescue_all?).to be(false)
       end
     end
 
@@ -216,39 +193,39 @@ describe Grape::DSL::RequestResponse do
     end
 
     describe 'list of exceptions is passed' do
-      let(:default_rescue_options) { [Grape::DSL::RescueOptions.new] }
+      let(:default_rescue_options) { Grape::DSL::RescueOptions.new }
 
       it 'sets hash of exceptions as rescue handlers' do
         subject.rescue_from StandardError
         expect(subject.inheritable_setting.rescue_handlers).to eq(StandardError => nil)
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq(default_rescue_options)
+        expect(subject.inheritable_setting.rescue_options).to eq(default_rescue_options)
       end
 
       it 'rescues only base handlers if rescue_subclasses: false option is passed' do
         subject.rescue_from StandardError, rescue_subclasses: false
         expect(subject.inheritable_setting.base_only_rescue_handlers).to eq(StandardError => nil)
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq(default_rescue_options)
+        expect(subject.inheritable_setting.rescue_options).to eq(default_rescue_options)
       end
 
       it 'sets given proc as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
         subject.rescue_from StandardError, rescue_handler_proc
         expect(subject.inheritable_setting.rescue_handlers).to eq(StandardError => rescue_handler_proc)
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq(default_rescue_options)
+        expect(subject.inheritable_setting.rescue_options).to eq(default_rescue_options)
       end
 
       it 'sets given block as rescue handler for each key in hash' do
         rescue_handler_proc = proc {}
         subject.rescue_from StandardError, &rescue_handler_proc
         expect(subject.inheritable_setting.rescue_handlers).to eq(StandardError => rescue_handler_proc)
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq(default_rescue_options)
+        expect(subject.inheritable_setting.rescue_options).to eq(default_rescue_options)
       end
 
       it 'sets a rescue handler declared through :with option for each key in hash' do
         with_block = -> { 'hello' }
         subject.rescue_from StandardError, with: with_block
         expect(subject.inheritable_setting.rescue_handlers).to eq(StandardError => with_block)
-        expect(subject.inheritable_setting.namespace_stackable[:rescue_options]).to eq(default_rescue_options)
+        expect(subject.inheritable_setting.rescue_options).to eq(default_rescue_options)
       end
     end
   end

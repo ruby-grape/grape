@@ -3,9 +3,10 @@
 module Grape
   module DSL
     # Immutable value object holding the response-shaping booleans accepted
-    # by +Grape::DSL::RequestResponse#rescue_from+. Stored on the
-    # inheritable settings as +namespace_stackable[:rescue_options]+ and
-    # delegated to by +Grape::Middleware::Error+ (which forwards
+    # by +Grape::DSL::RequestResponse#rescue_from+. Recorded on the
+    # inheritable settings via +Grape::Util::InheritableSetting#add_rescue_options+
+    # (the nearest scope's latest registration wins on read, see
+    # +#rescue_options+) and delegated to by +Grape::Middleware::Error+ (which forwards
     # +backtrace+/+original_exception+ to the formatter as
     # +include_backtrace+/+include_original_exception+).
     #

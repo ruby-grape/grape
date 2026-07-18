@@ -101,29 +101,18 @@ module Grape
         meta_selector = (args & META_RESCUE_SELECTORS).first
         raise ArgumentError, "rescue_from #{meta_selector.inspect} does not accept additional arguments" if meta_selector && args.size > 1
 
-        namespace_inheritable = nil
-        arg = nil
-
-        if args.one?
-          arg = args.first
-          namespace_inheritable = inheritable_setting.namespace_inheritable
-        end
-
-        case arg
+        case meta_selector
         when :all
-          namespace_inheritable[:rescue_all] = true
-          namespace_inheritable[:all_rescue_handler] = handler
+          inheritable_setting.add_all_rescue_handler(handler)
         when :grape_exceptions
-          namespace_inheritable[:rescue_all] = true
-          namespace_inheritable[:rescue_grape_exceptions] = true
-          namespace_inheritable[:grape_exceptions_rescue_handler] = handler
+          inheritable_setting.add_grape_exceptions_rescue_handler(handler)
         when :internal_grape_exceptions
-          namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
+          inheritable_setting.add_internal_grape_exceptions_rescue_handler(handler)
         else
           inheritable_setting.add_rescue_handlers(args.to_h { |klass| [klass, handler] }, subclasses: rescue_subclasses)
         end
 
-        inheritable_setting.namespace_stackable[:rescue_options] = RescueOptions.new(backtrace:, original_exception:)
+        inheritable_setting.add_rescue_options(RescueOptions.new(backtrace:, original_exception:))
       end
 
       # Allows you to specify a default representation entity for a
