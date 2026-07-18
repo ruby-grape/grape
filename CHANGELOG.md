@@ -24,6 +24,7 @@
 * [#2798](https://github.com/ruby-grape/grape/pull/2798): Internalize callback filters behind `Grape::Util::InheritableSetting` accessors (`callbacks` / `add_callback`) - [@ericproulx](https://github.com/ericproulx).
 * [#2799](https://github.com/ruby-grape/grape/pull/2799): Internalize the remaining rescue configuration (`rescue_options`, meta-selector handlers and flags) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * [#2800](https://github.com/ruby-grape/grape/pull/2800): Internalize content negotiation state (content types, formatters, parsers, error formatters) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
+* [#2801](https://github.com/ruby-grape/grape/pull/2801): Internalize `represent` registrations behind `Grape::Util::InheritableSetting` accessors (`representations` / `add_representation`), and remove the inert `:representations` seeding in `Grape::Endpoint#initialize` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

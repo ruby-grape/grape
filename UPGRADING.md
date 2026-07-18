@@ -106,6 +106,11 @@ The keys' storage is unchanged for now, so `namespace_stackable[:rescue_options]
 #### Content negotiation state is recorded through `InheritableSetting` accessors
 
 The state written by the `content_type`, `format`, `formatter`, `parser` and `error_formatter` DSL methods is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`content_types` / `add_content_type`, `formatters` / `add_formatter`, `parsers` / `add_parser`, `error_formatters` / `add_error_formatter`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. Each writer records one single-entry Hash per registration and each reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged name => value Hash (nearest scope wins) or `nil` when nothing is registered. The keys' storage is unchanged for now, so `namespace_stackable[:content_types]` and friends still return the same values, but they should be considered internal.
+#### `represent` registrations are recorded through `InheritableSetting` accessors
+
+The model-class => entity-class registrations written by `represent` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`representations` / `add_representation(model_class, entity_class)`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged Hash (nearest scope wins) or `nil` when nothing is registered. The key's storage is unchanged for now, so `namespace_stackable[:representations]` still returns the same values, but it should be considered internal.
+
+Also removed: the `namespace_stackable[:representations] ||= []` line in `Grape::Endpoint#initialize`. It was provably inert — `Grape::Util::StackableValues#[]` always returns an array (a frozen empty one for never-written keys), which is truthy, so the `||=` assignment could never execute. No settings state changes as a result.
 
 ### Upgrading to >= 3.3
 

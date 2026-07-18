@@ -234,7 +234,7 @@ describe Grape::DSL::RequestResponse do
     it 'sets a presenter for a class' do
       presenter = Class.new
       subject.represent :ThisClass, with: presenter
-      expect(subject.inheritable_setting.namespace_stackable[:representations]).to eq([{ ThisClass: presenter }])
+      expect(subject.inheritable_setting.representations).to eq(ThisClass: presenter)
     end
   end
 end
