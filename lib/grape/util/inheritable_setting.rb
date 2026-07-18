@@ -106,6 +106,48 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # Serialization and error-response defaults recorded by the
+      # request/response DSL's get-or-set methods (see DSL::RequestResponse):
+      # +format+ is the enforced API format, +default_format+ the fallback
+      # used when a request doesn't specify one, and
+      # +default_error_formatter+ / +default_error_status+ shape error
+      # responses. Nearest-wins scalars — a nested scope's assignment
+      # overrides an inherited one, hence plain +=+ writers rather than the
+      # +add_*+ writers used for stackable registrations. Readers return nil
+      # when never set (Endpoint applies the request-serving fallbacks); the
+      # backing store is an internal detail.
+      def format
+        namespace_inheritable[:format]
+      end
+
+      def format=(format)
+        namespace_inheritable[:format] = format
+      end
+
+      def default_format
+        namespace_inheritable[:default_format]
+      end
+
+      def default_format=(default_format)
+        namespace_inheritable[:default_format] = default_format
+      end
+
+      def default_error_formatter
+        namespace_inheritable[:default_error_formatter]
+      end
+
+      def default_error_formatter=(formatter)
+        namespace_inheritable[:default_error_formatter] = formatter
+      end
+
+      def default_error_status
+        namespace_inheritable[:default_error_status]
+      end
+
+      def default_error_status=(status)
+        namespace_inheritable[:default_error_status] = status
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

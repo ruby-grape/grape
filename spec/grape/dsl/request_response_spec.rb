@@ -16,7 +16,7 @@ describe Grape::DSL::RequestResponse do
   describe '.default_format' do
     it 'sets the default format' do
       subject.default_format :format
-      expect(subject.inheritable_setting.namespace_inheritable[:default_format]).to eq(:format)
+      expect(subject.inheritable_setting.default_format).to eq(:format)
     end
 
     it 'returns the format without paramter' do
@@ -28,8 +28,8 @@ describe Grape::DSL::RequestResponse do
   describe '.format' do
     it 'sets a new format' do
       subject.format format
-      expect(subject.inheritable_setting.namespace_inheritable[:format]).to eq(format.to_sym)
-      expect(subject.inheritable_setting.namespace_inheritable[:default_error_formatter]).to eq(Grape::ErrorFormatter::Txt)
+      expect(subject.inheritable_setting.format).to eq(format.to_sym)
+      expect(subject.inheritable_setting.default_error_formatter).to eq(Grape::ErrorFormatter::Txt)
     end
   end
 
@@ -50,7 +50,7 @@ describe Grape::DSL::RequestResponse do
   describe '.default_error_formatter' do
     it 'sets a new error formatter' do
       subject.default_error_formatter :json
-      expect(subject.inheritable_setting.namespace_inheritable[:default_error_formatter]).to eq(Grape::ErrorFormatter::Json)
+      expect(subject.inheritable_setting.default_error_formatter).to eq(Grape::ErrorFormatter::Json)
     end
   end
 
@@ -87,7 +87,7 @@ describe Grape::DSL::RequestResponse do
   describe '.default_error_status' do
     it 'sets a default error status' do
       subject.default_error_status 500
-      expect(subject.inheritable_setting.namespace_inheritable[:default_error_status]).to eq(500)
+      expect(subject.inheritable_setting.default_error_status).to eq(500)
     end
   end
 

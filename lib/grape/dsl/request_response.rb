@@ -6,19 +6,19 @@ module Grape
       # Specify the default format for the API's serializers.
       # May be `:json` or `:txt` (default).
       def default_format(new_format = nil)
-        return inheritable_setting.namespace_inheritable[:default_format] if new_format.nil?
+        return inheritable_setting.default_format if new_format.nil?
 
-        inheritable_setting.namespace_inheritable[:default_format] = new_format.to_sym
+        inheritable_setting.default_format = new_format.to_sym
       end
 
       # Specify the format for the API's serializers.
       # May be `:json`, `:xml`, `:txt`, etc.
       def format(new_format = nil)
-        return inheritable_setting.namespace_inheritable[:format] if new_format.nil?
+        return inheritable_setting.format if new_format.nil?
 
         symbolic_new_format = new_format.to_sym
-        inheritable_setting.namespace_inheritable[:format] = symbolic_new_format
-        inheritable_setting.namespace_inheritable[:default_error_formatter] = Grape::ErrorFormatter.formatter_for(symbolic_new_format)
+        inheritable_setting.format = symbolic_new_format
+        inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(symbolic_new_format)
 
         content_type = content_types[symbolic_new_format]
         raise Grape::Exceptions::MissingMimeType.new(new_format) unless content_type
@@ -38,10 +38,9 @@ module Grape
 
       # Specify a default error formatter.
       def default_error_formatter(new_formatter_name = nil)
-        return inheritable_setting.namespace_inheritable[:default_error_formatter] if new_formatter_name.nil?
+        return inheritable_setting.default_error_formatter if new_formatter_name.nil?
 
-        new_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
-        inheritable_setting.namespace_inheritable[:default_error_formatter] = new_formatter
+        inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
       end
 
       def error_formatter(format, options = nil, with: nil)
@@ -63,9 +62,9 @@ module Grape
 
       # Specify the default status code for errors.
       def default_error_status(new_status = nil)
-        return inheritable_setting.namespace_inheritable[:default_error_status] if new_status.nil?
+        return inheritable_setting.default_error_status if new_status.nil?
 
-        inheritable_setting.namespace_inheritable[:default_error_status] = new_status
+        inheritable_setting.default_error_status = new_status
       end
 
       # Allows you to rescue certain exceptions that occur to return

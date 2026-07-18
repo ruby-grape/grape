@@ -82,6 +82,10 @@ A route's declared params were previously carried inside the `route_options` bag
 
 Like `params` above, a route's `requirements` and `anchor` were previously carried inside the `route_options` bag. They are now composed into their own endpoint inputs (`Grape::Endpoint::Options` gains `:requirements` and `:anchor` members, and `Grape::Endpoint.new` gains `requirements:` and `anchor:` keywords) and exposed only through the `route.requirements` and `route.anchor` readers. `route.options[:requirements]` and `route.options[:anchor]` now return `nil` — including for a mount's `anchor: false`. Nothing in Grape or grape-swagger read them that way, so this only affects code that reached into the options Hash for these keys directly.
 
+#### Format and error-response defaults are recorded through `InheritableSetting` accessors
+
+The nearest-wins scalars written by the `format`, `default_format`, `default_error_formatter` and `default_error_status` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`format` / `format=`, `default_format` / `default_format=`, `default_error_formatter` / `default_error_formatter=`, `default_error_status` / `default_error_status=`) instead of raw `namespace_inheritable` keys — the first batch of the `namespace_inheritable` cleanup, following the pattern used for `namespace_stackable`. Since these are overriding assignments rather than stacking registrations, the writers use plain `=` instead of the `add_*` naming. The keys' storage is unchanged for now, so `namespace_inheritable[:format]` and friends still return the same values, but they should be considered internal.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3

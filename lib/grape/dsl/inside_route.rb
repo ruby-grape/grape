@@ -27,7 +27,7 @@ module Grape
       # @param backtrace [Array<String>] The backtrace of the exception that caused the error.
       # @param original_exception [Exception] The original exception that caused the error.
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
-        status = self.status(status || inheritable_setting.namespace_inheritable[:default_error_status])
+        status = self.status(status || inheritable_setting.default_error_status)
         headers = additional_headers.present? ? header.merge(additional_headers) : header
         throw :error, Grape::Exceptions::ErrorResponse.new(
           message:, status:, headers:, backtrace:, original_exception:
