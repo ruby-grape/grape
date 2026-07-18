@@ -316,6 +316,43 @@ module Grape
         namespace_stackable[:helpers] = mod
       end
 
+      # Grape::Namespace objects registered by the +namespace+ DSL and its
+      # aliases (group, resource, resources, segment; see DSL::Routing),
+      # outermost scope first. Not to be confused with the #namespace values
+      # store. Record them with #add_namespace; the backing store is an
+      # internal detail.
+      def namespaces
+        namespace_stackable[:namespace]
+      end
+
+      def add_namespace(namespace)
+        namespace_stackable[:namespace] = namespace
+      end
+
+      # The normalized path prefix formed by joining every registered
+      # namespace's space (see Grape::Namespace.joined_space_path).
+      def namespace_path
+        Grape::Namespace.joined_space_path(namespaces)
+      end
+
+      # The param requirements declared by registered namespaces, outermost
+      # scope first.
+      def namespace_requirements
+        namespaces.filter_map(&:requirements)
+      end
+
+      # The path a Grape API is mounted under, recorded on the mounted API's
+      # top-level settings by +mount+ (see DSL::Routing). Reading returns the
+      # outermost mount path — nil when the API is not mounted; the backing
+      # store is an internal detail.
+      def mount_path
+        namespace_stackable[:mount_path].first
+      end
+
+      def add_mount_path(mount_path)
+        namespace_stackable[:mount_path] = mount_path
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

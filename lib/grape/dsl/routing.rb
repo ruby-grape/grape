@@ -137,7 +137,7 @@ module Grape
           # instantiated Grape::API::Instance (vs. a bare Rack app).
           if app.is_a?(Grape::Mountable)
             mount_path = Grape::Util::PathNormalizer.call(path)
-            app.top_level_setting.namespace_stackable[:mount_path] = mount_path
+            app.top_level_setting.add_mount_path(mount_path)
 
             app.inherit_settings(inheritable_setting)
 
@@ -229,11 +229,11 @@ module Grape
       #       end
       #     end
       def namespace(space = nil, requirements: nil, **options, &block)
-        return Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace]) unless space || block
+        return inheritable_setting.namespace_path unless space || block
 
         within_namespace do
           nest(block) do
-            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, requirements:, **options) if space
+            inheritable_setting.add_namespace(Grape::Namespace.new(space, requirements:, **options)) if space
           end
         end
       end

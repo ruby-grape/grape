@@ -123,7 +123,7 @@ module Grape
     end
 
     def namespace
-      @namespace ||= Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace])
+      @namespace ||= inheritable_setting.namespace_path
     end
 
     def call(env)
@@ -320,7 +320,7 @@ module Grape
     end
 
     def prepare_routes_requirements(route_options_requirements)
-      namespace_requirements = inheritable_setting.namespace_stackable[:namespace].filter_map(&:requirements)
+      namespace_requirements = inheritable_setting.namespace_requirements
       namespace_requirements << route_options_requirements if route_options_requirements.present?
       namespace_requirements.reduce({}, :merge)
     end
@@ -349,7 +349,7 @@ module Grape
                   versions: inheritable_setting.namespace_inheritable[:version].flatten,
                   version_options:,
                   prefix: inheritable_setting.namespace_inheritable[:root_prefix],
-                  mount_path: inheritable_setting.namespace_stackable[:mount_path].first
+                  mount_path: inheritable_setting.mount_path
       end
 
       stack.use Grape::Middleware::Formatter,
