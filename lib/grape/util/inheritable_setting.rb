@@ -106,6 +106,53 @@ module Grape
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end
 
+      # Versioning state recorded by the routing DSL (see DSL::Routing):
+      # +version+ holds the Array of version strings registered by the
+      # +version+ DSL method, +version_options+ its DSL::VersionOptions
+      # value object, and +root_prefix+ the path prefix set by +prefix+.
+      # Nearest-wins scalars with plain += writers; readers return nil when
+      # never set; the backing store is an internal detail.
+      def version
+        namespace_inheritable[:version]
+      end
+
+      def version=(versions)
+        namespace_inheritable[:version] = versions
+      end
+
+      def version_options
+        namespace_inheritable[:version_options]
+      end
+
+      def version_options=(options)
+        namespace_inheritable[:version_options] = options
+      end
+
+      def root_prefix
+        namespace_inheritable[:root_prefix]
+      end
+
+      def root_prefix=(prefix)
+        namespace_inheritable[:root_prefix] = prefix
+      end
+
+      # Cascade flag assigned by the +cascade+ DSL. An explicit nil is
+      # meaningful and distinct from never-set (the backing store is
+      # key-presence based), so #cascade_defined? reports whether any scope
+      # assigned it — Grape::API::Instance#cascade? falls back to the
+      # version options' cascade, then to true, when it was never assigned.
+      def cascade
+        namespace_inheritable[:cascade]
+      end
+
+      def cascade=(value)
+        namespace_inheritable[:cascade] = value
+      end
+
+      def cascade_defined?
+        namespace_inheritable.key?(:cascade)
+      end
+
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
       # class and merged so a nested scope's handler wins. Record them with
       # #add_rescue_handlers; the backing store is an internal detail.

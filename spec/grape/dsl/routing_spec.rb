@@ -24,8 +24,8 @@ describe Grape::DSL::Routing do
     it 'sets a version for route' do
       version = 'v1'
       expect(subject.version(version)).to eq(version)
-      expect(subject.inheritable_setting.namespace_inheritable[:version]).to eq([version])
-      expect(subject.inheritable_setting.namespace_inheritable[:version_options]).to eq(Grape::DSL::VersionOptions.new)
+      expect(subject.inheritable_setting.version).to eq([version])
+      expect(subject.inheritable_setting.version_options).to eq(Grape::DSL::VersionOptions.new)
     end
   end
 
@@ -33,7 +33,7 @@ describe Grape::DSL::Routing do
     it 'sets a prefix for route' do
       prefix = '/api'
       subject.prefix prefix
-      expect(subject.inheritable_setting.namespace_inheritable[:root_prefix]).to eq(prefix)
+      expect(subject.inheritable_setting.root_prefix).to eq(prefix)
     end
   end
 

@@ -292,8 +292,8 @@ module Grape
       params = config.params
       path_settings = prepare_default_path_settings
       forward_match = bare_rack_app?
-      version = prepare_version(inheritable_setting.namespace_inheritable[:version])
-      prefix = inheritable_setting.namespace_inheritable[:root_prefix]
+      version = prepare_version(inheritable_setting.version)
+      prefix = inheritable_setting.root_prefix
       requirements = prepare_routes_requirements(config.requirements)
       anchor = config.anchor
       settings = inheritable_setting.route.except(:declared_params, :saved_validations)
@@ -351,12 +351,12 @@ module Grape
 
       stack.concat inheritable_setting.namespace_stackable[:middleware]
 
-      if inheritable_setting.namespace_inheritable[:version].present?
-        version_options = inheritable_setting.namespace_inheritable[:version_options]
+      if inheritable_setting.version.present?
+        version_options = inheritable_setting.version_options
         stack.use Grape::Middleware::Versioner.using(version_options.using),
-                  versions: inheritable_setting.namespace_inheritable[:version].flatten,
+                  versions: inheritable_setting.version.flatten,
                   version_options:,
-                  prefix: inheritable_setting.namespace_inheritable[:root_prefix],
+                  prefix: inheritable_setting.root_prefix,
                   mount_path: inheritable_setting.namespace_stackable[:mount_path].first
       end
 

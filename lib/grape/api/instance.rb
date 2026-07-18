@@ -134,9 +134,9 @@ module Grape
       # errors from reaching upstream. This is effectivelly done by unsetting
       # X-Cascade. Default :cascade is true.
       def cascade?
-        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
-        return namespace_inheritable[:cascade] if namespace_inheritable.key?(:cascade)
-        return namespace_inheritable[:version_options].cascade if namespace_inheritable[:version_options]
+        setting = self.class.inheritable_setting
+        return setting.cascade if setting.cascade_defined?
+        return setting.version_options.cascade if setting.version_options
 
         true
       end
