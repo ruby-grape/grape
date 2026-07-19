@@ -32,6 +32,7 @@
 * [#2806](https://github.com/ruby-grape/grape/pull/2806): Internalize versioning state behind `Grape::Util::InheritableSetting` accessors (`version`, `version_options`, `root_prefix`, `cascade` / `cascade_defined?`) - [@ericproulx](https://github.com/ericproulx).
 * [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers) - [@ericproulx](https://github.com/ericproulx).
 * [#2808](https://github.com/ruby-grape/grape/pull/2808): Internalize `build_params_with` and `auth` behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
+* [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers), and drop the vestigial `namespace_inheritable` hash copy in `Grape::API::Instance`'s route-config collection - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
