@@ -44,7 +44,7 @@ module Grape
       #      # whatever
       #    end
       def reset_validations!
-        inheritable_setting.namespace_stackable.delete(:declared_params, :params, :validations)
+        inheritable_setting.reset_validations!
       end
     end
   end

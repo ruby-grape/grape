@@ -43,7 +43,7 @@ describe Grape::Validations::ParamsDocumentation do
         except_values: [4, 5, 6]
       }
       subject.document_params(attrs, spec_for(validations))
-      stored = api_double.inheritable_setting.namespace_stackable[:params].first
+      stored = api_double.inheritable_setting.params_documentation
       expect(stored.keys).to include('full_name_foo', 'full_name_bar')
       expect(stored['full_name_foo']).to include(
         required: true,
@@ -69,7 +69,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'does not store any documented params' do
         subject.document_params([:foo], spec_for(validations))
-        expect(api_double.inheritable_setting.namespace_stackable[:params]).to be_empty
+        expect(api_double.inheritable_setting.params_documentation).to be_nil
       end
 
       it 'does not mutate the input validations' do
@@ -86,7 +86,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'does not raise an error' do
         expect { subject.document_params([:foo], spec_for(validations)) }.not_to raise_error
-        expect(api_double.inheritable_setting.namespace_stackable[:params].first['full_name_foo']).to eq({ required: false })
+        expect(api_double.inheritable_setting.params_documentation['full_name_foo']).to eq({ required: false })
       end
     end
 
@@ -97,7 +97,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'uses description if desc is not present' do
         subject.document_params([:foo], spec_for(validations))
-        expect(api_double.inheritable_setting.namespace_stackable[:params].first['full_name_foo'][:desc]).to eq('desc2')
+        expect(api_double.inheritable_setting.params_documentation['full_name_foo'][:desc]).to eq('desc2')
       end
     end
 
@@ -108,7 +108,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'uses description if desc is not present' do
         subject.document_params([:foo], spec_for(validations))
-        expect(api_double.inheritable_setting.namespace_stackable[:params].first['full_name_foo']).to eq({ required: false })
+        expect(api_double.inheritable_setting.params_documentation['full_name_foo']).to eq({ required: false })
       end
     end
 
@@ -119,7 +119,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'does not include documentation' do
         subject.document_params([:foo], spec_for(validations))
-        expect(api_double.inheritable_setting.namespace_stackable[:params].first['full_name_foo']).not_to have_key(:documentation)
+        expect(api_double.inheritable_setting.params_documentation['full_name_foo']).not_to have_key(:documentation)
       end
     end
 
@@ -130,7 +130,7 @@ describe Grape::Validations::ParamsDocumentation do
 
       it 'sets type as nil' do
         subject.document_params([:foo], spec_for(validations))
-        expect(api_double.inheritable_setting.namespace_stackable[:params].first['full_name_foo'][:type]).to be_nil
+        expect(api_double.inheritable_setting.params_documentation['full_name_foo'][:type]).to be_nil
       end
     end
   end

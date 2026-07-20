@@ -54,7 +54,7 @@ module Grape
       #       end
       #     end
       def use(*names, **options)
-        named_params = @api.inheritable_setting.namespace_stackable_with_hash(:named_params) || {}
+        named_params = @api.inheritable_setting.named_params || {}
         names.each do |name|
           params_block = named_params.fetch(name) do
             raise "Params :#{name} not found!"

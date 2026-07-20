@@ -115,7 +115,7 @@ module Grape
         def process_named_params
           return if @named_params.blank?
 
-          api.inheritable_setting.namespace_stackable[:named_params] = @named_params
+          api.inheritable_setting.add_named_params(@named_params)
         end
       end
     end

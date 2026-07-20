@@ -53,17 +53,12 @@ describe Grape::DSL::Parameters do
   end
 
   describe '#use' do
-    before do
-      allow_message_expectations_on_nil
-      allow(subject.api).to receive(:namespace_stackable).with(:named_params)
-    end
-
     let(:options) { { option: 'value' } }
     let(:named_params) { { params_group: proc {} } }
 
     it 'calls processes associated with named params' do
       subject.api = Class.new { include Grape::DSL::Settings }.new
-      subject.api.inheritable_setting.namespace_stackable[:named_params] = named_params
+      subject.api.inheritable_setting.add_named_params(named_params)
       expect(subject).to receive(:instance_exec).with(options).and_yield
       subject.use :params_group, **options
     end
