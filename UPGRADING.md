@@ -91,6 +91,55 @@ Related contract changes, none with known external consumers:
 * `Grape::Endpoint#inherit_settings` now takes the parent `Grape::Util::InheritableSetting` instead of that setting's raw `namespace_stackable` store.
 * The endpoint's request-time validator snapshot moved from `route_setting(:saved_validations)` to `route_setting(:validations)`, symmetric with `route_setting(:declared_params)`. The vestigial `saved_` prefix dated back to the 2014 settings refactor. Neither key appears in `route.settings`, as before.
 * `Grape::Util::InheritableSetting#api_class` (a Hash nothing in Grape ever wrote to) and `#point_in_time_copies` (only ever used internally) are removed.
+#### Callback filters are recorded through `InheritableSetting` accessors
+
+The filter blocks registered by `before`, `before_validation`, `after_validation`, `after` and `finally` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` — `add_callback(name, block)` to record, and `callbacks` returning a Hash keyed by the DSL method names (`callbacks[:before]`, `callbacks[:finally]`, …) — instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:befores]` and friends still return the same values, but the pluralized keys should be considered internal.
+#### Rescue configuration is recorded through `InheritableSetting` accessors
+
+The remaining rescue state written by `rescue_from` is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting`, completing the encapsulation started with `rescue_handlers` / `add_rescue_handlers`:
+
+* `rescue_options` / `add_rescue_options(options)` replace `namespace_stackable[:rescue_options]`. The reader absorbs the nearest-scope-wins convention (previously the `&.last` at the read site) and returns a single `Grape::DSL::RescueOptions` or `nil`, not the raw stack.
+* `add_all_rescue_handler(handler)`, `add_grape_exceptions_rescue_handler(handler)` and `add_internal_grape_exceptions_rescue_handler(handler)` replace the direct `namespace_inheritable` writes for the `rescue_from :all` / `:grape_exceptions` / `:internal_grape_exceptions` meta selectors; each records its handler and flips the associated flags.
+* `rescue_all?`, `rescue_grape_exceptions?`, `all_rescue_handler`, `grape_exceptions_rescue_handler` and `internal_grape_exceptions_rescue_handler` replace the corresponding `namespace_inheritable` reads. The two `?` readers return `false` (rather than `nil`) when never set; `Grape::Middleware::Error` only ever used them in boolean context, so behavior is unchanged.
+
+The keys' storage is unchanged for now, so `namespace_stackable[:rescue_options]` and the `namespace_inheritable` keys still return the same values, but they should be considered internal.
+#### Content negotiation state is recorded through `InheritableSetting` accessors
+
+The state written by the `content_type`, `format`, `formatter`, `parser` and `error_formatter` DSL methods is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`content_types` / `add_content_type`, `formatters` / `add_formatter`, `parsers` / `add_parser`, `error_formatters` / `add_error_formatter`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. Each writer records one single-entry Hash per registration and each reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged name => value Hash (nearest scope wins) or `nil` when nothing is registered. The keys' storage is unchanged for now, so `namespace_stackable[:content_types]` and friends still return the same values, but they should be considered internal.
+#### `represent` registrations are recorded through `InheritableSetting` accessors
+
+The model-class => entity-class registrations written by `represent` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`representations` / `add_representation(model_class, entity_class)`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The reader absorbs the `namespace_stackable_with_hash` deep-merge convention, returning the merged Hash (nearest scope wins) or `nil` when nothing is registered. The key's storage is unchanged for now, so `namespace_stackable[:representations]` still returns the same values, but it should be considered internal.
+
+Also removed: the `namespace_stackable[:representations] ||= []` line in `Grape::Endpoint#initialize`. It was provably inert — `Grape::Util::StackableValues#[]` always returns an array (a frozen empty one for never-written keys), which is truthy, so the `||=` assignment could never execute. No settings state changes as a result.
+#### Middleware and helper registrations are recorded through `InheritableSetting` accessors
+
+The state written by the middleware DSL (`use`, `insert`, `insert_before`, `insert_after`) and by `helpers` is now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`middleware` / `add_middleware`, `helpers` / `add_helper`) instead of raw `namespace_stackable` keys, following the same move made for rescue handlers. The keys' storage is unchanged for now, so `namespace_stackable[:middleware]` and `namespace_stackable[:helpers]` still return the same values, but they should be considered internal.
+
+One micro-change: the `middleware` DSL reader dropped its `|| []` fallback — `Grape::Util::StackableValues#[]` never returns `nil`, so the fallback was dead code. When no middleware is registered the reader now returns the shared frozen empty array instead of a fresh mutable one; no caller in Grape or grape-swagger mutates the returned array.
+#### Namespace and mount-path registrations are recorded through `InheritableSetting` accessors
+
+The `Grape::Namespace` objects registered by the `namespace` DSL (and its `group` / `resource` / `resources` / `segment` aliases) and the mount path recorded by `mount` are now written and read through dedicated accessors on `Grape::Util::InheritableSetting` instead of raw `namespace_stackable` keys, following the same move made for rescue handlers:
+
+* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the `InheritableValues` store).
+* `namespace_path` returns the normalized joined path prefix, absorbing the `Grape::Namespace.joined_space_path(...)` call previously spelled out at the read sites, and `namespace_requirements` returns the requirements declared by registered namespaces, absorbing the `filter_map(&:requirements)`.
+* `mount_path` / `add_mount_path(path)` replace `namespace_stackable[:mount_path]`; the reader absorbs the outermost-wins convention (previously the `.first` at the read site in `Endpoint#build_stack`).
+
+The keys' storage is unchanged for now, so `namespace_stackable[:namespace]` and `namespace_stackable[:mount_path]` still return the same values, but they should be considered internal.
+#### Contract key maps are recorded through `InheritableSetting` accessors
+
+The Dry::Schema key maps registered by `contract` blocks are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`contract_key_maps` / `add_contract_key_map(key_map)`) instead of the raw `namespace_stackable[:contract_key_map]` key, following the same move made for rescue handlers. The key's storage is unchanged for now, so `namespace_stackable[:contract_key_map]` still returns the same values, but it should be considered internal.
+#### Format and error-response defaults are recorded through `InheritableSetting` accessors
+
+The nearest-wins scalars written by the `format`, `default_format`, `default_error_formatter` and `default_error_status` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`format` / `format=`, `default_format` / `default_format=`, `default_error_formatter` / `default_error_formatter=`, `default_error_status` / `default_error_status=`) instead of raw `namespace_inheritable` keys — the first batch of the `namespace_inheritable` cleanup, following the pattern used for `namespace_stackable`. Since these are overriding assignments rather than stacking registrations, the writers use plain `=` instead of the `add_*` naming. The keys' storage is unchanged for now, so `namespace_inheritable[:format]` and friends still return the same values, but they should be considered internal.
+#### Versioning state is recorded through `InheritableSetting` accessors
+
+The nearest-wins scalars written by the `version`, `prefix` and `cascade` DSL methods are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`version` / `version=`, `version_options` / `version_options=`, `root_prefix` / `root_prefix=`, `cascade` / `cascade=`) instead of raw `namespace_inheritable` keys. `cascade` is presence-sensitive — an explicit `nil` is distinct from never-set — so the accessor family includes `cascade_defined?`, absorbing the `namespace_inheritable.key?(:cascade)` checks previously spelled out in `DSL::Routing#cascade` and `Grape::API::Instance#cascade?`. The keys' storage is unchanged for now, so `namespace_inheritable[:version]` and friends still return the same values, but they should be considered internal.
+#### Routing scope flags are recorded through `InheritableSetting` accessors
+
+The flags flipped by `do_not_route_head!`, `do_not_route_options!`, `do_not_document!` and `lint!` are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`!` writers, `?` readers) instead of raw `namespace_inheritable` keys. The `?` readers return `false` (rather than `nil`) when never set; every consumer only used them in boolean context, so behavior is unchanged. The keys' storage is unchanged for now, so `namespace_inheritable[:do_not_route_head]` and friends still return the same values, but they should be considered internal.
+#### `build_params_with` and `auth` are recorded through `InheritableSetting` accessors
+
+The params-builder strategy written by `build_with` (both the API-level and the params-block DSL) and the authentication configuration written by the `auth` DSL are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`build_params_with` / `build_params_with=`, `auth` / `auth=`) instead of raw `namespace_inheritable` keys, completing the per-key `namespace_inheritable` cleanup. The keys' storage is unchanged for now, so `namespace_inheritable[:build_params_with]` and `namespace_inheritable[:auth]` still return the same values, but they should be considered internal.
 
 ### Upgrading to >= 3.3
 

@@ -24,8 +24,8 @@ describe Grape::DSL::Routing do
     it 'sets a version for route' do
       version = 'v1'
       expect(subject.version(version)).to eq(version)
-      expect(subject.inheritable_setting.namespace_inheritable[:version]).to eq([version])
-      expect(subject.inheritable_setting.namespace_inheritable[:version_options]).to eq(Grape::DSL::VersionOptions.new)
+      expect(subject.inheritable_setting.version).to eq([version])
+      expect(subject.inheritable_setting.version_options).to eq(Grape::DSL::VersionOptions.new)
     end
   end
 
@@ -33,7 +33,7 @@ describe Grape::DSL::Routing do
     it 'sets a prefix for route' do
       prefix = '/api'
       subject.prefix prefix
-      expect(subject.inheritable_setting.namespace_inheritable[:root_prefix]).to eq(prefix)
+      expect(subject.inheritable_setting.root_prefix).to eq(prefix)
     end
   end
 
@@ -58,14 +58,14 @@ describe Grape::DSL::Routing do
   describe '.do_not_route_head!' do
     it 'sets do not route head option' do
       subject.do_not_route_head!
-      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_head]).to be(true)
+      expect(subject.inheritable_setting.do_not_route_head?).to be(true)
     end
   end
 
   describe '.do_not_route_options!' do
     it 'sets do not route options option' do
       subject.do_not_route_options!
-      expect(subject.inheritable_setting.namespace_inheritable[:do_not_route_options]).to be(true)
+      expect(subject.inheritable_setting.do_not_route_options?).to be(true)
     end
   end
 

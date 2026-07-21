@@ -51,7 +51,7 @@ module Grape
       def entity_class_for_obj(object)
         klass = object_class(object)
 
-        representations = inheritable_setting.namespace_stackable_with_hash(:representations)
+        representations = inheritable_setting.representations
         if representations
           potential = klass.ancestors.detect { |potential| representations.key?(potential) }
           return representations[potential] if potential && representations[potential]

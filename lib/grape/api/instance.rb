@@ -134,9 +134,9 @@ module Grape
       # errors from reaching upstream. This is effectivelly done by unsetting
       # X-Cascade. Default :cascade is true.
       def cascade?
-        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable
-        return namespace_inheritable[:cascade] if namespace_inheritable.key?(:cascade)
-        return namespace_inheritable[:version_options].cascade if namespace_inheritable[:version_options]
+        setting = self.class.inheritable_setting
+        return setting.cascade if setting.cascade_defined?
+        return setting.version_options.cascade if setting.version_options
 
         true
       end
@@ -154,18 +154,11 @@ module Grape
         # contain already versioning information when using path versioning.
         all_routes = self.class.endpoints.flat_map(&:routes)
 
-        # Read the settings the helper routes need from a *copy* with the
-        # root-prefix/versioning keys stripped, so adding these routes won't
-        # prepend versioning information again. This used to delete those keys
-        # from the shared class-level settings and restore them in an ensure;
-        # a request served concurrently on another instance during a runtime
-        # recompile could observe the missing keys (e.g. via #cascade?). A
-        # local copy keeps that mutation off the shared object.
-        namespace_inheritable = self.class.inheritable_setting.namespace_inheritable.to_hash.except(*ROOT_PREFIX_VERSIONING_KEYS)
-        collect_route_config_per_pattern(all_routes, namespace_inheritable)
+        collect_route_config_per_pattern(all_routes)
       end
 
-      def collect_route_config_per_pattern(all_routes, namespace_inheritable)
+      def collect_route_config_per_pattern(all_routes)
+        setting = self.class.inheritable_setting
         routes_by_regexp = all_routes.group_by(&:pattern_regexp)
 
         # Build the configuration based on the first endpoint and the collection of methods supported.
@@ -174,18 +167,15 @@ module Grape
 
           last_route = routes.last # Most of the configuration is taken from the last endpoint
           allowed_methods = routes.map(&:request_method)
-          allowed_methods |= [Rack::HEAD] if !namespace_inheritable[:do_not_route_head] && allowed_methods.include?(Rack::GET)
+          allowed_methods |= [Rack::HEAD] if !setting.do_not_route_head? && allowed_methods.include?(Rack::GET)
 
-          allow_header = namespace_inheritable[:do_not_route_options] ? allowed_methods : [Rack::OPTIONS] | allowed_methods
-          last_route.app.options_route_enabled = true unless namespace_inheritable[:do_not_route_options] || allowed_methods.include?(Rack::OPTIONS)
+          allow_header = setting.do_not_route_options? ? allowed_methods : [Rack::OPTIONS] | allowed_methods
+          last_route.app.options_route_enabled = true unless setting.do_not_route_options? || allowed_methods.include?(Rack::OPTIONS)
 
           greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
           @router.associate_routes(greedy_route)
         end
       end
-
-      ROOT_PREFIX_VERSIONING_KEYS = %i[version version_options root_prefix].freeze
-      private_constant :ROOT_PREFIX_VERSIONING_KEYS
     end
   end
 end

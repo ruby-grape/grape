@@ -6,7 +6,7 @@ module Grape
     # +ValidationsSpec+; never mutates the user's validations hash.
     module ParamsDocumentation
       def document_params(attrs, spec)
-        return if @api.inheritable_setting.namespace_inheritable[:do_not_document]
+        return if @api.inheritable_setting.do_not_document?
 
         documented_attrs = attrs.to_h do |name|
           [full_name(name), extract_details(spec)]

@@ -35,8 +35,9 @@ module Grape
       [self.class, space, requirements, options].hash
     end
 
-    # Join the namespaces from a list of settings to create a path prefix.
-    # @param settings [Array] list of Grape::Util::InheritableSettings.
+    # Join the namespaces from a list of Namespace objects to create a path
+    # prefix.
+    # @param settings [Array] list of Grape::Namespace objects.
     def self.joined_space_path(settings)
       JoinedSpaceCache[joined_space(settings)]
     end

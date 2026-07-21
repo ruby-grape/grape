@@ -16,9 +16,9 @@ module Grape
       end
 
       def cascade(value = nil)
-        return inheritable_setting.namespace_inheritable.key?(:cascade) ? !inheritable_setting.namespace_inheritable[:cascade].nil? : true if value.nil?
+        return inheritable_setting.cascade_defined? ? !inheritable_setting.cascade.nil? : true if value.nil?
 
-        inheritable_setting.namespace_inheritable[:cascade] = value
+        inheritable_setting.cascade = value
       end
 
       # Specify an API version.
@@ -72,13 +72,13 @@ module Grape
 
         if block
           within_namespace do
-            inheritable_setting.namespace_inheritable[:version] = requested_versions
-            inheritable_setting.namespace_inheritable[:version_options] = options
+            inheritable_setting.version = requested_versions
+            inheritable_setting.version_options = options
             instance_eval(&block)
           end
         else
-          inheritable_setting.namespace_inheritable[:version] = requested_versions
-          inheritable_setting.namespace_inheritable[:version_options] = options
+          inheritable_setting.version = requested_versions
+          inheritable_setting.version_options = options
         end
 
         @versions&.last
@@ -86,9 +86,9 @@ module Grape
 
       # Define a root URL prefix for your entire API.
       def prefix(prefix = nil)
-        return inheritable_setting.namespace_inheritable[:root_prefix] if prefix.nil?
+        return inheritable_setting.root_prefix if prefix.nil?
 
-        inheritable_setting.namespace_inheritable[:root_prefix] = prefix.to_s
+        inheritable_setting.root_prefix = prefix.to_s
       end
 
       # Create a scope without affecting the URL.
@@ -102,25 +102,25 @@ module Grape
       end
 
       def build_with(build_with)
-        inheritable_setting.namespace_inheritable[:build_params_with] = build_with
+        inheritable_setting.build_params_with = build_with
       end
 
       # Do not route HEAD requests to GET requests automatically.
       def do_not_route_head!
-        inheritable_setting.namespace_inheritable[:do_not_route_head] = true
+        inheritable_setting.do_not_route_head!
       end
 
       # Do not automatically route OPTIONS.
       def do_not_route_options!
-        inheritable_setting.namespace_inheritable[:do_not_route_options] = true
+        inheritable_setting.do_not_route_options!
       end
 
       def lint!
-        inheritable_setting.namespace_inheritable[:lint] = true
+        inheritable_setting.lint!
       end
 
       def do_not_document!
-        inheritable_setting.namespace_inheritable[:do_not_document] = true
+        inheritable_setting.do_not_document!
       end
 
       def mount(mounts, *opts)
@@ -137,7 +137,7 @@ module Grape
           # instantiated Grape::API::Instance (vs. a bare Rack app).
           if app.is_a?(Grape::Mountable)
             mount_path = Grape::Util::PathNormalizer.call(path)
-            app.top_level_setting.namespace_stackable[:mount_path] = mount_path
+            app.top_level_setting.add_mount_path(mount_path)
 
             app.inherit_settings(inheritable_setting)
 
@@ -229,11 +229,11 @@ module Grape
       #       end
       #     end
       def namespace(space = nil, requirements: nil, **options, &block)
-        return Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace]) unless space || block
+        return inheritable_setting.namespace_path unless space || block
 
         within_namespace do
           nest(block) do
-            inheritable_setting.namespace_stackable[:namespace] = Grape::Namespace.new(space, requirements:, **options) if space
+            inheritable_setting.add_namespace(Grape::Namespace.new(space, requirements:, **options)) if space
           end
         end
       end

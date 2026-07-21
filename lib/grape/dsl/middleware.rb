@@ -13,7 +13,7 @@ module Grape
         arr = [:use, middleware_class, *args]
         arr << block if block
 
-        inheritable_setting.namespace_stackable[:middleware] = arr
+        inheritable_setting.add_middleware(arr)
       end
 
       %i[insert insert_before insert_after].each do |method_name|
@@ -21,7 +21,7 @@ module Grape
           arr = [method_name, *args]
           arr << block if block
 
-          inheritable_setting.namespace_stackable[:middleware] = arr
+          inheritable_setting.add_middleware(arr)
         end
       end
 
@@ -29,7 +29,7 @@ module Grape
       # and arguments that are currently applied to the
       # application.
       def middleware
-        inheritable_setting.namespace_stackable[:middleware] || []
+        inheritable_setting.middleware
       end
     end
   end

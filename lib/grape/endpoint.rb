@@ -116,14 +116,14 @@ module Grape
       compile!
       routes.each do |route|
         router.append(route.apply(self))
-        next if inheritable_setting.namespace_inheritable[:do_not_route_head] || route.request_method != Rack::GET
+        next if inheritable_setting.do_not_route_head? || route.request_method != Rack::GET
 
         router.append(route.to_head.apply(self))
       end
     end
 
     def namespace
-      @namespace ||= Namespace.joined_space_path(inheritable_setting.namespace_stackable[:namespace])
+      @namespace ||= inheritable_setting.namespace_path
     end
 
     def call(env)
@@ -270,13 +270,13 @@ module Grape
       @app = config.app || build_stack
       warn_unauthenticated_mounted_app
       @helpers = build_helpers
-      stackable = inheritable_setting.namespace_stackable
-      @befores            = stackable[:befores]
-      @before_validations = stackable[:before_validations]
-      @after_validations  = stackable[:after_validations]
-      @afters             = stackable[:afters]
-      @finallies          = stackable[:finallies]
-      @build_params_with  = inheritable_setting.namespace_inheritable[:build_params_with]
+      callbacks = inheritable_setting.callbacks
+      @befores            = callbacks.fetch(:before)
+      @before_validations = callbacks.fetch(:before_validation)
+      @after_validations  = callbacks.fetch(:after_validation)
+      @afters             = callbacks.fetch(:after)
+      @finallies          = callbacks.fetch(:finally)
+      @build_params_with  = inheritable_setting.build_params_with
     end
 
     def to_routes
@@ -284,8 +284,8 @@ module Grape
       params = config.params
       path_settings = prepare_default_path_settings
       forward_match = bare_rack_app?
-      version = prepare_version(inheritable_setting.namespace_inheritable[:version])
-      prefix = inheritable_setting.namespace_inheritable[:root_prefix]
+      version = prepare_version(inheritable_setting.version)
+      prefix = inheritable_setting.root_prefix
       requirements = prepare_routes_requirements(config.requirements)
       anchor = config.anchor
       settings = inheritable_setting.route.except(:declared_params, :validations)
@@ -320,7 +320,7 @@ module Grape
     end
 
     def prepare_routes_requirements(route_options_requirements)
-      namespace_requirements = inheritable_setting.namespace_stackable[:namespace].filter_map(&:requirements)
+      namespace_requirements = inheritable_setting.namespace_requirements
       namespace_requirements << route_options_requirements if route_options_requirements.present?
       namespace_requirements.reduce({}, :merge)
     end
@@ -334,30 +334,30 @@ module Grape
     def build_stack
       stack = Grape::Middleware::Stack.new
 
-      content_types = inheritable_setting.namespace_stackable_with_hash(:content_types)
-      format = inheritable_setting.namespace_inheritable[:format]
+      content_types = inheritable_setting.content_types
+      format = inheritable_setting.format
 
       stack.use Rack::Head
       stack.use Rack::Lint if lint?
       stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
 
-      stack.concat inheritable_setting.namespace_stackable[:middleware]
+      stack.concat inheritable_setting.middleware
 
-      if inheritable_setting.namespace_inheritable[:version].present?
-        version_options = inheritable_setting.namespace_inheritable[:version_options]
+      if inheritable_setting.version.present?
+        version_options = inheritable_setting.version_options
         stack.use Grape::Middleware::Versioner.using(version_options.using),
-                  versions: inheritable_setting.namespace_inheritable[:version].flatten,
+                  versions: inheritable_setting.version.flatten,
                   version_options:,
-                  prefix: inheritable_setting.namespace_inheritable[:root_prefix],
-                  mount_path: inheritable_setting.namespace_stackable[:mount_path].first
+                  prefix: inheritable_setting.root_prefix,
+                  mount_path: inheritable_setting.mount_path
       end
 
       stack.use Grape::Middleware::Formatter,
                 format:,
-                default_format: inheritable_setting.namespace_inheritable[:default_format] || :txt,
+                default_format: inheritable_setting.default_format || :txt,
                 content_types:,
-                formatters: inheritable_setting.namespace_stackable_with_hash(:formatters),
-                parsers: inheritable_setting.namespace_stackable_with_hash(:parsers)
+                formatters: inheritable_setting.formatters,
+                parsers: inheritable_setting.parsers
 
       builder = stack.build
       builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
@@ -365,27 +365,26 @@ module Grape
     end
 
     def error_middleware_options(format, content_types)
-      ns_inh = inheritable_setting.namespace_inheritable
-      ns_stack = inheritable_setting
+      setting = inheritable_setting
       {
         format:,
         content_types:,
-        default_status: ns_inh[:default_error_status],
-        rescue_all: ns_inh[:rescue_all],
-        rescue_grape_exceptions: ns_inh[:rescue_grape_exceptions],
-        default_error_formatter: ns_inh[:default_error_formatter],
-        error_formatters: ns_stack.namespace_stackable_with_hash(:error_formatters),
-        rescue_options: ns_stack.namespace_stackable[:rescue_options]&.last,
-        rescue_handlers: ns_stack.rescue_handlers,
-        base_only_rescue_handlers: ns_stack.base_only_rescue_handlers,
-        all_rescue_handler: ns_inh[:all_rescue_handler],
-        grape_exceptions_rescue_handler: ns_inh[:grape_exceptions_rescue_handler],
-        internal_grape_exceptions_rescue_handler: ns_inh[:internal_grape_exceptions_rescue_handler]
+        default_status: setting.default_error_status,
+        rescue_all: setting.rescue_all?,
+        rescue_grape_exceptions: setting.rescue_grape_exceptions?,
+        default_error_formatter: setting.default_error_formatter,
+        error_formatters: setting.error_formatters,
+        rescue_options: setting.rescue_options,
+        rescue_handlers: setting.rescue_handlers,
+        base_only_rescue_handlers: setting.base_only_rescue_handlers,
+        all_rescue_handler: setting.all_rescue_handler,
+        grape_exceptions_rescue_handler: setting.grape_exceptions_rescue_handler,
+        internal_grape_exceptions_rescue_handler: setting.internal_grape_exceptions_rescue_handler
       }
     end
 
     def build_helpers
-      helpers = inheritable_setting.namespace_stackable[:helpers]
+      helpers = inheritable_setting.helpers
       return if helpers.empty?
 
       Module.new { helpers.each { |mod_to_include| include mod_to_include } }
@@ -398,7 +397,7 @@ module Grape
     # inherited settings. Warn so this bypass isn't silent.
     def warn_unauthenticated_mounted_app
       return unless bare_rack_app?
-      return unless inheritable_setting.namespace_inheritable[:auth]
+      return unless inheritable_setting.auth
 
       warn "Grape: #{config.app} is mounted under an API that declares authentication, but authentication " \
            'middleware does not wrap mounted Rack applications. Requests to this mount are not authenticated by Grape.'
@@ -414,7 +413,7 @@ module Grape
     end
 
     def lint?
-      inheritable_setting.namespace_inheritable[:lint] || Grape.config.lint
+      inheritable_setting.lint? || Grape.config.lint
     end
   end
 end
