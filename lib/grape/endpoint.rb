@@ -282,7 +282,7 @@ module Grape
     def to_routes
       route_options = config.route_options
       params = config.params
-      path_settings = prepare_default_path_settings
+      path_settings = inheritable_setting.path_settings
       forward_match = bare_rack_app?
       version = prepare_version(inheritable_setting.version)
       prefix = inheritable_setting.root_prefix
@@ -311,12 +311,6 @@ module Grape
     # rather than an anchored route.
     def bare_rack_app?
       config.app && !config.app.is_a?(Grape::Mountable)
-    end
-
-    def prepare_default_path_settings
-      namespace_stackable_hash = inheritable_setting.namespace_stackable.to_hash
-      namespace_inheritable_hash = inheritable_setting.namespace_inheritable.to_hash
-      namespace_stackable_hash.merge!(namespace_inheritable_hash)
     end
 
     def prepare_routes_requirements(route_options_requirements)
