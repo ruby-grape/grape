@@ -38,6 +38,7 @@
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2812](https://github.com/ruby-grape/grape/pull/2813): Fix `type: Array` combined with `values: [...]` list coercing to the guessed element type instead of `Array` - [@schinery](https://github.com/schinery).
 * Your contribution here.
 
 ### 3.3.3 (2026-07-17)
