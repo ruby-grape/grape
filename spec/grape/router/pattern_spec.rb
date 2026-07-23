@@ -15,7 +15,17 @@ RSpec.describe Grape::Router::Pattern do
 
   describe '.build' do
     subject(:pattern) do
-      described_class.build(path: '/foo', namespace: 'ns', settings: { root_prefix: '/api' }, anchor: true, params: {}, version: nil, requirements: {})
+      described_class.build(
+        path: '/foo',
+        namespace: 'ns',
+        settings: Grape::Util::InheritableSetting::PathSettings.new(
+          mount_path: nil, root_prefix: '/api', format: nil, content_types: nil, version: nil, version_options: nil
+        ),
+        anchor: true,
+        params: {},
+        version: nil,
+        requirements: {}
+      )
     end
 
     it 'assembles origin/suffix from the path, namespace and settings via Path' do
