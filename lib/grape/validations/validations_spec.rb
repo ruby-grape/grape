@@ -51,6 +51,7 @@ module Grape
         @allow_blank = resolve_value(raw[:allow_blank])
         @fail_fast = raw[:fail_fast] || false
 
+        @guessed_coerce_type = guess_coerce_type(@coerce_type, @values, @except_values)
         @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
         @validator_entries = build_validator_entries(raw)
 
@@ -73,10 +74,14 @@ module Grape
       # construction so an incoherent spec (e.g. a +default+ outside +values+,
       # or +values+ whose elements don't match +type+) can never exist —
       # callers no longer have to remember to invoke these separately.
+      #
+      # NB. +@guessed_coerce_type+ is used only for this check, never for
+      # +coerce_options+ — a bare +type: Array+ combined with scalar
+      # +values:+ must still coerce to +Array+ at runtime (only the elements
+      # are scalar), so the real +@coerce_type+ is never overwritten by it.
       def validate!
-        guessed_coerce_type = guess_coerce_type(@coerce_type, @values, @except_values)
         check_incompatible_option_values(@default, @values, @except_values)
-        validate_value_coercion(guessed_coerce_type, @values, @except_values)
+        validate_value_coercion(@guessed_coerce_type, @values, @except_values)
       end
 
       def check_incompatible_option_values(default, values, except_values)
