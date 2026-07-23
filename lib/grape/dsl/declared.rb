@@ -24,8 +24,8 @@ module Grape
 
         contract_key_map = inheritable_setting.contract_key_maps
         handler = DeclaredParamsHandler.new(include_missing:, evaluate_given:, stringify:, contract_key_map:)
-        declared_params = include_parent_namespaces ? inheritable_setting.route[:declared_params] : (inheritable_setting.declared_params.last || [])
-        renamed_params = inheritable_setting.route[:renamed_params] || {}
+        declared_params = include_parent_namespaces ? inheritable_setting.route_declared_params : (inheritable_setting.declared_params.last || [])
+        renamed_params = inheritable_setting.route_renamed_params
         route_params = config.params
 
         handler.call(passed_params, declared_params, route_params, renamed_params)

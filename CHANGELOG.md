@@ -33,6 +33,7 @@
 * [#2808](https://github.com/ruby-grape/grape/pull/2808): Internalize `build_params_with` and `auth` behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers), and drop the vestigial `namespace_inheritable` hash copy in `Grape::API::Instance`'s route-config collection - [@ericproulx](https://github.com/ericproulx).
 * [#2810](https://github.com/ruby-grape/grape/pull/2810): Make `Grape::Util::InheritableSetting`'s raw stores internal where the ecosystem allows: `namespace_inheritable` is now protected and `namespace_stackable_with_hash` private, while `namespace_stackable` stays public for grape-swagger; `Router::Pattern::Path` reads a dedicated `path_settings` snapshot, and `mount_paths` exposes the full mount-path stack - [@ericproulx](https://github.com/ericproulx).
+* [#2811](https://github.com/ruby-grape/grape/pull/2811): Internalize the route scope behind `Grape::Util::InheritableSetting` accessors (`route_validations`, `route_declared_params`, `route_renamed_params` / `add_route_renamed_param`, `route_description`, `route_settings`, `route_setting`, `inherit_route_params`), so no external code touches the raw `route` store - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
