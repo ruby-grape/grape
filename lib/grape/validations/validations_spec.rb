@@ -51,7 +51,6 @@ module Grape
         @allow_blank = resolve_value(raw[:allow_blank])
         @fail_fast = raw[:fail_fast] || false
 
-        @coerce_type = guess_coerce_type(@coerce_type, @values, @except_values)
         @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
         @validator_entries = build_validator_entries(raw)
 
@@ -75,8 +74,9 @@ module Grape
       # or +values+ whose elements don't match +type+) can never exist —
       # callers no longer have to remember to invoke these separately.
       def validate!
+        guessed_coerce_type = guess_coerce_type(@coerce_type, @values, @except_values)
         check_incompatible_option_values(@default, @values, @except_values)
-        validate_value_coercion(@coerce_type, @values, @except_values)
+        validate_value_coercion(guessed_coerce_type, @values, @except_values)
       end
 
       def check_incompatible_option_values(default, values, except_values)
