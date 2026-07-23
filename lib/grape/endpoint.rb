@@ -88,11 +88,7 @@ module Grape
     # the endpoint's API is mounted under another one.
     # @param settings [Grape::Util::InheritableSetting]
     def inherit_settings(settings)
-      parent_validations = settings.validations
-      inheritable_setting.route[:validations].concat(parent_validations) if parent_validations.any?
-      parent_declared_params = settings.declared_params
-      inheritable_setting.route[:declared_params].concat(parent_declared_params.flatten) if parent_declared_params.any?
-
+      inheritable_setting.inherit_route_params(settings)
       endpoints&.each { |e| e.inherit_settings(settings) }
     end
 
@@ -201,7 +197,7 @@ module Grape
     end
 
     def run_validators(request:)
-      validators = inheritable_setting.route[:validations]
+      validators = inheritable_setting.route_validations
       return if validators.blank?
 
       validation_exceptions = nil
@@ -288,7 +284,7 @@ module Grape
       prefix = inheritable_setting.root_prefix
       requirements = prepare_routes_requirements(config.requirements)
       anchor = config.anchor
-      settings = inheritable_setting.route.except(:declared_params, :validations)
+      settings = inheritable_setting.route_settings
 
       config.http_methods.flat_map do |method|
         config.path.map do |path|

@@ -37,7 +37,7 @@ module Grape
       end
 
       def route_setting(key, value = nil)
-        get_or_set(inheritable_setting.route, key, value)
+        inheritable_setting.route_setting(key, value)
       end
 
       def namespace_setting(key, value = nil)
