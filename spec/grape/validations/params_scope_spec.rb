@@ -158,6 +158,39 @@ describe Grape::Validations::ParamsScope do
         subject.params { requires :numbers, type: Array, values: 0.0..10 }
       end.to raise_error Grape::Exceptions::IncompatibleOptionValues
     end
+
+    it 'accepts an array containing only allowed values, given as a literal array' do
+      subject.params do
+        optional :periods, type: Array, values: %w[day month]
+      end
+      subject.get('/optional') { 'optional works' }
+
+      get '/optional', periods: %w[day month]
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('optional works')
+    end
+
+    it 'raises a single values error, not a duplicate coercion error, for a disallowed value' do
+      subject.params do
+        optional :periods, type: Array, values: %w[day month]
+      end
+      subject.get('/optional') { 'optional works' }
+
+      get '/optional', periods: ['year']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('periods does not have a valid value')
+    end
+
+    it 'still enforces the declared Array type at runtime, given a literal values array' do
+      subject.params do
+        optional :periods, type: Array, values: %w[day month]
+      end
+      subject.get('/optional') { 'optional works' }
+
+      get '/optional', periods: 'day'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('periods is invalid')
+    end
   end
 
   context 'coercing values validation with proc' do

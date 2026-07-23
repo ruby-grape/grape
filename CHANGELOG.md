@@ -1,3 +1,46 @@
+### 4.0.0 (Next)
+
+#### Features
+
+* [#2768](https://github.com/ruby-grape/grape/pull/2768): Remove Guard - [@ericproulx](https://github.com/ericproulx).
+* [#2774](https://github.com/ruby-grape/grape/pull/2774): Make `forward_match` an internal kwarg instead of a route option - [@ericproulx](https://github.com/ericproulx).
+* [#2775](https://github.com/ruby-grape/grape/pull/2775): Pass `http_methods` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2776](https://github.com/ruby-grape/grape/pull/2776): Pass `path` to `Grape::Endpoint` as a keyword instead of via options - [@ericproulx](https://github.com/ericproulx).
+* [#2777](https://github.com/ruby-grape/grape/pull/2777): Add `Grape::Endpoint#mounted_app` reader and `app:` keyword - [@ericproulx](https://github.com/ericproulx).
+* [#2778](https://github.com/ruby-grape/grape/pull/2778): Rename `Grape::Endpoint`'s `for:` keyword to `api:` and expose `#api` - [@ericproulx](https://github.com/ericproulx).
+* [#2779](https://github.com/ruby-grape/grape/pull/2779): Promote route metadata (`version`, `namespace`, `prefix`, `requirements`, `anchor`, `settings`) to `Grape::Router::Route` keyword arguments, and drop the unused `Grape::Endpoint::Options` `format` member - [@ericproulx](https://github.com/ericproulx).
+* [#2782](https://github.com/ruby-grape/grape/pull/2782): Remove the dead `format` keyword from `Grape::Router::Pattern` - [@ericproulx](https://github.com/ericproulx).
+* [#2783](https://github.com/ruby-grape/grape/pull/2783): Read a route's `version`, `anchor` and `requirements` from its pattern instead of storing them again on the route - [@ericproulx](https://github.com/ericproulx).
+* [#2784](https://github.com/ruby-grape/grape/pull/2784): Move HEAD route creation into `Grape::Router::Route#to_head` - [@ericproulx](https://github.com/ericproulx).
+* [#2787](https://github.com/ruby-grape/grape/pull/2787): Stop populating the write-only `namespace_setting(:description)` in `desc` - [@ericproulx](https://github.com/ericproulx).
+* [#2795](https://github.com/ruby-grape/grape/pull/2795): Make `Grape::Util::InheritableSetting#namespace_reverse_stackable` internal, exposing `rescue_handlers` / `base_only_rescue_handlers` / `add_rescue_handlers` instead - [@ericproulx](https://github.com/ericproulx).
+* [#2793](https://github.com/ruby-grape/grape/pull/2793): Add a `Grape::Mountable` marker to identify a Grape app instead of duck-typing on `respond_to?(:inheritable_setting)` - [@ericproulx](https://github.com/ericproulx).
+* [#2792](https://github.com/ruby-grape/grape/pull/2792): Move `Grape::Path` to `Grape::Router::Pattern::Path` and add a `Grape::Router::Pattern.build` factory (`Grape::Path` kept as a deprecated constant) - [@ericproulx](https://github.com/ericproulx).
+* [#2785](https://github.com/ruby-grape/grape/pull/2785): Make route `params` a first-class endpoint input and split `Grape::Router::Route#params` into `#params` (declared definitions) and `#params_for(input)` (extracted values) - [@ericproulx](https://github.com/ericproulx).
+* [#2786](https://github.com/ruby-grape/grape/pull/2786): Make route `requirements` and `anchor` explicit keyword arguments and first-class endpoint inputs instead of opaque `route_options` keys - [@ericproulx](https://github.com/ericproulx).
+* [#2788](https://github.com/ruby-grape/grape/pull/2788): Compare the base API instead of `to_s` when refreshing a mounted app - [@ericproulx](https://github.com/ericproulx).
+* [#2796](https://github.com/ruby-grape/grape/pull/2796): Remove `Grape::Util::ReverseStackableValues`, storing rescue handlers in plain per-scope hashes merged over `InheritableSetting#parent` - [@ericproulx](https://github.com/ericproulx).
+* [#2797](https://github.com/ruby-grape/grape/pull/2797): Internalize params state (validations, declared params, param documentation, named params) behind `Grape::Util::InheritableSetting` accessors, and remove the unused `api_class` / `point_in_time_copies` readers - [@ericproulx](https://github.com/ericproulx).
+* [#2798](https://github.com/ruby-grape/grape/pull/2798): Internalize callback filters behind `Grape::Util::InheritableSetting` accessors (`callbacks` / `add_callback`) - [@ericproulx](https://github.com/ericproulx).
+* [#2799](https://github.com/ruby-grape/grape/pull/2799): Internalize the remaining rescue configuration (`rescue_options`, meta-selector handlers and flags) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
+* [#2800](https://github.com/ruby-grape/grape/pull/2800): Internalize content negotiation state (content types, formatters, parsers, error formatters) behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
+* [#2801](https://github.com/ruby-grape/grape/pull/2801): Internalize `represent` registrations behind `Grape::Util::InheritableSetting` accessors (`representations` / `add_representation`), and remove the inert `:representations` seeding in `Grape::Endpoint#initialize` - [@ericproulx](https://github.com/ericproulx).
+* [#2802](https://github.com/ruby-grape/grape/pull/2802): Internalize middleware and helper registrations behind `Grape::Util::InheritableSetting` accessors (`middleware` / `add_middleware`, `helpers` / `add_helper`) - [@ericproulx](https://github.com/ericproulx).
+* [#2803](https://github.com/ruby-grape/grape/pull/2803): Internalize namespace and mount-path registrations behind `Grape::Util::InheritableSetting` accessors (`namespaces` / `add_namespace` / `namespace_path` / `namespace_requirements`, `mount_path` / `add_mount_path`) - [@ericproulx](https://github.com/ericproulx).
+* [#2804](https://github.com/ruby-grape/grape/pull/2804): Internalize contract key maps behind `Grape::Util::InheritableSetting` accessors (`contract_key_maps` / `add_contract_key_map`) - [@ericproulx](https://github.com/ericproulx).
+* [#2805](https://github.com/ruby-grape/grape/pull/2805): Internalize format and error-response defaults behind `Grape::Util::InheritableSetting` accessors (`format`, `default_format`, `default_error_formatter`, `default_error_status`) - [@ericproulx](https://github.com/ericproulx).
+* [#2806](https://github.com/ruby-grape/grape/pull/2806): Internalize versioning state behind `Grape::Util::InheritableSetting` accessors (`version`, `version_options`, `root_prefix`, `cascade` / `cascade_defined?`) - [@ericproulx](https://github.com/ericproulx).
+* [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers) - [@ericproulx](https://github.com/ericproulx).
+* [#2808](https://github.com/ruby-grape/grape/pull/2808): Internalize `build_params_with` and `auth` behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
+* [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers), and drop the vestigial `namespace_inheritable` hash copy in `Grape::API::Instance`'s route-config collection - [@ericproulx](https://github.com/ericproulx).
+* Your contribution here.
+
+#### Fixes
+
+* [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2812](https://github.com/ruby-grape/grape/pull/2813): Fix `type: Array` combined with `values: [...]` list coercing to the guessed element type instead of `Array` - [@schinery](https://github.com/schinery).
+* Your contribution here.
+
 ### 3.3.3 (2026-07-17)
 
 #### Fixes
