@@ -10,9 +10,8 @@ module Grape
       #
       # Intentionally left unfrozen:
       #   - Procs / lambdas — may be deferred DB-backed callables
-      #   - Coercers (e.g. ArrayCoercer) — use lazy ivar memoization at request time
       #   - Classes / Modules — shared constants that must remain open
-      #   - ParamsScope — self-freezes at the end of its own initialize
+      #   - Coercers and ParamsScope — self-freeze at construction
       def deep_freeze(obj)
         case obj
         when Hash

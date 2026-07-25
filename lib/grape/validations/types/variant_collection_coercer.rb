@@ -6,6 +6,8 @@ module Grape
       # This class wraps {MultipleTypeCoercer}, for use with collections
       # that allow members of more than one type.
       class VariantCollectionCoercer
+        extend Grape::Util::FreezeOnNew
+
         # @return [Array<Class>,Set<Class>] the member types as declared in the DSL
         attr_reader :types
 

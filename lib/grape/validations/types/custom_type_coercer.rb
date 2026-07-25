@@ -33,6 +33,8 @@ module Grape
       # contract as +coerced?+, and must be supplied with a coercion
       # +method+.
       class CustomTypeCoercer
+        extend Grape::Util::FreezeOnNew
+
         TYPE_CHECK_METHODS = %i[coerced? parsed?].freeze
         COLLECTION_TYPES = [Array, Set].freeze
         private_constant :TYPE_CHECK_METHODS, :COLLECTION_TYPES

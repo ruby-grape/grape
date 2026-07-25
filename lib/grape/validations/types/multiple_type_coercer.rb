@@ -13,6 +13,8 @@ module Grape
       # an allowed type it should be declared last, since it will always
       # successfully "coerce" the value.
       class MultipleTypeCoercer
+        extend Grape::Util::FreezeOnNew
+
         # Construct a new coercer that will attempt to coerce
         # values to the given list of types in the given order.
         #
@@ -28,7 +30,7 @@ module Grape
             else
               Types.build_coercer type, strict: !@method.nil?
             end
-          end
+          end.freeze
         end
 
         # Coerces the given value.
