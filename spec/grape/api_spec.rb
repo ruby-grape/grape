@@ -18,13 +18,12 @@ describe Grape::API do
       subject.get('/x') { 'x' }
       subject.compile!
 
-      shared = subject.base_instance.inheritable_setting.namespace_inheritable
-      expect(shared).not_to receive(:delete)
+      shared = subject.base_instance.inheritable_setting
 
       subject.change!
       subject.compile!
 
-      expect(shared[:version_options]).to be_present
+      expect(shared.version_options).to be_present
     end
   end
 

@@ -8,12 +8,11 @@ describe Grape::DSL::InsideRoute do
       include Grape::DSL::InsideRoute
       include Grape::DSL::Settings
 
-      attr_reader :env, :request, :new_settings
+      attr_reader :env, :request
 
       def initialize
         @env = {}
         @header = {}
-        @new_settings = { namespace_inheritable: inheritable_setting.namespace_inheritable, namespace_stackable: inheritable_setting.namespace_stackable }
       end
 
       def header(key = nil, val = nil)

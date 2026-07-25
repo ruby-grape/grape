@@ -30,9 +30,9 @@
 * [#2804](https://github.com/ruby-grape/grape/pull/2804): Internalize contract key maps behind `Grape::Util::InheritableSetting` accessors (`contract_key_maps` / `add_contract_key_map`) - [@ericproulx](https://github.com/ericproulx).
 * [#2805](https://github.com/ruby-grape/grape/pull/2805): Internalize format and error-response defaults behind `Grape::Util::InheritableSetting` accessors (`format`, `default_format`, `default_error_formatter`, `default_error_status`) - [@ericproulx](https://github.com/ericproulx).
 * [#2806](https://github.com/ruby-grape/grape/pull/2806): Internalize versioning state behind `Grape::Util::InheritableSetting` accessors (`version`, `version_options`, `root_prefix`, `cascade` / `cascade_defined?`) - [@ericproulx](https://github.com/ericproulx).
-* [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers) - [@ericproulx](https://github.com/ericproulx).
 * [#2808](https://github.com/ruby-grape/grape/pull/2808): Internalize `build_params_with` and `auth` behind `Grape::Util::InheritableSetting` accessors - [@ericproulx](https://github.com/ericproulx).
 * [#2807](https://github.com/ruby-grape/grape/pull/2807): Internalize routing scope flags behind `Grape::Util::InheritableSetting` accessors (`do_not_route_head`, `do_not_route_options`, `do_not_document`, `lint` — `!` writers / `?` readers), and drop the vestigial `namespace_inheritable` hash copy in `Grape::API::Instance`'s route-config collection - [@ericproulx](https://github.com/ericproulx).
+* [#2810](https://github.com/ruby-grape/grape/pull/2810): Make `Grape::Util::InheritableSetting`'s raw stores internal where the ecosystem allows: `namespace_inheritable` is now protected and `namespace_stackable_with_hash` private, while `namespace_stackable` stays public for grape-swagger; `Router::Pattern::Path` reads a dedicated `path_settings` snapshot, and `mount_paths` exposes the full mount-path stack - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

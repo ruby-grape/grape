@@ -10,8 +10,8 @@ describe Grape::Util::InheritableSetting do
     described_class.new.tap do |settings|
       settings.global[:global_thing] = :global_foo_bar
       settings.namespace[:namespace_thing] = :namespace_foo_bar
-      settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
-      settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar
+      settings.root_prefix = :namespace_inheritable_foo_bar
+      settings.add_helper(:namespace_stackable_foo_bar)
       settings.route[:route_thing] = :route_foo_bar
     end
   end
@@ -19,8 +19,8 @@ describe Grape::Util::InheritableSetting do
   let(:other_parent) do
     described_class.new.tap do |settings|
       settings.namespace[:namespace_thing] = :namespace_foo_bar_other
-      settings.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar_other
-      settings.namespace_stackable[:namespace_stackable_thing] = :namespace_stackable_foo_bar_other
+      settings.root_prefix = :namespace_inheritable_foo_bar_other
+      settings.add_helper(:namespace_stackable_foo_bar_other)
       settings.route[:route_thing] = :route_foo_bar_other
     end
   end
@@ -68,39 +68,39 @@ describe Grape::Util::InheritableSetting do
 
   describe '#namespace_inheritable' do
     it 'works with inheritable values' do
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
+      expect(subject.root_prefix).to eq :namespace_inheritable_foo_bar
     end
 
     it 'handles different parents' do
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
+      expect(subject.root_prefix).to eq :namespace_inheritable_foo_bar
 
       subject.inherit_from other_parent
 
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar_other
+      expect(subject.root_prefix).to eq :namespace_inheritable_foo_bar_other
 
       subject.inherit_from parent
 
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
+      expect(subject.root_prefix).to eq :namespace_inheritable_foo_bar
 
       subject.inherit_from other_parent
 
-      subject.namespace_inheritable[:namespace_inheritable_thing] = :my_thing
+      subject.root_prefix = :my_thing
 
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :my_thing
+      expect(subject.root_prefix).to eq :my_thing
 
       subject.inherit_from parent
 
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :my_thing
+      expect(subject.root_prefix).to eq :my_thing
     end
   end
 
   describe '#namespace_stackable' do
     it 'works with stackable values' do
-      expect(subject.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
+      expect(subject.helpers).to eq [:namespace_stackable_foo_bar]
 
       subject.inherit_from other_parent
 
-      expect(subject.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar_other]
+      expect(subject.helpers).to eq [:namespace_stackable_foo_bar_other]
     end
   end
 
@@ -164,24 +164,24 @@ describe Grape::Util::InheritableSetting do
     end
 
     it 'decouples namespace inheritable values' do
-      expect(cloned_obj.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
+      expect(cloned_obj.root_prefix).to eq :namespace_inheritable_foo_bar
 
-      subject.namespace_inheritable[:namespace_inheritable_thing] = :my_thing
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :my_thing
+      subject.root_prefix = :my_thing
+      expect(subject.root_prefix).to eq :my_thing
 
-      expect(cloned_obj.namespace_inheritable[:namespace_inheritable_thing]).to eq :namespace_inheritable_foo_bar
+      expect(cloned_obj.root_prefix).to eq :namespace_inheritable_foo_bar
 
-      cloned_obj.namespace_inheritable[:namespace_inheritable_thing] = :my_cloned_thing
-      expect(cloned_obj.namespace_inheritable[:namespace_inheritable_thing]).to eq :my_cloned_thing
-      expect(subject.namespace_inheritable[:namespace_inheritable_thing]).to eq :my_thing
+      cloned_obj.root_prefix = :my_cloned_thing
+      expect(cloned_obj.root_prefix).to eq :my_cloned_thing
+      expect(subject.root_prefix).to eq :my_thing
     end
 
     it 'decouples namespace stackable values' do
-      expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
+      expect(cloned_obj.helpers).to eq [:namespace_stackable_foo_bar]
 
-      subject.namespace_stackable[:namespace_stackable_thing] = :other_thing
-      expect(subject.namespace_stackable[:namespace_stackable_thing]).to eq %i[namespace_stackable_foo_bar other_thing]
-      expect(cloned_obj.namespace_stackable[:namespace_stackable_thing]).to eq [:namespace_stackable_foo_bar]
+      subject.add_helper(:other_thing)
+      expect(subject.helpers).to eq %i[namespace_stackable_foo_bar other_thing]
+      expect(cloned_obj.helpers).to eq [:namespace_stackable_foo_bar]
     end
 
     it 'decouples route values' do
@@ -200,17 +200,17 @@ describe Grape::Util::InheritableSetting do
     it 'return all settings as a hash' do
       subject.global[:global_thing] = :global_foo_bar
       subject.namespace[:namespace_thing] = :namespace_foo_bar
-      subject.namespace_inheritable[:namespace_inheritable_thing] = :namespace_inheritable_foo_bar
-      subject.namespace_stackable[:namespace_stackable_thing] = [:namespace_stackable_foo_bar]
+      subject.root_prefix = :namespace_inheritable_foo_bar
+      subject.add_helper([:namespace_stackable_foo_bar])
       subject.add_rescue_handlers({ StandardError => :handler }, subclasses: true)
       subject.route[:route_thing] = :route_foo_bar
       expect(subject.to_hash).to match(
         global: { global_thing: :global_foo_bar },
         namespace: { namespace_thing: :namespace_foo_bar },
         namespace_inheritable: {
-          namespace_inheritable_thing: :namespace_inheritable_foo_bar
+          root_prefix: :namespace_inheritable_foo_bar
         },
-        namespace_stackable: { namespace_stackable_thing: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] },
+        namespace_stackable: { helpers: [:namespace_stackable_foo_bar, [:namespace_stackable_foo_bar]] },
         rescue_handlers: { StandardError => :handler },
         base_only_rescue_handlers: nil,
         route: { route_thing: :route_foo_bar }

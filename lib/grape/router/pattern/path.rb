@@ -4,10 +4,11 @@ module Grape
   class Router
     class Pattern
       # Assembles the path template a {Pattern} compiles into a matcher. It turns
-      # a raw path plus the API's inheritable settings (mount path, root prefix,
-      # path-versioning and format) into an +origin+ (the route prefix) and a
-      # +suffix+ (the format segment). {Pattern.build} is the entry point that
-      # wires this into pattern construction.
+      # a raw path plus the path-settings snapshot taken by
+      # {Grape::Util::InheritableSetting#path_settings} (mount paths, root
+      # prefix, path-versioning and format) into an +origin+ (the route prefix)
+      # and a +suffix+ (the format segment). {Pattern.build} is the entry point
+      # that wires this into pattern construction.
       class Path
         DEFAULT_FORMAT_SEGMENT = '(/.:format)'
         NO_VERSIONING_WITH_VALID_PATH_FORMAT_SEGMENT = '(.:format)'
@@ -27,7 +28,7 @@ module Grape
         private
 
         def build_suffix(raw_path, raw_namespace, settings)
-          return "(.#{settings[:format]})" if uses_specific_format?(settings)
+          return "(.#{settings.format})" if uses_specific_format?(settings)
           return NO_VERSIONING_WITH_VALID_PATH_FORMAT_SEGMENT if !uses_path_versioning?(settings) || valid_part?(raw_namespace) || valid_part?(raw_path)
 
           DEFAULT_FORMAT_SEGMENT
@@ -35,8 +36,8 @@ module Grape
 
         def build_parts(raw_path, raw_namespace, settings)
           parts = []
-          add_part(parts, settings[:mount_path])
-          add_part(parts, settings[:root_prefix])
+          add_part(parts, settings.mount_path)
+          add_part(parts, settings.root_prefix)
           parts << VERSION_SEGMENT if uses_path_versioning?(settings)
           add_part(parts, raw_namespace)
           add_part(parts, raw_path)
@@ -52,15 +53,11 @@ module Grape
         end
 
         def uses_specific_format?(settings)
-          return false unless settings.key?(:format) && settings.key?(:content_types)
-
-          settings[:format] && Array(settings[:content_types]).size == 1
+          settings.format && Array(settings.content_types).size == 1
         end
 
         def uses_path_versioning?(settings)
-          return false unless settings.key?(:version) && settings[:version_options]
-
-          settings[:version] && settings[:version_options].using == :path
+          settings.version && settings.version_options&.using == :path
         end
 
         def valid_part?(part)

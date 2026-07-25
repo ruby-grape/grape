@@ -141,6 +141,17 @@ The flags flipped by `do_not_route_head!`, `do_not_route_options!`, `do_not_docu
 
 The params-builder strategy written by `build_with` (both the API-level and the params-block DSL) and the authentication configuration written by the `auth` DSL are now recorded and read through dedicated accessors on `Grape::Util::InheritableSetting` (`build_params_with` / `build_params_with=`, `auth` / `auth=`) instead of raw `namespace_inheritable` keys, completing the per-key `namespace_inheritable` cleanup. The keys' storage is unchanged for now, so `namespace_inheritable[:build_params_with]` and `namespace_inheritable[:auth]` still return the same values, but they should be considered internal.
 
+#### `InheritableSetting`'s raw stores are internal, except `namespace_stackable`
+
+The per-key encapsulation documented in the sections above is now enforced where the ecosystem allows: `Grape::Util::InheritableSetting#namespace_inheritable` is protected and `#namespace_stackable_with_hash` is private — every `namespace_inheritable` key is reachable only through its dedicated accessor.
+
+`#namespace_stackable` deliberately **remains public**: grape-swagger reads it directly (`swagger_documentation_adder.rb` reads `[:namespace]` and `[:mount_path]`, `token_owner_resolver.rb` reads `[:helpers]`, and `request_param_parsers/route.rb` walks the `StackableValues#inherited_values` chain to collect per-scope params). Treat it as read-only from outside Grape and prefer the dedicated accessors (`namespaces`, `mount_paths`, `helpers`, …) for everything they cover; the reader may be narrowed in a future major once grape-swagger has migrated. The `route`, `namespace` and `global` scratch stores (backing `route_setting` / `namespace_setting` / `global_setting`) also remain public and unchanged.
+
+Two supporting changes:
+
+* `Router::Pattern::Path` no longer receives a merged dump of both stores; `Endpoint#to_routes` passes the new `InheritableSetting#path_settings` snapshot — a `Grape::Util::InheritableSetting::PathSettings` value object (`Data`) — which carries exactly the six values `Path` reads (full mount-path stack, root prefix, format, raw content-types stack, version, version options) with always-present keys. `Path`'s `key?`-presence guards became nil-tolerant truthiness checks — equivalent under the snapshot. `Endpoint#prepare_default_path_settings` is removed.
+* `InheritableSetting#mount_paths` is added, exposing the full mount-path stack (one entry per mount level, outermost first), complementing `#mount_path`, which returns only the outermost entry.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
