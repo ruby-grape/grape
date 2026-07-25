@@ -6,6 +6,8 @@ module Grape
       # This class wraps {MultipleTypeCoercer}, for use with collections
       # that allow members of more than one type.
       class VariantCollectionCoercer
+        extend Grape::Util::FreezeOnNew
+
         # Construct a new coercer that will attempt to coerce
         # a list of values such that all members are of one of
         # the given types. The container may also optionally be

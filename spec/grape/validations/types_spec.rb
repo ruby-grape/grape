@@ -97,5 +97,46 @@ describe Grape::Validations::Types do
       b_coercer = described_class.build_coercer(Array[String])
       expect(a_coercer.object_id).to eq(b_coercer.object_id)
     end
+
+    # Coercer instances are shared across requests, so they must be frozen at
+    # construction — a request-time lazy ivar write would be a data race and
+    # now raises FrozenError instead.
+    describe 'returned coercers are frozen' do
+      [
+        Integer,
+        Array[Integer],
+        Array[Array[Integer]],
+        Set[Integer],
+        JSON,
+        [Integer, String]
+      ].each do |type|
+        it "freezes the coercer for #{type.inspect}" do
+          expect(described_class.build_coercer(type)).to be_frozen
+        end
+      end
+
+      it 'freezes a coercer built around a coerce_with method' do
+        expect(described_class.build_coercer(Integer, method: ->(v) { Integer(v) })).to be_frozen
+      end
+
+      it 'freezes a coercer for a custom type' do
+        custom = Class.new do
+          def self.parse(value)
+            value
+          end
+        end
+        expect(described_class.build_coercer(custom)).to be_frozen
+      end
+
+      it 'freezes a directly-built VariantCollectionCoercer' do
+        expect(Grape::Validations::Types::VariantCollectionCoercer.new([Integer, String])).to be_frozen
+      end
+
+      it 'still coerces through a frozen multiple-type coercer' do
+        coercer = described_class.build_coercer([Integer, String])
+        expect(coercer.call('10')).to eq(10)
+        expect(coercer.call('ten')).to eq('ten')
+      end
+    end
   end
 end

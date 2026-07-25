@@ -13,6 +13,7 @@ module Grape
       # (e.g. +memoize+, <tt>||=</tt>) will raise +FrozenError+ at request time.
       class Base
         extend Forwardable
+        extend Grape::Util::FreezeOnNew
         include Grape::Util::Translation
 
         attr_reader :attrs
@@ -43,10 +44,6 @@ module Grape
             else
               @default_message_key || (superclass.respond_to?(:default_message_key) ? superclass.default_message_key : nil)
             end
-          end
-
-          def new(...)
-            super.freeze
           end
 
           def inherited(klass)

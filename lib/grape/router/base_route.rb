@@ -22,16 +22,17 @@ module Grape
         @settings = settings
       end
 
-      def regexp_capture_index
-        @regexp_capture_index ||= CaptureIndexCache[@index]
-      end
+      # Assigned eagerly in {#to_regexp} (router compilation) rather than
+      # memoized here: this reader is called from request-time route matching
+      # on instances shared across threads, so it must not write state.
+      attr_reader :regexp_capture_index
 
       def pattern_regexp
         @pattern.to_regexp
       end
 
       def to_regexp(index)
-        @index = index
+        @regexp_capture_index = CaptureIndexCache[index]
         Regexp.new("(?<#{regexp_capture_index}>#{pattern_regexp})")
       end
 

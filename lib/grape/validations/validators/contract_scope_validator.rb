@@ -4,11 +4,12 @@ module Grape
   module Validations
     module Validators
       class ContractScopeValidator
+        extend Grape::Util::FreezeOnNew
+
         attr_reader :schema
 
         def initialize(schema:)
           @schema = schema
-          freeze
         end
 
         # Validates a given request.
