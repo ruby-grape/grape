@@ -193,6 +193,50 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'coercing values validation with a variant-member-type collection' do
+    it 'accepts values compatible with the declared member types' do
+      expect do
+        subject.params { optional :status, type: [Integer, String], values: [1, 2] }
+      end.not_to raise_error
+    end
+
+    it 'accepts except_values compatible with the declared member types' do
+      expect do
+        subject.params { optional :status, type: [Integer, String], except_values: [3] }
+      end.not_to raise_error
+    end
+
+    it 'accepts a Set container with values compatible with the declared member types' do
+      expect do
+        subject.params { optional :status, type: Set[Integer, String], values: [1, 2] }
+      end.not_to raise_error
+    end
+
+    it 'raises exception when values do not match the first declared member type' do
+      expect do
+        subject.params { optional :status, type: [Integer, String], values: %w[active] }
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+    end
+
+    it 'accepts an array containing only allowed values at request time' do
+      subject.params { optional :status, type: [Integer, String], values: [1, 2] }
+      subject.get('/variant') { 'variant works' }
+
+      get '/variant', status: %w[1 2]
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('variant works')
+    end
+
+    it 'rejects a disallowed value at request time' do
+      subject.params { optional :status, type: [Integer, String], values: [1, 2] }
+      subject.get('/variant') { 'variant works' }
+
+      get '/variant', status: %w[3]
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('status does not have a valid value')
+    end
+  end
+
   context 'coercing values validation with proc' do
     it 'allows the proc to pass validation without checking' do
       subject.params { requires :numbers, type: Integer, values: -> { [0, 1, 2] } }

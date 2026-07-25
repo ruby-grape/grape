@@ -51,7 +51,7 @@ module Grape
         @allow_blank = resolve_value(raw[:allow_blank])
         @fail_fast = raw[:fail_fast] || false
 
-        @guessed_coerce_type = guess_coerce_type(@coerce_type, @values, @except_values)
+        @guessed_coerce_type = guess_coerce_type(declared_coerce_type, @values, @except_values)
         @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
         @validator_entries = build_validator_entries(raw)
 
@@ -138,6 +138,16 @@ module Grape
 
       def resolve_value(opt)
         opt.is_a?(Hash) ? opt[:value] : opt
+      end
+
+      # The type as written in the DSL. Identical to +@coerce_type+ except for
+      # a multiple-type declaration (+type: [Integer, String]+), where
+      # {#parse_coerce} wraps the declared list in a
+      # {Types::VariantCollectionCoercer} for runtime coercion — the
+      # definition-time coherence checks need the list back, since the wrapper
+      # matches nothing under +===+.
+      def declared_coerce_type
+        @coerce_type.is_a?(Types::VariantCollectionCoercer) ? @coerce_type.types : @coerce_type
       end
 
       def guess_coerce_type(coerce_type, *values_list)
