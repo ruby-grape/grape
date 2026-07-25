@@ -971,6 +971,25 @@ describe Grape::Validations::Validators::CoerceValidator do
         expect(last_response.body).to eq('splines[x] does not have a valid value')
       end
 
+      it 'parses a payload containing a blank line' do
+        subject.params do
+          requires :splines, type: JSON do
+            requires :x, type: Integer
+          end
+        end
+        subject.get '/' do
+          params[:splines][:x]
+        end
+
+        get '/', splines: <<~JSON
+          {"x": 1,
+
+          "ints": [1, 2]}
+        JSON
+        expect(last_response).to be_successful
+        expect(last_response.body).to eq('1')
+      end
+
       it 'accepts Array[JSON] shorthand' do
         subject.params do
           requires :splines, type: Array[JSON] do
