@@ -15,7 +15,9 @@ module Grape
         def initialize(type, strict: false)
           super
           @coercer = strict ? DryTypes::Strict::Array : DryTypes::Params::Array
-          @subtype = type.first
+          # Built eagerly: instances are shared across requests (and cached in
+          # Types::CoercerCache), so no lazy state may be created at call time.
+          @elem_coercer = DryTypeCoercer.coercer_instance_for(type.first, strict:)
         end
 
         def call(_val)
@@ -27,7 +29,7 @@ module Grape
 
         protected
 
-        attr_reader :subtype
+        attr_reader :elem_coercer
 
         def coerce_elements(collection)
           return if collection.nil?
@@ -49,10 +51,6 @@ module Grape
         # Virtus doesn't allow nil in arrays.
         def reject?(val)
           val.nil?
-        end
-
-        def elem_coercer
-          @elem_coercer ||= DryTypeCoercer.coercer_instance_for(subtype, strict:)
         end
       end
     end

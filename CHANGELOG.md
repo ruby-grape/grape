@@ -38,6 +38,7 @@
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2817](https://github.com/ruby-grape/grape/pull/2817): Remove request-time mutable state from Array and custom-type coercers - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.4 (2026-07-25)
