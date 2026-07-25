@@ -88,8 +88,12 @@ module Grape
           ->(val) { method.call(val).deep_symbolize_keys }
         end
 
+        # +dup+ before +map!+: the collection is whatever the user's coercion
+        # method returned — possibly frozen, possibly the input itself — so we
+        # must not mutate it in place. +dup+ also preserves the class, keeping a
+        # +Set+ a +Set+ (unlike +map+, which would return an +Array+).
         def collection_symbolizer(method)
-          ->(val) { method.call(val).map! { |item| symbolize_if_hash(item) } }
+          ->(val) { method.call(val).dup.map! { |item| symbolize_if_hash(item) } }
         end
 
         def symbolize_if_hash(item)
