@@ -152,6 +152,22 @@ Two supporting changes:
 * `Router::Pattern::Path` no longer receives a merged dump of both stores; `Endpoint#to_routes` passes the new `InheritableSetting#path_settings` snapshot — a `Grape::Util::InheritableSetting::PathSettings` value object (`Data`) — which carries exactly the six values `Path` reads (full mount-path stack, root prefix, format, raw content-types stack, version, version options) with always-present keys. `Path`'s `key?`-presence guards became nil-tolerant truthiness checks — equivalent under the snapshot. `Endpoint#prepare_default_path_settings` is removed.
 * `InheritableSetting#mount_paths` is added, exposing the full mount-path stack (one entry per mount level, outermost first), complementing `#mount_path`, which returns only the outermost entry.
 
+#### `Grape::Util::StackableValues` is a read-only view, not a store
+
+Stackable registrations now live on `Grape::Util::InheritableSetting` itself, as one plain Hash of `key => Array` per scope, and inheritance is resolved by walking `#parent` — the same recursion `#rescue_handlers` already used. Previously the registrations lived in a `StackableValues` instance which maintained its own parallel chain through `#inherited_values`, so every scope carried two links to its parent.
+
+`InheritableSetting#namespace_stackable` still returns a `Grape::Util::StackableValues`, still resolves reads across the chain, and still exposes `#new_values` / `#inherited_values` / `#keys` / `#to_hash`, so the grape-swagger call sites listed above keep working unchanged. What changed:
+
+* It is now a **view built on demand**, not the backing store. Each call returns a new instance, so the object is no longer identity-stable across calls, and writing to it registers nothing.
+* `StackableValues#[]=` and `#delete` are removed — the class is read-only. Registration happens through the semantic `add_*` accessors on `InheritableSetting`.
+* `StackableValues.new` now takes `(new_values, inherited_values)` instead of `(inherited_values = nil)`.
+* `Grape::Util::BaseInheritable` is removed. It existed only to share plumbing between `StackableValues` and `InheritableValues`; with the former no longer a store, its contents moved into `Grape::Util::InheritableValues`, whose public behavior is unchanged (its now-unused `#keys` is dropped).
+
+Settings semantics are otherwise deliberately identical, including two pre-existing quirks worth knowing about, since neither is fixed here:
+
+* A stack reader returns the backing Array itself when only the current scope registered anything (a frozen empty Array when nothing is registered anywhere), so callers must treat the result as read-only.
+* `#point_in_time_copy` copies the per-scope Hash shallowly, so the per-key Arrays stay shared with the source. A registration made on a scope *after* an endpoint was defined in it is therefore still visible to that endpoint — but only when the same key already had a registration when the endpoint was defined. This is why `use SomeMiddleware` written below a route can still apply to it.
+
 ### Upgrading to >= 3.3
 
 #### Minimum required Ruby is now 3.3
