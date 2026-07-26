@@ -88,6 +88,11 @@ RSpec.describe Grape::Router::Pattern::Path do
         path = described_class.new(nil, nil, path_settings(version: :v1, version_options: Grape::DSL::VersionOptions.new))
         expect(path.suffix).to eql('(/.:format)')
       end
+
+      it "includes a '/' when the path starts with whitespace" do
+        path = described_class.new("\n/path", nil, path_settings(version: :v1, version_options: Grape::DSL::VersionOptions.new))
+        expect(path.suffix).to eql('(/.:format)')
+      end
     end
   end
 end

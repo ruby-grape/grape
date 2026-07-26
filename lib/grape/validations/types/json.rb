@@ -17,9 +17,7 @@ module Grape
           # @return [Hash,Array<Hash>,nil]
           def parse(input)
             return input if parsed?(input)
-
-            # Allow nulls and blank strings
-            return if input.nil? || input.match?(/^\s*$/)
+            return if input.blank?
 
             JSON.parse(input, symbolize_names: true)
           end

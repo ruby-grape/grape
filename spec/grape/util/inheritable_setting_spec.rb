@@ -140,6 +140,50 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
+  describe 'route-scope accessors' do
+    it 'reads and writes the per-route validation snapshot' do
+      subject.route_validations = [:validator]
+      expect(subject.route_validations).to eq [:validator]
+    end
+
+    it 'reads and writes the per-route declared-params snapshot' do
+      subject.route_declared_params = [:id]
+      expect(subject.route_declared_params).to eq [:id]
+    end
+
+    it 'defaults renamed params to an empty hash and accumulates additions' do
+      expect(subject.route_renamed_params).to eq({})
+
+      subject.add_route_renamed_param(['a'], 'b')
+      subject.add_route_renamed_param(['c'], 'd')
+      expect(subject.route_renamed_params).to eq({ ['a'] => 'b', ['c'] => 'd' })
+    end
+
+    it 'defaults the description to an empty hash and round-trips writes' do
+      expect(subject.route_description).to eq({})
+
+      subject.route_description = { description: 'x' }
+      expect(subject.route_description).to eq({ description: 'x' })
+    end
+
+    it 'exposes route settings without the internal param snapshots' do
+      subject.route_end
+      subject.route_validations = [:validator]
+      subject.route_declared_params = [:id]
+      subject.route_description = { description: 'x' }
+      subject.route[:custom] = :value
+
+      expect(subject.route_settings).to eq(description: { description: 'x' }, custom: :value)
+    end
+
+    it 'reads and writes arbitrary route settings' do
+      expect(subject.route_setting(:custom)).to be_nil
+
+      subject.route_setting(:custom, :value)
+      expect(subject.route_setting(:custom)).to eq :value
+    end
+  end
+
   describe '#inherit_from' do
     it 'notifies clones' do
       new_settings = subject.point_in_time_copy

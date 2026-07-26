@@ -8,8 +8,8 @@ module Grape
     # first), plain +=+ writers are nearest-wins scalar overrides, and
     # +!+/+?+ pairs are scope flags. Deep-merged readers return nil when
     # nothing is registered; plain stack readers return a frozen empty
-    # Array. The backing stores (InheritableValues, StackableValues and the
-    # per-scope Hashes) and their keys are internal.
+    # Array. The backing stores (InheritableValues and the per-scope Hashes)
+    # and their keys are internal.
     #
     # Settings instances form a chain: a scope inherits its parent's values
     # (see #inherit_from), and endpoints snapshot the chain with
@@ -25,13 +25,20 @@ module Grape
         finally: :finallies
       }.freeze
 
+      # Shared empty result for #stacked / #stacked_keys when nothing is
+      # registered anywhere in the chain, so neither hands out a mutable Array.
+      EMPTY_STACK = [].freeze
+
       attr_reader :route, :namespace, :parent
 
-      # The stackable store. Public for ecosystem compatibility — grape-swagger
-      # reads it directly (and walks its inherited_values chain) — but treat it
-      # as read-only from the outside: every semantic key has a dedicated
-      # accessor below, and new code should use those.
-      attr_reader :namespace_stackable
+      # A StackableValues view of this scope's registrations, rebuilt on each
+      # call. Public for ecosystem compatibility only — grape-swagger reads it
+      # directly and walks its inherited_values chain — and read-only: it is a
+      # view, not the store, so writing to it registers nothing. Every
+      # semantic key has a dedicated accessor below; new code should use those.
+      def namespace_stackable
+        StackableValues.new(@stackable_values, parent&.namespace_stackable || {})
+      end
 
       # Retrieve global settings.
       def self.global
@@ -53,7 +60,10 @@ module Grape
         @namespace = InheritableValues.new # only inheritable from a parent when
         # used with a mount, or should every API::Class be a separate namespace by default?
         @namespace_inheritable = InheritableValues.new
-        @namespace_stackable = StackableValues.new
+        # This scope's own stackable registrations, one Array per key. Stays
+        # nil until the first registration so scopes that only inherit don't
+        # each carry an empty Hash.
+        @stackable_values = nil
         @parent = nil
         @point_in_time_copies = nil
       end
@@ -73,7 +83,6 @@ module Grape
         @parent = parent
 
         @namespace_inheritable.inherited_values = parent.namespace_inheritable
-        @namespace_stackable.inherited_values = parent.namespace_stackable
         @route = parent.route.merge(route)
 
         @point_in_time_copies&.each { |cloned_one| cloned_one.inherit_from parent }
@@ -98,8 +107,8 @@ module Grape
       # and request-serving defaults are applied.
       def point_in_time_copy_for_endpoint
         copy = point_in_time_copy
-        copy.route[:declared_params] = copy.declared_params.flatten
-        copy.route[:validations] = copy.validations.dup
+        copy.route_declared_params = copy.declared_params.flatten
+        copy.route_validations = copy.validations.dup
         copy.default_error_status ||= 500
         copy
       end
@@ -110,6 +119,77 @@ module Grape
         @route = {}
       end
 
+      # Validator instances and declared-params entries for the route currently
+      # being built. Unlike the same-named namespace stacks (#validations /
+      # #declared_params), these are flat per-route snapshots: seeded when an
+      # endpoint copy is forked (see #point_in_time_copy_for_endpoint), topped
+      # up from mounting parents (see Endpoint#inherit_settings), and read back
+      # by run_validators / #declared.
+      def route_validations
+        @route[:validations]
+      end
+
+      def route_validations=(validations)
+        @route[:validations] = validations
+      end
+
+      def route_declared_params
+        @route[:declared_params]
+      end
+
+      def route_declared_params=(declared_params)
+        @route[:declared_params] = declared_params
+      end
+
+      # Path => renamed-name map recorded by +as:+ (see ParamsScope), consumed
+      # by #declared. Record entries with #add_route_renamed_param; an empty
+      # Hash when nothing was renamed.
+      def route_renamed_params
+        @route[:renamed_params] || {}
+      end
+
+      def add_route_renamed_param(path, new_name)
+        (@route[:renamed_params] ||= {})[path] = new_name
+      end
+
+      # Endpoint description recorded by +desc+ (see DSL::Desc), consumed by
+      # +route+. An empty Hash when +desc+ was never called.
+      def route_description
+        @route[:description] || {}
+      end
+
+      def route_description=(description)
+        @route[:description] = description
+      end
+
+      # The route-scope settings handed to each Grape::Router::Route: every
+      # +route_setting+ registration plus the description, minus the internal
+      # param snapshots (#route_validations / #route_declared_params).
+      def route_settings
+        route.except(:declared_params, :validations)
+      end
+
+      # Read (when +value+ is nil) or write an arbitrary route-scoped setting.
+      # This is the open store behind the +route_setting+ DSL; the known keys
+      # have the dedicated accessors above.
+      def route_setting(key, value = nil)
+        return @route[key] if value.nil?
+
+        @route[key] = value
+      end
+
+      # Fold a mounting parent scope's accumulated validations and declared
+      # params into this endpoint copy's per-route snapshots (see
+      # Endpoint#inherit_settings). Both are appended, so the parent's entries
+      # follow the ones already seeded from the surrounding scopes.
+      def inherit_route_params(parent)
+        parent_validations = parent.validations
+        route_validations.concat(parent_validations) if parent_validations.any?
+
+        parent_declared_params = parent.declared_params
+        route_declared_params.concat(parent_declared_params.flatten) if parent_declared_params.any?
+      end
+
       # Return a serializable hash of our values.
       def to_hash
         {
@@ -117,7 +197,7 @@ module Grape
           route: route.clone,
           namespace: namespace.to_hash,
           namespace_inheritable: @namespace_inheritable.to_hash,
-          namespace_stackable: @namespace_stackable.to_hash,
+          namespace_stackable: stacked_keys.to_h { |key| [key, stacked(key)] },
           rescue_handlers:,
           base_only_rescue_handlers:
         }
@@ -132,22 +212,22 @@ module Grape
       # outermost scope first. Record them with #add_validation; the backing
       # store is an internal detail.
       def validations
-        @namespace_stackable[:validations]
+        stacked(:validations)
       end
 
       def add_validation(validator)
-        @namespace_stackable[:validations] = validator
+        stack(:validations, validator)
       end
 
       # Declared-params entries registered by +params+ blocks, one Array per
       # scope, outermost scope first. Record them with #add_declared_params;
       # the backing store is an internal detail.
       def declared_params
-        @namespace_stackable[:declared_params]
+        stacked(:declared_params)
       end
 
       def add_declared_params(params)
-        @namespace_stackable[:declared_params] = params
+        stack(:declared_params, params)
       end
 
       # Param documentation recorded by +params+ blocks (see
@@ -160,14 +240,14 @@ module Grape
       end
 
       def add_params_documentation(documented_attrs)
-        @namespace_stackable[:params] = documented_attrs
+        stack(:params, documented_attrs)
       end
 
       # Drops this scope's own validations, declared params and params
       # documentation once an endpoint has consumed them (see
       # +reset_validations!+ in DSL::Validations). Inherited entries are kept.
       def reset_validations!
-        @namespace_stackable.delete(:declared_params, :params, :validations)
+        unstack(:declared_params, :params, :validations)
       end
 
       # Reusable +params :name do ... end+ blocks defined in helpers, as one
@@ -179,7 +259,7 @@ module Grape
       end
 
       def add_named_params(named_params)
-        @namespace_stackable[:named_params] = named_params
+        stack(:named_params, named_params)
       end
 
       # Filter blocks registered by the callbacks DSL (see DSL::Callbacks),
@@ -188,11 +268,11 @@ module Grape
       # +:finally+), outermost scope first. Record them with #add_callback;
       # the backing store is an internal detail.
       def callbacks
-        CALLBACK_STORE_KEYS.transform_values { |store_key| @namespace_stackable[store_key] }
+        CALLBACK_STORE_KEYS.transform_values { |store_key| stacked(store_key) }
       end
 
       def add_callback(callback_name, block)
-        @namespace_stackable[CALLBACK_STORE_KEYS.fetch(callback_name)] = block
+        stack(CALLBACK_STORE_KEYS.fetch(callback_name), block)
       end
 
       # Response-shaping options recorded by +rescue_from+ (see
@@ -201,11 +281,11 @@ module Grape
       # +rescue_from+ was never called. Record them with #add_rescue_options;
       # the backing store is an internal detail.
       def rescue_options
-        @namespace_stackable[:rescue_options].last
+        stacked(:rescue_options).last
       end
 
       def add_rescue_options(options)
-        @namespace_stackable[:rescue_options] = options
+        stack(:rescue_options, options)
       end
 
       # Meta-selector registrations from +rescue_from :all+,
@@ -280,7 +360,7 @@ module Grape
       end
 
       def add_content_type(format, content_type)
-        @namespace_stackable[:content_types] = { format => content_type }
+        stack(:content_types, { format => content_type })
       end
 
       def formatters
@@ -288,7 +368,7 @@ module Grape
       end
 
       def add_formatter(content_type, formatter)
-        @namespace_stackable[:formatters] = { content_type => formatter }
+        stack(:formatters, { content_type => formatter })
       end
 
       def parsers
@@ -296,7 +376,7 @@ module Grape
       end
 
       def add_parser(content_type, parser)
-        @namespace_stackable[:parsers] = { content_type => parser }
+        stack(:parsers, { content_type => parser })
       end
 
       def error_formatters
@@ -304,7 +384,7 @@ module Grape
       end
 
       def add_error_formatter(format, formatter)
-        @namespace_stackable[:error_formatters] = { format => formatter }
+        stack(:error_formatters, { format => formatter })
       end
 
       # Model-class => entity-class registrations from +represent+ (see
@@ -317,7 +397,7 @@ module Grape
       end
 
       def add_representation(model_class, entity_class)
-        @namespace_stackable[:representations] = { model_class => entity_class }
+        stack(:representations, { model_class => entity_class })
       end
 
       # Middleware specs recorded by the middleware DSL (+use+, +insert+,
@@ -326,22 +406,22 @@ module Grape
       # first. Record them with #add_middleware; the backing store is an
       # internal detail.
       def middleware
-        @namespace_stackable[:middleware]
+        stacked(:middleware)
       end
 
       def add_middleware(operation_with_arguments)
-        @namespace_stackable[:middleware] = operation_with_arguments
+        stack(:middleware, operation_with_arguments)
       end
 
       # Helper modules registered by +helpers+ blocks and modules (see
       # DSL::Helpers), outermost scope first. Record them with #add_helper;
       # the backing store is an internal detail.
       def helpers
-        @namespace_stackable[:helpers]
+        stacked(:helpers)
       end
 
       def add_helper(mod)
-        @namespace_stackable[:helpers] = mod
+        stack(:helpers, mod)
       end
 
       # Grape::Namespace objects registered by the +namespace+ DSL and its
@@ -350,11 +430,11 @@ module Grape
       # store. Record them with #add_namespace; the backing store is an
       # internal detail.
       def namespaces
-        @namespace_stackable[:namespace]
+        stacked(:namespace)
       end
 
       def add_namespace(namespace)
-        @namespace_stackable[:namespace] = namespace
+        stack(:namespace, namespace)
       end
 
       # The normalized path prefix formed by joining every registered
@@ -374,18 +454,18 @@ module Grape
       # outermost mount path — nil when the API is not mounted; the backing
       # store is an internal detail.
       def mount_path
-        @namespace_stackable[:mount_path].first
+        stacked(:mount_path).first
       end
 
       def add_mount_path(mount_path)
-        @namespace_stackable[:mount_path] = mount_path
+        stack(:mount_path, mount_path)
       end
 
       # The full mount-path stack — one entry per mount level, outermost
       # first; what Router::Pattern::Path joins into a route's origin (see
       # #path_settings).
       def mount_paths
-        @namespace_stackable[:mount_path]
+        stacked(:mount_path)
       end
 
       # Dry::Schema key maps registered by +contract+ blocks (see
@@ -394,11 +474,11 @@ module Grape
       # declared keys. Record them with #add_contract_key_map; the backing
       # store is an internal detail.
       def contract_key_maps
-        @namespace_stackable[:contract_key_map]
+        stacked(:contract_key_map)
       end
 
       def add_contract_key_map(key_map)
-        @namespace_stackable[:contract_key_map] = key_map
+        stack(:contract_key_map, key_map)
       end
 
       # Serialization and error-response defaults recorded by the
@@ -572,7 +652,7 @@ module Grape
           mount_path: mount_paths.presence,
           root_prefix:,
           format:,
-          content_types: @namespace_stackable[:content_types].presence,
+          content_types: stacked(:content_types).presence,
           version:,
           version_options:
         )
@@ -587,6 +667,31 @@ module Grape
       # This scope's own +rescue_from+ registrations, before inheritance:
       # {rescue_handlers: {klass => handler}, base_only_rescue_handlers: {...}}.
       attr_reader :rescue_handler_maps
+
+      # This scope's own stackable registrations, before inheritance; nil when
+      # the scope registered nothing. Peer access for #copy_state_from.
+      attr_reader :stackable_values
+
+      # Every registration for +key+ along the chain, outermost scope first.
+      # Returns the frozen EMPTY_STACK when nothing is registered anywhere, and
+      # — like the store it replaced — the backing Array itself when only this
+      # scope registered anything, so callers must treat the result as
+      # read-only.
+      def stacked(key)
+        inherited = parent&.stacked(key)
+        own = @stackable_values&.[](key)
+        return own || EMPTY_STACK unless inherited
+
+        own ? inherited + own : inherited
+      end
+
+      # Every key registered along the chain, outermost scope's keys first.
+      def stacked_keys
+        inherited = parent&.stacked_keys || EMPTY_STACK
+        return inherited if @stackable_values.blank?
+
+        (inherited + @stackable_values.keys).uniq
+      end
 
       # Nearest scope's handlers first: Middleware::Error scans with +find+,
       # so a nested scope's registrations must precede inherited ones even
@@ -604,17 +709,37 @@ module Grape
       def copy_state_from(source)
         @namespace = source.namespace.clone
         @namespace_inheritable = source.namespace_inheritable.clone
-        @namespace_stackable = source.namespace_stackable.clone
+        # Shallow, matching the store this replaced: the per-key Arrays stay
+        # shared with the source, so a registration made on the source after
+        # the copy was taken is still visible through it.
+        @stackable_values = source.stackable_values&.dup
         @rescue_handler_maps = source.rescue_handler_maps&.dup
         @route = source.route.clone
       end
 
       private
 
+      # Appends one registration for +key+ to this scope, leaving inherited
+      # ones untouched. The store is allocated on first use. Returns the
+      # registered value, since this replaced an assignment expression and the
+      # +add_*+ writers built on it inherited that return value.
+      def stack(key, value)
+        ((@stackable_values ||= {})[key] ||= []) << value
+        value
+      end
+
+      # Drops this scope's own registrations for +keys+; inherited ones are
+      # kept, since they belong to the enclosing scopes.
+      def unstack(*keys)
+        return if @stackable_values.nil?
+
+        keys.each { |key| @stackable_values.delete(key) }
+      end
+
       # Deep-merges a stackable key's registrations into one Hash, nearest
       # scope winning; nil when nothing is registered.
       def namespace_stackable_with_hash(key)
-        data = @namespace_stackable[key]
+        data = stacked(key)
         return if data.blank?
 
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
