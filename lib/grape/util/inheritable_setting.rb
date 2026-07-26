@@ -98,8 +98,8 @@ module Grape
       # and request-serving defaults are applied.
       def point_in_time_copy_for_endpoint
         copy = point_in_time_copy
-        copy.route[:declared_params] = copy.declared_params.flatten
-        copy.route[:validations] = copy.validations.dup
+        copy.route_declared_params = copy.declared_params.flatten
+        copy.route_validations = copy.validations.dup
         copy.default_error_status ||= 500
         copy
       end
@@ -108,6 +108,77 @@ module Grape
       # @api private
       def route_end
         @route = {}
+      end
+
+      # Validator instances and declared-params entries for the route currently
+      # being built. Unlike the same-named namespace stacks (#validations /
+      # #declared_params), these are flat per-route snapshots: seeded when an
+      # endpoint copy is forked (see #point_in_time_copy_for_endpoint), topped
+      # up from mounting parents (see Endpoint#inherit_settings), and read back
+      # by run_validators / #declared.
+      def route_validations
+        @route[:validations]
+      end
+
+      def route_validations=(validations)
+        @route[:validations] = validations
+      end
+
+      def route_declared_params
+        @route[:declared_params]
+      end
+
+      def route_declared_params=(declared_params)
+        @route[:declared_params] = declared_params
+      end
+
+      # Path => renamed-name map recorded by +as:+ (see ParamsScope), consumed
+      # by #declared. Record entries with #add_route_renamed_param; an empty
+      # Hash when nothing was renamed.
+      def route_renamed_params
+        @route[:renamed_params] || {}
+      end
+
+      def add_route_renamed_param(path, new_name)
+        (@route[:renamed_params] ||= {})[path] = new_name
+      end
+
+      # Endpoint description recorded by +desc+ (see DSL::Desc), consumed by
+      # +route+. An empty Hash when +desc+ was never called.
+      def route_description
+        @route[:description] || {}
+      end
+
+      def route_description=(description)
+        @route[:description] = description
+      end
+
+      # The route-scope settings handed to each Grape::Router::Route: every
+      # +route_setting+ registration plus the description, minus the internal
+      # param snapshots (#route_validations / #route_declared_params).
+      def route_settings
+        route.except(:declared_params, :validations)
+      end
+
+      # Read (when +value+ is nil) or write an arbitrary route-scoped setting.
+      # This is the open store behind the +route_setting+ DSL; the known keys
+      # have the dedicated accessors above.
+      def route_setting(key, value = nil)
+        return @route[key] if value.nil?
+
+        @route[key] = value
+      end
+
+      # Fold a mounting parent scope's accumulated validations and declared
+      # params into this endpoint copy's per-route snapshots (see
+      # Endpoint#inherit_settings). Both are appended, so the parent's entries
+      # follow the ones already seeded from the surrounding scopes.
+      def inherit_route_params(parent)
+        parent_validations = parent.validations
+        route_validations.concat(parent_validations) if parent_validations.any?
+
+        parent_declared_params = parent.declared_params
+        route_declared_params.concat(parent_declared_params.flatten) if parent_declared_params.any?
       end
 
       # Return a serializable hash of our values.
