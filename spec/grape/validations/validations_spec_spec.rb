@@ -58,6 +58,18 @@ describe Grape::Validations::ValidationsSpec do
       expect(spec.coerce_type).to eq(Array)
       expect(spec.coerce_options.type).to eq(Array)
     end
+
+    it 'checks values against the declared member types, not the wrapping coercer' do
+      multi_spec = described_class.from(type: [Integer, String], values: [1, 2])
+      expect(multi_spec.coerce_type).to be_a(Grape::Validations::Types::VariantCollectionCoercer)
+      expect(multi_spec.values).to eq([1, 2])
+    end
+
+    it 'raises IncompatibleOptionValues when values do not match the declared member types' do
+      expect do
+        described_class.from(type: [Integer, String], values: %w[active])
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+    end
   end
 
   describe 'shared opts' do

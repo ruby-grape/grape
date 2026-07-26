@@ -40,6 +40,7 @@
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2814](https://github.com/ruby-grape/grape/pull/2814): Fix `type: [A, B]` combined with `values:`/`except_values:` raising `IncompatibleOptionValues` at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2815](https://github.com/ruby-grape/grape/pull/2815): Fix line-anchored regexes: `type: JSON` payloads containing a blank line were silently coerced to `nil` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
