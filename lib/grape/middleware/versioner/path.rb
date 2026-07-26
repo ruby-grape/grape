@@ -31,13 +31,34 @@ module Grape
           end
 
           slash_position = path_info.index('/', 1) # omit the first one
-          return unless slash_position
+          return version_from_first_segment(path_info, slash_position) if slash_position
 
+          version_from_only_segment(path_info)
+        end
+
+        private
+
+        def version_from_first_segment(path_info, slash_position)
           potential_version = path_info[1..(slash_position - 1)]
           return unless potential_version.match?(pattern)
 
           version_not_found! unless potential_version_match?(potential_version)
           env[Grape::Env::API_VERSION] = potential_version
+        end
+
+        # The path is a single segment (e.g. `GET /v1` — the root route of a
+        # path-versioned API). Nothing follows to disambiguate a version from a
+        # plain path or from a `.format` suffix (`/v1.json`), so the version is
+        # only recorded on an exact match against the declared versions, and an
+        # unmatched segment is left for the router to resolve — never a 404.
+        def version_from_only_segment(path_info)
+          candidate = path_info[1..]
+          candidate = candidate[0...candidate.rindex('.')] while candidate.include?('.') && !declared_version?(candidate)
+          env[Grape::Env::API_VERSION] = candidate if declared_version?(candidate)
+        end
+
+        def declared_version?(candidate)
+          versions.present? && versions.include?(candidate)
         end
       end
     end

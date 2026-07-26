@@ -11,6 +11,16 @@ shared_examples_for 'versioning' do
     expect(last_response.body).to eql 'Version: v1'
   end
 
+  it 'sets the API version for the root route' do
+    subject.format :txt
+    subject.version 'v1', **macro_options.except(:format)
+    subject.get do
+      "Version: #{request.env[Grape::Env::API_VERSION]}"
+    end
+    versioned_get '/', 'v1', macro_options
+    expect(last_response.body).to eql 'Version: v1'
+  end
+
   it 'adds the prefix before the API version' do
     subject.format :txt
     subject.prefix 'api'
