@@ -16,7 +16,7 @@ module Grape
       end
 
       def cascade(value = nil)
-        return inheritable_setting.cascade_defined? ? !inheritable_setting.cascade.nil? : true if value.nil?
+        return inheritable_setting.cascade_defined? ? inheritable_setting.cascade : true if value.nil?
 
         inheritable_setting.cascade = value
       end

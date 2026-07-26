@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### The `cascade` getter returns the configured value
+
+Calling `cascade` with no argument used to report whether cascading had been *configured at all* (`cascade false` still read back as `true`, contradicting the actual runtime behavior, which was correctly disabled). It now returns the configured value itself — `true`/`false` as set, or `true` when never set. Code that used the getter to detect "was `cascade` called" rather than "does this API cascade" must track that separately.
+
 #### `forward_match` is no longer exposed on routes
 
 `forward_match` is an internal, construction-time detail that decides how a route matches incoming paths (a prefix match for mounted Rack apps, the compiled pattern otherwise). It is now passed to `Grape::Router::Route` as a keyword argument and derived from the mounted app instead of being carried in the route's options.

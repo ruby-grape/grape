@@ -4890,12 +4890,33 @@ describe Grape::API do
   describe '.cascade' do
     subject { api.cascade }
 
-    let(:api) do
-      Class.new(Grape::API) do
-        cascade true
-      end
+    context 'when not set' do
+      let(:api) { Class.new(described_class) }
+
+      it { is_expected.to be(true) }
     end
 
-    it { is_expected.to be(true) }
+    context 'when set to true' do
+      let(:api) do
+        Class.new(Grape::API) do
+          cascade true
+        end
+      end
+
+      it { is_expected.to be(true) }
+    end
+
+    # Regression: the getter returned whether cascade had been set at all
+    # (!value.nil?), so `cascade false` still read back as true — contradicting
+    # the runtime cascading behavior, which was correctly disabled.
+    context 'when set to false' do
+      let(:api) do
+        Class.new(Grape::API) do
+          cascade false
+        end
+      end
+
+      it { is_expected.to be(false) }
+    end
   end
 end
