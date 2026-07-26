@@ -52,7 +52,7 @@ Metrics/BlockLength:
     - spec/**/*_spec.rb
 
 Metrics/ClassLength:
-  Max: 395
+  Max: 405
 
 Metrics/CyclomaticComplexity:
   Max: 15

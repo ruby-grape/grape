@@ -59,6 +59,39 @@ describe Grape::Util::InheritableValues do
     end
   end
 
+  describe '#==' do
+    it 'is true for two layers over the same parent with the same overrides' do
+      subject[:some_thing] = :foo
+      expect(subject).to eq(described_class.new(parent).tap { |v| v[:some_thing] = :foo })
+    end
+
+    it 'is false when the overrides differ' do
+      subject[:some_thing] = :foo
+      expect(subject).not_to eq(described_class.new(parent).tap { |v| v[:some_thing] = :bar })
+    end
+
+    it 'is false when the inherited values differ' do
+      parent[:some_thing] = :foo
+      expect(subject).not_to eq(described_class.new(described_class.new))
+    end
+
+    it 'does not distinguish a never-written layer from one emptied by #delete' do
+      subject[:some_thing] = :foo
+      subject.delete :some_thing
+      expect(subject).to eq(described_class.new(parent))
+    end
+
+    it 'is true when an override only restates an inherited value' do
+      parent[:some_thing] = :foo
+      subject[:some_thing] = :foo
+      expect(subject).to eq(described_class.new(parent))
+    end
+
+    it 'is false for a non-InheritableValues' do
+      expect(subject).not_to eq(subject.to_hash)
+    end
+  end
+
   describe '#clone' do
     let(:obj_cloned) { subject.clone }
 

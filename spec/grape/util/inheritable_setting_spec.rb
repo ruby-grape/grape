@@ -25,6 +25,46 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
+  describe '#==' do
+    # Endpoint settings are forked as siblings sharing one parent, so this is
+    # the shape the duplicate-route check in DSL::Routing#route compares.
+    let(:sibling) { subject.point_in_time_copy }
+
+    it 'is true for two copies forked from the same scope' do
+      expect(subject.point_in_time_copy).to eq sibling
+    end
+
+    it 'is false when only one copy registered a namespace' do
+      sibling.add_namespace(Grape::Namespace.new(:foo))
+      expect(subject.point_in_time_copy).not_to eq sibling
+    end
+
+    it 'is false when the route settings differ' do
+      sibling.route_setting(:description, foo: :bar)
+      expect(subject.point_in_time_copy).not_to eq sibling
+    end
+
+    it 'is false when an inheritable value differs' do
+      sibling.default_error_status = 404
+      expect(subject.point_in_time_copy).not_to eq sibling
+    end
+
+    it 'is false when a rescue handler differs' do
+      sibling.add_rescue_handlers({ StandardError => :handler }, subclasses: true)
+      expect(subject.point_in_time_copy).not_to eq sibling
+    end
+
+    it 'still compares copies that hang off different parents' do
+      other = described_class.new
+      other.inherit_from other_parent
+      expect(subject.point_in_time_copy).not_to eq other.point_in_time_copy
+    end
+
+    it 'is false for a non-InheritableSetting' do
+      expect(subject).not_to eq subject.to_hash
+    end
+  end
+
   describe '#global' do
     it 'sets a global value' do
       subject.global[:some_thing] = :foo_bar
