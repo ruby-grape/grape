@@ -1630,6 +1630,37 @@ params do
 end
 ```
 
+#### `numericality`
+
+Numeric parameters can be restricted to a range or a shape with the `:numericality` option. It accepts any combination of `:greater_than`, `:greater_than_or_equal_to`, `:less_than`, `:less_than_or_equal_to`, `:equal_to`, `:other_than`, `:only_integer`, `:odd` and `:even`.
+
+```ruby
+params do
+  requires :quantity, type: Integer, numericality: { greater_than: 0 }
+  requires :discount, type: Float, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  requires :rating, type: Integer, numericality: { equal_to: 5 }
+  requires :page, type: Integer, numericality: { greater_than: 0, only_integer: true }
+end
+```
+
+`:only_integer` accepts whole-numbered `Float`/`BigDecimal` values as well as `Integer`, so it also works on non-integer types:
+
+```ruby
+params do
+  requires :amount, type: Float, numericality: { only_integer: true } # 5.0 is valid, 5.5 is not
+end
+```
+
+When applied to a typed array, every element is checked individually:
+
+```ruby
+params do
+  requires :numbers, type: [Integer], numericality: { greater_than: 0 }
+end
+```
+
+`:equal_to` cannot be combined with any other comparison option, `:greater_than`/`:greater_than_or_equal_to` cannot be combined with each other (same for the `:less_than` pair), and `:odd`/`:even` are mutually exclusive; combining them raises an `ArgumentError` when the params are defined. Values that aren't `Numeric` (e.g. because no `:type`/coercion was declared) are left untouched by this validator — pair it with `:type` to enforce numeric-ness.
+
 #### `regexp`
 
 Parameters can be restricted to match a specific regular expression with the `:regexp` option. If the value does not match the regular expression an error will be returned. Note that this is true for both `requires` and `optional` parameters.
@@ -2019,6 +2050,14 @@ params do
   requires :code, type: String, length: { is: 2, message: 'code is expected to be exactly 2 characters long' }
   requires :str, type: String, length: { min: 5, message: 'str is expected to be at least 5 characters long' }
   requires :list, type: [Integer], length: { min: 2, max: 3, message: 'list is expected to have between 2 and 3 elements' }
+end
+```
+
+#### `numericality`
+
+```ruby
+params do
+  requires :rating, type: Integer, numericality: { equal_to: 5, message: 'must be a perfect score' }
 end
 ```
 
