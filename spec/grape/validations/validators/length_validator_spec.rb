@@ -430,4 +430,24 @@ describe Grape::Validations::Validators::LengthValidator do
       end
     end
   end
+
+  describe 'a non-hash element inside an Array scope' do
+    let(:app) do
+      Class.new(Grape::API) do
+        params do
+          requires :list, type: Array do
+            requires :name, length: { min: 2 }
+          end
+        end
+        post 'nested' do
+        end
+      end
+    end
+
+    it 'responds with a validation error instead of raising a TypeError' do
+      post '/nested', list: ['str']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('list[0][name] is missing')
+    end
+  end
 end

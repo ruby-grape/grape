@@ -200,4 +200,24 @@ describe Grape::Validations::Validators::OneofValidator do
       expect(last_response.status).to eq(400)
     end
   end
+
+  describe 'a non-hash element inside an Array scope' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        params do
+          requires :items, type: Array do
+            requires :value, type: Hash, oneof: [proc { requires :x, type: Integer }]
+          end
+        end
+        post('/items') { 'ok' }
+      end
+    end
+
+    it 'responds with a validation error instead of raising a TypeError' do
+      post '/items', { items: ['str'] }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(JSON.parse(last_response.body)['error']).to include('items[0][value] is invalid')
+    end
+  end
 end

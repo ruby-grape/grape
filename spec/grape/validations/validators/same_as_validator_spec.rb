@@ -87,4 +87,24 @@ describe Grape::Validations::Validators::SameAsValidator do
       end
     end
   end
+
+  describe 'a non-hash element inside an Array scope' do
+    let(:app) do
+      Class.new(Grape::API) do
+        params do
+          requires :pair, type: Array do
+            requires :a, same_as: :b
+          end
+        end
+        post 'nested' do
+        end
+      end
+    end
+
+    it 'responds with a validation error instead of raising a TypeError' do
+      post '/nested', pair: ['str']
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('pair[0][a] is missing')
+    end
+  end
 end

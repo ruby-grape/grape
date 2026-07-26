@@ -18,6 +18,8 @@ module Grape
         end
 
         def validate_param!(attr_name, params)
+          return unless hash_like?(params)
+
           value = params[attr_name]
           return if value.nil? && !required?
 
