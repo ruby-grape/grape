@@ -52,6 +52,12 @@ describe Grape::Validations::ValidationsSpec do
       expect(spec.coerce_type).to eq([Integer, String])
       expect(spec.coerce_type.to_s).to eq('[Integer, String]')
     end
+
+    it 'never lets the values-guessed type leak into coerce_type for a bare Array type' do
+      spec = described_class.from(type: Array, values: %w[a b c])
+      expect(spec.coerce_type).to eq(Array)
+      expect(spec.coerce_options.type).to eq(Array)
+    end
   end
 
   describe 'shared opts' do
