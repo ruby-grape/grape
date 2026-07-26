@@ -61,7 +61,7 @@ module Grape
         end
 
         def valid_part?(part)
-          part&.match?(/^\S/) && not_slash?(part)
+          part&.match?(/\A\S/) && not_slash?(part)
         end
 
         class PartsCache < Grape::Util::Cache

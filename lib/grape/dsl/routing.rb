@@ -184,7 +184,7 @@ module Grape
       #   end
       def route(methods, paths = ['/'], requirements: nil, anchor: true, **route_options, &)
         http_methods = methods == :any ? '*' : methods
-        endpoint_description = inheritable_setting.route[:description] || {}
+        endpoint_description = inheritable_setting.route_description
 
         # +params+, +requirements+ and +anchor+ each travel as their own endpoint
         # input; the route-options bag keeps the description's other keys

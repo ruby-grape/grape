@@ -66,7 +66,7 @@ module Grape
         # Only the route scope is consumed downstream (by +route+ and the
         # route's readers, e.g. +http_codes+); the namespace scope was
         # write-only, so it is no longer populated.
-        inheritable_setting.route[:description] = settings
+        inheritable_setting.route_description = settings
       end
     end
   end
