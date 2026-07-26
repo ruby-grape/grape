@@ -132,7 +132,7 @@ One micro-change: the `middleware` DSL reader dropped its `|| []` fallback — `
 
 The `Grape::Namespace` objects registered by the `namespace` DSL (and its `group` / `resource` / `resources` / `segment` aliases) and the mount path recorded by `mount` are now written and read through dedicated accessors on `Grape::Util::InheritableSetting` instead of raw `namespace_stackable` keys, following the same move made for rescue handlers:
 
-* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the `InheritableValues` store).
+* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the namespace-settings store).
 * `namespace_path` returns the normalized joined path prefix, absorbing the `Grape::Namespace.joined_space_path(...)` call previously spelled out at the read sites, and `namespace_requirements` returns the requirements declared by registered namespaces, absorbing the `filter_map(&:requirements)`.
 * `mount_path` / `add_mount_path(path)` replace `namespace_stackable[:mount_path]`; the reader absorbs the outermost-wins convention (previously the `.first` at the read site in `Endpoint#build_stack`).
 

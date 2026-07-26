@@ -57,8 +57,11 @@ module Grape
       # #inherit_from).
       def initialize
         @route = {}
-        @namespace = InheritableValues.new # only inheritable from a parent when
-        # used with a mount, or should every API::Class be a separate namespace by default?
+        # Namespace settings are scope-local by design: nothing ever layers
+        # them over a parent's (see #inherit_from, and the nesting behaviour
+        # DSL::Settings#namespace_setting is specified to have), so a plain
+        # Hash is the whole store.
+        @namespace = {}
         @namespace_inheritable = InheritableValues.new
         # This scope's own stackable registrations, one Array per key. Stays
         # nil until the first registration so scopes that only inherit don't
@@ -195,7 +198,7 @@ module Grape
         {
           global: global.clone,
           route: route.clone,
-          namespace: namespace.to_hash,
+          namespace: namespace.dup,
           namespace_inheritable: @namespace_inheritable.to_hash,
           namespace_stackable: stacked_keys.to_h { |key| [key, stacked(key)] },
           rescue_handlers:,
@@ -727,7 +730,7 @@ module Grape
       # Used by +point_in_time_copy+ to populate a freshly-built instance
       # with cloned state from another instance of the same class.
       def copy_state_from(source)
-        @namespace = source.namespace.clone
+        @namespace = source.namespace.dup
         @namespace_inheritable = source.namespace_inheritable.clone
         # Shallow, matching the store this replaced: the per-key Arrays stay
         # shared with the source, so a registration made on the source after
