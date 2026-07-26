@@ -8,6 +8,8 @@ module Grape
       # but check its type. More information there
       # https://dry-rb.org/gems/dry-types/main/built-in-types/
       class DryTypeCoercer
+        extend Grape::Util::FreezeOnNew
+
         class << self
           # Returns a collection coercer which corresponds to a given type.
           # Example:

@@ -21,6 +21,20 @@ RSpec.describe Grape::Router::Route do
     it { is_expected.to be_a(Grape::Router::BaseRoute) }
   end
 
+  describe '#regexp_capture_index' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    # The reader is called from request-time route matching on instances
+    # shared across threads, so it must be assigned during #to_regexp
+    # (router compilation), never lazily at read time. Freezing the route
+    # proves no ivar is written after compilation.
+    it 'is assigned eagerly by #to_regexp and readable on a frozen route' do
+      route.to_regexp(3)
+      route.freeze
+      expect(route.regexp_capture_index).to eq('_3')
+    end
+  end
+
   describe 'metadata attributes (namespace, prefix, settings)' do
     subject(:route) do
       described_class.new(endpoint, :get, pattern, options, forward_match: false,

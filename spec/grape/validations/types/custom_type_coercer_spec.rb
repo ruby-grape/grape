@@ -23,6 +23,17 @@ describe Grape::Validations::Types::CustomTypeCoercer do
           expect(coercer.call('[{"foo":"bar"}]')).to eq(Set[{ foo: 'bar' }])
         end
       end
+
+      context 'when the coercion method returns a frozen array' do
+        let(:type) { Array }
+        let(:coerce_method) { ->(val) { JSON.parse(val).freeze } }
+
+        # The returned array belongs to the user's coercion method and may be
+        # frozen or be the input itself, so symbolization must not mutate it.
+        it 'symbolizes without mutating the returned array' do
+          expect(coercer.call('[{"foo":"bar"}]')).to eq([{ foo: 'bar' }])
+        end
+      end
     end
   end
 end
