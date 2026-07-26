@@ -37,6 +37,7 @@
 * [#2823](https://github.com/ruby-grape/grape/pull/2823): Move stackable settings storage onto `Grape::Util::InheritableSetting`, resolving inheritance by walking `parent` instead of a second chain; `Grape::Util::StackableValues` becomes a read-only view kept for grape-swagger, and `Grape::Util::BaseInheritable` is removed - [@ericproulx](https://github.com/ericproulx).
 * [#2828](https://github.com/ruby-grape/grape/pull/2828): Compare `Grape::Util::InheritableSetting` by own state instead of serializing both chains through `to_hash`, and give `Grape::Util::InheritableValues` an `==`, so the duplicate-route check in `route` stops costing O(n²) `to_hash` calls on APIs whose namespaces share relative paths - [@ericproulx](https://github.com/ericproulx).
 * [#2831](https://github.com/ruby-grape/grape/pull/2831): Document and test open (beginless/endless) `Range`s as a `values:`/`except_values:` alternative to a dedicated numericality validator - [@dblock](https://github.com/dblock).
+* [#2830](https://github.com/ruby-grape/grape/pull/2830): Remove `Grape::Util::InheritableValues`, resolving inheritable settings by walking `Grape::Util::InheritableSetting#parent` instead of layering a second chain of stores, and keep namespace settings in a plain Hash - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

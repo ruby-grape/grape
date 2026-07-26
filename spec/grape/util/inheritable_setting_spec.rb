@@ -134,6 +134,48 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
+  describe 'inheritable value resolution' do
+    it 'shadows an inherited value with an explicitly assigned nil' do
+      parent.cascade = true
+      subject.cascade = nil
+
+      expect(subject.cascade).to be_nil
+      expect(parent.cascade).to be(true)
+    end
+
+    it 'reports through the predicate that an enclosing scope assigned a value' do
+      expect(subject.cascade_defined?).to be(false)
+
+      parent.cascade = false
+
+      expect(subject.cascade_defined?).to be(true)
+      expect(subject.cascade).to be(false)
+    end
+
+    it 'resolves a value the parent gains after the child was created' do
+      expect(subject.auth).to be_nil
+
+      parent.auth = { type: :http_basic }
+
+      expect(subject.auth).to eq(type: :http_basic)
+    end
+
+    it 'leaves the parent untouched when a nested scope overrides' do
+      subject.root_prefix = :child_prefix
+
+      expect(parent.root_prefix).to eq :namespace_inheritable_foo_bar
+    end
+
+    # See bug #891: entity classes and the like are shared with a copy, never
+    # duplicated.
+    it 'shares complex values with a point-in-time copy rather than duplicating them' do
+      options = { entity: Class.new }
+      subject.version_options = options
+
+      expect(subject.point_in_time_copy.version_options).to be(options)
+    end
+  end
+
   describe '#namespace_stackable' do
     it 'works with stackable values' do
       expect(subject.helpers).to eq [:namespace_stackable_foo_bar]
