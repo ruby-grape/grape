@@ -204,7 +204,27 @@ module Grape
       end
 
       def ==(other)
-        other.is_a?(self.class) && to_hash == other.to_hash
+        return true if equal?(other)
+        return false unless other.is_a?(self.class)
+
+        # Endpoint copies are siblings of the scope they were forked from, not
+        # children of it (see #point_in_time_copy), so every endpoint of an API
+        # hangs off the same parent object — which is the case the duplicate
+        # check in DSL::Routing#route runs on. Both sides then inherit the same
+        # values, so comparing own state decides it without serializing either
+        # chain; #global is class-level and identical for both either way.
+        # Stacks concatenate and #stack never records an empty one, so matching
+        # own stacks means matching resolved ones; the rescue handler maps
+        # merge, where a scope can restate an inherited mapping, so those are
+        # compared resolved.
+        return to_hash == other.to_hash unless parent.equal?(other.parent)
+
+        same_own_store?(@stackable_values, other.stackable_values) &&
+          route == other.route &&
+          @namespace_inheritable == other.namespace_inheritable &&
+          namespace == other.namespace &&
+          rescue_handlers == other.rescue_handlers &&
+          base_only_rescue_handlers == other.base_only_rescue_handlers
       end
       alias eql? ==
 
@@ -734,6 +754,15 @@ module Grape
         return if @stackable_values.nil?
 
         keys.each { |key| @stackable_values.delete(key) }
+      end
+
+      # Compares two lazily-allocated own-registration stores (see #stack and
+      # #add_rescue_handlers): nil and an emptied Hash both mean "this scope
+      # registered nothing", so #== must not tell them apart.
+      def same_own_store?(mine, theirs)
+        return theirs.blank? if mine.blank?
+
+        mine == theirs
       end
 
       # Deep-merges a stackable key's registrations into one Hash, nearest
