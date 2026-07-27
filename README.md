@@ -1559,6 +1559,27 @@ params do
 end
 ```
 
+An exclusive upper bound is expressed with the standard Ruby `...` range (three dots). Ruby has no range syntax for an exclusive *lower* bound; an arity-one `:values` Proc predicate (see below) is the recommended way to express one, though excluding a specific endpoint (e.g. zero) via `:except_values` also works:
+
+```ruby
+params do
+  requires :score,    type: Float, values: 0.0...5.0                    # 0.0 <= score < 5.0
+  requires :positive, type: Float, values: ->(v) { v > 0.0 }            # amount > 0.0 (recommended)
+  requires :other,    type: Float, values: 0.0.., except_values: [0.0]  # amount > 0.0 (alternative)
+end
+```
+
+Combined with `:type`, ranges (open or closed) cover common numeric bound checks without a dedicated validator:
+
+```ruby
+params do
+  requires :quantity, type: Integer, values: 1..       # must be a positive integer
+  requires :discount, type: Float, values: 0.0..100.0  # must be between 0 and 100
+  requires :rating,   type: Integer, values: 5..5      # must be exactly 5
+  requires :numbers,  type: [Integer], values: 1..     # every element must be positive
+end
+```
+
 The `:values` option can also be supplied with a `Proc`, evaluated lazily with each request.
 If the Proc has arity zero (i.e. it takes no arguments) it is expected to return either a list or a range which will then be used to validate the parameter.
 
@@ -1594,12 +1615,13 @@ With `requires`, blank values are already rejected: `requires` enforces presence
 
 Parameters can be restricted from having a specific set of values with the `:except_values` option.
 
-The `except_values` validator behaves similarly to the `values` validator in that it accepts either an Array, a Range, or a Proc.  Unlike the `values` validator, however, `except_values` only accepts Procs with arity zero.
+The `except_values` validator behaves similarly to the `values` validator in that it accepts either an Array, a Range (including open/beginless/endless ranges), or a Proc.  Unlike the `values` validator, however, `except_values` only accepts Procs with arity zero.
 
 ```ruby
 params do
   requires :browser, except_values: [ 'ie6', 'ie7', 'ie8' ]
   requires :port, except_values: { value: 0..1024, message: 'is not allowed' }
+  requires :negative, type: Integer, except_values: ..-1
   requires :hashtag, except_values: -> { Hashtag.FORBIDDEN_LIST }
 end
 ```

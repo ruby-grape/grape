@@ -157,6 +157,20 @@ describe Grape::Validations::Validators::ExceptValuesValidator do
         { value: 11, rc: 400, body: { error: 'type has a value not allowed' }.to_json },
         { value: 13, rc: 200, body: { type: 13 }.to_json }
       ]
+    },
+    req_except_endless_range: {
+      optional: { type: Integer, except_values: 100.. },
+      tests: [
+        { value: 150, rc: 400, body: { error: 'type has a value not allowed' }.to_json },
+        { value: 50, rc: 200, body: { type: 50 }.to_json }
+      ]
+    },
+    req_except_beginless_range: {
+      optional: { type: Integer, except_values: ..0 },
+      tests: [
+        { value: -5, rc: 400, body: { error: 'type has a value not allowed' }.to_json },
+        { value: 5, rc: 200, body: { type: 5 }.to_json }
+      ]
     }
   }.each do |path, param_def|
     param_def[:tests].each do |t|

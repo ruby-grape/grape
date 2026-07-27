@@ -330,6 +330,275 @@ describe Grape::Validations::Validators::ValuesValidator do
     end
   end
 
+  describe '/beginless' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          optional :type, type: Integer, values: ..10
+        end
+        get '/beginless' do
+          { type: params[:type] }
+        end
+      end
+    end
+
+    it 'validates against values in a beginless range' do
+      get('/beginless', type: 5)
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 5 }.to_json)
+    end
+
+    it 'does not allow an invalid value for a parameter using a beginless range' do
+      get('/beginless', type: 11)
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'type does not have a valid value' }.to_json)
+    end
+  end
+
+  # Ruby's `...` range excludes its upper bound; there is no equivalent for an exclusive
+  # lower bound, so that is achieved by combining `values:` with `except_values:`.
+  describe '/exclusive_bounds' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        resources :exclusive_bounds do
+          params do
+            requires :score, type: Float, values: 0.0...5.0
+          end
+          get '/exclusive_end' do
+            { score: params[:score] }
+          end
+
+          params do
+            requires :amount, type: Float, values: 0.0.., except_values: [0.0]
+          end
+          get '/exclusive_start' do
+            { amount: params[:amount] }
+          end
+
+          params do
+            requires :amount, type: Float, values: ->(v) { v > 0.0 }
+          end
+          get '/exclusive_start_predicate' do
+            { amount: params[:amount] }
+          end
+        end
+      end
+    end
+
+    context 'with an exclusive upper bound (0.0...5.0)' do
+      it 'allows a value just below the upper bound' do
+        get('/exclusive_bounds/exclusive_end', score: 4.9999)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ score: 4.9999 }.to_json)
+      end
+
+      it 'rejects the upper bound itself' do
+        get('/exclusive_bounds/exclusive_end', score: 5.0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'score does not have a valid value' }.to_json)
+      end
+
+      it 'allows the lower bound (inclusive)' do
+        get('/exclusive_bounds/exclusive_end', score: 0.0)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ score: 0.0 }.to_json)
+      end
+    end
+
+    context 'with an exclusive lower bound (via values: 0.0.. + except_values: [0.0])' do
+      it 'allows a value just above the lower bound' do
+        get('/exclusive_bounds/exclusive_start', amount: 0.0001)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ amount: 0.0001 }.to_json)
+      end
+
+      it 'rejects exactly the excluded lower bound' do
+        get('/exclusive_bounds/exclusive_start', amount: 0.0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'amount has a value not allowed' }.to_json)
+      end
+
+      it 'rejects a value below the lower bound' do
+        get('/exclusive_bounds/exclusive_start', amount: -1.0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'amount does not have a valid value' }.to_json)
+      end
+    end
+
+    context 'with an exclusive lower bound (via values: ->(v) { v > 0.0 }, the cleaner alternative)' do
+      it 'allows a value just above the lower bound' do
+        get('/exclusive_bounds/exclusive_start_predicate', amount: 0.0001)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ amount: 0.0001 }.to_json)
+      end
+
+      it 'rejects exactly the lower bound' do
+        get('/exclusive_bounds/exclusive_start_predicate', amount: 0.0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'amount does not have a valid value' }.to_json)
+      end
+
+      it 'rejects a value below the lower bound' do
+        get('/exclusive_bounds/exclusive_start_predicate', amount: -1.0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'amount does not have a valid value' }.to_json)
+      end
+    end
+  end
+
+  # Open (beginless/endless) ranges cover the common numeric-bounding needs (positive
+  # numbers, percentages, exact values) without a dedicated `numericality` validator, since
+  # `values:` already accepts a `Range` and checks it with `Range#include?`.
+  # See https://github.com/ruby-grape/grape/pull/2822#issuecomment-5084586238
+  describe '/open_ranges' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        resources :open_ranges do
+          params do
+            requires :quantity, type: Integer, values: 1..
+          end
+          get '/quantity' do
+            { quantity: params[:quantity] }
+          end
+
+          params do
+            requires :discount, type: Float, values: 0.0..100.0
+          end
+          get '/discount' do
+            { discount: params[:discount] }
+          end
+
+          params do
+            requires :rating, type: Integer, values: 5..5
+          end
+          get '/rating' do
+            { rating: params[:rating] }
+          end
+
+          params do
+            requires :page, type: Integer, values: 1..
+          end
+          get '/page' do
+            { page: params[:page] }
+          end
+
+          params do
+            requires :numbers, type: [Integer], values: 1..
+          end
+          get '/numbers' do
+            { numbers: params[:numbers] }
+          end
+        end
+      end
+    end
+
+    context 'when a positive quantity is required (greater_than: 0)' do
+      it 'allows a positive value' do
+        get('/open_ranges/quantity', quantity: 1)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ quantity: 1 }.to_json)
+      end
+
+      it 'rejects zero' do
+        get('/open_ranges/quantity', quantity: 0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'quantity does not have a valid value' }.to_json)
+      end
+
+      it 'rejects a negative value' do
+        get('/open_ranges/quantity', quantity: -1)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'quantity does not have a valid value' }.to_json)
+      end
+    end
+
+    context 'when a percentage is required (greater_than_or_equal_to: 0, less_than_or_equal_to: 100)' do
+      it 'allows a value within range' do
+        get('/open_ranges/discount', discount: 50)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ discount: 50.0 }.to_json)
+      end
+
+      it 'allows the lower bound' do
+        get('/open_ranges/discount', discount: 0)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ discount: 0.0 }.to_json)
+      end
+
+      it 'allows the upper bound' do
+        get('/open_ranges/discount', discount: 100)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ discount: 100.0 }.to_json)
+      end
+
+      it 'rejects a value below the range' do
+        get('/open_ranges/discount', discount: -1)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'discount does not have a valid value' }.to_json)
+      end
+
+      it 'rejects a value above the range' do
+        get('/open_ranges/discount', discount: 101)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'discount does not have a valid value' }.to_json)
+      end
+    end
+
+    context 'when an exact value is required (equal_to: 5)' do
+      it 'allows the exact value' do
+        get('/open_ranges/rating', rating: 5)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ rating: 5 }.to_json)
+      end
+
+      it 'rejects any other value' do
+        get('/open_ranges/rating', rating: 4)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'rating does not have a valid value' }.to_json)
+      end
+    end
+
+    context 'when a positive integer is required (greater_than: 0, only_integer: true)' do
+      it 'allows a positive integer' do
+        get('/open_ranges/page', page: 1)
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ page: 1 }.to_json)
+      end
+
+      it 'rejects a non-integer value' do
+        get('/open_ranges/page', page: 1.5)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'page is invalid, page does not have a valid value' }.to_json)
+      end
+
+      it 'rejects zero' do
+        get('/open_ranges/page', page: 0)
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'page does not have a valid value' }.to_json)
+      end
+    end
+
+    context 'when every array element must satisfy the constraint (greater_than: 0)' do
+      it 'allows an array whose elements all satisfy the constraint' do
+        get('/open_ranges/numbers', numbers: [1, 2, 3])
+        expect(last_response.status).to eq 200
+        expect(last_response.body).to eq({ numbers: [1, 2, 3] }.to_json)
+      end
+
+      it 'rejects an array with an element violating the constraint' do
+        get('/open_ranges/numbers', numbers: [1, 0, 3])
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq({ error: 'numbers does not have a valid value' }.to_json)
+      end
+    end
+  end
+
   describe '/lambda_val' do
     let(:app) do
       Class.new(Grape::API) do
