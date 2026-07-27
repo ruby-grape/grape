@@ -53,6 +53,7 @@
 * [#2825](https://github.com/ruby-grape/grape/pull/2825): Stop `present` entity autodetection from picking up a top-level `::Entity` constant - [@ericproulx](https://github.com/ericproulx).
 * [#2827](https://github.com/ruby-grape/grape/pull/2827): Make the `cascade` DSL getter return the configured value (`cascade false` read back as `true`) - [@ericproulx](https://github.com/ericproulx).
 * [#2829](https://github.com/ruby-grape/grape/pull/2829): Fix a cascading route handing over only to the last route registered for the path, making a middle version (3+ mounted versions with a catch-all) answer 406 - [@ericproulx](https://github.com/ericproulx).
+* [#2834](https://github.com/ruby-grape/grape/pull/2834): Restore the #2824 fix for cascaded routes leaking `route_info` and path captures, silently reverted by #2829 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.4 (2026-07-25)

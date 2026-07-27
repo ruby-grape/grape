@@ -108,4 +108,39 @@ describe Grape::Router do
       expect(headers['X-Cascade']).to eq('pass')
     end
   end
+
+  # Regression: routing args were seeded once (`||=`) and merged in place, so
+  # when a route cascaded (X-Cascade pass) the next candidate still saw the
+  # previous attempt's :route_info and path captures.
+  describe 'routing args across cascading routes' do
+    let(:app) do
+      v2 = Class.new(Grape::API) do
+        version 'v2', using: :header, vendor: 'grape', cascade: true
+        get ':id' do
+          { from: 'v2' }
+        end
+      end
+      v1 = Class.new(Grape::API) do
+        format :json
+        version 'v1', using: :header, vendor: 'grape'
+        get ':name' do
+          { origin: route.origin, params: params.to_h }
+        end
+      end
+      Class.new(Grape::API) do
+        format :json
+        mount v2
+        mount v1
+      end
+    end
+
+    it 'does not leak route_info or path captures from a cascaded attempt' do
+      get '/123', {}, 'HTTP_ACCEPT' => 'application/vnd.grape-v1+json'
+
+      expect(last_response.status).to eq(200)
+      body = JSON.parse(last_response.body)
+      expect(body['origin']).to eq('/:name')
+      expect(body['params']).to eq('name' => '123')
+    end
+  end
 end
