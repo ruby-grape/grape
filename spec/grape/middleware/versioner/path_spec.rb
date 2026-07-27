@@ -74,14 +74,20 @@ describe Grape::Middleware::Versioner::Path do
       expect(subject.call(Rack::PATH_INFO => '/v1.json').last).to eq('v1')
     end
 
-    it 'sets a dotted version when a format suffix follows' do
-      options[:versions] = %w[v1.2]
-      expect(subject.call(Rack::PATH_INFO => '/v1.2.json').last).to eq('v1.2')
+    context 'with a dotted version' do
+      let(:options) { { versions: %w[v1.2] } }
+
+      it 'sets the version when a format suffix follows' do
+        expect(subject.call(Rack::PATH_INFO => '/v1.2.json').last).to eq('v1.2')
+      end
     end
 
-    it 'sets the version behind a prefix' do
-      options[:prefix] = '/api'
-      expect(subject.call(Rack::PATH_INFO => '/api/v1').last).to eq('v1')
+    context 'behind a prefix' do
+      let(:options) { { versions: %w[v1], prefix: '/api' } }
+
+      it 'sets the version' do
+        expect(subject.call(Rack::PATH_INFO => '/api/v1').last).to eq('v1')
+      end
     end
 
     it 'leaves an unknown segment for the router instead of failing with 404' do
