@@ -126,10 +126,14 @@ module Grape
       !cascade
     end
 
+    # Routing args are rebuilt for every attempt: when a route cascades
+    # (X-Cascade pass), the next candidate must not observe the previous
+    # attempt's +route_info+ or path captures.
     def process_route(route, input, env, include_allow_header: false)
       route_params = route.params(input)
-      env[Grape::Env::GRAPE_ROUTING_ARGS] ||= { route_info: route }
-      env[Grape::Env::GRAPE_ROUTING_ARGS].merge!(route_params) if route_params.present?
+      routing_args = { route_info: route }
+      routing_args.merge!(route_params) if route_params.present?
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
       route.call(env)
     end
