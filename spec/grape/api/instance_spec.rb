@@ -31,6 +31,17 @@ describe Grape::API::Instance do
     end
   end
 
+  describe '.to_s' do
+    it 'falls back to the class name when there is no base' do
+      expect(described_class.to_s).to eq('Grape::API::Instance')
+    end
+
+    it 'delegates to the base API once mounted' do
+      stub_const('SomeAPI', Class.new(Grape::API))
+      expect(SomeAPI.base_instance.to_s).to eq('SomeAPI')
+    end
+  end
+
   context 'when an instance is the root' do
     let(:root_api) do
       to_mount = an_instance
