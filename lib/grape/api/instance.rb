@@ -21,11 +21,11 @@ module Grape
       Boolean = Grape::API::Boolean
 
       class << self
-        extend Forwardable
-
         attr_accessor :configuration
 
-        def_delegators :@base, :to_s
+        def to_s
+          @base&.to_s || super
+        end
 
         def base=(grape_api)
           @base = grape_api
