@@ -133,6 +133,19 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       expect(last_response.body).to eq('Auto-detect!')
     end
 
+    it 'autodetection does not use a top-level ::Entity constant' do
+      some_model = Class.new
+      entity = Class.new(Grape::Entity)
+      stub_const('Entity', entity)
+
+      subject.get '/example' do
+        present some_model.new
+      end
+
+      expect(entity).not_to receive(:represent)
+      get '/example'
+    end
+
     it 'autodetection does not use Entity if it is not a presenter' do
       some_model = Class.new
       entity = Class.new

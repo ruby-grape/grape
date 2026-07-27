@@ -45,7 +45,8 @@ module Grape
       # Attempt to locate the Entity class for a given object, if not given
       # explicitly. This is done by looking for the presence of Klass::Entity,
       # where Klass is the class of the `object` parameter, or one of its
-      # ancestors.
+      # ancestors. Object is excluded from the search: top-level constants
+      # live on it, so a global ::Entity class is not a representer.
       # @param object [Object] the object to locate the Entity class for
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object)
@@ -57,9 +58,10 @@ module Grape
           return representations[potential] if potential && representations[potential]
         end
 
-        return unless klass.const_defined?(:Entity)
+        owner = klass.ancestors.detect { |ancestor| ancestor != Object && ancestor.const_defined?(:Entity, false) }
+        return unless owner
 
-        entity = klass.const_get(:Entity)
+        entity = owner.const_get(:Entity, false)
         entity if entity.respond_to?(:represent)
       end
 
