@@ -38,6 +38,7 @@
 * [#2828](https://github.com/ruby-grape/grape/pull/2828): Compare `Grape::Util::InheritableSetting` by own state instead of serializing both chains through `to_hash`, and give `Grape::Util::InheritableValues` an `==`, so the duplicate-route check in `route` stops costing O(n²) `to_hash` calls on APIs whose namespaces share relative paths - [@ericproulx](https://github.com/ericproulx).
 * [#2831](https://github.com/ruby-grape/grape/pull/2831): Document and test open (beginless/endless) `Range`s as a `values:`/`except_values:` alternative to a dedicated numericality validator - [@dblock](https://github.com/dblock).
 * [#2830](https://github.com/ruby-grape/grape/pull/2830): Remove `Grape::Util::InheritableValues`, resolving inheritable settings by walking `Grape::Util::InheritableSetting#parent` instead of layering a second chain of stores, and keep namespace settings in a plain Hash - [@ericproulx](https://github.com/ericproulx).
+* [#2833](https://github.com/ruby-grape/grape/pull/2833): Fix `Grape::API::Instance.to_s` returning an empty string instead of the class name when the instance has no base (regression from #2581) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
