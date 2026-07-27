@@ -36,6 +36,7 @@
 * [#2811](https://github.com/ruby-grape/grape/pull/2811): Internalize the route scope behind `Grape::Util::InheritableSetting` accessors (`route_validations`, `route_declared_params`, `route_renamed_params` / `add_route_renamed_param`, `route_description`, `route_settings`, `route_setting`, `inherit_route_params`), so no external code touches the raw `route` store - [@ericproulx](https://github.com/ericproulx).
 * [#2823](https://github.com/ruby-grape/grape/pull/2823): Move stackable settings storage onto `Grape::Util::InheritableSetting`, resolving inheritance by walking `parent` instead of a second chain; `Grape::Util::StackableValues` becomes a read-only view kept for grape-swagger, and `Grape::Util::BaseInheritable` is removed - [@ericproulx](https://github.com/ericproulx).
 * [#2828](https://github.com/ruby-grape/grape/pull/2828): Compare `Grape::Util::InheritableSetting` by own state instead of serializing both chains through `to_hash`, and give `Grape::Util::InheritableValues` an `==`, so the duplicate-route check in `route` stops costing O(n²) `to_hash` calls on APIs whose namespaces share relative paths - [@ericproulx](https://github.com/ericproulx).
+* [#2831](https://github.com/ruby-grape/grape/pull/2831): Document and test open (beginless/endless) `Range`s as a `values:`/`except_values:` alternative to a dedicated numericality validator - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes
