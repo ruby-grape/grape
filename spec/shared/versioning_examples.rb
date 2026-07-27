@@ -172,12 +172,24 @@ shared_examples_for 'versioning' do
       end
       klass
     end
+    # A third version makes v2 a *middle* version: reachable neither as the
+    # first route matched nor as the last one, which is what regressed when a
+    # cascading route handed straight over to the catch-all.
+    let(:v3) do
+      klass = Class.new(Grape::API)
+      klass.version 'v3', **options.except(:format)
+      klass.get 'version' do
+        'v3'
+      end
+      klass
+    end
 
     before do
       subject.format :txt
 
       subject.mount v1
       subject.mount v2
+      subject.mount v3
 
       subject.route :any, '*path' do
         params[:path]
@@ -209,6 +221,28 @@ shared_examples_for 'versioning' do
         versioned_get '/whatever', 'v2', macro_options
         expect(last_response.status).to eq(200)
         expect(last_response.body).to end_with 'whatever'
+      end
+    end
+
+    context 'v3' do
+      it 'finds endpoint' do
+        versioned_get '/version', 'v3', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('v3')
+      end
+
+      it 'finds catch all' do
+        versioned_get '/whatever', 'v3', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to end_with 'whatever'
+      end
+    end
+
+    context 'with an unknown version' do
+      it 'falls through to the catch-all' do
+        versioned_get '/version', 'v999', macro_options
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to end_with 'version'
       end
     end
   end

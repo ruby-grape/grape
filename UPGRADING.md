@@ -6,6 +6,14 @@ Upgrading Grape
 #### The `cascade` getter returns the configured value
 
 Calling `cascade` with no argument used to report whether cascading had been *configured at all* (`cascade false` still read back as `true`, contradicting the actual runtime behavior, which was correctly disabled). It now returns the configured value itself — `true`/`false` as set, or `true` when never set. Code that used the getter to detect "was `cascade` called" rather than "does this API cascade" must track that separately.
+#### A cascading route hands over to every remaining route
+
+A route that answers with `X-Cascade: pass` — what a version mismatch does by default — now hands the request to every remaining matching route, in registration order, before the router gives up. Previously it handed over to the *last* route registered for the path and stopped there, so with three or more routes sharing a path (typically three mounted API versions) every route in between was unreachable.
+
+Two consequences:
+
+* **A middle version is now served.** `mount v1; mount v2; mount v3` alongside a catch-all `route :any, '*path'` answered `406 API version not found` for v2, while v1 and v3 worked; v2 is now served.
+* **An unmatched version reaches a catch-all.** When a catch-all ANY route is present, a request whose version matches nothing now falls through to it instead of surfacing the versioner's `406`, which is what `cascade: true` (the default) asks for. Declare `version ..., cascade: false` to keep the hard 406 — that path is unchanged and never consults the catch-all.
 
 #### `forward_match` is no longer exposed on routes
 

@@ -49,9 +49,7 @@ module Grape
     def call(env)
       with_optimization do
         input = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
-        method = env[Rack::REQUEST_METHOD]
-        response, route = identity(input, method, env)
-        response || rotation(input, method, env, route)
+        transaction(input, env[Rack::REQUEST_METHOD], env)
       end
     end
 
@@ -67,52 +65,69 @@ module Grape
 
     private
 
-    def identity(input, method, env)
-      route = nil
-      response = transaction(input, method, env) do
-        route = match?(input, method)
-        process_route(route, input, env) if route
+    # Resolve +input+ against the compiled routes, in priority order:
+    #
+    # 1. the routes registered for +method+ — the compiled-union match first,
+    #    then, when that route cascades, its siblings (see #rotation);
+    # 2. the ANY (+'*'+) routes;
+    # 3. the greedy neighbour, which answers auto-OPTIONS and 405.
+    #
+    # Returns nil when nothing answered, leaving the caller to 404. A response
+    # that cascades is never final: it is returned only once every later
+    # candidate has declined too, so the caller (or a mounting app upstream)
+    # can keep looking.
+    def transaction(input, method, env)
+      exact_route = match?(input, method)
+      response = process_route(exact_route, input, env) if exact_route
+      return response if halt?(response)
+
+      # A cascading route has only declined this request. Its siblings — the
+      # routes sharing this path but differing in, say, version — must be
+      # tried before falling back to the ANY routes and the greedy neighbour.
+      # Skipped when nothing matched: the compiled union is the disjunction of
+      # the same patterns #rotation walks, so a miss there is a miss here.
+      cascaded = !response.nil?
+      if cascaded
+        response = rotation(input, method, env, exact_route)
+        return response if response && !cascade?(response)
       end
-      [response, route]
+
+      last_neighbor_route = greedy_match?(input)
+
+      # If last_neighbor_route exists and request method is OPTIONS,
+      # return response by using #include_allow_header.
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !cascaded && method == Rack::OPTIONS && last_neighbor_route
+
+      star_route = match?(input, '*')
+
+      if star_route
+        close_body(response) if response # superseded by the ANY route
+        response = process_route(star_route, input, env)
+        return response if halt?(response)
+
+        cascaded ||= !response.nil?
+      end
+
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !cascaded && last_neighbor_route
+
+      response
     end
 
+    # The routes registered for +method+ other than +exact_route+, tried in
+    # registration order until one answers without cascading. Returns the last
+    # response processed — a cascading one when every sibling declined, so the
+    # caller can hand it back — or nil when no sibling matched.
     def rotation(input, method, env, exact_route)
       response = nil
       @map[method]&.each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
+        close_body(response) if response # the previous sibling cascaded
         response = process_route(route, input, env)
         break unless cascade?(response)
       end
       response
-    end
-
-    def transaction(input, method, env)
-      response = yield
-      return response if halt?(response)
-
-      last_response_cascade = !response.nil?
-      last_neighbor_route = greedy_match?(input)
-
-      # If last_neighbor_route exists and request method is OPTIONS,
-      # return response by using #include_allow_header.
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !last_response_cascade && method == Rack::OPTIONS && last_neighbor_route
-
-      route = match?(input, '*')
-
-      return last_neighbor_route.call(env) if last_neighbor_route && last_response_cascade && route
-
-      if route
-        route_response = process_route(route, input, env)
-        return route_response if halt?(route_response)
-
-        last_response_cascade = !route_response.nil?
-      end
-
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !last_response_cascade && last_neighbor_route
-
-      nil
     end
 
     # Returns true if `response` should be returned as-is from the enclosing
@@ -122,18 +137,22 @@ module Grape
       return false unless response
 
       cascade = cascade?(response)
-      response[2].close if cascade && response[2].respond_to?(:close)
+      close_body(response) if cascade
       !cascade
     end
 
-    # Routing args are rebuilt for every attempt: when a route cascades
-    # (X-Cascade pass), the next candidate must not observe the previous
-    # attempt's +route_info+ or path captures.
+    # Releases a response the router has decided not to return. Rack requires
+    # every body it hands out to be closed, and a cascading candidate is
+    # discarded as soon as a later one answers.
+    def close_body(response)
+      body = response[2]
+      body.close if body.respond_to?(:close)
+    end
+
     def process_route(route, input, env, include_allow_header: false)
       route_params = route.params_for(input)
-      routing_args = { route_info: route }
-      routing_args.merge!(route_params) if route_params.present?
-      env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
+      env[Grape::Env::GRAPE_ROUTING_ARGS] ||= { route_info: route }
+      env[Grape::Env::GRAPE_ROUTING_ARGS].merge!(route_params) if route_params.present?
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
       route.call(env)
     end
