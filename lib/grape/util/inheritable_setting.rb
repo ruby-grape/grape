@@ -8,12 +8,15 @@ module Grape
     # first), plain +=+ writers are nearest-wins scalar overrides, and
     # +!+/+?+ pairs are scope flags. Deep-merged readers return nil when
     # nothing is registered; plain stack readers return a frozen empty
-    # Array. The backing stores (InheritableValues and the per-scope Hashes)
-    # and their keys are internal.
+    # Array. The backing stores — a per-scope Hash per kind of state, each
+    # holding only what that scope itself set — and their keys are internal.
     #
     # Settings instances form a chain: a scope inherits its parent's values
     # (see #inherit_from), and endpoints snapshot the chain with
-    # #point_in_time_copy_for_endpoint.
+    # #point_in_time_copy_for_endpoint. Nothing is copied down the chain when
+    # a scope is created; every reader resolves against #parent on demand, so
+    # a value an enclosing scope gains later is visible through scopes already
+    # nested inside it.
     class InheritableSetting
       # Maps the callbacks DSL method names to their pluralized
       # namespace-stackable storage keys (see #callbacks / #add_callback).
@@ -57,9 +60,16 @@ module Grape
       # #inherit_from).
       def initialize
         @route = {}
-        @namespace = InheritableValues.new # only inheritable from a parent when
-        # used with a mount, or should every API::Class be a separate namespace by default?
-        @namespace_inheritable = InheritableValues.new
+        # Namespace settings are scope-local by design: nothing ever layers
+        # them over a parent's (see #inherit_from, and the nesting behaviour
+        # DSL::Settings#namespace_setting is specified to have), so a plain
+        # Hash is the whole store.
+        @namespace = {}
+        # This scope's own inheritable overrides. Like @stackable_values it
+        # stays nil until the first write, and inheritance is resolved by
+        # walking #parent (see #inheritable) rather than by keeping a second
+        # chain of stores alongside it.
+        @namespace_inheritable = nil
         # This scope's own stackable registrations, one Array per key. Stays
         # nil until the first registration so scopes that only inherit don't
         # each carry an empty Hash.
@@ -73,16 +83,15 @@ module Grape
         self.class.global
       end
 
-      # Set our inherited values to the given parent's current values. Also,
-      # update the inherited values on any settings instances which were forked
-      # from us.
+      # Inherit from the given parent: its values resolve behind ours from now
+      # on, including any it gains later. Also re-parents any settings
+      # instances which were forked from us.
       # @param parent [InheritableSetting]
       def inherit_from(parent)
         return if parent.nil?
 
         @parent = parent
 
-        @namespace_inheritable.inherited_values = parent.namespace_inheritable
         @route = parent.route.merge(route)
 
         @point_in_time_copies&.each { |cloned_one| cloned_one.inherit_from parent }
@@ -195,8 +204,8 @@ module Grape
         {
           global: global.clone,
           route: route.clone,
-          namespace: namespace.to_hash,
-          namespace_inheritable: @namespace_inheritable.to_hash,
+          namespace: namespace.dup,
+          namespace_inheritable: inheritable_values,
           namespace_stackable: stacked_keys.to_h { |key| [key, stacked(key)] },
           rescue_handlers:,
           base_only_rescue_handlers:
@@ -315,38 +324,38 @@ module Grape
       # through #rescue_all? / #rescue_grape_exceptions?; the backing store
       # is an internal detail.
       def add_all_rescue_handler(handler)
-        @namespace_inheritable[:rescue_all] = true
-        @namespace_inheritable[:all_rescue_handler] = handler
+        set_inheritable(:rescue_all, true)
+        set_inheritable(:all_rescue_handler, handler)
       end
 
       def add_grape_exceptions_rescue_handler(handler)
-        @namespace_inheritable[:rescue_all] = true
-        @namespace_inheritable[:rescue_grape_exceptions] = true
-        @namespace_inheritable[:grape_exceptions_rescue_handler] = handler
+        set_inheritable(:rescue_all, true)
+        set_inheritable(:rescue_grape_exceptions, true)
+        set_inheritable(:grape_exceptions_rescue_handler, handler)
       end
 
       def add_internal_grape_exceptions_rescue_handler(handler)
-        @namespace_inheritable[:internal_grape_exceptions_rescue_handler] = handler
+        set_inheritable(:internal_grape_exceptions_rescue_handler, handler)
       end
 
       def rescue_all?
-        @namespace_inheritable[:rescue_all] == true
+        inheritable(:rescue_all) == true
       end
 
       def rescue_grape_exceptions?
-        @namespace_inheritable[:rescue_grape_exceptions] == true
+        inheritable(:rescue_grape_exceptions) == true
       end
 
       def all_rescue_handler
-        @namespace_inheritable[:all_rescue_handler]
+        inheritable(:all_rescue_handler)
       end
 
       def grape_exceptions_rescue_handler
-        @namespace_inheritable[:grape_exceptions_rescue_handler]
+        inheritable(:grape_exceptions_rescue_handler)
       end
 
       def internal_grape_exceptions_rescue_handler
-        @namespace_inheritable[:internal_grape_exceptions_rescue_handler]
+        inheritable(:internal_grape_exceptions_rescue_handler)
       end
 
       # Rescue-handler maps registered by +rescue_from+, keyed by exception
@@ -512,35 +521,35 @@ module Grape
       # when never set (Endpoint applies the request-serving fallbacks); the
       # backing store is an internal detail.
       def format
-        @namespace_inheritable[:format]
+        inheritable(:format)
       end
 
       def format=(format)
-        @namespace_inheritable[:format] = format
+        set_inheritable(:format, format)
       end
 
       def default_format
-        @namespace_inheritable[:default_format]
+        inheritable(:default_format)
       end
 
       def default_format=(default_format)
-        @namespace_inheritable[:default_format] = default_format
+        set_inheritable(:default_format, default_format)
       end
 
       def default_error_formatter
-        @namespace_inheritable[:default_error_formatter]
+        inheritable(:default_error_formatter)
       end
 
       def default_error_formatter=(formatter)
-        @namespace_inheritable[:default_error_formatter] = formatter
+        set_inheritable(:default_error_formatter, formatter)
       end
 
       def default_error_status
-        @namespace_inheritable[:default_error_status]
+        inheritable(:default_error_status)
       end
 
       def default_error_status=(status)
-        @namespace_inheritable[:default_error_status] = status
+        set_inheritable(:default_error_status, status)
       end
 
       # Versioning state recorded by the routing DSL (see DSL::Routing):
@@ -550,27 +559,27 @@ module Grape
       # Nearest-wins scalars with plain += writers; readers return nil when
       # never set; the backing store is an internal detail.
       def version
-        @namespace_inheritable[:version]
+        inheritable(:version)
       end
 
       def version=(versions)
-        @namespace_inheritable[:version] = versions
+        set_inheritable(:version, versions)
       end
 
       def version_options
-        @namespace_inheritable[:version_options]
+        inheritable(:version_options)
       end
 
       def version_options=(options)
-        @namespace_inheritable[:version_options] = options
+        set_inheritable(:version_options, options)
       end
 
       def root_prefix
-        @namespace_inheritable[:root_prefix]
+        inheritable(:root_prefix)
       end
 
       def root_prefix=(prefix)
-        @namespace_inheritable[:root_prefix] = prefix
+        set_inheritable(:root_prefix, prefix)
       end
 
       # Cascade flag assigned by the +cascade+ DSL. An explicit nil is
@@ -579,15 +588,15 @@ module Grape
       # assigned it — Grape::API::Instance#cascade? falls back to the
       # version options' cascade, then to true, when it was never assigned.
       def cascade
-        @namespace_inheritable[:cascade]
+        inheritable(:cascade)
       end
 
       def cascade=(value)
-        @namespace_inheritable[:cascade] = value
+        set_inheritable(:cascade, value)
       end
 
       def cascade_defined?
-        @namespace_inheritable.key?(:cascade)
+        inheritable?(:cascade)
       end
 
       # Scope flags flipped by the routing DSL's bang methods (see
@@ -596,35 +605,35 @@ module Grape
       # and everything nested under it. Readers return false when never set;
       # the backing store is an internal detail.
       def do_not_route_head!
-        @namespace_inheritable[:do_not_route_head] = true
+        set_inheritable(:do_not_route_head, true)
       end
 
       def do_not_route_head?
-        @namespace_inheritable[:do_not_route_head] == true
+        inheritable(:do_not_route_head) == true
       end
 
       def do_not_route_options!
-        @namespace_inheritable[:do_not_route_options] = true
+        set_inheritable(:do_not_route_options, true)
       end
 
       def do_not_route_options?
-        @namespace_inheritable[:do_not_route_options] == true
+        inheritable(:do_not_route_options) == true
       end
 
       def do_not_document!
-        @namespace_inheritable[:do_not_document] = true
+        set_inheritable(:do_not_document, true)
       end
 
       def do_not_document?
-        @namespace_inheritable[:do_not_document] == true
+        inheritable(:do_not_document) == true
       end
 
       def lint!
-        @namespace_inheritable[:lint] = true
+        set_inheritable(:lint, true)
       end
 
       def lint?
-        @namespace_inheritable[:lint] == true
+        inheritable(:lint) == true
       end
 
       # The params-builder strategy set by +build_with+ (both the
@@ -633,11 +642,11 @@ module Grape
       # builds its Grape::Request. Nearest-wins scalar; nil when never set;
       # the backing store is an internal detail.
       def build_params_with
-        @namespace_inheritable[:build_params_with]
+        inheritable(:build_params_with)
       end
 
       def build_params_with=(strategy)
-        @namespace_inheritable[:build_params_with] = strategy
+        set_inheritable(:build_params_with, strategy)
       end
 
       # The authentication configuration Hash recorded by the +auth+ DSL
@@ -646,11 +655,11 @@ module Grape
       # to warn about unauthenticated bare Rack mounts; the backing store is
       # an internal detail.
       def auth
-        @namespace_inheritable[:auth]
+        inheritable(:auth)
       end
 
       def auth=(auth_options)
-        @namespace_inheritable[:auth] = auth_options
+        set_inheritable(:auth, auth_options)
       end
 
       # Immutable snapshot of the settings Router::Pattern::Path reads to
@@ -680,9 +689,39 @@ module Grape
 
       protected
 
-      # Peer access to the inheritable store for #inherit_from and
-      # #copy_state_from; internal code reads the ivar directly.
+      # This scope's own inheritable overrides, before inheritance; nil when
+      # the scope overrode nothing. Peer access for #copy_state_from.
       attr_reader :namespace_inheritable
+
+      # The nearest scope's value for +key+: this scope's own override when it
+      # has one, otherwise the enclosing scope's. Keyed on presence rather than
+      # truthiness, so a scope can deliberately override an inherited value
+      # with nil (see #cascade).
+      def inheritable(key)
+        return @namespace_inheritable[key] if @namespace_inheritable&.key?(key)
+
+        parent&.inheritable(key)
+      end
+
+      # Whether any scope along the chain assigned +key+ — including one that
+      # assigned nil, which #inheritable cannot distinguish from never-set.
+      def inheritable?(key)
+        return true if @namespace_inheritable&.key?(key)
+
+        parent&.inheritable?(key) || false
+      end
+
+      # Every inheritable value along the chain resolved into one Hash, nearest
+      # scope winning. Like #stacked it hands back the backing Hash when only
+      # one scope in the chain has values, so callers must treat the result as
+      # read-only.
+      def inheritable_values
+        inherited = parent&.inheritable_values
+        own = @namespace_inheritable
+        return own || {} unless inherited
+
+        own ? inherited.merge(own) : inherited
+      end
 
       # This scope's own +rescue_from+ registrations, before inheritance:
       # {rescue_handlers: {klass => handler}, base_only_rescue_handlers: {...}}.
@@ -727,8 +766,8 @@ module Grape
       # Used by +point_in_time_copy+ to populate a freshly-built instance
       # with cloned state from another instance of the same class.
       def copy_state_from(source)
-        @namespace = source.namespace.clone
-        @namespace_inheritable = source.namespace_inheritable.clone
+        @namespace = source.namespace.dup
+        @namespace_inheritable = source.namespace_inheritable&.dup
         # Shallow, matching the store this replaced: the per-key Arrays stay
         # shared with the source, so a registration made on the source after
         # the copy was taken is still visible through it.
@@ -738,6 +777,13 @@ module Grape
       end
 
       private
+
+      # Overrides +key+ for this scope, leaving the enclosing scopes' value
+      # untouched. The store is allocated on first use. Returns the assigned
+      # value, since the writers built on it are +=+ methods.
+      def set_inheritable(key, value)
+        (@namespace_inheritable ||= {})[key] = value
+      end
 
       # Appends one registration for +key+ to this scope, leaving inherited
       # ones untouched. The store is allocated on first use. Returns the

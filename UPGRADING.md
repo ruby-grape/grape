@@ -14,6 +14,11 @@ Two consequences:
 
 * **A middle version is now served.** `mount v1; mount v2; mount v3` alongside a catch-all `route :any, '*path'` answered `406 API version not found` for v2, while v1 and v3 worked; v2 is now served.
 * **An unmatched version reaches a catch-all.** When a catch-all ANY route is present, a request whose version matches nothing now falls through to it instead of surfacing the versioner's `406`, which is what `cascade: true` (the default) asks for. Declare `version ..., cascade: false` to keep the hard 406 — that path is unchanged and never consults the catch-all.
+#### `Grape::Util::InheritableValues` has been removed
+
+Inheritable settings no longer layer a scope's values over a store handed down from the enclosing scope. Each `Grape::Util::InheritableSetting` now keeps only what its own scope assigned, and resolves a lookup by walking `#parent` — the same move `Grape::Util::StackableValues` got in [#2823](https://github.com/ruby-grape/grape/pull/2823), and the reason `Grape::Util::InheritableValues` no longer has anything to do.
+
+Resolution is unchanged in every observable way: the nearest scope wins, a scope may override an inherited value with an explicit `nil`, and a value an enclosing scope gains later is still visible through scopes already nested inside it. Only the class is gone. Nothing in Grape referenced it outside `InheritableSetting`; code that constructed one directly should keep a plain Hash per scope and resolve against the parent chain.
 
 #### `forward_match` is no longer exposed on routes
 
@@ -132,7 +137,7 @@ One micro-change: the `middleware` DSL reader dropped its `|| []` fallback — `
 
 The `Grape::Namespace` objects registered by the `namespace` DSL (and its `group` / `resource` / `resources` / `segment` aliases) and the mount path recorded by `mount` are now written and read through dedicated accessors on `Grape::Util::InheritableSetting` instead of raw `namespace_stackable` keys, following the same move made for rescue handlers:
 
-* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the `InheritableValues` store).
+* `namespaces` / `add_namespace(namespace)` replace `namespace_stackable[:namespace]` (not to be confused with the pre-existing `namespace` reader, which returns the namespace-settings store).
 * `namespace_path` returns the normalized joined path prefix, absorbing the `Grape::Namespace.joined_space_path(...)` call previously spelled out at the read sites, and `namespace_requirements` returns the requirements declared by registered namespaces, absorbing the `filter_map(&:requirements)`.
 * `mount_path` / `add_mount_path(path)` replace `namespace_stackable[:mount_path]`; the reader absorbs the outermost-wins convention (previously the `.first` at the read site in `Endpoint#build_stack`).
 
