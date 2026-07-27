@@ -39,6 +39,7 @@
 * [#2831](https://github.com/ruby-grape/grape/pull/2831): Document and test open (beginless/endless) `Range`s as a `values:`/`except_values:` alternative to a dedicated numericality validator - [@dblock](https://github.com/dblock).
 * [#2830](https://github.com/ruby-grape/grape/pull/2830): Remove `Grape::Util::InheritableValues`, resolving inheritable settings by walking `Grape::Util::InheritableSetting#parent` instead of layering a second chain of stores, and keep namespace settings in a plain Hash - [@ericproulx](https://github.com/ericproulx).
 * [#2833](https://github.com/ruby-grape/grape/pull/2833): Fix `Grape::API::Instance.to_s` returning an empty string instead of the class name when the instance has no base (regression from #2581) - [@ericproulx](https://github.com/ericproulx).
+* [#2837](https://github.com/ruby-grape/grape/pull/2837): Document the definition-time rejection of an `Array`/`Set` of an uncoercible element type introduced by #2817, and pin it with specs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -47,7 +48,7 @@
 * [#2816](https://github.com/ruby-grape/grape/pull/2816): Guard `length`, `same_as` and `oneof` validators against non-hash params (500 → 400) - [@ericproulx](https://github.com/ericproulx).
 * [#2814](https://github.com/ruby-grape/grape/pull/2814): Fix `type: [A, B]` combined with `values:`/`except_values:` raising `IncompatibleOptionValues` at definition time - [@ericproulx](https://github.com/ericproulx).
 * [#2815](https://github.com/ruby-grape/grape/pull/2815): Fix line-anchored regexes: `type: JSON` payloads containing a blank line were silently coerced to `nil` - [@ericproulx](https://github.com/ericproulx).
-* [#2817](https://github.com/ruby-grape/grape/pull/2817): Remove request-time mutable state from Array and custom-type coercers - [@ericproulx](https://github.com/ericproulx).
+* [#2817](https://github.com/ruby-grape/grape/pull/2817): Remove request-time mutable state from Array and custom-type coercers, which also makes an `Array`/`Set` of an uncoercible element type raise when the API is defined instead of on the first request that supplies it (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2819](https://github.com/ruby-grape/grape/pull/2819): Freeze coercers at construction, synchronize `Grape::Util::Cache` lookups, and assign `Route#regexp_capture_index` eagerly - [@ericproulx](https://github.com/ericproulx).
 * [#2824](https://github.com/ruby-grape/grape/pull/2824): Fix cascaded routes (`X-Cascade: pass`) leaking `route_info` and path captures into the next matched route's `route` and `params` - [@ericproulx](https://github.com/ericproulx).
 * [#2825](https://github.com/ruby-grape/grape/pull/2825): Stop `present` entity autodetection from picking up a top-level `::Entity` constant - [@ericproulx](https://github.com/ericproulx).
