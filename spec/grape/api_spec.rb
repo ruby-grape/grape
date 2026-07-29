@@ -25,6 +25,42 @@ describe Grape::API do
 
       expect(shared.version_options).to be_present
     end
+
+    # Regression: #call and #recognize_path read @instance again after
+    # compiling it, so a change! landing between the two reads (what `helpers`
+    # and `mount` do on a live API) left them calling nil.
+    it 'compiles to the instance so callers need not re-read @instance' do
+      subject.get('/x') { 'x' }
+      base = subject.base_instance
+
+      compiled = base.compile!
+      expect(compiled).to be_a(base)
+      # Already compiled: must still hand back the instance rather than nil,
+      # which is what lets #call and #recognize_path use the return value.
+      expect(base.compile!).to be(compiled)
+    end
+
+    it 'serves the compiled instance when change! lands in the compile window' do
+      subject.get('/x') { 'x' }
+      base = subject.base_instance
+
+      allow(base).to receive(:compile!).and_wrap_original do |original|
+        original.call.tap { base.change! }
+      end
+
+      expect { subject.call(Rack::MockRequest.env_for('/x')) }.not_to raise_error
+    end
+
+    it 'recognizes a path when change! lands in the compile window' do
+      subject.get('/x') { 'x' }
+      base = subject.base_instance
+
+      allow(base).to receive(:compile!).and_wrap_original do |original|
+        original.call.tap { base.change! }
+      end
+
+      expect { subject.recognize_path('/x') }.not_to raise_error
+    end
   end
 
   describe '.prefix' do
