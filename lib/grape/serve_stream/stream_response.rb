@@ -19,6 +19,12 @@ module Grape
         stream == other.stream
       end
       alias eql? ==
+
+      # Mirrors #==, which keys on the stream alone and does not check the
+      # class, so the class must stay out of the hash too.
+      def hash
+        stream.hash
+      end
     end
   end
 end

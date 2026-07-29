@@ -25,6 +25,28 @@ describe Grape::Util::InheritableSetting do
     end
   end
 
+  describe '#hash' do
+    it 'matches for two copies forked from the same scope' do
+      sibling = subject.point_in_time_copy
+      expect(subject.point_in_time_copy.hash).to eq sibling.hash
+    end
+
+    # #== accepts two instances whose own stores differ as long as their
+    # chains resolve alike, so #hash has to key on the resolved state.
+    it 'matches when different chains resolve to the same values' do
+      parent = described_class.new
+      parent.add_helper(:shared)
+      inherits = described_class.new.tap { |setting| setting.inherit_from(parent) }
+
+      standalone = described_class.new
+      standalone.add_helper(:shared)
+
+      expect(inherits).to eq standalone
+      expect(inherits.hash).to eq standalone.hash
+      expect(Set.new([inherits, standalone]).size).to eq 1
+    end
+  end
+
   describe '#==' do
     # Endpoint settings are forked as siblings sharing one parent, so this is
     # the shape the duplicate-route check in DSL::Routing#route compares.

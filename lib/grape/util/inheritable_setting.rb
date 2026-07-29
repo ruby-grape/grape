@@ -237,6 +237,16 @@ module Grape
       end
       alias eql? ==
 
+      # Keyed on the fully resolved state, because #== accepts two instances
+      # whose own stores differ as long as their chains resolve alike (the
+      # #to_hash path above) — hashing own state would tell those apart. The
+      # same-parent fast path implies equal resolved state, so it agrees. This
+      # is the cold path: nothing in Grape uses a setting as a Hash key or in
+      # a Set, and #== keeps avoiding #to_hash wherever it can.
+      def hash
+        to_hash.hash
+      end
+
       # Validator instances registered by +params+ and +contract+ blocks,
       # outermost scope first. Record them with #add_validation; the backing
       # store is an internal detail.

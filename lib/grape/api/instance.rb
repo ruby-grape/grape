@@ -21,11 +21,11 @@ module Grape
       Boolean = Grape::API::Boolean
 
       class << self
-        extend Forwardable
-
         attr_accessor :configuration
 
-        def_delegators :@base, :to_s
+        def to_s
+          @base&.to_s || super
+        end
 
         attr_reader :base
 
@@ -54,20 +54,19 @@ module Grape
         # the headers, and the body. See [the rack specification]
         # (http://www.rubydoc.info/github/rack/rack/master/file/SPEC) for more.
         def call(env)
-          compile!
-          @instance.call(env)
+          compile!.call(env)
         end
 
+        # Returns the compiled instance, so callers serve the one they
+        # compiled rather than re-reading @instance — +change!+ can nil it
+        # between the two reads (see #call / #recognize_path).
         def compile!
-          return if @instance
-
-          LOCK.synchronize { @instance ||= new }
+          @instance || LOCK.synchronize { @instance ||= new }
         end
 
         # see Grape::Router#recognize_path
         def recognize_path(path)
-          compile!
-          @instance.router.recognize_path(path)
+          compile!.router.recognize_path(path)
         end
 
         # Wipe the compiled API so we can recompile after changes were made.
