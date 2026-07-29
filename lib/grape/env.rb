@@ -14,5 +14,11 @@ module Grape
     GRAPE_ROUTING_ARGS = 'grape.routing_args'
     GRAPE_ALLOWED_METHODS = 'grape.allowed_methods'
     GRAPE_EXCEPTION = 'grape.exception'
+
+    # Not a Grape-owned key: the de-facto convention for an exception that was
+    # handled rather than raised, which is how error trackers find one they
+    # never saw propagate. sentry-ruby, for one, collects
+    # +env['rack.exception'] || env['sinatra.error']+.
+    RACK_EXCEPTION = 'rack.exception'
   end
 end

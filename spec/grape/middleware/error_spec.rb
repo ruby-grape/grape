@@ -99,6 +99,109 @@ describe Grape::Middleware::Error do
     end
   end
 
+  # Rendering happens inside #call!'s rescue clause, so it is not covered by
+  # that rescue: without a failsafe an error formatter that raises takes the
+  # exception straight out through every middleware above.
+  describe 'when the error response cannot be rendered' do
+    subject(:response) do
+      get '/'
+      last_response
+    end
+
+    context 'and the formatter chokes on the payload' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :json
+
+          rescue_from(:all) { |e| error!({ detail: e.message }, 404) }
+
+          # A message the JSON formatter cannot serialize.
+          get('/') { raise StandardError, +"bad \xC3 byte".b }
+        end
+      end
+
+      it 'answers with the framework message in the API format' do
+        expect(response.status).to eq(500)
+        expect(response.headers[Rack::CONTENT_TYPE]).to include('application/json')
+        expect(JSON.parse(response.body)).to eq('error' => 'Internal Server Error')
+      end
+
+      it 'exposes the rendering failure on the rack env' do
+        get '/'
+        expect(last_request.env[Grape::Env::GRAPE_EXCEPTION]).to be_a(StandardError)
+      end
+
+      # The key error trackers read to find an exception that never propagated;
+      # grape.exception alone leaves a swallowed failure invisible to them.
+      it 'exposes the rendering failure under rack.exception' do
+        get '/'
+        expect(last_request.env[Grape::Env::RACK_EXCEPTION]).to be(last_request.env[Grape::Env::GRAPE_EXCEPTION])
+      end
+
+      it 'writes the rendering failure to rack.errors' do
+        errors = StringIO.new
+        get '/', {}, Rack::RACK_ERRORS => errors
+        expect(errors.string).to include('Grape could not render the error response: JSON::GeneratorError')
+      end
+    end
+
+    context 'and the formatter is broken outright' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :json
+
+          error_formatter :json, ->(**) { raise 'formatter is broken' }
+          rescue_from(:all) { error!({ detail: 'nope' }, 404) }
+
+          get('/') { raise StandardError, 'boom' }
+        end
+      end
+
+      it 'drops the formatter rather than recursing' do
+        expect(response.status).to eq(500)
+        expect(response.headers[Rack::CONTENT_TYPE]).to include('text/plain')
+        expect(response.body).to eq('500 Internal Server Error')
+      end
+    end
+
+    context 'and nothing rescues the original exception' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :json
+
+          get('/') { raise ArgumentError, 'kaboom' }
+        end
+      end
+
+      it 'keeps propagating it' do
+        expect { get '/' }.to raise_error(ArgumentError, 'kaboom')
+      end
+    end
+
+    context 'and Grape.config.raise_rendering_errors is set' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :json
+
+          rescue_from(:all) { |e| error!({ detail: e.message }, 404) }
+
+          get('/') { raise StandardError, +"bad \xC3 byte".b }
+        end
+      end
+
+      around do |example|
+        Grape.config.raise_rendering_errors = true
+        example.run
+      ensure
+        Grape.config.raise_rendering_errors = false
+      end
+
+      it 'lets the rendering failure propagate as it did before the failsafe' do
+        expect { get '/' }.to raise_error(JSON::GeneratorError)
+      end
+    end
+  end
+
   describe 'when a rescue_from block raises' do
     subject(:response) do
       get '/'

@@ -131,6 +131,34 @@ end
 ```
 
 Declared in the root API, this covers mounted APIs too. Treat it as a migration aid rather than a permanent setting: it restores the inconsistency this change fixes, so `values: ['café']` will keep rejecting `GET /café` while accepting `?id=café`.
+#### A failed error rendering answers 500 instead of escaping the middleware stack
+
+When Grape could not render an error response — an error formatter handed a payload it cannot serialize, most often — the exception escaped every middleware above Grape and reached the application server. Rendering runs inside `Grape::Middleware::Error#call!`'s own `rescue` clause, so that clause did not cover it.
+
+Grape now answers `500` instead: first retrying the API's format with the framework's own `Internal Server Error` message, then falling back to a bare `text/plain` body if even that cannot be rendered.
+
+This mirrors what `ActionDispatch::ShowExceptions#render_exception` does in Rails: try the application's own error rendering, and fall back to a bare `500 Internal Server Error` in `text/plain` when that rendering is itself broken.
+
+**What can break.** Code that observed these exceptions by letting them propagate — a test asserting `expect { get '/' }.to raise_error`, most directly — no longer sees them raised. The exception is published on the rack env instead, under both Grape's own key and the conventional one that error trackers read:
+
+```ruby
+env[Grape::Env::RACK_EXCEPTION]  # 'rack.exception' — what trackers collect
+env[Grape::Env::GRAPE_EXCEPTION] # 'grape.exception' — same object, Grape's key
+```
+
+An error tracker mounted as Rack middleware above Grape therefore keeps reporting these with no change on your side: sentry-ruby, for one, collects `env['rack.exception'] || env['sinatra.error']` for exactly this case — an exception that was handled rather than raised. The failure is also written to `rack.errors`, so it lands in the server log even with no tracker installed.
+
+**Opting out.** To keep the pre-4.0 behaviour and have the exception propagate out of the middleware stack:
+
+```ruby
+Grape.configure do |config|
+  config.raise_rendering_errors = true
+end
+```
+
+With this on, the failsafe never runs: the exception is re-raised untouched, so neither env key is set and nothing is written to `rack.errors` — whatever caught it before catches it again.
+
+Exceptions that no `rescue_from` matches still propagate exactly as before; only rendering failures changed.
 
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
