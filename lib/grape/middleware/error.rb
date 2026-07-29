@@ -48,6 +48,13 @@ module Grape
       def_delegator :rescue_options, :backtrace, :include_backtrace
       def_delegator :rescue_options, :original_exception, :include_original_exception
 
+      # Emitted by {#failsafe_response} once even the framework's own message
+      # could not be rendered. Deliberately built without a formatter, an i18n
+      # lookup or anything else that could be the thing that is broken.
+      FAILSAFE_STATUS = 500
+      FAILSAFE_MESSAGE = '500 Internal Server Error'
+      FAILSAFE_CONTENT_TYPE = 'text/plain'
+
       def call!(env)
         @env = env
         error_response(catch(:error) { return @app.call(@env) })
@@ -104,7 +111,45 @@ module Grape
           backtrace: raw.backtrace || raw.original_exception&.backtrace || []
         )
         env[Grape::Env::API_ENDPOINT].status(payload.status) # error! may not have been called
-        rack_response(payload.status, payload.headers, format_message(payload))
+        begin
+          rack_response(payload.status, payload.headers, format_message(payload))
+        rescue StandardError => e
+          failsafe_response(e)
+        end
+      end
+
+      # Last resort for an error response that could not be rendered — an error
+      # formatter handed a payload it cannot serialize, typically. Rendering runs
+      # inside #call!'s rescue clause, so it is not covered by that rescue and
+      # anything raised here would escape the entire middleware stack. Grape has
+      # committed to answering with an error by this point, so it answers with
+      # one that does not depend on the payload rather than dropping the request.
+      #
+      # First retry the API's own format with the framework's InternalServerError,
+      # whose message is a static string and so cannot be what defeated the first
+      # attempt. Should even that fail — a wholesale broken formatter, rather than
+      # one payload it choked on — drop the formatter entirely. Both attempts call
+      # {#format_message} directly rather than re-entering {#error_response}, so
+      # this path cannot recurse.
+      #
+      # The exception is exposed on the rack env so upstream middleware (loggers,
+      # error trackers) can still observe what actually went wrong.
+      def failsafe_response(error)
+        env[Grape::Env::GRAPE_EXCEPTION] = error
+        headers = { Rack::CONTENT_TYPE => content_type }
+        rack_response(FAILSAFE_STATUS, headers, format_message(failsafe_payload(headers)))
+      rescue StandardError
+        rack_response(FAILSAFE_STATUS, { Rack::CONTENT_TYPE => FAILSAFE_CONTENT_TYPE }, FAILSAFE_MESSAGE)
+      end
+
+      def failsafe_payload(headers)
+        Grape::Exceptions::ErrorResponse.new(
+          status: FAILSAFE_STATUS,
+          message: Grape::Exceptions::InternalServerError.new.message,
+          headers:,
+          backtrace: [],
+          original_exception: nil
+        )
       end
 
       def default_rescue_handler(exception)
