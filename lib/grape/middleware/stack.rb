@@ -30,6 +30,15 @@ module Grape
         end
         alias eql? ==
 
+        # Keyed on the wrapped class, so two Middleware wrapping the same
+        # class hash alike — and so does the class itself, which #== also
+        # accepts. The superclass fallback above can't be honoured here (a
+        # class and its superclass hash differently); it only ever serves
+        # #index / #include?, which compare with #== rather than by hash.
+        def hash
+          klass.hash
+        end
+
         def inspect
           klass.to_s
         end
