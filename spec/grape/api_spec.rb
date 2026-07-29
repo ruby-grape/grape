@@ -309,6 +309,68 @@ describe Grape::API do
         expect(last_response.body).to eq('{"foo":1234}')
       end
     end
+
+    context 'with a non-ascii segment' do
+      it 'tags the param as UTF-8 rather than leaving it binary' do
+        subject.route_param :id do
+          get { params[:id].encoding.name }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      it 'tags every captured segment' do
+        subject.namespace :a do
+          route_param :one do
+            route_param :two do
+              get { [params[:one].encoding.name, params[:two].encoding.name].join(',') }
+            end
+          end
+        end
+
+        get '/a/caf%C3%A9/th%C3%A9'
+        expect(last_response.body).to eq('UTF-8,UTF-8')
+      end
+
+      it 'tags a splat capture' do
+        subject.get('/files/*path') { params[:path].encoding.name }
+
+        get '/files/a/b/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      # An unnamed splat captures into an Array rather than a String.
+      it 'tags every element of an unnamed splat capture' do
+        subject.get('/files/*') { params[:splat].map { |s| s.encoding.name }.join(',') }
+
+        get '/files/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      # A path param used to arrive binary while the same value arrived UTF-8
+      # through the query string, so an API's own declaration disagreed with
+      # itself depending on where the value came from.
+      it 'compares equal to the utf-8 literal the API declares' do
+        subject.params { requires :id, type: String, values: ['café'] }
+        subject.route_param :id do
+          get { 'matched' }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('matched')
+      end
+
+      it 'leaves the bytes untouched' do
+        subject.route_param :id do
+          get { params[:id] }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.body.b).to eq('caf%C3%A9'.b.gsub('%C3%A9', "\xC3\xA9".b))
+      end
+    end
   end
 
   describe '.route' do
