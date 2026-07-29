@@ -1025,6 +1025,30 @@ describe Grape::Endpoint do
     end
   end
 
+  describe '#hash' do
+    let(:options) do
+      {
+        http_methods: 'GET',
+        path: '/x',
+        route_options: {},
+        api: Class.new
+      }
+    end
+    let(:settings) { Grape::Util::InheritableSetting.new }
+
+    it 'matches for two endpoints built from the same settings and config' do
+      one = described_class.new(settings, **options) { 'x' }
+      another = described_class.new(settings, **options) { 'x' }
+      expect(one.hash).to eq another.hash
+    end
+
+    it 'dedups equal endpoints in a Set' do
+      endpoints = [described_class.new(settings, **options) { 'x' },
+                   described_class.new(settings, **options) { 'x' }]
+      expect(Set.new(endpoints).size).to eq 1
+    end
+  end
+
   describe '#inspect' do
     subject { described_class.new(settings, **options).inspect }
 

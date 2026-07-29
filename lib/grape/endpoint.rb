@@ -141,6 +141,14 @@ module Grape
     end
     alias eql? ==
 
+    # Mirrors #==. The class stays out: #== admits a subclass instance
+    # through is_a?, and such a pair must hash alike. The block (#source) is
+    # not part of either, matching the long-standing duplicate-route check in
+    # DSL::Routing#route.
+    def hash
+      [config, inheritable_setting].hash
+    end
+
     # The purpose of this override is solely for stripping internals when an error occurs while calling
     # an endpoint through an api. See https://github.com/ruby-grape/grape/issues/2398
     # Otherwise, it calls super.
