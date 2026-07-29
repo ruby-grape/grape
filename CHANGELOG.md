@@ -40,6 +40,7 @@
 * [#2830](https://github.com/ruby-grape/grape/pull/2830): Remove `Grape::Util::InheritableValues`, resolving inheritable settings by walking `Grape::Util::InheritableSetting#parent` instead of layering a second chain of stores, and keep namespace settings in a plain Hash - [@ericproulx](https://github.com/ericproulx).
 * [#2833](https://github.com/ruby-grape/grape/pull/2833): Fix `Grape::API::Instance.to_s` returning an empty string instead of the class name when the instance has no base (regression from #2581) - [@ericproulx](https://github.com/ericproulx).
 * [#2836](https://github.com/ruby-grape/grape/pull/2836): Define `#hash` alongside the `eql?`/`==` pairs on `Grape::Endpoint`, `Grape::Util::InheritableSetting`, `Grape::Middleware::Stack::Middleware`, `Grape::ServeStream::StreamResponse` and `Grape::ServeStream::FileBody`, so equal objects hash alike in a `Hash`, `Set` or `uniq` - [@ericproulx](https://github.com/ericproulx).
+* [#2835](https://github.com/ruby-grape/grape/pull/2835): Return the compiled instance from `Grape::API::Instance.compile!` so `call` and `recognize_path` no longer re-read `@instance`, which a concurrent `change!` could nil between the two reads - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
