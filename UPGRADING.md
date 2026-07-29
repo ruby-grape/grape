@@ -38,6 +38,65 @@ end
 
 Nothing changes for the ordinary arrangement — registrations declared before a route, or inherited from an enclosing namespace or a mounting API, still apply exactly as before, including values an enclosing scope gains after the nested scope was created.
 
+#### Path params are tagged UTF-8 instead of ASCII-8BIT
+
+Params captured from the request path — `route_param`, `:id`-style segments, splats — now come back tagged `UTF-8`. They used to carry the `ASCII-8BIT` encoding of Rack's `PATH_INFO`, because Mustermann decodes the path against that raw string and nothing re-tagged the result. Query and body params were already `UTF-8`, since Rack tags those itself.
+
+**Why UTF-8.** Nothing obliges a client to send it — HTTP treats the request target as octets, and Rack's SPEC has CGI keys carry non-ASCII as `ASCII-8BIT`. UTF-8 is a convention rather than a guarantee. But it is the convention Rack itself already applies to everything *except* the path: `Rack::QueryParser#unescape` decodes the query string and form bodies with `URI.decode_www_form_component(string, Encoding::UTF_8)`, which tags the result without validating it.
+
+One request carrying the same invalid octets in three places, before this change:
+
+| source | encoding | `valid_encoding?` |
+| --- | --- | --- |
+| query — `?q=%C3%28` | `UTF-8` | `false` |
+| form body — `form=%C3%28` | `UTF-8` | `false` |
+| path — `/%C3%28` | **`ASCII-8BIT`** | `true` |
+
+The bytes are equally malformed in all three; only the label differed. The path reads `true` merely because `ASCII-8BIT` considers every byte sequence valid. So this change is not Grape adopting an outside convention — it is Grape agreeing with the library handing it the request. The path param was the odd one out only because Mustermann decodes against `PATH_INFO` directly and never had Rack's `unescape` applied to it.
+
+Grape does exactly what Rack does: re-tag, do not validate. The bytes are untouched, so octets that are *not* UTF-8 stay detectably invalid rather than being scrubbed into something the client never sent. (Rails takes the same approach for path captures — `ActionDispatch::Journey::Router` force-encodes each one to UTF-8 after unescaping.)
+
+**What this fixes.** An API's own declarations used to disagree with themselves depending on where a value arrived from — a binary string never equals the UTF-8 literal it was written as:
+
+```ruby
+params { requires :id, type: String, values: ['café'] }
+```
+
+| request | before | 4.0 |
+| --- | --- | --- |
+| `GET /?id=café` (query) | `200` | unchanged |
+| `GET /café` (path) | `400 "id does not have a valid value"` | `200` |
+
+The same held for `same_as`, `except_values`, and any comparison an endpoint made against a non-ASCII literal. Serialization was affected too: a non-ASCII path param rendered into a JSON response emitted an encoding warning from the `json` gem, and is slated to raise there in json 3.0.
+
+**What can break.** Only the encoding tag changes; the bytes are untouched, and an invalid byte sequence stays invalid rather than being scrubbed. Comparisons against pure-ASCII strings are unaffected. Code that relied on a path param being binary — concatenating one with genuinely binary data, for instance — can now raise `Encoding::CompatibilityError`, and should call `.b` on the param to opt back into binary:
+
+```ruby
+params[:id].b + binary_blob
+```
+
+An application that worked around the old behavior with its own `force_encoding(Encoding::UTF_8)` needs no change; that call is now a no-op.
+
+**Restoring the old behavior wholesale.** If enough code depends on binary path params that patching each site is impractical, a `before` filter at the top of your root API re-tags them all back. `env['grape.routing_args']` holds exactly the params that came from the path, so query and body params are left alone, and `before` runs ahead of validation, so declarations see the binary strings too:
+
+```ruby
+class API < Grape::API
+  before do
+    env['grape.routing_args']&.each_key do |key|
+      next if key == :route_info
+
+      value = params[key]
+      params[key] = value.b if value.is_a?(String)
+      params[key] = value.map(&:b) if value.is_a?(Array)
+    end
+  end
+
+  # ... mounts and routes
+end
+```
+
+Declared in the root API, this covers mounted APIs too. Treat it as a migration aid rather than a permanent setting: it restores the inconsistency this change fixes, so `values: ['café']` will keep rejecting `GET /café` while accepting `?id=café`.
+
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
 Declaring a collection whose element type Grape cannot coerce — `type: Array[Foo]` or `type: Set[Foo]` where `Foo` is neither a primitive, a structure, nor a valid custom type — now raises as soon as the `params` block is evaluated, i.e. while the API class is being loaded:
