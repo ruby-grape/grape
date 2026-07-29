@@ -41,6 +41,19 @@ params[:id].b + binary_blob
 ```
 
 An application that worked around the old behavior with its own `force_encoding(Encoding::UTF_8)` needs no change; that call is now a no-op.
+#### A failed error rendering answers 500 instead of escaping the middleware stack
+
+When Grape could not render an error response — an error formatter handed a payload it cannot serialize, most often — the exception escaped every middleware above Grape and reached the application server. Rendering runs inside `Grape::Middleware::Error#call!`'s own `rescue` clause, so that clause did not cover it.
+
+Grape now answers `500` instead: first retrying the API's format with the framework's own `Internal Server Error` message, then falling back to a bare `text/plain` body if even that cannot be rendered.
+
+**What can break.** Code that observed these exceptions by letting them propagate — an error tracker mounted as Rack middleware above Grape, or a test asserting `expect { get '/' }.to raise_error` — no longer sees them. The exception is exposed on the rack env instead, under the same key the existing unrecognised-error path uses:
+
+```ruby
+env[Grape::Env::GRAPE_EXCEPTION] # => the exception that defeated rendering
+```
+
+Exceptions that no `rescue_from` matches still propagate exactly as before; only rendering failures changed.
 
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
