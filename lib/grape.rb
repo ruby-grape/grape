@@ -53,6 +53,9 @@ module Grape
   setting :param_builder, default: :hash_with_indifferent_access
   setting :lint, default: false
   setting :warn_on_helper_overrides, default: false
+  # Let an error response that cannot be rendered propagate out of the
+  # middleware stack instead of being answered with a failsafe 500.
+  setting :raise_rendering_errors, default: false
 
   HTTP_SUPPORTED_METHODS = [
     Rack::GET,

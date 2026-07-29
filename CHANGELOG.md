@@ -59,6 +59,9 @@
 * [#2838](https://github.com/ruby-grape/grape/pull/2838): Reject request params nested in more arrays than the block declares, instead of silently unwrapping them and passing validation, and report `type: Array[JSON]` errors against the element that failed - [@ericproulx](https://github.com/ericproulx).
 * [#2842](https://github.com/ruby-grape/grape/pull/2842): Warn at definition time when a `rescue_from` class is already covered by one registered earlier in the same scope, since the later handler never runs - [@ericproulx](https://github.com/ericproulx).
 * [#2853](https://github.com/ruby-grape/grape/pull/2853): Restore, behind a deprecation warning, the trailing positional options Hash of `requires`, `optional` and `use`, which #2618 turned into a parameter name - [@ericproulx](https://github.com/ericproulx).
+* [#2840](https://github.com/ruby-grape/grape/pull/2840): Answer 500 instead of letting an exception escape the middleware stack when an error response cannot be rendered (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2840](https://github.com/ruby-grape/grape/pull/2840): Expose the exception that defeated an error rendering on `rack.exception` and write it to `rack.errors`, so error trackers mounted above Grape keep reporting it - [@ericproulx](https://github.com/ericproulx).
+* [#2840](https://github.com/ruby-grape/grape/pull/2840): Add `Grape.config.raise_rendering_errors` to opt out of the failsafe and let an unrenderable error response propagate as before - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

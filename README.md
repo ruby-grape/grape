@@ -580,6 +580,7 @@ Use `Grape.configure` to set up global settings at load time.
 Currently the configurable settings are:
 
 * `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
+* `raise_rendering_errors`: Lets an error response that cannot be rendered propagate out of the middleware stack instead of being answered with a failsafe `500`, defaults to `false`. See [When the error response itself cannot be rendered](#when-the-error-response-itself-cannot-be-rendered).
 
 To change a setting value make sure that at some point during load time the following code runs
 
@@ -2990,6 +2991,38 @@ Here `'inner'` will be result of handling occurred `ArgumentError`.
 Any exception that is not subclass of `StandardError` should be rescued explicitly.
 Usually it is not a case for an application logic as such errors point to problems in Ruby runtime.
 This is following [standard recommendations for exceptions handling](https://ruby-doc.org/core/Exception.html).
+
+#### When the error response itself cannot be rendered
+
+A `rescue_from` handler can build a payload its error formatter cannot serialize. The common case is echoing request-derived text back to the client:
+
+```ruby
+class Missing < StandardError; end
+
+class API < Grape::API
+  format :json
+
+  rescue_from(Missing) { |e| error!({ error: 'not_found', detail: e.message }, 404) }
+
+  route_param(:id) { get { raise Missing, "no such thing: #{params[:id]}" } }
+end
+```
+
+`GET /%C3%28` puts an invalid UTF-8 byte in `params[:id]`, and the JSON formatter raises when it reaches that byte in the message — after the handler has already returned, so `rescue_from :all` does not help.
+
+Rather than let that exception escape the middleware stack, Grape answers `500`: first retrying the API's own format with the framework's `Internal Server Error` message, then falling back to a bare `text/plain` body if even that cannot be rendered.
+
+The exception is published on the rack env under `rack.exception` — the key error trackers read to find an exception that was handled rather than raised — and on Grape's own `grape.exception`. It is also written to `rack.errors`, so it reaches the log with no tracker installed.
+
+To opt out and have the exception propagate out of the middleware stack instead:
+
+```ruby
+Grape.configure do |config|
+  config.raise_rendering_errors = true
+end
+```
+
+With this on the failsafe never runs: the exception is re-raised untouched, so neither env key is set and nothing is written to `rack.errors`.
 
 ## Logging
 
