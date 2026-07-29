@@ -3,6 +3,63 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### `Array`/`Set` of an unsupported type is rejected when the API is defined
+
+Declaring a collection whose element type Grape cannot coerce — `type: Array[Foo]` or `type: Set[Foo]` where `Foo` is neither a primitive, a structure, nor a valid custom type — now raises as soon as the `params` block is evaluated, i.e. while the API class is being loaded:
+
+```
+ArgumentError: type Foo should support coercion via `[]`
+```
+
+This is a **load-time** failure. An application that boots today can fail to boot on 4.0 without any request being made.
+
+A valid custom type is one that implements a class-level `parse` taking exactly one argument (`Grape::Validations::Types.custom?`). A class that implements neither that nor `[]` was never coercible, so such a declaration was always a misconfiguration — but it used to surface much later, and much less clearly.
+
+**What changed.** Nothing about which types are supported; only *when* the element coercer is built. [#2817](https://github.com/ruby-grape/grape/pull/2817) made `ArrayCoercer` build it eagerly in the constructor rather than memoizing it on first use, because coercers are shared across requests and must not create state at request time. Building it eagerly means the unsupported element type is discovered while the route is being defined.
+
+Previously the coercer was built on the first request that actually supplied the parameter. An API that declared the parameter but was never sent one — a documentation-only declaration, for instance — never built it and never raised. When a request did supply it, the same `ArgumentError` was raised inside the coercer and swallowed by the coercion validator into a generic `400`:
+
+```json
+{ "error": "foo is invalid" }
+```
+
+so the misconfiguration presented as a puzzling per-request validation failure rather than as a broken declaration.
+
+Note that the non-collection form has always raised at definition time:
+
+| declaration | before | 4.0 |
+| --- | --- | --- |
+| `type: Foo` | `ArgumentError` when defined | unchanged |
+| `type: Array[Foo]` | accepted; `400 "is invalid"` per request | `ArgumentError` when defined |
+
+The collection form's leniency was an accident of the lazy build, not a supported behavior. The two are now consistent.
+
+**Fixing a declaration that now raises.** Give the type a one-argument `parse`, which is what makes it a custom type:
+
+```ruby
+class Foo
+  def self.parse(value)
+    new(value)
+  end
+end
+
+params { requires :foos, type: Array[Foo] }
+```
+
+Or coerce the collection yourself, in which case Grape does not build an element coercer at all:
+
+```ruby
+params { requires :foos, type: Array[Foo], coerce_with: ->(value) { Array(value).map { |v| Foo.new(v) } } }
+```
+
+Or, if the class is only there to describe the parameter and never to coerce it — the common case behind this break — drop `type:` and document it instead:
+
+```ruby
+params { requires :foos, documentation: { type: Foo } }
+```
+
+Defining `self.[]` on the class silences the load-time error, because that is the escape hatch for `dry-types` objects, but it does **not** make the type coercible: such a parameter still fails with `400 "is invalid"` on every request. Prefer `parse` or `coerce_with`.
+
 #### The `cascade` getter returns the configured value
 
 Calling `cascade` with no argument used to report whether cascading had been *configured at all* (`cascade false` still read back as `true`, contradicting the actual runtime behavior, which was correctly disabled). It now returns the configured value itself — `true`/`false` as set, or `true` when never set. Code that used the getter to detect "was `cascade` called" rather than "does this API cascade" must track that separately.

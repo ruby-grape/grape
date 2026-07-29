@@ -98,6 +98,48 @@ describe Grape::Validations::Types do
       expect(a_coercer.object_id).to eq(b_coercer.object_id)
     end
 
+    # The element coercer is built eagerly (see ArrayCoercer), so a collection
+    # of a type Grape cannot coerce is rejected here -- while the params block
+    # is evaluated -- rather than on the first request that supplies the
+    # parameter, where it used to surface as a generic 400. See UPGRADING.
+    describe 'a collection of an unsupported element type' do
+      before { stub_const('UncoercibleType', Class.new) }
+
+      it 'raises for an Array of it' do
+        expect { described_class.build_coercer(Array[UncoercibleType]) }
+          .to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+      end
+
+      it 'raises for a Set of it' do
+        expect { described_class.build_coercer(Set[UncoercibleType]) }
+          .to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+      end
+
+      it 'raises while the params block is evaluated' do
+        expect do
+          Class.new(Grape::API) do
+            params { requires :foos, type: Array[UncoercibleType] }
+            get('/foos') { 'never reached' }
+          end
+        end.to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+      end
+
+      # A one-argument `parse` makes it a custom type, which ::custom? accepts
+      # and which routes to CustomTypeCollectionCoercer instead of dry-types.
+      it 'is accepted once the element type implements a one-argument parse' do
+        stub_const('CoercibleType', Class.new { def self.parse(value) = value })
+
+        expect { described_class.build_coercer(Array[CoercibleType]) }.not_to raise_error
+      end
+
+      # coerce_with takes over the whole collection, so no element coercer is
+      # built and the element type is never looked up.
+      it 'is accepted when coerce_with supplies the coercion' do
+        expect { described_class.build_coercer(Array[UncoercibleType], method: ->(v) { Array(v) }) }
+          .not_to raise_error
+      end
+    end
+
     # Coercer instances are shared across requests, so they must be frozen at
     # construction — a request-time lazy ivar write would be a data race and
     # now raises FrozenError instead.
