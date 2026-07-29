@@ -1011,13 +1011,41 @@ describe Grape::Validations::Validators::CoerceValidator do
         expect(last_response).to be_successful
         expect(last_response.body).to eq("#{integer_class_name}.#{integer_class_name}")
 
+        # A bare object is coerced into a one-element array, so it reports
+        # against that element the same way an explicit array does.
         get '/', splines: '{"x":"4","y":"woof"}'
         expect(last_response).to be_bad_request
-        expect(last_response.body).to eq('splines[x] does not have a valid value')
+        expect(last_response.body).to eq('splines[0][x] does not have a valid value')
 
         get '/', splines: '[{"x":"4","y":"woof"}]'
         expect(last_response).to be_bad_request
-        expect(last_response.body).to eq('splines[x] does not have a valid value')
+        expect(last_response.body).to eq('splines[0][x] does not have a valid value')
+      end
+
+      it 'reports Array[JSON] errors against the element that failed' do
+        subject.params do
+          requires :splines, type: Array[JSON] do
+            requires :x, type: Integer
+          end
+        end
+        subject.get('/') { 'ok' }
+
+        get '/', splines: '[{"x":1},{},{"x":3}]'
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('splines[1][x] is missing')
+      end
+
+      it 'reports every failing Array[JSON] element, not just one' do
+        subject.params do
+          requires :splines, type: Array[JSON] do
+            requires :x, type: Integer
+          end
+        end
+        subject.get('/') { 'ok' }
+
+        get '/', splines: '[{},{}]'
+        expect(last_response).to be_bad_request
+        expect(last_response.body).to eq('splines[0][x] is missing, splines[1][x] is missing')
       end
 
       it "doesn't make sense using coerce_with" do
