@@ -59,4 +59,39 @@ describe Grape::Middleware::Versioner::Path do
       expect(subject.call(Rack::PATH_INFO => '/mounted/v1/foo').last).to eq('v1')
     end
   end
+
+  # Regression: the version was only extracted when a second slash followed it,
+  # so the root route of a path-versioned API (`GET /v1`) ran without
+  # env['api.version'] being set.
+  context 'when the version is the only path segment' do
+    let(:options) { { versions: %w[v1] } }
+
+    it 'sets the version' do
+      expect(subject.call(Rack::PATH_INFO => '/v1').last).to eq('v1')
+    end
+
+    it 'sets the version when a format suffix follows' do
+      expect(subject.call(Rack::PATH_INFO => '/v1.json').last).to eq('v1')
+    end
+
+    context 'with a dotted version' do
+      let(:options) { { versions: %w[v1.2] } }
+
+      it 'sets the version when a format suffix follows' do
+        expect(subject.call(Rack::PATH_INFO => '/v1.2.json').last).to eq('v1.2')
+      end
+    end
+
+    context 'behind a prefix' do
+      let(:options) { { versions: %w[v1], prefix: '/api' } }
+
+      it 'sets the version' do
+        expect(subject.call(Rack::PATH_INFO => '/api/v1').last).to eq('v1')
+      end
+    end
+
+    it 'leaves an unknown segment for the router instead of failing with 404' do
+      expect(subject.call(Rack::PATH_INFO => '/awesome').last).to be_nil
+    end
+  end
 end
