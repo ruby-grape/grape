@@ -57,6 +57,7 @@
 * [#2826](https://github.com/ruby-grape/grape/pull/2826): Fix `api.version` not being set for the root route of a path-versioned API (`GET /v1`) - [@ericproulx](https://github.com/ericproulx).
 * [#2834](https://github.com/ruby-grape/grape/pull/2834): Restore the #2824 fix for cascaded routes leaking `route_info` and path captures, silently reverted by #2829 - [@ericproulx](https://github.com/ericproulx).
 * [#2838](https://github.com/ruby-grape/grape/pull/2838): Reject request params nested in more arrays than the block declares, instead of silently unwrapping them and passing validation, and report `type: Array[JSON]` errors against the element that failed - [@ericproulx](https://github.com/ericproulx).
+* [#2839](https://github.com/ruby-grape/grape/pull/2839): Tag path params as UTF-8 instead of leaving them ASCII-8BIT, so they compare equal to the non-ASCII literals an API declares (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
