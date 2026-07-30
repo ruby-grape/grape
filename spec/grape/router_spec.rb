@@ -48,6 +48,7 @@ describe Grape::Router do
       expect(status).to eq(404)
     end
   end
+
   # Regression: routing args were seeded once (`||=`) and merged in place, so
   # when a route cascaded (X-Cascade pass) the next candidate still saw the
   # previous attempt's :route_info and path captures.
