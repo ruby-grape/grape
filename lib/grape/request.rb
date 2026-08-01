@@ -168,13 +168,37 @@ module Grape
 
     def make_params
       params = @params_builder.call(rack_params)
-      routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]
-      filtered = routing_args&.except(:version, :route_info)
+      filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
       return params if filtered.blank?
 
       params.deep_merge!(filtered)
     rescue *Grape::RACK_ERRORS
       raise Grape::Exceptions::RequestError
+    end
+
+    # The routing args carry two things that are not request params:
+    # +:route_info+, which is always Grape's own, and +:version+, which is only
+    # Grape's own when the API declared a version — that is captured as a path
+    # segment and exposed through +env['api.version']+ instead.
+    #
+    # An API that declares no version can legitimately name a param +:version+
+    # (`route_param :version`, `get '/:version'`), and that capture belongs to
+    # the application. Dropping it unconditionally left `params[:version]` nil
+    # on a route that had matched, losing the segment silently.
+    def routing_args_as_params(routing_args)
+      return if routing_args.nil?
+      return routing_args.except(:version, :route_info) if grape_owns_version?(routing_args)
+
+      routing_args.except(:route_info)
+    end
+
+    # A route reports a +version+ only when the API declared one, which is the
+    # case where the captured segment is Grape's rather than the application's.
+    def grape_owns_version?(routing_args)
+      return false unless routing_args.key?(:version)
+
+      route = routing_args[:route_info]
+      route.respond_to?(:version) && !route.version.nil?
     end
 
     # Uses a plain `each_header` block instead of `each_header.with_object`:
