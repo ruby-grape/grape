@@ -10,6 +10,11 @@ module Grape
       def initialize(attrs, scope)
         @attrs = attrs
         @scope = scope
+        # How many times #do_each may descend into a nested array. The
+        # declaration allows one level per Array-typed scope on the chain, less
+        # the one +Array.wrap+ already consumes in #each. Anything deeper was
+        # put there by the request, not by the declaration.
+        @max_nesting = [scope.array_depth - 1, 0].max
       end
 
       def each(params, &)
@@ -24,19 +29,24 @@ module Grape
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indices
-          if resource_params.is_a?(Array)
+          #
+          # Only descend as far as the declaration nests. A request that wraps
+          # its elements deeper than that is yielded as-is, so the attribute
+          # validators see a non-hash and fail it the same way any other
+          # unexpected element type does.
+          if resource_params.is_a?(Array) && parent_indices.size < @max_nesting
             do_each(resource_params, original_params, [index] + parent_indices, &block)
             next
           end
 
-          if @scope.type == Array
+          if @scope.iterates_elements?
             next unless original_params.is_a?(Array) # do not validate content of array if it isn't array
 
             store_indices(@scope, index, parent_indices)
           elsif original_params.is_a?(Array)
             # Lateral scope (no @element) whose params resolved to an array —
-            # delegate index tracking to the nearest array-typed ancestor so
-            # that full_name produces the correct bracketed index.
+            # delegate index tracking to the nearest element-iterating ancestor
+            # so that full_name produces the correct bracketed index.
             target = @scope.nearest_array_ancestor
             store_indices(target, index, parent_indices) if target
           end
