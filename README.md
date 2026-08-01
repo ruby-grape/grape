@@ -2737,6 +2737,19 @@ rescue_from :grape_exceptions do |e|
 end
 ```
 
+The opt-in takes precedence over a catch-all handler, whether that catch-all is written as `rescue_from :all` or as a class such as `rescue_from StandardError`. So a validation failure stays a `400` rather than becoming whatever the catch-all returns:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from StandardError do
+    error!('server error', 500)
+  end
+  rescue_from :grape_exceptions   # validation errors still answer 400
+end
+```
+
+A handler registered for a specific Grape exception class is more precise than the opt-in and still wins, so `rescue_from Grape::Exceptions::ValidationErrors` keeps its own handler. The opt-in only outranks handlers that matched through a non-Grape ancestor.
+
 You can also rescue specific exceptions.
 
 ```ruby
