@@ -2633,6 +2633,59 @@ describe Grape::API do
       expect(last_response).to be_forbidden
       expect(last_response.body).to eq('Redefined Error')
     end
+
+    # The opt-in exists to keep Grape's own errors rendering with their own
+    # status. A catch-all registered as a class is matched before it, and
+    # Grape's exceptions are StandardErrors, so it used to be silently inert
+    # unless the catch-all happened to be spelled `rescue_from :all`.
+    context 'with a catch-all class handler' do
+      subject(:app) do
+        Class.new(Grape::API) do
+          format :json
+          rescue_from(StandardError) { error!({ h: 'catch-all' }, 500) }
+          rescue_from(:grape_exceptions) { |e| error!({ h: 'grape' }, e.status) }
+          params { requires :n, type: Integer }
+          get('/validated') { 'ok' }
+          get('/boom') { raise ArgumentError, 'app error' }
+        end
+      end
+
+      it 'keeps a validation failure a 400' do
+        get '/validated'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq({ h: 'grape' }.to_json)
+      end
+
+      it 'still sends the application’s own errors to the catch-all' do
+        get '/boom'
+
+        expect(last_response.status).to eq(500)
+        expect(last_response.body).to eq({ h: 'catch-all' }.to_json)
+      end
+    end
+
+    it 'lets a handler registered for a grape exception class win over the opt-in' do
+      subject.rescue_from(Grape::Exceptions::ValidationErrors) { error!('specific', 422) }
+      subject.rescue_from(StandardError) { error!('catch-all', 500) }
+      subject.params { requires :n, type: Integer }
+      subject.get('/validated') { 'ok' }
+
+      get '/validated'
+
+      expect(last_response.status).to eq(422)
+      expect(last_response.body).to eq('specific')
+    end
+
+    it 'does not intercept an exception that is not a grape exception' do
+      subject.rescue_from(StandardError) { error!('catch-all', 500) }
+      subject.get('/boom') { raise ArgumentError }
+
+      get '/boom'
+
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('catch-all')
+    end
   end
 
   describe '.error_format' do

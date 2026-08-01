@@ -88,6 +88,37 @@ end
 ```
 
 Nothing changes for the ordinary arrangement — registrations declared before a route, or inherited from an enclosing namespace or a mounting API, still apply exactly as before, including values an enclosing scope gains after the nested scope was created.
+#### `rescue_from :grape_exceptions` now outranks a catch-all class handler
+
+`rescue_from :grape_exceptions` is an opt-in to keep Grape's own errors rendering with their own status — a validation failure answers `400` rather than whatever the application's catch-all returns.
+
+It only ever worked against `rescue_from :all`. Written as a class instead, a catch-all is a *registered* handler, which `Grape::Middleware::Error` consults first, and Grape's exceptions are `StandardError`s — so the opt-in was silently inert:
+
+```ruby
+rescue_from StandardError do
+  error!('server error', 500)
+end
+rescue_from :grape_exceptions
+```
+
+| request | before | 4.0 |
+| --- | --- | --- |
+| fails parameter validation | **500** `server error` | `400` |
+| raises an application error | `500` `server error` | unchanged |
+
+**What can break.** An API that registers a catch-all as a class *and* opts into `:grape_exceptions` will now answer Grape's own status for Grape's own errors, where it previously answered the catch-all's. That is what the opt-in asks for, so the change makes the two spellings agree — but a client or test asserting the catch-all's status for a validation failure will see the new one.
+
+Precedence is unchanged in every other case. A handler registered for a specific Grape exception class is more precise than the opt-in and still wins:
+
+```ruby
+rescue_from Grape::Exceptions::ValidationErrors do
+  error!('unprocessable', 422)   # still runs
+end
+rescue_from StandardError { ... }
+rescue_from :grape_exceptions
+```
+
+Application errors still reach the catch-all, `rescue_from :all` behaves as before, and `Grape::Exceptions::InvalidVersionHeader` is still never rescued, so version cascading keeps working. An API that does not use `rescue_from :grape_exceptions` is unaffected.
 
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
