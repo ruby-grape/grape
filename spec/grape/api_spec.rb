@@ -1517,6 +1517,48 @@ describe Grape::API do
         expect(last_response.body).to eql 'hello'
       end
 
+      # A route captures the middleware registered above it. Whether some
+      # earlier `use` had already seeded the scope's stack must not change that.
+      context 'when declared below a route' do
+        it 'does not apply to that route' do
+          subject.get('/') { env['phony.args'].inspect }
+          subject.use phony_middleware, 'too-late'
+
+          get '/'
+          expect(last_response.body).to eql 'nil'
+        end
+
+        it 'does not apply to that route when an earlier use seeded the stack' do
+          subject.use phony_middleware, 'in-time'
+          subject.get('/') { env['phony.args'].flatten.inspect }
+          subject.use phony_middleware, 'too-late'
+
+          get '/'
+          expect(last_response.body).to eql ['in-time'].inspect
+        end
+      end
+    end
+
+    describe '.rescue_from declared below a route' do
+      let(:boom) { Class.new(StandardError) }
+
+      it 'does not apply to that route' do
+        error_class = boom
+        subject.get('/') { raise error_class }
+        subject.rescue_from(error_class) { error!('too late', 480) }
+
+        expect { get '/' }.to raise_error(error_class)
+      end
+
+      it 'does not apply to that route when an earlier rescue_from seeded the map' do
+        error_class = boom
+        subject.rescue_from(ArgumentError) { error!('in time', 481) }
+        subject.get('/') { raise error_class }
+        subject.rescue_from(error_class) { error!('too late', 480) }
+
+        expect { get '/' }.to raise_error(error_class)
+      end
+
       it 'adds a block if one is given' do
         block = -> {}
         subject.use phony_middleware, &block
