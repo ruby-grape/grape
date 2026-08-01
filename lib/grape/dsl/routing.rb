@@ -206,6 +206,11 @@ module Grape
         )
         endpoints << new_endpoint unless endpoints.include?(new_endpoint)
 
+        # The router is built once, when the API is first compiled, so an
+        # endpoint added after that would be listed by #routes and still 404.
+        # `helpers` and `mount` already invalidate for the same reason.
+        change!
+
         inheritable_setting.route_end
         reset_validations!
       end

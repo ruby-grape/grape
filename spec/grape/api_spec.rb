@@ -4120,6 +4120,48 @@ describe Grape::API do
     end
   end
 
+  # The router is built once, when the API is first compiled. A route declared
+  # after that was listed by .routes and still answered 404, so the API's own
+  # metadata disagreed with what it served.
+  describe 'a route declared after the API has been compiled' do
+    before do
+      subject.format :json
+      subject.get('/first') { 'first' }
+    end
+
+    it 'is served after a request has already been made' do
+      get '/first'
+      subject.get('/second') { 'second' }
+
+      get '/second'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('second'.to_json)
+    end
+
+    it 'is served after recognize_path has compiled the router' do
+      subject.recognize_path('/first')
+      subject.get('/second') { 'second' }
+
+      get '/second'
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'is recognised by recognize_path' do
+      get '/first'
+      subject.get('/second') { 'second' }
+
+      expect(subject.recognize_path('/second')).not_to be_nil
+    end
+
+    it 'leaves the routes declared before it serving' do
+      get '/first'
+      subject.get('/second') { 'second' }
+
+      get '/first'
+      expect(last_response.body).to eq('first'.to_json)
+    end
+  end
+
   describe '.endpoint' do
     before do
       subject.format :json

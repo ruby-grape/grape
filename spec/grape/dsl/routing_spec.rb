@@ -12,6 +12,10 @@ describe Grape::DSL::Routing do
       class << self
         attr_reader :instance, :base
         attr_accessor :configuration
+
+        # Part of the contract Grape::DSL::Routing expects of its host, the
+        # same way #mount already relies on it.
+        def change!; end
       end
     end
   end
