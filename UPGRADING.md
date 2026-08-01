@@ -3,6 +3,41 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
+
+A route captures the middleware, helpers, callbacks and rescue handlers registered above it. That was already true most of the time, but not always: `Grape::Util::InheritableSetting#point_in_time_copy` copied a scope's stackable store and its rescue-handler maps shallowly, so the nested Arrays and Hashes stayed shared with the scope. A registration added *after* an endpoint was defined therefore still reached that endpoint — but only when the key already held at least one registration when the endpoint was defined, since otherwise the scope allocated a fresh store only for itself.
+
+The outcome depended on something the API never expressed:
+
+```ruby
+class A < Grape::API
+  use Middleware1
+  get('/x') { }      # endpoint defined here
+  use Middleware2    # applied to GET /x
+end
+
+class B < Grape::API
+  get('/x') { }      # endpoint defined here
+  use Middleware2    # NOT applied to GET /x
+end
+```
+
+`A` and `B` state the same thing and behaved differently. Both now behave like `B`. The same held for `rescue_from` declared below a route.
+
+**What can break.** An API that declares `use` (or `helpers`, a filter such as `before`, or `rescue_from`) below its routes and relies on it applying to them. That arrangement only ever worked when an earlier registration for the same key happened to seed the stack, so it was never dependable, but code written against it will now see the middleware or helper silently not run.
+
+**The fix is to move the registration above the routes it should cover**, which is where Grape's documentation has always placed it:
+
+```ruby
+class A < Grape::API
+  use Middleware1
+  use Middleware2
+  get('/x') { }
+end
+```
+
+Nothing changes for the ordinary arrangement — registrations declared before a route, or inherited from an enclosing namespace or a mounting API, still apply exactly as before, including values an enclosing scope gains after the nested scope was created.
+
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
 Declaring a collection whose element type Grape cannot coerce — `type: Array[Foo]` or `type: Set[Foo]` where `Foo` is neither a primitive, a structure, nor a valid custom type — now raises as soon as the `params` block is evaluated, i.e. while the API class is being loaded:

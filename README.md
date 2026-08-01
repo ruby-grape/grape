@@ -2758,6 +2758,18 @@ end
 
 Grape warns when a `rescue_from` is registered for a class an earlier one in the same scope already covers. This is about ordering within a scope; a handler in a nested namespace or a mounted API always takes precedence over one inherited from an enclosing scope, whatever the classes are.
 
+A `rescue_from` also has to be declared **above** the routes it should cover. A route captures the handlers registered before it, so one declared below a route never runs for it:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do ... end   # covers GET /statuses
+  get :statuses do ... end
+  rescue_from ArgumentError do ... end   # never runs for GET /statuses
+end
+```
+
+The same goes for `use`, `helpers` and the `before`/`after` callbacks.
+
 Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
 
 ```ruby
@@ -3799,13 +3811,13 @@ class TwitterAPI < Grape::API
     @var = 1
   end
 
+  rescue_from :all do
+    puts @var # => 1
+  end
+
   get '/' do
     puts @var # => 1
     raise
-  end
-
-  rescue_from :all do
-    puts @var # => 1
   end
 end
 ```

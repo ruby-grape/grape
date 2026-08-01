@@ -388,6 +388,68 @@ describe Grape::Util::InheritableSetting do
       expect(cloned_obj.helpers).to eq [:namespace_stackable_foo_bar]
     end
 
+    # The case above registers only on the parent, so the copy never shares an
+    # Array with `subject` and passes even when the per-key Arrays are shared.
+    # Here the key already holds one of `subject`'s own registrations when the
+    # copy is taken, which is what made the later one leak into it.
+    context 'when the scope already registered the key itself' do
+      subject(:setting) do
+        described_class.new.tap do |settings|
+          settings.inherit_from parent
+          settings.add_helper(:own_before_copy)
+        end
+      end
+
+      let!(:cloned_obj) { setting.point_in_time_copy }
+
+      it 'does not leak a later registration into the copy' do
+        setting.add_helper(:own_after_copy)
+
+        expect(setting.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy own_after_copy]
+        expect(cloned_obj.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+      end
+
+      it 'does not leak the copy’s own registration back to the source' do
+        cloned_obj.add_helper(:only_on_copy)
+
+        expect(setting.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+        expect(cloned_obj.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy only_on_copy]
+      end
+
+      it 'keeps sibling copies independent' do
+        sibling = setting.point_in_time_copy
+        cloned_obj.add_helper(:only_on_first)
+
+        expect(sibling.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+      end
+    end
+
+    # Same shape as the stackable case: the per-kind Hashes inside
+    # @rescue_handler_maps have to be duped, not just the Hash holding them.
+    context 'when the scope already registered a rescue handler' do
+      subject(:setting) do
+        described_class.new.tap do |settings|
+          settings.add_rescue_handlers({ ArgumentError => :before_copy }, subclasses: true)
+        end
+      end
+
+      let!(:cloned_obj) { setting.point_in_time_copy }
+
+      it 'does not leak a later handler into the copy' do
+        setting.add_rescue_handlers({ TypeError => :after_copy }, subclasses: true)
+
+        expect(setting.rescue_handlers).to eq(ArgumentError => :before_copy, TypeError => :after_copy)
+        expect(cloned_obj.rescue_handlers).to eq(ArgumentError => :before_copy)
+      end
+
+      it 'does not leak a later base-only handler into the copy' do
+        setting.add_rescue_handlers({ TypeError => :after_copy }, subclasses: false)
+
+        expect(setting.base_only_rescue_handlers).to eq(TypeError => :after_copy)
+        expect(cloned_obj.base_only_rescue_handlers).to be_blank
+      end
+    end
+
     it 'decouples route values' do
       expect(cloned_obj.route[:route_thing]).to eq :route_foo_bar
 
