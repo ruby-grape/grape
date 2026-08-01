@@ -87,7 +87,10 @@ module Grape
       end
 
       def find_handler(klass)
-        registered_rescue_handler(klass) ||
+        registered_entry = registered_rescue_handler_entry(klass)
+
+        grape_exceptions_precedence_handler(klass, registered_entry) ||
+          registered_entry&.last ||
           rescue_handler_for_grape_exception(klass) ||
           rescue_handler_for_any_class(klass) ||
           raise
@@ -118,16 +121,51 @@ module Grape
       end
 
       def registered_rescue_handler(klass)
-        rescue_handler_from(base_only_rescue_handlers) { |err| klass == err } ||
-          rescue_handler_from(rescue_handlers) { |err| klass <= err }
+        registered_rescue_handler_entry(klass)&.last
       end
 
-      def rescue_handler_from(handlers)
+      # The matched entry rather than just its handler, so callers can tell
+      # *which* class matched — see {#grape_exceptions_precedence_handler}.
+      # @return [Array(Class, #call), nil]
+      def registered_rescue_handler_entry(klass)
+        rescue_handler_entry_from(base_only_rescue_handlers) { |err| klass == err } ||
+          rescue_handler_entry_from(rescue_handlers) { |err| klass <= err }
+      end
+
+      def rescue_handler_entry_from(handlers)
         error, handler = handlers&.find { |err, _handler| yield(err) }
 
         return unless error
 
-        handler || method(:default_rescue_handler)
+        [error, handler || method(:default_rescue_handler)]
+      end
+
+      # +rescue_from :grape_exceptions+ is an opt-in to keep Grape's own errors
+      # rendering with their own status — a validation failure stays a 400
+      # instead of becoming whatever the app's catch-all returns.
+      #
+      # It only ever worked against +rescue_from :all+, which lives in
+      # +all_rescue_handler+ and is consulted last. Spelled as a class instead,
+      # +rescue_from StandardError+ is a *registered* handler, matched first,
+      # and Grape's exceptions are StandardErrors — so the opt-in silently did
+      # nothing and validation errors came back as 500s either way.
+      #
+      # Let it win over a handler that only matched through a non-Grape
+      # ancestor. One registered for a Grape exception class is more specific
+      # than the opt-in and still wins, so an explicit
+      # +rescue_from Grape::Exceptions::ValidationErrors+ keeps its handler.
+      #
+      # InvalidVersionHeader is left alone: it must keep reaching Rack so the
+      # next versioned route is tried.
+      def grape_exceptions_precedence_handler(klass, registered_entry)
+        return unless rescue_grape_exceptions
+        return unless klass <= Grape::Exceptions::Base
+        return if klass == Grape::Exceptions::InvalidVersionHeader
+
+        matched, = registered_entry
+        return if matched.nil? || matched <= Grape::Exceptions::Base
+
+        grape_exceptions_rescue_handler || method(:error_response)
       end
 
       def rescue_handler_for_grape_exception(klass)
