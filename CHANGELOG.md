@@ -62,6 +62,7 @@
 * [#2841](https://github.com/ruby-grape/grape/pull/2841): Stop `use`, `helpers`, `rescue_from` and other registrations declared below a route from reaching it when an earlier registration had seeded the same key (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2842](https://github.com/ruby-grape/grape/pull/2842): Warn at definition time when a `rescue_from` class is already covered by one registered earlier in the same scope, since the later handler never runs - [@ericproulx](https://github.com/ericproulx).
 * [#2843](https://github.com/ruby-grape/grape/pull/2843): Let `rescue_from :grape_exceptions` take precedence over a catch-all registered as a class, so Grape errors keep their own status (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2844](https://github.com/ruby-grape/grape/pull/2844): Look an entity up by the presented object's own class before treating it as a collection, so `represent` is no longer skipped for models that respond to `#first` or `#klass` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
