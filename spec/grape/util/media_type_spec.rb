@@ -41,6 +41,25 @@ RSpec.describe Grape::Util::MediaType do
         it_behaves_like 'MediaType'
       end
     end
+
+    # Media types are case-insensitive (RFC 9110 §8.3.1); the vendor pattern is
+    # written in lower case, so anything else used to parse as no vendor at all.
+    context 'when the header is not in lower case' do
+      subject(:media_type) { described_class.parse(header) }
+
+      let(:header) { 'APPLICATION/VND.TEST-V1+JSON' }
+
+      it 'parses the vendor, version and format' do
+        expect(media_type.vendor).to eq('test')
+        expect(media_type.version).to eq('v1')
+        expect(media_type.format).to eq('json')
+      end
+
+      it 'down-cases the type and subtype' do
+        expect(media_type.type).to eq('application')
+        expect(media_type.subtype).to eq('vnd.test-v1+json')
+      end
+    end
   end
 
   describe '.match?' do
