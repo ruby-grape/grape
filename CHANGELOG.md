@@ -60,6 +60,7 @@
 * [#2839](https://github.com/ruby-grape/grape/pull/2839): Tag path params as UTF-8 instead of leaving them ASCII-8BIT, so they compare equal to the non-ASCII literals an API declares (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2840](https://github.com/ruby-grape/grape/pull/2840): Answer 500 instead of letting an exception escape the middleware stack when an error response cannot be rendered (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2841](https://github.com/ruby-grape/grape/pull/2841): Stop `use`, `helpers`, `rescue_from` and other registrations declared below a route from reaching it when an earlier registration had seeded the same key (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2842](https://github.com/ruby-grape/grape/pull/2842): Warn at definition time when a `rescue_from` class is already covered by one registered earlier in the same scope, since the later handler never runs - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

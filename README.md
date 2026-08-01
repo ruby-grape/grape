@@ -2747,6 +2747,17 @@ end
 
 In this case ```UserDefinedError``` must be inherited from ```StandardError```.
 
+When several classes could match, the one registered **first** in a scope wins — as with the clauses of a Ruby `rescue`. Register the more specific class before the broader one, or the narrower handler never runs:
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from ArgumentError do ... end   # matched first
+  rescue_from StandardError do ... end   # everything else
+end
+```
+
+Grape warns when a `rescue_from` is registered for a class an earlier one in the same scope already covers. This is about ordering within a scope; a handler in a nested namespace or a mounted API always takes precedence over one inherited from an enclosing scope, whatever the classes are.
+
 Notice that you could combine these two approaches (rescuing custom errors takes precedence). For example, it's useful for handling all exceptions except Grape validation errors.
 
 ```ruby

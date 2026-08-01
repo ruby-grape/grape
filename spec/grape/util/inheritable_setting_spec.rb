@@ -227,6 +227,62 @@ describe Grape::Util::InheritableSetting do
       subject.add_rescue_handlers({ StandardError => :child }, subclasses: true)
       expect(subject.rescue_handlers).to eq(StandardError => :child)
     end
+
+    # Middleware::Error resolves with #find, so the first matching class in a
+    # scope wins and a narrower one registered after it is dead code.
+    describe 'shadowing warnings' do
+      def add(mapping, subclasses: true)
+        subject.add_rescue_handlers(mapping, subclasses:)
+      end
+
+      it 'warns when a broader class was registered first' do
+        add({ StandardError => :broad })
+
+        expect { add({ ArgumentError => :narrow }) }
+          .to output(/rescue_from ArgumentError will never run — StandardError was registered earlier/).to_stderr
+      end
+
+      it 'warns when the same class is registered twice' do
+        add({ ArgumentError => :first })
+
+        expect { add({ ArgumentError => :second }) }
+          .to output(/rescue_from ArgumentError was already registered in this scope/).to_stderr
+      end
+
+      it 'does not warn when the narrower class was registered first' do
+        add({ ArgumentError => :narrow })
+
+        expect { add({ StandardError => :broad }) }.not_to output.to_stderr
+      end
+
+      it 'does not warn for unrelated classes' do
+        add({ ArgumentError => :one })
+
+        expect { add({ TypeError => :two }) }.not_to output.to_stderr
+      end
+
+      # `rescue_from A, B` registers one handler for both, so the entry that
+      # loses to the other changes nothing.
+      it 'does not warn when both classes share a handler' do
+        expect { add({ StandardError => :shared, ArgumentError => :shared }) }.not_to output.to_stderr
+      end
+
+      # Exact-match handlers are consulted before the subclass-matching ones and
+      # never match a descendant, so they cannot shadow each other.
+      it 'does not warn for exact-match handlers' do
+        add({ StandardError => :broad }, subclasses: false)
+
+        expect { add({ ArgumentError => :narrow }, subclasses: false) }.not_to output.to_stderr
+      end
+
+      # Across scopes the nearest registration deliberately wins.
+      it 'does not warn about a handler inherited from an enclosing scope' do
+        parent = described_class.new.tap { |s| s.add_rescue_handlers({ StandardError => :outer }, subclasses: true) }
+        subject.inherit_from parent
+
+        expect { add({ ArgumentError => :inner }) }.not_to output.to_stderr
+      end
+    end
   end
 
   describe '#route' do
