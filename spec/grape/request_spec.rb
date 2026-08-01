@@ -50,13 +50,29 @@ describe Grape::Request do
       let(:routing_args) do
         {
           version: '123',
-          route_info: '456',
+          route_info: instance_double(Grape::Router::Route, version: route_version),
           c: 'ccc'
         }
       end
 
-      it 'cuts version and route_info' do
-        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc'))
+      context 'when the route carries a version of its own' do
+        let(:route_version) { 'v1' }
+
+        it 'cuts version and route_info' do
+          expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc'))
+        end
+      end
+
+      # Without a declared version the captured segment is the application's:
+      # `route_param :version` on an unversioned API has to reach the endpoint.
+      context 'when the route carries no version' do
+        let(:route_version) { nil }
+
+        it 'cuts only route_info' do
+          expect(request.params).to eq(
+            ActiveSupport::HashWithIndifferentAccess.new(a: '123', b: 'xyz', c: 'ccc', version: '123')
+          )
+        end
       end
     end
 

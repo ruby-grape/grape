@@ -152,7 +152,7 @@ describe 'Hashie', if: defined?(Hashie) do
         let(:routing_args) do
           {
             version: '123',
-            route_info: '456',
+            route_info: instance_double(Grape::Router::Route, version: 'v1'),
             c: 'ccc'
           }
         end
