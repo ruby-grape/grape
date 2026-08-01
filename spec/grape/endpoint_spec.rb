@@ -667,6 +667,38 @@ describe Grape::Endpoint do
       get '/hey'
       expect(last_response.body).to eq 'test body'
     end
+
+    # The message is announced as text/plain, so it has to be rendered as such
+    # whatever the API's own format is. Left to the JSON formatter it came back
+    # as a quoted JSON string under a text/plain content type.
+    context 'when the API declares a format of its own' do
+      before do
+        subject.format :json
+        subject.get('/hey') { redirect '/ha' }
+      end
+
+      it 'renders the message as plain text' do
+        get '/hey'
+
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+        expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
+      end
+
+      it 'renders an overridden body as plain text too' do
+        subject.get('/there') { redirect '/ha', body: 'go away' }
+
+        get '/there'
+        expect(last_response.body).to eq 'go away'
+      end
+
+      it 'leaves the format of other routes alone' do
+        subject.get('/plain') { { a: 1 } }
+
+        get '/plain'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+        expect(last_response.body).to eq({ a: 1 }.to_json)
+      end
+    end
   end
 
   describe 'NameError' do
