@@ -3,6 +3,123 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### Path params are tagged UTF-8 instead of ASCII-8BIT
+
+Params captured from the request path — `route_param`, `:id`-style segments, splats — now come back tagged `UTF-8`. They used to carry the `ASCII-8BIT` encoding of Rack's `PATH_INFO`, because Mustermann decodes the path against that raw string and nothing re-tagged the result. Query and body params were already `UTF-8`, since Rack tags those itself.
+
+**Why UTF-8.** Nothing obliges a client to send it — HTTP treats the request target as octets, and Rack's SPEC has CGI keys carry non-ASCII as `ASCII-8BIT`. UTF-8 is a convention rather than a guarantee. But it is the convention Rack itself already applies to everything *except* the path: `Rack::QueryParser#unescape` decodes the query string and form bodies with `URI.decode_www_form_component(string, Encoding::UTF_8)`, which tags the result without validating it.
+
+One request carrying the same invalid octets in three places, before this change:
+
+| source | encoding | `valid_encoding?` |
+| --- | --- | --- |
+| query — `?q=%C3%28` | `UTF-8` | `false` |
+| form body — `form=%C3%28` | `UTF-8` | `false` |
+| path — `/%C3%28` | **`ASCII-8BIT`** | `true` |
+
+The bytes are equally malformed in all three; only the label differed. The path reads `true` merely because `ASCII-8BIT` considers every byte sequence valid. So this change is not Grape adopting an outside convention — it is Grape agreeing with the library handing it the request. The path param was the odd one out only because Mustermann decodes against `PATH_INFO` directly and never had Rack's `unescape` applied to it.
+
+Grape does exactly what Rack does: re-tag, do not validate. The bytes are untouched, so octets that are *not* UTF-8 stay detectably invalid rather than being scrubbed into something the client never sent. (Rails takes the same approach for path captures — `ActionDispatch::Journey::Router` force-encodes each one to UTF-8 after unescaping.)
+
+**What this fixes.** An API's own declarations used to disagree with themselves depending on where a value arrived from — a binary string never equals the UTF-8 literal it was written as:
+
+```ruby
+params { requires :id, type: String, values: ['café'] }
+```
+
+| request | before | 4.0 |
+| --- | --- | --- |
+| `GET /?id=café` (query) | `200` | unchanged |
+| `GET /café` (path) | `400 "id does not have a valid value"` | `200` |
+
+The same held for `same_as`, `except_values`, and any comparison an endpoint made against a non-ASCII literal. Serialization was affected too: a non-ASCII path param rendered into a JSON response emitted an encoding warning from the `json` gem, and is slated to raise there in json 3.0.
+
+**What can break.** Only the encoding tag changes; the bytes are untouched, and an invalid byte sequence stays invalid rather than being scrubbed. Comparisons against pure-ASCII strings are unaffected. Code that relied on a path param being binary — concatenating one with genuinely binary data, for instance — can now raise `Encoding::CompatibilityError`, and should call `.b` on the param to opt back into binary:
+
+```ruby
+params[:id].b + binary_blob
+```
+
+An application that worked around the old behavior with its own `force_encoding(Encoding::UTF_8)` needs no change; that call is now a no-op.
+#### A failed error rendering answers 500 instead of escaping the middleware stack
+
+When Grape could not render an error response — an error formatter handed a payload it cannot serialize, most often — the exception escaped every middleware above Grape and reached the application server. Rendering runs inside `Grape::Middleware::Error#call!`'s own `rescue` clause, so that clause did not cover it.
+
+Grape now answers `500` instead: first retrying the API's format with the framework's own `Internal Server Error` message, then falling back to a bare `text/plain` body if even that cannot be rendered.
+
+**What can break.** Code that observed these exceptions by letting them propagate — an error tracker mounted as Rack middleware above Grape, or a test asserting `expect { get '/' }.to raise_error` — no longer sees them. The exception is exposed on the rack env instead, under the same key the existing unrecognised-error path uses:
+
+```ruby
+env[Grape::Env::GRAPE_EXCEPTION] # => the exception that defeated rendering
+```
+
+Exceptions that no `rescue_from` matches still propagate exactly as before; only rendering failures changed.
+#### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
+
+A route captures the middleware, helpers, callbacks and rescue handlers registered above it. That was already true most of the time, but not always: `Grape::Util::InheritableSetting#point_in_time_copy` copied a scope's stackable store and its rescue-handler maps shallowly, so the nested Arrays and Hashes stayed shared with the scope. A registration added *after* an endpoint was defined therefore still reached that endpoint — but only when the key already held at least one registration when the endpoint was defined, since otherwise the scope allocated a fresh store only for itself.
+
+The outcome depended on something the API never expressed:
+
+```ruby
+class A < Grape::API
+  use Middleware1
+  get('/x') { }      # endpoint defined here
+  use Middleware2    # applied to GET /x
+end
+
+class B < Grape::API
+  get('/x') { }      # endpoint defined here
+  use Middleware2    # NOT applied to GET /x
+end
+```
+
+`A` and `B` state the same thing and behaved differently. Both now behave like `B`. The same held for `rescue_from` declared below a route.
+
+**What can break.** An API that declares `use` (or `helpers`, a filter such as `before`, or `rescue_from`) below its routes and relies on it applying to them. That arrangement only ever worked when an earlier registration for the same key happened to seed the stack, so it was never dependable, but code written against it will now see the middleware or helper silently not run.
+
+**The fix is to move the registration above the routes it should cover**, which is where Grape's documentation has always placed it:
+
+```ruby
+class A < Grape::API
+  use Middleware1
+  use Middleware2
+  get('/x') { }
+end
+```
+
+Nothing changes for the ordinary arrangement — registrations declared before a route, or inherited from an enclosing namespace or a mounting API, still apply exactly as before, including values an enclosing scope gains after the nested scope was created.
+#### `rescue_from :grape_exceptions` now outranks a catch-all class handler
+
+`rescue_from :grape_exceptions` is an opt-in to keep Grape's own errors rendering with their own status — a validation failure answers `400` rather than whatever the application's catch-all returns.
+
+It only ever worked against `rescue_from :all`. Written as a class instead, a catch-all is a *registered* handler, which `Grape::Middleware::Error` consults first, and Grape's exceptions are `StandardError`s — so the opt-in was silently inert:
+
+```ruby
+rescue_from StandardError do
+  error!('server error', 500)
+end
+rescue_from :grape_exceptions
+```
+
+| request | before | 4.0 |
+| --- | --- | --- |
+| fails parameter validation | **500** `server error` | `400` |
+| raises an application error | `500` `server error` | unchanged |
+
+**What can break.** An API that registers a catch-all as a class *and* opts into `:grape_exceptions` will now answer Grape's own status for Grape's own errors, where it previously answered the catch-all's. That is what the opt-in asks for, so the change makes the two spellings agree — but a client or test asserting the catch-all's status for a validation failure will see the new one.
+
+Precedence is unchanged in every other case. A handler registered for a specific Grape exception class is more precise than the opt-in and still wins:
+
+```ruby
+rescue_from Grape::Exceptions::ValidationErrors do
+  error!('unprocessable', 422)   # still runs
+end
+rescue_from StandardError { ... }
+rescue_from :grape_exceptions
+```
+
+Application errors still reach the catch-all, `rescue_from :all` behaves as before, and `Grape::Exceptions::InvalidVersionHeader` is still never rescued, so version cascading keeps working. An API that does not use `rescue_from :grape_exceptions` is unaffected.
+
 #### `Array`/`Set` of an unsupported type is rejected when the API is defined
 
 Declaring a collection whose element type Grape cannot coerce — `type: Array[Foo]` or `type: Set[Foo]` where `Foo` is neither a primitive, a structure, nor a valid custom type — now raises as soon as the `params` block is evaluated, i.e. while the API class is being loaded:
@@ -304,16 +421,16 @@ rescue_from MyError, with: :other_handler
 
 Calls that only use one meta selector or only use exception classes (the documented forms) are unaffected.
 
-#### `auth`, `http_basic` and `http_digest` now take keyword arguments
+#### `auth` and `http_basic` now take keyword arguments
 
-`Grape::Middleware::Auth::DSL#auth`, `#http_basic` and `#http_digest` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:
+`Grape::Middleware::Auth::DSL#auth` and `#http_basic` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:
 
 ```ruby
 http_basic realm: 'API' do |u, p|
   # ...
 end
 
-auth :http_digest, realm: 'API', opaque: 'secret', &proc
+auth :my_strategy, realm: 'API', &proc
 ```
 
 Passing a positional options `Hash` still works but is deprecated and will be removed in a future release:
@@ -321,12 +438,32 @@ Passing a positional options `Hash` still works but is deprecated and will be re
 ```ruby
 # deprecated
 http_basic({ realm: 'API' })
-auth :http_digest, { realm: 'API', opaque: 'secret' }
+auth :my_strategy, { realm: 'API' }
 
 # preferred
 http_basic(realm: 'API')
-auth :http_digest, realm: 'API', opaque: 'secret'
+auth :my_strategy, realm: 'API'
 ```
+
+#### `http_digest` is removed
+
+`Grape::Middleware::Auth::DSL#http_digest` is gone. Calling it now raises `NoMethodError` while the API class is being defined.
+
+Nothing it could reach has existed since **2.0.0**, which removed `Rack::Auth::Digest` along with Grape's `:http_digest` strategy ([#2361](https://github.com/ruby-grape/grape/pull/2361)) after Rack 3 dropped digest authentication. The method survived that removal and kept recording its settings happily, so an API declaring `http_digest` still booted — and then raised `Grape::Exceptions::UnknownAuthStrategy` on the *first request*, from inside the middleware build, as an uncaught exception rather than a response. Failing while the class is defined is the point of removing it.
+
+**If you registered your own `:http_digest` strategy**, it still works; call `auth` directly:
+
+```ruby
+Grape::Middleware::Auth::Strategies.add(:http_digest, MyDigestStrategy, ->(settings) { [settings[:realm]] })
+
+class API < Grape::API
+  auth :http_digest, realm: 'API Authorization', opaque: 'secret' do |username|
+    # ...
+  end
+end
+```
+
+The removed method supplied two defaults that `auth` does not, so pass them explicitly if you were relying on them: `realm` defaulted to `'API Authorization'`, and `opaque` to `'secret'` (nested inside `realm` when `realm` was itself a Hash).
 
 #### Middleware options now route through per-class `Options` `Data` value objects
 

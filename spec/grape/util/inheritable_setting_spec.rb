@@ -227,6 +227,62 @@ describe Grape::Util::InheritableSetting do
       subject.add_rescue_handlers({ StandardError => :child }, subclasses: true)
       expect(subject.rescue_handlers).to eq(StandardError => :child)
     end
+
+    # Middleware::Error resolves with #find, so the first matching class in a
+    # scope wins and a narrower one registered after it is dead code.
+    describe 'shadowing warnings' do
+      def add(mapping, subclasses: true)
+        subject.add_rescue_handlers(mapping, subclasses:)
+      end
+
+      it 'warns when a broader class was registered first' do
+        add({ StandardError => :broad })
+
+        expect { add({ ArgumentError => :narrow }) }
+          .to output(/rescue_from ArgumentError will never run — StandardError was registered earlier/).to_stderr
+      end
+
+      it 'warns when the same class is registered twice' do
+        add({ ArgumentError => :first })
+
+        expect { add({ ArgumentError => :second }) }
+          .to output(/rescue_from ArgumentError was already registered in this scope/).to_stderr
+      end
+
+      it 'does not warn when the narrower class was registered first' do
+        add({ ArgumentError => :narrow })
+
+        expect { add({ StandardError => :broad }) }.not_to output.to_stderr
+      end
+
+      it 'does not warn for unrelated classes' do
+        add({ ArgumentError => :one })
+
+        expect { add({ TypeError => :two }) }.not_to output.to_stderr
+      end
+
+      # `rescue_from A, B` registers one handler for both, so the entry that
+      # loses to the other changes nothing.
+      it 'does not warn when both classes share a handler' do
+        expect { add({ StandardError => :shared, ArgumentError => :shared }) }.not_to output.to_stderr
+      end
+
+      # Exact-match handlers are consulted before the subclass-matching ones and
+      # never match a descendant, so they cannot shadow each other.
+      it 'does not warn for exact-match handlers' do
+        add({ StandardError => :broad }, subclasses: false)
+
+        expect { add({ ArgumentError => :narrow }, subclasses: false) }.not_to output.to_stderr
+      end
+
+      # Across scopes the nearest registration deliberately wins.
+      it 'does not warn about a handler inherited from an enclosing scope' do
+        parent = described_class.new.tap { |s| s.add_rescue_handlers({ StandardError => :outer }, subclasses: true) }
+        subject.inherit_from parent
+
+        expect { add({ ArgumentError => :inner }) }.not_to output.to_stderr
+      end
+    end
   end
 
   describe '#route' do
@@ -330,6 +386,68 @@ describe Grape::Util::InheritableSetting do
       subject.add_helper(:other_thing)
       expect(subject.helpers).to eq %i[namespace_stackable_foo_bar other_thing]
       expect(cloned_obj.helpers).to eq [:namespace_stackable_foo_bar]
+    end
+
+    # The case above registers only on the parent, so the copy never shares an
+    # Array with `subject` and passes even when the per-key Arrays are shared.
+    # Here the key already holds one of `subject`'s own registrations when the
+    # copy is taken, which is what made the later one leak into it.
+    context 'when the scope already registered the key itself' do
+      subject(:setting) do
+        described_class.new.tap do |settings|
+          settings.inherit_from parent
+          settings.add_helper(:own_before_copy)
+        end
+      end
+
+      let!(:cloned_obj) { setting.point_in_time_copy }
+
+      it 'does not leak a later registration into the copy' do
+        setting.add_helper(:own_after_copy)
+
+        expect(setting.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy own_after_copy]
+        expect(cloned_obj.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+      end
+
+      it 'does not leak the copy’s own registration back to the source' do
+        cloned_obj.add_helper(:only_on_copy)
+
+        expect(setting.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+        expect(cloned_obj.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy only_on_copy]
+      end
+
+      it 'keeps sibling copies independent' do
+        sibling = setting.point_in_time_copy
+        cloned_obj.add_helper(:only_on_first)
+
+        expect(sibling.helpers).to eq %i[namespace_stackable_foo_bar own_before_copy]
+      end
+    end
+
+    # Same shape as the stackable case: the per-kind Hashes inside
+    # @rescue_handler_maps have to be duped, not just the Hash holding them.
+    context 'when the scope already registered a rescue handler' do
+      subject(:setting) do
+        described_class.new.tap do |settings|
+          settings.add_rescue_handlers({ ArgumentError => :before_copy }, subclasses: true)
+        end
+      end
+
+      let!(:cloned_obj) { setting.point_in_time_copy }
+
+      it 'does not leak a later handler into the copy' do
+        setting.add_rescue_handlers({ TypeError => :after_copy }, subclasses: true)
+
+        expect(setting.rescue_handlers).to eq(ArgumentError => :before_copy, TypeError => :after_copy)
+        expect(cloned_obj.rescue_handlers).to eq(ArgumentError => :before_copy)
+      end
+
+      it 'does not leak a later base-only handler into the copy' do
+        setting.add_rescue_handlers({ TypeError => :after_copy }, subclasses: false)
+
+        expect(setting.base_only_rescue_handlers).to eq(TypeError => :after_copy)
+        expect(cloned_obj.base_only_rescue_handlers).to be_blank
+      end
     end
 
     it 'decouples route values' do

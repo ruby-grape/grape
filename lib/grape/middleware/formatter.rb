@@ -156,11 +156,15 @@ module Grape
         extension if content_type_for(extension)
       end
 
+      # Media types are case-insensitive (RFC 9110 §8.3.1) but the registered
+      # ones are spelled in lower case and Rack matches them literally, so an
+      # `Accept: TEXT/PLAIN` found nothing and fell through to the default
+      # format — the client quietly got something other than what it asked for.
       def format_from_header
         accept_header = try_scrub(env['HTTP_ACCEPT'])
         return if accept_header.blank? || accept_header == ALL_MEDIA_TYPES
 
-        media_type = Rack::Utils.best_q_match(accept_header, mime_types.keys)
+        media_type = Rack::Utils.best_q_match(accept_header.downcase, mime_types.keys)
         mime_types[media_type] if media_type
       end
     end

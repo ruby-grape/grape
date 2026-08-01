@@ -384,6 +384,7 @@ module Grape
       def add_rescue_handlers(mapping, subclasses:)
         @rescue_handler_maps ||= {}
         own = (@rescue_handler_maps[subclasses ? :rescue_handlers : :base_only_rescue_handlers] ||= {})
+        ShadowedRescueHandlers.warn_about(own, mapping) if subclasses
         own.merge!(mapping) { |_klass, registered, _new| registered }
       end
 
@@ -778,11 +779,14 @@ module Grape
       def copy_state_from(source)
         @namespace = source.namespace.dup
         @namespace_inheritable = source.namespace_inheritable&.dup
-        # Shallow, matching the store this replaced: the per-key Arrays stay
-        # shared with the source, so a registration made on the source after
-        # the copy was taken is still visible through it.
-        @stackable_values = source.stackable_values&.dup
-        @rescue_handler_maps = source.rescue_handler_maps&.dup
+        # The nested stores are duped too, not just the Hash holding them. A
+        # copy is a point in time: what the source registers afterwards must not
+        # reach it. Sharing them made that depend on whether the key already
+        # held a registration — `use` below a route applied to it when some
+        # earlier `use` had seeded the Array, and did nothing otherwise; the
+        # same went for `rescue_from` below a route.
+        @stackable_values = source.stackable_values&.transform_values(&:dup)
+        @rescue_handler_maps = source.rescue_handler_maps&.transform_values(&:dup)
         @route = source.route.clone
       end
 

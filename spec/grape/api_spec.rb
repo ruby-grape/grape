@@ -177,6 +177,78 @@ describe Grape::API do
       subject.represent represent_object, with: dummy_presenter_klass
       expect(subject.inheritable_setting.representations).to eq(represent_object => dummy_presenter_klass)
     end
+
+    # Both the collection tests are duck-typed, and plenty of single objects
+    # answer them, so a registered entity used to be skipped for those in favour
+    # of the entity for whatever #first returned.
+    context 'when the presented object also looks like a collection' do
+      let(:entity) do
+        Class.new do
+          def self.represent(object, **)
+            { presented: object.class.name.to_s }
+          end
+        end
+      end
+
+      def present_with(api, model, object, entity)
+        api.format :json
+        api.represent model, with: entity
+        api.get('/') { present object }
+      end
+
+      it 'uses the entity registered for a Struct' do
+        model = Struct.new(:name)
+        present_with(subject, model, model.new('x'), entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'uses the entity registered for an Enumerable model' do
+        model = Class.new do
+          include Enumerable
+
+          def each(&) = [1, 2].each(&)
+        end
+        present_with(subject, model, model.new, entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'uses the entity registered for an object exposing #klass' do
+        model = Class.new do
+          def klass = String
+        end
+        present_with(subject, model, model.new, entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'still resolves an array through its element class' do
+        model = Class.new
+        present_with(subject, model, [model.new], entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => 'Array')
+      end
+
+      # A relation resolves through #klass, so #first must not be reached.
+      it 'does not call #first when the object resolves without it' do
+        model = Class.new
+        relation = Class.new do
+          def initialize(klass) = (@klass = klass)
+          attr_reader :klass
+
+          def first = raise('#first should not have been called')
+        end
+        present_with(subject, model, relation.new(model), entity)
+
+        expect { get '/' }.not_to raise_error
+        expect(last_response.status).to eq(200)
+      end
+    end
   end
 
   describe '.namespace' do
@@ -307,6 +379,68 @@ describe Grape::API do
         end
         get '/route_param/1234'
         expect(last_response.body).to eq('{"foo":1234}')
+      end
+    end
+
+    context 'with a non-ascii segment' do
+      it 'tags the param as UTF-8 rather than leaving it binary' do
+        subject.route_param :id do
+          get { params[:id].encoding.name }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      it 'tags every captured segment' do
+        subject.namespace :a do
+          route_param :one do
+            route_param :two do
+              get { [params[:one].encoding.name, params[:two].encoding.name].join(',') }
+            end
+          end
+        end
+
+        get '/a/caf%C3%A9/th%C3%A9'
+        expect(last_response.body).to eq('UTF-8,UTF-8')
+      end
+
+      it 'tags a splat capture' do
+        subject.get('/files/*path') { params[:path].encoding.name }
+
+        get '/files/a/b/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      # An unnamed splat captures into an Array rather than a String.
+      it 'tags every element of an unnamed splat capture' do
+        subject.get('/files/*') { params[:splat].map { |s| s.encoding.name }.join(',') }
+
+        get '/files/caf%C3%A9'
+        expect(last_response.body).to eq('UTF-8')
+      end
+
+      # A path param used to arrive binary while the same value arrived UTF-8
+      # through the query string, so an API's own declaration disagreed with
+      # itself depending on where the value came from.
+      it 'compares equal to the utf-8 literal the API declares' do
+        subject.params { requires :id, type: String, values: ['café'] }
+        subject.route_param :id do
+          get { 'matched' }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('matched')
+      end
+
+      it 'leaves the bytes untouched' do
+        subject.route_param :id do
+          get { params[:id] }
+        end
+
+        get '/caf%C3%A9'
+        expect(last_response.body.b).to eq('caf%C3%A9'.b.gsub('%C3%A9', "\xC3\xA9".b))
       end
     end
   end
@@ -1517,6 +1651,48 @@ describe Grape::API do
         expect(last_response.body).to eql 'hello'
       end
 
+      # A route captures the middleware registered above it. Whether some
+      # earlier `use` had already seeded the scope's stack must not change that.
+      context 'when declared below a route' do
+        it 'does not apply to that route' do
+          subject.get('/') { env['phony.args'].inspect }
+          subject.use phony_middleware, 'too-late'
+
+          get '/'
+          expect(last_response.body).to eql 'nil'
+        end
+
+        it 'does not apply to that route when an earlier use seeded the stack' do
+          subject.use phony_middleware, 'in-time'
+          subject.get('/') { env['phony.args'].flatten.inspect }
+          subject.use phony_middleware, 'too-late'
+
+          get '/'
+          expect(last_response.body).to eql ['in-time'].inspect
+        end
+      end
+    end
+
+    describe '.rescue_from declared below a route' do
+      let(:boom) { Class.new(StandardError) }
+
+      it 'does not apply to that route' do
+        error_class = boom
+        subject.get('/') { raise error_class }
+        subject.rescue_from(error_class) { error!('too late', 480) }
+
+        expect { get '/' }.to raise_error(error_class)
+      end
+
+      it 'does not apply to that route when an earlier rescue_from seeded the map' do
+        error_class = boom
+        subject.rescue_from(ArgumentError) { error!('in time', 481) }
+        subject.get('/') { raise error_class }
+        subject.rescue_from(error_class) { error!('too late', 480) }
+
+        expect { get '/' }.to raise_error(error_class)
+      end
+
       it 'adds a block if one is given' do
         block = -> {}
         subject.use phony_middleware, &block
@@ -2528,6 +2704,59 @@ describe Grape::API do
 
       expect(last_response).to be_forbidden
       expect(last_response.body).to eq('Redefined Error')
+    end
+
+    # The opt-in exists to keep Grape's own errors rendering with their own
+    # status. A catch-all registered as a class is matched before it, and
+    # Grape's exceptions are StandardErrors, so it used to be silently inert
+    # unless the catch-all happened to be spelled `rescue_from :all`.
+    context 'with a catch-all class handler' do
+      subject(:app) do
+        Class.new(Grape::API) do
+          format :json
+          rescue_from(StandardError) { error!({ h: 'catch-all' }, 500) }
+          rescue_from(:grape_exceptions) { |e| error!({ h: 'grape' }, e.status) }
+          params { requires :n, type: Integer }
+          get('/validated') { 'ok' }
+          get('/boom') { raise ArgumentError, 'app error' }
+        end
+      end
+
+      it 'keeps a validation failure a 400' do
+        get '/validated'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq({ h: 'grape' }.to_json)
+      end
+
+      it 'still sends the application’s own errors to the catch-all' do
+        get '/boom'
+
+        expect(last_response.status).to eq(500)
+        expect(last_response.body).to eq({ h: 'catch-all' }.to_json)
+      end
+    end
+
+    it 'lets a handler registered for a grape exception class win over the opt-in' do
+      subject.rescue_from(Grape::Exceptions::ValidationErrors) { error!('specific', 422) }
+      subject.rescue_from(StandardError) { error!('catch-all', 500) }
+      subject.params { requires :n, type: Integer }
+      subject.get('/validated') { 'ok' }
+
+      get '/validated'
+
+      expect(last_response.status).to eq(422)
+      expect(last_response.body).to eq('specific')
+    end
+
+    it 'does not intercept an exception that is not a grape exception' do
+      subject.rescue_from(StandardError) { error!('catch-all', 500) }
+      subject.get('/boom') { raise ArgumentError }
+
+      get '/boom'
+
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).to eq('catch-all')
     end
   end
 
@@ -4180,6 +4409,32 @@ describe Grape::API do
         get '/params/x'
         expect(last_response.body).to eq('y')
       end
+    end
+  end
+
+  # Media types are case-insensitive (RFC 9110 §8.3.1). The registered ones are
+  # spelled in lower case and matched literally, so a differently-cased Accept
+  # used to find nothing: content negotiation fell through to the default format
+  # and header versioning behaved as though no version had been asked for.
+  describe 'a differently-cased Accept header' do
+    it 'still negotiates the content type' do
+      subject.content_type :json, 'application/json'
+      subject.content_type :txt, 'text/plain'
+      subject.default_format :json
+      subject.get('/x') { { a: 1 } }
+
+      get '/x', {}, 'HTTP_ACCEPT' => 'TEXT/PLAIN'
+      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+    end
+
+    it 'still resolves the version of a vendor media type' do
+      subject.version 'v1', using: :header, vendor: 'twitter'
+      subject.format :json
+      subject.get('/x') { env[Grape::Env::API_VERSION] }
+
+      get '/x', {}, 'HTTP_ACCEPT' => 'APPLICATION/VND.TWITTER-V1+JSON'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('v1'.to_json)
     end
   end
 
