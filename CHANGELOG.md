@@ -55,6 +55,7 @@
 * [#2827](https://github.com/ruby-grape/grape/pull/2827): Make the `cascade` DSL getter return the configured value (`cascade false` read back as `true`) - [@ericproulx](https://github.com/ericproulx).
 * [#2829](https://github.com/ruby-grape/grape/pull/2829): Fix a cascading route handing over only to the last route registered for the path, making a middle version (3+ mounted versions with a catch-all) answer 406 - [@ericproulx](https://github.com/ericproulx).
 * [#2826](https://github.com/ruby-grape/grape/pull/2826): Fix `api.version` not being set for the root route of a path-versioned API (`GET /v1`) - [@ericproulx](https://github.com/ericproulx).
+* [#2844](https://github.com/ruby-grape/grape/pull/2844): Look an entity up by the presented object's own class before treating it as a collection, so `represent` is no longer skipped for models that respond to `#first` or `#klass` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
