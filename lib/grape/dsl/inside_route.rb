@@ -52,7 +52,12 @@ module Grape
           body_message ||= "This resource has been moved temporarily to #{url}."
         end
         header 'Location', url
+        # The message is plain text, so say so and render it as such. Setting
+        # only the header left the body to the API's own formatter, which on a
+        # JSON API returned the sentence wrapped in quotes under a text/plain
+        # content type.
         content_type 'text/plain'
+        api_format :txt
         body body_message
       end
 
