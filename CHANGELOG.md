@@ -64,6 +64,7 @@
 * [#2843](https://github.com/ruby-grape/grape/pull/2843): Let `rescue_from :grape_exceptions` take precedence over a catch-all registered as a class, so Grape errors keep their own status (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2844](https://github.com/ruby-grape/grape/pull/2844): Look an entity up by the presented object's own class before treating it as a collection, so `represent` is no longer skipped for models that respond to `#first` or `#klass` - [@ericproulx](https://github.com/ericproulx).
 * [#2845](https://github.com/ruby-grape/grape/pull/2845): Render a `redirect` message as the plain text its content type announces, instead of letting the API's formatter re-encode it - [@ericproulx](https://github.com/ericproulx).
+* [#2846](https://github.com/ruby-grape/grape/pull/2846): Keep a `:version` path capture in `params` when the API declares no version, instead of always dropping it as Grape's own - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
