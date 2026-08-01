@@ -22,19 +22,6 @@ module Grape
           auth(:http_basic, **options, &)
         end
 
-        def http_digest(*legacy_options, **options, &)
-          options = merge_legacy_auth_options(:http_digest, legacy_options, options)
-          options[:realm] ||= 'API Authorization'
-
-          if options[:realm].respond_to?(:values_at)
-            options[:realm][:opaque] ||= 'secret'
-          else
-            options[:opaque] ||= 'secret'
-          end
-
-          auth(:http_digest, **options, &)
-        end
-
         private
 
         # @deprecated Passing a positional options Hash is deprecated; pass
