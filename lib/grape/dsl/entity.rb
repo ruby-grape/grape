@@ -50,11 +50,39 @@ module Grape
       # @param object [Object] the object to locate the Entity class for
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object)
-        klass = object_class(object)
+        entity_for_class(object.class) || entity_for_class(element_class(object))
+      end
+
+      private
+
+      # The class standing in for a collection or wrapper: ActiveRecord::Relation
+      # and the like expose #klass, anything else falls back to the class of its
+      # first element.
+      #
+      # Consulted only once the object's own class has come up empty, because
+      # both tests are duck-typed and plenty of single objects answer them —
+      # a Struct is Enumerable, so it responds to #first, and so does any model
+      # that includes Enumerable. Asking this first meant `represent Model,
+      # with: Entity` was silently ignored for those, the entity for the
+      # *element* type being looked up instead. Deferring it also keeps #first
+      # from being called at all when the object resolves on its own class.
+      #
+      # @param object [Object] the object to represent.
+      # @return [Class, nil]
+      def element_class(object)
+        return object.klass if object.respond_to?(:klass)
+
+        object.first.class if object.respond_to?(:first)
+      end
+
+      # @param klass [Class, nil] the class to look an entity up for.
+      # @return [Class, nil] the registered or conventionally named entity.
+      def entity_for_class(klass)
+        return if klass.nil?
 
         representations = inheritable_setting.representations
         if representations
-          potential = klass.ancestors.detect { |potential| representations.key?(potential) }
+          potential = klass.ancestors.detect { |ancestor| representations.key?(ancestor) }
           return representations[potential] if potential && representations[potential]
         end
 
@@ -63,18 +91,6 @@ module Grape
 
         entity = owner.const_get(:Entity, false)
         entity if entity.respond_to?(:represent)
-      end
-
-      private
-
-      # Resolves the class used to look up the Entity for +object+.
-      # @param object [Object] the object to represent.
-      # @return [Class] the object's collection element class, wrapped class, or its own class.
-      def object_class(object)
-        return object.klass if object.respond_to?(:klass)
-        return object.first.class if object.respond_to?(:first)
-
-        object.class
       end
 
       # @param entity_class [Class] the entity class to use for representation.

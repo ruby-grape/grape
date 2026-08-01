@@ -177,6 +177,78 @@ describe Grape::API do
       subject.represent represent_object, with: dummy_presenter_klass
       expect(subject.inheritable_setting.representations).to eq(represent_object => dummy_presenter_klass)
     end
+
+    # Both the collection tests are duck-typed, and plenty of single objects
+    # answer them, so a registered entity used to be skipped for those in favour
+    # of the entity for whatever #first returned.
+    context 'when the presented object also looks like a collection' do
+      let(:entity) do
+        Class.new do
+          def self.represent(object, **)
+            { presented: object.class.name.to_s }
+          end
+        end
+      end
+
+      def present_with(api, model, object, entity)
+        api.format :json
+        api.represent model, with: entity
+        api.get('/') { present object }
+      end
+
+      it 'uses the entity registered for a Struct' do
+        model = Struct.new(:name)
+        present_with(subject, model, model.new('x'), entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'uses the entity registered for an Enumerable model' do
+        model = Class.new do
+          include Enumerable
+
+          def each(&) = [1, 2].each(&)
+        end
+        present_with(subject, model, model.new, entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'uses the entity registered for an object exposing #klass' do
+        model = Class.new do
+          def klass = String
+        end
+        present_with(subject, model, model.new, entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => model.name.to_s)
+      end
+
+      it 'still resolves an array through its element class' do
+        model = Class.new
+        present_with(subject, model, [model.new], entity)
+
+        get '/'
+        expect(JSON.parse(last_response.body)).to eq('presented' => 'Array')
+      end
+
+      # A relation resolves through #klass, so #first must not be reached.
+      it 'does not call #first when the object resolves without it' do
+        model = Class.new
+        relation = Class.new do
+          def initialize(klass) = (@klass = klass)
+          attr_reader :klass
+
+          def first = raise('#first should not have been called')
+        end
+        present_with(subject, model, relation.new(model), entity)
+
+        expect { get '/' }.not_to raise_error
+        expect(last_response.status).to eq(200)
+      end
+    end
   end
 
   describe '.namespace' do
