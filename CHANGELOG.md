@@ -66,6 +66,7 @@
 * [#2841](https://github.com/ruby-grape/grape/pull/2841): Stop `use`, `helpers`, `rescue_from` and other registrations declared below a route from reaching it when an earlier registration had seeded the same key (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2846](https://github.com/ruby-grape/grape/pull/2846): Keep a `:version` path capture in `params` when the API declares no version, instead of always dropping it as Grape's own - [@ericproulx](https://github.com/ericproulx).
 * [#2839](https://github.com/ruby-grape/grape/pull/2839): Tag path params as UTF-8 instead of leaving them ASCII-8BIT, so they compare equal to the non-ASCII literals an API declares (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2845](https://github.com/ruby-grape/grape/pull/2845): Render `redirect`'s default message as the plain text its content type announces, instead of letting the API's formatter re-encode it (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

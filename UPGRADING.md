@@ -38,6 +38,41 @@ end
 
 Nothing changes for the ordinary arrangement — registrations declared before a route, or inherited from an enclosing namespace or a mounting API, still apply exactly as before, including values an enclosing scope gains after the nested scope was created.
 
+#### `redirect` renders its default message as plain text
+
+The `redirect` API set the content type to `text/plain`, but delegated body rendering to the formatter. With an API defaulting to JSON, a `redirect` would render the body as JSON with a `text/plain` content-type header.
+
+```ruby
+class API < Grape::API
+  format :json
+  get('/r') { redirect '/there' }
+end
+```
+
+```
+Content-Type: text/plain
+
+"This resource has been moved temporarily to /there."
+```
+
+Grape now renders the message it generates with the txt formatter, so the body is the plain sentence the content type claims:
+
+```
+Content-Type: text/plain
+
+This resource has been moved temporarily to /there.
+```
+
+**What can break.** Code that parses a redirect body — `JSON.parse(response.body)` on a redirect succeeded before and now raises — or a test asserting on the encoded form. On a JSON API the `Location` header, the status and the `Content-Type` are unchanged, so a client that follows the redirect is unaffected.
+
+On an API whose formatter cannot serialize a String, such as `format :xml`, `redirect` did not work at all: the formatter raised, and the response was a `500` carrying an error document and no `Location` header. Those APIs now get the `302` and the `Location` they always should have.
+
+This applies only to the message Grape generates. A body you pass yourself is still rendered by the API's formatter, unchanged:
+
+```ruby
+redirect '/there', body: { message: 'moved' }   # still {"message":"moved"} on a JSON API
+```
+
 #### Path params are tagged UTF-8 instead of ASCII-8BIT
 
 Params captured from the request path — `route_param`, `:id`-style segments, splats — now come back tagged `UTF-8`. They used to carry the `ASCII-8BIT` encoding of Rack's `PATH_INFO`, because Mustermann decodes the path against that raw string and nothing re-tagged the result. Query and body params were already `UTF-8`, since Rack tags those itself.
