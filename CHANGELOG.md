@@ -41,6 +41,7 @@
 * [#2837](https://github.com/ruby-grape/grape/pull/2837): Document the definition-time rejection of an `Array`/`Set` of an uncoercible element type introduced by #2817, and pin it with specs - [@ericproulx](https://github.com/ericproulx).
 * [#2836](https://github.com/ruby-grape/grape/pull/2836): Define `#hash` alongside the `eql?`/`==` pairs on `Grape::Endpoint`, `Grape::Util::InheritableSetting`, `Grape::Middleware::Stack::Middleware`, `Grape::ServeStream::StreamResponse` and `Grape::ServeStream::FileBody`, so equal objects hash alike in a `Hash`, `Set` or `uniq` - [@ericproulx](https://github.com/ericproulx).
 * [#2835](https://github.com/ruby-grape/grape/pull/2835): Return the compiled instance from `Grape::API::Instance.compile!` so `call` and `recognize_path` no longer re-read `@instance`, which a concurrent `change!` could nil between the two reads - [@ericproulx](https://github.com/ericproulx).
+* [#2849](https://github.com/ruby-grape/grape/pull/2849): Remove `http_digest`, which has had no strategy behind it since 2.0.0 and raised on the first request rather than when the API was defined (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
