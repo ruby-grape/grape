@@ -54,6 +54,8 @@ module Grape
       #       end
       #     end
       def use(*names, **options)
+        options = names.pop if options.empty? && names.size > 1 && names.last.is_a?(Hash)
+
         named_params = @api.inheritable_setting.named_params || {}
         names.each do |name|
           params_block = named_params.fetch(name) do
