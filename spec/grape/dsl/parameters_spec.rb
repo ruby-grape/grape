@@ -63,6 +63,13 @@ describe Grape::DSL::Parameters do
       subject.use :params_group, **options
     end
 
+    it 'extracts a positional options hash from named params' do
+      subject.api = Class.new { include Grape::DSL::Settings }.new
+      subject.api.inheritable_setting.add_named_params(named_params)
+      expect(subject).to receive(:instance_exec).with(options).and_yield
+      subject.use :params_group, options
+    end
+
     it 'raises error when non-existent named param is called' do
       subject.api = Class.new { include Grape::DSL::Settings }.new
       expect { subject.use :params_group }.to raise_error('Params :params_group not found!')
