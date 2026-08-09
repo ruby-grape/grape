@@ -9,6 +9,22 @@ describe Grape::Validations::ParamsScope do
     subject
   end
 
+  context 'when the options are given as a deprecated positional Hash' do
+    it 'coerces the parameter as if the options had been passed as keyword arguments' do
+      Grape.deprecator.silence do
+        subject.params do
+          requires :id, { type: Integer }
+          optional :page, { type: Integer, default: 1 }
+        end
+      end
+      subject.get('/legacy') { [params[:id].class, params[:page]].join(',') }
+
+      get '/legacy', id: '5'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Integer,1')
+    end
+  end
+
   context 'when using custom types' do
     let(:custom_type) do
       Class.new do
