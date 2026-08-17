@@ -131,17 +131,13 @@ module Grape
         render_failsafe_response
       end
 
-      # Swallowing the exception must not make it invisible. +grape.exception+ is
-      # Grape's own key; +rack.exception+ is what the ecosystem actually reads to
-      # find an exception that never propagated, so a tracker mounted above Grape
-      # keeps reporting these without any application change. The failure also
-      # goes to +rack.errors+ so it reaches the log with no tracker installed —
+      # The exception is published on the rack env (see {#expose_exception}) and
+      # written to +rack.errors+ so it reaches the log with no tracker installed.
       # Rails writes to $stderr from its failsafe branch for the same reason:
       # deferring the logging to the application is not an option when the
       # application's own error rendering is what broke.
       def record_rendering_failure(error)
-        env[Grape::Env::GRAPE_EXCEPTION] = error
-        env[Grape::Env::RACK_EXCEPTION] = error
+        expose_exception(error)
         env[Rack::RACK_ERRORS]&.write("Grape could not render the error response: #{error.class}: #{error.message}\n")
       end
 
@@ -156,6 +152,17 @@ module Grape
         rack_response(FAILSAFE_STATUS, headers, format_message(failsafe_payload(headers)))
       rescue StandardError
         rack_response(FAILSAFE_STATUS, { Rack::CONTENT_TYPE => FAILSAFE_CONTENT_TYPE }, FAILSAFE_MESSAGE)
+      end
+
+      # Publish an exception Grape swallowed, on both keys. +grape.exception+ is
+      # Grape's own and has been set on these paths all along; +rack.exception+ is
+      # what the ecosystem actually reads to find an exception that never
+      # propagated — sentry-ruby collects +env['rack.exception'] ||
+      # env['sinatra.error']+ — so a tracker mounted above Grape keeps reporting
+      # these with no application change.
+      def expose_exception(error)
+        env[Grape::Env::GRAPE_EXCEPTION] = error
+        env[Grape::Env::RACK_EXCEPTION] = error
       end
 
       def failsafe_payload(headers)
@@ -252,7 +259,7 @@ module Grape
       # message. The framework deliberately does no logging of its own
       # here; that's the application's call.
       def safe_default(error, endpoint)
-        env[Grape::Env::GRAPE_EXCEPTION] = error
+        expose_exception(error)
         return run_rescue_handler(internal_grape_exceptions_rescue_handler, error, endpoint, redispatched: true) if internal_grape_exceptions_rescue_handler
 
         framework_default(endpoint)

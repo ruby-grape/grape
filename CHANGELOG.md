@@ -62,6 +62,7 @@
 * [#2840](https://github.com/ruby-grape/grape/pull/2840): Answer 500 instead of letting an exception escape the middleware stack when an error response cannot be rendered (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2840](https://github.com/ruby-grape/grape/pull/2840): Expose the exception that defeated an error rendering on `rack.exception` and write it to `rack.errors`, so error trackers mounted above Grape keep reporting it - [@ericproulx](https://github.com/ericproulx).
 * [#2840](https://github.com/ruby-grape/grape/pull/2840): Add `Grape.config.raise_rendering_errors` to opt out of the failsafe and let an unrenderable error response propagate as before - [@ericproulx](https://github.com/ericproulx).
+* [#2855](https://github.com/ruby-grape/grape/pull/2855): Expose an unhandled exception raised inside a `rescue_from` block on `rack.exception`, so error trackers report it instead of the generic 500 arriving silently - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
