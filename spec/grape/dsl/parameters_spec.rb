@@ -244,6 +244,60 @@ describe Grape::DSL::Parameters do
     end
   end
 
+  describe 'deprecated positional options Hash' do
+    it 'deprecates a positional Hash for `requires` but still works when silenced' do
+      expect { subject.requires :id, { type: Integer, desc: 'Identity.' } }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `requires`/)
+
+      Grape.deprecator.silence { subject.requires :id, { type: Integer, desc: 'Identity.' } }
+      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
+      expect(subject.push_declared_params_reader).to eq([:id])
+    end
+
+    it 'deprecates a positional Hash for `optional` but still works when silenced' do
+      expect { subject.optional :id, { type: Integer, desc: 'Identity.' } }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `optional`/)
+
+      Grape.deprecator.silence { subject.optional :id, { type: Integer, desc: 'Identity.' } }
+      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.push_declared_params_reader).to eq([:id])
+    end
+
+    it 'deprecates a positional Hash for `use` but still works when silenced' do
+      subject.api = Class.new { include Grape::DSL::Settings }.new
+      subject.api.inheritable_setting.add_named_params(params_group: proc {})
+
+      expect { subject.use :params_group, { option: 'value' } }
+        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `use`/)
+
+      expect(subject).to receive(:instance_exec).with(option: 'value').and_yield
+      Grape.deprecator.silence { subject.use :params_group, { option: 'value' } }
+    end
+
+    it 'keeps the options of the positional Hash applying to every attribute' do
+      Grape.deprecator.silence { subject.requires :a, :b, { type: Integer } }
+
+      expect(subject.validate_attributes_reader).to eq([%i[a b], { type: Integer, presence: { value: true, message: nil } }])
+      expect(subject.push_declared_params_reader).to eq(%i[a b])
+    end
+
+    it 'routes :using out of the positional Hash to the keyword argument' do
+      documentation = { id: { type: Integer } }
+      expect(subject).to receive(:require_required_and_optional_fields).with(:all, using: documentation, except: nil)
+
+      Grape.deprecator.silence { subject.requires :all, { using: documentation } }
+    end
+
+    it 'does not deprecate keyword arguments' do
+      expect { subject.requires :id, type: Integer }.not_to raise_error
+      expect { subject.optional :id, type: Integer }.not_to raise_error
+    end
+
+    it 'does not deprecate a Hash that is the only argument' do
+      expect { subject.requires(type: Integer) }.not_to raise_error
+    end
+  end
+
   describe '#params' do
     it 'inherits params from parent' do
       parent_params = { foo: 'bar' }

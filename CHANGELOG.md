@@ -56,6 +56,10 @@
 * [#2829](https://github.com/ruby-grape/grape/pull/2829): Fix a cascading route handing over only to the last route registered for the path, making a middle version (3+ mounted versions with a catch-all) answer 406 - [@ericproulx](https://github.com/ericproulx).
 * [#2826](https://github.com/ruby-grape/grape/pull/2826): Fix `api.version` not being set for the root route of a path-versioned API (`GET /v1`) - [@ericproulx](https://github.com/ericproulx).
 * [#2847](https://github.com/ruby-grape/grape/pull/2847): Match `Accept` media types case-insensitively, so a differently-cased header still negotiates the content type and resolves a vendor version - [@ericproulx](https://github.com/ericproulx).
+* [#2834](https://github.com/ruby-grape/grape/pull/2834): Restore the #2824 fix for cascaded routes leaking `route_info` and path captures, silently reverted by #2829 - [@ericproulx](https://github.com/ericproulx).
+* [#2838](https://github.com/ruby-grape/grape/pull/2838): Reject request params nested in more arrays than the block declares, instead of silently unwrapping them and passing validation, and report `type: Array[JSON]` errors against the element that failed - [@ericproulx](https://github.com/ericproulx).
+* [#2842](https://github.com/ruby-grape/grape/pull/2842): Warn at definition time when a `rescue_from` class is already covered by one registered earlier in the same scope, since the later handler never runs - [@ericproulx](https://github.com/ericproulx).
+* [#2853](https://github.com/ruby-grape/grape/pull/2853): Restore, behind a deprecation warning, the trailing positional options Hash of `requires`, `optional` and `use`, which #2618 turned into a parameter name - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

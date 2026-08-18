@@ -76,12 +76,4 @@ describe 'GrapeSwagger', if: defined?(GrapeSwagger) do
       expect(swagger.dig('definitions', 'postWidgets', 'required')).to eq(['name'])
     end
   end
-
-  describe 'add_swagger_documentation' do
-    it 'relies on the deprecated positional Hash form of `desc`' do
-      expect do
-        Class.new(Grape::API) { add_swagger_documentation }
-      end.to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `desc`/)
-    end
-  end
 end

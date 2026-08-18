@@ -3,7 +3,7 @@
 module Grape
   module Validations
     class ParamsScope
-      attr_reader :parent, :type, :nearest_array_ancestor, :full_path
+      attr_reader :parent, :type, :nearest_array_ancestor, :array_depth, :full_path
 
       def qualifying_params
         ParamScopeTracker.current&.qualifying_params(self)
@@ -78,6 +78,9 @@ module Grape
         # configure_declared_params consumes it and clears @declared_params to nil.
         @declared_params = []
         @full_path = build_full_path
+        # Read by the validators instantiated from the block below, so it has to
+        # be settled before the instance_eval.
+        @array_depth = find_array_depth
 
         instance_eval(&block) if block
 
@@ -167,6 +170,17 @@ module Grape
       # @return [Boolean] whether or not this scope is nested
       def nested?
         @parent && @element
+      end
+
+      # Whether this scope's params resolve to one entry per element, which is
+      # what makes both an element index and a nesting level meaningful.
+      #
+      # +type: Array[JSON]+ counts as much as +type: Array+ does. It is easy to
+      # miss because it evaluates to the Array *instance* +[JSON]+ rather than
+      # the Array class, so an +== Array+ test quietly excluded it.
+      # @return [Boolean]
+      def iterates_elements?
+        @type == Array || @type == SPECIAL_JSON.last
       end
 
       # A lateral scope is subordinate to its parent, but its keys are at the
@@ -320,8 +334,16 @@ module Grape
 
       def find_nearest_array_ancestor
         scope = @parent
-        scope = scope.parent while scope && scope.type != Array
+        scope = scope.parent while scope && !scope.iterates_elements?
         scope
+      end
+
+      # Every element-iterating scope on the chain adds one level of nesting to
+      # what {#params} returns, because +map_params+ maps over the array it
+      # resolved from the parent. Counting them tells {AttributesIterator} how
+      # deep the declaration says the params for this scope may legitimately be.
+      def find_array_depth
+        (iterates_elements? ? 1 : 0) + (@parent&.array_depth || 0)
       end
 
       def validates(attrs, validations)
