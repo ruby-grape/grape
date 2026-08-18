@@ -2848,7 +2848,9 @@ end
 
 The first handler re-raises; the second handler runs against the new exception.
 
-If the re-raised exception has no registered `rescue_from` and is a `Grape::Exceptions::Base` subclass, it is rendered through the default Grape error path (using its own `status` and `message`). Anything else — typos, `NoMethodError`, an unrelated `StandardError` — is treated as an internal error: it is exposed on `env['grape.exception']` for upstream Rack middleware to observe, and rendered to the API consumer as a generic `500 Internal Server Error`. This avoids leaking internal detail in the response body.
+If the re-raised exception has no registered `rescue_from` and is a `Grape::Exceptions::Base` subclass, it is rendered through the default Grape error path (using its own `status` and `message`). Anything else — typos, `NoMethodError`, an unrelated `StandardError` — is treated as an internal error: it is exposed on the rack env for upstream Rack middleware to observe, and rendered to the API consumer as a generic `500 Internal Server Error`. This avoids leaking internal detail in the response body.
+
+Because the exception is answered rather than raised, nothing above Grape catches it, so it is published under `rack.exception` — the key error trackers read for a handled exception — as well as Grape's own `grape.exception`. Grape does no logging of its own here; register a `rescue_from :internal_grape_exceptions` handler to take that over.
 
 You can take control of the internal-error path by opting in with `rescue_from :internal_grape_exceptions`:
 

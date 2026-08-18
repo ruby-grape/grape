@@ -292,6 +292,24 @@ describe Grape::Middleware::Error do
         expect(captured).to be_a(NoMethodError)
         expect(captured.message).to include("undefined method 'foo'")
       end
+
+      # grape.exception is Grape's own key, which no error tracker reads. This
+      # path answers 500 rather than letting the exception propagate, so without
+      # rack.exception a tracker above Grape never learns it happened.
+      it "exposes the original exception via env['rack.exception']" do
+        captured = nil
+        original_call = app.method(:call)
+        allow(app).to receive(:call) do |env|
+          result = original_call.call(env)
+          captured = env[Grape::Env::RACK_EXCEPTION]
+          result
+        end
+
+        response
+
+        expect(captured).to be_a(NoMethodError)
+        expect(captured.message).to include("undefined method 'foo'")
+      end
     end
 
     context 'and a redispatched handler also raises' do
