@@ -54,6 +54,8 @@ module Grape
       #       end
       #     end
       def use(*names, **options)
+        return redispatch_legacy_options(:use, names, options) if legacy_options?(names)
+
         named_params = @api.inheritable_setting.named_params || {}
         names.each do |name|
           params_block = named_params.fetch(name) do
@@ -74,8 +76,8 @@ module Grape
       #
       # @param attrs list of parameters names, or, if :using is
       #   passed as an option, which keys to include (:all or :none) from
-      #   the :using hash. The last key can be a hash, which specifies
-      #   options for the parameters
+      #   the :using hash. Passing the options as a trailing positional Hash
+      #   is deprecated; pass them as keyword arguments instead.
       # @option attrs :type [Class] the type to coerce this parameter to before
       #   passing it to the endpoint. See {Grape::Validations::Types} for a list of
       #   types that are supported automatically. Custom classes may be used
@@ -123,6 +125,8 @@ module Grape
       #       end
       #     end
       def requires(*attrs, using: nil, except: nil, **opts, &block)
+        return redispatch_legacy_options(:requires, attrs, { using:, except: }.compact.merge(opts), &block) if legacy_options?(attrs)
+
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if @group
 
@@ -137,6 +141,8 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def optional(*attrs, using: nil, except: nil, **opts, &block)
+        return redispatch_legacy_options(:optional, attrs, { using:, except: }.compact.merge(opts), &block) if legacy_options?(attrs)
+
         type = opts[:type]
         opts = @group.deep_merge(opts) if @group
 
@@ -209,6 +215,22 @@ module Grape
       end
 
       private
+
+      # @deprecated A trailing positional options Hash is deprecated; pass keyword
+      #   arguments instead. Before Ruby 3 keyword separation this Hash was pulled
+      #   off the argument list by `extract_options!`; now it lands in the splat and
+      #   would silently be treated as a parameter name.
+      def legacy_options?(args)
+        args.size > 1 && args.last.is_a?(Hash)
+      end
+
+      # Re-invokes +method_name+ with the trailing Hash splatted as keyword
+      # arguments, so Ruby routes its keys to the same place they would have
+      # reached had the caller omitted the braces.
+      def redispatch_legacy_options(method_name, args, opts, &)
+        Grape.deprecator.warn("Passing a positional options Hash to `#{method_name}` is deprecated. Pass keyword arguments instead.")
+        __send__(method_name, *args[0..-2], **args.last.merge(opts), &)
+      end
 
       def first_hash_key_or_param(parameter)
         parameter.is_a?(Hash) ? parameter.keys.first : parameter

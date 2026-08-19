@@ -4255,6 +4255,32 @@ describe Grape::API do
     end
   end
 
+  # Media types are case-insensitive (RFC 9110 §8.3.1). The registered ones are
+  # spelled in lower case and matched literally, so a differently-cased Accept
+  # used to find nothing: content negotiation fell through to the default format
+  # and header versioning behaved as though no version had been asked for.
+  describe 'a differently-cased Accept header' do
+    it 'still negotiates the content type' do
+      subject.content_type :json, 'application/json'
+      subject.content_type :txt, 'text/plain'
+      subject.default_format :json
+      subject.get('/x') { { a: 1 } }
+
+      get '/x', {}, 'HTTP_ACCEPT' => 'TEXT/PLAIN'
+      expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+    end
+
+    it 'still resolves the version of a vendor media type' do
+      subject.version 'v1', using: :header, vendor: 'twitter'
+      subject.format :json
+      subject.get('/x') { env[Grape::Env::API_VERSION] }
+
+      get '/x', {}, 'HTTP_ACCEPT' => 'APPLICATION/VND.TWITTER-V1+JSON'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('v1'.to_json)
+    end
+  end
+
   describe '.format' do
     context ':txt' do
       before do

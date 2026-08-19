@@ -384,6 +384,7 @@ module Grape
       def add_rescue_handlers(mapping, subclasses:)
         @rescue_handler_maps ||= {}
         own = (@rescue_handler_maps[subclasses ? :rescue_handlers : :base_only_rescue_handlers] ||= {})
+        ShadowedRescueHandlers.warn_about(own, mapping) if subclasses
         own.merge!(mapping) { |_klass, registered, _new| registered }
       end
 

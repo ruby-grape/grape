@@ -9,6 +9,22 @@ describe Grape::Validations::ParamsScope do
     subject
   end
 
+  context 'when the options are given as a deprecated positional Hash' do
+    it 'coerces the parameter as if the options had been passed as keyword arguments' do
+      Grape.deprecator.silence do
+        subject.params do
+          requires :id, { type: Integer }
+          optional :page, { type: Integer, default: 1 }
+        end
+      end
+      subject.get('/legacy') { [params[:id].class, params[:page]].join(',') }
+
+      get '/legacy', id: '5'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('Integer,1')
+    end
+  end
+
   context 'when using custom types' do
     let(:custom_type) do
       Class.new do
@@ -758,6 +774,101 @@ describe Grape::Validations::ParamsScope do
 
         expect(last_response.status).to eq(400)
         expect(last_response.body).to eq('array[1][json] is missing, array[1][json][b] is missing')
+      end
+    end
+
+    context 'when the request nests its arrays deeper than the declaration' do
+      before do
+        subject.params do
+          requires :lines, type: Array do
+            requires :name, type: String
+          end
+        end
+        subject.post('/lines') { 'ok' }
+      end
+
+      it 'accepts the declared shape' do
+        post '/lines', { lines: [{ name: 'x' }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      # Without this the elements are silently unwrapped, validation passes, and
+      # the endpoint receives an Array where it declared a Hash.
+      it 'rejects elements wrapped in an extra array' do
+        post '/lines', { lines: [[{ name: 'x' }]] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('lines[0][name] is missing, lines[0][name] is invalid')
+      end
+
+      it 'rejects elements wrapped in several extra arrays' do
+        post '/lines', { lines: [[[{ name: 'x' }]]] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+      end
+
+      it 'rejects an empty array element' do
+        post '/lines', { lines: [[]] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'when an array is declared inside a hash' do
+      before do
+        subject.params do
+          requires :outer, type: Hash do
+            requires :inner, type: Array do
+              requires :leaf, type: String
+            end
+          end
+        end
+        subject.post('/hash_array') { 'ok' }
+      end
+
+      it 'accepts the declared shape' do
+        post '/hash_array', { outer: { inner: [{ leaf: 'x' }] } }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'rejects elements wrapped in an extra array' do
+        post '/hash_array', { outer: { inner: [[{ leaf: 'x' }]] } }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'when arrays are nested in the declaration' do
+      before do
+        subject.params do
+          requires :a, type: Array do
+            requires :b, type: Array do
+              requires :c, type: String
+            end
+          end
+        end
+        subject.post('/nested_arrays') { 'ok' }
+      end
+
+      it 'still descends as deep as the declaration nests' do
+        post '/nested_arrays', { a: [{ b: [{ c: 'x' }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'reports errors against the inner elements' do
+        post '/nested_arrays', { a: [{ b: [{}] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a[0][b][0][c] is missing')
+      end
+
+      it 'rejects one level deeper than declared' do
+        post '/nested_arrays', { a: [{ b: [[{ c: 'x' }]] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
       end
     end
 

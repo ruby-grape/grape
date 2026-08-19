@@ -304,16 +304,16 @@ rescue_from MyError, with: :other_handler
 
 Calls that only use one meta selector or only use exception classes (the documented forms) are unaffected.
 
-#### `auth`, `http_basic` and `http_digest` now take keyword arguments
+#### `auth` and `http_basic` now take keyword arguments
 
-`Grape::Middleware::Auth::DSL#auth`, `#http_basic` and `#http_digest` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:
+`Grape::Middleware::Auth::DSL#auth` and `#http_basic` now accept their options as keyword arguments instead of a positional `Hash`. Calls using bare keyword syntax or a block are unaffected:
 
 ```ruby
 http_basic realm: 'API' do |u, p|
   # ...
 end
 
-auth :http_digest, realm: 'API', opaque: 'secret', &proc
+auth :my_strategy, realm: 'API', &proc
 ```
 
 Passing a positional options `Hash` still works but is deprecated and will be removed in a future release:
@@ -321,12 +321,32 @@ Passing a positional options `Hash` still works but is deprecated and will be re
 ```ruby
 # deprecated
 http_basic({ realm: 'API' })
-auth :http_digest, { realm: 'API', opaque: 'secret' }
+auth :my_strategy, { realm: 'API' }
 
 # preferred
 http_basic(realm: 'API')
-auth :http_digest, realm: 'API', opaque: 'secret'
+auth :my_strategy, realm: 'API'
 ```
+
+#### `http_digest` is removed
+
+`Grape::Middleware::Auth::DSL#http_digest` is gone. Calling it now raises `NoMethodError` while the API class is being defined.
+
+Nothing it could reach has existed since **2.0.0**, which removed `Rack::Auth::Digest` along with Grape's `:http_digest` strategy ([#2361](https://github.com/ruby-grape/grape/pull/2361)) after Rack 3 dropped digest authentication. The method survived that removal and kept recording its settings happily, so an API declaring `http_digest` still booted — and then raised `Grape::Exceptions::UnknownAuthStrategy` on the *first request*, from inside the middleware build, as an uncaught exception rather than a response. Failing while the class is defined is the point of removing it.
+
+**If you registered your own `:http_digest` strategy**, it still works; call `auth` directly:
+
+```ruby
+Grape::Middleware::Auth::Strategies.add(:http_digest, MyDigestStrategy, ->(settings) { [settings[:realm]] })
+
+class API < Grape::API
+  auth :http_digest, realm: 'API Authorization', opaque: 'secret' do |username|
+    # ...
+  end
+end
+```
+
+The removed method supplied two defaults that `auth` does not, so pass them explicitly if you were relying on them: `realm` defaulted to `'API Authorization'`, and `opaque` to `'secret'` (nested inside `realm` when `realm` was itself a Hash).
 
 #### Middleware options now route through per-class `Options` `Data` value objects
 
@@ -707,7 +727,16 @@ Grape has been modernized to use Ruby 3+'s preferred argument delegation pattern
 - Method signatures are now more explicit and follow Ruby 3+ best practices
 - The `active_support/core_ext/array/extract_options` dependency has been removed
 
-This is a modernization effort that improves code quality while maintaining full backward compatibility.
+Passing the options of `requires`, `optional` and `use` as a trailing positional Hash still works, but is deprecated:
+
+```ruby
+params do
+  requires :id, { type: Integer } # deprecated
+  requires :id, type: Integer     # do this instead
+end
+```
+
+Under `extract_options!` the braces made no difference. They do now: Ruby only turns a trailing Hash into keyword arguments when it is written without braces, so a braced Hash lands in the splat and would otherwise be taken for a parameter name.
 
 See [#2618](https://github.com/ruby-grape/grape/pull/2618) for more information.
 
