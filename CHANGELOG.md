@@ -63,6 +63,7 @@
 * [#2842](https://github.com/ruby-grape/grape/pull/2842): Warn at definition time when a `rescue_from` class is already covered by one registered earlier in the same scope, since the later handler never runs - [@ericproulx](https://github.com/ericproulx).
 * [#2853](https://github.com/ruby-grape/grape/pull/2853): Restore, behind a deprecation warning, the trailing positional options Hash of `requires`, `optional` and `use`, which #2618 turned into a parameter name - [@ericproulx](https://github.com/ericproulx).
 * [#2856](https://github.com/ruby-grape/grape/pull/2856): Update simplecov - [@ericproulx](https://github.com/ericproulx).
+* [#2841](https://github.com/ruby-grape/grape/pull/2841): Stop `use`, `helpers`, `rescue_from` and other registrations declared below a route from reaching it when an earlier registration had seeded the same key (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
