@@ -26,7 +26,7 @@ group :test do
   gem 'rack-contrib', require: false
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'
-  gem 'simplecov', '~> 0.21', require: false
+  gem 'simplecov', '~> 1.1', require: false
   gem 'simplecov-lcov', '~> 0.8', require: false
 end
 

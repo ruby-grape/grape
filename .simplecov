@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Configuration only. `SimpleCov.start` lives in spec/spec_helper.rb.
 if ENV['GITHUB_USER'] # only when running CI
   require 'simplecov-lcov'
   SimpleCov::Formatter::LcovFormatter.config do |c|
@@ -10,7 +11,5 @@ if ENV['GITHUB_USER'] # only when running CI
   SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
 end
 
-SimpleCov.start do
-  enable_coverage :branch
-  add_filter '/spec/'
-end
+SimpleCov.enable_coverage :branch
+SimpleCov.skip '/spec/'
