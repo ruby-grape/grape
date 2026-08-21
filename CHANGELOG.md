@@ -64,6 +64,7 @@
 * [#2853](https://github.com/ruby-grape/grape/pull/2853): Restore, behind a deprecation warning, the trailing positional options Hash of `requires`, `optional` and `use`, which #2618 turned into a parameter name - [@ericproulx](https://github.com/ericproulx).
 * [#2856](https://github.com/ruby-grape/grape/pull/2856): Update simplecov - [@ericproulx](https://github.com/ericproulx).
 * [#2841](https://github.com/ruby-grape/grape/pull/2841): Stop `use`, `helpers`, `rescue_from` and other registrations declared below a route from reaching it when an earlier registration had seeded the same key (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2846](https://github.com/ruby-grape/grape/pull/2846): Keep a `:version` path capture in `params` when the API declares no version, instead of always dropping it as Grape's own - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
