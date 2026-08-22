@@ -49,7 +49,9 @@ module Grape
         parsed = pattern.params(input)
         return unless parsed
 
-        parsed.compact.symbolize_keys
+        params = {}
+        parsed.each { |name, value| params[name.to_sym] = tag_utf8!(value) unless value.nil? }
+        params
       end
 
       protected
@@ -59,6 +61,38 @@ module Grape
       end
 
       private
+
+      # Mustermann decodes path captures out of +PATH_INFO+, which Rack hands us
+      # tagged ASCII-8BIT, so path params came back binary while Rack tags query
+      # and body params UTF-8. That split makes an API's own declarations
+      # disagree with themselves: `values: ['café']` matched `?id=café` but not
+      # `/café`, since a binary string never equals the UTF-8 literal it was
+      # written as.
+      #
+      # Re-tag as UTF-8. Nothing obliges a client to send UTF-8: the request
+      # target is octets to HTTP, and Rack's SPEC has CGI keys carry non-ASCII
+      # as ASCII-8BIT. But UTF-8 is what browsers percent-encode with, what an
+      # IRI maps to, and what Rails settles on — ActionDispatch::Journey::Router
+      # force_encodes every path capture to UTF-8 after unescaping it.
+      #
+      # Only the encoding changes; the bytes are untouched. Octets that are not
+      # UTF-8 therefore stay invalid and are caught downstream rather than being
+      # silently scrubbed into something the client never sent.
+      #
+      # The re-tag is in place, hence the bang. Mustermann's +Pattern#params+
+      # builds a fresh Hash of fresh, unfrozen strings on every call and skips
+      # its own Match cache, so the mutation cannot escape this request — which
+      # is also what lets the Array branch re-tag its elements with +each+.
+      def tag_utf8!(value)
+        case value
+        when String
+          value.force_encoding(Encoding::UTF_8)
+        when Array
+          value.each { |v| tag_utf8!(v) }
+        else
+          value
+        end
+      end
 
       def upcase_method(method)
         method_s = method.to_s
