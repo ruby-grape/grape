@@ -3,6 +3,41 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### A route no longer answers every option name
+
+`Grape::Router::BaseRoute` forwarded any unknown method to its options, an `ActiveSupport::OrderedOptions` that answers *anything* with `nil`. Every route therefore responded to every name:
+
+```ruby
+route.respond_to?(:anything_at_all) # => true
+route.anything_at_all               # => nil
+```
+
+That is gone. A route exposes readers for the options Grape documents — `description` plus the `desc` keys (`summary`, `detail`, `entity`, `http_codes`, `tags`, `hidden`, `deprecated`, …) — and raises `NoMethodError` for anything else. It also means a genuinely absent method now says so instead of quietly returning `nil`.
+
+Custom options are still carried and still readable, through the options Hash:
+
+```ruby
+get('/x', my_option: 1) { }
+
+route.my_option        # NoMethodError
+route.options[:my_option] # => 1
+```
+
+#### `desc` stores `success:` and `failure:` under `entity:` and `http_codes:`
+
+In a `desc` block, `success` and `failure` have always been aliases writing to `:entity` and `:http_codes`. A Hash of options never went through that path, so the aliases survived as keys of their own and were readable only through the forwarding described above:
+
+```ruby
+desc 'a', success: Entity        # stored :success
+desc 'b' do success Entity end   # stored :entity
+```
+
+Both now store `:entity`, and `failure:` likewise stores `:http_codes`, so the two forms are equivalent. Read them with `route.entity` and `route.http_codes`. When a description carries both an alias and its documented key, the documented key wins.
+
+`route.options[:success]` and `route.options[:failure]` are consequently `nil`; the values are under `route.options[:entity]` and `route.options[:http_codes]`.
+
+**grape-swagger** reads `route.success`, `route.failure`, `route.default_response` and `route.desc`, so it needs a release built against this: the first two become `route.entity` / `route.http_codes`, and the last two — which are grape-swagger's own conventions rather than Grape options — become `route.options[:default_response]` / `route.options[:desc]`.
+
 #### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
 
 A route captures the middleware, helpers, callbacks and rescue handlers registered above it. That was already true most of the time, but not always: `Grape::Util::InheritableSetting#point_in_time_copy` copied a scope's stackable store and its rescue-handler maps shallowly, so the nested Arrays and Hashes stayed shared with the scope. A registration added *after* an endpoint was defined therefore still reached that endpoint — but only when the key already held at least one registration when the endpoint was defined, since otherwise the scope allocated a fresh store only for itself.

@@ -21,6 +21,24 @@ RSpec.describe Grape::Router::Route do
     it { is_expected.to be_a(Grape::Router::BaseRoute) }
   end
 
+  # A route used to forward every unknown name to its options, an
+  # ActiveSupport::OrderedOptions that answers anything with nil. A name Grape
+  # does not define now raises instead; custom options are read from #options.
+  describe 'an option Grape does not define a reader for' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    let(:options) { { custom_option: 'value' } }
+
+    it 'is not exposed as a reader' do
+      expect { route.custom_option }.to raise_error(NoMethodError)
+      expect(route).not_to respond_to(:custom_option)
+    end
+
+    it 'is readable from #options' do
+      expect(route.options[:custom_option]).to eq('value')
+    end
+  end
+
   describe '#regexp_capture_index' do
     subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
 

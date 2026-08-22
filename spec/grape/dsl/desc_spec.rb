@@ -107,5 +107,30 @@ describe Grape::DSL::Desc do
         expect(subject.namespace_setting(:description)).to be_nil
       end
     end
+
+    # `success` and `failure` are the block form's aliases for `entity` and
+    # `http_codes`. A Hash never reaches Grape::Util::ApiDescription, so the
+    # aliases are normalized on the way in and both forms store alike.
+    describe 'the success and failure aliases' do
+      it 'stores a Hash success under entity and failure under http_codes' do
+        subject.desc 'The description', success: Object, failure: [[401, 'Unauthorized']]
+
+        expect(subject.route_setting(:description)).to eq(
+          description: 'The description', entity: Object, http_codes: [[401, 'Unauthorized']]
+        )
+      end
+
+      it 'lets an explicit entity or http_codes win over its alias' do
+        subject.desc 'The description', entity: Integer, success: Object
+
+        expect(subject.route_setting(:description)).to eq(description: 'The description', entity: Integer)
+      end
+
+      it 'leaves a description carrying neither alias untouched' do
+        subject.desc 'The description', summary: 'summary'
+
+        expect(subject.route_setting(:description)).to eq(description: 'The description', summary: 'summary')
+      end
+    end
   end
 end

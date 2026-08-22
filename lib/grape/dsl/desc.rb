@@ -61,7 +61,7 @@ module Grape
             endpoint_config = defined?(configuration) ? configuration : nil
             Grape::Util::ApiDescription.new(description, endpoint_config, &config_block).settings
           else
-            options.merge(description:)
+            Grape::Util::ApiDescription.normalize_aliases(options).merge(description:)
           end
         # Only the route scope is consumed downstream (by +route+ and the
         # route's readers, e.g. +http_codes+); the namespace scope was

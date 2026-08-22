@@ -35,8 +35,25 @@ module Grape
         end
       end
 
-      alias success entity
-      alias failure http_codes
+      # The block form's aliases: writing +success+ stores under +:entity+ and
+      # +failure+ under +:http_codes+, so a description always carries the
+      # documented key whichever spelling was used.
+      ALIASES = { success: :entity, failure: :http_codes }.freeze
+
+      ALIASES.each { |from, to| alias_method from, to }
+
+      # A Hash of options never reaches this class, so its +success+/+failure+
+      # keys would survive unaliased. Rename them to keep both forms
+      # equivalent; an explicit documented key wins over its alias.
+      def self.normalize_aliases(options)
+        return options unless options.keys.intersect?(ALIASES.keys)
+
+        options.except(*ALIASES.keys).merge(
+          ALIASES.filter_map do |from, to|
+            [to, options[from]] if options.key?(from) && !options.key?(to)
+          end.to_h
+        )
+      end
 
       def configuration
         @configuration ||= eval_endpoint_config(@endpoint_configuration)

@@ -5,8 +5,6 @@ module Grape
     class BaseRoute
       extend Forwardable
 
-      delegate_missing_to :@options
-
       attr_reader :options, :pattern, :prefix, :settings, :namespace
 
       # +version+, +anchor+ and +requirements+ shape the matcher, so they are

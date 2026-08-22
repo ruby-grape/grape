@@ -18,7 +18,16 @@ module Grape
         @allow_header = allow_header
       end
 
-      def params(_input = nil)
+      # A greedy route matches by prefix and captures nothing, so it has neither
+      # declared params to document nor values to extract. Both are defined
+      # explicitly: {Grape::Router#process_route} calls +params_for+ on whatever
+      # route it matched, and BaseRoute no longer forwards unknown names to
+      # +@options+ (where an OrderedOptions lookup would answer nil by accident).
+      def params
+        nil
+      end
+
+      def params_for(_input)
         nil
       end
     end
