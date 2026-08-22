@@ -667,6 +667,66 @@ describe Grape::Endpoint do
       get '/hey'
       expect(last_response.body).to eq 'test body'
     end
+
+    # The generated message is announced as text/plain, so it has to be rendered
+    # as such whatever the API's own format is. Left to the JSON formatter it
+    # came back as a quoted JSON string under a text/plain content type.
+    context 'when the API declares a format of its own' do
+      before do
+        subject.format :json
+        subject.get('/hey') { redirect '/ha' }
+      end
+
+      it 'renders the message as plain text' do
+        get '/hey'
+
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+        expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
+      end
+
+      # Only the message Grape generates is known to be text. A body the caller
+      # passed keeps the API's format, so a structured one stays parseable
+      # rather than being rendered through the txt formatter's `to_s`.
+      it 'leaves a structured body to the API format' do
+        subject.get('/there') { redirect '/ha', body: { message: 'go away' } }
+
+        get '/there'
+        expect(last_response.body).to eq({ message: 'go away' }.to_json)
+      end
+
+      it 'leaves a string body to the API format' do
+        subject.get('/there') { redirect '/ha', body: 'go away' }
+
+        get '/there'
+        expect(last_response.body).to eq '"go away"'
+      end
+
+      it 'leaves the format of other routes alone' do
+        subject.get('/plain') { { a: 1 } }
+
+        get '/plain'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
+        expect(last_response.body).to eq({ a: 1 }.to_json)
+      end
+    end
+
+    # The XML formatter cannot serialize a String, so it raised and the redirect
+    # came back as a 500 carrying an error document and no Location header.
+    context 'when the API format cannot serialize a string' do
+      before do
+        subject.format :xml
+        subject.get('/hey') { redirect '/ha' }
+      end
+
+      it 'still redirects' do
+        get '/hey'
+
+        expect(last_response.status).to eq 302
+        expect(last_response.headers['Location']).to eq '/ha'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain')
+        expect(last_response.body).to eq 'This resource has been moved temporarily to /ha.'
+      end
+    end
   end
 
   describe 'NameError' do
