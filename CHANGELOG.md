@@ -70,6 +70,7 @@
 * [#2840](https://github.com/ruby-grape/grape/pull/2840): Answer 500 instead of letting an exception escape the middleware stack when an error response cannot be rendered, exposing it on `rack.exception` and writing it to `rack.errors` so error trackers keep reporting it, with `Grape.config.raise_rendering_errors` to opt back out (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2855](https://github.com/ruby-grape/grape/pull/2855): Expose an unhandled exception raised inside a `rescue_from` block on `rack.exception`, so error trackers report it instead of the generic 500 arriving silently - [@ericproulx](https://github.com/ericproulx).
 * [#2843](https://github.com/ruby-grape/grape/pull/2843): Let `rescue_from :grape_exceptions` take precedence over a catch-all registered as a class, so Grape errors keep their own status (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2858](https://github.com/ruby-grape/grape/pull/2858): Define `Grape::Router::GreedyRoute#params_for` instead of letting the call fall through to the route's options Hash - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

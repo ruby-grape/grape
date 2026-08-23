@@ -35,4 +35,13 @@ RSpec.describe Grape::Router::GreedyRoute do
 
     it { is_expected.to be_nil }
   end
+
+  # A greedy route answers auto-OPTIONS and 405, and Router#process_route asks
+  # every route it dispatches for the params of the matched path. A greedy
+  # route captures nothing, so there are none.
+  describe '#params_for' do
+    subject { instance.params_for('/anything') }
+
+    it { is_expected.to be_nil }
+  end
 end
