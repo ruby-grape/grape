@@ -18,7 +18,11 @@ module Grape
         @allow_header = allow_header
       end
 
-      def params(_input = nil)
+      def params
+        nil
+      end
+
+      def params_for(_input)
         nil
       end
     end
