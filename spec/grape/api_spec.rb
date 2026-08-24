@@ -3387,6 +3387,29 @@ describe Grape::API do
       end
     end
 
+    describe 'a described api structure' do
+      before do
+        subject.desc 'block form' do
+          success Object
+          failure [[401, 'Unauthorized']]
+        end
+        subject.get('/block') { 'pong' }
+
+        subject.desc 'keyword form', success: Object, failure: [[401, 'Unauthorized']]
+        subject.get('/keyword') { 'pong' }
+      end
+
+      # The block DSL records `success`/`failure` under `entity`/`http_codes`,
+      # while keyword options keep the name they were written with. A route
+      # answers both readers either way.
+      it 'exposes success and failure however the description spelled them' do
+        subject.routes.each do |route|
+          expect(route.success).to eq(Object)
+          expect(route.failure).to eq([[401, 'Unauthorized']])
+        end
+      end
+    end
+
     describe 'api structure with two versions and a namespace' do
       before do
         subject.version 'v1', using: :path

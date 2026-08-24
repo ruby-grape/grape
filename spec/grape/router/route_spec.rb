@@ -78,6 +78,37 @@ RSpec.describe Grape::Router::Route do
     end
   end
 
+  describe '#success and #failure' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    context 'when the description used the block DSL names' do
+      let(:options) { { entity: Object, http_codes: [[401, 'Unauthorized']] } }
+
+      it 'reads the canonical keys' do
+        expect(route.success).to eq(Object)
+        expect(route.failure).to eq([[401, 'Unauthorized']])
+      end
+    end
+
+    context 'when the description was written as keyword options' do
+      let(:options) { { success: Object, failure: [[401, 'Unauthorized']] } }
+
+      it 'reads the keys as spelled' do
+        expect(route.success).to eq(Object)
+        expect(route.failure).to eq([[401, 'Unauthorized']])
+      end
+    end
+
+    context 'when the description carries neither' do
+      let(:options) { {} }
+
+      it 'returns nil' do
+        expect(route.success).to be_nil
+        expect(route.failure).to be_nil
+      end
+    end
+  end
+
   describe 'params' do
     let(:pattern) do
       Grape::Router::Pattern.new(origin: '/users/:id', suffix: '', anchor: true,

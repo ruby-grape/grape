@@ -71,6 +71,7 @@
 * [#2855](https://github.com/ruby-grape/grape/pull/2855): Expose an unhandled exception raised inside a `rescue_from` block on `rack.exception`, so error trackers report it instead of the generic 500 arriving silently - [@ericproulx](https://github.com/ericproulx).
 * [#2843](https://github.com/ruby-grape/grape/pull/2843): Let `rescue_from :grape_exceptions` take precedence over a catch-all registered as a class, so Grape errors keep their own status (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2858](https://github.com/ruby-grape/grape/pull/2858): Define `Grape::Router::GreedyRoute#params_for` instead of letting the call fall through to the route's options Hash - [@ericproulx](https://github.com/ericproulx).
+* [#2859](https://github.com/ruby-grape/grape/pull/2859): Answer `Grape::Router::Route#success` and `#failure` from the description whichever way it was written - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
