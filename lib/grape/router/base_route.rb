@@ -22,6 +22,19 @@ module Grape
         @settings = settings
       end
 
+      # +success+ and +failure+ are the +desc+ DSL's names for +entity+ and
+      # +http_codes+: the block form writes the canonical key, a keyword option
+      # keeps the name it was written with, so both spellings are read here.
+      # Without this they resolve through +delegate_missing_to+, which answers
+      # nil for whichever of the two keys the description did not use.
+      def success
+        @options[:entity] || @options[:success]
+      end
+
+      def failure
+        @options[:http_codes] || @options[:failure]
+      end
+
       # Assigned eagerly in {#to_regexp} (router compilation) rather than
       # memoized here: this reader is called from request-time route matching
       # on instances shared across threads, so it must not write state.
