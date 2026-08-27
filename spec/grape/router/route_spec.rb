@@ -81,7 +81,7 @@ RSpec.describe Grape::Router::Route do
   describe 'description attributes' do
     subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
 
-    let(:options) { { description: 'a route', default: { code: 400 }, tags: %w[a b] } }
+    let(:options) { { description: 'a route', tags: %w[a b] } }
 
     it 'reads them from the options Hash' do
       expect(route.description).to eq('a route')
@@ -91,11 +91,42 @@ RSpec.describe Grape::Router::Route do
     it 'returns nil for a key the description did not set' do
       expect(route.summary).to be_nil
     end
+  end
 
-    # +default+ is also Hash#default, so delegating it to the options Hash
-    # answered the Hash's own default value instead of the documented one.
-    it 'reads default as a description key, not as the Hash default value' do
-      expect(route.default).to eq(code: 400)
+  describe '#default_response' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    context 'when the description used the current name' do
+      let(:options) { { default_response: { code: 400 } } }
+
+      it 'reads it' do
+        expect(route.default_response).to eq(code: 400)
+      end
+    end
+
+    context 'when the description carries neither' do
+      let(:options) { {} }
+
+      it 'returns nil' do
+        expect(route.default_response).to be_nil
+      end
+    end
+  end
+
+  # +default+ is also Hash#default, so this one reader cannot be generated as a
+  # delegator to the options Hash: the call would answer the Hash's own default
+  # value instead of the key.
+  describe '#default' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    let(:options) { { default_response: { code: 400 } } }
+
+    it 'is deprecated' do
+      expect { route.default }.to raise_error(ActiveSupport::DeprecationException, /default_response/)
+    end
+
+    it 'answers default_response when deprecations are silenced' do
+      Grape.deprecator.silence { expect(route.default).to eq(code: 400) }
     end
   end
 
