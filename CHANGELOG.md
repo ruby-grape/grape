@@ -47,6 +47,7 @@
 #### Fixes
 
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
+* [#2863](https://github.com/ruby-grape/grape/pull/2863): Enable `Style/MutableConstant`'s `Recursive` option, so a literal nested inside a frozen constant has to be frozen too - [@ericproulx](https://github.com/ericproulx).
 * [#2816](https://github.com/ruby-grape/grape/pull/2816): Guard `length`, `same_as` and `oneof` validators against non-hash params (500 → 400) - [@ericproulx](https://github.com/ericproulx).
 * [#2815](https://github.com/ruby-grape/grape/pull/2815): Fix line-anchored regexes: `type: JSON` payloads containing a blank line were silently coerced to `nil` - [@ericproulx](https://github.com/ericproulx).
 * [#2817](https://github.com/ruby-grape/grape/pull/2817): Remove request-time mutable state from Array and custom-type coercers, which also makes an `Array`/`Set` of an uncoercible element type raise when the API is defined instead of on the first request that supplies it (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
