@@ -27,6 +27,13 @@ describe 'GrapeSwagger', if: defined?(GrapeSwagger) do
           { id: 2, name: params[:name] }
         end
 
+        desc 'Delete a widget' do
+          default_response code: 'default', message: 'unexpected error'
+        end
+        delete '/widgets' do
+          {}
+        end
+
         add_swagger_documentation info: { title: 'Widget API', version: '1.0' }
       end
     end
@@ -44,9 +51,9 @@ describe 'GrapeSwagger', if: defined?(GrapeSwagger) do
       expect(last_response.content_type).to eq('application/json')
     end
 
-    it 'documents both routes from the mounted API' do
+    it 'documents every route from the mounted API' do
       expect(swagger['paths'].keys).to contain_exactly('/widgets')
-      expect(swagger['paths']['/widgets'].keys).to contain_exactly('get', 'post')
+      expect(swagger['paths']['/widgets'].keys).to contain_exactly('get', 'post', 'delete')
     end
 
     it 'carries the descriptions set via Grape::DSL::Desc' do
@@ -56,6 +63,14 @@ describe 'GrapeSwagger', if: defined?(GrapeSwagger) do
 
     it 'translates the success: option into a documented response' do
       expect(swagger['paths']['/widgets']['get']['responses']).to include('200')
+    end
+
+    # grape-swagger reads the route's #default_response, so the desc DSL name
+    # has to be the one it asks for.
+    it 'translates a default_response into the documented default response' do
+      responses = swagger['paths']['/widgets']['delete']['responses']
+      expect(responses).to include('default')
+      expect(responses['default']['description']).to eq('unexpected error')
     end
 
     it 'documents the declared query parameter' do

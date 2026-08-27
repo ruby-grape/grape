@@ -12,7 +12,7 @@ module Grape
       # +version+, +anchor+ and +requirements+ shape the matcher, so they are
       # read from the pattern rather than stored again on the route.
       def_delegators :@pattern, :path, :origin, :version, :anchor, :requirements
-      def_delegators :@options, :description, *(Grape::Util::ApiDescription::DSL_METHODS - %i[default])
+      def_delegators :@options, :description, *Grape::Util::ApiDescription::DSL_METHODS
 
       def initialize(pattern, options = {}, namespace: nil, prefix: nil, settings: nil)
         @pattern = pattern
@@ -35,12 +35,15 @@ module Grape
         @options[:http_codes] || @options[:failure]
       end
 
-      # +default+ is the one +desc+ key that cannot be delegated to +@options+.
-      # An ActiveSupport::OrderedOptions answers an unknown name with that key's
-      # value, but +default+ is not unknown to it — it is +Hash#default+, the
-      # Hash's own default value — so delegating it reported nil for every route.
+      # @deprecated Use {#default_response}, the name grape-swagger asks for.
+      #   This one has to be written out rather than delegated like the rest:
+      #   an ActiveSupport::OrderedOptions answers an unknown name with that
+      #   key's value, but +default+ is not unknown to it — it is +Hash#default+,
+      #   the Hash's own default value — so a delegator would report nil for
+      #   every route.
       def default
-        @options[:default]
+        Grape.deprecator.warn('`Grape::Router::Route#default` is deprecated. Use `#default_response` instead.')
+        default_response
       end
 
       # Assigned eagerly in {#to_regexp} (router compilation) rather than

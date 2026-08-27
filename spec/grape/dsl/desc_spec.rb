@@ -36,6 +36,37 @@ describe Grape::DSL::Desc do
       end
     end
 
+    context 'when the deprecated default option is passed' do
+      it 'is deprecated' do
+        expect { subject.desc 'The description', default: { code: 400 } }.to raise_error(ActiveSupport::DeprecationException, /default_response/)
+      end
+
+      it 'stores it under default_response when deprecations are silenced' do
+        Grape.deprecator.silence { subject.desc 'The description', default: { code: 400 } }
+        expect(subject.route_setting(:description)).to include(default_response: { code: 400 })
+        expect(subject.route_setting(:description)).not_to have_key(:default)
+      end
+
+      it 'does not overwrite an explicit default_response' do
+        Grape.deprecator.silence do
+          subject.desc 'The description', default: { code: 400 }, default_response: { code: 500 }
+        end
+        expect(subject.route_setting(:description)).to include(default_response: { code: 500 })
+      end
+    end
+
+    context 'when the deprecated default is called in a block' do
+      it 'is deprecated' do
+        expect { subject.desc('The description') { default(code: 400) } }.to raise_error(ActiveSupport::DeprecationException, /default_response/)
+      end
+
+      it 'writes the default_response key when deprecations are silenced' do
+        Grape.deprecator.silence { subject.desc('The description') { default(code: 400) } }
+        expect(subject.route_setting(:description)).to include(default_response: { code: 400 })
+        expect(subject.route_setting(:description)).not_to have_key(:default)
+      end
+    end
+
     context 'when a block is passed' do
       let(:expected_options) do
         {
@@ -44,7 +75,7 @@ describe Grape::DSL::Desc do
           detail: 'more details',
           params: { first: :param },
           entity: Object,
-          default: { code: 400, message: 'Invalid' },
+          default_response: { code: 400, message: 'Invalid' },
           http_codes: [[401, 'Unauthorized', 'Entities::Error']],
           named: 'My named route',
           body_name: 'My body name',
@@ -77,7 +108,7 @@ describe Grape::DSL::Desc do
           detail 'more details'
           params(first: :param)
           success Object
-          default code: 400, message: 'Invalid'
+          default_response code: 400, message: 'Invalid'
           failure [[401, 'Unauthorized', 'Entities::Error']]
           named 'My named route'
           body_name 'My body name'
