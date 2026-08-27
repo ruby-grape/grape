@@ -29,6 +29,9 @@ Style/HashSyntax:
 Style/MultilineIfModifier:
   Enabled: false
 
+Style/MutableConstant:
+  Recursive: true
+
 Style/RaiseArgs:
   Enabled: false
 
