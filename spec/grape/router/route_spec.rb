@@ -78,6 +78,27 @@ RSpec.describe Grape::Router::Route do
     end
   end
 
+  describe 'description attributes' do
+    subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
+
+    let(:options) { { description: 'a route', default: { code: 400 }, tags: %w[a b] } }
+
+    it 'reads them from the options Hash' do
+      expect(route.description).to eq('a route')
+      expect(route.tags).to eq(%w[a b])
+    end
+
+    it 'returns nil for a key the description did not set' do
+      expect(route.summary).to be_nil
+    end
+
+    # +default+ is also Hash#default, so delegating it to the options Hash
+    # answered the Hash's own default value instead of the documented one.
+    it 'reads default as a description key, not as the Hash default value' do
+      expect(route.default).to eq(code: 400)
+    end
+  end
+
   describe '#success and #failure' do
     subject(:route) { described_class.new(endpoint, :get, pattern, options, forward_match: false) }
 
