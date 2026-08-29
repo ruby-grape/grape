@@ -379,6 +379,33 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error Grape::Exceptions::MissingGroupType
     end
 
+    # `requires` read the group's type through the `with` merge and `optional`
+    # did not, so the same declaration was accepted for one and rejected for
+    # the other.
+    it 'takes the type from an enclosing with block' do
+      expect do
+        subject.params do
+          with(type: Hash) do
+            optional :a do
+              requires :b, type: String
+            end
+          end
+        end
+      end.not_to raise_error
+    end
+
+    it 'still errors when neither the declaration nor the group provides a type' do
+      expect do
+        subject.params do
+          with(documentation: { in: 'body' }) do
+            optional :a do
+              requires :b, type: String
+            end
+          end
+        end
+      end.to raise_error Grape::Exceptions::MissingGroupType
+    end
+
     it 'allows Hash as type' do
       subject.params do
         group :a, type: Hash do

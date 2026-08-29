@@ -143,14 +143,7 @@ module Grape
       def optional(*attrs, using: nil, except: nil, **opts, &block)
         return redispatch_legacy_options(:optional, attrs, { using:, except: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
-        type = opts[:type]
         opts = @group.deep_merge(opts) if @group
-
-        # check type for optional parameter group
-        if attrs && block
-          raise Grape::Exceptions::MissingGroupType if type.nil?
-          raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
-        end
 
         return require_optional_fields(attrs.first, using:, except:) if using
 

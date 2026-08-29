@@ -277,8 +277,11 @@ module Grape
       #   is optional or not (and hence, whether this block's params will be).
       # @yield parameter scope
       def new_scope(element, type:, as:, optional: false, &)
-        # if required params are grouped and no type or unsupported type is provided, raise an error
-        if element && !optional
+        # A group needs a type: it says whether the nested params sit under one
+        # object or repeat in a list, and without it the `type || Array` below
+        # would quietly pick one. Checked here for `requires` and `optional`
+        # alike — `new_scope` is only reached from their block branch.
+        if element
           raise Grape::Exceptions::MissingGroupType if type.nil?
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end

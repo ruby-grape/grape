@@ -26,6 +26,22 @@ route.default_response
 ```
 
 A `desc 'x', default: ...` keyword is stored under `:default_response`, so a route carries one key under one name. Code reading `route.options[:default]` directly — rather than through the reader — has to read `route.options[:default_response]` instead.
+#### A group's type check is now the same for `requires` and `optional`
+
+The rule that a group declaration needs a type (`Array`, `Hash`, `JSON` or `Array[JSON]`) was implemented twice — once in `ParamsScope#new_scope` for `requires`, once inline in `optional` — and the two copies had drifted. `optional` read the type before merging in the attributes of an enclosing `with`, so a group type supplied by `with` was invisible to it:
+
+```ruby
+params do
+  with(type: Hash) do
+    requires(:a) { requires :b, type: String }   # accepted
+    optional(:a) { optional :b, type: String }   # raised MissingGroupType
+  end
+end
+```
+
+Both are accepted now. A group with no type from either the declaration or an enclosing `with` still raises `Grape::Exceptions::MissingGroupType`, and an unsupported type still raises `Grape::Exceptions::UnsupportedGroupType`.
+
+One case stops raising. `optional :a, using: SomeEntity do ... end` — a block *and* `using:` — raised `MissingGroupType` before; it now ignores the block and documents the entity's params, which is what `requires` has always done with that combination. If you have such a declaration, the block was never going to be applied; delete it or drop `using:`.
 
 #### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
 
