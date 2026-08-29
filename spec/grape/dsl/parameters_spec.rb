@@ -13,12 +13,17 @@ describe Grape::DSL::Parameters do
         @validate_attributes = []
       end
 
-      def validate_attributes(*args)
+      def validate_attributes(*args, **kwargs)
         @validate_attributes.push(*args)
+        @validate_attributes_kwargs = kwargs
       end
 
       def validate_attributes_reader
         @validate_attributes
+      end
+
+      def validate_attributes_kwargs_reader
+        @validate_attributes_kwargs
       end
 
       def push_declared_params(args, _opts)
@@ -85,12 +90,18 @@ describe Grape::DSL::Parameters do
     it 'adds a required parameter' do
       subject.requires :id, type: Integer, desc: 'Identity.'
 
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
+      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq([:id])
     end
   end
 
   describe '#optional' do
+    it 'signals that the parameter is not required' do
+      subject.optional :id, type: Integer
+      expect(subject.validate_attributes_kwargs_reader).to eq(required: false)
+    end
+
     it 'adds an optional parameter' do
       subject.optional :id, type: Integer, desc: 'Identity.'
 
@@ -250,7 +261,8 @@ describe Grape::DSL::Parameters do
         .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `requires`/)
 
       Grape.deprecator.silence { subject.requires :id, { type: Integer, desc: 'Identity.' } }
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.', presence: { value: true, message: nil } }])
+      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq([:id])
     end
 
@@ -277,7 +289,8 @@ describe Grape::DSL::Parameters do
     it 'keeps the options of the positional Hash applying to every attribute' do
       Grape.deprecator.silence { subject.requires :a, :b, { type: Integer } }
 
-      expect(subject.validate_attributes_reader).to eq([%i[a b], { type: Integer, presence: { value: true, message: nil } }])
+      expect(subject.validate_attributes_reader).to eq([%i[a b], { type: Integer }])
+      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq(%i[a b])
     end
 

@@ -127,13 +127,12 @@ module Grape
       def requires(*attrs, using: nil, except: nil, as: nil, **opts, &block)
         return redispatch_legacy_options(:requires, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
-        opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if @group
         as ||= opts[:as]
 
         return require_required_and_optional_fields(attrs.first, using:, except:) if using
 
-        validate_attributes(attrs, **opts, &block)
+        validate_attributes(attrs, opts, required: true, &block)
         block ? new_scope(attrs.first, type: opts[:type], as:, &block) : push_declared_params(attrs, as:)
       end
 
@@ -149,7 +148,7 @@ module Grape
 
         return require_optional_fields(attrs.first, using:, except:) if using
 
-        validate_attributes(attrs, **opts, &block)
+        validate_attributes(attrs, opts, required: false, &block)
         block ? new_scope(attrs.first, type: opts[:type], as:, optional: true, &block) : push_declared_params(attrs, as:)
       end
 
@@ -163,7 +162,7 @@ module Grape
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
         define_method validator do |*attrs, message: nil|
-          validates(attrs, validator => { value: true, message: })
+          validates(attrs, { validator => { value: true, message: } })
         end
       end
 
