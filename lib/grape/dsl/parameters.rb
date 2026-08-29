@@ -210,8 +210,8 @@ module Grape
       # other bucket", while +optional+ has no other bucket — +:all+ ignores
       # +except+ and +:none+ uses it to drop fields entirely.
       def declare(attrs, opts, required:, using:, except:, as:, &block)
-        opts = @group.deep_merge(opts) if @group
-        as ||= opts[:as]
+        merged_opts = @group&.deep_merge(opts) || opts
+        as ||= merged_opts[:as]
 
         if using
           return require_required_and_optional_fields(attrs.first, using:, except:) if required
@@ -219,10 +219,10 @@ module Grape
           return require_optional_fields(attrs.first, using:, except:)
         end
 
-        validates(attrs, opts, required:)
+        validates(attrs, merged_opts, required:)
         return push_declared_params(attrs, as:) unless block
 
-        new_scope(attrs.first, type: opts[:type], as:, optional: !required, &block)
+        new_scope(attrs.first, type: merged_opts[:type], as:, optional: !required, &block)
       end
 
       def legacy_options?(args)
