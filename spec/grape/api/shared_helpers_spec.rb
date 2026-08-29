@@ -11,6 +11,15 @@ describe Grape::API::Helpers do
       end
     end
 
+    nested = Class.new(Grape::API) do
+      params do
+        use :pagination
+      end
+      get '/child' do
+        declared(params, include_missing: true)
+      end
+    end
+
     Class.new(Grape::API) do
       helpers shared_params
       format :json
@@ -21,6 +30,8 @@ describe Grape::API::Helpers do
       get do
         declared(params, include_missing: true)
       end
+
+      mount nested
     end
   end
 
@@ -30,6 +41,12 @@ describe Grape::API::Helpers do
 
   it 'defines parameters' do
     get '/'
+    expect(last_response.status).to eq 200
+    expect(last_response.body).to eq({ page: nil, size: nil }.to_json)
+  end
+
+  it 'inherits parameters' do
+    get '/child'
     expect(last_response.status).to eq 200
     expect(last_response.body).to eq({ page: nil, size: nil }.to_json)
   end
