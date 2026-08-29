@@ -10,20 +10,20 @@ describe Grape::DSL::Parameters do
       attr_accessor :api, :element, :parent
 
       def initialize
-        @validate_attributes = []
+        @validates = []
       end
 
-      def validate_attributes(*args, **kwargs)
-        @validate_attributes.push(*args)
-        @validate_attributes_kwargs = kwargs
+      def validates(*args, **kwargs)
+        @validates.push(*args)
+        @validates_kwargs = kwargs
       end
 
-      def validate_attributes_reader
-        @validate_attributes
+      def validates_reader
+        @validates
       end
 
-      def validate_attributes_kwargs_reader
-        @validate_attributes_kwargs
+      def validates_kwargs_reader
+        @validates_kwargs
       end
 
       def push_declared_params(args, _opts)
@@ -32,14 +32,6 @@ describe Grape::DSL::Parameters do
 
       def push_declared_params_reader
         @push_declared_params
-      end
-
-      def validates(*args)
-        @validates = *args
-      end
-
-      def validates_reader
-        @validates
       end
 
       def new_scope(element, **_opts, &block)
@@ -90,8 +82,8 @@ describe Grape::DSL::Parameters do
     it 'adds a required parameter' do
       subject.requires :id, type: Integer, desc: 'Identity.'
 
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
+      expect(subject.validates_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validates_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq([:id])
     end
   end
@@ -99,13 +91,13 @@ describe Grape::DSL::Parameters do
   describe '#optional' do
     it 'signals that the parameter is not required' do
       subject.optional :id, type: Integer
-      expect(subject.validate_attributes_kwargs_reader).to eq(required: false)
+      expect(subject.validates_kwargs_reader).to eq(required: false)
     end
 
     it 'adds an optional parameter' do
       subject.optional :id, type: Integer, desc: 'Identity.'
 
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validates_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
       expect(subject.push_declared_params_reader).to eq([:id])
     end
   end
@@ -114,14 +106,14 @@ describe Grape::DSL::Parameters do
     it 'creates a scope with group attributes' do
       subject.with(type: Integer) { subject.optional :id, desc: 'Identity.' }
 
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validates_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
       expect(subject.push_declared_params_reader).to eq([:id])
     end
 
     it 'merges the group attributes' do
       subject.with(documentation: { in: 'body' }) { subject.optional :vault, documentation: { default: 33 } }
 
-      expect(subject.validate_attributes_reader).to eq([[:vault], { documentation: { in: 'body', default: 33 } }])
+      expect(subject.validates_reader).to eq([[:vault], { documentation: { in: 'body', default: 33 } }])
       expect(subject.push_declared_params_reader).to eq([:vault])
     end
 
@@ -131,7 +123,7 @@ describe Grape::DSL::Parameters do
         subject.optional :allowed_vaults, type: [Integer], documentation: { default: [31, 32, 33], is_array: true }
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
           [:allowed_vaults], { type: [Integer], documentation: { in: 'body', default: [31, 32, 33], is_array: true } }
@@ -144,7 +136,7 @@ describe Grape::DSL::Parameters do
         subject.optional :vault, type: Integer, documentation: { x: nil }
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:vault], { type: Integer, documentation: { x: nil } }
         ]
@@ -157,7 +149,7 @@ describe Grape::DSL::Parameters do
         subject.optional :role, type: String, documentation: { default: 'resident' }
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:info], { type: Hash, documentation: { default: { vault: '33' } } },
           [:role], { type: String, documentation: { default: 'resident' } }
@@ -170,7 +162,7 @@ describe Grape::DSL::Parameters do
         subject.optional :vault, documentation: { details: { desc: 'The vault number' } }
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:vault], { documentation: { details: { in: 'body', hidden: false, desc: 'The vault number' } } }
         ]
@@ -191,7 +183,7 @@ describe Grape::DSL::Parameters do
         end
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:pipboy_id], { type: Integer, documentation: { in: 'body' } },
           [:vault], { type: Integer, documentation: { in: 'body', default: 33 } },
@@ -208,7 +200,7 @@ describe Grape::DSL::Parameters do
         end
       end
 
-      expect(subject.validate_attributes_reader).to eq(
+      expect(subject.validates_reader).to eq(
         [
           [:info], { type: Hash, documentation: { in: 'body', desc: 'The info', x: { nullable: true } } },
           [:vault], { type: Integer, documentation: { in: 'body', default: 33, desc: 'The vault number' } }
@@ -261,8 +253,8 @@ describe Grape::DSL::Parameters do
         .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `requires`/)
 
       Grape.deprecator.silence { subject.requires :id, { type: Integer, desc: 'Identity.' } }
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
-      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
+      expect(subject.validates_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validates_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq([:id])
     end
 
@@ -271,7 +263,7 @@ describe Grape::DSL::Parameters do
         .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `optional`/)
 
       Grape.deprecator.silence { subject.optional :id, { type: Integer, desc: 'Identity.' } }
-      expect(subject.validate_attributes_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
+      expect(subject.validates_reader).to eq([[:id], { type: Integer, desc: 'Identity.' }])
       expect(subject.push_declared_params_reader).to eq([:id])
     end
 
@@ -289,8 +281,8 @@ describe Grape::DSL::Parameters do
     it 'keeps the options of the positional Hash applying to every attribute' do
       Grape.deprecator.silence { subject.requires :a, :b, { type: Integer } }
 
-      expect(subject.validate_attributes_reader).to eq([%i[a b], { type: Integer }])
-      expect(subject.validate_attributes_kwargs_reader).to eq(required: true)
+      expect(subject.validates_reader).to eq([%i[a b], { type: Integer }])
+      expect(subject.validates_kwargs_reader).to eq(required: true)
       expect(subject.push_declared_params_reader).to eq(%i[a b])
     end
 

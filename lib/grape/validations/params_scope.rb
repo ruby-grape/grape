@@ -263,11 +263,6 @@ module Grape
         end
       end
 
-      def validate_attributes(attrs, opts, required:, &block)
-        opts = opts.merge(type: Array) if block && opts[:type].nil?
-        validates(attrs, opts, required:)
-      end
-
       # Returns a new parameter scope, subordinate to the current one and nested
       # under the given element.
       # @param element [Symbol] the parameter name under which this scope is nested

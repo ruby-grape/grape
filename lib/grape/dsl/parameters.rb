@@ -219,7 +219,7 @@ module Grape
           return require_optional_fields(attrs.first, using:, except:)
         end
 
-        validate_attributes(attrs, opts, required:, &block)
+        validates(attrs, opts, required:)
         return push_declared_params(attrs, as:) unless block
 
         new_scope(attrs.first, type: opts[:type], as:, optional: !required, &block)
