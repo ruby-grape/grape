@@ -3259,6 +3259,41 @@ Built-in formatters are the following.
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
 
+#### Serving pre-rendered JSON
+
+The `:json` and `:serializable_hash` formatters encode whatever the endpoint returned,
+so a String that already holds JSON gets encoded a second time. Wrap the body in
+`Grape::PrecompiledJson` to opt that response out of encoding.
+
+```ruby
+class API < Grape::API
+  format :json
+
+  get '/cached' do
+    body Grape::PrecompiledJson.new(Rails.cache.read('payload')) # => '{"id":1}', served as-is
+  end
+end
+```
+
+An `Array` is joined into a JSON array without its members being parsed, so a cached
+collection is spliced together rather than round-tripped. Members may themselves be
+`Grape::PrecompiledJson` instances.
+
+```ruby
+Grape::PrecompiledJson.new(['{"id":1}', '{"id":2}']).to_s # => '[{"id":1},{"id":2}]'
+```
+
+Bodies that are not wrapped keep encoding exactly as before, so this is opt-in per
+response rather than a mode the whole API is in. Wrap only the whole body: a wrapper
+nested inside a Hash or Array that is then handed to an encoder is serialized as an
+ordinary object, because no encoder knows to unwrap it. A value that is neither a
+String nor an Array raises `Grape::Exceptions::InvalidFormatter` and answers 500,
+rather than handing Rack a body it cannot serve. Nothing checks that the String
+actually holds JSON — that is the caller's responsibility.
+
+Errors are unaffected: they are rendered by the error formatter, so `error!` still
+returns properly encoded JSON.
+
 If a body is present in a request to an API, with a Content-Type header value that is of an unsupported type a "415 Unsupported Media Type" error code will be returned by Grape.
 
 Response statuses that indicate no content as defined by [Rack](https://github.com/rack) [here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567) will bypass serialization and the body entity - though there should be none - will not be modified.
