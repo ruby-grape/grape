@@ -360,6 +360,36 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'when a parameter is renamed with as' do
+    # `as` is a DSL concern — the rename happens in push_declared_params and
+    # new_scope, both of which take it as a keyword. It reaches them from the
+    # declaration or from an enclosing `with`, the declaration winning.
+    it 'renames a parameter declared with as' do
+      subject.params { requires :a, as: :b, type: String }
+      subject.get('/rename') { declared(params).to_json }
+
+      get '/rename', a: 'x'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq({ b: 'x' }.to_json)
+    end
+
+    it 'takes the name from an enclosing with block' do
+      subject.params { with(as: :z) { requires :c, type: String } }
+      subject.get('/group_rename') { declared(params).to_json }
+
+      get '/group_rename', c: 'x'
+      expect(last_response.body).to eq({ z: 'x' }.to_json)
+    end
+
+    it 'lets the declaration win over the group' do
+      subject.params { with(as: :z) { requires :c, as: :own, type: String } }
+      subject.get('/both') { declared(params).to_json }
+
+      get '/both', c: 'x'
+      expect(last_response.body).to eq({ own: 'x' }.to_json)
+    end
+  end
+
   context 'parameters in group' do
     it 'errors when no type is provided' do
       expect do

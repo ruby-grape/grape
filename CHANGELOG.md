@@ -43,6 +43,7 @@
 * [#2835](https://github.com/ruby-grape/grape/pull/2835): Return the compiled instance from `Grape::API::Instance.compile!` so `call` and `recognize_path` no longer re-read `@instance`, which a concurrent `change!` could nil between the two reads - [@ericproulx](https://github.com/ericproulx).
 * [#2849](https://github.com/ruby-grape/grape/pull/2849): Remove `http_digest`, which has had no strategy behind it since 2.0.0 and raised on the first request rather than when the API was defined (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2862](https://github.com/ruby-grape/grape/pull/2862): Rename the `desc` `default` key to `default_response`, the name grape-swagger reads, deprecating `default` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2866](https://github.com/ruby-grape/grape/pull/2866): Take `as` as a keyword argument in `requires` and `optional` instead of carrying it in the options Hash, where it was dispatched as a no-op `AsValidator` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

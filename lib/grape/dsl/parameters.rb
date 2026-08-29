@@ -124,31 +124,33 @@ module Grape
       #         requires :name, type: String
       #       end
       #     end
-      def requires(*attrs, using: nil, except: nil, **opts, &block)
-        return redispatch_legacy_options(:requires, attrs, { using:, except: }.compact.merge(opts), &block) if legacy_options?(attrs)
+      def requires(*attrs, using: nil, except: nil, as: nil, **opts, &block)
+        return redispatch_legacy_options(:requires, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
         opts[:presence] = { value: true, message: opts[:message] }
         opts = @group.deep_merge(opts) if @group
+        as ||= opts[:as]
 
         return require_required_and_optional_fields(attrs.first, using:, except:) if using
 
         validate_attributes(attrs, **opts, &block)
-        block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], &block) : push_declared_params(attrs, as: opts[:as])
+        block ? new_scope(attrs.first, type: opts[:type], as:, &block) : push_declared_params(attrs, as:)
       end
 
       # Allow, but don't require, one or more parameters for the current
       #   endpoint.
       # @param (see #requires)
       # @option (see #requires)
-      def optional(*attrs, using: nil, except: nil, **opts, &block)
-        return redispatch_legacy_options(:optional, attrs, { using:, except: }.compact.merge(opts), &block) if legacy_options?(attrs)
+      def optional(*attrs, using: nil, except: nil, as: nil, **opts, &block)
+        return redispatch_legacy_options(:optional, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
         opts = @group.deep_merge(opts) if @group
+        as ||= opts[:as]
 
         return require_optional_fields(attrs.first, using:, except:) if using
 
         validate_attributes(attrs, **opts, &block)
-        block ? new_scope(attrs.first, type: opts[:type], as: opts[:as], optional: true, &block) : push_declared_params(attrs, as: opts[:as])
+        block ? new_scope(attrs.first, type: opts[:type], as:, optional: true, &block) : push_declared_params(attrs, as:)
       end
 
       # Define common settings for one or more parameters
