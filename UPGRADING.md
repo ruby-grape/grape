@@ -69,6 +69,30 @@ end
 ```
 
 An API that sets `message:` on a `with` block and relies on the generic wording for missing parameters will see its own message instead.
+#### `refresh_already_mounted` is no longer a `mount` option
+
+`mount` accepted an undocumented `refresh_already_mounted` option that replaced any endpoint already mounted for the same base API instead of adding a second one. It exists for Grape's own re-mounting machinery: when a class-level method runs after a `mount`, `Grape::API.refresh_mount_step` replays that mount, and replaying it naively would duplicate the endpoint.
+
+That decision belongs to the replay, not to the call, so the endpoint replacement moved into the private `refresh_mounted_api` which is the only caller that ever wanted it. Nothing changes for the re-mounting itself.
+
+Passing the option to `mount` still works and now warns; it will be ignored in a future release. There is no replacement, because an API has no reason to ask for it — mounting the same app twice on purpose is still two endpoints.
+
+#### A `mount` target is recognised as a mapping only when it is a `Hash`
+
+`mount` decided between "a Hash of app => path" and "a bare app mounted at /" with `mounts.respond_to?(:each_pair)`. A `Struct` and an `OpenStruct` answer that too, and neither can express an app => path mapping — their keys are member names — so a Rack app that happened to be one was read as a mapping and silently mounted its own field value as a path:
+
+```ruby
+RackStruct = Struct.new(:name) do
+  def call(env) = [200, {}, ['ok']]
+end
+
+mount RackStruct.new('x')
+
+# before: mounted at "/x", because :name => 'x' was read as app => path
+# now:    mounted at "/", as the Rack app it is
+```
+
+The test is now `mounts.is_a?(Hash)`. Every Hash-like people pass — `HashWithIndifferentAccess`, `Hashie::Mash`, `ActiveSupport::OrderedOptions` — subclasses `Hash` and is unaffected.
 
 #### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
 

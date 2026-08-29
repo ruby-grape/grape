@@ -79,6 +79,7 @@
 * [#2861](https://github.com/ruby-grape/grape/pull/2861): Read `Grape::Router::Route#default` from the description instead of from the options Hash's own default value, which was always `nil` - [@ericproulx](https://github.com/ericproulx).
 * [#2864](https://github.com/ruby-grape/grape/pull/2864): Apply a group's type check to `optional` the same way as `requires`, so a type supplied by an enclosing `with` is no longer invisible to it (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2865](https://github.com/ruby-grape/grape/pull/2865): Pass `required` from `requires`/`optional` as an argument instead of writing a `presence` key into the caller's options, deprecating a user-supplied `presence` and letting a `with` block's `message` reach the presence validator (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2871](https://github.com/ruby-grape/grape/pull/2871): Move the endpoint replacement behind `mount`'s private re-mounting path, deprecating the undocumented `refresh_already_mounted` option, and recognise a mount mapping by `Hash` rather than by `respond_to?(:each_pair)` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
