@@ -42,6 +42,7 @@
 * [#2836](https://github.com/ruby-grape/grape/pull/2836): Define `#hash` alongside the `eql?`/`==` pairs on `Grape::Endpoint`, `Grape::Util::InheritableSetting`, `Grape::Middleware::Stack::Middleware`, `Grape::ServeStream::StreamResponse` and `Grape::ServeStream::FileBody`, so equal objects hash alike in a `Hash`, `Set` or `uniq` - [@ericproulx](https://github.com/ericproulx).
 * [#2835](https://github.com/ruby-grape/grape/pull/2835): Return the compiled instance from `Grape::API::Instance.compile!` so `call` and `recognize_path` no longer re-read `@instance`, which a concurrent `change!` could nil between the two reads - [@ericproulx](https://github.com/ericproulx).
 * [#2849](https://github.com/ruby-grape/grape/pull/2849): Remove `http_digest`, which has had no strategy behind it since 2.0.0 and raised on the first request rather than when the API was defined (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2862](https://github.com/ruby-grape/grape/pull/2862): Rename the `desc` `default` key to `default_response`, the name grape-swagger reads, deprecating `default` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -73,6 +74,7 @@
 * [#2843](https://github.com/ruby-grape/grape/pull/2843): Let `rescue_from :grape_exceptions` take precedence over a catch-all registered as a class, so Grape errors keep their own status (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2858](https://github.com/ruby-grape/grape/pull/2858): Define `Grape::Router::GreedyRoute#params_for` instead of letting the call fall through to the route's options Hash - [@ericproulx](https://github.com/ericproulx).
 * [#2859](https://github.com/ruby-grape/grape/pull/2859): Answer `Grape::Router::Route#success` and `#failure` from the description whichever way it was written - [@ericproulx](https://github.com/ericproulx).
+* [#2861](https://github.com/ruby-grape/grape/pull/2861): Read `Grape::Router::Route#default` from the description instead of from the options Hash's own default value, which was always `nil` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

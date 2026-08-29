@@ -567,7 +567,7 @@ end
 * `params`: Define parameters directly from an `Entity`
 * `success`: (former entity) The `Entity` to be used to present the success response for this route.
 * `failure`: (former http_codes) A definition of the used failure HTTP Codes and Entities.
-* `default`: The definition and `Entity` used to present the default response for this route.
+* `default_response`: (former `default`) The definition and `Entity` used to present the default response for this route.
 * `named`: A helper to give a route a name and find it with this name in the documentation Hash
 * `headers`: A definition of the used Headers
 * Other options can be found in [grape-swagger][grape-swagger]

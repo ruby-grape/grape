@@ -35,6 +35,17 @@ module Grape
         @options[:http_codes] || @options[:failure]
       end
 
+      # @deprecated Use {#default_response}, the name grape-swagger asks for.
+      #   This one has to be written out rather than delegated like the rest:
+      #   an ActiveSupport::OrderedOptions answers an unknown name with that
+      #   key's value, but +default+ is not unknown to it — it is +Hash#default+,
+      #   the Hash's own default value — so a delegator would report nil for
+      #   every route.
+      def default
+        Grape.deprecator.warn('`Grape::Router::Route#default` is deprecated. Use `#default_response` instead.')
+        default_response
+      end
+
       # Assigned eagerly in {#to_regexp} (router compilation) rather than
       # memoized here: this reader is called from request-time route matching
       # on instances shared across threads, so it must not write state.

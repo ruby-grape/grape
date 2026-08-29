@@ -6,7 +6,7 @@ module Grape
       DSL_METHODS = %i[
         body_name
         consumes
-        default
+        default_response
         deprecated
         detail
         entity
@@ -37,6 +37,15 @@ module Grape
 
       alias success entity
       alias failure http_codes
+
+      # @deprecated Use {#default_response}. The description is read back
+      #   through an ActiveSupport::OrderedOptions, where +default+ is
+      #   +Hash#default+ rather than a key lookup, and grape-swagger has always
+      #   asked the route for +default_response+.
+      def default(value)
+        Grape.deprecator.warn('`default` in a `desc` block is deprecated. Use `default_response` instead.')
+        default_response(value)
+      end
 
       def configuration
         @configuration ||= eval_endpoint_config(@endpoint_configuration)

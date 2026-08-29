@@ -3,6 +3,30 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### The `desc` `default` key is renamed to `default_response`
+
+grape-swagger reads a route's default response as `route.default_response`, a name Grape never defined — the `desc` DSL wrote the key as `default`, and the reader for it resolved to `Hash#default` on the route's options bag, so it answered `nil` for every route. A default response declared the way the README documented it therefore never reached the generated OpenAPI document.
+
+The key, the `desc` block method and the route reader are all named `default_response` now. `default` still works everywhere it did, and warns:
+
+```ruby
+# deprecated
+desc 'Delete a widget' do
+  default code: 'default', message: 'unexpected error'
+end
+desc 'Delete a widget', default: { code: 'default' }
+route.default
+
+# preferred
+desc 'Delete a widget' do
+  default_response code: 'default', message: 'unexpected error'
+end
+desc 'Delete a widget', default_response: { code: 'default' }
+route.default_response
+```
+
+A `desc 'x', default: ...` keyword is stored under `:default_response`, so a route carries one key under one name. Code reading `route.options[:default]` directly — rather than through the reader — has to read `route.options[:default_response]` instead.
+
 #### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
 
 A route captures the middleware, helpers, callbacks and rescue handlers registered above it. That was already true most of the time, but not always: `Grape::Util::InheritableSetting#point_in_time_copy` copied a scope's stackable store and its rescue-handler maps shallowly, so the nested Arrays and Hashes stayed shared with the scope. A registration added *after* an endpoint was defined therefore still reached that endpoint — but only when the key already held at least one registration when the endpoint was defined, since otherwise the scope allocated a fresh store only for itself.
