@@ -263,9 +263,9 @@ module Grape
         end
       end
 
-      def validate_attributes(attrs, **opts, &block)
-        opts[:type] ||= Array if block
-        validates(attrs, opts)
+      def validate_attributes(attrs, opts, required:, &block)
+        opts = opts.merge(type: Array) if block && opts[:type].nil?
+        validates(attrs, opts, required:)
       end
 
       # Returns a new parameter scope, subordinate to the current one and nested
@@ -349,7 +349,24 @@ module Grape
         (iterates_elements? ? 1 : 0) + (@parent&.array_depth || 0)
       end
 
-      def validates(attrs, validations)
+      # +required+ is the DSL's own signal — +requires+ passes true, +optional+
+      # false. It used to travel as a +:presence+ key that +requires+ wrote into
+      # the caller's option Hash, which is why a user-supplied +presence:+ was
+      # silently overwritten there and silently honoured by +optional+, where
+      # nothing overwrote it. The key is built here from the flag instead, after
+      # the caller has merged in any enclosing +with+ attributes, so a
+      # group-level +message:+ reaches the presence validator.
+      #
+      # A +presence:+ supplied by an API still decides the outcome exactly as it
+      # used to — deprecated rather than dropped, so nothing changes under an
+      # API that relies on it until the key is ignored outright.
+      def validates(attrs, validations, required: false)
+        if validations.key?(:presence)
+          Grape.deprecator.warn('Passing a `presence` option is deprecated and it will be ignored in a future release. Declare the parameter with `requires` to make it required, `optional` to make it optional.')
+        end
+
+        validations = validations.merge(presence: { value: true, message: validations[:message] }) if required
+
         process_oneof!(validations) if validations.key?(:oneof)
         spec = ValidationsSpec.from(validations)
 

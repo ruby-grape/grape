@@ -390,6 +390,32 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'when a presence option is supplied' do
+    # `presence` is how the DSL tells the pipeline a param is required;
+    # `requires` overwrote whatever an API passed, and `optional` honoured it.
+    # Both still resolve exactly as they did, with a warning.
+    it 'is deprecated' do
+      expect do
+        subject.params { requires :a, presence: false }
+      end.to raise_error(ActiveSupport::DeprecationException, /presence/)
+
+      expect do
+        subject.params { optional :a, presence: true }
+      end.to raise_error(ActiveSupport::DeprecationException, /presence/)
+    end
+
+    it 'keeps deciding the outcome the way it always did' do
+      Grape.deprecator.silence do
+        subject.params { optional :a, presence: true }
+      end
+      subject.get('/presence') { 'ok' }
+
+      get '/presence'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('a is missing')
+    end
+  end
+
   context 'parameters in group' do
     it 'errors when no type is provided' do
       expect do
