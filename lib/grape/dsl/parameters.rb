@@ -124,32 +124,20 @@ module Grape
       #         requires :name, type: String
       #       end
       #     end
-      def requires(*attrs, using: nil, except: nil, as: nil, **opts, &block)
-        return redispatch_legacy_options(:requires, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
+      def requires(*attrs, using: nil, except: nil, as: nil, **opts, &)
+        return redispatch_legacy_options(:requires, attrs, { using:, except:, as: }.compact.merge(opts), &) if legacy_options?(attrs)
 
-        opts = @group.deep_merge(opts) if @group
-        as ||= opts[:as]
-
-        return require_required_and_optional_fields(attrs.first, using:, except:) if using
-
-        validate_attributes(attrs, opts, required: true, &block)
-        block ? new_scope(attrs.first, type: opts[:type], as:, &block) : push_declared_params(attrs, as:)
+        declare(attrs, opts, required: true, using:, except:, as:, &)
       end
 
       # Allow, but don't require, one or more parameters for the current
       #   endpoint.
       # @param (see #requires)
       # @option (see #requires)
-      def optional(*attrs, using: nil, except: nil, as: nil, **opts, &block)
-        return redispatch_legacy_options(:optional, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
+      def optional(*attrs, using: nil, except: nil, as: nil, **opts, &)
+        return redispatch_legacy_options(:optional, attrs, { using:, except:, as: }.compact.merge(opts), &) if legacy_options?(attrs)
 
-        opts = @group.deep_merge(opts) if @group
-        as ||= opts[:as]
-
-        return require_optional_fields(attrs.first, using:, except:) if using
-
-        validate_attributes(attrs, opts, required: false, &block)
-        block ? new_scope(attrs.first, type: opts[:type], as:, optional: true, &block) : push_declared_params(attrs, as:)
+        declare(attrs, opts, required: false, using:, except:, as:, &)
       end
 
       # Define common settings for one or more parameters
@@ -214,6 +202,29 @@ module Grape
       #   arguments instead. Before Ruby 3 keyword separation this Hash was pulled
       #   off the argument list by `extract_options!`; now it lands in the splat and
       #   would silently be treated as a parameter name.
+      # +requires+ and +optional+ differ only in whether what they declare is
+      # required, so the declaration itself lives here.
+      #
+      # The two +using:+ helpers stay separate. They are not one computation
+      # with a flag flipped: +requires+ treats +except+ as "these go in the
+      # other bucket", while +optional+ has no other bucket — +:all+ ignores
+      # +except+ and +:none+ uses it to drop fields entirely.
+      def declare(attrs, opts, required:, using:, except:, as:, &block)
+        opts = @group.deep_merge(opts) if @group
+        as ||= opts[:as]
+
+        if using
+          return require_required_and_optional_fields(attrs.first, using:, except:) if required
+
+          return require_optional_fields(attrs.first, using:, except:)
+        end
+
+        validate_attributes(attrs, opts, required:, &block)
+        return push_declared_params(attrs, as:) unless block
+
+        new_scope(attrs.first, type: opts[:type], as:, optional: !required, &block)
+      end
+
       def legacy_options?(args)
         args.size > 1 && args.last.is_a?(Hash)
       end
