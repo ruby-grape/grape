@@ -61,8 +61,9 @@ module Grape
 
         if options.key?(:default)
           Grape.deprecator.warn('The `default` option of `desc` is deprecated. Use `default_response` instead.')
-          legacy_default = options.delete(:default)
-          options[:default_response] = legacy_default unless options.key?(:default_response)
+          # Rebuilt rather than mutated in place: an explicit +default_response+
+          # still wins, since the merged Hash is the one that keeps its key.
+          options = { default_response: options[:default] }.merge(options.except(:default))
         end
 
         settings =

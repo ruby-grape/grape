@@ -47,6 +47,19 @@ describe Grape::DSL::Desc do
         expect(subject.route_setting(:description)).not_to have_key(:default)
       end
 
+      # Reviewed on #2861: `desc` must not mutate the Hash it was handed.
+      it 'does not modify the caller options Hash' do
+        options = { default: { code: 400 } }
+        Grape.deprecator.silence { subject.desc 'The description', **options }
+        expect(options).to eq(default: { code: 400 })
+      end
+
+      it 'does not modify a positional options Hash either' do
+        options = { default: { code: 400 } }
+        Grape.deprecator.silence { subject.desc 'The description', options }
+        expect(options).to eq(default: { code: 400 })
+      end
+
       it 'does not overwrite an explicit default_response' do
         Grape.deprecator.silence do
           subject.desc 'The description', default: { code: 400 }, default_response: { code: 500 }
