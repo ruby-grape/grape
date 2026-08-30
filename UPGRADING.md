@@ -42,6 +42,33 @@ end
 Both are accepted now. A group with no type from either the declaration or an enclosing `with` still raises `Grape::Exceptions::MissingGroupType`, and an unsupported type still raises `Grape::Exceptions::UnsupportedGroupType`.
 
 One case stops raising. `optional :a, using: SomeEntity do ... end` — a block *and* `using:` — raised `MissingGroupType` before; it now ignores the block and documents the entity's params, which is what `requires` has always done with that combination. If you have such a declaration, the block was never going to be applied; delete it or drop `using:`.
+#### The `presence` option of `requires` and `optional` is deprecated
+
+`presence` is how the params DSL tells the validation pipeline that a parameter is required. It travelled as a key written into the same options Hash that carries an API's own options, so an API could set it — and got opposite results depending on which method it was passed to, because `requires` overwrote it while nothing overwrote it for `optional`:
+
+```ruby
+requires :a, presence: false   # ignored: :a is still required
+optional :a, presence: true    # honoured: :a is actually required
+```
+
+Both still resolve exactly as they did, and now emit a deprecation warning. Declare the parameter with `requires` to make it required and `optional` to make it optional; the option will be ignored outright in a future release.
+
+#### A `with` block's `message` now reaches the presence validator
+
+The presence entry for a `requires` was built before the attributes of an enclosing `with` were merged in, so a group-level `message:` never reached it. It does now:
+
+```ruby
+params do
+  with(message: 'custom missing') do
+    requires :a
+  end
+end
+
+# before: "a is missing"
+# now:    "a custom missing"
+```
+
+An API that sets `message:` on a `with` block and relies on the generic wording for missing parameters will see its own message instead.
 
 #### `use`, `helpers`, `rescue_from` and other registrations no longer reach routes defined above them
 
