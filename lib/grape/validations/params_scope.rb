@@ -200,12 +200,16 @@ module Grape
 
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
-      def push_declared_params(attrs, **opts)
-        opts[:declared_params_scope] = self unless opts.key?(:declared_params_scope)
-        return @parent.push_declared_params(attrs, **opts) if lateral?
+      # +declared_params_scope+ is the scope an attribute is recorded against.
+      # It defaults to the receiver and is forwarded unchanged when a lateral
+      # scope hands the push to its parent, so an attribute declared inside a
+      # +given+ block stays attributed to the lateral scope that declared it
+      # rather than to the parent that stores it.
+      def push_declared_params(attrs, as: nil, declared_params_scope: self)
+        return @parent.push_declared_params(attrs, as:, declared_params_scope:) if lateral?
 
-        push_renamed_param(full_path + [attrs.first], opts[:as]) if opts[:as]
-        @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, opts[:declared_params_scope]) })
+        push_renamed_param(full_path + [attrs.first], as) if as
+        @declared_params.concat(attrs.map { |attr| ::Grape::Validations::ParamsScope::Attr.new(attr, declared_params_scope) })
       end
 
       private
