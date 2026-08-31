@@ -52,7 +52,13 @@ module Grape
           bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
-          Rack::Response.new(bodymap, status, headers)
+          # A bare Rack tuple rather than a Rack::Response: +headers+ is already
+          # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
+          # re-normalizes the same keys into a second Headers hash that
+          # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
+          # The 204/304 bodies Rack::Response#finish would blank are returned
+          # above, before this point.
+          [status, headers, bodymap]
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
