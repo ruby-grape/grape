@@ -52,7 +52,13 @@ module Grape
           bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
-          Rack::Response.new(bodymap, status, headers)
+          # A bare Rack tuple rather than a Rack::Response: +headers+ is already
+          # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
+          # re-normalizes the same keys into a second Headers hash that
+          # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
+          # The 204/304 bodies Rack::Response#finish would blank are returned
+          # above, before this point.
+          [status, headers, bodymap]
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
@@ -141,19 +147,42 @@ module Grape
       end
 
       def negotiate_content_type
-        fmt = format_from_extension || query_params['format'] || format || format_from_header || default_format
+        fmt = format_from_extension || format_from_query || format || format_from_header || default_format
         return env[Grape::Env::API_FORMAT] = fmt.to_sym if content_type_for(fmt)
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
       end
 
       def format_from_extension
-        request_path = try_scrub(rack_request.path)
+        request_path = try_scrub(path_for_extension)
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
         extension = request_path[(dot_pos + 1)..]
         extension if content_type_for(extension)
+      end
+
+      # The extension is the tail of the request path, so PATH_INFO answers it
+      # on its own whenever there is one: a dot in SCRIPT_NAME is followed by
+      # the slash that opens PATH_INFO, and no registered extension holds a
+      # slash. Only an empty PATH_INFO needs +Rack::Request#path+ — and with it
+      # the String its concatenation allocates. Tested with +empty?+ rather
+      # than +blank?+: the path is not scrubbed yet, and a regexp match on an
+      # invalid byte sequence raises.
+      def path_for_extension
+        path_info = env[Rack::PATH_INFO]
+        return rack_request.path if path_info.nil? || path_info.empty?
+
+        path_info
+      end
+
+      # +?format=+ can only be there when there is a query string at all, so
+      # the common query-less request skips parsing one.
+      def format_from_query
+        query_string = env[Rack::QUERY_STRING]
+        return if query_string.nil? || query_string.empty?
+
+        query_params['format']
       end
 
       # Media types are case-insensitive (RFC 9110 §8.3.1) but the registered
