@@ -14,8 +14,10 @@ module Grape
         return '/' unless path
         return path if path == '/'
 
-        # Fast path for the overwhelming majority of paths that don't need to be normalized
-        return path if path.start_with?('/') && !(path.end_with?('/') || path.match?(%r{%|//}))
+        # Fast path for the overwhelming majority of paths that don't need to be
+        # normalized. Two String#include? calls rather than one `%|//` regexp:
+        # same predicate, and the scan stays in C without building a match.
+        return path if path.start_with?('/') && !(path.end_with?('/') || path.include?('%') || path.include?('//'))
 
         # Slow path
         encoding = path.encoding
