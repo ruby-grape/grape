@@ -141,7 +141,7 @@ module Grape
 
     def initialize(env, build_params_with: nil)
       super(env)
-      @params_builder = Grape::ParamsBuilder.params_builder_for(build_params_with || Grape.config.param_builder)
+      @params_builder = Grape::ParamsBuilder.params_builder_for(build_params_with || Grape.config[:param_builder])
     end
 
     def params
