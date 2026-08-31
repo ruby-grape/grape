@@ -123,12 +123,18 @@ module Grape
         inheritable_setting.do_not_document!
       end
 
-      def mount(mounts, *opts)
-        mounts = { mounts => '/' } unless mounts.respond_to?(:each_pair)
-        mounts.each_pair do |app, path|
+      def mount(mounts, opts = {})
+        if opts[:refresh_already_mounted]
+          Grape.deprecator.warn('`refresh_already_mounted` is not a `mount` option and will be ignored in a future release.')
+          drop_endpoints_mounted_for(mounts)
+          # Dropped before the recursion below re-enters with the same options,
+          # so a Grape API does not warn once per mount and once per instance.
+          opts = opts.except(:refresh_already_mounted)
+        end
+
+        normalize_mounts(mounts).each_pair do |app, path|
           if app.respond_to?(:mount_instance)
-            opts_with = opts.any? ? opts.first[:with] : {}
-            mount({ app.mount_instance(configuration: opts_with) => path }, *opts)
+            mount({ app.mount_instance(configuration: opts[:with] || {}) => path }, opts)
             next
           end
           in_setting = inheritable_setting
@@ -145,15 +151,6 @@ module Grape
 
             app.change!
             change!
-          end
-
-          # When trying to mount multiple times the same endpoint, remove the previous ones
-          # from the list of endpoints if refresh_already_mounted parameter is true
-          refresh_already_mounted = opts.any? ? opts.first[:refresh_already_mounted] : false
-          if refresh_already_mounted && !endpoints.empty?
-            endpoints.delete_if do |endpoint|
-              same_mounted_app?(endpoint.mounted_app, app)
-            end
           end
 
           endpoints << Grape::Endpoint.new(
@@ -289,9 +286,31 @@ module Grape
         @endpoints = []
       end
 
-      def refresh_mounted_api(mounts, *opts)
-        opts << { refresh_already_mounted: true }
-        mount(mounts, *opts)
+      # Re-mount +mounts+, replacing any endpoint already mounted for the same
+      # base API rather than adding a second one. Called by
+      # {Grape::API.refresh_mount_step} when a class-level method runs after the
+      # API was mounted.
+      def refresh_mounted_api(mounts, opts = {})
+        drop_endpoints_mounted_for(mounts)
+        mount(mounts, opts)
+      end
+
+      # A mounted Grape API is stored as the throwaway instance +mount+ built
+      # for it, never as the class that was written, so endpoints are matched on
+      # the base API both of them share.
+      def drop_endpoints_mounted_for(mounts)
+        normalize_mounts(mounts).each_key do |app|
+          endpoints.delete_if { |endpoint| same_mounted_app?(endpoint.mounted_app, app) }
+        end
+      end
+
+      # A bare app mounts at the root. The test is +Hash+ rather than
+      # +respond_to?(:each_pair)+ because a Struct or an OpenStruct answers that
+      # too, and neither can express an app => path mapping — their keys are
+      # member names. Reading one as a mapping would silently mount nonsense
+      # instead of mounting the app itself.
+      def normalize_mounts(mounts)
+        mounts.is_a?(Hash) ? mounts : { mounts => '/' }
       end
 
       # Two mounts refer to the same app when they share the same base Grape
