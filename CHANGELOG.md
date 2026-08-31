@@ -44,8 +44,13 @@
 * [#2849](https://github.com/ruby-grape/grape/pull/2849): Remove `http_digest`, which has had no strategy behind it since 2.0.0 and raised on the first request rather than when the API was defined (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2862](https://github.com/ruby-grape/grape/pull/2862): Rename the `desc` `default` key to `default_response`, the name grape-swagger reads, deprecating `default` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2866](https://github.com/ruby-grape/grape/pull/2866): Take `as` as a keyword argument in `requires` and `optional` instead of carrying it in the options Hash, where it was dispatched as a no-op `AsValidator` - [@ericproulx](https://github.com/ericproulx).
+* [#2867](https://github.com/ruby-grape/grape/pull/2867): Extract the shared body of `requires` and `optional` into one private declaration, and drop `validate_attributes`, whose only step defaulted a type that no declaration could reach - [@ericproulx](https://github.com/ericproulx).
 * [#2869](https://github.com/ruby-grape/grape/pull/2869): Add `Grape::PrecompiledJson`, a body wrapper the JSON formatters serve verbatim instead of encoding a second time - [@ericproulx](https://github.com/ericproulx).
 * [#2873](https://github.com/ruby-grape/grape/pull/2873): Read `Grape.config[:param_builder]` instead of routing the per-request lookup through dry-configurable's `method_missing` - [@ericproulx](https://github.com/ericproulx).
+* [#2877](https://github.com/ruby-grape/grape/pull/2877): Write `route_info` into the path captures in `Grape::Router#process_route` instead of merging a second Hash into it - [@ericproulx](https://github.com/ericproulx).
+* [#2874](https://github.com/ruby-grape/grape/pull/2874): Test the `Grape::Util::PathNormalizer` fast path with two `String#include?` calls instead of a regexp - [@ericproulx](https://github.com/ericproulx).
+* [#2876](https://github.com/ruby-grape/grape/pull/2876): Return a bare Rack tuple from `Grape::Middleware::Formatter` instead of a `Rack::Response` the enclosing middleware immediately unwraps - [@ericproulx](https://github.com/ericproulx).
+* [#2875](https://github.com/ruby-grape/grape/pull/2875): Skip the query-string parse and the `script_name + path_info` concatenation during content negotiation when neither can affect the result - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
@@ -80,6 +85,7 @@
 * [#2861](https://github.com/ruby-grape/grape/pull/2861): Read `Grape::Router::Route#default` from the description instead of from the options Hash's own default value, which was always `nil` - [@ericproulx](https://github.com/ericproulx).
 * [#2864](https://github.com/ruby-grape/grape/pull/2864): Apply a group's type check to `optional` the same way as `requires`, so a type supplied by an enclosing `with` is no longer invisible to it (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2865](https://github.com/ruby-grape/grape/pull/2865): Pass `required` from `requires`/`optional` as an argument instead of writing a `presence` key into the caller's options, deprecating a user-supplied `presence` and letting a `with` block's `message` reach the presence validator (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2871](https://github.com/ruby-grape/grape/pull/2871): Move the endpoint replacement behind `mount`'s private re-mounting path, deprecating the undocumented `refresh_already_mounted` option, and recognise a mount mapping by `Hash` rather than by `respond_to?(:each_pair)` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)

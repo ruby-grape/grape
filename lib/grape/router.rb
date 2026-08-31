@@ -153,9 +153,10 @@ module Grape
     # (X-Cascade pass), the next candidate must not observe the previous
     # attempt's +route_info+ or path captures.
     def process_route(route, input, env, include_allow_header: false)
-      route_params = route.params_for(input)
-      routing_args = { route_info: route }
-      routing_args.merge!(route_params) if route_params.present?
+      # The path captures are the hash: +route_info+ is written into them
+      # rather than merged in from a second one.
+      routing_args = route.params_for(input) || {}
+      routing_args[:route_info] = route
       env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
       route.call(env)
