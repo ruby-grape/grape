@@ -111,10 +111,21 @@ module Grape
           status: raw.status || default_status,
           message: raw.message || default_message,
           headers:,
-          backtrace: raw.backtrace || raw.original_exception&.backtrace || []
+          backtrace: resolved_backtrace(raw)
         )
         env[Grape::Env::API_ENDPOINT].status(payload.status) # error! may not have been called
         render_response(payload)
+      end
+
+      # The backtrace an error formatter is handed. Assembled only when the API
+      # asked for one with `rescue_from ..., backtrace: true`: reading it off
+      # the exception is not free — +Exception#backtrace+ builds the whole Array
+      # of location strings — and every built-in formatter drops it otherwise.
+      # A formatter that wants one regardless still has +original_exception+.
+      def resolved_backtrace(raw)
+        return [] unless include_backtrace
+
+        raw.backtrace || raw.original_exception&.backtrace || []
       end
 
       # Rendering runs inside #call!'s own rescue clause, so it is not covered by
