@@ -46,6 +46,7 @@
 * [#2866](https://github.com/ruby-grape/grape/pull/2866): Take `as` as a keyword argument in `requires` and `optional` instead of carrying it in the options Hash, where it was dispatched as a no-op `AsValidator` - [@ericproulx](https://github.com/ericproulx).
 * [#2867](https://github.com/ruby-grape/grape/pull/2867): Extract the shared body of `requires` and `optional` into one private declaration, and drop `validate_attributes`, whose only step defaulted a type that no declaration could reach - [@ericproulx](https://github.com/ericproulx).
 * [#2869](https://github.com/ruby-grape/grape/pull/2869): Add `Grape::PrecompiledJson`, a body wrapper the JSON formatters serve verbatim instead of encoding a second time - [@ericproulx](https://github.com/ericproulx).
+* [#2876](https://github.com/ruby-grape/grape/pull/2876): Return a bare Rack tuple from `Grape::Middleware::Formatter` instead of a `Rack::Response` the enclosing middleware immediately unwraps - [@ericproulx](https://github.com/ericproulx).
 * [#2875](https://github.com/ruby-grape/grape/pull/2875): Skip the query-string parse and the `script_name + path_info` concatenation during content negotiation when neither can affect the result - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
