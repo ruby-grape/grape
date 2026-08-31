@@ -45,6 +45,7 @@
 * [#2862](https://github.com/ruby-grape/grape/pull/2862): Rename the `desc` `default` key to `default_response`, the name grape-swagger reads, deprecating `default` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2866](https://github.com/ruby-grape/grape/pull/2866): Take `as` as a keyword argument in `requires` and `optional` instead of carrying it in the options Hash, where it was dispatched as a no-op `AsValidator` - [@ericproulx](https://github.com/ericproulx).
 * [#2869](https://github.com/ruby-grape/grape/pull/2869): Add `Grape::PrecompiledJson`, a body wrapper the JSON formatters serve verbatim instead of encoding a second time - [@ericproulx](https://github.com/ericproulx).
+* [#2874](https://github.com/ruby-grape/grape/pull/2874): Test the `Grape::Util::PathNormalizer` fast path with two `String#include?` calls instead of a regexp - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
