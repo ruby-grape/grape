@@ -3938,19 +3938,15 @@ describe Grape::API do
       end
     end
 
-    context 'with refresh_already_mounted' do
+    # `Grape::API.refresh_mount_step` replays every mount through the private
+    # `refresh_mounted_api` whenever a class-level method runs after the mount,
+    # which has to replace the endpoint rather than add a second one.
+    context 'when a class-level method runs after a mount' do
       let(:app) { Class.new(described_class) { get('/x') { 'x' } } }
 
-      it 'replaces a previously mounted app instead of duplicating it' do
+      it 'replaces the mounted endpoint instead of duplicating it' do
         subject.mount app => '/thing'
-        expect { subject.mount({ app => '/thing' }, refresh_already_mounted: true) }
-          .not_to(change { subject.endpoints.count })
-      end
-
-      it 'duplicates the endpoint without the flag' do
-        subject.mount app => '/thing'
-        expect { subject.mount app => '/thing' }
-          .to change { subject.endpoints.count }.by(1)
+        expect { subject.format :json }.not_to(change { subject.endpoints.count })
       end
 
       it 'does not confuse two distinct apps that share a name' do
@@ -3961,8 +3957,33 @@ describe Grape::API do
         allow(other).to receive(:to_s).and_return('SameName')
 
         subject.mount app => '/thing'
-        expect { subject.mount({ other => '/thing' }, refresh_already_mounted: true) }
+        subject.mount other => '/thing'
+        expect { subject.format :json }.not_to(change { subject.endpoints.count })
+        expect(subject.endpoints.count).to eq(2)
+      end
+
+      it 'duplicates the endpoint when the same app is mounted twice' do
+        subject.mount app => '/thing'
+        expect { subject.mount app => '/thing' }
           .to change { subject.endpoints.count }.by(1)
+      end
+    end
+
+    context 'when mount is passed refresh_already_mounted' do
+      let(:app) { Class.new(described_class) { get('/x') { 'x' } } }
+
+      it 'is deprecated' do
+        subject.mount app => '/thing'
+        expect { subject.mount({ app => '/thing' }, refresh_already_mounted: true) }
+          .to raise_error(ActiveSupport::DeprecationException, /refresh_already_mounted/)
+      end
+
+      it 'still replaces the endpoint when deprecations are silenced' do
+        subject.mount app => '/thing'
+        Grape.deprecator.silence do
+          expect { subject.mount({ app => '/thing' }, refresh_already_mounted: true) }
+            .not_to(change { subject.endpoints.count })
+        end
       end
     end
 
