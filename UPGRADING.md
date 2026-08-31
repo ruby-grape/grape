@@ -3,6 +3,24 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### An error response carries a backtrace only when one was asked for
+
+Every error response used to materialize the raised exception's backtrace, even though the built-in error formatters render it only under `rescue_from ..., backtrace: true`. It is now assembled only when that option is set, since `Exception#backtrace` builds an Array of location Strings on every call and a Grape error is raised deep inside the request stack.
+
+`Grape::Exceptions::ErrorResponse#backtrace` is therefore an empty Array on the payload handed to an error formatter unless the API asked for backtraces. The built-in formatters are unaffected — they already guarded on the `include_backtrace:` argument they are passed.
+
+A custom error formatter that reads `error.backtrace` while ignoring that argument will now see an empty Array. Read it from the exception instead, which still travels on the payload:
+
+```ruby
+# before
+error.backtrace
+
+# after — equivalent regardless of the rescue options
+error.original_exception&.backtrace || []
+```
+
+`Grape::Exceptions::ErrorResponse.from_exception` no longer stores a backtrace either, for the same reason; `original_exception` is set, so nothing is lost.
+
 #### The `desc` `default` key is renamed to `default_response`
 
 grape-swagger reads a route's default response as `route.default_response`, a name Grape never defined — the `desc` DSL wrote the key as `default`, and the reader for it resolved to `Hash#default` on the route's options bag, so it answered `nil` for every route. A default response declared the way the README documented it therefore never reached the generated OpenAPI document.

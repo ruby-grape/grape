@@ -15,12 +15,15 @@ module Grape
         "#<#{self.class.name} status=#{status.inspect} message=#{message.inspect} headers=#{headers.inspect}>"
       end
 
+      # The backtrace is deliberately left unset: +Exception#backtrace+ builds
+      # the whole Array of location strings, and the response only renders one
+      # when the API asked for it. The exception travels along, so
+      # +Middleware::Error#error_response+ can still materialize it there.
       def self.from_exception(exception)
         new(
           status: exception.status,
           message: exception.message,
           headers: exception.headers,
-          backtrace: exception.backtrace,
           original_exception: exception
         )
       end
