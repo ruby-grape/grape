@@ -123,14 +123,12 @@ module Grape
     end
 
     def call(env)
-      dup.call!(env)
+      @prototype.dup.call!(env)
     end
 
     def call!(env)
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
-      # this adds the helpers only to the instance
-      singleton_class.include(@helpers) if @helpers
       @app.call(env)
     end
 
@@ -281,6 +279,48 @@ module Grape
       @afters             = callbacks.fetch(:after)
       @finallies          = callbacks.fetch(:finally)
       @build_params_with  = inheritable_setting.build_params_with
+      @prototype          = build_prototype
+    end
+
+    # The object each request is copied from.
+    #
+    # Helpers reach an endpoint by module inclusion, and +Object#dup+ does not
+    # carry a singleton class over — so including them on the per-request copy
+    # meant giving every request a brand-new singleton class, whose method
+    # cache then started cold for the helpers, the route block and every DSL
+    # method the endpoint answers. Include them once into a subclass owned by
+    # this endpoint instead, and copy this endpoint's state onto an instance of
+    # it: the per-request copy already answers to the helpers, against a class
+    # that has been warm since boot. It also keeps request handling free of
+    # class mutation.
+    #
+    # Endpoints with no helpers are their own prototype, exactly as before.
+    #
+    # +allocate+ rather than +new+ because the constructor rebuilds state from
+    # the DSL's arguments — a fresh settings copy, a fresh +@config+, another
+    # +block_to_unbound_method+ — and would still not hold what +compile!+ has
+    # just computed. What is wanted is what +dup+ itself does (allocate, then
+    # copy the ivars over) across a class boundary, which neither +dup+ nor
+    # +initialize_copy+ will do: both insist on the receiver's own class. So
+    # the copy is written out here. Taking all of them is safe because
+    # everything set past this point (+routes+, +namespace+) is route-building
+    # memoization the request path never reads.
+    def build_prototype
+      return self unless @helpers
+
+      klass = Class.new(self.class)
+      # Anonymous classes answer nil to +name+ and render as a bare address,
+      # which would reach anything that reports on the endpoint — +inspect+
+      # here, a logger or an error tracker elsewhere. The annotation is what
+      # +set_temporary_name+ is for; a plain constant path is rejected, which
+      # is right, since this class is not reachable under that name.
+      klass.set_temporary_name("#{self.class}(helpers)")
+      klass.include(@helpers)
+      prototype = klass.allocate
+      # Everything but the prototype slot itself, so that recompiling (a
+      # remount) does not leave the new prototype holding the one it replaces.
+      (instance_variables - [:@prototype]).each { |name| prototype.instance_variable_set(name, instance_variable_get(name)) }
+      prototype
     end
 
     def to_routes

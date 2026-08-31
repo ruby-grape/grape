@@ -37,6 +37,33 @@ error.original_exception&.backtrace || []
 
 `Grape::Exceptions::ErrorResponse.from_exception` no longer stores a backtrace either, for the same reason; `original_exception` is set, so nothing is lost.
 
+#### An endpoint that declares helpers is served from a subclass of `Grape::Endpoint`
+
+Helpers were included into the singleton class of the per-request copy of an endpoint, which meant every request built a fresh singleton class and re-ran `Module#include`. They are now included once, when the API is compiled, into a subclass owned by that endpoint, and each request copies an instance of it.
+
+The endpoint exposed as `env['api.endpoint']` (and handed to `before`/`after` filters, `rescue_from` blocks and middleware) is therefore an instance of that subclass rather than of `Grape::Endpoint` itself, for any endpoint whose scope declares `helpers`. Endpoints with no helpers are unaffected.
+
+Inheritance-based checks are unchanged:
+
+```ruby
+endpoint.is_a?(Grape::Endpoint)      # => true, as before
+endpoint.kind_of?(Grape::Endpoint)   # => true, as before
+Grape::Endpoint === endpoint         # => true, as before
+```
+
+Exact-class checks are not, and have no equivalent — use `is_a?`:
+
+```ruby
+# before => true, now => false
+endpoint.instance_of?(Grape::Endpoint)
+endpoint.class == Grape::Endpoint
+
+# before => "Grape::Endpoint", now => "Grape::Endpoint(helpers)"
+endpoint.class.name
+endpoint.class.to_s
+```
+
+The subclass carries a temporary name (`Module#set_temporary_name`), so it never answers `nil` to `#name` or renders as a bare `#<Class:0x...>` address. Code that logs or groups by `endpoint.class.name` — an error tracker keying on it, say — will see `Grape::Endpoint(helpers)` for these endpoints, and should match on `is_a?` if it needs to treat both kinds alike.
 #### The `desc` `default` key is renamed to `default_response`
 
 grape-swagger reads a route's default response as `route.default_response`, a name Grape never defined — the `desc` DSL wrote the key as `default`, and the reader for it resolved to `Hash#default` on the route's options bag, so it answered `nil` for every route. A default response declared the way the README documented it therefore never reached the generated OpenAPI document.
