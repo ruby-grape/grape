@@ -69,6 +69,7 @@ end
 ```
 
 An API that sets `message:` on a `with` block and relies on the generic wording for missing parameters will see its own message instead.
+
 #### `refresh_already_mounted` is no longer a `mount` option
 
 `mount` accepted an undocumented `refresh_already_mounted` option that replaced any endpoint already mounted for the same base API instead of adding a second one. It exists for Grape's own re-mounting machinery: when a class-level method runs after a `mount`, `Grape::API.refresh_mount_step` replays that mount, and replaying it naively would duplicate the endpoint.
