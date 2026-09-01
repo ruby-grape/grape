@@ -26,9 +26,11 @@ module Grape
           path_info = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
           return if path_info == '/'
 
-          path_info = @prefixes.reduce(path_info) do |pi, path|
-            pi.start_with?(path) ? pi.delete_prefix(path) : pi
-          end
+          # `each` rather than `reduce`: Array does not override Enumerable's,
+          # so the generic accumulator path costs more than the work it drives
+          # on a list that holds at most a mount path and a prefix — and most
+          # often nothing at all.
+          @prefixes.each { |prefix| path_info = path_info.delete_prefix(prefix) if path_info.start_with?(prefix) }
 
           slash_position = path_info.index('/', 1) # omit the first one
           return version_from_first_segment(path_info, slash_position) if slash_position
