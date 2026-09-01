@@ -20,6 +20,11 @@ module Grape
 
       ALL_MEDIA_TYPES = '*/*'
 
+      # The request methods that can carry a body worth parsing. See
+      # {#read_body_input?}, which tests the env against this before anything
+      # asks for a Rack::Request.
+      BODY_CARRYING_METHODS = [Rack::POST, Rack::PUT, Rack::PATCH, Rack::DELETE].freeze
+
       def_delegators :config, :default_format, :format, :formatters, :parsers
 
       def before
@@ -90,9 +95,10 @@ module Grape
       end
 
       def read_body_input
+        return unless read_body_input?
+
         input = rack_request.body # reads RACK_INPUT
         return if input.nil?
-        return unless read_body_input?
 
         rewind = input.respond_to?(:rewind)
 
@@ -139,11 +145,15 @@ module Grape
       # - multipart/related
       # - multipart/mixed
       def read_body_input?
-        return false unless rack_request.post? || rack_request.put? || rack_request.patch? || rack_request.delete?
+        # Read off the env rather than through Rack::Request's predicates: this
+        # is what decides the question for every request, and on the GET, HEAD
+        # and OPTIONS majority it is the only thing the formatter would have
+        # built a Rack::Request for.
+        return false unless BODY_CARRYING_METHODS.include?(env[Rack::REQUEST_METHOD])
         return false if rack_request.form_data? && rack_request.content_type
         return false if rack_request.parseable_data?
 
-        rack_request.content_length.to_i.positive? || rack_request.env['HTTP_TRANSFER_ENCODING'] == 'chunked'
+        rack_request.content_length.to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
       end
 
       def negotiate_content_type
