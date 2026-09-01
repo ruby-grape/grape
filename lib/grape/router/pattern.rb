@@ -29,6 +29,21 @@ module Grape
         @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
         @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(version, requirements))
         @to_regexp = @pattern.to_regexp
+        @captures = @to_regexp.names.any?
+      end
+
+      # True when the compiled pattern has named captures to extract from a
+      # matched path. A fully static path has none — not even +format+, which
+      # the suffix spells as a literal — so asking Mustermann for its params
+      # would run the regexp a second time (the router's union already matched
+      # it) only to hand back an empty Hash.
+      #
+      # Resolved once here rather than per request: +Regexp#names+ builds an
+      # Array and a String per capture, and Ruby offers no predicate that skips
+      # that (+named_captures+ builds a Hash, and scanning the source for
+      # <tt>(?<</tt> would count lookbehinds, which name nothing).
+      def captures?
+        @captures
       end
 
       def captures_default
