@@ -18,18 +18,6 @@ describe Grape::Middleware::Versioner::Path do
     expect(subject.call(Rack::PATH_INFO => '/').last).to be_nil
   end
 
-  context 'with a pattern' do
-    let(:options) { { pattern: /v./i } }
-
-    it 'sets the version if it matches' do
-      expect(subject.call(Rack::PATH_INFO => '/v1/awesome').last).to eq('v1')
-    end
-
-    it 'ignores the version if it fails to match' do
-      expect(subject.call(Rack::PATH_INFO => '/awesome/radical').last).to be_nil
-    end
-  end
-
   [%w[v1 v2], %i[v1 v2], [:v1, 'v2'], ['v1', :v2]].each do |versions|
     context "with specified versions as #{versions}" do
       let(:options) { { versions: } }
@@ -45,7 +33,7 @@ describe Grape::Middleware::Versioner::Path do
   end
 
   context 'with prefix, but requested version is not matched' do
-    let(:options) { { prefix: '/v1', pattern: /v./i } }
+    let(:options) { { prefix: '/v1' } }
 
     it 'recognizes potential version' do
       expect(subject.call(Rack::PATH_INFO => '/v3/foo').last).to eq('v3')

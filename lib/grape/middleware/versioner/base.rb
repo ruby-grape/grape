@@ -8,12 +8,12 @@ module Grape
         include Grape::Middleware::PrecomputedContentTypes
 
         Options = Data.define(
-          :content_types, :format, :mount_path, :pattern, :prefix, :version_options, :versions
+          :content_types, :format, :mount_path, :prefix, :version_options, :versions
         ) do
           include Grape::Middleware::DeprecatedOptionsHashAccess
 
           def initialize(
-            content_types: nil, format: nil, mount_path: nil, pattern: /.*/i, prefix: nil,
+            content_types: nil, format: nil, mount_path: nil, prefix: nil,
             version_options: Grape::DSL::VersionOptions.new, versions: nil
           )
             super
@@ -33,7 +33,7 @@ module Grape
 
         attr_reader :available_media_types, :error_headers, :versions
 
-        def_delegators :config, :mount_path, :pattern, :prefix, :version_options
+        def_delegators :config, :mount_path, :prefix, :version_options
         def_delegators :version_options, :cascade, :parameter, :strict, :vendor
 
         def initialize(app, **options)

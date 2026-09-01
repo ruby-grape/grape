@@ -40,8 +40,6 @@ module Grape
 
         def version_from_first_segment(path_info, slash_position)
           potential_version = path_info[1..(slash_position - 1)]
-          return unless potential_version.match?(pattern)
-
           version_not_found! unless potential_version_match?(potential_version)
           env[Grape::Env::API_VERSION] = potential_version
         end

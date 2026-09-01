@@ -3,6 +3,22 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### The versioner's `pattern` option has been removed
+
+`Grape::Middleware::Versioner::Base` accepted a `pattern` option, which `Versioner::Path` matched the candidate version segment against before recording it. It dates from the original versioner (2010), where it was the only way to decide whether the first path segment was a version — there was no declared version list yet.
+
+`versions:` took that job over: a segment is checked against the versions the API declared, and an unrecognized one answers 404. `pattern` was never connected to the `version` DSL that arrived later — `DSL::Routing#version` does not accept a `pattern:` keyword and `Endpoint#build_stack` never passed one — so it could only be reached by inserting the middleware yourself:
+
+```ruby
+use Grape::Middleware::Versioner::Path, versions: %w[v1], pattern: /v.+/
+```
+
+which also meant forgoing what `version` does for routing. That now raises `ArgumentError: unknown keyword: :pattern`, at the point the middleware is built rather than on a request.
+
+`Grape::Middleware::Versioner::Base::DEFAULT_OPTIONS` no longer carries a `:pattern` key, and `Versioner::Base#pattern` is gone. An API that declares its version through `version 'v1', using: :path` is unaffected — it never had a pattern.
+
+The one behaviour that disappears with it: a hand-wired versioner could use `pattern` to say "this segment is not a version at all", leaving `api.version` unset and letting the request through, as distinct from "unknown version", which answers 404. Nothing in the `version` DSL exposed that distinction, and `versions:` cannot express it. If you relied on it, match the segment yourself in a small middleware ahead of the versioner rather than through this option.
+
 #### An error response carries a backtrace only when one was asked for
 
 Every error response used to materialize the raised exception's backtrace, even though the built-in error formatters render it only under `rescue_from ..., backtrace: true`. It is now assembled only when that option is set, since `Exception#backtrace` builds an Array of location Strings on every call and a Grape error is raised deep inside the request stack.
