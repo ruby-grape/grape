@@ -6,14 +6,18 @@
 # benchmark/version_throughput/RESULTS.md.
 #
 # Each version is benched twice: once without YJIT, once with `--yjit`
-# (skipped if the running Ruby wasn't built with YJIT). Results show both
-# columns plus the YJIT speedup.
+# (skipped if the running Ruby wasn't built with YJIT). Each pass reports
+# throughput plus two deltas — against the previous benched version and
+# against the first one — so the table reads as improvement over time.
 #
 # Usage:
 #   ruby benchmark/version_throughput/run.rb
 #
 # To bench against a specific subset:
-#   GRAPE_VERSIONS="3.0.0,3.2.1,master" ruby benchmark/version_throughput/run.rb
+#   GRAPE_VERSIONS="3.0.0,3.3.5,master" ruby benchmark/version_throughput/run.rb
+#
+# Versions must be listed oldest to newest: the delta columns compare each
+# row against the one above it and against the first row.
 #
 # To run a YJIT-enabled Ruby that isn't the project default:
 #   RBENV_VERSION=4.0.3 ruby benchmark/version_throughput/run.rb
@@ -26,7 +30,7 @@ ROOT = File.expand_path('../..', __dir__)
 HERE = __dir__
 TMP  = File.join(ROOT, 'tmp', 'bench-versions')
 
-DEFAULT_VERSIONS = %w[3.0.0 3.0.1 3.1.0 3.1.1 3.2.0 3.2.1 master].freeze
+DEFAULT_VERSIONS = %w[3.0.0 3.1.0 3.2.0 3.3.0 3.3.5 master].freeze
 versions = (ENV['GRAPE_VERSIONS']&.split(',')&.map(&:strip) || DEFAULT_VERSIONS).freeze
 
 def gemfile_for(version)
@@ -125,8 +129,74 @@ host_desc = `uname -mrs 2>/dev/null`.strip
 report_path = File.join(HERE, 'RESULTS.md')
 
 format_ips = ->(n) { n.round.to_s.reverse.scan(/\d{1,3}/).join(',').reverse }
+ips_cell    = ->(pass) { pass&.dig(:ips)    ? format_ips.call(pass[:ips]) : 'err' }
+us_cell     = ->(pass) { pass&.dig(:us)     ? format('%.2f', pass[:us]) : '' }
+stddev_cell = ->(pass) { pass&.dig(:stddev) ? format('±%.2f%%', pass[:stddev]) : '' }
+
+# Throughput of `version` in a given pass (:no_yjit / :yjit), or nil when it produced no number.
+ips_of = ->(version, pass) { results.dig(version, pass, :ips) }
+
+# Newest version benched before `version` in this pass — the reference of `vs prev`.
+previous_of = lambda do |version, pass|
+  versions[0...versions.index(version)].reverse_each.find { |v| ips_of.call(v, pass) }
+end
+
+# Oldest version benched in this pass — the reference of `vs <first>`.
+baseline_of = ->(pass) { versions.find { |v| ips_of.call(v, pass) } }
+
+percent = lambda do |current, reference|
+  return '—' unless current && reference&.positive?
+
+  format('%+.1f%%', (current - reference) / reference * 100.0)
+end
+
+# [vs previous version, vs first version] for one pass — the improvement-over-time columns.
+deltas_of = lambda do |version, pass|
+  current = ips_of.call(version, pass)
+  previous = previous_of.call(version, pass)
+  baseline = baseline_of.call(pass)
+  [
+    previous ? percent.call(current, ips_of.call(previous, pass)) : '—',
+    baseline && baseline != version ? percent.call(current, ips_of.call(baseline, pass)) : '—'
+  ]
+end
+
+first_version = baseline_of.call(:no_yjit) || baseline_of.call(:yjit) || versions.first
+last_version = versions.reverse_each.find { |v| ips_of.call(v, :no_yjit) || ips_of.call(v, :yjit) }
+
+headers =
+  if with_yjit
+    ['Version', 'No-YJIT (i/s)', 'μs/req', 'vs prev', "vs #{first_version}",
+     'YJIT (i/s)', 'μs/req', 'vs prev', "vs #{first_version}", 'YJIT speedup']
+  else
+    ['Version', 'Throughput (i/s)', 'μs/req', '± stddev', 'vs prev', "vs #{first_version}"]
+  end
+
+row_for = lambda do |version|
+  r = results[version]
+  return [version, "error: #{r[:error]}"] + Array.new(headers.size - 2, '') if r.is_a?(Hash) && r[:error]
+
+  no_yjit = r[:no_yjit]
+  yjit = r[:yjit]
+  head = [version, ips_cell.call(no_yjit), us_cell.call(no_yjit)]
+  return head + [stddev_cell.call(no_yjit)] + deltas_of.call(version, :no_yjit) unless with_yjit
+
+  head + deltas_of.call(version, :no_yjit) + [ips_cell.call(yjit), us_cell.call(yjit)] +
+    deltas_of.call(version, :yjit) + [percent.call(yjit&.dig(:ips), no_yjit&.dig(:ips))]
+end
+
+# One-line summary of the whole timeline: first benched version to last, per pass.
+overall = %i[no_yjit yjit].filter_map do |pass|
+  current = ips_of.call(last_version, pass)
+  reference = ips_of.call(first_version, pass)
+  next unless current && reference && last_version != first_version
+
+  "**#{percent.call(current, reference)}** #{pass == :yjit ? 'with' : 'without'} YJIT"
+end
 
 File.open(report_path, 'w') do |f|
+  row = ->(cells) { f.puts("| #{cells.join(' | ')} |") }
+
   f.puts "# Grape throughput by version\n\n"
   f.puts "Generated: #{Time.now.strftime('%Y-%m-%d %H:%M:%S %Z')}  "
   f.puts "Ruby: #{ruby_desc}  "
@@ -136,43 +206,16 @@ File.open(report_path, 'w') do |f|
          '`BenchAPI.call(env)` against `/api/v1/hello` returning a small JSON object. ' \
          "Reproduce with `ruby benchmark/version_throughput/run.rb`.\n\n"
 
-  if with_yjit
-    f.puts '| Version | No-YJIT (i/s) | μs/req | YJIT (i/s) | μs/req | YJIT speedup |'
-    f.puts '|---|---:|---:|---:|---:|---:|'
-  else
-    f.puts '| Version | Throughput (i/s) | μs/req | ± stddev |'
-    f.puts '|---|---:|---:|---:|'
-  end
+  row.call(headers)
+  row.call(['---'] + Array.new(headers.size - 1, '---:'))
+  versions.each { |version| row.call(row_for.call(version)) }
 
-  versions.each do |version|
-    r = results[version]
-    if r.is_a?(Hash) && r[:error]
-      cols = with_yjit ? 5 : 3
-      f.puts "| #{version} | error: #{r[:error]} #{'|' * cols}"
-      next
-    end
-
-    no_yjit = r[:no_yjit]
-    yjit = r[:yjit]
-
-    if with_yjit
-      no_yjit_cell = no_yjit&.dig(:ips) ? format_ips.call(no_yjit[:ips]) : 'err'
-      no_yjit_us   = no_yjit&.dig(:us)  ? format('%.2f', no_yjit[:us]) : ''
-      yjit_cell    = yjit&.dig(:ips)    ? format_ips.call(yjit[:ips]) : 'err'
-      yjit_us      = yjit&.dig(:us)     ? format('%.2f', yjit[:us]) : ''
-      speedup = (no_yjit&.dig(:ips) && yjit&.dig(:ips)) ?
-        format('%+.1f%%', (yjit[:ips] - no_yjit[:ips]) / no_yjit[:ips] * 100.0) : '—'
-      f.puts "| #{version} | #{no_yjit_cell} | #{no_yjit_us} | #{yjit_cell} | #{yjit_us} | #{speedup} |"
-    else
-      cell = no_yjit&.dig(:ips) ? format_ips.call(no_yjit[:ips]) : 'err'
-      us = no_yjit&.dig(:us) ? format('%.2f', no_yjit[:us]) : ''
-      stddev = no_yjit&.dig(:stddev) ? format('±%.2f%%', no_yjit[:stddev]) : ''
-      f.puts "| #{version} | #{cell} | #{us} | #{stddev} |"
-    end
-  end
+  f.puts "\nOver time, #{first_version} → #{last_version}: #{overall.join(', ')}." unless overall.empty?
 
   f.puts "\n## Notes"
   f.puts '- All versions exercised through the same `BenchAPI` definition (kept stable in `app.rb`).'
+  f.puts "- `vs prev` compares throughput against the previous benched version and `vs #{first_version}` " \
+         'against the first one; read those columns for improvement over time.'
   f.puts '- Results are noisy at this scale (±5-8%); rerun if a number looks off.'
   if with_yjit
     f.puts '- `YJIT speedup` is `(yjit_ips - no_yjit_ips) / no_yjit_ips`.'
