@@ -919,6 +919,25 @@ describe Grape::API do
       expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, POST, HEAD'
     end
 
+    # Regression: a route declared with a verb outside Grape::HTTP_SUPPORTED_METHODS
+    # was listed in Allow but never compiled into the router's optimized map, so
+    # the resource advertised a method it answered with 405.
+    specify 'serves a method listed in the Allow header but outside the standard verbs' do
+      subject.get 'example' do
+        'example'
+      end
+      subject.route :purge, 'example' do
+        'purged'
+      end
+
+      custom_request 'PURGE', '/example'
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eql 'purged'
+
+      put '/example'
+      expect(last_response.headers['Allow']).to eql 'OPTIONS, GET, PURGE, HEAD'
+    end
+
     specify '405 responses includes an Content-Type header' do
       subject.get 'example' do
         'example'

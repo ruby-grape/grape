@@ -49,6 +49,41 @@ describe Grape::Router do
     end
   end
 
+  # Regression: the optimized map was compiled from Grape::HTTP_SUPPORTED_METHODS,
+  # so a route registered for any other verb stayed in @map and out of the map
+  # #match? reads. It was advertised in the resource's Allow header and then
+  # 405'd on every request.
+  describe 'routes registered with a non-standard HTTP method' do
+    subject(:router) { described_class.new }
+
+    let(:endpoint) { ->(_env) { [200, {}, ['purged']] } }
+    let(:pattern) do
+      Grape::Router::Pattern.new(origin: '/cache', suffix: '', anchor: true, params: {}, version: nil, requirements: {})
+    end
+
+    before do
+      router.append(Grape::Router::Route.new(endpoint, :purge, pattern, {}, forward_match: false))
+      router.compile!
+    end
+
+    it 'compiles the method into the optimized map' do
+      expect(router.instance_variable_get(:@optimized_map)).to have_key('PURGE')
+    end
+
+    it 'matches a request using that method' do
+      status, _, body = router.call(Rack::MockRequest.env_for('/cache', method: 'PURGE'))
+
+      expect(status).to eq(200)
+      expect(body.to_a).to eq(['purged'])
+    end
+
+    it 'still 404s a method that has no routes' do
+      status, = router.call(Rack::MockRequest.env_for('/cache', method: 'PROPFIND'))
+
+      expect(status).to eq(404)
+    end
+  end
+
   # Regression: a cascading route used to hand straight over to the greedy
   # neighbour — the *last* route registered for the path — so any route
   # between the first match and that last one was unreachable.
