@@ -54,10 +54,32 @@ module Grape
 
       private
 
+      # The declared versions constrain the +:version+ capture. They are handed
+      # to Mustermann as one alternation Regexp rather than as the Array of
+      # Strings they arrive in, because an Array capture makes Mustermann build
+      # a *converter* for the capture -- and for an Array of plain Strings that
+      # converter is the identity function (Mustermann only derives one from a
+      # Class or a Symbol, so every entry contributes nothing and the lambda
+      # falls through to `|| string`).
+      #
+      # A non-empty converter table costs every request on the route: it makes
+      # Mustermann's +identity_params?+ fast path unreachable, so +params+
+      # rebuilds the capture Hash through +map_param+ and calls the do-nothing
+      # lambda on each value. Passing a Regexp registers no converter at all.
+      #
+      # The generated matcher differs in one respect: Mustermann expands an
+      # Array entry the way it expands a path literal, so each character also
+      # matches its own percent-encoding (+v1+ as <tt>(?:v|%76)(?:1|%31)</tt>).
+      # A Regexp is inserted verbatim, so a percent-encoded version segment no
+      # longer matches the route. It never reached the endpoint anyway --
+      # {Versioner::Base#potential_version_match?} compares the raw segment
+      # against the declared versions, so +/api/%76%31/x+ was matched here and
+      # then rejected as an unknown version, ending in the same cascading 404
+      # the router now returns directly.
       def extract_capture(version, requirements)
         return requirements if version.blank?
 
-        requirements.merge(version: map_str(version))
+        requirements.merge(version: Regexp.union(map_str(version)))
       end
 
       def build_path_from_pattern(pattern, anchor)
