@@ -10,13 +10,18 @@ module Grape
     # at initialization so per-request +dup+s inherit them rather than
     # rebuilding them.
     #
+    # +mime_types+ is not warmed here: Formatter is the only middleware that
+    # reads it, and it warms it itself. The tables behind +mime_types+ and
+    # +content_type_for+ are shared process-wide per content-type registry
+    # (see Grape::ContentTypes), so the ivars below memoize a lookup, not a
+    # copy.
+    #
     # Opt-in: plain +Grape::Middleware::Base+ subclasses that don't need
     # content-type-aware helpers don't pay for them.
     module PrecomputedContentTypes
       def initialize(app, **options)
         super
         content_types
-        mime_types
         content_types_lookup
       end
 
@@ -38,20 +43,8 @@ module Grape
 
       private
 
-      # Every format under both spellings in one plain Hash, so a lookup is a
-      # single +Hash#[]+. +HashWithIndifferentAccess+ converted the key on every
-      # read instead, and this is read two or three times per request — to
-      # negotiate the format, and again to set the response content type.
-      #
-      # Keys arrive as Symbols: the +content_type+ DSL symbolizes what it is
-      # given and the defaults are Symbols. The key is stored as it came too,
-      # so a middleware constructed directly with String keys still answers to
-      # either spelling, as the indifferent hash did.
       def content_types_lookup
-        @content_types_lookup ||= content_types.each_with_object({}) do |(format, media_type), lookup|
-          lookup[format] = media_type
-          lookup[format.is_a?(String) ? format.to_sym : format.to_s] = media_type
-        end.freeze
+        @content_types_lookup ||= Grape::ContentTypes.lookup_for(content_types)
       end
     end
   end

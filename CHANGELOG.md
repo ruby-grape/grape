@@ -59,6 +59,7 @@
 * [#2881](https://github.com/ruby-grape/grape/pull/2881): Decide whether a request carries a body from the env, so `Grape::Middleware::Formatter` no longer builds a `Rack::Request` for GET, HEAD and OPTIONS - [@ericproulx](https://github.com/ericproulx).
 * [#2883](https://github.com/ruby-grape/grape/pull/2883): Resolve a format's content type through a plain Hash carrying both spellings instead of a `HashWithIndifferentAccess` that converts the key on every read - [@ericproulx](https://github.com/ericproulx).
 * [#2887](https://github.com/ruby-grape/grape/pull/2887): Add support for the HTTP `QUERY` method (RFC 10008), including the `query` DSL verb and parsing the request content into `params` - [@ericproulx](https://github.com/ericproulx).
+* [#2885](https://github.com/ruby-grape/grape/pull/2885): Share the content-type lookup and mime-type tables between middleware instances that register the same content types, instead of building a copy per API - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
