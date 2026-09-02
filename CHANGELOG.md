@@ -61,6 +61,7 @@
 * [#2887](https://github.com/ruby-grape/grape/pull/2887): Add support for the HTTP `QUERY` method (RFC 10008), including the `query` DSL verb and parsing the request content into `params` - [@ericproulx](https://github.com/ericproulx).
 * [#2885](https://github.com/ruby-grape/grape/pull/2885): Share the content-type lookup and mime-type tables between middleware instances that register the same content types, instead of building a copy per API - [@ericproulx](https://github.com/ericproulx).
 * [#2891](https://github.com/ruby-grape/grape/pull/2891): Look registrations up in a plain Hash carrying both spellings instead of a `HashWithIndifferentAccess` - [@ericproulx](https://github.com/ericproulx).
+* [#2888](https://github.com/ruby-grape/grape/pull/2888): Resolve an API instance's cascade setting once at compile time instead of walking the settings chain on every request - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
