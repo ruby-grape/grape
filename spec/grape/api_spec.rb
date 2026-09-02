@@ -745,6 +745,55 @@ describe Grape::API do
       end
     end
 
+    # RFC 10008: QUERY is a safe, idempotent method whose content carries the
+    # query, so the body is parsed the way POST's is while the response keeps
+    # GET's default 200.
+    describe 'the QUERY method' do
+      before do
+        subject.format :json
+        subject.params { requires :q, type: String }
+        subject.query('/search') { { found: params[:q] } }
+      end
+
+      def query_request(body, content_type: 'application/json')
+        custom_request 'QUERY', '/search', {}, 'CONTENT_TYPE' => content_type, input: body
+      end
+
+      it 'reads the query from the request content' do
+        query_request '{"q":"grape"}'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eql '{"found":"grape"}'
+      end
+
+      it 'validates the parsed content' do
+        query_request '{}'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eql '{"error":"q is missing"}'
+      end
+
+      it 'rejects content sent without a content-type' do
+        custom_request 'QUERY', '/search', {}, input: '{"q":"grape"}'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eql '{"error":"The QUERY method requires a content-type."}'
+      end
+
+      it 'rejects an unsupported content-type' do
+        query_request '{"q":"grape"}', content_type: 'application/x-yaml'
+
+        expect(last_response.status).to eq(415)
+      end
+
+      it 'is listed in the Allow header alongside the other verbs' do
+        subject.get('/search') { 'get' }
+
+        put '/search'
+        expect(last_response.headers['Allow']).to eql 'OPTIONS, QUERY, GET, HEAD'
+      end
+    end
+
     it 'allows for catch-all in a namespace' do
       subject.namespace :nested do
         get do

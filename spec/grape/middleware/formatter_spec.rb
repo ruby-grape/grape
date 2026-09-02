@@ -264,7 +264,7 @@ describe Grape::Middleware::Formatter do
 
   context 'input' do
     content_types = ['application/json', 'application/json; charset=utf-8'].freeze
-    %w[POST PATCH PUT DELETE].each do |method|
+    %w[POST PATCH PUT DELETE QUERY].each do |method|
       context 'when body is not nil or empty' do
         context 'when Content-Type is supported' do
           let(:io) { StringIO.new('{"is_boolean":true,"string":"thing"}') }
@@ -412,6 +412,34 @@ describe Grape::Middleware::Formatter do
           )
           expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]).to be_nil
         end
+      end
+    end
+
+    # RFC 10008, Sections 2 and 2.1: a QUERY carries the query in its content,
+    # so a body that never says what it is cannot be read as the default format.
+    context 'when a body is sent without a Content-Type' do
+      def error_from(method)
+        io = StringIO.new('{"is_boolean":true,"string":"thing"}')
+        catch(:error) do
+          subject.call(
+            Rack::PATH_INFO => '/info',
+            Rack::REQUEST_METHOD => method,
+            Rack::RACK_INPUT => io,
+            'CONTENT_LENGTH' => io.length.to_s
+          )
+          nil
+        end
+      end
+
+      it 'rejects a QUERY with a 400 HTTP error status' do
+        error = error_from(Grape::QUERY)
+
+        expect(error.status).to eq(400)
+        expect(error.message).to eq('The QUERY method requires a content-type.')
+      end
+
+      it 'leaves the default-format fallback in place for the other methods' do
+        expect(%w[POST PATCH PUT DELETE].map { |method| error_from(method) }).to all(be_nil)
       end
     end
   end
