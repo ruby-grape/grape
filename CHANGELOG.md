@@ -61,6 +61,7 @@
 * [#2887](https://github.com/ruby-grape/grape/pull/2887): Add support for the HTTP `QUERY` method (RFC 10008), including the `query` DSL verb and parsing the request content into `params` - [@ericproulx](https://github.com/ericproulx).
 * [#2885](https://github.com/ruby-grape/grape/pull/2885): Share the content-type lookup and mime-type tables between middleware instances that register the same content types, instead of building a copy per API - [@ericproulx](https://github.com/ericproulx).
 * [#2889](https://github.com/ruby-grape/grape/pull/2889): Constrain the `:version` capture with a `Regexp` so Mustermann stops registering an identity param converter, which was defeating its `identity_params?` fast path on every path-versioned request - [@ericproulx](https://github.com/ericproulx).
+* [#2890](https://github.com/ruby-grape/grape/pull/2890): Read the path version off the route the router already matched instead of re-deriving it from `PATH_INFO` in `Grape::Middleware::Versioner::Path` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
