@@ -57,6 +57,7 @@
 * [#2872](https://github.com/ruby-grape/grape/pull/2872): Include an endpoint's helpers once at compile time instead of on every request, so a request no longer builds a singleton class whose method cache starts cold (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2882](https://github.com/ruby-grape/grape/pull/2882): Strip mount path and prefix in `Grape::Middleware::Versioner::Path` with `each` instead of `Enumerable#reduce` - [@ericproulx](https://github.com/ericproulx).
 * [#2881](https://github.com/ruby-grape/grape/pull/2881): Decide whether a request carries a body from the env, so `Grape::Middleware::Formatter` no longer builds a `Rack::Request` for GET, HEAD and OPTIONS - [@ericproulx](https://github.com/ericproulx).
+* [#2883](https://github.com/ruby-grape/grape/pull/2883): Resolve a format's content type through a plain Hash carrying both spellings instead of a `HashWithIndifferentAccess` that converts the key on every read - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
