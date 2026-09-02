@@ -53,6 +53,7 @@
 * [#2876](https://github.com/ruby-grape/grape/pull/2876): Return a bare Rack tuple from `Grape::Middleware::Formatter` instead of a `Rack::Response` the enclosing middleware immediately unwraps - [@ericproulx](https://github.com/ericproulx).
 * [#2875](https://github.com/ruby-grape/grape/pull/2875): Skip the query-string parse and the `script_name + path_info` concatenation during content negotiation when neither can affect the result - [@ericproulx](https://github.com/ericproulx).
 * [#2879](https://github.com/ruby-grape/grape/pull/2879): Skip path-param extraction for routes whose compiled pattern captures nothing, instead of re-running the regexp to build an empty Hash - [@ericproulx](https://github.com/ericproulx).
+* [#2880](https://github.com/ruby-grape/grape/pull/2880): Remove `Grape::Middleware::Versioner`'s `pattern` option, a leftover of the 2010 versioner that `versions:` superseded and the `version` DSL never exposed (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
