@@ -621,7 +621,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on `POST` and `PUT` for form input, JSON and XML content-types.
+Parameters are automatically populated from the request body on `POST`, `PUT` and `QUERY` for form input, JSON and XML content-types.
 
 The request:
 
@@ -2301,6 +2301,26 @@ namespace :outer, requirements: { id: /[0-9]*/ } do
   end
 end
 ```
+
+### The QUERY Method
+
+Grape supports [`QUERY`](https://www.rfc-editor.org/info/rfc10008/), a safe and idempotent method that carries its query in the request content rather than in the URI. It is the method to reach for when a query is too large, too structured, or too sensitive to encode into a query string.
+
+```ruby
+params do
+  requires :q, type: String
+  optional :limit, type: Integer
+end
+query '/search' do
+  Status.search(params[:q], limit: params[:limit])
+end
+```
+
+```
+curl -X QUERY 'http://localhost:9292/search' -H Content-Type:application/json -d '{"q": "grape", "limit": 10}'
+```
+
+The content is parsed into `params` exactly as it is for `POST`, and a successful response defaults to `200`, not `201`. Because the content *is* the query, a `QUERY` request that arrives without a `Content-Type` is rejected with `400` instead of falling back to the API's default format.
 
 ## Helpers
 

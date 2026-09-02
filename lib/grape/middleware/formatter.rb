@@ -22,8 +22,9 @@ module Grape
 
       # The request methods that can carry a body worth parsing. See
       # {#read_body_input?}, which tests the env against this before anything
-      # asks for a Rack::Request.
-      BODY_CARRYING_METHODS = [Rack::POST, Rack::PUT, Rack::PATCH, Rack::DELETE].freeze
+      # asks for a Rack::Request. QUERY is here because its content *is* the
+      # query (RFC 10008, Section 2), not an optional payload.
+      BODY_CARRYING_METHODS = [Rack::POST, Rack::PUT, Rack::PATCH, Rack::DELETE, Grape::QUERY].freeze
 
       def_delegators :config, :default_format, :format, :formatters, :parsers
 
@@ -115,6 +116,13 @@ module Grape
         return if body.empty?
 
         media_type = rack_request.media_type
+
+        # RFC 10008, Sections 2 and 2.1: a QUERY carries its query in the
+        # content, so a request that never says what that content is cannot be
+        # interpreted and must fail rather than be read as the default format.
+        # Every other method keeps that fallback.
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: 'The QUERY method requires a content-type.') if media_type.nil? && env[Rack::REQUEST_METHOD] == Grape::QUERY
+
         fmt = media_type ? mime_types[media_type] : default_format
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
