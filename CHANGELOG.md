@@ -65,6 +65,7 @@
 * [#2889](https://github.com/ruby-grape/grape/pull/2889): Constrain the `:version` capture with a `Regexp` so Mustermann stops registering an identity param converter, which was defeating its `identity_params?` fast path on every path-versioned request - [@ericproulx](https://github.com/ericproulx).
 * [#2890](https://github.com/ruby-grape/grape/pull/2890): Read the path version off the route the router already matched instead of re-deriving it from `PATH_INFO` in `Grape::Middleware::Versioner::Path` - [@ericproulx](https://github.com/ericproulx).
 * [#2892](https://github.com/ruby-grape/grape/pull/2892): Resolve the params builder when `params` are first read rather than in every `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
+* [#2893](https://github.com/ruby-grape/grape/pull/2893): Scrub the format extension rather than the whole request path when negotiating a format - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
