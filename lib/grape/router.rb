@@ -52,7 +52,10 @@ module Grape
 
     def call(env)
       with_optimization do
-        input = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
+        # Published on the env so the middleware the matched route runs -- the
+        # path versioner above all -- reads the path this routed on instead of
+        # normalizing PATH_INFO a second time.
+        input = env[Grape::Env::GRAPE_NORMALIZED_PATH] = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
         transaction(input, env[Rack::REQUEST_METHOD], env)
       end
     end
