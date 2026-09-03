@@ -25,10 +25,14 @@ module Grape
 
       @union = Regexp.union(@neutral_regexes)
       @neutral_regexes = nil
-      (Grape::HTTP_SUPPORTED_METHODS + ['*']).each do |method|
-        next unless @map.key?(method)
-
-        routes = @map[method]
+      # Compiled from the routes actually registered rather than from
+      # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
+      # (`route :purge, '/cache'`) is accepted at definition time and is
+      # already collected into the resource's Allow header, so skipping it here
+      # left it in @map but out of @optimized_map — the only map #match? reads.
+      # The resource then advertised a method that could never be matched and
+      # answered every request for it with 405.
+      @map.each do |method, routes|
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         @optimized_map[method] = Regexp.union(optimized_map)
       end
