@@ -28,6 +28,14 @@ module Grape
 
       def_delegators :config, :default_format, :format, :formatters, :parsers
 
+      # The formatter is the only middleware that maps an incoming media type
+      # back to a format, so it warms +mime_types+ itself rather than making
+      # every content-type-aware middleware build a table none of them read.
+      def initialize(app, **options)
+        super
+        mime_types
+      end
+
       def before
         negotiate_content_type
         read_body_input

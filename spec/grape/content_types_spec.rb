@@ -73,6 +73,46 @@ describe Grape::ContentTypes do
       end
 
       it { is_expected.to eq('application/xml' => :xml) }
+
+      it { is_expected.to be_frozen }
+
+      it 'returns the same table for an equal registry' do
+        expect(subject).to be(described_class.mime_types_for({ xml: 'application/xml;charset=utf-8' }))
+      end
+    end
+  end
+
+  describe '.lookup_for' do
+    subject { described_class.lookup_for(from_settings) }
+
+    let(:from_settings) { { json: 'application/json' } }
+
+    it 'holds every format under both spellings' do
+      expect(subject).to eq(json: 'application/json', 'json' => 'application/json')
+    end
+
+    it { is_expected.to be_frozen }
+
+    context 'with String keys' do
+      let(:from_settings) { { 'json' => 'application/json' } }
+
+      it 'answers to either spelling' do
+        expect(subject).to eq('json' => 'application/json', json: 'application/json')
+      end
+    end
+
+    context 'when another registry has the same content types' do
+      it 'returns the same table' do
+        expect(subject).to be(described_class.lookup_for({ json: 'application/json' }))
+      end
+    end
+
+    context 'when the registry is mutated after being looked up' do
+      it 'keeps answering the original registry' do
+        subject
+        from_settings[:xml] = 'application/xml'
+        expect(described_class.lookup_for({ json: 'application/json' })).to eq(json: 'application/json', 'json' => 'application/json')
+      end
     end
   end
 
