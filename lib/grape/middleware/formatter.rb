@@ -179,12 +179,17 @@ module Grape
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
       end
 
+      # Only the extension is scrubbed, and only once the path turns out to have
+      # one: +String#rindex+ takes a byte offset and never raises on an invalid
+      # sequence, and a +.+ byte cannot be part of a multi-byte one, so the dot
+      # sits at the same place before and after scrubbing. The overwhelming
+      # majority of paths carry no extension and now skip the scrub entirely.
       def format_from_extension
-        request_path = try_scrub(path_for_extension)
+        request_path = path_for_extension
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
-        extension = request_path[(dot_pos + 1)..]
+        extension = try_scrub(request_path[(dot_pos + 1)..])
         extension if content_type_for(extension)
       end
 
