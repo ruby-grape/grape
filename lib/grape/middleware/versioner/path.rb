@@ -23,7 +23,10 @@ module Grape
         end
 
         def before
-          path_info = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
+          routed = routed_version
+          return env[Grape::Env::API_VERSION] = routed if routed
+
+          path_info = env[Grape::Env::GRAPE_NORMALIZED_PATH] || Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
           return if path_info == '/'
 
           # `each` rather than `reduce`: Array does not override Enumerable's,
@@ -39,6 +42,24 @@ module Grape
         end
 
         private
+
+        # Under path versioning every route pattern carries the version as a
+        # named capture (Pattern::Path#build_parts inserts it), constrained to
+        # the declared versions -- so the router has already sliced the segment
+        # out and validated it, and re-deriving it from PATH_INFO would repeat
+        # the normalize, prefix-strip and slice below for the same answer.
+        #
+        # Nil, and the path parsed as before, when there are no routing args at
+        # all (the middleware used outside a Grape router) and for the greedy
+        # routes behind auto-OPTIONS and 405, which capture nothing. An Array
+        # means the route declared a +:version+ segment of its own on top of the
+        # versioning one: Mustermann then reports the capture as every position
+        # it matched rather than the single segment recorded here, so that too
+        # is left to the path parse.
+        def routed_version
+          version = env[Grape::Env::GRAPE_ROUTING_ARGS]&.[](:version)
+          version if version.is_a?(String)
+        end
 
         def version_from_first_segment(path_info, slash_position)
           potential_version = path_info[1..(slash_position - 1)]
