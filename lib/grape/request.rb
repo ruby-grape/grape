@@ -141,7 +141,7 @@ module Grape
 
     def initialize(env, build_params_with: nil)
       super(env)
-      @params_builder = Grape::ParamsBuilder.params_builder_for(build_params_with || Grape.config[:param_builder])
+      @build_params_with = build_params_with
     end
 
     def params
@@ -166,8 +166,16 @@ module Grape
 
     private
 
+    # Resolved on first use rather than in the constructor: a request that never
+    # reads +params+ -- an endpoint with no validations whose block does not ask
+    # for them -- pays neither the registry lookup nor the global config read,
+    # and every request builds a Grape::Request.
+    def params_builder
+      @params_builder ||= Grape::ParamsBuilder.params_builder_for(@build_params_with || Grape.config[:param_builder])
+    end
+
     def make_params
-      params = @params_builder.call(rack_params)
+      params = params_builder.call(rack_params)
       filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
       return params if filtered.blank?
 
