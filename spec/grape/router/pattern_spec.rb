@@ -13,6 +13,37 @@ RSpec.describe Grape::Router::Pattern do
     end
   end
 
+  describe 'version capture' do
+    subject(:pattern) do
+      described_class.new(origin: '/:version/x', suffix: '', anchor: true, params: {}, version:, requirements: {})
+    end
+
+    # The declared versions reach Mustermann as one alternation Regexp, and
+    # Regexp.union only accepts Strings and Regexps -- it raises a TypeError on
+    # a Symbol or an Integer as soon as there is more than one of them, since a
+    # lone entry goes through Regexp.escape instead. `version` accepts both
+    # spellings, so they are coerced before the union is built.
+    [
+      ['Strings',  %w[v1 v2],   %w[v1 v2]],
+      ['Symbols',  %i[v1 v2],   %w[v1 v2]],
+      ['Integers', [1, 2],      %w[1 2]],
+      ['a lone Symbol', :v1,    %w[v1]]
+    ].each do |label, declared, expected|
+      context "declared as #{label}" do
+        let(:version) { declared }
+
+        it 'matches every declared version and nothing else' do
+          expected.each { |v| expect(pattern.match?("/#{v}/x")).to be(true) }
+          expect(pattern.match?('/v9/x')).to be(false)
+        end
+
+        it 'captures the version as a String' do
+          expect(pattern.params("/#{expected.first}/x")).to eq('version' => expected.first)
+        end
+      end
+    end
+  end
+
   describe '.build' do
     subject(:pattern) do
       described_class.build(
