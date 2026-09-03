@@ -111,12 +111,13 @@ module Grape
 
         @router.compile!
         @router.freeze
+        @cascade = resolve_cascade
       end
 
       # Handle a request. See Rack documentation for what `env` is.
       def call(env)
         status, headers, response = @router.call(env)
-        unless cascade?
+        unless @cascade
           headers = Grape::Util::Header.new.merge(headers)
           headers.delete('X-Cascade')
         end
@@ -132,12 +133,13 @@ module Grape
       # In some applications (e.g. mounting grape on rails), one might need to trap
       # errors from reaching upstream. This is effectivelly done by unsetting
       # X-Cascade. Default :cascade is true.
+      #
+      # Resolved in the constructor rather than per request: answering it walks
+      # the whole scope chain twice, and it reads the same settings the routes
+      # were compiled and frozen from -- changing those has to go through
+      # +change!+, which discards this instance.
       def cascade?
-        setting = self.class.inheritable_setting
-        return setting.cascade if setting.cascade_defined?
-        return setting.version_options.cascade if setting.version_options
-
-        true
+        @cascade
       end
 
       reset!
@@ -174,6 +176,15 @@ module Grape
           greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
           @router.associate_routes(greedy_route)
         end
+      end
+
+      # Backs {#cascade?}; called once, from the constructor.
+      def resolve_cascade
+        setting = self.class.inheritable_setting
+        return setting.cascade if setting.cascade_defined?
+        return setting.version_options.cascade if setting.version_options
+
+        true
       end
     end
   end
