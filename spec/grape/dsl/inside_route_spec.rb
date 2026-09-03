@@ -100,7 +100,7 @@ describe Grape::DSL::InsideRoute do
     %w[GET PUT OPTIONS].each do |method|
       it 'defaults to 200 on GET' do
         request = Grape::Request.new(Rack::MockRequest.env_for('/', method:))
-        expect(subject).to receive(:request).and_return(request).twice
+        expect(subject).to receive(:request).and_return(request)
         expect(subject.status).to eq 200
       end
     end
@@ -113,14 +113,14 @@ describe Grape::DSL::InsideRoute do
 
     it 'defaults to 204 on DELETE' do
       request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
-      expect(subject).to receive(:request).and_return(request).twice
+      expect(subject).to receive(:request).and_return(request)
       expect(subject.status).to eq 204
     end
 
     it 'defaults to 200 on DELETE with a body present' do
       request = Grape::Request.new(Rack::MockRequest.env_for('/', method: Rack::DELETE))
       subject.body 'content here'
-      expect(subject).to receive(:request).and_return(request).twice
+      expect(subject).to receive(:request).and_return(request)
       expect(subject.status).to eq 200
     end
 
