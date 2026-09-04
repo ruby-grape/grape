@@ -8,9 +8,11 @@ module Grape
       def yield_attributes(val)
         return if skip?(val)
 
-        @attrs.each do |attr_name|
-          yield val, attr_name, empty?(val)
-        end
+        # The emptiness of the scope's params is the same answer for every
+        # attribute in it, and answering it costs a +respond_to?+, so it is
+        # asked once for the whole list rather than once per attribute.
+        empty_val = empty?(val)
+        @attrs.each { |attr_name| yield val, attr_name, empty_val }
       end
 
       # Primitives like Integers and Booleans don't respond to +empty?+.

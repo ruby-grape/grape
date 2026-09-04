@@ -67,6 +67,7 @@
 * [#2892](https://github.com/ruby-grape/grape/pull/2892): Resolve the params builder when `params` are first read rather than in every `Grape::Request` - [@ericproulx](https://github.com/ericproulx).
 * [#2893](https://github.com/ruby-grape/grape/pull/2893): Scrub the format extension rather than the whole request path when negotiating a format - [@ericproulx](https://github.com/ericproulx).
 * [#2894](https://github.com/ruby-grape/grape/pull/2894): Read the request method once in `default_status` instead of asking through `post?` and `delete?` - [@ericproulx](https://github.com/ericproulx).
+* [#2895](https://github.com/ruby-grape/grape/pull/2895): Cut per-request work out of the endpoint, validation and router paths: scan the router's compiled union by capture number rather than by name, skip the Array boxing in `AttributesIterator` for a flat scope, read a coerced attribute once instead of three times, and resolve the formatter's config and the coercers' type checks once at build time - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

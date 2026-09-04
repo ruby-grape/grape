@@ -19,6 +19,13 @@ module Grape
 
       def each(params, &)
         original_params = @scope.params(params)
+        # A scope resolves to a Hash unless the declaration nests arrays, and
+        # then #do_each has nothing to do but hand it straight back: Array.wrap
+        # boxes it, the loop unboxes it on its only iteration, and with no Array
+        # anywhere neither the nesting descent nor the index bookkeeping
+        # applies. Every validator on a flat +params+ block comes through here.
+        return yield_attributes(original_params, &) if original_params.is_a?(Hash) && !@scope.iterates_elements?
+
         # because we need recursion for nested arrays
         do_each(Array.wrap(original_params), original_params, &)
       end

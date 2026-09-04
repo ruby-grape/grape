@@ -51,6 +51,12 @@ module Grape
       # on instances shared across threads, so it must not write state.
       attr_reader :regexp_capture_index
 
+      # The number of the group this route occupies in the union the router
+      # compiled it into. Only the union can say what it is, so it is written
+      # back by {Router#compile!} right after building one, and like
+      # +regexp_capture_index+ it is never assigned at request time.
+      attr_reader :regexp_capture_group
+
       def pattern_regexp
         @pattern.to_regexp
       end
@@ -58,6 +64,12 @@ module Grape
       def to_regexp(index)
         @regexp_capture_index = CaptureIndexCache[index]
         Regexp.new("(?<#{regexp_capture_index}>#{pattern_regexp})")
+      end
+
+      # @api private
+      # @see #regexp_capture_group
+      def resolve_capture_group!(union_named_captures)
+        @regexp_capture_group = union_named_captures.fetch(regexp_capture_index).first
       end
 
       class CaptureIndexCache < Grape::Util::Cache

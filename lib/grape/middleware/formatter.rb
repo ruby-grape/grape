@@ -3,7 +3,6 @@
 module Grape
   module Middleware
     class Formatter < Base
-      extend Forwardable
       include PrecomputedContentTypes
 
       Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
@@ -26,13 +25,22 @@ module Grape
       # query (RFC 10008, Section 2), not an optional payload.
       BODY_CARRYING_METHODS = [Rack::POST, Rack::PUT, Rack::PATCH, Rack::DELETE, Grape::QUERY].freeze
 
-      def_delegators :config, :default_format, :format, :formatters, :parsers
+      # Read off ivars rather than delegated into +config+ on every request:
+      # +negotiate_content_type+ asks for +format+ and +default_format+ per
+      # request and +fetch_formatter+ for +formatters+, and each delegator cost
+      # a Forwardable frame plus a Data reader for a value that was frozen when
+      # the middleware was built.
+      attr_reader :default_format, :format, :formatters, :parsers
 
       # The formatter is the only middleware that maps an incoming media type
       # back to a format, so it warms +mime_types+ itself rather than making
       # every content-type-aware middleware build a table none of them read.
       def initialize(app, **options)
         super
+        @default_format = config.default_format
+        @format = config.format
+        @formatters = config.formatters
+        @parsers = config.parsers
         mime_types
       end
 

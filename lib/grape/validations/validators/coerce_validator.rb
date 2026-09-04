@@ -21,10 +21,16 @@ module Grape
             end
         end
 
+        # The attribute is read once and held: +coerce_value+ only ever sees the
+        # value, never the Hash, so the two further reads the identity check
+        # used to make came back with the same object -- through a
+        # HashWithIndifferentAccess key conversion each time, for every coerced
+        # attribute of every request.
         def validate_param!(attr_name, params)
           validation_error!(attr_name) unless hash_like?(params)
 
-          new_value = coerce_value(params[attr_name])
+          value = params[attr_name]
+          new_value = coerce_value(value)
 
           validation_error!(attr_name, new_value.message || exception_message) if new_value.is_a?(Types::InvalidValue)
 
@@ -37,7 +43,7 @@ module Grape
           #     h[:list] = list
           #     h
           #     => #<Hashie::Mash list=[1, 2, 3, 4]>
-          return if params[attr_name].instance_of?(new_value.class) && params[attr_name] == new_value
+          return if value.instance_of?(new_value.class) && value == new_value
 
           params[attr_name] = new_value
         end

@@ -199,9 +199,11 @@ module Grape
       # The default HTTP status when none has been set explicitly.
       # Reads the request method once instead of asking through +post?+ and
       # +delete?+, each of which reads it again. Every response that did not set
-      # a status of its own comes through here.
+      # a status of its own comes through here, so it is read straight off the
+      # env: +Grape::Request+ wraps the very same Hash and answers
+      # +request_method+ with the same lookup, two method calls further down.
       def default_status
-        request_method = request.request_method
+        request_method = env[Rack::REQUEST_METHOD]
         return 201 if request_method == Rack::POST
         return 204 if request_method == Rack::DELETE && @body.blank?
 
