@@ -124,17 +124,18 @@ module Grape
       end
 
       def mount(mounts, opts = {})
+        mount_opts = opts
         if opts[:refresh_already_mounted]
           Grape.deprecator.warn('`refresh_already_mounted` is not a `mount` option and will be ignored in a future release.')
           drop_endpoints_mounted_for(mounts)
           # Dropped before the recursion below re-enters with the same options,
           # so a Grape API does not warn once per mount and once per instance.
-          opts = opts.except(:refresh_already_mounted)
+          mount_opts = opts.except(:refresh_already_mounted)
         end
 
         normalize_mounts(mounts).each_pair do |app, path|
           if app.respond_to?(:mount_instance)
-            mount({ app.mount_instance(configuration: opts[:with] || {}) => path }, opts)
+            mount({ app.mount_instance(configuration: mount_opts[:with] || {}) => path }, mount_opts)
             next
           end
           in_setting = inheritable_setting
@@ -251,13 +252,13 @@ module Grape
       # @param param [Symbol] The name of the parameter you wish to declare.
       # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
       def route_param(param, requirements: nil, type: nil, **, &)
-        requirements = { param.to_sym => requirements } if requirements.is_a?(Regexp)
+        param_requirements = requirements.is_a?(Regexp) ? { param.to_sym => requirements } : requirements
 
         Grape::Validations::ParamsScope.new(api: self) do
           requires param, type: type
         end if type
 
-        namespace(":#{param}", requirements:, **, &)
+        namespace(":#{param}", requirements: param_requirements, **, &)
       end
 
       # @return array of defined versions

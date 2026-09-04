@@ -364,10 +364,9 @@ module Grape
           Grape.deprecator.warn('Passing a `presence` option is deprecated and it will be ignored in a future release. Declare the parameter with `requires` to make it required, `optional` to make it optional.')
         end
 
-        validations = validations.merge(presence: { value: true, message: validations[:message] }) if required
-
-        process_oneof!(validations) if validations.key?(:oneof)
-        spec = ValidationsSpec.from(validations)
+        declared = required ? validations.merge(presence: { value: true, message: validations[:message] }) : validations
+        declared = declared.merge(oneof: collected_oneof(declared)) if declared.key?(:oneof)
+        spec = ValidationsSpec.from(declared)
 
         document_params(attrs, spec)
 
@@ -419,14 +418,17 @@ module Grape
       # {OneofCollector} so the full params DSL is available inside variants
       # and the resulting validators are kept out of the real API's
       # registration list.
-      def process_oneof!(validations)
+      # Returns the collected variants rather than writing them back into
+      # +validations+, which is the options Hash the +requires+/+optional+ call
+      # site built.
+      def collected_oneof(validations)
         raise ArgumentError, 'oneof: requires type: Hash' unless validations[:type] == Hash
 
         variants = validations[:oneof]
         raise ArgumentError, 'oneof: must be a non-empty Array of blocks' unless variants.is_a?(Array) && variants.any?
         raise ArgumentError, 'oneof: each variant must be a Proc' unless variants.all?(Proc)
 
-        validations[:oneof] = variants.map { |block| OneofCollector.collect(block) }
+        variants.map { |block| OneofCollector.collect(block) }
       end
 
       def validate(type, options, attrs, required, opts)

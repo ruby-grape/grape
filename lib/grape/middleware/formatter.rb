@@ -56,25 +56,25 @@ module Grape
       private
 
       def build_formatted_response(status, headers, bodies)
-        headers = ensure_content_type(headers)
+        typed_headers = ensure_content_type(headers)
 
         if bodies.is_a?(Grape::ServeStream::StreamResponse)
-          Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
+          Grape::ServeStream::SendfileResponse.new([], status, typed_headers) do |resp|
             resp.body = bodies.stream
           end
         else
           # Allow content-type to be explicitly overwritten
-          formatter = fetch_formatter(headers)
+          formatter = fetch_formatter(typed_headers)
           bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
-          # A bare Rack tuple rather than a Rack::Response: +headers+ is already
+          # A bare Rack tuple rather than a Rack::Response: +typed_headers+ is already
           # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
           # re-normalizes the same keys into a second Headers hash that
           # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
           # The 204/304 bodies Rack::Response#finish would blank are returned
           # above, before this point.
-          [status, headers, bodymap]
+          [status, typed_headers, bodymap]
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
@@ -101,8 +101,10 @@ module Grape
       def ensure_content_type(headers)
         return headers if headers[Rack::CONTENT_TYPE]
 
-        headers[Rack::CONTENT_TYPE] = content_type_for(env[Grape::Env::API_FORMAT])
-        headers
+        # Merged rather than written in place: +headers+ belongs to the response
+        # the app returned, and negotiating a content type for it is not a reason
+        # to reach back into it.
+        headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
       end
 
       def read_body_input
@@ -140,12 +142,12 @@ module Grape
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
-          body = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
-          if body.is_a?(Hash)
+          parsed = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
+          if parsed.is_a?(Hash)
             if (form_hash = env[Rack::RACK_REQUEST_FORM_HASH])
-              form_hash.merge!(body)
+              form_hash.merge!(parsed)
             else
-              env[Rack::RACK_REQUEST_FORM_HASH] = body
+              env[Rack::RACK_REQUEST_FORM_HASH] = parsed
             end
             env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
           end
