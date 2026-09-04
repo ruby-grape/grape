@@ -3,6 +3,18 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### `grape/testing` is no longer loaded unless you require it
+
+`Grape::Testing` has been documented as opt-in since 3.3 — "intended for test environments only and is not loaded by default" — but it was never excluded from Grape's eager load, so `require 'grape'` installed it anyway. It extends `Grape::Endpoint` with `before_each` / `reset_before_each` and prepends a wrapper around `Grape::Endpoint#run` that every request goes through.
+
+It is now excluded, so the documented behaviour is the actual one. If your suite calls `Grape::Endpoint.before_each` without requiring the module first, it will now raise `NoMethodError`. Add the require the 3.3 note already asked for to your test helper:
+
+```ruby
+require 'grape/testing'
+```
+
+Nothing else changes: the module's API is the same, and referencing the `Grape::Testing` constant still autoloads it.
+
 #### The versioner's `pattern` option has been removed
 
 `Grape::Middleware::Versioner::Base` accepted a `pattern` option, which `Versioner::Path` matched the candidate version segment against before recording it. It dates from the original versioner (2010), where it was the only way to decide whether the first path segment was a version — there was no declared version list yet.
