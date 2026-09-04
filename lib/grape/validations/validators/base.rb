@@ -64,7 +64,6 @@ module Grape
         def initialize(attrs, options, required, scope, opts)
           @attrs = Array(attrs).freeze
           @options = Grape::Util::DeepFreeze.deep_freeze(options)
-          @option = @options # TODO: remove in next major release
           @required = required
           @scope = scope
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))

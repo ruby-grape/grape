@@ -65,7 +65,7 @@ describe Grape::Middleware::Error do
     end
   end
 
-  context 'when a rescue handler returns a Hash with :message, :status, :headers' do
+  context 'when a rescue handler returns a Hash that looks like an error response' do
     let(:raising_app) do
       Class.new do
         def self.call(_env)
@@ -92,10 +92,14 @@ describe Grape::Middleware::Error do
       end
     end
 
-    it 'emits a deprecation warning' do
-      expect { get '/' }.to raise_error(
-        ActiveSupport::DeprecationException, /rescue handler is deprecated/
-      )
+    # A Hash used to be accepted as an error response. It no longer is: a
+    # handler says what it means with `error!` or a Grape::Exceptions::ErrorResponse,
+    # and anything else is an invalid response rather than a guess at one.
+    it 'answers with an invalid response rather than reading the Hash' do
+      get '/'
+
+      expect(last_response.status).to eq(500)
+      expect(last_response.body).not_to include('oops')
     end
   end
 

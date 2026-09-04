@@ -6,16 +6,10 @@ module Grape
       include PrecomputedContentTypes
 
       Options = Data.define(:content_types, :default_format, :format, :formatters, :parsers) do
-        include Grape::Middleware::DeprecatedOptionsHashAccess
-
         def initialize(content_types: nil, default_format: :txt, format: nil, formatters: nil, parsers: nil)
           super
         end
       end
-
-      # @deprecated Kept as a frozen Hash representation of the {Options}
-      #   defaults for back-compat. Will be removed in a future release.
-      DEFAULT_OPTIONS = Options.new.to_h.freeze
 
       ALL_MEDIA_TYPES = '*/*'
 

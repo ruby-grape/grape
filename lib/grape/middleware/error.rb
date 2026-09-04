@@ -13,8 +13,6 @@ module Grape
         :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
         :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
       ) do
-        include Grape::Middleware::DeprecatedOptionsHashAccess
-
         def initialize(
           all_rescue_handler: nil, base_only_rescue_handlers: nil, content_types: nil,
           default_error_formatter: nil, default_message: '', default_status: 500,
@@ -31,10 +29,6 @@ module Grape
           super
         end
       end
-
-      # @deprecated Kept as a frozen Hash representation of the {Options}
-      #   defaults for back-compat. Will be removed in a future release.
-      DEFAULT_OPTIONS = Options.new.to_h.freeze
 
       def_delegators :config,
                      :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
@@ -328,20 +322,7 @@ module Grape
       end
 
       def error?(response)
-        case response
-        when Grape::Exceptions::ErrorResponse
-          true
-        when Hash
-          return false unless response.key?(:message) && response.key?(:status) && response.key?(:headers)
-
-          Grape.deprecator.warn(
-            'Returning or throwing a Hash from a rescue handler is deprecated. ' \
-            'Use `error!(...)` or a `Grape::Exceptions::ErrorResponse` instead.'
-          )
-          true
-        else
-          false
-        end
+        response.is_a?(Grape::Exceptions::ErrorResponse)
       end
     end
   end

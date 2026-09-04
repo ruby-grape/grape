@@ -16,7 +16,7 @@ describe Grape::Validations do
     let(:default_length_validator) do
       Class.new(Grape::Validations::Validators::Base) do
         def validate_param!(attr_name, params)
-          max = params.key?(:max) ? params[:max].to_i : @option
+          max = params.key?(:max) ? params[:max].to_i : @options
           return if params[attr_name].length <= max
 
           raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message: "must be at the most #{max} characters long")
@@ -154,7 +154,7 @@ describe Grape::Validations do
           # @attrs is a list containing the attribute we are currently validating
           return unless request.params.key? @attrs.first
           # check if admin flag is set to true
-          return unless @option
+          return unless @options
 
           # check if user is admin or not
           # as an example get a token from request and check if it's admin or not

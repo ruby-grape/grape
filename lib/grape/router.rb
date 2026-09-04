@@ -2,14 +2,6 @@
 
 module Grape
   class Router
-    # @deprecated Use {Grape::Util::PathNormalizer.call} instead.
-    def self.normalize_path(path)
-      Grape.deprecator.warn(
-        '`Grape::Router.normalize_path` is deprecated. Use `Grape::Util::PathNormalizer.call` instead.'
-      )
-      Grape::Util::PathNormalizer.call(path)
-    end
-
     def initialize
       @neutral_map = []
       @neutral_regexes = []

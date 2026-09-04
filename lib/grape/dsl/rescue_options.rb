@@ -14,8 +14,8 @@ module Grape
     # signature on purpose: keeping them on both sides means each entry point
     # is self-documenting without needing to import a shared constant — the
     # DSL signature shows what a user sees in the IDE, and the Data object
-    # has working defaults when constructed directly (middleware
-    # `DEFAULT_OPTIONS`, spec fixtures, etc.). The two must stay in lockstep.
+    # has working defaults when constructed directly (spec fixtures, a
+    # middleware built by hand). The two must stay in lockstep.
     RescueOptions = Data.define(:backtrace, :original_exception) do
       def initialize(backtrace: false, original_exception: false)
         super
