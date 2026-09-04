@@ -42,7 +42,12 @@ loader.inflector.inflect(
   'dsl' => 'DSL'
 )
 railtie = "#{__dir__}/grape/railtie.rb"
-loader.do_not_eager_load(railtie)
+# Grape::Testing is a test-environment helper -- it extends Grape::Endpoint with
+# `before_each` and prepends a hook to Grape::Endpoint#run. It is documented as
+# opt-in (`require 'grape/testing'`), which eager loading quietly contradicted
+# by installing it in every process.
+testing = "#{__dir__}/grape/testing.rb"
+loader.do_not_eager_load(railtie, testing)
 loader.setup
 
 I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
