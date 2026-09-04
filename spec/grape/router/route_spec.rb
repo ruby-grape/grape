@@ -194,6 +194,33 @@ RSpec.describe Grape::Router::Route do
       it 'returns nil when the input does not match' do
         expect(route.params_for('/nope')).to be_nil
       end
+
+      # Rack hands us PATH_INFO tagged ASCII-8BIT, so an extracted capture is
+      # re-tagged UTF-8 to compare equal to the literals an API declares.
+      context 'with a non-ascii capture' do
+        let(:pattern) do
+          Grape::Router::Pattern.new(origin: '/users/:id', suffix: '', anchor: true,
+                                     params: {}, version: nil, requirements: {})
+        end
+
+        it 'tags the extracted value as UTF-8' do
+          expect(route.params_for(+'/users/caf%C3%A9'.b)).to eq(id: 'café')
+        end
+      end
+
+      # Mustermann builds a converter for a capture given as a Class or a
+      # Symbol it knows, so the extracted value is not a String at all and has
+      # to reach the endpoint as it is.
+      context 'when a requirement names a capture type that converts' do
+        let(:pattern) do
+          Grape::Router::Pattern.new(origin: '/users/:id', suffix: '', anchor: true,
+                                     params: {}, version: nil, requirements: { id: Integer })
+        end
+
+        it 'keeps the converted value' do
+          expect(route.params_for('/users/7')).to eq(id: 7)
+        end
+      end
     end
   end
 

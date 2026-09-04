@@ -2302,6 +2302,58 @@ namespace :outer, requirements: { id: /[0-9]*/ } do
 end
 ```
 
+A requirement can also name one of the capture types of [Mustermann](https://github.com/sinatra/mustermann), the pattern library Grape routes with, instead of a regular expression. Besides constraining the match, a capture type that carries a converter hands the endpoint the converted value rather than a String.
+
+```ruby
+get ':id', requirements: { id: Integer } do
+  params[:id] # => 23, an Integer, for GET /23 — GET /michael is a 404
+end
+
+get 'events/:on', requirements: { on: :date } do
+  params[:on] # => #<Date: 2020-01-02>, for GET /events/2020-01-02
+end
+```
+
+`Integer`, `Float`, `Symbol`, `Date` and `Gem::Version` convert, as do their symbol spellings `:integer`, `:float`, `:symbol`, `:date` and `:version`. `:uuid`, `:slug` and `:locale` constrain the match without converting. A name Mustermann has no capture type for raises when the API is defined.
+
+A `params` block still owns what the endpoint sees, since validation runs after the router: declaring `requires :id, type: String` alongside `requirements: { id: Integer }` hands the endpoint `"23"`.
+
+`route_param` names the parameter itself, so it takes the constraint on its own — `route_param :id, requirements: Integer` — and refuses a Hash, which would name the parameter a second time. A namespace or an endpoint can carry several captures, so requirements there are the Hash form keyed by param name.
+
+`route_param :id` defines the parameter on its own — `params[:id]` reaches the endpoint, and the route documents it as a path capture. `type:` and `requirements:` are two ways of typing it, and they work at different layers. `type: Integer` declares `requires :id, type: Integer`: the value is coerced, appears in `declared(params)` and carries its type into the route's documented params, and a value the path let through but the type rejects is a 400. `requirements: Integer` types the route instead: a segment that does not match is not this route at all, so it is a 404, and the value arrives already converted by the router, undeclared and documented only as a capture. A declared `type: Integer` also narrows the path, but to digits alone, so `/-7` is a 404 there while the requirement matches it. Given both, the requirement decides what the route matches and the declared type decides what the endpoint sees.
+
+#### Dots in a path segment
+
+A path capture matches `[^/?#.]+`: a dot introduces the format suffix, so a captured segment never contains one. A dotted value therefore either fails to route or arrives truncated, and the declared type makes no difference — `type: String` and `type: Float` compile the same pattern as an untyped parameter, only `type: Integer` narrows it to digits.
+
+```ruby
+class WithFormat < Grape::API
+  format :json
+  route_param :name do
+    get { params[:name] } # GET /report.pdf => 404, the segment cannot hold the dot
+  end
+end
+
+class WithoutFormat < Grape::API
+  route_param :name do
+    # GET /report.pdf => 200, params[:name] is "report" and params[:format] is "pdf"
+    get { params[:name] }
+  end
+end
+```
+
+The second one is the one to watch: the extension is taken as the format, so the endpoint is handed a truncated value and the client still gets a 200.
+
+Percent-encoding the dot routes it through — `GET /report%2Epdf` hands the endpoint `"report.pdf"` — and so does a requirement that admits dots:
+
+```ruby
+route_param :name, requirements: /.+/ do
+  get { params[:name] } # => "report.pdf" for GET /report.pdf, "1.2.3" for GET /1.2.3
+end
+```
+
+Such a regexp claims the extension as well, so `GET /a.b.json` hands the endpoint `"a.b.json"` and format-by-extension no longer applies to that route. A narrower constraint leaves the suffix alone: `get ':n', requirements: { n: Float }` matches `/4.2` and still reads `.json` as the format.
+
 ### The QUERY Method
 
 Grape supports [`QUERY`](https://www.rfc-editor.org/info/rfc10008/), a safe and idempotent method that carries its query in the request content rather than in the URI. It is the method to reach for when a query is too large, too structured, or too sensitive to encode into a query string.

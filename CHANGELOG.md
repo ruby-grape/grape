@@ -109,6 +109,7 @@
 * [#2886](https://github.com/ruby-grape/grape/pull/2886): Compile the router's optimized map from the registered routes, so a route declared with a verb outside `Grape::HTTP_SUPPORTED_METHODS` is served instead of being advertised in `Allow` and answered with 405 - [@ericproulx](https://github.com/ericproulx).
 * [#2901](https://github.com/ruby-grape/grape/pull/2901): Reject `error_formatter` without a formatter instead of registering `nil`, which left the format with no error formatter at all and answered every error for it with a failsafe 500 (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2902](https://github.com/ruby-grape/grape/pull/2902): Make `Grape::ErrorFormatter.formatter_for` a lookup that answers `nil` for an unregistered format, like `Grape::Parser.parser_for`, and move the `default_error_formatter` / `Grape::ErrorFormatter::Txt` fallback to `Grape::Middleware::Error`, which owns it; `default_error_formatter` naming nothing registered now raises `Grape::Exceptions::UnknownErrorFormatter` instead of silently storing `Txt` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2904](https://github.com/ruby-grape/grape/pull/2904): Document and spec route `requirements` given as a Mustermann capture type, which constrains the match and hands the endpoint the converted value - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
