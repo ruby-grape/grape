@@ -54,6 +54,17 @@ describe Grape::Middleware::Error do
     expect(last_response.body).to eq('Aww, hamburgers.')
   end
 
+  context 'with a format that has no error formatter of its own' do
+    let(:options) { { default_message: 'Aww, hamburgers.', format: :custom } }
+
+    it 'renders through the text formatter' do
+      err_app.error = { status: 410, message: 'Awesome stuff.' }
+      get '/'
+      expect(last_response.status).to eq(410)
+      expect(last_response.body).to eq('Awesome stuff.')
+    end
+  end
+
   context 'with http code' do
     let(:options) {  { default_message: 'Aww, hamburgers.' } }
 

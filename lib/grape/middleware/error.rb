@@ -74,17 +74,18 @@ module Grape
         Grape::ContentTypes.media_type(content_type).to_s.casecmp?('text/html')
       end
 
+      # +formatter_for+ always resolves to something callable — a registered
+      # formatter, the API's +default_error_formatter+, or +ErrorFormatter::Txt+
+      # — and +error_formatter+ no longer lets a nil registration through, so
+      # there is no no-formatter case to handle here. The +throw :error, 406+
+      # that used to stand in for one could not work anyway: nothing catches
+      # +:error+ around this call (+#call!+ has left its +catch+ by the time
+      # +error_response+ runs), so it raised +UncaughtThrowError+ and the
+      # request answered with the failsafe 500 rather than the 406 it named.
       def format_message(error)
         current_format = env[Grape::Env::API_FORMAT] || format
         formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters, default_error_formatter)
-        return formatter.call(error:, env:, include_backtrace:, include_original_exception:) if formatter
-
-        throw :error, Grape::Exceptions::ErrorResponse.new(
-          status: 406,
-          message: "The requested format '#{current_format}' is not supported.",
-          backtrace: error.backtrace,
-          original_exception: error.original_exception
-        )
+        formatter.call(error:, env:, include_backtrace:, include_original_exception:)
       end
 
       def find_handler(klass)
