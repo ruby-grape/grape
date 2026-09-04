@@ -388,7 +388,7 @@ describe Grape::API do
     context 'with a capture type as the requirement' do
       it 'converts the captured value' do
         subject.namespace :users do
-          route_param :id, requirements: { id: Integer } do
+          route_param :id, requirements: Integer do
             get { { id: params[:id], type: params[:id].class.to_s }.to_json }
           end
         end
@@ -399,7 +399,7 @@ describe Grape::API do
 
       it 'constrains what the route matches' do
         subject.namespace :users do
-          route_param :id, requirements: { id: Integer } do
+          route_param :id, requirements: Integer do
             get { params[:id].to_json }
           end
         end
@@ -412,7 +412,7 @@ describe Grape::API do
 
       it 'converts with a capture type named as a Symbol' do
         subject.namespace :events do
-          route_param :on, requirements: { on: :date } do
+          route_param :on, requirements: :date do
             get { { on: params[:on].to_s, type: params[:on].class.to_s }.to_json }
           end
         end
@@ -423,12 +423,22 @@ describe Grape::API do
         expect(last_response).to be_not_found
       end
 
+      it 'refuses a Hash, which route_param has no use for' do
+        expect do
+          subject.namespace :users do
+            route_param :id, requirements: { id: Integer } do
+              get { params[:id].to_json }
+            end
+          end
+        end.to raise_error(ArgumentError, /route_param :id constrains :id/)
+      end
+
       # The declared type still owns what the endpoint sees: validation runs
       # after the router, on the value the converter produced.
       it 'is still coerced to the type the params block declares' do
         subject.namespace :users do
           params { requires :id, type: String }
-          route_param :id, requirements: { id: Integer } do
+          route_param :id, requirements: Integer do
             get { { id: params[:id], type: params[:id].class.to_s }.to_json }
           end
         end

@@ -144,6 +144,14 @@ describe Grape::DSL::Routing do
         .to change { subject.endpoints.count }.from(0).to(1)
     end
 
+    # Requirements are merged by param name when routes are built, so a lone
+    # constraint has nothing to attach to and used to raise a TypeError there,
+    # on the first request rather than here.
+    it 'rejects requirements that are not a Hash' do
+      expect { subject.route(:any, '/', requirements: Integer) }
+        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got Class')
+    end
+
     it 'does not duplicate identical endpoints' do
       subject.route(:any)
       expect { subject.route(:any) }
@@ -223,6 +231,11 @@ describe Grape::DSL::Routing do
       expect(subject.namespace(:foo, foo: 'bar')).to eq(Grape::Namespace.new(:foo, foo: 'bar'))
     end
 
+    it 'rejects requirements that are not a Hash' do
+      expect { subject.namespace(:foo, requirements: Integer) {} }
+        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got Class')
+    end
+
     it 'calls #joined_space_path on Namespace' do
       inside_namespace = nil
       subject.namespace(:foo, foo: 'bar') do
@@ -298,6 +311,22 @@ describe Grape::DSL::Routing do
       allow(subject).to receive(:namespace)
       expect { subject.route_param('foo', **options, &proc {}) }
         .not_to(change { options })
+    end
+
+    # The param is named here, so any lone constraint belongs to it — not just
+    # a Regexp, which was the only one nested before.
+    it 'nests a lone capture type under param name' do
+      expect(subject).to receive(:namespace) do |_param, options|
+        expect(options[:requirements]).to eq(foo: Integer)
+      end
+      subject.route_param('foo', requirements: Integer, &proc {})
+    end
+
+    # A Hash would name the param twice, or constrain a capture this namespace
+    # does not introduce — Mustermann resolves that to no constraint at all.
+    it 'rejects a Hash of requirements' do
+      expect { subject.route_param('foo', requirements: { foo: Integer }, &proc {}) }
+        .to raise_error(ArgumentError, 'route_param :foo constrains :foo; pass the constraint itself, or a Hash of requirements to the enclosing namespace')
     end
   end
 

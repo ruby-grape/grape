@@ -180,6 +180,8 @@ module Grape
       #     end
       #   end
       def route(methods, paths = ['/'], requirements: nil, anchor: true, **route_options, &)
+        validate_requirements!(requirements)
+
         http_methods = methods == :any ? '*' : methods
         endpoint_description = inheritable_setting.route_description
 
@@ -228,6 +230,8 @@ module Grape
       def namespace(space = nil, requirements: nil, **options, &block)
         return inheritable_setting.namespace_path unless space || block
 
+        validate_requirements!(requirements)
+
         within_namespace do
           nest(block) do
             inheritable_setting.add_namespace(Grape::Namespace.new(space, requirements:, **options)) if space
@@ -249,15 +253,20 @@ module Grape
       # in your API.
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
-      # @option options [Regexp] You may supply a regular expression that the declared parameter must meet.
+      # @option options [Regexp, Class, Symbol] The constraint the declared parameter must meet — a Regexp, or a capture type such as +Integer+.
       def route_param(param, requirements: nil, type: nil, **, &)
-        requirements = { param.to_sym => requirements } if requirements.is_a?(Regexp)
+        # The param is named here, so the constraint is its own: nest whatever
+        # it is, not just a Regexp. A Hash would name the param twice, or key a
+        # capture this namespace does not introduce, and belongs on +namespace+.
+        raise ArgumentError, "route_param :#{param} constrains :#{param}; pass the constraint itself, or a Hash of requirements to the enclosing namespace" if requirements.respond_to?(:to_hash)
+
+        param_requirements = { param.to_sym => requirements } unless requirements.nil?
 
         Grape::Validations::ParamsScope.new(api: self) do
           requires param, type: type
         end if type
 
-        namespace(":#{param}", requirements:, **, &)
+        namespace(":#{param}", requirements: param_requirements, **, &)
       end
 
       # @return array of defined versions
@@ -266,6 +275,15 @@ module Grape
       end
 
       private
+
+      # Requirements are keyed by param name and merged across namespaces, so
+      # anything else has nothing to attach to. Rejected here rather than at
+      # the merge, which runs on the first request that builds the routes.
+      def validate_requirements!(requirements)
+        return if requirements.nil? || requirements.respond_to?(:to_hash)
+
+        raise ArgumentError, "requirements must be a Hash of param name => constraint, got #{requirements.class}"
+      end
 
       # Compose a route's params: the declared params (+params do … end+) deep-merged
       # with any documented alongside +desc ..., params:+ (+description_params+).
