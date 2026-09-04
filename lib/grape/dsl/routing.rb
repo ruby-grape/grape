@@ -124,17 +124,18 @@ module Grape
       end
 
       def mount(mounts, opts = {})
+        mount_opts = opts
         if opts[:refresh_already_mounted]
           Grape.deprecator.warn('`refresh_already_mounted` is not a `mount` option and will be ignored in a future release.')
           drop_endpoints_mounted_for(mounts)
           # Dropped before the recursion below re-enters with the same options,
           # so a Grape API does not warn once per mount and once per instance.
-          opts = opts.except(:refresh_already_mounted)
+          mount_opts = opts.except(:refresh_already_mounted)
         end
 
         normalize_mounts(mounts).each_pair do |app, path|
           if app.respond_to?(:mount_instance)
-            mount({ app.mount_instance(configuration: opts[:with] || {}) => path }, opts)
+            mount({ app.mount_instance(configuration: mount_opts[:with] || {}) => path }, mount_opts)
             next
           end
           in_setting = inheritable_setting
@@ -260,7 +261,7 @@ module Grape
         # capture this namespace does not introduce, and belongs on +namespace+.
         raise ArgumentError, "route_param :#{param} constrains :#{param}; pass the constraint itself, or a Hash of requirements to the enclosing namespace" if requirements.respond_to?(:to_hash)
 
-        param_requirements = { param.to_sym => requirements } unless requirements.nil?
+        param_requirements = requirements ? { param.to_sym => requirements } : requirements
 
         Grape::Validations::ParamsScope.new(api: self) do
           requires param, type: type

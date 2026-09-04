@@ -191,9 +191,8 @@ module Grape
       # @return hash of parameters relevant for the current scope
       # @api private
       def params(params)
-        params = @parent.qualifying_params.presence || @parent.params(params) if @parent
-        params = map_params(params, @element) if @element
-        params
+        scoped = @parent ? (@parent.qualifying_params.presence || @parent.params(params)) : params
+        @element ? map_params(scoped, @element) : scoped
       end
 
       private
@@ -211,7 +210,7 @@ module Grape
       # +except+ and +:none+ uses it to drop fields entirely.
       def declare(attrs, opts, required:, using:, except:, as:, &block)
         merged_opts = @group&.deep_merge(opts) || opts
-        as ||= merged_opts[:as]
+        declared_as = as || merged_opts[:as]
 
         if using
           return require_required_and_optional_fields(attrs.first, using:, except:) if required
@@ -220,9 +219,9 @@ module Grape
         end
 
         validates(attrs, merged_opts, required:)
-        return push_declared_params(attrs, as:) unless block
+        return push_declared_params(attrs, as: declared_as) unless block
 
-        new_scope(attrs.first, type: merged_opts[:type], as:, optional: !required, &block)
+        new_scope(attrs.first, type: merged_opts[:type], as: declared_as, optional: !required, &block)
       end
 
       def legacy_options?(args)

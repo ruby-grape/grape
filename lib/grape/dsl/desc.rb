@@ -54,19 +54,22 @@ module Grape
       #     end
       #
       def desc(description, **options, &config_block)
-        if options.key?(:default)
-          Grape.deprecator.warn('The `default` option of `desc` is deprecated. Use `default_response` instead.')
-          # Rebuilt rather than mutated in place: an explicit +default_response+
-          # still wins, since the merged Hash is the one that keeps its key.
-          options = { default_response: options[:default] }.merge(options.except(:default))
-        end
+        resolved_options =
+          if options.key?(:default)
+            Grape.deprecator.warn('The `default` option of `desc` is deprecated. Use `default_response` instead.')
+            # Rebuilt rather than mutated in place: an explicit +default_response+
+            # still wins, since the merged Hash is the one that keeps its key.
+            { default_response: options[:default] }.merge(options.except(:default))
+          else
+            options
+          end
 
         settings =
           if config_block
             endpoint_config = defined?(configuration) ? configuration : nil
             Grape::Util::ApiDescription.new(description, endpoint_config, &config_block).settings
           else
-            options.merge(description:)
+            resolved_options.merge(description:)
           end
         # Only the route scope is consumed downstream (by +route+ and the
         # route's readers, e.g. +http_codes+); the namespace scope was

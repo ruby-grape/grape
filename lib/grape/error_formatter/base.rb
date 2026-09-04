@@ -26,12 +26,13 @@ module Grape
           # Extract it here so the presenter can be resolved and the key is not serialized in the response.
           # See spec/integration/grape_entity/entity_spec.rb for examples.
           with = nil
+          payload = message
           if message.is_a?(Hash) && message.key?(:with)
-            message = message.dup
-            with = message.delete(:with)
+            payload = message.dup
+            with = payload.delete(:with)
           end
 
-          presenter = with || env[Grape::Env::API_ENDPOINT].entity_class_for_obj(message)
+          presenter = with || env[Grape::Env::API_ENDPOINT].entity_class_for_obj(payload)
 
           unless presenter || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
             # env['api.endpoint'].route does not work when the error occurs within a middleware
@@ -44,11 +45,11 @@ module Grape
             presenter = found_code[2] if found_code
           end
 
-          return message unless presenter
+          return payload unless presenter
 
           embeds = { env: }
           embeds[:version] = env[Grape::Env::API_VERSION] if env.key?(Grape::Env::API_VERSION)
-          presenter.represent(message, embeds).serializable_hash
+          presenter.represent(payload, embeds).serializable_hash
         end
 
         def wrap_message(message)

@@ -48,15 +48,15 @@ module Grape
         def call(value)
           return unless value.is_a? Array
 
-          value =
+          coerced =
             if @method
               @method.call(value)
             else
               value.map { |v| @member_coercer.call(v) }
             end
-          return Set.new value if @types.is_a? Set
+          return Set.new coerced if @types.is_a? Set
 
-          value
+          coerced
         end
       end
     end

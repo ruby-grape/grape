@@ -97,13 +97,13 @@ module Grape
       def validate_value_coercion(coerce_type, *values_list)
         return unless coerce_type
 
-        coerce_type = coerce_type.first if coerce_type.is_a?(Enumerable)
+        element_type = coerce_type.is_a?(Enumerable) ? coerce_type.first : coerce_type
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
 
           value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
-          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if coerce_type == Grape::API::Boolean
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, coerce_type, :values, values) unless value_types.all?(coerce_type)
+          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if element_type == Grape::API::Boolean
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, element_type, :values, values) unless value_types.all?(element_type)
         end
       end
 

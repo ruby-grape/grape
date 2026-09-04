@@ -41,12 +41,12 @@ module Grape
         #   of {InvalidValue} if the value could not be coerced.
         def call(val)
           # once the value is coerced by the custom method, its type should be checked
-          val = @method.call(val) if @method
+          candidate = @method ? @method.call(val) : val
 
           coerced_val = InvalidValue.new
 
           @type_coercers.each do |coercer|
-            coerced_val = coercer.call(val)
+            coerced_val = coercer.call(candidate)
 
             return coerced_val unless coerced_val.is_a?(InvalidValue)
           end
