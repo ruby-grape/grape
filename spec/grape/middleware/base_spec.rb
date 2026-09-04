@@ -189,6 +189,24 @@ describe Grape::Middleware::Base do
       end
     end
 
+    context 'when a middleware defines an instance-level #default_options' do
+      let(:example_ware) do
+        Class.new(Grape::Middleware::Base) do
+          def default_options
+            { monkey: true }
+          end
+        end
+      end
+
+      it 'merges options through the instance method instead of a constant' do
+        expect(example_ware.new(blank_app).options[:monkey]).to be true
+      end
+
+      it 'overrides default options when provided' do
+        expect(example_ware.new(blank_app, monkey: false).options[:monkey]).to be false
+      end
+    end
+
     context 'when a middleware declares its own Options Data class' do
       let(:example_ware) do
         Class.new(Grape::Middleware::Base) do

@@ -18,7 +18,7 @@ describe Grape::Middleware::Stack do
   let(:others) { [[:use, bar_middleware], [:insert_before, bar_middleware, block_middleware, proc]] }
 
   before do
-    subject.use foo_middleware
+    subject.use foo_middleware if subject.respond_to?(:use)
   end
 
   describe '#use' do
@@ -149,6 +149,16 @@ describe Grape::Middleware::Stack do
     it 'calls +merge_with+ with the :use specs' do
       expect(subject).to receive(:merge_with).with [[:use, bar_middleware]]
       subject.concat others
+    end
+  end
+
+  describe Grape::Middleware::Stack::Middleware do
+    subject { described_class.new(foo_middleware, [], nil) }
+
+    describe '#==' do
+      it 'returns falsy for an object that is neither a Middleware nor a Class' do
+        expect(subject == 'not a middleware').to be_falsy
+      end
     end
   end
 end

@@ -21,4 +21,21 @@ describe Grape::Router::MustermannPattern do
       end
     end
   end
+
+  describe ':name capture syntax' do
+    context 'when the param is declared as an Integer' do
+      it 'only matches digits' do
+        pattern = described_class.new('/foo/:bar', params: { 'bar' => { type: 'Integer' } })
+        expect(pattern.params('/foo/123')).to eq('bar' => '123')
+        expect(pattern).not_to match('/foo/abc')
+      end
+    end
+
+    context 'when the param is not declared as an Integer' do
+      it 'matches any single path segment' do
+        pattern = described_class.new('/foo/:bar')
+        expect(pattern.params('/foo/abc')).to eq('bar' => 'abc')
+      end
+    end
+  end
 end

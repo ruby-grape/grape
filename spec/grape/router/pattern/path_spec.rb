@@ -73,6 +73,15 @@ RSpec.describe Grape::Router::Pattern::Path do
       end
     end
 
+    context 'when versioning is used but not via path (e.g. header)' do
+      it "does not include a '/'" do
+        path = described_class.new(
+          nil, nil, path_settings(version: :v1, version_options: Grape::DSL::VersionOptions.new(using: :header))
+        )
+        expect(path.suffix).to eql('(.:format)')
+      end
+    end
+
     context 'when path versioning is not used' do
       it "does not include a '/' when the path has a namespace" do
         path = described_class.new(nil, 'namespace', path_settings)

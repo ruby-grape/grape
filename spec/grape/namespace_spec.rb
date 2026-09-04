@@ -30,4 +30,15 @@ describe Grape::Namespace do
       expect(namespace.hash).not_to eq(other.hash)
     end
   end
+
+  describe '.joined_space' do
+    it 'maps a list of Namespace objects to their #space' do
+      other = described_class.new('bar')
+      expect(described_class.joined_space([namespace, other])).to eq(%w[foo bar])
+    end
+
+    it 'returns nil for a nil settings list' do
+      expect(described_class.joined_space(nil)).to be_nil
+    end
+  end
 end

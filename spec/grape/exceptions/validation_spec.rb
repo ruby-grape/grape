@@ -5,6 +5,18 @@ describe Grape::Exceptions::Validation do
     expect { described_class.new(message: 'presence') }.to raise_error(ArgumentError, /missing keyword:.+?params/)
   end
 
+  context 'when message is omitted' do
+    subject(:error) { described_class.new(params: ['id']) }
+
+    it 'has a nil message_key' do
+      expect(error.message_key).to be_nil
+    end
+
+    it 'has no message from the given options' do
+      expect(error.message).to eq(described_class.name)
+    end
+  end
+
   context 'when message is a Symbol' do
     subject(:error) { described_class.new(params: ['id'], message: :presence) }
 

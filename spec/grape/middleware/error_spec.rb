@@ -455,4 +455,34 @@ describe Grape::Middleware::Error do
       expect(middleware.__send__(:error?, 'not an error')).to be false
     end
   end
+
+  describe '#resolved_backtrace' do
+    subject(:middleware) { described_class.new(->(_env) {}, rescue_options: Grape::DSL::RescueOptions.new(backtrace: true)) }
+
+    context 'when the raw response has no backtrace of its own' do
+      it 'falls back to the original exception backtrace' do
+        original_exception = RuntimeError.new('boom')
+        original_exception.set_backtrace(['original.rb:1'])
+        raw = Grape::Exceptions::ErrorResponse.new(original_exception:)
+
+        expect(middleware.__send__(:resolved_backtrace, raw)).to eq(['original.rb:1'])
+      end
+    end
+
+    context 'when neither the raw response nor the original exception have a backtrace' do
+      it 'returns an empty array' do
+        raw = Grape::Exceptions::ErrorResponse.new
+        expect(middleware.__send__(:resolved_backtrace, raw)).to eq([])
+      end
+    end
+  end
+
+  describe '#grape_exceptions_precedence_handler' do
+    subject(:middleware) { described_class.new(->(_env) {}, rescue_grape_exceptions: true) }
+
+    it 'leaves InvalidVersionHeader alone so it keeps reaching Rack' do
+      handler = middleware.__send__(:grape_exceptions_precedence_handler, Grape::Exceptions::InvalidVersionHeader, nil)
+      expect(handler).to be_nil
+    end
+  end
 end
