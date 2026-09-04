@@ -21,11 +21,14 @@ module Grape
           rescue_all: false, rescue_grape_exceptions: false, rescue_handlers: nil,
           rescue_options: nil
         )
-          # `rescue_options:` arrives nil from `Endpoint#error_middleware_options`
-          # when no `rescue_from` has been called — fall back to the documented
-          # defaults rather than letting nil propagate to `def_delegator
-          # :rescue_options, :backtrace`.
+          # `rescue_options:` and `default_error_formatter:` arrive nil from
+          # `Endpoint#error_middleware_options` when the API called no
+          # `rescue_from` and no `format` — and an explicit nil bypasses the
+          # keyword defaults above, so restore them here rather than letting nil
+          # propagate to `def_delegator :rescue_options, :backtrace` or to the
+          # formatter lookup in `#format_message`.
           rescue_options ||= Grape::DSL::RescueOptions.new
+          default_error_formatter ||= Grape::ErrorFormatter::Txt
           super
         end
       end
@@ -74,17 +77,17 @@ module Grape
         Grape::ContentTypes.media_type(content_type).to_s.casecmp?('text/html')
       end
 
-      # +formatter_for+ always resolves to something callable — a registered
-      # formatter, the API's +default_error_formatter+, or +ErrorFormatter::Txt+
-      # — and +error_formatter+ no longer lets a nil registration through, so
-      # there is no no-formatter case to handle here. The +throw :error, 406+
-      # that used to stand in for one could not work anyway: nothing catches
-      # +:error+ around this call (+#call!+ has left its +catch+ by the time
-      # +error_response+ runs), so it raised +UncaughtThrowError+ and the
-      # request answered with the failsafe 500 rather than the 406 it named.
+      # The registry answers nil for a format nothing is registered for, and
+      # the API's +default_error_formatter+ — +ErrorFormatter::Txt+ unless the
+      # API set another — takes it from there, so this always has something
+      # callable. The +throw :error, 406+ that used to stand in for a missing
+      # formatter could not work anyway: nothing catches +:error+ around this
+      # call (+#call!+ has left its +catch+ by the time +error_response+ runs),
+      # so it raised +UncaughtThrowError+ and the request answered with the
+      # failsafe 500 rather than the 406 it named.
       def format_message(error)
         current_format = env[Grape::Env::API_FORMAT] || format
-        formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters, default_error_formatter)
+        formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters) || default_error_formatter
         formatter.call(error:, env:, include_backtrace:, include_original_exception:)
       end
 

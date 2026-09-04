@@ -52,6 +52,11 @@ describe Grape::DSL::RequestResponse do
       subject.default_error_formatter :json
       expect(subject.inheritable_setting.default_error_formatter).to eq(Grape::ErrorFormatter::Json)
     end
+
+    it 'raises when nothing is registered under the given name' do
+      expect { subject.default_error_formatter :jsonn }.to raise_error(Grape::Exceptions::UnknownErrorFormatter, /unknown error formatter: jsonn/)
+      expect(subject.inheritable_setting.default_error_formatter).to be_nil
+    end
   end
 
   describe '.error_formatter' do
