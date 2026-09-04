@@ -7,10 +7,18 @@ module Grape
       # initialization. When +strict+ is true, it doesn't coerce a value but check
       # that it has the proper type.
       class PrimitiveCoercer < DryTypeCoercer
+        # The input classes Virtus refused for a given declared type, keyed by
+        # that type. Resolved once in #initialize rather than re-derived from
+        # +type+ on every value: the answer only ever depends on the
+        # declaration, and every coerced attribute of every request asks.
+        REJECTED_INPUTS = { String => [Array, Hash].freeze, Hash => [String].freeze }.freeze
+
         def initialize(type, strict: false)
           super
 
           @coercer = cache_coercer[type]
+          @rejected_inputs = REJECTED_INPUTS[type]
+          @treat_empty_as_nil = type != String
         end
 
         def call(val)
@@ -29,21 +37,16 @@ module Grape
         # but Virtus wouldn't accept it. So, this method only exists to not introduce
         # breaking changes.
         def reject?(val)
-          case val
-          when Array, Hash
-            type == String
-          when String
-            type == Hash
-          else
-            false
-          end
+          return false unless @rejected_inputs
+
+          @rejected_inputs.any? { |klass| val.is_a?(klass) }
         end
 
         # Dry-Types treats an empty string as invalid. However, Grape considers an empty string as
         # absence of a value and coerces it into nil. See a discussion there
         # https://github.com/ruby-grape/grape/pull/2045
         def treat_as_nil?(val)
-          val == '' && type != String
+          @treat_empty_as_nil && val == ''
         end
       end
     end

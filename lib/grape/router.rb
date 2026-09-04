@@ -23,7 +23,7 @@ module Grape
     def compile!
       return if @compiled
 
-      @union = Regexp.union(@neutral_regexes)
+      @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
       @neutral_regexes = nil
       # Compiled from the routes actually registered rather than from
       # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
@@ -34,7 +34,7 @@ module Grape
       # answered every request for it with 405.
       @map.each do |method, routes|
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
-        @optimized_map[method] = Regexp.union(optimized_map)
+        @optimized_map[method] = resolve_capture_groups(Regexp.union(optimized_map), routes)
       end
       @map.freeze
       @optimized_map.freeze
@@ -169,6 +169,17 @@ module Grape
       route.call(env)
     end
 
+    # Tells each route the number of the group it ended up as in +union+. The
+    # numbering is a property of the union rather than of the route's own
+    # pattern -- every route ahead of it contributes however many groups its
+    # pattern declares -- so it can only be resolved once the union is built.
+    # Returns the union, so a caller can assign it in one expression.
+    def resolve_capture_groups(union, routes)
+      named_captures = union.named_captures
+      routes.each { |route| route.resolve_capture_group!(named_captures) }
+      union
+    end
+
     def with_optimization
       compile!
       yield || default_response
@@ -178,12 +189,17 @@ module Grape
       [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY.dup]
     end
 
+    # Which alternative of the union matched is answered by scanning one group
+    # per registered route, so on an API with many of them that scan is what a
+    # request costs. The groups are indexed by number rather than by name: a
+    # name sends MatchData through the pattern's name table on every lookup,
+    # a number indexes the match region directly.
     def match?(input, method)
-      @optimized_map[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_index] } }
+      @optimized_map[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_group] } }
     end
 
     def greedy_match?(input)
-      @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_index] } }
+      @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
     end
 
     def cascade?(response)

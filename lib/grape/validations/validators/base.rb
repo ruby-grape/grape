@@ -78,9 +78,10 @@ module Grape
         # @raise [Grape::Exceptions::Validation] if validation failed
         # @return [void]
         def validate(request)
-          return unless scope.should_validate?(request.params)
+          params = request.params
+          return unless scope.should_validate?(params)
 
-          validate!(request.params)
+          validate!(params)
         end
 
         # Validates a given parameter hash.
