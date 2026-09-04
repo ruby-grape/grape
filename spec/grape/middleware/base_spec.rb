@@ -251,6 +251,23 @@ describe Grape::Middleware::Base do
       expect(last_response.headers['X-Test-Before']).to eq('Hi')
       expect(last_response.headers['X-Test-After']).to eq('Bye')
     end
+
+    context 'when the downstream app returns a Rack::Response' do
+      let(:app) do
+        context = self
+
+        Rack::Builder.app do
+          use context.example_ware
+          run ->(_) { Rack::Response.new('Yeah', 200, {}) }
+        end
+      end
+
+      it 'merges the header onto the Rack::Response' do
+        get '/'
+        expect(last_response.headers['X-Test-Before']).to eq('Hi')
+        expect(last_response.headers['X-Test-After']).to eq('Bye')
+      end
+    end
   end
 
   context 'header overwrite' do

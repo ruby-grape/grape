@@ -69,6 +69,7 @@
 * [#2894](https://github.com/ruby-grape/grape/pull/2894): Read the request method once in `default_status` instead of asking through `post?` and `delete?` - [@ericproulx](https://github.com/ericproulx).
 * [#2895](https://github.com/ruby-grape/grape/pull/2895): Cut per-request work out of the endpoint, validation and router paths: scan the router's compiled union by capture number rather than by name, skip the Array boxing in `AttributesIterator` for a flat scope, read a coerced attribute once instead of three times, and resolve the formatter's config and the coercers' type checks once at build time - [@ericproulx](https://github.com/ericproulx).
 * [#2900](https://github.com/ruby-grape/grape/pull/2900): Remove the deprecations announced in 3.2 and 3.3: `Grape::Router.normalize_path`, Hash access on middleware `Options` and their `DEFAULT_OPTIONS` constants, the positional options Hash for `auth`/`http_basic`/`desc`, a Hash returned from a `rescue_from` handler, and `@option` on validators (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
+* [#2896](https://github.com/ruby-grape/grape/pull/2896): Bring test suite line coverage to 100% - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes

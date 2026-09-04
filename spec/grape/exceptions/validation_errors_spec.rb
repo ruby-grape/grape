@@ -37,6 +37,13 @@ describe Grape::Exceptions::ValidationErrors do
     end
   end
 
+  describe '#to_json' do
+    it 'returns the JSON representation of #as_json' do
+      error = described_class.new(exceptions: [validation_error])
+      expect(error.to_json).to eq(error.as_json.to_json)
+    end
+  end
+
   describe '#full_messages' do
     context 'with errors' do
       subject { described_class.new(exceptions: [validation_error_1, validation_error_2]).full_messages }

@@ -52,4 +52,11 @@ describe Grape::Exceptions::Validation do
       expect(error.message).to eq('raw message')
     end
   end
+
+  describe '#as_json' do
+    it 'returns the string representation of the error' do
+      error = described_class.new(params: ['id'], message: 'raw message')
+      expect(error.as_json).to eq(error.to_s)
+    end
+  end
 end

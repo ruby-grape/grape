@@ -79,12 +79,19 @@ module Grape
         formatter = Grape::ErrorFormatter.formatter_for(current_format, error_formatters, default_error_formatter)
         return formatter.call(error:, env:, include_backtrace:, include_original_exception:) if formatter
 
+        # simplecov:disable
+        # Unreachable: Grape::ErrorFormatter.formatter_for always returns a
+        # truthy value. Grape::ErrorFormatter::Base.inherited registers every
+        # formatter subclass, including Txt, so the registry lookup falls back
+        # to Txt even for an unrecognized format, before default_error_formatter
+        # is ever consulted.
         throw :error, Grape::Exceptions::ErrorResponse.new(
           status: 406,
           message: "The requested format '#{current_format}' is not supported.",
           backtrace: error.backtrace,
           original_exception: error.original_exception
         )
+        # simplecov:enable
       end
 
       def find_handler(klass)

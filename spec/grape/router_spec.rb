@@ -134,6 +134,15 @@ describe Grape::Router do
       expect(status).to eq(404)
       expect(headers['X-Cascade']).to eq('pass')
     end
+
+    it 'marks the request as cascaded when only an ANY route responds' do
+      append_route(cascading, '*')
+      router.compile!
+
+      status, headers, = router.call(Rack::MockRequest.env_for('/hello'))
+      expect(status).to eq(404)
+      expect(headers['X-Cascade']).to eq('pass')
+    end
   end
 
   # Regression: routing args were seeded once (`||=`) and merged in place, so
