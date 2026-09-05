@@ -110,6 +110,7 @@
 * [#2901](https://github.com/ruby-grape/grape/pull/2901): Reject `error_formatter` without a formatter instead of registering `nil`, which left the format with no error formatter at all and answered every error for it with a failsafe 500 (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2902](https://github.com/ruby-grape/grape/pull/2902): Make `Grape::ErrorFormatter.formatter_for` a lookup that answers `nil` for an unregistered format, like `Grape::Parser.parser_for`, and move the `default_error_formatter` / `Grape::ErrorFormatter::Txt` fallback to `Grape::Middleware::Error`, which owns it; `default_error_formatter` naming nothing registered now raises `Grape::Exceptions::UnknownErrorFormatter` instead of silently storing `Txt` (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2904](https://github.com/ruby-grape/grape/pull/2904): Document and spec route `requirements` given as a Mustermann capture type, which constrains the match and hands the endpoint the converted value - [@ericproulx](https://github.com/ericproulx).
+* [#2905](https://github.com/ruby-grape/grape/pull/2905): Nest any `route_param` requirement under the param name, not just a Regexp, and reject the `requirements` shapes that have no param to attach to where they are written rather than on the first request - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
