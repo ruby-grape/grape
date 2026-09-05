@@ -116,6 +116,7 @@
 * [#2908](https://github.com/ruby-grape/grape/pull/2908): Stop reassigning method parameters across `lib`, so a parameter keeps the value its caller passed for the whole method; the `oneof` collection in `Grape::Validations::ParamsScope` no longer writes into the Hash it was given - [@ericproulx](https://github.com/ericproulx).
 * [#2910](https://github.com/ruby-grape/grape/pull/2910): Restore `Grape::Middleware::Formatter`'s in-place content-type negotiation as `ensure_content_type!`, which #2908 had turned into a copy of the response headers on every response - [@ericproulx](https://github.com/ericproulx).
 * [#2911](https://github.com/ruby-grape/grape/pull/2911): Copy response headers with `merge!` instead of `merge` in `Grape::API::Instance#call` and `Grape::Middleware::Error`, which allocated a `Grape::Util::Header` only to discard it - [@ericproulx](https://github.com/ericproulx).
+* [#2907](https://github.com/ruby-grape/grape/pull/2907): Stop `Grape::Endpoint::Options` from appending the default `'/'` into the path Array it was given, so declaring a route with an empty Array of paths inside a `namespace`, `resource`, `group` or `route_param` block no longer mutates the caller's Array — and raises `FrozenError` at boot when it is frozen - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 3.3.5 (2026-07-30)
