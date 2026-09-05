@@ -72,6 +72,7 @@
 
 #### Fixes
 
+* [#2899](https://github.com/ruby-grape/grape/pull/2899): Derive `Grape.deprecator`'s deprecation horizon from `Grape::VERSION` instead of the hardcoded `2.0` it has announced since 2023 - [@ericproulx](https://github.com/ericproulx).
 * [#2898](https://github.com/ruby-grape/grape/pull/2898): Stop eager loading `grape/testing`, so the module is opt-in as its 3.3 release note has always said instead of being installed in every process (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2767](https://github.com/ruby-grape/grape/pull/2767): Update rubocop to 1.88.0 and rubocop-rspec to 3.10.2 - [@ericproulx](https://github.com/ericproulx).
 * [#2863](https://github.com/ruby-grape/grape/pull/2863): Enable `Style/MutableConstant`'s `Recursive` option, so a literal nested inside a frozen constant has to be frozen too - [@ericproulx](https://github.com/ericproulx).

@@ -95,8 +95,15 @@ module Grape
       ]
     end.freeze
 
+  # The deprecation horizon is the version a deprecation announces as its
+  # removal point, so it is the *next* major rather than the current one, and
+  # it is derived from VERSION rather than written out. Written out, it went
+  # stale: it said '2.0' from 2023 (#2353) through all of 2.x, 3.x and 4.x, so
+  # a method deprecated through this deprecator announced a removal version
+  # that had already shipped, and every custom `behavior` lambda -- how a Rails
+  # app consumes deprecations -- was handed the same wrong number.
   def self.deprecator
-    @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'Grape')
+    @deprecator ||= ActiveSupport::Deprecation.new("#{Gem::Version.new(VERSION).segments.first + 1}.0", 'Grape')
   end
 end
 
