@@ -2024,6 +2024,17 @@ describe Grape::API do
       expect(last_response.body).to eql 'Hello, world.'
     end
 
+    it 'includes all known helpers in scope when called with no args and no block' do
+      subject.helpers do
+        def hello
+          'Hello, world.'
+        end
+      end
+
+      new_mod = subject.helpers
+      expect(new_mod.instance_methods).to include(:hello)
+    end
+
     it 'is scopable' do
       subject.helpers do
         def generic

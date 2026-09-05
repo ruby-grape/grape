@@ -552,4 +552,27 @@ describe Grape::Validations::Validators::DefaultValidator do
       expect(JSON.parse(last_response.body)).to eq(expected)
     end
   end
+
+  describe 'default value that is not duplicable' do
+    let(:app) do
+      Class.new(Grape::API) do
+        require 'singleton'
+        singleton_class = Class.new { include Singleton }
+
+        default_format :json
+
+        params do
+          optional :callback, default: singleton_class.instance
+        end
+        get '/non_duplicable_default' do
+          { callback: params[:callback].class.name }
+        end
+      end
+    end
+
+    it 'uses the singleton object directly, without attempting to #dup it' do
+      get '/non_duplicable_default'
+      expect(last_response.status).to eq(200)
+    end
+  end
 end

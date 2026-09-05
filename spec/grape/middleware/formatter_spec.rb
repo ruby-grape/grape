@@ -281,6 +281,20 @@ describe Grape::Middleware::Formatter do
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
             expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
           end
+
+          it "merges into a pre-existing rack.request.form_hash when parsing the body from #{method}" do
+            subject.call(
+              Rack::PATH_INFO => '/info',
+              Rack::REQUEST_METHOD => method,
+              'CONTENT_TYPE' => content_type,
+              Rack::RACK_INPUT => io,
+              'CONTENT_LENGTH' => io.length.to_s,
+              Rack::RACK_REQUEST_FORM_HASH => { 'existing' => 'value' }
+            )
+            expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['existing']).to eq('value')
+            expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['is_boolean']).to be true
+            expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]['string']).to eq('thing')
+          end
         end
 
         context 'when Content-Type is not supported' do

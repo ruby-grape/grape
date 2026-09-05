@@ -136,4 +136,40 @@ describe Grape::Exceptions::Base do
       end
     end
   end
+
+  describe '#translate_message (private)' do
+    subject(:translate_message) { described_class.new.__send__(:translate_message, translation_key) }
+
+    context 'when given a Proc' do
+      let(:translation_key) { -> { 'from a proc' } }
+
+      it 'calls the Proc' do
+        expect(translate_message).to eq('from a proc')
+      end
+    end
+
+    context 'when given a Hash matching {key:, **opts}' do
+      let(:translation_key) { { key: :invalid_formatter, klass: String, to_format: 'xml' } }
+
+      it 'translates using the key and forwards the remaining pairs as opts' do
+        expect(translate_message).to eq('cannot convert String to xml')
+      end
+    end
+
+    context 'when given a Hash that does not have a :key entry' do
+      let(:translation_key) { { klass: String, to_format: 'xml' } }
+
+      it 'raises NoMatchingPatternKeyError' do
+        expect { translate_message }.to raise_error(NoMatchingPatternKeyError)
+      end
+    end
+
+    context 'when given anything else (e.g. a plain String)' do
+      let(:translation_key) { 'a literal message' }
+
+      it 'returns it unchanged' do
+        expect(translate_message).to eq('a literal message')
+      end
+    end
+  end
 end

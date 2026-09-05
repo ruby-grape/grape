@@ -460,4 +460,62 @@ describe Grape::Middleware::Error do
       end
     end
   end
+
+  describe '#error!' do
+    it 'sets the status and renders a formatted error response' do
+      env = Rack::MockRequest.env_for('/')
+      endpoint = Spec::Support::EndpointFaker::FakerAPI.endpoints.first
+      env[Grape::Env::API_ENDPOINT] = endpoint
+      middleware = described_class.new(->(_env) {})
+      middleware.instance_variable_set(:@env, env)
+
+      expect(endpoint).to receive(:status).with(422)
+      response = middleware.__send__(:error!, 'failure', 422)
+      expect(response.status).to eq(422)
+      expect(response.body).to eq(['failure'])
+    end
+  end
+
+  describe '#error?' do
+    subject(:middleware) { described_class.new(->(_env) {}) }
+
+    it 'returns true for a Grape::Exceptions::ErrorResponse' do
+      response = Grape::Exceptions::ErrorResponse.new(message: 'oops', status: 500, headers: {})
+      expect(middleware.__send__(:error?, response)).to be true
+    end
+
+    it 'returns false for any other object' do
+      expect(middleware.__send__(:error?, 'not an error')).to be false
+    end
+  end
+
+  describe '#resolved_backtrace' do
+    subject(:middleware) { described_class.new(->(_env) {}, rescue_options: Grape::DSL::RescueOptions.new(backtrace: true)) }
+
+    context 'when the raw response has no backtrace of its own' do
+      it 'falls back to the original exception backtrace' do
+        original_exception = RuntimeError.new('boom')
+        original_exception.set_backtrace(['original.rb:1'])
+        raw = Grape::Exceptions::ErrorResponse.new(original_exception:)
+
+        expect(middleware.__send__(:resolved_backtrace, raw)).to eq(['original.rb:1'])
+      end
+    end
+
+    context 'when neither the raw response nor the original exception have a backtrace' do
+      it 'returns an empty array' do
+        raw = Grape::Exceptions::ErrorResponse.new
+        expect(middleware.__send__(:resolved_backtrace, raw)).to eq([])
+      end
+    end
+  end
+
+  describe '#grape_exceptions_precedence_handler' do
+    subject(:middleware) { described_class.new(->(_env) {}, rescue_grape_exceptions: true) }
+
+    it 'leaves InvalidVersionHeader alone so it keeps reaching Rack' do
+      handler = middleware.__send__(:grape_exceptions_precedence_handler, Grape::Exceptions::InvalidVersionHeader, nil)
+      expect(handler).to be_nil
+    end
+  end
 end

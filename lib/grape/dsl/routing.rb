@@ -81,7 +81,12 @@ module Grape
           inheritable_setting.version_options = options
         end
 
+        # simplecov:disable
+        # Unreachable: @versions was just set to `versions | requested_versions`
+        # above (line 70), which always returns an Array, so `&.` here can
+        # never short-circuit to nil.
         @versions&.last
+        # simplecov:enable
       end
 
       # Define a root URL prefix for your entire API.

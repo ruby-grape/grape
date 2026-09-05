@@ -42,5 +42,15 @@ describe Grape::Testing do
       Grape::Endpoint.reset_before_each
       expect { get '/' }.to raise_error(NoMethodError, /undefined method [`']authenticate_user!' for/)
     end
+
+    it 'raises an ArgumentError when no block is given' do
+      expect { Grape::Endpoint.before_each }.to raise_error(ArgumentError, 'a block is required')
+    end
+
+    it 'does nothing when no before_each hooks were registered' do
+      subject.get('/') { 'hello' }
+      expect { get '/' }.not_to raise_error
+      expect(last_response.body).to eq('hello')
+    end
   end
 end

@@ -24,7 +24,13 @@ module Grape
         message = ::I18n.translate(key, **i18n_opts)
         return message unless message.equal?(MISSING)
 
+        # simplecov:disable
+        # Unreachable: I18n.translate resolves any default: value that is not
+        # itself MISSING before returning, so `message` above is only ever
+        # MISSING when the caller's own default was MISSING — i.e. `default`
+        # is always MISSING here too.
         effective_default = default.equal?(MISSING) ? [*Array(scope), key].join('.') : default
+        # simplecov:enable
         return effective_default if fallback_locale?(locale) || fallback_locale_unavailable?
 
         ::I18n.translate(key, default: effective_default, scope:, locale: FALLBACK_LOCALE, **)

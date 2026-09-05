@@ -338,4 +338,13 @@ describe Grape::Middleware::Versioner::Header do
       expect { versioned_get '/', 'v1', using: :header }.to raise_error Grape::Exceptions::MissingVendorOption
     end
   end
+
+  context 'when the vendor option is not set on the middleware directly' do
+    subject { described_class.new(app, version_options: Grape::DSL::VersionOptions.new(using: :header, vendor: nil)) }
+
+    it 'skips the best-quality-media-type match entirely' do
+      status, = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
+      expect(status).to eq(200)
+    end
+  end
 end

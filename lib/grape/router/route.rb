@@ -97,7 +97,14 @@ module Grape
         when Array
           value.each { |v| tag_utf8!(v) }
         else
+          # simplecov:disable
+          # Unreachable: Mustermann's Pattern#params returns only String or
+          # Array (of String) captures - see mustermann/pattern.rb#params,
+          # mustermann/regexp_based.rb#params. params_for also filters out nil
+          # before calling this, so there is no other value #tag_utf8! is ever
+          # called with.
           value
+          # simplecov:enable
         end
       end
 

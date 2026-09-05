@@ -27,4 +27,16 @@ describe Grape::Json, if: (defined?(MultiJSON) || defined?(MultiJson)) && !defin
       expect(JSON.parse(response.body)).to eq('received' => 'hi')
     end
   end
+
+  describe '.dump' do
+    it 'serializes an object to a JSON string via the active multi_json backend' do
+      expect(JSON.parse(subject.dump(a: 1))).to eq('a' => 1)
+    end
+  end
+
+  describe '.parse' do
+    it 'deserializes a JSON string via the active multi_json backend' do
+      expect(subject.parse('{"a":1}')).to eq('a' => 1)
+    end
+  end
 end
