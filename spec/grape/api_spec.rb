@@ -382,6 +382,62 @@ describe Grape::API do
       end
     end
 
+    # A requirement given as a Class or a Symbol Mustermann knows constrains
+    # the match the way a Regexp does and converts the captured value with it,
+    # so the endpoint is handed an Integer or a Date rather than a String.
+    context 'with a capture type as the requirement' do
+      it 'converts the captured value' do
+        subject.namespace :users do
+          route_param :id, requirements: { id: Integer } do
+            get { { id: params[:id], type: params[:id].class.to_s }.to_json }
+          end
+        end
+
+        get '/users/23'
+        expect(last_response.body).to eq('{"id":23,"type":"Integer"}')
+      end
+
+      it 'constrains what the route matches' do
+        subject.namespace :users do
+          route_param :id, requirements: { id: Integer } do
+            get { params[:id].to_json }
+          end
+        end
+
+        get '/users/michael'
+        expect(last_response).to be_not_found
+        get '/users/23'
+        expect(last_response).to be_successful
+      end
+
+      it 'converts with a capture type named as a Symbol' do
+        subject.namespace :events do
+          route_param :on, requirements: { on: :date } do
+            get { { on: params[:on].to_s, type: params[:on].class.to_s }.to_json }
+          end
+        end
+
+        get '/events/2020-01-02'
+        expect(last_response.body).to eq('{"on":"2020-01-02","type":"Date"}')
+        get '/events/nope'
+        expect(last_response).to be_not_found
+      end
+
+      # The declared type still owns what the endpoint sees: validation runs
+      # after the router, on the value the converter produced.
+      it 'is still coerced to the type the params block declares' do
+        subject.namespace :users do
+          params { requires :id, type: String }
+          route_param :id, requirements: { id: Integer } do
+            get { { id: params[:id], type: params[:id].class.to_s }.to_json }
+          end
+        end
+
+        get '/users/23'
+        expect(last_response.body).to eq('{"id":"23","type":"String"}')
+      end
+    end
+
     context 'with a non-ascii segment' do
       it 'tags the param as UTF-8 rather than leaving it binary' do
         subject.route_param :id do
