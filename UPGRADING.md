@@ -78,6 +78,23 @@ end
 ```
 
 `@options`, `option_value` and the rest of the documented custom-validator surface are unchanged.
+#### `error_formatter` now requires a formatter
+
+`error_formatter` takes the formatter positionally or as `with:`. Called with neither, it used to register `nil` for that format:
+
+```ruby
+error_formatter :json # no formatter given
+```
+
+`Grape::ErrorFormatter.formatter_for` hands a registered value back as-is, so the format resolved to no formatter at all — and every error response in that format then failed to render and came back as the failsafe `500 Internal Server Error` in `text/plain`, whatever status and message the API had asked for.
+
+That call now raises `ArgumentError` when the API is defined, rather than on the first error the API tries to render. Pass the formatter:
+
+```ruby
+error_formatter :json, with: MyErrorFormatter
+```
+
+An API that already passes one is unaffected, and a format with no `error_formatter` of its own keeps falling back to `default_error_formatter` and then to `Grape::ErrorFormatter::Txt`.
 
 #### `grape/testing` is no longer loaded unless you require it
 

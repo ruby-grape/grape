@@ -65,6 +65,15 @@ describe Grape::DSL::RequestResponse do
       subject.error_formatter format, with: :error_formatter
       expect(subject.inheritable_setting.error_formatters).to eq(format.to_sym => :error_formatter)
     end
+
+    it 'raises when no formatter is given' do
+      expect { subject.error_formatter format }.to raise_error(ArgumentError, 'error_formatter "txt" requires a formatter, given positionally or as `with:`')
+      expect(subject.inheritable_setting.error_formatters).to be_nil
+    end
+
+    it 'raises when the formatter is nil' do
+      expect { subject.error_formatter format, with: nil }.to raise_error(ArgumentError)
+    end
   end
 
   describe '.content_type' do

@@ -43,8 +43,16 @@ module Grape
         inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
       end
 
+      # Specify a custom error formatter for a format, passed positionally or
+      # as +with:+. A nil formatter used to be registered as-is, and
+      # +ErrorFormatter.formatter_for+ hands a registered value back verbatim
+      # — so the format resolved to no formatter at all and every error
+      # response for it died in the middleware. Reject it here instead, where
+      # the mistake is.
       def error_formatter(format, options = nil, with: nil)
         formatter = with || options
+        raise ArgumentError, "error_formatter #{format.inspect} requires a formatter, given positionally or as `with:`" if formatter.nil?
+
         inheritable_setting.add_error_formatter(format.to_sym, formatter)
       end
 
