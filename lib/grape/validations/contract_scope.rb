@@ -9,19 +9,20 @@ module Grape
       # @yield a block yielding a new schema class. Optional.
       def initialize(api, contract = nil, &block)
         # When block is passed, the first arg is either schema or nil.
-        contract = Dry::Schema.Params(parent: contract, &block) if block
+        declared = block ? Dry::Schema.Params(parent: contract, &block) : contract
 
-        if contract.respond_to?(:schema)
+        if declared.respond_to?(:schema)
           # It's a Dry::Validation::Contract, then.
-          contract = contract.new
-          key_map = contract.schema.key_map
+          schema = declared.new
+          key_map = schema.schema.key_map
         else
           # Dry::Schema::Processor, hopefully.
-          key_map = contract.key_map
+          schema = declared
+          key_map = declared.key_map
         end
 
         api.inheritable_setting.add_contract_key_map(key_map)
-        api.inheritable_setting.add_validation(Validators::ContractScopeValidator.new(schema: contract))
+        api.inheritable_setting.add_validation(Validators::ContractScopeValidator.new(schema:))
       end
     end
   end

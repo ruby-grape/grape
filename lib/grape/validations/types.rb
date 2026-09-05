@@ -162,20 +162,20 @@ module Grape
 
       def create_coercer_instance(type, method, strict)
         # map_special doesn't recurse into collections — applied only to the top-level type here.
-        type = map_special(type)
+        mapped = map_special(type)
 
         # Multiply-typed parameters, e.g. types: [Integer, String].
-        return MultipleTypeCoercer.new(type, method) if multiple?(type)
+        return MultipleTypeCoercer.new(mapped, method) if multiple?(mapped)
 
         # User-supplied coercion method, or a custom type with its own #parse.
-        return CustomTypeCoercer.new(type, method) if method || custom?(type)
+        return CustomTypeCoercer.new(mapped, method) if method || custom?(mapped)
 
         # Array/Set of a custom type — CustomTypeCoercer already handles single
         # custom types when an explicit coercion method is supplied.
-        return CustomTypeCollectionCoercer.new(map_special(type.first), set: type.is_a?(Set)) if collection_of_custom?(type)
+        return CustomTypeCollectionCoercer.new(map_special(mapped.first), set: mapped.is_a?(Set)) if collection_of_custom?(mapped)
 
         # Fallback: let dry-types handle primitives, structures, and known specials.
-        DryTypeCoercer.coercer_instance_for(type, strict:)
+        DryTypeCoercer.coercer_instance_for(mapped, strict:)
       end
 
       class CoercerCache < Grape::Util::Cache

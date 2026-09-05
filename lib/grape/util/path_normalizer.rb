@@ -19,17 +19,18 @@ module Grape
         # same predicate, and the scan stays in C without building a match.
         return path if path.start_with?('/') && !(path.end_with?('/') || path.include?('%') || path.include?('//'))
 
-        # Slow path
+        # Slow path. The bangs below are safe because +normalized+ is a fresh
+        # String built here, never the one the caller passed in.
         encoding = path.encoding
-        path = "/#{path}"
-        path.squeeze!('/')
+        normalized = "/#{path}"
+        normalized.squeeze!('/')
 
-        unless path == '/'
-          path.delete_suffix!('/')
-          path.gsub!(/(%[a-f0-9]{2})/) { ::Regexp.last_match(1).upcase }
+        unless normalized == '/'
+          normalized.delete_suffix!('/')
+          normalized.gsub!(/(%[a-f0-9]{2})/) { ::Regexp.last_match(1).upcase }
         end
 
-        path.force_encoding(encoding)
+        normalized.force_encoding(encoding)
       end
     end
   end

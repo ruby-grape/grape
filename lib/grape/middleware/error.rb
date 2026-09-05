@@ -27,9 +27,14 @@ module Grape
           # keyword defaults above, so restore them here rather than letting nil
           # propagate to `def_delegator :rescue_options, :backtrace` or to the
           # formatter lookup in `#format_message`.
-          rescue_options ||= Grape::DSL::RescueOptions.new
-          default_error_formatter ||= Grape::ErrorFormatter::Txt
-          super
+          super(
+            rescue_options: rescue_options || Grape::DSL::RescueOptions.new,
+            default_error_formatter: default_error_formatter || Grape::ErrorFormatter::Txt,
+            all_rescue_handler:, base_only_rescue_handlers:, content_types:,
+            default_message:, default_status:, error_formatters:, format:,
+            grape_exceptions_rescue_handler:, internal_grape_exceptions_rescue_handler:,
+            rescue_all:, rescue_grape_exceptions:, rescue_handlers:
+          )
         end
       end
 
@@ -62,8 +67,8 @@ module Grape
       private
 
       def rack_response(status, headers, message)
-        message = Rack::Utils.escape_html(message) if html_content_type?(headers[Rack::CONTENT_TYPE])
-        Rack::Response.new(Array.wrap(message), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
+        body = html_content_type?(headers[Rack::CONTENT_TYPE]) ? Rack::Utils.escape_html(message) : message
+        Rack::Response.new(Array.wrap(body), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
       end
 
       # Escaping must key off the media type only, case-insensitively. Comparing
@@ -261,9 +266,9 @@ module Grape
       end
 
       def run_rescue_handler(handler, error, endpoint, redispatched: false)
-        handler = endpoint.public_method(handler) if handler.is_a?(Symbol)
+        callable = handler.is_a?(Symbol) ? endpoint.public_method(handler) : handler
         response = catch(:error) do
-          handler.arity.zero? ? endpoint.instance_exec(&handler) : endpoint.instance_exec(error, &handler)
+          callable.arity.zero? ? endpoint.instance_exec(&callable) : endpoint.instance_exec(error, &callable)
         rescue StandardError => e
           return redispatch(e, endpoint, redispatched)
         end
