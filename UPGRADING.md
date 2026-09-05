@@ -78,6 +78,55 @@ end
 ```
 
 `@options`, `option_value` and the rest of the documented custom-validator surface are unchanged.
+#### `Grape::ErrorFormatter.formatter_for` answers `nil` for an unregistered format
+
+It used to take the API's `default_error_formatter` as a third argument and end in `default_error_formatter || Grape::ErrorFormatter::Txt` — a global registry implementing the caller's fallback policy. It is now a lookup, the same shape as `Grape::Parser.parser_for`:
+
+```ruby
+Grape::ErrorFormatter.formatter_for(:json)     # => Grape::ErrorFormatter::Json
+Grape::ErrorFormatter.formatter_for(:unknown)  # => nil, was Grape::ErrorFormatter::Txt
+```
+
+Passing a third argument now raises `ArgumentError`. The fallback moved to `Grape::Middleware::Error`, which applies the API's `default_error_formatter` and resolves that to `Grape::ErrorFormatter::Txt` when the API set none.
+
+Error responses are unchanged, including the precedence: a formatter registered for the requested format still wins over the API's `default_error_formatter`, which applies to formats that have none of their own.
+
+Two things follow at definition time, where the lookup's fallback used to hide them.
+
+`default_error_formatter` names an error formatter, so a name nothing is registered under is now an error rather than a silent `Txt`:
+
+```ruby
+default_error_formatter :jsonn
+# => Grape::Exceptions::UnknownErrorFormatter: unknown error formatter: jsonn
+```
+
+`format` names a *format*, and a format with no error formatter of its own is ordinary, so it still succeeds — but the stored setting is now `nil` rather than `Grape::ErrorFormatter::Txt`:
+
+```ruby
+content_type :xls, 'application/vnd.ms-excel'
+format :xls
+MyAPI.default_error_formatter # => nil, was Grape::ErrorFormatter::Txt
+```
+
+The middleware supplies `Txt` at render time, so error responses are unchanged; the setting is only visible if you read it back.
+
+#### `error_formatter` now requires a formatter
+
+`error_formatter` takes the formatter positionally or as `with:`. Called with neither, it used to register `nil` for that format:
+
+```ruby
+error_formatter :json # no formatter given
+```
+
+`Grape::ErrorFormatter.formatter_for` hands a registered value back as-is, so the format resolved to no formatter at all — and every error response in that format then failed to render and came back as the failsafe `500 Internal Server Error` in `text/plain`, whatever status and message the API had asked for.
+
+That call now raises `ArgumentError` when the API is defined, rather than on the first error the API tries to render. Pass the formatter:
+
+```ruby
+error_formatter :json, with: MyErrorFormatter
+```
+
+An API that already passes one is unaffected, and a format with no `error_formatter` of its own keeps falling back to `default_error_formatter` and then to `Grape::ErrorFormatter::Txt`.
 
 #### `grape/testing` is no longer loaded unless you require it
 

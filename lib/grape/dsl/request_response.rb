@@ -36,15 +36,27 @@ module Grape
         inheritable_setting.add_parser(content_type.to_sym, new_parser)
       end
 
-      # Specify a default error formatter.
+      # Specify a default error formatter, by the name it is registered under.
+      # A name nothing is registered for used to be stored as
+      # +ErrorFormatter::Txt+ — the fallback the lookup applied — so a typo
+      # read back as a working setting and silently rendered errors as text.
       def default_error_formatter(new_formatter_name = nil)
         return inheritable_setting.default_error_formatter if new_formatter_name.nil?
 
-        inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
+        formatter = Grape::ErrorFormatter.formatter_for(new_formatter_name)
+        raise Grape::Exceptions::UnknownErrorFormatter.new(new_formatter_name) if formatter.nil?
+
+        inheritable_setting.default_error_formatter = formatter
       end
 
+      # Specify a custom error formatter for a format, passed positionally or
+      # as +with:+. A nil formatter used to be registered as-is, which is the
+      # one thing the registration cannot mean: the format then resolves as if
+      # the call had never been made. Reject it here, where the mistake is.
       def error_formatter(format, options = nil, with: nil)
         formatter = with || options
+        raise ArgumentError, "error_formatter #{format.inspect} requires a formatter, given positionally or as `with:`" if formatter.nil?
+
         inheritable_setting.add_error_formatter(format.to_sym, formatter)
       end
 

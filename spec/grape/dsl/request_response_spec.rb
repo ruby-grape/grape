@@ -52,6 +52,11 @@ describe Grape::DSL::RequestResponse do
       subject.default_error_formatter :json
       expect(subject.inheritable_setting.default_error_formatter).to eq(Grape::ErrorFormatter::Json)
     end
+
+    it 'raises when nothing is registered under the given name' do
+      expect { subject.default_error_formatter :jsonn }.to raise_error(Grape::Exceptions::UnknownErrorFormatter, /unknown error formatter: jsonn/)
+      expect(subject.inheritable_setting.default_error_formatter).to be_nil
+    end
   end
 
   describe '.error_formatter' do
@@ -64,6 +69,15 @@ describe Grape::DSL::RequestResponse do
     it 'understands syntactic sugar' do
       subject.error_formatter format, with: :error_formatter
       expect(subject.inheritable_setting.error_formatters).to eq(format.to_sym => :error_formatter)
+    end
+
+    it 'raises when no formatter is given' do
+      expect { subject.error_formatter format }.to raise_error(ArgumentError, 'error_formatter "txt" requires a formatter, given positionally or as `with:`')
+      expect(subject.inheritable_setting.error_formatters).to be_nil
+    end
+
+    it 'raises when the formatter is nil' do
+      expect { subject.error_formatter format, with: nil }.to raise_error(ArgumentError)
     end
   end
 

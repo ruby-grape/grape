@@ -54,6 +54,39 @@ describe Grape::Middleware::Error do
     expect(last_response.body).to eq('Aww, hamburgers.')
   end
 
+  context 'with a format that has no error formatter of its own' do
+    let(:options) { { default_message: 'Aww, hamburgers.', format: :custom } }
+
+    it 'renders through the text formatter' do
+      err_app.error = { status: 410, message: 'Awesome stuff.' }
+      get '/'
+      expect(last_response.status).to eq(410)
+      expect(last_response.body).to eq('Awesome stuff.')
+    end
+
+    context 'when the API set a default error formatter' do
+      let(:options) do
+        { default_message: 'Aww, hamburgers.', format: :custom, content_types: { custom: 'application/json' }, default_error_formatter: Grape::ErrorFormatter::Json }
+      end
+
+      it 'renders through it' do
+        err_app.error = { status: 410, message: 'Awesome stuff.' }
+        get '/'
+        expect(last_response.body).to eq('{"error":"Awesome stuff."}')
+      end
+    end
+  end
+
+  context 'with a format that has an error formatter of its own' do
+    let(:options) { { default_message: 'Aww, hamburgers.', format: :txt, default_error_formatter: Grape::ErrorFormatter::Json } }
+
+    it "takes it over the API's default error formatter" do
+      err_app.error = { status: 410, message: 'Awesome stuff.' }
+      get '/'
+      expect(last_response.body).to eq('Awesome stuff.')
+    end
+  end
+
   context 'with http code' do
     let(:options) {  { default_message: 'Aww, hamburgers.' } }
 

@@ -48,6 +48,7 @@ en:
         regexp: 'is invalid'
         same_as: 'is not the same as %{parameter}'
         unknown_auth_strategy: 'unknown auth strategy: %{strategy}'
+        unknown_error_formatter: 'unknown error formatter: %{error_formatter_type}'
         unknown_options: 'unknown options: %{options}'
         unknown_parameter: 'unknown parameter: %{param}'
         unknown_params_builder: 'unknown params_builder: %{params_builder_type}'
