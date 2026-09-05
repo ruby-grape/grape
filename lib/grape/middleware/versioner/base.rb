@@ -10,8 +10,6 @@ module Grape
         Options = Data.define(
           :content_types, :format, :mount_path, :prefix, :version_options, :versions
         ) do
-          include Grape::Middleware::DeprecatedOptionsHashAccess
-
           def initialize(
             content_types: nil, format: nil, mount_path: nil, prefix: nil,
             version_options: Grape::DSL::VersionOptions.new, versions: nil
@@ -19,10 +17,6 @@ module Grape
             super
           end
         end
-
-        # @deprecated Kept as a frozen Hash representation of the {Options}
-        #   defaults for back-compat. Will be removed in a future release.
-        DEFAULT_OPTIONS = Options.new.to_h.freeze
 
         CASCADE_PASS_HEADER = { 'X-Cascade' => 'pass' }.freeze
 

@@ -3,6 +3,82 @@ Upgrading Grape
 
 ### Upgrading to >= 4.0.0
 
+#### A positional options Hash is no longer accepted by `auth`, `http_basic` or `desc`
+
+Deprecated in 3.3 ([#2723](https://github.com/ruby-grape/grape/pull/2723), [#2728](https://github.com/ruby-grape/grape/pull/2728)). These take keyword arguments:
+
+```ruby
+# Before
+auth :custom, { realm: 'r', opaque: 'o' }
+http_basic({ realm: 'API' })
+desc 'Get users', { detail: 'Returns every user' }
+
+# After
+auth :custom, realm: 'r', opaque: 'o'
+http_basic realm: 'API'
+desc 'Get users', detail: 'Returns every user'
+```
+
+A leftover positional Hash now raises `ArgumentError` rather than warning. A call that already used bare keyword syntax, or a block, is unaffected.
+
+#### A `rescue_from` handler can no longer return or throw a Hash
+
+Deprecated in 3.3. A handler that returned `{ message:, status:, headers: }` was read as an error response. Say what you mean instead:
+
+```ruby
+# Before
+rescue_from :all do |e|
+  { message: e.message, status: 500, headers: {} }
+end
+
+# After
+rescue_from :all do |e|
+  error!(e.message, 500)
+end
+```
+
+A handler that still returns such a Hash no longer has it interpreted: the response is an invalid one, which Grape answers with its framework default rather than with the status the Hash carried.
+
+#### Middleware `Options` no longer answer `[]`, and the `DEFAULT_OPTIONS` constants are gone
+
+Deprecated in 3.3, when middleware options moved to per-class `Options` `Data` value objects. `Grape::Middleware::Error::DEFAULT_OPTIONS`, `Grape::Middleware::Formatter::DEFAULT_OPTIONS` and `Grape::Middleware::Versioner::Base::DEFAULT_OPTIONS` are removed, as is Hash-style access on the `Options` objects themselves:
+
+```ruby
+# Before
+middleware.config[:default_format]
+Grape::Middleware::Formatter::DEFAULT_OPTIONS[:default_format]
+
+# After
+middleware.config.default_format
+Grape::Middleware::Formatter::Options.new.default_format
+```
+
+`Grape::Middleware::Base` still supports a plain `DEFAULT_OPTIONS` Hash on middleware that declares no `Options` class, so third-party middleware written against that path is unaffected.
+
+#### `Grape::Router.normalize_path` is removed
+
+Deprecated in 3.3. Use `Grape::Util::PathNormalizer.call`, which is where the implementation has lived since.
+
+#### Custom validators read `@options`, not `@option`
+
+`Grape::Validations::Validators::Base` kept `@option` as an alias of `@options` from 3.2 with a note to drop it at the next major. A custom validator reading `@option` now sees `nil`:
+
+```ruby
+# Before
+def validate_param!(attr_name, params)
+  return if params[attr_name].length <= @option
+  # ...
+end
+
+# After
+def validate_param!(attr_name, params)
+  return if params[attr_name].length <= @options
+  # ...
+end
+```
+
+`@options`, `option_value` and the rest of the documented custom-validator surface are unchanged.
+
 #### `grape/testing` is no longer loaded unless you require it
 
 `Grape::Testing` has been documented as opt-in since 3.3 — "intended for test environments only and is not loaded by default" — but it was never excluded from Grape's eager load, so `require 'grape'` installed it anyway. It extends `Grape::Endpoint` with `before_each` / `reset_before_each` and prepends a wrapper around `Grape::Endpoint#run` that every request goes through.

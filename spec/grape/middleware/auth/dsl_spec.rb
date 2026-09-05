@@ -45,21 +45,13 @@ describe Grape::Middleware::Auth::DSL do
     end
   end
 
-  describe 'deprecated positional options Hash' do
-    it 'deprecates a positional Hash for `auth` but still works when silenced' do
-      expect { subject.auth :custom, { realm: 'r', opaque: 'o' }, &block }
-        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `auth`/)
-
-      Grape.deprecator.silence { subject.auth :custom, { realm: 'r', opaque: 'o' }, &block }
-      expect(subject.auth).to eq(realm: 'r', opaque: 'o', type: :custom, proc: block)
+  describe 'a positional options Hash' do
+    it 'is rejected by `auth` -- options are keyword arguments' do
+      expect { subject.auth :custom, { realm: 'r', opaque: 'o' }, &block }.to raise_error(ArgumentError)
     end
 
-    it 'deprecates a positional Hash for `http_basic` but still works when silenced' do
-      expect { subject.http_basic({ realm: 'my_realm' }, &block) }
-        .to raise_error(ActiveSupport::DeprecationException, /positional options Hash to `http_basic`/)
-
-      Grape.deprecator.silence { subject.http_basic({ realm: 'my_realm' }, &block) }
-      expect(subject.auth).to eq(realm: 'my_realm', type: :http_basic, proc: block)
+    it 'is rejected by `http_basic` -- options are keyword arguments' do
+      expect { subject.http_basic({ realm: 'my_realm' }, &block) }.to raise_error(ArgumentError)
     end
   end
 end

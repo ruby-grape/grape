@@ -1420,7 +1420,7 @@ describe Grape::Validations do
         let(:custom_validator_with_options) do
           Class.new(Grape::Validations::Validators::Base) do
             def validate_param!(attr_name, params)
-              return if params[attr_name] == @option[:text]
+              return if params[attr_name] == @options[:text]
 
               raise Grape::Exceptions::Validation.new(params: [@scope.full_name(attr_name)], message:)
             end

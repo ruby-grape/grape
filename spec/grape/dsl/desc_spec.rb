@@ -20,19 +20,8 @@ describe Grape::DSL::Desc do
     end
 
     context 'when a positional options Hash is passed' do
-      let(:desc_text) { 'The description' }
-      let(:options) { { message: 'none' } }
-
-      it 'is deprecated' do
-        expect { subject.desc desc_text, options }.to raise_error(ActiveSupport::DeprecationException)
-      end
-
-      it 'still sets the description when deprecations are silenced' do
-        Grape.deprecator.silence do
-          subject.desc desc_text, options
-        end
-        expect(subject.route_setting(:description)).to eq(options.merge(description: desc_text))
-        expect(subject.namespace_setting(:description)).to be_nil
+      it 'is rejected -- options are keyword arguments' do
+        expect { subject.desc 'The description', { message: 'none' } }.to raise_error(ArgumentError)
       end
     end
 
@@ -51,12 +40,6 @@ describe Grape::DSL::Desc do
       it 'does not modify the caller options Hash' do
         options = { default: { code: 400 } }
         Grape.deprecator.silence { subject.desc 'The description', **options }
-        expect(options).to eq(default: { code: 400 })
-      end
-
-      it 'does not modify a positional options Hash either' do
-        options = { default: { code: 400 } }
-        Grape.deprecator.silence { subject.desc 'The description', options }
         expect(options).to eq(default: { code: 400 })
       end
 

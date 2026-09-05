@@ -53,12 +53,7 @@ module Grape
       #       # ...
       #     end
       #
-      def desc(description, *legacy_options, **options, &config_block)
-        if legacy_options.any?
-          Grape.deprecator.warn('Passing a positional options Hash to `desc` is deprecated. Pass keyword arguments instead.')
-          options = legacy_options.first.merge(options)
-        end
-
+      def desc(description, **options, &config_block)
         if options.key?(:default)
           Grape.deprecator.warn('The `default` option of `desc` is deprecated. Use `default_response` instead.')
           # Rebuilt rather than mutated in place: an explicit +default_response+
