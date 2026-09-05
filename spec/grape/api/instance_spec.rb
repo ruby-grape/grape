@@ -105,4 +105,16 @@ describe Grape::API::Instance do
       expect(last_response.body).to eq 'Not found! (2)'
     end
   end
+
+  describe '.cascade?' do
+    subject(:an_instance) do
+      Class.new(Grape::API::Instance) do
+        cascade true
+      end
+    end
+
+    it 'returns the configured cascade setting' do
+      expect(an_instance.compile!.cascade?).to be(true)
+    end
+  end
 end

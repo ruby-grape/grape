@@ -95,4 +95,11 @@ RSpec.describe Grape::Router::Pattern::Path do
       end
     end
   end
+
+  describe '#to_s' do
+    it 'concatenates the origin and the suffix' do
+      path = described_class.new('/foo', nil, path_settings)
+      expect(path.to_s).to eq("#{path.origin}#{path.suffix}")
+    end
+  end
 end

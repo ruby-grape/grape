@@ -120,6 +120,12 @@ describe Grape::DSL::RequestResponse do
         expect(subject.inheritable_setting.all_rescue_handler).to eq(with_block)
       end
 
+      it 'converts a String :with option to a Symbol' do
+        subject.rescue_from :all, with: 'my_handler'
+        expect(subject.inheritable_setting.rescue_all?).to be(true)
+        expect(subject.inheritable_setting.all_rescue_handler).to eq(:my_handler)
+      end
+
       it 'abort if :with option value is not Symbol, String or Proc' do
         expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, "with: #{integer_class_name}, expected Symbol, String or Proc")
       end

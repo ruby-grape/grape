@@ -1042,6 +1042,9 @@ describe Grape::Endpoint do
       subject.before do
         # Placeholder
       end
+      subject.params do
+        optional :id, type: Integer
+      end
       subject.get do
         'hello'
       end
@@ -1064,7 +1067,10 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(described_class) }),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(described_class),
+                                                                          validators: an_instance_of(Array),
+                                                                          request: a_kind_of(Grape::Request) }),
+        have_attributes(name: 'endpoint_render.grape', payload: { endpoint: a_kind_of(described_class) }),
         have_attributes(name: 'endpoint_run.grape', payload: { endpoint: a_kind_of(described_class),
                                                                env: an_instance_of(Hash) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
@@ -1078,7 +1084,10 @@ describe Grape::Endpoint do
         have_attributes(name: 'endpoint_run_filters.grape', payload: { endpoint: a_kind_of(described_class),
                                                                        filters: a_collection_containing_exactly(an_instance_of(Proc)),
                                                                        type: :before }),
-        have_attributes(name: 'endpoint_render.grape',      payload: { endpoint: a_kind_of(described_class) }),
+        have_attributes(name: 'endpoint_run_validators.grape', payload: { endpoint: a_kind_of(described_class),
+                                                                          validators: an_instance_of(Array),
+                                                                          request: a_kind_of(Grape::Request) }),
+        have_attributes(name: 'endpoint_render.grape', payload: { endpoint: a_kind_of(described_class) }),
         have_attributes(name: 'format_response.grape', payload: { env: an_instance_of(Hash),
                                                                   formatter: a_kind_of(Module) })
       )
@@ -1125,6 +1134,21 @@ describe Grape::Endpoint do
 
     it 'does not raise an error' do
       expect { subject }.not_to raise_error
+    end
+
+    context 'when the endpoint has handled a request (env is set)' do
+      it 'includes the route origin in the inspect output' do
+        inspect_output = nil
+        api = Class.new(Grape::API) do
+          get('/hello') do
+            inspect_output = inspect
+            'world'
+          end
+        end
+        env = Rack::MockRequest.env_for('/hello')
+        api.call(env)
+        expect(inspect_output).to eq("#{described_class} in '/hello' endpoint")
+      end
     end
   end
 end

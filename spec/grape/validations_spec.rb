@@ -104,6 +104,21 @@ describe Grape::Validations do
       end
     end
 
+    context 'optional :none, except: using Grape::Entity documentation' do
+      before do
+        documentation = { field_a: { type: String }, field_b: { type: String } }
+        subject.params do
+          optional :none, except: :field_a, using: documentation
+        end
+        subject.get('/optional_none') { 'optional none works' }
+      end
+
+      it 'still requires the excepted field to be optional (unaffected by the :none context)' do
+        get '/optional_none', field_a: 'woof'
+        expect(last_response.status).to eq(200)
+      end
+    end
+
     context 'required' do
       before do
         subject.params do

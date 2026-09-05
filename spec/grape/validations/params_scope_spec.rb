@@ -1966,4 +1966,33 @@ describe Grape::Validations::ParamsScope do
       end
     end
   end
+
+  describe Grape::Validations::ParamsScope::Attr do
+    let(:scope) { instance_double(Grape::Validations::ParamsScope) }
+
+    describe '.attr_key' do
+      it 'returns a plain value unchanged' do
+        expect(described_class.attr_key(:id)).to eq(:id)
+      end
+
+      it 'recurses into the #key of a nested Attr' do
+        inner = described_class.new(:id, scope)
+        outer = described_class.new(inner, scope)
+        expect(described_class.attr_key(outer)).to eq(:id)
+      end
+
+      it 'transforms the values of a Hash of nested declared params' do
+        inner = described_class.new(:id, scope)
+        result = described_class.attr_key(nested: [inner])
+        expect(result).to eq(nested: [:id])
+      end
+    end
+
+    describe '.attrs_keys' do
+      it 'maps declared params to their keys' do
+        declared_params = [described_class.new(:id, scope), described_class.new(:name, scope)]
+        expect(described_class.attrs_keys(declared_params)).to eq(%i[id name])
+      end
+    end
+  end
 end

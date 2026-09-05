@@ -427,4 +427,32 @@ describe Grape::Middleware::Error do
       end
     end
   end
+
+  describe '#error!' do
+    it 'sets the status and renders a formatted error response' do
+      env = Rack::MockRequest.env_for('/')
+      endpoint = Spec::Support::EndpointFaker::FakerAPI.endpoints.first
+      env[Grape::Env::API_ENDPOINT] = endpoint
+      middleware = described_class.new(->(_env) {})
+      middleware.instance_variable_set(:@env, env)
+
+      expect(endpoint).to receive(:status).with(422)
+      response = middleware.__send__(:error!, 'failure', 422)
+      expect(response.status).to eq(422)
+      expect(response.body).to eq(['failure'])
+    end
+  end
+
+  describe '#error?' do
+    subject(:middleware) { described_class.new(->(_env) {}) }
+
+    it 'returns true for a Grape::Exceptions::ErrorResponse' do
+      response = Grape::Exceptions::ErrorResponse.new(message: 'oops', status: 500, headers: {})
+      expect(middleware.__send__(:error?, response)).to be true
+    end
+
+    it 'returns false for any other object' do
+      expect(middleware.__send__(:error?, 'not an error')).to be false
+    end
+  end
 end
