@@ -118,7 +118,12 @@ module Grape
       def call(env)
         status, headers, response = @router.call(env)
         unless @cascade
-          headers = Grape::Util::Header.new.merge(headers)
+          # +merge!+, not +merge+: the latter is a `dup` plus a `merge!`, so the
+          # Header built on this line would be allocated only to be discarded.
+          # The copy stays because +headers+ can come from a mounted Rack app,
+          # which is free to hand back a frozen or shared Hash that the delete
+          # below must not reach into.
+          headers = Grape::Util::Header.new.merge!(headers)
           headers.delete('X-Cascade')
         end
 

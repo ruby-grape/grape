@@ -68,7 +68,7 @@ module Grape
 
       def rack_response(status, headers, message)
         body = html_content_type?(headers[Rack::CONTENT_TYPE]) ? Rack::Utils.escape_html(message) : message
-        Rack::Response.new(Array.wrap(body), Rack::Utils.status_code(status), Grape::Util::Header.new.merge(headers))
+        Rack::Response.new(Array.wrap(body), Rack::Utils.status_code(status), Grape::Util::Header.new.merge!(headers))
       end
 
       # Escaping must key off the media type only, case-insensitively. Comparing

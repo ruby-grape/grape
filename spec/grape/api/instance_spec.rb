@@ -117,4 +117,29 @@ describe Grape::API::Instance do
       expect(an_instance.compile!.cascade?).to be(true)
     end
   end
+
+  describe '#call' do
+    context 'when cascade is false' do
+      let(:rack_headers) { { 'content-type' => 'text/plain', 'x-cascade' => 'pass' }.freeze }
+      let(:root_api) do
+        headers = rack_headers
+        Class.new(Grape::API::Instance) do
+          cascade false
+          mount ->(_env) { [200, headers, ['from rack']] } => '/rack'
+        end
+      end
+
+      it 'strips X-Cascade from the response' do
+        get '/rack'
+        expect(last_response.headers).not_to have_key('x-cascade')
+      end
+
+      # The mounted app owns the Hash it returned and is free to hand back a
+      # frozen or shared one, so removing X-Cascade has to happen on a copy.
+      it 'does not write into the headers the mounted app returned' do
+        get '/rack'
+        expect(rack_headers).to eq('content-type' => 'text/plain', 'x-cascade' => 'pass')
+      end
+    end
+  end
 end
