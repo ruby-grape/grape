@@ -72,7 +72,7 @@ describe Grape::DSL::RequestResponse do
     end
 
     it 'raises when no formatter is given' do
-      expect { subject.error_formatter format }.to raise_error(ArgumentError, 'error_formatter "txt" requires a formatter, given positionally or as `with:`')
+      expect { subject.error_formatter format }.to raise_error(ArgumentError, 'error_formatter `"txt"` requires a formatter, given positionally or as `with:`')
       expect(subject.inheritable_setting.error_formatters).to be_nil
     end
 
@@ -141,7 +141,7 @@ describe Grape::DSL::RequestResponse do
       end
 
       it 'abort if :with option value is not Symbol, String or Proc' do
-        expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, "with: #{integer_class_name}, expected Symbol, String or Proc")
+        expect { subject.rescue_from :all, with: 1234 }.to raise_error(ArgumentError, "with: `#{integer_class_name}`, expected Symbol, String or Proc")
       end
 
       it 'abort if both :with option and block are passed' do
@@ -198,17 +198,17 @@ describe Grape::DSL::RequestResponse do
     describe 'meta selector mixed with exception classes' do
       it 'raises ArgumentError for :all + exception class' do
         expect { subject.rescue_from :all, StandardError }
-          .to raise_error(ArgumentError, 'rescue_from :all does not accept additional arguments')
+          .to raise_error(ArgumentError, 'rescue_from `:all` does not accept additional arguments')
       end
 
       it 'raises ArgumentError for :grape_exceptions + exception class' do
         expect { subject.rescue_from :grape_exceptions, StandardError }
-          .to raise_error(ArgumentError, 'rescue_from :grape_exceptions does not accept additional arguments')
+          .to raise_error(ArgumentError, 'rescue_from `:grape_exceptions` does not accept additional arguments')
       end
 
       it 'raises ArgumentError for :internal_grape_exceptions + exception class' do
         expect { subject.rescue_from :internal_grape_exceptions, StandardError }
-          .to raise_error(ArgumentError, 'rescue_from :internal_grape_exceptions does not accept additional arguments')
+          .to raise_error(ArgumentError, 'rescue_from `:internal_grape_exceptions` does not accept additional arguments')
       end
     end
 

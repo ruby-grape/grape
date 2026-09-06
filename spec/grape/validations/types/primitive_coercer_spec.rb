@@ -115,7 +115,7 @@ describe Grape::Validations::Types::PrimitiveCoercer do
 
       it 'raises error on init' do
         expect(Grape::DryTypes::Params.constants).not_to include(type.name.to_sym)
-        expect { subject }.to raise_error(/type Complex should support coercion/)
+        expect { subject }.to raise_error(/type `Complex` should support coercion/)
       end
     end
 

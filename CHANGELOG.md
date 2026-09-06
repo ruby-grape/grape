@@ -71,6 +71,7 @@
 * [#2900](https://github.com/ruby-grape/grape/pull/2900): Remove the deprecations announced in 3.2 and 3.3: `Grape::Router.normalize_path`, Hash access on middleware `Options` and their `DEFAULT_OPTIONS` constants, the positional options Hash for `auth`/`http_basic`/`desc`, a Hash returned from a `rescue_from` handler, and `@option` on validators (see UPGRADING) - [@ericproulx](https://github.com/ericproulx).
 * [#2896](https://github.com/ruby-grape/grape/pull/2896): Bring test suite line coverage to 100% - [@dblock](https://github.com/dblock).
 * [#2897](https://github.com/ruby-grape/grape/pull/2897): Improve test suite branch coverage - [@dblock](https://github.com/dblock).
+* [#2909](https://github.com/ruby-grape/grape/pull/2909): Standardize bare Ruby exception messages (`ArgumentError`, etc.) to lowercase, unpunctuated, matching Ruby's own core/stdlib style, and wrap interpolated values in backticks via `rubocop-exception_messages` - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 #### Fixes

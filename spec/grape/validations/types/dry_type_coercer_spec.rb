@@ -11,7 +11,7 @@ describe Grape::Validations::Types::DryTypeCoercer do
     end
 
     it 'raises an ArgumentError for any other type' do
-      expect { described_class.collection_coercer_for({}) }.to raise_error(ArgumentError, /Unknown type/)
+      expect { described_class.collection_coercer_for({}) }.to raise_error(ArgumentError, /unknown type/)
     end
   end
 end

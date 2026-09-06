@@ -10,7 +10,7 @@ module Grape
           @min, @max, @is = options.values_at(:min, :max, :is)
           validate_boundary!(:min, @min)
           validate_boundary!(:max, @max)
-          raise ArgumentError, "min #{@min} cannot be greater than max #{@max}" if @min && @max && @min > @max
+          raise ArgumentError, "min `#{@min}` cannot be greater than max `#{@max}`" if @min && @max && @min > @max
 
           return if @is.nil?
           raise ArgumentError, 'is must be an integer greater than zero' unless @is.is_a?(Integer) && @is.positive?
@@ -42,7 +42,7 @@ module Grape
         private
 
         def validate_boundary!(name, val)
-          raise ArgumentError, "#{name} must be an integer greater than or equal to zero" if !val.nil? && (!val.is_a?(Integer) || val.negative?)
+          raise ArgumentError, "`#{name}` must be an integer greater than or equal to zero" if !val.nil? && (!val.is_a?(Integer) || val.negative?)
         end
       end
     end

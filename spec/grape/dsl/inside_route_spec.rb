@@ -141,7 +141,7 @@ describe Grape::DSL::InsideRoute do
 
     it 'raises error if status is not a integer or symbol' do
       expect { subject.status Object.new }
-        .to raise_error(ArgumentError, 'Status code must be Integer or Symbol.')
+        .to raise_error(ArgumentError, 'status code must be Integer or Symbol')
     end
   end
 
@@ -230,7 +230,7 @@ describe Grape::DSL::InsideRoute do
         let(:file_object) { double('StreamerObject', each: nil) }
 
         it 'raises an error that only a file path is supported' do
-          expect { subject.sendfile file_object }.to raise_error(ArgumentError, /Argument must be a file path/)
+          expect { subject.sendfile file_object }.to raise_error(ArgumentError, /argument must be a file path/)
         end
       end
     end
@@ -392,7 +392,7 @@ describe Grape::DSL::InsideRoute do
           subject.present 'dummy1', with: entity_mock_one
           expect do
             subject.present 'dummy2', with: entity_mock_two
-          end.to raise_error ArgumentError, 'Representation of type String cannot be merged.'
+          end.to raise_error ArgumentError, 'representation of type `String` cannot be merged'
         end
       end
     end

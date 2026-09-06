@@ -74,6 +74,22 @@ Ruby style is enforced with [Rubocop](https://github.com/bbatsov/rubocop), run `
 
 Make sure that `bundle exec rake` completes without errors.
 
+##### Exception Messages
+
+When you `raise` a bare Ruby exception (`ArgumentError`, `NotImplementedError`, etc.) for programmer errors — invalid DSL usage, misconfiguration and the like — write the message as a lowercase fragment with no trailing period, matching Ruby's own core exceptions (e.g. `TypeError: no implicit conversion from nil to integer`). This reads naturally when Ruby prints it after the exception class name and colon in a backtrace:
+
+```ruby
+raise ArgumentError, 'a block is required'
+```
+
+rather than:
+
+```ruby
+raise ArgumentError, 'A block is required.'
+```
+
+This does not apply to `Grape::Exceptions::*` messages meant to be rendered in an API response body, which are already lowercase and unpunctuated by convention and typically come from locale YAML rather than inline strings.
+
 #### Write Documentation
 
 Document any external behavior in the [README](README.md).

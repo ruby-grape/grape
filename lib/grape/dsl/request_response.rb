@@ -55,7 +55,7 @@ module Grape
       # the call had never been made. Reject it here, where the mistake is.
       def error_formatter(format, options = nil, with: nil)
         formatter = with || options
-        raise ArgumentError, "error_formatter #{format.inspect} requires a formatter, given positionally or as `with:`" if formatter.nil?
+        raise ArgumentError, "error_formatter `#{format.inspect}` requires a formatter, given positionally or as `with:`" if formatter.nil?
 
         inheritable_setting.add_error_formatter(format.to_sym, formatter)
       end
@@ -109,7 +109,7 @@ module Grape
       def rescue_from(*args, with: nil, rescue_subclasses: true, backtrace: false, original_exception: false, &block)
         handler = extract_handler(args, with:, block:)
         meta_selector = (args & META_RESCUE_SELECTORS).first
-        raise ArgumentError, "rescue_from #{meta_selector.inspect} does not accept additional arguments" if meta_selector && args.size > 1
+        raise ArgumentError, "rescue_from `#{meta_selector.inspect}` does not accept additional arguments" if meta_selector && args.size > 1
 
         case meta_selector
         when :all
@@ -163,7 +163,7 @@ module Grape
         case with
         when Proc, Symbol then with
         when String then with.to_sym
-        else raise ArgumentError, "with: #{with.class}, expected Symbol, String or Proc"
+        else raise ArgumentError, "with: `#{with.class}`, expected Symbol, String or Proc"
         end
       end
     end

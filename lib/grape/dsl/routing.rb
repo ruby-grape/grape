@@ -259,7 +259,7 @@ module Grape
         # The param is named here, so the constraint is its own: nest whatever
         # it is, not just a Regexp. A Hash would name the param twice, or key a
         # capture this namespace does not introduce, and belongs on +namespace+.
-        raise ArgumentError, "route_param :#{param} constrains :#{param}; pass the constraint itself, or a Hash of requirements to the enclosing namespace" if requirements.respond_to?(:to_hash)
+        raise ArgumentError, "route_param :`#{param}` constrains :`#{param}`; pass the constraint itself, or a Hash of requirements to the enclosing namespace" if requirements.respond_to?(:to_hash)
 
         param_requirements = requirements ? { param.to_sym => requirements } : requirements
 
@@ -283,7 +283,7 @@ module Grape
       def validate_requirements!(requirements)
         return if requirements.nil? || requirements.respond_to?(:to_hash)
 
-        raise ArgumentError, "requirements must be a Hash of param name => constraint, got #{requirements.class}"
+        raise ArgumentError, "requirements must be a Hash of param name => constraint, got `#{requirements.class}`"
       end
 
       # Compose a route's params: the declared params (+params do … end+) deep-merged

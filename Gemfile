@@ -9,6 +9,7 @@ group :development, :test do
   gem 'bundler'
   gem 'rake'
   gem 'rubocop', '1.88.0', require: false
+  gem 'rubocop-exception_messages', '0.2.0', require: false
   gem 'rubocop-performance', '1.26.1', require: false
   gem 'rubocop-rspec', '3.10.2', require: false
 end

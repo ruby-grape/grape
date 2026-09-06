@@ -24,7 +24,7 @@ describe Grape::DSL::Validations do
   describe '.contract' do
     context 'when contract is nil and blockless' do
       it 'raises an ArgumentError' do
-        expect { dummy_class.contract }.to raise_error(ArgumentError, 'Either contract or block must be provided')
+        expect { dummy_class.contract }.to raise_error(ArgumentError, 'either contract or block must be provided')
       end
     end
 
@@ -69,7 +69,7 @@ describe Grape::DSL::Validations do
         end
 
         it 'raises an ArgumentError' do
-          expect { dummy_class.contract(my_contract.new) { :my_block } }.to raise_error(ArgumentError, 'Cannot inherit from contract, only schema')
+          expect { dummy_class.contract(my_contract.new) { :my_block } }.to raise_error(ArgumentError, 'cannot inherit from contract, only schema')
         end
       end
     end

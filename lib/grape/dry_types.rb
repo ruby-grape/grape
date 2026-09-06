@@ -48,7 +48,7 @@ module Grape
     def self.wrapped_dry_types_const_get(dry_type, type)
       dry_type.const_get(type.name, false)
     rescue NameError
-      raise ArgumentError, "type #{type} should support coercion via `[]`" unless type.respond_to?(:[])
+      raise ArgumentError, "type `#{type}` should support coercion via `[]`" unless type.respond_to?(:[])
     end
   end
 end

@@ -17,8 +17,8 @@ module Grape
       #   subclass, allowing to define the schema inline. When the
       #   +contract+ parameter is a schema, it will be used as a parent. Optional.
       def contract(contract = nil, &block)
-        raise ArgumentError, 'Either contract or block must be provided' unless contract || block
-        raise ArgumentError, 'Cannot inherit from contract, only schema' if block && contract.respond_to?(:schema)
+        raise ArgumentError, 'either contract or block must be provided' unless contract || block
+        raise ArgumentError, 'cannot inherit from contract, only schema' if block && contract.respond_to?(:schema)
 
         Grape::Validations::ContractScope.new(self, contract, &block)
       end

@@ -258,7 +258,7 @@ describe Grape::Middleware::Error do
           end
 
           rescue_from :all do |e|
-            raise custom_error_class, "wrapped(#{e.message})"
+            raise custom_error_class, "wrapped(`#{e.message}`)"
           end
 
           get('/') { raise ArgumentError, 'oops' }
@@ -267,7 +267,7 @@ describe Grape::Middleware::Error do
 
       it 'redispatches to the registered handler' do
         expect(response.status).to eq(422)
-        expect(response.body).to eq('custom-handled: wrapped(oops)')
+        expect(response.body).to eq('custom-handled: wrapped(`oops`)')
       end
     end
 

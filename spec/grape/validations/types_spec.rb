@@ -107,12 +107,12 @@ describe Grape::Validations::Types do
 
       it 'raises for an Array of it' do
         expect { described_class.build_coercer(Array[UncoercibleType]) }
-          .to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+          .to raise_error(ArgumentError, 'type `UncoercibleType` should support coercion via `[]`')
       end
 
       it 'raises for a Set of it' do
         expect { described_class.build_coercer(Set[UncoercibleType]) }
-          .to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+          .to raise_error(ArgumentError, 'type `UncoercibleType` should support coercion via `[]`')
       end
 
       it 'raises while the params block is evaluated' do
@@ -121,7 +121,7 @@ describe Grape::Validations::Types do
             params { requires :foos, type: Array[UncoercibleType] }
             get('/foos') { 'never reached' }
           end
-        end.to raise_error(ArgumentError, 'type UncoercibleType should support coercion via `[]`')
+        end.to raise_error(ArgumentError, 'type `UncoercibleType` should support coercion via `[]`')
       end
 
       # A one-argument `parse` makes it a custom type, which ::custom? accepts

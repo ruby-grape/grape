@@ -210,7 +210,7 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       it 'raises an error' do
-        expect { post 'negative_min', list: [12] }.to raise_error(ArgumentError, 'min must be an integer greater than or equal to zero')
+        expect { post 'negative_min', list: [12] }.to raise_error(ArgumentError, '`min` must be an integer greater than or equal to zero')
       end
     end
   end
@@ -228,7 +228,7 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       it do
-        expect { post 'negative_max', list: [12] }.to raise_error(ArgumentError, 'max must be an integer greater than or equal to zero')
+        expect { post 'negative_max', list: [12] }.to raise_error(ArgumentError, '`max` must be an integer greater than or equal to zero')
       end
     end
   end
@@ -246,7 +246,7 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       it do
-        expect { post 'float_min', list: [12] }.to raise_error(ArgumentError, 'min must be an integer greater than or equal to zero')
+        expect { post 'float_min', list: [12] }.to raise_error(ArgumentError, '`min` must be an integer greater than or equal to zero')
       end
     end
   end
@@ -264,7 +264,7 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       it do
-        expect { post 'float_max', list: [12] }.to raise_error(ArgumentError, 'max must be an integer greater than or equal to zero')
+        expect { post 'float_max', list: [12] }.to raise_error(ArgumentError, '`max` must be an integer greater than or equal to zero')
       end
     end
   end
@@ -282,7 +282,7 @@ describe Grape::Validations::Validators::LengthValidator do
       end
 
       it do
-        expect { post 'min_greater_than_max', list: [12] }.to raise_error(ArgumentError, 'min 15 cannot be greater than max 3')
+        expect { post 'min_greater_than_max', list: [12] }.to raise_error(ArgumentError, 'min `15` cannot be greater than max `3`')
       end
     end
   end

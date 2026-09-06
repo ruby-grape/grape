@@ -430,7 +430,7 @@ describe Grape::API do
               get { params[:id].to_json }
             end
           end
-        end.to raise_error(ArgumentError, /route_param :id constrains :id/)
+        end.to raise_error(ArgumentError, /route_param :`id` constrains :`id`/)
       end
 
       # The declared type still owns what the endpoint sees: validation runs
@@ -5311,7 +5311,7 @@ describe Grape::API do
         rescue_from :all do
           error!(context.env, 400)
         end
-        get { raise ArgumentError, 'Oops!' }
+        get { raise ArgumentError, 'oops' }
       end
     end
 

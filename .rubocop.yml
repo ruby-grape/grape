@@ -8,6 +8,7 @@ AllCops:
     - benchmark/**/*
 
 plugins:
+  - rubocop-exception_messages
   - rubocop-performance
   - rubocop-rspec
 

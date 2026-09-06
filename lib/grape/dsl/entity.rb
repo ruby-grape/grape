@@ -34,7 +34,7 @@ module Grape
         if key
           representation = body&.merge(key => representation) || { key => representation }
         elsif entity_class.present? && body
-          raise ArgumentError, "Representation of type #{representation.class} cannot be merged." unless representation.respond_to?(:merge)
+          raise ArgumentError, "representation of type `#{representation.class}` cannot be merged" unless representation.respond_to?(:merge)
 
           representation = body.merge(representation)
         end

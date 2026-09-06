@@ -72,7 +72,7 @@ module Grape
         when Symbol, Integer
           @status = Rack::Utils.status_code(status)
         else
-          raise ArgumentError, 'Status code must be Integer or Symbol.'
+          raise ArgumentError, 'status code must be Integer or Symbol'
         end
       end
 
@@ -128,7 +128,7 @@ module Grape
       def sendfile(value = nil)
         return stream if value.nil?
 
-        raise ArgumentError, 'Argument must be a file path' unless value.is_a?(String)
+        raise ArgumentError, 'argument must be a file path' unless value.is_a?(String)
 
         file_body = Grape::ServeStream::FileBody.new(value)
         @stream = Grape::ServeStream::StreamResponse.new(file_body)
@@ -191,7 +191,7 @@ module Grape
       def stream_body(value)
         return Grape::ServeStream::FileBody.new(value) if value.is_a?(String)
 
-        raise ArgumentError, 'Stream object must respond to :each.' unless value.respond_to?(:each)
+        raise ArgumentError, 'stream object must respond to :each' unless value.respond_to?(:each)
 
         value
       end

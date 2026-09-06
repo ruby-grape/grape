@@ -149,7 +149,7 @@ describe Grape::DSL::Routing do
     # on the first request rather than here.
     it 'rejects requirements that are not a Hash' do
       expect { subject.route(:any, '/', requirements: Integer) }
-        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got Class')
+        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got `Class`')
     end
 
     it 'does not duplicate identical endpoints' do
@@ -233,7 +233,7 @@ describe Grape::DSL::Routing do
 
     it 'rejects requirements that are not a Hash' do
       expect { subject.namespace(:foo, requirements: Integer) {} }
-        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got Class')
+        .to raise_error(ArgumentError, 'requirements must be a Hash of param name => constraint, got `Class`')
     end
 
     it 'calls #joined_space_path on Namespace' do
@@ -326,7 +326,7 @@ describe Grape::DSL::Routing do
     # does not introduce — Mustermann resolves that to no constraint at all.
     it 'rejects a Hash of requirements' do
       expect { subject.route_param('foo', requirements: { foo: Integer }, &proc {}) }
-        .to raise_error(ArgumentError, 'route_param :foo constrains :foo; pass the constraint itself, or a Hash of requirements to the enclosing namespace')
+        .to raise_error(ArgumentError, 'route_param :`foo` constrains :`foo`; pass the constraint itself, or a Hash of requirements to the enclosing namespace')
     end
   end
 

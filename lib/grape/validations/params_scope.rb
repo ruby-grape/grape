@@ -245,7 +245,7 @@ module Grape
         end
         required_fields.each do |field|
           field_opts = using[field]
-          raise ArgumentError, "required field not exist: #{field}" unless field_opts
+          raise ArgumentError, "required field not exist: `#{field}`" unless field_opts
 
           requires(field, **field_opts)
         end

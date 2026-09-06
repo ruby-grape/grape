@@ -13,7 +13,7 @@ module Spec
         when :param, :header, :accept_version_header
           File.join('/', options[:prefix] || '', options[:path])
         else
-          raise ArgumentError.new("unknown versioning strategy: #{options[:using]}")
+          raise ArgumentError.new("unknown versioning strategy: `#{options[:using]}`")
         end
       end
 
@@ -33,7 +33,7 @@ module Spec
             'HTTP_ACCEPT_VERSION' => options[:version].to_s
           }
         else
-          raise ArgumentError.new("unknown versioning strategy: #{options[:using]}")
+          raise ArgumentError.new("unknown versioning strategy: `#{options[:using]}`")
         end
       end
 

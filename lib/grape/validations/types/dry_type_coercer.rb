@@ -23,7 +23,7 @@ module Grape
             when Set
               SetCoercer
             else
-              raise ArgumentError, "Unknown type: #{type}"
+              raise ArgumentError, "unknown type: `#{type}`"
             end
           end
 
