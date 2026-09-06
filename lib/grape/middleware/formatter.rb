@@ -56,25 +56,25 @@ module Grape
       private
 
       def build_formatted_response(status, headers, bodies)
-        typed_headers = ensure_content_type(headers)
+        ensure_content_type!(headers)
 
         if bodies.is_a?(Grape::ServeStream::StreamResponse)
-          Grape::ServeStream::SendfileResponse.new([], status, typed_headers) do |resp|
+          Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
             resp.body = bodies.stream
           end
         else
           # Allow content-type to be explicitly overwritten
-          formatter = fetch_formatter(typed_headers)
+          formatter = fetch_formatter(headers)
           bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
-          # A bare Rack tuple rather than a Rack::Response: +typed_headers+ is already
+          # A bare Rack tuple rather than a Rack::Response: +headers+ is already
           # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
           # re-normalizes the same keys into a second Headers hash that
           # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
           # The 204/304 bodies Rack::Response#finish would blank are returned
           # above, before this point.
-          [status, typed_headers, bodymap]
+          [status, headers, bodymap]
         end
       rescue Grape::Exceptions::InvalidFormatter => e
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
@@ -96,15 +96,16 @@ module Grape
 
       # Set the content type header for the API format if it is not already present.
       #
-      # @param headers [Hash]
-      # @return [Hash]
-      def ensure_content_type(headers)
-        return headers if headers[Rack::CONTENT_TYPE]
+      # Written into +headers+ rather than returned as a copy, hence the +!+:
+      # this runs on every response, and copying the hash costs an allocation
+      # per request for a header the caller is about to send anyway.
+      #
+      # @param headers [Hash] the response headers, mutated in place
+      # @return [void]
+      def ensure_content_type!(headers)
+        return if headers[Rack::CONTENT_TYPE]
 
-        # Merged rather than written in place: +headers+ belongs to the response
-        # the app returned, and negotiating a content type for it is not a reason
-        # to reach back into it.
-        headers.merge(Rack::CONTENT_TYPE => content_type_for(env[Grape::Env::API_FORMAT]))
+        headers[Rack::CONTENT_TYPE] = content_type_for(env[Grape::Env::API_FORMAT])
       end
 
       def read_body_input
