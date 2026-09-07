@@ -14,7 +14,7 @@ Cross-version throughput benchmark for Grape. Measures `BenchAPI.call(env)` requ
 ## Usage
 
 ```sh
-# default: 3.0.1, 3.1.1, 3.2.1, 3.3.5, master
+# default: 3.0.1, 3.1.1, 3.2.1, 3.3.5, 4.0.0, master
 ruby benchmark/version_throughput/run.rb
 
 # subset
@@ -41,6 +41,7 @@ YJIT columns are only emitted if the running Ruby was built with YJIT support (`
 ## Interpreting results
 
 - **Noise floor is ~5-8%.** A single 5s window on macOS can easily move a few percent under thermal throttling or background load. Rerun before drawing conclusions on small deltas.
+- **`master` right after a release benches the same code twice.** When nothing has landed on `master` since the newest benched release, the two rows exercise identical code and their spread is a direct read of that session's noise floor — not a regression or a win.
 - **Run on a quiet machine.** Close other apps, plug in the laptop, don't touch the keyboard during the run. Each version takes ~14s of wall-clock measurement plus bundle install on first use.
 - **`master` vs released gems is not apples-to-apples for code paths that changed.** If a refactor moved code between files, both numbers still measure the same `app.rb` request — that's the point — but interpret deltas as "end-to-end request cost" rather than per-method.
 - **YJIT speedup is `(yjit_ips - no_yjit_ips) / no_yjit_ips`.** Both passes share the same Ruby binary; only the `--yjit` flag differs.

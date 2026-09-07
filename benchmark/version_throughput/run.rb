@@ -30,7 +30,7 @@ ROOT = File.expand_path('../..', __dir__)
 HERE = __dir__
 TMP  = File.join(ROOT, 'tmp', 'bench-versions')
 
-DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 master].freeze
+DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 4.0.0 master].freeze
 versions = (ENV['GRAPE_VERSIONS']&.split(',')&.map(&:strip) || DEFAULT_VERSIONS).freeze
 
 def gemfile_for(version)
