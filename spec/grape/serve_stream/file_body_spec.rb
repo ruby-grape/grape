@@ -14,9 +14,8 @@ describe Grape::ServeStream::FileBody do
         file.flush
 
         chunks = []
-        # rubocop:disable Style/MapIntoArray -- FileBody#each is not Enumerable, so #map is unavailable here.
+        # rubocop:disable-next Style/MapIntoArray -- FileBody#each is not Enumerable, so #map is unavailable here.
         described_class.new(file.path).each { |chunk| chunks << chunk }
-        # rubocop:enable Style/MapIntoArray
         expect(chunks.join).to eq('hello world')
       end
     end
