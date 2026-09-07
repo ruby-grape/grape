@@ -1,4 +1,4 @@
-### 4.0.0 (Next)
+### 4.0.0 (2026-09-07)
 
 #### Features
 
@@ -73,7 +73,6 @@
 * [#2896](https://github.com/ruby-grape/grape/pull/2896): Bring test suite line coverage to 100% - [@dblock](https://github.com/dblock).
 * [#2897](https://github.com/ruby-grape/grape/pull/2897): Improve test suite branch coverage - [@dblock](https://github.com/dblock).
 * [#2909](https://github.com/ruby-grape/grape/pull/2909): Standardize bare Ruby exception messages (`ArgumentError`, etc.) to lowercase, unpunctuated, matching Ruby's own core/stdlib style, and wrap interpolated values in backticks via `rubocop-exception_messages` - [@dblock](https://github.com/dblock).
-* Your contribution here.
 
 #### Fixes
 
@@ -118,7 +117,6 @@
 * [#2911](https://github.com/ruby-grape/grape/pull/2911): Copy response headers with `merge!` instead of `merge` in `Grape::API::Instance#call` and `Grape::Middleware::Error`, which allocated a `Grape::Util::Header` only to discard it - [@ericproulx](https://github.com/ericproulx).
 * [#2907](https://github.com/ruby-grape/grape/pull/2907): Stop `Grape::Endpoint::Options` from appending the default `'/'` into the path Array it was given, so declaring a route with an empty Array of paths inside a `namespace`, `resource`, `group` or `route_param` block no longer mutates the caller's Array — and raises `FrozenError` at boot when it is frozen - [@ericproulx](https://github.com/ericproulx).
 * [#2912](https://github.com/ruby-grape/grape/pull/2912): Correct the 4.0.0 release notes and file the `http_digest` removal note under `Upgrading to >= 4.0.0` - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 3.3.5 (2026-07-30)
 
