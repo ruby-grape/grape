@@ -14,13 +14,13 @@
 #   ruby benchmark/version_throughput/run.rb
 #
 # To bench against a specific subset:
-#   GRAPE_VERSIONS="3.0.0,3.3.5,master" ruby benchmark/version_throughput/run.rb
+#   GRAPE_VERSIONS="3.0.1,3.3.5,master" ruby benchmark/version_throughput/run.rb
 #
 # Versions must be listed oldest to newest: the delta columns compare each
 # row against the one above it and against the first row.
 #
 # To run a YJIT-enabled Ruby that isn't the project default:
-#   RBENV_VERSION=4.0.3 ruby benchmark/version_throughput/run.rb
+#   RBENV_VERSION=4.0.6 ruby benchmark/version_throughput/run.rb
 
 require 'fileutils'
 require 'open3'
@@ -30,7 +30,7 @@ ROOT = File.expand_path('../..', __dir__)
 HERE = __dir__
 TMP  = File.join(ROOT, 'tmp', 'bench-versions')
 
-DEFAULT_VERSIONS = %w[3.0.0 3.1.0 3.2.0 3.3.0 3.3.5 master].freeze
+DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 master].freeze
 versions = (ENV['GRAPE_VERSIONS']&.split(',')&.map(&:strip) || DEFAULT_VERSIONS).freeze
 
 def gemfile_for(version)
