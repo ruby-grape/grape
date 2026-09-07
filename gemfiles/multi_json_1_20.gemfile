@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
 gem 'multi_json', '< 1.21'
+# multi_json < 1.21's json_gem adapter calls JSON.parse(source, opts) positionally, which json 3 rejects.
+gem 'json', '< 3'
 
 eval_gemfile '../Gemfile'

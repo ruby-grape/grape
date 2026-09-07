@@ -3,4 +3,6 @@
 eval_gemfile '../Gemfile'
 
 gem 'rails', '~> 7.2.0'
+# ActiveSupport < 8.1 passes `quirks_mode:` to JSON.generate, a keyword json 3 removed.
+gem 'json', '< 3'
 gem 'tzinfo-data', require: false
