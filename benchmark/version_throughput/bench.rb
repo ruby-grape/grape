@@ -23,5 +23,9 @@ report = Benchmark.ips do |ips|
 end
 
 entry = report.entries.first
-yjit = (defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled?) ? 'on' : 'off'
-puts format('RESULT,%.2f,%.4f,%.2f,%s', entry.ips, 1_000_000.0 / entry.ips, entry.error_percentage, yjit)
+
+# Which JIT actually ran, so the orchestrator can confirm the flag it passed
+# took effect rather than trusting a silently ignored one. Only one can be
+# enabled at a time -- Ruby refuses to boot with both flags.
+jit = %w[YJIT ZJIT].find { |mod| RubyVM.const_defined?(mod) && RubyVM.const_get(mod).enabled? } || 'none'
+puts format('RESULT,%.2f,%.4f,%.2f,%s', entry.ips, 1_000_000.0 / entry.ips, entry.error_percentage, jit.downcase)
