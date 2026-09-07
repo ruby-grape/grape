@@ -21,6 +21,26 @@ desc 'Get users', detail: 'Returns every user'
 
 A leftover positional Hash now raises `ArgumentError` rather than warning. A call that already used bare keyword syntax, or a block, is unaffected.
 
+#### `http_digest` is removed
+
+`Grape::Middleware::Auth::DSL#http_digest` is gone. Calling it now raises `NoMethodError` while the API class is being defined.
+
+Nothing it could reach has existed since **2.0.0**, which removed `Rack::Auth::Digest` along with Grape's `:http_digest` strategy ([#2361](https://github.com/ruby-grape/grape/pull/2361)) after Rack 3 dropped digest authentication. The method survived that removal and kept recording its settings happily, so an API declaring `http_digest` still booted — and then raised `Grape::Exceptions::UnknownAuthStrategy` on the *first request*, from inside the middleware build, as an uncaught exception rather than a response. Failing while the class is defined is the point of removing it.
+
+**If you registered your own `:http_digest` strategy**, it still works; call `auth` directly:
+
+```ruby
+Grape::Middleware::Auth::Strategies.add(:http_digest, MyDigestStrategy, ->(settings) { [settings[:realm]] })
+
+class API < Grape::API
+  auth :http_digest, realm: 'API Authorization', opaque: 'secret' do |username|
+    # ...
+  end
+end
+```
+
+The removed method supplied two defaults that `auth` does not, so pass them explicitly if you were relying on them: `realm` defaulted to `'API Authorization'`, and `opaque` to `'secret'` (nested inside `realm` when `realm` was itself a Hash).
+
 #### A `rescue_from` handler can no longer return or throw a Hash
 
 Deprecated in 3.3. A handler that returned `{ message:, status:, headers: }` was read as an error response. Say what you mean instead:
@@ -746,6 +766,8 @@ Grape::Exceptions::ValidationErrors.new(errors: [validation, validation_array_er
 
 # after
 Grape::Exceptions::ValidationErrors.new(exceptions: [validation, validation_array_errors], headers:)
+```
+
 #### `Grape::Exceptions::ValidationErrors` no longer mixes in `Enumerable`
 
 `Grape::Exceptions::ValidationErrors` no longer includes `Enumerable` and no longer defines a public `#each`. The Enumerable surface (`#each`, `#map`, `#select`, `#to_a`, etc.) was undocumented and untested; the documented accessors — `#errors`, `#full_messages`, `#message`, `#as_json` — are unchanged.
@@ -805,26 +827,6 @@ auth :my_strategy, { realm: 'API' }
 http_basic(realm: 'API')
 auth :my_strategy, realm: 'API'
 ```
-
-#### `http_digest` is removed
-
-`Grape::Middleware::Auth::DSL#http_digest` is gone. Calling it now raises `NoMethodError` while the API class is being defined.
-
-Nothing it could reach has existed since **2.0.0**, which removed `Rack::Auth::Digest` along with Grape's `:http_digest` strategy ([#2361](https://github.com/ruby-grape/grape/pull/2361)) after Rack 3 dropped digest authentication. The method survived that removal and kept recording its settings happily, so an API declaring `http_digest` still booted — and then raised `Grape::Exceptions::UnknownAuthStrategy` on the *first request*, from inside the middleware build, as an uncaught exception rather than a response. Failing while the class is defined is the point of removing it.
-
-**If you registered your own `:http_digest` strategy**, it still works; call `auth` directly:
-
-```ruby
-Grape::Middleware::Auth::Strategies.add(:http_digest, MyDigestStrategy, ->(settings) { [settings[:realm]] })
-
-class API < Grape::API
-  auth :http_digest, realm: 'API Authorization', opaque: 'secret' do |username|
-    # ...
-  end
-end
-```
-
-The removed method supplied two defaults that `auth` does not, so pass them explicitly if you were relying on them: `realm` defaulted to `'API Authorization'`, and `opaque` to `'secret'` (nested inside `realm` when `realm` was itself a Hash).
 
 #### Middleware options now route through per-class `Options` `Data` value objects
 
