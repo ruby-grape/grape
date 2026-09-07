@@ -8,6 +8,7 @@
 
 #### Fixes
 
+* [#2916](https://github.com/ruby-grape/grape/pull/2916): Pin `json` below 3 in the gemfiles whose dependencies cannot use it - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
