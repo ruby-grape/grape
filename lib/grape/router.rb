@@ -76,8 +76,14 @@ module Grape
     # candidate has declined too, so the caller (or a mounting app upstream)
     # can keep looking.
     def transaction(input, method, env)
-      exact_route = match?(input, method)
-      response = process_route(exact_route, input, env) if exact_route
+      # Matched here rather than through #match? so the MatchData survives: the
+      # route's path captures are groups of it (see Route#params_for).
+      exact_route = nil
+      response = nil
+      @optimized_map[method]&.match(input) do |m|
+        exact_route = @map[method].detect { |route| m[route.regexp_capture_group] }
+        response = process_route(exact_route, input, env, m) if exact_route
+      end
       return response if halt?(response)
 
       # A cascading route has only declined this request. Its siblings — the
@@ -91,6 +97,13 @@ module Grape
         return response if response && !cascade?(response)
       end
 
+      neighbours(input, method, env, response, cascaded)
+    end
+
+    # The ANY ('*') routes and the greedy neighbour, tried once the routes for
+    # +method+ have declined. +cascaded+ says whether any of them matched: the
+    # auto-OPTIONS and 405 answers are only right when none did.
+    def neighbours(input, method, env, response, cascaded)
       last_neighbor_route = greedy_match?(input)
 
       # If last_neighbor_route exists and request method is OPTIONS,
@@ -151,10 +164,10 @@ module Grape
     # Routing args are rebuilt for every attempt: when a route cascades
     # (X-Cascade pass), the next candidate must not observe the previous
     # attempt's +route_info+ or path captures.
-    def process_route(route, input, env, include_allow_header: false)
+    def process_route(route, input, env, match = nil, include_allow_header: false)
       # The path captures are the hash: +route_info+ is written into them
       # rather than merged in from a second one.
-      routing_args = route.params_for(input) || {}
+      routing_args = route.params_for(input, match) || {}
       routing_args[:route_info] = route
       env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header

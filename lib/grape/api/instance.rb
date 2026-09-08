@@ -116,18 +116,22 @@ module Grape
 
       # Handle a request. See Rack documentation for what `env` is.
       def call(env)
-        status, headers, response = @router.call(env)
-        unless @cascade
-          # +merge!+, not +merge+: the latter is a `dup` plus a `merge!`, so the
-          # Header built on this line would be allocated only to be discarded.
-          # The copy stays because +headers+ can come from a mounted Rack app,
-          # which is free to hand back a frozen or shared Hash that the delete
-          # below must not reach into.
-          headers = Grape::Util::Header.new.merge!(headers)
-          headers.delete('X-Cascade')
-        end
+        response = @router.call(env)
+        return response if @cascade
 
-        [status, headers, response]
+        headers = response[1]
+        # A Grape::Util::Header folds case the way the copy below does, so it can
+        # answer for it; any other Hash cannot, and still goes through the copy.
+        return response if headers.is_a?(Grape::Util::Header) && !headers.key?('X-Cascade')
+
+        # +merge!+, not +merge+: the latter is a `dup` plus a `merge!`, so the
+        # Header built on this line would be allocated only to be discarded.
+        # The copy stays because +headers+ can come from a mounted Rack app,
+        # which is free to hand back a frozen or shared Hash that the delete
+        # below must not reach into.
+        headers = Grape::Util::Header.new.merge!(headers)
+        headers.delete('X-Cascade')
+        [response[0], headers, response[2]]
       end
 
       # Some requests may return a HTTP 404 error if grape cannot find a matching
