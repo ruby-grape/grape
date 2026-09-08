@@ -22,6 +22,12 @@ module Grape
         end
 
         def call(val)
+          # A value already of the declared type is what the dry-types coercer
+          # hands back for it -- the very same object, in both the params and
+          # the strict cache -- so the round trip through it only costs time.
+          # +instance_of?+ rather than +is_a?+: a subclass is not covered by
+          # that, and Coercible::String does rebuild one.
+          return val if val.instance_of?(@type)
           return InvalidValue.new if reject?(val)
           return if val.nil? || treat_as_nil?(val)
 
