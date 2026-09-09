@@ -66,10 +66,17 @@ module Grape
         Regexp.new("(?<#{regexp_capture_index}>#{pattern_regexp})")
       end
 
+      # This route's named captures mapped to their group numbers in the router's
+      # union, or nil when a union match would not reproduce what Mustermann
+      # returns (see Route#params_for). Assigned in {#resolve_capture_group!},
+      # never at request time -- instances are shared across threads.
+      attr_reader :union_captures
+
       # @api private
       # @see #regexp_capture_group
       def resolve_capture_group!(union_named_captures)
         @regexp_capture_group = union_named_captures.fetch(regexp_capture_index).first
+        @union_captures = resolve_union_captures
       end
 
       class CaptureIndexCache < Grape::Util::Cache
@@ -79,6 +86,27 @@ module Grape
             h[index] = "_#{index}"
           end
         end
+      end
+
+      private
+
+      # +to_regexp+'s wrapper is the group just before the pattern's own, and
+      # +Regexp.union+ shifts numbering only by the groups preceding a branch --
+      # what +regexp_capture_group+ counts. So the capture at position +n+ of the
+      # route's regexp is group +regexp_capture_group + n+ of the union.
+      def resolve_union_captures
+        own = @pattern.to_regexp.named_captures
+        return if own.empty?
+
+        # Mustermann returns an Array for a name matched at several positions.
+        return unless own.each_value.all? { |positions| positions.size == 1 }
+
+        # Rejects param converters and the always-Array +splat+/+captures+ names.
+        # Empty strings probe only what holds for every request; unescaping, the
+        # one thing that does not, is gated on the path in Route#params_for.
+        return unless @pattern.pattern.identity_params?(own.transform_values { '' })
+
+        own.to_h { |name, positions| [name.to_sym, @regexp_capture_group + positions.first] }
       end
     end
   end

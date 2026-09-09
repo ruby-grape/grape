@@ -136,6 +136,10 @@ module Grape
       ["HTTP_#{header.upcase.tr('-', '_')}", header]
     end.freeze
 
+    # Routing-args keys that are Grape's own, not request params.
+    GRAPE_OWNED_ROUTING_ARGS = %i[version route_info].freeze
+    ROUTE_INFO_ONLY = %i[route_info].freeze
+
     alias rack_params params
     alias rack_cookies cookies
 
@@ -195,9 +199,13 @@ module Grape
     # on a route that had matched, losing the segment silently.
     def routing_args_as_params(routing_args)
       return if routing_args.nil?
-      return routing_args.except(:version, :route_info) if grape_owns_version?(routing_args)
 
-      routing_args.except(:route_info)
+      grape_owned = grape_owns_version?(routing_args) ? GRAPE_OWNED_ROUTING_ARGS : ROUTE_INFO_ONLY
+      # Nothing but Grape's own keys: +except+ would build an empty Hash for
+      # +make_params+ to find blank and discard.
+      return if routing_args.size == grape_owned.count { |key| routing_args.key?(key) }
+
+      routing_args.except(*grape_owned)
     end
 
     # A route reports a +version+ only when the API declared one, which is the

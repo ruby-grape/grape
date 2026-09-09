@@ -50,8 +50,17 @@ module Grape
       # match entirely and answers nil — the same way {GreedyRoute#params_for}
       # does, and what the router already coerces into the Hash it builds
       # routing args in.
-      def params_for(input)
+      #
+      # +match+, when given, is the union MatchData the router matched this route
+      # with; its groups already hold the substrings a second match would produce
+      # (see {BaseRoute#union_captures}). Mustermann percent-decodes a captured
+      # value containing '%', and none can unless the path does -- so a '%'-free
+      # path reads the groups, anything else the full match below.
+      def params_for(input, match = nil)
         return unless pattern.captures?
+
+        captures = union_captures
+        return params_from_union(captures, match) if match && captures && !input.include?('%')
 
         parsed = pattern.params(input)
         return unless parsed
@@ -68,6 +77,17 @@ module Grape
       end
 
       private
+
+      # MatchData yields fresh, unfrozen Strings, as Mustermann's Hash does, so
+      # +tag_utf8!+ stays safe in place.
+      def params_from_union(captures, match)
+        params = {}
+        captures.each do |name, group|
+          value = match[group]
+          params[name] = tag_utf8!(value) unless value.nil?
+        end
+        params
+      end
 
       # Mustermann decodes path captures out of +PATH_INFO+, which Rack hands us
       # tagged ASCII-8BIT, so path params came back binary while Rack tags query
