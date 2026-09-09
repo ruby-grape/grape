@@ -12,6 +12,7 @@
 * [#2915](https://github.com/ruby-grape/grape/pull/2915): Update rubocop to 1.90.0 and rubocop-performance to 1.27.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2918](https://github.com/ruby-grape/grape/pull/2918): Skip the dry-types round trip when a value already is the declared type - [@ericproulx](https://github.com/ericproulx).
 * [#2917](https://github.com/ruby-grape/grape/pull/2917): Read path captures out of the router's union match instead of re-running the route's pattern - [@ericproulx](https://github.com/ericproulx).
+* [#2919](https://github.com/ruby-grape/grape/pull/2919): Resolve a path carrying no percent-encoding against a union compiled without them - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)

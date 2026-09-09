@@ -18,6 +18,7 @@ describe Grape::Router do
     it 'freezes the internal maps after compilation' do
       expect(router.instance_variable_get(:@map)).to be_frozen
       expect(router.instance_variable_get(:@optimized_map)).to be_frozen
+      expect(router.instance_variable_get(:@plain_map)).to be_frozen
     end
 
     # Regression: the maps used to be auto-vivifying hashes, so a request whose
@@ -177,6 +178,73 @@ describe Grape::Router do
       body = JSON.parse(last_response.body)
       expect(body['origin']).to eq('/:name')
       expect(body['params']).to eq('name' => '123')
+    end
+  end
+
+  # Every route pattern is compiled with Mustermann's uri_decode, which expands
+  # each literal path character into an alternation with its percent-encodings.
+  # The router resolves a request carrying no '%' against unions built without
+  # them (see PlainUnion); the two must agree on every such path, and the
+  # decode-aware ones must still answer the requests that do carry one.
+  describe 'percent-encoded paths' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        get('/a.b/:id') { { route: 'dotted', id: params[:id] } }
+        get('/with space/:id') { { route: 'spaced', id: params[:id] } }
+      end
+    end
+
+    it 'compiles a separate union without the percent-encoded alternatives' do
+      router = app.compile!.router
+      optimized_map = router.instance_variable_get(:@optimized_map)
+      plain_map = router.instance_variable_get(:@plain_map)
+
+      expect(plain_map['GET']).not_to be(optimized_map['GET'])
+      expect(plain_map['GET'].source.size).to be < optimized_map['GET'].source.size
+    end
+
+    # GET routes are mirrored for HEAD, so both unions compile from the same
+    # source and the stand-in is built once for the two of them.
+    it 'shares one stand-in between unions compiled from the same source' do
+      plain_map = app.compile!.router.instance_variable_get(:@plain_map)
+
+      expect(plain_map['HEAD']).to be(plain_map['GET'])
+    end
+
+    it 'routes a path with no percent-encoding' do
+      get '/a.b/7'
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq('route' => 'dotted', 'id' => '7')
+    end
+
+    it 'routes a percent-encoded path literal to the same route' do
+      get '/a%2Eb/7'
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq('route' => 'dotted', 'id' => '7')
+    end
+
+    it 'decodes a percent-encoded path capture' do
+      get '/a.b/caf%C3%A9'
+
+      expect(JSON.parse(last_response.body)).to eq('route' => 'dotted', 'id' => 'café')
+    end
+
+    # A plus stands for a space in a path literal, and carries no '%' of its
+    # own -- so it is resolved against the union the percent-encodings were
+    # stripped from, which has to have kept that branch.
+    it 'routes a plus onto a literal space' do
+      get '/with+space/7'
+
+      expect(JSON.parse(last_response.body)).to eq('route' => 'spaced', 'id' => '7')
+    end
+
+    it 'still 404s a path that matches no route' do
+      get '/nothing/here'
+
+      expect(last_response.status).to eq(404)
     end
   end
 end

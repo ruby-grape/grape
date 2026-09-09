@@ -10,12 +10,23 @@ module Grape
       # so request-time reads never mutate shared state (see #match? / #rotation).
       @map = {}
       @optimized_map = {}
+      # The same unions as @optimized_map / @union, with the percent-encoded
+      # alternatives of their path literals removed (see PlainUnion). Read for
+      # any input that carries no '%', which is nearly all of them.
+      @plain_map = {}
     end
 
     def compile!
       return if @compiled
 
+      # A route registered for GET is mirrored for HEAD, and the greedy
+      # neighbours mirror both, so the same source is usually compiled several
+      # times over. Its stand-in is built once and shared: a Regexp carries no
+      # per-match state, and unions with the same source number their groups
+      # the same way.
+      plain_unions = {}
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
+      @plain_union = plain_unions[@union.source] = PlainUnion.build(@union)
       @neutral_regexes = nil
       # Compiled from the routes actually registered rather than from
       # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
@@ -26,10 +37,13 @@ module Grape
       # answered every request for it with 405.
       @map.each do |method, routes|
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
-        @optimized_map[method] = resolve_capture_groups(Regexp.union(optimized_map), routes)
+        union = resolve_capture_groups(Regexp.union(optimized_map), routes)
+        @optimized_map[method] = union
+        @plain_map[method] = plain_unions[union.source] ||= PlainUnion.build(union)
       end
       @map.freeze
       @optimized_map.freeze
+      @plain_map.freeze
       @compiled = true
     end
 
@@ -59,6 +73,7 @@ module Grape
       any.endpoint
     end
 
+    PERCENT = '%'
     DEFAULT_RESPONSE_HEADERS = Grape::Util::Header.new.merge('X-Cascade' => 'pass').freeze
     DEFAULT_RESPONSE_BODY = ['404 Not Found'].freeze
 
@@ -80,7 +95,7 @@ module Grape
       # route's path captures are groups of it (see Route#params_for).
       exact_route = nil
       response = nil
-      @optimized_map[method]&.match(input) do |m|
+      unions(input)[method]&.match(input) do |m|
         exact_route = @map[method].detect { |route| m[route.regexp_capture_group] }
         response = process_route(exact_route, input, env, m) if exact_route
       end
@@ -200,11 +215,28 @@ module Grape
     # name sends MatchData through the pattern's name table on every lookup,
     # a number indexes the match region directly.
     def match?(input, method)
-      @optimized_map[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_group] } }
+      unions(input)[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_group] } }
     end
 
     def greedy_match?(input)
-      @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
+      neutral_union(input).match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
+    end
+
+    # The compiled unions to resolve +input+ against. A path with no '%' cannot
+    # match a percent-encoded literal, so it is resolved against the cheaper
+    # unions {PlainUnion} derived from these -- which accept exactly the same
+    # '%'-free strings, through the same groups.
+    #
+    # Re-read from +input+ at each of the three call sites rather than resolved
+    # once per request and threaded down: only the first of them runs on a
+    # request that matches a route, and String#include? on a path is a byte
+    # scan, cheaper than the extra argument would be to pass.
+    def unions(input)
+      input.include?(PERCENT) ? @optimized_map : @plain_map
+    end
+
+    def neutral_union(input)
+      input.include?(PERCENT) ? @union : @plain_union
     end
 
     def cascade?(response)
