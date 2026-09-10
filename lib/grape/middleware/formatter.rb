@@ -13,6 +13,40 @@ module Grape
 
       ALL_MEDIA_TYPES = '*/*'
 
+      # @api private
+      # The format an Accept header asks for out of +mime_types+, or nil.
+      # Callers scrub the header first.
+      #
+      # Media types are case-insensitive (RFC 9110 §8.3.1) but the registered
+      # ones are spelled in lower case and Rack matches them literally, so an
+      # `Accept: TEXT/PLAIN` found nothing and fell through to the default
+      # format — the client quietly got something other than what it asked for.
+      def self.format_for_accept(accept_header, mime_types)
+        return if accept_header.blank? || accept_header == ALL_MEDIA_TYPES
+
+        media_type = Rack::Utils.best_q_match(accept_header.downcase, mime_types.keys)
+        mime_types[media_type] if media_type
+      end
+
+      # +format_for_accept+ answers from the header and +mime_types+ alone. A
+      # client that names the format it wants sends one of those media types as
+      # it is registered (+application/json+), and most others send +*/*+ or
+      # nothing, so those answers are worked out once instead of re-running
+      # Rack's q-value match on every request. Any other header misses and is
+      # negotiated as before; only registered media types are keys, so a client
+      # cannot grow a table.
+      #
+      # Shared per +mime_types+, which Grape::ContentTypes already shares per
+      # content-type registry: every endpoint builds its own formatter.
+      class FormatForAcceptCache < Grape::Util::Cache
+        def initialize
+          super
+          @cache = Hash.new do |h, mime_types|
+            h[mime_types] = [*mime_types.keys, ALL_MEDIA_TYPES, nil].to_h { |accept| [accept, Formatter.format_for_accept(accept, mime_types)] }.freeze
+          end
+        end
+      end
+
       # The request methods that can carry a body worth parsing. See
       # {#read_body_input?}, which tests the env against this before anything
       # asks for a Rack::Request. QUERY is here because its content *is* the
@@ -36,6 +70,8 @@ module Grape
         @formatters = config.formatters
         @parsers = config.parsers
         mime_types
+        # Only an API that pins no format negotiates one from the Accept header.
+        @format_for_accept = FormatForAcceptCache[mime_types] unless format
       end
 
       def before
@@ -221,16 +257,11 @@ module Grape
         query_params['format']
       end
 
-      # Media types are case-insensitive (RFC 9110 §8.3.1) but the registered
-      # ones are spelled in lower case and Rack matches them literally, so an
-      # `Accept: TEXT/PLAIN` found nothing and fell through to the default
-      # format — the client quietly got something other than what it asked for.
+      # The keys are registered media types -- valid strings, which scrubbing
+      # leaves alone -- so only a miss needs the header scrubbed.
       def format_from_header
-        accept_header = try_scrub(env['HTTP_ACCEPT'])
-        return if accept_header.blank? || accept_header == ALL_MEDIA_TYPES
-
-        media_type = Rack::Utils.best_q_match(accept_header.downcase, mime_types.keys)
-        mime_types[media_type] if media_type
+        accept_header = env['HTTP_ACCEPT']
+        @format_for_accept.fetch(accept_header) { Formatter.format_for_accept(try_scrub(accept_header), mime_types) }
       end
     end
   end
