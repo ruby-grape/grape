@@ -179,4 +179,78 @@ describe Grape::Router do
       expect(body['params']).to eq('name' => '123')
     end
   end
+
+  # When no route for the request's method matches its path, the router answers
+  # 405 if a route for another method does, and 404 otherwise. It only tries the
+  # paths the method has no route on, since the others share a pattern with a
+  # route that has just missed -- so these cover a path with no route for the
+  # method, a covered path whose pattern overlaps an uncovered one, and methods
+  # with no routes at all, for which every path is still a candidate.
+  describe 'answering a path no route for the method matches' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        get('/items') { 'index' }
+        post('/items') { 'create' }
+        get('/items/:id') { 'show' }
+        put('/items/:id') { 'update' }
+        delete('/items/:id') { 'destroy' }
+        # Digits only, so /users/me misses it and reaches the POST-only path.
+        get('/users/:id', requirements: { id: /\d+/ }) { 'user' }
+        post('/users/me') { 'me' }
+      end
+    end
+
+    it 'answers 405 from a path the method has no route on' do
+      post '/items/1'
+
+      expect(last_response.status).to eq(405)
+      expect(last_response.headers['Allow']).to eq('OPTIONS, GET, PUT, DELETE, HEAD')
+    end
+
+    it 'answers 405 from an uncovered path when a covered one overlaps it' do
+      get '/users/me'
+
+      expect(last_response.status).to eq(405)
+      expect(last_response.headers['Allow']).to eq('OPTIONS, POST')
+    end
+
+    it 'answers 405 to a method that has no routes at all' do
+      patch '/items/1'
+
+      expect(last_response.status).to eq(405)
+      expect(last_response.headers['Allow']).to eq('OPTIONS, GET, PUT, DELETE, HEAD')
+    end
+
+    it 'answers OPTIONS for a path' do
+      options '/items/1'
+
+      expect(last_response.status).to eq(204)
+      expect(last_response.headers['Allow']).to eq('OPTIONS, GET, PUT, DELETE, HEAD')
+    end
+
+    it 'answers 404 to a path no route matches' do
+      get '/nothing/here'
+      expect(last_response.status).to eq(404)
+
+      post '/nothing/here'
+      expect(last_response.status).to eq(404)
+    end
+
+    context 'when every path has a route for the method' do
+      let(:app) do
+        Class.new(Grape::API) do
+          get('/items') { 'index' }
+          get('/items/:id') { 'show' }
+          delete('/items/:id') { 'destroy' }
+        end
+      end
+
+      it 'answers 404 to a path no route matches' do
+        get '/nothing/here'
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+  end
 end
