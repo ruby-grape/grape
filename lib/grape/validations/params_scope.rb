@@ -166,6 +166,14 @@ module Grape
         !@parent
       end
 
+      # Whether #should_validate? answers true for every request: this scope
+      # and each of its ancestors is required and depends on nothing, so
+      # neither the params nor the parent chain have anything to say.
+      # @return [Boolean]
+      def always_validated?
+        !@optional && !@dependent_on && (@parent.nil? || @parent.always_validated?)
+      end
+
       # A nested scope is contained in one of its parent's elements.
       # @return [Boolean] whether or not this scope is nested
       def nested?

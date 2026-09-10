@@ -209,6 +209,24 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  # An Array group handed something other than an Array fails its own type
+  # check, and its members are not then validated against that value as
+  # though it were one element.
+  context 'array group given a Hash' do
+    it 'reports the group as invalid without validating its members' do
+      subject.params do
+        requires :items, type: Array do
+          requires :id, type: Integer
+        end
+      end
+      subject.post('/items') { 'ok' }
+
+      post '/items', { items: { name: 'x' } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('items is invalid')
+    end
+  end
+
   context 'coercing values validation with a variant-member-type collection' do
     it 'accepts values compatible with the declared member types' do
       expect do

@@ -69,6 +69,10 @@ module Grape
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
           @iterator = iterator_class.new(@attrs, @scope).freeze
+          # A scope's parent, optionality, dependency and type are all set
+          # before its block declares anything, so this is settled by the time
+          # a validator is built. See #validate!.
+          @direct = scope.always_validated? && !scope.iterates_elements?
         end
 
         # Validates a given request.
@@ -78,7 +82,7 @@ module Grape
         # @return [void]
         def validate(request)
           params = request.params
-          return unless scope.should_validate?(params)
+          return unless @direct || scope.should_validate?(params)
 
           validate!(params)
         end
@@ -90,6 +94,9 @@ module Grape
         # @raise [Grape::Exceptions::Validation] if validation failed
         # @return [void]
         def validate!(params)
+          scoped = scope.params(params) if @direct
+          return validate_attributes!(scoped) if scoped.is_a?(Hash)
+
           # we collect errors inside array because
           # there may be more than one error per field
           array_errors = nil
@@ -122,6 +129,25 @@ module Grape
         attr_reader :options, :scope, :required, :exception_message
 
         alias required? required
+
+        # #validate! on a scope that always validates and does not iterate
+        # elements, once its params resolved to a Hash: the root scope and the
+        # required Hash scopes under it, which is most validators of most
+        # endpoints. There the iterator hands back that Hash once per
+        # attribute, and every scope on the chain is required with no
+        # dependency, so the per-attribute checks reduce to this. The
+        # machinery cost more than the validation itself.
+        def validate_attributes!(params)
+          array_errors = nil
+
+          @attrs.each do |attr_name|
+            validate_param!(attr_name, params) if required? || params.key?(attr_name)
+          rescue Grape::Exceptions::Validation => e
+            (array_errors ||= []) << e
+          end
+
+          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
+        end
 
         # The AttributesIterator subclass used to walk this validator's
         # attributes. Built once in #initialize and reused across requests.
