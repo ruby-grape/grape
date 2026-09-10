@@ -6,17 +6,19 @@ module Grape
       @neutral_map = []
       @neutral_regexes = []
       # Plain hashes with no auto-vivifying default: a lookup for an HTTP method
-      # that has no routes must not insert a key. `compile!` freezes both maps,
+      # that has no routes must not insert a key. `compile!` freezes the maps,
       # so request-time reads never mutate shared state (see #match? / #rotation).
       @map = {}
       @optimized_map = {}
+      # Per HTTP method, the greedy routes still worth trying once that method's
+      # own routes have missed a path (see #compile_neighbour_map).
+      @neighbour_map = {}
     end
 
     def compile!
       return if @compiled
 
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
-      @neutral_regexes = nil
       # Compiled from the routes actually registered rather than from
       # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
       # (`route :purge, '/cache'`) is accepted at definition time and is
@@ -28,8 +30,11 @@ module Grape
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         @optimized_map[method] = resolve_capture_groups(Regexp.union(optimized_map), routes)
       end
+      compile_neighbour_map
+      @neutral_regexes = nil
       @map.freeze
       @optimized_map.freeze
+      @neighbour_map.freeze
       @compiled = true
     end
 
@@ -104,7 +109,9 @@ module Grape
     # +method+ have declined. +cascaded+ says whether any of them matched: the
     # auto-OPTIONS and 405 answers are only right when none did.
     def neighbours(input, method, env, response, cascaded)
-      last_neighbor_route = greedy_match?(input)
+      # Only ever read while nothing for +method+ has matched, so once a route
+      # has -- and cascaded -- there is no neighbour to look for.
+      last_neighbor_route = neighbour_match?(input, method) unless cascaded
 
       # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #include_allow_header.
@@ -205,6 +212,51 @@ module Grape
 
     def greedy_match?(input)
       @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
+    end
+
+    # The greedy route for +input+ once the routes for +method+ have all missed
+    # it, from the ones #compile_neighbour_map left to try. A method with no
+    # routes of its own covers no path, so it still walks the whole of @union.
+    def neighbour_match?(input, method)
+      return greedy_match?(input) unless @map.key?(method)
+
+      union, groups = @neighbour_map[method]
+      union&.match(input) { |m| groups.find { |_route, group| m[group] }&.first }
+    end
+
+    # After a miss, #neighbours looks for a greedy route to answer 405 with.
+    # Walking the whole of @union for it would cost a 404 a second walk over
+    # every path, and most of that walk cannot succeed: a greedy route shares
+    # its pattern with the routes it was collected from (see
+    # API::Instance#collect_route_config_per_pattern), so once the union for
+    # +method+ has missed a path, the greedy route of every path +method+ has a
+    # route on has missed it too. What is left to try is the paths +method+ has
+    # no route on -- in an API where every path answers GET, none at all for a
+    # GET.
+    #
+    # Built from the same members as @union, in the same order, so a path
+    # resolves to the same greedy route either way. Methods that leave the same
+    # paths uncovered -- PUT and DELETE on a member, say -- share one union.
+    def compile_neighbour_map
+      unions = {}
+      @map.each do |method, routes|
+        covered = routes.to_set(&:pattern_regexp)
+        uncovered = @neutral_map.each_index.reject { |index| covered.include?(@neutral_map[index].pattern_regexp) }
+        @neighbour_map[method] = unions[uncovered] ||= neighbour_union(uncovered) unless uncovered.empty?
+      end
+    end
+
+    # The union of the greedy routes at +indices+ of @neutral_map, and the
+    # group each of them occupies in it: a subset of @union numbers its groups
+    # differently, so the ones #resolve_capture_groups recorded do not apply.
+    def neighbour_union(indices)
+      union = Regexp.union(@neutral_regexes.values_at(*indices))
+      named_captures = union.named_captures
+      groups = indices.to_h do |index|
+        route = @neutral_map[index]
+        [route, named_captures.fetch(route.regexp_capture_index).first]
+      end
+      [union, groups.freeze].freeze
     end
 
     def cascade?(response)
