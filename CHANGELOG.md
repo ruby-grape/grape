@@ -13,6 +13,7 @@
 * [#2918](https://github.com/ruby-grape/grape/pull/2918): Skip the dry-types round trip when a value already is the declared type - [@ericproulx](https://github.com/ericproulx).
 * [#2917](https://github.com/ruby-grape/grape/pull/2917): Read path captures out of the router's union match instead of re-running the route's pattern - [@ericproulx](https://github.com/ericproulx).
 * [#2921](https://github.com/ruby-grape/grape/pull/2921): Pin the router's request-time isolation regressions through requests instead of its instance variables - [@ericproulx](https://github.com/ericproulx).
+* [#2923](https://github.com/ruby-grape/grape/pull/2923): Read the versioners' `vendor`, `strict`, `parameter` and `cascade` off instance variables instead of two delegators per request - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
