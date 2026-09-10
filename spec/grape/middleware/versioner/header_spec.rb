@@ -145,6 +145,17 @@ describe Grape::Middleware::Versioner::Header do
         expect(exception.message).to include('API version not found')
       end
     end
+
+    # Requests sending the same Accept header are all answered from one parsed
+    # media type, so what a request is handed must not be alterable in place.
+    it 'cannot be altered by one request for the next' do
+      keys = [Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE, Grape::Env::API_VENDOR, Grape::Env::API_VERSION, Grape::Env::API_FORMAT]
+      _, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+      keys.each { |key| expect { env[key] << '-altered' }.to raise_error(FrozenError) }
+
+      _, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+      expect(env.values_at(*keys)).to eq(%w[application vnd.vendor-v1+json vendor v1 json])
+    end
   end
 
   it 'succeeds if :strict is not set' do

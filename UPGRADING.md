@@ -1,6 +1,20 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 4.1.0
+
+#### The header versioner's `api.*` env values are frozen
+
+`version ..., using: :header` now answers the Accept headers most requests send from a table built once, so every request sending the same header is handed the same parsed media type ([#2922](https://github.com/ruby-grape/grape/pull/2922)). The strings it writes into the env — `api.type`, `api.subtype`, `api.vendor`, `api.version` and `api.format` — are therefore frozen, as is `Grape::Util::MediaType` itself. Code that altered one of them in place now raises `FrozenError`; build a new String instead:
+
+```ruby
+# Before
+env['api.version'] << '-beta'
+
+# After
+env['api.version'] = "#{env['api.version']}-beta"
+```
+
 ### Upgrading to >= 4.0.0
 
 #### A positional options Hash is no longer accepted by `auth`, `http_basic` or `desc`
