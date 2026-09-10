@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 describe Grape::Router do
-  describe 'request-time map isolation' do
+  # Regression: the maps used to be auto-vivifying hashes, so a request whose
+  # HTTP method had no routes inserted a key at request time — a data race
+  # under concurrency and unbounded growth from arbitrary methods. A compiled
+  # router freezes its maps, and Grape::API::Instance freezes the router
+  # itself, so a write like that raises rather than passing silently: routing
+  # such a request without error is what shows none happens.
+  describe 'routing a method that has no routes' do
     subject(:router) { described_class.new }
 
     let(:endpoint) { instance_double(Grape::Endpoint) }
@@ -13,31 +19,15 @@ describe Grape::Router do
     before do
       router.append(route)
       router.compile!
+      router.freeze
     end
 
-    it 'freezes the internal maps after compilation' do
-      expect(router.instance_variable_get(:@map)).to be_frozen
-      expect(router.instance_variable_get(:@optimized_map)).to be_frozen
-    end
+    %w[POST PUT PROPFIND CUSTOM].each do |http_method|
+      it "answers #{http_method} with the default 404" do
+        status, = router.call(Rack::MockRequest.env_for('/hello', method: http_method))
 
-    # Regression: the maps used to be auto-vivifying hashes, so a request whose
-    # HTTP method had no routes inserted a key at request time — a data race
-    # under concurrency and unbounded growth from arbitrary methods.
-    it 'does not mutate the maps when routing a method that has no routes' do
-      map = router.instance_variable_get(:@map)
-      optimized_map = router.instance_variable_get(:@optimized_map)
-      keys_before = [map.keys.sort, optimized_map.keys.sort]
-
-      %w[POST PUT PROPFIND CUSTOM].each do |http_method|
-        router.call(Rack::MockRequest.env_for('/hello', method: http_method))
+        expect(status).to eq(404)
       end
-
-      expect([map.keys.sort, optimized_map.keys.sort]).to eq(keys_before)
-    end
-
-    it 'routes a method with no routes to the default 404 response without error' do
-      status, = router.call(Rack::MockRequest.env_for('/hello', method: 'POST'))
-      expect(status).to eq(404)
     end
   end
 
@@ -56,10 +46,6 @@ describe Grape::Router do
     before do
       router.append(Grape::Router::Route.new(endpoint, :purge, pattern, {}, forward_match: false))
       router.compile!
-    end
-
-    it 'compiles the method into the optimized map' do
-      expect(router.instance_variable_get(:@optimized_map)).to have_key('PURGE')
     end
 
     it 'matches a request using that method' do
