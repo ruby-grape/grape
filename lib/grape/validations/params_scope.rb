@@ -5,7 +5,14 @@ module Grape
     class ParamsScope
       attr_reader :parent, :type, :nearest_array_ancestor, :array_depth, :full_path
 
+      # The elements a +given+ scope narrowed its Array params down to during
+      # this request (see #meets_dependency?). Only a scope with a dependency
+      # ever stores any, so every other scope answers without the fiber-storage
+      # and tracker lookups -- which #params pays on each nested resolution,
+      # twice per validator, on every request.
       def qualifying_params
+        return unless @dependent_on
+
         ParamScopeTracker.current&.qualifying_params(self)
       end
 
