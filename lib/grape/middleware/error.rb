@@ -66,9 +66,13 @@ module Grape
 
       private
 
+      # +headers+ is handed over as it is: Rack::Response copies it into a
+      # Headers of its own on every supported Rack (Rack 2.2 through
+      # +HeaderHash[]+, which only adopts a Hash that already is one), and every
+      # caller builds it fresh for this response.
       def rack_response(status, headers, message)
         body = html_content_type?(headers[Rack::CONTENT_TYPE]) ? Rack::Utils.escape_html(message) : message
-        Rack::Response.new(Array.wrap(body), Rack::Utils.status_code(status), Grape::Util::Header.new.merge!(headers))
+        Rack::Response.new(Array.wrap(body), Rack::Utils.status_code(status), headers)
       end
 
       # Escaping must key off the media type only, case-insensitively. Comparing
@@ -268,7 +272,7 @@ module Grape
       def run_rescue_handler(handler, error, endpoint, redispatched: false)
         callable = handler.is_a?(Symbol) ? endpoint.public_method(handler) : handler
         response = catch(:error) do
-          callable.arity.zero? ? endpoint.instance_exec(&callable) : endpoint.instance_exec(error, &callable)
+          call_rescue_handler(callable, error, endpoint)
         rescue StandardError => e
           return redispatch(e, endpoint, redispatched)
         end
@@ -277,6 +281,18 @@ module Grape
         return response if response.is_a?(Rack::Response)
 
         run_rescue_handler(method(:default_rescue_handler), Grape::Exceptions::InvalidResponse.new, endpoint)
+      end
+
+      # A +rescue_from+ block runs as the endpoint. A Method (the middleware's
+      # own handlers, or the endpoint's for a +with:+ Symbol) is already bound
+      # to a receiver that instance_exec cannot change, so it is called as it
+      # is rather than turned into a Proc first.
+      def call_rescue_handler(callable, error, endpoint)
+        if callable.is_a?(Method)
+          callable.arity.zero? ? callable.call : callable.call(error)
+        else
+          callable.arity.zero? ? endpoint.instance_exec(&callable) : endpoint.instance_exec(error, &callable)
+        end
       end
 
       # Route an exception raised inside a +rescue_from+ block.
