@@ -14,6 +14,7 @@
 * [#2917](https://github.com/ruby-grape/grape/pull/2917): Read path captures out of the router's union match instead of re-running the route's pattern - [@ericproulx](https://github.com/ericproulx).
 * [#2921](https://github.com/ruby-grape/grape/pull/2921): Pin the router's request-time isolation regressions through requests instead of its instance variables - [@ericproulx](https://github.com/ericproulx).
 * [#2927](https://github.com/ruby-grape/grape/pull/2927): Validate required Hash params scopes without the attributes iterator - [@ericproulx](https://github.com/ericproulx).
+* [#2933](https://github.com/ruby-grape/grape/pull/2933): Validate the elements of an Array params scope without the attributes iterator - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)

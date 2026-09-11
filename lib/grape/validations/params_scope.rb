@@ -171,7 +171,16 @@ module Grape
       # neither the params nor the parent chain have anything to say.
       # @return [Boolean]
       def always_validated?
-        !@optional && !@dependent_on && (@parent.nil? || @parent.always_validated?)
+        !@optional && validated_when_given?
+      end
+
+      # Whether #should_validate? has nothing to ask but whether this scope's
+      # own params were given: it depends on no other param, and every scope
+      # above it is always validated. A required scope like that is then
+      # always validated, an optional one whenever its params are there.
+      # @return [Boolean]
+      def validated_when_given?
+        !@dependent_on && (@parent.nil? || @parent.always_validated?)
       end
 
       # A nested scope is contained in one of its parent's elements.

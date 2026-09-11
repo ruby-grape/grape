@@ -227,6 +227,23 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  context 'hash group given an Array' do
+    it 'reports the group as invalid without validating the optional array group inside it' do
+      subject.params do
+        requires :meta, type: Hash do
+          optional :items, type: Array do
+            requires :id, type: Integer
+          end
+        end
+      end
+      subject.post('/meta') { 'ok' }
+
+      post '/meta', { meta: [{}] }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('meta is invalid')
+    end
+  end
+
   context 'coercing values validation with a variant-member-type collection' do
     it 'accepts values compatible with the declared member types' do
       expect do
