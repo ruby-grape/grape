@@ -192,11 +192,13 @@ module Grape
         )
       end
 
+      # No +backtrace:+: #resolved_backtrace reads it off +original_exception+
+      # when the API asked for one, and only then, since building it is the
+      # dearest part of rendering the error.
       def default_rescue_handler(exception)
         error_response(
           Grape::Exceptions::ErrorResponse.new(
             message: exception.message,
-            backtrace: exception.backtrace,
             original_exception: exception
           )
         )
