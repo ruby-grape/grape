@@ -888,4 +888,39 @@ describe Grape::Endpoint do
 
     it { is_expected.to be_successful }
   end
+
+  describe 'Array elements that are not a Hash' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          optional :items, type: Array do
+            requires :id, type: Integer
+            optional :name, type: String
+          end
+        end
+        post('/items') { declared(params) }
+
+        params do
+          requires :tags, type: Array do
+            optional :label, type: String
+          end
+        end
+        post('/tags') { declared(params, include_missing: false) }
+      end
+    end
+
+    it 'returns the blank elements an optional Array passes over as they came in' do
+      post_with_json '/items', items: [nil, { id: 1, junk: 2 }, '']
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('items' => [nil, { 'id' => 1, 'name' => nil }, ''])
+    end
+
+    it 'returns the elements an Array of optional params lets through as they came in' do
+      post_with_json '/tags', tags: ['x', 1, { label: 'y', junk: 3 }]
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('tags' => ['x', 1, { 'label' => 'y' }])
+    end
+  end
 end

@@ -20,7 +20,16 @@ module Grape
 
     private
 
+    # An element of an Array scope that is not a Hash has no keys to filter,
+    # so it is returned as it came in, the way a leaf value is. Validation
+    # lets one through wherever nothing in the scope is required of it: an
+    # optional scope passes over blank elements, and a scope whose params are
+    # all optional checks nothing on an element that is not a Hash. Filtering
+    # it anyway meant building an empty copy of it, which raised for +nil+,
+    # +false+ and numbers and indexed a String with a Symbol.
     def recursive_declared(passed_params, declared_params:, route_params:, renamed_params:, params_nested_path: [])
+      return passed_params unless passed_params.is_a?(Array) || passed_params.respond_to?(:key?)
+
       res = if passed_params.is_a?(Array)
               passed_params.map do |passed_param|
                 recursive_declared(passed_param, declared_params:, params_nested_path:, renamed_params:, route_params:)
