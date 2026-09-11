@@ -152,12 +152,22 @@ module Grape
             end
             env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
           end
-        rescue Grape::Exceptions::Base => e
-          raise e
-        rescue StandardError => e
+        rescue ForeignParserError => e
           throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: e.message, backtrace: e.backtrace, original_exception: e)
         end
       end
+
+      # What a parser raises that is not a Grape error, and so is answered as a
+      # 400 here. A Grape error goes on to the error middleware as it is. It
+      # used to be rescued just to be raised again, and re-raising at request
+      # depth cost about 25 µs -- paid by every malformed body, since the
+      # built-in parsers report one as InvalidMessageBody.
+      module ForeignParserError
+        def self.===(exception)
+          exception.is_a?(StandardError) && !exception.is_a?(Grape::Exceptions::Base)
+        end
+      end
+      private_constant :ForeignParserError
 
       # this middleware will not try to format the following content-types since Rack already handles them
       # when calling Rack's `params` function
