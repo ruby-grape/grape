@@ -527,4 +527,27 @@ describe Grape::Middleware::Formatter do
       expect(error.original_exception.class).to eq StandardError
     end
   end
+
+  # Only a parser's StandardErrors are answered with a 400. Anything else --
+  # an Interrupt, a SystemExit -- is not the body's fault and keeps going.
+  context 'custom parser raises an exception that is not a StandardError' do
+    it 'lets it through rather than answering 400' do
+      subject = described_class.new(
+        app,
+        parsers: { json: ->(_object, _env) { raise NotImplementedError, 'fatal' } }
+      )
+      io = StringIO.new('{}')
+      expect do
+        catch(:error) do
+          subject.call(
+            Rack::PATH_INFO => '/info',
+            Rack::REQUEST_METHOD => Rack::POST,
+            'CONTENT_TYPE' => 'application/json',
+            Rack::RACK_INPUT => io,
+            'CONTENT_LENGTH' => io.length.to_s
+          )
+        end
+      end.to raise_error(NotImplementedError, 'fatal')
+    end
+  end
 end
