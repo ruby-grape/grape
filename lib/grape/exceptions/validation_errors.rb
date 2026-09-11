@@ -23,7 +23,19 @@ module Grape
         as_json.to_json
       end
 
+      # Translated once, when the error is built for its #message, and handed
+      # out as a copy from then on. Every lookup here is an I18n call of a few
+      # microseconds, and the README's recipe for answering with the list,
+      # +error!({ messages: e.full_messages }, 400)+, asked for all of them a
+      # second time. It also keeps the list the same as #message, which was
+      # already fixed at that point, if the locale changes in between.
       def full_messages
+        (@full_messages ||= translate_full_messages).dup
+      end
+
+      private
+
+      def translate_full_messages
         messages = errors.flat_map do |attributes, errs|
           errs.map do |error|
             translate(
@@ -38,8 +50,6 @@ module Grape
         messages.uniq!
         messages
       end
-
-      private
 
       def translate_attributes(keys)
         keys.map do |key|
