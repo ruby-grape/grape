@@ -881,6 +881,32 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items[0][key] is missing')
       end
 
+      it 'skips the elements that are empty' do
+        subject.params do
+          optional :items, type: Array do
+            requires :key
+          end
+        end
+        subject.post('/optional_group') { 'optional group works' }
+
+        post_with_json '/optional_group', items: [{}, { not_key: 'foo' }]
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[1][key] is missing')
+      end
+
+      it "doesn't validate the group when every element is blank" do
+        subject.params do
+          optional :items, type: Array do
+            requires :key
+          end
+        end
+        subject.post('/optional_group') { 'optional group works' }
+
+        post_with_json '/optional_group', items: [false, ' ']
+        expect(last_response.status).to eq(201)
+        expect(last_response.body).to eq('optional group works')
+      end
+
       it "errors when param is present but isn't an Array" do
         get '/optional_group', items: 'hello'
         expect(last_response.status).to eq(400)

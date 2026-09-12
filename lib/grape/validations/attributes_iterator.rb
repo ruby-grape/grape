@@ -19,20 +19,42 @@ module Grape
 
       def each(params, &)
         original_params = @scope.params(params)
+        iterates_elements = @scope.iterates_elements?
         # A scope resolves to a Hash unless the declaration nests arrays, and
         # then #do_each has nothing to do but hand it straight back: Array.wrap
         # boxes it, the loop unboxes it on its only iteration, and with no Array
         # anywhere neither the nesting descent nor the index bookkeeping
         # applies. Every validator on a flat +params+ block comes through here.
-        return yield_attributes(original_params, &) if original_params.is_a?(Hash) && !@scope.iterates_elements?
+        return yield_attributes(original_params, &) if original_params.is_a?(Hash) && !iterates_elements
+
+        array_params = original_params.is_a?(Array)
+        # Do not validate the content of an array scope that did not get one.
+        return if iterates_elements && !array_params
+
+        # Where each element's index is recorded depends on the scope and on
+        # whether its params are an Array, never on the element, so it is
+        # settled once here rather than per element. A lateral scope (no
+        # @element) whose params resolved to an array hands its index to the
+        # nearest element-iterating ancestor, so full_name still produces the
+        # right bracketed index.
+        index_scope = iterates_elements ? @scope : (@scope.nearest_array_ancestor if array_params)
+        # No tracker means we're outside a ParamScopeTracker.track block (e.g.
+        # a unit test that invokes a validator directly). Index tracking is
+        # skipped — full_name will produce bracket-less names — but validation
+        # continues rather than crashing.
+        tracker = ParamScopeTracker.current if index_scope
 
         # because we need recursion for nested arrays
-        do_each(Array.wrap(original_params), original_params, &)
+        do_each(Array.wrap(original_params), tracker, index_scope, NO_PARENT_INDICES, &)
       end
 
       private
 
-      def do_each(params_to_process, original_params, parent_indices = [], &block)
+      # The top-level call's parent indices; only ever read.
+      NO_PARENT_INDICES = [].freeze
+      private_constant :NO_PARENT_INDICES
+
+      def do_each(params_to_process, tracker, index_scope, parent_indices, &block)
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indices
@@ -42,32 +64,16 @@ module Grape
           # validators see a non-hash and fail it the same way any other
           # unexpected element type does.
           if resource_params.is_a?(Array) && parent_indices.size < @max_nesting
-            do_each(resource_params, original_params, [index] + parent_indices, &block)
+            do_each(resource_params, tracker, index_scope, [index] + parent_indices, &block)
             next
           end
 
-          if @scope.iterates_elements?
-            next unless original_params.is_a?(Array) # do not validate content of array if it isn't array
-
-            store_indices(@scope, index, parent_indices)
-          elsif original_params.is_a?(Array)
-            # Lateral scope (no @element) whose params resolved to an array —
-            # delegate index tracking to the nearest element-iterating ancestor
-            # so that full_name produces the correct bracketed index.
-            target = @scope.nearest_array_ancestor
-            store_indices(target, index, parent_indices) if target
-          end
-
+          store_indices(tracker, index_scope, index, parent_indices) if tracker
           yield_attributes(resource_params, &block)
         end
       end
 
-      def store_indices(target_scope, index, parent_indices)
-        # No tracker means we're outside a ParamScopeTracker.track block (e.g.
-        # a unit test that invokes a validator directly). Index tracking is
-        # skipped — full_name will produce bracket-less names — but validation
-        # continues rather than crashing.
-        tracker = ParamScopeTracker.current or return
+      def store_indices(tracker, target_scope, index, parent_indices)
         parent_scope = target_scope.parent
         parent_indices.each do |parent_index|
           break unless parent_scope

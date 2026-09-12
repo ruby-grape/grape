@@ -17,14 +17,10 @@ module Grape
           #    collection_coercer_for(Array)
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
-            case type
-            when Array
-              ArrayCoercer
-            when Set
-              SetCoercer
-            else
-              raise ArgumentError, "unknown type: `#{type}`"
-            end
+            return ArrayCoercer if type.is_a?(Array)
+            return SetCoercer if type.is_a?(Set)
+
+            raise ArgumentError, "unknown type: `#{type}`"
           end
 
           # Returns an instance of a coercer for a given type
@@ -43,13 +39,25 @@ module Grape
         # Coerces the given value to a type which was specified during
         # initialization as a type argument.
         #
+        # Given a block, dry-types reports a value it cannot coerce by calling
+        # the block instead of raising. Raising is what cost: its CoercionError
+        # is re-raised with the backtrace of the error underneath, and building
+        # that backtrace as strings at request depth took about 25 µs for every
+        # rejected value -- every `types: [Integer, String]` param given a
+        # string, every 400 for a mistyped value.
+        #
+        # Every coercion dry-types runs takes that block, so none of them
+        # raises a CoercionError here. Anything that raises something else --
+        # +Kernel#String+, which +Coercible::String+ is built from, ignores the
+        # block and raises TypeError -- is answered by
+        # +CoerceValidator#coerce_value+, which rescues StandardError with the
+        # same InvalidValue.
+        #
         # @param val [Object]
         def call(val)
           return if val.nil?
 
-          @coercer[val]
-        rescue Dry::Types::CoercionError
-          InvalidValue.new
+          @coercer.call(val) { InvalidValue.new }
         end
 
         protected

@@ -15,6 +15,7 @@
 * [#2921](https://github.com/ruby-grape/grape/pull/2921): Pin the router's request-time isolation regressions through requests instead of its instance variables - [@ericproulx](https://github.com/ericproulx).
 * [#2935](https://github.com/ruby-grape/grape/pull/2935): Return the elements of an Array params scope that are not a Hash from `declared` instead of raising - [@ericproulx](https://github.com/ericproulx).
 * [#2937](https://github.com/ruby-grape/grape/pull/2937): Forward the class methods kept off an API class to its base instance explicitly, and pin what `delegate_missing_to` still answers - [@ericproulx](https://github.com/ericproulx).
+* [#2936](https://github.com/ruby-grape/grape/pull/2936): Speed up header versioning, content negotiation, params validation and error responses on the request path - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)

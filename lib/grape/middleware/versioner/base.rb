@@ -27,11 +27,20 @@ module Grape
 
         attr_reader :available_media_types, :error_headers, :versions
 
+        # Read off ivars rather than delegated through +version_options+ into
+        # +config+: the versioners ask for +vendor+, +strict+ or +parameter+ on
+        # every request, and each read went two Forwardable frames and two Data
+        # readers deep for a value fixed when the middleware was built.
+        attr_reader :cascade, :parameter, :strict, :vendor
+
         def_delegators :config, :mount_path, :prefix, :version_options
-        def_delegators :version_options, :cascade, :parameter, :strict, :vendor
 
         def initialize(app, **options)
           super
+          @cascade = version_options.cascade
+          @parameter = version_options.parameter
+          @strict = version_options.strict
+          @vendor = version_options.vendor
           @versions = config.versions&.map(&:to_s) # making sure versions are strings to ease potential match
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @available_media_types = build_available_media_types

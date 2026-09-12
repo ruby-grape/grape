@@ -65,6 +65,15 @@ describe Grape::Exceptions::ValidationErrors do
         expect(subject.first).to eq('admin_field Can not set admin-only field')
       end
     end
+
+    context 'when the caller changes the array it was given' do
+      subject(:error) { described_class.new(exceptions: [Grape::Exceptions::Validation.new(params: ['id'], message: :presence)]) }
+
+      it 'returns the same messages the next time' do
+        error.full_messages << 'name is missing'
+        expect(error.full_messages).to eq(['id is missing'])
+      end
+    end
   end
 
   context 'api' do

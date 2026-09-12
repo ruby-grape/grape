@@ -13,14 +13,19 @@ module Grape
       # in the case they will be compared in.
       VENDOR_VERSION_HEADER_REGEX = /\Avnd\.(?<vendor>[a-z0-9.\-_!^]+?)(?:-(?<version>[a-z0-9*.]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/
 
+      # Immutable, strings included: the header versioner shares one instance
+      # per declared media type across every request that sends it, and these
+      # strings are what it writes into the env. The arguments are copied
+      # rather than frozen, as they are the caller's.
       def initialize(type:, subtype:)
-        @type = type
-        @subtype = subtype
-        VENDOR_VERSION_HEADER_REGEX.match(subtype) do |m|
-          @vendor = m[:vendor]
-          @version = m[:version]
-          @format = m[:format]
+        @type = -type
+        @subtype = -subtype
+        VENDOR_VERSION_HEADER_REGEX.match(@subtype) do |m|
+          @vendor = m[:vendor].freeze
+          @version = m[:version].freeze
+          @format = m[:format].freeze
         end
+        freeze
       end
 
       def ==(other)

@@ -209,6 +209,41 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  # An Array group handed something other than an Array fails its own type
+  # check, and its members are not then validated against that value as
+  # though it were one element.
+  context 'array group given a Hash' do
+    it 'reports the group as invalid without validating its members' do
+      subject.params do
+        requires :items, type: Array do
+          requires :id, type: Integer
+        end
+      end
+      subject.post('/items') { 'ok' }
+
+      post '/items', { items: { name: 'x' } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('items is invalid')
+    end
+  end
+
+  context 'hash group given an Array' do
+    it 'reports the group as invalid without validating the optional array group inside it' do
+      subject.params do
+        requires :meta, type: Hash do
+          optional :items, type: Array do
+            requires :id, type: Integer
+          end
+        end
+      end
+      subject.post('/meta') { 'ok' }
+
+      post '/meta', { meta: [{}] }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('meta is invalid')
+    end
+  end
+
   context 'coercing values validation with a variant-member-type collection' do
     it 'accepts values compatible with the declared member types' do
       expect do
@@ -1019,6 +1054,32 @@ describe Grape::Validations::ParamsScope do
         }
         post '/array_with_given', params.to_json, 'CONTENT_TYPE' => 'application/json'
         expect(last_response.body).to eq('array[1][b] is missing, array[2][b] is missing')
+        expect(last_response.status).to eq(400)
+      end
+    end
+
+    # A with group inside an array scope is a lateral scope whose params are
+    # the array itself, so each element's index is recorded against the array
+    # scope. Failing a first element as well as the last shows it was: a stale
+    # index names the wrong element.
+    context 'array with a with group' do
+      before do
+        subject.params do
+          requires :array, type: Array do
+            requires :a, type: Integer
+            with(type: Integer) do
+              requires :b
+            end
+          end
+        end
+
+        subject.post '/array_with_group'
+      end
+
+      it 'names the elements that failed' do
+        params = { array: [{ a: 1 }, { a: 3, b: 4 }, { a: 5 }] }
+        post '/array_with_group', params.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.body).to eq('array[0][b] is missing, array[2][b] is missing')
         expect(last_response.status).to eq(400)
       end
     end
