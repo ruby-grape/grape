@@ -30,7 +30,7 @@ module Grape
       send_cookies << name
     end
 
-    # see https://github.com/rack/rack/blob/main/lib/rack/utils.rb#L338-L340
+    # Same attributes Rack::Utils uses to delete a cookie
     def delete(name, **opts)
       self.[]=(name, opts.merge(DELETED_COOKIES_ATTRS))
     end

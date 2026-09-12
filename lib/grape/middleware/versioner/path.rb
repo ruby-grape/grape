@@ -4,15 +4,14 @@ module Grape
   module Middleware
     module Versioner
       # This middleware sets various version related rack environment variables
-      # based on the uri path and removes the version substring from the uri
-      # path. If the version substring does not match any potential initialized
-      # versions, a 404 error is thrown.
+      # based on the uri path, which it leaves unchanged. If the version
+      # substring does not match any potential initialized versions, a 404
+      # error is thrown.
       #
       # Example: For a uri path
       #   /v1/resource
       #
-      # The following rack env variables are set and path is rewritten to
-      # '/resource':
+      # The following rack env variable is set:
       #
       #   env['api.version'] => 'v1'
       #

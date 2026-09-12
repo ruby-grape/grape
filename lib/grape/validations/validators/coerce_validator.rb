@@ -35,7 +35,7 @@ module Grape
           validation_error!(attr_name, new_value.message || exception_message) if new_value.is_a?(Types::InvalidValue)
 
           # Don't assign a value if it is identical. It fixes a problem with Hashie::Mash
-          # which looses wrappers for hashes and arrays after reassigning values
+          # which loses wrappers for hashes and arrays after reassigning values
           #
           #     h = Hashie::Mash.new(list: [1, 2, 3, 4])
           #     => #<Hashie::Mash list=#<Hashie::Array [1, 2, 3, 4]>>

@@ -51,11 +51,10 @@ module Grape
     end
 
     # Both tables below are derived from nothing but the content-type registry,
-    # and one content-type-aware middleware is built per API instance — so an
-    # app mounting N APIs held N copies of tables it only ever reads. Keying
-    # the cache on the registry itself collapses them: Hash keys compare by
-    # value, so every API that registers the same content types shares one
-    # table.
+    # and every endpoint builds its own content-type-aware middlewares — so an
+    # app held one copy per endpoint of tables it only ever reads. Keying the
+    # cache on the registry collapses them: Hash keys compare by value, so
+    # every registry with the same content types shares one table.
     #
     # Both the key and the table are frozen: the caller's registry stays
     # reachable (through +middleware.options[:content_types]+, among others)

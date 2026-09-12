@@ -6,8 +6,8 @@ module Grape
       # Add helper methods that will be accessible from any
       # endpoint within this namespace (and child namespaces).
       #
-      # When called without a block, all known helpers within this scope
-      # are included.
+      # When called with neither modules nor a block, returns a module
+      # including all known helpers within this scope.
       #
       # @param [Array] new_modules optional array of modules to include
       # @param [Block] block optional block of methods to include
@@ -77,11 +77,8 @@ module Grape
 
       # When +Grape.config.warn_on_helper_overrides+ is enabled, emit a
       # warning to +$stderr+ for any helper method that masks an instance
-      # method on +Grape::Endpoint+. Helpers are mixed into the endpoint's
-      # singleton class and therefore take precedence over +Endpoint+
-      # instance methods — usually intentional, but a common source of
-      # surprise when the framework gains a method that already collides
-      # with an existing helper name.
+      # method on +Grape::Endpoint+. Helpers are included into a subclass of
+      # the endpoint (see Endpoint#build_prototype), so they take precedence.
       def warn_on_endpoint_overrides(mod)
         overridden = mod.instance_methods(false).select { |m| Grape::Endpoint.method_defined?(m) }
         return if overridden.empty?

@@ -15,10 +15,11 @@ module Grape
       # consisting only of keys that have been declared by a
       # `params` statement against the current/target endpoint or parent
       # namespaces.
-      # @param params [Hash] The initial hash to filter. Usually this will just be `params`
-      # @param options [Hash] Can pass `:include_missing`, `:stringify` and `:include_parent_namespaces`
-      # options. `:include_parent_namespaces` defaults to true, hence must be set to false if
-      # you want only to return params declared against the current/target endpoint.
+      # @param passed_params [Hash] The initial hash to filter. Usually this will just be `params`
+      # @param include_parent_namespaces [Boolean] false to only return params declared against the current/target endpoint
+      # @param include_missing [Boolean] include declared params that were not passed
+      # @param evaluate_given [Boolean] drop params whose +given+ condition is not met
+      # @param stringify [Boolean] return String keys
       def declared(passed_params, include_parent_namespaces: true, include_missing: true, evaluate_given: false, stringify: false)
         raise MethodNotYetAvailable unless before_filter_passed
 

@@ -99,7 +99,7 @@ module Grape
             resp.body = bodies.stream
           end
         else
-          # Allow content-type to be explicitly overwritten
+          # Picked by env['api.format']; the Content-Type header only counts when that is unset
           formatter = fetch_formatter(headers)
           bodymap = instrument_format_response(formatter) do
             bodies.map { |body| formatter.call(body, env) }

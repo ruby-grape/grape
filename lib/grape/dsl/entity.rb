@@ -43,10 +43,9 @@ module Grape
       end
 
       # Attempt to locate the Entity class for a given object, if not given
-      # explicitly. This is done by looking for the presence of Klass::Entity,
-      # where Klass is the class of the `object` parameter, or one of its
-      # ancestors. Object is excluded from the search: top-level constants
-      # live on it, so a global ::Entity class is not a representer.
+      # explicitly: a +represent+ registration or Klass::Entity for the object's
+      # class or an ancestor, then the same for its element class. Object is
+      # excluded: a global ::Entity class is not a representer.
       # @param object [Object] the object to locate the Entity class for
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object)

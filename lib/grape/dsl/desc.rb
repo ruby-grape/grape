@@ -9,8 +9,7 @@ module Grape
       # @param description [String] descriptive string for this endpoint
       #   or namespace
       # @param options [Hash] other properties you can set to describe the
-      #   endpoint or namespace. Optional. Pass these as keyword arguments;
-      #   passing a positional options Hash is deprecated.
+      #   endpoint or namespace, as keyword arguments. Optional.
       # @option options :detail [String] additional detail about this endpoint
       # @option options :summary [String] summary for this endpoint
       # @option options :params [Hash] param types and info. normally, you set

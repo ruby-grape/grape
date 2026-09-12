@@ -14,7 +14,7 @@ module Grape
           # Returns a collection coercer which corresponds to a given type.
           # Example:
           #
-          #    collection_coercer_for(Array)
+          #    collection_coercer_for([Integer])
           #    #=> Grape::Validations::Types::ArrayCoercer
           def collection_coercer_for(type)
             return ArrayCoercer if type.is_a?(Array)

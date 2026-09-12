@@ -13,8 +13,8 @@ module Grape
       def_delegators :to_regexp, :===
       alias match? ===
 
-      # Build a Pattern from a raw path, namespace and the API's inheritable
-      # settings. {Path} owns the settings-aware assembly of +origin+/+suffix+;
+      # Build a Pattern from a raw path, namespace and a PathSettings snapshot.
+      # {Path} owns the settings-aware assembly of +origin+/+suffix+;
       # the Pattern itself stays value-based (see {#initialize}).
       def self.build(path:, namespace:, settings:, anchor:, params:, version:, requirements:)
         built_path = Path.new(path, namespace, settings)

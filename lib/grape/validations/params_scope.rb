@@ -57,7 +57,7 @@ module Grape
       end
 
       # Open up a new ParamsScope, allowing parameter definitions per
-      #   Grape::DSL::Params.
+      #   Grape::DSL::Parameters.
       # @param api [API] the API endpoint to modify
       # @param element [Symbol] the element that contains this scope; for
       #   this to be relevant, parent must be set
@@ -66,10 +66,10 @@ module Grape
       # @param parent [ParamsScope] the scope containing this scope
       # @param optional [Boolean] whether or not this scope needs to have
       #   any parameters set or not
-      # @param type [Class] a type meant to govern this scope (deprecated)
-      # @param type [Hash] group options for this scope
-      # @param dependent_on [Symbol] if present, this scope should only
-      #   validate if this param is present in the parent scope
+      # @param type [Class] a type meant to govern this scope
+      # @param group [Hash] group options for this scope
+      # @param dependent_on [Array<Symbol, Hash>] if present, this scope should
+      #   only validate if these params are present in the parent scope
       # @yield the instance context, open for parameter definitions
       def initialize(api:, element: nil, element_renamed: nil, parent: nil, optional: false, type: nil, group: nil, dependent_on: nil, &block)
         @element          = element
@@ -323,8 +323,8 @@ module Grape
 
       # Returns a new parameter scope, not nested under any current-level param
       # but instead at the same level as the current scope.
-      # @param dependent_on [Symbol] if given, specifies that this scope should
-      #   only validate if this parameter from the above scope is present
+      # @param dependent_on [Array<Symbol, Hash>] if given, this scope only
+      #   validates if these parameters from the above scope are present
       # @yield parameter scope
       def new_lateral_scope(dependent_on:, &)
         self.class.new(

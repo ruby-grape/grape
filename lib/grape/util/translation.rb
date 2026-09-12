@@ -6,9 +6,7 @@ module Grape
       FALLBACK_LOCALE = :en
       private_constant :FALLBACK_LOCALE
       # Sentinel returned by I18n when a key is missing (passed as the default:
-      # value). Using a named class rather than plain Object.new makes it
-      # identifiable in debug output and immune to backends that call .to_s on
-      # the default before returning it.
+      # value). Its +inspect+ names it in debug output.
       MISSING = Class.new { def inspect = 'Grape::Util::Translation::MISSING' }.new.freeze
       private_constant :MISSING
 

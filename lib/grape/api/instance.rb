@@ -140,7 +140,7 @@ module Grape
       # looking for a matching route on other resources.
       #
       # In some applications (e.g. mounting grape on rails), one might need to trap
-      # errors from reaching upstream. This is effectivelly done by unsetting
+      # errors from reaching upstream. This is effectively done by unsetting
       # X-Cascade. Default :cascade is true.
       #
       # Resolved in the constructor rather than per request: answering it walks
@@ -171,7 +171,7 @@ module Grape
         setting = self.class.inheritable_setting
         routes_by_regexp = all_routes.group_by(&:pattern_regexp)
 
-        # Build the configuration based on the first endpoint and the collection of methods supported.
+        # Build the configuration from the collection of methods supported.
         routes_by_regexp.each_value do |routes|
           next if routes.any? { |route| route.request_method == '*' }
 

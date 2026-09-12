@@ -254,7 +254,8 @@ module Grape
       # in your API.
       #
       # @param param [Symbol] The name of the parameter you wish to declare.
-      # @option options [Regexp, Class, Symbol] The constraint the declared parameter must meet — a Regexp, or a capture type such as +Integer+.
+      # @param requirements [Regexp, Class, Symbol] The constraint the parameter must meet.
+      # @param type [Class] Declares the parameter with this type.
       def route_param(param, requirements: nil, type: nil, **, &)
         # The param is named here, so the constraint is its own: nest whatever
         # it is, not just a Regexp. A Hash would name the param twice, or key a

@@ -6,7 +6,7 @@ module Grape
     # by {ValidationsSpec#coerce_options} from the parsed +type+/+coerce_with+/
     # +coerce_message+ declaration — never written by the user — and consumed
     # by {ParamsScope#check_coerce_with} / {ParamsScope#validate_coerce} and by
-    # {Validators::Validators::CoerceValidator} (which receives it as its
+    # {Validators::CoerceValidator} (which receives it as its
     # +options+ argument).
     #
     # All three fields may be +nil+ (e.g. a remountable API evaluated on its

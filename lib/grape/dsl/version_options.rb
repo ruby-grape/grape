@@ -5,7 +5,7 @@ module Grape
     # Immutable value object holding the resolved options from
     # +Grape::DSL::Routing#version+. Stored on the inheritable settings as
     # +Grape::Util::InheritableSetting#version_options+ and read by internal call
-    # sites (`Path`, `Endpoint`, `API::Instance#cascade?`,
+    # sites (`Path`, `Endpoint`, `API::Instance`,
     # `Middleware::Versioner::Base`) via accessors.
     #
     # Defaults are duplicated on +#initialize+ here and on +#version+'s
