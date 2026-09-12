@@ -135,11 +135,11 @@ module Grape
         raw.backtrace || raw.original_exception&.backtrace || []
       end
 
-      # Rendering runs inside #call!'s own rescue clause, so it is not covered by
-      # that rescue: an error formatter that raises on the payload it was handed
-      # takes the exception out through every middleware above Grape. By this
-      # point Grape has committed to answering with an error, so it answers with
-      # one that does not depend on the payload rather than dropping the request.
+      # An error formatter that raises on its payload would take the exception
+      # out through every middleware above Grape: rendering from a rescue
+      # handler runs in #call!'s rescue clause, which nothing covers. Grape has
+      # committed to an error by now, so it answers with one that does not
+      # depend on the payload.
       #
       # +Grape.config.raise_rendering_errors+ opts back out, for an application
       # that would rather have the exception propagate as it did before.

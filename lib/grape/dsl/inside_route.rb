@@ -9,7 +9,7 @@ module Grape
       # Backward compatibility: alias exception class to previous location
       MethodNotYetAvailable = Declared::MethodNotYetAvailable
 
-      # The API version as specified in the URL.
+      # The API version negotiated for this request.
       def version
         env[Grape::Env::API_VERSION]
       end
@@ -23,7 +23,7 @@ module Grape
       #
       # @param message [String] The message to display.
       # @param status [Integer] The HTTP Status Code. Defaults to default_error_status, 500 if not set.
-      # @param additional_headers [Hash] Addtional headers for the response.
+      # @param additional_headers [Hash] Additional headers for the response.
       # @param backtrace [Array<String>] The backtrace of the exception that caused the error.
       # @param original_exception [Exception] The original exception that caused the error.
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
@@ -121,7 +121,7 @@ module Grape
       #
       # @example
       #   get '/file' do
-      #     sendfile FileStreamer.new(...)
+      #     sendfile '/path/to/file'
       #   end
       #
       #   GET /file # => "contents of file"

@@ -4,7 +4,7 @@ module Grape
   module Validations
     module Types
       # See {CustomTypeCoercer} for details on types
-      # that will be supported by this by this coercer.
+      # that will be supported by this coercer.
       # This coercer works in the same way as +CustomTypeCoercer+
       # except that it expects to receive an array of strings to
       # coerce and will return an array (or optionally, a set)

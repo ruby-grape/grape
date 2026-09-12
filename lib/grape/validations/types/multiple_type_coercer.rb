@@ -35,8 +35,7 @@ module Grape
 
         # Coerces the given value.
         #
-        # @param val [String] value to be coerced, in grape
-        #   this should always be a string.
+        # @param val [Object] value to be coerced
         # @return [Object,InvalidValue] the coerced result, or an instance
         #   of {InvalidValue} if the value could not be coerced.
         def call(val)

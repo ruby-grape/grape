@@ -3,7 +3,7 @@
 module Grape
   module DSL
     module Logger
-      # Set or retrive the configured logger. If none was configured, this
+      # Set or retrieve the configured logger. If none was configured, this
       # method will create a new one, logging to stdout.
       # @param logger [Object] the new logger to use
       def logger(logger = nil)

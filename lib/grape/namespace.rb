@@ -8,10 +8,9 @@ module Grape
     attr_reader :space, :requirements, :options
 
     # @param space [String] the name of this namespace
+    # @param requirements [Hash] param-regex pairs a request's path must meet
+    #   for this namespace's endpoints to match
     # @param options [Hash] options hash
-    # @option options :requirements [Hash] param-regex pairs, all of which must
-    #   be met by a request's params for all endpoints in this namespace, or
-    #   validation will fail and return a 422.
     def initialize(space, requirements: nil, **options)
       @space = space.to_s
       @requirements = requirements

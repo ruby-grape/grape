@@ -6,18 +6,13 @@ module Grape
     # and describe the parameters accepted by an endpoint, or all endpoints
     # within a namespace.
     module Parameters
-      # Set the module used to build the request.params.
+      # Set the builder used to build the request.params.
       #
-      # @param build_with the ParamBuilder module to use when building request.params
-      #   Available builders are:
-      #
-      #     * Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder (default)
-      #     * Grape::Extensions::Hash::ParamBuilder
-      #     * Grape::Extensions::Hashie::Mash::ParamBuilder
+      # @param build_with [Symbol] +:hash_with_indifferent_access+ (default,
+      #   see +Grape.config.param_builder+), +:hash+ or +:hashie_mash+
       #
       # @example
       #
-      #     require 'grape/extenstions/hashie_mash'
       #     class API < Grape::API
       #       desc "Get collection"
       #       params do
@@ -91,7 +86,7 @@ module Grape
       #   and validation rules for variant-type parameters.
       # @option attrs :desc [String] description to document this parameter
       # @option attrs :default [Object] default value, if parameter is optional
-      # @option attrs :values [Array] permissable values for this field. If any
+      # @option attrs :values [Array] permissible values for this field. If any
       #   other value is given, it will be handled as a validation error
       # @option attrs :using [Hash[Symbol => Hash]] a hash defining keys and
       #   options, like that returned by {Grape::Entity#documentation}. The value
@@ -110,7 +105,7 @@ module Grape
       #       # Basic usage: require a parameter of a certain type
       #       requires :user_id, type: Integer
       #
-      #       # You don't need to specify type; String is default
+      #       # Without a type, the value is not coerced
       #       requires :foo
       #
       #       # Multiple params can be specified at once if they share
@@ -156,9 +151,9 @@ module Grape
 
       # Define a block of validations which should be applied if and only if
       # the given parameter is present. The parameters are not nested.
-      # @param attr [Symbol] the parameter which, if present, triggers the
-      #   validations
-      # @raise Grape::Exceptions::UnknownParameter if `attr` has not been
+      # @param attrs [Array<Symbol, Hash>] the parameters which, if present (or
+      #   passing the Proc they map to), trigger the validations
+      # @raise Grape::Exceptions::UnknownParameter if one has not been
       #   defined in this scope yet
       # @yield a parameter definition DSL
       def given(*attrs, &)
@@ -176,8 +171,7 @@ module Grape
         # Elements of @declared_params of lateral scope are pushed in @parent. So check them in @parent.
         return @parent.declared_param?(param) if lateral?
 
-        # @declared_params also includes hashes of options and such, but those
-        # won't be flattened out.
+        # A nested scope is recorded as an Attr keyed by { element => children }.
         @declared_params.flatten.any? do |declared_param_attr|
           first_hash_key_or_param(declared_param_attr.key) == param
         end
@@ -197,10 +191,6 @@ module Grape
 
       private
 
-      # @deprecated A trailing positional options Hash is deprecated; pass keyword
-      #   arguments instead. Before Ruby 3 keyword separation this Hash was pulled
-      #   off the argument list by `extract_options!`; now it lands in the splat and
-      #   would silently be treated as a parameter name.
       # +requires+ and +optional+ differ only in whether what they declare is
       # required, so the declaration itself lives here.
       #
@@ -224,6 +214,8 @@ module Grape
         new_scope(attrs.first, type: merged_opts[:type], as: declared_as, optional: !required, &block)
       end
 
+      # A trailing positional options Hash (deprecated): since Ruby 3 keyword
+      # separation it lands in the splat and would be read as a parameter name.
       def legacy_options?(args)
         args.size > 1 && args.last.is_a?(Hash)
       end

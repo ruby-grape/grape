@@ -69,7 +69,8 @@ module Grape
     # 1. the routes registered for +method+ — the compiled-union match first,
     #    then, when that route cascades, its siblings (see #rotation);
     # 2. the ANY (+'*'+) routes;
-    # 3. the greedy neighbour, which answers auto-OPTIONS and 405.
+    # 3. the greedy neighbour, which answers 405 — and auto-OPTIONS, ahead of
+    #    the ANY routes.
     #
     # Returns nil when nothing answered, leaving the caller to 404. A response
     # that cascades is never final: it is returned only once every later

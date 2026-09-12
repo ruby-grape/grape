@@ -9,9 +9,8 @@ module Grape
     #
     # Splits the raw entries into three logical buckets:
     #
-    # * Spec-consumed keys (type/types/coerce*, presence/message,
-    #   default/fail_fast, doc keys) — exposed via named accessors and never
-    #   handed to validator dispatch.
+    # * Spec-consumed keys (type/types/coerce*, presence/message, fail_fast,
+    #   doc keys) — never handed to validator dispatch.
     # * Shared opts (allow_blank, fail_fast) — read by every validator at
     #   construction time via {#shared_opts}.
     # * Validator entries (everything else, e.g. +regexp+, +length+, +values+,

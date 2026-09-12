@@ -9,8 +9,8 @@ module Grape
     # Grape uses a number of tests and assertions to
     # work out exactly how a parameter should be handled,
     # based on the +type+ and +coerce_with+ options that
-    # may be supplied to {Grape::Dsl::Parameters#requires}
-    # and {Grape::Dsl::Parameters#optional}. The main
+    # may be supplied to {Grape::DSL::Parameters#requires}
+    # and {Grape::DSL::Parameters#optional}. The main
     # entry point for this process is {Types.build_coercer}.
     module Types
       module_function
@@ -112,11 +112,10 @@ module Grape
           type.respond_to?(:parse) && type.method(:parse).arity == 1
       end
 
-      # Is the declared type an +Array+ or +Set+ of a {#custom?} type?
+      # Is the declared type an +Array+ or +Set+ of a {#custom?} or {#special?} type?
       #
       # @param type [Array<Class>,Class] type to check
-      # @return [Boolean] true if +type+ is a collection of a type that implements
-      #   its own +#parse+ method.
+      # @return [Boolean] true if +type+ is a one-element collection of such a type
       def collection_of_custom?(type)
         array_or_set?(type) && type.length == 1 && (custom?(type.first) || special?(type.first))
       end
@@ -131,26 +130,21 @@ module Grape
       #
       # There are a few very special coercers which might be returned.
       #
-      # +Grape::Types::MultipleTypeCoercer+ is a coercer which is returned when
-      # the given type implies values in an array with different types.
-      # For example, +[Integer, String]+ allows integer and string values in
-      # an array.
+      # +MultipleTypeCoercer+ is returned for a value that may be one of
+      # several types, e.g. +types: [Integer, String]+.
       #
-      # +Grape::Types::CustomTypeCoercer+ is a coercer which is returned when
-      # a method is specified by a user with +coerce_with+ option or the user
-      # specifies a custom type which implements requirments of
-      # +Grape::Types::CustomTypeCoercer+.
+      # +CustomTypeCoercer+ is returned for a +coerce_with+ method or a type
+      # with its own +parse+ (see {#custom?}).
       #
-      # +Grape::Types::CustomTypeCollectionCoercer+ is a very similar to the
-      # previous one, but it expects an array or set of values having a custom
-      # type implemented by the user.
+      # +CustomTypeCollectionCoercer+ is returned for an array or set of such
+      # a type (see {#collection_of_custom?}).
       #
       # There is also a group of custom types implemented by Grape, check
       # +Grape::Validations::Types::SPECIAL+ to get the full list.
       #
-      # @param type [Class] the type to which input strings
-      #   should be coerced
+      # @param type [Class] the type to which input values should be coerced
       # @param method [Class,#call] the coercion method to use
+      # @param strict [Boolean] check the type rather than coerce
       # @return [Object] object to be used
       #   for coercion and type validation
       def build_coercer(type, method: nil, strict: false)

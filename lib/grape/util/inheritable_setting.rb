@@ -99,7 +99,7 @@ module Grape
 
       # Create a point-in-time copy of this settings instance, with clones of
       # all our values. Note that, should this instance's parent be set or
-      # changed via #inherit_from, it will copy that inheritence to any copies
+      # changed via #inherit_from, it will copy that inheritance to any copies
       # which were made.
       def point_in_time_copy
         new_setting = self.class.new
@@ -172,8 +172,8 @@ module Grape
       end
 
       # The route-scope settings handed to each Grape::Router::Route: every
-      # +route_setting+ registration plus the description, minus the internal
-      # param snapshots (#route_validations / #route_declared_params).
+      # +route_setting+ registration, the description and renamed params,
+      # minus #route_validations / #route_declared_params.
       def route_settings
         route.except(:declared_params, :validations)
       end
@@ -593,11 +593,9 @@ module Grape
         set_inheritable(:root_prefix, prefix)
       end
 
-      # Cascade flag assigned by the +cascade+ DSL. An explicit nil is
-      # meaningful and distinct from never-set (the backing store is
-      # key-presence based), so #cascade_defined? reports whether any scope
-      # assigned it — Grape::API::Instance#cascade? falls back to the
-      # version options' cascade, then to true, when it was never assigned.
+      # Cascade flag assigned by the +cascade+ DSL. An explicit nil is distinct
+      # from never-set, which #cascade_defined? tells apart; when never set,
+      # Grape::API::Instance falls back to the version options' cascade, then true.
       def cascade
         inheritable(:cascade)
       end
@@ -701,7 +699,7 @@ module Grape
       protected
 
       # This scope's own inheritable overrides, before inheritance; nil when
-      # the scope overrode nothing. Peer access for #copy_state_from.
+      # the scope overrode nothing. Peer access for #copy_state_from and #==.
       attr_reader :namespace_inheritable
 
       # The nearest scope's value for +key+: this scope's own override when it
@@ -723,9 +721,7 @@ module Grape
       end
 
       # Every inheritable value along the chain resolved into one Hash, nearest
-      # scope winning. Like #stacked it hands back the backing Hash when only
-      # one scope in the chain has values, so callers must treat the result as
-      # read-only.
+      # scope winning. May be the root scope's own Hash: treat it as read-only.
       def inheritable_values
         inherited = parent&.inheritable_values
         own = @namespace_inheritable
@@ -739,14 +735,12 @@ module Grape
       attr_reader :rescue_handler_maps
 
       # This scope's own stackable registrations, before inheritance; nil when
-      # the scope registered nothing. Peer access for #copy_state_from.
+      # the scope registered nothing. Peer access for #copy_state_from and #==.
       attr_reader :stackable_values
 
-      # Every registration for +key+ along the chain, outermost scope first.
-      # Returns the frozen EMPTY_STACK when nothing is registered anywhere, and
-      # — like the store it replaced — the backing Array itself when only this
-      # scope registered anything, so callers must treat the result as
-      # read-only.
+      # Every registration for +key+ along the chain, outermost scope first;
+      # the frozen EMPTY_STACK when there is none. May be the root scope's own
+      # Array: treat it as read-only.
       def stacked(key)
         inherited = parent&.stacked(key)
         own = @stackable_values&.[](key)
@@ -816,9 +810,8 @@ module Grape
         keys.each { |key| @stackable_values.delete(key) }
       end
 
-      # Compares two lazily-allocated own-registration stores (see #stack and
-      # #add_rescue_handlers): nil and an emptied Hash both mean "this scope
-      # registered nothing", so #== must not tell them apart.
+      # Compares two lazily-allocated own stackable stores (see #stack): nil and
+      # an emptied Hash both mean "registered nothing".
       def same_own_store?(mine, theirs)
         return theirs.blank? if mine.blank?
 

@@ -7,10 +7,10 @@ module Grape
       #
       # == Freeze contract
       # Validator instances are shared across requests and are frozen after
-      # initialization (via +.new+). All inputs (+options+, +opts+, +attrs+)
-      # arrive pre-frozen from the DSL boundary, so subclass ivars derived
-      # from them are frozen by construction. Lazy ivar assignment
-      # (e.g. +memoize+, <tt>||=</tt>) will raise +FrozenError+ at request time.
+      # initialization (via +.new+). #initialize freezes +attrs+ and
+      # deep-freezes +options+, so subclass ivars derived from them are frozen
+      # by construction. Lazy ivar assignment (e.g. +memoize+, <tt>||=</tt>)
+      # will raise +FrozenError+ at request time.
       class Base
         extend Forwardable
         extend Grape::Util::FreezeOnNew

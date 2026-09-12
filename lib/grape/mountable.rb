@@ -8,10 +8,8 @@ module Grape
   # rather than duck-typing on an incidental internal method such as
   # `inheritable_setting`.
   #
-  # `Grape::API` and `Grape::API::Instance` are not related by inheritance and
-  # do not even respond to the same methods (the former to `mount_instance`,
-  # the latter to `inheritable_setting`/`endpoints`), so there is no common
-  # ancestor to key an `is_a?` check on without this marker.
+  # `Grape::API` and `Grape::API::Instance` are not related by inheritance, so
+  # there is no common ancestor to key an `is_a?` check on without this marker.
   #
   # It answers identity only ("is this a Grape app?"). Capability checks that
   # go on to call a stage-specific method — e.g. `respond_to?(:endpoints)`

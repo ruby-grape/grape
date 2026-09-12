@@ -8,14 +8,12 @@ module Grape
       # request parameters for subsequent middleware and API.
       # If the version substring does not match any potential initialized
       # versions, a 404 error is thrown.
-      # If the version substring is not passed the version (highest mounted)
-      # version will be used.
+      # If no version is passed, none is set and the first matching route answers.
       #
       # Example: For a uri path
       #   /resource?apiver=v1
       #
-      # The following rack env variables are set and path is rewritten to
-      # '/resource':
+      # The following rack env variable is set:
       #
       #   env['api.version'] => 'v1'
       class Param < Base

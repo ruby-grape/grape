@@ -4,7 +4,7 @@ module Grape
   module DSL
     module RequestResponse
       # Specify the default format for the API's serializers.
-      # May be `:json` or `:txt` (default).
+      # e.g. `:json`, `:xml` or `:txt` (default).
       def default_format(new_format = nil)
         return inheritable_setting.default_format if new_format.nil?
 
@@ -78,6 +78,9 @@ module Grape
         inheritable_setting.default_error_status = new_status
       end
 
+      META_RESCUE_SELECTORS = %i[all grape_exceptions internal_grape_exceptions].freeze
+      private_constant :META_RESCUE_SELECTORS
+
       # Allows you to rescue certain exceptions that occur to return
       # a grape error rather than raising all the way to the
       # server level.
@@ -89,17 +92,15 @@ module Grape
       #       rescue_from CustomError
       #     end
       #
-      META_RESCUE_SELECTORS = %i[all grape_exceptions internal_grape_exceptions].freeze
-      private_constant :META_RESCUE_SELECTORS
-
       # @overload rescue_from(*exception_classes, **options)
       #   @param [Array] exception_classes A list of classes that you want to rescue, or
       #     one of the meta selectors +:all+, +:grape_exceptions+,
       #     +:internal_grape_exceptions+. Meta selectors must be used alone;
       #     mixing with exception classes raises +ArgumentError+.
-      #   @param [Block] block Execution block to handle the given exception.
-      #   @param [Proc] with Execution proc to handle the given exception as an alternative
-      #     to passing a block.
+      #   @param [Block] block Execution block to handle the given exception; a
+      #     trailing Proc argument works too.
+      #   @param [Proc, Symbol, String] with Alternative to a block; a Symbol or
+      #     String names an endpoint method.
       #   @param [Boolean] rescue_subclasses Also rescue subclasses of exception classes;
       #     defaults to +true+.
       #   @param [Boolean] backtrace Include the rescued exception's backtrace in the

@@ -10,7 +10,7 @@ module Grape
       # there are any problems parsing the string.
       #
       # Alternately an optional +method+ may be supplied (see the
-      # +coerce_with+ option of {Grape::Dsl::Parameters#requires}).
+      # +coerce_with+ option of {Grape::DSL::Parameters#requires}).
       # This may be any class or object implementing +parse+ or +call+,
       # with the same contract as described above.
       #
@@ -53,8 +53,7 @@ module Grape
 
         # Coerces the given value.
         #
-        # @param value [String] value to be coerced, in grape
-        #   this should always be a string.
+        # @param val [Object] value to be coerced
         # @return [Object] the coerced result
         def call(val)
           coerced_val = @method.call(val)
