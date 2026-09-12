@@ -7,8 +7,11 @@ module Grape
     # Marks this and every subclass as a mountable Grape app (see Grape::Mountable).
     extend Grape::Mountable
 
-    # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting= top_level_setting].freeze
+    # Class methods that we want to call on the API rather than on the API object.
+    # +inherit_settings+ is protected on the base instance, and +.methods+ answers
+    # protected methods too, so it has to be named here for {.override_all_methods!}
+    # to leave it alone.
+    NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
@@ -30,12 +33,22 @@ module Grape
 
       delegate_missing_to :base_instance
 
-      # This is the interface point between Rack and Grape; it accepts a request
-      # from Rack and ultimately returns an array of three values: the status,
-      # the headers, and the body. See [the rack specification]
+      # Every NON_OVERRIDABLE name the base instance answers is forwarded here
+      # rather than left to +delegate_missing_to+, which stays for the names
+      # this list cannot know: anything defined on Grape::API::Instance after
+      # an API class was created, since {.override_all_methods!} copies the
+      # methods it finds at that moment.
+      #
+      # +call+ is the interface point between Rack and Grape; it accepts a
+      # request from Rack and ultimately returns an array of three values: the
+      # status, the headers, and the body. See [the rack specification]
       # (https://github.com/rack/rack/blob/main/SPEC.rdoc) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes
+      #
+      # +inherit_settings+ is left out: it is protected on the base instance, so
+      # a delegator would raise NoMethodError just as the missing one does.
+      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes,
+                     :base=, :base_instance?, :reset!, :top_level_setting
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
