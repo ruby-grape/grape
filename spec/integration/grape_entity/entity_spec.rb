@@ -101,6 +101,39 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       expect(last_response.body).to eq('Auto-detect!')
     end
 
+    it 'uses the Entity a superclass or an included module names' do
+      entity = Class.new(Grape::Entity)
+      allow(entity).to receive(:represent).and_return('Inherited!')
+      base_model = Class.new
+      base_model.const_set :Entity, entity
+      concern = Module.new
+      concern.const_set :Entity, entity
+      subclass = Class.new(base_model)
+      including = Class.new { include concern }
+
+      subject.get('/subclass') { present subclass.new }
+      subject.get('/including') { present including.new }
+
+      get '/subclass'
+      expect(last_response.body).to eq('Inherited!')
+      get '/including'
+      expect(last_response.body).to eq('Inherited!')
+    end
+
+    it 'does not use a top-level Entity' do
+      entity = Class.new(Grape::Entity)
+      allow(entity).to receive(:represent).and_return('Top-level!')
+      stub_const('Entity', entity)
+      inner_body = nil
+
+      subject.get '/example' do
+        present({ abc: 'def' })
+        inner_body = body
+      end
+      get '/example'
+      expect(inner_body).to eql(abc: 'def')
+    end
+
     it 'does not run autodetection for Entity when explicitly provided' do
       entity = Class.new(Grape::Entity)
       some_array = []
