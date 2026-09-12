@@ -127,6 +127,32 @@ describe Grape::Validations::Validators::DefaultValidator do
     end
   end
 
+  describe 'values given in a JSON body' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          optional :type, default: 'default-type'
+          optional :kept, default: 'default-kept'
+          requires :nested, type: Hash do
+            optional :label, default: ->(nested) { "#{nested[:name]}-label" }
+            requires :name
+          end
+        end
+        post '/defaults' do
+          { type: params[:type], kept: params[:kept], nested: params[:nested] }
+        end
+      end
+    end
+
+    it 'defaults a null, keeps a false and hands a proc the params of its own scope' do
+      post '/defaults', { type: nil, kept: false, nested: { name: 'n' } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('type' => 'default-type', 'kept' => false, 'nested' => { 'name' => 'n', 'label' => 'n-label' })
+    end
+  end
+
   describe '/optional_array' do
     let(:app) do
       Class.new(Grape::API) do

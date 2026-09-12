@@ -48,10 +48,21 @@ module Grape
       end
 
       # The request methods that can carry a body worth parsing. See
-      # {#read_body_input?}, which tests the env against this before anything
-      # asks for a Rack::Request. QUERY is here because its content *is* the
-      # query (RFC 10008, Section 2), not an optional payload.
+      # {#body_given?}, which tests the env against this before anything asks
+      # for a Rack::Request. QUERY is here because its content *is* the query
+      # (RFC 10008, Section 2), not an optional payload.
       BODY_CARRYING_METHODS = [Rack::POST, Rack::PUT, Rack::PATCH, Rack::DELETE, Grape::QUERY].freeze
+
+      # The media types whose bodies Rack parses itself once the params are
+      # asked for, so the formatter leaves them alone.
+      #
+      # Tested against the media type the formatter parses anyway, rather than
+      # through Rack's +form_data?+ and +parseable_data?+, which parse
+      # CONTENT_TYPE again each. It is the same answer: +form_data?+ also holds
+      # for a POST with no media type, but Rack only finds none when
+      # CONTENT_TYPE is missing or empty, and a body like that was never left
+      # to Rack.
+      RACK_PARSED_MEDIA_TYPES = (Rack::Request::FORM_DATA_MEDIA_TYPES + Rack::Request::PARSEABLE_DATA_MEDIA_TYPES).freeze
 
       # Read off ivars rather than delegated into +config+ on every request:
       # +negotiate_content_type+ asks for +format+ and +default_format+ per
@@ -145,7 +156,10 @@ module Grape
       end
 
       def read_body_input
-        return unless read_body_input?
+        return unless body_given?
+
+        media_type = rack_request.media_type
+        return if RACK_PARSED_MEDIA_TYPES.include?(media_type)
 
         input = rack_request.body # reads RACK_INPUT
         return if input.nil?
@@ -155,16 +169,14 @@ module Grape
         input.rewind if rewind
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
-          read_rack_input(body)
+          read_rack_input(body, media_type)
         ensure
           input.rewind if rewind
         end
       end
 
-      def read_rack_input(body)
+      def read_rack_input(body, media_type)
         return if body.empty?
-
-        media_type = rack_request.media_type
 
         # RFC 10008, Sections 2 and 2.1: a QUERY carries its query in the
         # content, so a request that never says what that content is cannot be
@@ -205,22 +217,15 @@ module Grape
       end
       private_constant :ForeignParserError
 
-      # this middleware will not try to format the following content-types since Rack already handles them
-      # when calling Rack's `params` function
-      # - application/x-www-form-urlencoded
-      # - multipart/form-data
-      # - multipart/related
-      # - multipart/mixed
-      def read_body_input?
-        # Read off the env rather than through Rack::Request's predicates: this
-        # is what decides the question for every request, and on the GET, HEAD
-        # and OPTIONS majority it is the only thing the formatter would have
-        # built a Rack::Request for.
+      # Whether the request carries a body at all, read off the env alone. Every
+      # request asks, and the ones answered no -- the GET, HEAD and OPTIONS
+      # majority, and a POST or DELETE with nothing in it -- are answered before
+      # CONTENT_TYPE is parsed or a Rack::Request is built. The env key is
+      # spelled out: on Rack 3, +Rack::CONTENT_LENGTH+ names the response header.
+      def body_given?
         return false unless BODY_CARRYING_METHODS.include?(env[Rack::REQUEST_METHOD])
-        return false if rack_request.form_data? && rack_request.content_type
-        return false if rack_request.parseable_data?
 
-        rack_request.content_length.to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
+        env['CONTENT_LENGTH'].to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
       end
 
       def negotiate_content_type
