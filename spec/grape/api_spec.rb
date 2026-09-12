@@ -1379,6 +1379,30 @@ describe Grape::API do
     end
   end
 
+  # .override_all_methods! redefines every method of the base instance on the
+  # class itself, so that calling one records a setup step to replay on each
+  # mounted instance. What it leaves out reaches the base instance through
+  # +delegate_missing_to+: the NON_OVERRIDABLE names, and anything defined
+  # after the class was created, since the list is taken when it is.
+  describe 'class methods answered by the base instance' do
+    it 'answers a name kept off the class' do
+      expect(subject.base_instance?).to be(true)
+      expect(subject.top_level_setting).to be(subject.base_instance.top_level_setting)
+    end
+
+    context 'when Grape::API::Instance gains a method after the class was created' do
+      after { Grape::API::Instance.singleton_class.remove_method(:added_by_a_plugin) }
+
+      it 'answers it too' do
+        api = Class.new(described_class)
+        Grape::API::Instance.singleton_class.define_method(:added_by_a_plugin) { :plugged }
+
+        expect(api).to respond_to(:added_by_a_plugin)
+        expect(api.added_by_a_plugin).to eq(:plugged)
+      end
+    end
+  end
+
   describe 'filters' do
     it 'adds a before filter' do
       subject.before { @foo = 'first'  }

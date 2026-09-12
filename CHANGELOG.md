@@ -14,6 +14,7 @@
 * [#2917](https://github.com/ruby-grape/grape/pull/2917): Read path captures out of the router's union match instead of re-running the route's pattern - [@ericproulx](https://github.com/ericproulx).
 * [#2921](https://github.com/ruby-grape/grape/pull/2921): Pin the router's request-time isolation regressions through requests instead of its instance variables - [@ericproulx](https://github.com/ericproulx).
 * [#2935](https://github.com/ruby-grape/grape/pull/2935): Return the elements of an Array params scope that are not a Hash from `declared` instead of raising - [@ericproulx](https://github.com/ericproulx).
+* [#2937](https://github.com/ruby-grape/grape/pull/2937): Forward the class methods kept off an API class to its base instance explicitly, and pin what `delegate_missing_to` still answers - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
