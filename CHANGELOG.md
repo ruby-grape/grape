@@ -20,6 +20,7 @@
 * [#2938](https://github.com/ruby-grape/grape/pull/2938): Correct code comments that no longer match the code - [@ericproulx](https://github.com/ericproulx).
 * [#2939](https://github.com/ruby-grape/grape/pull/2939): Speed up error responses, param defaults and deciding whether to read a request body - [@ericproulx](https://github.com/ericproulx).
 * [#2940](https://github.com/ruby-grape/grape/pull/2940): Speed up matching fully static routes - [@ericproulx](https://github.com/ericproulx).
+* [#2942](https://github.com/ruby-grape/grape/pull/2942): Route a path carrying raw non-ASCII bytes on an API with a non-ASCII route instead of raising `Encoding::CompatibilityError` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
