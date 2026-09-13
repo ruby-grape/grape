@@ -17,6 +17,7 @@
 * [#2937](https://github.com/ruby-grape/grape/pull/2937): Forward the class methods kept off an API class to its base instance explicitly, and pin what `delegate_missing_to` still answers - [@ericproulx](https://github.com/ericproulx).
 * [#2936](https://github.com/ruby-grape/grape/pull/2936): Speed up header versioning, content negotiation, params validation and error responses on the request path - [@ericproulx](https://github.com/ericproulx).
 * [#2938](https://github.com/ruby-grape/grape/pull/2938): Correct code comments that no longer match the code - [@ericproulx](https://github.com/ericproulx).
+* [#2940](https://github.com/ruby-grape/grape/pull/2940): Speed up matching fully static routes - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
@@ -1530,4 +1531,3 @@
 ### 0.1.0 (2010/11/13)
 
 * Initial public release - [@mbleigh](https://github.com/mbleigh).
-
