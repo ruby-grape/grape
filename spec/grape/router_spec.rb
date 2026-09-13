@@ -214,4 +214,60 @@ describe Grape::Router do
       expect(body['params']).to eq('name' => '123')
     end
   end
+
+  # Regression: Rack hands PATH_INFO over binary, and a binary string holding
+  # non-ASCII bytes raises when matched against a UTF-8 regexp. A route whose
+  # path holds a non-ASCII literal compiles to one, so on such an API every
+  # path carrying raw non-ASCII bytes raised instead of routing.
+  describe 'routing a binary path holding non-ASCII bytes' do
+    let(:app) do
+      Class.new(Grape::API) do
+        get('/café') { 'static non-ascii literal' }
+        get('/café/:id') { "non-ascii literal #{params[:id]}" }
+        get('/plain/:id') { "plain #{params[:id] == 'é'}" }
+      end
+    end
+
+    def request_path(path)
+      env = Rack::MockRequest.env_for('/')
+      env[Rack::PATH_INFO] = path.b
+      status, _, body = app.call(env)
+      buffer = +''
+      body.each { |chunk| buffer << chunk }
+      body.close if body.respond_to?(:close)
+      [status, buffer]
+    end
+
+    it 'routes a UTF-8 path to the route with a non-ASCII literal' do
+      expect(request_path('/café/42')).to eq([200, 'non-ascii literal 42'])
+    end
+
+    it 'routes a UTF-8 path to a route spelling out a non-ASCII literal in full' do
+      expect(request_path('/café')).to eq([200, 'static non-ascii literal'])
+    end
+
+    it 'routes a UTF-8 path to an ASCII route of the same API' do
+      expect(request_path('/plain/é')).to eq([200, 'plain true'])
+    end
+
+    it 'answers a path whose bytes are not UTF-8 as one no route matched' do
+      expect(request_path("/plain/\xFF").first).to eq(404)
+    end
+
+    it 'recognizes a UTF-8 path' do
+      expect(app.recognize_path('/café/42'.b)).to be_a(Grape::Endpoint)
+    end
+
+    context 'when no route holds a non-ASCII literal' do
+      let(:app) do
+        Class.new(Grape::API) do
+          get('/plain/:id') { "plain #{params[:id].valid_encoding?}" }
+        end
+      end
+
+      it 'still routes a path whose bytes are not UTF-8' do
+        expect(request_path("/plain/\xFF")).to eq([200, 'plain false'])
+      end
+    end
+  end
 end

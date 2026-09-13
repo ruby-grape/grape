@@ -39,6 +39,10 @@ module Grape
       @map.freeze
       @optimized_map.freeze
       @static_routes.freeze
+      # A route whose path holds a non-ASCII literal compiles to a UTF-8
+      # regexp, which raises when matched against a binary string holding
+      # non-ASCII bytes (see #utf8_path).
+      @utf8_patterns = @union.fixed_encoding? || @optimized_map.each_value.any? { |union, _| union.fixed_encoding? }
       @compiled = true
     end
 
@@ -53,16 +57,25 @@ module Grape
 
     def call(env)
       with_optimization do
+        input = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
+        if @utf8_patterns && !input.ascii_only?
+          input = utf8_path(input)
+          next unless input
+        end
+
         # Published on the env so the middleware the matched route runs -- the
         # path versioner above all -- reads the path this routed on instead of
         # normalizing PATH_INFO a second time.
-        input = env[Grape::Env::GRAPE_NORMALIZED_PATH] = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
+        env[Grape::Env::GRAPE_NORMALIZED_PATH] = input
         transaction(input, env[Rack::REQUEST_METHOD], env)
       end
     end
 
     def recognize_path(input)
-      any = with_optimization { greedy_match?(input) }
+      any = with_optimization do
+        input = utf8_path(input) if @utf8_patterns && !input.ascii_only?
+        greedy_match?(input) if input
+      end
       return if any == default_response
 
       any.endpoint
@@ -72,6 +85,22 @@ module Grape
     DEFAULT_RESPONSE_BODY = ['404 Not Found'].freeze
 
     private
+
+    # +path+ tagged UTF-8 when its bytes are UTF-8, or nil when they are not.
+    #
+    # Rack hands PATH_INFO over binary, and a binary string holding non-ASCII
+    # bytes raises Encoding::CompatibilityError when matched against a UTF-8
+    # regexp -- so once one route held a non-ASCII literal (`/café/:id`),
+    # every path carrying raw non-ASCII bytes raised, whichever route it was
+    # meant for. Tagged UTF-8, such a path routes the way its percent-encoded
+    # spelling does. Bytes that are not UTF-8 cannot be matched against these
+    # routes at all, so the router answers them as a path nothing matched.
+    #
+    # A copy, so PATH_INFO itself stays binary as Rack requires.
+    def utf8_path(path)
+      utf8 = String.new(path, encoding: Encoding::UTF_8)
+      utf8 if utf8.valid_encoding?
+    end
 
     # Resolve +input+ against the compiled routes, in priority order:
     #
