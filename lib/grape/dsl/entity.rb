@@ -85,6 +85,8 @@ module Grape
           return representations[potential] if potential && representations[potential]
         end
 
+        return unless klass.const_defined?(:Entity)
+
         owner = klass.ancestors.detect { |ancestor| ancestor != Object && ancestor.const_defined?(:Entity, false) }
         return unless owner
 
