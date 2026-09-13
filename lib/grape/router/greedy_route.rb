@@ -22,7 +22,7 @@ module Grape
         nil
       end
 
-      def params_for(_input, _match = nil)
+      def params_for(_input, _match = nil, _captures = nil)
         nil
       end
     end

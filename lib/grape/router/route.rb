@@ -53,13 +53,15 @@ module Grape
       #
       # +match+, when given, is the union MatchData the router matched this route
       # with; its groups already hold the substrings a second match would produce
-      # (see {BaseRoute#union_captures}). Mustermann percent-decodes a captured
-      # value containing '%', and none can unless the path does -- so a '%'-free
-      # path reads the groups, anything else the full match below.
-      def params_for(input, match = nil)
+      # (see {BaseRoute#union_captures}). +captures+ names those groups, since a
+      # route sits at one number in the router's union and at another in each
+      # bucket that holds it (see {BaseRoute#union_captures_at}); nil there means
+      # the match cannot stand in for Mustermann. Mustermann percent-decodes a
+      # captured value containing '%', and none can unless the path does -- so a
+      # '%'-free path reads the groups, anything else the full match below.
+      def params_for(input, match = nil, captures = union_captures)
         return unless pattern.captures?
 
-        captures = union_captures
         return params_from_union(captures, match) if match && captures && !input.include?('%')
 
         parsed = pattern.params(input)

@@ -72,6 +72,19 @@ module Grape
       # never at request time -- instances are shared across threads.
       attr_reader :union_captures
 
+      # {#union_captures} renumbered for a union in which this route's own
+      # group is +group+ -- one of a bucket's, say. Every capture sits at a
+      # fixed offset from the route's own group, so the whole map shifts by
+      # the same number. Nil when the route has no reusable captures.
+      def union_captures_at(group)
+        return if @union_captures.nil?
+
+        shift = group - @regexp_capture_group
+        return @union_captures if shift.zero?
+
+        @union_captures.transform_values { |capture| capture + shift }.freeze
+      end
+
       # @api private
       # @see #regexp_capture_group
       def resolve_capture_group!(union_named_captures)
