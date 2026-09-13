@@ -4,6 +4,7 @@
 
 * [#2914](https://github.com/ruby-grape/grape/pull/2914): Bench 4.0.0 in the version throughput benchmark - [@ericproulx](https://github.com/ericproulx).
 * [#2913](https://github.com/ruby-grape/grape/pull/2913): Bench ZJIT alongside YJIT in the version benchmark - [@ericproulx](https://github.com/ericproulx).
+* [#2941](https://github.com/ruby-grape/grape/pull/2941): Bench static, parameterized and many-route shapes in separate tables in the version throughput benchmark - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
