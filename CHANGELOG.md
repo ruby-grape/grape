@@ -18,6 +18,7 @@
 * [#2936](https://github.com/ruby-grape/grape/pull/2936): Speed up header versioning, content negotiation, params validation and error responses on the request path - [@ericproulx](https://github.com/ericproulx).
 * [#2938](https://github.com/ruby-grape/grape/pull/2938): Correct code comments that no longer match the code - [@ericproulx](https://github.com/ericproulx).
 * [#2939](https://github.com/ruby-grape/grape/pull/2939): Speed up error responses, param defaults and deciding whether to read a request body - [@ericproulx](https://github.com/ericproulx).
+* [#2940](https://github.com/ruby-grape/grape/pull/2940): Speed up matching fully static routes - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.0 (2026-09-07)
@@ -1531,4 +1532,3 @@
 ### 0.1.0 (2010/11/13)
 
 * Initial public release - [@mbleigh](https://github.com/mbleigh).
-

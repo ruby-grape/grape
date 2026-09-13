@@ -62,6 +62,55 @@ describe Grape::Router do
     end
   end
 
+  describe 'routing static paths' do
+    subject(:router) { described_class.new }
+
+    def append_route(endpoint, origin:, version: nil)
+      pattern = Grape::Router::Pattern.new(origin:, suffix: '', anchor: true, params: {}, version:, requirements: {})
+      router.append(Grape::Router::Route.new(endpoint, :get, pattern, {}, forward_match: false))
+    end
+
+    it 'preserves an earlier parameterized route and fresh captured values' do
+      captured_ids = []
+      dynamic_endpoint = lambda do |env|
+        id = env.fetch(Grape::Env::GRAPE_ROUTING_ARGS).fetch(:id)
+        captured_ids << id.dup
+        id << '!'
+        [200, {}, [id]]
+      end
+      append_route(dynamic_endpoint, origin: '/:id')
+      append_route(->(_env) { raise 'the parameterized route should match first' }, origin: '/status')
+      router.compile!
+
+      bodies = Array.new(2) do
+        status, _, body = router.call(Rack::MockRequest.env_for('/status'))
+        expect(status).to eq(200)
+
+        body.to_a.join
+      end
+
+      expect(bodies).to eq(%w[status! status!])
+      expect(captured_ids).to eq(%w[status status])
+    end
+
+    it 'routes every declared path version' do
+      versions = []
+      endpoint = lambda do |env|
+        versions << env.fetch(Grape::Env::GRAPE_ROUTING_ARGS).fetch(:version)
+        [200, {}, ['ok']]
+      end
+      append_route(endpoint, origin: '/:version/status', version: %w[v1 v2])
+      router.compile!
+
+      %w[v1 v2].each do |version|
+        status, = router.call(Rack::MockRequest.env_for("/#{version}/status"))
+        expect(status).to eq(200)
+      end
+
+      expect(versions).to eq(%w[v1 v2])
+    end
+  end
+
   # Regression: a cascading route used to hand straight over to the greedy
   # neighbour — the *last* route registered for the path — so any route
   # between the first match and that last one was unreachable.

@@ -6,10 +6,11 @@ module Grape
       @neutral_map = []
       @neutral_regexes = []
       # Plain hashes with no auto-vivifying default: a lookup for an HTTP method
-      # that has no routes must not insert a key. `compile!` freezes both maps,
+      # that has no routes must not insert a key. `compile!` freezes them all,
       # so request-time reads never mutate shared state (see #match? / #rotation).
       @map = {}
       @optimized_map = {}
+      @static_routes = {}
     end
 
     def compile!
@@ -26,10 +27,18 @@ module Grape
       # answered every request for it with 405.
       @map.each do |method, routes|
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
-        @optimized_map[method] = resolve_capture_groups(Regexp.union(optimized_map), routes)
+        union = resolve_capture_groups(Regexp.union(optimized_map), routes)
+        # Paired with the routes it was built from, so a match reads both
+        # through a single lookup.
+        @optimized_map[method] = [union, routes].freeze
+        # Left out when no route spells out a path in full, so a request for
+        # +method+ goes straight to the union rather than missing a lookup first.
+        static_routes = static_routes_for(union, routes)
+        @static_routes[method] = static_routes unless static_routes.empty?
       end
       @map.freeze
       @optimized_map.freeze
+      @static_routes.freeze
       @compiled = true
     end
 
@@ -77,13 +86,19 @@ module Grape
     # candidate has declined too, so the caller (or a mounting app upstream)
     # can keep looking.
     def transaction(input, method, env)
-      # Matched here rather than through #match? so the MatchData survives: the
-      # route's path captures are groups of it (see Route#params_for).
       exact_route = nil
       response = nil
-      @optimized_map[method]&.match(input) do |m|
-        exact_route = @map[method].detect { |route| m[route.regexp_capture_group] }
-        response = process_route(exact_route, input, env, m) if exact_route
+      if (static = @static_routes[method]&.[](input))
+        exact_route, captures = static
+        response = process_static_route(exact_route, captures, env)
+      else
+        # Matched here rather than through #match? so the MatchData survives: the
+        # route's path captures are groups of it (see Route#params_for).
+        union, routes = @optimized_map[method]
+        union&.match(input) do |m|
+          exact_route = routes.detect { |route| m[route.regexp_capture_group] }
+          response = process_route(exact_route, input, env, m) if exact_route
+        end
       end
       return response if halt?(response)
 
@@ -175,6 +190,59 @@ module Grape
       route.call(env)
     end
 
+    # {#process_route} for an entry of {#static_routes_for}. Its captures were
+    # read when the table was built; each request gets its own copy of each,
+    # the way it gets fresh strings out of a match.
+    def process_static_route(route, captures, env)
+      routing_args = captures ? captures.transform_values(&:dup) : {}
+      routing_args[:route_info] = route
+      env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
+      route.call(env)
+    end
+
+    # A request for a path a route spells out in full -- no param in it, its
+    # version filled in -- is answered from this table rather than by the
+    # union. The union tries its alternatives one after another, and finding
+    # which one matched scans every route ahead of it, so a request costs more
+    # the later its route was registered; a Hash lookup does not.
+    #
+    # Each path is resolved here the way a request for it is, through the
+    # union and the scan, so an entry holds whichever route answers it -- an
+    # earlier route with a param where the path has a segment included -- and
+    # the captures it hands over. Only paths worked out from the routes are
+    # keys, so a client cannot grow the table, and a path that is not in it,
+    # or whose captures are not all plain Strings, is matched as before.
+    def static_routes_for(union, routes)
+      routes.each_with_object({}) do |route, table|
+        static_paths(route).each do |path|
+          next if table.key?(path)
+
+          union.match(path) do |m|
+            matched = routes.detect { |candidate| m[candidate.regexp_capture_group] }
+            captures = matched&.params_for(path, m)
+            next unless matched && (captures.nil? || captures.each_value.all?(String))
+
+            table[path] = [matched, captures.presence&.each_value(&:freeze)&.freeze].freeze
+          end
+        end
+      end.freeze
+    end
+
+    STATIC_PATH_EXCLUDED = /[:*?(){}|\\%]/
+    private_constant :STATIC_PATH_EXCLUDED
+
+    # The request paths +route+ spells out in full: its origin, with each
+    # version it declares filled in under path versioning. A path still
+    # holding pattern syntax or a '%', or one the normalizer would rewrite, is
+    # left out, since no request routes on it spelled that way. This only
+    # picks the paths worth resolving; what answers them is up to the union.
+    def static_paths(route)
+      origin = route.origin
+      version_segment = Grape::Router::Pattern::Path::VERSION_SEGMENT
+      paths = origin.include?(version_segment) ? Array(route.version).map { |version| origin.sub(version_segment, version.to_s) } : [origin]
+      paths.select { |path| !path.match?(STATIC_PATH_EXCLUDED) && Grape::Util::PathNormalizer.call(path) == path }
+    end
+
     # Tells each route the number of the group it ended up as in +union+. The
     # numbering is a property of the union rather than of the route's own
     # pattern -- every route ahead of it contributes however many groups its
@@ -201,7 +269,8 @@ module Grape
     # name sends MatchData through the pattern's name table on every lookup,
     # a number indexes the match region directly.
     def match?(input, method)
-      @optimized_map[method]&.match(input) { |m| @map[method].detect { |route| m[route.regexp_capture_group] } }
+      union, routes = @optimized_map[method]
+      union&.match(input) { |m| routes.detect { |route| m[route.regexp_capture_group] } }
     end
 
     def greedy_match?(input)
