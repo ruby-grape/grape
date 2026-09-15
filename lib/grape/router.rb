@@ -18,6 +18,9 @@ module Grape
 
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
       @neutral_regexes = nil
+      # Shared by the methods below: HEAD's routes mirror GET's, so their
+      # buckets compile to the same unions.
+      bucket_unions = {}
       # Compiled from the routes actually registered rather than from
       # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
       # (`route :purge, '/cache'`) is accepted at definition time and is
@@ -29,8 +32,9 @@ module Grape
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         union = resolve_capture_groups(Regexp.union(optimized_map), routes)
         # Paired with the routes it was built from, so a match reads both
-        # through a single lookup.
-        @optimized_map[method] = [union, routes].freeze
+        # through a single lookup, and with the buckets that narrow those
+        # routes by a path segment (nil when no segment splits them well).
+        @optimized_map[method] = [union, routes, RouteBuckets.build(routes, optimized_map, bucket_unions)].freeze
         # Left out when no route spells out a path in full, so a request for
         # +method+ goes straight to the union rather than missing a lookup first.
         static_routes = static_routes_for(union, routes)
@@ -121,12 +125,20 @@ module Grape
         exact_route, captures = static
         response = process_static_route(exact_route, captures, env)
       else
-        # Matched here rather than through #match? so the MatchData survives: the
-        # route's path captures are groups of it (see Route#params_for).
-        union, routes = @optimized_map[method]
-        union&.match(input) do |m|
-          exact_route = routes.detect { |route| m[route.regexp_capture_group] }
-          response = process_route(exact_route, input, env, m) if exact_route
+        union, routes, buckets = @optimized_map[method]
+        if (bucket = buckets&.bucket_for(input))
+          # A bucket numbers its groups its own way, while a route's captures
+          # are numbered for the full union, so the route reads them off its
+          # own pattern.
+          exact_route = bucket.match(input)
+          response = process_route(exact_route, input, env) if exact_route
+        else
+          # Matched here rather than through #match? so the MatchData survives: the
+          # route's path captures are groups of it (see Route#params_for).
+          union&.match(input) do |m|
+            exact_route = routes.detect { |route| m[route.regexp_capture_group] }
+            response = process_route(exact_route, input, env, m) if exact_route
+          end
         end
       end
       return response if halt?(response)
