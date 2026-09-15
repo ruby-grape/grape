@@ -10,8 +10,9 @@ module Grape
     # Class methods that we want to call on the API rather than on the API object.
     # +inherit_settings+ is protected on the base instance, and +.methods+ answers
     # protected methods too, so it has to be named here for {.override_all_methods!}
-    # to leave it alone.
-    NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
+    # to leave it alone. +base+ is read on the API class itself whenever a mount
+    # is refreshed, so recording it would refresh every mount below it again.
+    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
@@ -48,7 +49,7 @@ module Grape
       # +inherit_settings+ is left out: it is protected on the base instance, so
       # a delegator would raise NoMethodError just as the missing one does.
       def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes,
-                     :base=, :base_instance?, :reset!, :top_level_setting
+                     :base, :base=, :base_instance?, :reset!, :top_level_setting
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
