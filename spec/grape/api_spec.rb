@@ -4136,6 +4136,17 @@ describe Grape::API do
         expect { subject.mount app => '/thing' }
           .to change { subject.endpoints.count }.by(1)
       end
+
+      # Matching a mount reads the base of the API it names; recorded as a setup
+      # step, that read refreshed every mount below it again (#2945).
+      it 'does not record a setup step on an API mounted below the refreshed mount' do
+        middle = Class.new(described_class)
+        middle.mount app => '/thing'
+        subject.mount middle => '/middle'
+
+        expect(app).not_to receive(:add_setup)
+        subject.format :json
+      end
     end
 
     context 'when mount is passed refresh_already_mounted' do
