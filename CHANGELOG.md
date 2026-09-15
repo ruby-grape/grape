@@ -21,8 +21,13 @@
 * [#2939](https://github.com/ruby-grape/grape/pull/2939): Speed up error responses, param defaults and deciding whether to read a request body - [@ericproulx](https://github.com/ericproulx).
 * [#2940](https://github.com/ruby-grape/grape/pull/2940): Speed up matching fully static routes - [@ericproulx](https://github.com/ericproulx).
 * [#2942](https://github.com/ruby-grape/grape/pull/2942): Route a path carrying raw non-ASCII bytes on an API with a non-ASCII route instead of raising `Encoding::CompatibilityError` - [@ericproulx](https://github.com/ericproulx).
-* [#2946](https://github.com/ruby-grape/grape/pull/2946): Stop reading a class-level setting on an API with nested mounts from remounting the whole mount tree - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
+
+### 4.0.1 (2026-09-15)
+
+#### Fixes
+
+* [#2946](https://github.com/ruby-grape/grape/pull/2946): Stop reading a class-level setting on an API with nested mounts from remounting the whole mount tree - [@ericproulx](https://github.com/ericproulx).
 
 ### 4.0.0 (2026-09-07)
 
