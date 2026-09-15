@@ -8,7 +8,7 @@ module Grape
     extend Grape::Mountable
 
     # Class methods that we want to call on the API rather than on the API object
-    NON_OVERRIDABLE = %i[base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting= top_level_setting].freeze
+    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting= top_level_setting].freeze
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
@@ -35,7 +35,11 @@ module Grape
       # the headers, and the body. See [the rack specification]
       # (https://github.com/rack/rack/blob/main/SPEC.rdoc) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
-      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes
+      #
+      # +inherit_settings+ is left out: it is protected on the base instance, so
+      # a delegator would raise NoMethodError just as the missing one does.
+      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes,
+                     :base, :base=, :base_instance?, :reset!, :top_level_setting
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
