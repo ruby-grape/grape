@@ -1,28 +1,8 @@
-### 4.1.0 (Next)
-
-#### Features
-
-* [#2914](https://github.com/ruby-grape/grape/pull/2914): Bench 4.0.0 in the version throughput benchmark - [@ericproulx](https://github.com/ericproulx).
-* [#2913](https://github.com/ruby-grape/grape/pull/2913): Bench ZJIT alongside YJIT in the version benchmark - [@ericproulx](https://github.com/ericproulx).
-* [#2941](https://github.com/ruby-grape/grape/pull/2941): Bench static, parameterized and many-route shapes in separate tables in the version throughput benchmark - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
+### 4.0.1 (2026-09-15)
 
 #### Fixes
 
-* [#2916](https://github.com/ruby-grape/grape/pull/2916): Pin `json` below 3 in the gemfiles whose dependencies cannot use it - [@ericproulx](https://github.com/ericproulx).
-* [#2915](https://github.com/ruby-grape/grape/pull/2915): Update rubocop to 1.90.0 and rubocop-performance to 1.27.0 - [@ericproulx](https://github.com/ericproulx).
-* [#2918](https://github.com/ruby-grape/grape/pull/2918): Skip the dry-types round trip when a value already is the declared type - [@ericproulx](https://github.com/ericproulx).
-* [#2917](https://github.com/ruby-grape/grape/pull/2917): Read path captures out of the router's union match instead of re-running the route's pattern - [@ericproulx](https://github.com/ericproulx).
-* [#2921](https://github.com/ruby-grape/grape/pull/2921): Pin the router's request-time isolation regressions through requests instead of its instance variables - [@ericproulx](https://github.com/ericproulx).
-* [#2935](https://github.com/ruby-grape/grape/pull/2935): Return the elements of an Array params scope that are not a Hash from `declared` instead of raising - [@ericproulx](https://github.com/ericproulx).
-* [#2937](https://github.com/ruby-grape/grape/pull/2937): Forward the class methods kept off an API class to its base instance explicitly, and pin what `delegate_missing_to` still answers - [@ericproulx](https://github.com/ericproulx).
-* [#2936](https://github.com/ruby-grape/grape/pull/2936): Speed up header versioning, content negotiation, params validation and error responses on the request path - [@ericproulx](https://github.com/ericproulx).
-* [#2938](https://github.com/ruby-grape/grape/pull/2938): Correct code comments that no longer match the code - [@ericproulx](https://github.com/ericproulx).
-* [#2939](https://github.com/ruby-grape/grape/pull/2939): Speed up error responses, param defaults and deciding whether to read a request body - [@ericproulx](https://github.com/ericproulx).
-* [#2940](https://github.com/ruby-grape/grape/pull/2940): Speed up matching fully static routes - [@ericproulx](https://github.com/ericproulx).
-* [#2942](https://github.com/ruby-grape/grape/pull/2942): Route a path carrying raw non-ASCII bytes on an API with a non-ASCII route instead of raising `Encoding::CompatibilityError` - [@ericproulx](https://github.com/ericproulx).
 * [#2946](https://github.com/ruby-grape/grape/pull/2946): Stop reading a class-level setting on an API with nested mounts from remounting the whole mount tree - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 4.0.0 (2026-09-07)
 
