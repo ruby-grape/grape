@@ -37,7 +37,7 @@ module Grape
           unless presenter || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
             # env['api.endpoint'].route does not work when the error occurs within a middleware
             # the Endpoint does not have a valid env at this moment
-            http_codes = env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info].http_codes || []
+            http_codes = env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info].failure || []
             found_code = http_codes.find do |http_code|
               (http_code[0].to_i == env[Grape::Env::API_ENDPOINT].status) && http_code[2].respond_to?(:represent)
             end if env[Grape::Env::API_ENDPOINT].request
