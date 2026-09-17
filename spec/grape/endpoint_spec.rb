@@ -627,6 +627,42 @@ describe Grape::Endpoint do
 
       expect(memoized_endpoint.status).to eq(403)
     end
+
+    # `desc` keeps a keyword option under the name it was written with, so
+    # `failure:` is stored as such while the block form records `http_codes`.
+    context 'when the description names a presenter for the status' do
+      let(:presenter) do
+        Class.new do
+          def self.represent(object, _options = {})
+            new(object)
+          end
+
+          def initialize(object)
+            @object = object
+          end
+
+          def serializable_hash
+            { presented: @object[:code] }
+          end
+        end
+      end
+
+      {
+        'the http_codes keyword' => ->(api, codes) { api.desc 'hey', http_codes: codes },
+        'the failure keyword' => ->(api, codes) { api.desc 'hey', failure: codes },
+        'the failure block method' => ->(api, codes) { api.desc('hey') { failure codes } }
+      }.each do |spelling, describe_with|
+        it "presents the error with the presenter given through #{spelling}" do
+          subject.format :json
+          describe_with.call(subject, [[408, 'Request Timeout', presenter]])
+          subject.get('/hey') { error!({ code: 408 }, 408) }
+
+          get '/hey'
+          expect(last_response.status).to eq(408)
+          expect(last_response.body).to eq('{"presented":408}')
+        end
+      end
+    end
   end
 
   describe '#redirect' do

@@ -449,6 +449,22 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       end
     end
 
+    context 'when using failure' do
+      let(:app) do
+        Class.new(Grape::API) do
+          desc 'some desc', failure: [[408, 'Unauthorized', ErrorPresenter]]
+          get '/exception' do
+            error!({ code: 408 }, 408)
+          end
+        end
+      end
+
+      it 'is used as presenter' do
+        expect(subject).to be_request_timeout
+        expect(subject.body).to eql({ code: 408, static: 'some static text' }.to_json)
+      end
+    end
+
     context 'when using with' do
       let(:app) do
         Class.new(Grape::API) do
