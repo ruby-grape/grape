@@ -20,6 +20,9 @@ module Grape
       return if @compiled
 
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
+      # Shared by the methods below: HEAD's routes mirror GET's, so their
+      # buckets compile to the same unions.
+      bucket_unions = {}
       # Compiled from the routes actually registered rather than from
       # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
       # (`route :purge, '/cache'`) is accepted at definition time and is
@@ -31,8 +34,9 @@ module Grape
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         union = resolve_capture_groups(Regexp.union(optimized_map), routes)
         # Paired with the routes it was built from, so a match reads both
-        # through a single lookup.
-        @optimized_map[method] = [union, routes].freeze
+        # through a single lookup, and with the buckets that narrow those
+        # routes by a path segment (nil when no segment splits them well).
+        @optimized_map[method] = [union, routes, RouteBuckets.build(routes, optimized_map, bucket_unions)].freeze
         # Left out when no route spells out a path in full, so a request for
         # +method+ goes straight to the union rather than missing a lookup first.
         static_routes = static_routes_for(union, routes)
@@ -126,12 +130,21 @@ module Grape
         exact_route, captures = static
         response = process_static_route(exact_route, captures, env)
       else
-        # Matched here rather than through #match? so the MatchData survives: the
-        # route's path captures are groups of it (see Route#params_for).
-        union, routes = @optimized_map[method]
-        union&.match(input) do |m|
-          exact_route = routes.detect { |route| m[route.regexp_capture_group] }
-          response = process_route(exact_route, input, env, m) if exact_route
+        union, routes, buckets = @optimized_map[method]
+        if (bucket = buckets&.bucket_for(input))
+          # A bucket numbers its groups its own way, so it hands over the
+          # captures numbered for its own union along with the match.
+          bucket.match(input) do |route, m, captures|
+            exact_route = route
+            response = process_route(route, input, env, m, captures)
+          end
+        else
+          # Matched here rather than through #match? so the MatchData survives: the
+          # route's path captures are groups of it (see Route#params_for).
+          union&.match(input) do |m|
+            exact_route = routes.detect { |route| m[route.regexp_capture_group] }
+            response = process_route(exact_route, input, env, m, exact_route.union_captures) if exact_route
+          end
         end
       end
       return response if halt?(response)
@@ -216,10 +229,12 @@ module Grape
     # Routing args are rebuilt for every attempt: when a route cascades
     # (X-Cascade pass), the next candidate must not observe the previous
     # attempt's +route_info+ or path captures.
-    def process_route(route, input, env, match = nil, include_allow_header: false)
+    def process_route(route, input, env, match = nil, captures = nil, include_allow_header: false)
       # The path captures are the hash: +route_info+ is written into them
-      # rather than merged in from a second one.
-      routing_args = route.params_for(input, match) || {}
+      # rather than merged in from a second one. +captures+ names the groups of
+      # +match+ that hold them: the router's union numbers them one way, a
+      # bucket's another.
+      routing_args = route.params_for(input, match, captures) || {}
       routing_args[:route_info] = route
       env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
       env[Grape::Env::GRAPE_ALLOWED_METHODS] = route.allow_header if include_allow_header
@@ -230,7 +245,7 @@ module Grape
     # read when the table was built; each request gets its own copy of each,
     # the way it gets fresh strings out of a match.
     def process_static_route(route, captures, env)
-      routing_args = captures ? captures.transform_values(&:dup) : {}
+      routing_args = captures&.transform_values(&:dup) || {}
       routing_args[:route_info] = route
       env[Grape::Env::GRAPE_ROUTING_ARGS] = routing_args
       route.call(env)
