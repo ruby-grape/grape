@@ -118,11 +118,17 @@ module Grape
       type = route_params.dig(key, :type)
       return yield if type.nil?
 
-      return {} if type == 'Hash' && route_params.keys.none? { |k| k != key && k.start_with?("#{key}[") }
+      return {} if type == 'Hash' && no_child_params?(route_params, "#{key}[")
       return [] if type == 'Array' || (type.start_with?('[') && !type.include?(','))
       return Set.new if type == 'Set' || type.start_with?('#<Set', 'Set')
 
       yield
+    end
+
+    # The prefix is built once by the caller: interpolated inside the block, it
+    # was a new String for every param on the route.
+    def no_child_params?(route_params, prefix)
+      route_params.keys.none? { |k| k.start_with?(prefix) }
     end
   end
 end
