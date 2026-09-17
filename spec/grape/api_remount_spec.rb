@@ -373,6 +373,32 @@ describe Grape::API do
         end
       end
 
+      context 'when the configuration is nested' do
+        subject(:a_remounted_api) do
+          Class.new(described_class) do
+            get configuration[:db][:path] do
+              "#{configuration[:db][:host]} #{configuration[:hosts][0]}"
+            end
+          end
+        end
+
+        it 'reads a key nested in a Hash and in an Array' do
+          root_api.mount a_remounted_api, with: { db: { path: 'votes', host: 'localhost' }, hosts: %w[a b] }
+          get '/votes'
+          expect(last_response.body).to eq 'localhost a'
+        end
+
+        it 'reads a different value on every mount' do
+          root_api.mount({ a_remounted_api => 'first' }, with: { db: { path: 'votes', host: 'localhost' }, hosts: %w[a b] })
+          root_api.mount({ a_remounted_api => 'second' }, with: { db: { path: 'scores', host: 'example.com' }, hosts: %w[x y] })
+
+          get '/first/votes'
+          expect(last_response.body).to eq 'localhost a'
+          get '/second/scores'
+          expect(last_response.body).to eq 'example.com x'
+        end
+      end
+
       context 'when the configuration is read within a namespace' do
         before do
           a_remounted_api.namespace 'api' do

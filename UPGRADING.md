@@ -15,6 +15,26 @@ env['api.version'] << '-beta'
 env['api.version'] = "#{env['api.version']}-beta"
 ```
 
+#### `Grape::Util::Lazy` no longer builds a tree of value wrappers
+
+A configuration read is now a single `Grape::Util::Lazy::Value` holding the configuration it was read from and the path of keys walked into it, rather than a node in a tree mirroring the whole `with:` Hash ([#2950](https://github.com/ruby-grape/grape/pull/2950)). `Grape::Util::Lazy::ValueHash`, `Grape::Util::Lazy::ValueArray` and `Grape::Util::Lazy::ValueEnumerable` are gone, as are `Value#reached_by` and `Value#fetch`; `Value#access_keys` is now `Value#path`. The `configuration` DSL is unchanged — only code reaching into these internals is affected.
+
+`Grape::Util::EndpointConfiguration#evaluate` also answers the configuration Hash itself now, instead of rebuilding a copy on each call. Mutating what `configuration` returns inside an endpoint therefore persists for later requests, where it used to be discarded:
+
+```ruby
+# Before: mutated a throwaway copy
+# After: mutates the configuration every later request reads
+get '/x' do
+  configuration[:list] << 'item'
+end
+
+# Treat it as read-only, or copy it first
+get '/x' do
+  list = configuration[:list].dup
+  list << 'item'
+end
+```
+
 ### Upgrading to >= 4.0.0
 
 #### A positional options Hash is no longer accepted by `auth`, `http_basic` or `desc`
