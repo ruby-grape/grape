@@ -82,4 +82,23 @@ describe Grape::Middleware::Versioner::Path do
       expect(subject.call(Rack::PATH_INFO => '/awesome').last).to be_nil
     end
   end
+
+  context 'when the router matched the request' do
+    let(:options) { { versions: %w[v1 v2] } }
+    let(:env) { { Rack::PATH_INFO => '/v1/awesome', Grape::Env::GRAPE_ROUTING_ARGS => { version: 'v2' } } }
+
+    it 'sets the version the route captured' do
+      expect(subject.call(env).last).to eq('v2')
+    end
+
+    context 'when the app answers with a Rack::Response' do
+      let(:app) { ->(env) { Rack::Response.new([env[Grape::Env::API_VERSION]], 200) } }
+
+      it 'answers with a Rack response triplet' do
+        status, _, body = subject.call(env)
+        expect(status).to eq(200)
+        expect(body.to_a).to eq(['v2'])
+      end
+    end
+  end
 end

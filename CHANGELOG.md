@@ -23,6 +23,7 @@
 * [#2942](https://github.com/ruby-grape/grape/pull/2942): Route a path carrying raw non-ASCII bytes on an API with a non-ASCII route instead of raising `Encoding::CompatibilityError` - [@ericproulx](https://github.com/ericproulx).
 * [#2920](https://github.com/ruby-grape/grape/pull/2920): Look for a 405 neighbour only on paths the request's method has no route on - [@ericproulx](https://github.com/ericproulx).
 * [#2943](https://github.com/ruby-grape/grape/pull/2943): Speed up matching among many parameterized routes - [@ericproulx](https://github.com/ericproulx).
+* [#2948](https://github.com/ruby-grape/grape/pull/2948): Speed up path-versioned requests and error responses - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

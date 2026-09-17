@@ -21,8 +21,20 @@ module Grape
           @prefixes = [mount_path, Grape::Util::PathNormalizer.call(prefix)].select { |p| p.present? && p != '/' }.freeze
         end
 
+        # A request the router matched carries its version already (see
+        # #routed_version), so all there is to do is record it -- without the
+        # per-request copy of this middleware that Base#call makes to run
+        # #before and #after, neither of which has anything left to do.
+        def call(env)
+          routed = routed_version(env)
+          return super unless routed
+
+          env[Grape::Env::API_VERSION] = routed
+          app.call(env).to_a
+        end
+
         def before
-          routed = routed_version
+          routed = routed_version(env)
           return env[Grape::Env::API_VERSION] = routed if routed
 
           path_info = env[Grape::Env::GRAPE_NORMALIZED_PATH] || Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
@@ -55,7 +67,7 @@ module Grape
         # versioning one: Mustermann then reports the capture as every position
         # it matched rather than the single segment recorded here, so that too
         # is left to the path parse.
-        def routed_version
+        def routed_version(env)
           version = env[Grape::Env::GRAPE_ROUTING_ARGS]&.[](:version)
           version if version.is_a?(String)
         end
