@@ -25,6 +25,7 @@
 * [#2943](https://github.com/ruby-grape/grape/pull/2943): Speed up matching among many parameterized routes - [@ericproulx](https://github.com/ericproulx).
 * [#2948](https://github.com/ruby-grape/grape/pull/2948): Speed up path-versioned requests and error responses - [@ericproulx](https://github.com/ericproulx).
 * [#2949](https://github.com/ruby-grape/grape/pull/2949): Present an error response with the entity a `desc` `failure:` keyword names - [@ericproulx](https://github.com/ericproulx).
+* [#2947](https://github.com/ruby-grape/grape/pull/2947): Speed up `declared` filling in a missing Hash param - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

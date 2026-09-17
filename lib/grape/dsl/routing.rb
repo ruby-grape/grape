@@ -247,7 +247,7 @@ module Grape
 
       # An array of API routes.
       def routes
-        @routes ||= endpoints.map(&:routes).flatten
+        @routes ||= endpoints.flat_map(&:routes)
       end
 
       # This method allows you to quickly define a parameter route segment

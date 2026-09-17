@@ -360,7 +360,7 @@ module Grape
     def prepare_routes_requirements(route_options_requirements)
       namespace_requirements = inheritable_setting.namespace_requirements
       namespace_requirements << route_options_requirements if route_options_requirements.present?
-      namespace_requirements.reduce({}, :merge)
+      {}.merge!(*namespace_requirements)
     end
 
     def prepare_version(namespace_inheritable_version)
