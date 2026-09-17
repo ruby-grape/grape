@@ -49,7 +49,10 @@ module Grape
       # @param object [Object] the object to locate the Entity class for
       # @return [Class] the located Entity class, or nil if none is found
       def entity_class_for_obj(object)
-        entity_for_class(object.class) || entity_for_class(element_class(object))
+        # Read once for both lookups: it walks every scope up to the API's root,
+        # and any object that answers #first (a Hash among them) needs both.
+        representations = inheritable_setting.representations
+        entity_for_class(object.class, representations) || entity_for_class(element_class(object), representations)
       end
 
       private
@@ -75,11 +78,11 @@ module Grape
       end
 
       # @param klass [Class, nil] the class to look an entity up for.
+      # @param representations [Hash, nil] the +represent+ registrations in scope.
       # @return [Class, nil] the registered or conventionally named entity.
-      def entity_for_class(klass)
+      def entity_for_class(klass, representations)
         return if klass.nil?
 
-        representations = inheritable_setting.representations
         if representations
           potential = klass.ancestors.detect { |ancestor| representations.key?(ancestor) }
           return representations[potential] if potential && representations[potential]

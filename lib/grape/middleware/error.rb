@@ -57,9 +57,19 @@ module Grape
       FAILSAFE_MESSAGE = '500 Internal Server Error'
       FAILSAFE_CONTENT_TYPE = 'text/plain'
 
+      # Whether the app answered is recorded rather than returned from inside
+      # the +catch+ block: a +return+ there leaves the method through Kernel#catch,
+      # which unwinds like a throw and allocates for it, on every request that
+      # did not fail.
       def call!(env)
         @env = env
-        error_response(catch(:error) { return @app.call(@env) })
+        answered = false
+        response = catch(:error) do
+          app_response = @app.call(@env)
+          answered = true
+          app_response
+        end
+        answered ? response : error_response(response)
       rescue Exception => e # rubocop:disable Lint/RescueException
         run_rescue_handler(find_handler(e.class), e, @env[Grape::Env::API_ENDPOINT])
       end
