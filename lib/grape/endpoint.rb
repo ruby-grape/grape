@@ -32,6 +32,13 @@ module Grape
       config.app
     end
 
+    # The paths this endpoint was declared at, relative to its {#namespace},
+    # as an Array: the paths given to +route+, or for a mount the path
+    # {#mounted_app} was mounted at.
+    def path
+      config.path
+    end
+
     class << self
       def block_to_unbound_method(block)
         return unless block
