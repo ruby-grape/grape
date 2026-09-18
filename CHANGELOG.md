@@ -33,6 +33,7 @@
 * [#2954](https://github.com/ruby-grape/grape/pull/2954): Answer a `DELETE` whose body holds bytes invalid in its encoding with `200` instead of raising `ArgumentError` - [@ericproulx](https://github.com/ericproulx).
 * [#2956](https://github.com/ruby-grape/grape/pull/2956): Keep every mount of an API mounted more than once when a later declaration refreshes the mounts - [@ericproulx](https://github.com/ericproulx).
 * [#2958](https://github.com/ruby-grape/grape/pull/2958): Answer a `HEAD` request for a path no route matches without a body - [@ericproulx](https://github.com/ericproulx).
+* [#2953](https://github.com/ruby-grape/grape/pull/2953): Answer an `error!` String message with its own status instead of a `500` when the route names a `failure` entity for that status - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
