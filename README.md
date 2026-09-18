@@ -508,7 +508,7 @@ version 'v1', using: :param, parameter: 'v'
 
 ## Linting
 
-You can check whether your API is in conformance with the [Rack's specification](https://github.com/rack/rack/blob/main/SPEC.rdoc) by calling `lint!` at the API level or through [configuration](#configuration).
+You can check whether your API is in conformance with the [Rack's specification](https://github.com/rack/rack/blob/main/SPEC.rdoc) by calling `lint!` at the top level of the API you serve, or through [configuration](#configuration). Every response the API gives is then checked once with `Rack::Lint`, including the 404 for a path no route matches and the responses of Rack apps mounted with `mount`. A `lint!` inside a namespace, or in an API mounted into another one, has no effect.
 
 ```ruby
 class Api < Grape::API

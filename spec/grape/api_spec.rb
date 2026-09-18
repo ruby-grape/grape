@@ -336,7 +336,7 @@ describe Grape::API do
     context 'it does not add to the app setup' do
       it 'calls the app' do
         expect(subject).not_to receive(:add_setup)
-        subject.call({})
+        subject.call(Rack::MockRequest.env_for('/'))
       end
     end
   end
@@ -5409,6 +5409,51 @@ describe Grape::API do
     it 'raises a Rack::Lint error' do
       # Status must be an Integer >= 100
       expect { get '/' }.to raise_error(Rack::Lint::LintError)
+    end
+
+    # A path nothing matches is answered by the router itself. Rack::Lint
+    # checks the request as well as the response, and a PATH_INFO without its
+    # leading slash is one the router still routes.
+    it 'raises a Rack::Lint error for a request to a path nothing matches' do
+      env = Rack::MockRequest.env_for('/')
+      env[Rack::PATH_INFO] = 'nothing'
+      expect { app.call(env) }.to raise_error(Rack::Lint::LintError)
+    end
+
+    it 'answers HEAD to a path nothing matches' do
+      head '/nothing'
+      expect(last_response.status).to eq(404)
+    end
+
+    context 'with a Rack app mounted' do
+      let(:app) do
+        Class.new(described_class) do
+          lint!
+          mount ->(_env) { [42, {}, ['mounted']] } => '/rack'
+        end
+      end
+
+      # The router calls a mounted Rack app directly, through no endpoint's
+      # stack.
+      it 'raises a Rack::Lint error' do
+        expect { get '/rack' }.to raise_error(Rack::Lint::LintError)
+      end
+    end
+
+    context 'with a Grape API mounted' do
+      let(:app) do
+        mounted = Class.new(described_class) do
+          get('/bad') { status 42 }
+        end
+        Class.new(described_class) do
+          lint!
+          mount mounted => '/mounted'
+        end
+      end
+
+      it 'raises a Rack::Lint error for an endpoint of the mounted API' do
+        expect { get '/mounted/bad' }.to raise_error(Rack::Lint::LintError)
+      end
     end
   end
 

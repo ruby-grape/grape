@@ -3,6 +3,22 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `lint!` checks every response once, from the API that is served
+
+`lint!` and `Grape.config.lint` used to put `Rack::Lint` in each endpoint's stack, which missed two kinds of response: the 404 the router answers for a path nothing matches, and those of a Rack app mounted with `mount`, which the router calls directly. A single `Rack::Lint` around the router now checks every response the API gives ([#2960](https://github.com/ruby-grape/grape/pull/2960)). Two things follow from that.
+
+`lint!` counts only at the top level of the API that is served. Declared inside a namespace, or in an API mounted into another one, it no longer does anything: declare it on the API you serve, or set `Grape.config.lint`.
+
+A test suite that lints its API may start raising `Rack::Lint::LintError` where a mounted Rack app breaks the Rack SPEC — returning a frozen headers Hash, for instance — or where a spec calls the API with an incomplete env:
+
+```ruby
+# Before: passed under Grape.config.lint
+MyAPI.call({})
+
+# After
+MyAPI.call(Rack::MockRequest.env_for('/'))
+```
+
 #### The header versioner's `api.*` env values are frozen
 
 `version ..., using: :header` now answers the Accept headers most requests send from a table built once, so every request sending the same header is handed the same parsed media type ([#2936](https://github.com/ruby-grape/grape/pull/2936)). The strings it writes into the env — `api.type`, `api.subtype`, `api.vendor`, `api.version` and `api.format` — are therefore frozen, as is `Grape::Util::MediaType` itself. Code that altered one of them in place now raises `FrozenError`; build a new String instead:
