@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A collection with multiple member types rejects what it cannot coerce
+
+A param declared as a collection whose members may be of several types — `type: Array[Integer, String]`, or such a collection listed in `types:` — is now validated the way a collection of one type is ([#2955](https://github.com/ruby-grape/grape/pull/2955)). A value that is not an Array, and an Array holding a member none of the types accepts, answer `400` with `is invalid`. The first used to reach the endpoint as `nil`, even under `requires`, and the second with an internal `Grape::Validations::Types::InvalidValue` object where the member was. A `nil` value or an empty String is still `nil`.
+
+A `coerce_with` method given to such a param is now handed every value, as it is for `types:`, instead of only an Array. A method that splits a String into the collection works now; one that only ever expected an Array may raise on a String, which answers `400`.
+
 #### A route's failure entity no longer presents a String error message
 
 An entity named for a status in a route's `failure` (or `http_codes`) is now applied to a structured `error!` message only — a Hash or an object — and a String message renders as it does without one ([#2953](https://github.com/ruby-grape/grape/pull/2953)). An entity exposing attributes cannot read any off a String, so `error!('Unauthorized', 401)` under `desc failure: [[401, 'Unauthorized', API::Error]]` raised while rendering and was answered with a `500`; it now answers `401` with the message. An entity written to take the String itself is no longer handed one; give it a Hash to expose from instead:
@@ -20,7 +26,6 @@ class API::Error < Grape::Entity
 end
 error!({ message: 'Unauthorized' }, 401)
 ```
-
 #### `lint!` checks every response once, from the API that is served
 
 `lint!` and `Grape.config.lint` used to put `Rack::Lint` in each endpoint's stack, which missed two kinds of response: the 404 the router answers for a path nothing matches, and those of a Rack app mounted with `mount`, which the router calls directly. A single `Rack::Lint` around the router now checks every response the API gives ([#2960](https://github.com/ruby-grape/grape/pull/2960)). Two things follow from that.
@@ -35,6 +40,7 @@ MyAPI.call({})
 
 # After
 MyAPI.call(Rack::MockRequest.env_for('/'))
+```
 #### The header versioner's `api.*` env values are frozen
 
 `version ..., using: :header` now answers the Accept headers most requests send from a table built once, so every request sending the same header is handed the same parsed media type ([#2936](https://github.com/ruby-grape/grape/pull/2936)). The strings it writes into the env — `api.type`, `api.subtype`, `api.vendor`, `api.version` and `api.format` — are therefore frozen, as is `Grape::Util::MediaType` itself. Code that altered one of them in place now raises `FrozenError`; build a new String instead:

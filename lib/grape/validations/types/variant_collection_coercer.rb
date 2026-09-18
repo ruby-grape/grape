@@ -41,22 +41,36 @@ module Grape
 
         # Coerce the given value.
         #
+        # A value that is not an Array, and an Array holding a member none of
+        # the types accepts, are invalid, as they are for a collection of one
+        # type. A coercion method is handed the value whatever it is, as it is
+        # for +types:+, so it can build the collection out of a String.
+        #
         # @param value [Array<String>] collection of values to be coerced
-        # @return [Array<Object>,Set<Object>,InvalidValue]
-        #   the coerced result, or an instance
-        #   of {InvalidValue} if the value could not be coerced.
+        # @return [Array<Object>,Set<Object>,InvalidValue,nil]
+        #   the coerced result, nil when the value is nil or an empty String,
+        #   or an instance of {InvalidValue} if the value could not be coerced.
         def call(value)
-          return unless value.is_a? Array
+          return if value.nil? || (value.is_a?(String) && value.empty?)
 
-          coerced =
-            if @method
-              @method.call(value)
-            else
-              value.map { |v| @member_coercer.call(v) }
-            end
+          coerced = @method ? @method.call(value) : coerce_members(value)
+          return coerced if coerced.is_a?(InvalidValue)
           return Set.new coerced if @types.is_a? Set
 
           coerced
+        end
+
+        private
+
+        def coerce_members(value)
+          return InvalidValue.new unless value.is_a?(Array)
+
+          value.map do |member|
+            coerced = @member_coercer.call(member)
+            return coerced if coerced.is_a?(InvalidValue)
+
+            coerced
+          end
         end
       end
     end
