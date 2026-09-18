@@ -65,7 +65,8 @@ module Grape
     end
 
     def call(env)
-      with_optimization do
+      request_method = env[Rack::REQUEST_METHOD]
+      with_optimization(request_method) do
         input = Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
         if @utf8_patterns && !input.ascii_only?
           input = utf8_path(input)
@@ -76,7 +77,7 @@ module Grape
         # path versioner above all -- reads the path this routed on instead of
         # normalizing PATH_INFO a second time.
         env[Grape::Env::GRAPE_NORMALIZED_PATH] = input
-        transaction(input, env[Rack::REQUEST_METHOD], env)
+        transaction(input, request_method, env)
       end
     end
 
@@ -305,13 +306,17 @@ module Grape
       union
     end
 
-    def with_optimization
+    def with_optimization(request_method = nil)
       compile!
-      yield || default_response
+      yield || default_response(request_method)
     end
 
-    def default_response
-      [404, DEFAULT_RESPONSE_HEADERS.dup, DEFAULT_RESPONSE_BODY.dup]
+    # The 404 answered when nothing matched. A HEAD request gets it without a
+    # body, as Rack requires: every endpoint strips its own with Rack::Head,
+    # but no endpoint answers a path nothing matched.
+    def default_response(request_method = nil)
+      body = request_method == Rack::HEAD ? [] : DEFAULT_RESPONSE_BODY.dup
+      [404, DEFAULT_RESPONSE_HEADERS.dup, body]
     end
 
     # Which alternative of the union matched is answered by scanning one group
