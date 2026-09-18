@@ -205,9 +205,19 @@ module Grape
       def default_status
         request_method = env[Rack::REQUEST_METHOD]
         return 201 if request_method == Rack::POST
-        return 204 if request_method == Rack::DELETE && @body.blank?
+        return 204 if request_method == Rack::DELETE && blank_body?
 
         200
+      end
+
+      # +String#blank?+ matches a regexp, which raises ArgumentError on a
+      # String holding bytes its encoding does not allow -- a body echoing a
+      # path param percent-encoded as half a character, say. Such a String is
+      # never blank: an invalid byte is not whitespace.
+      def blank_body?
+        return false if @body.is_a?(String) && !@body.valid_encoding?
+
+        @body.blank?
       end
     end
   end

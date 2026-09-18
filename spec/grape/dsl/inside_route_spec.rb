@@ -120,6 +120,12 @@ describe Grape::DSL::InsideRoute do
       expect(subject.status).to eq 200
     end
 
+    it 'defaults to 200 on DELETE with a body holding bytes its encoding does not allow' do
+      subject.env[Rack::REQUEST_METHOD] = Rack::DELETE
+      subject.body "deleted caf\xC3"
+      expect(subject.status).to eq 200
+    end
+
     it 'returns status set' do
       subject.status 501
       expect(subject.status).to eq 501
