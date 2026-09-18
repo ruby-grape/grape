@@ -25,6 +25,7 @@ describe Grape::Router::RouteBuckets do
         end
         get('/v1.2/items/:id') { { route: 'dotted literal' } }
         get('/proxy', anchor: false) { { route: 'unanchored' } }
+        get('/files/*path') { { route: 'files', path: params[:path] } }
         get('/:slug') { { route: 'slug', slug: params[:slug] } }
       end
     end
@@ -63,6 +64,10 @@ describe Grape::Router::RouteBuckets do
 
     it 'routes an unanchored route on a path running on from its last segment' do
       expect(route_for('/api/v1/proxyextra')).to eq('route' => 'unanchored')
+    end
+
+    it 'routes a splat route on a path running on from the segment ahead of its splat' do
+      expect(route_for('/api/v1/filesextra')).to eq('route' => 'files', 'path' => 'extra')
     end
   end
 
