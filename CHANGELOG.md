@@ -37,6 +37,7 @@
 * [#2955](https://github.com/ruby-grape/grape/pull/2955): Reject a value that is not an Array, and a member of none of the types, in a collection with multiple member types instead of passing them on as `nil` and `InvalidValue` - [@ericproulx](https://github.com/ericproulx).
 * [#2957](https://github.com/ruby-grape/grape/pull/2957): Reject an element that is not a Hash in an Array param given a block, and stop `declared` raising on a value that is not a Hash where nested params are declared - [@ericproulx](https://github.com/ericproulx).
 * [#2959](https://github.com/ruby-grape/grape/pull/2959): Send a content type for an `api_format` the API does not declare instead of a `nil` header - [@ericproulx](https://github.com/ericproulx).
+* [#2961](https://github.com/ruby-grape/grape/pull/2961): Correct the README on where `using: :param` reads the version from and on the status of an unsupported request content type - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
