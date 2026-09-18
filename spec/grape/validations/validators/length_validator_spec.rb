@@ -447,7 +447,7 @@ describe Grape::Validations::Validators::LengthValidator do
     it 'responds with a validation error instead of raising a TypeError' do
       post '/nested', list: ['str']
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('list[0][name] is missing')
+      expect(last_response.body).to eq('list[0] is invalid, list[0][name] is missing')
     end
   end
 end

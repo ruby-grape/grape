@@ -104,7 +104,7 @@ describe Grape::Validations::Validators::SameAsValidator do
     it 'responds with a validation error instead of raising a TypeError' do
       post '/nested', pair: ['str']
       expect(last_response.status).to eq(400)
-      expect(last_response.body).to eq('pair[0][a] is missing')
+      expect(last_response.body).to eq('pair[0] is invalid, pair[0][a] is missing')
     end
   end
 end

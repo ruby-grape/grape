@@ -894,6 +894,19 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items[1][key] is missing')
       end
 
+      it 'rejects an element that is not a Hash when every param of the group is optional' do
+        subject.params do
+          optional :items, type: Array do
+            optional :key
+          end
+        end
+        subject.post('/optional_group') { 'optional group works' }
+
+        post_with_json '/optional_group', items: [{ key: 'a' }, 'b', 3]
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[1] is invalid')
+      end
+
       it "doesn't validate the group when every element is blank" do
         subject.params do
           optional :items, type: Array do

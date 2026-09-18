@@ -309,6 +309,10 @@ module Grape
           raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
         end
 
+        # The block declares the keys of each element, so an element has to be
+        # a Hash. +Array[JSON]+ checks that when it parses the elements.
+        validate('hash_elements', {}, [element], false, {}) if type == Array
+
         self.class.new(
           api: @api,
           element:,
