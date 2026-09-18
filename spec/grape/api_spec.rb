@@ -4775,6 +4775,41 @@ describe Grape::API do
       end
     end
 
+    context ':json only' do
+      before { subject.format :json }
+
+      it "sends Grape's media type for an explicit api_format the API does not declare" do
+        subject.get '/plain' do
+          api_format :txt
+          'plain'
+        end
+        get '/plain'
+        expect(last_response.headers['Content-Type']).to eq('text/plain')
+        expect(last_response.body).to eq('plain')
+      end
+
+      it 'leaves the content type out for an explicit api_format with no media type' do
+        subject.formatter :csv, ->(object, _env) { object.to_s }
+        subject.get '/csv' do
+          api_format :csv
+          'a,b'
+        end
+        get '/csv'
+        expect(last_response.headers).not_to have_key('Content-Type')
+        expect(last_response.body).to eq('a,b')
+      end
+
+      it 'renders an error after an explicit api_format the API does not declare in its media type' do
+        subject.get '/plain_error' do
+          api_format :txt
+          error!('a < b', 400)
+        end
+        get '/plain_error'
+        expect(last_response.headers['Content-Type']).to eq('text/plain')
+        expect(last_response.body).to eq('a < b')
+      end
+    end
+
     context ':serializable_hash' do
       before do
         stub_const(
