@@ -30,6 +30,7 @@
 * [#2950](https://github.com/ruby-grape/grape/pull/2950): Read a configuration key nested in a Hash or an Array in a remountable API instead of raising `NoMethodError` - [@ericproulx](https://github.com/ericproulx).
 * [#2952](https://github.com/ruby-grape/grape/pull/2952): Route a path running on from the segment ahead of a trailing `*path` the same way on an API with many routes as on one with few - [@ericproulx](https://github.com/ericproulx).
 * [#2954](https://github.com/ruby-grape/grape/pull/2954): Answer a `DELETE` whose body holds bytes invalid in its encoding with `200` instead of raising `ArgumentError` - [@ericproulx](https://github.com/ericproulx).
+* [#2956](https://github.com/ruby-grape/grape/pull/2956): Keep every mount of an API mounted more than once when a later declaration refreshes the mounts - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

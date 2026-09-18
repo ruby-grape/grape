@@ -42,6 +42,38 @@ describe Grape::API do
         end
       end
 
+      context 'when mounting twice and declaring a route after' do
+        before do
+          root_api.mount a_remounted_api => '/posts'
+          root_api.mount a_remounted_api => '/comments'
+          root_api.get('/other') { 'other' }
+        end
+
+        it 'can access the votes in both places' do
+          get '/posts/votes'
+          expect(last_response.body).to eql '10 votes'
+          get '/comments/votes'
+          expect(last_response.body).to eql '10 votes'
+        end
+      end
+
+      context 'when mounting at the root and again on a namespace' do
+        before do
+          stub_const('StaticRefToAPI', a_remounted_api)
+          root_api.mount a_remounted_api
+          root_api.namespace 'comments' do
+            mount StaticRefToAPI
+          end
+        end
+
+        it 'can access the votes in both places' do
+          get '/votes'
+          expect(last_response.body).to eql '10 votes'
+          get '/comments/votes'
+          expect(last_response.body).to eql '10 votes'
+        end
+      end
+
       context 'when mounting on namespace' do
         before do
           stub_const('StaticRefToAPI', a_remounted_api)

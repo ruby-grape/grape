@@ -317,10 +317,17 @@ module Grape
 
       # A mounted Grape API is stored as the throwaway instance +mount+ built
       # for it, never as the class that was written, so endpoints are matched on
-      # the base API both of them share.
+      # the base API both of them share -- and on where it was mounted, the
+      # path and the current namespace: the same API mounted at two paths, or
+      # in two namespaces, is two mounts, and refreshing one must leave the
+      # other in place.
       def drop_endpoints_mounted_for(mounts)
-        normalize_mounts(mounts).each_key do |app|
-          endpoints.delete_if { |endpoint| same_mounted_app?(endpoint.mounted_app, app) }
+        namespace = inheritable_setting.namespace_path
+        normalize_mounts(mounts).each_pair do |app, path|
+          paths = Array(path)
+          endpoints.delete_if do |endpoint|
+            same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
+          end
         end
       end
 

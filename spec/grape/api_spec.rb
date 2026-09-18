@@ -4101,6 +4101,16 @@ describe Grape::API do
         expect(subject.endpoints.last.mounted_app).to be_nil
       end
 
+      it 'exposes the path it was mounted at through #path' do
+        subject.mount mounted_app => '/mounty'
+        expect(subject.endpoints.last.path).to eq(['/mounty'])
+      end
+
+      it 'exposes the paths of a plain block endpoint through #path' do
+        subject.get(%w[/plain /other]) { 'hi' }
+        expect(subject.endpoints.last.path).to eq(%w[/plain /other])
+      end
+
       it 'still surfaces the mounted app on the options Hash' do
         subject.mount mounted_app => '/mounty'
         expect(subject.endpoints.last.options[:app]).to be(mounted_app)
