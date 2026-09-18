@@ -28,6 +28,7 @@
 * [#2949](https://github.com/ruby-grape/grape/pull/2949): Present an error response with the entity a `desc` `failure:` keyword names - [@ericproulx](https://github.com/ericproulx).
 * [#2947](https://github.com/ruby-grape/grape/pull/2947): Speed up `declared` filling in a missing Hash param - [@ericproulx](https://github.com/ericproulx).
 * [#2950](https://github.com/ruby-grape/grape/pull/2950): Read a configuration key nested in a Hash or an Array in a remountable API instead of raising `NoMethodError` - [@ericproulx](https://github.com/ericproulx).
+* [#2952](https://github.com/ruby-grape/grape/pull/2952): Route a path running on from the segment ahead of a trailing `*path` the same way on an API with many routes as on one with few - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

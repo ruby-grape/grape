@@ -7,7 +7,8 @@ module Grape
     #
     # A route that spells out a literal at segment +k+ of its path -- with
     # every segment ahead of it a literal or a lone +:param+ that cannot span
-    # a '/' -- matches only paths whose segment +k+ is that literal. Grouping
+    # a '/', and no '/' after it that its pattern makes optional -- matches
+    # only paths whose segment +k+ is that literal. Grouping
     # the routes by it, and keeping every route that cannot be grouped in each
     # group, gives each group the routes that could match a path with that
     # segment, still in registration order, so the first of them to match is
@@ -110,21 +111,30 @@ module Grape
         # segment can tell the route apart either.
         def fill_keys(keys_by_position, index, route, segments)
           last = segments.size - 1
+          run_on = run_on_position(route, last)
           position = 1
           while position <= last
             segment = segments[position]
-            keys_by_position[position][index] = segment if key?(route, segment, position == last)
+            keys_by_position[position][index] = segment if position != run_on && key?(segment)
             return unless single_segment?(route, segment)
 
             position += 1
           end
         end
 
-        def key?(route, segment, last_segment)
-          return false unless segment.match?(KEY_SEGMENT) && segment.ascii_only?
+        def key?(segment)
+          segment.match?(KEY_SEGMENT) && segment.ascii_only?
+        end
 
-          # An unanchored route's trailing '/?*path' can run on into this segment.
-          !last_segment || route.anchor
+        # The position of the segment a path can run on from without a '/', or
+        # nil. Pattern#build_path_from_pattern makes the '/' ahead of a
+        # trailing +*path+ optional, and follows an unanchored route's last
+        # segment with '/?*path', so either segment can be the start of a
+        # longer one in the path.
+        def run_on_position(route, last)
+          return last - 1 if route.origin.end_with?('*path')
+
+          last unless route.anchor
         end
 
         def single_segment?(route, segment)
