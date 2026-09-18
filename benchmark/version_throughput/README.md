@@ -8,8 +8,8 @@ Cross-version throughput benchmark for Grape. Measures `API.call(env)` requests-
 |---|---|
 | `app.rb` | The APIs under test, one per route shape. Kept deliberately small and version-agnostic — only DSL surface stable across Grape 3.x, so the same file can run against `3.0.1 … master` without edits. |
 | `bench.rb` | Single-scenario benchmark. `bench.rb <scenario>` loads `app.rb`, sanity-checks that scenario's response, runs `Benchmark.ips` (2s warmup + 5s measure), prints one `RESULT,<scenario>,<ips>,<μs>,<stddev>,<jit>` line for the orchestrator. The orchestrator discards a line naming a different scenario than the one it asked for, and the trailing field names the JIT that was actually enabled, so it can tell a flag that took effect from one that was silently ignored. |
-| `run.rb` | Orchestrator. For each version: writes a `Gemfile`, runs `bundle install` under `tmp/bench-versions/<version>/`, exec's `bench.rb` once per route shape and available JIT mode — plain, `--yjit`, `--zjit` — parses results, writes `RESULTS.md`. |
-| `RESULTS.md` | Generated report — overwritten on every run. |
+| `run.rb` | Orchestrator. For each version it benches: writes a `Gemfile`, runs `bundle install` under `tmp/bench-versions/<version>/`, exec's `bench.rb` once per route shape and available JIT mode — plain, `--yjit`, `--zjit` — parses results, stores them in `tmp/bench-versions/results.json`, then writes `RESULTS.md` from everything stored. |
+| `RESULTS.md` | Generated report — rewritten on every run from the stored results. |
 
 ## Route shapes
 
@@ -27,13 +27,13 @@ A single static route used to be the whole benchmark. That shape is the one a ro
 ## Usage
 
 ```sh
-# default: 3.0.1, 3.1.1, 3.2.1, 3.3.5, 4.0.0, master; every route shape
+# default: bench master (plus any version with no stored results yet); every route shape
 ruby benchmark/version_throughput/run.rb
 
-# version subset
+# bench exactly these versions again, released ones included
 GRAPE_VERSIONS="3.3.5,master" ruby benchmark/version_throughput/run.rb
 
-# route-shape subset, in the order the tables should appear
+# route-shape subset
 GRAPE_SCENARIOS="static,parameterized" ruby benchmark/version_throughput/run.rb
 
 # different Ruby (e.g. one built with YJIT/ZJIT)
@@ -45,6 +45,8 @@ bundle exec ruby benchmark/version_throughput/bench.rb many_parameterized
 
 `master` is benched against the working tree (`gemspec path: <repo root>`), so unstaged changes are picked up. All other versions resolve to released gems on rubygems.org.
 
+A released gem's numbers don't change between runs, so `run.rb` keeps every pass that produced a number in `tmp/bench-versions/results.json`, under the running Ruby's `RUBY_DESCRIPTION`. A run without `GRAPE_VERSIONS` benches `master` and only those versions in `DEFAULT_VERSIONS` that have no stored pass for this Ruby — every version on a first run or a new Ruby, none after that — and carries every other row over. `GRAPE_VERSIONS` benches exactly the versions it names, whether or not they're stored. Either way `RESULTS.md` covers `DEFAULT_VERSIONS` plus any version named in `GRAPE_VERSIONS`, sorted oldest to newest with `master` last, and every route shape with a stored result. A failed pass isn't stored, so the next run benches its version again. Delete `results.json` to start from scratch.
+
 ## Output
 
 `RESULTS.md` has one section per route shape. Each section's table has a row per version, listed oldest to newest so it reads as a timeline:
@@ -53,16 +55,17 @@ bundle exec ruby benchmark/version_throughput/bench.rb many_parameterized
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | … | … | … | … | … | … | … | … | … | … | … | … | … | … | … |
 
-The two delta columns per pass are the point of the report: `vs prev` is the release-over-release change, `vs <first>` the cumulative change since the oldest version benched in that table (the header names it — `vs 3.0.1` with the default list, whatever comes first in `GRAPE_VERSIONS` otherwise). A one-line summary under each table restates first → last for every pass.
+The two delta columns per pass are the point of the report: `vs prev` is the release-over-release change, `vs <first>` the cumulative change since the oldest version in that table (the header names it — `vs 3.0.1` with the default list). A one-line summary under each table restates first → last for every pass.
 
 A JIT's columns are only emitted if the running Ruby can actually run it: `run.rb` boots `ruby <flag>` and checks `RubyVM::YJIT.enabled?` / `RubyVM::ZJIT.enabled?`, not merely that the constant exists — both are defined on a supporting build whether or not the flag was given. With no JIT available the tables fall back to the compact layout, keeping the `± stddev` column and both deltas.
 
 ## Interpreting results
 
 - **Compare a shape across versions, never i/s across shapes.** The tables answer "did this shape get faster", not "which shape is fastest". A change that only speeds up literal paths shows up in `static` and `many_static` and nowhere else — which is the reason the shapes are reported apart.
-- **Noise floor is ~5-8%.** A single 5s window on macOS can easily move a few percent under thermal throttling or background load. Rerun before drawing conclusions on small deltas.
-- **`master` right after a release benches the same code twice.** When nothing has landed on `master` since the newest benched release, the two rows exercise identical code and their spread is a direct read of that session's noise floor — not a regression or a win.
-- **Run on a quiet machine.** Close other apps, plug in the laptop, don't touch the keyboard during the run. Every route shape takes ~7s of wall-clock measurement per JIT mode per version, plus bundle install on first use; narrow `GRAPE_SCENARIOS` or `GRAPE_VERSIONS` when only one table matters.
+- **Noise floor is ~5-8%.** A single 5s window on macOS can easily move a few percent under thermal throttling or background load. Rerun before drawing conclusions on small deltas — a plain run re-benches `master`; name a release in `GRAPE_VERSIONS` to re-bench its row.
+- **Released rows can predate the `master` row.** They're carried over from whichever run stored them, so a change in machine load, OS or power settings since then shows up as a `master` delta. After a change like that, re-bench everything with `GRAPE_VERSIONS` set to the full list.
+- **`master` right after a release benches the same code twice.** When nothing has landed on `master` since the newest benched release, the two rows exercise identical code and their spread is a direct read of the noise floor — not a regression or a win.
+- **Run on a quiet machine.** Close other apps, plug in the laptop, don't touch the keyboard during the run. Every route shape takes ~7s of wall-clock measurement per JIT mode per benched version, plus bundle install on first use; narrow `GRAPE_SCENARIOS` when only one table matters.
 - **`master` vs released gems is not apples-to-apples for code paths that changed.** If a refactor moved code between files, both numbers still measure the same `app.rb` request — that's the point — but interpret deltas as "end-to-end request cost" rather than per-method.
 - **A JIT's speedup is measured against the No JIT pass on the same row.** Every pass shares the same Ruby binary; only the JIT flag differs. Ruby refuses to boot with both `--yjit` and `--zjit`, so each JIT gets its own pass rather than being stacked.
 - **Deltas are computed per pass, on i/s.** A version that failed to bench is skipped as a reference, so `vs prev` always points at the closest version that actually produced a number — an `error:` row never breaks the chain.
@@ -100,7 +103,7 @@ BUNDLE_GEMFILE=tmp/bench-versions/master/Gemfile \
 
 ## Adding a version
 
-Edit `DEFAULT_VERSIONS` in `run.rb`, keeping it in release order — the delta columns assume the list runs oldest to newest. The orchestrator handles `bundle install` and gemfile generation; nothing else needs to change as long as the new version exposes the DSL `app.rb` uses (`prefix`, `format`, `version 'v1', using: :path`, `get` with a literal or `:param` path).
+Add it to `DEFAULT_VERSIONS` in `run.rb`. The next run benches it, since it has no stored results yet, and places it in the report by version number. The orchestrator handles `bundle install` and gemfile generation; nothing else needs to change as long as the new version exposes the DSL `app.rb` uses (`prefix`, `format`, `version 'v1', using: :path`, `get` with a literal or `:param` path).
 
 ## Adding a route shape
 

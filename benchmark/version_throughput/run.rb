@@ -5,6 +5,11 @@
 # bundle per version under tmp/), parses the RESULT lines, and writes Markdown
 # tables to benchmark/version_throughput/RESULTS.md.
 #
+# A released gem's numbers don't move between runs, so every measurement is
+# kept in tmp/bench-versions/results.json, per Ruby. A run benches master —
+# the working tree — plus any version with no numbers yet for the running
+# Ruby, and carries every other row over from that file.
+#
 # Each route shape is benched once per JIT mode the running Ruby supports: the
 # plain interpreter, `--yjit` and `--zjit`. Each pass reports throughput plus
 # two deltas — against the previous benched version and against the first one
@@ -14,28 +19,35 @@
 # Usage:
 #   ruby benchmark/version_throughput/run.rb
 #
-# To bench against a specific subset:
+# To bench exactly these versions again, released ones included:
 #   GRAPE_VERSIONS="3.0.1,3.3.5,master" ruby benchmark/version_throughput/run.rb
 #
 # To bench selected route shapes:
 #   GRAPE_SCENARIOS="static,parameterized" ruby benchmark/version_throughput/run.rb
 #
-# Versions must be listed oldest to newest: the delta columns compare each
-# row against the one above it and against the first row.
+# Either way the report covers every version and route shape with numbers,
+# benched on this run or an earlier one.
 #
 # To run a JIT-enabled Ruby that isn't the project default:
 #   RBENV_VERSION=4.0.6 ruby benchmark/version_throughput/run.rb
 
 require 'fileutils'
+require 'json'
 require 'open3'
 require 'rbconfig'
 
 ROOT = File.expand_path('../..', __dir__)
 HERE = __dir__
 TMP  = File.join(ROOT, 'tmp', 'bench-versions')
+STORE_PATH = File.join(TMP, 'results.json')
 
 DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 4.0.1 master].freeze
-versions = (ENV['GRAPE_VERSIONS']&.split(',')&.map(&:strip) || DEFAULT_VERSIONS).freeze
+requested_versions = ENV.fetch('GRAPE_VERSIONS', '').split(',').map(&:strip).reject(&:empty?)
+# Oldest to newest, master last: the delta columns compare each row against
+# the one above it and against the first row.
+versions = (DEFAULT_VERSIONS | requested_versions).sort_by do |version|
+  version == 'master' ? [1] : [0, Gem::Version.new(version)]
+end.freeze
 
 # One pass per JIT mode, in report column order. +flag+ is what `ruby` is
 # invoked with (none for the interpreter), +key+ is where the pass is recorded
@@ -76,11 +88,11 @@ scenario_keys = SCENARIO_DEFINITIONS.map { |scenario| scenario.fetch(:key) }
 unknown_scenarios = requested_scenarios - scenario_keys
 abort "unknown scenarios: #{unknown_scenarios.join(', ')}" unless unknown_scenarios.empty?
 
-scenarios = if requested_scenarios.empty?
-              SCENARIO_DEFINITIONS
-            else
-              requested_scenarios.map { |key| SCENARIO_DEFINITIONS.find { |scenario| scenario.fetch(:key) == key } }
-            end
+benched_scenarios = if requested_scenarios.empty?
+                      SCENARIO_DEFINITIONS
+                    else
+                      SCENARIO_DEFINITIONS.select { |scenario| requested_scenarios.include?(scenario.fetch(:key)) }
+                    end
 
 def gemfile_for(version)
   if version == 'master'
@@ -139,25 +151,51 @@ def jit_available?(mode)
   status.success?
 end
 
+# Every pass that produced a number, as { scenario => { version => { mode =>
+# pass } } } under the running Ruby's description: a row benched under
+# another Ruby is no reference for this one's.
+def load_store
+  return {} unless File.exist?(STORE_PATH)
+
+  JSON.parse(File.read(STORE_PATH))
+end
+
 modes = JIT_MODES.select { |mode| jit_available?(mode) }
 jit_modes = modes.reject { |mode| mode[:key] == :none }
 puts "JIT modes available in current Ruby: #{jit_modes.map { |mode| mode[:label] }.join(', ').then { |l| l.empty? ? 'none' : l }}"
 
-results = scenarios.to_h { |scenario| [scenario.fetch(:key), {}] }
+ruby_desc = `ruby -e 'puts RUBY_DESCRIPTION'`.strip
+store = load_store
+results = SCENARIO_DEFINITIONS.to_h do |scenario|
+  rows = store.dig(ruby_desc, scenario.fetch(:key)) || {}
+  [scenario.fetch(:key), rows.transform_values { |passes| passes.to_h { |mode, pass| [mode.to_sym, pass.transform_keys(&:to_sym)] } }]
+end
+
+# GRAPE_VERSIONS names exactly what to bench. Without it, master is benched on
+# every run and a released version only while it lacks a pass.
+due = lambda do |version, scenario|
+  next requested_versions.include?(version) unless requested_versions.empty?
+
+  version == 'master' || modes.any? { |mode| !results.dig(scenario.fetch(:key), version, mode[:key], :ips) }
+end
+
 versions.each do |version|
+  due_scenarios = benched_scenarios.select { |scenario| due.call(version, scenario) }
+  next if due_scenarios.empty?
+
   print "[#{version}] preparing... "
   dir = prepare(version)
   install_out, install_status = run_bundle_install(dir)
   unless install_status.success?
     puts "FAILED (bundle install)\n#{install_out}"
-    scenarios.each do |scenario|
+    due_scenarios.each do |scenario|
       results.fetch(scenario.fetch(:key))[version] = { error: 'bundle install failed' }
     end
     next
   end
 
   puts 'done'
-  scenarios.each do |scenario|
+  due_scenarios.each do |scenario|
     scenario_results = results.fetch(scenario.fetch(:key))
     scenario_results[version] = {}
     print "[#{version}] #{scenario.fetch(:label)}: "
@@ -182,8 +220,18 @@ versions.each do |version|
   end
 end
 
+# Keep the passes that produced a number. A failed one is dropped rather than
+# stored, so the next run benches its version again.
+stored = results.transform_values do |rows|
+  rows.filter_map do |version, passes|
+    kept = passes.select { |_mode, pass| pass.is_a?(Hash) && pass[:ips] }
+    [version, kept] unless kept.empty?
+  end.to_h
+end
+FileUtils.mkdir_p(TMP)
+File.write(STORE_PATH, JSON.pretty_generate(store.merge(ruby_desc => stored)))
+
 # Write Markdown report
-ruby_desc = `ruby -e 'puts RUBY_DESCRIPTION'`.strip
 host_desc = `uname -mrs 2>/dev/null`.strip
 report_path = File.join(HERE, 'RESULTS.md')
 
@@ -208,15 +256,19 @@ File.open(report_path, 'w') do |f|
   f.puts "JIT modes benched: #{modes.map { |mode| mode[:label] }.join(', ')}\n\n"
   f.puts 'Single-threaded `Benchmark.ips`, 2s warmup + 5s measure. Each route shape has an independent table, ' \
          'so a static-route fast path cannot be mistaken for general request throughput. ' \
+         'Released versions are benched once per Ruby and carried over; each run benches `master` again. ' \
          'Reproduce with `ruby benchmark/version_throughput/run.rb`.'
 
-  scenarios.each do |scenario|
+  SCENARIO_DEFINITIONS.each do |scenario|
     scenario_results = results.fetch(scenario.fetch(:key))
+    table_versions = versions.select { |version| scenario_results.key?(version) }
+    next if table_versions.empty?
+
     ips_of = ->(version, pass) { scenario_results.dig(version, pass, :ips) }
     previous_of = lambda do |version, pass|
-      versions[0...versions.index(version)].reverse_each.find { |v| ips_of.call(v, pass) }
+      table_versions[0...table_versions.index(version)].reverse_each.find { |v| ips_of.call(v, pass) }
     end
-    baseline_of = ->(pass) { versions.find { |v| ips_of.call(v, pass) } }
+    baseline_of = ->(pass) { table_versions.find { |v| ips_of.call(v, pass) } }
     deltas_of = lambda do |version, pass|
       current = ips_of.call(version, pass)
       previous = previous_of.call(version, pass)
@@ -226,8 +278,8 @@ File.open(report_path, 'w') do |f|
         baseline && baseline != version ? percent.call(current, ips_of.call(baseline, pass)) : '—'
       ]
     end
-    first_version = modes.filter_map { |mode| baseline_of.call(mode[:key]) }.first || versions.first
-    last_version = versions.reverse_each.find { |v| modes.any? { |mode| ips_of.call(v, mode[:key]) } }
+    first_version = modes.filter_map { |mode| baseline_of.call(mode[:key]) }.first || table_versions.first
+    last_version = table_versions.reverse_each.find { |v| modes.any? { |mode| ips_of.call(v, mode[:key]) } }
     headers =
       if jit_modes.empty?
         ['Version', 'Throughput (i/s)', 'μs/req', '± stddev', 'vs prev', "vs #{first_version}"]
@@ -263,7 +315,7 @@ File.open(report_path, 'w') do |f|
     f.puts "\n## #{scenario.fetch(:label)}\n\n#{scenario.fetch(:description)}\n\n"
     row.call(headers)
     row.call(['---'] + Array.new(headers.size - 1, '---:'))
-    versions.each { |version| row.call(row_for.call(version)) }
+    table_versions.each { |version| row.call(row_for.call(version)) }
     f.puts "\nOver time, #{first_version} → #{last_version}: #{overall.join(', ')}." unless overall.empty?
   end
 
