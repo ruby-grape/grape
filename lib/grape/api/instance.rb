@@ -111,12 +111,13 @@ module Grape
 
         @router.compile!
         @router.freeze
+        @app = lint? ? Rack::Lint.new(@router) : @router
         @cascade = resolve_cascade
       end
 
       # Handle a request. See Rack documentation for what `env` is.
       def call(env)
-        response = @router.call(env)
+        response = @app.call(env)
         return response if @cascade
 
         headers = response[1]
@@ -185,6 +186,17 @@ module Grape
           greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
           @router.associate_routes(greedy_route)
         end
+      end
+
+      # +lint!+ declared at the top of this API, or Grape.config.lint: one
+      # Rack::Lint around the router then checks every response the API gives
+      # -- an endpoint's, the 404 the router answers itself, a mounted Rack
+      # app's -- exactly once. Linting inside each endpoint's stack instead
+      # missed the last two, and wrapping a second Rack::Lint around those
+      # breaks a middleware that calls +to_ary+ on the body, as Rack::ETag does.
+      # Called once, from the constructor.
+      def lint?
+        self.class.inheritable_setting.lint? || Grape.config.lint
       end
 
       # Backs {#cascade?}; called once, from the constructor.
