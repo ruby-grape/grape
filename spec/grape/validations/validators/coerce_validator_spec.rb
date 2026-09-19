@@ -1173,6 +1173,22 @@ describe Grape::Validations::Validators::CoerceValidator do
           expect(last_response).to be_successful
           expect(last_response.body).to eq([1, 'two'].to_set.to_s)
         end
+
+        it 'rejects a collection with multiple types given something other than a collection' do
+          get '/', c: 'three'
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('c is invalid')
+        end
+
+        it 'rejects a collection with multiple types holding a member of none of them' do
+          get '/', c: [1, { two: 2 }]
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('c is invalid')
+
+          get '/', d: [{ one: 1 }]
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('d is invalid')
+        end
       end
 
       context 'custom coercion rules' do
