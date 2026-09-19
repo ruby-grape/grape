@@ -493,7 +493,7 @@ By default, the first matching version is used when no `Accept-Version` header i
 version 'v1', using: :param
 ```
 
-Using this versioning strategy, clients should pass the desired version as a request parameter, either in the URL query string or in the request body.
+Using this versioning strategy, clients should pass the desired version as a parameter in the URL query string. A version given in the request body is not read.
 
     curl http://localhost:9292/statuses/public_timeline?apiver=v1
 
@@ -3270,7 +3270,7 @@ end
 * `GET /hello?format=xml` will respond with an HTTP 406 error code, because the XML format specified by the request parameter is not supported.
 * `GET /hello` with an `Accept: application/xml` header will still respond with JSON, since it could not negotiate a recognized content-type from the headers and JSON is the effective default.
 
-The formats apply to parsing, too. The following API will only respond to the JSON content-type and will not parse any other input than `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests will fail with an HTTP 406 error code.
+The formats apply to parsing, too. The following API will only respond to the JSON content-type and will not parse any other input than `application/json`, `application/x-www-form-urlencoded`, `multipart/form-data`, `multipart/related` and `multipart/mixed`. All other requests will fail with an HTTP 415 error code.
 
 ```ruby
 class Twitter::API < Grape::API
@@ -3278,7 +3278,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-When the content-type is omitted, Grape will return a 406 error code unless `default_format` is specified.
+When the content-type is omitted, Grape will return a 415 error code unless `default_format` is specified.
 The following API will try to parse any data without a content-type using a JSON parser.
 
 ```ruby
