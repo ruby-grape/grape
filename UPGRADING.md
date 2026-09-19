@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A `redirect` body you pass carries the API's content type
+
+A body given to `redirect` with `body:` is rendered by the API's formatter, and the response now carries that format's content type instead of `text/plain` ([#2968](https://github.com/ruby-grape/grape/pull/2968)). On a JSON API, `redirect '/there', body: { message: 'moved' }` sent `{"message":"moved"}` labelled `text/plain`; it is now labelled `application/json`. The message Grape generates when no body is given is still plain text under `text/plain`.
+
+A client that picked the redirect body's parser by its `Content-Type` now gets the format the body is in; one that relied on `text/plain` for every redirect sees the API's own content type on those that pass a body.
+
 #### Every `middleware` entry ends in its block
 
 Each entry `API.middleware` returns now ends in the block its `use`, `insert`, `insert_before` or `insert_after` was given, `nil` when there was none ([#2967](https://github.com/ruby-grape/grape/pull/2967)). A Proc passed as the last argument used to be taken for the block, so `use SomeMiddleware, ->(env) { ... }` built the middleware without its callable and raised `ArgumentError`.
