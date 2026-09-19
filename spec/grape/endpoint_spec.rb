@@ -661,6 +661,16 @@ describe Grape::Endpoint do
           expect(last_response.status).to eq(408)
           expect(last_response.body).to eq('{"presented":408}')
         end
+
+        it "answers a String message unpresented when the presenter is given through #{spelling}" do
+          subject.format :json
+          describe_with.call(subject, [[408, 'Request Timeout', presenter]])
+          subject.get('/hey') { error!('took too long', 408) }
+
+          get '/hey'
+          expect(last_response.status).to eq(408)
+          expect(last_response.body).to eq('{"error":"took too long"}')
+        end
       end
     end
   end

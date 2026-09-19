@@ -465,6 +465,22 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       end
     end
 
+    context 'when using failure with a String message' do
+      let(:app) do
+        Class.new(Grape::API) do
+          desc 'some desc', failure: [[408, 'Unauthorized', ErrorPresenter]]
+          get '/exception' do
+            error!('took too long', 408)
+          end
+        end
+      end
+
+      it 'is not used as presenter' do
+        expect(subject).to be_request_timeout
+        expect(subject.body).to eq('took too long')
+      end
+    end
+
     context 'when using with' do
       let(:app) do
         Class.new(Grape::API) do

@@ -34,7 +34,11 @@ module Grape
 
           presenter = with || env[Grape::Env::API_ENDPOINT].entity_class_for_obj(payload)
 
-          unless presenter || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
+          # The entities a route's failure codes name document a structured
+          # error body. A String message has no attributes for one to expose
+          # -- presenting it raised, and the failsafe answered 500 in place of
+          # the status +error!+ asked for -- so it is left for #wrap_message.
+          unless presenter || payload.is_a?(String) || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
             # env['api.endpoint'].route does not work when the error occurs within a middleware
             # the Endpoint does not have a valid env at this moment
             http_codes = env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info].failure || []
