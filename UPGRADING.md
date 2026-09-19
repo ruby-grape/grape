@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A `redirect` body you pass carries the API's content type
+
+A body given to `redirect` with `body:` is rendered by the API's formatter, and the response now carries that format's content type instead of `text/plain` ([#2968](https://github.com/ruby-grape/grape/pull/2968)). On a JSON API, `redirect '/there', body: { message: 'moved' }` sent `{"message":"moved"}` labelled `text/plain`; it is now labelled `application/json`. The message Grape generates when no body is given is still plain text under `text/plain`.
+
+A client that picked the redirect body's parser by its `Content-Type` now gets the format the body is in; one that relied on `text/plain` for every redirect sees the API's own content type on those that pass a body.
+
 #### Minimum required Ruby is now 3.3.1
 
 Grape no longer supports Ruby 3.3.0; 3.3.1 is now the minimum (`required_ruby_version = '>= 3.3.1'`) ([#2966](https://github.com/ruby-grape/grape/pull/2966)). Ruby 3.3.0 rejects forwarding an anonymous parameter (`*`, `**`, `&`) from inside a block, which Grape does, so Grape could not be loaded on it; 3.3.1 fixed that. Upgrade your runtime to Ruby 3.3.1 or newer before bumping Grape.

@@ -52,13 +52,16 @@ module Grape
           body_message ||= "This resource has been moved temporarily to #{url}."
         end
         header 'Location', url
-        content_type 'text/plain'
         # Render the message Grape generated as the plain text it is. Setting
         # only the header left it to the API's own formatter, which on a JSON
         # API returned the sentence wrapped in quotes under a text/plain content
-        # type. A caller-supplied body keeps the API's format: it may be
-        # structured, and the txt formatter would render a Hash through `to_s`.
-        api_format :txt unless body
+        # type. A caller-supplied body keeps the API's format, and the content
+        # type that goes with it: it may be structured, and the txt formatter
+        # would render a Hash through `to_s`.
+        unless body
+          content_type 'text/plain'
+          api_format :txt
+        end
         body body_message
       end
 
