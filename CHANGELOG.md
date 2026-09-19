@@ -39,6 +39,7 @@
 * [#2959](https://github.com/ruby-grape/grape/pull/2959): Send a content type for an `api_format` the API does not declare instead of a `nil` header - [@ericproulx](https://github.com/ericproulx).
 * [#2961](https://github.com/ruby-grape/grape/pull/2961): Correct the README on where `using: :param` reads the version from and on the status of an unsupported request content type - [@ericproulx](https://github.com/ericproulx).
 * [#2963](https://github.com/ruby-grape/grape/pull/2963): Stop reading a setting on an API class, such as `MyAPI.version`, from discarding the compiled API and re-mounting everything mounted in it - [@ericproulx](https://github.com/ericproulx).
+* [#2964](https://github.com/ruby-grape/grape/pull/2964): Stop keeping every instance a mounted API was re-mounted with each time a later declaration refreshed the mounts - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
