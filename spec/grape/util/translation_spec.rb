@@ -5,8 +5,8 @@ describe Grape::Util::Translation do
     Class.new do
       include Grape::Util::Translation
 
-      def translate_message(key, **opts)
-        translate(key, **opts)
+      def translate_message(key, **)
+        translate(key, **)
       end
     end.new
   end

@@ -13,8 +13,8 @@ describe Grape::DSL::Parameters do
         @validates = []
       end
 
-      def validates(*args, **kwargs)
-        @validates.push(*args)
+      def validates(*, **kwargs)
+        @validates.push(*)
         @validates_kwargs = kwargs
       end
 
@@ -34,9 +34,9 @@ describe Grape::DSL::Parameters do
         @push_declared_params
       end
 
-      def new_scope(element, **_opts, &block)
+      def new_scope(element, **_opts, &)
         nested_scope = self.class.new
-        nested_scope.new_group_scope(element, &block)
+        nested_scope.new_group_scope(element, &)
         nested_scope
       end
 
