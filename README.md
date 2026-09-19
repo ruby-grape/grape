@@ -1439,13 +1439,13 @@ You can rename parameters:
 ```ruby
 params do
   optional :category, as: :type
-  given type: ->(val) { val == 'foo' } do
+  given category: ->(val) { val == 'foo' } do
     requires :description
   end
 end
 ```
 
-Note: param in `given` should be the renamed one. In the example, it should be `type`, not `category`.
+Note: `given` takes the name a param is declared with, not the one `as` renames it to. In the example, it is `category`, not `type`: the renaming applies only to [`declared(params)`](#declared), and naming `type` raises `Grape::Exceptions::UnknownParameter`.
 
 ### Group Options
 
@@ -2354,7 +2354,7 @@ route_param :name, requirements: /.+/ do
 end
 ```
 
-Such a regexp claims the extension as well, so `GET /a.b.json` hands the endpoint `"a.b.json"` and format-by-extension no longer applies to that route. A narrower constraint leaves the suffix alone: `get ':n', requirements: { n: Float }` matches `/4.2` and still reads `.json` as the format.
+Such a regexp claims the extension as well, so `GET /a.b.json` hands the endpoint `"a.b.json"`. The response format is still read off the end of the path, though, whatever the route captured: with no `format` of its own, the API above answers `GET /a.b.json` in JSON, and `GET /a.b.xml` with a `500`, since the XML formatter cannot render a String. Declaring `format` settles the response format whatever the extension. A narrower constraint leaves the suffix alone: `get ':n', requirements: { n: Float }` matches `/4.2` and still reads `.json` as the format.
 
 ### The QUERY Method
 
