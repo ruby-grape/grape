@@ -47,7 +47,7 @@ describe Grape::DSL::Middleware do
       subject.use foo_middleware, :arg1, &proc
       subject.insert_before bar_middleware, :arg1, :arg2
 
-      expect(subject.middleware).to eq [[:use, foo_middleware, :arg1, proc], [:insert_before, bar_middleware, :arg1, :arg2]]
+      expect(subject.middleware).to eq [[:use, foo_middleware, :arg1, proc], [:insert_before, bar_middleware, :arg1, :arg2, nil]]
     end
   end
 end

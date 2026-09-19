@@ -15,7 +15,7 @@ describe Grape::Middleware::Stack do
     end
   end
   let(:proc) { -> {} }
-  let(:others) { [[:use, bar_middleware], [:insert_before, bar_middleware, block_middleware, proc]] }
+  let(:others) { [[:use, bar_middleware, nil], [:insert_before, bar_middleware, block_middleware, proc]] }
 
   before do
     subject.use foo_middleware if subject.respond_to?(:use)
@@ -112,13 +112,18 @@ describe Grape::Middleware::Stack do
       expect(subject[2]).to eq(bar_middleware)
     end
 
-    context 'middleware spec with proc declaration exists' do
-      let(:middleware_spec_with_proc) { [:use, foo_middleware, proc] }
+    it 'hands the last element of a spec over as the block' do
+      subject.merge_with([[:use, block_middleware, proc]])
 
-      it 'properly forwards spec arguments' do
-        expect(subject).to receive(:use).with(foo_middleware)
-        subject.merge_with([middleware_spec_with_proc])
-      end
+      expect(subject.last.args).to eq([])
+      expect(subject.last.block).to eq(proc)
+    end
+
+    it 'hands a Proc ahead of the block over as an argument' do
+      subject.merge_with([[:use, block_middleware, proc, nil]])
+
+      expect(subject.last.args).to eq([proc])
+      expect(subject.last.block).to be_nil
     end
   end
 
@@ -128,7 +133,7 @@ describe Grape::Middleware::Stack do
     end
 
     context 'when @others are present' do
-      let(:others) { [[:insert_after, Grape::Middleware::Formatter, bar_middleware]] }
+      let(:others) { [[:insert_after, Grape::Middleware::Formatter, bar_middleware, nil]] }
 
       it 'applies the middleware specs stored in @others' do
         subject.concat others
@@ -147,7 +152,7 @@ describe Grape::Middleware::Stack do
     end
 
     it 'calls +merge_with+ with the :use specs' do
-      expect(subject).to receive(:merge_with).with [[:use, bar_middleware]]
+      expect(subject).to receive(:merge_with).with [[:use, bar_middleware, nil]]
       subject.concat others
     end
   end
