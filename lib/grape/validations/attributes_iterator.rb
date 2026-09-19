@@ -54,7 +54,7 @@ module Grape
       NO_PARENT_INDICES = [].freeze
       private_constant :NO_PARENT_INDICES
 
-      def do_each(params_to_process, tracker, index_scope, parent_indices, &block)
+      def do_each(params_to_process, tracker, index_scope, parent_indices, &)
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indices
@@ -64,12 +64,12 @@ module Grape
           # validators see a non-hash and fail it the same way any other
           # unexpected element type does.
           if resource_params.is_a?(Array) && parent_indices.size < @max_nesting
-            do_each(resource_params, tracker, index_scope, [index] + parent_indices, &block)
+            do_each(resource_params, tracker, index_scope, [index] + parent_indices, &)
             next
           end
 
           store_indices(tracker, index_scope, index, parent_indices) if tracker
-          yield_attributes(resource_params, &block)
+          yield_attributes(resource_params, &)
         end
       end
 

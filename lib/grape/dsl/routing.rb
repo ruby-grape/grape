@@ -228,14 +228,14 @@ module Grape
       #         # defines the endpoint: GET /foo/bar
       #       end
       #     end
-      def namespace(space = nil, requirements: nil, **options, &block)
+      def namespace(space = nil, requirements: nil, **, &block)
         return inheritable_setting.namespace_path unless space || block
 
         validate_requirements!(requirements)
 
         within_namespace do
           nest(block) do
-            inheritable_setting.add_namespace(Grape::Namespace.new(space, requirements:, **options)) if space
+            inheritable_setting.add_namespace(Grape::Namespace.new(space, requirements:, **)) if space
           end
         end
       end

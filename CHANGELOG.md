@@ -7,6 +7,7 @@
 * [#2941](https://github.com/ruby-grape/grape/pull/2941): Bench static, parameterized and many-route shapes in separate tables in the version throughput benchmark - [@ericproulx](https://github.com/ericproulx).
 * [#2951](https://github.com/ruby-grape/grape/pull/2951): Re-bench only `master` in the version throughput benchmark and carry released versions' results over - [@ericproulx](https://github.com/ericproulx).
 * [#2960](https://github.com/ruby-grape/grape/pull/2960): Lint every response of an API once under `lint!`, including the router's 404 and mounted Rack apps, instead of inside each endpoint's stack - [@ericproulx](https://github.com/ericproulx).
+* [#2966](https://github.com/ruby-grape/grape/pull/2966): Require Ruby 3.3.1, the first 3.3 release that parses anonymous argument forwarding from inside a block - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes

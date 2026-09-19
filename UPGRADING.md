@@ -3,6 +3,10 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### Minimum required Ruby is now 3.3.1
+
+Grape no longer supports Ruby 3.3.0; 3.3.1 is now the minimum (`required_ruby_version = '>= 3.3.1'`) ([#2966](https://github.com/ruby-grape/grape/pull/2966)). Ruby 3.3.0 rejects forwarding an anonymous parameter (`*`, `**`, `&`) from inside a block, which Grape does, so Grape could not be loaded on it; 3.3.1 fixed that. Upgrade your runtime to Ruby 3.3.1 or newer before bumping Grape.
+
 #### An Array param given a block rejects elements that are not a Hash
 
 The block of `requires :items, type: Array do ... end` declares the keys of each element, and an element that is not a Hash now answers `400` with `items[1] is invalid` ([#2957](https://github.com/ruby-grape/grape/pull/2957)). It used to fail only where the block required a key of it, so a block whose params are all optional let a String, a number or a nested Array through to the endpoint, and an Array nested one level too deep in a nested Array scope passed validation and then made `declared` raise. A blank element — `nil`, `''`, `false`, `[]`, `{}` — is still passed over.

@@ -7,8 +7,8 @@ describe Grape::DSL::Settings do
     Class.new do
       include Grape::DSL::Settings
 
-      def with_namespace(&block)
-        within_namespace(&block)
+      def with_namespace(&)
+        within_namespace(&)
       end
 
       def reset_validations!; end

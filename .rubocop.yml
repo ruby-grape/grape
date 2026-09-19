@@ -6,6 +6,7 @@ AllCops:
     - vendor/**/*
     - bin/**/*
     - benchmark/**/*
+    - tmp/**/*
 
 plugins:
   - rubocop-exception_messages
