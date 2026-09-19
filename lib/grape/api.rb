@@ -14,6 +14,18 @@ module Grape
     # is refreshed, so recording it would refresh every mount below it again.
     NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
 
+    # DSL methods that answer a setting when called with nothing to set -- no
+    # argument, keyword or block -- and change none. Such a call is a read, and
+    # is answered without being recorded: as a setup step it was replayed on
+    # every mount and, like any step, refreshed every mount made before it,
+    # which discards the compiled API, so a read after boot made the next
+    # request recompile it. +helpers+ is left out: called bare it includes the
+    # helpers in scope and calls +change!+ itself.
+    SETTING_READERS = %i[
+      auth cascade content_types default_error_formatter default_error_status default_format endpoints format
+      group inheritable_setting logger middleware namespace prefix resource resources segment version versions
+    ].freeze
+
     Helpers = Grape::DSL::Helpers::BaseHelper
 
     class Boolean
@@ -60,11 +72,16 @@ module Grape
         @base_instance = mount_instance
       end
 
-      # Redefines all methods so that are forwarded to add_setup and be recorded
+      # Redefines all methods so that are forwarded to add_setup and be recorded.
+      # A read (see SETTING_READERS) is answered by the last instance, which is
+      # where add_setup takes its answer from, without being recorded.
       def override_all_methods!
         (base_instance.methods - Class.methods - NON_OVERRIDABLE).each do |method_override|
           define_singleton_method(method_override) do |*args, **kwargs, &block|
-            add_setup(method: method_override, args:, kwargs:, block:)
+            step = { method: method_override, args:, kwargs:, block: }
+            return replay_step_on(@instances.last, **step) if setting_read?(method_override, args, kwargs, block)
+
+            add_setup(**step)
           end
         end
       end
@@ -148,6 +165,10 @@ module Grape
         return response if skip_immediate_run?(instance, [response], kwargs)
 
         evaluate_arguments(instance.configuration, response).first
+      end
+
+      def setting_read?(method, args, kwargs, block)
+        SETTING_READERS.include?(method) && args.empty? && kwargs.empty? && block.nil?
       end
 
       # Skips steps that contain arguments to be lazily executed (on re-mount time)
