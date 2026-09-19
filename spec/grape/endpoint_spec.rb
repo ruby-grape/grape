@@ -732,11 +732,13 @@ describe Grape::Endpoint do
 
       # Only the message Grape generates is known to be text. A body the caller
       # passed keeps the API's format, so a structured one stays parseable
-      # rather than being rendered through the txt formatter's `to_s`.
+      # rather than being rendered through the txt formatter's `to_s`, and is
+      # labelled with that format's content type rather than as text/plain.
       it 'leaves a structured body to the API format' do
         subject.get('/there') { redirect '/ha', body: { message: 'go away' } }
 
         get '/there'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
         expect(last_response.body).to eq({ message: 'go away' }.to_json)
       end
 
@@ -744,6 +746,7 @@ describe Grape::Endpoint do
         subject.get('/there') { redirect '/ha', body: 'go away' }
 
         get '/there'
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('application/json')
         expect(last_response.body).to eq '"go away"'
       end
 
