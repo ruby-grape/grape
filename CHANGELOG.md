@@ -38,6 +38,7 @@
 * [#2957](https://github.com/ruby-grape/grape/pull/2957): Reject an element that is not a Hash in an Array param given a block, and stop `declared` raising on a value that is not a Hash where nested params are declared - [@ericproulx](https://github.com/ericproulx).
 * [#2959](https://github.com/ruby-grape/grape/pull/2959): Send a content type for an `api_format` the API does not declare instead of a `nil` header - [@ericproulx](https://github.com/ericproulx).
 * [#2961](https://github.com/ruby-grape/grape/pull/2961): Correct the README on where `using: :param` reads the version from and on the status of an unsupported request content type - [@ericproulx](https://github.com/ericproulx).
+* [#2963](https://github.com/ruby-grape/grape/pull/2963): Stop reading a setting on an API class, such as `MyAPI.version`, from discarding the compiled API and re-mounting everything mounted in it - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

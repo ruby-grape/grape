@@ -4147,6 +4147,30 @@ describe Grape::API do
           .to change { subject.endpoints.count }.by(1)
       end
 
+      # A read answers a setting and changes none. Recorded as a setup step,
+      # it refreshed the mounts, discarding the compiled API.
+      it 'keeps the compiled API when a setting is read' do
+        subject.version 'v1', using: :path
+        subject.prefix :api
+        subject.mount app => '/thing'
+        compiled = subject.compile!
+
+        expect([subject.version, subject.prefix, subject.format]).to eq(['v1', 'api', nil])
+        expect(subject.compile!).to be(compiled)
+      end
+
+      # Called with no argument, +get+ still declares a route, so it is recorded
+      # like any step and replayed on every mount of the API.
+      it 'declares a route written with no argument on every mount of the API' do
+        first = Class.new(described_class)
+        first.mount app => '/one'
+        second = Class.new(described_class)
+        second.mount app => '/two'
+        app.get
+
+        expect(Rack::MockRequest.new(first).get('/one').status).to eq(200)
+      end
+
       # Matching a mount reads the base of the API it names; recorded as a setup
       # step, that read refreshed every mount below it again (#2945).
       it 'does not record a setup step on an API mounted below the refreshed mount' do
