@@ -326,9 +326,23 @@ module Grape
         normalize_mounts(mounts).each_pair do |app, path|
           paths = Array(path)
           endpoints.delete_if do |endpoint|
-            same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
+            dropped = same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
+            release_mount_instance(endpoint.mounted_app) if dropped
+            dropped
           end
         end
+      end
+
+      # A Grape API keeps every instance +mount+ builds for it, so that steps
+      # recorded later replay onto each (see Grape::API::Instance.base=). Once
+      # the endpoint serving one is dropped, nothing serves it: its API lets go
+      # of it, and of the instances built for the APIs mounted inside it.
+      # Otherwise every refresh left another copy of each mounted API behind.
+      def release_mount_instance(mounted)
+        return unless mounted.respond_to?(:base) && mounted.base.respond_to?(:instances)
+
+        mounted.base.instances.delete(mounted)
+        mounted.endpoints.each { |endpoint| release_mount_instance(endpoint.mounted_app) }
       end
 
       # A bare app mounts at the root. The test is +Hash+ rather than

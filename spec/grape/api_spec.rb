@@ -4171,6 +4171,27 @@ describe Grape::API do
         expect(Rack::MockRequest.new(first).get('/one').status).to eq(200)
       end
 
+      # Each step after a mount re-mounts it with a new instance of the mounted
+      # API; the one it replaces is served no more, so its API lets go of it.
+      it 'keeps no instance of the mounted API that a refresh replaced' do
+        subject.mount app => '/thing'
+        3.times { |i| subject.get("/r#{i}") { 'r' } }
+
+        expect(app.instances.size).to eq(2) # its own and the one mounted here
+        expect(Rack::MockRequest.new(subject).get('/thing/x').status).to eq(200)
+      end
+
+      it 'keeps no instance of an API mounted inside one that a refresh replaced' do
+        inner = Class.new(described_class) { get('/i') { 'i' } }
+        app.mount inner => '/inner'
+        subject.mount app => '/thing'
+        3.times { |i| subject.get("/r#{i}") { 'r' } }
+
+        # Its own, the one mounted in app itself, and the one in the copy of app mounted here.
+        expect(inner.instances.size).to eq(3)
+        expect(Rack::MockRequest.new(subject).get('/thing/inner/i').status).to eq(200)
+      end
+
       # Matching a mount reads the base of the API it names; recorded as a setup
       # step, that read refreshed every mount below it again (#2945).
       it 'does not record a setup step on an API mounted below the refreshed mount' do
