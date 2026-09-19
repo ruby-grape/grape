@@ -2354,7 +2354,7 @@ route_param :name, requirements: /.+/ do
 end
 ```
 
-Such a regexp claims the extension as well, so `GET /a.b.json` hands the endpoint `"a.b.json"` and format-by-extension no longer applies to that route. A narrower constraint leaves the suffix alone: `get ':n', requirements: { n: Float }` matches `/4.2` and still reads `.json` as the format.
+Such a regexp claims the extension as well, so `GET /a.b.json` hands the endpoint `"a.b.json"`. The response format is still read off the end of the path, though, whatever the route captured: with no `format` of its own, the API above answers `GET /a.b.json` in JSON, and `GET /a.b.xml` with a `500`, since the XML formatter cannot render a String. Declaring `format` settles the response format whatever the extension. A narrower constraint leaves the suffix alone: `get ':n', requirements: { n: Float }` matches `/4.2` and still reads `.json` as the format.
 
 ### The QUERY Method
 
