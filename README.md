@@ -951,7 +951,7 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/users/signup -d 
       "first_name": "first name",
       "last_name": null,
       "address": {
-        "city": "Zurich",
+        "city": "SF",
         "region": null
       }
     }
@@ -1082,11 +1082,13 @@ curl -X POST -H "Content-Type: application/json" localhost:9292/child -d '{"chil
 Using `route_param` takes higher precedence over a regular parameter defined with same name:
 
 ```ruby
+format :json
+
 params do
   requires :foo, type: String
 end
 route_param :foo do
-  get do
+  post do
     { value: params[:foo] }
   end
 end
