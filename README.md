@@ -1439,13 +1439,13 @@ You can rename parameters:
 ```ruby
 params do
   optional :category, as: :type
-  given type: ->(val) { val == 'foo' } do
+  given category: ->(val) { val == 'foo' } do
     requires :description
   end
 end
 ```
 
-Note: param in `given` should be the renamed one. In the example, it should be `type`, not `category`.
+Note: `given` takes the name a param is declared with, not the one `as` renames it to. In the example, it is `category`, not `type`: the renaming applies only to [`declared(params)`](#declared), and naming `type` raises `Grape::Exceptions::UnknownParameter`.
 
 ### Group Options
 
