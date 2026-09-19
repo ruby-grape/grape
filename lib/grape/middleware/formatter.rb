@@ -147,12 +147,16 @@ module Grape
       # this runs on every response, and copying the hash costs an allocation
       # per request for a header the caller is about to send anyway.
       #
+      # A format with no media type at all (see #media_type_for) leaves the
+      # header out: Rack forbids a nil header value.
+      #
       # @param headers [Hash] the response headers, mutated in place
       # @return [void]
       def ensure_content_type!(headers)
         return if headers[Rack::CONTENT_TYPE]
 
-        headers[Rack::CONTENT_TYPE] = content_type_for(env[Grape::Env::API_FORMAT])
+        content_type = media_type_for(env[Grape::Env::API_FORMAT])
+        headers[Rack::CONTENT_TYPE] = content_type if content_type
       end
 
       def read_body_input

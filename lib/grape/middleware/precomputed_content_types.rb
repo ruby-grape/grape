@@ -4,7 +4,7 @@ module Grape
   module Middleware
     # Include in a middleware subclass that needs content-type negotiation.
     # Provides +content_types+ / +mime_types+ / +content_type_for+ /
-    # +content_type+ resolved from +config.content_types+ and
+    # +media_type_for+ / +content_type+ resolved from +config.content_types+ and
     # +config.format+ — so the consuming middleware's +Options+ Data class
     # must declare both fields. Warms those caches on the parent instance
     # at initialization so per-request +dup+s inherit them rather than
@@ -19,6 +19,9 @@ module Grape
     # Opt-in: plain +Grape::Middleware::Base+ subclasses that don't need
     # content-type-aware helpers don't pay for them.
     module PrecomputedContentTypes
+      # Grape's own media type for each built-in format, under both spellings.
+      DEFAULT_CONTENT_TYPES = Grape::ContentTypes.lookup_for(Grape::ContentTypes::DEFAULTS)
+
       def initialize(app, **options)
         super
         content_types
@@ -37,8 +40,17 @@ module Grape
         content_types_lookup[format]
       end
 
+      # The media type to label a response rendered in +format+ with: the one
+      # this API declares for it, or else Grape's own -- +api_format :txt+ in
+      # a +format :json+ API renders text/plain. #content_type_for stays nil
+      # for a format the API does not declare, since negotiation asks it
+      # whether the API supports the format at all.
+      def media_type_for(format)
+        content_type_for(format) || DEFAULT_CONTENT_TYPES[format]
+      end
+
       def content_type
-        content_type_for(env[Grape::Env::API_FORMAT] || config.format) || 'text/html'
+        media_type_for(env[Grape::Env::API_FORMAT] || config.format) || 'text/html'
       end
 
       private
