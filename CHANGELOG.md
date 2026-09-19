@@ -35,6 +35,7 @@
 * [#2958](https://github.com/ruby-grape/grape/pull/2958): Answer a `HEAD` request for a path no route matches without a body - [@ericproulx](https://github.com/ericproulx).
 * [#2953](https://github.com/ruby-grape/grape/pull/2953): Answer an `error!` String message with its own status instead of a `500` when the route names a `failure` entity for that status - [@ericproulx](https://github.com/ericproulx).
 * [#2955](https://github.com/ruby-grape/grape/pull/2955): Reject a value that is not an Array, and a member of none of the types, in a collection with multiple member types instead of passing them on as `nil` and `InvalidValue` - [@ericproulx](https://github.com/ericproulx).
+* [#2957](https://github.com/ruby-grape/grape/pull/2957): Reject an element that is not a Hash in an Array param given a block, and stop `declared` raising on a value that is not a Hash where nested params are declared - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

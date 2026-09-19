@@ -72,8 +72,13 @@ module Grape
       memo_key = build_memo_key(params_nested_path, parent, renamed_params)
       passed_children = passed_params[parent] || passed_params.class.new
       nested_path = nested_path_for(params_nested_path, parent)
+      # A value that is neither a Hash nor an Array where children are declared
+      # -- left unvalidated by a +given+ whose dependency is not met, say -- is
+      # returned as it came in, as #recursive_declared returns an element like
+      # it.
+      has_passed_children = !passed_children.respond_to?(:any?) || passed_children.any?
 
-      memo[memo_key] = handle_passed_param(nested_path, route_params:, has_passed_children: passed_children.any?) do
+      memo[memo_key] = handle_passed_param(nested_path, route_params:, has_passed_children:) do
         recursive_declared(
           passed_children,
           declared_params: children,

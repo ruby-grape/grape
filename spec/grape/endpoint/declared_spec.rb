@@ -917,10 +917,35 @@ describe Grape::Endpoint do
       expect(JSON.parse(last_response.body)).to eq('items' => [nil, { 'id' => 1, 'name' => nil }, ''])
     end
 
-    it 'returns the elements an Array of optional params lets through as they came in' do
-      post_with_json '/tags', tags: ['x', 1, { label: 'y', junk: 3 }]
+    it 'returns the blank elements an Array of optional params lets through as they came in' do
+      post_with_json '/tags', tags: [' ', false, { label: 'y', junk: 3 }]
       expect(last_response.status).to eq(201)
-      expect(JSON.parse(last_response.body)).to eq('tags' => ['x', 1, { 'label' => 'y' }])
+      expect(JSON.parse(last_response.body)).to eq('tags' => [' ', false, { 'label' => 'y' }])
+    end
+  end
+
+  describe 'a value that is not a Hash where nested params are declared' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+
+        params do
+          optional :shipping, type: Grape::API::Boolean
+          given :shipping do
+            optional :address, type: Hash do
+              optional :city, type: String
+            end
+          end
+        end
+        post('/') { declared(params) }
+      end
+    end
+
+    # The given's dependency is not met, so nothing validates address.
+    it 'returns it as it came in' do
+      post_with_json '/', address: 'somewhere'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('shipping' => nil, 'address' => 'somewhere')
     end
   end
 end

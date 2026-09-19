@@ -917,7 +917,7 @@ describe Grape::Validations::ParamsScope do
         post '/lines', { lines: [[{ name: 'x' }]] }.to_json, 'CONTENT_TYPE' => 'application/json'
 
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('lines[0][name] is missing, lines[0][name] is invalid')
+        expect(last_response.body).to eq('lines[0] is invalid, lines[0][name] is missing, lines[0][name] is invalid')
       end
 
       it 'rejects elements wrapped in several extra arrays' do
@@ -930,6 +930,39 @@ describe Grape::Validations::ParamsScope do
         post '/lines', { lines: [[]] }.to_json, 'CONTENT_TYPE' => 'application/json'
 
         expect(last_response.status).to eq(400)
+      end
+    end
+
+    context 'when the request nests its arrays deeper than a declaration of optional params' do
+      before do
+        subject.params do
+          requires :orders, type: Array do
+            optional :lines, type: Array do
+              optional :sku, type: String
+            end
+          end
+        end
+        subject.post('/orders') { declared(params) }
+      end
+
+      it 'accepts the declared shape' do
+        post '/orders', { orders: [{ lines: [{ sku: 'a' }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'rejects elements wrapped in an extra array' do
+        post '/orders', { orders: [[{ lines: 5 }]] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('orders[0] is invalid')
+      end
+
+      it 'rejects an element of the nested Array that is not a Hash' do
+        post '/orders', { orders: [{ lines: [{ sku: 'a' }, 'b'] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('orders[0][lines][1] is invalid')
       end
     end
 

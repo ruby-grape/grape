@@ -3,12 +3,26 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### An Array param given a block rejects elements that are not a Hash
+
+The block of `requires :items, type: Array do ... end` declares the keys of each element, and an element that is not a Hash now answers `400` with `items[1] is invalid` ([#2957](https://github.com/ruby-grape/grape/pull/2957)). It used to fail only where the block required a key of it, so a block whose params are all optional let a String, a number or a nested Array through to the endpoint, and an Array nested one level too deep in a nested Array scope passed validation and then made `declared` raise. A blank element — `nil`, `''`, `false`, `[]`, `{}` — is still passed over.
+
+Where a block does require a key, the element's own error now comes first:
+
+```
+# Before
+items[0][key] is missing
+# After
+items[0] is invalid, items[0][key] is missing
+```
+
+An API that accepts elements of other shapes in the same list should declare the param without a block (`type: Array`) and check the elements itself.
+
 #### A collection with multiple member types rejects what it cannot coerce
 
 A param declared as a collection whose members may be of several types — `type: Array[Integer, String]`, or such a collection listed in `types:` — is now validated the way a collection of one type is ([#2955](https://github.com/ruby-grape/grape/pull/2955)). A value that is not an Array, and an Array holding a member none of the types accepts, answer `400` with `is invalid`. The first used to reach the endpoint as `nil`, even under `requires`, and the second with an internal `Grape::Validations::Types::InvalidValue` object where the member was. A `nil` value or an empty String is still `nil`.
 
 A `coerce_with` method given to such a param is now handed every value, as it is for `types:`, instead of only an Array. A method that splits a String into the collection works now; one that only ever expected an Array may raise on a String, which answers `400`.
-
 #### A route's failure entity no longer presents a String error message
 
 An entity named for a status in a route's `failure` (or `http_codes`) is now applied to a structured `error!` message only — a Hash or an object — and a String message renders as it does without one ([#2953](https://github.com/ruby-grape/grape/pull/2953)). An entity exposing attributes cannot read any off a String, so `error!('Unauthorized', 401)` under `desc failure: [[401, 'Unauthorized', API::Error]]` raised while rendering and was answered with a `500`; it now answers `401` with the message. An entity written to take the String itself is no longer handed one; give it a Hash to expose from instead:
