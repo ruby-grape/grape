@@ -3,6 +3,21 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### Every `middleware` entry ends in its block
+
+Each entry `API.middleware` returns now ends in the block its `use`, `insert`, `insert_before` or `insert_after` was given, `nil` when there was none ([#2967](https://github.com/ruby-grape/grape/pull/2967)). A Proc passed as the last argument used to be taken for the block, so `use SomeMiddleware, ->(env) { ... }` built the middleware without its callable and raised `ArgumentError`.
+
+```ruby
+use SomeMiddleware, 'abc'
+
+# Before
+API.middleware # => [[:use, SomeMiddleware, 'abc']]
+# After
+API.middleware # => [[:use, SomeMiddleware, 'abc', nil]]
+```
+
+Code that reads these entries should take the last element as the block.
+
 #### Minimum required Ruby is now 3.3.1
 
 Grape no longer supports Ruby 3.3.0; 3.3.1 is now the minimum (`required_ruby_version = '>= 3.3.1'`) ([#2966](https://github.com/ruby-grape/grape/pull/2966)). Ruby 3.3.0 rejects forwarding an anonymous parameter (`*`, `**`, `&`) from inside a block, which Grape does, so Grape could not be loaded on it; 3.3.1 fixed that. Upgrade your runtime to Ruby 3.3.1 or newer before bumping Grape.

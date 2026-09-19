@@ -80,14 +80,13 @@ module Grape
         middlewares.push(middleware)
       end
 
+      # Each spec ends in the block its operation was given, +nil+ when there
+      # was none. Telling the block apart by its class would take a Proc passed
+      # as the last argument, such as a callable the middleware is configured
+      # with, for the block.
       def merge_with(middleware_specs)
-        middleware_specs.each do |operation, klass, *args|
-          if args.last.is_a?(Proc)
-            last_proc = args.pop
-            public_send(operation, klass, *args, &last_proc)
-          else
-            public_send(operation, klass, *args)
-          end
+        middleware_specs.each do |operation, *args, block|
+          public_send(operation, *args, &block)
         end
       end
 
@@ -100,7 +99,7 @@ module Grape
       end
 
       # @description Add middlewares with :use operation to the stack. Store others with :insert_* operation for later
-      # @param [Array] other_specs An array of middleware specifications (e.g. [[:use, klass], [:insert_before, *args]])
+      # @param [Array] other_specs An array of middleware specifications (e.g. [[:use, klass, nil], [:insert_before, *args, block]])
       def concat(other_specs)
         use, not_use = other_specs.partition { |o| o.first == :use }
         others << not_use

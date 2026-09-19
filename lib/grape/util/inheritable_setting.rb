@@ -442,9 +442,9 @@ module Grape
 
       # Middleware specs recorded by the middleware DSL (+use+, +insert+,
       # +insert_before+, +insert_after+; see DSL::Middleware), one
-      # [operation, *arguments] Array per registration, outermost scope
-      # first. Record them with #add_middleware; the backing store is an
-      # internal detail.
+      # [operation, *arguments, block] Array per registration, the block +nil+
+      # when none was given, outermost scope first. Record them with
+      # #add_middleware; the backing store is an internal detail.
       def middleware
         stacked(:middleware)
       end

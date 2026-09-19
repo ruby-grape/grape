@@ -1764,7 +1764,7 @@ describe Grape::API do
     describe '.middleware' do
       it 'includes middleware arguments from settings' do
         subject.use phony_middleware, 'abc', 123
-        expect(subject.middleware).to eql [[:use, phony_middleware, 'abc', 123]]
+        expect(subject.middleware).to eql [[:use, phony_middleware, 'abc', 123, nil]]
       end
 
       it 'includes all middleware from stacked settings' do
@@ -1773,9 +1773,9 @@ describe Grape::API do
         subject.use phony_middleware, 'foo'
 
         expect(subject.middleware).to eql [
-          [:use, phony_middleware, 123],
-          [:use, phony_middleware, 'abc'],
-          [:use, phony_middleware, 'foo']
+          [:use, phony_middleware, 123, nil],
+          [:use, phony_middleware, 'abc', nil],
+          [:use, phony_middleware, 'foo', nil]
         ]
       end
     end
@@ -1783,7 +1783,7 @@ describe Grape::API do
     describe '.use' do
       it 'adds middleware' do
         subject.use phony_middleware, 123
-        expect(subject.middleware).to eql [[:use, phony_middleware, 123]]
+        expect(subject.middleware).to eql [[:use, phony_middleware, 123, nil]]
       end
 
       it 'does not show up outside the namespace' do
@@ -1795,8 +1795,8 @@ describe Grape::API do
           inner_middleware = middleware
         end
 
-        expect(subject.middleware).to eql [[:use, phony_middleware, 123]]
-        expect(inner_middleware).to eql [[:use, phony_middleware, 123], [:use, phony_middleware, 'abc']]
+        expect(subject.middleware).to eql [[:use, phony_middleware, 123, nil]]
+        expect(inner_middleware).to eql [[:use, phony_middleware, 123, nil], [:use, phony_middleware, 'abc', nil]]
       end
 
       it 'calls the middleware' do
@@ -1827,6 +1827,50 @@ describe Grape::API do
 
           get '/'
           expect(last_response.body).to eql ['in-time'].inspect
+        end
+      end
+
+      # Regression: a Proc passed as the last argument was taken for the block,
+      # so a middleware configured with a callable was built without it.
+      context 'when the last argument is a Proc' do
+        let(:callable_middleware) do
+          Class.new do
+            def initialize(app, callable, &block)
+              @app = app
+              @callable = callable
+              @block = block
+            end
+
+            def call(env)
+              env['callable_middleware'] = [@callable.call, @block&.call].compact.join(' and ')
+              @app.call(env)
+            end
+          end
+        end
+
+        it 'hands the Proc to the middleware as an argument' do
+          subject.use callable_middleware, -> { 'argument' }
+          subject.get('/') { env['callable_middleware'] }
+
+          get '/'
+          expect(last_response.body).to eq('argument')
+        end
+
+        it 'hands the middleware a block given alongside it' do
+          subject.use(callable_middleware, -> { 'argument' }) { 'block' }
+          subject.get('/') { env['callable_middleware'] }
+
+          get '/'
+          expect(last_response.body).to eq('argument and block')
+        end
+
+        it 'hands the Proc to a middleware inserted before another as an argument' do
+          subject.use phony_middleware
+          subject.insert_before phony_middleware, callable_middleware, -> { 'argument' }
+          subject.get('/') { env['callable_middleware'] }
+
+          get '/'
+          expect(last_response.body).to eq('argument')
         end
       end
     end
