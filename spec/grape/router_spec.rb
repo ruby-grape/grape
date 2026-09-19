@@ -328,6 +328,17 @@ describe Grape::Router do
       expect(last_response.status).to eq(404)
     end
 
+    # No endpoint's stack answers a path nothing matched, so none of their
+    # Rack::Head middlewares is there to strip the body.
+    it 'answers HEAD to a path no route matches without a body' do
+      head '/nothing/here'
+      expect(last_response.status).to eq(404)
+      expect(last_response.body).to be_empty
+
+      get '/nothing/here'
+      expect(last_response.body).to eq('404 Not Found')
+    end
+
     context 'when every path has a route for the method' do
       let(:app) do
         Class.new(Grape::API) do
