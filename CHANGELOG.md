@@ -42,6 +42,7 @@
 * [#2963](https://github.com/ruby-grape/grape/pull/2963): Stop reading a setting on an API class, such as `MyAPI.version`, from discarding the compiled API and re-mounting everything mounted in it - [@ericproulx](https://github.com/ericproulx).
 * [#2964](https://github.com/ruby-grape/grape/pull/2964): Stop keeping every instance a mounted API was re-mounted with each time a later declaration refreshed the mounts - [@ericproulx](https://github.com/ericproulx).
 * [#2965](https://github.com/ruby-grape/grape/pull/2965): Correct two README examples whose shown response did not match their request - [@ericproulx](https://github.com/ericproulx).
+* [#2970](https://github.com/ruby-grape/grape/pull/2970): Correct the README on the response format of a route whose requirement admits dots - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
