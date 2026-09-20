@@ -26,6 +26,13 @@ module Grape
 
       SPECIAL_JSON = [JSON, Array[JSON]].freeze
 
+      # What {#validated_params} returns for a scope that should not be
+      # validated. A plain +false+ would be indistinguishable from params of
+      # that value, which +map_params+ can hand back for an element a request
+      # set to +false+.
+      NOT_VALIDATED = Object.new.freeze
+      private_constant :NOT_VALIDATED
+
       class Attr
         attr_reader :key, :scope
 
@@ -80,6 +87,9 @@ module Grape
         @type             = type
         @group            = group
         @dependent_on     = dependent_on
+        # See #independent?. Settled here because a scope's block may declare
+        # children, and each of them asks its parent.
+        @independent      = !dependent_on && (parent.nil? || parent.independent?)
         # Must be an ivar: push_declared_params is dispatched on self during
         # instance_eval, so local variables from initialize are unreachable.
         # configure_declared_params consumes it and clears @declared_params to nil.
@@ -104,6 +114,8 @@ module Grape
       # @return [Boolean] whether or not this entire scope needs to be
       #   validated
       def should_validate?(parameters)
+        return !NOT_VALIDATED.equal?(validated_params(parameters)) if @independent
+
         scoped_params = params(parameters)
 
         return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
@@ -111,6 +123,15 @@ module Grape
         return true if @parent.nil?
 
         @parent.should_validate?(parameters)
+      end
+
+      # Whether this scope and every scope above it declare no dependency, so
+      # #should_validate? has nothing to ask but whether each of them was given
+      # params -- and +qualifying_params+, which only a +given+ scope ever
+      # stores, cannot stand in for any of them.
+      # @return [Boolean]
+      def independent?
+        @independent
       end
 
       def meets_dependency?(params, request_params)
@@ -221,6 +242,29 @@ module Grape
       end
 
       protected
+
+      # This scope's params, once it and every scope above it has been found
+      # worth validating; NOT_VALIDATED as soon as one of them is not.
+      #
+      # Only for an independent chain (see #independent?), where every scope
+      # answers from its own params alone: each one is then resolved from the
+      # one above rather than from the root, so the walk costs one +map_params+
+      # per scope instead of one per scope per level. Nothing here has a side
+      # effect, so checking from the root down rather than from here up reaches
+      # the same answer.
+      def validated_params(parameters)
+        if @parent
+          scoped = @parent.validated_params(parameters)
+          return scoped if NOT_VALIDATED.equal?(scoped)
+
+          scoped = map_params(scoped, @element) if @element
+        else
+          scoped = parameters
+        end
+        return NOT_VALIDATED if @optional && (scoped.blank? || all_element_blank?(scoped))
+
+        scoped
+      end
 
       # Adds a parameter declaration to our list of validations.
       # @param attrs [Array] (see Grape::DSL::Parameters#requires)
@@ -471,7 +515,15 @@ module Grape
         @api.inheritable_setting.add_validation(validator_instance)
       end
 
+      # Only ever asked about params that are not blank (see #should_validate?
+      # and #validated_params), and a Hash that is not blank is never all
+      # blank: what +all?+ yields for it is a [key, value] pair, an Array of
+      # two, which +blank?+ is false for. Asking anyway walked the Hash and
+      # built one of those Arrays per entry, for every optional Hash scope of
+      # every request.
       def all_element_blank?(scoped_params)
+        return false if scoped_params.is_a?(::Hash)
+
         scoped_params.respond_to?(:all?) && scoped_params.all?(&:blank?)
       end
     end

@@ -178,8 +178,26 @@ module Grape
       @params_builder ||= Grape::ParamsBuilder.params_builder_for(@build_params_with || Grape.config[:param_builder])
     end
 
+    # Whether the request can have form params at all. Rack::Request#params is
+    # the query params merged with the form params, and a request that carries
+    # no body has none to merge -- but finding that out costs Rack a
+    # CONTENT_TYPE parse and an empty Hash written back into the env, on every
+    # request that reads params without sending a body. The env answers it
+    # first: form params already read, by Rack or by the formatter's parsers,
+    # are memoized under Rack's own key, and without them only a body could
+    # hold any. The method is deliberately not part of the test -- Rack reads
+    # a form body whatever the method says.
+    def form_params?
+      return true if env.key?(Rack::RACK_REQUEST_FORM_HASH)
+
+      env['CONTENT_LENGTH'].to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
+    end
+
     def make_params
-      params = params_builder.call(rack_params)
+      # A copy, because that is what the merge Rack::Request#params makes
+      # hands over: the params builder, and everything that writes to the
+      # params after it, must not reach the query params Rack memoized.
+      params = params_builder.call(form_params? ? rack_params : self.GET.dup)
       filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
       return params if filtered.blank?
 

@@ -13,6 +13,9 @@ module Grape
 
       ALL_MEDIA_TYPES = '*/*'
 
+      # The query param that names the format. See #format_from_query.
+      FORMAT_PARAM = 'format'
+
       # @api private
       # The format an Accept header asks for out of +mime_types+, or nil.
       # Callers scrub the header first.
@@ -269,9 +272,17 @@ module Grape
 
       # +?format=+ can only be there when there is a query string at all, so
       # the common query-less request skips parsing one.
+      #
+      # And a query string that spells neither +format+ nor a percent-escape
+      # cannot hold that key either: Rack splits the string on +&+ and +=+ and
+      # then unescapes each key, and unescaping only ever rewrites +%XX+ (or a
+      # +++, which becomes a space). So the parse -- the most expensive thing
+      # a request with a query string does, and one the endpoint may never ask
+      # for -- is left to whoever reads the params.
       def format_from_query
         query_string = env[Rack::QUERY_STRING]
         return if query_string.nil? || query_string.empty?
+        return unless query_string.include?(FORMAT_PARAM) || query_string.include?('%')
 
         query_params['format']
       end

@@ -547,6 +547,26 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq('{"a":[]}')
     end
 
+    # A scope two levels under one that was not given must not be validated
+    # either: the answer belongs to the whole chain, not to the nearest scope.
+    it 'does not validate a required scope nested in an optional scope that was not given' do
+      subject.params do
+        optional :a, type: Hash do
+          requires :b, type: Hash do
+            requires :c, type: Integer
+          end
+        end
+      end
+      subject.post('/nested_optional') { declared(params).to_json }
+
+      post '/nested_optional', {}.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+
+      post '/nested_optional', { a: { b: {} } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('a[b][c] is missing')
+    end
+
     it 'errors with an unsupported type' do
       expect do
         subject.params do

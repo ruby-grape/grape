@@ -76,7 +76,40 @@ describe Grape::Request do
       end
     end
 
+    # Rack reads a form body whatever the method says, so the params of a GET
+    # that sends one are still the query params merged with it.
+    context 'when a GET carries a form body' do
+      let(:env) do
+        Rack::MockRequest.env_for('/?a=query', method: Rack::GET, input: 'b=body',
+                                               'CONTENT_TYPE' => 'application/x-www-form-urlencoded')
+      end
+
+      it 'merges the form params into the query params' do
+        expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new('a' => 'query', 'b' => 'body'))
+      end
+    end
+
+    context 'when the query string is nested deeper than Rack parses' do
+      let(:env) { Rack::MockRequest.env_for("/?foo#{'[a]' * Rack::Utils.param_depth_limit}=bar") }
+
+      it 'raises a Grape::Exceptions::RequestError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+      end
+    end
+
+    context 'when the query string names one key as both a value and a hash' do
+      let(:env) { Rack::MockRequest.env_for('/?x[y]=1&x[y]z=2') }
+
+      it 'raises a Grape::Exceptions::RequestError' do
+        expect { request.params }.to raise_error(Grape::Exceptions::RequestError)
+      end
+    end
+
+    # The errors below are raised while a body is parsed, so the request
+    # carries one: Grape only asks Rack for form params when it does.
     context 'when rack_params raises an EOFError' do
+      let(:method) { Rack::POST }
+
       before { allow(request).to receive(:rack_params).and_raise(EOFError) }
 
       it 'raises a Grape::Exceptions::RequestError' do
@@ -89,6 +122,7 @@ describe Grape::Request do
     # On Rack 2, there is no such module and each exception class must be tested individually.
     if defined?(Rack::BadRequest)
       context 'when rack_params raises a custom error that includes Rack::BadRequest' do
+        let(:method) { Rack::POST }
         let(:custom_rack_error) do
           Class.new(StandardError) { include Rack::BadRequest }
         end
@@ -101,6 +135,8 @@ describe Grape::Request do
       end
     else
       context 'when rack_params raises a Rack::Multipart::MultipartPartLimitError' do
+        let(:method) { Rack::POST }
+
         before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartPartLimitError) }
 
         it 'raises a Grape::Exceptions::RequestError' do
@@ -109,6 +145,8 @@ describe Grape::Request do
       end
 
       context 'when rack_params raises a Rack::Multipart::MultipartTotalPartLimitError' do
+        let(:method) { Rack::POST }
+
         before { allow(request).to receive(:rack_params).and_raise(Rack::Multipart::MultipartTotalPartLimitError) }
 
         it 'raises a Grape::Exceptions::RequestError' do
@@ -117,6 +155,8 @@ describe Grape::Request do
       end
 
       context 'when rack_params raises a Rack::Utils::ParameterTypeError' do
+        let(:method) { Rack::POST }
+
         before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::ParameterTypeError) }
 
         it 'raises a Grape::Exceptions::RequestError' do
@@ -125,6 +165,8 @@ describe Grape::Request do
       end
 
       context 'when rack_params raises a Rack::Utils::InvalidParameterError' do
+        let(:method) { Rack::POST }
+
         before { allow(request).to receive(:rack_params).and_raise(Rack::Utils::InvalidParameterError) }
 
         it 'raises a Grape::Exceptions::RequestError' do
@@ -133,6 +175,8 @@ describe Grape::Request do
       end
 
       context 'when rack_params raises a Rack::QueryParser::ParamsTooDeepError' do
+        let(:method) { Rack::POST }
+
         before { allow(request).to receive(:rack_params).and_raise(Rack::QueryParser::ParamsTooDeepError) }
 
         it 'raises a Grape::Exceptions::RequestError' do

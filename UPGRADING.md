@@ -3,6 +3,23 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A query string Grape does not parse no longer decides the response
+
+Grape parsed the query string of every request that had one, only to look for a `?format=` override ([#2972](https://github.com/ruby-grape/grape/pull/2972)). It now parses it only when the string could name that param, and leaves it to whoever reads the params otherwise.
+
+A query string Rack refuses to parse -- nested past `Rack::Utils.param_depth_limit`, naming one key as both a value and a hash, or carrying more pairs than the parser accepts -- therefore no longer answers `400` on an endpoint that reads no params. Such a request is answered the way any other request for that route is:
+
+```ruby
+get('/ping') { 'pong' }
+
+# Before
+GET /ping?a[a][a]...=1 # => 400
+# After
+GET /ping?a[a][a]...=1 # => 200
+```
+
+An endpoint that reads the params -- one with a `params` block, or whose code asks for `params` -- still answers `400`, from the parse it asked for.
+
 #### A `redirect` body you pass carries the API's content type
 
 A body given to `redirect` with `body:` is rendered by the API's formatter, and the response now carries that format's content type instead of `text/plain` ([#2968](https://github.com/ruby-grape/grape/pull/2968)). On a JSON API, `redirect '/there', body: { message: 'moved' }` sent `{"message":"moved"}` labelled `text/plain`; it is now labelled `application/json`. The message Grape generates when no body is given is still plain text under `text/plain`.
