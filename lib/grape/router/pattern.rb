@@ -27,7 +27,13 @@ module Grape
         @version = version
         @requirements = requirements
         @path = PatternCache[[build_path_from_pattern(@origin, anchor), suffix]]
-        @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(version, requirements))
+        # +cache: false+: Mustermann memoizes what it matched in two
+        # ObjectSpace::WeakKeyMaps per pattern, one for +match+ and one for
+        # +peek_match+. Grape calls neither -- it matches through the compiled
+        # +to_regexp+, and the one method it does reach Mustermann for,
+        # +params+, reads the captures straight off that regexp without
+        # touching either map. Both were allocated per route and never read.
+        @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(version, requirements), cache: false)
         @to_regexp = @pattern.to_regexp
         @captures = @to_regexp.names.any?
       end

@@ -45,6 +45,7 @@
 * [#2967](https://github.com/ruby-grape/grape/pull/2967): Hand a Proc passed as the last argument to `use`, `insert_before` or `insert_after` to the middleware instead of taking it for its block - [@ericproulx](https://github.com/ericproulx).
 * [#2968](https://github.com/ruby-grape/grape/pull/2968): Label a `redirect` body the caller supplies with the API format it is rendered in instead of `text/plain` - [@ericproulx](https://github.com/ericproulx).
 * [#2972](https://github.com/ruby-grape/grape/pull/2972): Stop the request path resolving params it was not asked for - [@ericproulx](https://github.com/ericproulx).
+* [#2973](https://github.com/ruby-grape/grape/pull/2973): Stop allocating two match caches per route that Mustermann is never asked to use - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
