@@ -193,11 +193,21 @@ module Grape
       env['CONTENT_LENGTH'].to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
     end
 
+    # +self.GET+ is the query hash Rack memoized in the env, not the copy the
+    # merge in Rack::Request#params used to hand over. Every builder Grape
+    # ships constructs a new object, so there is nothing to copy; one that
+    # returns its argument would otherwise let the writes that follow --
+    # routing args, coercions, defaults -- reach the env.
+    def build_params
+      return params_builder.call(rack_params) if form_params?
+
+      query_hash = self.GET
+      built = params_builder.call(query_hash)
+      built.equal?(query_hash) ? built.dup : built
+    end
+
     def make_params
-      # A copy, because that is what the merge Rack::Request#params makes
-      # hands over: the params builder, and everything that writes to the
-      # params after it, must not reach the query params Rack memoized.
-      params = params_builder.call(form_params? ? rack_params : self.GET.dup)
+      params = build_params
       filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
       return params if filtered.blank?
 
