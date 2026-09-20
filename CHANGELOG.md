@@ -2,6 +2,7 @@
 
 #### Features
 
+* [#2978](https://github.com/ruby-grape/grape/pull/2978): Add Ractor mode (Ruby 4.0 and later): `Grape.ractor!` and `MyAPI.finalize!` freeze a compiled API, and the process-wide state a request reads, so that it can be served from non-main Ractors - [@ericproulx](https://github.com/ericproulx).
 * [#3019](https://github.com/ruby-grape/grape/pull/3019): Add `API.eager_load!` to compile an API and load its I18n translations at boot - [@ericproulx](https://github.com/ericproulx).
 * [#3022](https://github.com/ruby-grape/grape/pull/3022): Compile the APIs mounted in a Rails application's routes at boot when it eager loads - [@ericproulx](https://github.com/ericproulx).
 * [#3052](https://github.com/ruby-grape/grape/pull/3052): Add `Grape::ErrorFormatter::ProblemJson` to answer errors as RFC 9457 problem details - [@ericproulx](https://github.com/ericproulx).
