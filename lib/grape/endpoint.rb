@@ -11,6 +11,12 @@ module Grape
     include Grape::DSL::Headers
     include Grape::DSL::InsideRoute
 
+    # The innermost app of every endpoint's Rack stack. The endpoint to run
+    # comes out of the env, so the lambda holds no state and one of them serves
+    # every stack, rather than one being allocated per endpoint.
+    RUN_ENDPOINT = ->(env) { env[Grape::Env::API_ENDPOINT].run }
+    private_constant :RUN_ENDPOINT
+
     attr_reader :env, :request, :source, :options, :endpoints
     attr_accessor :options_route_enabled
 
@@ -163,8 +169,10 @@ module Grape
       "#{self.class} in '#{route.origin}' endpoint"
     end
 
-    protected
-
+    # Serve the request the endpoint's Rack stack was entered with: its
+    # +before+ filters, its validations, the route block, its +after+ and
+    # +finally+ filters, answered as a Rack triplet. The innermost app of that
+    # stack calls it, so it expects #call! to have put the env in place first.
     def run
       instrument_run do
         @request = Grape::Request.new(env, build_params_with: @build_params_with)
@@ -200,6 +208,8 @@ module Grape
         end
       end
     end
+
+    protected
 
     def execute
       return unless source
@@ -404,7 +414,7 @@ module Grape
                 parsers: inheritable_setting.parsers
 
       builder = stack.build
-      builder.run ->(env) { env[Grape::Env::API_ENDPOINT].run }
+      builder.run RUN_ENDPOINT
       builder.to_app
     end
 

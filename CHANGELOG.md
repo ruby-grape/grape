@@ -47,6 +47,7 @@
 * [#2972](https://github.com/ruby-grape/grape/pull/2972): Stop the request path resolving params it was not asked for - [@ericproulx](https://github.com/ericproulx).
 * [#2973](https://github.com/ruby-grape/grape/pull/2973): Stop allocating two match caches per route that Mustermann is never asked to use - [@ericproulx](https://github.com/ericproulx).
 * [#2977](https://github.com/ruby-grape/grape/pull/2977): Stop copying the query params of a request whose params builder builds a new object - [@ericproulx](https://github.com/ericproulx).
+* [#2974](https://github.com/ruby-grape/grape/pull/2974): Run every endpoint's Rack stack through one shared lambda instead of one allocated per endpoint, and make `Grape::Endpoint#run` public - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
