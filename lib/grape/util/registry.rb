@@ -8,7 +8,7 @@ module Grape
         return if short_name.nil?
 
         warn "#{short_name} is already registered with class #{registry[short_name]}. It will be overridden globally with the following: #{klass.name}" if registry.key?(short_name)
-        registry[short_name] = registry[short_name.to_sym] = klass
+        @registry = registry.merge(short_name => klass, short_name.to_sym => klass).freeze
       end
 
       private
@@ -29,8 +29,15 @@ module Grape
       #
       # +register+ derives the short name as a String, so the Symbol is the
       # alias.
+      #
+      # Registration replaces the Hash instead of writing into it, and freezes
+      # the replacement: a registry is written when a formatter, parser,
+      # params builder, validator or versioner class is defined, and from then
+      # on it is only ever looked up -- on the request path, at that. Nothing
+      # holding a registry can find it changed underneath, and nothing can
+      # write to one without going through +register+.
       def registry
-        @registry ||= {}
+        @registry ||= {}.freeze
       end
     end
   end
