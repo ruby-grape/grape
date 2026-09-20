@@ -76,6 +76,35 @@ describe Grape::Request do
       end
     end
 
+    # Rack memoizes the query params in the env, and that is the hash Grape
+    # hands the params builder. A builder that returns its argument would
+    # otherwise let the writes that follow -- here the routing args -- reach
+    # the env.
+    context 'when the params builder returns the hash it was given' do
+      let(:passthrough_builder) do
+        Class.new(Grape::ParamsBuilder::Base) do
+          def self.call(params)
+            params
+          end
+        end
+      end
+
+      let(:options) { default_options.merge('grape.routing_args' => { c: 'ccc' }) }
+      let(:request) { described_class.new(env, build_params_with: :passthrough) }
+
+      before do
+        stub_const('Passthrough', passthrough_builder)
+        Grape::ParamsBuilder.register(Passthrough)
+      end
+
+      after { Grape::ParamsBuilder.deregister(:passthrough) }
+
+      it 'merges the routing args without touching the query params Rack memoized' do
+        expect(request.params).to eq('a' => '123', 'b' => 'xyz', c: 'ccc')
+        expect(env[Rack::RACK_REQUEST_QUERY_HASH]).to eq('a' => '123', 'b' => 'xyz')
+      end
+    end
+
     # Rack reads a form body whatever the method says, so the params of a GET
     # that sends one are still the query params merged with it.
     context 'when a GET carries a form body' do
