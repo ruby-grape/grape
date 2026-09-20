@@ -49,6 +49,7 @@
 * [#2977](https://github.com/ruby-grape/grape/pull/2977): Stop copying the query params of a request whose params builder builds a new object - [@ericproulx](https://github.com/ericproulx).
 * [#2974](https://github.com/ruby-grape/grape/pull/2974): Run every endpoint's Rack stack through one shared lambda instead of one allocated per endpoint, and make `Grape::Endpoint#run` public - [@ericproulx](https://github.com/ericproulx).
 * [#2975](https://github.com/ruby-grape/grape/pull/2975): Hold a static `values` or `except_values` collection as it came instead of behind a lambda that only hands it back - [@ericproulx](https://github.com/ericproulx).
+* [#2976](https://github.com/ruby-grape/grape/pull/2976): Replace a registry on registration instead of writing into it, so a registered formatter, parser, params builder, validator or versioner cannot be changed underneath a reader - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

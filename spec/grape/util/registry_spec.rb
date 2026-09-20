@@ -16,6 +16,10 @@ describe Grape::Util::Registry do
       def registry_get(key)
         registry[key]
       end
+
+      def registry_frozen?
+        registry.frozen?
+      end
     end
   end
 
@@ -82,6 +86,15 @@ describe Grape::Util::Registry do
         subject.register(test_class)
         expect(subject.registry_get(:test_class)).to eq(test_class)
         expect(subject.registry_get('test_class')).to eq(test_class)
+      end
+
+      it 'hands out a frozen registry before anything is registered' do
+        expect(subject.registry_frozen?).to be true
+      end
+
+      it 'hands out a frozen registry after registering' do
+        subject.register(test_class)
+        expect(subject.registry_frozen?).to be true
       end
     end
 
