@@ -105,6 +105,18 @@ describe Grape::Middleware::Formatter do
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
     end
 
+    # The query string is only parsed when it could name the format param, and
+    # a percent-escaped key is what unescaping turns back into that name.
+    it 'uses the format parameter when its name is percent-escaped' do
+      subject.call(Rack::PATH_INFO => '/info', Rack::QUERY_STRING => '%66ormat=json')
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:json)
+    end
+
+    it 'uses the default format when the query string names no format' do
+      subject.call(Rack::PATH_INFO => '/info', Rack::QUERY_STRING => 'formats[]=json&informat=xml&a=format')
+      expect(subject.env[Grape::Env::API_FORMAT]).to eq(:txt)
+    end
+
     it 'uses the default format if none is provided' do
       subject.call(Rack::PATH_INFO => '/info')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:txt)
@@ -118,6 +130,34 @@ describe Grape::Middleware::Formatter do
     it 'uses the file extension format if provided before headers' do
       subject.call(Rack::PATH_INFO => '/info.txt', 'HTTP_ACCEPT' => 'application/json')
       expect(subject.env[Grape::Env::API_FORMAT]).to eq(:txt)
+    end
+  end
+
+  # The query string is Rack's to parse, and it is parsed when someone asks for
+  # the params -- not to look for a format param that cannot be there.
+  context 'when the query string is one Rack would refuse to parse' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        get('/reads') { { n: params.size } }
+        get('/ignores') { { ok: true } }
+      end
+    end
+
+    def get_with_query(path, query)
+      env = Rack::MockRequest.env_for(path)
+      env[Rack::QUERY_STRING] = query
+      app.call(env)
+    end
+
+    it 'answers an endpoint that reads the params with 400' do
+      status, = get_with_query('/reads', "foo#{'[a]' * Rack::Utils.param_depth_limit}=bar")
+      expect(status).to eq(400)
+    end
+
+    it 'answers an endpoint that does not read them as it would any other request' do
+      status, = get_with_query('/ignores', "foo#{'[a]' * Rack::Utils.param_depth_limit}=bar")
+      expect(status).to eq(200)
     end
   end
 

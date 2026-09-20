@@ -184,8 +184,18 @@ module Grape
       # @param params [Hash] initial hash of parameters
       # @return hash of parameters relevant for the current scope
       # @api private
+      # Only a +given+ scope ever stores qualifying params, and a scope on an
+      # independent chain has none above it (see ParamsScope#independent?), so
+      # the lookup and the +presence+ test that follows it are skipped -- both
+      # of them, at every level, on every call.
       def params(params)
-        scoped = @parent ? (@parent.qualifying_params.presence || @parent.params(params)) : params
+        scoped = if @parent.nil?
+                   params
+                 elsif @independent
+                   @parent.params(params)
+                 else
+                   @parent.qualifying_params.presence || @parent.params(params)
+                 end
         @element ? map_params(scoped, @element) : scoped
       end
 
