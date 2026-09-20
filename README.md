@@ -28,7 +28,7 @@ The maintainers of Grape are working with Tidelift to deliver commercial support
 
 ## Installation
 
-Ruby 3.3 or newer is required.
+Ruby 3.3.1 or newer is required.
 
 Grape is available as a gem, to install it run:
 
@@ -125,7 +125,7 @@ Grape's [deprecator](https://api.rubyonrails.org/v7.1.0/classes/ActiveSupport/De
 ### All
 
 
-By default Grape will compile the routes on the first route, but it is possible to pre-load routes using the `compile!` method.
+By default Grape will compile the routes on the first request, but it is possible to pre-load routes using the `compile!` method.
 
 ```ruby
 Twitter::API.compile!
@@ -352,7 +352,7 @@ end
 ```ruby
 class BasicAPI < Grape::API
   desc 'Statuses index' do
-    params: (configuration[:entity] || API::Entities::Status).documentation
+    params((configuration[:entity] || API::Entities::Status).documentation)
   end
   params do
     requires :all, using: (configuration[:entity] || API::Entities::Status).documentation
@@ -467,7 +467,7 @@ Using this versioning strategy, clients should pass the desired version in the H
 
     curl -H Accept:application/vnd.twitter-v1+json http://localhost:9292/statuses/public_timeline
 
-By default, the first matching version is used when no `Accept` header is supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error is returned when no correct `Accept` header is supplied.
+By default, the first matching version is used when no `Accept` header is supplied. This behavior is similar to routing in Rails. To circumvent this default behavior, one could use the `:strict` option. When this option is set to `true`, a `406 Not Acceptable` error is returned when no correct `Accept` header is supplied and the `:cascade` option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
 
 When an invalid `Accept` header is supplied, a `406 Not Acceptable` error is returned if the `:cascade` option is set to `false`. Otherwise a `404 Not Found` error is returned by Rack if no other route matches.
 
@@ -540,7 +540,7 @@ desc 'Returns your public timeline.' do
   params  API::Entities::Status.documentation
   success API::Entities::Entity
   failure [[401, 'Unauthorized', 'Entities::Error']]
-  default { code: 500, message: 'InvalidRequest', model: Entities::Error }
+  default_response code: 500, message: 'InvalidRequest', model: Entities::Error
   named 'My named route'
   headers XAuthToken: {
             description: 'Validates your identity',
@@ -579,7 +579,9 @@ end
 Use `Grape.configure` to set up global settings at load time.
 Currently the configurable settings are:
 
-* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `Grape::Extensions::ActiveSupport::HashWithIndifferentAccess::ParamBuilder`.
+* `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `:hash_with_indifferent_access`.
+* `lint`: Checks every response against Rack's specification, defaults to `false`. See [Linting](#linting).
+* `warn_on_helper_overrides`: Warns when a helper method masks a `Grape::Endpoint` instance method, defaults to `false`.
 * `raise_rendering_errors`: Lets an error response that cannot be rendered propagate out of the middleware stack instead of being answered with a failsafe `500`, defaults to `false`. See [When the error response itself cannot be rendered](#when-the-error-response-itself-cannot-be-rendered).
 
 To change a setting value make sure that at some point during load time the following code runs
@@ -621,7 +623,7 @@ get :public_timeline do
 end
 ```
 
-Parameters are automatically populated from the request body on `POST`, `PUT` and `QUERY` for form input, JSON and XML content-types.
+Parameters are automatically populated from the request body on `POST`, `PUT`, `PATCH`, `DELETE` and `QUERY` for form input, JSON and XML content-types.
 
 The request:
 
@@ -657,7 +659,7 @@ In the case of conflict between either of:
 
 * route string parameters
 * `GET`, `POST` and `PUT` parameters
-* the contents of the request body on `POST` and `PUT`
+* the contents of the request body on `POST`, `PUT`, `PATCH`, `DELETE` and `QUERY`
 
 Route string parameters will have precedence.
 
@@ -675,6 +677,7 @@ class API < Grape::API
   get do
     params.color # instead of params[:color]
   end
+end
 ```
 
 The class can also be overridden on individual parameter blocks using `build_with` as follows.
@@ -846,7 +849,7 @@ curl -X GET -H "Content-Type: application/json" localhost:9292/parent/foo/bar
   "with_parent_namespaces": {
     "parent_name": "foo",
     "child_name": "bar"
-  },
+  }
 }
 ````
 
@@ -1120,7 +1123,7 @@ params do
     requires :url
   end
   optional :audio, type: Hash do
-    requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg], default: :mp3
+    requires :format, type: Symbol, values: [:mp3, :wav, :aac, :ogg]
   end
   mutually_exclusive :media, :audio
 end
@@ -1144,7 +1147,7 @@ end
 Default values are eagerly evaluated. Above `:non_random_number` will evaluate to the same number for each call to the endpoint of this `params` block. To have the default evaluate lazily with each request use a lambda, like `:random_number` above.
 
 Note that default values will be passed through to any validation options specified.
-The following example will always fail if `:color` is not explicitly provided.
+The following example raises `Grape::Exceptions::IncompatibleOptionValues` when the API is defined, since the default is not one of the allowed values.
 
 ```ruby
 params do
@@ -1188,7 +1191,7 @@ The following are all valid types, supported out of the box by Grape:
 
 ### Custom Types and Coercions
 
-Aside from the default set of supported types listed above, any class can be used as a type as long as an explicit coercion method is supplied. If the type implements a class-level `parse` method, Grape will use it automatically. This method must take one string argument and return an instance of the correct type, or return an instance of `Grape::Types::InvalidValue` which optionally accepts a message to be returned in the response.
+Aside from the default set of supported types listed above, any class can be used as a type as long as an explicit coercion method is supplied. If the type implements a class-level `parse` method, Grape will use it automatically. This method must take one string argument and return an instance of the correct type, or return an instance of `Grape::Validations::Types::InvalidValue` which optionally accepts a message to be returned in the response.
 
 ```ruby
 class Color
@@ -1200,12 +1203,12 @@ class Color
   def self.parse(value)
     return new(value) if %w[blue red green].include?(value)
 
-    Grape::Types::InvalidValue.new('Unsupported color')
+    Grape::Validations::Types::InvalidValue.new('Unsupported color')
   end
 end
 
 params do
-  requires :color, type: Color, default: Color.new('blue')
+  optional :color, type: Color, default: Color.new('blue')
   requires :more_colors, type: Array[Color] # Collections work
   optional :unique_colors, type: Set[Color] # Duplicates discarded
 end
@@ -1287,8 +1290,8 @@ get '/' do
   params[:json].inspect
 end
 
-client.get('/', json: '{"int":1}') # => "{:int=>1}"
-client.get('/', json: '[{"int":"1"}]') # => "[{:int=>1}]"
+client.get('/', json: '{"int":1}') # => '{"int" => 1}'
+client.get('/', json: '[{"int":"1"}]') # => '[{"int" => 1}]'
 
 client.get('/', json: '{"int":4}') # => HTTP 400
 client.get('/', json: '[{"int":4}]') # => HTTP 400
@@ -1392,7 +1395,7 @@ end
 
 Parameters can be nested using `group` or by calling `requires` or `optional` with a block.
 In the [above example](#parameter-validation-and-coercion), this means `params[:media][:url]` is required along with `params[:id]`, and `params[:audio][:format]` is required only if `params[:audio]` is present.
-With a block, `group`, `requires` and `optional` accept an additional option `type` which can be either `Array` or `Hash`, and defaults to `Array`. Depending on the value, the nested parameters will be treated either as values of a hash or as values of hashes in an array.
+With a block, `group`, `requires` and `optional` require an additional option `type`, which can be either `Array` or `Hash`; a block without one raises `Grape::Exceptions::MissingGroupType`. Depending on the value, the nested parameters will be treated either as values of a hash or as values of hashes in an array.
 
 ```ruby
 params do
@@ -1456,9 +1459,9 @@ The example below presents a typical case when parameters share common options.
 
 ```ruby
 params do
-  requires :first_name, type: String, regexp: /w+/, desc: 'First name', documentation: { in: 'body' }
-  optional :middle_name, type: String, regexp: /w+/, desc: 'Middle name', documentation: { in: 'body', x: { nullable: true } }
-  requires :last_name, type: String, regexp: /w+/, desc: 'Last name', documentation: { in: 'body' }
+  requires :first_name, type: String, regexp: /\w+/, desc: 'First name', documentation: { in: 'body' }
+  optional :middle_name, type: String, regexp: /\w+/, desc: 'Middle name', documentation: { in: 'body', x: { nullable: true } }
+  requires :last_name, type: String, regexp: /\w+/, desc: 'Last name', documentation: { in: 'body' }
 end
 ```
 
@@ -1466,7 +1469,7 @@ Grape allows you to present the same logic through the `with` method in your par
 
 ```ruby
 params do
-  with(type: String, regexp: /w+/, documentation: { in: 'body' }) do
+  with(type: String, regexp: /\w+/, documentation: { in: 'body' }) do
     requires :first_name, desc: 'First name'
     optional :middle_name, desc: 'Middle name', documentation: { x: { nullable: true } }
     requires :last_name, desc: 'Last name'
@@ -1530,7 +1533,7 @@ Parameters can be restricted to a specific set of values with the `:values` opti
 ```ruby
 params do
   requires :status, type: Symbol, values: [:not_started, :processing, :done]
-  optional :numbers, type: Array[Integer], default: 1, values: [1, 2, 3, 5, 8]
+  optional :numbers, type: Array[Integer], default: [1], values: [1, 2, 3, 5, 8]
 end
 ```
 
@@ -1548,7 +1551,7 @@ Note endless ranges are also supported with ActiveSupport >= 6.0, but they requi
 
 ```ruby
 params do
-  requires :minimum, type: Integer, values: 10..
+  requires :minimum, type: Integer, values: (10..)
   optional :maximum, type: Integer, values: ..10
 end
 ```
@@ -1576,10 +1579,10 @@ Combined with `:type`, ranges (open or closed) cover common numeric bound checks
 
 ```ruby
 params do
-  requires :quantity, type: Integer, values: 1..       # must be a positive integer
+  requires :quantity, type: Integer, values: (1..)     # must be a positive integer
   requires :discount, type: Float, values: 0.0..100.0  # must be between 0 and 100
   requires :rating,   type: Integer, values: 5..5      # must be exactly 5
-  requires :numbers,  type: [Integer], values: 1..     # every element must be positive
+  requires :numbers,  type: [Integer], values: (1..)   # every element must be positive
 end
 ```
 
@@ -1623,9 +1626,9 @@ The `except_values` validator behaves similarly to the `values` validator in tha
 ```ruby
 params do
   requires :browser, except_values: [ 'ie6', 'ie7', 'ie8' ]
-  requires :port, except_values: { value: 0..1024, message: 'is not allowed' }
+  requires :port, type: Integer, except_values: { value: 0..1024, message: 'is not allowed' }
   requires :negative, type: Integer, except_values: ..-1
-  requires :hashtag, except_values: -> { Hashtag.FORBIDDEN_LIST }
+  requires :hashtag, except_values: -> { Hashtag::FORBIDDEN_LIST }
 end
 ```
 
@@ -1845,7 +1848,7 @@ end
 You can also create custom classes that take parameters.
 
 ```ruby
-class Length < Grape::Validations::Validators::Base
+class MaxLength < Grape::Validations::Validators::Base
   def validate_param!(attr_name, params)
     return if params[attr_name].length <= @options
 
@@ -1856,9 +1859,11 @@ end
 
 ```ruby
 params do
-  requires :text, length: 140
+  requires :text, max_length: 140
 end
 ```
+
+A validator is registered under its class name, underscored and without a `Validator` suffix, for every API in the process. Pick a name that no built-in validator uses: a class named `Length` would replace the built-in [`length`](#length) validator everywhere.
 
 You can also create custom validation that use request to validate the attribute. For example if you want to have parameters that are available to only admins, you can do the following.
 
@@ -2116,7 +2121,7 @@ params do
   requires :name, message: :name_required
 end
 ```
-```ruby
+```yaml
 # en.yml
 
 en:
@@ -2131,7 +2136,7 @@ en:
 
 You can also override attribute names.
 
-```ruby
+```yaml
 # en.yml
 
 en:
@@ -2151,7 +2156,7 @@ You cannot set a custom message option for Default as it requires interpolation 
 
 ```ruby
 params do
-  requires :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
+  optional :name, values: { value: -> { (1..10).to_a }, message: 'not in range from 1 to 10' }, default: 5
 end
 ```
 
@@ -2216,8 +2221,7 @@ curl -H "secret_PassWord: swordfish" ...
 
 The header name will have been normalized for you.
 
-- In the `header` helper names will be coerced into a downcased kebab case as `secret-password` if using Rack 3.
-- In the `header` helper names will be coerced into a capitalized kebab case as `Secret-PassWord` if using Rack < 3.
+- In the `headers` helper names will be coerced into a downcased kebab case as `secret-password`, and looked up case-insensitively, so `headers['Secret-Password']` finds it too. On Rack < 3, a standard header such as `User-Agent` keeps its usual capitalization.
 - In the `env` collection they appear in all uppercase, in snake case, and prefixed with 'HTTP_' as `HTTP_SECRET_PASSWORD`
 
 The header name will have been normalized per HTTP standards defined in [RFC2616 Section 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) regardless of what is being sent by a client.
@@ -2296,7 +2300,7 @@ get ':id', requirements: { id: /[0-9]*/ } do
 end
 
 namespace :outer, requirements: { id: /[0-9]*/ } do
-  get :id do
+  get ':id' do
   end
 
   get ':id/edit' do
@@ -2531,13 +2535,15 @@ You can set, get and delete your cookies very simply using `cookies` method.
 ```ruby
 class API < Grape::API
   get 'status_count' do
-    cookies[:status_count] ||= 0
-    cookies[:status_count] += 1
+    # a cookie the client sent back is a String, so convert before counting
+    cookies[:status_count] = cookies[:status_count].to_i + 1
     { status_count: cookies[:status_count] }
   end
 
   delete 'status_count' do
-    { status_count: cookies.delete(:status_count) }
+    status_count = cookies[:status_count]
+    cookies.delete(:status_count)
+    { status_count: status_count }
   end
 end
 ```
@@ -2658,7 +2664,7 @@ class API < Grape::API
 end
 ```
 
-When you add a route for a resource, a route for the `OPTIONS` method will also be added. The response to an OPTIONS request will include an "Allow" header listing the supported methods. If the resource has `before` and `after` callbacks they will be executed, but no other callbacks will run.
+When you add a route for a resource, a route for the `OPTIONS` method will also be added. The response to an OPTIONS request will include an "Allow" header listing the supported methods. If the resource has `before`, `after` and `finally` callbacks they will be executed, but no other callbacks will run.
 
 ```ruby
 class API < Grape::API
@@ -2682,12 +2688,12 @@ curl -v -X OPTIONS http://localhost:3000/rt_count
 > OPTIONS /rt_count HTTP/1.1
 >
 < HTTP/1.1 204 No Content
-< Allow: OPTIONS, GET, PUT
+< Allow: OPTIONS, GET, PUT, HEAD
 ```
 
 You can disable this behavior with `do_not_route_options!`.
 
-If a request for a resource is made with an unsupported HTTP method, an HTTP 405 (Method Not Allowed) response will be returned. If the resource has `before` callbacks they will be executed, but no other callbacks will run.
+If a request for a resource is made with an unsupported HTTP method, an HTTP 405 (Method Not Allowed) response will be returned. If the resource has `before` and `finally` callbacks they will be executed, but no other callbacks will run.
 
 ``` shell
 curl -X DELETE -v http://localhost:3000/rt_count/
@@ -2696,7 +2702,7 @@ curl -X DELETE -v http://localhost:3000/rt_count/
 > Host: localhost:3000
 >
 < HTTP/1.1 405 Method Not Allowed
-< Allow: OPTIONS, GET, PUT
+< Allow: OPTIONS, GET, PUT, HEAD
 ```
 
 ## Raising Exceptions
@@ -2736,22 +2742,22 @@ module API
 end
 ```
 
-The following example specifies the entity to use in the `http_codes` definition.
+The following example specifies the entity to use in the `failure` definition.
 
 ```ruby
 desc 'My Route' do
- failure [[408, 'Unauthorized', API::Error]]
+ failure [[401, 'Unauthorized', API::Error]]
 end
-error!({ message: 'Unauthorized' }, 408)
+error!({ message: 'Unauthorized' }, 401)
 ```
 
 The following example specifies the presented entity explicitly in the error message.
 
 ```ruby
 desc 'My Route' do
- failure [[408, 'Unauthorized']]
+ failure [[401, 'Unauthorized']]
 end
-error!({ message: 'Unauthorized', with: API::Error }, 408)
+error!({ message: 'Unauthorized', with: API::Error }, 401)
 ```
 
 ### Default Error HTTP Status Code
@@ -2774,7 +2780,7 @@ In its simplest form, it can be like:
 
 ```ruby
 route :any, '*path' do
-  error! # or something else
+  error!('Not Found', 404) # or something else
 end
 ```
 
@@ -2833,7 +2839,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-In this case ```UserDefinedError``` must be inherited from ```StandardError```.
+A class listed explicitly is rescued whether or not it inherits from `StandardError`; see [Exceptions that should be rescued explicitly](#exceptions-that-should-be-rescued-explicitly).
 
 When several classes could match, the one registered **first** in a scope wins — as with the clauses of a Ruby `rescue`. Register the more specific class before the broader one, or the narrower handler never runs:
 
@@ -2887,7 +2893,7 @@ You can also use a module or class.
 ```ruby
 module CustomFormatter
   def self.call(error:, **)
-    { status: error.status, message: error.message, backtrace: error.backtrace }
+    { status: error.status, message: error.message, backtrace: error.backtrace }.to_json
   end
 end
 
@@ -2996,7 +3002,7 @@ rescue_from APIErrors::ParentError do |e|
     error!({
       error: "#{e.class} error",
       message: e.message
-    }, e.status)
+    }, 500)
 end
 ```
 
@@ -3006,10 +3012,8 @@ The code below will rescue exceptions of type `RuntimeError` but _not_ its subcl
 ```ruby
 rescue_from RuntimeError, rescue_subclasses: false do |e|
     error!({
-      status: e.status,
-      message: e.message,
-      errors: e.errors
-    }, e.status)
+      message: e.message
+    }, 500)
 end
 ```
 
@@ -3030,7 +3034,7 @@ class Twitter::API < Grape::API
 end
 ```
 
-The `rescue_from` handler must return a `Rack::Response` object, call `error!`, or raise an exception (either the original exception or another custom one). The exception raised in `rescue_from` will be handled outside Grape. For example, if you mount Grape in Rails, the exception will be handle by [Rails Action Controller](https://guides.rubyonrails.org/action_controller_overview.html#rescue).
+The `rescue_from` handler must return a `Rack::Response` object, call `error!`, or raise an exception (either the original exception or another custom one). An exception raised in `rescue_from` is dispatched to the handler registered for its class; when there is none, Grape answers it itself, as described in [Re-raising from inside a `rescue_from` block](#re-raising-from-inside-a-rescue_from-block).
 
 Alternately, use the `with` option in `rescue_from` to specify a method or a `proc`.
 
@@ -3202,7 +3206,7 @@ If you declare any `content_type` whatsoever, the Grape defaults will be overrid
 ```ruby
 class Twitter::API < Grape::API
   content_type :xml, 'application/xml'
-  content_type :rss, 'application/xml+rss'
+  content_type :rss, 'application/rss+xml'
 
   default_format :xml
 end
@@ -3291,13 +3295,14 @@ end
 ```
 
 If you combine `format` with `rescue_from :all`, errors will be rendered using the same format.
-If you do not want this behavior, set the default error formatter with `default_error_formatter`.
+`default_error_formatter` renders the errors of a format that has no error formatter of its own, such as one you declared yourself; it does not replace the error formatter of a built-in format like `:json`. To change how errors of a built-in format are rendered, register one for it with [`error_formatter`](#exception-handling).
 
 ```ruby
 class Twitter::API < Grape::API
-  format :json
-  content_type :txt, 'text/plain'
-  default_error_formatter :txt
+  content_type :xls, 'application/vnd.ms-excel'
+  format :xls
+
+  default_error_formatter :json # :xls has no error formatter of its own
 end
 ```
 
@@ -3421,7 +3426,7 @@ end
 
 ## API Data Formats
 
-Grape accepts and parses input data sent with the POST and PUT methods as described in the Parameters section above. It also supports custom data formats. You must declare additional content-types via `content_type` and optionally supply a parser via `parser` unless a parser is already available within Grape to enable a custom format. Such a parser can be a function or a class.
+Grape accepts and parses input data sent with the `POST`, `PUT`, `PATCH`, `DELETE` and `QUERY` methods as described in the Parameters section above. It also supports custom data formats. You must declare additional content-types via `content_type` and optionally supply a parser via `parser` unless a parser is already available within Grape to enable a custom format. Such a parser can be a function or a class.
 
 With a parser, parsed data is available "as-is" in `env['api.request.body']`.
 Without a parser, data is available "as-is" and in `env['api.request.input']`.
@@ -3479,9 +3484,9 @@ module API
       expose :ip, if: { type: :full }
       expose :user_type, :user_id, if: ->(status, options) { status.user.public? }
       expose :digest do |status, options|
-        Digest::MD5.hexdigest(status.txt)
+        Digest::MD5.hexdigest(status.text)
       end
-      expose :replies, using: API::Status, as: :replies
+      expose :replies, using: API::Entities::Status, as: :replies
     end
   end
 
@@ -3489,7 +3494,7 @@ module API
     version 'v1'
 
     desc 'Statuses index' do
-      params: API::Entities::Status.documentation
+      params API::Entities::Status.documentation
     end
     get '/statuses' do
       statuses = Status.all
@@ -3559,9 +3564,9 @@ You can present `hash` with `Grape::Presenters::Presenter` to keep things consis
 
 ```ruby
 get '/users' do
-  present { id: 10, name: :dgz }, with: Grape::Presenters::Presenter
+  present({ id: 10, name: :dgz }, with: Grape::Presenters::Presenter)
 end
-````
+```
 The response will be
 
 ```ruby
@@ -3700,9 +3705,9 @@ Example:
 Grape::Middleware::Auth::Strategies.add(:my_auth, AuthMiddleware, ->(options) { [options[:realm]] } )
 
 
-auth :my_auth, { realm: 'Test Api'} do |credentials|
+auth :my_auth, realm: 'Test Api' do |username, password|
   # lookup the user's password here
-  { 'user1' => 'password1' }[username]
+  { 'user1' => 'password1' }[username] == password
 end
 
 ```
@@ -3731,7 +3736,7 @@ end
 Examine the routes at runtime.
 
 ```ruby
-TwitterAPI::versions # yields [ 'v1', 'v2' ]
+TwitterAPI::versions # yields ['v1']
 TwitterAPI::routes # yields an array of Grape::Route objects
 TwitterAPI::routes[0].version # => 'v1'
 TwitterAPI::routes[0].description # => 'Includes custom settings.'
@@ -3758,7 +3763,7 @@ class MyAPI < Grape::API
     requires :id, type: Integer, desc: 'Identity.'
   end
   get 'params/:id' do
-    route.params[params[:id]] # yields the parameter description
+    route.params['id'] # yields the parameter description
   end
 end
 ```
@@ -3770,7 +3775,7 @@ class ApiLogger < Grape::Middleware::Base
   def before
     file = env['api.endpoint'].source.source_location[0]
     line = env['api.endpoint'].source.source_location[1]
-    logger.debug "[api] #{file}:#{line}"
+    env['rack.logger']&.debug "[api] #{file}:#{line}"
   end
 end
 ```
@@ -3792,9 +3797,9 @@ Before and after callbacks execute in the following order:
 
 Steps 4, 5 and 6 only happen if validation succeeds.
 
-If a request for a resource is made with an unsupported HTTP method (returning HTTP 405) only `before` callbacks will be executed.  The remaining callbacks will be bypassed.
+If a request for a resource is made with an unsupported HTTP method (returning HTTP 405) only `before` and `finally` callbacks will be executed.  The remaining callbacks will be bypassed.
 
-If a request for a resource is made that triggers the built-in `OPTIONS` handler, only `before` and `after` callbacks will be executed.  The remaining callbacks will be bypassed.
+If a request for a resource is made that triggers the built-in `OPTIONS` handler, only `before`, `after` and `finally` callbacks will be executed.  The remaining callbacks will be bypassed.
 
 For example, using a simple `before` block to set a header.
 
@@ -3872,7 +3877,7 @@ The behavior is then:
 
 ```bash
 GET /123        # 'Integer'
-GET /foo        # 400 error - 'blah is invalid'
+GET /foo        # 404, the declared Integer narrows the path to digits
 ```
 
 **Versioning**
@@ -3906,8 +3911,8 @@ end
 The behavior is then:
 
 ```bash
-GET /foo/v1       # 'v1-hello'
-GET /foo/v2       # 'v2-hello'
+GET /v1/foo       # 'v1-hello'
+GET /v2/foo       # 'v2-hello'
 ```
 
 **Altering Responses**
@@ -3939,7 +3944,7 @@ Instead of altering a response, you can also terminate and rewrite it from any c
 
 ## Anchoring
 
-Grape by default anchors all request paths, which means that the request URL should match from start to end to match, otherwise a `404 Not Found` is returned. However, this is sometimes not what you want, because it is not always known upfront what can be expected from the call. This is because Rack-mount by default anchors requests to match from the start to the end, or not at all.
+Grape by default anchors all request paths, which means that the request URL should match from start to end to match, otherwise a `404 Not Found` is returned. However, this is sometimes not what you want, because it is not always known upfront what can be expected from the call.
 Rails solves this problem by using a `anchor: false` option in your routes.
 In Grape this option can be used as well when a method is defined.
 
@@ -4124,7 +4129,7 @@ describe Twitter::API do
     it 'creates many statuses' do
       statuses = [{ text: '...' }, { text: '...'}]
       post '/api/statuses', statuses.to_json, 'CONTENT_TYPE' => 'application/json'
-      expect(last_response.body).to eq 201
+      expect(last_response.status).to eq 201
     end
   end
 end
@@ -4157,7 +4162,7 @@ end
 ```ruby
 require 'test_helper'
 
-class Twitter::APITest < MiniTest::Test
+class Twitter::APITest < Minitest::Test
   include Rack::Test::Methods
 
   def app
@@ -4383,10 +4388,10 @@ For example, `payload[:endpoint].body` provides the current state of the respons
 ```ruby
 ActiveSupport::Notifications.subscribe(/v1/) do |name, start, finish, id, payload|
   hook_record = {
-    hook: name
-    status: payload[:env]&.dig("api.endpoint")&.status
-    format: payload[:env]&.dig("api.format")
-    body: payload[:endpoint]&.body
+    hook: name,
+    status: payload[:env]&.dig("api.endpoint")&.status,
+    format: payload[:env]&.dig("api.format"),
+    body: payload[:endpoint]&.body,
     duration: (finish - start) * 1000
   }
   # your code to save the notification
