@@ -44,6 +44,8 @@ en:
           summary: 'when version using header, you must specify :vendor option'
         mutual_exclusion: 'are mutually exclusive'
         oneof: 'does not match any of the allowed schemas'
+        ractor_mode_unsupported: 'Ractor mode needs a Ruby that can make a Method shareable, which is 4.0 and later; this is %{ruby_version}'
+        ractor_mode_not_enabled: 'finalize! needs Ractor mode, which has to be turned on with Grape.ractor! before the API classes load'
         presence: 'is missing'
         regexp: 'is invalid'
         same_as: 'is not the same as %{parameter}'

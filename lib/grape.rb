@@ -55,6 +55,8 @@ I18n.load_path << File.expand_path('grape/locale/en.yml', __dir__)
 module Grape
   extend Dry::Configurable
 
+  @ractor = false
+
   setting :param_builder, default: :hash_with_indifferent_access
   setting :lint, default: false
   setting :warn_on_helper_overrides, default: false
@@ -102,6 +104,30 @@ module Grape
   # a method deprecated through this deprecator announced a removal version
   # that had already shipped, and every custom `behavior` lambda -- how a Rails
   # app consumes deprecations -- was handed the same wrong number.
+  # Ractor mode. A Grape API is defined and compiled in the main Ractor -- a
+  # non-main one may not write a class instance variable at all, which is where
+  # the DSL keeps everything -- and is then frozen whole and served from as
+  # many Ractors as the application wants (see Grape::API::Instance.finalize!).
+  #
+  # This has to be on before the API classes load, because it decides how a
+  # route block is turned into a method: Ruby refuses to call a method defined
+  # from a Proc that is not shareable from another Ractor, so in this mode the
+  # blocks are isolated as they are read. Turn it on in an initializer, above
+  # the requires that define the API.
+  #
+  # Needs a Ruby that can make a Method object shareable, which is Ruby 4.0
+  # and later; on an earlier one this raises rather than letting the failure
+  # surface later, out of the middle of a frozen object graph.
+  def self.ractor!
+    raise Grape::Exceptions::RactorModeUnsupported unless Grape::Util::Shareable.supported?
+
+    @ractor = true
+  end
+
+  def self.ractor?
+    @ractor
+  end
+
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new("#{Gem::Version.new(VERSION).segments.first + 1}.0", 'Grape')
   end

@@ -143,9 +143,23 @@ module Grape
     alias rack_params params
     alias rack_cookies cookies
 
+    class << self
+      # The query parser every Grape request parses its query string with, or
+      # nil to leave Rack to its own default. Ractor mode sets it (see
+      # Grape::Util::Shareable), because Rack keeps its default in a class
+      # instance variable, which a non-main Ractor may not read.
+      attr_accessor :query_parser
+    end
+
     def initialize(env, build_params_with: nil)
       super(env)
       @build_params_with = build_params_with
+    end
+
+    # Rack answers +@query_parser+ first and falls back to its own default, so
+    # this only steps in front of that fallback.
+    def query_parser
+      Grape::Request.query_parser || super
     end
 
     def params

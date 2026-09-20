@@ -49,6 +49,12 @@ module Grape
       def block_to_unbound_method(block)
         return unless block
 
+        # In Ractor mode the block has to be isolated before it becomes a
+        # method: Ruby refuses to call a method defined from an unshareable
+        # Proc from another Ractor. A block that reads an outer variable
+        # holding something unshareable cannot be isolated, and says so here,
+        # as the API class loads, rather than on the first request.
+        ::Ractor.make_shareable(block) if Grape.ractor?
         define_method :temp_unbound_method, block
         method = instance_method(:temp_unbound_method)
         remove_method :temp_unbound_method
@@ -262,24 +268,28 @@ module Grape
     # directly (no added allocations); the block is forwarded anonymously so
     # nothing is allocated unless a subscriber is present.
     def instrument_run(&)
+      return yield if Grape.ractor?
       return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run.grape')
 
       ActiveSupport::Notifications.instrument('endpoint_run.grape', endpoint: self, env:, &)
     end
 
     def instrument_render(&)
+      return yield if Grape.ractor?
       return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_render.grape')
 
       ActiveSupport::Notifications.instrument('endpoint_render.grape', endpoint: self, &)
     end
 
     def instrument_run_validators(validators, request, &)
+      return yield if Grape.ractor?
       return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run_validators.grape')
 
       ActiveSupport::Notifications.instrument('endpoint_run_validators.grape', endpoint: self, validators:, request:, &)
     end
 
     def instrument_run_filters(filters, type, &)
+      return yield if Grape.ractor?
       return yield unless ActiveSupport::Notifications.notifier.listening?('endpoint_run_filters.grape')
 
       ActiveSupport::Notifications.instrument('endpoint_run_filters.grape', endpoint: self, filters:, type:, &)

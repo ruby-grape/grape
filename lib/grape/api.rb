@@ -12,7 +12,7 @@ module Grape
     # protected methods too, so it has to be named here for {.override_all_methods!}
     # to leave it alone. +base+ is read on the API class itself whenever a mount
     # is refreshed, so recording it would refresh every mount below it again.
-    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
+    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! finalize! inherit_settings recognize_path reset! routes top_level_setting].freeze
 
     # DSL methods that answer a setting when called with nothing to set -- no
     # argument, keyword or block -- and change none. Such a call is a read, and
