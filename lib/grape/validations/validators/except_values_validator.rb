@@ -13,14 +13,19 @@ module Grape
           raise ArgumentError, 'except_values Proc must have arity of zero (use values: with a one-arity predicate for per-element checks)' if except_proc && !except.arity.zero?
 
           # Zero-arity procs (e.g. -> { User.pluck(:role) }) must be called per-request,
-          # not at definition time, so they are wrapped in a lambda to defer execution.
-          @excepts_call = except_proc ? except : -> { except }
+          # not at definition time. Anything else is the collection itself, held
+          # as it came rather than behind a lambda that would only hand it back.
+          if except_proc
+            @excepts_call = except
+          else
+            @excepts = except
+          end
         end
 
         def validate_param!(attr_name, params)
           return unless hash_like?(params) && params.key?(attr_name)
 
-          excepts = @excepts_call.call
+          excepts = @excepts_call ? @excepts_call.call : @excepts
           return if excepts.nil?
 
           param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])

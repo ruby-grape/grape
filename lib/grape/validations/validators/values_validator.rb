@@ -12,12 +12,13 @@ module Grape
 
           # Zero-arity procs return a collection per-request (e.g. DB-backed lists).
           # Non-zero-arity procs are per-element predicates, called directly at validation time.
-          # Non-Proc values are wrapped in a zero-arity lambda for a uniform call interface.
+          # Anything else is the collection itself, held as it came rather than
+          # behind a lambda that would only hand it back.
           if values.is_a?(Proc)
             @values_call = values
             @values_is_predicate = !values.arity.zero?
           else
-            @values_call = -> { values }
+            @values = values
             @values_is_predicate = false
           end
         end
@@ -47,7 +48,7 @@ module Grape
               false
             end
           else
-            values = @values_call.call
+            values = @values_call ? @values_call.call : @values
             return true if values.nil?
 
             param_array.all? { |param| values.include?(param) }
