@@ -16,9 +16,9 @@ module Grape
       class HashElementsValidator < Base
         default_message_key :coerce
 
+        # Registered not required, so it is only asked about params that are a
+        # Hash (see Base#validate!).
         def validate_param!(attr_name, params)
-          return unless hash_like?(params)
-
           elements = params[attr_name]
           return unless elements.is_a?(Array)
 

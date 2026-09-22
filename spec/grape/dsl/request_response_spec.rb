@@ -31,6 +31,21 @@ describe Grape::DSL::RequestResponse do
       expect(subject.inheritable_setting.format).to eq(format.to_sym)
       expect(subject.inheritable_setting.default_error_formatter).to eq(Grape::ErrorFormatter::Txt)
     end
+
+    it 'returns the format without parameter' do
+      subject.format format
+      expect(subject.format).to eq format.to_sym
+    end
+
+    it 'raises when no content type is registered for the format' do
+      expect { subject.format :invalid }.to raise_error(Grape::Exceptions::MissingMimeType, /missing mime type for invalid/)
+    end
+
+    it 'accepts a format a content type has been registered for' do
+      subject.content_type :invalid, 'application/invalid'
+      subject.format :invalid
+      expect(subject.format).to eq :invalid
+    end
   end
 
   describe '.formatter' do
@@ -56,6 +71,11 @@ describe Grape::DSL::RequestResponse do
     it 'raises when nothing is registered under the given name' do
       expect { subject.default_error_formatter :jsonn }.to raise_error(Grape::Exceptions::UnknownErrorFormatter, /unknown error formatter: jsonn/)
       expect(subject.inheritable_setting.default_error_formatter).to be_nil
+    end
+
+    it 'returns the error formatter without parameter' do
+      subject.default_error_formatter :json
+      expect(subject.default_error_formatter).to eq Grape::ErrorFormatter::Json
     end
   end
 
@@ -102,6 +122,11 @@ describe Grape::DSL::RequestResponse do
     it 'sets a default error status' do
       subject.default_error_status 500
       expect(subject.inheritable_setting.default_error_status).to eq(500)
+    end
+
+    it 'returns the default error status without parameter' do
+      subject.default_error_status 500
+      expect(subject.default_error_status).to eq 500
     end
   end
 

@@ -875,6 +875,32 @@ describe Grape::Validations::Validators::CoerceValidator do
         end
       end
 
+      # A callable in place of a type checks the coerced value.
+      context 'a callable type and coerce_with' do
+        before do
+          subject.params do
+            requires :int, type: ->(val) { val.is_a?(Integer) && val.even? }, coerce_with: ->(val) { Integer(val) }
+          end
+          subject.get '/' do
+            params[:int].inspect
+          end
+        end
+
+        it 'accepts a value the callable accepts' do
+          get '/', int: '4'
+
+          expect(last_response).to be_successful
+          expect(last_response.body).to eq('4')
+        end
+
+        it 'rejects a value the callable rejects' do
+          get '/', int: '3'
+
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('int is invalid')
+        end
+      end
+
       it 'must be supplied with :type or :coerce' do
         expect do
           subject.params do
@@ -1226,6 +1252,101 @@ describe Grape::Validations::Validators::CoerceValidator do
           get '/', a: 'true'
           expect(last_response).to be_successful
           expect(last_response.body).to eq('String')
+        end
+      end
+
+      context 'custom coercion rules given as an object with a parse method' do
+        let(:parser) do
+          Module.new do
+            def self.parse(val)
+              val == 'yup' ? true : val
+            end
+          end
+        end
+
+        before do
+          parser = self.parser
+          subject.params do
+            requires :a, types: [Grape::API::Boolean, Integer], coerce_with: parser
+          end
+          subject.get '/' do
+            params[:a].inspect
+          end
+        end
+
+        it 'coerces with its parse method' do
+          get '/', a: 'yup'
+          expect(last_response).to be_successful
+          expect(last_response.body).to eq('true')
+        end
+
+        it 'still validates type' do
+          get '/', a: 'nope'
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('a is invalid')
+        end
+      end
+
+      context 'a variant-member-type collection given coerce_with as an object with a parse method' do
+        let(:parser) do
+          Module.new do
+            def self.parse(val)
+              val.split(',').map { |member| member.match?(/\A\d+\z/) ? member.to_i : member }
+            end
+          end
+        end
+
+        before do
+          parser = self.parser
+          subject.params do
+            requires :a, type: [Integer, String], coerce_with: parser
+          end
+          subject.get '/' do
+            params[:a].inspect
+          end
+        end
+
+        it 'coerces with its parse method' do
+          get '/', a: '1,two,3'
+          expect(last_response).to be_successful
+          expect(last_response.body).to eq('[1, "two", 3]')
+        end
+      end
+
+      # The custom method's result is only type-checked, for an Array member
+      # type as for any other: neither the collection nor its elements are
+      # coerced any further.
+      context 'custom coercion rules with an Array member type' do
+        before do
+          subject.params do
+            requires :a, types: [[Integer], String], coerce_with: (lambda do |val|
+              case val
+              when 'integers' then [1, 2]
+              when 'strings' then %w[1 2]
+              when 'blank' then ''
+              else val
+              end
+            end)
+          end
+          subject.get '/' do
+            params[:a].inspect
+          end
+        end
+
+        it 'accepts an Array of the member type' do
+          get '/', a: 'integers'
+          expect(last_response.body).to eq('[1, 2]')
+        end
+
+        it 'does not coerce the elements' do
+          get '/', a: 'strings'
+          expect(last_response).to be_bad_request
+          expect(last_response.body).to eq('a is invalid')
+        end
+
+        it 'does not coerce a blank String into an Array' do
+          get '/', a: 'blank'
+          expect(last_response.body).to eq('""')
         end
       end
 

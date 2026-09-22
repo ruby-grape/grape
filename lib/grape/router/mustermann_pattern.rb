@@ -20,7 +20,7 @@ module Grape
         param_name = scan(/\w+/)
         # Integer params (declared via Grape's `params` option) match digits only;
         # any other capture matches a single path segment (anything but / ? # .).
-        param_type = pattern&.options&.dig(:params, param_name, :type)
+        param_type = pattern.options.dig(:params, param_name, :type)
         constraint = param_type == 'Integer' ? /\d/ : '[^/?#.]'
         node(:capture, param_name, constraint:) { scan(/\w+/) }
       end

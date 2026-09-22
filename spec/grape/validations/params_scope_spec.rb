@@ -175,6 +175,14 @@ describe Grape::Validations::ParamsScope do
       end.to raise_error Grape::Exceptions::IncompatibleOptionValues
     end
 
+    # An empty list says nothing about the member type, so it is taken from
+    # the next one.
+    it 'takes the member type from except_values when values is empty' do
+      expect do
+        subject.params { requires :numbers, type: Array, values: [], except_values: [1, 2] }
+      end.not_to raise_error
+    end
+
     it 'accepts an array containing only allowed values, given as a literal array' do
       subject.params do
         optional :periods, type: Array, values: %w[day month]
@@ -1595,6 +1603,63 @@ describe Grape::Validations::ParamsScope do
       get '/test', foos: ['']
       expect(last_response.status).to eq(200)
       expect(last_response.body).to eq('ok')
+    end
+  end
+
+  # A validator run on its own -- as a custom validator's unit test does --
+  # runs outside the request's ParamScopeTracker. Nothing is tracked then: the
+  # elements a +given+ scope narrowed its array down to, and the element
+  # indices, which is why the names below carry none.
+  context 'when a given scope within an array param is validated outside a request' do
+    before do
+      subject.params do
+        requires :items, type: Array do
+          optional :a
+          given :a do
+            requires :b
+            optional :c, type: Hash do
+              requires :d
+            end
+          end
+        end
+      end
+    end
+
+    it 'still reports what is missing' do
+      env = Rack::MockRequest.env_for('/', params: { items: [{ a: 1, c: { e: 1 } }, { a: 1, b: 2, c: { d: 3 } }] })
+      request = Grape::Request.new(env)
+      errors = subject.inheritable_setting.validations.flat_map do |validator|
+        validator.validate(request)
+        []
+      rescue Grape::Exceptions::ValidationArrayErrors => e
+        e.errors.map { |error| "#{error.params.join(', ')} #{error.message}" }
+      end
+
+      expect(errors).to eq(['items[b] is missing', 'items[c][d] is missing'])
+    end
+  end
+
+  # The same, for an array scope at the root, which its validators check
+  # element by element without the iterator.
+  context 'when an array param is validated outside a request' do
+    before do
+      subject.params do
+        requires :items, type: Array do
+          requires :b
+        end
+      end
+    end
+
+    it 'still reports what is missing' do
+      request = Grape::Request.new(Rack::MockRequest.env_for('/', params: { items: [{ a: 1 }, { a: 2, b: 3 }] }))
+      errors = subject.inheritable_setting.validations.flat_map do |validator|
+        validator.validate(request)
+        []
+      rescue Grape::Exceptions::ValidationArrayErrors => e
+        e.errors.map { |error| "#{error.params.join(', ')} #{error.message}" }
+      end
+
+      expect(errors).to eq(['items[b] is missing'])
     end
   end
 

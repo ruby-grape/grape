@@ -77,6 +77,12 @@ RSpec.describe Grape::Util::MediaType do
       it { is_expected.to be_falsey }
     end
 
+    context 'when header has an empty subtype' do
+      let(:media_type) { 'application/' }
+
+      it { is_expected.to be_falsey }
+    end
+
     context 'when header is a valid mime type but not vendor' do
       let(:media_type) { 'text/html' }
 

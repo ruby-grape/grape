@@ -104,6 +104,21 @@ describe Grape::Validations do
       end
     end
 
+    context 'optional :all using documentation with a field that has no options' do
+      before do
+        subject.format :json
+        subject.params do
+          optional :all, using: { field_a: nil, field_b: { type: String } }
+        end
+        subject.get('/') { declared(params) }
+      end
+
+      it 'leaves that field out of the declared params' do
+        get '/', field_a: 'a', field_b: 'b'
+        expect(JSON.parse(last_response.body)).to eq('field_b' => 'b')
+      end
+    end
+
     context 'optional :none, except: using Grape::Entity documentation' do
       before do
         documentation = { field_a: { type: String }, field_b: { type: String } }
@@ -213,6 +228,32 @@ describe Grape::Validations do
           'first_level[second_level][1][third_level][0][value] is invalid, ' \
           'first_level[second_level][1][third_level][1][fourth_level][0][value] is missing'
         )
+      end
+    end
+
+    # An optional array scope passes over an empty element, however deep it
+    # is nested -- here past the one-level shortcut.
+    context 'optional array nested in an array' do
+      before do
+        subject.params do
+          requires :items, type: Array do
+            optional :subs, type: Array do
+              requires :x
+            end
+          end
+        end
+        subject.post('/') { 'ok' }
+      end
+
+      it 'passes over an empty element' do
+        post '/', { items: [{ subs: [{}, { x: 1 }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(201)
+      end
+
+      it 'still validates an element that is not empty' do
+        post '/', { items: [{ subs: [{ y: 1 }, { x: 1 }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[0][subs][0][x] is missing')
       end
     end
 

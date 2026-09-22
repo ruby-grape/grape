@@ -59,10 +59,7 @@ module Grape
         def match?(media_type)
           return false if media_type.blank?
 
-          subtype = media_type.downcase.split('/', 2).last
-          return false if subtype.blank?
-
-          VENDOR_VERSION_HEADER_REGEX.match?(subtype)
+          VENDOR_VERSION_HEADER_REGEX.match?(media_type.downcase.split('/', 2).last)
         end
 
         # The available types are registered in lower case and Rack matches them

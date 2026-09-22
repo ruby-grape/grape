@@ -119,6 +119,12 @@ describe Grape::Validations::Validators::OneofValidator do
       expect(last_response.status).to eq(201)
     end
 
+    it 'accepts an explicit null' do
+      post '/', { value: nil }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+      expect(JSON.parse(last_response.body)).to eq('value' => nil)
+    end
+
     it 'still validates when the value is provided' do
       post '/', { value: { a: 'oops' } }.to_json, 'CONTENT_TYPE' => 'application/json'
       expect(last_response.status).to eq(400)

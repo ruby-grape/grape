@@ -22,10 +22,12 @@ module Grape
         message = ::I18n.translate(key, **i18n_opts)
         return message unless message.equal?(MISSING)
 
-        effective_default = default.equal?(MISSING) ? [*Array(scope), key].join('.') : default
-        return effective_default if fallback_locale?(locale) || fallback_locale_unavailable?
+        # Only a call without +default:+ gets here: I18n answers any other with
+        # that default, so a miss falls back to the key's full path instead.
+        scoped_key = [*Array(scope), key].join('.')
+        return scoped_key if fallback_locale?(locale) || fallback_locale_unavailable?
 
-        ::I18n.translate(key, default: effective_default, scope:, locale: FALLBACK_LOCALE, **)
+        ::I18n.translate(key, default: scoped_key, scope:, locale: FALLBACK_LOCALE, **)
       end
 
       def fallback_locale?(locale)

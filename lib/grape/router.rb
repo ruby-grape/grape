@@ -144,7 +144,7 @@ module Grape
           # route's path captures are groups of it (see Route#params_for).
           union&.match(input) do |m|
             exact_route = routes.detect { |route| m[route.regexp_capture_group] }
-            response = process_route(exact_route, input, env, m, exact_route.union_captures) if exact_route
+            response = process_route(exact_route, input, env, m, exact_route.union_captures)
           end
         end
       end
@@ -341,8 +341,7 @@ module Grape
 
       union, routes, groups = @neighbour_map[method]
       union&.match(input) do |m|
-        index = groups.index { |group| m[group] }
-        routes[index] if index
+        routes[groups.index { |group| m[group] }]
       end
     end
 

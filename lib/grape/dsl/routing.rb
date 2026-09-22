@@ -81,7 +81,7 @@ module Grape
           inheritable_setting.version_options = options
         end
 
-        @versions&.last
+        @versions.last
       end
 
       # Define a root URL prefix for your entire API.

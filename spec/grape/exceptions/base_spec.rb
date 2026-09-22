@@ -135,6 +135,19 @@ describe Grape::Exceptions::Base do
         expect(subject).to include('Problem:', 'Resolution:')
       end
     end
+
+    context 'when the message defines a step with a blank translation' do
+      let(:key) { :blank_step_message }
+      let(:attributes) { {} }
+
+      before do
+        I18n.backend.store_translations(:en, grape: { errors: { messages: { key => { problem: 'the problem', summary: '', resolution: 'the resolution' } } } })
+      end
+
+      it 'omits the blank step' do
+        expect(subject).to eq("\nProblem:\n  the problem\nResolution:\n  the resolution")
+      end
+    end
   end
 
   describe '#translate_message (private)' do
