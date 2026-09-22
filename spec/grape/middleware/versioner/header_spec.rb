@@ -177,6 +177,36 @@ describe Grape::Middleware::Versioner::Header do
       _, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
       expect(env.values_at(*keys)).to eq(%w[application vnd.vendor-v1+json vendor v1 json])
     end
+
+    context 'when the version is declared with capitals' do
+      before do
+        @options[:versions] = ['V1']
+      end
+
+      %w[application/vnd.vendor-V1+json application/vnd.vendor-v1+json].each do |accept|
+        it "matches #{accept}" do
+          status, _, env = subject.call('HTTP_ACCEPT' => accept)
+          expect(status).to eq(200)
+          expect(env[Grape::Env::API_VERSION]).to eql 'v1'
+        end
+      end
+
+      it 'does not report it as not found when the format is unsupported' do
+        expect(subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-V1+yaml').first).to eq(200)
+      end
+    end
+  end
+
+  context 'when a content type is declared with capitals' do
+    before do
+      @options[:content_types] = { csv: 'Text/CSV' }
+    end
+
+    it 'matches it' do
+      status, _, env = subject.call('HTTP_ACCEPT' => 'text/csv')
+      expect(status).to eq(200)
+      expect(env.values_at(Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE)).to eq(%w[text csv])
+    end
   end
 
   it 'succeeds if :strict is not set' do

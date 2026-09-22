@@ -70,7 +70,10 @@ module Grape
           content_types.each_key { |extension| media_types << "#{base_media_type}+#{extension}" }
           media_types << base_media_type
           media_types.concat(content_types.values.flatten)
-          media_types
+          # Media types are case-insensitive, and Grape::Util::MediaType matches
+          # an Accept header in lowercase; a version or content type declared
+          # with capitals would otherwise never match one.
+          media_types.map!(&:downcase)
         end
       end
     end

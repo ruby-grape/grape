@@ -51,6 +51,7 @@
 * [#2975](https://github.com/ruby-grape/grape/pull/2975): Hold a static `values` or `except_values` collection as it came instead of behind a lambda that only hands it back - [@ericproulx](https://github.com/ericproulx).
 * [#2976](https://github.com/ruby-grape/grape/pull/2976): Replace a registry on registration instead of writing into it, so a registered formatter, parser, params builder, validator or versioner cannot be changed underneath a reader - [@ericproulx](https://github.com/ericproulx).
 * [#2986](https://github.com/ruby-grape/grape/pull/2986): Match a header-versioned vendor declared with capitals - [@ericproulx](https://github.com/ericproulx).
+* [#2987](https://github.com/ruby-grape/grape/pull/2987): Match a header version or content type declared with capitals - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
