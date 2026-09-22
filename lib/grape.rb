@@ -95,6 +95,31 @@ module Grape
       ]
     end.freeze
 
+  # Where an error message comes from (see Grape::Translator). The default
+  # asks I18n at request time, which is how Grape has always resolved them.
+  @translator = Translator::I18n
+
+  class << self
+    attr_accessor :translator
+  end
+
+  # The locale {Grape::Translator::Catalog} answers in. Fiber-local, so a
+  # +before+ filter can set it per request and fiber-based servers keep each
+  # request's locale to itself -- the same storage I18n uses for its own
+  # config, and Grape for its param scopes.
+  #
+  # The default translator reads I18n's locale instead, and ignores this.
+  LOCALE_KEY = :grape_locale
+  private_constant :LOCALE_KEY
+
+  def self.locale
+    Fiber[LOCALE_KEY]
+  end
+
+  def self.locale=(locale)
+    Fiber[LOCALE_KEY] = locale
+  end
+
   # The deprecation horizon is the version a deprecation announces as its
   # removal point, so it is the *next* major rather than the current one, and
   # it is derived from VERSION rather than written out. Written out, it went

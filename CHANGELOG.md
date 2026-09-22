@@ -9,6 +9,7 @@
 * [#2960](https://github.com/ruby-grape/grape/pull/2960): Lint every response of an API once under `lint!`, including the router's 404 and mounted Rack apps, instead of inside each endpoint's stack - [@ericproulx](https://github.com/ericproulx).
 * [#2966](https://github.com/ruby-grape/grape/pull/2966): Require Ruby 3.3.1, the first 3.3 release that parses anonymous argument forwarding from inside a block - [@ericproulx](https://github.com/ericproulx).
 * [#3008](https://github.com/ruby-grape/grape/pull/3008): Add the grape-on-rack app as a live-server memory profiling harness - [@ericproulx](https://github.com/ericproulx).
+* [#2980](https://github.com/ruby-grape/grape/pull/2980): Resolve error messages through `Grape.translator`, and add `Grape::Translator::Catalog`, which answers them from a table built once instead of through I18n - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 #### Fixes
