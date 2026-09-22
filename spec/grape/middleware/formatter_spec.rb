@@ -496,6 +496,32 @@ describe Grape::Middleware::Formatter do
         expect(%w[POST PATCH PUT DELETE].map { |method| error_from(method) }).to all(be_nil)
       end
     end
+
+    # The headers say a body follows, but there is nothing to parse.
+    context 'when a body is announced but not carried' do
+      def error_from(env)
+        catch(:error) do
+          subject.call(
+            Rack::PATH_INFO => '/info',
+            Rack::REQUEST_METHOD => 'POST',
+            'CONTENT_TYPE' => 'application/json',
+            **env
+          )
+          nil
+        end
+      end
+
+      # Rack 3.1 made rack.input optional.
+      it 'passes a request with no rack.input through unparsed' do
+        expect(error_from('CONTENT_LENGTH' => '10')).to be_nil
+        expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]).to be_nil
+      end
+
+      it 'passes a chunked request with an empty input through unparsed' do
+        expect(error_from(Rack::RACK_INPUT => StringIO.new, 'HTTP_TRANSFER_ENCODING' => 'chunked')).to be_nil
+        expect(subject.env[Rack::RACK_REQUEST_FORM_HASH]).to be_nil
+      end
+    end
   end
 
   context 'send file' do
