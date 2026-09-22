@@ -41,6 +41,13 @@ describe Grape::DSL::RequestResponse do
       expect { subject.format :invalid }.to raise_error(Grape::Exceptions::MissingMimeType, /missing mime type for invalid/)
     end
 
+    it 'leaves the format and its error formatter untouched when it raises' do
+      subject.format :json
+      expect { subject.format :invalid }.to raise_error(Grape::Exceptions::MissingMimeType)
+      expect(subject.format).to eq :json
+      expect(subject.default_error_formatter).to eq Grape::ErrorFormatter::Json
+    end
+
     it 'accepts a format a content type has been registered for' do
       subject.content_type :invalid, 'application/invalid'
       subject.format :invalid

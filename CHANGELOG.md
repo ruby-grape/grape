@@ -53,6 +53,7 @@
 * [#2986](https://github.com/ruby-grape/grape/pull/2986): Match a header-versioned vendor declared with capitals - [@ericproulx](https://github.com/ericproulx).
 * [#2987](https://github.com/ruby-grape/grape/pull/2987): Match a header version or content type declared with capitals - [@ericproulx](https://github.com/ericproulx).
 * [#2988](https://github.com/ruby-grape/grape/pull/2988): Drop the routed-version check left behind in `Versioner::Path#before` - [@ericproulx](https://github.com/ericproulx).
+* [#2989](https://github.com/ruby-grape/grape/pull/2989): Leave the API format untouched when `format` rejects one with no content type - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
