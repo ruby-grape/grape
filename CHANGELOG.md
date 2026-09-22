@@ -55,6 +55,7 @@
 * [#2988](https://github.com/ruby-grape/grape/pull/2988): Drop the routed-version check left behind in `Versioner::Path#before` - [@ericproulx](https://github.com/ericproulx).
 * [#2989](https://github.com/ruby-grape/grape/pull/2989): Leave the API format untouched when `format` rejects one with no content type - [@ericproulx](https://github.com/ericproulx).
 * [#2990](https://github.com/ruby-grape/grape/pull/2990): Name a nested array element by its own indices when a Hash scope sits between two Array scopes - [@ericproulx](https://github.com/ericproulx).
+* [#2991](https://github.com/ruby-grape/grape/pull/2991): Require exactly one name for a `requires` or `optional` block - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

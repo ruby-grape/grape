@@ -218,6 +218,10 @@ module Grape
           return require_optional_fields(attrs.first, using:, except:)
         end
 
+        # A block declares the keys of one param. Without a name its params
+        # landed one level up; with several, only the first got them.
+        raise ArgumentError, "a params block needs exactly one parameter name, got `#{attrs.size}`" if block && attrs.size != 1
+
         validates(attrs, merged_opts, required:)
         return push_declared_params(attrs, as: declared_as) unless block
 
