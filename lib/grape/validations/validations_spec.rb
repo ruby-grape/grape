@@ -32,6 +32,9 @@ module Grape
         desc description documentation
       ].freeze
 
+      BOOLEAN_VALUES = [true, false].freeze
+      private_constant :BOOLEAN_VALUES
+
       attr_reader :raw, :coerce_type, :coerce_method, :coerce_message, :presence_options, :values, :except_values, :default, :allow_blank, :fail_fast, :shared_opts, :validator_entries
 
       def self.from(validations)
@@ -101,9 +104,14 @@ module Grape
           next if !values || values.is_a?(Proc)
 
           value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
-          value_types = value_types.map { |type| Grape::API::Boolean.build(type) } if element_type == Grape::API::Boolean
-          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, element_type, :values, values) unless value_types.all?(element_type)
+          raise Grape::Exceptions::IncompatibleOptionValues.new(:type, element_type, :values, values) unless all_of_type?(value_types, element_type)
         end
+      end
+
+      def all_of_type?(values, type)
+        return values.all? { |value| BOOLEAN_VALUES.include?(value) } if type == Grape::API::Boolean
+
+        values.all?(type)
       end
 
       def build_validator_entries(raw)

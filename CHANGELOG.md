@@ -50,6 +50,7 @@
 * [#2974](https://github.com/ruby-grape/grape/pull/2974): Run every endpoint's Rack stack through one shared lambda instead of one allocated per endpoint, and make `Grape::Endpoint#run` public - [@ericproulx](https://github.com/ericproulx).
 * [#2975](https://github.com/ruby-grape/grape/pull/2975): Hold a static `values` or `except_values` collection as it came instead of behind a lambda that only hands it back - [@ericproulx](https://github.com/ericproulx).
 * [#2976](https://github.com/ruby-grape/grape/pull/2976): Replace a registry on registration instead of writing into it, so a registered formatter, parser, params builder, validator or versioner cannot be changed underneath a reader - [@ericproulx](https://github.com/ericproulx).
+* [#2982](https://github.com/ruby-grape/grape/pull/2982): Check `Boolean` values directly instead of through `Grape::API::Boolean.build` - [@ericproulx](https://github.com/ericproulx).
 * [#2986](https://github.com/ruby-grape/grape/pull/2986): Match a header-versioned vendor declared with capitals - [@ericproulx](https://github.com/ericproulx).
 * [#2987](https://github.com/ruby-grape/grape/pull/2987): Match a header version or content type declared with capitals - [@ericproulx](https://github.com/ericproulx).
 * [#2988](https://github.com/ruby-grape/grape/pull/2988): Drop the routed-version check left behind in `Versioner::Path#before` - [@ericproulx](https://github.com/ericproulx).
