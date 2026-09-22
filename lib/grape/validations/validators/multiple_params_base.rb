@@ -22,10 +22,19 @@ module Grape
           MultipleAttributesIterator
         end
 
-        def keys_in_common(resource_params, known_keys = all_keys)
+        # Returns full names of the group attrs present on +resource_params+.
+        #
+        # Only the declared group attrs are inspected. The previous approach
+        # mapped every request key through +scope.full_name+ then intersected
+        # with the group — O(keys × nesting) per element, which dominated
+        # large Array scopes with +mutually_exclusive+ / +exactly_one_of+ /
+        # +all_or_none_of+.
+        def keys_in_common(resource_params)
           return [] unless hash_like?(resource_params)
 
-          known_keys & resource_params.keys.map! { |attr| scope.full_name(attr) }
+          attrs.filter_map do |attr|
+            scope.full_name(attr) if resource_params.key?(attr)
+          end
         end
 
         def all_keys

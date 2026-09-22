@@ -7,11 +7,10 @@ module Grape
         default_message_key :all_or_none
 
         def validate_params!(params)
-          known_keys = all_keys
-          keys = keys_in_common(params, known_keys)
+          keys = keys_in_common(params)
           return if keys.empty? || keys.length == attrs.length
 
-          validation_error!(known_keys)
+          validation_error!(all_keys)
         end
       end
     end
