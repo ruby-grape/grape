@@ -1999,6 +1999,34 @@ Grape supports I18n for parameter-related error messages, but will fallback to E
 
 In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
 
+#### Where messages come from
+
+`translate` hands every lookup to `Grape.translator`, which answers it. The default, `Grape::Translator::I18n`, asks I18n at request time — the behaviour described above, and what you want in an application that localizes.
+
+There are two because I18n cannot always be reached. It keeps its configuration in class variables — `@@backend`, `@@default_locale` — and a non-main Ractor may not read a class variable at all, frozen or not. An API served from a Ractor therefore cannot look a message up through I18n, and a message is what every validation failure needs.
+
+`Grape::Translator::Catalog` answers from a table built once instead:
+
+```ruby
+Grape.translator = Grape::Translator::Catalog.build
+```
+
+It reads Grape's own [en.yml](lib/grape/locale/en.yml) directly, so it needs no I18n at all, and merges whatever I18n has loaded over the top, so your overrides of `grape.errors.messages.*` and your other locales are carried. Looking a message up costs a `Hash` read and a `format` rather than a trip through I18n.
+
+What it trades away:
+
+* **It is a snapshot.** A locale file loaded lazily, or reloaded through `I18n.reload!` in development, is not in a table that was already built. Build it after your locales are loaded.
+* **The locale comes from `Grape.locale`**, not from I18n, because a non-main Ractor cannot read I18n's configuration at all. Set it per request where you would have set `I18n.locale`:
+
+```ruby
+before { Grape.locale = I18n.locale }
+```
+
+  It is stored per fiber, so requests do not see each other's, and a fiber started mid-request inherits it.
+* **It carries the `grape` scope only.** A validator translating from a namespace of its own has to name it: `Grape::Translator::Catalog.build(scopes: %w[grape my_app])`.
+
+A translator is anything answering `call(key, default:, scope:, locale:, **options)`, so an application can supply its own.
+
 Custom validators that inherit from `Grape::Validations::Validators::Base` have access to a `translate` helper (see `Grape::Util::Translation`) and should use it instead of calling `I18n` directly. It applies the same `:en` fallback as built-in validators, defaults `scope` to `'grape.errors.messages'`, and handles interpolation without needing `format`:
 
 ```ruby
