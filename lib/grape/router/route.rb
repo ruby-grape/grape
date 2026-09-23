@@ -3,14 +3,10 @@
 module Grape
   class Router
     class Route < BaseRoute
-      extend Forwardable
-
       FORWARD_MATCH_METHOD = ->(input, pattern) { input.start_with?(pattern.origin) }
       NON_FORWARD_MATCH_METHOD = ->(input, pattern) { pattern.match?(input) }
 
       attr_reader :app, :request_method, :index
-
-      def_delegators :@app, :call
 
       def initialize(endpoint, method, pattern, options, forward_match:, params: {}, **route_attributes)
         super(pattern, options, **route_attributes)
@@ -29,6 +25,13 @@ module Grape
       def apply(app)
         @app = app
         self
+      end
+
+      # Written out rather than delegated: the router calls it on every
+      # request, and a Forwardable delegator checks its target with +defined?+
+      # and forwards through +...+ each time.
+      def call(env)
+        @app.call(env)
       end
 
       # The router hands over a normalized path, which always opens with a

@@ -177,7 +177,7 @@ module Grape
       instrument_run do
         @request = Grape::Request.new(env, build_params_with: @build_params_with)
         begin
-          run_filters befores, :before
+          run_filters befores, :before unless befores.empty?
           @before_filter_passed = true
 
           if env.key?(Grape::Env::GRAPE_ALLOWED_METHODS)
@@ -187,13 +187,13 @@ module Grape
             response_object = ''
             status 204
           else
-            run_filters before_validations, :before_validation
+            run_filters before_validations, :before_validation unless before_validations.empty?
             run_validators(request:)
-            run_filters after_validations, :after_validation
+            run_filters after_validations, :after_validation unless after_validations.empty?
             response_object = execute
           end
 
-          run_filters afters, :after
+          run_filters afters, :after unless afters.empty?
           build_response_cookies
 
           # status verifies body presence when DELETE
@@ -204,7 +204,7 @@ module Grape
 
           [status, header, response_object]
         ensure
-          run_filters finallies, :finally
+          run_filters finallies, :finally unless finallies.empty?
         end
       end
     end
@@ -239,9 +239,10 @@ module Grape
       raise Grape::Exceptions::ValidationErrors.new(exceptions: validation_exceptions, headers: header) if validation_exceptions
     end
 
+    # Every request passes through five filter phases, and most endpoints
+    # register nothing for most of them, so #run skips an empty phase rather
+    # than calling in to find that out.
     def run_filters(filters, type = :other)
-      return if filters.empty?
-
       instrument_run_filters(filters, type) do
         filters.each { |filter| instance_eval(&filter) }
       end
