@@ -40,7 +40,10 @@ module Grape
           @cascade = version_options.cascade
           @parameter = version_options.parameter
           @strict = version_options.strict
-          @vendor = version_options.vendor
+          # Media types are case-insensitive, and Grape::Util::MediaType parses
+          # an Accept header into lowercase; a vendor declared with capitals
+          # would otherwise never match one.
+          @vendor = version_options.vendor&.downcase
           @versions = config.versions&.map(&:to_s) # making sure versions are strings to ease potential match
           @error_headers = cascade ? CASCADE_PASS_HEADER : {}
           @available_media_types = build_available_media_types

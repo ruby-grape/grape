@@ -118,6 +118,27 @@ describe Grape::Middleware::Versioner::Header do
           end
       end
     end
+
+    context 'when the vendor is declared with capitals' do
+      before do
+        @options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'MyCompany')
+        @options[:versions] = ['v1']
+      end
+
+      %w[application/vnd.MyCompany-v1+json application/vnd.mycompany-v1+json].each do |accept|
+        it "matches #{accept}" do
+          status, _, env = subject.call('HTTP_ACCEPT' => accept)
+          expect(status).to eq(200)
+          expect(env[Grape::Env::API_VENDOR]).to eql 'mycompany'
+          expect(env[Grape::Env::API_VERSION]).to eql 'v1'
+        end
+      end
+
+      it 'reports an unknown version rather than an unknown vendor' do
+        expect { subject.call('HTTP_ACCEPT' => 'application/vnd.MyCompany-v2+json') }
+          .to raise_exception(Grape::Exceptions::InvalidVersionHeader, /API version not found/)
+      end
+    end
   end
 
   context 'api.version' do
