@@ -33,10 +33,8 @@ module Grape
           app.call(env).to_a
         end
 
+        # Reached only when #call found no routed version.
         def before
-          routed = routed_version(env)
-          return env[Grape::Env::API_VERSION] = routed if routed
-
           path_info = env[Grape::Env::GRAPE_NORMALIZED_PATH] || Grape::Util::PathNormalizer.call(env[Rack::PATH_INFO])
           return if path_info == '/'
 
