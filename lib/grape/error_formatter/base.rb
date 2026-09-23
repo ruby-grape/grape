@@ -39,8 +39,11 @@ module Grape
           # -- presenting it raised, and the failsafe answered 500 in place of
           # the status +error!+ asked for -- so it is left for #wrap_message.
           unless presenter || payload.is_a?(String) || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
-            # env['api.endpoint'].route does not work when the error occurs within a middleware
-            # the Endpoint does not have a valid env at this moment
+            # A route's failure presenters are written for the errors the
+            # endpoint itself raises. One raised by middleware before the
+            # endpoint ran -- it has no request yet -- keeps the shape that
+            # middleware gave it rather than being fit to an entity it was
+            # not written for.
             http_codes = env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info].failure || []
             found_code = http_codes.find do |http_code|
               (http_code[0].to_i == env[Grape::Env::API_ENDPOINT].status) && http_code[2].respond_to?(:represent)
