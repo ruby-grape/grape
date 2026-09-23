@@ -180,6 +180,24 @@ describe Grape::Middleware::Error do
         get '/', {}, Rack::RACK_ERRORS => errors
         expect(errors.string).to include('Grape could not render the error response: JSON::GeneratorError')
       end
+
+      # The Rack SPEC requires rack.errors, so reaching a server that leaves it
+      # out takes Rack::Lint off and bypasses rack-test, which flushes it.
+      context 'when the env has no rack.errors' do
+        around do |example|
+          Grape.config.lint = false
+          example.run
+        ensure
+          Grape.config.lint = true
+        end
+
+        it 'still answers with the framework message' do
+          env = Rack::MockRequest.env_for('/').except(Rack::RACK_ERRORS)
+          status, _headers, body = app.call(env)
+          expect(status).to eq(500)
+          expect(JSON.parse(body.to_enum.to_a.join)).to eq('error' => 'Internal Server Error')
+        end
+      end
     end
 
     context 'and the formatter is broken outright' do

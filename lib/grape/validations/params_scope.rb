@@ -120,8 +120,9 @@ module Grape
 
         return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
         return false unless meets_dependency?(scoped_params, parameters)
-        return true if @parent.nil?
 
+        # Past the +@independent+ return, this scope or one above it is a
+        # +given+ scope, and a +given+ scope is always nested: there is a parent.
         @parent.should_validate?(parameters)
       end
 

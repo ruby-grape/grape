@@ -52,5 +52,11 @@ describe Grape::Testing do
       expect { get '/' }.not_to raise_error
       expect(last_response.body).to eq('hello')
     end
+
+    # Hooks are registered per class, so a subclass that never had one has
+    # nothing to reset -- what an unconditional `after` hook runs into.
+    it 'resets an endpoint class no hook was ever registered on' do
+      expect { Class.new(Grape::Endpoint).reset_before_each }.not_to raise_error
+    end
   end
 end

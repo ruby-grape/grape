@@ -243,4 +243,47 @@ describe Grape::Validations::Validators::ExceptValuesValidator do
       expect(last_response.body).to eq({ error: 'type has a value not allowed' }.to_json)
     end
   end
+
+  describe 'uncommon declarations' do
+    def response_to(body, &declaration)
+      app = Class.new(Grape::API) do
+        format :json
+        params(&declaration)
+        post('/') { 'ok' }
+      end
+      Rack::MockRequest.new(app).post('/', input: body.to_json, 'CONTENT_TYPE' => 'application/json')
+    end
+
+    it 'rejects a Proc that takes an argument' do
+      expect do
+        Class.new(Grape::API) { params { optional :a, except_values: ->(val) { val == 1 } } }
+      end.to raise_error(ArgumentError, /except_values Proc must have arity of zero/)
+    end
+
+    it 'leaves a non-Hash element of an Array param to its own type check' do
+      response = response_to(items: [1]) do
+        requires :items, type: Array do
+          requires :a, except_values: [1]
+        end
+      end
+      expect(response.body).to eq({ error: 'items[0] is invalid, items[0][a] is missing' }.to_json)
+    end
+
+    it 'accepts any value when a Proc hands back no list' do
+      expect(response_to(a: 1) { optional :a, except_values: -> {} }.status).to eq(201)
+    end
+
+    # Excluding nil tells an explicit null apart from a param that was left out.
+    context 'when nil is excluded' do
+      it 'rejects an explicit null' do
+        response = response_to(a: nil) { optional :a, except_values: [nil] }
+        expect(response.body).to eq({ error: 'a has a value not allowed' }.to_json)
+      end
+
+      it 'does not also reject a required param that was left out' do
+        response = response_to({}) { requires :a, except_values: [nil] }
+        expect(response.body).to eq({ error: 'a is missing' }.to_json)
+      end
+    end
+  end
 end

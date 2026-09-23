@@ -105,6 +105,24 @@ describe Grape::Router::RouteBuckets do
     end
   end
 
+  context 'when the routes are told apart by a segment past a prefix' do
+    let(:app) do
+      Class.new(Grape::API) do
+        prefix :api
+        format :json
+        10.times do |i|
+          get("/resource#{i}/:id") { { route: "show #{i}" } }
+        end
+      end
+    end
+
+    it 'answers a path that stops short of that segment as one no route matched' do
+      get '/api'
+
+      expect(last_response.status).to eq(404)
+    end
+  end
+
   context 'with methods whose routes line up position for position' do
     let(:app) do
       Class.new(Grape::API) do
@@ -121,6 +139,25 @@ describe Grape::Router::RouteBuckets do
 
       expect(last_response.status).to eq(201)
       expect(JSON.parse(last_response.body)).to eq('route' => 'add item 3')
+    end
+  end
+
+  # Mustermann answers every position of a name matched more than once, which
+  # the union match cannot stand in for, so such a route sits in each bucket
+  # with no captures of its own.
+  context 'with a route naming a param twice' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        10.times do |i|
+          get("/resource#{i}/:id") { { route: "show #{i}" } }
+        end
+        get('/:a/x/:a') { { route: 'repeated', a: params[:a] } }
+      end
+    end
+
+    it 'captures the param at every position' do
+      expect(route_for('/one/x/two')).to eq('route' => 'repeated', 'a' => %w[one two])
     end
   end
 end

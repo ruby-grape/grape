@@ -57,7 +57,7 @@ module Grape
         end
 
         def uses_path_versioning?(settings)
-          settings.version && settings.version_options&.using == :path
+          settings.version && settings.version_options.using == :path
         end
 
         def valid_part?(part)

@@ -678,6 +678,28 @@ describe Grape::Validations::Validators::ValuesValidator do
     end
   end
 
+  # Unlike an empty list, no list at all constrains nothing.
+  describe '/nil_lambda' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :type, values: -> {}
+        end
+        get '/nil_lambda' do
+          { type: params[:type] }
+        end
+      end
+    end
+
+    it 'accepts any value when the proc hands back no list' do
+      get('/nil_lambda', type: 'any')
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq({ type: 'any' }.to_json)
+    end
+  end
+
   describe '/default_lambda' do
     let(:app) do
       Class.new(Grape::API) do

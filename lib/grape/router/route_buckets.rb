@@ -54,7 +54,7 @@ module Grape
         def match(input)
           @union&.match(input) do |m|
             index = @groups.index { |group| m[group] }
-            yield(@routes[index], m, @captures[index]) if index
+            yield(@routes[index], m, @captures[index])
           end
         end
       end
