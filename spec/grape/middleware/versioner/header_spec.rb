@@ -401,6 +401,16 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
+  # Through the DSL a header-versioned API always declares its versions; the
+  # middleware used on its own need not.
+  context 'when no versions are declared on the middleware directly' do
+    it 'passes a request naming a version through' do
+      status, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-v1+json')
+      expect(status).to eq(200)
+      expect(env[Grape::Env::API_VERSION]).to be_nil
+    end
+  end
+
   context 'when the vendor option is not set on the middleware directly' do
     subject { described_class.new(app, version_options: Grape::DSL::VersionOptions.new(using: :header, vendor: nil)) }
 

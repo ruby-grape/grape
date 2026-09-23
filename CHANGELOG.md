@@ -60,6 +60,7 @@
 * [#2993](https://github.com/ruby-grape/grape/pull/2993): Say a param is invalid when its validation error has no message, instead of naming the exception class - [@ericproulx](https://github.com/ericproulx).
 * [#2994](https://github.com/ruby-grape/grape/pull/2994): Honour the message of a `coerce:` option given as `{ value:, message: }` - [@ericproulx](https://github.com/ericproulx).
 * [#2995](https://github.com/ruby-grape/grape/pull/2995): Merge a middleware's headers with a guard clause instead of a `case` - [@ericproulx](https://github.com/ericproulx).
+* [#2996](https://github.com/ruby-grape/grape/pull/2996): Cover the header versioner's last two branches - [@ericproulx](https://github.com/ericproulx).
 * [#2997](https://github.com/ruby-grape/grape/pull/2997): Cover the router's missed branches and drop its dead guards - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
