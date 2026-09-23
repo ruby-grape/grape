@@ -12,7 +12,6 @@
 
 #### Fixes
 
-* [#2981](https://github.com/ruby-grape/grape/pull/2981): Speed up group validators inside large Array scopes by only inspecting declared attrs - [@braktar](https://github.com/braktar).
 * [#2916](https://github.com/ruby-grape/grape/pull/2916): Pin `json` below 3 in the gemfiles whose dependencies cannot use it - [@ericproulx](https://github.com/ericproulx).
 * [#2915](https://github.com/ruby-grape/grape/pull/2915): Update rubocop to 1.90.0 and rubocop-performance to 1.27.0 - [@ericproulx](https://github.com/ericproulx).
 * [#2918](https://github.com/ruby-grape/grape/pull/2918): Skip the dry-types round trip when a value already is the declared type - [@ericproulx](https://github.com/ericproulx).
@@ -68,6 +67,7 @@
 * [#3001](https://github.com/ruby-grape/grape/pull/3001): Drop the safe navigation on the declared handler's contract key maps - [@ericproulx](https://github.com/ericproulx).
 * [#3002](https://github.com/ruby-grape/grape/pull/3002): Render an XML error without checking for `to_xml` - [@ericproulx](https://github.com/ericproulx).
 * [#3005](https://github.com/ruby-grape/grape/pull/3005): Load rails before grape in the Rails gemfiles so the specs exercise loading `Grape::Railtie` - [@ericproulx](https://github.com/ericproulx).
+* [#2981](https://github.com/ruby-grape/grape/pull/2981): Speed up group validators inside large Array scopes by only inspecting declared attrs - [@braktar](https://github.com/braktar).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

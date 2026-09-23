@@ -7,10 +7,10 @@ module Grape
         default_message_key :mutual_exclusion
 
         def validate_params!(params)
-          keys = keys_in_common(params)
-          return if keys.length <= 1
+          present = present_attrs(params)
+          return if present.length <= 1
 
-          validation_error!(keys)
+          validation_error!(full_names(present))
         end
       end
     end

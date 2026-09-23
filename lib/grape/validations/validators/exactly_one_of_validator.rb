@@ -11,11 +11,11 @@ module Grape
         end
 
         def validate_params!(params)
-          keys = keys_in_common(params)
-          return if keys.length == 1
+          present = present_attrs(params)
+          return if present.length == 1
 
-          validation_error!(all_keys, @exactly_one_exception_message) if keys.empty?
-          validation_error!(keys, @mutual_exclusion_exception_message)
+          validation_error!(all_keys, @exactly_one_exception_message) if present.empty?
+          validation_error!(full_names(present), @mutual_exclusion_exception_message)
         end
       end
     end

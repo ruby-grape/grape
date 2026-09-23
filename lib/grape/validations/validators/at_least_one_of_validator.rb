@@ -7,7 +7,7 @@ module Grape
         default_message_key :at_least_one
 
         def validate_params!(params)
-          return if hash_like?(params) && attrs.any? { |attr| params.key?(attr) }
+          return if any_attr_present?(params)
 
           validation_error!(all_keys)
         end

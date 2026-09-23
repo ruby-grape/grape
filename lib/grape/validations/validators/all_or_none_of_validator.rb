@@ -7,8 +7,8 @@ module Grape
         default_message_key :all_or_none
 
         def validate_params!(params)
-          keys = keys_in_common(params)
-          return if keys.empty? || keys.length == attrs.length
+          present = present_attrs(params)
+          return if present.empty? || present.length == attrs.length
 
           validation_error!(all_keys)
         end

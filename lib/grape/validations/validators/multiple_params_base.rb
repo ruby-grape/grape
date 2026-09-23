@@ -22,23 +22,35 @@ module Grape
           MultipleAttributesIterator
         end
 
-        # Returns full names of the group attrs present on +resource_params+.
-        #
-        # Only the declared group attrs are inspected. The previous approach
-        # mapped every request key through +scope.full_name+ then intersected
-        # with the group — O(keys × nesting) per element, which dominated
-        # large Array scopes with +mutually_exclusive+ / +exactly_one_of+ /
-        # +all_or_none_of+.
-        def keys_in_common(resource_params)
+        def present_attrs(resource_params)
           return [] unless hash_like?(resource_params)
 
-          attrs.filter_map do |attr|
-            scope.full_name(attr) if resource_params.key?(attr)
-          end
+          attrs.select { |attr| attr_present?(resource_params, attr) }.uniq
+        end
+
+        def any_attr_present?(resource_params)
+          return false unless hash_like?(resource_params)
+
+          attrs.any? { |attr| attr_present?(resource_params, attr) }
+        end
+
+        def attr_present?(params, attr)
+          return true if params.key?(attr)
+
+          alternate = attr.is_a?(Symbol) ? attr.to_s : attr.to_sym
+          params.key?(alternate)
+        end
+
+        def full_names(attr_list)
+          attr_list.map { |attr| scope.full_name(attr) }
+        end
+
+        def keys_in_common(resource_params, _known_keys = nil)
+          full_names(present_attrs(resource_params))
         end
 
         def all_keys
-          attrs.map { |attr| scope.full_name(attr) }
+          full_names(attrs)
         end
       end
     end
