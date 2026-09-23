@@ -73,13 +73,15 @@ module Grape
         end
       end
 
+      # Each parent index belongs to the next element-iterating scope up the
+      # chain, which a Hash scope may sit below. There is always one:
+      # +parent_indices+ holds at most +array_depth - 1+ entries, and
+      # +target_scope+ has that many iterating ancestors.
       def store_indices(tracker, target_scope, index, parent_indices)
-        parent_scope = target_scope.parent
+        parent_scope = target_scope.nearest_array_ancestor
         parent_indices.each do |parent_index|
-          break unless parent_scope
-
           tracker.store_index(parent_scope, parent_index)
-          parent_scope = parent_scope.parent
+          parent_scope = parent_scope.nearest_array_ancestor
         end
         tracker.store_index(target_scope, index)
       end

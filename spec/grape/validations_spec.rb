@@ -257,6 +257,30 @@ describe Grape::Validations do
       end
     end
 
+    # The outer array's index belongs to that array, not to the Hash between.
+    context 'requires with a Hash between two Arrays' do
+      before do
+        subject.params do
+          requires :a, type: Array do
+            requires :b, type: Hash do
+              requires :c, type: Array do
+                requires :d, type: String
+              end
+            end
+          end
+        end
+        subject.post('/') { 'ok' }
+      end
+
+      it 'names the element by the index of each array' do
+        body = { a: [{ b: { c: [{ d: 'x' }, {}] } }, { b: { c: [{ d: 'x' }] } }, { b: { c: [{}] } }] }
+        post '/', body.to_json, 'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a[0][b][c][1][d] is missing, a[2][b][c][0][d] is missing')
+      end
+    end
+
     context 'requires :all using Grape::Entity documentation' do
       def define_requires_all
         documentation = {
