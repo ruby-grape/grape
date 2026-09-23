@@ -13,16 +13,18 @@ module Grape
 
       # Specify the format for the API's serializers.
       # May be `:json`, `:xml`, `:txt`, etc.
+      # A format no content type is registered for used to be assigned before
+      # the check that rejects it, so a rescued call left the API formatting
+      # with a format it had just refused, and no default error formatter.
       def format(new_format = nil)
         return inheritable_setting.format if new_format.nil?
 
         symbolic_new_format = new_format.to_sym
-        inheritable_setting.format = symbolic_new_format
-        inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(symbolic_new_format)
-
         content_type = content_types[symbolic_new_format]
         raise Grape::Exceptions::MissingMimeType.new(new_format) unless content_type
 
+        inheritable_setting.format = symbolic_new_format
+        inheritable_setting.default_error_formatter = Grape::ErrorFormatter.formatter_for(symbolic_new_format)
         inheritable_setting.add_content_type(symbolic_new_format, content_type)
       end
 
