@@ -81,6 +81,37 @@ describe Grape::Validations::Validators::CoerceValidator do
         expect(last_response.body).to eq('int works')
       end
 
+      # +coerce:+ takes the same { value:, message: } form as +type:+.
+      context 'given with coerce:' do
+        it 'errors on malformed input with the message' do
+          subject.params do
+            requires :int, coerce: { value: Integer, message: 'type cast is invalid' }
+          end
+          subject.get('/single') { 'int works' }
+
+          get '/single', int: '43a'
+          expect(last_response.body).to eq('int type cast is invalid')
+        end
+
+        it 'lets coerce_message: take precedence' do
+          subject.params do
+            requires :int, coerce: { value: Integer, message: 'ignored' }, coerce_message: 'type cast is invalid'
+          end
+          subject.get('/single') { 'int works' }
+
+          get '/single', int: '43a'
+          expect(last_response.body).to eq('int type cast is invalid')
+        end
+
+        it 'checks values: against the value, not the Hash' do
+          expect do
+            subject.params do
+              requires :int, coerce: { value: Integer, message: 'type cast is invalid' }, values: [1, 5]
+            end
+          end.not_to raise_error
+        end
+      end
+
       context 'on custom coercion rules' do
         before do
           subject.params do

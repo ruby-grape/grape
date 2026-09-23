@@ -11,8 +11,7 @@ module Grape
 
           @exception_message = options.message if options.message
 
-          raw_type = options.type
-          type = hash_like?(raw_type) ? raw_type[:value] : raw_type
+          type = options.type
           @converter =
             if type.is_a?(Grape::Validations::Types::VariantCollectionCoercer)
               type
