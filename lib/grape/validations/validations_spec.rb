@@ -121,8 +121,8 @@ module Grape
           coerce, coerce_message = extract_value_and_message(raw[:types])
           coerce_with = raw[:coerce_with]
         else
-          coerce = raw[:coerce]
-          coerce_message = raw[:coerce_message]
+          coerce, message = extract_value_and_message(raw[:coerce])
+          coerce_message = raw[:coerce_message] || message
           coerce_with = raw[:coerce_with]
         end
 

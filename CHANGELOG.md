@@ -58,6 +58,7 @@
 * [#2991](https://github.com/ruby-grape/grape/pull/2991): Require exactly one name for a `requires` or `optional` block - [@ericproulx](https://github.com/ericproulx).
 * [#2992](https://github.com/ruby-grape/grape/pull/2992): Accept a beginless range of `values` for a bare `Array` type - [@ericproulx](https://github.com/ericproulx).
 * [#2993](https://github.com/ruby-grape/grape/pull/2993): Say a param is invalid when its validation error has no message, instead of naming the exception class - [@ericproulx](https://github.com/ericproulx).
+* [#2994](https://github.com/ruby-grape/grape/pull/2994): Honour the message of a `coerce:` option given as `{ value:, message: }` - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
