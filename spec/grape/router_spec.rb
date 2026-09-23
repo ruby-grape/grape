@@ -160,6 +160,19 @@ describe Grape::Router do
       expect(response_body).to eq('any')
     end
 
+    # Rack requires every body it hands out to be closed.
+    it 'closes the body of a response it cascades past' do
+      closed = []
+      body = ['declined']
+      body.define_singleton_method(:close) { closed << true }
+      append_route(->(_env) { [404, { 'X-Cascade' => 'pass' }, body] })
+      append_route(serving)
+      router.compile!
+
+      expect(response_body).to eq('served')
+      expect(closed).to eq([true])
+    end
+
     it 'returns the last cascading response when nothing else answers' do
       append_route(cascading)
       append_route(cascading)
@@ -215,6 +228,31 @@ describe Grape::Router do
     end
   end
 
+  # An earlier route that names a param twice answers a path another route
+  # spells out in full, with an Array capture. That path is left to the union
+  # each time rather than kept for every request to share: only a String is
+  # frozen whole in the table.
+  describe 'routing a static path an earlier route answers with an Array capture' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        get('/:a/x/:a') do
+          first = params[:a].first
+          seen = first.dup
+          first << '!' unless first.frozen?
+          { seen: }
+        end
+        get('/one/x/two') { { route: 'literal' } }
+      end
+    end
+
+    it 'hands each request its own capture' do
+      bodies = Array.new(2) { Rack::MockRequest.new(app).get('/one/x/two').body }
+
+      expect(bodies).to eq([{ seen: 'one' }.to_json] * 2)
+    end
+  end
+
   # Regression: Rack hands PATH_INFO over binary, and a binary string holding
   # non-ASCII bytes raises when matched against a UTF-8 regexp. A route whose
   # path holds a non-ASCII literal compiles to one, so on such an API every
@@ -252,6 +290,10 @@ describe Grape::Router do
 
     it 'answers a path whose bytes are not UTF-8 as one no route matched' do
       expect(request_path("/plain/\xFF").first).to eq(404)
+    end
+
+    it 'does not recognize a path whose bytes are not UTF-8' do
+      expect(app.recognize_path("/plain/\xFF".b)).to be_nil
     end
 
     it 'recognizes a UTF-8 path' do

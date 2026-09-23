@@ -84,7 +84,8 @@ module Grape
     def recognize_path(input)
       any = with_optimization do
         input = utf8_path(input) if @utf8_patterns && !input.ascii_only?
-        greedy_match?(input) if input
+        # A path that is not valid UTF-8 comes back nil and matches nothing.
+        greedy_match?(input)
       end
       return if any == default_response
 
@@ -197,7 +198,7 @@ module Grape
     # caller can hand it back — or nil when no sibling matched.
     def rotation(input, method, env, exact_route)
       response = nil
-      @map[method]&.each do |route|
+      @map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
@@ -271,8 +272,10 @@ module Grape
 
           union.match(path) do |m|
             matched = routes.detect { |candidate| m[candidate.regexp_capture_group] }
-            captures = matched&.params_for(path, m)
-            next unless matched && (captures.nil? || captures.each_value.all?(String))
+            captures = matched.params_for(path, m)
+            # Only a String is frozen whole below; any other capture would be
+            # shared across requests with its insides open to change.
+            next unless captures.nil? || captures.each_value.all?(String)
 
             table[path] = [matched, captures.presence&.each_value(&:freeze)&.freeze].freeze
           end
