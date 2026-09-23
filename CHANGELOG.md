@@ -64,6 +64,7 @@
 * [#2996](https://github.com/ruby-grape/grape/pull/2996): Cover the header versioner's last two branches - [@ericproulx](https://github.com/ericproulx).
 * [#2997](https://github.com/ruby-grape/grape/pull/2997): Cover the router's missed branches and drop its dead guards - [@ericproulx](https://github.com/ericproulx).
 * [#2998](https://github.com/ruby-grape/grape/pull/2998): Drop the unused `simplecov-lcov` setup; Coveralls reads SimpleCov's own results - [@ericproulx](https://github.com/ericproulx).
+* [#3001](https://github.com/ruby-grape/grape/pull/3001): Drop the safe navigation on the declared handler's contract key maps - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
