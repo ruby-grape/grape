@@ -154,7 +154,9 @@ module Grape
 
         values_list.each do |values|
           next if !values || values.is_a?(Proc)
-          return values.first.class if values.is_a?(Range) || !values.empty?
+          # A beginless Range has no first element to ask.
+          return (values.begin || values.end).class if values.is_a?(Range)
+          return values.first.class unless values.empty?
         end
         coerce_type
       end

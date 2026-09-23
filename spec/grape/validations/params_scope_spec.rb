@@ -183,6 +183,21 @@ describe Grape::Validations::ParamsScope do
       end.not_to raise_error
     end
 
+    it 'accepts beginless and endless range values' do
+      expect do
+        subject.params do
+          requires :low, type: Array, values: ..5
+          requires :high, type: Array, values: 1..
+        end
+      end.not_to raise_error
+    end
+
+    it 'still raises for a beginless range whose end is not of the member type' do
+      expect do
+        subject.params { requires :numbers, type: Array, values: ..5, except_values: ['a'] }
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+    end
+
     it 'accepts an array containing only allowed values, given as a literal array' do
       subject.params do
         optional :periods, type: Array, values: %w[day month]
