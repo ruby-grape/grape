@@ -9,16 +9,16 @@ module Grape
 
       def initialize(params:, message: nil, status: nil, headers: nil)
         @params = Array(params)
-        translated =
-          if message
-            @message_key = case message
-                           when Symbol then message
-                           when Hash then message[:key]
-                           end
-            translate_message(message)
-          end
+        # Without a message, StandardError#message answers with this class's
+        # name, and that reached the response -- from a custom validator with
+        # no default_message_key, say.
+        message ||= :invalid
+        @message_key = case message
+                       when Symbol then message
+                       when Hash then message[:key]
+                       end
 
-        super(status:, message: translated, headers:)
+        super(status:, message: translate_message(message), headers:)
         # Pre-seed the backtrace so Ruby's raise skips capture. Validation errors are
         # a hot path (raised per bad attribute) and end up as 400 Bad Request responses;
         # backtraces here point into Grape internals and have no diagnostic value.

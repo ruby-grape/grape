@@ -8,12 +8,12 @@ describe Grape::Exceptions::Validation do
   context 'when message is omitted' do
     subject(:error) { described_class.new(params: ['id']) }
 
-    it 'has a nil message_key' do
-      expect(error.message_key).to be_nil
+    it 'falls back to the invalid message_key' do
+      expect(error.message_key).to eq(:invalid)
     end
 
-    it 'has no message from the given options' do
-      expect(error.message).to eq(described_class.name)
+    it 'says the param is invalid rather than naming the exception class' do
+      expect(error.message).to eq('is invalid')
     end
   end
 
