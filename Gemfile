@@ -28,7 +28,6 @@ group :test do
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'
   gem 'simplecov', '~> 1.1', require: false
-  gem 'simplecov-lcov', '~> 0.8', require: false
 end
 
 platforms :jruby do
