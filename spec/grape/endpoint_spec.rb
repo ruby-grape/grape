@@ -672,6 +672,38 @@ describe Grape::Endpoint do
           expect(last_response.body).to eq('{"error":"took too long"}')
         end
       end
+
+      it 'leaves an error raised by middleware before the endpoint in its own shape' do
+        rejecting = Class.new(Grape::Middleware::Base) do
+          def before
+            throw :error, status: 408, message: { code: 408, reason: 'rejected' }
+          end
+        end
+        subject.format :json
+        subject.use rejecting
+        subject.desc 'hey', failure: [[408, 'Request Timeout', presenter]]
+        subject.get('/hey') { 'unreachable' }
+
+        get '/hey'
+        expect(last_response.status).to eq(408)
+        expect(last_response.body).to eq('{"code":408,"reason":"rejected"}')
+      end
+
+      it 'hands the presenter the version on a versioned request' do
+        versioned_presenter = Class.new do
+          def self.represent(_object, options = {})
+            Struct.new(:version) { def serializable_hash = { version: } }.new(options[:version])
+          end
+        end
+        subject.format :json
+        subject.version 'v1', using: :path
+        subject.desc 'hey', failure: [[408, 'Request Timeout', versioned_presenter]]
+        subject.get('/hey') { error!({ code: 408 }, 408) }
+
+        get '/v1/hey'
+        expect(last_response.status).to eq(408)
+        expect(last_response.body).to eq('{"version":"v1"}')
+      end
     end
   end
 
