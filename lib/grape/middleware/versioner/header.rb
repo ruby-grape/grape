@@ -45,10 +45,9 @@ module Grape
             super
             @cache = Hash.new do |h, available_media_types|
               declared = available_media_types.map(&:-@).freeze
-              h[declared] = [*declared, *COMMON_ACCEPT_HEADERS].each_with_object({}) do |accept, media_types|
-                media_type = Grape::Util::MediaType.best_quality(accept, declared)
-                media_types[accept] = media_type if media_type
-              end.freeze
+              h[declared] = [*declared, *COMMON_ACCEPT_HEADERS].to_h do |accept|
+                [accept, Grape::Util::MediaType.best_quality(accept, declared)]
+              end.compact.freeze
             end
           end
         end
