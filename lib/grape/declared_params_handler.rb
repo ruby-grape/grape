@@ -2,7 +2,7 @@
 
 module Grape
   class DeclaredParamsHandler
-    def initialize(include_missing: true, evaluate_given: false, stringify: false, contract_key_map: nil)
+    def initialize(include_missing: true, evaluate_given: false, stringify: false, contract_key_map: [])
       @include_missing = include_missing
       @evaluate_given = evaluate_given
       @stringify = stringify
@@ -38,7 +38,7 @@ module Grape
               declared_hash(passed_params, declared_params:, params_nested_path:, renamed_params:, route_params:)
             end
 
-      @contract_key_map&.each { |key_map| key_map.write(passed_params, res) }
+      @contract_key_map.each { |key_map| key_map.write(passed_params, res) }
 
       res
     end
