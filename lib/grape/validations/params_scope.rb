@@ -346,13 +346,11 @@ module Grape
       # @yield parameter scope
       def new_scope(element, type:, as:, optional: false, &)
         # A group needs a type: it says whether the nested params sit under one
-        # object or repeat in a list, and without it the `type || Array` below
-        # would quietly pick one. Checked here for `requires` and `optional`
-        # alike — `new_scope` is only reached from their block branch.
-        if element
-          raise Grape::Exceptions::MissingGroupType if type.nil?
-          raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
-        end
+        # object or repeat in a list, and nothing else could decide it. Checked
+        # here for `requires` and `optional` alike — `new_scope` is only reached
+        # from their block branch.
+        raise Grape::Exceptions::MissingGroupType if type.nil?
+        raise Grape::Exceptions::UnsupportedGroupType unless Grape::Validations::Types.group?(type)
 
         # The block declares the keys of each element, so an element has to be
         # a Hash. +Array[JSON]+ checks that when it parses the elements.
@@ -364,7 +362,7 @@ module Grape
           element_renamed: as,
           parent: self,
           optional:,
-          type: type || Array,
+          type:,
           group: @group,
           &
         )

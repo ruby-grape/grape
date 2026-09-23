@@ -493,6 +493,22 @@ describe Grape::Validations::ParamsScope do
       end.not_to raise_error
     end
 
+    # Without a name the block's params landed one level up; with several,
+    # only the first name got them.
+    %w[requires optional].each do |method|
+      it "errors when #{method} is given a block without a name" do
+        expect do
+          subject.params { __send__(method, type: Hash) { requires :b } }
+        end.to raise_error(ArgumentError, 'a params block needs exactly one parameter name, got `0`')
+      end
+
+      it "errors when #{method} is given a block with several names" do
+        expect do
+          subject.params { __send__(method, :a, :c, type: Hash) { requires :b } }
+        end.to raise_error(ArgumentError, 'a params block needs exactly one parameter name, got `2`')
+      end
+    end
+
     it 'still errors when neither the declaration nor the group provides a type' do
       expect do
         subject.params do

@@ -3,6 +3,35 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A `requires` or `optional` block needs exactly one name
+
+A `requires` or `optional` given a block now raises `ArgumentError` unless it names exactly one parameter ([#2991](https://github.com/ruby-grape/grape/pull/2991)). Both forms were accepted before, and both declared something other than what they read:
+
+```ruby
+# No name: the block's params were declared one level up, and under
+# `optional` they were still required.
+optional type: Hash do
+  requires :x
+end
+
+# Several names: `b` was required, but only `a` got the block's params,
+# and `b` was left out of `declared`.
+requires :a, :b, type: Hash do
+  requires :x
+end
+```
+
+Name the one parameter the block describes, and repeat the block for each parameter that shares its shape:
+
+```ruby
+requires :a, type: Hash do
+  requires :x
+end
+requires :b, type: Hash do
+  requires :x
+end
+```
+
 #### A query string Grape does not parse no longer decides the response
 
 Grape parsed the query string of every request that had one, only to look for a `?format=` override ([#2972](https://github.com/ruby-grape/grape/pull/2972)). It now parses it only when the string could name that param, and leaves it to whoever reads the params otherwise.
