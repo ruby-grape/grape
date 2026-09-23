@@ -351,6 +351,26 @@ describe Grape::DSL::InsideRoute do
             expect(subject.body).to eq 'dummy'
           end
         end
+
+        # A versioned request hands the entity its version along with env.
+        describe 'on a versioned request' do
+          let(:echoing_entity) do
+            Class.new do
+              def self.represent(object, **options)
+                { object:, version: options[:version], env_given: options.key?(:env) }
+              end
+            end
+          end
+
+          before do
+            subject.env[Grape::Env::API_VERSION] = 'v1'
+            subject.present 'dummy', with: echoing_entity
+          end
+
+          it 'passes the version to the entity' do
+            expect(subject.body).to eq(object: 'dummy', version: 'v1', env_given: true)
+          end
+        end
       end
     end
 
