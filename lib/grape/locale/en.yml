@@ -12,6 +12,7 @@ en:
         except_values: 'has a value not allowed'
         incompatible_option_values: '%{option1}: %{value1} is incompatible with %{option2}: %{value2}'
         internal_server_error: 'Internal Server Error'
+        invalid: 'is invalid'
         invalid_accept_header:
           problem: 'invalid accept header'
           resolution: '%{message}'

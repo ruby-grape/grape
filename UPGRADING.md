@@ -3,6 +3,19 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A validation error without a message says the param is invalid
+
+A `Grape::Exceptions::Validation` created without a `message:` now carries the `:invalid` message key and the message `is invalid` ([#2993](https://github.com/ruby-grape/grape/pull/2993)). Before, its `message_key` was `nil`, and its message was the exception's class name, which went into the response. A custom validator with no `default_message_key` that calls `validation_error!(attr_name)` answered:
+
+```
+# Before
+number Grape::Exceptions::Validation
+# After
+number is invalid
+```
+
+Code that checked `message_key` for `nil` to find such errors should check for `:invalid` instead. The message can be translated or overridden under `grape.errors.messages.invalid`.
+
 #### A `requires` or `optional` block needs exactly one name
 
 A `requires` or `optional` given a block now raises `ArgumentError` unless it names exactly one parameter ([#2991](https://github.com/ruby-grape/grape/pull/2991)). Both forms were accepted before, and both declared something other than what they read:
@@ -31,7 +44,6 @@ requires :b, type: Hash do
   requires :x
 end
 ```
-
 #### A query string Grape does not parse no longer decides the response
 
 Grape parsed the query string of every request that had one, only to look for a `?format=` override ([#2972](https://github.com/ruby-grape/grape/pull/2972)). It now parses it only when the string could name that param, and leaves it to whoever reads the params otherwise.

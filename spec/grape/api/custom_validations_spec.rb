@@ -133,6 +133,50 @@ describe Grape::Validations do
     end
   end
 
+  # No default_message_key, no :message option and no block for +message+:
+  # the error still reads as one about the param.
+  describe 'using a custom validator that gives no message' do
+    subject do
+      Class.new(Grape::API) do
+        params do
+          requires :number, even_number: true
+        end
+        get do
+          'bacon'
+        end
+      end
+    end
+
+    let(:even_number_validator) do
+      Class.new(Grape::Validations::Validators::Base) do
+        def initialize(*, **)
+          super
+          @exception_message = message
+        end
+
+        def validate_param!(attr_name, params)
+          validation_error!(attr_name) unless params[attr_name].to_i.even?
+        end
+      end
+    end
+    let(:app) { subject }
+
+    before do
+      stub_const('EvenNumberValidator', even_number_validator)
+      described_class.register(EvenNumberValidator)
+    end
+
+    after do
+      described_class.deregister(:even_number)
+    end
+
+    it 'says the param is invalid' do
+      get '/', number: '3'
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq 'number is invalid'
+    end
+  end
+
   describe 'using a custom request/param validator' do
     subject do
       Class.new(Grape::API) do
