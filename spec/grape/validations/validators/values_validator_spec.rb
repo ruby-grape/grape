@@ -775,6 +775,20 @@ describe Grape::Validations::Validators::ValuesValidator do
         subject.params { requires :type, except_values: [10.5, 11], type: Integer }
       end.to raise_error Grape::Exceptions::IncompatibleOptionValues
     end
+
+    it 'raises when a Boolean type has a non-boolean value' do
+      subject = Class.new(Grape::API)
+      expect do
+        subject.params { requires :type, values: [true, 'yes'], type: Grape::API::Boolean }
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+    end
+
+    it 'raises when an Array of Boolean has a non-boolean value' do
+      subject = Class.new(Grape::API)
+      expect do
+        subject.params { requires :type, values: [false, 1], type: [Grape::API::Boolean] }
+      end.to raise_error Grape::Exceptions::IncompatibleOptionValues
+    end
   end
 
   describe '/values/optional_boolean' do

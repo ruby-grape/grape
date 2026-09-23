@@ -28,16 +28,7 @@ module Grape
 
     Helpers = Grape::DSL::Helpers::BaseHelper
 
-    class Boolean
-      VALUES = [true, false].freeze
-      private_constant :VALUES
-
-      def self.build(val)
-        return unless VALUES.include?(val)
-
-        new
-      end
-    end
+    Boolean = Class.new
 
     class << self
       extend Forwardable
