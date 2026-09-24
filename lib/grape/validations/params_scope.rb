@@ -118,7 +118,7 @@ module Grape
 
         scoped_params = params(parameters)
 
-        return false if @optional && (scoped_params.blank? || all_element_blank?(scoped_params))
+        return false if @optional && (blank_param?(scoped_params) || all_element_blank?(scoped_params))
         return false unless meets_dependency?(scoped_params, parameters)
 
         # Past the +@independent+ return, this scope or one above it is a
@@ -164,7 +164,7 @@ module Grape
             key, callable = dependency.first
             callable.call(params[key])
           else
-            params[dependency].present?
+            !blank_param?(params[dependency])
           end
         end
       end
@@ -262,7 +262,7 @@ module Grape
         else
           scoped = parameters
         end
-        return NOT_VALIDATED if @optional && (scoped.blank? || all_element_blank?(scoped))
+        return NOT_VALIDATED if @optional && (blank_param?(scoped) || all_element_blank?(scoped))
 
         scoped
       end
@@ -523,7 +523,17 @@ module Grape
       def all_element_blank?(scoped_params)
         return false if scoped_params.is_a?(::Hash)
 
-        scoped_params.respond_to?(:all?) && scoped_params.all?(&:blank?)
+        scoped_params.respond_to?(:all?) && scoped_params.all? { |element| blank_param?(element) }
+      end
+
+      # +blank?+, except that a String holding bytes its encoding does not
+      # allow -- a query string percent-encoding half a character, say -- is
+      # never blank: an invalid byte is not whitespace. +blank?+ itself raises
+      # on one, as its whitespace regexp cannot match an invalid byte sequence.
+      def blank_param?(value)
+        return false if value.is_a?(String) && !value.valid_encoding?
+
+        value.blank?
       end
     end
   end

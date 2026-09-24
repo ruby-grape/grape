@@ -75,14 +75,18 @@ module Grape
           return unless vendor
 
           strict_header_checks!
-          media_type = @media_type_for_accept[accept_header] || Grape::Util::MediaType.best_quality(accept_header, available_media_types)
+          # The table's keys are valid Strings, which scrubbing leaves alone, so
+          # it is read with the header as it came.
+          media_type = @media_type_for_accept[env['HTTP_ACCEPT']] || Grape::Util::MediaType.best_quality(accept_header, available_media_types)
           return yield media_type if media_type
 
           fail!
         end
 
+        # Scrubbed of any bytes its encoding does not allow: +blank?+,
+        # +downcase+ and Rack's q-value parsing all raise on one.
         def accept_header
-          env['HTTP_ACCEPT']
+          @accept_header ||= try_scrub(env['HTTP_ACCEPT'])
         end
 
         def strict_header_checks!

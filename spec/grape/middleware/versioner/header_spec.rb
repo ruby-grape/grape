@@ -226,6 +226,12 @@ describe Grape::Middleware::Versioner::Header do
     expect(subject.call({}).first).to eq(200)
   end
 
+  it 'succeeds without a vendor if :strict is not set and the header holds an invalid byte sequence' do
+    status, _, env = subject.call('HTTP_ACCEPT' => "\xFF")
+    expect(status).to eq(200)
+    expect(env[Grape::Env::API_VENDOR]).to be_nil
+  end
+
   context 'when :strict is set' do
     before do
       @options[:versions] = ['v1']
@@ -247,6 +253,14 @@ describe Grape::Middleware::Versioner::Header do
         expect(exception.headers).to eql('X-Cascade' => 'pass')
         expect(exception.status).to be 406
         expect(exception.message).to include('Accept header must be set.')
+      end
+    end
+
+    it 'fails with 406 Not Acceptable if header holds an invalid byte sequence' do
+      expect { subject.call('HTTP_ACCEPT' => "\xFF").last }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.status).to be 406
+        expect(exception.message).to include('API vendor or version not found.')
       end
     end
 

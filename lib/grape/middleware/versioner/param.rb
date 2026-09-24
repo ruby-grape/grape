@@ -18,7 +18,7 @@ module Grape
       #   env['api.version'] => 'v1'
       class Param < Base
         def before
-          potential_version = query_params[parameter]
+          potential_version = try_scrub(query_params[parameter])
           return if potential_version.blank?
 
           version_not_found! unless potential_version_match?(potential_version)
