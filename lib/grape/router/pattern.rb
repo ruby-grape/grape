@@ -35,7 +35,7 @@ module Grape
         # touching either map. Both were allocated per route and never read.
         @pattern = MustermannPattern.new(@path, uri_decode: true, params:, capture: extract_capture(version, requirements), cache: false)
         @to_regexp = @pattern.to_regexp
-        @captures = @to_regexp.names.any?
+        @captures = !@to_regexp.names.empty?
       end
 
       # True when the compiled pattern has named captures to extract from a
@@ -89,7 +89,7 @@ module Grape
       # +Regexp.escape+, which does accept a Symbol -- but a second raises
       # TypeError.
       def extract_capture(version, requirements)
-        return requirements if version.blank?
+        return requirements if version.nil? || version.empty?
 
         requirements.merge(version: Regexp.union(Array.wrap(version).map(&:to_s)))
       end

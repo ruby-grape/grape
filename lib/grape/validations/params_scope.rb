@@ -137,12 +137,12 @@ module Grape
 
       def meets_dependency?(params, request_params)
         return true unless @dependent_on
-        return false if @parent.present? && !@parent.meets_dependency?(@parent.params(request_params), request_params)
+        return false if @parent && !@parent.meets_dependency?(@parent.params(request_params), request_params)
 
         if params.is_a?(Array)
           filtered = params.flatten.filter { |param| meets_dependency?(param, request_params) }
           ParamScopeTracker.current&.store_qualifying_params(self, filtered)
-          return filtered.present?
+          return !filtered.empty?
         end
 
         meets_hash_dependency?(params)
@@ -150,7 +150,7 @@ module Grape
 
       def attr_meets_dependency?(params)
         return true unless @dependent_on
-        return false if @parent.present? && !@parent.attr_meets_dependency?(params)
+        return false if @parent && !@parent.attr_meets_dependency?(params)
 
         meets_hash_dependency?(params)
       end
@@ -496,7 +496,7 @@ module Grape
         raise ArgumentError, 'oneof: requires type: Hash' unless validations[:type] == Hash
 
         variants = validations[:oneof]
-        raise ArgumentError, 'oneof: must be a non-empty Array of blocks' unless variants.is_a?(Array) && variants.any?
+        raise ArgumentError, 'oneof: must be a non-empty Array of blocks' if !variants.is_a?(Array) || variants.empty?
         raise ArgumentError, 'oneof: each variant must be a Proc' unless variants.all?(Proc)
 
         variants.map { |block| OneofCollector.collect(block) }

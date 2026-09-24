@@ -45,6 +45,17 @@ describe Grape::Validations::Validators::OneofValidator do
         end
       end.to raise_error(ArgumentError, /each variant must be a Proc/)
     end
+
+    it 'raises that a variant is not a Proc when it is nil' do
+      expect do
+        Class.new(Grape::API) do
+          params do
+            requires :value, type: Hash, oneof: [nil]
+          end
+          post('/') {}
+        end
+      end.to raise_error(ArgumentError, /each variant must be a Proc/)
+    end
   end
 
   describe 'request-time validation with two flat variants' do

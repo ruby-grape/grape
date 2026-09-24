@@ -221,7 +221,7 @@ module Grape
 
     def run_validators(request:)
       validators = inheritable_setting.route_validations
-      return if validators.blank?
+      return if validators.empty?
 
       validation_exceptions = nil
 
@@ -240,7 +240,7 @@ module Grape
     end
 
     def run_filters(filters, type = :other)
-      return if filters.blank?
+      return if filters.empty?
 
       instrument_run_filters(filters, type) do
         filters.each { |filter| instance_eval(&filter) }
@@ -376,12 +376,12 @@ module Grape
 
     def prepare_routes_requirements(route_options_requirements)
       namespace_requirements = inheritable_setting.namespace_requirements
-      namespace_requirements << route_options_requirements if route_options_requirements.present?
+      namespace_requirements << route_options_requirements if route_options_requirements
       {}.merge!(*namespace_requirements)
     end
 
     def prepare_version(namespace_inheritable_version)
-      return if namespace_inheritable_version.blank?
+      return if namespace_inheritable_version.nil? || namespace_inheritable_version.empty?
 
       namespace_inheritable_version.length == 1 ? namespace_inheritable_version.first : namespace_inheritable_version
     end
@@ -397,10 +397,11 @@ module Grape
 
       stack.concat inheritable_setting.middleware
 
-      if inheritable_setting.version.present?
+      versions = inheritable_setting.version
+      unless versions.nil? || versions.empty?
         version_options = inheritable_setting.version_options
         stack.use Grape::Middleware::Versioner.using(version_options.using),
-                  versions: inheritable_setting.version.flatten,
+                  versions: versions.flatten,
                   version_options:,
                   prefix: inheritable_setting.root_prefix,
                   mount_path: inheritable_setting.mount_path

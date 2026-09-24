@@ -18,7 +18,7 @@ module Grape
       class Path < Base
         def initialize(app, **options)
           super
-          @prefixes = [mount_path, Grape::Util::PathNormalizer.call(prefix)].select { |p| p.present? && p != '/' }.freeze
+          @prefixes = [mount_path, Grape::Util::PathNormalizer.call(prefix)].select { |p| p && p != '/' }.freeze
         end
 
         # A request the router matched carries its version already (see
@@ -88,7 +88,7 @@ module Grape
         end
 
         def declared_version?(candidate)
-          versions.present? && versions.include?(candidate)
+          !versions.nil? && versions.include?(candidate)
         end
       end
     end

@@ -191,7 +191,7 @@ module Grape
         # (+success+, +tags+, …) plus any custom options.
         params = prepare_params(endpoint_description[:params])
         all_route_options = endpoint_description.except(:params)
-        all_route_options.deep_merge!(route_options) if route_options.present?
+        all_route_options.deep_merge!(route_options) unless route_options.empty?
 
         new_endpoint = Grape::Endpoint.new(
           inheritable_setting,

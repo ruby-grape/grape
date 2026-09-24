@@ -82,7 +82,7 @@ module Grape
       # +response+ is a Rack triplet, unless +after+ or the app handed back a
       # Rack::Response.
       def merge_headers(response)
-        return if @header.blank?
+        return if @header.nil? || @header.empty?
         return response.headers.merge!(@header) if response.is_a?(Rack::Response)
 
         response[1].merge!(@header)

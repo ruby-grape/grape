@@ -31,8 +31,10 @@ module Grape
         self
       end
 
+      # The router hands over a normalized path, which always opens with a
+      # slash, so there is no whitespace-only one to treat as blank.
       def match?(input)
-        return false if input.blank?
+        return false if input.nil? || input.empty?
 
         @match_function.call(input, pattern)
       end
