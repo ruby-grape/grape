@@ -103,7 +103,7 @@ module Grape
         end
 
         def version_and_vendor_check!
-          return if versions.blank? || version_and_vendor?
+          return if versions.nil? || versions.empty? || version_and_vendor?
 
           invalid_accept_header!('API vendor or version not found.')
         end
@@ -125,7 +125,7 @@ module Grape
         end
 
         def fail!
-          return if env[Grape::Env::GRAPE_ALLOWED_METHODS].present?
+          return if env[Grape::Env::GRAPE_ALLOWED_METHODS]
 
           media_types = q_values_mime_types.map { |mime_type| Grape::Util::MediaType.parse(mime_type) }
           vendor_not_found!(media_types) || version_not_found!(media_types)

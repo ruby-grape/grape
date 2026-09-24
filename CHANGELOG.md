@@ -68,6 +68,7 @@
 * [#3002](https://github.com/ruby-grape/grape/pull/3002): Render an XML error without checking for `to_xml` - [@ericproulx](https://github.com/ericproulx).
 * [#3005](https://github.com/ruby-grape/grape/pull/3005): Load rails before grape in the Rails gemfiles so the specs exercise loading `Grape::Railtie` - [@ericproulx](https://github.com/ericproulx).
 * [#3006](https://github.com/ruby-grape/grape/pull/3006): Answer params and versions holding invalid bytes instead of raising `ArgumentError` - [@ericproulx](https://github.com/ericproulx).
+* [#3007](https://github.com/ruby-grape/grape/pull/3007): Reserve `blank?` and `present?` for outside input and check Grape's own values precisely - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

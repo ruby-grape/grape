@@ -110,7 +110,7 @@ module Grape
         protected
 
         def process_named_params
-          return if @named_params.blank?
+          return unless @named_params
 
           api.inheritable_setting.add_named_params(@named_params)
         end

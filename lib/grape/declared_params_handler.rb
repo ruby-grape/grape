@@ -105,7 +105,7 @@ module Grape
     # String per declared param -- and only an API using +as:+ has anything to
     # find with it, so the common empty table is not asked.
     def build_memo_key(params_nested_path, declared_param, renamed_params)
-      renamed_param_name = renamed_params[nested_path_for(params_nested_path, declared_param)] if renamed_params.any?
+      renamed_param_name = renamed_params[nested_path_for(params_nested_path, declared_param)] unless renamed_params.empty?
       param = renamed_param_name || declared_param
       @stringify ? param.to_s : param.to_sym
     end

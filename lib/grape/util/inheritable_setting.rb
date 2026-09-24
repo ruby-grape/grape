@@ -193,10 +193,10 @@ module Grape
       # follow the ones already seeded from the surrounding scopes.
       def inherit_route_params(parent)
         parent_validations = parent.validations
-        route_validations.concat(parent_validations) if parent_validations.any?
+        route_validations.concat(parent_validations) unless parent_validations.empty?
 
         parent_declared_params = parent.declared_params
-        route_declared_params.concat(parent_declared_params.flatten) if parent_declared_params.any?
+        route_declared_params.concat(parent_declared_params.flatten) unless parent_declared_params.empty?
       end
 
       # Return a serializable hash of our values.
@@ -752,7 +752,7 @@ module Grape
       # Every key registered along the chain, outermost scope's keys first.
       def stacked_keys
         inherited = parent&.stacked_keys || EMPTY_STACK
-        return inherited if @stackable_values.blank?
+        return inherited if @stackable_values.nil? || @stackable_values.empty?
 
         (inherited + @stackable_values.keys).uniq
       end
@@ -813,7 +813,7 @@ module Grape
       # Compares two lazily-allocated own stackable stores (see #stack): nil and
       # an emptied Hash both mean "registered nothing".
       def same_own_store?(mine, theirs)
-        return theirs.blank? if mine.blank?
+        return theirs.nil? || theirs.empty? if mine.nil? || mine.empty?
 
         mine == theirs
       end
@@ -822,7 +822,7 @@ module Grape
       # scope winning; nil when nothing is registered.
       def namespace_stackable_with_hash(key)
         data = stacked(key)
-        return if data.blank?
+        return if data.empty?
 
         data.each_with_object({}) { |value, result| result.deep_merge!(value) }
       end

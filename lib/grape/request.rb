@@ -209,7 +209,7 @@ module Grape
     def make_params
       params = build_params
       filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
-      return params if filtered.blank?
+      return params unless filtered
 
       params.deep_merge!(filtered)
     rescue *Grape::RACK_ERRORS
@@ -230,7 +230,7 @@ module Grape
 
       grape_owned = grape_owns_version?(routing_args) ? GRAPE_OWNED_ROUTING_ARGS : ROUTE_INFO_ONLY
       # Nothing but Grape's own keys: +except+ would build an empty Hash for
-      # +make_params+ to find blank and discard.
+      # +make_params+ to merge for nothing. What is returned is never empty.
       return if routing_args.size == grape_owned.count { |key| routing_args.key?(key) }
 
       routing_args.except(*grape_owned)

@@ -50,7 +50,7 @@ module Grape
         end
 
         def potential_version_match?(potential_version)
-          versions.blank? || versions.include?(potential_version)
+          versions.nil? || versions.empty? || versions.include?(potential_version)
         end
 
         def version_not_found!
