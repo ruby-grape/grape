@@ -200,5 +200,34 @@ describe Grape::Validations::Validators::AllOrNoneOfValidator do
         )
       end
     end
+
+    describe 'when the same attr is named twice in the group' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            all_or_none_of(*%i[beer beer wine])
+          end
+          post do
+          end
+        end
+      end
+
+      let(:path) { '/' }
+      let(:params) { { beer: true, wine: true } }
+
+      it 'returns a validation error' do
+        validate
+        expect(last_response.status).to eq 400
+        expect(JSON.parse(last_response.body)).to eq(
+          'beer,beer,wine' => ['provide all or none of parameters']
+        )
+      end
+    end
   end
 end

@@ -279,5 +279,31 @@ describe Grape::Validations::Validators::ExactlyOneOfValidator do
         )
       end
     end
+
+    describe 'when the same attr is named twice in the group' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            exactly_one_of(*%i[beer beer wine])
+          end
+          post do
+          end
+        end
+      end
+
+      let(:path) { '/' }
+      let(:params) { { beer: true } }
+
+      it 'does not return a validation error' do
+        validate
+        expect(last_response.status).to eq 201
+      end
+    end
   end
 end

@@ -260,5 +260,73 @@ describe Grape::Validations::Validators::MutuallyExclusiveValidator do
         )
       end
     end
+
+    describe 'string group attrs under build_with :hash' do
+      let(:app) do
+        Class.new(Grape::API) do
+          build_with :hash
+
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            optional :beer
+            optional :wine
+            mutually_exclusive 'beer', 'wine'
+          end
+          post do
+          end
+        end
+      end
+
+      let(:path) { '/' }
+      let(:params) { { beer: true, wine: true } }
+
+      it 'returns a validation error' do
+        validate
+        expect(last_response.status).to eq 400
+        expect(JSON.parse(last_response.body)).to eq('beer,wine' => ['are mutually exclusive'])
+      end
+    end
+
+    describe '/nested-array with many unrelated keys' do
+      let(:app) do
+        Class.new(Grape::API) do
+          rescue_from Grape::Exceptions::ValidationErrors do |e|
+            error!(e.errors.transform_keys! { |key| key.join(',') }, 400)
+          end
+
+          params do
+            requires :items, type: Array do
+              optional :beer
+              optional :wine
+              optional :a, :b, :c, :d, :e, :f, :g, :h
+              mutually_exclusive :beer, :wine
+            end
+          end
+          post '/nested-array-many-keys' do
+          end
+        end
+      end
+
+      let(:path) { '/nested-array-many-keys' }
+      let(:params) do
+        {
+          items: Array.new(50) do |i|
+            base = { a: i, b: i, c: i, d: i, e: i, f: i, g: i, h: i }
+            i == 7 ? base.merge(beer: true, wine: true) : base.merge(beer: true)
+          end
+        }
+      end
+
+      it 'still detects a collision without scanning unrelated keys via full_name' do
+        validate
+        expect(last_response.status).to eq 400
+        expect(JSON.parse(last_response.body)).to eq(
+          'items[7][beer],items[7][wine]' => ['are mutually exclusive']
+        )
+      end
+    end
   end
 end

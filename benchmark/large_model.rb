@@ -1,19 +1,75 @@
 # frozen_string_literal: true
 
-# gem 'grape', '=1.0.1'
+# Wall-clock bench for group validators on a large VRP-shaped payload.
+#
+#   bundle exec ruby benchmark/large_model.rb          # current code (new)
+#   bundle exec ruby benchmark/large_model.rb new
+#   bundle exec ruby benchmark/large_model.rb old      # pre-#2981 keys_in_common
+#   bundle exec ruby benchmark/large_model.rb profile  # ruby-prof flat dump
+#
+# Fixture: benchmark/resource/vrp_example.json
+# (~949 services, ~5397 timewindows with at_least_one_of each)
 
+$LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 require 'grape'
-require 'ruby-prof'
-require 'hashie'
+require 'json'
+require 'rack'
 
-class API < Grape::API
-  # include Grape::Extensions::Hash::ParamBuilder
-  # include Grape::Extensions::Hashie::Mash::ParamBuilder
+MODE = ARGV.fetch(0, 'new')
+ROOT = File.expand_path('..', __dir__)
+FIXTURE = File.join(ROOT, 'benchmark/resource/vrp_example.json')
 
-  rescue_from do |e|
-    warn "\n\n#{e.class} (#{e.message}):\n    #{e.backtrace.join("\n    ")}\n\n"
+if MODE == 'old'
+  Grape::Validations::Validators::MultipleParamsBase.class_eval do
+    def keys_in_common(resource_params, known_keys = all_keys)
+      return [] unless hash_like?(resource_params)
+
+      known_keys & resource_params.keys.map! { |attr| scope.full_name(attr) }
+    end
   end
 
+  # Patch group validators to the pre-optimization shape (full_name on every key).
+  Grape::Validations::Validators::MutuallyExclusiveValidator.class_eval do
+    def validate_params!(params)
+      keys = keys_in_common(params)
+      return if keys.length <= 1
+
+      validation_error!(keys)
+    end
+  end
+
+  Grape::Validations::Validators::AtLeastOneOfValidator.class_eval do
+    def validate_params!(params)
+      known_keys = all_keys
+      return if hash_like?(params) && known_keys.intersect?(params.keys.map { |attr| scope.full_name(attr) })
+
+      validation_error!(known_keys)
+    end
+  end
+
+  Grape::Validations::Validators::ExactlyOneOfValidator.class_eval do
+    def validate_params!(params)
+      known_keys = all_keys
+      keys = keys_in_common(params, known_keys)
+      return if keys.length == 1
+
+      validation_error!(known_keys, @exactly_one_exception_message) if keys.empty?
+      validation_error!(keys, @mutual_exclusion_exception_message)
+    end
+  end
+
+  Grape::Validations::Validators::AllOrNoneOfValidator.class_eval do
+    def validate_params!(params)
+      known_keys = all_keys
+      keys = keys_in_common(params, known_keys)
+      return if keys.empty? || keys.length == attrs.length
+
+      validation_error!(known_keys)
+    end
+  end
+end
+
+class API < Grape::API
   prefix :api
   version 'v1', using: :path
   content_type :json, 'application/json; charset=UTF-8'
@@ -77,64 +133,38 @@ class API < Grape::API
     this.optional(:cost_fixed, type: Float)
     this.optional(:cost_distance_multiplier, type: Float)
     this.optional(:cost_time_multiplier, type: Float)
-
     this.optional :router_dimension, type: String, values: %w[time distance]
     this.optional(:skills, type: Array[Array[String]], coerce_with: ->(val) { val.is_a?(String) ? [val.split(',').map(&:strip)] : val })
-
     this.optional(:unavailable_work_day_indices, type: Array[Integer])
-
     this.optional(:free_approach, type: Boolean)
     this.optional(:free_return, type: Boolean)
-
     this.optional(:start_point_id, type: String)
     this.optional(:end_point_id, type: String)
-    this.optional(:capacities, type: Array) do
-      API.vrp_request_capacity(self)
-    end
-
-    this.optional(:sequence_timewindows, type: Array) do
-      API.vrp_request_timewindow(self)
-    end
+    this.optional(:capacities, type: Array) { API.vrp_request_capacity(self) }
+    this.optional(:sequence_timewindows, type: Array) { API.vrp_request_timewindow(self) }
   end
 
   def self.vrp_request_service(this)
     this.requires(:id, type: String, allow_blank: false)
     this.optional(:priority, type: Integer, values: 0..8)
     this.optional(:exclusion_cost, type: Integer)
-
     this.optional(:visits_number, type: Integer, coerce_with: ->(val) { val.to_i.positive? && val.to_i }, default: 1, allow_blank: false)
-
     this.optional(:unavailable_visit_indices, type: Array[Integer])
     this.optional(:unavailable_visit_day_indices, type: Array[Integer])
-
     this.optional(:minimum_lapse, type: Float)
     this.optional(:maximum_lapse, type: Float)
-
     this.optional(:sticky_vehicle_ids, type: Array[String])
     this.optional(:skills, type: Array[String])
-
     this.optional(:type, type: Symbol)
-    this.optional(:activity, type: Hash) do
-      API.vrp_request_activity(self)
-    end
-    this.optional(:quantities, type: Array) do
-      API.vrp_request_quantity(self)
-    end
+    this.optional(:activity, type: Hash) { API.vrp_request_activity(self) }
+    this.optional(:quantities, type: Array) { API.vrp_request_quantity(self) }
   end
 
   def self.vrp_request_configuration(this)
-    this.optional(:preprocessing, type: Hash) do
-      API.vrp_request_preprocessing(self)
-    end
-    this.optional(:resolution, type: Hash) do
-      API.vrp_request_resolution(self)
-    end
-    this.optional(:restitution, type: Hash) do
-      API.vrp_request_restitution(self)
-    end
-    this.optional(:schedule, type: Hash) do
-      API.vrp_request_schedule(self)
-    end
+    this.optional(:preprocessing, type: Hash) { API.vrp_request_preprocessing(self) }
+    this.optional(:resolution, type: Hash) { API.vrp_request_resolution(self) }
+    this.optional(:restitution, type: Hash) { API.vrp_request_restitution(self) }
+    this.optional(:schedule, type: Hash) { API.vrp_request_schedule(self) }
   end
 
   def self.vrp_request_partition(this)
@@ -153,9 +183,7 @@ class API < Grape::API
     this.optional(:force_cluster, type: Boolean)
     this.optional(:prefer_short_segment, type: Boolean)
     this.optional(:neighbourhood_size, type: Integer)
-    this.optional(:partitions, type: Array) do
-      API.vrp_request_partition(self)
-    end
+    this.optional(:partitions, type: Array) { API.vrp_request_partition(self) }
     this.optional(:first_solution_strategy, type: Array[String])
   end
 
@@ -192,58 +220,56 @@ class API < Grape::API
   end
 
   def self.vrp_request_schedule(this)
-    this.optional(:range_indices, type: Hash) do
-      API.vrp_request_indice_range(self)
-    end
+    this.optional(:range_indices, type: Hash) { API.vrp_request_indice_range(self) }
     this.optional(:unavailable_indices, type: Array[Integer])
   end
 
   params do
     optional(:vrp, type: Hash, documentation: { param_type: 'body' }) do
       optional(:name, type: String)
-
-      optional(:points, type: Array) do
-        API.vrp_request_point(self)
-      end
-
-      optional(:units, type: Array) do
-        API.vrp_request_unit(self)
-      end
-
-      requires(:vehicles, type: Array) do
-        API.vrp_request_vehicle(self)
-      end
-
-      optional(:services, type: Array, allow_blank: false) do
-        API.vrp_request_service(self)
-      end
-
-      optional(:configuration, type: Hash) do
-        API.vrp_request_configuration(self)
-      end
+      optional(:points, type: Array) { API.vrp_request_point(self) }
+      optional(:units, type: Array) { API.vrp_request_unit(self) }
+      requires(:vehicles, type: Array) { API.vrp_request_vehicle(self) }
+      optional(:services, type: Array, allow_blank: false) { API.vrp_request_service(self) }
+      optional(:configuration, type: Hash) { API.vrp_request_configuration(self) }
     end
   end
   post '/' do
-    {
-      skills_v1: params[:vrp][:vehicles].first[:skills],
-      skills_v2: params[:vrp][:vehicles].last[:skills]
-    }
+    status 201
+    { ok: true }
   end
 end
-puts Grape::VERSION
 
-options = {
-  method: Rack::POST,
-  params: JSON.parse(File.read('benchmark/resource/vrp_example.json'))
-}
+raw = File.binread(FIXTURE)
 
-env = Rack::MockRequest.env_for('/api/v1', options)
-
-start = Time.now
-result = RubyProf.profile do
-  response = API.call env
-  puts response.last
+def call_api(raw)
+  env = Rack::MockRequest.env_for(
+    '/api/v1',
+    method: 'POST',
+    input: StringIO.new(raw.dup),
+    'CONTENT_TYPE' => 'application/json',
+    'CONTENT_LENGTH' => raw.bytesize.to_s
+  )
+  API.call(env)
 end
-puts Time.now - start
-printer = RubyProf::FlatPrinter.new(result)
-File.open('test_prof.out', 'w+') { |f| printer.print(f, {}) }
+
+if MODE == 'profile'
+  require 'ruby-prof'
+  call_api(raw) # warmup
+  result = RubyProf.profile { call_api(raw) }
+  out = File.join(ROOT, 'test_prof.out')
+  File.open(out, 'w+') { |f| RubyProf::FlatPrinter.new(result).print(f, {}) }
+  warn "Wrote #{out}"
+  exit
+end
+
+warn "grape #{Grape::VERSION} mode=#{MODE}"
+2.times { status, = call_api(raw); abort "warmup failed #{status}" unless status == 201 }
+t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+iterations = 3
+iterations.times do
+  status, = call_api(raw)
+  abort "bad status #{status}" unless status == 201
+end
+dt = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0) / iterations
+puts format('%s %.6f', MODE, dt)

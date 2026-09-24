@@ -67,6 +67,7 @@
 * [#3001](https://github.com/ruby-grape/grape/pull/3001): Drop the safe navigation on the declared handler's contract key maps - [@ericproulx](https://github.com/ericproulx).
 * [#3002](https://github.com/ruby-grape/grape/pull/3002): Render an XML error without checking for `to_xml` - [@ericproulx](https://github.com/ericproulx).
 * [#3005](https://github.com/ruby-grape/grape/pull/3005): Load rails before grape in the Rails gemfiles so the specs exercise loading `Grape::Railtie` - [@ericproulx](https://github.com/ericproulx).
+* [#2981](https://github.com/ruby-grape/grape/pull/2981): Speed up group validators inside large Array scopes by only inspecting declared attrs - [@braktar](https://github.com/braktar).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
@@ -363,7 +364,7 @@
 * [#2651](https://github.com/ruby-grape/grape/pull/2651): Migrate Danger to use danger-pr-comment workflow - [@dblock](https://github.com/dblock).
 
 #### Fixes
-    
+
 * [#2633](https://github.com/ruby-grape/grape/pull/2633): Fix cascade reading - [@ericproulx](https://github.com/ericproulx).
 * [#2641](https://github.com/ruby-grape/grape/pull/2641): Restore support for `return` in endpoint blocks - [@ericproulx](https://github.com/ericproulx).
 * [#2642](https://github.com/ruby-grape/grape/pull/2642): Fix array allocation in base_route.rb - [@ericproulx](https://github.com/ericproulx).

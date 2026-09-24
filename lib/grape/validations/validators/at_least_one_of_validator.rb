@@ -7,10 +7,9 @@ module Grape
         default_message_key :at_least_one
 
         def validate_params!(params)
-          known_keys = all_keys
-          return if hash_like?(params) && known_keys.intersect?(params.keys.map { |attr| scope.full_name(attr) })
+          return if any_attr_present?(params)
 
-          validation_error!(known_keys)
+          validation_error!(all_keys)
         end
       end
     end

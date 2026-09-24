@@ -22,14 +22,35 @@ module Grape
           MultipleAttributesIterator
         end
 
-        def keys_in_common(resource_params, known_keys = all_keys)
+        def present_attrs(resource_params)
           return [] unless hash_like?(resource_params)
 
-          known_keys & resource_params.keys.map! { |attr| scope.full_name(attr) }
+          attrs.select { |attr| attr_present?(resource_params, attr) }.uniq
+        end
+
+        def any_attr_present?(resource_params)
+          return false unless hash_like?(resource_params)
+
+          attrs.any? { |attr| attr_present?(resource_params, attr) }
+        end
+
+        def attr_present?(params, attr)
+          return true if params.key?(attr)
+
+          alternate = attr.is_a?(Symbol) ? attr.to_s : attr.to_sym
+          params.key?(alternate)
+        end
+
+        def full_names(attr_list)
+          attr_list.map { |attr| scope.full_name(attr) }
+        end
+
+        def keys_in_common(resource_params, _known_keys = nil)
+          full_names(present_attrs(resource_params))
         end
 
         def all_keys
-          attrs.map { |attr| scope.full_name(attr) }
+          full_names(attrs)
         end
       end
     end
