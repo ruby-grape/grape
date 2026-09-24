@@ -586,6 +586,62 @@ describe Grape::Validations::ParamsScope do
       expect(last_response.body).to eq('{"a":[]}')
     end
 
+    context 'when the value holds an invalid byte sequence' do
+      it 'rejects it where an optional Hash is declared, as any other String' do
+        subject.params do
+          optional :a, type: Hash do
+            optional :b, type: String
+          end
+        end
+        subject.get('/test') { 'ok' }
+
+        get '/test?a=x'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+
+        get '/test?a=%FF'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+      end
+
+      it 'rejects it where an optional Hash is declared inside a given, as any other String' do
+        subject.params do
+          optional :x
+          given :x do
+            optional :a, type: Hash do
+              optional :b, type: String
+            end
+          end
+        end
+        subject.get('/test') { 'ok' }
+
+        get '/test?x=1&a=x'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+
+        get '/test?x=1&a=%FF'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a is invalid')
+      end
+
+      it 'rejects it as an element where an optional Array of Hashes is declared, as any other String' do
+        subject.params do
+          optional :a, type: Array do
+            optional :b, type: String
+          end
+        end
+        subject.get('/test') { 'ok' }
+
+        get '/test?a[]=x'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a[0] is invalid')
+
+        get '/test?a[]=%FF'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('a[0] is invalid')
+      end
+    end
+
     # A scope two levels under one that was not given must not be validated
     # either: the answer belongs to the whole chain, not to the nearest scope.
     it 'does not validate a required scope nested in an optional scope that was not given' do
@@ -646,6 +702,14 @@ describe Grape::Validations::ParamsScope do
 
       get '/test', a: true, b: true
       expect(last_response.status).to eq(200)
+    end
+
+    # %FF decodes to a String holding a byte UTF-8 does not allow, which
+    # +blank?+ raised on rather than answering.
+    it 'applies the validations if the parameter holds an invalid byte sequence' do
+      get '/test?a=%FF'
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq('b is missing')
     end
 
     it 'applies the validations of multiple parameters' do

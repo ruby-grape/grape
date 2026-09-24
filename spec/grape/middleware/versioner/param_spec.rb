@@ -47,6 +47,11 @@ describe Grape::Middleware::Versioner::Param do
       expect(catch(:error) { subject.call(env) }.status).to eq(404)
     end
 
+    it 'throws an error if the version holds an invalid byte sequence' do
+      env = Rack::MockRequest.env_for('/awesome?apiver=%FF')
+      expect(catch(:error) { subject.call(env) }.status).to eq(404)
+    end
+
     it 'allows versions that have been specified' do
       env = Rack::MockRequest.env_for('/awesome', params: { 'apiver' => 'v1' })
       expect(subject.call(env)[1][Grape::Env::API_VERSION]).to eq('v1')
