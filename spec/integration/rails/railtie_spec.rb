@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 if defined?(Rails)
-  describe Grape::Railtie do
+  # Named by string: the constant would autoload lib/grape/railtie.rb itself and
+  # hide whether requiring grape after rails loaded it.
+  describe 'Grape::Railtie' do
     describe '.railtie' do
       subject { test_app.deprecators[:grape] }
 

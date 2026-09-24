@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+# Declared ahead of the Gemfile so Bundler.require loads rails before grape, as
+# a Rails app does, and lib/grape.rb finds Rails::Railtie to load Grape::Railtie.
+gem 'rails', '~> 7.2.0'
+
 eval_gemfile '../Gemfile'
 
-gem 'rails', '~> 7.2.0'
 # ActiveSupport < 8.1 passes `quirks_mode:` to JSON.generate, a keyword json 3 removed.
 gem 'json', '< 3'
 gem 'tzinfo-data', require: false
