@@ -88,25 +88,41 @@ module Grape
         @format_for_accept = FormatForAcceptCache[mime_types] unless format
       end
 
-      def before
-        negotiate_content_type
-        read_body_input
+      # Base#call copies the middleware per request so #before and #after can
+      # keep the env and the app's response in ivars. The formatter keeps
+      # neither: it passes the env along and answers from the one instance the
+      # stack built.
+      def call(env)
+        call!(env).to_a
       end
 
-      def after
-        return unless @app_response
-
-        status, headers, bodies = @app_response
-
-        return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
-
-        build_formatted_response(status, headers, bodies)
+      def call!(env)
+        negotiate_content_type(env)
+        read_body_input(env)
+        response = @app.call(env)
+        reporting_after_errors { format_response(env, response) } || response
       end
+
+      # Base's per-request readers look for the request in ivars that only a
+      # per-request copy sets, so the one instance the formatter answers from
+      # has none to give: +env+ is nil, +response+ raises, and +rack_request+
+      # would memoize a request on the instance every request shares.
+      private :env, :context, :rack_request, :query_params, :response
 
       private
 
-      def build_formatted_response(status, headers, bodies)
-        ensure_content_type!(headers)
+      def format_response(env, response)
+        return unless response
+
+        status, headers, bodies = response
+
+        return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+
+        build_formatted_response(env, status, headers, bodies)
+      end
+
+      def build_formatted_response(env, status, headers, bodies)
+        ensure_content_type!(env, headers)
 
         if bodies.is_a?(Grape::ServeStream::StreamResponse)
           Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
@@ -114,8 +130,8 @@ module Grape
           end
         else
           # Picked by env['api.format']; the Content-Type header only counts when that is unset
-          formatter = fetch_formatter(headers)
-          bodymap = instrument_format_response(formatter) do
+          formatter = fetch_formatter(env, headers)
+          bodymap = instrument_format_response(env, formatter) do
             bodies.map { |body| formatter.call(body, env) }
           end
           # A bare Rack tuple rather than a Rack::Response: +headers+ is already
@@ -133,13 +149,13 @@ module Grape
       # Guards on +listening?+ so that with no subscriber the payload Hash and
       # notification machinery are skipped and the block runs directly (no added
       # allocations); the block is forwarded anonymously.
-      def instrument_format_response(formatter, &)
+      def instrument_format_response(env, formatter, &)
         return yield unless ActiveSupport::Notifications.notifier.listening?('format_response.grape')
 
         ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:, &)
       end
 
-      def fetch_formatter(headers)
+      def fetch_formatter(env, headers)
         api_format = env.fetch(Grape::Env::API_FORMAT) { mime_types[headers[Rack::CONTENT_TYPE]] }
         Grape::Formatter.formatter_for(api_format, formatters)
       end
@@ -155,20 +171,21 @@ module Grape
       #
       # @param headers [Hash] the response headers, mutated in place
       # @return [void]
-      def ensure_content_type!(headers)
+      def ensure_content_type!(env, headers)
         return if headers[Rack::CONTENT_TYPE]
 
         content_type = media_type_for(env[Grape::Env::API_FORMAT])
         headers[Rack::CONTENT_TYPE] = content_type if content_type
       end
 
-      def read_body_input
-        return unless body_given?
+      def read_body_input(env)
+        return unless body_given?(env)
 
-        media_type = rack_request.media_type
+        request = Rack::Request.new(env)
+        media_type = request.media_type
         return if RACK_PARSED_MEDIA_TYPES.include?(media_type)
 
-        input = rack_request.body # reads RACK_INPUT
+        input = request.body # reads RACK_INPUT
         return if input.nil?
 
         rewind = input.respond_to?(:rewind)
@@ -176,13 +193,13 @@ module Grape
         input.rewind if rewind
         body = env[Grape::Env::API_REQUEST_INPUT] = input.read
         begin
-          read_rack_input(body, media_type)
+          read_rack_input(env, body, media_type)
         ensure
           input.rewind if rewind
         end
       end
 
-      def read_rack_input(body, media_type)
+      def read_rack_input(env, body, media_type)
         return if body.empty?
 
         # RFC 10008, Sections 2 and 2.1: a QUERY carries its query in the
@@ -229,14 +246,14 @@ module Grape
       # majority, and a POST or DELETE with nothing in it -- are answered before
       # CONTENT_TYPE is parsed or a Rack::Request is built. The env key is
       # spelled out: on Rack 3, +Rack::CONTENT_LENGTH+ names the response header.
-      def body_given?
+      def body_given?(env)
         return false unless BODY_CARRYING_METHODS.include?(env[Rack::REQUEST_METHOD])
 
         env['CONTENT_LENGTH'].to_i.positive? || env['HTTP_TRANSFER_ENCODING'] == 'chunked'
       end
 
-      def negotiate_content_type
-        fmt = format_from_extension || format_from_query || format || format_from_header || default_format
+      def negotiate_content_type(env)
+        fmt = format_from_extension(env) || format_from_query(env) || format || format_from_header(env) || default_format
         return env[Grape::Env::API_FORMAT] = fmt.to_sym if content_type_for(fmt)
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
@@ -247,8 +264,8 @@ module Grape
       # sequence, and a +.+ byte cannot be part of a multi-byte one, so the dot
       # sits at the same place before and after scrubbing. The overwhelming
       # majority of paths carry no extension and now skip the scrub entirely.
-      def format_from_extension
-        request_path = path_for_extension
+      def format_from_extension(env)
+        request_path = path_for_extension(env)
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
@@ -263,9 +280,9 @@ module Grape
       # the String its concatenation allocates. Tested with +empty?+ rather
       # than +blank?+: the path is not scrubbed yet, and a regexp match on an
       # invalid byte sequence raises.
-      def path_for_extension
+      def path_for_extension(env)
         path_info = env[Rack::PATH_INFO]
-        return rack_request.path if path_info.nil? || path_info.empty?
+        return Rack::Request.new(env).path if path_info.nil? || path_info.empty?
 
         path_info
       end
@@ -279,17 +296,19 @@ module Grape
       # +++, which becomes a space). So the parse -- the most expensive thing
       # a request with a query string does, and one the endpoint may never ask
       # for -- is left to whoever reads the params.
-      def format_from_query
+      def format_from_query(env)
         query_string = env[Rack::QUERY_STRING]
         return if query_string.nil? || query_string.empty?
         return unless query_string.include?(FORMAT_PARAM) || query_string.include?('%')
 
-        query_params['format']
+        Rack::Request.new(env).GET[FORMAT_PARAM]
+      rescue *Grape::RACK_ERRORS
+        raise Grape::Exceptions::RequestError
       end
 
       # The keys are registered media types -- valid strings, which scrubbing
       # leaves alone -- so only a miss needs the header scrubbed.
-      def format_from_header
+      def format_from_header(env)
         accept_header = env['HTTP_ACCEPT']
         @format_for_accept.fetch(accept_header) { Formatter.format_for_accept(try_scrub(accept_header), mime_types) }
       end

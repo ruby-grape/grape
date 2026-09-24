@@ -35,12 +35,7 @@ module Grape
         begin
           @app_response = @app.call(@env)
         ensure
-          begin
-            after_response = after
-          rescue StandardError => e
-            warn "caught error of type #{e.class} in after callback inside #{self.class.name} : #{e.message}"
-            raise e
-          end
+          after_response = reporting_after_errors { after }
         end
 
         response = after_response || @app_response
@@ -78,6 +73,17 @@ module Grape
       end
 
       private
+
+      # Runs what the middleware does once the app has answered. An error it
+      # raises is reported before it goes on: a +rescue_from :all+ handler
+      # turns it into a 500 without logging it, so this may be the only trace
+      # of it.
+      def reporting_after_errors
+        yield
+      rescue StandardError => e
+        warn "caught error of type #{e.class} in after callback inside #{self.class.name} : #{e.message}"
+        raise e
+      end
 
       # +response+ is a Rack triplet, unless +after+ or the app handed back a
       # Rack::Response.

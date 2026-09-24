@@ -66,6 +66,7 @@
 * [#2998](https://github.com/ruby-grape/grape/pull/2998): Drop the unused `simplecov-lcov` setup; Coveralls reads SimpleCov's own results - [@ericproulx](https://github.com/ericproulx).
 * [#3001](https://github.com/ruby-grape/grape/pull/3001): Drop the safe navigation on the declared handler's contract key maps - [@ericproulx](https://github.com/ericproulx).
 * [#3002](https://github.com/ruby-grape/grape/pull/3002): Render an XML error without checking for `to_xml` - [@ericproulx](https://github.com/ericproulx).
+* [#3004](https://github.com/ruby-grape/grape/pull/3004): Stop copying the formatter and calling empty filter phases per request - [@ericproulx](https://github.com/ericproulx).
 * [#3005](https://github.com/ruby-grape/grape/pull/3005): Load rails before grape in the Rails gemfiles so the specs exercise loading `Grape::Railtie` - [@ericproulx](https://github.com/ericproulx).
 * [#3006](https://github.com/ruby-grape/grape/pull/3006): Answer params and versions holding invalid bytes instead of raising `ArgumentError` - [@ericproulx](https://github.com/ericproulx).
 * [#3007](https://github.com/ruby-grape/grape/pull/3007): Reserve `blank?` and `present?` for outside input and check Grape's own values precisely - [@ericproulx](https://github.com/ericproulx).

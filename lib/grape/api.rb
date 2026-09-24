@@ -43,16 +43,24 @@ module Grape
       # an API class was created, since {.override_all_methods!} copies the
       # methods it finds at that moment.
       #
-      # +call+ is the interface point between Rack and Grape; it accepts a
-      # request from Rack and ultimately returns an array of three values: the
-      # status, the headers, and the body. See [the rack specification]
+      # +inherit_settings+ is left out: it is protected on the base instance, so
+      # a delegator would raise NoMethodError just as the missing one does.
+      # +call+ is written out below.
+      def_delegators :base_instance, :new, :configuration, :change!, :compile!, :recognize_path, :routes,
+                     :base, :base=, :base_instance?, :reset!, :top_level_setting
+
+      # The interface point between Rack and Grape; it accepts a request from
+      # Rack and ultimately returns an array of three values: the status, the
+      # headers, and the body. See [the rack specification]
       # (https://github.com/rack/rack/blob/main/SPEC.rdoc) for more.
       # NOTE: This will only be called on an API directly mounted on RACK
       #
-      # +inherit_settings+ is left out: it is protected on the base instance, so
-      # a delegator would raise NoMethodError just as the missing one does.
-      def_delegators :base_instance, :new, :configuration, :call, :change!, :compile!, :recognize_path, :routes,
-                     :base, :base=, :base_instance?, :reset!, :top_level_setting
+      # Not delegated with the rest because it runs on every request, and a
+      # Forwardable delegator checks its target with +defined?+ and forwards
+      # through +...+ each time: about as much again as the call it makes.
+      def call(env)
+        base_instance.call(env)
+      end
 
       # Initialize the instance variables on the remountable class, and the base_instance
       # an instance that will be used to create the set up but will not be mounted
