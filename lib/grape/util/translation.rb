@@ -17,6 +17,8 @@ module Grape
       # Callers must not pass unintended keyword arguments — any extra keyword
       # will silently become an I18n interpolation variable.
       def translate(key, default: MISSING, scope: 'grape.errors.messages', locale: nil, **)
+        return translate_from_snapshot(key, default:, scope:, **) if Grape.ractor?
+
         i18n_opts = { default:, scope:, ** }
         i18n_opts[:locale] = locale if locale
         message = ::I18n.translate(key, **i18n_opts)
@@ -28,6 +30,27 @@ module Grape
         return scoped_key if fallback_locale?(locale) || fallback_locale_unavailable?
 
         ::I18n.translate(key, default: scoped_key, scope:, locale: FALLBACK_LOCALE, **)
+      end
+
+      # Ractor mode answers from the frozen translations taken when the process
+      # was finalized (see Grape::Util::Shareable), because I18n keeps its
+      # configuration in class variables, which a non-main Ractor may not read.
+      # The locale is the one that was default at that moment: choosing one per
+      # request is what this trades away.
+      def translate_from_snapshot(key, default:, scope:, **)
+        path = Array(scope).flat_map { |part| part.to_s.split('.') }.push(*key.to_s.split('.')).map!(&:to_sym)
+        message = Grape::Util::Shareable.translations&.dig(*path)
+        message = default.equal?(MISSING) ? path.join('.') : default if message.nil?
+        interpolate(message, **)
+      end
+
+      # I18n accepts a message with either +%{name}+ or +%<name>s+ placeholders
+      # and fills both; Ruby's format only knows the second, so the first is
+      # rewritten into it.
+      def interpolate(message, **options)
+        return message unless message.is_a?(String) && options.any? && message.match?(/%[{<]/)
+
+        format(message.gsub(/%\{(\w+)\}/) { "%<#{::Regexp.last_match(1)}>s" }, **options)
       end
 
       def fallback_locale?(locale)

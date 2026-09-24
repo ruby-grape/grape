@@ -69,6 +69,23 @@ module Grape
           compile!.router.recognize_path(path)
         end
 
+        # Compile this API and make the compiled app shareable, so that it can
+        # be served from non-main Ractors -- the whole object graph behind it
+        # is frozen, and so is the process-wide state a request reads (see
+        # Grape::Util::Shareable).
+        #
+        # Nothing may be defined on the API, or configured on Grape, after
+        # this: both answer a write with a FrozenError from here on. Returns
+        # the API class it was called on, so a rackup file can
+        # +run MyAPI.finalize!+.
+        def finalize!
+          raise Grape::Exceptions::RactorModeNotEnabled unless Grape.ractor?
+
+          Grape::Util::Shareable.freeze_globals!
+          ::Ractor.make_shareable(compile!)
+          base || self
+        end
+
         # Wipe the compiled API so we can recompile after changes were made.
         def change!
           @instance = nil

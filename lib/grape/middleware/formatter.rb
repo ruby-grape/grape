@@ -13,6 +13,12 @@ module Grape
 
       ALL_MEDIA_TYPES = '*/*'
 
+      # Rack leaves its own copy of this table unfrozen, in a constant a
+      # non-main Ractor may not read (see Grape::Util::Shareable), and every
+      # response reads it. A copy of Rack's, frozen, so that Grape neither
+      # reaches for Rack's nor has to freeze a constant it does not own.
+      STATUS_WITH_NO_ENTITY_BODY = Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.dup.freeze
+
       # The query param that names the format. See #format_from_query.
       FORMAT_PARAM = 'format'
 
@@ -98,7 +104,7 @@ module Grape
 
         status, headers, bodies = @app_response
 
-        return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+        return [status, headers, []] if STATUS_WITH_NO_ENTITY_BODY.include?(status)
 
         build_formatted_response(status, headers, bodies)
       end
@@ -134,6 +140,7 @@ module Grape
       # notification machinery are skipped and the block runs directly (no added
       # allocations); the block is forwarded anonymously.
       def instrument_format_response(formatter, &)
+        return yield if Grape.ractor?
         return yield unless ActiveSupport::Notifications.notifier.listening?('format_response.grape')
 
         ActiveSupport::Notifications.instrument('format_response.grape', formatter:, env:, &)

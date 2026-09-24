@@ -4410,6 +4410,45 @@ Grape integrates with following third-party tools:
 * **[ElasticAPM](https://www.elastic.co/products/apm)** - [elastic-apm](https://github.com/elastic/apm-agent-ruby) gem, [documentation](https://www.elastic.co/guide/en/apm/agent/ruby/3.x/getting-started-rack.html#getting-started-grape)
 * **[Datadog APM](https://docs.datadoghq.com/tracing/)** - [ddtrace](https://github.com/datadog/dd-trace-rb) gem, [documentation](https://docs.datadoghq.com/tracing/setup_overview/setup/ruby/#grape)
 
+## Ractor Mode
+
+> Experimental, and only as solid as Ruby's own Ractors, which are experimental themselves.
+> Needs Ruby 4.0 or later: earlier Rubies cannot make a `Method` object shareable, and an API is
+> full of them -- every endpoint holds its route block as one. `Grape.ractor!` raises there.
+
+A Grape API is defined, compiled and frozen in the main Ractor, and can then be served from as many Ractors as you like -- in parallel, with no GVL between them. Turn the mode on before the API classes load, and finalize the API once it is fully defined:
+
+```ruby
+# config.ru
+require 'grape'
+Grape.ractor!
+
+require_relative 'api'
+
+run MyAPI.finalize!
+```
+
+`Grape.ractor!` has to come first because it changes how a route block becomes a method: Ruby refuses to call a method defined from an unshareable `Proc` from another Ractor, so in this mode every block is isolated as it is read. A block that reads an outer variable holding something unshareable cannot be isolated, and says so as the class loads rather than on the first request:
+
+```ruby
+limit = +'10' # a mutable String
+
+Class.new(Grape::API) do
+  get('/items') { limit } # Ractor::IsolationError, while the class loads
+end
+```
+
+`finalize!` compiles the API, freezes the whole object graph behind it, and settles the process-wide state a request reads: Grape's own configuration, the lookup tables Rack and Builder fill as they load, and a snapshot of the `grape` translations. Nothing can be defined on the API or configured on Grape afterwards -- both answer a write with an error from then on. It returns the API class, so `run MyAPI.finalize!` reads as one step.
+
+Serving from Ractors is the server's job; Grape's part is being ready for it. A server that runs the app in the main Ractor serves a finalized API just as well.
+
+What the mode gives up:
+
+* **Instrumentation.** `ActiveSupport::Notifications` keeps its notifier where a non-main Ractor cannot read it, so the `*.grape` hook points are skipped.
+* **Per-request locale.** I18n keeps its configuration in class variables, which a non-main Ractor may not read at all. Messages come from a frozen snapshot of the locale that was default when `finalize!` ran.
+* **File uploads.** Ruby's `Tempfile` is a `Delegator`, and a delegated method cannot be called from a non-main Ractor, so a multipart request carrying a file cannot be parsed there.
+* **Reloading.** A finalized API cannot be changed, so reloading in development is out.
+
 ## Contributing to Grape
 
 Grape is work of hundreds of contributors. You're encouraged to submit pull requests, propose features and discuss issues.
