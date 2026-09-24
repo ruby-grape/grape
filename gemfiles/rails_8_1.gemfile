@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+# Declared ahead of the Gemfile so Bundler.require loads rails before grape, as
+# a Rails app does, and lib/grape.rb finds Rails::Railtie to load Grape::Railtie.
+gem 'rails', '~> 8.1.0'
+
 eval_gemfile '../Gemfile'
 
-gem 'rails', '~> 8.1.0'
 gem 'tzinfo-data', require: false
