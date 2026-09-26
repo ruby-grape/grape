@@ -72,6 +72,7 @@
 * [#3006](https://github.com/ruby-grape/grape/pull/3006): Answer params and versions holding invalid bytes instead of raising `ArgumentError` - [@ericproulx](https://github.com/ericproulx).
 * [#3007](https://github.com/ruby-grape/grape/pull/3007): Reserve `blank?` and `present?` for outside input and check Grape's own values precisely - [@ericproulx](https://github.com/ericproulx).
 * [#3009](https://github.com/ruby-grape/grape/pull/3009): Fold `SingleAttributeIterator` and `MultipleAttributesIterator` into `AttributesIterator` - [@ericproulx](https://github.com/ericproulx).
+* [#3013](https://github.com/ruby-grape/grape/pull/3013): Read a header version holding a hyphen, such as `2024-06-20`, whole - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
