@@ -1579,7 +1579,9 @@ describe Grape::API do
     end
 
     it 'sets content type for xml' do
-      get '/foo.xml'
+      subject.get('/hash') { { foo: 'bar' } }
+      get '/hash.xml'
+      expect(last_response).to be_successful
       expect(last_response.content_type).to eq('application/xml')
     end
 
@@ -5007,6 +5009,67 @@ describe Grape::API do
             <message>Unauthorized</message>
           </error>
         XML
+      end
+    end
+
+    context 'a negotiated format that cannot render the body' do
+      before do
+        subject.get('/string') { 'example' }
+      end
+
+      it 'answers in the default format for an Accept header' do
+        get '/string', {}, 'HTTP_ACCEPT' => 'application/xml'
+        expect(last_response.status).to eq(200)
+        expect(last_response.content_type).to eq('text/plain')
+        expect(last_response.body).to eq('example')
+      end
+
+      it "answers in the default format for axios's Accept header" do
+        get '/string', {}, 'HTTP_ACCEPT' => 'application/json, text/plain, */*'
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('example')
+      end
+
+      it 'answers in the default format for an extension' do
+        get '/string.xml'
+        expect(last_response.status).to eq(200)
+        expect(last_response.content_type).to eq('text/plain')
+      end
+
+      it 'answers in a declared default format' do
+        subject.namespace :json do
+          default_format :json
+          get('string') { 'example' }
+        end
+        get '/json/string', {}, 'HTTP_ACCEPT' => 'application/xml'
+        expect(last_response.status).to eq(200)
+        expect(last_response.content_type).to eq('application/json')
+        expect(last_response.body).to eq('"example"')
+      end
+
+      it 'still renders a body the format can render' do
+        subject.get('/hash') { { a: 1 } }
+        get '/hash', {}, 'HTTP_ACCEPT' => 'application/xml'
+        expect(last_response.content_type).to eq('application/xml')
+        expect(last_response.body).to include('<a type="integer">1</a>')
+      end
+
+      it 'fails when the endpoint set the content type' do
+        subject.get('/typed') do
+          content_type 'application/xml'
+          'example'
+        end
+        get '/typed', {}, 'HTTP_ACCEPT' => 'application/xml'
+        expect(last_response).to be_server_error
+      end
+
+      it 'fails when the endpoint picked the format' do
+        subject.get('/picked') do
+          api_format :xml
+          'example'
+        end
+        get '/picked', {}, 'HTTP_ACCEPT' => 'application/json'
+        expect(last_response).to be_server_error
       end
     end
   end
