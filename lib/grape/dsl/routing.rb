@@ -156,7 +156,7 @@ module Grape
 
           endpoints << Grape::Endpoint.new(
             in_setting,
-            http_methods: :any,
+            http_methods: '*',
             path:,
             app:,
             anchor: false,
@@ -310,9 +310,21 @@ module Grape
       # base API rather than adding a second one. Called by
       # {Grape::API.refresh_mount_step} when a class-level method runs after the
       # API was mounted.
+      #
+      # A bare Rack app is put back where it was mounted. It is routed as an
+      # ANY route, and those are tried in the order they were declared, so
+      # re-mounting it last let a catch-all declared after it answer first. A
+      # mounted Grape API still moves to the end: its routes answer for
+      # specific methods, where moving them would change which of two
+      # routes on the same path answers.
       def refresh_mounted_api(mounts, opts = {})
-        drop_endpoints_mounted_for(mounts)
-        mount(mounts, opts)
+        namespace = inheritable_setting.namespace_path
+        normalize_mounts(mounts).each_pair do |app, path|
+          position = endpoints.index { |endpoint| mounted_at?(endpoint, app, Array(path), namespace) }
+          drop_endpoints_mounted_for(app => path)
+          mount({ app => path }, opts)
+          endpoints.insert(position, endpoints.pop) if position && !app.respond_to?(:mount_instance)
+        end
       end
 
       # A mounted Grape API is stored as the throwaway instance +mount+ built
@@ -326,7 +338,7 @@ module Grape
         normalize_mounts(mounts).each_pair do |app, path|
           paths = Array(path)
           endpoints.delete_if do |endpoint|
-            dropped = same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
+            dropped = mounted_at?(endpoint, app, paths, namespace)
             release_mount_instance(endpoint.mounted_app) if dropped
             dropped
           end
@@ -352,6 +364,10 @@ module Grape
       # instead of mounting the app itself.
       def normalize_mounts(mounts)
         mounts.is_a?(Hash) ? mounts : { mounts => '/' }
+      end
+
+      def mounted_at?(endpoint, app, paths, namespace)
+        same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
       end
 
       # Two mounts refer to the same app when they share the same base Grape
