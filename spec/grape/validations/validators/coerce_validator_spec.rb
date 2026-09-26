@@ -215,6 +215,44 @@ describe Grape::Validations::Validators::CoerceValidator do
           expect(last_response).to be_created
           expect(last_response.body).to eq('true')
         end
+
+        context 'a number with a fractional part' do
+          before do
+            subject.format :json
+            subject.params do
+              optional :int, type: Integer
+              optional :ints, type: Array[Integer]
+              optional :number, types: [Integer, Float]
+            end
+            subject.post '/numbers' do
+              { int: params[:int], ints: params[:ints], number: params[:number] }
+            end
+          end
+
+          it 'is not an Integer' do
+            post '/numbers', { int: 2.99 }.to_json, headers
+            expect(last_response).to be_bad_request
+            expect(last_response.body).to eq({ error: 'int is invalid' }.to_json)
+          end
+
+          it 'is not an Integer element' do
+            post '/numbers', { ints: [1, -0.5] }.to_json, headers
+            expect(last_response).to be_bad_request
+            expect(last_response.body).to eq({ error: 'ints is invalid' }.to_json)
+          end
+
+          it 'is left to the next of multiple types' do
+            post '/numbers', { number: 2.99 }.to_json, headers
+            expect(last_response).to be_created
+            expect(last_response.body).to eq({ int: nil, ints: nil, number: 2.99 }.to_json)
+          end
+
+          it 'is an Integer when the number is whole' do
+            post '/numbers', { int: 1.0, ints: [2.0], number: 3.0 }.to_json, headers
+            expect(last_response).to be_created
+            expect(last_response.body).to eq({ int: 1, ints: [2], number: 3 }.to_json)
+          end
+        end
       end
 
       it 'BigDecimal' do
