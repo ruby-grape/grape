@@ -3,6 +3,29 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A required param with `values` rejects `nil` in a nested scope
+
+A `requires` param with `values:` now rejects `nil` in a Hash scope, an Array scope or a `given` block, not only at the root ([#3010](https://github.com/ruby-grape/grape/pull/3010)). So does a value that coerces to `nil`, such as `""` for `type: Integer`. Before, only the root scope rejected it, so `{"lines":[{"qty":null}]}` passed the declaration below and reached the endpoint with `qty` set to `nil`:
+
+```ruby
+params do
+  requires :lines, type: Array do
+    requires :qty, type: Integer, values: 1..99
+  end
+end
+```
+
+That request now answers `400` with `lines[0][qty] does not have a valid value`. A nested param that is missing now reports that message after `is missing`, as a root param already did:
+
+```
+# Before
+address[country] is missing
+# After
+address[country] is missing, address[country] does not have a valid value
+```
+
+A child scope whose optional parent is absent is still not validated. To keep accepting `nil`, declare the param with `optional` instead.
+
 #### A validation error without a message says the param is invalid
 
 A `Grape::Exceptions::Validation` created without a `message:` now carries the `:invalid` message key and the message `is invalid` ([#2993](https://github.com/ruby-grape/grape/pull/2993)). Before, its `message_key` was `nil`, and its message was the exception's class name, which went into the response. A custom validator with no `default_message_key` that calls `validation_error!(attr_name)` answered:
