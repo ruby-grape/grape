@@ -77,6 +77,7 @@
 * [#3012](https://github.com/ruby-grape/grape/pull/3012): Route a mounted Rack app as an ANY route in the order it was mounted - [@ericproulx](https://github.com/ericproulx).
 * [#3013](https://github.com/ruby-grape/grape/pull/3013): Read a header version holding a hyphen, such as `2024-06-20`, whole - [@ericproulx](https://github.com/ericproulx).
 * [#3014](https://github.com/ruby-grape/grape/pull/3014): Validate a blank element of an optional Array block when other elements are not blank - [@ericproulx](https://github.com/ericproulx).
+* [#3015](https://github.com/ruby-grape/grape/pull/3015): Answer in the default format when a negotiated format cannot render the body, instead of 500 - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

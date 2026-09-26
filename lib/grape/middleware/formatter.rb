@@ -97,10 +97,10 @@ module Grape
       end
 
       def call!(env)
-        negotiate_content_type(env)
+        negotiated = negotiate_content_type(env)
         read_body_input(env)
         response = @app.call(env)
-        reporting_after_errors { format_response(env, response) } || response
+        reporting_after_errors { format_response(env, response, negotiated) } || response
       end
 
       # Base's per-request readers look for the request in ivars that only a
@@ -111,17 +111,18 @@ module Grape
 
       private
 
-      def format_response(env, response)
+      def format_response(env, response, negotiated)
         return unless response
 
         status, headers, bodies = response
 
         return [status, headers, []] if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 
-        build_formatted_response(env, status, headers, bodies)
+        build_formatted_response(env, status, headers, bodies, negotiated)
       end
 
-      def build_formatted_response(env, status, headers, bodies)
+      def build_formatted_response(env, status, headers, bodies, negotiated)
+        content_type_given = headers.key?(Rack::CONTENT_TYPE)
         ensure_content_type!(env, headers)
 
         if bodies.is_a?(Grape::ServeStream::StreamResponse)
@@ -143,7 +144,34 @@ module Grape
           [status, headers, bodymap]
         end
       rescue Grape::Exceptions::InvalidFormatter => e
+        fallback = format_as_default(env, status, headers, bodies) if falls_back?(env, negotiated, content_type_given)
+        return fallback if fallback
+
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
+      end
+
+      # A format the client negotiated -- by its Accept header, the path's
+      # extension or +?format=+ -- that cannot render the body answers in the
+      # default format rather than 500. On an API that pins no format, a
+      # browser's Accept header and axios's both negotiate XML, which cannot
+      # render a String. The fallback applies only while the format is the
+      # client's alone: when the API pins one, or the endpoint set a
+      # Content-Type or another format itself, a body that does not fit is the
+      # endpoint's error and still answers 500.
+      def falls_back?(env, negotiated, content_type_given)
+        format.nil? && !content_type_given && env[Grape::Env::API_FORMAT] == negotiated
+      end
+
+      # Nil when the default format cannot render the body either.
+      def format_as_default(env, status, headers, bodies)
+        formatter = Grape::Formatter.formatter_for(default_format, formatters)
+        bodymap = bodies.map { |body| formatter.call(body, env) }
+        env[Grape::Env::API_FORMAT] = default_format.to_sym
+        headers.delete(Rack::CONTENT_TYPE)
+        ensure_content_type!(env, headers)
+        [status, headers, bodymap]
+      rescue Grape::Exceptions::InvalidFormatter
+        nil
       end
 
       # Guards on +listening?+ so that with no subscriber the payload Hash and
