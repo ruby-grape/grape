@@ -237,4 +237,33 @@ describe Grape::Validations::Validators::OneofValidator do
       expect(JSON.parse(last_response.body)['error']).to include('items[0][value] is invalid')
     end
   end
+
+  describe 'an optional Array scope inside a variant' do
+    let(:app) do
+      Class.new(Grape::API) do
+        format :json
+        params do
+          requires :value, type: Hash, oneof: [
+            proc do
+              optional :items, type: Array do
+                requires :k
+              end
+            end
+          ]
+        end
+        post('/') { 'ok' }
+      end
+    end
+
+    it 'passes over the Array when its elements are all empty' do
+      post '/', { value: { items: [{}, {}] } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(201)
+    end
+
+    it 'does not match when an empty element is sent with others' do
+      post '/', { value: { items: [{}, { k: 1 }] } }.to_json, 'CONTENT_TYPE' => 'application/json'
+      expect(last_response.status).to eq(400)
+      expect(JSON.parse(last_response.body)['error']).to eq('value does not match any of the allowed schemas')
+    end
+  end
 end

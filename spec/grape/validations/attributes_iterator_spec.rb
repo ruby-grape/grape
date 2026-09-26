@@ -21,8 +21,8 @@ describe Grape::Validations::AttributesIterator do
         [{ first: 'string1', second: 'string1' }, { first: 'string2', second: 'string2' }]
       end
 
-      it 'yields each element of the array' do
-        expect { |b| iterator.each(params, &b) }.to yield_successive_args(params[0], params[1])
+      it 'yields each element of the array, not as an element of its own' do
+        expect { |b| iterator.each(params, &b) }.to yield_successive_args([params[0], false], [params[1], false])
       end
     end
 
@@ -30,7 +30,7 @@ describe Grape::Validations::AttributesIterator do
       let(:params) { [Grape::DSL::Parameters::EmptyOptionalValue, 10] }
 
       it 'does not yield it' do
-        expect { |b| iterator.each(params, &b) }.to yield_successive_args(params[1])
+        expect { |b| iterator.each(params, &b) }.to yield_successive_args([params[1], false])
       end
     end
   end
