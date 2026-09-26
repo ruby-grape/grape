@@ -13,17 +13,38 @@ module Grape
       # in the case they will be compared in.
       VENDOR_VERSION_HEADER_REGEX = /\Avnd\.(?<vendor>[a-z0-9.\-_!^]+?)(?:-(?<version>[a-z0-9*.]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/
 
+      # The pattern above cannot tell where a vendor ends and a version begins
+      # when either holds a hyphen, so it keeps hyphens out of the version: a
+      # dated version such as +2024-06-20+ read as vendor +acme-2024-06+ and
+      # version +20+. Given the vendor it is parsed for, the vendor is spelled
+      # out and everything after it up to the format is the version.
+      #
+      # Keyed by the vendors APIs declare, never by what a client sends.
+      class VendorVersionHeaderRegexCache < Grape::Util::Cache
+        def initialize
+          super
+          @cache = Hash.new do |h, vendor|
+            h[vendor] = /\Avnd\.(?<vendor>#{Regexp.escape(vendor)})(?:-(?<version>[a-z0-9*.-]+))?(?:\+(?<format>[a-z0-9*\-.]+))?\z/
+          end
+        end
+      end
+
       # Immutable, strings included: the header versioner shares one instance
       # per declared media type across every request that sends it, and these
       # strings are what it writes into the env. The arguments are copied
       # rather than frozen, as they are the caller's.
-      def initialize(type:, subtype:)
+      #
+      # A +subtype+ naming a vendor other than +vendor+ is parsed as it would
+      # be without one.
+      def initialize(type:, subtype:, vendor: nil)
         @type = -type
         @subtype = -subtype
-        VENDOR_VERSION_HEADER_REGEX.match(@subtype) do |m|
-          @vendor = m[:vendor].freeze
-          @version = m[:version].freeze
-          @format = m[:format].freeze
+        match = VendorVersionHeaderRegexCache[vendor].match(@subtype) if vendor
+        match ||= VENDOR_VERSION_HEADER_REGEX.match(@subtype)
+        if match
+          @vendor = match[:vendor].freeze
+          @version = match[:version].freeze
+          @format = match[:format].freeze
         end
         freeze
       end
@@ -43,17 +64,17 @@ module Grape
       end
 
       class << self
-        def best_quality(header, available_media_types)
-          parse(best_quality_media_type(header, available_media_types))
+        def best_quality(header, available_media_types, vendor: nil)
+          parse(best_quality_media_type(header, available_media_types), vendor:)
         end
 
-        def parse(media_type)
+        def parse(media_type, vendor: nil)
           return if media_type.blank?
 
           type, subtype = media_type.downcase.split('/', 2)
           return if type.blank? || subtype.blank?
 
-          new(type:, subtype:)
+          new(type:, subtype:, vendor:)
         end
 
         def match?(media_type)
