@@ -3,6 +3,20 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### An `Integer` param rejects a number with a fractional part
+
+A param of `type: Integer` now rejects a number with a fractional part instead of truncating it ([#3011](https://github.com/ruby-grape/grape/pull/3011)). A JSON body's `2.99` became `2` and `-0.5` became `0`, while the same value sent as a string, `"2.99"` in a query, was already rejected. The same applies to `Array[Integer]` and `Set[Integer]` elements. A whole number such as `1.0` still becomes `1`.
+
+```
+# {"quantity": 2.99} against `requires :quantity, type: Integer`
+# Before
+201, params[:quantity] == 2
+# After
+400, quantity is invalid
+```
+
+`types: [Integer, Float]` now answers `2.99` for that body, as it already did for the query string, where it used to answer `2`. To keep accepting and truncating fractional numbers, declare the param `type: Float` and call `to_i` on it, or pass `coerce_with: ->(value) { Integer(value.to_f) }`.
+
 #### A validation error without a message says the param is invalid
 
 A `Grape::Exceptions::Validation` created without a `message:` now carries the `:invalid` message key and the message `is invalid` ([#2993](https://github.com/ruby-grape/grape/pull/2993)). Before, its `message_key` was `nil`, and its message was the exception's class name, which went into the response. A custom validator with no `default_message_key` that calls `validation_error!(attr_name)` answered:
