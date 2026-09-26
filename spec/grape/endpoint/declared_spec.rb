@@ -911,16 +911,21 @@ describe Grape::Endpoint do
       end
     end
 
-    it 'returns the blank elements an optional Array passes over as they came in' do
-      post_with_json '/items', items: [nil, { id: 1, junk: 2 }, '']
+    it 'returns the elements of an optional Array that are all blank as they came in' do
+      post_with_json '/items', items: [nil, '']
       expect(last_response.status).to eq(201)
-      expect(JSON.parse(last_response.body)).to eq('items' => [nil, { 'id' => 1, 'name' => nil }, ''])
+      expect(JSON.parse(last_response.body)).to eq('items' => [nil, ''])
     end
 
-    it 'returns the blank elements an Array of optional params lets through as they came in' do
-      post_with_json '/tags', tags: [' ', false, { label: 'y', junk: 3 }]
+    it 'returns the elements of an Array of optional params that are all blank as they came in' do
+      post_with_json '/tags', tags: [' ', false]
       expect(last_response.status).to eq(201)
-      expect(JSON.parse(last_response.body)).to eq('tags' => [' ', false, { 'label' => 'y' }])
+      expect(JSON.parse(last_response.body)).to eq('tags' => [' ', false])
+    end
+
+    it 'never sees a blank element sent with others' do
+      post_with_json '/items', items: [nil, { id: 1, junk: 2 }, '']
+      expect(last_response.status).to eq(400)
     end
   end
 
