@@ -68,6 +68,19 @@ describe Grape::Validations::Types::PrimitiveCoercer do
       it 'accepts non-nil value' do
         expect(subject.call(42)).to be_a(Integer)
       end
+
+      it 'rejects a number with a fractional part' do
+        [2.99, -0.5, BigDecimal('1.5'), Rational(3, 2), Float::INFINITY, Float::NAN].each do |number|
+          expect(subject.call(number)).to be_instance_of(Grape::Validations::Types::InvalidValue)
+        end
+      end
+
+      it 'coerces a whole number' do
+        expect(subject.call(1.0)).to eq(1)
+        expect(subject.call(-3.0)).to eq(-3)
+        expect(subject.call(BigDecimal('7'))).to eq(7)
+        expect(subject.call(1e20)).to eq(100_000_000_000_000_000_000)
+      end
     end
 
     context 'Numeric' do

@@ -19,6 +19,7 @@ module Grape
           @coercer = cache_coercer[type]
           @rejected_inputs = REJECTED_INPUTS[type]
           @treat_empty_as_nil = type != String
+          @integer = type == Integer
         end
 
         def call(val)
@@ -43,9 +44,19 @@ module Grape
         # but Virtus wouldn't accept it. So, this method only exists to not introduce
         # breaking changes.
         def reject?(val)
+          return fractional?(val) if @integer
           return false unless @rejected_inputs
 
           @rejected_inputs.any? { |klass| val.is_a?(klass) }
+        end
+
+        # dry-types turns a number into an Integer with Kernel#Integer, which
+        # truncates, so a JSON body's 2.99 became 2 while the same value in a
+        # query string, "2.99", was rejected. A number with a fractional part
+        # is refused instead; a whole one such as 1.0 still becomes 1. Complex
+        # numbers have no fractional part to test and are left to dry-types.
+        def fractional?(val)
+          val.is_a?(Numeric) && val.real? && !(val % 1).zero?
         end
 
         # Dry-Types treats an empty string as invalid. However, Grape considers an empty string as
