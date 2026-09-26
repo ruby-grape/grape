@@ -60,6 +60,30 @@ RSpec.describe Grape::Util::MediaType do
         expect(media_type.subtype).to eq('vnd.test-v1+json')
       end
     end
+
+    context 'when a hyphen could end the vendor or the version' do
+      let(:header) { 'application/vnd.acme-2024-06-20+json' }
+
+      it 'keeps the hyphens in the vendor without one to parse for' do
+        media_type = described_class.parse(header)
+        expect([media_type.vendor, media_type.version]).to eq(%w[acme-2024-06 20])
+      end
+
+      it 'keeps them in the version when parsed for the vendor' do
+        media_type = described_class.parse(header, vendor: 'acme')
+        expect([media_type.vendor, media_type.version, media_type.format]).to eq(%w[acme 2024-06-20 json])
+      end
+
+      it 'parses a hyphenated vendor' do
+        media_type = described_class.parse('application/vnd.my-vendor-v1+json', vendor: 'my-vendor')
+        expect([media_type.vendor, media_type.version]).to eq(%w[my-vendor v1])
+      end
+
+      it 'parses another vendor as it would without one' do
+        expect(described_class.parse('application/vnd.other-2024-06-20+json', vendor: 'acme'))
+          .to eq(described_class.parse('application/vnd.other-2024-06-20+json'))
+      end
+    end
   end
 
   describe '.match?' do

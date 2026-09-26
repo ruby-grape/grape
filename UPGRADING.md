@@ -3,6 +3,23 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A header version holding a hyphen is read whole
+
+With `version ..., using: :header`, a version holding a hyphen, such as a date (`2024-06-20`) or `2.0-beta`, is now read whole ([#3013](https://github.com/ruby-grape/grape/pull/3013)). The Accept header was split at the version's last hyphen, so the request was routed to the right version but reported the wrong one:
+
+```
+# version '2024-06-20', using: :header, vendor: 'acme'
+# Accept: application/vnd.acme-2024-06-20+json
+# Before
+version            # => "20"
+env['api.vendor']  # => "acme-2024-06"
+# After
+version            # => "2024-06-20"
+env['api.vendor']  # => "acme"
+```
+
+An undeclared version of that shape now fails with `Grape::Exceptions::InvalidVersionHeader` (`API version not found.`), where it failed with `Grape::Exceptions::InvalidAcceptHeader` (`API vendor not found.`).
+
 #### A validation error without a message says the param is invalid
 
 A `Grape::Exceptions::Validation` created without a `message:` now carries the `:invalid` message key and the message `is invalid` ([#2993](https://github.com/ruby-grape/grape/pull/2993)). Before, its `message_key` was `nil`, and its message was the exception's class name, which went into the response. A custom validator with no `default_message_key` that calls `validation_error!(attr_name)` answered:
