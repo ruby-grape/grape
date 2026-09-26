@@ -3,6 +3,30 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A mounted Rack app is an ANY route
+
+A Rack app mounted with `mount` (a lambda, Sinatra, Rails engine, anything that is not a Grape API) is now routed as an ANY route, like `route :any`, and keeps the place it was mounted in ([#3012](https://github.com/ruby-grape/grape/pull/3012)). Before, its route carried the method `ANY`, which the router has no routes for. The app was reached only as the fallback that answers `405` and auto `OPTIONS`, and that had these effects:
+
+* A `route :any, '*path'` catch-all took every request meant for the app, even one declared after the `mount`.
+* The app's env carried `grape.allowed_methods` (`["OPTIONS", "ANY"]`).
+* A method the app should have answered got `405` when a Grape route used the same path for another method.
+
+```ruby
+mount RackApp => '/rack'
+route(:any, '*path') { error!('not found', 404) }
+
+# GET /rack/x  Before: 404 from the catch-all  After: RackApp
+```
+
+```ruby
+mount RackApp => '/rack'
+get('rack/status') { 'ok' }
+
+# POST /rack/status  Before: 405 (Allow: OPTIONS, GET, HEAD)  After: RackApp
+```
+
+The mount's route reports `request_method` as `'*'` instead of `'ANY'`. Code that picks mounted apps out of `API.routes` by that value should compare with `'*'`.
+
 #### A validation error without a message says the param is invalid
 
 A `Grape::Exceptions::Validation` created without a `message:` now carries the `:invalid` message key and the message `is invalid` ([#2993](https://github.com/ruby-grape/grape/pull/2993)). Before, its `message_key` was `nil`, and its message was the exception's class name, which went into the response. A custom validator with no `default_message_key` that calls `validation_error!(attr_name)` answered:

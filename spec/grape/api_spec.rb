@@ -4103,6 +4103,49 @@ describe Grape::API do
         get '/mounty'
         expect(last_response.body).to eq('MOUNTED')
       end
+
+      it 'is routed for any method' do
+        expect(subject.routes.map(&:request_method)).to eq(['*'])
+      end
+
+      it 'answers every method without being told what the path allows' do
+        subject.mount ->(env) { [200, {}, ["#{env[Rack::REQUEST_METHOD]} #{env.key?(Grape::Env::GRAPE_ALLOWED_METHODS)}"]] } => '/echo'
+        post '/echo/x'
+        expect(last_response.body).to eq('POST false')
+        options '/echo/x'
+        expect(last_response.body).to eq('OPTIONS false')
+      end
+
+      it 'answers ahead of a catch-all declared after it' do
+        subject.route(:any, '*path') { 'catch-all' }
+        get '/mounty/awesome'
+        expect(last_response.body).to eq('MOUNTED')
+        get '/elsewhere'
+        expect(last_response.body).to eq('catch-all')
+      end
+
+      it 'answers a method its path has no route for' do
+        subject.get('mounty/special') { 'grape' }
+        get '/mounty/special'
+        expect(last_response.body).to eq('grape')
+        post '/mounty/special'
+        expect(last_response.body).to eq('MOUNTED')
+      end
+
+      it 'takes a prefix declared after it' do
+        subject.prefix :api
+        get '/api/mounty'
+        expect(last_response.body).to eq('MOUNTED')
+      end
+    end
+
+    context 'with a bare rack app mounted after a catch-all' do
+      it 'answers behind the catch-all' do
+        subject.route(:any, '*path') { 'catch-all' }
+        subject.mount mounted_app => '/mounty'
+        get '/mounty'
+        expect(last_response.body).to eq('catch-all')
+      end
     end
 
     context 'without a hash' do
