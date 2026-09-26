@@ -18,10 +18,6 @@ module Grape
 
         private
 
-        def iterator_class
-          MultipleAttributesIterator
-        end
-
         def keys_in_common(resource_params, known_keys = all_keys)
           return [] unless hash_like?(resource_params)
 

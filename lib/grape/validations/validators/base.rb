@@ -68,7 +68,7 @@ module Grape
           @scope = scope
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
-          @iterator = iterator_class.new(@attrs, @scope).freeze
+          @iterator = AttributesIterator.new(@scope).freeze
           # A scope's parent, optionality, dependency and type are all set
           # before its block declares anything, so these are settled by the
           # time a validator is built. See #validate and #validate!.
@@ -105,13 +105,15 @@ module Grape
           # there may be more than one error per field
           array_errors = nil
 
-          @iterator.each(params) do |val, attr_name, empty_val|
-            next if !scope.required? && empty_val
+          @iterator.each(params) do |val|
+            next if !scope.required? && empty_element?(val)
             next unless scope.meets_dependency?(val, params)
 
-            validate_param!(attr_name, val) if required? || (hash_like?(val) && val.key?(attr_name))
-          rescue Grape::Exceptions::Validation => e
-            (array_errors ||= []) << e
+            @attrs.each do |attr_name|
+              validate_param!(attr_name, val) if required? || (hash_like?(val) && val.key?(attr_name))
+            rescue Grape::Exceptions::Validation => e
+              (array_errors ||= []) << e
+            end
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
@@ -137,10 +139,10 @@ module Grape
         # #validate! on a scope that always validates and does not iterate
         # elements, once its params resolved to a Hash: the root scope and the
         # required Hash scopes under it, which is most validators of most
-        # endpoints. There the iterator hands back that Hash once per
-        # attribute, and every scope on the chain is required with no
-        # dependency, so the per-attribute checks reduce to this. The
-        # machinery cost more than the validation itself.
+        # endpoints. There the iterator hands back that Hash alone, and every
+        # scope on the chain is required with no dependency, so the checks
+        # around the attribute loop drop out. The machinery cost more than
+        # the validation itself.
         def validate_attributes!(params)
           array_errors = nil
 
@@ -185,20 +187,15 @@ module Grape
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
         end
 
-        # What the iterator passes over in an optional scope: an element given
-        # empty, or the placeholder +map_params+ puts where an optional scope's
-        # params were not given at all, which it can only do here when a scope
-        # above was handed an Array instead of a Hash.
+        # What an optional scope passes over: an element given empty, or the
+        # placeholder +map_params+ puts where an optional scope's params were
+        # not given at all. The iterator drops that placeholder itself;
+        # #validate_elements! meets it when a scope above was handed an Array
+        # instead of a Hash.
         def empty_element?(element)
           return true if Grape::DSL::Parameters::EmptyOptionalValue.equal?(element)
 
           element.respond_to?(:empty?) ? element.empty? : element.nil?
-        end
-
-        # The AttributesIterator subclass used to walk this validator's
-        # attributes. Built once in #initialize and reused across requests.
-        def iterator_class
-          SingleAttributeIterator
         end
 
         def validation_error!(attr_name_or_params, message = exception_message)
