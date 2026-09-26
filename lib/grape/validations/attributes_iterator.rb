@@ -5,6 +5,12 @@ module Grape
     # Yields each value a scope's attributes are read from: the scope's params,
     # or each element of them when the scope sits in an Array. Walking the
     # attributes themselves is left to the validator's block.
+    #
+    # Each value comes with whether it is an element a request sent in the
+    # scope's own Array. Otherwise it is the scope's value in an element of an
+    # Array further up, where an empty one is an optional scope left out of
+    # that element, or an element of an optional scope's Array whose elements
+    # are all empty, which is passed over the same way.
     class AttributesIterator
       # +scope+ is static per validator; only +params+ varies per request, so
       # an instance can be built once and reused (it keeps no request-derived
@@ -17,6 +23,8 @@ module Grape
         # the one +Array.wrap+ already consumes in #each. Anything deeper was
         # put there by the request, not by the declaration.
         @max_nesting = [scope.array_depth - 1, 0].max
+        @iterates_elements = scope.iterates_elements?
+        @optional = !scope.required?
       end
 
       def each(params, &)
@@ -47,7 +55,8 @@ module Grape
         tracker = ParamScopeTracker.current if index_scope
 
         # because we need recursion for nested arrays
-        do_each(Array.wrap(original_params), tracker, index_scope, NO_PARENT_INDICES, &)
+        params_to_process = Array.wrap(original_params)
+        do_each(params_to_process, tracker, index_scope, NO_PARENT_INDICES, sent_elements?(params_to_process, NO_PARENT_INDICES), &)
       end
 
       private
@@ -56,7 +65,7 @@ module Grape
       NO_PARENT_INDICES = [].freeze
       private_constant :NO_PARENT_INDICES
 
-      def do_each(params_to_process, tracker, index_scope, parent_indices, &)
+      def do_each(params_to_process, tracker, index_scope, parent_indices, sent_elements, &)
         params_to_process.each_with_index do |resource_params, index|
           # when we get arrays of arrays it means that target element located inside array
           # we need this because we want to know parent arrays indices
@@ -66,13 +75,28 @@ module Grape
           # validators see a non-hash and fail it the same way any other
           # unexpected element type does.
           if resource_params.is_a?(Array) && parent_indices.size < @max_nesting
-            do_each(resource_params, tracker, index_scope, [index] + parent_indices, &)
+            nested_indices = [index] + parent_indices
+            do_each(resource_params, tracker, index_scope, nested_indices, sent_elements?(resource_params, nested_indices), &)
             next
           end
 
           store_indices(tracker, index_scope, index, parent_indices) if tracker
-          yield resource_params unless skip?(resource_params)
+          yield resource_params, sent_elements unless skip?(resource_params)
         end
+      end
+
+      # Whether +values+, reached through +parent_indices+, are elements of the
+      # scope's own Array that were sent. An optional scope's Array whose
+      # elements are all empty is passed over, as the scope itself is when it
+      # is left out (see ParamsScope#should_validate?, which answers that for
+      # the Array at the root). Checked once per Array rather than per element.
+      def sent_elements?(values, parent_indices)
+        @iterates_elements && parent_indices.size == @max_nesting && !(@optional && values.all? { |value| empty?(value) })
+      end
+
+      # Primitives like Integers and Booleans don't respond to +empty?+.
+      def empty?(value)
+        value.respond_to?(:empty?) ? value.empty? : value.nil?
       end
 
       # Each parent index belongs to the next element-iterating scope up the

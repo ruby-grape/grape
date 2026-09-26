@@ -10,9 +10,11 @@ module Grape
       # the block required a key of it, so a block of optional params let
       # anything through.
       #
-      # A blank element is passed over, as the block's own validators pass
-      # over an optional scope whose elements are all blank. It is scrubbed
-      # first, since String#blank? raises on bytes its encoding does not allow.
+      # An Array whose elements are all blank is passed over, as the block's
+      # own validators pass over an optional scope whose elements are all
+      # blank. Otherwise a blank element is not a Hash either. Elements are
+      # scrubbed first, since String#blank? raises on bytes their encoding
+      # does not allow.
       class HashElementsValidator < Base
         default_message_key :coerce
 
@@ -21,8 +23,9 @@ module Grape
         def validate_param!(attr_name, params)
           elements = params[attr_name]
           return unless elements.is_a?(Array)
+          return if elements.all? { |element| scrub(element).blank? }
 
-          index = elements.index { |element| !hash_like?(element) && !scrub(element).blank? }
+          index = elements.index { |element| !hash_like?(element) }
           validation_error!(["#{scope.full_name(attr_name)}[#{index}]"]) if index
         end
       end
