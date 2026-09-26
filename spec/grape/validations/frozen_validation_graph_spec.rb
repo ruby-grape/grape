@@ -147,8 +147,7 @@ RSpec.describe Grape::Validations do
         Grape::Validations::Validators::ValuesValidator,
         Grape::Validations::Validators::OneofValidator,
         Grape::Validations::Validators::MutuallyExclusiveValidator,
-        Grape::Validations::SingleAttributeIterator,
-        Grape::Validations::MultipleAttributesIterator,
+        Grape::Validations::AttributesIterator,
         Grape::Validations::ParamsScope,
         Grape::Validations::Types::PrimitiveCoercer,
         Grape::Validations::Types::ArrayCoercer,
@@ -162,7 +161,7 @@ RSpec.describe Grape::Validations do
 
     it 'reports an unfrozen contract instance (walker self-test)' do
       scope = app.endpoints.first.inheritable_setting.route[:validations].first.__send__(:scope)
-      unfrozen = Grape::Validations::SingleAttributeIterator.new([:a], scope)
+      unfrozen = Grape::Validations::AttributesIterator.new(scope)
 
       violations = []
       walk(unfrozen, 'probe', {}.compare_by_identity, violations, Hash.new(0))

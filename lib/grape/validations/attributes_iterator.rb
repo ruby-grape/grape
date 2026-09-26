@@ -2,13 +2,15 @@
 
 module Grape
   module Validations
+    # Yields each value a scope's attributes are read from: the scope's params,
+    # or each element of them when the scope sits in an Array. Walking the
+    # attributes themselves is left to the validator's block.
     class AttributesIterator
-      # +attrs+ and +scope+ are static per validator; only +params+ varies
-      # per request, so an instance can be built once and reused (it keeps
-      # no request-derived state). Reused instances are shared across
-      # threads, so +each+ must stay free of mutable instance state.
-      def initialize(attrs, scope)
-        @attrs = attrs
+      # +scope+ is static per validator; only +params+ varies per request, so
+      # an instance can be built once and reused (it keeps no request-derived
+      # state). Reused instances are shared across threads, so +each+ must
+      # stay free of mutable instance state.
+      def initialize(scope)
         @scope = scope
         # How many times #do_each may descend into a nested array. The
         # declaration allows one level per Array-typed scope on the chain, less
@@ -25,7 +27,7 @@ module Grape
         # boxes it, the loop unboxes it on its only iteration, and with no Array
         # anywhere neither the nesting descent nor the index bookkeeping
         # applies. Every validator on a flat +params+ block comes through here.
-        return yield_attributes(original_params, &) if original_params.is_a?(Hash) && !iterates_elements
+        return yield(original_params) if original_params.is_a?(Hash) && !iterates_elements
 
         array_params = original_params.is_a?(Array)
         # Do not validate the content of an array scope that did not get one.
@@ -69,7 +71,7 @@ module Grape
           end
 
           store_indices(tracker, index_scope, index, parent_indices) if tracker
-          yield_attributes(resource_params, &)
+          yield resource_params unless skip?(resource_params)
         end
       end
 
@@ -84,10 +86,6 @@ module Grape
           parent_scope = parent_scope.nearest_array_ancestor
         end
         tracker.store_index(target_scope, index)
-      end
-
-      def yield_attributes(_resource_params)
-        raise NotImplementedError
       end
 
       # This is a special case so that we can ignore trees where option
