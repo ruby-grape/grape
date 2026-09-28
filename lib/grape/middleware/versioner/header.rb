@@ -57,19 +57,35 @@ module Grape
           @media_type_for_accept = MediaTypeForAcceptCache[[vendor, available_media_types]]
         end
 
+        # Base#call copies the middleware per request so #before can keep the
+        # env and the Accept header it scrubs in ivars. A request whose Accept
+        # header the table answers (see MediaTypeForAcceptCache) needs neither
+        # unless the API is strict, whose checks read the header itself: its
+        # media type is recorded and the app called from the one instance the
+        # stack built. Any other request goes through #before.
+        def call(env)
+          media_type = @media_type_for_accept[env['HTTP_ACCEPT']] if vendor && !strict
+          return super unless media_type
+
+          record_media_type(env, media_type)
+          app.call(env).to_a
+        end
+
         def before
-          match_best_quality_media_type! do |media_type|
-            env.update(
-              Grape::Env::API_TYPE => media_type.type,
-              Grape::Env::API_SUBTYPE => media_type.subtype,
-              Grape::Env::API_VENDOR => media_type.vendor,
-              Grape::Env::API_VERSION => media_type.version,
-              Grape::Env::API_FORMAT => media_type.format
-            )
-          end
+          match_best_quality_media_type! { |media_type| record_media_type(env, media_type) }
         end
 
         private
+
+        def record_media_type(env, media_type)
+          env.update(
+            Grape::Env::API_TYPE => media_type.type,
+            Grape::Env::API_SUBTYPE => media_type.subtype,
+            Grape::Env::API_VENDOR => media_type.vendor,
+            Grape::Env::API_VERSION => media_type.version,
+            Grape::Env::API_FORMAT => media_type.format
+          )
+        end
 
         def match_best_quality_media_type!
           return unless vendor

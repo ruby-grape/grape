@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `Grape::Middleware::Versioner::Header` answers a common Accept header without `#before`
+
+`Middleware::Base#call` copied the header versioner for every request so that `#before` could keep the env and the Accept header it scrubs in instance variables. When the API is not strict and the Accept header is one the versioner worked out when it was built (a media type it declares, `*/*` or none), it now records the media type and calls the app from the one instance the stack built ([#3017](https://github.com/ruby-grape/grape/pull/3017)). Any other request still goes through `#before`.
+
+A subclass that overrides `#before` is therefore not called for those requests. Override `#call` instead, and keep what a request needs in locals or in the env rather than in instance variables: the instance is shared by every request.
+
 #### `Grape::Middleware::Auth::Base#call` no longer goes through `#call!`
 
 `Middleware::Base#call` copied the auth middleware for every request so that `#call!` could keep the env in an instance variable, which only the strategy's block read, to find the endpoint that checks the credentials. The block now takes the endpoint from the request's env, and `#call` answers from the one instance the stack built ([#3018](https://github.com/ruby-grape/grape/pull/3018)). `#call!` still answers a request when called directly.
