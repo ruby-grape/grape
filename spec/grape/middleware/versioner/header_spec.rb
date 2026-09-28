@@ -482,5 +482,10 @@ describe Grape::Middleware::Versioner::Header do
       status, = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor+json')
       expect(status).to eq(200)
     end
+
+    it 'records no media type, even for a content type it declares' do
+      _, _, env = subject.call('HTTP_ACCEPT' => 'application/json')
+      expect(env.keys & [Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE, Grape::Env::API_VENDOR, Grape::Env::API_VERSION, Grape::Env::API_FORMAT]).to be_empty
+    end
   end
 end
