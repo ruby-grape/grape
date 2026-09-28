@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `Grape::Middleware::Error#call` no longer goes through `#call!`
+
+`Grape::Middleware::Error` is in every endpoint's stack, and `Middleware::Base#call` copied it for every request so that `#call!` could keep the env in an ivar, which only rendering an error reads. It now answers from the one instance the stack built, and copies itself only once there is an error to render ([#3016](https://github.com/ruby-grape/grape/pull/3016)). `#call!` still answers a request when called directly.
+
+A subclass that overrides `#call!` to wrap every request is therefore no longer called for one. Override `#call` instead, and keep what a request needs in locals or in the env rather than in instance variables: the instance is shared by every request.
+
 #### A blank element of an optional Array block is validated when others are not blank
 
 An optional Array param given a block used to pass over every empty element, even one sent with others ([#3014](https://github.com/ruby-grape/grape/pull/3014)). So `[{"sku":"A"}, {}]` passed `requires :sku` inside the block, and `[{"sku":"A"}, null]` or `[{"sku":"A"}, ""]` reached the endpoint, where `params[:variants].map { |variant| variant[:sku] }` raised. Such an element is now validated like any other:

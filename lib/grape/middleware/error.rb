@@ -3,7 +3,6 @@
 module Grape
   module Middleware
     class Error < Base
-      extend Forwardable
       include PrecomputedContentTypes
 
       Options = Data.define(
@@ -38,17 +37,18 @@ module Grape
         end
       end
 
-      def_delegators :config,
-                     :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
-                     :default_message, :default_status, :error_formatters, :format,
-                     :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
-                     :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
+      # Read off ivars rather than delegated into +config+: rendering an error
+      # asks for most of them, and each delegator cost a Forwardable frame plus
+      # a Data reader for a value that was fixed when the middleware was built.
+      attr_reader :all_rescue_handler, :base_only_rescue_handlers, :default_error_formatter,
+                  :default_message, :default_status, :error_formatters, :format,
+                  :grape_exceptions_rescue_handler, :internal_grape_exceptions_rescue_handler,
+                  :rescue_all, :rescue_grape_exceptions, :rescue_handlers, :rescue_options
 
       # +:backtrace+ / +:original_exception+ on the rescue options become
       # +#include_backtrace+ / +#include_original_exception+ on the middleware,
       # which is what the formatter call site reads.
-      def_delegator :rescue_options, :backtrace, :include_backtrace
-      def_delegator :rescue_options, :original_exception, :include_original_exception
+      attr_reader :include_backtrace, :include_original_exception
 
       # Emitted by {#render_failsafe_response} once even the framework's own message
       # could not be rendered. Deliberately built without a formatter, an i18n
@@ -57,24 +57,69 @@ module Grape
       FAILSAFE_MESSAGE = '500 Internal Server Error'
       FAILSAFE_CONTENT_TYPE = 'text/plain'
 
+      def initialize(app, **options)
+        super
+        @all_rescue_handler = config.all_rescue_handler
+        @base_only_rescue_handlers = config.base_only_rescue_handlers
+        @default_error_formatter = config.default_error_formatter
+        @default_message = config.default_message
+        @default_status = config.default_status
+        @error_formatters = config.error_formatters
+        @format = config.format
+        @grape_exceptions_rescue_handler = config.grape_exceptions_rescue_handler
+        @internal_grape_exceptions_rescue_handler = config.internal_grape_exceptions_rescue_handler
+        @rescue_all = config.rescue_all
+        @rescue_grape_exceptions = config.rescue_grape_exceptions
+        @rescue_handlers = config.rescue_handlers
+        @rescue_options = config.rescue_options
+        @include_backtrace = rescue_options.backtrace
+        @include_original_exception = rescue_options.original_exception
+      end
+
+      # Base#call copies the middleware for every request so that #call! can
+      # keep the env in an ivar, but only rendering an error reads it there. A
+      # request that goes through without one is answered by the one instance
+      # the stack built, and a copy is taken once there is an error to render.
+      def call(env)
+        respond(env).to_a
+      end
+
+      def call!(env)
+        @env = env
+        respond(env)
+      end
+
+      protected
+
+      # What #respond hands a thrown error or a raised exception to: a copy of
+      # the middleware, holding the request's env for the rendering below.
+      def render_thrown(env, error)
+        @env = env
+        error_response(error)
+      end
+
+      def render_raised(env, exception)
+        @env = env
+        run_rescue_handler(find_handler(exception.class), exception, env[Grape::Env::API_ENDPOINT])
+      end
+
+      private
+
       # Whether the app answered is recorded rather than returned from inside
       # the +catch+ block: a +return+ there leaves the method through Kernel#catch,
       # which unwinds like a throw and allocates for it, on every request that
       # did not fail.
-      def call!(env)
-        @env = env
+      def respond(env)
         answered = false
         response = catch(:error) do
-          app_response = @app.call(@env)
+          app_response = @app.call(env)
           answered = true
           app_response
         end
-        answered ? response : error_response(response)
+        answered ? response : dup.render_thrown(env, response)
       rescue Exception => e # rubocop:disable Lint/RescueException
-        run_rescue_handler(find_handler(e.class), e, @env[Grape::Env::API_ENDPOINT])
+        dup.render_raised(env, e)
       end
-
-      private
 
       # +headers+ is handed over as it is: Rack::Response copies it into a
       # Headers of its own on every supported Rack (Rack 2.2 through
@@ -101,7 +146,7 @@ module Grape
       # API set another — takes it from there, so this always has something
       # callable. The +throw :error, 406+ that used to stand in for a missing
       # formatter could not work anyway: nothing catches +:error+ around this
-      # call (+#call!+ has left its +catch+ by the time +error_response+ runs),
+      # call (+#respond+ has left its +catch+ by the time +error_response+ runs),
       # so it raised +UncaughtThrowError+ and the request answered with the
       # failsafe 500 rather than the 406 it named.
       def format_message(error)
@@ -147,7 +192,7 @@ module Grape
 
       # An error formatter that raises on its payload would take the exception
       # out through every middleware above Grape: rendering from a rescue
-      # handler runs in #call!'s rescue clause, which nothing covers. Grape has
+      # handler runs in #respond's rescue clause, which nothing covers. Grape has
       # committed to an error by now, so it answers with one that does not
       # depend on the payload.
       #
