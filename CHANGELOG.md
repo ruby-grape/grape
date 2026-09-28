@@ -79,6 +79,7 @@
 * [#3014](https://github.com/ruby-grape/grape/pull/3014): Validate a blank element of an optional Array block when other elements are not blank - [@ericproulx](https://github.com/ericproulx).
 * [#3015](https://github.com/ruby-grape/grape/pull/3015): Answer in the default format when a negotiated format cannot render the body, instead of 500 - [@ericproulx](https://github.com/ericproulx).
 * [#3016](https://github.com/ruby-grape/grape/pull/3016): Stop copying the error middleware on requests that do not fail - [@ericproulx](https://github.com/ericproulx).
+* [#3018](https://github.com/ruby-grape/grape/pull/3018): Stop copying the auth middleware per request - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

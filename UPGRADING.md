@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `Grape::Middleware::Auth::Base#call` no longer goes through `#call!`
+
+`Middleware::Base#call` copied the auth middleware for every request so that `#call!` could keep the env in an instance variable, which only the strategy's block read, to find the endpoint that checks the credentials. The block now takes the endpoint from the request's env, and `#call` answers from the one instance the stack built ([#3018](https://github.com/ruby-grape/grape/pull/3018)). `#call!` still answers a request when called directly.
+
+A subclass that overrides `#call!` is therefore no longer called for a request. Override `#call` instead, and keep what a request needs in locals or in the env rather than in instance variables: the instance is shared by every request. A strategy registered with `Grape::Middleware::Auth::Strategies.add` is a middleware of its own and is not affected.
+
 #### `Grape::Middleware::Error#call` no longer goes through `#call!`
 
 `Grape::Middleware::Error` is in every endpoint's stack, and `Middleware::Base#call` copied it for every request so that `#call!` could keep the env in an ivar, which only rendering an error reads. It now answers from the one instance the stack built, and copies itself only once there is an error to render ([#3016](https://github.com/ruby-grape/grape/pull/3016)). `#call!` still answers a request when called directly.
