@@ -73,6 +73,7 @@
 * [#3007](https://github.com/ruby-grape/grape/pull/3007): Reserve `blank?` and `present?` for outside input and check Grape's own values precisely - [@ericproulx](https://github.com/ericproulx).
 * [#3009](https://github.com/ruby-grape/grape/pull/3009): Fold `SingleAttributeIterator` and `MultipleAttributesIterator` into `AttributesIterator` - [@ericproulx](https://github.com/ericproulx).
 * [#3010](https://github.com/ruby-grape/grape/pull/3010): Reject `nil` for a required param with `values` in a nested scope, as the root scope does - [@ericproulx](https://github.com/ericproulx).
+* [#3011](https://github.com/ruby-grape/grape/pull/3011): Reject a number with a fractional part for an `Integer` param instead of truncating it - [@ericproulx](https://github.com/ericproulx).
 * [#3012](https://github.com/ruby-grape/grape/pull/3012): Route a mounted Rack app as an ANY route in the order it was mounted - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
