@@ -3,6 +3,30 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A blank element of an optional Array block is validated when others are not blank
+
+An optional Array param given a block used to pass over every empty element, even one sent with others ([#3014](https://github.com/ruby-grape/grape/pull/3014)). So `[{"sku":"A"}, {}]` passed `requires :sku` inside the block, and `[{"sku":"A"}, null]` or `[{"sku":"A"}, ""]` reached the endpoint, where `params[:variants].map { |variant| variant[:sku] }` raised. Such an element is now validated like any other:
+
+```ruby
+params do
+  optional :variants, type: Array do
+    requires :sku
+  end
+end
+
+# {"variants": [{"sku": "A"}, {}]}
+# Before: 201, the second variant has no sku
+# After:  400, variants[1][sku] is missing
+
+# {"variants": [{"sku": "A"}, null]}
+# Before: 201, the endpoint gets nil
+# After:  400, variants[1] is invalid, variants[1][sku] is missing
+```
+
+A blank element that is not a Hash is also rejected in a required Array param whose block declares only optional params: `{"tags": [" ", {"label": "y"}]}` against `requires :tags, type: Array do optional :label end` now answers `tags[0] is invalid`.
+
+An Array whose elements are all blank is still passed over, as the whole param is when it is left out, and so is an optional Array scope left out of an element of an Array further up. To keep accepting placeholder elements, leave them out on the client, or declare the param without a block (`optional :variants, type: Array`) and check its elements in the endpoint.
+
 #### A header version holding a hyphen is read whole
 
 With `version ..., using: :header`, a version holding a hyphen, such as a date (`2024-06-20`) or `2.0-beta`, is now read whole ([#3013](https://github.com/ruby-grape/grape/pull/3013)). The Accept header was split at the version's last hyphen, so the request was routed to the right version but reported the wrong one:
@@ -166,7 +190,7 @@ Grape no longer supports Ruby 3.3.0; 3.3.1 is now the minimum (`required_ruby_ve
 
 #### An Array param given a block rejects elements that are not a Hash
 
-The block of `requires :items, type: Array do ... end` declares the keys of each element, and an element that is not a Hash now answers `400` with `items[1] is invalid` ([#2957](https://github.com/ruby-grape/grape/pull/2957)). It used to fail only where the block required a key of it, so a block whose params are all optional let a String, a number or a nested Array through to the endpoint, and an Array nested one level too deep in a nested Array scope passed validation and then made `declared` raise. A blank element — `nil`, `''`, `false`, `[]`, `{}` — is still passed over.
+The block of `requires :items, type: Array do ... end` declares the keys of each element, and an element that is not a Hash now answers `400` with `items[1] is invalid` ([#2957](https://github.com/ruby-grape/grape/pull/2957)). It used to fail only where the block required a key of it, so a block whose params are all optional let a String, a number or a nested Array through to the endpoint, and an Array nested one level too deep in a nested Array scope passed validation and then made `declared` raise. An Array whose elements are all blank — `nil`, `''`, `false`, `[]`, `{}` — is still passed over; a blank element sent with others is not (see above).
 
 Where a block does require a key, the element's own error now comes first:
 

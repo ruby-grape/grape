@@ -231,8 +231,9 @@ describe Grape::Validations do
       end
     end
 
-    # An optional array scope passes over an empty element, however deep it
-    # is nested -- here past the one-level shortcut.
+    # An optional array scope passes over an Array whose elements are all
+    # empty, however deep it is nested -- here past the one-level shortcut --
+    # and validates an empty element sent with others.
     context 'optional array nested in an array' do
       before do
         subject.params do
@@ -245,9 +246,21 @@ describe Grape::Validations do
         subject.post('/') { 'ok' }
       end
 
-      it 'passes over an empty element' do
-        post '/', { items: [{ subs: [{}, { x: 1 }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+      it 'passes over an Array whose elements are all empty' do
+        post '/', { items: [{ subs: [{}, {}] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
         expect(last_response.status).to eq(201)
+      end
+
+      it 'validates an empty element sent with others' do
+        post '/', { items: [{ subs: [{}, { x: 1 }] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[0][subs][0][x] is missing')
+      end
+
+      it 'rejects a blank element that is not a Hash sent with others' do
+        post '/', { items: [{ subs: [{ x: 1 }, nil] }] }.to_json, 'CONTENT_TYPE' => 'application/json'
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to eq('items[0][subs][1] is invalid, items[0][subs][1][x] is missing')
       end
 
       it 'still validates an element that is not empty' do
@@ -946,7 +959,7 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items[0][key] is missing')
       end
 
-      it 'skips the elements that are empty' do
+      it 'validates the elements that are empty when others are not' do
         subject.params do
           optional :items, type: Array do
             requires :key
@@ -956,7 +969,22 @@ describe Grape::Validations do
 
         post_with_json '/optional_group', items: [{}, { not_key: 'foo' }]
         expect(last_response.status).to eq(400)
-        expect(last_response.body).to eq('items[1][key] is missing')
+        expect(last_response.body).to eq('items[0][key] is missing, items[1][key] is missing')
+      end
+
+      it 'rejects the blank elements that are not a Hash when others are not blank' do
+        subject.params do
+          optional :items, type: Array do
+            requires :key
+          end
+        end
+        subject.post('/optional_group') { params[:items].map { |item| item[:key] }.join(',') }
+
+        [[{ key: 'a' }, nil], [{ key: 'a' }, ''], [{ key: 'a' }, []]].each do |items|
+          post_with_json('/optional_group', items:)
+          expect(last_response.status).to eq(400)
+          expect(last_response.body).to start_with('items[1] is invalid, items[1][key] is missing')
+        end
       end
 
       it 'rejects an element that is not a Hash when every param of the group is optional' do

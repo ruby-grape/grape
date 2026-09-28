@@ -105,8 +105,8 @@ module Grape
           # there may be more than one error per field
           array_errors = nil
 
-          @iterator.each(params) do |val|
-            next if !scope.required? && empty_element?(val)
+          @iterator.each(params) do |val, element|
+            next if passed_over?(val, element)
             next unless scope.meets_dependency?(val, params)
 
             @attrs.each do |attr_name|
@@ -161,21 +161,24 @@ module Grape
         # request's Array as it came in, with no nesting for the iterator to
         # descend into. It depends on no other param and every scope above it
         # is always validated, so the iterator's per-element checks come down
-        # to the index it records for the error names and, for an optional
-        # scope, passing over an empty element. An element that is not a Hash
-        # goes through the same +hash_like?+ test as on the iterator path, and
-        # the members of a scope that did not get an Array are left alone, as
-        # they are there: the scope's own type check reports it.
+        # to the index it records for the error names and passing over the
+        # placeholder of an optional scope that was left out. An optional
+        # scope whose elements are all empty is passed over too, as the
+        # iterator does; otherwise an empty element was sent, and is validated
+        # like any other. An element that is not a Hash goes through the same
+        # +hash_like?+ test as on the iterator path, and the members of a scope
+        # that did not get an Array are left alone, as they are there: the
+        # scope's own type check reports it.
         def validate_elements!(elements)
           return unless elements.is_a?(Array)
+          return if !scope.required? && elements.all? { |element| empty_element?(element) }
 
           tracker = ParamScopeTracker.current
-          optional = !scope.required?
           array_errors = nil
 
           elements.each_with_index do |element, index|
             tracker&.store_index(scope, index)
-            next if optional && empty_element?(element)
+            next if Grape::DSL::Parameters::EmptyOptionalValue.equal?(element)
 
             @attrs.each do |attr_name|
               validate_param!(attr_name, element) if required? || (hash_like?(element) && element.key?(attr_name))
@@ -187,11 +190,18 @@ module Grape
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
         end
 
-        # What an optional scope passes over: an element given empty, or the
-        # placeholder +map_params+ puts where an optional scope's params were
-        # not given at all. The iterator drops that placeholder itself;
-        # #validate_elements! meets it when a scope above was handed an Array
-        # instead of a Hash.
+        # Whether #validate! leaves +val+ alone: in an optional scope, an empty
+        # value that is not an element the request sent (see AttributesIterator).
+        def passed_over?(val, element)
+          !scope.required? && !element && empty_element?(val)
+        end
+
+        # What an optional scope passes over: its params given empty in an
+        # element of an Array further up, or the placeholder +map_params+ puts
+        # where they were not given at all. The iterator drops that placeholder
+        # itself; #validate_elements! meets it when a scope above was handed an
+        # Array instead of a Hash. An empty element of the scope's own Array is
+        # passed over only when every element of that Array is empty.
         def empty_element?(element)
           return true if Grape::DSL::Parameters::EmptyOptionalValue.equal?(element)
 
