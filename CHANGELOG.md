@@ -75,6 +75,7 @@
 * [#3010](https://github.com/ruby-grape/grape/pull/3010): Reject `nil` for a required param with `values` in a nested scope, as the root scope does - [@ericproulx](https://github.com/ericproulx).
 * [#3011](https://github.com/ruby-grape/grape/pull/3011): Reject a number with a fractional part for an `Integer` param instead of truncating it - [@ericproulx](https://github.com/ericproulx).
 * [#3012](https://github.com/ruby-grape/grape/pull/3012): Route a mounted Rack app as an ANY route in the order it was mounted - [@ericproulx](https://github.com/ericproulx).
+* [#3013](https://github.com/ruby-grape/grape/pull/3013): Read a header version holding a hyphen, such as `2024-06-20`, whole - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

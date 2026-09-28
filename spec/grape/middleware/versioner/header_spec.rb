@@ -341,6 +341,56 @@ describe Grape::Middleware::Versioner::Header do
     end
   end
 
+  context 'when a version holds a hyphen' do
+    before do
+      @options[:versions] = %w[2024-01-01 2.0-beta]
+    end
+
+    %w[2024-01-01 2.0-beta].each do |version|
+      it "sets the vendor and version for #{version}" do
+        status, _, env = subject.call('HTTP_ACCEPT' => "application/vnd.vendor-#{version}+json")
+        expect(status).to eq(200)
+        expect(env.values_at(Grape::Env::API_VENDOR, Grape::Env::API_VERSION, Grape::Env::API_FORMAT)).to eq(['vendor', version, 'json'])
+      end
+    end
+
+    it 'sets the version without a format' do
+      _, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-2024-01-01')
+      expect(env[Grape::Env::API_VERSION]).to eq('2024-01-01')
+    end
+
+    it 'sets the version out of a q-value list' do
+      _, _, env = subject.call('HTTP_ACCEPT' => 'text/html;q=0.1, application/vnd.vendor-2024-01-01+json')
+      expect(env[Grape::Env::API_VERSION]).to eq('2024-01-01')
+    end
+
+    it 'fails another version as a version not found' do
+      expect { subject.call('HTTP_ACCEPT' => 'application/vnd.vendor-2023-01-01+json') }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidVersionHeader)
+        expect(exception.message).to include('API version not found')
+      end
+    end
+
+    it 'fails another vendor as a vendor not found' do
+      expect { subject.call('HTTP_ACCEPT' => 'application/vnd.other-2024-01-01+json') }.to raise_exception do |exception|
+        expect(exception).to be_a(Grape::Exceptions::InvalidAcceptHeader)
+        expect(exception.message).to include('API vendor not found')
+      end
+    end
+  end
+
+  context 'when the vendor holds a hyphen' do
+    before do
+      @options[:versions] = ['v1']
+      @options[:version_options] = Grape::DSL::VersionOptions.new(using: :header, vendor: 'my-vendor')
+    end
+
+    it 'sets the vendor and version' do
+      _, _, env = subject.call('HTTP_ACCEPT' => 'application/vnd.my-vendor-v1+json')
+      expect(env.values_at(Grape::Env::API_VENDOR, Grape::Env::API_VERSION)).to eq(%w[my-vendor v1])
+    end
+  end
+
   context 'when there are multiple versions with complex vendor specified with rescue_from :all' do
     subject do
       Class.new(Grape::API) do

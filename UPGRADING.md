@@ -3,6 +3,23 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A header version holding a hyphen is read whole
+
+With `version ..., using: :header`, a version holding a hyphen, such as a date (`2024-06-20`) or `2.0-beta`, is now read whole ([#3013](https://github.com/ruby-grape/grape/pull/3013)). The Accept header was split at the version's last hyphen, so the request was routed to the right version but reported the wrong one:
+
+```
+# version '2024-06-20', using: :header, vendor: 'acme'
+# Accept: application/vnd.acme-2024-06-20+json
+# Before
+version            # => "20"
+env['api.vendor']  # => "acme-2024-06"
+# After
+version            # => "2024-06-20"
+env['api.vendor']  # => "acme"
+```
+
+An undeclared version of that shape now fails with `Grape::Exceptions::InvalidVersionHeader` (`API version not found.`), where it failed with `Grape::Exceptions::InvalidAcceptHeader` (`API vendor not found.`).
+
 #### An `Integer` param rejects a number with a fractional part
 
 A param of `type: Integer` now rejects a number with a fractional part instead of truncating it ([#3011](https://github.com/ruby-grape/grape/pull/3011)). A JSON body's `2.99` became `2` and `-0.5` became `0`, while the same value sent as a string, `"2.99"` in a query, was already rejected. The same applies to `Array[Integer]` and `Set[Integer]` elements. A whole number such as `1.0` still becomes `1`.
