@@ -136,7 +136,53 @@ describe Grape::Middleware::Error do
     end
   end
 
-  # Rendering happens inside #call!'s rescue clause, so it is not covered by
+  # One instance of the middleware answers every request, so an error has to
+  # be rendered from the env of the request that raised it, even when another
+  # request went through while its rescue handler ran.
+  context 'when a rescue handler runs another request through it' do
+    subject(:middleware) { described_class.new(raising_app, rescue_handlers: { StandardError => handler }) }
+
+    let(:endpoint) { Spec::Support::EndpointFaker::FakerAPI.endpoints.first }
+    let(:raising_app) { ->(env) { raise StandardError, env[Rack::PATH_INFO] } }
+    let(:nested) { {} }
+    let(:handler) do
+      spec = self
+      lambda do |e|
+        spec.nested[:response] = spec.middleware.call(spec.request_env('/nested', format: :json)) if e.message == '/outer'
+        Grape::Exceptions::ErrorResponse.new(status: 400, message: "failed #{e.message}")
+      end
+    end
+
+    def request_env(path, format: nil)
+      env = Rack::MockRequest.env_for(path)
+      env[Grape::Env::API_ENDPOINT] = endpoint
+      env[Grape::Env::API_FORMAT] = format if format
+      env
+    end
+
+    it 'renders each error in the format of its own request' do
+      _, headers, body = middleware.call(request_env('/outer'))
+      _, nested_headers, nested_body = nested[:response]
+
+      expect([headers[Rack::CONTENT_TYPE], body.to_a]).to eq(['text/plain', ['failed /outer']])
+      expect([nested_headers[Rack::CONTENT_TYPE], nested_body.to_a]).to eq(['application/json', ['{"error":"failed /nested"}']])
+    end
+  end
+
+  describe '#call!' do
+    subject(:middleware) { described_class.new(err_app, **options) }
+
+    let(:env) { Rack::MockRequest.env_for('/').merge(Grape::Env::API_ENDPOINT => Spec::Support::EndpointFaker::FakerAPI.endpoints.first) }
+
+    it 'answers the request as #call does' do
+      err_app.error = { status: 410, message: 'Awesome stuff.' }
+      status, _, body = middleware.call!(env).to_a
+
+      expect([status, body.to_a]).to eq([410, ['Awesome stuff.']])
+    end
+  end
+
+  # Rendering happens inside #respond's rescue clause, so it is not covered by
   # that rescue: without a failsafe an error formatter that raises takes the
   # exception straight out through every middleware above.
   describe 'when the error response cannot be rendered' do
