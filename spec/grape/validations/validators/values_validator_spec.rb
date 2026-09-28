@@ -194,9 +194,84 @@ describe Grape::Validations::Validators::ValuesValidator do
       end
     end
 
-    it 'allows nil value for a required param in child scope' do
+    it 'does not validate a required param in child scope when its optional parent is absent' do
       get('/optional_with_required_values')
       expect(last_response.status).to eq 200
+    end
+  end
+
+  describe 'nil value for a required param in a nested scope' do
+    let(:app) do
+      Class.new(Grape::API) do
+        default_format :json
+
+        params do
+          requires :lines, type: Array do
+            requires :qty, type: Integer, values: 1..99
+          end
+        end
+        post('/lines') { { total: params[:lines].sum { |line| line[:qty] } } }
+
+        params do
+          requires :address, type: Hash do
+            requires :country, type: String, values: %w[US CA]
+          end
+        end
+        post('/address') { { country: params[:address][:country].downcase } }
+
+        params do
+          requires :kind, type: String
+          given kind: ->(kind) { kind == 'physical' } do
+            requires :size, type: String, values: %w[S M L]
+          end
+        end
+        post('/given') { { size: params[:size] } }
+      end
+    end
+
+    def post_json(path, body)
+      post path, body.to_json, 'CONTENT_TYPE' => 'application/json'
+    end
+
+    it 'does not allow nil in an array scope' do
+      post_json '/lines', lines: [{ qty: 5 }, { qty: nil }]
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'lines[1][qty] does not have a valid value' }.to_json)
+    end
+
+    it 'does not allow a value that coerces to nil in an array scope' do
+      post_json '/lines', lines: [{ qty: '' }]
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'lines[0][qty] does not have a valid value' }.to_json)
+    end
+
+    it 'does not allow nil in a hash scope' do
+      post_json '/address', address: { country: nil }
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'address[country] does not have a valid value' }.to_json)
+    end
+
+    it 'reports a missing param the way the root scope does' do
+      post_json '/address', address: {}
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'address[country] is missing, address[country] does not have a valid value' }.to_json)
+    end
+
+    it 'does not allow nil in a given block whose dependency is met' do
+      post_json '/given', kind: 'physical', size: nil
+      expect(last_response.status).to eq 400
+      expect(last_response.body).to eq({ error: 'size does not have a valid value' }.to_json)
+    end
+
+    it 'does not validate a given block whose dependency is not met' do
+      post_json '/given', kind: 'digital'
+      expect(last_response.status).to eq 201
+    end
+
+    it 'accepts a valid value' do
+      post_json '/lines', lines: [{ qty: 5 }, { qty: 7 }]
+      expect(last_response.status).to eq 201
+      expect(last_response.body).to eq({ total: 12 }.to_json)
     end
   end
 
