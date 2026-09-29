@@ -11,6 +11,6 @@ Dir[File.expand_path('api/*.rb', __dir__)].each { |file| require file }
 require_relative 'app/api'
 require_relative 'app/acme_app'
 
-Acme::API.compile!
+Acme::API.eager_load!
 
 run Acme::App.instance

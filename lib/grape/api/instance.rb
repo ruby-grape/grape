@@ -66,6 +66,17 @@ module Grape
           @instance || LOCK.synchronize { @instance ||= new }
         end
 
+        # Compiles the API and loads I18n's translations, which its first
+        # request and its first error response would otherwise do. Meant for
+        # boot, once the application's locale files are on +I18n.load_path+.
+        #
+        # @example
+        #   Twitter::API.eager_load!
+        def eager_load!
+          load_i18n_translations
+          compile!
+        end
+
         # see Grape::Router#recognize_path
         def recognize_path(path)
           compile!.router.recognize_path(path)
@@ -96,6 +107,18 @@ module Grape
         def inherited(subclass)
           super
           subclass.reset!
+        end
+
+        # A Simple backend is loaded the way its first lookup loads it: its
+        # +eager_load!+ would also make every later +I18n.reload!+ load at
+        # once, and raises on a LazyLoadable backend set to +lazy_load+. Any
+        # other backend is eager loaded if it can be, or left to its first
+        # lookup.
+        def load_i18n_translations
+          backend = I18n.backend
+          return backend.translations(do_init: true) if backend.is_a?(I18n::Backend::Simple::Implementation)
+
+          backend.eager_load! if backend.respond_to?(:eager_load!)
         end
       end
 

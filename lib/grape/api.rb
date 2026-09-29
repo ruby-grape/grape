@@ -12,7 +12,7 @@ module Grape
     # protected methods too, so it has to be named here for {.override_all_methods!}
     # to leave it alone. +base+ is read on the API class itself whenever a mount
     # is refreshed, so recording it would refresh every mount below it again.
-    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! inherit_settings recognize_path reset! routes top_level_setting].freeze
+    NON_OVERRIDABLE = %i[base base= base_instance? call change! configuration compile! eager_load! inherit_settings recognize_path reset! routes top_level_setting].freeze
 
     # DSL methods that answer a setting when called with nothing to set -- no
     # argument, keyword or block -- and change none. Such a call is a read, and
@@ -46,7 +46,7 @@ module Grape
       # +inherit_settings+ is left out: it is protected on the base instance, so
       # a delegator would raise NoMethodError just as the missing one does.
       # +call+ is written out below.
-      def_delegators :base_instance, :new, :configuration, :change!, :compile!, :recognize_path, :routes,
+      def_delegators :base_instance, :new, :configuration, :change!, :compile!, :eager_load!, :recognize_path, :routes,
                      :base, :base=, :base_instance?, :reset!, :top_level_setting
 
       # The interface point between Rack and Grape; it accepts a request from
