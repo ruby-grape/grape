@@ -33,8 +33,8 @@ module Grape
         # a declared media type spelled as declared (+application/vnd.acme-v1+json+)
         # or one of COMMON_ACCEPT_HEADERS -- so their answers are worked out
         # once instead of re-running Rack's q-value match and a parse on every
-        # request. Any other header (a q-value list, another casing) is not a
-        # key and takes the full path, so a client cannot grow a table.
+        # request. Any other header (a q-value list, another casing) is learned on
+        # first sight, within AcceptTable's bounds, so a client cannot grow a table.
         #
         # Shared per vendor and list: every endpoint builds its own versioner,
         # and all of an API's declare the same media types. The list in the
@@ -45,9 +45,44 @@ module Grape
             super
             @cache = Hash.new do |h, (vendor, available_media_types)|
               declared = available_media_types.map(&:-@).freeze
-              h[[vendor, declared].freeze] = [*declared, *COMMON_ACCEPT_HEADERS].to_h do |accept|
-                [accept, Grape::Util::MediaType.best_quality(accept, declared, vendor:)]
-              end.compact.freeze
+              h[[vendor, declared].freeze] = AcceptTable.new(vendor, declared)
+            end
+          end
+        end
+
+        # The answers for one vendor and list of media types. The declared media
+        # types and COMMON_ACCEPT_HEADERS are worked out when the table is built.
+        # Any other valid header -- a browser sends a q-value list -- is worked
+        # out on its first request and kept, up to MAX_LEARNED of them of at most
+        # MAX_KEY_BYTES each: real clients send a handful of distinct headers,
+        # and a client sending a new one every time cannot grow the table past
+        # that; it takes the full path, as it did before.
+        class AcceptTable
+          MAX_LEARNED = 32
+          MAX_KEY_BYTES = 512
+
+          def initialize(vendor, declared)
+            @vendor = vendor
+            @declared = declared
+            @answers = [*declared, *COMMON_ACCEPT_HEADERS].to_h do |accept|
+              [accept, Grape::Util::MediaType.best_quality(accept, declared, vendor:)]
+            end.compact.freeze
+            @learned = Concurrent::Map.new
+          end
+
+          def [](accept)
+            @answers[accept] || learn(accept)
+          end
+
+          private
+
+          def learn(accept)
+            return unless accept.is_a?(String) && accept.bytesize <= MAX_KEY_BYTES && accept.valid_encoding?
+
+            @learned.fetch(accept) do
+              media_type = Grape::Util::MediaType.best_quality(accept, @declared, vendor: @vendor)
+              @learned.put_if_absent(-accept, media_type) if media_type && @learned.size < MAX_LEARNED
+              media_type
             end
           end
         end
