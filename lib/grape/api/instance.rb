@@ -103,6 +103,7 @@ module Grape
       # Builds the routes from the defined endpoints, effectively compiling
       # this API into a usable form.
       def initialize
+        eager_load_i18n if Grape.config[:eager_load_i18n]
         @router = Router.new
         add_head_not_allowed_methods_and_options_methods
         self.class.endpoints.each do |endpoint|
@@ -155,6 +156,15 @@ module Grape
       reset!
 
       private
+
+      # I18n reads its files on the first lookup, which would be the first
+      # error a process answers. A backend that does not inherit
+      # I18n::Backend::Base, or one from an older i18n, may have no
+      # +eager_load!+, and is left to load on that first lookup.
+      def eager_load_i18n
+        backend = I18n.backend
+        backend.eager_load! if backend.respond_to?(:eager_load!)
+      end
 
       # For every resource add a 'OPTIONS' route that returns an HTTP 204 response
       # with a list of HTTP methods that can be called. Also add a route that

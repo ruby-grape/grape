@@ -7,6 +7,66 @@ describe Grape::API do
 
   let(:app) { subject }
 
+  describe 'loading translations' do
+    around do |example|
+      backend = I18n.backend
+      I18n.backend = I18n::Backend::Simple.new
+      example.run
+    ensure
+      I18n.backend = backend
+    end
+
+    it 'leaves them to the first lookup by default' do
+      subject.get('/x') { 'x' }
+      subject.compile!
+
+      expect(I18n.backend).not_to be_initialized
+    end
+
+    context 'when Grape.config.eager_load_i18n is on' do
+      around do |example|
+        Grape.config.eager_load_i18n = true
+        example.run
+      ensure
+        Grape.config.eager_load_i18n = false
+      end
+
+      it 'reads them when the API is compiled rather than on the first error' do
+        subject.get('/x') { 'x' }
+        expect(I18n.backend).not_to be_initialized
+
+        subject.compile!
+
+        expect(I18n.backend).to be_initialized
+      end
+
+      it 'still answers the first error in the message it is translated to' do
+        subject.params { requires :id }
+        subject.get('/x') { 'x' }
+
+        get '/x'
+
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq 'id is missing'
+      end
+
+      it 'answers through a backend that cannot load eagerly' do
+        simple = I18n.backend
+        I18n.backend = Class.new do
+          define_method(:translate) { |*args, **options| simple.translate(*args, **options) }
+          define_method(:available_locales) { simple.available_locales }
+        end.new
+        subject.params { requires :id }
+        subject.get('/x') { 'x' }
+
+        get '/x'
+
+        expect(last_response.status).to eq 400
+        expect(last_response.body).to eq 'id is missing'
+      end
+    end
+  end
+
   describe 'thread-safe (re)compilation' do
     # Regression: building the HEAD/OPTIONS/405 helper routes used to delete the
     # root-prefix/versioning keys from the shared class-level settings and
