@@ -133,6 +133,8 @@ Twitter::API.compile!
 
 This can be added to your `config.ru` (if using rackup), `application.rb` (if using rails), or any file that loads your server.
 
+Outside Rails, compiling can also load I18n's translations. See [I18n](#i18n).
+
 ### Rack
 
 The above sample creates a Rack application that can be run from a rackup `config.ru` file with `rackup`:
@@ -582,6 +584,7 @@ Currently the configurable settings are:
 * `param_builder`: Sets the [Parameter Builder](#parameters), defaults to `:hash_with_indifferent_access`.
 * `lint`: Checks every response against Rack's specification, defaults to `false`. See [Linting](#linting).
 * `warn_on_helper_overrides`: Warns when a helper method masks a `Grape::Endpoint` instance method, defaults to `false`.
+* `eager_load_i18n`: Loads I18n's translations when an API is compiled rather than on the first lookup, usually the first error response, defaults to `false`. Rails already does this when `config.eager_load` is on. See [I18n](#i18n).
 * `raise_rendering_errors`: Lets an error response that cannot be rendered propagate out of the middleware stack instead of being answered with a failsafe `500`, defaults to `false`. See [When the error response itself cannot be rendered](#when-the-error-response-itself-cannot-be-rendered).
 
 To change a setting value make sure that at some point during load time the following code runs
@@ -1998,6 +2001,18 @@ end
 Grape supports I18n for parameter-related error messages, but will fallback to English if translations for the default locale have not been provided. See [en.yml](lib/grape/locale/en.yml) for message keys.
 
 In case your app enforces available locales only and :en is not included in your available locales, Grape cannot fall back to English and will return the translation key for the error message. To avoid this behaviour, either provide a translation for your default locale or add :en to your available locales.
+
+I18n reads its translations on the first lookup, which is usually the first error response a process answers. In Rails, the application loads them at boot whenever `config.eager_load` is on, as it is in production, so there is nothing to set. Elsewhere, turn on `eager_load_i18n` to have compiling an API load them, and compile at boot:
+
+```ruby
+Grape.configure do |config|
+  config.eager_load_i18n = true
+end
+
+Twitter::API.compile!
+```
+
+Call `compile!` after your own locale files are on `I18n.load_path`: a file appended later (`I18n.load_path << path`) is read only after `I18n.reload!`, while assigning the path (`I18n.load_path += [path]`) reloads the translations at once.
 
 Custom validators that inherit from `Grape::Validations::Validators::Base` have access to a `translate` helper (see `Grape::Util::Translation`) and should use it instead of calling `I18n` directly. It applies the same `:en` fallback as built-in validators, defaults `scope` to `'grape.errors.messages'`, and handles interpolation without needing `format`:
 
