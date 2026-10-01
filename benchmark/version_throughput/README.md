@@ -37,7 +37,7 @@ GRAPE_VERSIONS="3.3.5,master" ruby benchmark/version_throughput/run.rb
 GRAPE_SCENARIOS="static,parameterized" ruby benchmark/version_throughput/run.rb
 
 # different Ruby (e.g. one built with YJIT/ZJIT)
-RBENV_VERSION=4.0.6 ruby benchmark/version_throughput/run.rb
+RBENV_VERSION=4.0.7 ruby benchmark/version_throughput/run.rb
 
 # one shape against the working tree, without the orchestrator
 bundle exec ruby benchmark/version_throughput/bench.rb many_parameterized
@@ -73,7 +73,7 @@ A JIT's columns are only emitted if the running Ruby can actually run it: `run.r
 
 ## Why ZJIT trails YJIT
 
-ZJIT comes out well ahead of the interpreter but well behind YJIT — roughly +20% against +86% on `master`, on the `static` shape. That gap is ZJIT's codegen, not the harness. Measured on Ruby 4.0.6; re-check before assuming it still holds, because the answer is expected to move as ZJIT matures.
+ZJIT comes out well ahead of the interpreter but well behind YJIT — roughly +20% against +86% on `master`, on the `static` shape. That gap is ZJIT's codegen, not the harness. Measured on Ruby 4.0.7; re-check before assuming it still holds, because the answer is expected to move as ZJIT matures.
 
 What was ruled out:
 
