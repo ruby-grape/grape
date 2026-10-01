@@ -29,7 +29,7 @@
 # benched on this run or an earlier one.
 #
 # To run a JIT-enabled Ruby that isn't the project default:
-#   RBENV_VERSION=4.0.6 ruby benchmark/version_throughput/run.rb
+#   RBENV_VERSION=4.0.7 ruby benchmark/version_throughput/run.rb
 
 require 'fileutils'
 require 'json'
