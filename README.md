@@ -131,7 +131,7 @@ By default Grape will compile the routes on the first request, but it is possibl
 Twitter::API.compile!
 ```
 
-This can be added to your `config.ru` (if using rackup), `application.rb` (if using rails), or any file that loads your server.
+This can be added to your `config.ru` (if using rackup) or any file that loads your server. In Rails, the APIs mounted in the routes are compiled for you, see [Rails](#rails).
 
 ### Rack
 
@@ -197,6 +197,15 @@ Modify `config/routes`:
 ```ruby
 mount Twitter::API => '/'
 ```
+
+Whenever `config.eager_load` is on, as it is in production, Rails compiles the APIs mounted in its routes at boot, including those an engine's routes mount. An API that reaches Rails another way, such as inside a `Rack::Builder`, is compiled on its first request. To compile it at boot, call `compile!` once the application has initialized, since the API cannot be autoloaded yet in `config/application.rb` or an initializer:
+
+```ruby
+config.after_initialize do
+  Twitter::API.compile!
+end
+```
+
 #### Zeitwerk
 Rails's default autoloader is `Zeitwerk`. By default, it inflects `api` as `Api` instead of `API`. To make our example work, you need to uncomment the lines at the bottom of `config/initializers/inflections.rb`, and add `API` as an acronym:
 

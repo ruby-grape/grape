@@ -3,6 +3,12 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### APIs mounted in a Rails application's routes are compiled at boot
+
+When `config.eager_load` is on, as it is in production, Grape's Railtie now compiles the APIs mounted in the application's routes, and in the routes of the engines it mounts, as soon as the routes are loaded, rather than leaving it to the first request each process answers ([#3022](https://github.com/ruby-grape/grape/pull/3022)). A `compile!` call the application already makes can stay: an API is compiled once.
+
+Compiling builds each endpoint's middleware stack, so a middleware's `initialize` now runs at boot, and before the workers fork under a server that preloads the application, such as Puma with `preload_app!`. A middleware that opens a connection or starts a thread in `initialize` should do it on its first request instead. An API that fails to compile now fails the boot rather than its first request.
+
 #### `Grape::Middleware::Versioner::Header` answers a common Accept header without `#before`
 
 `Middleware::Base#call` copied the header versioner for every request so that `#before` could keep the env and the Accept header it scrubs in instance variables. When the API is not strict and the Accept header is one the versioner worked out when it was built (a media type it declares, `*/*` or none), it now records the media type and calls the app from the one instance the stack built ([#3017](https://github.com/ruby-grape/grape/pull/3017)). Any other request still goes through `#before`.
