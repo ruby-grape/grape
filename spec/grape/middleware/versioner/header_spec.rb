@@ -488,4 +488,44 @@ describe Grape::Middleware::Versioner::Header do
       expect(env.keys & [Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE, Grape::Env::API_VENDOR, Grape::Env::API_VERSION, Grape::Env::API_FORMAT]).to be_empty
     end
   end
+
+  context 'when a client sends an Accept header the table does not hold' do
+    let(:browser) { 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' }
+
+    it 'answers the same on every request' do
+      first = subject.call('HTTP_ACCEPT' => browser)[2]
+      second = subject.call('HTTP_ACCEPT' => browser.dup)[2]
+      expect(second.values_at(Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE, Grape::Env::API_FORMAT))
+        .to eq(first.values_at(Grape::Env::API_TYPE, Grape::Env::API_SUBTYPE, Grape::Env::API_FORMAT))
+    end
+
+    it 'still prefers the best q-value' do
+      accept = 'application/vnd.vendor+xml;q=0.5, application/vnd.vendor+json;q=0.9'
+      2.times do
+        _, _, env = subject.call('HTTP_ACCEPT' => accept)
+        expect(env[Grape::Env::API_SUBTYPE]).to eq('vnd.vendor+json')
+      end
+    end
+
+    it 'keeps failing a header that matches nothing' do
+      2.times do
+        expect { subject.call('HTTP_ACCEPT' => 'application/vnd.other-v1+json') }
+          .to raise_error(Grape::Exceptions::InvalidAcceptHeader)
+      end
+    end
+
+    it 'answers correctly past the number of headers it keeps' do
+      (Grape::Middleware::Versioner::Header::AcceptTable::MAX_LEARNED + 5).times do |i|
+        _, _, env = subject.call('HTTP_ACCEPT' => "application/vnd.vendor+json;q=0.#{i + 1}, */*;q=0.05")
+        expect(env[Grape::Env::API_SUBTYPE]).to eq('vnd.vendor+json')
+      end
+    end
+
+    it 'answers a header past the size it keeps as it does a short one' do
+      long = "application/vnd.vendor+json, #{'a/b, ' * 300}*/*"
+      short = 'application/vnd.vendor+json, */*'
+      expect(subject.call('HTTP_ACCEPT' => long)[2][Grape::Env::API_SUBTYPE])
+        .to eq(subject.call('HTTP_ACCEPT' => short)[2][Grape::Env::API_SUBTYPE])
+    end
+  end
 end
