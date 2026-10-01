@@ -81,6 +81,7 @@
 * [#3016](https://github.com/ruby-grape/grape/pull/3016): Stop copying the error middleware on requests that do not fail - [@ericproulx](https://github.com/ericproulx).
 * [#3017](https://github.com/ruby-grape/grape/pull/3017): Stop copying the header versioner per request for an Accept header it answers from its table - [@ericproulx](https://github.com/ericproulx).
 * [#3018](https://github.com/ruby-grape/grape/pull/3018): Stop copying the auth middleware per request - [@ericproulx](https://github.com/ericproulx).
+* [#3023](https://github.com/ruby-grape/grape/pull/3023): Raise from `error!` instead of throwing `:error`, so a transaction it leaves rolls back - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

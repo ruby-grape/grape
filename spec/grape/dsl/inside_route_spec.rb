@@ -37,33 +37,33 @@ describe Grape::DSL::InsideRoute do
   end
 
   describe '#error!' do
-    it 'throws :error' do
-      expect { subject.error! 'Not Found', 404 }.to throw_symbol(:error)
+    it 'raises a Grape::Exceptions::Halt carrying the response' do
+      expect { subject.error! 'Not Found', 404, 'X-Error' => 'detail' }.to raise_error(Grape::Exceptions::Halt) do |halt|
+        expect(halt.response).to have_attributes(status: 404, message: 'Not Found', headers: { 'X-Error' => 'detail' })
+      end
     end
 
-    describe 'thrown' do
-      before do
-        catch(:error) { subject.error! 'Not Found', 404 }
-      end
+    # async hands a StandardError raised in a task back to the task waiting on
+    # it, and stops its reactor on any other exception.
+    it 'raises a StandardError' do
+      expect { subject.error! 'Not Found', 404 }.to raise_error(StandardError)
+    end
 
-      it 'sets status' do
-        expect(subject.status).to eq 404
-      end
+    it 'sets status' do
+      expect { subject.error! 'Not Found', 404 }.to raise_error(Grape::Exceptions::Halt)
+      expect(subject.status).to eq 404
     end
 
     describe 'default_error_status' do
       before do
         subject.inheritable_setting.default_error_status = 500
-        catch(:error) { subject.error! 'Unknown' }
       end
 
       it 'sets status to default_error_status' do
+        expect { subject.error! 'Unknown' }.to raise_error(Grape::Exceptions::Halt)
         expect(subject.status).to eq 500
       end
     end
-
-    # self.status(status || settings[:default_error_status])
-    # throw :error, message: message, status: self.status, headers: headers
   end
 
   describe '#redirect' do

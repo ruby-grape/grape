@@ -2731,6 +2731,17 @@ You can set additional headers for the response. They will be merged with header
 error!('Something went wrong', 500, 'X-Error-Detail' => 'Invalid token.')
 ```
 
+`error!` raises a `Grape::Exceptions::Halt`, which Grape renders as the response without handing it to `rescue_from`. Since it is an exception, a database transaction it leaves is rolled back. It also reaches Grape from a fiber or thread whose result the route waits for, such as an `Async` task.
+
+```ruby
+Order.transaction do
+  order = Order.create!(declared(params))
+  error!('Out of stock', 409) unless order.product.in_stock? # the order is rolled back
+end
+```
+
+It is a `StandardError`, so a `rescue => e` around `error!` catches it as well. Rescue `Grape::Exceptions::Halt` first and re-raise it to let it through.
+
 You can present documented errors with a Grape entity using the [grape-entity](https://github.com/ruby-grape/grape-entity) gem.
 
 ```ruby
@@ -2878,7 +2889,7 @@ end
 
 The error format will match the request format. See "Content-Types" below.
 
-Custom error formatters for existing and additional types can be defined with a proc. The formatter receives a `Grape::Exceptions::ErrorResponse` value object as `error:` plus three context kwargs — `env:`, `include_backtrace:`, `include_original_exception:`. Pull just the keys you need with `**` to ignore the rest:
+Custom error formatters for existing and additional types can be defined with a proc. The formatter receives a frozen `Grape::Exceptions::ErrorResponse` as `error:` (read its `status`, `message`, `headers`, `backtrace` and `original_exception`), plus three context kwargs — `env:`, `include_backtrace:`, `include_original_exception:`. Pull just the keys you need with `**` to ignore the rest:
 
 ```ruby
 class Twitter::API < Grape::API

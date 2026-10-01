@@ -27,6 +27,10 @@ describe Grape::Exceptions::ErrorResponse do
       expect(payload.backtrace).to be_nil
       expect(payload.original_exception).to be_nil
     end
+
+    it 'is frozen' do
+      expect(described_class.new(status: 422)).to be_frozen
+    end
   end
 
   describe '#to_s' do
@@ -35,29 +39,6 @@ describe Grape::Exceptions::ErrorResponse do
       payload = described_class.new(status: 422, message: 'boom', headers:)
 
       expect(payload.to_s).to eq(%(#<Grape::Exceptions::ErrorResponse status=422 message="boom" headers=#{headers.inspect}>))
-    end
-  end
-
-  describe '#==' do
-    let(:exception) { StandardError.new('inner') }
-    let(:attrs) { { status: 422, message: 'boom', headers: { 'X-Foo' => 'bar' }, backtrace: ['line 1'], original_exception: exception } }
-    let(:payload) { described_class.new(**attrs) }
-    let(:twin) { described_class.new(**attrs) }
-
-    it 'is equal when every attribute matches' do
-      expect(payload).to eq(twin)
-    end
-
-    it 'is not equal when any attribute differs' do
-      expect(payload).not_to eq(described_class.new(**attrs, status: 500))
-    end
-
-    it 'is not equal to a non-ErrorResponse with the same shape' do
-      expect(described_class.new(status: 422)).not_to eq(Object.new)
-    end
-
-    it 'returns the same hash for equal instances' do
-      expect(payload.hash).to eq(twin.hash)
     end
   end
 

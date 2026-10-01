@@ -3,6 +3,32 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `error!` raises `Grape::Exceptions::Halt` instead of throwing `:error`
+
+`error!` used to `throw :error`, and a throw is not an exception. Active Record commits a transaction that a throw leaves, so `error!` inside `transaction` saved what the block had written while the client was told the request failed ([#2197](https://github.com/ruby-grape/grape/issues/2197)). A throw cannot leave the fiber or thread it was thrown in either, so `error!` inside an `Async` task answered 500 instead of its status.
+
+`error!` now raises `Grape::Exceptions::Halt` ([#3023](https://github.com/ruby-grape/grape/pull/3023)), a `StandardError` carrying the same response (`#response`, also `#status` and `#headers`). Grape renders it as it rendered the thrown error, without handing it to a `rescue_from` handler, `rescue_from :all` included.
+
+* A `rescue => e` or `rescue StandardError` around `error!` now catches it, whether in a route, a helper, a filter or a middleware added with `use`. Narrow the rescue, or let `Halt` through:
+
+  ```ruby
+  rescue Grape::Exceptions::Halt
+    raise
+  rescue StandardError => e
+    # ...
+  ```
+
+* Code that wraps `error!` in `catch(:error)`, a spec for instance, now gets the exception. Rescue `Grape::Exceptions::Halt` and read `#response`, the `Grape::Exceptions::ErrorResponse` that used to be thrown.
+* An `ActiveSupport::Notifications` subscriber to `endpoint_run.grape`, `endpoint_render.grape` or `endpoint_run_filters.grape` now finds `:exception` and `:exception_object` in the payload when `error!` ends the request, as it does for any exception.
+
+`throw :error` from your own middleware or `rescue_from` handlers still works.
+
+#### `Grape::Exceptions::ErrorResponse` is no longer a `Data`
+
+Every error response builds at least two `ErrorResponse`s, and building a `Data` costs several times what building a plain object does. It is now a plain frozen class ([#3023](https://github.com/ruby-grape/grape/pull/3023)). It is still built with keywords, each optional, and still answers its readers.
+
+It no longer copies itself with `#with`, compares by value (`==`, `eql?`, `hash`), converts with `#to_h`, lists `members`, takes positional arguments or takes part in pattern matching. Build a new one with `ErrorResponse.new` instead of calling `#with`. To check a payload, read its fields, for instance with `have_attributes(status: 404, message: 'Not Found')` in a spec.
+
 #### `Grape::Middleware::Versioner::Header` answers a common Accept header without `#before`
 
 `Middleware::Base#call` copied the header versioner for every request so that `#before` could keep the env and the Accept header it scrubs in instance variables. When the API is not strict and the Accept header is one the versioner worked out when it was built (a media type it declares, `*/*` or none), it now records the media type and calls the app from the one instance the stack built ([#3017](https://github.com/ruby-grape/grape/pull/3017)). Any other request still goes through `#before`.

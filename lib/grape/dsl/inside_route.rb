@@ -26,10 +26,11 @@ module Grape
       # @param additional_headers [Hash] Additional headers for the response.
       # @param backtrace [Array<String>] The backtrace of the exception that caused the error.
       # @param original_exception [Exception] The original exception that caused the error.
+      # @raise [Grape::Exceptions::Halt] always, carrying the response.
       def error!(message, status = nil, additional_headers = nil, backtrace = nil, original_exception = nil)
         resolved_status = self.status(status || inheritable_setting.default_error_status)
         headers = additional_headers.present? ? header.merge(additional_headers) : header
-        throw :error, Grape::Exceptions::ErrorResponse.new(
+        raise Grape::Exceptions::Halt.new(
           message:, status: resolved_status, headers:, backtrace:, original_exception:
         )
       end
