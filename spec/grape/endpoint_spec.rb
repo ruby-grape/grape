@@ -705,6 +705,54 @@ describe Grape::Endpoint do
         expect(last_response.body).to eq('{"version":"v1"}')
       end
     end
+
+    # Shaped like Active Record's transaction: it rolls back when an exception
+    # leaves the block, and commits on any other exit, a throw included.
+    it 'leaves an enclosing block as an exception, so a transaction around it rolls back' do
+      outcome = nil
+      transaction = lambda do |&block|
+        block.call
+      rescue Exception # rubocop:disable Lint/RescueException
+        outcome = :rolled_back
+        raise
+      ensure
+        outcome ||= :committed
+      end
+      subject.get('/hey') { transaction.call { error!('out of stock', 409) } }
+
+      get '/hey'
+      expect(last_response.status).to eq(409)
+      expect(last_response.body).to eq('out of stock')
+      expect(outcome).to eq(:rolled_back)
+    end
+
+    # As from a task under async, whose #wait resumes the request's fiber with
+    # what the task raised.
+    it 'answers from a fiber the route resumes' do
+      subject.get('/hey') { Fiber.new { error!('out of stock', 409) }.resume }
+
+      get '/hey'
+      expect(last_response.status).to eq(409)
+      expect(last_response.body).to eq('out of stock')
+    end
+
+    it 'is not handed to a rescue_from :all handler' do
+      subject.rescue_from(:all) { error!('rescued', 500) }
+      subject.get('/hey') { error!('out of stock', 409) }
+
+      get '/hey'
+      expect(last_response.status).to eq(409)
+      expect(last_response.body).to eq('out of stock')
+    end
+
+    it 'is not handed to a rescue_from StandardError handler' do
+      subject.rescue_from(StandardError) { error!('rescued', 500) }
+      subject.get('/hey') { error!('out of stock', 409) }
+
+      get '/hey'
+      expect(last_response.status).to eq(409)
+      expect(last_response.body).to eq('out of stock')
+    end
   end
 
   describe '#redirect' do

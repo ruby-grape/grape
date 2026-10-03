@@ -109,12 +109,18 @@ module Grape
       # the +catch+ block: a +return+ there leaves the method through Kernel#catch,
       # which unwinds like a throw and allocates for it, on every request that
       # did not fail.
+      #
+      # +error!+ raises a Halt carrying what a +throw :error+ carries. It is
+      # taken inside the +catch+, so it is rendered where a thrown error is and
+      # never reaches a +rescue_from+ handler, the +:all+ one included.
       def respond(env)
         answered = false
         response = catch(:error) do
           app_response = @app.call(env)
           answered = true
           app_response
+        rescue Grape::Exceptions::Halt => e
+          e.response
         end
         answered ? response : dup.render_thrown(env, response)
       rescue Exception => e # rubocop:disable Lint/RescueException
@@ -169,11 +175,12 @@ module Grape
         raw = Grape::Exceptions::ErrorResponse.coerce(error)
         headers = { Rack::CONTENT_TYPE => content_type }
         headers.merge!(raw.headers) if raw.headers.is_a?(Hash)
-        payload = raw.with(
+        payload = Grape::Exceptions::ErrorResponse.new(
           status: raw.status || default_status,
           message: raw.message || default_message,
           headers:,
-          backtrace: resolved_backtrace(raw)
+          backtrace: resolved_backtrace(raw),
+          original_exception: raw.original_exception
         )
         env[Grape::Env::API_ENDPOINT].status(payload.status) # error! may not have been called
         render_response(payload)
@@ -330,6 +337,8 @@ module Grape
         callable = handler.is_a?(Symbol) ? endpoint.public_method(handler) : handler
         response = catch(:error) do
           call_rescue_handler(callable, error, endpoint)
+        rescue Grape::Exceptions::Halt => e
+          e.response
         rescue StandardError => e
           return redispatch(e, endpoint, redispatched)
         end

@@ -2,13 +2,29 @@
 
 module Grape
   module Exceptions
-    # Value object representing the payload thrown via `throw :error, ...`
-    # and consumed by `Middleware::Error#error_response`. Replaces the
-    # implicit-schema Hash that previously circulated between throw sites
-    # and the error middleware.
-    ErrorResponse = Data.define(:status, :message, :headers, :backtrace, :original_exception) do
+    # The frozen payload thrown via `throw :error, ...` (or raised by `error!`
+    # inside a `Grape::Exceptions::Halt`) and consumed by
+    # `Middleware::Error#error_response`. Replaces the implicit-schema Hash
+    # that previously circulated between throw sites and the error middleware.
+    #
+    # A plain frozen class rather than a +Data+: every error response builds
+    # at least two (the payload, then the one +error_response+ fills the
+    # defaults into), and +Data+'s constructor takes its keywords as a Hash it
+    # then validates, about 450 ns apiece. A Ruby method keeps keyword
+    # arguments on the stack. It answers only what is read off it: its
+    # readers.
+    class ErrorResponse
+      MEMBERS = %i[status message headers backtrace original_exception].freeze
+
+      attr_reader(*MEMBERS)
+
       def initialize(status: nil, message: nil, headers: nil, backtrace: nil, original_exception: nil)
-        super
+        @status = status
+        @message = message
+        @headers = headers
+        @backtrace = backtrace
+        @original_exception = original_exception
+        freeze
       end
 
       def to_s
@@ -38,7 +54,7 @@ module Grape
         when Grape::Exceptions::Base
           from_exception(input)
         when Hash
-          new(**input.slice(:status, :message, :headers, :backtrace, :original_exception))
+          new(**input.slice(*MEMBERS))
         else
           new
         end
