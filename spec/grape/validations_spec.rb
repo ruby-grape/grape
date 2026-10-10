@@ -1000,6 +1000,12 @@ describe Grape::Validations do
         expect(last_response.body).to eq('items[1] is invalid')
       end
 
+      it 'rejects an element holding an invalid byte instead of raising' do
+        get '/optional_group', items: ["\xFF"]
+        expect(last_response.status).to eq(400)
+        expect(last_response.body).to start_with('items[0] is invalid')
+      end
+
       it "doesn't validate the group when every element is blank" do
         subject.params do
           optional :items, type: Array do

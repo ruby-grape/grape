@@ -23,7 +23,7 @@ module Grape
         def validate_param!(attr_name, params)
           elements = params[attr_name]
           return unless elements.is_a?(Array)
-          return if elements.all? { |element| scrub(element).blank? }
+          return if elements.all? { |element| Grape::Util::Scrub.blank?(element) }
 
           index = elements.index { |element| !hash_like?(element) }
           validation_error!(["#{scope.full_name(attr_name)}[#{index}]"]) if index
