@@ -3350,6 +3350,30 @@ Built-in formatters are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
+* `:md`, `:markdown`: use object's `to_markdown` when available, return a String "as is", otherwise raise `Grape::Exceptions::InvalidFormatter`. Not default content types, see [Serving Markdown](#serving-markdown)
+
+#### Serving Markdown
+
+`:md` and `:markdown` are not among the default content types. Declare either one to answer clients that ask for Markdown, such as LLM agents sending `Accept: text/markdown`.
+
+```ruby
+class API < Grape::API
+  content_type :json, 'application/json'
+  content_type :md, 'text/markdown; charset=utf-8'
+  default_format :json
+
+  get '/pages/:id' do
+    Page.find(params[:id]) # renders with Page#to_markdown
+  end
+end
+```
+
+* `GET /pages/1.md`, `GET /pages/1.markdown`, `GET /pages/1?format=md`, `?format=markdown` and `GET /pages/1` with an `Accept: text/markdown` header answer `text/markdown`.
+* `:md` and `:markdown` name the same format: declaring either one answers both extensions, under the name declared. A request for `.markdown` on the API above negotiates `:md`, so a `formatter :md` of your own renders it too.
+* `to_markdown` is the method Rails' `render markdown:` calls (Rails 8.1), so an object written for a Rails controller renders the same way in Grape.
+* Grape does not convert anything else to Markdown. When the client negotiated Markdown, a body without `to_markdown` that is not a String answers in the default format instead; when the API pins `format :md`, it answers `500`.
+* [RFC 7763](https://www.rfc-editor.org/rfc/rfc7763) makes `charset` a required parameter of `text/markdown`, hence `charset=utf-8`.
+* Errors are rendered as plain text, which is valid Markdown.
 
 #### Serving pre-rendered JSON
 

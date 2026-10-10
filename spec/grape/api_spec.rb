@@ -1723,6 +1723,103 @@ describe Grape::API do
       end
     end
 
+    context 'with a Markdown content_type' do
+      let(:page) do
+        Class.new do
+          def to_markdown
+            "# Hello\n"
+          end
+        end.new
+      end
+
+      markdown_names = %w[md markdown]
+
+      markdown_names.each do |declared|
+        context "declared as #{declared}" do
+          before do
+            markdown_page = page
+            subject.content_type :json, 'application/json'
+            subject.content_type declared, 'text/markdown; charset=utf-8'
+            subject.default_format :json
+
+            subject.get('/page') { markdown_page }
+            subject.get('/hash') { { foo: 'bar' } }
+            subject.get('/error') { error!('error in markdown', 422) }
+            subject.get('/api_format') { env[Grape::Env::API_FORMAT].to_s }
+          end
+
+          it 'renders #to_markdown for an Accept: text/markdown header' do
+            get '/page', {}, 'HTTP_ACCEPT' => 'text/markdown'
+            expect(last_response.content_type).to eql 'text/markdown; charset=utf-8'
+            expect(last_response.body).to eq "# Hello\n"
+          end
+
+          markdown_names.each do |extension|
+            context "with the #{extension} extension" do
+              it 'renders #to_markdown' do
+                get "/page.#{extension}"
+                expect(last_response.content_type).to eql 'text/markdown; charset=utf-8'
+                expect(last_response.body).to eq "# Hello\n"
+              end
+
+              it "negotiates the #{declared} format" do
+                get "/api_format.#{extension}"
+                expect(last_response.body).to eq declared
+              end
+
+              it 'answers in the default format when the body has no Markdown form' do
+                get "/hash.#{extension}"
+                expect(last_response).to be_successful
+                expect(last_response.content_type).to eql 'application/json'
+                expect(last_response.body).to eq '{"foo":"bar"}'
+              end
+
+              it 'renders an error as text' do
+                get "/error.#{extension}"
+                expect(last_response.status).to eq 422
+                expect(last_response.content_type).to eql 'text/markdown; charset=utf-8'
+                expect(last_response.body).to eq 'error in markdown'
+              end
+            end
+
+            it "renders #to_markdown for ?format=#{extension}" do
+              get '/page', format: extension
+              expect(last_response.content_type).to eql 'text/markdown; charset=utf-8'
+              expect(last_response.body).to eq "# Hello\n"
+            end
+          end
+        end
+      end
+
+      it 'formats the markdown extension with a formatter declared for md' do
+        subject.content_type :md, 'text/markdown; charset=utf-8'
+        subject.formatter :md, ->(object, _env) { "custom #{object}" }
+        subject.get('/page') { 'page' }
+
+        get '/page.markdown'
+        expect(last_response.body).to eq 'custom page'
+      end
+
+      context 'when none is declared' do
+        before do
+          subject.content_type :json, 'application/json'
+          subject.default_format :json
+          subject.get('/page') { 'page' }
+        end
+
+        it 'answers the markdown extension in the default format' do
+          get '/page.markdown'
+          expect(last_response.content_type).to eql 'application/json'
+          expect(last_response.body).to eq '"page"'
+        end
+
+        it 'rejects ?format=markdown' do
+          get '/page', format: 'markdown'
+          expect(last_response.status).to eq 406
+        end
+      end
+    end
+
     context 'env["api.format"]' do
       before do
         ct = content_type
