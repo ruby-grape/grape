@@ -15,6 +15,17 @@ module Grape
 
     MIME_TYPES = Grape::ContentTypes::DEFAULTS.except(:serializable_hash).invert.freeze
 
+    # Formats known by more than one name. A request naming one of them -- by
+    # extension, +?format=+ or +default_format+ -- is served under whichever
+    # the API declared, so declaring +:md+ answers +.markdown+ too, through
+    # the formatter, parser and error formatter declared for +:md+. Both
+    # spellings are keys: an extension arrives as a String, +default_format+
+    # as a Symbol.
+    FORMAT_SYNONYMS = {
+      md: :markdown, 'md' => :markdown,
+      markdown: :md, 'markdown' => :md
+    }.freeze
+
     def content_types_for(from_settings)
       from_settings.presence || DEFAULTS
     end
