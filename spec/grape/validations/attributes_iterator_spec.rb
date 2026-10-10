@@ -27,7 +27,7 @@ describe Grape::Validations::AttributesIterator do
     end
 
     context 'when an element is the empty optional placeholder' do
-      let(:params) { [Grape::DSL::Parameters::EmptyOptionalValue, 10] }
+      let(:params) { [Grape::Validations::ParamsScope::EmptyOptionalValue, 10] }
 
       it 'does not yield it' do
         expect { |b| iterator.each(params, &b) }.to yield_successive_args([params[1], false])

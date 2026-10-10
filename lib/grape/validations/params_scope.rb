@@ -16,6 +16,24 @@ module Grape
         ParamScopeTracker.current&.qualifying_params(self)
       end
 
+      # @param params [Hash] initial hash of parameters
+      # @return hash of parameters relevant for the current scope
+      # @api private
+      # Only a +given+ scope ever stores qualifying params, and a scope on an
+      # independent chain has none above it (see #independent?), so the
+      # lookup and the +presence+ test that follows it are skipped -- both of
+      # them, at every level, on every call.
+      def params(params)
+        scoped = if @parent.nil?
+                   params
+                 elsif @independent
+                   @parent.params(params)
+                 else
+                   @parent.qualifying_params.presence || @parent.params(params)
+                 end
+        @element ? map_params(scoped, @element) : scoped
+      end
+
       include Grape::DSL::Parameters
       include Grape::Validations::ParamsDocumentation
 
@@ -32,6 +50,12 @@ module Grape
       # set to +false+.
       NOT_VALIDATED = Object.new.freeze
       private_constant :NOT_VALIDATED
+
+      # What {#params} hands back for an element of an Array that left an
+      # optional scope out, in place of that scope's params. Dropping the
+      # element instead would shift the indices the errors name, so it stays,
+      # and AttributesIterator and the validators pass over it.
+      EmptyOptionalValue = Object.new.freeze
 
       class Attr
         attr_reader :key, :scope
@@ -282,6 +306,21 @@ module Grape
       end
 
       private
+
+      def map_params(params, element, is_array: false)
+        case params
+        when Array
+          params.map do |el|
+            map_params(el, element, is_array: true)
+          end
+        when Hash
+          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
+        when EmptyOptionalValue
+          EmptyOptionalValue
+        else
+          {}
+        end
+      end
 
       def build_full_path
         return @parent.full_path + [@element] if nested?

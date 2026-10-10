@@ -117,7 +117,7 @@ module Grape
       # at the parameter parsing stage as they are required to ensure
       # the correct indexing is maintained
       def skip?(val)
-        val == Grape::DSL::Parameters::EmptyOptionalValue
+        ParamsScope::EmptyOptionalValue.equal?(val)
       end
     end
   end
