@@ -15,10 +15,18 @@ module Grape
         evaluate_as_instance_with_configuration(block, lazy: true)
       end
 
+      # Called without a value, answers whether the API cascades: the value
+      # given here, else the +cascade:+ of +version+, else true. The compiled
+      # API reads it here too; this reader used to skip +version+, and so
+      # answered true for an API that did not cascade.
       def cascade(value = nil)
-        return inheritable_setting.cascade_defined? ? inheritable_setting.cascade : true if value.nil?
+        return inheritable_setting.cascade = value unless value.nil?
 
-        inheritable_setting.cascade = value
+        setting = inheritable_setting
+        return setting.cascade if setting.cascade_defined?
+        return setting.version_options.cascade if setting.version_options
+
+        true
       end
 
       # Specify an API version.

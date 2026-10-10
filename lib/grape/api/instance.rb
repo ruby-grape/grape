@@ -112,7 +112,7 @@ module Grape
         @router.compile!
         @router.freeze
         @app = lint? ? Rack::Lint.new(@router) : @router
-        @cascade = resolve_cascade
+        @cascade = self.class.cascade
       end
 
       # Handle a request. See Rack documentation for what `env` is.
@@ -197,15 +197,6 @@ module Grape
       # Called once, from the constructor.
       def lint?
         self.class.inheritable_setting.lint? || Grape.config.lint
-      end
-
-      # Backs {#cascade?}; called once, from the constructor.
-      def resolve_cascade
-        setting = self.class.inheritable_setting
-        return setting.cascade if setting.cascade_defined?
-        return setting.version_options.cascade if setting.version_options
-
-        true
       end
     end
   end
