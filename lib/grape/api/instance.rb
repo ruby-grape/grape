@@ -94,7 +94,6 @@ module Grape
         def inherited(subclass)
           super
           subclass.reset!
-          subclass.logger logger.clone
         end
       end
 

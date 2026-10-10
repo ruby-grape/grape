@@ -3,6 +3,26 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `logger` applies to the API it is set on
+
+`logger` kept the logger in settings shared by the whole process, so setting it on one API replaced it on every other: two APIs that each set a logger both logged to whichever was set last.
+
+A logger now belongs to the API it is set on, and to the APIs mounted under it that set none of their own ([#3024](https://github.com/ruby-grape/grape/pull/3024)). An API that sets none, and is mounted under none that does, still logs to a default shared by every such API, so a level set on that default reaches all of them as before.
+
+```ruby
+class Users < Grape::API
+  logger Logger.new('users.log')
+end
+
+class Orders < Grape::API
+  logger Logger.new('orders.log')
+end
+
+# Users.logger  Before: the orders.log logger  After: the users.log logger
+```
+
+If an API logged to a logger set on another API that does not mount it, set the logger on that API as well, or on an API that mounts both. Setting one on `Grape::API::Instance` no longer reaches the APIs you define.
+
 #### `error!` raises `Grape::Exceptions::Halt` instead of throwing `:error`
 
 `error!` used to `throw :error`, and a throw is not an exception. Active Record commits a transaction that a throw leaves, so `error!` inside `transaction` saved what the block had written while the client was told the request failed ([#2197](https://github.com/ruby-grape/grape/issues/2197)). A throw cannot leave the fiber or thread it was thrown in either, so `error!` inside an `Async` task answered 500 instead of its status.

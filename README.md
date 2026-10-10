@@ -3189,6 +3189,8 @@ class API < Grape::API
 end
 ```
 
+A logger belongs to the API it is set on, and to the APIs mounted under it that set none of their own. An API that sets none, and is mounted under none that does, logs to a default shared by every such API.
+
 For similar to Rails request logging try the [grape_logging](https://github.com/aserafin/grape_logging) or [grape-middleware-logger](https://github.com/ridiculous/grape-middleware-logger) gems.
 
 ## API Formats

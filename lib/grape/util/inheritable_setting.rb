@@ -671,6 +671,18 @@ module Grape
         set_inheritable(:auth, auth_options)
       end
 
+      # The logger assigned by the +logger+ DSL (see DSL::Logger), written to
+      # an API's top-level settings so that it reaches the APIs mounted under
+      # it. Nearest-wins scalar; nil when never set, where DSL::Logger falls
+      # back to its default; the backing store is an internal detail.
+      def logger
+        inheritable(:logger)
+      end
+
+      def logger=(logger)
+        set_inheritable(:logger, logger)
+      end
+
       # Immutable snapshot of the settings Router::Pattern::Path reads to
       # assemble a route's origin and suffix, built by #path_settings, which
       # always supplies every member (nil where unset) — unlike
