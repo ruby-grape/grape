@@ -5208,7 +5208,7 @@ describe Grape::API do
         subject.version 'v2', using: :path, cascade: false
         get '/v2/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers.keys).not_to include 'X-Cascade'
+        expect(last_response.headers['X-Cascade']).to be_nil
       end
     end
 
@@ -5224,7 +5224,7 @@ describe Grape::API do
         subject.cascade false
         get '/hello'
         expect(last_response).to be_not_found
-        expect(last_response.headers.keys).not_to include 'X-Cascade'
+        expect(last_response.headers['X-Cascade']).to be_nil
       end
     end
   end
@@ -5717,6 +5717,27 @@ describe Grape::API do
       end
 
       it { is_expected.to be(false) }
+    end
+
+    context 'when a version is declared with cascade: false' do
+      let(:api) do
+        Class.new(Grape::API) do
+          version 'v1', using: :path, cascade: false
+        end
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when set after a version declared with cascade: false' do
+      let(:api) do
+        Class.new(Grape::API) do
+          version 'v1', using: :path, cascade: false
+          cascade true
+        end
+      end
+
+      it { is_expected.to be(true) }
     end
   end
 end
