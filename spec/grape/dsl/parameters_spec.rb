@@ -7,7 +7,7 @@ describe Grape::DSL::Parameters do
     Class.new do
       include Grape::DSL::Parameters
 
-      attr_accessor :api, :element, :parent
+      attr_accessor :api
 
       def initialize
         @validates = []
@@ -300,36 +300,6 @@ describe Grape::DSL::Parameters do
 
     it 'does not deprecate a Hash that is the only argument' do
       expect { subject.requires(type: Integer) }.not_to raise_error
-    end
-  end
-
-  describe '#params' do
-    it 'inherits params from parent' do
-      parent_params = { foo: 'bar' }
-      subject.parent = Object.new
-      allow(subject.parent).to receive_messages(params: parent_params, qualifying_params: nil)
-      expect(subject.params({})).to eq parent_params
-    end
-
-    describe 'when params argument is an array of hashes' do
-      it 'returns values of each hash for @element key' do
-        subject.element = :foo
-        expect(subject.params([{ foo: 'bar' }, { foo: 'baz' }])).to eq(%w[bar baz])
-      end
-    end
-
-    describe 'when params argument is a hash' do
-      it 'returns value for @element key' do
-        subject.element = :foo
-        expect(subject.params(foo: 'bar')).to eq('bar')
-      end
-    end
-
-    describe 'when params argument is not a array or a hash' do
-      it 'returns empty hash' do
-        subject.element = Object.new
-        expect(subject.params(Object.new)).to eq({})
-      end
     end
   end
 end

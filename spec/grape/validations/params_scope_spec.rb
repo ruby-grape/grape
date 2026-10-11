@@ -2241,6 +2241,54 @@ describe Grape::Validations::ParamsScope do
     end
   end
 
+  # A nested scope's block runs with that scope as self, which is how these
+  # examples get hold of one.
+  describe '#params' do
+    let(:api) { Class.new(Grape::API) }
+
+    it 'answers the params it is given at the root' do
+      params = { foo: 'bar' }
+      expect(described_class.new(api:).params(params)).to be(params)
+    end
+
+    it 'answers the value under its element' do
+      foo = nil
+      described_class.new(api:) do
+        requires :foo, type: Hash do
+          foo = self
+          requires :bar
+        end
+      end
+      expect(foo.params({ foo: { bar: 1 } })).to eq({ bar: 1 })
+    end
+
+    it 'answers the value under its element in each element of an Array further up' do
+      sub = nil
+      described_class.new(api:) do
+        requires :items, type: Array do
+          requires :sub, type: Hash do
+            sub = self
+            requires :a
+          end
+        end
+      end
+      expect(sub.params({ items: [{ sub: { a: 1 } }, { sub: { a: 2 } }] })).to eq([{ a: 1 }, { a: 2 }])
+    end
+
+    it 'answers an empty Hash when the scope above resolved to neither a Hash nor an Array' do
+      bar = nil
+      described_class.new(api:) do
+        requires :foo, type: Hash do
+          requires :bar, type: Hash do
+            bar = self
+            requires :baz
+          end
+        end
+      end
+      expect(bar.params({ foo: 'not a hash' })).to eq({})
+    end
+  end
+
   describe Grape::Validations::ParamsScope::Attr do
     let(:scope) { instance_double(Grape::Validations::ParamsScope) }
 

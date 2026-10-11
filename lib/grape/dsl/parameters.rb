@@ -179,26 +179,6 @@ module Grape
 
       alias group requires
 
-      EmptyOptionalValue = Object.new.freeze
-
-      # @param params [Hash] initial hash of parameters
-      # @return hash of parameters relevant for the current scope
-      # @api private
-      # Only a +given+ scope ever stores qualifying params, and a scope on an
-      # independent chain has none above it (see ParamsScope#independent?), so
-      # the lookup and the +presence+ test that follows it are skipped -- both
-      # of them, at every level, on every call.
-      def params(params)
-        scoped = if @parent.nil?
-                   params
-                 elsif @independent
-                   @parent.params(params)
-                 else
-                   @parent.qualifying_params.presence || @parent.params(params)
-                 end
-        @element ? map_params(scoped, @element) : scoped
-      end
-
       private
 
       # +requires+ and +optional+ differ only in whether what they declare is
@@ -244,21 +224,6 @@ module Grape
 
       def first_hash_key_or_param(parameter)
         parameter.is_a?(Hash) ? parameter.keys.first : parameter
-      end
-
-      def map_params(params, element, is_array: false)
-        case params
-        when Array
-          params.map do |el|
-            map_params(el, element, is_array: true)
-          end
-        when Hash
-          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
-        when EmptyOptionalValue
-          EmptyOptionalValue
-        else
-          {}
-        end
       end
     end
   end

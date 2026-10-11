@@ -178,7 +178,7 @@ module Grape
 
           elements.each_with_index do |element, index|
             tracker&.store_index(scope, index)
-            next if Grape::DSL::Parameters::EmptyOptionalValue.equal?(element)
+            next if ParamsScope::EmptyOptionalValue.equal?(element)
 
             @attrs.each do |attr_name|
               validate_param!(attr_name, element) if required? || (hash_like?(element) && element.key?(attr_name))
@@ -203,7 +203,7 @@ module Grape
         # Array instead of a Hash. An empty element of the scope's own Array is
         # passed over only when every element of that Array is empty.
         def empty_element?(element)
-          return true if Grape::DSL::Parameters::EmptyOptionalValue.equal?(element)
+          return true if ParamsScope::EmptyOptionalValue.equal?(element)
 
           element.respond_to?(:empty?) ? element.empty? : element.nil?
         end
