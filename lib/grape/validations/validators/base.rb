@@ -240,10 +240,9 @@ module Grape
           options_key?(:value) ? options[:value] : options
         end
 
+        # Listed among the helpers a custom validator can call (see README).
         def scrub(value)
-          return value if !value.respond_to?(:valid_encoding?) || value.valid_encoding?
-
-          value.scrub
+          Grape::Util::Scrub.scrub(value)
         end
       end
     end
