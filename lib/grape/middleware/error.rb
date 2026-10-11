@@ -24,16 +24,12 @@ module Grape
           # `Endpoint#error_middleware_options` when the API called no
           # `rescue_from` and no `format` — and an explicit nil bypasses the
           # keyword defaults above, so restore them here rather than letting nil
-          # propagate to `def_delegator :rescue_options, :backtrace` or to the
-          # formatter lookup in `#format_message`.
-          super(
-            rescue_options: rescue_options || Grape::DSL::RescueOptions.new,
-            default_error_formatter: default_error_formatter || Grape::ErrorFormatter::Txt,
-            all_rescue_handler:, base_only_rescue_handlers:, content_types:,
-            default_message:, default_status:, error_formatters:, format:,
-            grape_exceptions_rescue_handler:, internal_grape_exceptions_rescue_handler:,
-            rescue_all:, rescue_grape_exceptions:, rescue_handlers:
-          )
+          # reach `rescue_options.backtrace` in `#initialize` or the formatter
+          # lookup in `#format_message`. A bare `super` hands the parameters
+          # over as they stand, these two included.
+          rescue_options ||= Grape::DSL::RescueOptions.new
+          default_error_formatter ||= Grape::ErrorFormatter::Txt
+          super
         end
       end
 
