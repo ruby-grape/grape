@@ -19,10 +19,16 @@ module Grape
       from_settings.presence || DEFAULTS
     end
 
+    # Identity rather than +==+ for the defaults, and the pairs rather than
+    # the registry for the cache key, because Hash equality ignores order and
+    # this table's order is the API's preference: the +*/*+ every browser
+    # sends picks the first media type declared. Compared by value, the first
+    # registry built with a set of content types fixed that order for every
+    # later one declaring the same set in another order.
     def mime_types_for(from_settings)
-      return MIME_TYPES if from_settings == Grape::ContentTypes::DEFAULTS
+      return MIME_TYPES if from_settings.equal?(Grape::ContentTypes::DEFAULTS)
 
-      MimeTypesCache[from_settings]
+      MimeTypesCache[from_settings.to_a]
     end
 
     # Every format under both spellings in one plain Hash, so a lookup is a
@@ -53,8 +59,9 @@ module Grape
     # Both tables below are derived from nothing but the content-type registry,
     # and every endpoint builds its own content-type-aware middlewares — so an
     # app held one copy per endpoint of tables it only ever reads. Keying the
-    # cache on the registry collapses them: Hash keys compare by value, so
-    # every registry with the same content types shares one table.
+    # cache on the registry collapses them: keys compare by value, so every
+    # registry with the same content types shares one table -- declared in
+    # the same order, for MimeTypesCache (see #mime_types_for).
     #
     # Both the key and the table are frozen: the caller's registry stays
     # reachable (through +middleware.options[:content_types]+, among others)
@@ -64,8 +71,8 @@ module Grape
     class MimeTypesCache < Grape::Util::Cache
       def initialize
         super
-        @cache = Hash.new do |h, from_settings|
-          h[from_settings.dup.freeze] = from_settings.invert.transform_keys! { |mime_type| Grape::ContentTypes.media_type(mime_type) }.freeze
+        @cache = Hash.new do |h, content_types|
+          h[content_types.freeze] = content_types.to_h.invert.transform_keys! { |mime_type| Grape::ContentTypes.media_type(mime_type) }.freeze
         end
       end
     end

@@ -3407,6 +3407,25 @@ describe Grape::API do
       expect(last_response.status).to eq(406)
       expect(last_response.body).to eq(Rack::Utils.escape_html("The requested format 'txt' is not supported."))
     end
+
+    it "answers a browser's */* in the type it declares first, whatever order another API declared the same types in" do
+      browser_accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      json_first = Class.new(described_class) do
+        content_type :json, 'application/json'
+        content_type :txt, 'text/plain'
+        get(:page) { 'page' }
+      end
+      txt_first = Class.new(described_class) do
+        content_type :txt, 'text/plain'
+        content_type :json, 'application/json'
+        get(:page) { 'page' }
+      end
+
+      content_types = [json_first, txt_first].map do |api|
+        Rack::MockRequest.new(api).get('/page', 'HTTP_ACCEPT' => browser_accept).content_type
+      end
+      expect(content_types).to eq(%w[application/json text/plain])
+    end
   end
 
   describe '.formatter' do
