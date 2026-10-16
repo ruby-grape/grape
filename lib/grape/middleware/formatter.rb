@@ -303,7 +303,9 @@ module Grape
         dot_pos = request_path.rindex('.')
         return unless dot_pos
 
-        extension = try_scrub(request_path[(dot_pos + 1)..])
+        # A start and a length rather than an endless Range, which is an object
+        # of its own built on every call. A length past the end is clamped.
+        extension = try_scrub(request_path[dot_pos + 1, request_path.length])
         extension if content_type_for(extension)
       end
 

@@ -74,6 +74,17 @@ describe Grape::Request do
           )
         end
       end
+
+      # A capture is a String, so the query's nested Hash under the same name
+      # is replaced rather than merged into, as +deep_merge!+ did.
+      context 'when the query holds a nested param named like a capture' do
+        let(:params) { { a: '123', c: { d: '1' } } }
+        let(:route_version) { nil }
+
+        it 'answers the capture' do
+          expect(request.params).to eq(ActiveSupport::HashWithIndifferentAccess.new(a: '123', c: 'ccc', version: '123'))
+        end
+      end
     end
 
     # Rack memoizes the query params in the env, and that is the hash Grape

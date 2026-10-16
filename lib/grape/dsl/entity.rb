@@ -26,7 +26,9 @@ module Grape
       #       admin: current_user.admin?
       #   end
       def present(*args, root: nil, with: nil, **options)
-        key, object = args.count == 2 && args.first.is_a?(Symbol) ? args : [nil, args.first]
+        # No [nil, object] Array to destructure for the one-argument form.
+        object = args.first
+        key, object = args if args.count == 2 && object.is_a?(Symbol)
         entity_class = with || entity_class_for_obj(object)
         representation = entity_class ? entity_representation_for(entity_class, object, options) : object
         representation = { root => representation } if root
@@ -103,13 +105,17 @@ module Grape
         entity if entity.respond_to?(:represent)
       end
 
+      # The embeds go straight into the call: collected into a Hash of their
+      # own and splatted, they cost every +present+ a second Hash.
+      #
       # @param entity_class [Class] the entity class to use for representation.
       # @param object [Object] the object to represent.
       # @param options [Hash] additional options forwarded to the entity's `represent` call.
       # @return the representation of the given object as done through the given entity_class.
       def entity_representation_for(entity_class, object, options)
-        embeds = env.key?(Grape::Env::API_VERSION) ? { env:, version: env[Grape::Env::API_VERSION] } : { env: }
-        entity_class.represent(object, **embeds, **options)
+        return entity_class.represent(object, env:, **options) unless env.key?(Grape::Env::API_VERSION)
+
+        entity_class.represent(object, env:, version: env[Grape::Env::API_VERSION], **options)
       end
     end
   end
