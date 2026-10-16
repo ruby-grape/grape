@@ -2141,6 +2141,35 @@ describe Grape::API do
         subject.logger.info message
         expect(subject.io.string).to include(message)
       end
+
+      it 'is not replaced by a logger another API sets' do
+        other_logger = Logger.new(StringIO.new)
+        api = subject
+        Class.new(described_class) { logger other_logger }
+        api.logger.info 'still mine'
+        expect(api.io.string).to include('still mine')
+      end
+
+      it 'is inherited by a subclass' do
+        Class.new(subject).logger.info 'from the subclass'
+        expect(subject.io.string).to include('from the subclass')
+      end
+    end
+
+    context 'with a level set on the default logger' do
+      let(:app) do
+        mounted = Class.new(described_class) do
+          format :txt
+          logger.level = Logger::WARN
+          get('/') { logger.level.to_s }
+        end
+        Class.new(described_class) { mount mounted }
+      end
+
+      it 'applies to the endpoints of the API once mounted' do
+        get '/'
+        expect(last_response.body).to eq(Logger::WARN.to_s)
+      end
     end
   end
 

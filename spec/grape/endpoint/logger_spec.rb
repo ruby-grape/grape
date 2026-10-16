@@ -23,6 +23,78 @@ describe Grape::Endpoint, '#logger' do
     end
   end
 
+  context 'when another API sets a logger of its own' do
+    let(:other_output) { StringIO.new }
+    let(:app) do
+      logger_instance = configured_logger
+      other_logger = Logger.new(other_output)
+      api = Class.new(Grape::API) do
+        format :txt
+        logger logger_instance
+        get('/') do
+          logger.error('from-route')
+          'ok'
+        end
+      end
+      Class.new(Grape::API) { logger other_logger }
+      api
+    end
+
+    it "keeps returning this API's logger" do
+      get '/'
+      expect(log_output.string).to include('from-route')
+      expect(other_output.string).to be_empty
+    end
+  end
+
+  context 'inside an API mounted under one that sets a logger' do
+    let(:app) do
+      logger_instance = configured_logger
+      mounted = Class.new(Grape::API) do
+        format :txt
+        get('/') do
+          logger.error('from-mounted-route')
+          'ok'
+        end
+      end
+      Class.new(Grape::API) do
+        logger logger_instance
+        mount mounted
+      end
+    end
+
+    it "returns the mounting API's logger" do
+      get '/'
+      expect(log_output.string).to include('from-mounted-route')
+    end
+  end
+
+  context 'inside a mounted API that sets a logger of its own' do
+    let(:mounted_output) { StringIO.new }
+    let(:app) do
+      logger_instance = configured_logger
+      mounted_logger = Logger.new(mounted_output)
+      mounted = Class.new(Grape::API) do
+        format :txt
+        logger mounted_logger
+        get('/') do
+          logger.error('from-mounted-route')
+          'ok'
+        end
+      end
+      Class.new(Grape::API) do
+        logger logger_instance
+        mount mounted
+      end
+    end
+
+    it "returns the mounted API's logger" do
+      get '/'
+      expect(mounted_output.string).to include('from-mounted-route')
+      expect(log_output.string).to be_empty
+    end
+  end
+
   context 'inside a before/after/after_validation/finally filter' do
     let(:app) do
       logger_instance = configured_logger
