@@ -3,6 +3,15 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### Formats named `:md` and `:markdown` have a built-in formatter
+
+`Grape::Formatter::Md` renders the `:md` format and `Grape::Formatter::Markdown` the `:markdown` one ([#3025](https://github.com/ruby-grape/grape/pull/3025)). Neither is a default content type, so only an API that declares one is affected. See [Serving Markdown](README.md#serving-markdown).
+
+* An API that declared `content_type :md` (or `:markdown`) without a matching `formatter` used to send its bodies unchanged. A String still is. An object answering `to_markdown` is now rendered with it, and any other object raises `Grape::Exceptions::InvalidFormatter`: it answers in the default format when the client negotiated Markdown, and `500` otherwise.
+* `:md` and `:markdown` now name the same format. An API that declared one of them used to answer the other extension (and `?format=`) in its default format, or `406`; it now answers it in Markdown, under the name it declared.
+* A `formatter :md` or `formatter :markdown` of your own still takes precedence.
+* A formatter class of your own named `Md` or `Markdown` that inherits `Grape::Formatter::Base` now replaces Grape's globally, with a warning that `md` or `markdown` is already registered. Rename it, and declare it with `formatter :md, YourFormatter` (or `:markdown`) in the APIs that use it.
+
 #### `logger` applies to the API it is set on
 
 `logger` kept the logger in settings shared by the whole process, so setting it on one API replaced it on every other: two APIs that each set a logger both logged to whichever was set last.

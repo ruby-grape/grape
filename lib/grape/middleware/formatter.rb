@@ -295,6 +295,9 @@ module Grape
         fmt = format_from_extension(env) || format_from_query(env) || format || format_from_header(env) || default_format
         return env[Grape::Env::API_FORMAT] = fmt.to_sym if content_type_for(fmt)
 
+        synonym = declared_synonym(fmt)
+        return env[Grape::Env::API_FORMAT] = synonym if synonym
+
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 406, message: "The requested format '#{fmt}' is not supported.")
       end
 
@@ -311,7 +314,16 @@ module Grape
         # A start and a length rather than an endless Range, which is an object
         # of its own built on every call. A length past the end is clamped.
         extension = try_scrub(request_path[dot_pos + 1, request_path.length])
-        extension if content_type_for(extension)
+        return extension if content_type_for(extension)
+
+        declared_synonym(extension)
+      end
+
+      # The name the API declared +fmt+ under when the request used another
+      # one for it (see Grape::ContentTypes::FORMAT_SYNONYMS), or nil.
+      def declared_synonym(fmt)
+        synonym = Grape::ContentTypes::FORMAT_SYNONYMS[fmt]
+        synonym if synonym && content_type_for(synonym)
       end
 
       # The extension is the tail of the request path, so PATH_INFO answers it
