@@ -41,13 +41,7 @@ module Grape
         # Do not validate the content of an array scope that did not get one.
         return if iterates_elements && !array_params
 
-        # Where each element's index is recorded depends on the scope and on
-        # whether its params are an Array, never on the element, so it is
-        # settled once here rather than per element. A lateral scope (no
-        # @element) whose params resolved to an array hands its index to the
-        # nearest element-iterating ancestor, so full_name still produces the
-        # right bracketed index.
-        index_scope = iterates_elements ? @scope : (@scope.nearest_array_ancestor if array_params)
+        index_scope = index_scope_for(iterates_elements, array_params)
         # No tracker means we're outside a ParamScopeTracker.track block (e.g.
         # a unit test that invokes a validator directly). Index tracking is
         # skipped — full_name will produce bracket-less names — but validation
@@ -64,6 +58,18 @@ module Grape
       # The top-level call's parent indices; only ever read.
       NO_PARENT_INDICES = [].freeze
       private_constant :NO_PARENT_INDICES
+
+      # Where each element's index is recorded depends on the scope and on
+      # whether its params are an Array, never on the element, so it is
+      # settled once per #each rather than per element. A lateral scope (no
+      # @element) whose params resolved to an array hands its index to the
+      # nearest element-iterating ancestor, so full_name still produces the
+      # right bracketed index.
+      def index_scope_for(iterates_elements, array_params)
+        return @scope if iterates_elements
+
+        @scope.nearest_array_ancestor if array_params
+      end
 
       def do_each(params_to_process, tracker, index_scope, parent_indices, sent_elements, &)
         params_to_process.each_with_index do |resource_params, index|

@@ -89,11 +89,25 @@ module Grape
       def check_incompatible_option_values(default, values, except_values)
         return if default.nil? || default.is_a?(Proc)
 
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if values && !values.is_a?(Proc) && Array(default).any? { |def_val| !values.include?(def_val) }
+        defaults = Array(default)
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :values, values) if any_outside?(defaults, values)
+        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values) if any_among?(defaults, except_values)
+      end
 
-        return unless except_values && !except_values.is_a?(Proc) && Array(default).any? { |def_val| except_values.include?(def_val) }
+      # Whether one of +defaults+ is outside +values+, known now (see #fixed_values?).
+      def any_outside?(defaults, values)
+        fixed_values?(values) && defaults.any? { |default| !values.include?(default) }
+      end
 
-        raise Grape::Exceptions::IncompatibleOptionValues.new(:default, default, :except, except_values)
+      # Whether one of +defaults+ is among +values+, known now (see #fixed_values?).
+      def any_among?(defaults, values)
+        fixed_values?(values) && defaults.any? { |default| values.include?(default) }
+      end
+
+      # A +values+ or +except_values+ list known at definition time: given,
+      # and not a Proc called on every request.
+      def fixed_values?(values)
+        values && !values.is_a?(Proc)
       end
 
       def validate_value_coercion(coerce_type, *values_list)
@@ -101,7 +115,7 @@ module Grape
 
         element_type = coerce_type.is_a?(Enumerable) ? coerce_type.first : coerce_type
         values_list.each do |values|
-          next if !values || values.is_a?(Proc)
+          next unless fixed_values?(values)
 
           value_types = values.is_a?(Range) ? [values.begin, values.end].compact : values
           raise Grape::Exceptions::IncompatibleOptionValues.new(:type, element_type, :values, values) unless all_of_type?(value_types, element_type)
@@ -161,7 +175,7 @@ module Grape
         return coerce_type unless coerce_type == Array
 
         values_list.each do |values|
-          next if !values || values.is_a?(Proc)
+          next unless fixed_values?(values)
           # A beginless Range has no first element to ask.
           return (values.begin || values.end).class if values.is_a?(Range)
           return values.first.class unless values.empty?

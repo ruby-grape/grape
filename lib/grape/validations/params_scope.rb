@@ -314,12 +314,19 @@ module Grape
             map_params(el, element, is_array: true)
           end
         when Hash
-          params[element] || (@optional && is_array ? EmptyOptionalValue : {})
+          params[element] || missing_element(is_array)
         when EmptyOptionalValue
           EmptyOptionalValue
         else
           {}
         end
+      end
+
+      # What a Hash without the element maps to: EmptyOptionalValue for an
+      # optional scope's element of an Array, which the validators pass over,
+      # and an empty Hash otherwise.
+      def missing_element(is_array)
+        @optional && is_array ? EmptyOptionalValue : {}
       end
 
       def build_full_path

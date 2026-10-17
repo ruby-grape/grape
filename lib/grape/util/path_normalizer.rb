@@ -19,8 +19,12 @@ module Grape
         # same predicate, and the scan stays in C without building a match.
         return path if path.start_with?('/') && !(path.end_with?('/') || path.include?('%') || path.include?('//'))
 
-        # Slow path. The bangs below are safe because +normalized+ is a fresh
-        # String built here, never the one the caller passed in.
+        normalize(path)
+      end
+
+      # The slow path. The bangs are safe because +normalized+ is a fresh String
+      # built here, never the one the caller passed in.
+      def self.normalize(path)
         encoding = path.encoding
         normalized = "/#{path}"
         normalized.squeeze!('/')
@@ -32,6 +36,7 @@ module Grape
 
         normalized.force_encoding(encoding)
       end
+      private_class_method :normalize
     end
   end
 end

@@ -138,8 +138,7 @@ module Grape
       # @param (see #requires)
       # @option (see #requires)
       def with(**opts, &)
-        new_group_attrs = @group&.deep_merge(opts) || opts
-        new_group_scope(new_group_attrs, &)
+        new_group_scope(with_group_options(opts), &)
       end
 
       %i[mutually_exclusive exactly_one_of at_least_one_of all_or_none_of].each do |validator|
@@ -188,7 +187,7 @@ module Grape
       # other bucket", while +optional+ has no other bucket — +:all+ ignores
       # +except+ and +:none+ uses it to drop fields entirely.
       def declare(attrs, opts, required:, using:, except:, as:, &block)
-        merged_opts = @group&.deep_merge(opts) || opts
+        merged_opts = with_group_options(opts)
         declared_as = as || merged_opts[:as]
 
         if using
@@ -205,6 +204,11 @@ module Grape
         return push_declared_params(attrs, as: declared_as) unless block
 
         new_scope(attrs.first, type: merged_opts[:type], as: declared_as, optional: !required, &block)
+      end
+
+      # +opts+ over the options of the +with+ blocks enclosing the declaration.
+      def with_group_options(opts)
+        @group&.deep_merge(opts) || opts
       end
 
       # A trailing positional options Hash (deprecated): since Ruby 3 keyword

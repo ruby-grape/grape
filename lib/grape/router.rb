@@ -144,13 +144,19 @@ module Grape
           # Matched here rather than through #match? so the MatchData survives: the
           # route's path captures are groups of it (see Route#params_for).
           union&.match(input) do |m|
-            exact_route = routes.detect { |route| m[route.regexp_capture_group] }
+            exact_route = matched_route(routes, m)
             response = process_route(exact_route, input, env, m, exact_route.union_captures)
           end
         end
       end
       return response if halt?(response)
 
+      fall_back(input, method, env, response, exact_route)
+    end
+
+    # What #transaction tries once the route +input+ matched has declined
+    # (+response+ cascades), or once none matched (+response+ is nil).
+    def fall_back(input, method, env, response, exact_route)
       # A cascading route has only declined this request. Its siblings — the
       # routes sharing this path but differing in, say, version — must be
       # tried before falling back to the ANY routes and the greedy neighbour.
@@ -175,21 +181,27 @@ module Grape
 
       # If last_neighbor_route exists and request method is OPTIONS,
       # return response by using #include_allow_header.
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !cascaded && method == Rack::OPTIONS && last_neighbor_route
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route && method == Rack::OPTIONS
 
       star_route = match?(input, '*')
-
       if star_route
-        close_body(response) if response # superseded by the ANY route
-        response = process_route(star_route, input, env)
-        return response if halt?(response)
-
-        cascaded ||= !response.nil?
+        response = process_star_route(star_route, input, env, response)
+        # Halting or cascading, the ANY route's answer is the one returned.
+        return response if response
       end
 
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if !cascaded && last_neighbor_route
+      return process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route
 
       response
+    end
+
+    # The ANY route's answer, superseding +response+. A cascading one has its
+    # body closed, as #halt? closes it, and is still what #neighbours returns.
+    def process_star_route(star_route, input, env, response)
+      close_body(response) if response
+      star_response = process_route(star_route, input, env)
+      close_body(star_response) if cascade?(star_response)
+      star_response
     end
 
     # The routes registered for +method+ other than +exact_route+, tried in
@@ -270,17 +282,25 @@ module Grape
         static_paths(route).each do |path|
           next if table.key?(path)
 
-          union.match(path) do |m|
-            matched = routes.detect { |candidate| m[candidate.regexp_capture_group] }
-            captures = matched.params_for(path, m)
-            # Only a String is frozen whole below; any other capture would be
-            # shared across requests with its insides open to change.
-            next unless captures.nil? || captures.each_value.all?(String)
-
-            table[path] = [matched, captures.presence&.each_value(&:freeze)&.freeze].freeze
-          end
+          entry = static_route_entry(union, routes, path)
+          table[path] = entry if entry
         end
       end.freeze
+    end
+
+    # The route a request for +path+ resolves to and the captures it hands
+    # over, frozen for every such request to share; nil when a capture is not
+    # a String.
+    def static_route_entry(union, routes, path)
+      union.match(path) do |m|
+        matched = matched_route(routes, m)
+        captures = matched.params_for(path, m)
+        # Only a String is frozen whole below; any other capture would be
+        # shared across requests with its insides open to change.
+        next unless captures.nil? || captures.each_value.all?(String)
+
+        [matched, captures.presence&.each_value(&:freeze)&.freeze].freeze
+      end
     end
 
     STATIC_PATH_EXCLUDED = /[:*?(){}|\\%]/
@@ -334,6 +354,12 @@ module Grape
 
     def greedy_match?(input)
       @union.match(input) { |m| @neutral_map.detect { |route| m[route.regexp_capture_group] } }
+    end
+
+    # The route of +routes+ whose alternative of their union produced +match+,
+    # found as #match? finds it.
+    def matched_route(routes, match)
+      routes.detect { |route| match[route.regexp_capture_group] }
     end
 
     # The greedy route for +input+ once the routes for +method+ have all missed

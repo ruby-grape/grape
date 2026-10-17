@@ -230,16 +230,7 @@ module Grape
       def read_rack_input(env, body, media_type)
         return if body.empty?
 
-        # RFC 10008, Sections 2 and 2.1: a QUERY carries its query in the
-        # content, so a request that never says what that content is cannot be
-        # interpreted and must fail rather than be read as the default format.
-        # Every other method keeps that fallback.
-        throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: 'The QUERY method requires a content-type.') if media_type.nil? && env[Rack::REQUEST_METHOD] == Grape::QUERY
-
-        fmt = media_type ? mime_types[media_type] : default_format
-
-        throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
-        parser = Grape::Parser.parser_for fmt, parsers
+        parser = Grape::Parser.parser_for body_format(env, media_type), parsers
         return env[Grape::Env::API_REQUEST_BODY] = body unless parser
 
         begin
@@ -255,6 +246,21 @@ module Grape
         rescue ForeignParserError => e
           throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: e.message, backtrace: e.backtrace, original_exception: e)
         end
+      end
+
+      # The format a body of +media_type+ is read as, thrown as an error
+      # response when it cannot be read at all.
+      def body_format(env, media_type)
+        # RFC 10008, Sections 2 and 2.1: a QUERY carries its query in the
+        # content, so a request that never says what that content is cannot be
+        # interpreted and must fail rather than be read as the default format.
+        # Every other method keeps that fallback.
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: 'The QUERY method requires a content-type.') if media_type.nil? && env[Rack::REQUEST_METHOD] == Grape::QUERY
+
+        fmt = media_type ? mime_types[media_type] : default_format
+        throw :error, Grape::Exceptions::ErrorResponse.new(status: 415, message: "The provided content-type '#{media_type}' is not supported.") unless content_type_for(fmt)
+
+        fmt
       end
 
       # What a parser raises that is not a Grape error, and so is answered as a

@@ -101,22 +101,7 @@ module Grape
           scoped = scope.params(params) if @direct
           return validate_attributes!(scoped) if scoped.is_a?(Hash)
 
-          # we collect errors inside array because
-          # there may be more than one error per field
-          array_errors = nil
-
-          @iterator.each(params) do |val, element|
-            next if passed_over?(val, element)
-            next unless scope.meets_dependency?(val, params)
-
-            @attrs.each do |attr_name|
-              validate_param!(attr_name, val) if required? || (hash_like?(val) && val.key?(attr_name))
-            rescue Grape::Exceptions::Validation => e
-              (array_errors ||= []) << e
-            end
-          end
-
-          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
+          validate_iterated!(params)
         end
 
         protected
@@ -171,7 +156,7 @@ module Grape
         # scope's own type check reports it.
         def validate_elements!(elements)
           return unless elements.is_a?(Array)
-          return if !scope.required? && elements.all? { |element| empty_element?(element) }
+          return if passed_over_elements?(elements)
 
           tracker = ParamScopeTracker.current
           array_errors = nil
@@ -180,20 +165,52 @@ module Grape
             tracker&.store_index(scope, index)
             next if ParamsScope::EmptyOptionalValue.equal?(element)
 
-            @attrs.each do |attr_name|
-              validate_param!(attr_name, element) if required? || (hash_like?(element) && element.key?(attr_name))
-            rescue Grape::Exceptions::Validation => e
-              (array_errors ||= []) << e
-            end
+            array_errors = validate_element_attributes(element, array_errors)
           end
 
           raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
+        end
+
+        # #validate! on every other scope: each value the iterator yields is
+        # validated, unless the scope passes it over or depends on a param it
+        # does not meet.
+        def validate_iterated!(params)
+          # we collect errors inside array because
+          # there may be more than one error per field
+          array_errors = nil
+
+          @iterator.each(params) do |val, element|
+            next if passed_over?(val, element)
+            next unless scope.meets_dependency?(val, params)
+
+            array_errors = validate_element_attributes(val, array_errors)
+          end
+
+          raise Grape::Exceptions::ValidationArrayErrors.new(array_errors) if array_errors
+        end
+
+        # Runs #validate_param! for each attribute +element+ holds, or for every
+        # one when they are required, and returns +array_errors+ with what
+        # failed appended, allocating it on the first failure.
+        def validate_element_attributes(element, array_errors)
+          @attrs.each do |attr_name|
+            validate_param!(attr_name, element) if required? || (hash_like?(element) && element.key?(attr_name))
+          rescue Grape::Exceptions::Validation => e
+            (array_errors ||= []) << e
+          end
+          array_errors
         end
 
         # Whether #validate! leaves +val+ alone: in an optional scope, an empty
         # value that is not an element the request sent (see AttributesIterator).
         def passed_over?(val, element)
           !scope.required? && !element && empty_element?(val)
+        end
+
+        # Whether #validate_elements! leaves +elements+ alone: an optional
+        # scope's Array whose elements are all empty, as the iterator does.
+        def passed_over_elements?(elements)
+          !scope.required? && elements.all? { |element| empty_element?(element) }
         end
 
         # What an optional scope passes over: its params given empty in an

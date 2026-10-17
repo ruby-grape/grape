@@ -123,11 +123,16 @@ module Grape
       type = route_params.dig(key, :type)
       return yield if type.nil?
 
+      empty_value_for(type, key, route_params) || yield
+    end
+
+    # The empty value a param of +type+ declares when it was not passed, or
+    # nil when +type+ has none. A fresh one every time: the caller may fill it.
+    def empty_value_for(type, key, route_params)
       return {} if type == 'Hash' && no_child_params?(route_params, "#{key}[")
       return [] if type == 'Array' || (type.start_with?('[') && !type.include?(','))
-      return Set.new if type == 'Set' || type.start_with?('#<Set', 'Set')
 
-      yield
+      Set.new if type.start_with?('#<Set', 'Set')
     end
 
     # The prefix is built once by the caller: interpolated inside the block, it

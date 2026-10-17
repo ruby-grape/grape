@@ -25,13 +25,21 @@ module Grape
         def validate_param!(attr_name, params)
           return unless hash_like?(params) && params.key?(attr_name)
 
-          excepts = @excepts_call ? @excepts_call.call : @excepts
+          excepts = current_excepts
           return if excepts.nil?
 
           param_array = params[attr_name].nil? ? [nil] : Array.wrap(params[attr_name])
           return if param_array.none? { |param| excepts.include?(param) }
 
           validation_error!(attr_name)
+        end
+
+        private
+
+        # The values ruled out, asked of the Proc on every request when they
+        # come from one.
+        def current_excepts
+          @excepts_call ? @excepts_call.call : @excepts
         end
       end
     end

@@ -173,6 +173,19 @@ describe Grape::Router do
       expect(closed).to eq([true])
     end
 
+    it 'closes the body of a cascading sibling an ANY route answers in place of' do
+      closed = []
+      body = ['declined']
+      body.define_singleton_method(:close) { closed << true }
+      append_route(cascading)
+      append_route(->(_env) { [404, { 'X-Cascade' => 'pass' }, body] })
+      append_route(any_handler, '*')
+      router.compile!
+
+      expect(response_body).to eq('any')
+      expect(closed).to eq([true])
+    end
+
     it 'returns the last cascading response when nothing else answers' do
       append_route(cascading)
       append_route(cascading)

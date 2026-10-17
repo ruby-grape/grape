@@ -9,6 +9,14 @@ module Grape
       # Backward compatibility: alias exception class to previous location
       MethodNotYetAvailable = Declared::MethodNotYetAvailable
 
+      # The body #redirect renders when the caller gives none, by status.
+      REDIRECT_MESSAGES = {
+        301 => 'This resource has been moved permanently to %<url>s.',
+        302 => 'This resource has been moved temporarily to %<url>s.',
+        303 => 'An alternate resource is located at %<url>s.'
+      }.freeze
+      private_constant :REDIRECT_MESSAGES
+
       # The API version negotiated for this request.
       def version
         env[Grape::Env::API_VERSION]
@@ -41,29 +49,27 @@ module Grape
       # @param permanent [Boolean] default false.
       # @param body default a short message including the URL.
       def redirect(url, permanent: false, body: nil)
-        body_message = body
-        if permanent
-          status 301
-          body_message ||= "This resource has been moved permanently to #{url}."
-        elsif http_version == 'HTTP/1.1' && !request.get?
-          status 303
-          body_message ||= "An alternate resource is located at #{url}."
-        else
-          status 302
-          body_message ||= "This resource has been moved temporarily to #{url}."
-        end
+        code = if permanent
+                 301
+               elsif http_version == 'HTTP/1.1' && !request.get?
+                 303
+               else
+                 302
+               end
+        status code
         header 'Location', url
+        # A caller-supplied body keeps the API's format, and the content type
+        # that goes with it: it may be structured, and the txt formatter would
+        # render a Hash through `to_s`.
+        return body(body) if body
+
         # Render the message Grape generated as the plain text it is. Setting
         # only the header left it to the API's own formatter, which on a JSON
         # API returned the sentence wrapped in quotes under a text/plain content
-        # type. A caller-supplied body keeps the API's format, and the content
-        # type that goes with it: it may be structured, and the txt formatter
-        # would render a Hash through `to_s`.
-        unless body
-          content_type 'text/plain'
-          api_format :txt
-        end
-        body body_message
+        # type.
+        content_type 'text/plain'
+        api_format :txt
+        body format(REDIRECT_MESSAGES.fetch(code), url:)
       end
 
       # Set or retrieve the HTTP status code.

@@ -161,8 +161,13 @@ module Grape
 
         return args.pop if args.last.is_a?(Proc)
         return block if block
-        return unless with
 
+        with_handler(with) if with
+      end
+
+      # A +with:+ handler as +rescue_from+ stores it: a Proc, or the name of a
+      # method to call.
+      def with_handler(with)
         case with
         when Proc, Symbol then with
         when String then with.to_sym

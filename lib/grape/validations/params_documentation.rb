@@ -23,20 +23,24 @@ module Grape
         details[:values] = spec.values if spec.values
         details[:except_values] = spec.except_values if spec.except_values
         details[:default] = spec.default unless spec.default.nil?
+        add_raw_details(details, spec.raw)
+        details
+      end
 
-        length = spec.raw[:length]
+      # What the declaration's own options document beyond its validations:
+      # the +length+ bounds, the description and the +documentation+ Hash.
+      def add_raw_details(details, raw)
+        length = raw[:length]
         if length.is_a?(Hash)
           details[:min_length] = length[:min] if length.key?(:min)
           details[:max_length] = length[:max] if length.key?(:max)
         end
 
-        desc = spec.raw[:desc] || spec.raw[:description]
+        desc = raw[:desc] || raw[:description]
         details[:desc] = desc if desc
 
-        documentation = spec.raw[:documentation]
+        documentation = raw[:documentation]
         details[:documentation] = documentation if documentation
-
-        details
       end
 
       class TypeCache < Grape::Util::Cache
