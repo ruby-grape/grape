@@ -77,13 +77,9 @@ module Grape
       # @param status [Integer] The HTTP Status Code to return for this request.
       def status(status = nil)
         return @status || default_status if status.nil?
+        raise ArgumentError, 'status code must be Integer or Symbol' unless status.is_a?(Symbol) || status.is_a?(Integer)
 
-        case status
-        when Symbol, Integer
-          @status = Rack::Utils.status_code(status)
-        else
-          raise ArgumentError, 'status code must be Integer or Symbol'
-        end
+        @status = Rack::Utils.status_code(status)
       end
 
       # Set response content-type

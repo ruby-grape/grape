@@ -3,7 +3,7 @@
 module Grape
   module DSL
     # Immutable value object holding the resolved options from
-    # +Grape::DSL::Routing#version+. Stored on the inheritable settings as
+    # +Grape::DSL::Versioning#version+. Stored on the inheritable settings as
     # +Grape::Util::InheritableSetting#version_options+ and read by internal call
     # sites (`Path`, `Endpoint`, `API::Instance`,
     # `Middleware::Versioner::Base`) via accessors.

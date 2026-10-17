@@ -5,89 +5,6 @@ module Grape
     module Routing
       attr_reader :endpoints
 
-      def given(conditional_option, &)
-        return unless conditional_option
-
-        mounted(&)
-      end
-
-      def mounted(&block)
-        evaluate_as_instance_with_configuration(block, lazy: true)
-      end
-
-      # Called without a value, answers whether the API cascades: the value
-      # given here, else the +cascade:+ of +version+, else true. The compiled
-      # API reads it here too; this reader used to skip +version+, and so
-      # answered true for an API that did not cascade.
-      def cascade(value = nil)
-        return inheritable_setting.cascade = value unless value.nil?
-
-        setting = inheritable_setting
-        return setting.cascade if setting.cascade_defined?
-        return setting.version_options.cascade if setting.version_options
-
-        true
-      end
-
-      # Specify an API version.
-      #
-      # Called without arguments, returns the most recently declared version
-      # (or +nil+). Called with one or more version strings, registers them
-      # and stores a {Grape::DSL::VersionOptions} value object on the
-      # inheritable settings; when given a block, the registration applies
-      # within a nested namespace.
-      #
-      # @example API with legacy support.
-      #   class MyAPI < Grape::API
-      #     version 'v2'
-      #
-      #     get '/main' do
-      #       {some: 'data'}
-      #     end
-      #
-      #     version 'v1' do
-      #       get '/main' do
-      #         {legacy: 'data'}
-      #       end
-      #     end
-      #   end
-      #
-      # @param args [Array<String, Symbol>] one or more version identifiers.
-      # @param using [Symbol] versioning strategy — one of +:path+ (default),
-      #   +:header+, +:param+, or +:accept_version_header+.
-      # @param cascade [Boolean] forward to subsequent routes via the
-      #   +X-Cascade+ header on version mismatch. Defaults to +true+.
-      # @param parameter [String] name of the query/body parameter that
-      #   carries the version when +using: :param+. Defaults to +'apiver'+.
-      # @param strict [Boolean] reject requests that don't supply a usable
-      #   version (header strategies). Defaults to +false+.
-      # @param vendor [String, nil] vendor segment for the +:header+
-      #   strategy (+application/vnd.<vendor>-<version>+); required when
-      #   +using: :header+.
-      # @yield optional block to scope routes under this version.
-      # @return [String, nil] the most recently declared version.
-      # @raise [Grape::Exceptions::MissingVendorOption] when +using: :header+
-      #   is supplied without a +:vendor+.
-      def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
-        return @versions&.last if args.empty?
-
-        options = build_version_options(using:, cascade:, parameter:, strict:, vendor:)
-        requested_versions = args.flatten.map(&:to_s)
-
-        @versions = versions | requested_versions
-
-        if block
-          within_namespace do
-            apply_version(requested_versions, options)
-            instance_eval(&block)
-          end
-        else
-          apply_version(requested_versions, options)
-        end
-
-        @versions.last
-      end
-
       # Define a root URL prefix for your entire API.
       def prefix(prefix = nil)
         return inheritable_setting.root_prefix if prefix.nil?
@@ -100,9 +17,7 @@ module Grape
       # @param _name [Symbol] Purely placebo, just allows to name the scope to
       # make the code more readable.
       def scope(_name = nil, &block)
-        within_namespace do
-          nest(block)
-        end
+        within_namespace { nest(block) }
       end
 
       def build_with(build_with)
@@ -125,33 +40,6 @@ module Grape
 
       def do_not_document!
         inheritable_setting.do_not_document!
-      end
-
-      def mount(mounts, opts = {})
-        mount_opts = opts
-        if opts[:refresh_already_mounted]
-          Grape.deprecator.warn('`refresh_already_mounted` is not a `mount` option and will be ignored in a future release.')
-          drop_endpoints_mounted_for(mounts)
-          # Dropped before the recursion below re-enters with the same options,
-          # so a Grape API does not warn once per mount and once per instance.
-          mount_opts = opts.except(:refresh_already_mounted)
-        end
-
-        normalize_mounts(mounts).each_pair do |app, path|
-          if app.respond_to?(:mount_instance)
-            mount({ app.mount_instance(configuration: mount_opts[:with] || {}) => path }, mount_opts)
-            next
-          end
-
-          endpoints << Grape::Endpoint.new(
-            mounted_setting(app, path),
-            http_methods: '*',
-            path:,
-            app:,
-            anchor: false,
-            api: self
-          )
-        end
       end
 
       # Defines a route that will be recognized
@@ -256,11 +144,6 @@ module Grape
         namespace(":#{param}", requirements: param_requirements, **, &)
       end
 
-      # @return array of defined versions
-      def versions
-        @versions ||= []
-      end
-
       private
 
       # Requirements are keyed by param name and merged across namespaces, so
@@ -290,31 +173,6 @@ module Grape
         description_options.deep_merge!(route_options)
       end
 
-      def build_version_options(using:, vendor:, **)
-        raise Grape::Exceptions::MissingVendorOption.new if using == :header && vendor.nil?
-
-        VersionOptions.new(using:, vendor:, **)
-      end
-
-      def apply_version(versions, options)
-        inheritable_setting.version = versions
-        inheritable_setting.version_options = options
-      end
-
-      # The settings the endpoint mounting +app+ at +path+ is built with. Past
-      # #mount's +mount_instance+ branch, a Grape app is an already instantiated
-      # Grape::API::Instance (vs. a bare Rack app): it inherits this API's
-      # settings and is built from its own.
-      def mounted_setting(app, path)
-        return inheritable_setting unless app.is_a?(Grape::Mountable)
-
-        app.top_level_setting.add_mount_path(Grape::Util::PathNormalizer.call(path))
-        app.inherit_settings(inheritable_setting)
-        app.change!
-        change!
-        app.top_level_setting
-      end
-
       # Remove all defined routes.
       def reset_routes!
         endpoints.each(&:reset_routes!)
@@ -323,82 +181,6 @@ module Grape
 
       def reset_endpoints!
         @endpoints = []
-      end
-
-      # Re-mount +mounts+, replacing any endpoint already mounted for the same
-      # base API rather than adding a second one. Called by
-      # {Grape::API.refresh_mount_step} when a class-level method runs after the
-      # API was mounted.
-      #
-      # A bare Rack app is put back where it was mounted. It is routed as an
-      # ANY route, and those are tried in the order they were declared, so
-      # re-mounting it last let a catch-all declared after it answer first. A
-      # mounted Grape API still moves to the end: its routes answer for
-      # specific methods, where moving them would change which of two
-      # routes on the same path answers.
-      def refresh_mounted_api(mounts, opts = {})
-        namespace = inheritable_setting.namespace_path
-        normalize_mounts(mounts).each_pair do |app, path|
-          position = endpoints.index { |endpoint| mounted_at?(endpoint, app, Array(path), namespace) } unless app.respond_to?(:mount_instance)
-          drop_endpoints_mounted_for(app => path)
-          mount({ app => path }, opts)
-          endpoints.insert(position, endpoints.pop) if position
-        end
-      end
-
-      # A mounted Grape API is stored as the throwaway instance +mount+ built
-      # for it, never as the class that was written, so endpoints are matched on
-      # the base API both of them share -- and on where it was mounted, the
-      # path and the current namespace: the same API mounted at two paths, or
-      # in two namespaces, is two mounts, and refreshing one must leave the
-      # other in place.
-      def drop_endpoints_mounted_for(mounts)
-        namespace = inheritable_setting.namespace_path
-        normalize_mounts(mounts).each_pair do |app, path|
-          paths = Array(path)
-          endpoints.delete_if do |endpoint|
-            dropped = mounted_at?(endpoint, app, paths, namespace)
-            release_mount_instance(endpoint.mounted_app) if dropped
-            dropped
-          end
-        end
-      end
-
-      # A Grape API keeps every instance +mount+ builds for it, so that steps
-      # recorded later replay onto each (see Grape::API::Instance.base=). Once
-      # the endpoint serving one is dropped, nothing serves it: its API lets go
-      # of it, and of the instances built for the APIs mounted inside it.
-      # Otherwise every refresh left another copy of each mounted API behind.
-      def release_mount_instance(mounted)
-        return unless mounted.respond_to?(:base) && mounted.base.respond_to?(:instances)
-
-        mounted.base.instances.delete(mounted)
-        mounted.endpoints.each { |endpoint| release_mount_instance(endpoint.mounted_app) }
-      end
-
-      # A bare app mounts at the root. The test is +Hash+ rather than
-      # +respond_to?(:each_pair)+ because a Struct or an OpenStruct answers that
-      # too, and neither can express an app => path mapping — their keys are
-      # member names. Reading one as a mapping would silently mount nonsense
-      # instead of mounting the app itself.
-      def normalize_mounts(mounts)
-        mounts.is_a?(Hash) ? mounts : { mounts => '/' }
-      end
-
-      def mounted_at?(endpoint, app, paths, namespace)
-        same_mounted_app?(endpoint.mounted_app, app) && endpoint.path == paths && endpoint.namespace == namespace
-      end
-
-      # Two mounts refer to the same app when they share the same base Grape
-      # API. +mount+ turns every mounted Grape API into a throwaway
-      # +mount_instance+ (a fresh +Class.new+ per mount), so object identity
-      # never holds across mounts; comparing the base is the real signal.
-      # Plain Rack apps have no base and are mounted as-is, so they fall back
-      # to object identity.
-      def same_mounted_app?(mounted, app)
-        return mounted.base.equal?(app.base) if mounted.respond_to?(:base) && app.respond_to?(:base)
-
-        mounted.equal?(app)
       end
 
       # Execute first the provided block, then each of the
@@ -411,19 +193,6 @@ module Grape
         evaluate_as_instance_with_configuration(block) if block
         blocks.each { |b| evaluate_as_instance_with_configuration(b) }
         reset_validations!
-      end
-
-      def evaluate_as_instance_with_configuration(block, lazy: false)
-        lazy_block = Grape::Util::Lazy::Block.new do |configuration|
-          value_for_configuration = configuration
-          self.configuration = value_for_configuration.evaluate if value_for_configuration.is_a?(Grape::Util::Lazy::Base)
-          response = instance_eval(&block)
-          self.configuration = value_for_configuration
-          response
-        end
-        return lazy_block if @base && base_instance? && lazy
-
-        lazy_block.evaluate_from(configuration)
       end
     end
   end

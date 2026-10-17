@@ -485,7 +485,7 @@ module Grape
       end
 
       # The path a Grape API is mounted under, recorded on the mounted API's
-      # top-level settings by +mount+ (see DSL::Routing). Reading returns the
+      # top-level settings by +mount+ (see DSL::Mounting). Reading returns the
       # outermost mount path — nil when the API is not mounted; the backing
       # store is an internal detail.
       def mount_path
@@ -558,7 +558,7 @@ module Grape
         set_inheritable(:default_error_status, status)
       end
 
-      # Versioning state recorded by the routing DSL (see DSL::Routing):
+      # Versioning state recorded by the DSL (see DSL::Versioning and DSL::Routing):
       # +version+ holds the Array of version strings registered by the
       # +version+ DSL method, +version_options+ its DSL::VersionOptions
       # value object, and +root_prefix+ the path prefix set by +prefix+.
