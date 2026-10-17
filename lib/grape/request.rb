@@ -208,10 +208,8 @@ module Grape
 
     def make_params
       params = build_params
-      filtered = routing_args_as_params(env[Grape::Env::GRAPE_ROUTING_ARGS])
-      return params unless filtered
-
-      params.deep_merge!(filtered)
+      merge_routing_args!(params, env[Grape::Env::GRAPE_ROUTING_ARGS])
+      params
     rescue *Grape::RACK_ERRORS
       raise Grape::Exceptions::RequestError
     end
@@ -225,15 +223,19 @@ module Grape
     # (`route_param :version`, `get '/:version'`), and that capture belongs to
     # the application. Dropping it unconditionally left `params[:version]` nil
     # on a route that had matched, losing the segment silently.
-    def routing_args_as_params(routing_args)
+    #
+    # The rest are written into +params+ one by one rather than deep-merged
+    # from an +except+ copy, which was a Hash built per request only to be
+    # merged away. A capture is a String or an Array of them, never a Hash,
+    # so +deep_merge!+ had nothing to merge into: it replaced the value, as
+    # assigning it does.
+    def merge_routing_args!(params, routing_args)
       return if routing_args.nil?
 
       grape_owned = grape_owns_version?(routing_args) ? GRAPE_OWNED_ROUTING_ARGS : ROUTE_INFO_ONLY
-      # Nothing but Grape's own keys: +except+ would build an empty Hash for
-      # +make_params+ to merge for nothing. What is returned is never empty.
-      return if routing_args.size == grape_owned.count { |key| routing_args.key?(key) }
-
-      routing_args.except(*grape_owned)
+      routing_args.each do |key, value|
+        params[key] = value unless grape_owned.include?(key)
+      end
     end
 
     # A route reports a +version+ only when the API declared one, which is the
