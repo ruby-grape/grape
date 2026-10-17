@@ -93,6 +93,7 @@
 * [#3033](https://github.com/ruby-grape/grape/pull/3033): Allocate less per request when presenting an entity or reading path params - [@ericproulx](https://github.com/ericproulx).
 * [#3034](https://github.com/ruby-grape/grape/pull/3034): Shrink each request's copy of its endpoint - [@ericproulx](https://github.com/ericproulx).
 * [#3038](https://github.com/ruby-grape/grape/pull/3038): Hold every method to RuboCop's default ABC size - [@ericproulx](https://github.com/ericproulx).
+* [#3039](https://github.com/ruby-grape/grape/pull/3039): Hold every module to RuboCop's default length - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)

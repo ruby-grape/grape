@@ -15,6 +15,8 @@ module Grape
       extend Grape::DSL::Middleware
       extend Grape::DSL::RequestResponse
       extend Grape::DSL::Routing
+      extend Grape::DSL::Mounting
+      extend Grape::DSL::Versioning
       extend Grape::DSL::Helpers
       extend Grape::Middleware::Auth::DSL
 

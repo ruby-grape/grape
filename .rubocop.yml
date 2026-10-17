@@ -63,9 +63,6 @@ Metrics/ParameterLists:
 Metrics/MethodLength:
   Max: 32
 
-Metrics/ModuleLength:
-  Max: 220
-
 RSpec/ExampleLength:
   Max: 60
 
