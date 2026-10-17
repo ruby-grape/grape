@@ -69,9 +69,6 @@ Metrics/MethodLength:
 Metrics/ModuleLength:
   Max: 220
 
-Metrics/PerceivedComplexity:
-  Max: 15
-
 RSpec/ExampleLength:
   Max: 60
 
