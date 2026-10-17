@@ -67,72 +67,71 @@ module Grape
       alias use_scope use
       alias includes use
 
-      # Require one or more parameters for the current endpoint.
+      # @!method requires(*attrs, using: nil, except: nil, as: nil, **opts, &block)
+      #   Require one or more parameters for the current endpoint.
       #
-      # @param attrs list of parameters names, or, if :using is
-      #   passed as an option, which keys to include (:all or :none) from
-      #   the :using hash. Passing the options as a trailing positional Hash
-      #   is deprecated; pass them as keyword arguments instead.
-      # @option attrs :type [Class] the type to coerce this parameter to before
-      #   passing it to the endpoint. See {Grape::Validations::Types} for a list of
-      #   types that are supported automatically. Custom classes may be used
-      #   where they define a class-level `::parse` method, or in conjunction
-      #   with the `:coerce_with` parameter. `JSON` may be supplied to denote
-      #   `JSON`-formatted objects or arrays of objects. `Array[JSON]` accepts
-      #   the same values as `JSON` but will wrap single objects in an `Array`.
-      # @option attrs :types [Array<Class>] may be supplied in place of +:type+
-      #   to declare an attribute that has multiple allowed types. See
-      #   {Validations::Types::MultipleTypeCoercer} for more details on coercion
-      #   and validation rules for variant-type parameters.
-      # @option attrs :desc [String] description to document this parameter
-      # @option attrs :default [Object] default value, if parameter is optional
-      # @option attrs :values [Array] permissible values for this field. If any
-      #   other value is given, it will be handled as a validation error
-      # @option attrs :using [Hash[Symbol => Hash]] a hash defining keys and
-      #   options, like that returned by {Grape::Entity#documentation}. The value
-      #   of each key is an options hash accepting the same parameters
-      # @option attrs :except [Array[Symbol]] a list of keys to exclude from
-      #   the :using Hash. The meaning of this depends on if :all or :none was
-      #   passed; :all + :except will make the :except fields optional, whereas
-      #   :none + :except will make the :except fields required
-      # @option attrs :coerce_with [#parse, #call] method to be used when coercing
-      #   the parameter to the type named by `attrs[:type]`. Any class or object
-      #   that defines `::parse` or `::call` may be used.
+      #   @param attrs list of parameters names, or, if :using is
+      #     passed as an option, which keys to include (:all or :none) from
+      #     the :using hash. Passing the options as a trailing positional Hash
+      #     is deprecated; pass them as keyword arguments instead.
+      #   @option attrs :type [Class] the type to coerce this parameter to before
+      #     passing it to the endpoint. See {Grape::Validations::Types} for a list of
+      #     types that are supported automatically. Custom classes may be used
+      #     where they define a class-level `::parse` method, or in conjunction
+      #     with the `:coerce_with` parameter. `JSON` may be supplied to denote
+      #     `JSON`-formatted objects or arrays of objects. `Array[JSON]` accepts
+      #     the same values as `JSON` but will wrap single objects in an `Array`.
+      #   @option attrs :types [Array<Class>] may be supplied in place of +:type+
+      #     to declare an attribute that has multiple allowed types. See
+      #     {Validations::Types::MultipleTypeCoercer} for more details on coercion
+      #     and validation rules for variant-type parameters.
+      #   @option attrs :desc [String] description to document this parameter
+      #   @option attrs :default [Object] default value, if parameter is optional
+      #   @option attrs :values [Array] permissible values for this field. If any
+      #     other value is given, it will be handled as a validation error
+      #   @option attrs :using [Hash[Symbol => Hash]] a hash defining keys and
+      #     options, like that returned by {Grape::Entity#documentation}. The value
+      #     of each key is an options hash accepting the same parameters
+      #   @option attrs :except [Array[Symbol]] a list of keys to exclude from
+      #     the :using Hash. The meaning of this depends on if :all or :none was
+      #     passed; :all + :except will make the :except fields optional, whereas
+      #     :none + :except will make the :except fields required
+      #   @option attrs :coerce_with [#parse, #call] method to be used when coercing
+      #     the parameter to the type named by `attrs[:type]`. Any class or object
+      #     that defines `::parse` or `::call` may be used.
       #
-      # @example
+      #   @example
       #
-      #     params do
-      #       # Basic usage: require a parameter of a certain type
-      #       requires :user_id, type: Integer
+      #       params do
+      #         # Basic usage: require a parameter of a certain type
+      #         requires :user_id, type: Integer
       #
-      #       # Without a type, the value is not coerced
-      #       requires :foo
+      #         # Without a type, the value is not coerced
+      #         requires :foo
       #
-      #       # Multiple params can be specified at once if they share
-      #       # the same options.
-      #       requires :x, :y, :z, type: Date
+      #         # Multiple params can be specified at once if they share
+      #         # the same options.
+      #         requires :x, :y, :z, type: Date
       #
-      #       # Nested parameters can be handled as hashes. You must
-      #       # pass in a block, within which you can use any of the
-      #       # parameters DSL methods.
-      #       requires :user, type: Hash do
-      #         requires :name, type: String
+      #         # Nested parameters can be handled as hashes. You must
+      #         # pass in a block, within which you can use any of the
+      #         # parameters DSL methods.
+      #         requires :user, type: Hash do
+      #           requires :name, type: String
+      #         end
       #       end
-      #     end
-      def requires(*attrs, using: nil, except: nil, as: nil, **opts, &)
-        return redispatch_legacy_options(:requires, attrs, { using:, except:, as: }.compact.merge(opts), &) if legacy_options?(attrs)
+      #
+      # @!method optional(*attrs, using: nil, except: nil, as: nil, **opts, &block)
+      #   Allow, but don't require, one or more parameters for the current
+      #     endpoint.
+      #   @param (see Grape::DSL::Parameters#requires)
+      #   @option (see Grape::DSL::Parameters#requires)
+      { requires: true, optional: false }.each do |method_name, required|
+        define_method(method_name) do |*attrs, using: nil, except: nil, as: nil, **opts, &block|
+          return redispatch_legacy_options(method_name, attrs, { using:, except:, as: }.compact.merge(opts), &block) if legacy_options?(attrs)
 
-        declare(attrs, opts, required: true, using:, except:, as:, &)
-      end
-
-      # Allow, but don't require, one or more parameters for the current
-      #   endpoint.
-      # @param (see #requires)
-      # @option (see #requires)
-      def optional(*attrs, using: nil, except: nil, as: nil, **opts, &)
-        return redispatch_legacy_options(:optional, attrs, { using:, except:, as: }.compact.merge(opts), &) if legacy_options?(attrs)
-
-        declare(attrs, opts, required: false, using:, except:, as:, &)
+          declare(attrs, opts, required:, using:, except:, as:, &block)
+        end
       end
 
       # Define common settings for one or more parameters

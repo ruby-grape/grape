@@ -87,6 +87,7 @@
 * [#3027](https://github.com/ruby-grape/grape/pull/3027): Scrub outside input through one helper, `Grape::Util::Scrub` - [@ericproulx](https://github.com/ericproulx).
 * [#3028](https://github.com/ruby-grape/grape/pull/3028): Resolve a scope's request params in `ParamsScope` instead of the params DSL - [@ericproulx](https://github.com/ericproulx).
 * [#3030](https://github.com/ruby-grape/grape/pull/3030): Restore the Error middleware's two defaults without restating every option - [@ericproulx](https://github.com/ericproulx).
+* [#3035](https://github.com/ruby-grape/grape/pull/3035): Define `requires` and `optional` from one definition - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.0.1 (2026-09-15)
