@@ -3,6 +3,16 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### A `:jsonl` format you declared now gets Grape's JSON Lines formatter, parser and error formatter
+
+Grape now renders, parses and reports errors in JSON Lines under `:jsonl` ([#3029](https://github.com/ruby-grape/grape/pull/3029)). An API that declared `content_type :jsonl, ...` itself, with nothing of its own registered for it, gets Grape's:
+
+* A response body that is not a String renders as JSON Lines. A String is still served as it is.
+* A request body is parsed into an Array in `env['api.request.body']`, where it used to be the raw String. Keep the String with `parser :jsonl, nil`.
+* An error renders as a JSON line instead of through `default_error_formatter`.
+
+A formatter, parser or error formatter you register for `:jsonl` with `formatter`, `parser` or `error_formatter` still takes precedence.
+
 #### `logger` applies to the API it is set on
 
 `logger` kept the logger in settings shared by the whole process, so setting it on one API replaced it on every other: two APIs that each set a logger both logged to whichever was set last.
