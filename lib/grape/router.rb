@@ -10,7 +10,6 @@ module Grape
       # so request-time reads never mutate shared state (see #match? / #rotation).
       @map = {}
       @optimized_map = {}
-      @static_routes = {}
       # Per HTTP method, the greedy routes still worth trying once that method's
       # own routes have missed a path (see #compile_neighbour_map).
       @neighbour_map = {}
@@ -33,20 +32,19 @@ module Grape
       @map.each do |method, routes|
         optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
         union = resolve_capture_groups(Regexp.union(optimized_map), routes)
-        # Paired with the routes it was built from, so a match reads both
-        # through a single lookup, and with the buckets that narrow those
-        # routes by a path segment (nil when no segment splits them well).
-        @optimized_map[method] = [union, routes, RouteBuckets.build(routes, optimized_map, bucket_unions)].freeze
-        # Left out when no route spells out a path in full, so a request for
-        # +method+ goes straight to the union rather than missing a lookup first.
         static_routes = static_routes_for(union, routes)
-        @static_routes[method] = static_routes unless static_routes.empty?
+        # Paired with the routes it was built from, so a request reads
+        # everything it can be matched with through a single lookup: the
+        # buckets that narrow those routes by a path segment (nil when no
+        # segment splits them well), and the table of the paths they spell out
+        # in full -- nil when none does, so a request for +method+ goes
+        # straight to the union rather than missing a lookup first.
+        @optimized_map[method] = [union, routes, RouteBuckets.build(routes, optimized_map, bucket_unions), (static_routes unless static_routes.empty?)].freeze
       end
       compile_neighbour_map
       @neutral_regexes = nil
       @map.freeze
       @optimized_map.freeze
-      @static_routes.freeze
       @neighbour_map.freeze
       # A route whose path holds a non-ASCII literal compiles to a UTF-8
       # regexp, which raises when matched against a binary string holding
@@ -128,25 +126,23 @@ module Grape
     def transaction(input, method, env)
       exact_route = nil
       response = nil
-      if (static = @static_routes[method]&.[](input))
+      union, routes, buckets, static_routes = @optimized_map[method]
+      if (static = static_routes&.[](input))
         exact_route, captures = static
         response = process_static_route(exact_route, captures, env)
+      elsif (bucket = buckets&.bucket_for(input))
+        # A bucket numbers its groups its own way, so it hands over the
+        # captures numbered for its own union along with the match.
+        bucket.match(input) do |route, m, captures|
+          exact_route = route
+          response = process_route(route, input, env, m, captures)
+        end
       else
-        union, routes, buckets = @optimized_map[method]
-        if (bucket = buckets&.bucket_for(input))
-          # A bucket numbers its groups its own way, so it hands over the
-          # captures numbered for its own union along with the match.
-          bucket.match(input) do |route, m, captures|
-            exact_route = route
-            response = process_route(route, input, env, m, captures)
-          end
-        else
-          # Matched here rather than through #match? so the MatchData survives: the
-          # route's path captures are groups of it (see Route#params_for).
-          union&.match(input) do |m|
-            exact_route = matched_route(routes, m)
-            response = process_route(exact_route, input, env, m, exact_route.union_captures)
-          end
+        # Matched here rather than through #match? so the MatchData survives: the
+        # route's path captures are groups of it (see Route#params_for).
+        union&.match(input) do |m|
+          exact_route = matched_route(routes, m)
+          response = process_route(exact_route, input, env, m, exact_route.union_captures)
         end
       end
       return response if halt?(response)
