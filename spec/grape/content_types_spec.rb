@@ -51,18 +51,18 @@ describe Grape::ContentTypes do
   describe '.mime_types_for' do
     subject { described_class.mime_types_for(from_settings) }
 
-    context 'when from_settings is equal to Grape::ContentTypes::DEFAULTS' do
-      let(:from_settings) do
-        {
-          xml: 'application/xml',
-          serializable_hash: 'application/json',
-          json: 'application/json',
-          binary: 'application/octet-stream',
-          txt: 'text/plain'
-        }.freeze
-      end
+    context 'when from_settings is Grape::ContentTypes::DEFAULTS' do
+      let(:from_settings) { described_class::DEFAULTS }
 
       it { is_expected.to be(described_class::MIME_TYPES) }
+    end
+
+    context 'when from_settings holds the default content types in another order' do
+      let(:from_settings) { described_class::DEFAULTS.to_a.reverse.to_h }
+
+      it 'keeps that order' do
+        expect(subject.keys).to eq(%w[text/plain application/octet-stream application/json application/xml])
+      end
     end
 
     context 'when from_settings is not equal to Grape::ContentTypes::DEFAULTS' do
@@ -78,6 +78,12 @@ describe Grape::ContentTypes do
 
       it 'returns the same table for an equal registry' do
         expect(subject).to be(described_class.mime_types_for({ xml: 'application/xml;charset=utf-8' }))
+      end
+
+      it 'keeps the order of each registry declaring the same content types' do
+        txt_first = described_class.mime_types_for({ txt: 'text/plain', json: 'application/json' })
+        json_first = described_class.mime_types_for({ json: 'application/json', txt: 'text/plain' })
+        expect([txt_first.keys, json_first.keys]).to eq([%w[text/plain application/json], %w[application/json text/plain]])
       end
     end
   end
