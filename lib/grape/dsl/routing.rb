@@ -71,22 +71,18 @@ module Grape
       def version(*args, using: :path, cascade: true, parameter: 'apiver', strict: false, vendor: nil, &block)
         return @versions&.last if args.empty?
 
-        raise Grape::Exceptions::MissingVendorOption.new if using == :header && vendor.nil?
-
+        options = build_version_options(using:, cascade:, parameter:, strict:, vendor:)
         requested_versions = args.flatten.map(&:to_s)
-        options = VersionOptions.new(using:, cascade:, parameter:, strict:, vendor:)
 
         @versions = versions | requested_versions
 
         if block
           within_namespace do
-            inheritable_setting.version = requested_versions
-            inheritable_setting.version_options = options
+            apply_version(requested_versions, options)
             instance_eval(&block)
           end
         else
-          inheritable_setting.version = requested_versions
-          inheritable_setting.version_options = options
+          apply_version(requested_versions, options)
         end
 
         @versions.last
@@ -146,24 +142,9 @@ module Grape
             mount({ app.mount_instance(configuration: mount_opts[:with] || {}) => path }, mount_opts)
             next
           end
-          in_setting = inheritable_setting
-
-          # Past the mount_instance branch above, a Grape app here is an already
-          # instantiated Grape::API::Instance (vs. a bare Rack app).
-          if app.is_a?(Grape::Mountable)
-            mount_path = Grape::Util::PathNormalizer.call(path)
-            app.top_level_setting.add_mount_path(mount_path)
-
-            app.inherit_settings(inheritable_setting)
-
-            in_setting = app.top_level_setting
-
-            app.change!
-            change!
-          end
 
           endpoints << Grape::Endpoint.new(
-            in_setting,
+            mounted_setting(app, path),
             http_methods: '*',
             path:,
             app:,
@@ -197,19 +178,15 @@ module Grape
         # +params+, +requirements+ and +anchor+ each travel as their own endpoint
         # input; the route-options bag keeps the description's other keys
         # (+success+, +tags+, …) plus any custom options.
-        params = prepare_params(endpoint_description[:params])
-        all_route_options = endpoint_description.except(:params)
-        all_route_options.deep_merge!(route_options) unless route_options.empty?
-
         new_endpoint = Grape::Endpoint.new(
           inheritable_setting,
           http_methods:,
           path: paths,
           api: self,
-          params:,
+          params: prepare_params(endpoint_description[:params]),
           requirements:,
           anchor:,
-          route_options: all_route_options,
+          route_options: prepare_route_options(endpoint_description, route_options),
           &
         )
         endpoints << new_endpoint unless endpoints.include?(new_endpoint)
@@ -304,6 +281,40 @@ module Grape
         endpoint_params.deep_merge(description_params)
       end
 
+      # The route's description (+desc+) less its +params+, with any custom
+      # +route_options+ deep-merged over it.
+      def prepare_route_options(description, route_options)
+        description_options = description.except(:params)
+        return description_options if route_options.empty?
+
+        description_options.deep_merge!(route_options)
+      end
+
+      def build_version_options(using:, vendor:, **)
+        raise Grape::Exceptions::MissingVendorOption.new if using == :header && vendor.nil?
+
+        VersionOptions.new(using:, vendor:, **)
+      end
+
+      def apply_version(versions, options)
+        inheritable_setting.version = versions
+        inheritable_setting.version_options = options
+      end
+
+      # The settings the endpoint mounting +app+ at +path+ is built with. Past
+      # #mount's +mount_instance+ branch, a Grape app is an already instantiated
+      # Grape::API::Instance (vs. a bare Rack app): it inherits this API's
+      # settings and is built from its own.
+      def mounted_setting(app, path)
+        return inheritable_setting unless app.is_a?(Grape::Mountable)
+
+        app.top_level_setting.add_mount_path(Grape::Util::PathNormalizer.call(path))
+        app.inherit_settings(inheritable_setting)
+        app.change!
+        change!
+        app.top_level_setting
+      end
+
       # Remove all defined routes.
       def reset_routes!
         endpoints.each(&:reset_routes!)
@@ -328,10 +339,10 @@ module Grape
       def refresh_mounted_api(mounts, opts = {})
         namespace = inheritable_setting.namespace_path
         normalize_mounts(mounts).each_pair do |app, path|
-          position = endpoints.index { |endpoint| mounted_at?(endpoint, app, Array(path), namespace) }
+          position = endpoints.index { |endpoint| mounted_at?(endpoint, app, Array(path), namespace) } unless app.respond_to?(:mount_instance)
           drop_endpoints_mounted_for(app => path)
           mount({ app => path }, opts)
-          endpoints.insert(position, endpoints.pop) if position && !app.respond_to?(:mount_instance)
+          endpoints.insert(position, endpoints.pop) if position
         end
       end
 

@@ -69,7 +69,13 @@ module Grape
           endpoint = env[Grape::Env::API_ENDPOINT]
           return if routing_args.nil? || !endpoint.request
 
-          found_code = Array(routing_args[:route_info].failure).find { |http_code| http_code[0].to_i == endpoint.status && http_code[2].respond_to?(:represent) }
+          presenter_for_status(routing_args[:route_info].failure, endpoint.status)
+        end
+
+        # The entity +failure+ names for +status+, among the +[code, message,
+        # entity]+ entries a route's failure codes are.
+        def presenter_for_status(failure, status)
+          found_code = Array(failure).find { |http_code| http_code[0].to_i == status && http_code[2].respond_to?(:represent) }
           found_code[2] if found_code
         end
 

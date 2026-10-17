@@ -55,21 +55,8 @@ module Grape
 
       def initialize(app, **options)
         super
-        @all_rescue_handler = config.all_rescue_handler
-        @base_only_rescue_handlers = config.base_only_rescue_handlers
-        @default_error_formatter = config.default_error_formatter
-        @default_message = config.default_message
-        @default_status = config.default_status
-        @error_formatters = config.error_formatters
-        @format = config.format
-        @grape_exceptions_rescue_handler = config.grape_exceptions_rescue_handler
-        @internal_grape_exceptions_rescue_handler = config.internal_grape_exceptions_rescue_handler
-        @rescue_all = config.rescue_all
-        @rescue_grape_exceptions = config.rescue_grape_exceptions
-        @rescue_handlers = config.rescue_handlers
-        @rescue_options = config.rescue_options
-        @include_backtrace = rescue_options.backtrace
-        @include_original_exception = rescue_options.original_exception
+        read_rescue_config(config)
+        read_rendering_config(config)
       end
 
       # Base#call copies the middleware for every request so that #call! can
@@ -100,6 +87,29 @@ module Grape
       end
 
       private
+
+      # What #find_handler looks a rescue handler up in.
+      def read_rescue_config(config)
+        @all_rescue_handler = config.all_rescue_handler
+        @base_only_rescue_handlers = config.base_only_rescue_handlers
+        @grape_exceptions_rescue_handler = config.grape_exceptions_rescue_handler
+        @internal_grape_exceptions_rescue_handler = config.internal_grape_exceptions_rescue_handler
+        @rescue_all = config.rescue_all
+        @rescue_grape_exceptions = config.rescue_grape_exceptions
+        @rescue_handlers = config.rescue_handlers
+      end
+
+      # What an error response is rendered with.
+      def read_rendering_config(config)
+        @default_error_formatter = config.default_error_formatter
+        @default_message = config.default_message
+        @default_status = config.default_status
+        @error_formatters = config.error_formatters
+        @format = config.format
+        @rescue_options = config.rescue_options
+        @include_backtrace = @rescue_options.backtrace
+        @include_original_exception = @rescue_options.original_exception
+      end
 
       # Whether the app answered is recorded rather than returned from inside
       # the +catch+ block: a +return+ there leaves the method through Kernel#catch,
@@ -169,17 +179,23 @@ module Grape
 
       def error_response(error = nil)
         raw = Grape::Exceptions::ErrorResponse.coerce(error)
-        headers = { Rack::CONTENT_TYPE => content_type }
-        headers.merge!(raw.headers) if raw.headers.is_a?(Hash)
         payload = Grape::Exceptions::ErrorResponse.new(
           status: raw.status || default_status,
           message: raw.message || default_message,
-          headers:,
+          headers: error_response_headers(raw.headers),
           backtrace: resolved_backtrace(raw),
           original_exception: raw.original_exception
         )
         env[Grape::Env::API_ENDPOINT].status(payload.status) # error! may not have been called
         render_response(payload)
+      end
+
+      # The content type the error renders as, under any +headers+ it carries.
+      def error_response_headers(headers)
+        content_type_header = { Rack::CONTENT_TYPE => content_type }
+        return content_type_header unless headers.is_a?(Hash)
+
+        content_type_header.merge!(headers)
       end
 
       # The backtrace an error formatter is handed. Assembled only when the API

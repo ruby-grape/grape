@@ -183,14 +183,22 @@ module Grape
       # share. Most of the configuration is taken from the last endpoint.
       def associate_greedy_route(routes, setting)
         last_route = routes.last
-        allowed_methods = routes.map(&:request_method)
-        allowed_methods |= [Rack::HEAD] if !setting.do_not_route_head? && allowed_methods.include?(Rack::GET)
+        allowed_methods = allowed_methods_for(routes, setting)
 
         allow_header = setting.do_not_route_options? ? allowed_methods : [Rack::OPTIONS] | allowed_methods
         last_route.app.options_route_enabled = true unless setting.do_not_route_options? || allowed_methods.include?(Rack::OPTIONS)
 
         greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
         @router.associate_routes(greedy_route)
+      end
+
+      # The methods +routes+ answer, with HEAD alongside GET unless the API
+      # declared +do_not_route_head!+.
+      def allowed_methods_for(routes, setting)
+        allowed_methods = routes.map(&:request_method)
+        return allowed_methods if setting.do_not_route_head? || !allowed_methods.include?(Rack::GET)
+
+        allowed_methods | [Rack::HEAD]
       end
 
       # +lint!+ declared at the top of this API, or Grape.config.lint: one

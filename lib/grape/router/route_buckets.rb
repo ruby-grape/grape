@@ -103,12 +103,18 @@ module Grape
         # key of each route at it; nil when no route has a segment past the
         # first.
         def cheapest_position(routes)
-          segments = routes.map { |route| route.origin.split('/') }
-          depth = segments.map(&:size).max
-          keys_by_position = Array.new(depth) { Array.new(routes.size) }
-          routes.each_with_index { |route, index| fill_keys(keys_by_position, index, route, segments[index]) }
-          candidates = (1...depth).map { |position| [position, keys_by_position[position]] }
+          keys_by_position = route_keys_by_position(routes)
+          candidates = (1...keys_by_position.size).map { |position| [position, keys_by_position[position]] }
           candidates.min_by { |_, route_keys| cost(route_keys) }
+        end
+
+        # The key of each of +routes+ at every segment position, as far as
+        # the deepest of them goes (see #fill_keys).
+        def route_keys_by_position(routes)
+          segments = routes.map { |route| route.origin.split('/') }
+          keys_by_position = Array.new(segments.map(&:size).max) { Array.new(routes.size) }
+          routes.each_with_index { |route, index| fill_keys(keys_by_position, index, route, segments[index]) }
+          keys_by_position
         end
 
         # Writes into +keys_by_position+, at +index+, the literal +route+

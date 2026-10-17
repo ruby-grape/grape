@@ -17,14 +17,18 @@ module Grape
       private
 
       def extract_details(spec)
-        details = {}
-        details[:required] = spec.required?
+        details = { required: spec.required? }
         details[:type] = TypeCache[spec.coerce_type] if spec.coerce_type
+        add_value_details(details, spec)
+        add_raw_details(details, spec.raw)
+        details
+      end
+
+      # The values the declaration accepts, rejects and defaults to.
+      def add_value_details(details, spec)
         details[:values] = spec.values if spec.values
         details[:except_values] = spec.except_values if spec.except_values
         details[:default] = spec.default unless spec.default.nil?
-        add_raw_details(details, spec.raw)
-        details
       end
 
       # What the declaration's own options document beyond its validations:

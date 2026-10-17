@@ -114,17 +114,7 @@ module Grape
         meta_selector = (args & META_RESCUE_SELECTORS).first
         raise ArgumentError, "rescue_from `#{meta_selector.inspect}` does not accept additional arguments" if meta_selector && args.size > 1
 
-        case meta_selector
-        when :all
-          inheritable_setting.add_all_rescue_handler(handler)
-        when :grape_exceptions
-          inheritable_setting.add_grape_exceptions_rescue_handler(handler)
-        when :internal_grape_exceptions
-          inheritable_setting.add_internal_grape_exceptions_rescue_handler(handler)
-        else
-          inheritable_setting.add_rescue_handlers(args.to_h { |klass| [klass, handler] }, subclasses: rescue_subclasses)
-        end
-
+        add_rescue_handler(meta_selector, args, handler, rescue_subclasses)
         inheritable_setting.add_rescue_options(RescueOptions.new(backtrace:, original_exception:))
       end
 
@@ -163,6 +153,21 @@ module Grape
         return block if block
 
         with_handler(with) if with
+      end
+
+      # Registers +handler+ under +meta_selector+, or for each of the
+      # +exception_classes+ when there is none.
+      def add_rescue_handler(meta_selector, exception_classes, handler, rescue_subclasses)
+        case meta_selector
+        when :all
+          inheritable_setting.add_all_rescue_handler(handler)
+        when :grape_exceptions
+          inheritable_setting.add_grape_exceptions_rescue_handler(handler)
+        when :internal_grape_exceptions
+          inheritable_setting.add_internal_grape_exceptions_rescue_handler(handler)
+        else
+          inheritable_setting.add_rescue_handlers(exception_classes.to_h { |klass| [klass, handler] }, subclasses: rescue_subclasses)
+        end
       end
 
       # A +with:+ handler as +rescue_from+ stores it: a Proc, or the name of a

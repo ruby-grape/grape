@@ -48,9 +48,6 @@ Style/OptionalBooleanParameter:
 Style/Send:
   Enabled: true
 
-Metrics/AbcSize:
-  Max: 80 # TODO: revert to 50 once the refactor of public api is done.
-
 Metrics/BlockLength:
   Max: 30
   Exclude:

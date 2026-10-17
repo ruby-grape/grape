@@ -364,10 +364,7 @@ module Grape
 
           requires(field, **field_opts)
         end
-        optional_fields.each do |field|
-          field_opts = using[field]
-          optional(field, **field_opts) if field_opts
-        end
+        declare_optional_fields(optional_fields, using)
       end
 
       def require_optional_fields(context, using:, except: nil)
@@ -376,7 +373,13 @@ module Grape
           except_fields = Array.wrap(except)
           optional_fields.delete_if { |f| except_fields.include?(f) }
         end
-        optional_fields.each do |field|
+        declare_optional_fields(optional_fields, using)
+      end
+
+      # Each of +fields+ as optional, with its options in +using+; one +using+
+      # does not hold is left out.
+      def declare_optional_fields(fields, using)
+        fields.each do |field|
           field_opts = using[field]
           optional(field, **field_opts) if field_opts
         end
@@ -465,25 +468,8 @@ module Grape
         (iterates_elements? ? 1 : 0) + (@parent&.array_depth || 0)
       end
 
-      # +required+ is the DSL's own signal — +requires+ passes true, +optional+
-      # false. It used to travel as a +:presence+ key that +requires+ wrote into
-      # the caller's option Hash, which is why a user-supplied +presence:+ was
-      # silently overwritten there and silently honoured by +optional+, where
-      # nothing overwrote it. The key is built here from the flag instead, after
-      # the caller has merged in any enclosing +with+ attributes, so a
-      # group-level +message:+ reaches the presence validator.
-      #
-      # A +presence:+ supplied by an API still decides the outcome exactly as it
-      # used to — deprecated rather than dropped, so nothing changes under an
-      # API that relies on it until the key is ignored outright.
       def validates(attrs, validations, required: false)
-        if validations.key?(:presence)
-          Grape.deprecator.warn('Passing a `presence` option is deprecated and it will be ignored in a future release. Declare the parameter with `requires` to make it required, `optional` to make it optional.')
-        end
-
-        declared = required ? validations.merge(presence: { value: true, message: validations[:message] }) : validations
-        declared = declared.merge(oneof: collected_oneof(declared)) if declared.key?(:oneof)
-        spec = ValidationsSpec.from(declared)
+        spec = ValidationsSpec.from(declared_validations(validations, required))
 
         document_params(attrs, spec)
 
@@ -497,6 +483,28 @@ module Grape
         spec.validator_entries.each do |type, options|
           validate(type, options, attrs, spec.required?, spec.shared_opts)
         end
+      end
+
+      # +required+ is the DSL's own signal — +requires+ passes true, +optional+
+      # false. It used to travel as a +:presence+ key that +requires+ wrote into
+      # the caller's option Hash, which is why a user-supplied +presence:+ was
+      # silently overwritten there and silently honoured by +optional+, where
+      # nothing overwrote it. The key is built here from the flag instead, after
+      # the caller has merged in any enclosing +with+ attributes, so a
+      # group-level +message:+ reaches the presence validator.
+      #
+      # A +presence:+ supplied by an API still decides the outcome exactly as it
+      # used to — deprecated rather than dropped, so nothing changes under an
+      # API that relies on it until the key is ignored outright.
+      def declared_validations(validations, required)
+        if validations.key?(:presence)
+          Grape.deprecator.warn('Passing a `presence` option is deprecated and it will be ignored in a future release. Declare the parameter with `requires` to make it required, `optional` to make it optional.')
+        end
+
+        declared = required ? validations.merge(presence: { value: true, message: validations[:message] }) : validations
+        return declared unless declared.key?(:oneof)
+
+        declared.merge(oneof: collected_oneof(declared))
       end
 
       # Enforce correct usage of :coerce_with on a CoerceOptions.

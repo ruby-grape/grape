@@ -69,12 +69,7 @@ module Grape
           @opts = SharedOptions.new(**opts.slice(:allow_blank, :fail_fast))
           @exception_message = message(self.class.default_message_key) if self.class.default_message_key
           @iterator = AttributesIterator.new(@scope).freeze
-          # A scope's parent, optionality, dependency and type are all set
-          # before its block declares anything, so these are settled by the
-          # time a validator is built. See #validate and #validate!.
-          @always_validated = scope.always_validated?
-          @direct = @always_validated && !scope.iterates_elements?
-          @direct_elements = scope.validated_when_given? && scope.iterates_elements? && scope.array_depth == 1
+          choose_validation_path(scope)
         end
 
         # Validates a given request.
@@ -120,6 +115,15 @@ module Grape
         attr_reader :options, :scope, :required, :exception_message
 
         alias required? required
+
+        # A scope's parent, optionality, dependency and type are all set
+        # before its block declares anything, so these are settled by the
+        # time a validator is built. See #validate and #validate!.
+        def choose_validation_path(scope)
+          @always_validated = scope.always_validated?
+          @direct = @always_validated && !scope.iterates_elements?
+          @direct_elements = scope.validated_when_given? && scope.iterates_elements? && scope.array_depth == 1
+        end
 
         # #validate! on a scope that always validates and does not iterate
         # elements, once its params resolved to a Hash: the root scope and the

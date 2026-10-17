@@ -141,12 +141,7 @@ module Grape
 
       reset_routes!
       compile!
-      routes.each do |route|
-        router.append(route.apply(self))
-        next if inheritable_setting.do_not_route_head? || route.request_method != Rack::GET
-
-        router.append(route.to_head.apply(self))
-      end
+      append_routes_to(router)
     end
 
     def namespace
@@ -202,14 +197,7 @@ module Grape
           response_object = env.key?(Grape::Env::GRAPE_ALLOWED_METHODS) ? answer_allowed_methods : validate_and_execute(callbacks)
           run_filters callbacks, :after if callbacks
           build_response_cookies
-
-          # status verifies body presence when DELETE
-          @body ||= response_object
-
-          # The body commonly is an Array of Strings, the application instance itself, or a Stream-like object
-          response_object = stream || [body]
-
-          [status, header, response_object]
+          rack_triplet(response_object)
         ensure
           run_filters callbacks, :finally if callbacks
         end
@@ -302,6 +290,18 @@ module Grape
       execute
     end
 
+    # The response #run answers with, its body +route_value+ unless the
+    # endpoint set a body or a stream itself.
+    def rack_triplet(route_value)
+      # status verifies body presence when DELETE
+      @body ||= route_value
+
+      # The body commonly is an Array of Strings, the application instance itself, or a Stream-like object
+      response_body = stream || [body]
+
+      [status, header, response_body]
+    end
+
     # Instrument helpers. Each guards on +listening?+ so that with no subscriber
     # the payload Hash and notification machinery are skipped and the block runs
     # directly (no added allocations); the block is forwarded anonymously so
@@ -384,31 +384,54 @@ module Grape
       klass.include(helpers)
     end
 
+    # Each route, and after a GET route the HEAD route it also answers unless
+    # the API declared +do_not_route_head!+.
+    def append_routes_to(router)
+      routes.each do |route|
+        router.append(route.apply(self))
+        next if inheritable_setting.do_not_route_head? || route.request_method != Rack::GET
+
+        router.append(route.to_head.apply(self))
+      end
+    end
+
     def to_routes
+      patterns = route_patterns
       route_options = config.route_options
-      params = config.params
-      path_settings = inheritable_setting.path_settings
-      forward_match = bare_rack_app?
-      version = prepare_version(inheritable_setting.version)
-      prefix = inheritable_setting.root_prefix
-      requirements = prepare_routes_requirements(config.requirements)
-      anchor = config.anchor
-      settings = inheritable_setting.route_settings
+      attributes = route_attributes
 
       config.http_methods.flat_map do |method|
-        config.path.map do |path|
-          pattern = Grape::Router::Pattern.build(
-            path:,
-            namespace:,
-            settings: path_settings,
-            anchor:,
-            params:,
-            version:,
-            requirements:
-          )
-          Grape::Router::Route.new(self, method, pattern, route_options, forward_match:, params:, namespace:, prefix:, settings:)
-        end
+        patterns.map { |pattern| Grape::Router::Route.new(self, method, pattern, route_options, **attributes) }
       end
+    end
+
+    # The pattern of each of the endpoint's paths, shared by the routes of
+    # every method it answers, as a HEAD route shares its GET route's.
+    def route_patterns
+      path_settings = inheritable_setting.path_settings
+      params = config.params
+      version = prepare_version
+      requirements = prepare_routes_requirements
+      anchor = config.anchor
+
+      config.path.map do |path|
+        Grape::Router::Pattern.build(
+          path:,
+          namespace:,
+          settings: path_settings,
+          anchor:,
+          params:,
+          version:,
+          requirements:
+        )
+      end
+    end
+
+    # What every route of the endpoint is built with besides its method,
+    # pattern and options, read once for all of them.
+    def route_attributes
+      setting = inheritable_setting
+      { forward_match: bare_rack_app?, params: config.params, namespace:, prefix: setting.root_prefix, settings: setting.route_settings }
     end
 
     # True when a bare Rack app (anything that isn't a Grape app) is mounted at
@@ -418,13 +441,15 @@ module Grape
       config.app && !config.app.is_a?(Grape::Mountable)
     end
 
-    def prepare_routes_requirements(route_options_requirements)
+    def prepare_routes_requirements
       namespace_requirements = inheritable_setting.namespace_requirements
-      namespace_requirements << route_options_requirements if route_options_requirements
+      route_requirements = config.requirements
+      namespace_requirements << route_requirements if route_requirements
       {}.merge!(*namespace_requirements)
     end
 
-    def prepare_version(namespace_inheritable_version)
+    def prepare_version
+      namespace_inheritable_version = inheritable_setting.version
       return if namespace_inheritable_version.nil? || namespace_inheritable_version.empty?
 
       namespace_inheritable_version.length == 1 ? namespace_inheritable_version.first : namespace_inheritable_version
@@ -433,34 +458,45 @@ module Grape
     def build_stack
       stack = Grape::Middleware::Stack.new
 
-      content_types = inheritable_setting.content_types
-      format = inheritable_setting.format
+      setting = inheritable_setting
+      content_types = setting.content_types
+      format = setting.format
 
       stack.use Rack::Head
       stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
 
-      stack.concat inheritable_setting.middleware
-
-      versions = inheritable_setting.version
-      unless versions.nil? || versions.empty?
-        version_options = inheritable_setting.version_options
-        stack.use Grape::Middleware::Versioner.using(version_options.using),
-                  versions: versions.flatten,
-                  version_options:,
-                  prefix: inheritable_setting.root_prefix,
-                  mount_path: inheritable_setting.mount_path
-      end
-
-      stack.use Grape::Middleware::Formatter,
-                format:,
-                default_format: inheritable_setting.default_format || :txt,
-                content_types:,
-                formatters: inheritable_setting.formatters,
-                parsers: inheritable_setting.parsers
+      stack.concat setting.middleware
+      use_versioner(stack)
+      stack.use Grape::Middleware::Formatter, **formatter_middleware_options(format, content_types)
 
       builder = stack.build
       builder.run RUN_ENDPOINT
       builder.to_app
+    end
+
+    # The versioner for the strategy +version+ declared, when it declared one.
+    def use_versioner(stack)
+      setting = inheritable_setting
+      versions = setting.version
+      return if versions.nil? || versions.empty?
+
+      version_options = setting.version_options
+      stack.use Grape::Middleware::Versioner.using(version_options.using),
+                versions: versions.flatten,
+                version_options:,
+                prefix: setting.root_prefix,
+                mount_path: setting.mount_path
+    end
+
+    def formatter_middleware_options(format, content_types)
+      setting = inheritable_setting
+      {
+        format:,
+        default_format: setting.default_format || :txt,
+        content_types:,
+        formatters: setting.formatters,
+        parsers: setting.parsers
+      }
     end
 
     def error_middleware_options(format, content_types)
