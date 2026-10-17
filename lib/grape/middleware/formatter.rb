@@ -124,30 +124,31 @@ module Grape
       def build_formatted_response(env, status, headers, bodies, negotiated)
         content_type_given = headers.key?(Rack::CONTENT_TYPE)
         ensure_content_type!(env, headers)
+        return stream_response(status, headers, bodies) if bodies.is_a?(Grape::ServeStream::StreamResponse)
 
-        if bodies.is_a?(Grape::ServeStream::StreamResponse)
-          Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
-            resp.body = bodies.stream
-          end
-        else
-          # Picked by env['api.format']; the Content-Type header only counts when that is unset
-          formatter = fetch_formatter(env, headers)
-          bodymap = instrument_format_response(env, formatter) do
-            bodies.map { |body| formatter.call(body, env) }
-          end
-          # A bare Rack tuple rather than a Rack::Response: +headers+ is already
-          # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
-          # re-normalizes the same keys into a second Headers hash that
-          # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
-          # The 204/304 bodies Rack::Response#finish would blank are returned
-          # above, before this point.
-          [status, headers, bodymap]
+        # Picked by env['api.format']; the Content-Type header only counts when that is unset
+        formatter = fetch_formatter(env, headers)
+        bodymap = instrument_format_response(env, formatter) do
+          bodies.map { |body| formatter.call(body, env) }
         end
+        # A bare Rack tuple rather than a Rack::Response: +headers+ is already
+        # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
+        # re-normalizes the same keys into a second Headers hash that
+        # +Middleware::Base#call+ unwraps again with +to_a+ on the way out.
+        # The 204/304 bodies Rack::Response#finish would blank are returned
+        # by #format_response, before this point.
+        [status, headers, bodymap]
       rescue Grape::Exceptions::InvalidFormatter => e
         fallback = format_as_default(env, status, headers, bodies) if falls_back?(env, negotiated, content_type_given)
         return fallback if fallback
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
+      end
+
+      def stream_response(status, headers, bodies)
+        Grape::ServeStream::SendfileResponse.new([], status, headers) do |resp|
+          resp.body = bodies.stream
+        end
       end
 
       # A format the client negotiated -- by its Accept header, the path's
@@ -235,17 +236,21 @@ module Grape
 
         begin
           parsed = (env[Grape::Env::API_REQUEST_BODY] = parser.call(body, env))
-          if parsed.is_a?(Hash)
-            if (form_hash = env[Rack::RACK_REQUEST_FORM_HASH])
-              form_hash.merge!(parsed)
-            else
-              env[Rack::RACK_REQUEST_FORM_HASH] = parsed
-            end
-            env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
-          end
+          merge_form_hash(env, parsed) if parsed.is_a?(Hash)
         rescue ForeignParserError => e
           throw :error, Grape::Exceptions::ErrorResponse.new(status: 400, message: e.message, backtrace: e.backtrace, original_exception: e)
         end
+      end
+
+      # A body parsed into a Hash joins the form params Rack::Request reads,
+      # as a form body Rack parsed itself would.
+      def merge_form_hash(env, parsed)
+        if (form_hash = env[Rack::RACK_REQUEST_FORM_HASH])
+          form_hash.merge!(parsed)
+        else
+          env[Rack::RACK_REQUEST_FORM_HASH] = parsed
+        end
+        env[Rack::RACK_REQUEST_FORM_INPUT] = env[Rack::RACK_INPUT]
       end
 
       # The format a body of +media_type+ is read as, thrown as an error

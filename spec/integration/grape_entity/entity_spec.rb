@@ -465,6 +465,23 @@ describe 'Grape::Entity', if: defined?(Grape::Entity) do
       end
     end
 
+    context 'when using failure with an entity for another status first' do
+      let(:app) do
+        other_presenter = Class.new(Grape::Entity) { expose :code, as: :other_code }
+        Class.new(Grape::API) do
+          desc 'some desc', failure: [[400, 'Bad Request', other_presenter], [408, 'Unauthorized', ErrorPresenter]]
+          get '/exception' do
+            error!({ code: 408 }, 408)
+          end
+        end
+      end
+
+      it 'is presented with the entity for the status answered' do
+        expect(subject).to be_request_timeout
+        expect(subject.body).to eql({ code: 408, static: 'some static text' }.to_json)
+      end
+    end
+
     context 'when using failure with a String message' do
       let(:app) do
         Class.new(Grape::API) do

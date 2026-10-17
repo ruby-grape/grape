@@ -62,18 +62,19 @@ module Grape
         def build_available_media_types
           media_types = []
           base_media_type = "application/vnd.#{vendor}"
-          versions&.reverse_each do |version|
-            versioned_base = "#{base_media_type}-#{version}"
-            content_types.each_key { |extension| media_types << "#{versioned_base}+#{extension}" }
-            media_types << versioned_base
-          end
-          content_types.each_key { |extension| media_types << "#{base_media_type}+#{extension}" }
-          media_types << base_media_type
+          versions&.reverse_each { |version| append_media_types(media_types, "#{base_media_type}-#{version}") }
+          append_media_types(media_types, base_media_type)
           media_types.concat(content_types.values.flatten)
           # Media types are case-insensitive, and Grape::Util::MediaType matches
           # an Accept header in lowercase; a version or content type declared
           # with capitals would otherwise never match one.
           media_types.map!(&:downcase)
+        end
+
+        # +base+ with each content type's extension, then +base+ alone.
+        def append_media_types(media_types, base)
+          content_types.each_key { |extension| media_types << "#{base}+#{extension}" }
+          media_types << base
         end
       end
     end

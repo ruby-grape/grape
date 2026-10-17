@@ -123,6 +123,30 @@ describe Grape::Router::RouteBuckets do
     end
   end
 
+  context 'when the route a bucket matched cascades' do
+    let(:answered) { [] }
+    let(:app) do
+      answered = self.answered
+      Class.new(Grape::API) do
+        format :json
+        10.times do |i|
+          get("/resource#{i}") { { route: "index #{i}" } }
+        end
+        get('/resource3/:id') do
+          answered << :cascading
+          header 'X-Cascade', 'pass'
+          { route: 'cascading' }
+        end
+        get('/resource3/:name') { { route: 'sibling' } }
+      end
+    end
+
+    it 'tries its siblings without running it again' do
+      expect(route_for('/resource3/42')).to eq('route' => 'sibling')
+      expect(answered).to eq([:cascading])
+    end
+  end
+
   context 'with methods whose routes line up position for position' do
     let(:app) do
       Class.new(Grape::API) do

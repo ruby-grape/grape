@@ -1226,6 +1226,30 @@ describe Grape::API do
       end
     end
 
+    # The route answering 405 captures no version, so the path versioner reads
+    # it off the path, past the prefix and the mount path in front of it.
+    describe 'a 405 Not Allowed route under path versioning' do
+      it 'is reached behind a prefix' do
+        subject.prefix :api
+        subject.version 'v1', using: :path
+        subject.get(:example) { 'example' }
+        post '/api/v1/example'
+
+        expect(last_response).to be_method_not_allowed
+      end
+
+      it 'is reached under a mount path' do
+        versioned = Class.new(described_class) do
+          version 'v1', using: :path
+          get(:example) { 'example' }
+        end
+        subject.mount versioned => '/mounted'
+        post '/mounted/v1/example'
+
+        expect(last_response).to be_method_not_allowed
+      end
+    end
+
     describe 'when hook behaviour is controlled by attributes on the route' do
       before do
         subject.before do

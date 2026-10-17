@@ -19,28 +19,7 @@ module Grape
       return if @compiled
 
       @union = resolve_capture_groups(Regexp.union(@neutral_regexes), @neutral_map)
-      # Shared by the methods below: HEAD's routes mirror GET's, so their
-      # buckets compile to the same unions.
-      bucket_unions = {}
-      # Compiled from the routes actually registered rather than from
-      # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
-      # (`route :purge, '/cache'`) is accepted at definition time and is
-      # already collected into the resource's Allow header, so skipping it here
-      # left it in @map but out of @optimized_map — the only map #match? reads.
-      # The resource then advertised a method that could never be matched and
-      # answered every request for it with 405.
-      @map.each do |method, routes|
-        optimized_map = routes.map.with_index { |route, index| route.to_regexp(index) }
-        union = resolve_capture_groups(Regexp.union(optimized_map), routes)
-        static_routes = static_routes_for(union, routes)
-        # Paired with the routes it was built from, so a request reads
-        # everything it can be matched with through a single lookup: the
-        # buckets that narrow those routes by a path segment (nil when no
-        # segment splits them well), and the table of the paths they spell out
-        # in full -- nil when none does, so a request for +method+ goes
-        # straight to the union rather than missing a lookup first.
-        @optimized_map[method] = [union, routes, RouteBuckets.build(routes, optimized_map, bucket_unions), (static_routes unless static_routes.empty?)].freeze
-      end
+      compile_optimized_map
       compile_neighbour_map
       @neutral_regexes = nil
       @map.freeze
@@ -124,35 +103,47 @@ module Grape
     # candidate has declined too, so the caller (or a mounting app upstream)
     # can keep looking.
     def transaction(input, method, env)
-      exact_route = nil
-      response = nil
       union, routes, buckets, static_routes = @optimized_map[method]
       if (static = static_routes&.[](input))
         exact_route, captures = static
-        response = process_static_route(exact_route, captures, env)
+        settle(input, method, env, process_static_route(exact_route, captures, env), exact_route)
       elsif (bucket = buckets&.bucket_for(input))
-        # A bucket numbers its groups its own way, so it hands over the
-        # captures numbered for its own union along with the match.
-        bucket.match(input) do |route, m, captures|
-          exact_route = route
-          response = process_route(route, input, env, m, captures)
-        end
+        bucket_transaction(bucket, input, method, env)
       else
-        # Matched here rather than through #match? so the MatchData survives: the
-        # route's path captures are groups of it (see Route#params_for).
-        union&.match(input) do |m|
-          exact_route = matched_route(routes, m)
-          response = process_route(exact_route, input, env, m, exact_route.union_captures)
-        end
+        union_transaction(union, routes, input, method, env)
       end
-      return response if halt?(response)
-
-      fall_back(input, method, env, response, exact_route)
     end
 
-    # What #transaction tries once the route +input+ matched has declined
-    # (+response+ cascades), or once none matched (+response+ is nil).
-    def fall_back(input, method, env, response, exact_route)
+    # #transaction for a path a bucket narrowed the routes for. A bucket
+    # numbers its groups its own way, so it hands over the captures numbered
+    # for its own union along with the match.
+    def bucket_transaction(bucket, input, method, env)
+      exact_route = nil
+      response = bucket.match(input) do |route, m, captures|
+        exact_route = route
+        process_route(route, input, env, m, captures)
+      end
+      settle(input, method, env, response, exact_route)
+    end
+
+    # #transaction for a path matched against all the routes for +method+.
+    # Matched here rather than through #match? so the MatchData survives: the
+    # route's path captures are groups of it (see Route#params_for).
+    def union_transaction(union, routes, input, method, env)
+      exact_route = nil
+      response = union&.match(input) do |m|
+        exact_route = matched_route(routes, m)
+        process_route(exact_route, input, env, m, exact_route.union_captures)
+      end
+      settle(input, method, env, response, exact_route)
+    end
+
+    # What #transaction answers once +exact_route+ answered with +response+:
+    # that response, unless it cascades. A route that declined (+response+
+    # cascades), or none matching (+response+ is nil), leaves the rest to try.
+    def settle(input, method, env, response, exact_route)
+      return response if halt?(response)
+
       # A cascading route has only declined this request. Its siblings — the
       # routes sharing this path but differing in, say, version — must be
       # tried before falling back to the ANY routes and the greedy neighbour.
@@ -368,6 +359,35 @@ module Grape
       union&.match(input) do |m|
         routes[groups.index { |group| m[group] }]
       end
+    end
+
+    # Compiled from the routes actually registered rather than from
+    # Grape::HTTP_SUPPORTED_METHODS. A route declared with any other verb
+    # (`route :purge, '/cache'`) is accepted at definition time and is
+    # already collected into the resource's Allow header, so skipping it here
+    # left it in @map but out of @optimized_map — the only map #match? reads.
+    # The resource then advertised a method that could never be matched and
+    # answered every request for it with 405.
+    def compile_optimized_map
+      # Shared by the methods below: HEAD's routes mirror GET's, so their
+      # buckets compile to the same unions.
+      bucket_unions = {}
+      @map.each do |method, routes|
+        @optimized_map[method] = optimized_routes(routes, bucket_unions)
+      end
+    end
+
+    # The union of +routes+, paired with the routes it was built from, so a
+    # request reads everything it can be matched with through a single
+    # lookup: the buckets that narrow those routes by a path segment (nil
+    # when no segment splits them well), and the table of the paths they
+    # spell out in full -- nil when none does, so a request for their method
+    # goes straight to the union rather than missing a lookup first.
+    def optimized_routes(routes, bucket_unions)
+      regexps = routes.map.with_index { |route, index| route.to_regexp(index) }
+      union = resolve_capture_groups(Regexp.union(regexps), routes)
+      static_routes = static_routes_for(union, routes)
+      [union, routes, RouteBuckets.build(routes, regexps, bucket_unions), (static_routes unless static_routes.empty?)].freeze
     end
 
     # After a miss, #neighbours looks for a greedy route to answer 405 with.

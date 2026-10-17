@@ -46,15 +46,11 @@ module Grape
 
         @raw = raw
         @coerce_type, @coerce_message, @coerce_method = parse_coerce(raw)
-        @values = resolve_value(raw[:values])
-        @except_values = resolve_value(raw[:except_values])
-        @default = raw[:default]
+        read_values(raw)
         @presence_options = raw[:presence]
-        @allow_blank = resolve_value(raw[:allow_blank])
-        @fail_fast = raw[:fail_fast] || false
+        read_shared_opts(raw)
 
         @guessed_coerce_type = guess_coerce_type(declared_coerce_type, @values, @except_values)
-        @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
         @validator_entries = build_validator_entries(raw)
 
         validate!
@@ -71,6 +67,20 @@ module Grape
       end
 
       private
+
+      # The values the declaration accepts, rejects and defaults to.
+      def read_values(raw)
+        @values = resolve_value(raw[:values])
+        @except_values = resolve_value(raw[:except_values])
+        @default = raw[:default]
+      end
+
+      # What every validator of the declaration reads (see #shared_opts).
+      def read_shared_opts(raw)
+        @allow_blank = resolve_value(raw[:allow_blank])
+        @fail_fast = raw[:fail_fast] || false
+        @shared_opts = { allow_blank: @allow_blank, fail_fast: @fail_fast }.freeze
+      end
 
       # Cross-field consistency checks on the parsed declaration. Run at
       # construction so an incoherent spec (e.g. a +default+ outside +values+,
@@ -135,17 +145,15 @@ module Grape
       end
 
       def parse_coerce(raw)
+        coerce_with = raw[:coerce_with]
         if raw.key?(:type)
           coerce, coerce_message = extract_value_and_message(raw[:type])
-          coerce_with = raw[:coerce_with]
           return [Types::VariantCollectionCoercer.new(coerce, coerce_with), coerce_message, nil] if Types.multiple?(coerce)
         elsif raw.key?(:types)
           coerce, coerce_message = extract_value_and_message(raw[:types])
-          coerce_with = raw[:coerce_with]
         else
           coerce, message = extract_value_and_message(raw[:coerce])
           coerce_message = raw[:coerce_message] || message
-          coerce_with = raw[:coerce_with]
         end
 
         [coerce, coerce_message, coerce_with]
