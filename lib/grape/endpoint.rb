@@ -17,14 +17,35 @@ module Grape
     RUN_ENDPOINT = ->(env) { env[Grape::Env::API_ENDPOINT].run }
     private_constant :RUN_ENDPOINT
 
-    attr_reader :env, :request, :source, :options, :endpoints
-    attr_accessor :options_route_enabled
+    attr_reader :env, :request, :endpoints
+
+    # Written out rather than delegated: the request path reads them, and a
+    # +def_delegator+ method checks +defined?+ on every call.
+    def inheritable_setting
+      @state.inheritable_setting
+    end
+
+    def options
+      @state.options
+    end
+
+    def source
+      @state.source
+    end
+
+    def options_route_enabled
+      @state.options_route_enabled
+    end
+
+    def options_route_enabled=(enabled)
+      @state = @state.with(options_route_enabled: enabled)
+    end
 
     def_delegators :request, :params, :headers, :cookies
     def_delegator :cookies, :response_cookies
 
     # The API (a +Grape::API+ instance) this endpoint belongs to.
-    def_delegator :@config, :api
+    def_delegator :config, :api
 
     # The logger configured on the API this endpoint belongs to. Available
     # inside route handlers, +before+/+after+/+after_validation+/+finally+
@@ -80,21 +101,18 @@ module Grape
     # endpoint does not know if it will be mounted under a different endpoint.
     # @yield a block defining what your API should do when this endpoint is hit
     def initialize(new_settings, http_methods:, path:, api:, app: nil, params: {}, requirements: nil, anchor: true, **options, &block)
-      self.inheritable_setting = new_settings.point_in_time_copy_for_endpoint
-
-      @options = options
-      @config = Options.new(http_methods:, path:, api:, app:, params:, requirements:, anchor:, **options)
+      config = Options.new(http_methods:, path:, api:, app:, params:, requirements:, anchor:, **options)
       # +:app+ is still surfaced on the public options Hash for backwards
       # compatibility (e.g. grape-swagger); prefer the +mounted_app+ reader.
-      @options[:app] = app if app
+      options[:app] = app if app
 
-      @status = nil
-      @stream = nil
-      @body = nil
-      @source = self.class.block_to_unbound_method(block)
-      @before_filter_passed = false
-      @options_route_enabled = false
-      @endpoints = @config.app.endpoints if @config.app.respond_to?(:endpoints)
+      @state = State.new(
+        inheritable_setting: new_settings.point_in_time_copy_for_endpoint,
+        options:,
+        config:,
+        source: self.class.block_to_unbound_method(block)
+      )
+      @endpoints = app.endpoints if app.respond_to?(:endpoints)
     end
 
     # Update our settings from a given parent settings instance. Used when
@@ -142,7 +160,7 @@ module Grape
     def call!(env)
       env[Grape::Env::API_ENDPOINT] = self
       @env = env
-      @app.call(env)
+      @state.app.call(env)
     end
 
     def ==(other)
@@ -175,13 +193,14 @@ module Grape
     # stack calls it, so it expects #call! to have put the env in place first.
     def run
       instrument_run do
-        @request = Grape::Request.new(env, build_params_with: @build_params_with)
+        @request = Grape::Request.new(env, build_params_with: @state.build_params_with)
+        callbacks = @state.callbacks
         begin
-          run_filters befores, :before unless befores.empty?
+          run_filters callbacks, :before if callbacks
           @before_filter_passed = true
 
-          response_object = env.key?(Grape::Env::GRAPE_ALLOWED_METHODS) ? answer_allowed_methods : validate_and_execute
-          run_filters afters, :after unless afters.empty?
+          response_object = env.key?(Grape::Env::GRAPE_ALLOWED_METHODS) ? answer_allowed_methods : validate_and_execute(callbacks)
+          run_filters callbacks, :after if callbacks
           build_response_cookies
 
           # status verifies body presence when DELETE
@@ -192,7 +211,7 @@ module Grape
 
           [status, header, response_object]
         ensure
-          run_filters finallies, :finally unless finallies.empty?
+          run_filters callbacks, :finally if callbacks
         end
       end
     end
@@ -200,6 +219,7 @@ module Grape
     protected
 
     def execute
+      source = @state.source
       return unless source
 
       instrument_render do
@@ -208,7 +228,7 @@ module Grape
     end
 
     def run_validators(request:)
-      validators = inheritable_setting.route_validations
+      validators = @state.inheritable_setting.route_validations
       return if validators.empty?
 
       validation_exceptions = nil
@@ -227,19 +247,35 @@ module Grape
       raise Grape::Exceptions::ValidationErrors.new(exceptions: validation_exceptions, headers: header) if validation_exceptions
     end
 
-    # Every request passes through five filter phases, and most endpoints
-    # register nothing for most of them, so #run skips an empty phase rather
-    # than calling in to find that out.
-    def run_filters(filters, type = :other)
+    # An endpoint with filters still has none in most of its five phases, so
+    # an empty phase returns before it is instrumented.
+    def run_filters(callbacks, type)
+      filters = callbacks[type]
+      return if filters.empty?
+
       instrument_run_filters(filters, type) do
         filters.each { |filter| instance_eval(&filter) }
       end
     end
 
-    attr_reader :befores, :before_validations, :after_validations, :afters, :finallies, :config
+    def config
+      @state.config
+    end
 
     def options?
       options_route_enabled && env[Rack::REQUEST_METHOD] == Rack::OPTIONS
+    end
+
+    # Makes an +allocate+d endpoint the prototype #build_prototype answers:
+    # +state+, and the ivars a request sets, in place so that every copy
+    # starts with the same shape.
+    def become_prototype(state)
+      @state = state
+      @status = nil
+      @stream = nil
+      @body = nil
+      @before_filter_passed = false
+      self
     end
 
     private
@@ -259,10 +295,10 @@ module Grape
 
     # The route block's value, run once the params are validated between the
     # +before_validation+ and +after_validation+ filters.
-    def validate_and_execute
-      run_filters before_validations, :before_validation unless before_validations.empty?
+    def validate_and_execute(callbacks)
+      run_filters callbacks, :before_validation if callbacks
       run_validators(request:)
-      run_filters after_validations, :after_validation unless after_validations.empty?
+      run_filters callbacks, :after_validation if callbacks
       execute
     end
 
@@ -295,45 +331,49 @@ module Grape
     end
 
     def compile!
-      @app = config.app || build_stack
+      app = config.app || build_stack
       warn_unauthenticated_mounted_app
-      @helpers = build_helpers
+      # nil when no phase has a filter -- most endpoints -- so that #run skips
+      # all five on one read.
       callbacks = inheritable_setting.callbacks
-      @befores            = callbacks.fetch(:before)
-      @before_validations = callbacks.fetch(:before_validation)
-      @after_validations  = callbacks.fetch(:after_validation)
-      @afters             = callbacks.fetch(:after)
-      @finallies          = callbacks.fetch(:finally)
-      @build_params_with  = inheritable_setting.build_params_with
-      @prototype          = build_prototype
+      @state = @state.with(
+        app:,
+        callbacks: callbacks.each_value.all?(&:empty?) ? nil : callbacks.freeze,
+        build_params_with: inheritable_setting.build_params_with
+      )
+      @prototype = build_prototype(build_helpers)
     end
 
-    # The object each request is copied from.
+    # The object each request is copied from: this endpoint's State, and none
+    # of the route-building state (+@prototype+, +@endpoints+, +@namespace+,
+    # +@routes+) the request path never reads.
+    #
+    # Ruby sizes a new object by the most instance variables any object of its
+    # class has held. A copy holds the State and the seven ivars a request
+    # sets, which fits an 80-byte slot until a route block or a helper sets one
+    # of its own; carrying the route-building state as well, it took 320. The
+    # endpoint itself counts too when there are no helpers, both being a
+    # Grape::Endpoint, and it holds at most five.
     #
     # Helpers reach an endpoint by module inclusion, and +Object#dup+ does not
     # carry a singleton class over — so including them on the per-request copy
     # meant giving every request a brand-new singleton class, whose method
     # cache then started cold for the helpers, the route block and every DSL
     # method the endpoint answers. Include them once into a subclass owned by
-    # this endpoint instead, and copy this endpoint's state onto an instance of
-    # it: the per-request copy already answers to the helpers, against a class
-    # that has been warm since boot. It also keeps request handling free of
-    # class mutation.
+    # this endpoint instead, and hand its State to an instance of it: the
+    # per-request copy already answers to the helpers, against a class that
+    # has been warm since boot. It also keeps request handling free of class
+    # mutation.
     #
-    # Endpoints with no helpers are their own prototype, exactly as before.
-    #
-    # +allocate+ rather than +new+ because the constructor rebuilds state from
-    # the DSL's arguments — a fresh settings copy, a fresh +@config+, another
-    # +block_to_unbound_method+ — and would still not hold what +compile!+ has
-    # just computed. What is wanted is what +dup+ itself does (allocate, then
-    # copy the ivars over) across a class boundary, which neither +dup+ nor
-    # +initialize_copy+ will do: both insist on the receiver's own class. So
-    # the copy is written out here. Taking all of them is safe because
-    # everything set past this point (+routes+, +namespace+) is route-building
-    # memoization the request path never reads.
-    def build_prototype
-      return self unless @helpers
+    # +allocate+ rather than +new+ because the constructor builds an endpoint
+    # from the DSL's arguments — a fresh settings copy, a fresh +config+,
+    # another +block_to_unbound_method+ — and would still not hold what
+    # +compile!+ has just computed, while the State already holds all of it.
+    def build_prototype(helpers)
+      (helpers ? helpers_class(helpers) : self.class).allocate.become_prototype(@state)
+    end
 
+    def helpers_class(helpers)
       klass = Class.new(self.class)
       # Anonymous classes answer nil to +name+ and render as a bare address,
       # which would reach anything that reports on the endpoint — +inspect+
@@ -341,12 +381,7 @@ module Grape
       # +set_temporary_name+ is for; a plain constant path is rejected, which
       # is right, since this class is not reachable under that name.
       klass.set_temporary_name("#{self.class}(helpers)")
-      klass.include(@helpers)
-      prototype = klass.allocate
-      # Everything but the prototype slot itself, so that recompiling (a
-      # remount) does not leave the new prototype holding the one it replaces.
-      (instance_variables - [:@prototype]).each { |name| prototype.instance_variable_set(name, instance_variable_get(name)) }
-      prototype
+      klass.include(helpers)
     end
 
     def to_routes
