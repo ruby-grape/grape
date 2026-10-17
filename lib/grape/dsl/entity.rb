@@ -31,15 +31,7 @@ module Grape
         representation = entity_class ? entity_representation_for(entity_class, object, options) : object
         representation = { root => representation } if root
 
-        if key
-          representation = body&.merge(key => representation) || { key => representation }
-        elsif entity_class && body
-          raise ArgumentError, "representation of type `#{representation.class}` cannot be merged" unless representation.respond_to?(:merge)
-
-          representation = body.merge(representation)
-        end
-
-        body representation
+        body merged_with_body(representation, key, entity_class)
       end
 
       # Attempt to locate the Entity class for a given object, if not given
@@ -56,6 +48,16 @@ module Grape
       end
 
       private
+
+      # +representation+ merged into the body an earlier +present+ set: under
+      # +key+ when there is one, and whole when it came from an entity.
+      def merged_with_body(representation, key, entity_class)
+        return body&.merge(key => representation) || { key => representation } if key
+        return representation unless entity_class && body
+        raise ArgumentError, "representation of type `#{representation.class}` cannot be merged" unless representation.respond_to?(:merge)
+
+        body.merge(representation)
+      end
 
       # The class standing in for a collection or wrapper: ActiveRecord::Relation
       # and the like expose #klass, anything else falls back to the class of its
@@ -88,8 +90,12 @@ module Grape
           return representations[potential] if potential && representations[potential]
         end
 
-        return unless klass.const_defined?(:Entity)
+        conventional_entity_for(klass) if klass.const_defined?(:Entity)
+      end
 
+      # The +Entity+ constant of the nearest of +klass+'s ancestors defining
+      # one, when it can represent.
+      def conventional_entity_for(klass)
         owner = klass.ancestors.detect { |ancestor| ancestor != Object && ancestor.const_defined?(:Entity, false) }
         return unless owner
 

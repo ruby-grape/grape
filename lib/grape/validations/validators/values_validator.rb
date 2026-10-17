@@ -29,7 +29,7 @@ module Grape
           val = scrub(params[attr_name])
 
           return if val.nil? && !required?
-          return if val != false && val.blank? && allow_blank?
+          return if blank_and_allowed?(val)
           return if check_values?(val, attr_name)
 
           validation_error!(attr_name)
@@ -37,22 +37,24 @@ module Grape
 
         private
 
+        # +false+ is a value: AS's +blank?+ says otherwise.
+        def blank_and_allowed?(val)
+          val != false && val.blank? && allow_blank?
+        end
+
         def check_values?(val, attr_name)
           param_array = val.nil? ? [nil] : Array.wrap(val)
+          return predicate_holds?(param_array, attr_name) if @values_is_predicate
 
-          if @values_is_predicate
-            begin
-              param_array.all? { |param| @values_call.call(param) }
-            rescue StandardError => e
-              warn "Error '#{e}' raised while validating attribute '#{attr_name}'"
-              false
-            end
-          else
-            values = @values_call ? @values_call.call : @values
-            return true if values.nil?
+          values = @values_call ? @values_call.call : @values
+          values.nil? || param_array.all? { |param| values.include?(param) }
+        end
 
-            param_array.all? { |param| values.include?(param) }
-          end
+        def predicate_holds?(param_array, attr_name)
+          param_array.all? { |param| @values_call.call(param) }
+        rescue StandardError => e
+          warn "Error '#{e}' raised while validating attribute '#{attr_name}'"
+          false
         end
       end
     end

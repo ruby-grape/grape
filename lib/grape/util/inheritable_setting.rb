@@ -228,12 +228,7 @@ module Grape
         # compared resolved.
         return to_hash == other.to_hash unless parent.equal?(other.parent)
 
-        same_own_store?(@stackable_values, other.stackable_values) &&
-          route == other.route &&
-          @namespace_inheritable == other.namespace_inheritable &&
-          namespace == other.namespace &&
-          rescue_handlers == other.rescue_handlers &&
-          base_only_rescue_handlers == other.base_only_rescue_handlers
+        same_own_state?(other)
       end
       alias eql? ==
 
@@ -820,6 +815,12 @@ module Grape
         return if @stackable_values.nil?
 
         keys.each { |key| @stackable_values.delete(key) }
+      end
+
+      # #== between two scopes hanging off the same parent.
+      def same_own_state?(other)
+        same_own_store?(@stackable_values, other.stackable_values) && route == other.route && @namespace_inheritable == other.namespace_inheritable &&
+          namespace == other.namespace && rescue_handlers == other.rescue_handlers && base_only_rescue_handlers == other.base_only_rescue_handlers
       end
 
       # Compares two lazily-allocated own stackable stores (see #stack): nil and

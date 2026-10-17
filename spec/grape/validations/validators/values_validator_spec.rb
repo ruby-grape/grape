@@ -943,6 +943,7 @@ describe Grape::Validations::Validators::ValuesValidator do
 
         params do
           optional :name, type: String, values: %w[a b], allow_blank: true
+          optional :flag, type: Grape::API::Boolean, values: [true], allow_blank: true
         end
         get '/allow_blank'
       end
@@ -954,6 +955,13 @@ describe Grape::Validations::Validators::ValuesValidator do
 
       get 'allow_blank', name: ''
       expect(last_response.status).to eq(200)
+    end
+
+    # ActiveSupport counts false as blank, but a Boolean false is a value.
+    it 'still checks false against the values' do
+      get 'allow_blank', flag: false
+      expect(last_response.status).to eq(400)
+      expect(last_response.body).to eq({ error: 'flag does not have a valid value' }.to_json)
     end
   end
 

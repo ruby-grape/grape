@@ -12,9 +12,7 @@ module Grape
           validate_boundary!(:max, @max)
           raise ArgumentError, "min `#{@min}` cannot be greater than max `#{@max}`" if @min && @max && @min > @max
 
-          return if @is.nil?
-          raise ArgumentError, 'is must be an integer greater than zero' unless @is.is_a?(Integer) && @is.positive?
-          raise ArgumentError, 'is cannot be combined with min or max' unless @min.nil? && @max.nil?
+          validate_is! unless @is.nil?
         end
 
         def validate_param!(attr_name, params)
@@ -23,23 +21,33 @@ module Grape
           param = params[attr_name]
 
           return unless param.respond_to?(:length)
+          return if within_bounds?(param.length)
 
-          return unless (!@min.nil? && param.length < @min) || (!@max.nil? && param.length > @max) || (!@is.nil? && param.length != @is)
-
-          validation_error!(attr_name, message do
-            if @min && @max
-              translate(:length, min: @min, max: @max)
-            elsif @min
-              translate(:length_min, min: @min)
-            elsif @max
-              translate(:length_max, max: @max)
-            else
-              translate(:length_is, is: @is)
-            end
-          end)
+          validation_error!(attr_name, message { length_message })
         end
 
         private
+
+        def validate_is!
+          raise ArgumentError, 'is must be an integer greater than zero' unless @is.is_a?(Integer) && @is.positive?
+          raise ArgumentError, 'is cannot be combined with min or max' unless @min.nil? && @max.nil?
+        end
+
+        def within_bounds?(length)
+          (@min.nil? || length >= @min) && (@max.nil? || length <= @max) && (@is.nil? || length == @is)
+        end
+
+        def length_message
+          if @min && @max
+            translate(:length, min: @min, max: @max)
+          elsif @min
+            translate(:length_min, min: @min)
+          elsif @max
+            translate(:length_max, max: @max)
+          else
+            translate(:length_is, is: @is)
+          end
+        end
 
         def validate_boundary!(name, val)
           raise ArgumentError, "`#{name}` must be an integer greater than or equal to zero" if !val.nil? && (!val.is_a?(Integer) || val.negative?)

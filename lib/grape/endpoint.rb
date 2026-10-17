@@ -180,19 +180,7 @@ module Grape
           run_filters befores, :before unless befores.empty?
           @before_filter_passed = true
 
-          if env.key?(Grape::Env::GRAPE_ALLOWED_METHODS)
-            header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
-            raise Grape::Exceptions::MethodNotAllowed.new(header) unless options?
-
-            response_object = ''
-            status 204
-          else
-            run_filters before_validations, :before_validation unless before_validations.empty?
-            run_validators(request:)
-            run_filters after_validations, :after_validation unless after_validations.empty?
-            response_object = execute
-          end
-
+          response_object = env.key?(Grape::Env::GRAPE_ALLOWED_METHODS) ? answer_allowed_methods : validate_and_execute
           run_filters afters, :after unless afters.empty?
           build_response_cookies
 
@@ -257,6 +245,26 @@ module Grape
     private
 
     attr_reader :before_filter_passed
+
+    # The answer of a greedy route, which the router hands a request for a
+    # method its path has no route for: the Allow header, with a 204 to an
+    # auto-OPTIONS and a 405 to anything else.
+    def answer_allowed_methods
+      header['Allow'] = env[Grape::Env::GRAPE_ALLOWED_METHODS].join(', ')
+      raise Grape::Exceptions::MethodNotAllowed.new(header) unless options?
+
+      status 204
+      ''
+    end
+
+    # The route block's value, run once the params are validated between the
+    # +before_validation+ and +after_validation+ filters.
+    def validate_and_execute
+      run_filters before_validations, :before_validation unless before_validations.empty?
+      run_validators(request:)
+      run_filters after_validations, :after_validation unless after_validations.empty?
+      execute
+    end
 
     # Instrument helpers. Each guards on +listening?+ so that with no subscriber
     # the payload Hash and notification machinery are skipped and the block runs

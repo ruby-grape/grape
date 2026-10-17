@@ -32,26 +32,7 @@ module Grape
             with = payload.delete(:with)
           end
 
-          presenter = with || env[Grape::Env::API_ENDPOINT].entity_class_for_obj(payload)
-
-          # The entities a route's failure codes name document a structured
-          # error body. A String message has no attributes for one to expose
-          # -- presenting it raised, and the failsafe answered 500 in place of
-          # the status +error!+ asked for -- so it is left for #wrap_message.
-          unless presenter || payload.is_a?(String) || env[Grape::Env::GRAPE_ROUTING_ARGS].nil?
-            # A route's failure presenters are written for the errors the
-            # endpoint itself raises. One raised by middleware before the
-            # endpoint ran -- it has no request yet -- keeps the shape that
-            # middleware gave it rather than being fit to an entity it was
-            # not written for.
-            http_codes = env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info].failure || []
-            found_code = http_codes.find do |http_code|
-              (http_code[0].to_i == env[Grape::Env::API_ENDPOINT].status) && http_code[2].respond_to?(:represent)
-            end if env[Grape::Env::API_ENDPOINT].request
-
-            presenter = found_code[2] if found_code
-          end
-
+          presenter = with || env[Grape::Env::API_ENDPOINT].entity_class_for_obj(payload) || failure_presenter(payload, env)
           return payload unless presenter
 
           embeds = { env: }
@@ -70,6 +51,27 @@ module Grape
         end
 
         private
+
+        # The entity the route's failure codes name for the status being
+        # answered: those entities document a structured error body.
+        #
+        # A String message has no attributes for one to expose -- presenting
+        # it raised, and the failsafe answered 500 in place of the status
+        # +error!+ asked for -- so it is left for #wrap_message. And a route's
+        # failure presenters are written for the errors the endpoint itself
+        # raises: one raised by middleware before the endpoint ran -- it has
+        # no request yet -- keeps the shape that middleware gave it rather than
+        # being fit to an entity it was not written for.
+        def failure_presenter(payload, env)
+          return if payload.is_a?(String)
+
+          routing_args = env[Grape::Env::GRAPE_ROUTING_ARGS]
+          endpoint = env[Grape::Env::API_ENDPOINT]
+          return if routing_args.nil? || !endpoint.request
+
+          found_code = Array(routing_args[:route_info].failure).find { |http_code| http_code[0].to_i == endpoint.status && http_code[2].respond_to?(:represent) }
+          found_code[2] if found_code
+        end
 
         def inherited(klass)
           super

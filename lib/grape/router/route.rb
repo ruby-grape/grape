@@ -69,12 +69,7 @@ module Grape
 
         return params_from_union(captures, match) if match && captures && !input.include?('%')
 
-        parsed = pattern.params(input)
-        return unless parsed
-
-        params = {}
-        parsed.each { |name, value| params[name.to_sym] = tag_utf8!(value) unless value.nil? }
-        params
+        params_from_pattern(input)
       end
 
       protected
@@ -93,6 +88,15 @@ module Grape
           value = match[group]
           params[name] = tag_utf8!(value) unless value.nil?
         end
+        params
+      end
+
+      def params_from_pattern(input)
+        parsed = pattern.params(input)
+        return unless parsed
+
+        params = {}
+        parsed.each { |name, value| params[name.to_sym] = tag_utf8!(value) unless value.nil? }
         params
       end
 

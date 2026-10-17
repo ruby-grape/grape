@@ -91,18 +91,25 @@ module Grape
         def build(routes, regexps, unions)
           return if routes.size < MINIMUM_ROUTES
 
-          segments = routes.map { |route| route.origin.split('/') }
-          depth = segments.map(&:size).max
-          keys_by_position = Array.new(depth) { Array.new(routes.size) }
-          routes.each_with_index { |route, index| fill_keys(keys_by_position, index, route, segments[index]) }
-          candidates = (1...depth).map { |position| [position, keys_by_position[position]] }
-          position, keys = candidates.min_by { |_, route_keys| cost(route_keys) }
+          position, keys = cheapest_position(routes)
           return unless position && cost(keys) <= routes.size / 2
 
           new(position, routes, regexps, keys, unions)
         end
 
         private
+
+        # The segment position leaving the fewest +routes+ to match, and the
+        # key of each route at it; nil when no route has a segment past the
+        # first.
+        def cheapest_position(routes)
+          segments = routes.map { |route| route.origin.split('/') }
+          depth = segments.map(&:size).max
+          keys_by_position = Array.new(depth) { Array.new(routes.size) }
+          routes.each_with_index { |route, index| fill_keys(keys_by_position, index, route, segments[index]) }
+          candidates = (1...depth).map { |position| [position, keys_by_position[position]] }
+          candidates.min_by { |_, route_keys| cost(route_keys) }
+        end
 
         # Writes into +keys_by_position+, at +index+, the literal +route+
         # requires at each segment position, leaving nil where that segment

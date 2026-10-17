@@ -59,9 +59,6 @@ Metrics/BlockLength:
 Metrics/ClassLength:
   Max: 430
 
-Metrics/CyclomaticComplexity:
-  Max: 15
-
 Metrics/ParameterLists:
   CountKeywordArgs: false
   MaxOptionalParameters: 4

@@ -86,16 +86,9 @@ RSpec.describe Grape::Validations do
       ]
     end
 
-    # Walks ivars and collection members. Skips value types, callables
-    # (user-supplied procs are deliberately unfrozen), open classes/modules,
-    # and dry-types internals (external library, outside grape's contract).
+    # Walks ivars and collection members.
     def walk(obj, path, seen, violations, census)
-      case obj
-      when Module, Proc, Method, UnboundMethod, Symbol, Numeric, Range, Regexp, true, false, nil
-        return
-      end
-      return if obj.class.name&.start_with?('Dry::')
-      return if seen.key?(obj)
+      return if skipped?(obj) || seen.key?(obj)
 
       seen[obj] = true
       if frozen_contract_classes.any? { |klass| obj.is_a?(klass) }
@@ -103,6 +96,18 @@ RSpec.describe Grape::Validations do
         violations << "#{path} (#{obj.class})" unless obj.frozen?
       end
       walk_members(obj, path, seen, violations, census)
+    end
+
+    # Value types, callables (user-supplied procs are deliberately unfrozen),
+    # open classes/modules, and dry-types internals (external library, outside
+    # grape's contract) are not walked.
+    def skipped?(obj)
+      case obj
+      when Module, Proc, Method, UnboundMethod, Symbol, Numeric, Range, Regexp, true, false, nil
+        true
+      else
+        obj.class.name&.start_with?('Dry::')
+      end
     end
 
     def walk_members(obj, path, seen, violations, census)
