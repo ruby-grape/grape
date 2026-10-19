@@ -126,11 +126,11 @@ module Grape
         ensure_content_type!(env, headers)
         return stream_response(status, headers, bodies) if bodies.is_a?(Grape::ServeStream::StreamResponse)
 
-        # Picked by env['api.format']; the Content-Type header only counts when that is unset
-        formatter = fetch_formatter(env, headers)
-        bodymap = instrument_format_response(env, formatter) do
-          bodies.map { |body| formatter.call(body, env) }
-        end
+        bodymap = format_bodies(env, headers, bodies)
+        # A formatter that renders a body only as Rack reads it (see
+        # Grape::Formatter::Jsonl) hands back a stream, served as +stream+'s is.
+        return stream_response(status, headers, bodymap.first) if bodymap.first.is_a?(Grape::ServeStream::StreamResponse)
+
         # A bare Rack tuple rather than a Rack::Response: +headers+ is already
         # a Grape::Util::Header (a Rack::Headers on Rack 3), so wrapping only
         # re-normalizes the same keys into a second Headers hash that
@@ -143,6 +143,14 @@ module Grape
         return fallback if fallback
 
         throw :error, Grape::Exceptions::ErrorResponse.new(status: 500, message: e.message, backtrace: e.backtrace, original_exception: e)
+      end
+
+      def format_bodies(env, headers, bodies)
+        # Picked by env['api.format']; the Content-Type header only counts when that is unset
+        formatter = fetch_formatter(env, headers)
+        instrument_format_response(env, formatter) do
+          bodies.map { |body| formatter.call(body, env) }
+        end
       end
 
       def stream_response(status, headers, bodies)

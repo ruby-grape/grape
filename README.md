@@ -3350,6 +3350,7 @@ Built-in formatters are the following.
 * `:txt`: use object's `to_txt` when available, otherwise `to_s`
 * `:serializable_hash`: use object's `serializable_hash` when available, otherwise fallback to `:json`
 * `:binary`: data will be returned "as is"
+* `:jsonl`: one line per element of an Array or Enumerator, otherwise one line, each rendered as `:json` renders it. Not a default content type, see [JSON Lines](#json-lines)
 
 #### Serving pre-rendered JSON
 
@@ -3389,6 +3390,50 @@ returns properly encoded JSON.
 If a body is present in a request to an API, with a Content-Type header value that is of an unsupported type a "415 Unsupported Media Type" error code will be returned by Grape.
 
 Response statuses that indicate no content as defined by [Rack](https://github.com/rack) [here](https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L567) will bypass serialization and the body entity - though there should be none - will not be modified.
+
+#### JSON Lines
+
+`:jsonl` serves [JSON Lines](https://jsonlines.org): one JSON value per line, each line ended by a newline. It is not among the default content types, so declare it, as `application/jsonl`, or `application/x-ndjson` if your clients expect that one.
+
+```ruby
+class API < Grape::API
+  content_type :jsonl, 'application/jsonl'
+  format :jsonl
+
+  get :users do
+    User.all # {"id":1,"name":"Ada"}\n{"id":2,"name":"Grace"}\n
+  end
+end
+```
+
+An `Array` renders one line per element and any other object one line, each as the `:json` formatter renders it, so a `Grape::PrecompiledJson` element is served as its own line. A `String` is served as it is, taken to be JSON Lines already.
+
+An `Enumerator` is streamed: each element is rendered only as the server reads the body, so a large export is never held in memory whole.
+
+```ruby
+get :export do
+  User.find_each.lazy.map { |user| user.slice(:id, :name) }
+end
+```
+
+The status and headers of a streamed response are sent before its first line is rendered, so an exception raised while it streams is past `rescue_from`: the response just ends early.
+
+A request body of `application/jsonl` is parsed into an Array of its lines' values, skipping blank lines. Like a JSON body that is an Array, it is available in `env['api.request.body']` and is not merged into `params`. To validate the lines as params, wrap them in a Hash with a parser of your own.
+
+```ruby
+parser :jsonl, ->(body, env) { { items: Grape::Parser::Jsonl.call(body, env) } }
+
+params do
+  requires :items, type: Array do
+    requires :name, type: String
+  end
+end
+post :import do
+  declared(params)[:items]
+end
+```
+
+An error renders as a single JSON line.
 
 ### JSONP
 
