@@ -55,6 +55,29 @@ module Grape
         @global = {}
       end
 
+      # Declares a nearest-wins scalar per key: a nested scope's assignment
+      # overrides an inherited one, hence a plain +=+ writer rather than the
+      # +add_*+ writers of the stackable registrations, and a reader that
+      # resolves the key along the chain, nil when never set. The backing
+      # store is an internal detail.
+      def self.inheritable_property(*keys)
+        keys.each do |key|
+          define_method(key) { inheritable(key) }
+          define_method(:"#{key}=") { |value| set_inheritable(key, value) }
+        end
+      end
+
+      # Declares a scope flag per key: a bang method setting it, after which it
+      # applies to the scope and everything nested under it, and a predicate,
+      # false when never set. The backing store is an internal detail.
+      def self.inheritable_flag(*keys)
+        keys.each do |key|
+          define_method(:"#{key}!") { set_inheritable(key, true) }
+          define_method(:"#{key}?") { inheritable(key) == true }
+        end
+      end
+      private_class_method :inheritable_property, :inheritable_flag
+
       # Instantiate a new settings instance, with blank values. The fresh
       # instance can then be set to inherit from an existing instance (see
       # #inherit_from).
@@ -521,149 +544,39 @@ module Grape
       # +format+ is the enforced API format, +default_format+ the fallback
       # used when a request doesn't specify one, and
       # +default_error_formatter+ / +default_error_status+ shape error
-      # responses. Nearest-wins scalars — a nested scope's assignment
-      # overrides an inherited one, hence plain +=+ writers rather than the
-      # +add_*+ writers used for stackable registrations. Readers return nil
-      # when never set (Endpoint applies the request-serving fallbacks); the
-      # backing store is an internal detail.
-      def format
-        inheritable(:format)
-      end
-
-      def format=(format)
-        set_inheritable(:format, format)
-      end
-
-      def default_format
-        inheritable(:default_format)
-      end
-
-      def default_format=(default_format)
-        set_inheritable(:default_format, default_format)
-      end
-
-      def default_error_formatter
-        inheritable(:default_error_formatter)
-      end
-
-      def default_error_formatter=(formatter)
-        set_inheritable(:default_error_formatter, formatter)
-      end
-
-      def default_error_status
-        inheritable(:default_error_status)
-      end
-
-      def default_error_status=(status)
-        set_inheritable(:default_error_status, status)
-      end
+      # responses. Endpoint applies the request-serving fallbacks to a nil.
+      inheritable_property :format, :default_format, :default_error_formatter, :default_error_status
 
       # Versioning state recorded by the DSL (see DSL::Versioning and DSL::Routing):
       # +version+ holds the Array of version strings registered by the
       # +version+ DSL method, +version_options+ its DSL::VersionOptions
       # value object, and +root_prefix+ the path prefix set by +prefix+.
-      # Nearest-wins scalars with plain += writers; readers return nil when
-      # never set; the backing store is an internal detail.
-      def version
-        inheritable(:version)
-      end
-
-      def version=(versions)
-        set_inheritable(:version, versions)
-      end
-
-      def version_options
-        inheritable(:version_options)
-      end
-
-      def version_options=(options)
-        set_inheritable(:version_options, options)
-      end
-
-      def root_prefix
-        inheritable(:root_prefix)
-      end
-
-      def root_prefix=(prefix)
-        set_inheritable(:root_prefix, prefix)
-      end
+      inheritable_property :version, :version_options, :root_prefix
 
       # Cascade flag assigned by the +cascade+ DSL. An explicit nil is distinct
       # from never-set, which #cascade_defined? tells apart; when never set,
       # Grape::API::Instance falls back to the version options' cascade, then true.
-      def cascade
-        inheritable(:cascade)
-      end
-
-      def cascade=(value)
-        set_inheritable(:cascade, value)
-      end
-
-      def cascade_defined?
-        inheritable?(:cascade)
-      end
-
-      # Scope flags flipped by the routing DSL's bang methods (see
-      # DSL::Routing#do_not_route_head! and friends; Validations::OneofCollector
-      # also flips +do_not_document!+): once set in a scope they apply to it
-      # and everything nested under it. Readers return false when never set;
-      # the backing store is an internal detail.
-      def do_not_route_head!
-        set_inheritable(:do_not_route_head, true)
-      end
-
-      def do_not_route_head?
-        inheritable(:do_not_route_head) == true
-      end
-
-      def do_not_route_options!
-        set_inheritable(:do_not_route_options, true)
-      end
-
-      def do_not_route_options?
-        inheritable(:do_not_route_options) == true
-      end
-
-      def do_not_document!
-        set_inheritable(:do_not_document, true)
-      end
-
-      def do_not_document?
-        inheritable(:do_not_document) == true
-      end
-
-      def lint!
-        set_inheritable(:lint, true)
-      end
-
-      def lint?
-        inheritable(:lint) == true
-      end
+      inheritable_property :cascade
 
       # The params-builder strategy set by +build_with+ (both the
       # API-level DSL::Routing#build_with and the params-block
       # DSL::Parameters#build_with write it), consumed when the endpoint
-      # builds its Grape::Request. Nearest-wins scalar; nil when never set;
-      # the backing store is an internal detail.
-      def build_params_with
-        inheritable(:build_params_with)
-      end
-
-      def build_params_with=(strategy)
-        set_inheritable(:build_params_with, strategy)
-      end
+      # builds its Grape::Request.
+      inheritable_property :build_params_with
 
       # The authentication configuration Hash recorded by the +auth+ DSL
-      # (see Middleware::Auth::DSL): {type:, proc:, **options}. Nearest-wins
-      # scalar; nil when no authenticator is declared — Endpoint uses that
-      # to warn about unauthenticated bare Rack mounts; the backing store is
-      # an internal detail.
-      def auth
-        inheritable(:auth)
-      end
+      # (see Middleware::Auth::DSL): {type:, proc:, **options}; nil when no
+      # authenticator is declared — Endpoint uses that to warn about
+      # unauthenticated bare Rack mounts.
+      inheritable_property :auth
 
-      def auth=(auth_options)
-        set_inheritable(:auth, auth_options)
+      # Scope flags flipped by the routing DSL's bang methods (see
+      # DSL::Routing#do_not_route_head! and friends; Validations::OneofCollector
+      # also flips +do_not_document!+).
+      inheritable_flag :do_not_route_head, :do_not_route_options, :do_not_document, :lint
+
+      def cascade_defined?
+        inheritable?(:cascade)
       end
 
       # The logger assigned by the +logger+ DSL (see DSL::Logger), written to
