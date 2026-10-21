@@ -11,6 +11,7 @@
 * [#3008](https://github.com/ruby-grape/grape/pull/3008): Add the grape-on-rack app as a live-server memory profiling harness - [@ericproulx](https://github.com/ericproulx).
 * [#3025](https://github.com/ruby-grape/grape/pull/3025): Add `:md` and `:markdown` formatters that render an object's `to_markdown`, for APIs that declare a `text/markdown` content type - [@ericproulx](https://github.com/ericproulx).
 * [#3029](https://github.com/ruby-grape/grape/pull/3029): Add a built-in `:jsonl` (JSON Lines) format that streams an Enumerator body - [@ericproulx](https://github.com/ericproulx).
+* [#3040](https://github.com/ruby-grape/grape/pull/3040): Add the `raise_rescue_handler_errors` setting to let an exception raised inside a `rescue_from` block propagate - [@dduugg](https://github.com/dduugg).
 * Your contribution here.
 
 #### Fixes

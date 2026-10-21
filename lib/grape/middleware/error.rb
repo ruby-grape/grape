@@ -352,6 +352,8 @@ module Grape
         rescue Grape::Exceptions::Halt => e
           e.response
         rescue StandardError => e
+          raise if Grape.config.raise_rescue_handler_errors
+
           return redispatch(e, endpoint, redispatched)
         end
 

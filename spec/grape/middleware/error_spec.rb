@@ -523,6 +523,75 @@ describe Grape::Middleware::Error do
         expect(response.body).to eq('Invalid response')
       end
     end
+
+    context 'and Grape.config.raise_rescue_handler_errors is set' do
+      around do |example|
+        Grape.config.raise_rescue_handler_errors = true
+        example.run
+      ensure
+        Grape.config.raise_rescue_handler_errors = false
+      end
+
+      context 'and the block re-raises the exception it was handed' do
+        let(:app) do
+          Class.new(Grape::API) do
+            format :txt
+
+            rescue_from(:internal_grape_exceptions) { error!('internal', 503) }
+            rescue_from(:all) { |e| raise e }
+
+            get('/') { raise ArgumentError, 'oops' }
+          end
+        end
+
+        it 'lets it propagate past rescue_from :internal_grape_exceptions' do
+          expect { response }.to raise_error(ArgumentError, 'oops')
+          expect(last_request.env).not_to include(Grape::Env::GRAPE_EXCEPTION, Grape::Env::RACK_EXCEPTION)
+        end
+      end
+
+      context 'and the re-raised exception has a registered rescue_from' do
+        let(:app) do
+          Class.new(Grape::API) do
+            format :txt
+
+            custom_error_class = Class.new(StandardError)
+            const_set(:CustomError, custom_error_class)
+
+            rescue_from custom_error_class do |e|
+              error!("custom-handled: #{e.message}", 422)
+            end
+
+            rescue_from :all do |e|
+              raise custom_error_class, "wrapped(`#{e.message}`)"
+            end
+
+            get('/') { raise ArgumentError, 'oops' }
+          end
+        end
+
+        it 'lets it propagate instead of redispatching it' do
+          expect { response }.to raise_error(app::CustomError, 'wrapped(`oops`)')
+        end
+      end
+
+      context 'and the block calls error!' do
+        let(:app) do
+          Class.new(Grape::API) do
+            format :txt
+
+            rescue_from(:all) { |e| error!("handled: #{e.message}", 422) }
+
+            get('/') { raise ArgumentError, 'oops' }
+          end
+        end
+
+        it 'still renders the error' do
+          expect(response.status).to eq(422)
+          expect(response.body).to eq('handled: oops')
+        end
+      end
+    end
   end
 
   describe '#error!' do
