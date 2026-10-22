@@ -462,6 +462,7 @@ module Grape
       content_types = setting.content_types
       format = setting.format
 
+      stack.use Rack::TempfileReaper
       stack.use Rack::Head
       stack.use Grape::Middleware::Error, **error_middleware_options(format, content_types)
 

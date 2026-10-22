@@ -11,6 +11,7 @@
 * [#3008](https://github.com/ruby-grape/grape/pull/3008): Add the grape-on-rack app as a live-server memory profiling harness - [@ericproulx](https://github.com/ericproulx).
 * [#3025](https://github.com/ruby-grape/grape/pull/3025): Add `:md` and `:markdown` formatters that render an object's `to_markdown`, for APIs that declare a `text/markdown` content type - [@ericproulx](https://github.com/ericproulx).
 * [#3029](https://github.com/ruby-grape/grape/pull/3029): Add a built-in `:jsonl` (JSON Lines) format that streams an Enumerator body - [@ericproulx](https://github.com/ericproulx).
+* [#3041](https://github.com/ruby-grape/grape/pull/3041): Add `Rack::TempfileReaper` to every endpoint's middleware stack so multipart upload tempfiles are unlinked after the response - [@anyingiit](https://github.com/anyingiit).
 * Your contribution here.
 
 #### Fixes
