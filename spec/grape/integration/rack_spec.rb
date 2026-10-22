@@ -50,6 +50,46 @@ describe Rack do
     end
   end
 
+  # https://github.com/ruby-grape/grape/issues/2487
+  describe 'multipart tempfiles' do
+    let(:uploaded_paths) { [] }
+
+    let(:app) do
+      paths = uploaded_paths
+      Class.new(Grape::API) do
+        params do
+          requires :file, type: File
+        end
+
+        post 'upload' do
+          paths << params[:file][:tempfile].path
+          'ok'
+        end
+
+        post 'failed_upload' do
+          paths << params[:file][:tempfile].path
+          error!('failed', 422)
+        end
+      end
+    end
+
+    let(:upload) { Rack::Test::UploadedFile.new(__FILE__, 'text/plain') }
+
+    it 'unlinks the tempfile once the response is closed' do
+      post '/upload', file: upload
+      expect(last_response.body).to eq('ok')
+      expect(uploaded_paths.size).to eq(1)
+      expect(File.exist?(uploaded_paths.first)).to be(false)
+    end
+
+    it 'unlinks the tempfile when the endpoint returns an error' do
+      post '/failed_upload', file: upload
+      expect(last_response.status).to eq(422)
+      expect(uploaded_paths.size).to eq(1)
+      expect(File.exist?(uploaded_paths.first)).to be(false)
+    end
+  end
+
   context 'when the app is mounted' do
     let(:ping_mount) do
       Class.new(Grape::API) do
