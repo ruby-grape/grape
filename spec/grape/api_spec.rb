@@ -1348,6 +1348,26 @@ describe Grape::API do
       head '/example'
       expect(last_response).to be_bad_request
     end
+
+    it 'answers HEAD to a mounted Rack app without a body' do
+      subject.mount ->(_env) { [200, { 'content-type' => 'text/plain' }, ['mounted']] } => '/rack'
+      head '/rack'
+      expect(last_response).to be_successful
+      expect(last_response.body).to be_empty
+    end
+
+    it 'answers HEAD without the body a middleware inserted ahead of the others gives' do
+      overwriter = Class.new(Grape::Middleware::Base) do
+        def after
+          [200, { 'content-type' => 'text/plain' }, ['Overwritten.']]
+        end
+      end
+      subject.insert 0, overwriter
+      subject.get('example') { 'example' }
+      head '/example'
+      expect(last_response).to be_successful
+      expect(last_response.body).to be_empty
+    end
   end
 
   context 'do_not_route_head!' do
