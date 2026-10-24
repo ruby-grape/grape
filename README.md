@@ -583,6 +583,7 @@ Currently the configurable settings are:
 * `lint`: Checks every response against Rack's specification, defaults to `false`. See [Linting](#linting).
 * `warn_on_helper_overrides`: Warns when a helper method masks a `Grape::Endpoint` instance method, defaults to `false`.
 * `raise_rendering_errors`: Lets an error response that cannot be rendered propagate out of the middleware stack instead of being answered with a failsafe `500`, defaults to `false`. See [When the error response itself cannot be rendered](#when-the-error-response-itself-cannot-be-rendered).
+* `raise_rescue_handler_errors`: Lets an exception raised inside a `rescue_from` block propagate out of the middleware stack instead of being redispatched, defaults to `false`. See [Re-raising from inside a `rescue_from` block](#re-raising-from-inside-a-rescue_from-block).
 
 To change a setting value make sure that at some point during load time the following code runs
 
@@ -2970,6 +2971,16 @@ end
 When this handler is registered the framework hands the original exception to you, and you own the response shape and any logging. The framework deliberately does not log internal errors itself — it has no way to know your preferred format or destination.
 
 A second raise inside the redispatched handler is not redispatched again — it goes straight to the framework's generic 500. This bounds the chain at one redispatch and prevents loops.
+
+To have an exception raised inside a `rescue_from` block propagate out of the middleware stack instead, so that Rack middleware above Grape can act on it:
+
+```ruby
+Grape.configure do |config|
+  config.raise_rescue_handler_errors = true
+end
+```
+
+With this on the exception is re-raised untouched: it is not redispatched, so `rescue_from :internal_grape_exceptions` never sees it and neither `rack.exception` nor `grape.exception` is set. A block that calls `error!` still renders as usual.
 
 You can also rescue all exceptions with a code block and handle the Rack response at the lowest level.
 

@@ -61,6 +61,9 @@ module Grape
   # Let an error response that cannot be rendered propagate out of the
   # middleware stack instead of being answered with a failsafe 500.
   setting :raise_rendering_errors, default: false
+  # Let an exception raised inside a `rescue_from` block propagate out of the
+  # middleware stack instead of being redispatched.
+  setting :raise_rescue_handler_errors, default: false
 
   # The HTTP QUERY method (RFC 10008): a safe, idempotent request whose content
   # carries the query. Rack has no constant for it yet, hence the literal.
