@@ -112,7 +112,12 @@ module Grape
 
         @router.compile!
         @router.freeze
-        @app = lint? ? Rack::Lint.new(@router) : @router
+        # One Rack::Head around the router strips the body of every HEAD
+        # response the API gives, including the router's own 404 and a mounted
+        # Rack app's, which go through no endpoint's stack. Rack::Lint goes
+        # outside it, where it sees the response that is served.
+        @app = Rack::Head.new(@router)
+        @app = Rack::Lint.new(@app) if lint?
         @cascade = self.class.cascade
       end
 
