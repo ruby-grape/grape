@@ -383,8 +383,6 @@ describe Grape::Router do
       expect(last_response.status).to eq(404)
     end
 
-    # No endpoint's stack answers a path nothing matched, so none of their
-    # Rack::Head middlewares is there to strip the body.
     it 'answers HEAD to a path no route matches without a body' do
       head '/nothing/here'
       expect(last_response.status).to eq(404)

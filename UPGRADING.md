@@ -3,6 +3,16 @@ Upgrading Grape
 
 ### Upgrading to >= 4.1.0
 
+#### `Rack::Head` wraps the router instead of each endpoint's stack
+
+`Rack::Head` used to be the first middleware in each endpoint's stack. That missed a Rack app mounted with `mount`, which the router calls directly, and a middleware inserted ahead of it with `insert 0`: a `HEAD` request to either got the full body back. A single `Rack::Head` around the router now strips the body of every `HEAD` response the API gives ([#3042](https://github.com/ruby-grape/grape/pull/3042)).
+
+An endpoint's stack now starts with `Grape::Middleware::Error`, and three things follow from that:
+
+* `insert_before Rack::Head` and `insert_after Rack::Head` raise `No such middleware to insert before: Rack::Head` (or `after`) when the API compiles. Use `insert 0` to put a middleware first.
+* A middleware inserted by index lands one place further in. `insert 1` used to put it between `Rack::Head` and `Grape::Middleware::Error`; it now puts it inside `Grape::Middleware::Error`, so `rescue_from` handles what it raises. Use `insert 0` to keep it outside.
+* A middleware inserted with `insert 0` now sees the full body of a `HEAD` response, as one added with `use` always has.
+
 #### A `:jsonl` format you declared now gets Grape's JSON Lines formatter, parser and error formatter
 
 Grape now renders, parses and reports errors in JSON Lines under `:jsonl` ([#3029](https://github.com/ruby-grape/grape/pull/3029)). An API that declared `content_type :jsonl, ...` itself, with nothing of its own registered for it, gets Grape's:
