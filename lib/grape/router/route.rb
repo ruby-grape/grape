@@ -52,7 +52,7 @@ module Grape
       # Extract param values from a matched request path. Used by the router.
       #
       # A pattern with no named captures has nothing to extract, so it skips the
-      # match entirely and answers nil — the same way {GreedyRoute#params_for}
+      # match entirely and answers nil — the same way {AllowedMethodsRoute#params_for}
       # does, and what the router already coerces into the Hash it builds
       # routing args in.
       #
