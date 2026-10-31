@@ -186,23 +186,158 @@ describe Grape::Router do
       expect(closed).to eq([true])
     end
 
-    it 'returns the last cascading response when nothing else answers' do
-      append_route(cascading)
-      append_route(cascading)
+    it 'answers its own 404 when every sibling has cascaded, whatever they answered' do
+      append_route(->(_env) { [406, { 'X-Cascade' => 'pass' }, ['declined']] })
+      append_route(->(_env) { [406, { 'X-Cascade' => 'pass' }, ['declined too']] })
       router.compile!
 
-      status, headers, = router.call(Rack::MockRequest.env_for('/hello'))
+      status, headers, body = router.call(Rack::MockRequest.env_for('/hello'))
       expect(status).to eq(404)
       expect(headers['X-Cascade']).to eq('pass')
+      expect(body).to eq(['404 Not Found'])
     end
 
-    it 'marks the request as cascaded when only an ANY route responds' do
-      append_route(cascading, '*')
+    it 'answers its own 404 when the only route has cascaded, whatever it answered' do
+      append_route(->(_env) { [406, { 'X-Cascade' => 'pass' }, ['declined']] })
       router.compile!
 
-      status, headers, = router.call(Rack::MockRequest.env_for('/hello'))
+      status, headers, body = router.call(Rack::MockRequest.env_for('/hello'))
       expect(status).to eq(404)
       expect(headers['X-Cascade']).to eq('pass')
+      expect(body).to eq(['404 Not Found'])
+    end
+
+    it 'answers its own 404 when only an ANY route has cascaded, whatever it answered' do
+      append_route(->(_env) { [406, { 'X-Cascade' => 'pass' }, ['declined']] }, '*')
+      router.compile!
+
+      status, headers, body = router.call(Rack::MockRequest.env_for('/hello'))
+      expect(status).to eq(404)
+      expect(headers['X-Cascade']).to eq('pass')
+      expect(body).to eq(['404 Not Found'])
+    end
+
+    it 'closes the body of every response it answers in place of' do
+      closed = []
+      closing_body = lambda do
+        ['declined'].tap { |body| body.define_singleton_method(:close) { closed << true } }
+      end
+      append_route(->(_env) { [404, { 'X-Cascade' => 'pass' }, closing_body.call] })
+      append_route(->(_env) { [404, { 'X-Cascade' => 'pass' }, closing_body.call] })
+      append_route(->(_env) { [404, { 'X-Cascade' => 'pass' }, closing_body.call] }, '*')
+      router.compile!
+
+      router.call(Rack::MockRequest.env_for('/hello'))
+      expect(closed).to eq([true, true, true])
+    end
+  end
+
+  # The README: an invalid version is a 406 with `cascade: false`, otherwise a
+  # 404 if no other route matches. How many routes declined must not change that.
+  describe 'a version no route answers' do
+    let(:unknown_version) { { 'HTTP_ACCEPT' => 'application/vnd.acme-v9+txt' } }
+
+    def versioned_api(versions, cascade: true)
+      Class.new(Grape::API) do
+        format :txt
+        versions.each do |name|
+          version(name, using: :header, vendor: 'acme', cascade:)
+          get('/things') { name }
+        end
+      end
+    end
+
+    shared_examples 'a declined request' do
+      it 'answers 404 and lets an upstream app keep looking' do
+        get '/things', {}, unknown_version
+
+        expect(last_response.status).to eq(404)
+        expect(last_response.headers['X-Cascade']).to eq('pass')
+        expect(last_response.body).to eq('404 Not Found')
+      end
+    end
+
+    context 'with one version' do
+      let(:app) { versioned_api(%w[v1]) }
+
+      it_behaves_like 'a declined request'
+    end
+
+    context 'with several versions' do
+      let(:app) { versioned_api(%w[v1 v2 v3]) }
+
+      it_behaves_like 'a declined request'
+
+      it 'still routes a version one of them declares' do
+        get '/things', {}, 'HTTP_ACCEPT' => 'application/vnd.acme-v3+txt'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('v3')
+      end
+    end
+
+    context 'with an ANY route' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :txt
+          version 'v1', using: :header, vendor: 'acme', cascade: true
+          route(:any, '/things') { 'any' }
+        end
+      end
+
+      it_behaves_like 'a declined request'
+    end
+
+    context 'with an ANY route overlapping a path another method has a route on' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :txt
+          version 'v1', using: :header, vendor: 'acme', cascade: true
+          get('/things') { 'things' }
+          route(:any, '*path') { 'any' }
+        end
+      end
+
+      it 'answers 404 rather than 405, as a route matched and declined' do
+        put '/things', {}, unknown_version
+
+        expect(last_response.status).to eq(404)
+        expect(last_response.headers['X-Cascade']).to eq('pass')
+      end
+    end
+
+    context 'when the last version does not cascade' do
+      let(:app) do
+        Class.new(Grape::API) do
+          format :txt
+          version 'v1', using: :header, vendor: 'acme', cascade: true
+          get('/things') { 'v1' }
+          version 'v2', using: :header, vendor: 'acme', cascade: false
+          get('/things') { 'v2' }
+        end
+      end
+
+      it 'answers its 406' do
+        get '/things', {}, unknown_version
+
+        expect(last_response.status).to eq(406)
+        expect(last_response.headers['X-Cascade']).to be_nil
+      end
+    end
+
+    # Rack::Cascade goes by the status alone, so a 406 stopped it short of the
+    # next app, X-Cascade or not.
+    context 'when behind a Rack::Cascade' do
+      let(:app) do
+        Rack::Cascade.new([versioned_api(%w[v1 v2]), ->(_env) { [200, { 'content-type' => 'text/plain' }, ['next app']] }])
+      end
+
+      it 'reaches the next app' do
+        get '/things', {}, unknown_version
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('next app')
+      end
     end
   end
 
