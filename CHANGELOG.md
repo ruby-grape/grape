@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#3045](https://github.com/ruby-grape/grape/pull/3045): Pin `git` below 6 so Danger can load - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)
