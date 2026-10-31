@@ -1,4 +1,4 @@
-### 4.1.0 (Next)
+### 4.1.0 (2026-10-31)
 
 #### Features
 
@@ -12,7 +12,6 @@
 * [#3025](https://github.com/ruby-grape/grape/pull/3025): Add `:md` and `:markdown` formatters that render an object's `to_markdown`, for APIs that declare a `text/markdown` content type - [@ericproulx](https://github.com/ericproulx).
 * [#3029](https://github.com/ruby-grape/grape/pull/3029): Add a built-in `:jsonl` (JSON Lines) format that streams an Enumerator body - [@ericproulx](https://github.com/ericproulx).
 * [#3040](https://github.com/ruby-grape/grape/pull/3040): Add the `raise_rescue_handler_errors` setting to let an exception raised inside a `rescue_from` block propagate - [@dduugg](https://github.com/dduugg).
-* Your contribution here.
 
 #### Fixes
 
@@ -100,7 +99,6 @@
 * [#3031](https://github.com/ruby-grape/grape/pull/3031): Define `InheritableSetting`'s scalar settings and scope flags by key - [@ericproulx](https://github.com/ericproulx).
 * [#3032](https://github.com/ruby-grape/grape/pull/3032): Keep each API's content type order when negotiating a browser's `*/*` - [@ericproulx](https://github.com/ericproulx).
 * [#3042](https://github.com/ruby-grape/grape/pull/3042): Answer `HEAD` without a body from a mounted Rack app by wrapping the router in `Rack::Head` - [@ericproulx](https://github.com/ericproulx).
-* Your contribution here.
 
 ### 4.0.1 (2026-09-15)
 
