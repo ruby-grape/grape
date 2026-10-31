@@ -6,6 +6,7 @@
 
 #### Fixes
 
+* [#3043](https://github.com/ruby-grape/grape/pull/3043): Answer 404 when every route on a path cascades, however many there are - [@ericproulx](https://github.com/ericproulx).
 * [#3045](https://github.com/ruby-grape/grape/pull/3045): Pin `git` below 6 so Danger can load - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 

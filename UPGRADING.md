@@ -1,6 +1,18 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 4.2.0
+
+#### A request every route declines answers 404, however many routes declined
+
+A route declines a request by answering with `X-Cascade: pass`, as a version declared with `cascade: true` does for a version it does not serve. As the [README](README.md#header) documents, the router then answers its own `404` if no other route takes the request. It only did so when one route had declined: with two or more routes on the path, the last one's response came back instead, and so did that of an ANY route (since 4.0.0). So a request for an unknown version answered `404` from an API with one version and `406` from an API with several.
+
+Every such request now answers the router's `404`, with `X-Cascade: pass` still set ([#3043](https://github.com/ruby-grape/grape/pull/3043)).
+
+* A client or spec expecting `406` for an unknown version from an API with several versions now gets `404`. To keep the `406`, declare `cascade: false` on the last version only: a version that does not cascade answers every request it does not serve, so the versions after it are never reached.
+* The status, headers and body of a declined response are dropped, so a response you want a client to see must not set `X-Cascade: pass`. The same goes for a Rack app mounted on a path other routes share.
+* Behind `Rack::Cascade`, which looks only at the status, such a request now reaches the next app instead of stopping at the `406`.
+
 ### Upgrading to >= 4.1.0
 
 #### `Rack::Head` wraps the router instead of each endpoint's stack

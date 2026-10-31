@@ -99,9 +99,9 @@ module Grape
     #    the ANY routes.
     #
     # Returns nil when nothing answered, leaving the caller to 404. A response
-    # that cascades is never final: it is returned only once every later
-    # candidate has declined too, so the caller (or a mounting app upstream)
-    # can keep looking.
+    # that cascades is never final, whatever its status: the route has declined,
+    # so its body is closed and the caller's 404 stands in for it. That 404 still
+    # carries X-Cascade, so a mounting app upstream can keep looking.
     def transaction(input, method, env)
       union, routes, buckets, static_routes = @optimized_map[method]
       if (static = static_routes&.[](input))
@@ -152,16 +152,16 @@ module Grape
       cascaded = !response.nil?
       if cascaded
         response = rotation(input, method, env, exact_route)
-        return response if response && !cascade?(response)
+        return response if response
       end
 
-      neighbours(input, method, env, response, cascaded)
+      neighbours(input, method, env, cascaded)
     end
 
     # The ANY ('*') routes and the greedy neighbour, tried once the routes for
     # +method+ have declined. +cascaded+ says whether any of them matched: the
     # auto-OPTIONS and 405 answers are only right when none did.
-    def neighbours(input, method, env, response, cascaded)
+    def neighbours(input, method, env, cascaded)
       # Only ever read while nothing for +method+ has matched, so once a route
       # has -- and cascaded -- there is no neighbour to look for.
       last_neighbor_route = neighbour_match?(input, method) unless cascaded
@@ -171,41 +171,30 @@ module Grape
       return process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route && method == Rack::OPTIONS
 
       star_route = match?(input, '*')
-      if star_route
-        response = process_star_route(star_route, input, env, response)
-        # Halting or cascading, the ANY route's answer is the one returned.
-        return response if response
-      end
+      # An ANY route that declined still matched, so no 405 follows it.
+      return final_response(process_route(star_route, input, env)) if star_route
 
-      return process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route
-
-      response
-    end
-
-    # The ANY route's answer, superseding +response+. A cascading one has its
-    # body closed, as #halt? closes it, and is still what #neighbours returns.
-    def process_star_route(star_route, input, env, response)
-      close_body(response) if response
-      star_response = process_route(star_route, input, env)
-      close_body(star_response) if cascade?(star_response)
-      star_response
+      process_route(last_neighbor_route, input, env, include_allow_header: true) if last_neighbor_route
     end
 
     # The routes registered for +method+ other than +exact_route+, tried in
-    # registration order until one answers without cascading. Returns the last
-    # response processed — a cascading one when every sibling declined, so the
-    # caller can hand it back — or nil when no sibling matched.
+    # registration order until one answers without cascading. Returns that
+    # answer, or nil when every sibling declined or none matched.
     def rotation(input, method, env, exact_route)
-      response = nil
+      answer = nil
       @map[method].each do |route|
         next if exact_route == route
         next unless route.match?(input)
 
-        close_body(response) if response # the previous sibling cascaded
-        response = process_route(route, input, env)
-        break unless cascade?(response)
+        answer = final_response(process_route(route, input, env))
+        break if answer
       end
-      response
+      answer
+    end
+
+    # +response+, or nil when it cascades.
+    def final_response(response)
+      response if halt?(response)
     end
 
     # Returns true if `response` should be returned as-is from the enclosing
