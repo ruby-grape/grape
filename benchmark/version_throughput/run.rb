@@ -41,7 +41,7 @@ HERE = __dir__
 TMP  = File.join(ROOT, 'tmp', 'bench-versions')
 STORE_PATH = File.join(TMP, 'results.json')
 
-DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 4.0.1 master].freeze
+DEFAULT_VERSIONS = %w[3.0.1 3.1.1 3.2.1 3.3.5 4.0.1 4.1.0 master].freeze
 requested_versions = ENV.fetch('GRAPE_VERSIONS', '').split(',').map(&:strip).reject(&:empty?)
 # Oldest to newest, master last: the delta columns compare each row against
 # the one above it and against the first row.

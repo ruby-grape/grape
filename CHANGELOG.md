@@ -1,3 +1,13 @@
+### 4.2.0 (Next)
+
+#### Features
+
+* Your contribution here.
+
+#### Fixes
+
+* Your contribution here.
+
 ### 4.1.0 (2026-10-31)
 
 #### Features
