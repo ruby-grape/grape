@@ -24,6 +24,8 @@ group :test do
   gem 'danger', require: false
   gem 'danger-changelog', require: false
   gem 'danger-pr-comment', require: false
+  # danger 9.6.1 fails to load with git 6: https://github.com/danger/danger/issues/1560
+  gem 'git', '< 6', require: false
   gem 'rack-contrib', require: false
   gem 'rack-test', '~> 2.1'
   gem 'rspec', '~> 3.13'
