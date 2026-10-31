@@ -9,6 +9,7 @@
 * [#3043](https://github.com/ruby-grape/grape/pull/3043): Answer 404 when every route on a path cascades, however many there are - [@ericproulx](https://github.com/ericproulx).
 * [#3045](https://github.com/ruby-grape/grape/pull/3045): Pin `git` below 6 so Danger can load - [@ericproulx](https://github.com/ericproulx).
 * [#3046](https://github.com/ruby-grape/grape/pull/3046): Fix file uploads rejected inside `oneof` variants - [@ericproulx](https://github.com/ericproulx).
+* [#3047](https://github.com/ruby-grape/grape/pull/3047): Split the router's miss and cascade paths and name its methods for what they do - [@ericproulx](https://github.com/ericproulx).
 * Your contribution here.
 
 ### 4.1.0 (2026-10-31)

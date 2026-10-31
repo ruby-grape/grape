@@ -182,21 +182,21 @@ module Grape
         routes_by_regexp.each_value do |routes|
           next if routes.any? { |route| route.request_method == '*' }
 
-          associate_greedy_route(routes, setting)
+          associate_allowed_methods_route(routes, setting)
         end
       end
 
-      # The greedy route answering 405 and auto-OPTIONS for the path +routes+
+      # The route answering 405 and auto-OPTIONS for the path +routes+
       # share. Most of the configuration is taken from the last endpoint.
-      def associate_greedy_route(routes, setting)
+      def associate_allowed_methods_route(routes, setting)
         last_route = routes.last
         allowed_methods = allowed_methods_for(routes, setting)
 
         allow_header = setting.do_not_route_options? ? allowed_methods : [Rack::OPTIONS] | allowed_methods
         last_route.app.options_route_enabled = true unless setting.do_not_route_options? || allowed_methods.include?(Rack::OPTIONS)
 
-        greedy_route = Grape::Router::GreedyRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
-        @router.associate_routes(greedy_route)
+        route = Grape::Router::AllowedMethodsRoute.new(last_route.pattern, endpoint: last_route.app, allow_header:)
+        @router.associate_routes(route)
       end
 
       # The methods +routes+ answer, with HEAD alongside GET unless the API
