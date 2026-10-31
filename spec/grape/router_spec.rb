@@ -111,9 +111,9 @@ describe Grape::Router do
     end
   end
 
-  # Regression: a cascading route used to hand straight over to the greedy
-  # neighbour — the *last* route registered for the path — so any route
-  # between the first match and that last one was unreachable.
+  # Regression: a cascading route used to hand straight over to the
+  # allowed-methods route — the *last* route registered for the path — so any
+  # route between the first match and that last one was unreachable.
   describe 'cascading routes' do
     subject(:router) { described_class.new }
 
